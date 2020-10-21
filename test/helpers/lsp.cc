@@ -425,4 +425,19 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, unique_pt
     return getLSPResponsesFor(wrapper, move(messages));
 }
 
+string applyEdit(string_view source, const core::File &file, const Range &range, string_view newText) {
+    auto beginLine = static_cast<u4>(range.start->line + 1);
+    auto beginCol = static_cast<u4>(range.start->character + 1);
+    auto beginOffset = core::Loc::pos2Offset(file, {beginLine, beginCol}).value();
+
+    auto endLine = static_cast<u4>(range.end->line + 1);
+    auto endCol = static_cast<u4>(range.end->character + 1);
+    auto endOffset = core::Loc::pos2Offset(file, {endLine, endCol}).value();
+
+    string actualEditedFileContents = string(source);
+    actualEditedFileContents.replace(beginOffset, endOffset - beginOffset, newText);
+
+    return actualEditedFileContents;
+}
+
 } // namespace sorbet::test

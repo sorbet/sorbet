@@ -44,7 +44,7 @@ cc_test(
     }),
     visibility = ["//tools:__pkg__"],
     deps = [
-        "//experimental/rubyfmt:rubyfmt",
+        "//experimental/rubyfmt",
         "@doctest",
         "@doctest//:doctest_main",
     ],
