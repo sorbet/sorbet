@@ -21,7 +21,9 @@
                     "text": "command source .lldbinit",
                     "ignoreFailures": false
                 }
-            ]
+            ],
+            "showDisplayString": true,
+            "visualizerFile": "${workspaceFolder}/sorbet.natvis"
         }
     ]
 }

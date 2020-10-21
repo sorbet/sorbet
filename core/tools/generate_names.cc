@@ -462,12 +462,26 @@ void emit_name_header(ostream &out, NameDef &name) {
 }
 
 void emit_name_string(ostream &out, NameDef &name) {
-    out << "const char *" << name.srcName << " = \"";
+    out << "const char *" << name.srcName << "_s = \"";
     out << absl::CEscape(name.val) << "\";" << '\n';
 
     out << "std::string_view " << name.srcName << "_DESC{(char*)";
-    out << name.srcName << "," << name.val.size() << "};" << '\n';
+    out << name.srcName << "_s," << name.val.size() << "};" << '\n';
     out << '\n';
+}
+
+void emit_name_debug_table(ostream &out) {
+    out << "#ifdef DEBUG_MODE" << '\n';
+    out << "#pragma clang diagnostic push" << '\n';
+    out << "#pragma clang diagnostic ignored \"-Wunused-variable\"" << '\n';
+    out << "const char* DEBUG_NAMES_LOOKUP[] {" << '\n';
+    out << '\t' << "nullptr, // placeholder" << '\n';
+    for (auto &name : names) {
+        out << '\t' << name.srcName << "_s," << '\n';
+    }
+    out << "};" << '\n';
+    out << "#pragma clang diagnostic pop" << '\n';
+    out << "#endif" << '\n';
 }
 
 void emit_register(ostream &out) {
@@ -552,6 +566,9 @@ int main(int argc, char **argv) {
         }
         classfile << "}" << '\n';
         classfile << '\n';
+
+        // Output a debug table that can be used to easily inspect known names at runtime
+        emit_name_debug_table(classfile);
 
         emit_register(classfile);
 
