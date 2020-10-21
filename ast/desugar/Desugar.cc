@@ -1326,6 +1326,10 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 auto &gs = dctx.ctx.state;
                 for (auto &key : keys) {
                     auto lit = ast::cast_tree_const<ast::Literal>(key);
+                    if (lit == nullptr) {
+                        continue;
+                    }
+
                     auto isSymbol = lit->isSymbol(gs);
                     core::NameRef nameRef;
                     if (!lit) {
