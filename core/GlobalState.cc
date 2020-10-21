@@ -818,7 +818,7 @@ void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 f
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, vector<u4> methodHash) const {
+SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const vector<u4> &methodHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     SymbolData ownerScope = owner.dataAllowingNone(*this);
