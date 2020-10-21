@@ -59,7 +59,7 @@ string_view kindToDescription(ShowOperation::Kind kind) {
 } // namespace
 
 ShowOperation::ShowOperation(const LSPConfiguration &config, Kind kind)
-    : config(config), kind(kind), operationName(kindToOperationName(kind)), description(kindToDescription(kind)) {
+    : config(config), operationName(kindToOperationName(kind)), description(kindToDescription(kind)) {
     if (config.getClientConfig().enableOperationNotifications) {
         config.output->write(makeShowOperation(this->operationName, this->description, SorbetOperationStatus::Start));
     }

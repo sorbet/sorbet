@@ -13,7 +13,6 @@ class LSPConfiguration;
  */
 class ShowOperation final {
     const LSPConfiguration &config;
-    const Kind kind;
     const std::string operationName;
     const std::string description;
 
