@@ -9,9 +9,10 @@ class DocumentFormattingTask final : public LSPRequestTask {
     std::unique_ptr<DocumentFormattingParams> params;
 
 public:
-    DocumentFormattingTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<DocumentFormattingParams> params);
+    DocumentFormattingTask(const LSPConfiguration &config, MessageId id,
+                           std::unique_ptr<DocumentFormattingParams> params);
 
-    //TODO(@jvilk): don't wait for type checking
+    // TODO(@jvilk): don't wait for type checking
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 };
 
