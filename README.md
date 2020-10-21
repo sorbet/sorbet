@@ -202,13 +202,19 @@ sudo xcodebuild -license
 bazel clean --expunge
 ```
 
-**(Mac) `fatal error: 'stdio.h' file not found`** (or some other system header)
+**(Mac) `fatal error: 'math.h' file not found`** (or some other system header)
 
 This error can happen on Macs when the `/usr/include` folder is missing. The
 solution is to install macOS headers via the following package:
 
+macOS Mojave:
 ```shell
 open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
+```
+
+macOS Catalina:
+```shell
+sudo ln -s /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/* /usr/local/include/
 ```
 
 ## Running Sorbet
