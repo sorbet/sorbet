@@ -1358,6 +1358,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/references", ReferenceParams},
                                                 {"textDocument/signatureHelp", TextDocumentPositionParams},
                                                 {"textDocument/codeAction", CodeActionParams},
+                                                {"textDocument/formatting", DocumentFormattingParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
                                                 {"sorbet/readFile", TextDocumentIdentifier},
@@ -1390,6 +1391,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             {"textDocument/completion", CompletionList},
             {"textDocument/references", makeVariant({JSONNull, makeArray(Location)})},
             {"textDocument/signatureHelp", makeVariant({JSONNull, SignatureHelp})},
+            {"textDocument/formatting", makeVariant({JSONNull, makeArray(TextEdit)})},
             // (CodeAction | Command)[] | null
             // Sorbet only sends CodeAction[].
             {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction)})},
