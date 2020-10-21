@@ -89,5 +89,20 @@ class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
       end
       assert_match(/is not a class or module/, exn.message)
     end
+
+    # These tests describe the /current/ behavior, but we expect this
+    # behavior to change once we have a runtime implementation of
+    # packages
+    describe 'packaged form' do
+      it "when exists but isn't is_a?" do
+        res = T::NonForcingConstants.non_forcing_is_a?(nil, 'Integer', package: "SomePackage")
+        assert_equal(false, res)
+      end
+
+      it "when exists and is_a?" do
+        res = T::NonForcingConstants.non_forcing_is_a?(0, 'Integer', package: "SomePackage")
+        assert_equal(true, res)
+      end
+    end
   end
 end
