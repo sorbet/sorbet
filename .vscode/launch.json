@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "LSP Test - Debug active test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bazel-bin/test/lsp_test_runner",
+            "args": ["--single_test=${fileDirname}/${fileBasenameNoExtension}", "--dt-no-colors"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "sourceFileMap": {
+                "${workspaceFolder}/bazel-sorbet": "${workspaceFolder}"
+            },
+            "setupCommands": [
+                {
+                    "description": "Load .lldb init",
+                    "text": "command source .lldbinit",
+                    "ignoreFailures": false
+                }
+            ]
+        }
+    ]
+}
