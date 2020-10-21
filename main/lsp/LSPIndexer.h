@@ -82,7 +82,7 @@ public:
     /**
      * Given a file ref _that exists_, return the underlying file.
      */
-    core::File &getFile(core::FileRef fref) const;
+    const core::File &getFile(core::FileRef fref) const;
 };
 
 } // namespace sorbet::realmain::lsp
