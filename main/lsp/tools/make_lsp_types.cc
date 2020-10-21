@@ -1333,6 +1333,7 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                      "textDocument/didOpen",
                                      "textDocument/documentHighlight",
                                      "textDocument/documentSymbol",
+                                     "textDocument/formatting",
                                      "textDocument/hover",
                                      "textDocument/publishDiagnostics",
                                      "textDocument/references",
