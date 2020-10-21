@@ -73,6 +73,16 @@ public:
      * and file hashes. Also handles canceling the running slow path.
      */
     LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit);
+
+    /**
+     * Retrieves the file ref for the given file, if exists.
+     */
+    core::FileRef uri2FileRef(std::string_view uri) const;
+
+    /**
+     * Given a file ref _that exists_, return the underlying file.
+     */
+    core::File &getFile(core::FileRef fref) const;
 };
 
 } // namespace sorbet::realmain::lsp

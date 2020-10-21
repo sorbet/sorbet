@@ -321,4 +321,13 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     return update;
 }
 
+core::FileRef LSPIndexer::uri2FileRef(string_view uri) const {
+    return config->uri2FileRef(*initialGS, uri);
+}
+
+core::File &LSPIndexer::getFile(core::FileRef fref) const {
+    ENFORCE(fref.exists());
+    return fref.data(*initialGS);
+}
+
 } // namespace sorbet::realmain::lsp

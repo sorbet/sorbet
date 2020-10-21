@@ -12,7 +12,10 @@ public:
     DocumentFormattingTask(const LSPConfiguration &config, MessageId id,
                            std::unique_ptr<DocumentFormattingParams> params);
 
-    // TODO(@jvilk): don't wait for type checking
+    Phase finalPhase() const override;
+
+    void index(LSPIndexer &index) override;
+
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 };
 
