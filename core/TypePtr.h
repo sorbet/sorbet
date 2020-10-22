@@ -10,6 +10,17 @@ public:
     // We store tagged pointers as 64-bit values.
     using tagged_storage = u8;
 
+    // Type -> GroundType, ProxyType, LambdaParam,
+    //         SelfTypeParam, AliasType, SelfType, TypeVar,
+    //         AppliedType
+
+    // GroundType -> ClassType, OrType, AndType
+    //     ClassType -> BlamedUntyped, UnresolvedClassType, UnresolvedAppliedType
+
+    // ProxyType -> LiteralType, ShapeType, TupleType, MetaType,
+
+    // isa_class_type, isa_ground_type, isa_...
+
     enum class Tag {
         ClassType = 1,
         LambdaParam,

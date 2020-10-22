@@ -230,20 +230,90 @@ public:
 };
 CheckSize(Type, 8, 8);
 
-template <class To> To *cast_type(Type *what) {
-    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Type *&, To *>::value, "Ill Formed To, has to be a subclass of Type");
-    return fast_cast<Type, To>(what);
+template <class To> bool isa_type(const TypePtr &what) {
+    return what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value;
 }
 
-template <class To> const To *cast_type(const Type *what) {
-    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Type *&, To *>::value, "Ill Formed To, has to be a subclass of Type");
-    return fast_cast<const Type, const To>(what);
+// Override for class/etc?
+
+template <class To> To *cast_type(TypePtr &what) {
+    if (isa_type<To>(what)) {
+        return reinterpret_cast<To *>(what.get());
+    } else {
+        return nullptr;
+    }
 }
 
-template <class To> bool isa_type(Type *what) {
-    return cast_type<To>(what) != nullptr;
+template <class To> const To *cast_type_const(const TypePtr &what) {
+    if (isa_type<To>(what)) {
+        return reinterpret_cast<const To *>(what.get());
+    } else {
+        return nullptr;
+    }
+}
+
+// Specializations to handle the class hierarchy.
+
+class ClassType;
+template <> const ClassType *cast_type_const<ClassType>(const TypePtr &what) {
+    if (what == nullptr) {
+        return nullptr;
+    }
+    switch (what.tag()) {
+        case TypePtr::Tag::ClassType:
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::UnresolvedAppliedType:
+            return reinterpret_cast<const ClassType *>(what.get());
+        default:
+            return nullptr;
+    }
+};
+
+class GroundType;
+template <> const GroundType *cast_type_const<GroundType>(const TypePtr &what) {
+    if (what == nullptr) {
+        return nullptr;
+    }
+    switch (what.tag()) {
+        case TypePtr::Tag::ClassType:
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::UnresolvedAppliedType:
+        case TypePtr::Tag::OrType:
+        case TypePtr::Tag::AndType:
+            return reinterpret_cast<const GroundType *>(what.get());
+        default:
+            return nullptr;
+    }
+}
+
+class ProxyType;
+template <> const ProxyType *cast_type_const<ProxyType>(const TypePtr &what) {
+    if (what == nullptr) {
+        return nullptr;
+    }
+    switch (what.tag()) {
+        case TypePtr::Tag::LiteralType:
+        case TypePtr::Tag::ShapeType:
+        case TypePtr::Tag::TupleType:
+        case TypePtr::Tag::MetaType:
+            return reinterpret_cast<const ProxyType *>(what.get());
+        default:
+            return nullptr;
+    }
+}
+
+template <> bool isa_type<ClassType>(const TypePtr &what) {
+    return cast_type_const<ClassType>(what) != nullptr;
+}
+
+template <> bool isa_type<GroundType>(const TypePtr &what) {
+    return cast_type_const<GroundType>(what) != nullptr;
+}
+
+template <> bool isa_type<ProxyType>(const TypePtr &what) {
+    return cast_type_const<ProxyType>(what) != nullptr;
 }
 
 #define TYPE(name)                                                                                             \
