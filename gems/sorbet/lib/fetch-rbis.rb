@@ -19,7 +19,7 @@ class Sorbet::Private::FetchRBIs
   XDG_CACHE_HOME = ENV['XDG_CACHE_HOME'] || "#{ENV['HOME']}/.cache"
   RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/sorbet-typed"
 
-  SORBET_TYPED_REPO = 'https://github.com/sorbet/sorbet-typed.git'
+  SORBET_TYPED_REPO = ENV['SRB_SORBET_TYPED_REPO'] || 'https://github.com/sorbet/sorbet-typed.git'
   SORBET_TYPED_REVISION = ENV['SRB_SORBET_TYPED_REVISION'] || 'origin/master'
 
   HEADER = Sorbet::Private::Serialize.header(false, 'sorbet-typed')
