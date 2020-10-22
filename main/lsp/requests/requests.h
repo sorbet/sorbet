@@ -4,6 +4,7 @@
 #include "main/lsp/requests/code_action.h"
 #include "main/lsp/requests/completion.h"
 #include "main/lsp/requests/definition.h"
+#include "main/lsp/requests/document_formatting.h"
 #include "main/lsp/requests/document_highlight.h"
 #include "main/lsp/requests/document_symbol.h"
 #include "main/lsp/requests/get_counters.h"
