@@ -40,19 +40,14 @@ string_view kindToDescription(ShowOperation::Kind kind) {
     switch (kind) {
         case ShowOperation::Kind::Indexing:
             return "Indexing files...";
-            break;
         case ShowOperation::Kind::SlowPathBlocking:
             return "Typechecking...";
-            break;
         case ShowOperation::Kind::SlowPathNonBlocking:
             return "Typchecking in background";
-            break;
         case ShowOperation::Kind::References:
             return "Finding all references...";
-            break;
         case ShowOperation::Kind::SymbolSearch:
             return "Workspace symbol search...";
-            break;
     }
 }
 
