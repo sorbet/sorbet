@@ -164,7 +164,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
 
     vector<ast::ParsedFile> indexed;
     Timer timeit(config->logger, "initial_index");
-    ShowOperation op(*config, "Indexing", "Indexing files...");
+    ShowOperation op(*config, ShowOperation::Kind::Indexing);
     vector<core::FileRef> inputFiles;
     unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
     {
