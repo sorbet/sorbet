@@ -28,6 +28,7 @@ cc_library(
             "@ruby_2_6//:rubyfmt-static-deps",
             "@rubyfmt//:librubyfmt",
             "@rubyfmt//:rubyfmt_macro_wrappers",
+            "@com_google_absl//absl/synchronization",
         ],
     }),
 )

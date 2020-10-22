@@ -34,19 +34,22 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
         auto formatResult = experimental::rubyfmt::format(source);
         switch (formatResult.status) {
             // Note: I use different line numbers for the below exceptions so they show up differently in crash logs.
-            case Rubyfmt_FormatError::RUBYFMT_FORMAT_ERROR_IO_ERROR:
+            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_FORMAT_ERROR_IO_ERROR:
                 // Fatal error -- crash
                 Exception::raise("Rubyfmt reported an IO error");
-            case Rubyfmt_FormatError::RUBYFMT_OTHER_RUBY_ERROR:
+            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_OTHER_RUBY_ERROR:
                 // Fatal error -- crash
                 Exception::raise("Rubyfmt reported a Ruby error");
-            case Rubyfmt_FormatError::RUBYFMT_FORMAT_ERROR_RIPPER_PARSE_FAILURE:
-            case Rubyfmt_FormatError::RUBYFMT_FORMAT_ERROR_SYNTAX_ERROR:
+            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_INITIALIZE_ERROR:
+                // Fatal error -- crash
+                Exception::raise("Rubyfmt failed to initialize");
+            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_FORMAT_ERROR_RIPPER_PARSE_FAILURE:
+            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_FORMAT_ERROR_SYNTAX_ERROR:
                 // Non-fatal error. Returns null for result.
                 config.logger->debug("Rubyfmt returned non-fatal error code `{}` for file `{}`", formatResult.status,
                                      params->textDocument->uri);
                 break;
-            case Rubyfmt_FormatError::RUBYFMT_FORMAT_ERROR_OK:
+            case experimental::rubyfmt::RubyfmtFormatError::RUBYFMT_FORMAT_ERROR_OK:
                 // Construct text edit to replace entire document.
                 vector<unique_ptr<TextEdit>> edits;
                 // Note: VS Code uses 0-indexed lines, so the lineCount will be one more line than the size of the doc.

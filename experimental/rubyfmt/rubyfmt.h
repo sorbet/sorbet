@@ -4,8 +4,9 @@
 #include <string>
 #include <string_view>
 
-extern "C" {
-enum Rubyfmt_FormatError {
+namespace experimental::rubyfmt {
+
+enum RubyfmtFormatError {
     RUBYFMT_FORMAT_ERROR_OK = 0,
 
     // passed buffer contained a ruby syntax error. Non fatal, user should feel
@@ -25,18 +26,17 @@ enum Rubyfmt_FormatError {
     // a programming error. Please file a bug report and terminate the process
     // and restart.
     RUBYFMT_OTHER_RUBY_ERROR = 4,
-};
-}
 
-namespace experimental::rubyfmt {
+    // Rubyformat failed to initialize.
+    RUBYFMT_INITIALIZE_ERROR = 9999,
+};
 
 struct RubyfmtResult {
-    Rubyfmt_FormatError status;
+    RubyfmtFormatError status;
     std::string formatted;
 };
 
 // Formats the given string through RubyFmt.
-// WARNING: NOT THREAD SAFE. Assumes a single thread calling function at a time.
 RubyfmtResult format(std::string_view str);
 } // namespace experimental::rubyfmt
 
