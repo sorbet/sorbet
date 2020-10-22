@@ -750,15 +750,15 @@ bool SelfTypeParam::isFullyDefined() const {
     return true;
 }
 
-bool Type::hasUntyped() {
+bool Type::hasUntyped() const {
     return false;
 }
 
-bool ClassType::hasUntyped() {
+bool ClassType::hasUntyped() const {
     return isUntyped();
 }
 
-bool OrType::hasUntyped() {
+bool OrType::hasUntyped() const {
     return left->hasUntyped() || right->hasUntyped();
 }
 
@@ -767,7 +767,7 @@ TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-bool AndType::hasUntyped() {
+bool AndType::hasUntyped() const {
     return left->hasUntyped() || right->hasUntyped();
 }
 
@@ -776,7 +776,7 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-bool AppliedType::hasUntyped() {
+bool AppliedType::hasUntyped() const {
     for (auto &arg : this->targs) {
         if (arg->hasUntyped()) {
             return true;
@@ -785,7 +785,7 @@ bool AppliedType::hasUntyped() {
     return false;
 }
 
-bool TupleType::hasUntyped() {
+bool TupleType::hasUntyped() const {
     for (auto &arg : this->elems) {
         if (arg->hasUntyped()) {
             return true;
@@ -794,7 +794,7 @@ bool TupleType::hasUntyped() {
     return false;
 }
 
-bool ShapeType::hasUntyped() {
+bool ShapeType::hasUntyped() const {
     for (auto &arg : this->values) {
         if (arg->hasUntyped()) {
             return true;

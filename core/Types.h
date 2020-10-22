@@ -222,7 +222,7 @@ public:
     bool isNilClass() const;
     core::SymbolRef untypedBlame() const;
     bool isBottom() const;
-    virtual bool hasUntyped();
+    virtual bool hasUntyped() const;
     virtual bool isFullyDefined() const = 0;
     virtual int kind() const = 0;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc);
@@ -279,7 +279,7 @@ public:
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override final;
     virtual bool isFullyDefined() const final;
-    virtual bool hasUntyped() override final;
+    virtual bool hasUntyped() const override final;
 };
 CheckSize(ClassType, 16, 8);
 
@@ -450,7 +450,7 @@ public:
     virtual bool isFullyDefined() const final;
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual bool hasUntyped() override;
+    virtual bool hasUntyped() const override;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
@@ -506,7 +506,7 @@ public:
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
-    virtual bool hasUntyped() override;
+    virtual bool hasUntyped() const override;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 
@@ -551,7 +551,7 @@ public:
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() const final;
-    virtual bool hasUntyped() override;
+    virtual bool hasUntyped() const override;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr underlying() const override;
@@ -580,7 +580,7 @@ public:
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
-    virtual bool hasUntyped() override;
+    virtual bool hasUntyped() const override;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 
@@ -610,7 +610,7 @@ public:
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
-    virtual bool hasUntyped() override;
+    virtual bool hasUntyped() const override;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 };
