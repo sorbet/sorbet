@@ -488,83 +488,83 @@ void ClassType::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->symbol.exists());
 }
 
-int AppliedType::kind() {
+int AppliedType::kind() const {
     return 1;
 }
 
-int ClassType::kind() {
+int ClassType::kind() const {
     return 2;
 }
 
-int LiteralType::kind() {
+int LiteralType::kind() const {
     return 3;
 }
 
-int ShapeType::kind() {
+int ShapeType::kind() const {
     return 4;
 }
 
-int TupleType::kind() {
+int TupleType::kind() const {
     return 5;
 }
 
-int LambdaParam::kind() {
+int LambdaParam::kind() const {
     return 6;
 }
 
-int SelfTypeParam::kind() {
+int SelfTypeParam::kind() const {
     return 6;
 }
 
-int MetaType::kind() {
+int MetaType::kind() const {
     return 7;
 }
 
-int TypeVar::kind() {
+int TypeVar::kind() const {
     return 8;
 }
 
-int AliasType::kind() {
+int AliasType::kind() const {
     return 9;
 }
 
-int OrType::kind() {
+int OrType::kind() const {
     return 10;
 }
 
-int AndType::kind() {
+int AndType::kind() const {
     return 11;
 }
 
-int SelfType::kind() {
+int SelfType::kind() const {
     return 12;
 }
 
-bool ClassType::isFullyDefined() {
+bool ClassType::isFullyDefined() const {
     return true;
 }
 
-bool LiteralType::isFullyDefined() {
+bool LiteralType::isFullyDefined() const {
     return true;
 }
 
-bool ShapeType::isFullyDefined() {
-    return absl::c_all_of(values, [](TypePtr t) { return t->isFullyDefined(); });
+bool ShapeType::isFullyDefined() const {
+    return absl::c_all_of(values, [](const TypePtr &t) { return t->isFullyDefined(); });
 }
 
-bool TupleType::isFullyDefined() {
-    return absl::c_all_of(elems, [](TypePtr t) { return t->isFullyDefined(); });
+bool TupleType::isFullyDefined() const {
+    return absl::c_all_of(elems, [](const TypePtr &t) { return t->isFullyDefined(); });
 }
 
-bool AliasType::isFullyDefined() {
+bool AliasType::isFullyDefined() const {
     return true;
 }
 
-bool AndType::isFullyDefined() {
+bool AndType::isFullyDefined() const {
     return this->left->isFullyDefined() && this->right->isFullyDefined();
 }
 
-bool OrType::isFullyDefined() {
+bool OrType::isFullyDefined() const {
     return this->left->isFullyDefined() && this->right->isFullyDefined();
 }
 
@@ -653,7 +653,7 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
-bool TypeVar::isFullyDefined() {
+bool TypeVar::isFullyDefined() const {
     return false;
 }
 
@@ -673,7 +673,7 @@ void TypeVar::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->sym.exists());
 }
 
-bool AppliedType::isFullyDefined() {
+bool AppliedType::isFullyDefined() const {
     for (auto &targ : this->targs) {
         if (!targ->isFullyDefined()) {
             return false;
@@ -742,23 +742,23 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, DispatchArgs a
 void LambdaParam::_sanityCheck(const GlobalState &gs) {}
 void SelfTypeParam::_sanityCheck(const GlobalState &gs) {}
 
-bool LambdaParam::isFullyDefined() {
+bool LambdaParam::isFullyDefined() const {
     return false;
 }
 
-bool SelfTypeParam::isFullyDefined() {
+bool SelfTypeParam::isFullyDefined() const {
     return true;
 }
 
-bool Type::hasUntyped() {
+bool Type::hasUntyped() const {
     return false;
 }
 
-bool ClassType::hasUntyped() {
+bool ClassType::hasUntyped() const {
     return isUntyped();
 }
 
-bool OrType::hasUntyped() {
+bool OrType::hasUntyped() const {
     return left->hasUntyped() || right->hasUntyped();
 }
 
@@ -767,7 +767,7 @@ TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-bool AndType::hasUntyped() {
+bool AndType::hasUntyped() const {
     return left->hasUntyped() || right->hasUntyped();
 }
 
@@ -776,7 +776,7 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-bool AppliedType::hasUntyped() {
+bool AppliedType::hasUntyped() const {
     for (auto &arg : this->targs) {
         if (arg->hasUntyped()) {
             return true;
@@ -785,7 +785,7 @@ bool AppliedType::hasUntyped() {
     return false;
 }
 
-bool TupleType::hasUntyped() {
+bool TupleType::hasUntyped() const {
     for (auto &arg : this->elems) {
         if (arg->hasUntyped()) {
             return true;
@@ -794,7 +794,7 @@ bool TupleType::hasUntyped() {
     return false;
 }
 
-bool ShapeType::hasUntyped() {
+bool ShapeType::hasUntyped() const {
     for (auto &arg : this->values) {
         if (arg->hasUntyped()) {
             return true;
@@ -841,7 +841,7 @@ string SelfType::typeName() const {
     return "SelfType";
 }
 
-bool SelfType::isFullyDefined() {
+bool SelfType::isFullyDefined() const {
     return false;
 }
 
