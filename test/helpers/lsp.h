@@ -71,5 +71,7 @@ std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper,
 std::vector<std::unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper,
                                                             std::vector<std::unique_ptr<LSPMessage>> messages);
 
+std::string applyEdit(std::string_view source, const core::File &file, const Range &range, std::string_view newText);
+
 } // namespace sorbet::test
 #endif // TEST_HELPERS_LSP_H

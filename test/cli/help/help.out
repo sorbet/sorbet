@@ -94,6 +94,9 @@ Usage:
       --enable-experimental-lsp-document-symbol
                                 Enable experimental LSP feature: Document
                                 Symbol
+      --enable-experimental-lsp-document-formatting-rubyfmt
+                                Enable experimental LSP feature: Document
+                                Formatting with Rubyfmt
       --enable-experimental-lsp-document-highlight
                                 Enable experimental LSP feature: Document
                                 Highlight
