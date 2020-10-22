@@ -1,3 +1,5 @@
+# NOTE: If a target depends on this, that target **must** cargo cult the linkopts
+# from `rubyfmt_test`! Otherwise, it will not compile+link properly.
 cc_library(
     name = "rubyfmt",
     srcs = select({
@@ -7,20 +9,8 @@ cc_library(
     hdrs = [
         "rubyfmt.h",
     ],
-    linkopts = select({
-        "@com_stripe_ruby_typer//tools/config:darwin": ["-framework Foundation"],
-        "//tools/config:webasm": [],
-        "//conditions:default": [
-            "-lcrypt",
-            "-lrt",
-            "-lz",
-            "-lgmp",
-        ],
-    }),
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
+    features = ["fully_static_link"],
+    linkstatic = True,
     visibility = ["//visibility:public"],
     deps = select({
         "//tools/config:webasm": [],
@@ -31,6 +21,7 @@ cc_library(
             "@com_google_absl//absl/synchronization",
         ],
     }),
+    alwayslink = True,
 )
 
 cc_test(
@@ -39,6 +30,16 @@ cc_test(
     srcs = glob([
         "test/*.cc",
     ]),
+    linkopts = select({
+        "@com_stripe_ruby_typer//tools/config:darwin": ["-framework Foundation"],
+        "//tools/config:webasm": [],
+        "//conditions:default": [
+            "-lcrypt",
+            "-lrt",
+            "-lz",
+            "-lgmp",
+        ],
+    }),
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
