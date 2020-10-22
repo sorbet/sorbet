@@ -136,7 +136,8 @@ struct Modifier {
     // The name of the modification.
     core::NameRef name;
     // For methods: The name of the method being modified.
-    core::NameRef methodName;
+    // For constants: The name of the constant being modified.
+    core::NameRef target;
 };
 
 class FoundDefinitions final {
@@ -480,8 +481,8 @@ public:
             methodModifier.owner = getOwner();
             methodModifier.loc = original.loc;
             methodModifier.name = original.fun;
-            methodModifier.methodName = unwrapLiteralToMethodName(ctx, original, original.args[0]);
-            if (methodModifier.methodName.exists()) {
+            methodModifier.target = unwrapLiteralToMethodName(ctx, original, original.args[0]);
+            if (methodModifier.target.exists()) {
                 foundDefs->addModifier(move(methodModifier));
             }
         }
@@ -988,7 +989,7 @@ class SymbolDefiner {
         if (mod.name._id == core::Names::privateClassMethod()._id) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
-        auto method = ctx.state.lookupMethodSymbol(owner, mod.methodName);
+        auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
         if (method.exists()) {
             switch (mod.name._id) {
                 case core::Names::private_()._id:
