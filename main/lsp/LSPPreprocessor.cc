@@ -190,9 +190,6 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
                 return make_unique<CompletionTask>(*config, id, move(get<unique_ptr<CompletionParams>>(rawParams)));
             case LSPMethod::TextDocumentCodeAction:
                 return make_unique<CodeActionTask>(*config, id, move(get<unique_ptr<CodeActionParams>>(rawParams)));
-            case LSPMethod::TextDocumentFormatting:
-                return make_unique<DocumentFormattingTask>(*config, id,
-                                                           move(get<unique_ptr<DocumentFormattingParams>>(rawParams)));
             case LSPMethod::TextDocumentSignatureHelp:
                 return make_unique<SignatureHelpTask>(*config, id,
                                                       move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));

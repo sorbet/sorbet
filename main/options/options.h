@@ -210,7 +210,6 @@ struct Options {
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
-    bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
 
     std::string inlineInput; // passed via -e

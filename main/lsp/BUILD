@@ -53,7 +53,6 @@ cc_library(
         "//core",
         "//core/proto",
         "//core/serialize",
-        "//experimental/rubyfmt",
         "//main/cache",
         "//main/options",
         "//main/pipeline",

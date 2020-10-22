@@ -249,7 +249,7 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
     auto &receivedSymbolResponse = get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*response.result);
 
     auto expectedSymbolsPath = test.folder + expectationFileName;
-    auto expected = LSPMessage::fromClient(FileOps::read(expectedSymbolsPath));
+    auto expected = LSPMessage::fromClient(FileOps::read(expectedSymbolsPath.c_str()));
     auto &expectedResp = expected->asResponse();
     auto &expectedSymbolResponse =
         get<variant<JSONNullObject, vector<unique_ptr<DocumentSymbol>>>>(*expectedResp.result);
@@ -257,41 +257,6 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
     // Simple string comparison, just like other *.exp files.
     CHECK_EQ_DIFF(documentSymbolsToString(expectedSymbolResponse), documentSymbolsToString(receivedSymbolResponse),
                   "Mismatch on: " + expectedSymbolsPath);
-}
-
-void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
-                            string_view testFile) {
-    auto expectationFileName = test.expectations["document-formatting-rubyfmt"][testFile];
-    if (expectationFileName.empty()) {
-        // No .exp file found; nothing to do.
-        return;
-    }
-
-    auto params = make_unique<DocumentFormattingParams>(make_unique<TextDocumentIdentifier>(string(uri)),
-                                                        make_unique<FormattingOptions>(4, 4));
-    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentFormatting, move(params));
-    auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
-    {
-        INFO("Did not receive exactly one response for a documentFormatting request.");
-        REQUIRE_EQ(responses.size(), 1);
-    }
-    auto &msg = responses.at(0);
-    REQUIRE(msg->isResponse());
-    auto &response = msg->asResponse();
-    REQUIRE_MESSAGE(response.result, "Document formatting request returned error: " << msg->toJSON());
-    auto &receivedFormattingResponse = get<variant<JSONNullObject, vector<unique_ptr<TextEdit>>>>(*response.result);
-    string formattedText = "";
-    if (auto *edits = get_if<vector<unique_ptr<TextEdit>>>(&receivedFormattingResponse)) {
-        // We can support multiple edits, but right now the impl only returns one.
-        REQUIRE_EQ(1, edits->size());
-        formattedText = (*edits)[0]->newText;
-    }
-
-    auto expectedFormattingPath = test.folder + expectationFileName;
-    auto expectedFormattedText = FileOps::read(expectedFormattingPath);
-
-    // Simple string comparison, just like other *.exp files.
-    CHECK_EQ_DIFF(expectedFormattedText, formattedText, "Mismatch on: " + expectedFormattingPath);
 }
 
 TEST_CASE("LSPTest") {
@@ -399,7 +364,6 @@ TEST_CASE("LSPTest") {
 
     for (auto &filename : filenames) {
         testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[filename], filename);
-        testDocumentFormatting(*lspWrapper, test, nextId, testFileUris[filename], filename);
     }
     testQuickFixCodeActions(*lspWrapper, test, filenames, assertions, testFileUris, nextId);
 

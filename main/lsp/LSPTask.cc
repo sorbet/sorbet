@@ -66,8 +66,6 @@ ConstExprStr LSPTask::methodString() const {
             return "textDocument.documentHighlight";
         case LSPMethod::TextDocumentDocumentSymbol:
             return "textDocument.documentSymbol";
-        case LSPMethod::TextDocumentFormatting:
-            return "textDocument.formatting";
         case LSPMethod::TextDocumentHover:
             return "textDocument.hover";
         case LSPMethod::TextDocumentReferences:
