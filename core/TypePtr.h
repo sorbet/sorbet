@@ -166,6 +166,12 @@ public:
         return store == 0;
     }
 
+    bool isUntyped() const;
+
+    bool isNilClass() const;
+
+    bool isBottom() const;
+
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     friend class TypePtrTestHelper;
 };

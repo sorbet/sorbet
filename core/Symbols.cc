@@ -35,7 +35,7 @@ vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     for (auto tm : typeMembers()) {
         auto tmData = tm.data(gs);
         if (tmData->isFixed()) {
-            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
+            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
             targs.emplace_back(lambdaParam->upperBound);
         } else {
@@ -82,7 +82,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
 
         for (auto &tm : typeMembers()) {
             auto tmData = tm.data(gs);
-            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
+            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
 
             if (isStdlibGeneric) {
@@ -970,23 +970,23 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
 
     auto data = sealedSubclasses.data(ctx);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
-    auto appliedType = cast_type<AppliedType>(data->resultType.get());
+    auto appliedType = cast_type<AppliedType>(data->resultType);
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
     ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
     auto currentClasses = appliedType->targs[0];
 
-    auto iter = currentClasses.get();
-    OrType *orT = nullptr;
-    while ((orT = cast_type<OrType>(iter))) {
-        auto right = cast_type<ClassType>(orT->right.get());
+    const TypePtr *iter = &currentClasses;
+    const OrType *orT = nullptr;
+    while ((orT = cast_type<OrType>(*iter))) {
+        auto right = cast_type<ClassType>(orT->right);
         ENFORCE(left);
         if (right->symbol == classOfSubclass) {
             return;
         }
-        iter = orT->left.get();
+        iter = &orT->left;
     }
-    ENFORCE(isa_type<ClassType>(iter));
-    if (cast_type<ClassType>(iter)->symbol == classOfSubclass) {
+    ENFORCE(isa_type<ClassType>(*iter));
+    if (cast_type<ClassType>(*iter)->symbol == classOfSubclass) {
         return;
     }
     if (currentClasses != core::Types::bottom()) {
@@ -1011,26 +1011,26 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto data = sealedSubclasses.data(gs);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
-    auto appliedType = cast_type<AppliedType>(data->resultType.get());
+    auto appliedType = cast_type<AppliedType>(data->resultType);
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
     ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
 
     auto currentClasses = appliedType->targs[0];
-    if (currentClasses->isBottom()) {
+    if (currentClasses.isBottom()) {
         // Declared sealed parent class, but never saw any children.
         return Types::bottom();
     }
 
     auto result = Types::bottom();
-    while (auto orType = cast_type<OrType>(currentClasses.get())) {
-        auto classType = cast_type<ClassType>(orType->right.get());
+    while (auto orType = cast_type<OrType>(currentClasses)) {
+        auto classType = cast_type<ClassType>(orType->right);
         ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
         auto subclass = classType->symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
         result = Types::any(gs, make_type<ClassType>(subclass), result);
         currentClasses = orType->left;
     }
-    auto lastClassType = cast_type<ClassType>(currentClasses.get());
+    auto lastClassType = cast_type<ClassType>(currentClasses);
     ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
     auto subclass = lastClassType->symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
@@ -1040,7 +1040,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 }
 
 SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
-    if (auto alias = cast_type<AliasType>(resultType.get())) {
+    if (auto alias = cast_type<AliasType>(resultType)) {
         if (depthLimit == 0) {
             if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
                 e.setHeader("Too many alias expansions for symbol {}, the alias is either too long or infinite. Next "
@@ -1175,7 +1175,7 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         }
     }
     if (this->isMethod()) {
-        if (isa_type<AliasType>(this->resultType.get())) {
+        if (isa_type<AliasType>(this->resultType)) {
             // If we have an alias method, we should never look at it's arguments;
             // we should instead look at the arguments of whatever we're aliasing.
             ENFORCE_NO_TIMER(this->arguments().empty(), this->show(gs));

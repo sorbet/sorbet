@@ -43,7 +43,7 @@ Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method
 
 // This returns true if `sub` is a subtype of `super`, but it also returns true if either one is `nullptr` or if either
 // one is not fully defined. This is really just a useful helper function for this module: do not use it elsewhere.
-bool checkSubtype(const core::Context ctx, core::TypePtr sub, core::TypePtr super) {
+bool checkSubtype(const core::Context ctx, const core::TypePtr &sub, const core::TypePtr &super) {
     if (sub == nullptr || super == nullptr) {
         return true;
     }

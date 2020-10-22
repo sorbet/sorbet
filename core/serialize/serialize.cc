@@ -30,7 +30,7 @@ public:
     static Pickler pickle(const GlobalState &gs, bool payloadOnly = false);
     static void pickle(Pickler &p, const File &what);
     static void pickle(Pickler &p, const Name &what);
-    static void pickle(Pickler &p, Type *what);
+    static void pickle(Pickler &p, const TypePtr &what);
     static void pickle(Pickler &p, const ArgInfo &a);
     static void pickle(Pickler &p, const Symbol &what);
     static void pickle(Pickler &p, const ast::TreePtr &what);
@@ -341,7 +341,7 @@ Name SerializerImpl::unpickleName(UnPickler &p, GlobalState &gs) {
     return result;
 }
 
-void SerializerImpl::pickle(Pickler &p, Type *what) {
+void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
     if (what == nullptr) {
         p.putU4(0);
         return;
@@ -351,48 +351,48 @@ void SerializerImpl::pickle(Pickler &p, Type *what) {
         p.putU4(c->symbol.rawId());
     } else if (auto *o = cast_type<OrType>(what)) {
         p.putU4(2);
-        pickle(p, o->left.get());
-        pickle(p, o->right.get());
+        pickle(p, o->left);
+        pickle(p, o->right);
     } else if (auto *c = cast_type<LiteralType>(what)) {
         p.putU4(3);
         p.putU1((u1)c->literalKind);
         p.putS8(c->value);
     } else if (auto *a = cast_type<AndType>(what)) {
         p.putU4(4);
-        pickle(p, a->left.get());
-        pickle(p, a->right.get());
+        pickle(p, a->left);
+        pickle(p, a->right);
     } else if (auto *arr = cast_type<TupleType>(what)) {
         p.putU4(5);
-        pickle(p, arr->underlying().get());
+        pickle(p, arr->underlying());
         p.putU4(arr->elems.size());
         for (auto &el : arr->elems) {
-            pickle(p, el.get());
+            pickle(p, el);
         }
     } else if (auto *hash = cast_type<ShapeType>(what)) {
         p.putU4(6);
-        pickle(p, hash->underlying().get());
+        pickle(p, hash->underlying());
         p.putU4(hash->keys.size());
         ENFORCE(hash->keys.size() == hash->values.size());
         for (auto &el : hash->keys) {
-            pickle(p, el.get());
+            pickle(p, el);
         }
         for (auto &el : hash->values) {
-            pickle(p, el.get());
+            pickle(p, el);
         }
     } else if (auto *alias = cast_type<AliasType>(what)) {
         p.putU4(7);
         p.putU4(alias->symbol.rawId());
     } else if (auto *lp = cast_type<LambdaParam>(what)) {
         p.putU4(8);
-        pickle(p, lp->lowerBound.get());
-        pickle(p, lp->upperBound.get());
+        pickle(p, lp->lowerBound);
+        pickle(p, lp->upperBound);
         p.putU4(lp->definition.rawId());
     } else if (auto *at = cast_type<AppliedType>(what)) {
         p.putU4(9);
         p.putU4(at->klass.rawId());
         p.putU4(at->targs.size());
         for (auto &t : at->targs) {
-            pickle(p, t.get());
+            pickle(p, t);
         }
     } else if (auto *tp = cast_type<TypeVar>(what)) {
         p.putU4(10);
@@ -494,7 +494,7 @@ void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
     p.putU4(a.rebind.rawId());
     pickleWithFile(p, a.loc);
     p.putU1(a.flags.toU1());
-    pickle(p, a.type.get());
+    pickle(p, a.type);
 }
 
 ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
@@ -544,7 +544,7 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
         p.putU4(member.second);
     }
 
-    pickle(p, what.resultType.get());
+    pickle(p, what.resultType);
     p.putU4(what.locs().size());
     for (auto &loc : what.locs()) {
         pickleWithFile(p, loc);
@@ -922,7 +922,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
         },
         [&](ast::Literal *a) {
             pickleAstHeader(p, 4, a);
-            pickle(p, a->value.get());
+            pickle(p, a->value);
         },
         [&](ast::While *a) {
             pickleAstHeader(p, 5, a);
@@ -999,7 +999,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
         [&](ast::Cast *c) {
             pickleAstHeader(p, 19, c);
             p.putU4(c->cast._id);
-            pickle(p, c->type.get());
+            pickle(p, c->type);
             pickle(p, c->arg);
         },
 

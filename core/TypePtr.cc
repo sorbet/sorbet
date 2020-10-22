@@ -1,5 +1,8 @@
 #include "core/TypePtr.h"
+#include "core/SymbolRef.h"
 #include "core/Types.h"
+
+using namespace std;
 
 namespace sorbet::core {
 
@@ -72,4 +75,20 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
             break;
     }
 }
+
+bool TypePtr::isUntyped() const {
+    auto *t = cast_type<ClassType>(*this);
+    return t != nullptr && t->symbol == Symbols::untyped();
+}
+
+bool TypePtr::isNilClass() const {
+    auto *t = cast_type<ClassType>(*this);
+    return t != nullptr && t->symbol == Symbols::NilClass();
+}
+
+bool TypePtr::isBottom() const {
+    auto *t = cast_type<ClassType>(*this);
+    return t != nullptr && t->symbol == Symbols::bottom();
+}
+
 } // namespace sorbet::core

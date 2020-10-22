@@ -95,7 +95,7 @@ string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
     string res;
     typecase(
         this->value.get(), [&](core::LiteralType *l) { res = l->showValue(gs); },
-        [&](core::ClassType *l) {
+        [&](const core::ClassType *l) {
             if (l->symbol == core::Symbols::NilClass()) {
                 res = "nil";
             } else if (l->symbol == core::Symbols::FalseClass()) {
@@ -106,7 +106,7 @@ string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
                 res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0));
             }
         },
-        [&](core::Type *t) { res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0)); });
+        [&](const core::Type *t) { res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0)); });
     return res;
 }
 

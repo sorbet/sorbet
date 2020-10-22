@@ -78,7 +78,7 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
                 auto start = sendResp->dispatchResult.get();
                 vector<unique_ptr<DocumentHighlight>> highlights;
                 while (start != nullptr) {
-                    if (start->main.method.exists() && !start->main.receiver->isUntyped()) {
+                    if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                         highlights =
                             getHighlightsToSymbolInFile(typechecker, uri, start->main.method, move(highlights));
                     }
