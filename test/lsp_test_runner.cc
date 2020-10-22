@@ -280,7 +280,7 @@ void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nex
     auto &response = msg->asResponse();
     REQUIRE_MESSAGE(response.result, "Document formatting request returned error: " << msg->toJSON());
     auto &receivedFormattingResponse = get<variant<JSONNullObject, vector<unique_ptr<TextEdit>>>>(*response.result);
-    string formattedText = "";
+    string formattedText = string(test.sourceFileContents[testFile]->source());
     if (auto *edits = get_if<vector<unique_ptr<TextEdit>>>(&receivedFormattingResponse)) {
         // We can support multiple edits, but right now the impl only returns one.
         REQUIRE_EQ(1, edits->size());

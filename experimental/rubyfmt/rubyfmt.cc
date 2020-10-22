@@ -65,8 +65,8 @@ RubyfmtResult format(string_view str) {
         unsigned char *bytes = rubyfmt_string_ptr(out);
         size_t len = rubyfmt_string_len(out);
         result.formatted.assign(reinterpret_cast<char *>(bytes), len);
+        rubyfmt_string_free(out);
     }
-    rubyfmt_string_free(out);
     return result;
 }
 

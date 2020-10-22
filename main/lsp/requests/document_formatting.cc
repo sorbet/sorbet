@@ -57,10 +57,11 @@ void DocumentFormattingTask::index(LSPIndexer &index) {
                     make_unique<TextEdit>(make_unique<Range>(make_unique<Position>(0, 0),
                                                              make_unique<Position>(index.getFile(fref).lineCount(), 0)),
                                           formatResult.formatted));
-                response->result = move(edits);
+                result = move(edits);
                 break;
         }
     }
+    response->result = move(result);
     config.output->write(move(response));
     return;
 }
