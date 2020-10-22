@@ -75,11 +75,29 @@ public:
     }
 };
 
-UnorderedSet<string> knownExpectations = {
-    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
-    "rewrite-tree-raw", "index-tree",      "index-tree-raw",        "symbol-table", "symbol-table-raw", "name-tree",
-    "name-tree-raw",    "resolve-tree",    "resolve-tree-raw",      "flatten-tree", "flatten-tree-raw", "cfg",
-    "cfg-raw",          "autogen",         "document-symbols",      "package-tree"};
+UnorderedSet<string> knownExpectations = {"parse-tree",
+                                          "parse-tree-json",
+                                          "parse-tree-whitequark",
+                                          "desugar-tree",
+                                          "desugar-tree-raw",
+                                          "rewrite-tree",
+                                          "rewrite-tree-raw",
+                                          "index-tree",
+                                          "index-tree-raw",
+                                          "symbol-table",
+                                          "symbol-table-raw",
+                                          "name-tree",
+                                          "name-tree-raw",
+                                          "resolve-tree",
+                                          "resolve-tree-raw",
+                                          "flatten-tree",
+                                          "flatten-tree-raw",
+                                          "cfg",
+                                          "cfg-raw",
+                                          "autogen",
+                                          "document-symbols",
+                                          "package-tree",
+                                          "document-formatting-rubyfmt"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);

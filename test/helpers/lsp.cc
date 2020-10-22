@@ -215,7 +215,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     CHECK(capabilities.workspaceSymbolProvider.value_or(false));
     CHECK(capabilities.codeActionProvider.has_value());
     CHECK_FALSE(capabilities.codeLensProvider.has_value());
-    CHECK_FALSE(capabilities.documentFormattingProvider.has_value());
+    CHECK(capabilities.documentFormattingProvider.value_or(false));
     CHECK_FALSE(capabilities.documentRangeFormattingProvider.has_value());
     CHECK_FALSE(capabilities.documentRangeFormattingProvider.has_value());
     CHECK_FALSE(capabilities.documentOnTypeFormattingProvider.has_value());
@@ -423,6 +423,21 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, unique_pt
     vector<unique_ptr<LSPMessage>> messages;
     messages.push_back(move(message));
     return getLSPResponsesFor(wrapper, move(messages));
+}
+
+string applyEdit(string_view source, const core::File &file, const Range &range, string_view newText) {
+    auto beginLine = static_cast<u4>(range.start->line + 1);
+    auto beginCol = static_cast<u4>(range.start->character + 1);
+    auto beginOffset = core::Loc::pos2Offset(file, {beginLine, beginCol}).value();
+
+    auto endLine = static_cast<u4>(range.end->line + 1);
+    auto endCol = static_cast<u4>(range.end->character + 1);
+    auto endOffset = core::Loc::pos2Offset(file, {endLine, endCol}).value();
+
+    string actualEditedFileContents = string(source);
+    actualEditedFileContents.replace(beginOffset, endOffset - beginOffset, newText);
+
+    return actualEditedFileContents;
 }
 
 } // namespace sorbet::test

@@ -370,6 +370,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
     options.add_options("advanced")("enable-experimental-lsp-document-symbol",
                                     "Enable experimental LSP feature: Document Symbol");
+    options.add_options("advanced")("enable-experimental-lsp-document-formatting-rubyfmt",
+                                    "Enable experimental LSP feature: Document Formatting with Rubyfmt");
     options.add_options("advanced")("enable-experimental-lsp-document-highlight",
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
@@ -718,6 +720,8 @@ void readOptions(Options &opts,
         opts.lspDocumentHighlightEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-highlight"].as<bool>();
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
+        opts.lspDocumentFormatRubyfmtEnabled =
+            enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
