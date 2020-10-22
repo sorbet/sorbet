@@ -36,7 +36,6 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.autocorrect, opts.autocorrect);
     CHECK_EQ(empty.waitForDebugger, opts.waitForDebugger);
     CHECK_EQ(empty.skipRewriterPasses, opts.skipRewriterPasses);
-    CHECK_EQ(empty.suggestRuntimeProfiledType, opts.suggestRuntimeProfiledType);
     CHECK_EQ(empty.threads, opts.threads);
     CHECK_EQ(empty.logLevel, opts.logLevel);
     CHECK_EQ(empty.autogenVersion, opts.autogenVersion);

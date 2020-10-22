@@ -276,17 +276,6 @@ module Opus::Types::Test
         assert_equal(7, @mod.foo {self + 4})
       end
 
-      it "rejects T::Utils::RuntimeProfiled" do
-        @mod.sig {returns(T::Utils::RuntimeProfiled)}
-        def @mod.foo; end
-
-        err = assert_raises(TypeError) do
-          @mod.foo
-        end
-
-        assert_match("Expected type T::Utils::RuntimeProfiled, got type NilClass", err.message)
-      end
-
       it "gets the locations right with the second call" do
         @mod.sig {returns(String)}
         def @mod.foo

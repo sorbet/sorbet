@@ -164,8 +164,6 @@ module T::Utils
   def self.register_forwarder(from_method, to_method, remove_first_param: nil); end
 end
 
-class T::Utils::RuntimeProfiled
-end
 
 module T::AbstractUtils
   def self.abstract_method?(method); end

@@ -144,7 +144,6 @@ struct Options {
     bool autocorrect = false;
     bool waitForDebugger = false;
     bool skipRewriterPasses = false;
-    bool suggestRuntimeProfiledType = false;
     bool censorForSnapshotTests = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
