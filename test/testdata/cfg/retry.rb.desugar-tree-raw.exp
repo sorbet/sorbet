@@ -32,6 +32,7 @@ ClassDef{
               }
               fun = <U <>
               block = nullptr
+              pos_args = 1
               args = [
                 Literal{ value = 3 }
               ]
@@ -50,6 +51,7 @@ ClassDef{
                     }
                     fun = <U +>
                     block = nullptr
+                    pos_args = 1
                     args = [
                       Literal{ value = 1 }
                     ]
@@ -62,6 +64,7 @@ ClassDef{
                 }
                 fun = <U raise>
                 block = nullptr
+                pos_args = 1
                 args = [
                   Literal{ value = "e" }
                 ]
@@ -85,6 +88,7 @@ ClassDef{
                     }
                     fun = <U puts>
                     block = nullptr
+                    pos_args = 1
                     args = [
                       Literal{ value = "rescue" }
                     ]
@@ -107,6 +111,7 @@ ClassDef{
       }
       fun = <U main>
       block = nullptr
+      pos_args = 0
       args = [
       ]
     }

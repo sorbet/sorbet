@@ -55,15 +55,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def takes_keyword<<C <todo sym>>>(arg0:, &<blk>)
-      <self>.super({:"arg0" => arg0})
+      <self>.super(:"arg0", arg0)
     end
 
     def takes_two_keyword<<C <todo sym>>>(arg0:, arg1:, &<blk>)
-      <self>.super({:"arg0" => arg0, :"arg1" => arg1})
+      <self>.super(:"arg0", arg0, :"arg1", arg1)
     end
 
     def takes_positional_then_keyword<<C <todo sym>>>(arg0, arg1:, &<blk>)
-      <self>.super(arg0, {:"arg1" => arg1})
+      <self>.super(arg0, :"arg1", arg1)
     end
 
     def takes_rest<<C <todo sym>>>(*args, &<blk>)

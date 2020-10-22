@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C MyCommand><<C <todo sym>>> < (<emptyTree>::<C Opus>::<C Command>)
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"x" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C String>)
+      <self>.params(:"x", <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
     end
 
     def call<<C <todo sym>>>(x, &<blk>)
@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"x" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C String>)
+      <self>.params(:"x", <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
     end
 
     def self.call<<C <todo sym>>>(x, &<blk>)
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C OtherCommand><<C <todo sym>>> < (::<root>::<C Opus>::<C Command>)
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C Integer>)
+      <self>.params(:"x", <emptyTree>::<C String>).returns(<emptyTree>::<C Integer>)
     end
 
     def call<<C <todo sym>>>(x, &<blk>)
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C Integer>)
+      <self>.params(:"x", <emptyTree>::<C String>).returns(<emptyTree>::<C Integer>)
     end
 
     def self.call<<C <todo sym>>>(x, &<blk>)
@@ -53,7 +53,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C NotACommand><<C <todo sym>>> < (<emptyTree>::<C Llamas>::<C Opus>::<C Command>)
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C Integer>)
+      <self>.params(:"x", <emptyTree>::<C String>).returns(<emptyTree>::<C Integer>)
     end
 
     def call<<C <todo sym>>>(x, &<blk>)

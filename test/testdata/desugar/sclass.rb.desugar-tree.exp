@@ -48,7 +48,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
       <self>.sig() do ||
-        <self>.params({:"f" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
+        <self>.params(:"f", <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
       end
 
       <self>.attr_writer(:"f")

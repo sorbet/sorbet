@@ -12,7 +12,7 @@ begin
   class ::C<<C C>> < (::<todo sym>)
     def self.<static-init>(<blk>)
       ::C::L = begin
-        ::Sorbet::Private::Static.keep_for_typechecking(::T.proc().params({:"x" => ::Integer}).returns(::Integer))
+        ::Sorbet::Private::Static.keep_for_typechecking(::T.proc().params(:"x", ::Integer).returns(::Integer))
         T.let(<self>.lambda() do |x$1|
           x$1.*(x$1)
         end, AppliedType {

@@ -13,9 +13,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <self>.x().to_hash().merge({:"a" => "a"})
 
-  <self>.x().to_hash().merge({:"a" => "a"})
+  <self>.x().to_hash().merge(:"a", "a")
 
   {:"a" => "a"}.merge(<self>.x().to_hash()).merge(<self>.y().to_hash()).merge({:"b" => "b", :"c" => "c"}).merge(<self>.y().to_hash()).merge({:"d" => "d"})
 
-  {:"a" => "a"}.merge(<self>.x().to_hash()).merge(<self>.y().to_hash()).merge({:"b" => "b", :"c" => "c"}).merge(<self>.y().to_hash()).merge({:"d" => "d"})
+  {:"a" => "a"}.merge(<self>.x().to_hash()).merge(<self>.y().to_hash()).merge(:"b", "b", :"c", "c").merge(<self>.y().to_hash()).merge(:"d", "d")
 end

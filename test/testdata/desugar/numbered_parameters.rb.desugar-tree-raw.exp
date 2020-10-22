@@ -33,6 +33,7 @@ ClassDef{
           name = <U _1>
         }
       }
+      pos_args = 0
       args = [
       ]
     }
@@ -86,6 +87,7 @@ ClassDef{
           name = <U _9>
         }
       }
+      pos_args = 0
       args = [
       ]
     }
@@ -113,6 +115,7 @@ ClassDef{
           }
           fun = <U *>
           block = nullptr
+          pos_args = 1
           args = [
             UnresolvedIdent{
               kind = Local
@@ -121,6 +124,7 @@ ClassDef{
           ]
         }
       }
+      pos_args = 0
       args = [
       ]
     }
@@ -142,6 +146,7 @@ ClassDef{
           name = <U _1>
         }
       }
+      pos_args = 0
       args = [
       ]
     }
@@ -195,6 +200,7 @@ ClassDef{
           name = <U _9>
         }
       }
+      pos_args = 0
       args = [
       ]
     }
@@ -222,6 +228,7 @@ ClassDef{
           }
           fun = <U *>
           block = nullptr
+          pos_args = 1
           args = [
             UnresolvedIdent{
               kind = Local
@@ -230,6 +237,7 @@ ClassDef{
           ]
         }
       }
+      pos_args = 0
       args = [
       ]
     }
@@ -252,6 +260,7 @@ ClassDef{
           name = <U _1>
         }
       }
+      pos_args = 0
       args = [
       ]
     }
@@ -306,6 +315,7 @@ ClassDef{
           name = <U _9>
         }
       }
+      pos_args = 0
       args = [
       ]
     }
@@ -334,6 +344,7 @@ ClassDef{
           }
           fun = <U *>
           block = nullptr
+          pos_args = 1
           args = [
             UnresolvedIdent{
               kind = Local
@@ -342,6 +353,7 @@ ClassDef{
           ]
         }
       }
+      pos_args = 0
       args = [
       ]
     }
@@ -395,6 +407,7 @@ ClassDef{
           }
         }
       }
+      pos_args = 0
       args = [
       ]
     }

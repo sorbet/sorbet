@@ -64,13 +64,13 @@ begin
           <self>.returns(::Integer)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"v1" => ::Integer}).returns(::Integer)
+          <self>.params(:"v1", ::Integer).returns(::Integer)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::String)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"v2" => ::String}).returns(::String)
+          <self>.params(:"v2", ::String).returns(::String)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::String)

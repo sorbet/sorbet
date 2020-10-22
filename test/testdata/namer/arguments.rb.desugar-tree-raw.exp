@@ -173,6 +173,7 @@ ClassDef{
                   ]
                 }
               }
+              pos_args = 0
               args = [
               ]
             }

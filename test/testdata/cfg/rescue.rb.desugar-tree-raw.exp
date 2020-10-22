@@ -20,6 +20,7 @@ ClassDef{
           }
           fun = <U a>
           block = nullptr
+          pos_args = 0
           args = [
           ]
         }
@@ -37,6 +38,7 @@ ClassDef{
               }
               fun = <U b>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -48,6 +50,7 @@ ClassDef{
           }
           fun = <U c>
           block = nullptr
+          pos_args = 0
           args = [
           ]
         }
@@ -57,6 +60,7 @@ ClassDef{
           }
           fun = <U d>
           block = nullptr
+          pos_args = 0
           args = [
           ]
         }
@@ -109,6 +113,7 @@ ClassDef{
       }
       fun = <U puts>
       block = nullptr
+      pos_args = 1
       args = [
         Send{
           recv = Local{
@@ -116,6 +121,7 @@ ClassDef{
           }
           fun = <U foo>
           block = nullptr
+          pos_args = 0
           args = [
           ]
         }

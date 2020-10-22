@@ -9,7 +9,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"a" => <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+      <self>.params(:"a", <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
     def a=<<C <todo sym>>>(a, &<blk>)
@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"b" => <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+      <self>.params(:"b", <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
     def b=<<C <todo sym>>>(b, &<blk>)
@@ -41,7 +41,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"c" => <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+      <self>.params(:"c", <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
     def c=<<C <todo sym>>>(c, &<blk>)
@@ -73,7 +73,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"g" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+      <self>.params(:"g", <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
     def g=<<C <todo sym>>>(g, &<blk>)
@@ -81,7 +81,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"h" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+      <self>.params(:"h", <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
     def h=<<C <todo sym>>>(h, &<blk>)
@@ -89,7 +89,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params({:"i" => <emptyTree>::<C String>}).params({:"h" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+      <self>.params(:"i", <emptyTree>::<C String>).params(:"h", <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
     def i=<<C <todo sym>>>(i, &<blk>)

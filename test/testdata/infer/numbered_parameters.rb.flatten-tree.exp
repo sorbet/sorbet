@@ -8,7 +8,7 @@ begin
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"blk" => ::T.proc().params({:"a" => ::Integer, :"b" => ::String}).void()}).void()
+          <self>.params(:"blk", ::T.proc().params(:"a", ::Integer, :"b", ::String).void()).void()
         end
         <self>.extend(::T::Sig)
         ::Sorbet::Private::Static.keep_def(<self>, :"foo")

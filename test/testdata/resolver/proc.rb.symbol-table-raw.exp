@@ -1,19 +1,19 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=42:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=44:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
   class <C <U TestProc>> < <C <U Object>> () @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=3:15}
-    method <C <U TestProc>><U bad> (x, y, z, w, <blk>) -> NilClass @ Loc {file=test/testdata/resolver/proc.rb start=30:3 end=30:22}
+    method <C <U TestProc>><U bad> (x, y, z, w, <blk>) -> NilClass @ Loc {file=test/testdata/resolver/proc.rb start=32:3 end=32:22}
       argument x<> -> T.proc.returns(T.untyped) @ Loc {file=test/testdata/resolver/proc.rb start=24:7 end=24:8}
       argument y<> -> T.proc.returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=25:7 end=25:8}
-      argument z<> -> T.proc.params(arg0: Integer).returns(T.untyped) @ Loc {file=test/testdata/resolver/proc.rb start=26:7 end=26:8}
-      argument w<> -> T.proc.params(arg0: T.untyped).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=27:7 end=27:8}
+      argument z<> -> T.proc.returns(T.untyped) @ Loc {file=test/testdata/resolver/proc.rb start=26:7 end=26:8}
+      argument w<> -> T.proc.params(arg0: T.untyped).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=29:7 end=29:8}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
-    method <C <U TestProc>><U foo> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=34:3 end=34:13}
-      argument x<> -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=33:15 end=33:16}
+    method <C <U TestProc>><U foo> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=36:3 end=36:13}
+      argument x<> -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=35:15 end=35:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
-    method <C <U TestProc>><U foo1> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=41:3 end=41:14}
-      argument x<> -> T.proc.params(arg0: Integer).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=38:7 end=38:8}
+    method <C <U TestProc>><U foo1> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=43:3 end=43:14}
+      argument x<> -> T.proc.params(arg0: Integer).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=40:7 end=40:8}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
     method <C <U TestProc>><U good1> (blk) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=10:3 end=10:18}
       argument blk<block> -> T.proc.params(arg0: Integer).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=7:12 end=7:15}
@@ -21,6 +21,6 @@ class <C <U <root>>> < <C <U Object>> ()
       argument blk<block> -> T.proc.params(arg0: T::Array[String]).returns(T::Array[Integer]) @ Loc {file=test/testdata/resolver/proc.rb start=15:12 end=15:15}
   class <S <C <U TestProc>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/proc.rb start=3:7 end=3:15}
     type-member(+) <S <C <U TestProc>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U TestProc>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=TestProc) @ Loc {file=test/testdata/resolver/proc.rb start=3:7 end=3:15}
-    method <S <C <U TestProc>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=42:4}
+    method <S <C <U TestProc>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/proc.rb start=3:1 end=44:4}
       argument <blk><block> @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
 
