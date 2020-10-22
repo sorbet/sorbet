@@ -20,19 +20,14 @@ string_view kindToOperationName(ShowOperation::Kind kind) {
     switch (kind) {
         case ShowOperation::Kind::Indexing:
             return "Indexing";
-            break;
         case ShowOperation::Kind::SlowPathBlocking:
             return "SlowPathBlocking";
-            break;
         case ShowOperation::Kind::SlowPathNonBlocking:
             return "SlowPathNonBlocking";
-            break;
         case ShowOperation::Kind::References:
             return "References";
-            break;
         case ShowOperation::Kind::SymbolSearch:
             return "SymbolSearch";
-            break;
     }
 }
 
