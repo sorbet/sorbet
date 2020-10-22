@@ -8,7 +8,7 @@ using namespace experimental::rubyfmt;
 TEST_CASE("Formats files") {
     auto expected = "class Foo\nend\n";
     auto formatted = format(" class Foo; end");
-    CHECK_EQ(formatted.status, Rubyfmt_FormatError::RUBYFMT_FORMAT_ERROR_OK);
+    CHECK_EQ(formatted.status, RubyfmtFormatError::RUBYFMT_FORMAT_ERROR_OK);
     {
         INFO("Expected:\n" << expected << "\n\nActual:\n" << formatted.formatted);
         CHECK_EQ(formatted.formatted, expected);
@@ -16,7 +16,7 @@ TEST_CASE("Formats files") {
 
     // Can be run again
     auto formatted2 = format("      class Foo; end");
-    CHECK_EQ(formatted2.status, Rubyfmt_FormatError::RUBYFMT_FORMAT_ERROR_OK);
+    CHECK_EQ(formatted2.status, RubyfmtFormatError::RUBYFMT_FORMAT_ERROR_OK);
     {
         INFO("Expected:\n" << expected << "\n\nActual:\n" << formatted2.formatted);
         CHECK_EQ(formatted2.formatted, expected);
