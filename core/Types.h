@@ -210,7 +210,7 @@ public:
 
     // n.b..: dispatchCall accepts a TypePtr of `this` because 1) everyone is calling this method on the nd
     // 2) all of our APIs accept TypePtrs.
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) = 0;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) = 0;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) = 0;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const = 0;
     virtual void _sanityCheck(const GlobalState &gs) = 0;
@@ -316,7 +316,7 @@ public:
     virtual TypePtr underlying() const = 0;
     ProxyType() = default;
 
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) override;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) override;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) override;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const override;
 
@@ -333,8 +333,7 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const override;
     virtual std::string show(const GlobalState &gs) const override;
     virtual std::string typeName() const override;
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args)
-        override final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) override final;
 
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
@@ -366,7 +365,7 @@ public:
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() const final;
@@ -388,7 +387,7 @@ public:
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() const final;
@@ -405,7 +404,7 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
@@ -437,7 +436,7 @@ public:
     virtual int kind() const final;
     virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
 
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
@@ -483,7 +482,7 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() const final;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
@@ -506,7 +505,7 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(const GlobalState &gs) final;
@@ -560,7 +559,7 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
 
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
@@ -607,7 +606,7 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const override;
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() const final;
 
@@ -642,7 +641,7 @@ public:
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual int kind() const final;
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual bool hasUntyped() const override;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
@@ -662,7 +661,7 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() const final;
 
@@ -699,7 +698,7 @@ public:
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
-    virtual DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) final;
+    virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() const final;
 

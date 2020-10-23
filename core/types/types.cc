@@ -22,7 +22,7 @@ namespace sorbet::core {
 using namespace std;
 
 TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &recv, DispatchArgs args) {
-    auto dispatched = recv->dispatchCall(gs, recv, move(args));
+    auto dispatched = recv->dispatchCall(gs, move(args));
     auto link = &dispatched;
     while (link != nullptr) {
         for (auto &err : link->main.errors) {
@@ -704,14 +704,14 @@ TypePtr SelfTypeParam::getCallArguments(const GlobalState &gs, NameRef name) {
         "SelfTypeParam::getCallArguments not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-DispatchResult LambdaParam::dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) {
+DispatchResult LambdaParam::dispatchCall(const GlobalState &gs, DispatchArgs args) {
     Exception::raise(
         "LambdaParam::dispatchCall not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) {
+DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, DispatchArgs args) {
     auto untypedUntracked = Types::untypedUntracked();
-    return untypedUntracked->dispatchCall(gs, untypedUntracked, args);
+    return untypedUntracked->dispatchCall(gs, args);
 }
 
 void LambdaParam::_sanityCheck(const GlobalState &gs) {}
@@ -837,7 +837,7 @@ bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise("should never happen");
 }
 
-DispatchResult SelfType::dispatchCall(const GlobalState &gs, const TypePtr &thisType, DispatchArgs args) {
+DispatchResult SelfType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
     Exception::raise("should never happen");
 }
 
