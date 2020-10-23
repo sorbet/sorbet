@@ -1030,7 +1030,7 @@ SymbolRef unwrapSymbol(const TypePtr &type) {
             tempHolder = proxy->underlying();
             typePtr = &tempHolder;
         } else {
-            ENFORCE(false, "Unexpected type: {}", (*typePtr)->typeName());
+            ENFORCE(false, "Unexpected type: {}", (*typePtr).typeName());
         }
     }
     return result;

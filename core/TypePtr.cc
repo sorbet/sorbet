@@ -123,4 +123,41 @@ int TypePtr::typeKind() const {
     }
 }
 
+std::string TypePtr::typeName() const {
+    switch (tag()) {
+        case Tag::AppliedType:
+            return "AppliedType";
+        case Tag::BlamedUntyped:
+            return "BlamedUntyped";
+        case Tag::UnresolvedAppliedType:
+            return "UnresolvedAppliedType";
+        case Tag::UnresolvedClassType:
+            return "UnresolvedClassType";
+        case Tag::ClassType:
+            return "ClassType";
+        case Tag::LiteralType:
+            return "LiteralType";
+        case Tag::ShapeType:
+            return "ShapeType";
+        case Tag::TupleType:
+            return "TupleType";
+        case Tag::LambdaParam:
+            return "LambdaParam";
+        case Tag::SelfTypeParam:
+            return "SelfTypeParam";
+        case Tag::MetaType:
+            return "MetaType";
+        case Tag::TypeVar:
+            return "TypeVar";
+        case Tag::AliasType:
+            return "AliasType";
+        case Tag::OrType:
+            return "OrType";
+        case Tag::AndType:
+            return "AndType";
+        case Tag::SelfType:
+            return "SelfType";
+    }
+}
+
 } // namespace sorbet::core
