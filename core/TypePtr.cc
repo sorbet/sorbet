@@ -90,4 +90,37 @@ bool TypePtr::isBottom() const {
     return t != nullptr && t->symbol == Symbols::bottom();
 }
 
+int TypePtr::typeKind() const {
+    switch (tag()) {
+        case Tag::AppliedType:
+            return 1;
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType:
+            return 2;
+        case Tag::LiteralType:
+            return 3;
+        case Tag::ShapeType:
+            return 4;
+        case Tag::TupleType:
+            return 5;
+        case Tag::LambdaParam:
+        case Tag::SelfTypeParam:
+            return 6;
+        case Tag::MetaType:
+            return 7;
+        case Tag::TypeVar:
+            return 8;
+        case Tag::AliasType:
+            return 9;
+        case Tag::OrType:
+            return 10;
+        case Tag::AndType:
+            return 11;
+        case Tag::SelfType:
+            return 12;
+    }
+}
+
 } // namespace sorbet::core

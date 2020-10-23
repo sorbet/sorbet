@@ -178,7 +178,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         return t1;
     }
 
-    if (t1->kind() > t2->kind()) { // force the relation to be symmentric and half the implementation
+    if (t1.typeKind() > t2.typeKind()) { // force the relation to be symmentric and half the implementation
         return lub(gs, t2, t1);
     }
 
@@ -509,12 +509,10 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
 }
 
 TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    auto *g1 = cast_type_const<GroundType>(t1);
-    auto *g2 = cast_type_const<GroundType>(t2);
-    ENFORCE(g1 != nullptr);
-    ENFORCE(g2 != nullptr);
+    ENFORCE(isa_type<GroundType>(t1));
+    ENFORCE(isa_type<GroundType>(t2));
 
-    if (g1->kind() > g2->kind()) { // force the relation to be symmentric and half the implementation
+    if (t1.typeKind() > t1.typeKind()) { // force the relation to be symmentric and half the implementation
         return glbGround(gs, t2, t1);
     }
     /** this implementation makes a bet that types are small and very likely to be collapsable.
@@ -626,7 +624,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    if (t1->kind() > t2->kind()) { // force the relation to be symmentric and half the implementation
+    if (t1.typeKind() > t2.typeKind()) { // force the relation to be symmentric and half the implementation
         return glb(gs, t2, t1);
     }
     if (isa_type<AndType>(t1)) { // 4, 5
