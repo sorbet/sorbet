@@ -1224,7 +1224,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 return classSymbolIsAsGoodAs(gs, c1->symbol, c2->symbol);
             }
         }
-        Exception::raise("isSubTypeUnderConstraint({}, {}): unreachable", t1->typeName(), t2->typeName());
+        Exception::raise("isSubTypeUnderConstraint({}, {}): unreachable", t1.typeName(), t2.typeName());
     }
 }
 
@@ -1356,10 +1356,6 @@ string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 
 string MetaType::show(const GlobalState &gs) const {
     return "<Type: " + wrapped->show(gs) + ">";
-}
-
-string MetaType::typeName() const {
-    return "MetaType";
 }
 
 void MetaType::_sanityCheck(const GlobalState &gs) {

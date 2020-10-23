@@ -760,10 +760,6 @@ AppliedType::AppliedType(SymbolRef klass, vector<TypePtr> targs) : klass(klass),
     categoryCounterInc("types.allocated", "appliedtype");
 }
 
-string SelfType::typeName() const {
-    return "SelfType";
-}
-
 bool SelfType::isFullyDefined() const {
     return false;
 }

@@ -201,7 +201,6 @@ public:
         return show(gs);
     }
 
-    virtual std::string typeName() const = 0;
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) = 0;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc);
@@ -344,7 +343,6 @@ public:
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const override;
     virtual std::string show(const GlobalState &gs) const override;
-    virtual std::string typeName() const override;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) override final;
 
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
@@ -373,7 +371,6 @@ public:
     LambdaParam(SymbolRef definition, TypePtr lower, TypePtr upper);
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
@@ -394,7 +391,6 @@ public:
     SelfTypeParam(const SymbolRef definition);
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
@@ -413,7 +409,6 @@ public:
     AliasType(SymbolRef other);
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
@@ -437,7 +432,6 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string showValue(const GlobalState &gs) const final;
-    virtual std::string typeName() const override;
     virtual bool isFullyDefined() const final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
@@ -468,7 +462,6 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string showValue(const GlobalState &gs) const final;
-    virtual std::string typeName() const override;
     virtual bool isFullyDefined() const final;
 
     bool equals(const LiteralType &rhs) const;
@@ -487,7 +480,6 @@ public:
     TypeVar(SymbolRef sym);
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() const final;
@@ -508,7 +500,6 @@ public:
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
@@ -561,7 +552,6 @@ public:
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
 
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
@@ -608,7 +598,6 @@ public:
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const override;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() const final;
@@ -636,7 +625,6 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string showWithMoreInfo(const GlobalState &gs) const final;
-    virtual std::string typeName() const override;
     void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() const final;
 
@@ -661,7 +649,6 @@ public:
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual bool isFullyDefined() const final;
@@ -694,7 +681,6 @@ public:
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
@@ -824,7 +810,6 @@ public:
         : ClassType(core::Symbols::untyped()), scope(scope), names(names){};
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
 };
 
 TYPE(UnresolvedAppliedType) final : public ClassType {
@@ -835,7 +820,6 @@ public:
         : ClassType(core::Symbols::untyped()), klass(klass), targs(std::move(targs)){};
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
 };
 
 } // namespace sorbet::core

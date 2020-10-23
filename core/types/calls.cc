@@ -1169,7 +1169,7 @@ SymbolRef unwrapSymbol(const TypePtr &type) {
 
             [&](const ProxyType &proxy) { typePtr = proxy.underlying(); },
 
-            [&](const TypePtr &ty) { ENFORCE(false, "Unexpected type: {}", ty->typeName()); });
+            [&](const TypePtr &ty) { ENFORCE(false, "Unexpected type: {}", ty.typeName()); });
     }
     return result;
 }
