@@ -5,6 +5,7 @@
 using namespace std;
 using namespace experimental::rubyfmt;
 
+#ifdef RUBYFMT_ENABLED
 TEST_CASE("Formats files") {
     auto expected = "class Foo\nend\n";
     auto formatted = format(" class Foo; end");
@@ -22,3 +23,11 @@ TEST_CASE("Formats files") {
         CHECK_EQ(formatted2.formatted, expected);
     }
 }
+#else
+// No Rubyfmt
+TEST_CASE("Rubyfmt is disabled and should be a noop") {
+    auto expected = " class Foo; end";
+    auto formatted = format(" class Foo; end");
+    CHECK_EQ(formatted.formatted, expected);
+}
+#endif

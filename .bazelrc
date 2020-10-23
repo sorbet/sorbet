@@ -144,6 +144,8 @@ build:forcedebug --copt=-DFORCE_DEBUG
 # builds)
 build:skipslowenforce --copt=-DSKIP_SLOW_ENFORCE
 
+build:rubyfmt --define rubyfmt=true --copt=-DRUBYFMT_ENABLED
+
 # LTO build. Much longer compilation time. Smaller size and better perf.
 build:lto --copt=-flto=thin
 build:lto --linkopt=-flto=thin

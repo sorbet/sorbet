@@ -12,7 +12,7 @@ cc_library(
     name = "rubyfmt",
     srcs = select({
         ":enable_rubyfmt": ["rubyfmt.cc"],
-        "//conditions:default": ["rubyfmt-emscripten.cc"],
+        "//conditions:default": ["rubyfmt-noop.cc"],
     }),
     hdrs = [
         "rubyfmt.h",
@@ -35,9 +35,12 @@ cc_library(
 cc_test(
     name = "rubyfmt_test",
     size = "small",
-    srcs = glob([
-        "test/*.cc",
-    ]),
+    srcs = select({
+        ":enable_rubyfmt": glob([
+            "test/*.cc",
+        ]),
+        "//conditions:default": [],
+    }),
     linkopts = select({
         "@com_stripe_ruby_typer//tools/config:darwin": ["-framework Foundation"],
         "//conditions:default": [],
