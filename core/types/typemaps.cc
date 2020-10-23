@@ -53,7 +53,7 @@ TypePtr TypeVar::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
 TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
     if (tc.hasUpperBound(sym)) {
         auto bound = tc.findUpperBound(sym);
-        if (bound->isFullyDefined()) {
+        if (bound.isFullyDefined()) {
             return bound;
         }
     }

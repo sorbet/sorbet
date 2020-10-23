@@ -45,7 +45,7 @@ bool TypeConstraint::solve(const GlobalState &gs) {
         if (approximation) {
             findSolution(tv) = approximation;
         } else {
-            ENFORCE(bound->isFullyDefined());
+            ENFORCE(bound.isFullyDefined());
             findSolution(tv) = bound;
         }
     }
@@ -61,7 +61,7 @@ bool TypeConstraint::solve(const GlobalState &gs) {
         if (approximation) {
             sol = approximation;
         } else {
-            ENFORCE(bound->isFullyDefined());
+            ENFORCE(bound.isFullyDefined());
             sol = bound;
         }
     }
@@ -101,7 +101,7 @@ bool TypeConstraint::rememberIsSubtype(const GlobalState &gs, const TypePtr &t1,
         auto &entry = findUpperBound(t1p->sym);
         if (!entry) {
             entry = t2;
-        } else if (t2->isFullyDefined()) {
+        } else if (t2.isFullyDefined()) {
             entry = Types::all(gs, entry, t2);
         } else {
             entry = AndType::make_shared(entry, t2);
@@ -112,7 +112,7 @@ bool TypeConstraint::rememberIsSubtype(const GlobalState &gs, const TypePtr &t1,
         auto &entry = findLowerBound(t2p->sym);
         if (!entry) {
             entry = t1;
-        } else if (t1->isFullyDefined()) {
+        } else if (t1.isFullyDefined()) {
             entry = Types::any(gs, entry, t1);
         } else {
             entry = AndType::make_shared(entry, t1);

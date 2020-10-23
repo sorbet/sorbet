@@ -50,7 +50,7 @@ bool checkSubtype(const core::Context ctx, const core::TypePtr &sub, const core:
 
     // type-checking these in the presence of generic type parameters is tricky, so for now we're going to punt on
     // it. TODO: build up the machinery to type-check in the presence of type parameters!
-    if (!super->isFullyDefined() || !sub->isFullyDefined()) {
+    if (!super.isFullyDefined() || !sub.isFullyDefined()) {
         return true;
     }
 

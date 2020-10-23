@@ -453,32 +453,20 @@ void ClassType::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->symbol.exists());
 }
 
-bool ClassType::isFullyDefined() const {
-    return true;
-}
-
-bool LiteralType::isFullyDefined() const {
-    return true;
-}
-
 bool ShapeType::isFullyDefined() const {
-    return absl::c_all_of(values, [](const TypePtr &t) { return t->isFullyDefined(); });
+    return absl::c_all_of(values, [](const TypePtr &t) { return t.isFullyDefined(); });
 }
 
 bool TupleType::isFullyDefined() const {
-    return absl::c_all_of(elems, [](const TypePtr &t) { return t->isFullyDefined(); });
-}
-
-bool AliasType::isFullyDefined() const {
-    return true;
+    return absl::c_all_of(elems, [](const TypePtr &t) { return t.isFullyDefined(); });
 }
 
 bool AndType::isFullyDefined() const {
-    return this->left->isFullyDefined() && this->right->isFullyDefined();
+    return this->left.isFullyDefined() && this->right.isFullyDefined();
 }
 
 bool OrType::isFullyDefined() const {
-    return this->left->isFullyDefined() && this->right->isFullyDefined();
+    return this->left.isFullyDefined() && this->right.isFullyDefined();
 }
 
 /** Returns type parameters of what reordered in the order of type parameters of asIf
@@ -566,10 +554,6 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
-bool TypeVar::isFullyDefined() const {
-    return false;
-}
-
 TypePtr TypeVar::getCallArguments(const GlobalState &gs, NameRef name) {
     Exception::raise("should never happen");
 }
@@ -588,7 +572,7 @@ void TypeVar::_sanityCheck(const GlobalState &gs) {
 
 bool AppliedType::isFullyDefined() const {
     for (auto &targ : this->targs) {
-        if (!targ->isFullyDefined()) {
+        if (!targ.isFullyDefined()) {
             return false;
         }
     }
@@ -655,14 +639,6 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, DispatchArgs a
 
 void LambdaParam::_sanityCheck(const GlobalState &gs) {}
 void SelfTypeParam::_sanityCheck(const GlobalState &gs) {}
-
-bool LambdaParam::isFullyDefined() const {
-    return false;
-}
-
-bool SelfTypeParam::isFullyDefined() const {
-    return true;
-}
 
 bool Type::hasUntyped() const {
     return false;
@@ -758,10 +734,6 @@ SelfType::SelfType() {
 };
 AppliedType::AppliedType(SymbolRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     categoryCounterInc("types.allocated", "appliedtype");
-}
-
-bool SelfType::isFullyDefined() const {
-    return false;
 }
 
 TypePtr SelfType::getCallArguments(const GlobalState &gs, NameRef name) {

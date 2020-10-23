@@ -1287,7 +1287,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
         ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: {}", bind.value->toString(ctx, inWhat));
         tp.type->sanityCheck(ctx);
 
-        if (checkFullyDefined && !tp.type->isFullyDefined()) {
+        if (checkFullyDefined && !tp.type.isFullyDefined()) {
             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncompleteType)) {
                 e.setHeader("Expression does not have a fully-defined type (Did you reference another class's type "
                             "members?)");

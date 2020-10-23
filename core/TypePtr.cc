@@ -161,4 +161,47 @@ std::string TypePtr::typeName() const {
     }
 }
 
+bool TypePtr::isFullyDefined() const {
+    switch (tag()) {
+        // Base cases.
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::BlamedUntyped:
+        case Tag::ClassType:
+        case Tag::LiteralType:
+        case Tag::AliasType:
+        case Tag::SelfTypeParam:
+        case Tag::MetaType: // MetaType: this is kinda true but kinda false. it's false for subtyping but true for
+                            // inferencer.
+            return true;
+
+        case Tag::TypeVar:
+        case Tag::LambdaParam:
+        case Tag::SelfType:
+            return false;
+
+        // Composite types
+        case Tag::ShapeType: {
+            auto &shape = cast_type_nonnull<ShapeType>(*this);
+            return shape.isFullyDefined();
+        }
+        case Tag::TupleType: {
+            auto &tuple = cast_type_nonnull<TupleType>(*this);
+            return tuple.isFullyDefined();
+        }
+        case Tag::AndType: {
+            auto &andType = cast_type_nonnull<AndType>(*this);
+            return andType.isFullyDefined();
+        }
+        case Tag::OrType: {
+            auto &orType = cast_type_nonnull<OrType>(*this);
+            return orType.isFullyDefined();
+        }
+        case Tag::AppliedType: {
+            auto &app = cast_type_nonnull<AppliedType>(*this);
+            return app.isFullyDefined();
+        }
+    }
+}
+
 } // namespace sorbet::core
