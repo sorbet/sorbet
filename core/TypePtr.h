@@ -101,6 +101,8 @@ private:
         }
     }
 
+    void _sanityCheck(const GlobalState &gs) const;
+
 public:
     // Default: noSymbol class type.
     constexpr TypePtr() noexcept : counter(nullptr), ptr(0) {}
@@ -199,6 +201,12 @@ public:
     bool isFullyDefined() const;
 
     bool hasUntyped() const;
+
+    void sanityCheck(const GlobalState &gs) const {
+        if (!debug_mode)
+            return;
+        _sanityCheck(gs);
+    }
 
     core::SymbolRef untypedBlame() const;
 

@@ -476,4 +476,38 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, const InlinedVector<SymbolR
     }
 }
 
+void TypePtr::_sanityCheck(const GlobalState &gs) const {
+    switch (tag()) {
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType:
+            return cast_type_const<ClassType>(*this)->_sanityCheck(gs);
+        case Tag::TypeVar:
+            return cast_type_const<TypeVar>(*this)->_sanityCheck(gs);
+        case Tag::LiteralType:
+            return cast_type_const<LiteralType>(*this)->_sanityCheck(gs);
+        case Tag::SelfTypeParam:
+            return cast_type_const<SelfTypeParam>(*this)->_sanityCheck(gs);
+        case Tag::SelfType:
+            return cast_type_const<SelfType>(*this)->_sanityCheck(gs);
+        case Tag::TupleType:
+            return cast_type_const<TupleType>(*this)->_sanityCheck(gs);
+        case Tag::ShapeType:
+            return cast_type_const<ShapeType>(*this)->_sanityCheck(gs);
+        case Tag::OrType:
+            return cast_type_const<OrType>(*this)->_sanityCheck(gs);
+        case Tag::AndType:
+            return cast_type_const<AndType>(*this)->_sanityCheck(gs);
+        case Tag::AppliedType:
+            return cast_type_const<AppliedType>(*this)->_sanityCheck(gs);
+        case Tag::LambdaParam:
+            return cast_type_const<LambdaParam>(*this)->_sanityCheck(gs);
+        case Tag::MetaType:
+            return cast_type_const<MetaType>(*this)->_sanityCheck(gs);
+        case Tag::AliasType:
+            return cast_type_const<AliasType>(*this)->_sanityCheck(gs);
+    }
+}
+
 } // namespace sorbet::core

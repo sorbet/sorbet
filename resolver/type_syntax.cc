@@ -62,7 +62,7 @@ core::TypePtr getResultLiteral(core::Context ctx, ast::TreePtr &expr) {
             result = core::Types::untypedUntracked();
         });
     ENFORCE(result.get() != nullptr);
-    result->sanityCheck(ctx);
+    result.sanityCheck(ctx);
     return result;
 }
 
@@ -952,7 +952,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             result.type = core::Types::untypedUntracked();
         });
     ENFORCE(result.type.get() != nullptr);
-    result.type->sanityCheck(ctx);
+    result.type.sanityCheck(ctx);
     return result;
 }
 } // namespace
