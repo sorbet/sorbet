@@ -294,8 +294,8 @@ template <class To> To &cast_tree_nonnull(TreePtr &what) {
     return *reinterpret_cast<To *>(what.get());
 }
 
-template <class To> const To &cast_tree_nonnull_const(const TreePtr &what) {
-    ENFORCE(isa_tree<To>(what), "cast_tree_nonnull_const failed!");
+template <class To> const To &cast_tree_nonnull(const TreePtr &what) {
+    ENFORCE(isa_tree<To>(what), "cast_tree_nonnull failed!");
     return *reinterpret_cast<To *>(what.get());
 }
 

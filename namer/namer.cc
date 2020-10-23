@@ -522,7 +522,7 @@ public:
     }
 
     FoundDefinitionRef fillAssign(core::Context ctx, const ast::Assign &asgn) {
-        auto &lhs = ast::cast_tree_nonnull_const<ast::UnresolvedConstantLit>(asgn.lhs);
+        auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         FoundStaticField found;
         found.owner = getOwner();
@@ -584,7 +584,7 @@ public:
     }
 
     FoundDefinitionRef handleAssignment(core::Context ctx, const ast::Assign &asgn) {
-        auto &send = ast::cast_tree_nonnull_const<ast::Send>(asgn.rhs);
+        auto &send = ast::cast_tree_nonnull<ast::Send>(asgn.rhs);
         auto foundRef = fillAssign(ctx, asgn);
         ENFORCE(foundRef.kind() == DefinitionKind::StaticField);
         auto &staticField = foundRef.staticField(*foundDefs);
