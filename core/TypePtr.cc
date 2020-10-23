@@ -552,4 +552,49 @@ unsigned int TypePtr::hash(const GlobalState &gs) const {
     return _hash(this->toString(gs)); // TODO: make something better
 }
 
+std::string TypePtr::show(const GlobalState &gs) const {
+    switch (tag()) {
+        case Tag::UnresolvedAppliedType:
+            return cast_type_const<UnresolvedAppliedType>(*this)->show(gs);
+        case Tag::UnresolvedClassType:
+            return cast_type_const<UnresolvedClassType>(*this)->show(gs);
+        case Tag::BlamedUntyped:
+        case Tag::ClassType:
+            return cast_type_const<ClassType>(*this)->show(gs);
+        case Tag::TypeVar:
+            return cast_type_const<TypeVar>(*this)->show(gs);
+        case Tag::LiteralType:
+            return cast_type_const<LiteralType>(*this)->show(gs);
+        case Tag::SelfTypeParam:
+            return cast_type_const<SelfTypeParam>(*this)->show(gs);
+        case Tag::SelfType:
+            return cast_type_const<SelfType>(*this)->show(gs);
+        case Tag::TupleType:
+            return cast_type_const<TupleType>(*this)->show(gs);
+        case Tag::ShapeType:
+            return cast_type_const<ShapeType>(*this)->show(gs);
+        case Tag::OrType:
+            return cast_type_const<OrType>(*this)->show(gs);
+        case Tag::AndType:
+            return cast_type_const<AndType>(*this)->show(gs);
+        case Tag::AppliedType:
+            return cast_type_const<AppliedType>(*this)->show(gs);
+        case Tag::LambdaParam:
+            return cast_type_const<LambdaParam>(*this)->show(gs);
+        case Tag::MetaType:
+            return cast_type_const<MetaType>(*this)->show(gs);
+        case Tag::AliasType:
+            return cast_type_const<AliasType>(*this)->show(gs);
+    }
+}
+
+std::string TypePtr::showWithMoreInfo(const GlobalState &gs) const {
+    switch (tag()) {
+        case Tag::TupleType:
+            return cast_type_const<TupleType>(*this)->showWithMoreInfo(gs);
+        default:
+            return show(gs);
+    }
+}
+
 } // namespace sorbet::core

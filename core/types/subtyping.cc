@@ -1331,7 +1331,7 @@ string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string MetaType::show(const GlobalState &gs) const {
-    return "<Type: " + wrapped->show(gs) + ">";
+    return "<Type: " + wrapped.show(gs) + ">";
 }
 
 void MetaType::_sanityCheck(const GlobalState &gs) const {

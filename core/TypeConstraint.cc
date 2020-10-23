@@ -249,17 +249,17 @@ std::string TypeConstraint::toString(const core::GlobalState &gs) const {
     fmt::format_to(buf, "upperBounds: [{}]\n",
                    fmt::map_join(
                        this->upperBounds.begin(), this->upperBounds.end(), ", ", [&gs](auto pair) -> auto {
-                           return fmt::format("{}: {}", pair.first.toString(gs), pair.second->show(gs));
+                           return fmt::format("{}: {}", pair.first.toString(gs), pair.second.show(gs));
                        }));
     fmt::format_to(buf, "lowerBounds: [{}]\n",
                    fmt::map_join(
                        this->lowerBounds.begin(), this->lowerBounds.end(), ", ", [&gs](auto pair) -> auto {
-                           return fmt::format("{}: {}", pair.first.toString(gs), pair.second->show(gs));
+                           return fmt::format("{}: {}", pair.first.toString(gs), pair.second.show(gs));
                        }));
     fmt::format_to(buf, "solution: [{}]\n",
                    fmt::map_join(
                        this->solution.begin(), this->solution.end(), ", ", [&gs](auto pair) -> auto {
-                           return fmt::format("{}: {}", pair.first.toString(gs), pair.second->show(gs));
+                           return fmt::format("{}: {}", pair.first.toString(gs), pair.second.show(gs));
                        }));
     return to_string(buf);
 }

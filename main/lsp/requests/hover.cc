@@ -78,7 +78,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             string typeString;
             if (sendResp->dispatchResult->main.method.exists() && sendResp->dispatchResult->main.method.isSynthetic()) {
                 // For synthetic methods, just show the return type
-                typeString = retType->showWithMoreInfo(gs);
+                typeString = retType.showWithMoreInfo(gs);
             } else {
                 typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint);
             }
@@ -96,7 +96,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
                 retType = core::Types::untypedUntracked();
             }
             response->result = make_unique<Hover>(
-                formatRubyMarkup(clientHoverMarkupKind, retType->showWithMoreInfo(gs), documentation));
+                formatRubyMarkup(clientHoverMarkupKind, retType.showWithMoreInfo(gs), documentation));
         }
     }
     return response;
