@@ -75,6 +75,9 @@ string Name::showRaw(const GlobalState &gs) const {
                 case UniqueNameKind::TEnum:
                     kind = "E";
                     break;
+                case UniqueNameKind::Package:
+                    kind = "Q";
+                    break;
             }
             if (gs.censorForSnapshotTests && this->unique.uniqueNameKind == UniqueNameKind::Namer &&
                 this->unique.original == core::Names::staticInit()) {
