@@ -306,7 +306,11 @@ NameRef NameRef::lookupMangledPackageName(const GlobalState &gs) const {
     ENFORCE(name->kind == NameKind::UTF8, "manglePackageName over non-utf8 name");
     auto parts = absl::StrSplit(name->raw.utf8, "::");
     string nameEq = absl::StrCat(absl::StrJoin(parts, "_"), "_Package");
-    return gs.lookupNameConstant(nameEq);
+    auto constantName = gs.lookupNameConstant(nameEq);
+    if (!constantName.exists()) {
+        return constantName;
+    }
+    return gs.lookupNameUnique(UniqueNameKind::Package, constantName, 1);
 }
 
 Name Name::deepCopy(const GlobalState &to) const {
