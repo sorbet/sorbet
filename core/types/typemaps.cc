@@ -1,7 +1,6 @@
 #include "absl/base/casts.h"
 #include "common/common.h"
 #include "core/Context.h"
-#include "core/Hashing.h"
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
@@ -453,10 +452,6 @@ TypePtr AndType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver
         return Types::all(gs, left, right);
     }
     return nullptr;
-}
-
-unsigned int Type::hash(const GlobalState &gs) const {
-    return _hash(this->toString(gs)); // TODO: make something better
 }
 
 } // namespace sorbet::core

@@ -103,10 +103,10 @@ string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
             } else if (l.symbol == core::Symbols::TrueClass()) {
                 res = "true";
             } else {
-                res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0));
+                res = fmt::format("literal({})", this->value.toStringWithTabs(gs, 0));
             }
         },
-        [&](const core::TypePtr &t) { res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0)); });
+        [&](const core::TypePtr &t) { res = fmt::format("literal({})", this->value.toStringWithTabs(gs, 0)); });
     return res;
 }
 
@@ -202,7 +202,7 @@ string GetCurrentException::showRaw(const core::GlobalState &gs, const CFG &cfg,
 }
 
 string Cast::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("cast({}, {});", this->value.toString(gs, cfg), this->type->toString(gs));
+    return fmt::format("cast({}, {});", this->value.toString(gs, cfg), this->type.toString(gs));
 }
 
 string Cast::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {

@@ -1022,10 +1022,10 @@ string Literal::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
             } else if (l.symbol == core::Symbols::TrueClass()) {
                 res = "true";
             } else {
-                res = "literal(" + this->value->toStringWithTabs(gs, tabs) + ")";
+                res = "literal(" + this->value.toStringWithTabs(gs, tabs) + ")";
             }
         },
-        [&](const core::TypePtr &t) { res = "literal(" + this->value->toStringWithTabs(gs, tabs) + ")"; });
+        [&](const core::TypePtr &t) { res = "literal(" + this->value.toStringWithTabs(gs, tabs) + ")"; });
     return res;
 }
 
@@ -1163,7 +1163,7 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
 string Cast::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "T.{}", this->cast.toString(gs));
-    fmt::format_to(buf, "({}, {})", this->arg.toStringWithTabs(gs, tabs), this->type->toStringWithTabs(gs, tabs));
+    fmt::format_to(buf, "({}, {})", this->arg.toStringWithTabs(gs, tabs), this->type.toStringWithTabs(gs, tabs));
 
     return fmt::to_string(buf);
 }
@@ -1176,7 +1176,7 @@ string Cast::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 2);
     fmt::format_to(buf, "arg = {}\n", this->arg.showRaw(gs, tabs + 2));
     printTabs(buf, tabs + 2);
-    fmt::format_to(buf, "type = {},\n", this->type->toString(gs));
+    fmt::format_to(buf, "type = {},\n", this->type.toString(gs));
     printTabs(buf, tabs);
     fmt::format_to(buf, "}}\n");
 

@@ -215,6 +215,13 @@ public:
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
 
+    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
+    std::string toString(const GlobalState &gs) const {
+        return toStringWithTabs(gs);
+    }
+
+    unsigned int hash(const GlobalState &gs) const;
+
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     friend class TypePtrTestHelper;
 };
