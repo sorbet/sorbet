@@ -37,6 +37,7 @@ enum class DefinitionKind : u1 {
     StaticField = 4,
     TypeMember = 5,
     Symbol = 6,
+    Constant = 7,
 };
 
 class FoundDefinitionRef final {
@@ -471,22 +472,49 @@ public:
                 case core::Names::privateClassMethod()._id:
                 case core::Names::protected_()._id:
                 case core::Names::public_()._id:
+                    addMethodModifier(ctx, original);
+                    break;
+                case core::Names::privateConstant()._id:
+                    addConstantModifier(ctx, original);
                     break;
                 default:
                     return tree;
             }
-
-            Modifier methodModifier;
-            methodModifier.kind = DefinitionKind::Method;
-            methodModifier.owner = getOwner();
-            methodModifier.loc = original.loc;
-            methodModifier.name = original.fun;
-            methodModifier.target = unwrapLiteralToMethodName(ctx, original, original.args[0]);
-            if (methodModifier.target.exists()) {
-                foundDefs->addModifier(move(methodModifier));
-            }
         }
         return tree;
+    }
+
+    void addMethodModifier(core::Context ctx, ast::Send &original) {
+        Modifier methodModifier;
+        methodModifier.kind = DefinitionKind::Method;
+        methodModifier.owner = getOwner();
+        methodModifier.loc = original.loc;
+        methodModifier.name = original.fun;
+        methodModifier.target = unwrapLiteralToMethodName(ctx, original, original.args[0]);
+
+        if (methodModifier.target.exists()) {
+            foundDefs->addModifier(move(methodModifier));
+        }
+    }
+
+    void addConstantModifier(core::Context ctx, ast::Send &original) {
+        Modifier constantModifier;
+        constantModifier.kind = DefinitionKind::Constant;
+        constantModifier.owner = getOwner();
+        constantModifier.loc = original.loc;
+        constantModifier.name = original.fun;
+        if (auto sym = ast::cast_tree<ast::Literal>(original.args[0])) {
+            if (sym->isSymbol(ctx)) {
+                constantModifier.target = sym->asSymbol(ctx);
+            } else if (sym->isString(ctx)) {
+                constantModifier.target = sym->asString(ctx);
+            } else {
+                constantModifier.target = core::NameRef::noName();
+            }
+        }
+        if (constantModifier.target.exists()) {
+            foundDefs->addModifier(move(constantModifier));
+        }
     }
 
     core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::Send &original, ast::TreePtr &expr) {
@@ -1008,6 +1036,21 @@ class SymbolDefiner {
         }
     }
 
+    void modifyConstant(core::MutableContext ctx, const Modifier &mod) {
+        ENFORCE(mod.kind == DefinitionKind::Constant);
+
+        auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+        auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
+        auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
+        if (constant.exists() && mod.name._id == core::Names::privateConstant()._id) {
+            if (constant.data(ctx)->isClassOrModule()) {
+                constant.data(ctx)->setClassOrModulePrivate();
+            } else if (constant.data(ctx)->isStaticField()) {
+                constant.data(ctx)->setStaticFieldPrivate();
+            }
+        }
+    }
+
     core::SymbolRef getClassSymbol(core::MutableContext ctx, const FoundClass &klass) {
         core::SymbolRef symbol = squashNames(ctx, klass.klass, ctx.owner.data(ctx)->enclosingClass(ctx));
         ENFORCE(symbol.exists());
@@ -1308,6 +1351,9 @@ public:
                     break;
                 case DefinitionKind::Class:
                     modifyClass(ctx.withOwner(owner), modifier);
+                    break;
+                case DefinitionKind::Constant:
+                    modifyConstant(ctx.withOwner(owner), modifier);
                     break;
                 default:
                     Exception::raise("Found invalid modifier");
