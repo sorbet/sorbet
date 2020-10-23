@@ -707,9 +707,11 @@ struct DispatchArgs {
     InlinedVector<const TypeAndOrigins *, 2> &args;
     const TypePtr &selfType;
     const TypePtr &fullType;
+    const TypePtr &thisType;
     const std::shared_ptr<const SendAndBlockLink> &block;
 
     DispatchArgs withSelfRef(const TypePtr &newSelfRef);
+    DispatchArgs withThisRef(const TypePtr &newThisRef);
 };
 
 struct DispatchComponent {

@@ -1,4 +1,5 @@
 #include "environment.h"
+#include "absl/strings/match.h"
 #include "common/sort.h"
 #include "common/typecase.h"
 #include "core/GlobalState.h"
@@ -951,7 +952,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     send->receiverLoc,
                     send->argLocs,
                 };
-                core::DispatchArgs dispatchArgs{send->fun, locs, args, recvType.type, recvType.type, send->link};
+
+                core::DispatchArgs dispatchArgs{send->fun,     locs,          args,      recvType.type,
+                                                recvType.type, recvType.type, send->link};
                 auto dispatched = recvType.type->dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
