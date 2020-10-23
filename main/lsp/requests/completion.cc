@@ -6,7 +6,6 @@
 #include "ast/treemap/treemap.h"
 #include "common/formatting.h"
 #include "common/sort.h"
-#include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/NextMethodFinder.h"
@@ -168,19 +167,18 @@ SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName left, SimilarMetho
 
 SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, const core::TypePtr &receiver,
                                                string_view prefix) {
-    auto result = SimilarMethodsByName{};
-
-    typecase(
-        receiver.get(), [&](const core::ClassType *type) { result = similarMethodsForClass(gs, type->symbol, prefix); },
-        [&](const core::AppliedType *type) { result = similarMethodsForClass(gs, type->klass, prefix); },
-        [&](const core::AndType *type) {
-            result = mergeSimilarMethods(similarMethodsForReceiver(gs, type->left, prefix),
-                                         similarMethodsForReceiver(gs, type->right, prefix));
-        },
-        [&](const core::ProxyType *type) { result = similarMethodsForReceiver(gs, type->underlying(), prefix); },
-        [&](const core::Type *type) { return; });
-
-    return result;
+    if (auto *type = core::cast_type_const<core::ClassType>(receiver)) {
+        return similarMethodsForClass(gs, type->symbol, prefix);
+    } else if (auto *type = core::cast_type_const<core::AppliedType>(receiver)) {
+        return similarMethodsForClass(gs, type->klass, prefix);
+    } else if (auto *type = core::cast_type_const<core::AndType>(receiver)) {
+        return mergeSimilarMethods(similarMethodsForReceiver(gs, type->left, prefix),
+                                   similarMethodsForReceiver(gs, type->right, prefix));
+    } else if (auto *type = core::cast_type_const<core::ProxyType>(receiver)) {
+        return similarMethodsForReceiver(gs, type->underlying(), prefix);
+    } else {
+        return {};
+    }
 }
 
 // Walk a core::DispatchResult to find methods similar to `prefix` on any of its DispatchComponents' receivers.

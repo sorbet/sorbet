@@ -1,7 +1,6 @@
 #include "Instructions.h"
 
 #include "common/formatting.h"
-#include "common/typecase.h"
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
 #include <utility>
@@ -88,22 +87,21 @@ Literal::Literal(const core::TypePtr &value) : value(move(value)) {
 }
 
 string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    string res;
-    typecase(
-        this->value.get(), [&](core::LiteralType *l) { res = l->showValue(gs); },
-        [&](const core::ClassType *l) {
-            if (l->symbol == core::Symbols::NilClass()) {
-                res = "nil";
-            } else if (l->symbol == core::Symbols::FalseClass()) {
-                res = "false";
-            } else if (l->symbol == core::Symbols::TrueClass()) {
-                res = "true";
-            } else {
-                res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0));
-            }
-        },
-        [&](const core::Type *t) { res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0)); });
-    return res;
+    if (auto *l = core::cast_type_const<core::LiteralType>(this->value)) {
+        return l->showValue(gs);
+    } else if (auto *l = core::cast_type_const<core::ClassType>(this->value)) {
+        if (l->symbol == core::Symbols::NilClass()) {
+            return "nil";
+        } else if (l->symbol == core::Symbols::FalseClass()) {
+            return "false";
+        } else if (l->symbol == core::Symbols::TrueClass()) {
+            return "true";
+        } else {
+            return fmt::format("literal({})", this->value->toStringWithTabs(gs, 0));
+        }
+    } else {
+        return fmt::format("literal({})", this->value->toStringWithTabs(gs, 0));
+    }
 }
 
 string Literal::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {

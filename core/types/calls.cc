@@ -2,7 +2,6 @@
 #include "absl/strings/str_split.h"
 #include "common/common.h"
 #include "common/sort.h"
-#include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
@@ -1020,18 +1019,19 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
 
 SymbolRef unwrapSymbol(const TypePtr &type) {
     SymbolRef result;
-    const Type *rawTypePtr = type.get();
+    const TypePtr *typePtr = &type;
+    TypePtr tempHolder;
     while (!result.exists()) {
-        typecase(
-            rawTypePtr,
-
-            [&](const ClassType *klass) { result = klass->symbol; },
-
-            [&](const AppliedType *app) { result = app->klass; },
-
-            [&](const ProxyType *proxy) { rawTypePtr = proxy->underlying().get(); },
-
-            [&](const Type *ty) { ENFORCE(false, "Unexpected type: {}", ty->typeName()); });
+        if (auto *klass = cast_type_const<ClassType>(*typePtr)) {
+            result = klass->symbol;
+        } else if (auto *app = cast_type_const<AppliedType>(*typePtr)) {
+            result = app->klass;
+        } else if (auto *proxy = cast_type_const<ProxyType>(*typePtr)) {
+            tempHolder = proxy->underlying();
+            typePtr = &tempHolder;
+        } else {
+            ENFORCE(false, "Unexpected type: {}", (*typePtr)->typeName());
+        }
     }
     return result;
 }
@@ -2061,30 +2061,22 @@ class Array_flatten : public IntrinsicMethod {
         }
         const int newDepth = depth - 1;
 
-        TypePtr result;
-        typecase(
-            type.get(),
-
-            // This only shows up because t->elementType() for tuples returns an OrType of all its elements.
-            // So to properly handle nested tuples, we have to descend into the OrType's.
-            [&](const OrType *o) {
-                result = Types::any(gs, recursivelyFlattenArrays(gs, o->left, newDepth),
-                                    recursivelyFlattenArrays(gs, o->right, newDepth));
-            },
-
-            [&](const AppliedType *a) {
-                if (a->klass != Symbols::Array()) {
-                    result = type;
-                    return;
-                }
-                ENFORCE(a->targs.size() == 1);
-                result = recursivelyFlattenArrays(gs, a->targs.front(), newDepth);
-            },
-
-            [&](const TupleType *t) { result = recursivelyFlattenArrays(gs, t->elementType(), newDepth); },
-
-            [&](const Type *t) { result = std::move(type); });
-        return result;
+        // This only shows up because t->elementType() for tuples returns an OrType of all its elements.
+        // So to properly handle nested tuples, we have to descend into the OrType's.
+        if (auto *o = cast_type_const<OrType>(type)) {
+            return Types::any(gs, recursivelyFlattenArrays(gs, o->left, newDepth),
+                              recursivelyFlattenArrays(gs, o->right, newDepth));
+        } else if (auto *a = cast_type_const<AppliedType>(type)) {
+            if (a->klass != Symbols::Array()) {
+                return type;
+            }
+            ENFORCE(a->targs.size() == 1);
+            return recursivelyFlattenArrays(gs, a->targs.front(), newDepth);
+        } else if (auto *t = cast_type_const<TupleType>(type)) {
+            return recursivelyFlattenArrays(gs, t->elementType(), newDepth);
+        } else {
+            return type;
+        }
     }
 
 public:

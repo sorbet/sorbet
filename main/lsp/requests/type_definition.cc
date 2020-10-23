@@ -1,5 +1,4 @@
 #include "main/lsp/requests/type_definition.h"
-#include "common/typecase.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
 
@@ -13,25 +12,25 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
     if (type.isUntyped()) {
         return result;
     }
-    typecase(
-        type.get(), [&](const core::ClassType *t) { result.emplace_back(t->symbol.data(gs)->loc()); },
-        [&](const core::AppliedType *t) { result.emplace_back(t->klass.data(gs)->loc()); },
-        [&](const core::OrType *t) {
-            for (auto loc : locsForType(gs, t->left)) {
-                result.emplace_back(loc);
-            }
-            for (auto loc : locsForType(gs, t->right)) {
-                result.emplace_back(loc);
-            }
-        },
-        [&](const core::AndType *t) {
-            for (auto loc : locsForType(gs, t->left)) {
-                result.emplace_back(loc);
-            }
-            for (auto loc : locsForType(gs, t->right)) {
-                result.emplace_back(loc);
-            }
-        });
+    if (auto *t = core::cast_type_const<core::ClassType>(type)) {
+        result.emplace_back(t->symbol.data(gs)->loc());
+    } else if (auto *t = core::cast_type_const<core::AppliedType>(type)) {
+        result.emplace_back(t->klass.data(gs)->loc());
+    } else if (auto *t = core::cast_type_const<core::OrType>(type)) {
+        for (auto loc : locsForType(gs, t->left)) {
+            result.emplace_back(loc);
+        }
+        for (auto loc : locsForType(gs, t->right)) {
+            result.emplace_back(loc);
+        }
+    } else if (auto *t = core::cast_type_const<core::AndType>(type)) {
+        for (auto loc : locsForType(gs, t->left)) {
+            result.emplace_back(loc);
+        }
+        for (auto loc : locsForType(gs, t->right)) {
+            result.emplace_back(loc);
+        }
+    }
     return result;
 }
 } // namespace

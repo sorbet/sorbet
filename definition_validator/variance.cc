@@ -1,5 +1,3 @@
-
-#include "common/typecase.h"
 #include "core/Symbols.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
@@ -68,40 +66,44 @@ private:
     VarianceValidator(const core::Loc loc) : loc(loc) {}
 
     void validate(const core::Context ctx, const Polarity polarity, const core::TypePtr &type) {
-        typecase(
-            type.get(), [&](const core::ClassType *klass) {},
-
-            [&](const core::LiteralType *lit) {},
-
-            [&](const core::SelfType *self) {},
-
-            [&](const core::SelfTypeParam *sp) {},
-
-            [&](const core::TypeVar *tvar) {},
-
-            [&](const core::OrType *any) {
+        switch (type.tag()) {
+            case core::TypePtr::Tag::UnresolvedAppliedType:
+            case core::TypePtr::Tag::UnresolvedClassType:
+            case core::TypePtr::Tag::BlamedUntyped:
+            case core::TypePtr::Tag::ClassType:
+            case core::TypePtr::Tag::LiteralType:
+            case core::TypePtr::Tag::SelfType:
+            case core::TypePtr::Tag::SelfTypeParam:
+            case core::TypePtr::Tag::TypeVar:
+                break;
+            case core::TypePtr::Tag::OrType: {
+                auto *any = core::cast_type_const<core::OrType>(type);
                 validate(ctx, polarity, any->left);
                 validate(ctx, polarity, any->right);
-            },
-
-            [&](const core::AndType *all) {
+                break;
+            }
+            case core::TypePtr::Tag::AndType: {
+                auto *all = core::cast_type_const<core::AndType>(type);
                 validate(ctx, polarity, all->left);
                 validate(ctx, polarity, all->right);
-            },
-
-            [&](const core::ShapeType *shape) {
+                break;
+            }
+            case core::TypePtr::Tag::ShapeType: {
+                auto *shape = core::cast_type_const<core::ShapeType>(type);
                 for (auto value : shape->values) {
                     validate(ctx, polarity, value);
                 }
-            },
-
-            [&](const core::TupleType *tuple) {
+                break;
+            }
+            case core::TypePtr::Tag::TupleType: {
+                auto *tuple = core::cast_type_const<core::TupleType>(type);
                 for (auto value : tuple->elems) {
                     validate(ctx, polarity, value);
                 }
-            },
-
-            [&](const core::AppliedType *app) {
+                break;
+            }
+            case core::TypePtr::Tag::AppliedType: {
+                auto *app = core::cast_type_const<core::AppliedType>(type);
                 auto members = app->klass.data(ctx)->typeMembers();
                 auto params = app->targs;
 
@@ -133,10 +135,11 @@ private:
 
                     validate(ctx, paramPolarity, typeArg);
                 }
-            },
-
+                break;
+            }
             // This is where the actual variance checks are done.
-            [&](const core::LambdaParam *param) {
+            case core::TypePtr::Tag::LambdaParam: {
+                auto *param = core::cast_type_const<core::LambdaParam>(type);
                 auto paramData = param->definition.data(ctx);
 
                 ENFORCE(paramData->isTypeMember());
@@ -164,9 +167,10 @@ private:
                         }
                     }
                 }
-            },
-
-            [&](const core::AliasType *alias) {
+                break;
+            }
+            case core::TypePtr::Tag::AliasType: {
+                auto *alias = core::cast_type_const<core::AliasType>(type);
                 auto aliasSym = alias->symbol.data(ctx)->dealias(ctx);
 
                 // This can be introduced by `module_function`, which in its
@@ -177,11 +181,12 @@ private:
                 } else {
                     Exception::raise("Unexpected type alias: {}", alias->toString(ctx));
                 }
-            },
-
-            [&](const core::Type *skipped) {
-                Exception::raise("Unexpected type in variance checking: {}", skipped->toString(ctx));
-            });
+                break;
+            }
+            case core::TypePtr::Tag::MetaType: {
+                Exception::raise("Unexpected type in variance checking: {}", type->toString(ctx));
+            }
+        }
     }
 
 public:

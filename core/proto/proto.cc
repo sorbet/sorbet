@@ -6,7 +6,6 @@
 #include "absl/strings/str_cat.h"
 #include "common/Counters_impl.h"
 #include "common/Random.h"
-#include "common/typecase.h"
 #include "core/Names.h"
 
 using namespace std;
@@ -174,30 +173,41 @@ com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, cons
 
 com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr &typ) {
     com::stripe::rubytyper::Type proto;
-    typecase(
-        typ.get(),
-        [&](const ClassType *t) {
+    switch (typ.tag()) {
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedAppliedType:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::ClassType: {
+            auto *t = core::cast_type_const<core::ClassType>(typ);
             proto.set_kind(com::stripe::rubytyper::Type::CLASS);
             proto.set_class_full_name(t->symbol.show(gs));
-        },
-        [&](const AndType *t) {
+            break;
+        }
+        case TypePtr::Tag::AndType: {
+            auto *t = core::cast_type_const<core::AndType>(typ);
             proto.set_kind(com::stripe::rubytyper::Type::AND);
             *proto.mutable_and_()->mutable_left() = toProto(gs, t->left);
             *proto.mutable_and_()->mutable_right() = toProto(gs, t->right);
-        },
-        [&](const OrType *t) {
+            break;
+        }
+        case TypePtr::Tag::OrType: {
+            auto *t = core::cast_type_const<core::OrType>(typ);
             proto.set_kind(com::stripe::rubytyper::Type::OR);
             *proto.mutable_or_()->mutable_left() = toProto(gs, t->left);
             *proto.mutable_or_()->mutable_right() = toProto(gs, t->right);
-        },
-        [&](const AppliedType *t) {
+            break;
+        }
+        case TypePtr::Tag::AppliedType: {
+            auto *t = core::cast_type_const<core::AppliedType>(typ);
             proto.set_kind(com::stripe::rubytyper::Type::APPLIED);
             proto.mutable_applied()->set_symbol_full_name(t->klass.show(gs));
             for (auto &a : t->targs) {
                 *proto.mutable_applied()->add_type_args() = toProto(gs, a);
             }
-        },
-        [&](const ShapeType *t) {
+            break;
+        }
+        case TypePtr::Tag::ShapeType: {
+            auto *t = core::cast_type_const<core::ShapeType>(typ);
             proto.set_kind(com::stripe::rubytyper::Type::SHAPE);
             for (auto &k : t->keys) {
                 *proto.mutable_shape()->add_keys() = toProto(gs, k);
@@ -205,19 +215,33 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
             for (auto &v : t->values) {
                 *proto.mutable_shape()->add_values() = toProto(gs, v);
             }
-        },
-        [&](const LiteralType *t) {
+            break;
+        }
+        case TypePtr::Tag::LiteralType: {
+            auto *t = core::cast_type_const<core::LiteralType>(typ);
             proto.set_kind(com::stripe::rubytyper::Type::LITERAL);
             *proto.mutable_literal() = toProto(gs, *t);
-        },
-        [&](const TupleType *t) {
+            break;
+        }
+        case TypePtr::Tag::TupleType: {
+            auto *t = core::cast_type_const<core::TupleType>(typ);
             proto.set_kind(com::stripe::rubytyper::Type::TUPLE);
             for (auto &e : t->elems) {
                 *proto.mutable_tuple()->add_elems() = toProto(gs, e);
             }
-        },
-        // TODO later: add more types
-        [&](const Type *t) { proto.set_kind(com::stripe::rubytyper::Type::UNKNOWN); });
+            break;
+        }
+        case TypePtr::Tag::AliasType:
+        case TypePtr::Tag::LambdaParam:
+        case TypePtr::Tag::SelfType:
+        case TypePtr::Tag::SelfTypeParam:
+        case TypePtr::Tag::TypeVar:
+        case TypePtr::Tag::MetaType: {
+            // TODO later: add more types
+            proto.set_kind(com::stripe::rubytyper::Type::UNKNOWN);
+            break;
+        }
+    }
     return proto;
 }
 
