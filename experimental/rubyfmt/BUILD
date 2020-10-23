@@ -57,10 +57,6 @@ cc_test(
         ],
         ":enable_rubyfmt_darwin": [
             "-framework Foundation",
-            "-lcrypt",
-            "-lrt",
-            "-lz",
-            "-lgmp",
         ],
     }),
     linkstatic = select({
