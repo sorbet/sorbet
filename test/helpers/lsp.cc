@@ -215,7 +215,11 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     CHECK(capabilities.workspaceSymbolProvider.value_or(false));
     CHECK(capabilities.codeActionProvider.has_value());
     CHECK_FALSE(capabilities.codeLensProvider.has_value());
-    CHECK(capabilities.documentFormattingProvider.value_or(false));
+    if (rubyfmt_enabled) {
+        CHECK(capabilities.documentFormattingProvider.value_or(false));
+    } else {
+        CHECK_FALSE(capabilities.documentFormattingProvider.value_or(false));
+    }
     CHECK_FALSE(capabilities.documentRangeFormattingProvider.has_value());
     CHECK_FALSE(capabilities.documentRangeFormattingProvider.has_value());
     CHECK_FALSE(capabilities.documentOnTypeFormattingProvider.has_value());
