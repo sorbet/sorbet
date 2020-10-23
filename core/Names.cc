@@ -100,6 +100,8 @@ string Name::toString(const GlobalState &gs) const {
                 return fmt::format("<Class:{}>", this->unique.original.data(gs)->show(gs));
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(this->unique.original.data(gs)->show(gs), " (overload.", this->unique.num, ")");
+            } else if (this->unique.uniqueNameKind == UniqueNameKind::Package) {
+                return fmt::format("<pkg {}>", this->unique.original.data(gs)->toString(gs));
             }
             if (gs.censorForSnapshotTests && this->unique.uniqueNameKind == UniqueNameKind::Namer &&
                 this->unique.original == core::Names::staticInit()) {
@@ -123,6 +125,8 @@ string Name::show(const GlobalState &gs) const {
                 return absl::StrCat(this->unique.original.data(gs)->show(gs), " (overload.", this->unique.num, ")");
             } else if (this->unique.uniqueNameKind == UniqueNameKind::MangleRename) {
                 return this->unique.original.data(gs)->show(gs);
+            } else if (this->unique.uniqueNameKind == UniqueNameKind::Package) {
+                return fmt::format("<pkg {}>", this->unique.original.data(gs)->show(gs));
             } else if (this->unique.uniqueNameKind == UniqueNameKind::TEnum) {
                 // The entire goal of UniqueNameKind::TEnum is to have Name::show print the name as if on the
                 // original name, so that our T::Enum DSL-synthesized class names are kept as an implementation detail.
@@ -182,7 +186,8 @@ bool Name::isClassName(const GlobalState &gs) const {
         case NameKind::UNIQUE: {
             return (this->unique.uniqueNameKind == UniqueNameKind::Singleton ||
                     this->unique.uniqueNameKind == UniqueNameKind::MangleRename ||
-                    this->unique.uniqueNameKind == UniqueNameKind::TEnum) &&
+                    this->unique.uniqueNameKind == UniqueNameKind::TEnum ||
+                    this->unique.uniqueNameKind == UniqueNameKind::Package) &&
                    this->unique.original.data(gs)->isClassName(gs);
         }
         case NameKind::CONSTANT:
