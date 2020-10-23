@@ -443,24 +443,20 @@ TypePtr SelfType::_instantiate(const GlobalState &gs, const InlinedVector<Symbol
 
 TypePtr Types::replaceSelfType(const GlobalState &gs, const TypePtr &what, const TypePtr &receiver) {
     ENFORCE(what.get());
-    auto t = what->_replaceSelfType(gs, receiver);
+    auto t = what._replaceSelfType(gs, receiver);
     if (t) {
         return t;
     }
     return what;
 }
 
-TypePtr SelfType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) {
+TypePtr SelfType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
     return receiver;
 }
 
-TypePtr Type::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) {
-    return nullptr;
-}
-
-TypePtr OrType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) {
-    auto left = this->left->_replaceSelfType(gs, receiver);
-    auto right = this->right->_replaceSelfType(gs, receiver);
+TypePtr OrType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
+    auto left = this->left._replaceSelfType(gs, receiver);
+    auto right = this->right._replaceSelfType(gs, receiver);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -473,9 +469,9 @@ TypePtr OrType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver)
     return nullptr;
 }
 
-TypePtr AndType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) {
-    auto left = this->left->_replaceSelfType(gs, receiver);
-    auto right = this->right->_replaceSelfType(gs, receiver);
+TypePtr AndType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
+    auto left = this->left._replaceSelfType(gs, receiver);
+    auto right = this->right._replaceSelfType(gs, receiver);
     if (left || right) {
         if (!left) {
             left = this->left;
