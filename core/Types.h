@@ -221,7 +221,6 @@ public:
 
     virtual core::SymbolRef untypedBlame() const;
     virtual bool hasUntyped() const;
-    virtual bool isFullyDefined() const = 0;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc);
     unsigned int hash(const GlobalState &gs) const;
 
@@ -336,7 +335,6 @@ public:
     void _sanityCheck(const GlobalState &gs) final;
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override final;
-    virtual bool isFullyDefined() const final;
     virtual bool hasUntyped() const override final;
 };
 CheckSize(ClassType, 16, 8);
@@ -363,7 +361,6 @@ public:
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual bool isFullyDefined() const final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
@@ -383,7 +380,6 @@ public:
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual bool isFullyDefined() const final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
@@ -401,7 +397,6 @@ public:
 
     SymbolRef symbol;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual bool isFullyDefined() const final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
@@ -418,7 +413,6 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string showValue(const GlobalState &gs) const final;
-    virtual bool isFullyDefined() const final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
@@ -449,7 +443,6 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string showValue(const GlobalState &gs) const final;
-    virtual bool isFullyDefined() const final;
 
     bool equals(const LiteralType &rhs) const;
 
@@ -469,7 +462,7 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual bool isFullyDefined() const final;
+
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
@@ -491,7 +484,7 @@ public:
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual bool isFullyDefined() const final;
+
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual bool hasUntyped() const override;
@@ -544,7 +537,7 @@ public:
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual bool isFullyDefined() const final;
+
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
@@ -587,7 +580,6 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual bool isFullyDefined() const final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
@@ -613,7 +605,6 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string showWithMoreInfo(const GlobalState &gs) const final;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual bool isFullyDefined() const final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
@@ -638,7 +629,6 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual bool isFullyDefined() const final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
@@ -673,7 +663,6 @@ public:
 
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual bool isFullyDefined() const final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;

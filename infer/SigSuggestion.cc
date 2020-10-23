@@ -63,7 +63,7 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
         return nullptr;
     }
     const auto &to = args[argId].type;
-    if (!to || !to->isFullyDefined()) {
+    if (!to || !to.isFullyDefined()) {
         return nullptr;
     }
     return to;
@@ -311,7 +311,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
 
         guessedReturnType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
 
-        if (!guessedReturnType->isFullyDefined()) {
+        if (!guessedReturnType.isFullyDefined()) {
             guessedReturnType = core::Types::untypedUntracked();
         }
 

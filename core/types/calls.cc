@@ -270,7 +270,7 @@ SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef prim
 
                 auto argType = Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments()[i].type,
                                                            candidate.data(gs)->owner, inClass, targs);
-                if (argType->isFullyDefined() && !Types::isSubType(gs, arg->type, argType)) {
+                if (argType.isFullyDefined() && !Types::isSubType(gs, arg->type, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
@@ -1051,7 +1051,7 @@ public:
             return;
         }
         const auto loc = core::Loc(args.locs.file, args.locs.call);
-        if (!args.args[0]->type->isFullyDefined()) {
+        if (!args.args[0]->type.isFullyDefined()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type->show(gs));
             }
@@ -1477,7 +1477,7 @@ public:
             return;
         }
 
-        if (!receiver->type->isFullyDefined()) {
+        if (!receiver->type.isFullyDefined()) {
             return;
         }
 
@@ -1692,7 +1692,7 @@ public:
             return;
         }
 
-        if (!receiver->type->isFullyDefined()) {
+        if (!receiver->type.isFullyDefined()) {
             return;
         }
 
@@ -1754,7 +1754,7 @@ public:
             return;
         }
 
-        if (!receiver->type->isFullyDefined()) {
+        if (!receiver->type.isFullyDefined()) {
             return;
         }
 
