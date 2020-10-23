@@ -521,7 +521,7 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 }
 
 TypePtr Types::getProcReturnType(const GlobalState &gs, const TypePtr &procType) {
-    if (!procType->derivesFrom(gs, Symbols::Proc())) {
+    if (!procType.derivesFrom(gs, Symbols::Proc())) {
         return Types::untypedUntracked();
     }
     auto *applied = cast_type_const<AppliedType>(procType);
@@ -758,7 +758,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
 }
 
 core::SymbolRef Types::getRepresentedClass(const GlobalState &gs, const TypePtr &ty) {
-    if (!ty->derivesFrom(gs, core::Symbols::Module())) {
+    if (!ty.derivesFrom(gs, core::Symbols::Module())) {
         return core::Symbols::noSymbol();
     }
     core::SymbolRef singleton;

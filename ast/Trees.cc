@@ -1234,7 +1234,7 @@ bool Literal::isSymbol(const core::GlobalState &gs) const {
 }
 
 bool Literal::isNil(const core::GlobalState &gs) const {
-    return value->derivesFrom(gs, core::Symbols::NilClass());
+    return value.derivesFrom(gs, core::Symbols::NilClass());
 }
 
 bool Literal::isString(const core::GlobalState &gs) const {
@@ -1243,11 +1243,11 @@ bool Literal::isString(const core::GlobalState &gs) const {
 }
 
 bool Literal::isTrue(const core::GlobalState &gs) const {
-    return value->derivesFrom(gs, core::Symbols::TrueClass());
+    return value.derivesFrom(gs, core::Symbols::TrueClass());
 }
 
 bool Literal::isFalse(const core::GlobalState &gs) const {
-    return value->derivesFrom(gs, core::Symbols::FalseClass());
+    return value.derivesFrom(gs, core::Symbols::FalseClass());
 }
 
 string UnresolvedConstantLit::nodeName() {

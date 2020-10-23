@@ -642,12 +642,12 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         const auto &argType = send->args[0].type;
 
         if (auto *argClass = core::cast_type_const<core::ClassType>(argType)) {
-            if (!recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
+            if (!recvKlass.derivesFrom(ctx, core::Symbols::Class()) ||
                 !argClass->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
         } else if (auto *argClass = core::cast_type_const<core::AppliedType>(argType)) {
-            if (!recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
+            if (!recvKlass.derivesFrom(ctx, core::Symbols::Class()) ||
                 !argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
@@ -868,7 +868,7 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
 }
 
 core::TypePtr Environment::getReturnType(core::Context ctx, const core::TypePtr &procType) {
-    if (!procType->derivesFrom(ctx, core::Symbols::Proc())) {
+    if (!procType.derivesFrom(ctx, core::Symbols::Proc())) {
         return core::Types::untypedUntracked();
     }
     auto *applied = core::cast_type_const<core::AppliedType>(procType);
@@ -900,11 +900,11 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     if (fun != core::Names::flatMap()) {
         return returnType;
     }
-    if (!receiver->derivesFrom(ctx, core::Symbols::Enumerable())) {
+    if (!receiver.derivesFrom(ctx, core::Symbols::Enumerable())) {
         return returnType;
     }
 
-    if (!receiver.isUntyped() && receiver->derivesFrom(ctx, core::Symbols::Enumerator_Lazy())) {
+    if (!receiver.isUntyped() && receiver.derivesFrom(ctx, core::Symbols::Enumerator_Lazy())) {
         return returnType;
     }
 
@@ -1121,7 +1121,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 auto &blkArgs = insn->link->argFlags;
                 auto *tuple = core::cast_type_const<core::TupleType>(params);
                 if (blkArgs.size() > 1 && !blkArgs.front().isRepeated && tuple && tuple->elems.size() == 1 &&
-                    tuple->elems.front()->derivesFrom(ctx, core::Symbols::Array())) {
+                    tuple->elems.front().derivesFrom(ctx, core::Symbols::Array())) {
                     tp.type = std::move(tuple->elems.front());
                 } else if (params == nullptr) {
                     tp.type = core::Types::untypedUntracked();

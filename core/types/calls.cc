@@ -632,7 +632,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
             break;
         }
         if (ait + 1 == aend && hasKwargs && (spec.flags.isDefault || spec.flags.isRepeated) &&
-            Types::approximate(gs, arg->type, *constr)->derivesFrom(gs, Symbols::Hash())) {
+            Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
             break;
         }
 
@@ -769,7 +769,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                     result.main.errors.emplace_back(e.build());
                 }
             }
-        } else if (hashArgType->derivesFrom(gs, Symbols::Hash())) {
+        } else if (hashArgType.derivesFrom(gs, Symbols::Hash())) {
             --aend;
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
                 e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword arguments");
@@ -1338,7 +1338,7 @@ class Magic_expandSplat : public IntrinsicMethod {
 
         auto *tuple = cast_type_const<TupleType>(type);
         if (tuple == nullptr && core::Types::approximate(gs, type, core::TypeConstraint::EmptyFrozenConstraint)
-                                    ->derivesFrom(gs, Symbols::Array())) {
+                                    .derivesFrom(gs, Symbols::Array())) {
             // If this is an array and not a tuple, just pass it through. We
             // can't say anything about the elements.
             return type;
@@ -1365,8 +1365,8 @@ public:
         auto val = args.args.front()->type;
         auto *beforeLit = cast_type_const<LiteralType>(args.args[1]->type);
         auto *afterLit = cast_type_const<LiteralType>(args.args[2]->type);
-        if (!(beforeLit->underlying()->derivesFrom(gs, Symbols::Integer()) &&
-              afterLit->underlying()->derivesFrom(gs, Symbols::Integer()))) {
+        if (!(beforeLit->underlying().derivesFrom(gs, Symbols::Integer()) &&
+              afterLit->underlying().derivesFrom(gs, Symbols::Integer()))) {
             res.returnType = Types::untypedUntracked();
             return;
         }
@@ -1859,7 +1859,7 @@ public:
         if (args.args.size() == 1) {
             lit = cast_type_const<LiteralType>(args.args.front()->type);
         }
-        if (!lit || !lit->underlying()->derivesFrom(gs, Symbols::Integer())) {
+        if (!lit || !lit->underlying().derivesFrom(gs, Symbols::Integer())) {
             return;
         }
 
