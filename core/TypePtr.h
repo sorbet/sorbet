@@ -1,6 +1,7 @@
 #ifndef SORBET_TYPEPTR_H
 #define SORBET_TYPEPTR_H
 #include "common/common.h"
+#include "core/NameRef.h"
 #include "core/SymbolRef.h"
 #include <memory>
 
@@ -195,6 +196,12 @@ public:
     std::string typeName() const;
 
     bool isFullyDefined() const;
+
+    bool hasUntyped() const;
+
+    core::SymbolRef untypedBlame() const;
+
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
 };

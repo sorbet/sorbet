@@ -172,7 +172,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
         }
     } else if (auto *c = cast_type_const<ClassType>(from)) {
         auto cdata = c->symbol.data(gs);
-        if (c->hasUntyped()) {
+        if (from.hasUntyped()) {
             result = from;
         } else if (c->symbol == klass || c->derivesFrom(gs, klass)) {
             result = Types::bottom();
@@ -540,10 +540,6 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
-TypePtr TypeVar::getCallArguments(const GlobalState &gs, NameRef name) {
-    Exception::raise("should never happen");
-}
-
 bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
 }
@@ -594,16 +590,6 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return false;
 }
 
-TypePtr LambdaParam::getCallArguments(const GlobalState &gs, NameRef name) {
-    Exception::raise(
-        "LambdaParam::getCallArguments not implemented, not clear what it should do. Let's see this fire first.");
-}
-
-TypePtr SelfTypeParam::getCallArguments(const GlobalState &gs, NameRef name) {
-    Exception::raise(
-        "SelfTypeParam::getCallArguments not implemented, not clear what it should do. Let's see this fire first.");
-}
-
 DispatchResult LambdaParam::dispatchCall(const GlobalState &gs, DispatchArgs args) {
     Exception::raise(
         "LambdaParam::dispatchCall not implemented, not clear what it should do. Let's see this fire first.");
@@ -617,34 +603,9 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, DispatchArgs a
 void LambdaParam::_sanityCheck(const GlobalState &gs) {}
 void SelfTypeParam::_sanityCheck(const GlobalState &gs) {}
 
-bool Type::hasUntyped() const {
-    return false;
-}
-
-bool ClassType::hasUntyped() const {
-    return this->symbol == Symbols::untyped();
-}
-
-bool OrType::hasUntyped() const {
-    return left->hasUntyped() || right->hasUntyped();
-}
-
-core::SymbolRef Type::untypedBlame() const {
-    ENFORCE(hasUntyped());
-    return Symbols::noSymbol();
-}
-
-core::SymbolRef BlamedUntyped::untypedBlame() const {
-    return this->blame;
-}
-
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
     TypePtr res(TypePtr::Tag::OrType, new OrType(left, right));
     return res;
-}
-
-bool AndType::hasUntyped() const {
-    return left->hasUntyped() || right->hasUntyped();
 }
 
 TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
@@ -652,32 +613,6 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-bool AppliedType::hasUntyped() const {
-    for (auto &arg : this->targs) {
-        if (arg->hasUntyped()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool TupleType::hasUntyped() const {
-    for (auto &arg : this->elems) {
-        if (arg->hasUntyped()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool ShapeType::hasUntyped() const {
-    for (auto &arg : this->values) {
-        if (arg->hasUntyped()) {
-            return true;
-        }
-    }
-    return false;
-};
 SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags, int rubyBlockId)
     : argFlags(move(argFlags)), fun(fun), rubyBlockId(rubyBlockId) {}
 
@@ -711,10 +646,6 @@ SelfType::SelfType() {
 };
 AppliedType::AppliedType(SymbolRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     categoryCounterInc("types.allocated", "appliedtype");
-}
-
-TypePtr SelfType::getCallArguments(const GlobalState &gs, NameRef name) {
-    Exception::raise("should never happen");
 }
 
 bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {

@@ -1,9 +1,38 @@
 #include "core/TypePtr.h"
+#include "core/Symbols.h"
 #include "core/Types.h"
 
 using namespace std;
 
 namespace sorbet::core {
+
+namespace {
+
+TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name, const vector<TypePtr> &targs) {
+    SymbolRef method = klass.data(gs)->findMemberTransitive(gs, name);
+
+    if (!method.exists()) {
+        return nullptr;
+    }
+    const SymbolData data = method.data(gs);
+
+    vector<TypePtr> args;
+    args.reserve(data->arguments().size());
+    for (const auto &arg : data->arguments()) {
+        if (arg.flags.isRepeated) {
+            ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
+                    data->toString(gs));
+            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
+        }
+        ENFORCE(!arg.flags.isKeyword, "getCallArguments does not support kwargs: {}", data->toString(gs));
+        if (arg.flags.isBlock) {
+            continue;
+        }
+        args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
+    }
+    return TupleType::build(gs, args);
+}
+} // namespace
 
 void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
     ENFORCE(ptr != nullptr);
@@ -204,6 +233,128 @@ bool TypePtr::isFullyDefined() const {
                 }
             }
             return true;
+        }
+    }
+}
+
+bool TypePtr::hasUntyped() const {
+    switch (tag()) {
+        case Tag::TypeVar:
+        case Tag::LiteralType:
+        case Tag::SelfType:
+        case Tag::AliasType:
+        case Tag::SelfTypeParam:
+        case Tag::LambdaParam:
+        case Tag::MetaType:
+            // These cannot have untyped.
+            return false;
+
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType: {
+            auto *c = cast_type_const<ClassType>(*this);
+            return c->symbol == Symbols::untyped();
+        }
+        case Tag::OrType: {
+            auto *o = cast_type_const<OrType>(*this);
+            return o->left.hasUntyped() || o->right.hasUntyped();
+        }
+        case Tag::AndType: {
+            auto *a = cast_type_const<AndType>(*this);
+            return a->left.hasUntyped() || a->right.hasUntyped();
+        }
+        case Tag::AppliedType: {
+            auto *app = cast_type_const<AppliedType>(*this);
+            for (auto &arg : app->targs) {
+                if (arg.hasUntyped()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        case Tag::TupleType: {
+            auto *tuple = cast_type_const<TupleType>(*this);
+            for (auto &arg : tuple->elems) {
+                if (arg.hasUntyped()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        case Tag::ShapeType: {
+            auto *shape = cast_type_const<ShapeType>(*this);
+            for (auto &arg : shape->values) {
+                if (arg.hasUntyped()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+}
+
+core::SymbolRef TypePtr::untypedBlame() const {
+    ENFORCE(hasUntyped());
+    if (auto *blamed = cast_type_const<BlamedUntyped>(*this)) {
+        return blamed->blame;
+    }
+    return Symbols::noSymbol();
+}
+
+TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
+    switch (tag()) {
+        case Tag::MetaType:
+        case Tag::TupleType:
+        case Tag::ShapeType:
+        case Tag::LiteralType: {
+            auto *p = cast_type_const<ProxyType>(*this);
+            return p->underlying().getCallArguments(gs, name);
+        }
+        case Tag::OrType: {
+            auto *orType = cast_type_const<OrType>(*this);
+            auto largs = orType->left.getCallArguments(gs, name);
+            auto rargs = orType->right.getCallArguments(gs, name);
+            if (!largs) {
+                largs = Types::untypedUntracked();
+            }
+            if (!rargs) {
+                rargs = Types::untypedUntracked();
+            }
+            return Types::glb(gs, largs, rargs);
+        }
+        case Tag::AndType: {
+            auto *andType = cast_type_const<AndType>(*this);
+            auto l = andType->left.getCallArguments(gs, name);
+            auto r = andType->right.getCallArguments(gs, name);
+            if (l == nullptr) {
+                return r;
+            }
+            if (r == nullptr) {
+                return l;
+            }
+            return Types::any(gs, l, r);
+        }
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedClassType:
+        case Tag::UnresolvedAppliedType:
+        case Tag::ClassType: {
+            auto *c = cast_type_const<ClassType>(*this);
+            if (c->symbol == Symbols::untyped()) {
+                return Types::untyped(gs, untypedBlame());
+            }
+            return getMethodArguments(gs, c->symbol, name, vector<TypePtr>{});
+        }
+        case Tag::AppliedType: {
+            auto *app = cast_type_const<AppliedType>(*this);
+            return getMethodArguments(gs, app->klass, name, app->targs);
+        }
+        case Tag::SelfType:
+        case Tag::SelfTypeParam:
+        case Tag::LambdaParam:
+        case Tag::TypeVar:
+        case Tag::AliasType: {
+            Exception::raise("should never happen: getCallArguments on `{}`", typeName());
         }
     }
 }

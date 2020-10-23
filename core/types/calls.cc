@@ -24,10 +24,6 @@ DispatchResult ProxyType::dispatchCall(const GlobalState &gs, DispatchArgs args)
     return und->dispatchCall(gs, args.withThisRef(und));
 }
 
-TypePtr ProxyType::getCallArguments(const GlobalState &gs, NameRef name) {
-    return underlying()->getCallArguments(gs, name);
-}
-
 DispatchResult OrType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "ortype");
     auto leftRet = left->dispatchCall(gs, args.withSelfRef(left));
@@ -35,18 +31,6 @@ DispatchResult OrType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
     DispatchResult ret{Types::any(gs, leftRet.returnType, rightRet.returnType), move(leftRet.main),
                        make_unique<DispatchResult>(move(rightRet)), DispatchResult::Combinator::OR};
     return ret;
-}
-
-TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) {
-    auto largs = left->getCallArguments(gs, name);
-    auto rargs = right->getCallArguments(gs, name);
-    if (!largs) {
-        largs = Types::untypedUntracked();
-    }
-    if (!rargs) {
-        rargs = Types::untypedUntracked();
-    }
-    return Types::glb(gs, largs, rargs);
 }
 
 DispatchResult TypeVar::dispatchCall(const GlobalState &gs, DispatchArgs args) {
@@ -83,18 +67,6 @@ DispatchResult AndType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
                        DispatchResult::Combinator::AND};
 
     return ret;
-}
-
-TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name) {
-    auto l = left->getCallArguments(gs, name);
-    auto r = right->getCallArguments(gs, name);
-    if (l == nullptr) {
-        return r;
-    }
-    if (r == nullptr) {
-        return l;
-    }
-    return Types::any(gs, l, r);
 }
 
 DispatchResult ShapeType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
@@ -480,7 +452,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalSta
 DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core::SymbolRef symbol,
                                   vector<TypePtr> &targs) {
     if (symbol == core::Symbols::untyped()) {
-        return DispatchResult(Types::untyped(gs, args.thisType->untypedBlame()), std::move(args.selfType),
+        return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noSymbol());
     } else if (symbol == Symbols::void_()) {
         if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
@@ -946,48 +918,8 @@ DispatchResult AppliedType::dispatchCall(const GlobalState &gs, DispatchArgs arg
     return dispatchCallSymbol(gs, args, this->klass, this->targs);
 }
 
-TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name, const vector<TypePtr> &targs) {
-    SymbolRef method = klass.data(gs)->findMemberTransitive(gs, name);
-
-    if (!method.exists()) {
-        return nullptr;
-    }
-    const SymbolData data = method.data(gs);
-
-    vector<TypePtr> args;
-    args.reserve(data->arguments().size());
-    for (const auto &arg : data->arguments()) {
-        if (arg.flags.isRepeated) {
-            ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
-                    data->toString(gs));
-            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
-        }
-        ENFORCE(!arg.flags.isKeyword, "getCallArguments does not support kwargs: {}", data->toString(gs));
-        if (arg.flags.isBlock) {
-            continue;
-        }
-        args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
-    }
-    return TupleType::build(gs, args);
-}
-
-TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) {
-    if (hasUntyped()) {
-        return Types::untyped(gs, untypedBlame());
-    }
-    return getMethodArguments(gs, symbol, name, vector<TypePtr>{});
-}
-
-TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) {
-    return getMethodArguments(gs, klass, name, targs);
-}
-
 DispatchResult AliasType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
     Exception::raise("AliasType::dispatchCall");
-}
-
-TypePtr AliasType::getCallArguments(const GlobalState &gs, NameRef name) {
-    Exception::raise("AliasType::getCallArgumentType");
 }
 
 DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
