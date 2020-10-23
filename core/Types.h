@@ -205,10 +205,6 @@ public:
                                  const std::vector<TypePtr> &targs) = 0;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc);
 
-    virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver);
-
-    // n.b..: dispatchCall accepts a TypePtr of `this` because 1) everyone is calling this method on the nd
-    // 2) all of our APIs accept TypePtrs.
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) = 0;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const = 0;
     virtual void _sanityCheck(const GlobalState &gs) = 0;
@@ -406,7 +402,7 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
+    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
@@ -476,7 +472,7 @@ public:
                                  const std::vector<TypePtr> &targs) override;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
-    virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
+    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
 private:
     /*
@@ -525,7 +521,7 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
+    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 

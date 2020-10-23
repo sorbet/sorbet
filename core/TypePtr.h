@@ -206,6 +206,8 @@ public:
 
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
 
+    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
+
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
 };
 CheckSize(TypePtr, 16, 8);
