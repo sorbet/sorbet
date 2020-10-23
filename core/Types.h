@@ -769,9 +769,11 @@ struct DispatchArgs {
     InlinedVector<const TypeAndOrigins *, 2> &args;
     const TypePtr &selfType;
     const TypePtr &fullType;
+    const TypePtr &thisType;
     const std::shared_ptr<const SendAndBlockLink> &block;
 
     DispatchArgs withSelfRef(const TypePtr &newSelfRef);
+    DispatchArgs withThisRef(const TypePtr &newThisRef);
 };
 
 struct DispatchComponent {
@@ -794,7 +796,7 @@ struct DispatchResult {
 
     DispatchResult() = default;
     DispatchResult(TypePtr returnType, TypePtr receiverType, core::SymbolRef method)
-        : returnType(std::move(returnType)),
+        : returnType(returnType),
           main(DispatchComponent{
               std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, ArgInfo{}, nullptr}){};
     DispatchResult(TypePtr returnType, DispatchComponent comp)
