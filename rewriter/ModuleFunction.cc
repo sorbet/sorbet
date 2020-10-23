@@ -71,7 +71,7 @@ void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
 vector<ast::TreePtr> ModuleFunction::rewriteDefn(core::MutableContext ctx, const ast::TreePtr &expr,
                                                  const ast::TreePtr *prevStat) {
     vector<ast::TreePtr> stats;
-    auto mdef = ast::cast_tree_const<ast::MethodDef>(expr);
+    auto mdef = ast::cast_tree<ast::MethodDef>(expr);
     // only do this rewrite to method defs that aren't self methods
     if (mdef == nullptr || mdef->flags.isSelfMethod) {
         stats.emplace_back(expr.deepCopy());
@@ -86,7 +86,7 @@ vector<ast::TreePtr> ModuleFunction::rewriteDefn(core::MutableContext ctx, const
 
     // as well as a public static copy of the method signature
     if (prevStat) {
-        if (auto *sig = ast::cast_tree_const<ast::Send>(*prevStat)) {
+        if (auto *sig = ast::cast_tree<ast::Send>(*prevStat)) {
             if (sig->fun == core::Names::sig()) {
                 stats.emplace_back(sig->deepCopy());
             }

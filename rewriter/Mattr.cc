@@ -7,14 +7,14 @@ using namespace std;
 namespace sorbet::rewriter {
 
 static bool literalSymbolEqual(const core::GlobalState &gs, const ast::TreePtr &node, core::NameRef name) {
-    if (auto lit = ast::cast_tree_const<ast::Literal>(node)) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == name;
     }
     return false;
 }
 
 static bool isLiteralFalse(const core::GlobalState &gs, const ast::TreePtr &node) {
-    if (auto lit = ast::cast_tree_const<ast::Literal>(node)) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isFalse(gs);
     }
     return false;
@@ -57,7 +57,7 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
     if (send->args.empty()) {
         return empty;
     }
-    if (auto *options = ast::cast_tree_const<ast::Hash>(send->args.back())) {
+    if (auto *options = ast::cast_tree<ast::Hash>(send->args.back())) {
         symbolArgsBound--;
         for (int i = 0; i < options->keys.size(); i++) {
             auto &key = options->keys[i];
@@ -84,7 +84,7 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
 
     vector<ast::TreePtr> result;
     for (int i = 0; i < symbolArgsBound; i++) {
-        auto *lit = ast::cast_tree_const<ast::Literal>(send->args[i]);
+        auto *lit = ast::cast_tree<ast::Literal>(send->args[i]);
         if (!lit || !lit->isSymbol(ctx)) {
             return empty;
         }

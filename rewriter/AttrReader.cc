@@ -52,7 +52,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Tre
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
 // users, but we don't know that information in the Rewriter passes.
 bool isT(const ast::TreePtr &expr) {
-    auto *t = ast::cast_tree_const<ast::UnresolvedConstantLit>(expr);
+    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (t == nullptr || t->cnst != core::Names::Constants::T()) {
         return false;
     }
@@ -60,12 +60,12 @@ bool isT(const ast::TreePtr &expr) {
     if (ast::isa_tree<ast::EmptyTree>(scope)) {
         return true;
     }
-    auto root = ast::cast_tree_const<ast::ConstantLit>(scope);
+    auto root = ast::cast_tree<ast::ConstantLit>(scope);
     return root != nullptr && root->symbol == core::Symbols::root();
 }
 
 bool isTNilableOrUntyped(const ast::TreePtr &expr) {
-    auto *send = ast::cast_tree_const<ast::Send>(expr);
+    auto *send = ast::cast_tree<ast::Send>(expr);
     return send != nullptr && (send->fun == core::Names::nilable() || send->fun == core::Names::untyped()) &&
            isT(send->recv);
 }

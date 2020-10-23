@@ -8,21 +8,21 @@ using namespace std;
 namespace sorbet::rewriter {
 
 static bool literalSymbolEqual(const core::GlobalState &gs, const ast::TreePtr &node, core::NameRef name) {
-    if (auto lit = ast::cast_tree_const<ast::Literal>(node)) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == name;
     }
     return false;
 }
 
 static bool isLiteralTrue(const core::GlobalState &gs, const ast::TreePtr &node) {
-    if (auto lit = ast::cast_tree_const<ast::Literal>(node)) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isTrue(gs);
     }
     return false;
 }
 
 static optional<core::NameRef> stringOrSymbolNameRef(const core::GlobalState &gs, const ast::TreePtr &node) {
-    auto lit = ast::cast_tree_const<ast::Literal>(node);
+    auto lit = ast::cast_tree<ast::Literal>(node);
     if (!lit) {
         return nullopt;
     }
@@ -47,7 +47,7 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
         return empty;
     }
 
-    auto options = ast::cast_tree_const<ast::Hash>(send->args.back());
+    auto options = ast::cast_tree<ast::Hash>(send->args.back());
     if (!options) {
         return empty;
     }
@@ -92,7 +92,7 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
 
     vector<ast::TreePtr> methodStubs;
     for (int i = 0; i < send->args.size() - 1; i++) {
-        auto *lit = ast::cast_tree_const<ast::Literal>(send->args[i]);
+        auto *lit = ast::cast_tree<ast::Literal>(send->args[i]);
         if (!lit || !lit->isSymbol(ctx)) {
             return empty;
         }

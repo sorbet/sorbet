@@ -416,7 +416,7 @@ public:
     static ast::Local const *arg2Local(const ast::TreePtr &arg) {
         auto *cursor = &arg;
         while (true) {
-            if (auto *local = ast::cast_tree_const<ast::Local>(*cursor)) {
+            if (auto *local = ast::cast_tree<ast::Local>(*cursor)) {
                 // Buried deep within every argument is a Local
                 return local;
             }

@@ -281,8 +281,7 @@ template <class To> To *cast_tree(TreePtr &what) {
     }
 }
 
-// A variant of cast_tree that preserves the const-ness (if const in, then const out)
-template <class To> To const *cast_tree_const(const TreePtr &what) {
+template <class To> const To *cast_tree(const TreePtr &what) {
     if (isa_tree<To>(what)) {
         return reinterpret_cast<To *>(what.get());
     } else {
@@ -295,8 +294,8 @@ template <class To> To &cast_tree_nonnull(TreePtr &what) {
     return *reinterpret_cast<To *>(what.get());
 }
 
-template <class To> const To &cast_tree_nonnull_const(const TreePtr &what) {
-    ENFORCE(isa_tree<To>(what), "cast_tree_nonnull_const failed!");
+template <class To> const To &cast_tree_nonnull(const TreePtr &what) {
+    ENFORCE(isa_tree<To>(what), "cast_tree_nonnull failed!");
     return *reinterpret_cast<To *>(what.get());
 }
 
