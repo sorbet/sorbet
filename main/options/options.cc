@@ -354,9 +354,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "directory passed to Sorbet, if any.",
                                     cxxopts::value<string>()->default_value(empty.pathPrefix), "prefix");
     options.add_options("advanced")("a,autocorrect", "Auto-correct source files with suggested fixes");
-    options.add_options("advanced")(
-        "suggest-runtime-profiled",
-        "When suggesting signatures in `typed: strict` mode, suggest `::T::Utils::RuntimeProfiled`");
     options.add_options("advanced")("P,progress", "Draw progressbar");
     options.add_options("advanced")("license", "Show license");
     options.add_options("advanced")("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
@@ -826,7 +823,6 @@ void readOptions(Options &opts,
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
         opts.sleepInSlowPath = raw["sleep-in-slow-path"].as<bool>();
-        opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
         opts.censorForSnapshotTests = raw["censor-for-snapshot-tests"].as<bool>();

@@ -433,9 +433,6 @@ int realmain(int argc, char *argv[]) {
     if (opts.autocorrect) {
         gs->autocorrect = true;
     }
-    if (opts.suggestRuntimeProfiledType) {
-        gs->suggestRuntimeProfiledType = true;
-    }
     if (opts.print.isAutogen()) {
         gs->runningUnderAutogen = true;
     }

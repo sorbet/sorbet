@@ -683,10 +683,6 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());
     id.data(*this)->setIsModule(true);
 
-    // Synthesize T::Utils::RuntimeProfiled
-    id = enterStaticFieldSymbol(Loc::none(), id, core::Names::Constants::RuntimeProfiled());
-    id.data(*this)->resultType = make_type<core::AliasType>(Symbols::untyped());
-
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes
@@ -1715,7 +1711,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
 
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
-    result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;

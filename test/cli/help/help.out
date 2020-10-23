@@ -77,9 +77,6 @@ Usage:
                                 passed to Sorbet, if any. (default: "")
   -a, --autocorrect             Auto-correct source files with suggested
                                 fixes
-      --suggest-runtime-profiled
-                                When suggesting signatures in `typed: strict`
-                                mode, suggest `::T::Utils::RuntimeProfiled`
   -P, --progress                Draw progressbar
       --license                 Show license
       --color {always,never,[auto]}

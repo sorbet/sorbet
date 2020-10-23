@@ -296,9 +296,6 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     core::SymbolRef methodSymbol = cfg->symbol;
 
     bool guessedSomethingUseful = false;
-    if (ctx.state.suggestRuntimeProfiledType) {
-        guessedSomethingUseful = true;
-    }
 
     auto lspQueryMatches = ctx.state.lspQuery.matchesSuggestSig(methodSymbol);
     if (lspQueryMatches) {
@@ -410,11 +407,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 // TODO: maybe combine the old and new types in some way?
                 chosenType = oldType;
             }
-            if (!ctx.state.suggestRuntimeProfiledType || !chosenType->isUntyped()) {
-                fmt::format_to(ss, "{}: {}", argSym.argumentName(ctx), chosenType->show(ctx));
-            } else {
-                fmt::format_to(ss, "{}: ::T::Utils::RuntimeProfiled", argSym.argumentName(ctx));
-            }
+            fmt::format_to(ss, "{}: {}", argSym.argumentName(ctx), chosenType->show(ctx));
         }
         fmt::format_to(ss, ").");
     }
@@ -426,9 +419,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                         (core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType) &&
                          !guessedReturnType->isUntyped() && !guessedReturnType->isBottom());
 
-    if (ctx.state.suggestRuntimeProfiledType && guessedReturnType->isUntyped()) {
-        fmt::format_to(ss, "returns(::T::Utils::RuntimeProfiled)}}");
-    } else if (suggestsVoid) {
+    if (suggestsVoid) {
         fmt::format_to(ss, "void}}");
     } else {
         fmt::format_to(ss, "returns({})}}", guessedReturnType->show(ctx));

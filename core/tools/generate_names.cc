@@ -438,7 +438,6 @@ NameDef names[] = {
     {"Builder", "Builder", true},
     {"Sig", "Sig", true},
     {"Utils", "Utils", true},
-    {"RuntimeProfiled", "RuntimeProfiled", true},
     {"UndeclaredFieldStub", "<undeclared-field-stub>", true},
     {"badAliasMethodStub", "<bad-method-alias-stub>"},
     {"Helpers", "Helpers", true},
