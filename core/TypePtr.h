@@ -225,6 +225,8 @@ public:
     // Like show, but can include extra info. Does not necessarily match what the user can type.
     std::string showWithMoreInfo(const GlobalState &gs) const;
 
+    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+
     unsigned int hash(const GlobalState &gs) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);

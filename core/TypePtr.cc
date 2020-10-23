@@ -533,4 +533,37 @@ std::string TypePtr::showWithMoreInfo(const GlobalState &gs) const {
     }
 }
 
+bool TypePtr::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+    switch (tag()) {
+        case Tag::LiteralType:
+            return cast_type_nonnull<LiteralType>(*this).derivesFrom(gs, klass);
+        case Tag::ShapeType:
+            return cast_type_nonnull<ShapeType>(*this).derivesFrom(gs, klass);
+        case Tag::TupleType:
+            return cast_type_nonnull<TupleType>(*this).derivesFrom(gs, klass);
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedClassType:
+        case Tag::UnresolvedAppliedType:
+        case Tag::ClassType:
+            return cast_type_nonnull<ClassType>(*this).derivesFrom(gs, klass);
+        case Tag::OrType:
+            return cast_type_nonnull<OrType>(*this).derivesFrom(gs, klass);
+        case Tag::AndType:
+            return cast_type_nonnull<AndType>(*this).derivesFrom(gs, klass);
+        case Tag::AliasType:
+            return cast_type_nonnull<AliasType>(*this).derivesFrom(gs, klass);
+        case Tag::MetaType:
+            return cast_type_nonnull<MetaType>(*this).derivesFrom(gs, klass);
+        case Tag::TypeVar:
+            return cast_type_nonnull<TypeVar>(*this).derivesFrom(gs, klass);
+        case Tag::AppliedType:
+            return cast_type_nonnull<AppliedType>(*this).derivesFrom(gs, klass);
+        case Tag::LambdaParam:
+            return cast_type_nonnull<LambdaParam>(*this).derivesFrom(gs, klass);
+        case Tag::SelfTypeParam:
+            return cast_type_nonnull<SelfTypeParam>(*this).derivesFrom(gs, klass);
+        case Tag::SelfType:
+            return cast_type_nonnull<SelfType>(*this).derivesFrom(gs, klass);
+    }
+}
 } // namespace sorbet::core

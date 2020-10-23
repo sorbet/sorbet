@@ -1319,7 +1319,7 @@ bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypeP
 }
 
 bool ProxyType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    return underlying()->derivesFrom(gs, klass);
+    return underlying().derivesFrom(gs, klass);
 }
 
 bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
@@ -1330,11 +1330,11 @@ bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
 }
 
 bool OrType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    return left->derivesFrom(gs, klass) && right->derivesFrom(gs, klass);
+    return left.derivesFrom(gs, klass) && right.derivesFrom(gs, klass);
 }
 
 bool AndType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    return left->derivesFrom(gs, klass) || right->derivesFrom(gs, klass);
+    return left.derivesFrom(gs, klass) || right.derivesFrom(gs, klass);
 }
 
 bool AliasType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
