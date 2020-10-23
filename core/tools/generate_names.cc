@@ -470,7 +470,7 @@ void emit_name_string(ostream &out, NameDef &name) {
     out << '\n';
 }
 
-void emit_name_debug_table(ostream &out) {
+void emit_name_debug_table(ostream &out, int lastId) {
     out << "#ifdef DEBUG_MODE" << '\n';
     out << "#pragma clang diagnostic push" << '\n';
     out << "#pragma clang diagnostic ignored \"-Wunused-variable\"" << '\n';
@@ -480,6 +480,7 @@ void emit_name_debug_table(ostream &out) {
         out << '\t' << name.srcName << "_s," << '\n';
     }
     out << "};" << '\n';
+    out << "int DEBUG_NAME_LAST_WELL_KNOWN_NAME = " << lastId << ";" << '\n';
     out << "#pragma clang diagnostic pop" << '\n';
     out << "#endif" << '\n';
 }
@@ -567,8 +568,8 @@ int main(int argc, char **argv) {
         classfile << "}" << '\n';
         classfile << '\n';
 
-        // Output a debug table that can be used to easily inspect known names at runtime
-        emit_name_debug_table(classfile);
+        // Output a table that can be used to easily inspect known names from the debugger
+        emit_name_debug_table(classfile, lastId);
 
         emit_register(classfile);
 
