@@ -155,7 +155,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                            knowledgeFilter, *constr, methodReturnType);
                 if (cfg::isa_instruction<cfg::Send>(bind.value.get())) {
                     totalSendCount++;
-                    if (bind.bind.type && !bind.bind.type->isUntyped()) {
+                    if (bind.bind.type && !bind.bind.type.isUntyped()) {
                         typedSendCount++;
                     } else if (bind.bind.type->hasUntyped()) {
                         DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type->untypedBlame().rawId()););
@@ -166,7 +166,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 }
                 ENFORCE(bind.bind.type);
                 bind.bind.type->sanityCheck(ctx);
-                if (bind.bind.type->isBottom()) {
+                if (bind.bind.type.isBottom()) {
                     current.isDead = true;
                     madeBlockDead = core::Loc(ctx.file, bind.loc);
                 }

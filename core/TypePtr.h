@@ -1,10 +1,12 @@
 #ifndef SORBET_TYPEPTR_H
 #define SORBET_TYPEPTR_H
 #include "common/common.h"
+#include "core/SymbolRef.h"
 #include <memory>
 
 namespace sorbet::core {
 class Type;
+
 class TypePtr final {
 public:
     // We store tagged pointers as 64-bit values.
@@ -180,6 +182,12 @@ public:
     bool operator==(std::nullptr_t n) const {
         return ptr == 0;
     }
+
+    bool isUntyped() const;
+
+    bool isNilClass() const;
+
+    bool isBottom() const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
 };

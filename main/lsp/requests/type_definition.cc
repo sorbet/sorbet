@@ -8,15 +8,15 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 namespace {
-vector<core::Loc> locsForType(const core::GlobalState &gs, core::TypePtr type) {
+vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &type) {
     vector<core::Loc> result;
-    if (type->isUntyped()) {
+    if (type.isUntyped()) {
         return result;
     }
     typecase(
-        type.get(), [&](core::ClassType *t) { result.emplace_back(t->symbol.data(gs)->loc()); },
-        [&](core::AppliedType *t) { result.emplace_back(t->klass.data(gs)->loc()); },
-        [&](core::OrType *t) {
+        type.get(), [&](const core::ClassType *t) { result.emplace_back(t->symbol.data(gs)->loc()); },
+        [&](const core::AppliedType *t) { result.emplace_back(t->klass.data(gs)->loc()); },
+        [&](const core::OrType *t) {
             for (auto loc : locsForType(gs, t->left)) {
                 result.emplace_back(loc);
             }
@@ -24,7 +24,7 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, core::TypePtr type) {
                 result.emplace_back(loc);
             }
         },
-        [&](core::AndType *t) {
+        [&](const core::AndType *t) {
             for (auto loc : locsForType(gs, t->left)) {
                 result.emplace_back(loc);
             }

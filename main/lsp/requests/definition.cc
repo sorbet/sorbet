@@ -37,7 +37,7 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
                 auto sendResp = resp->isSend();
                 auto start = sendResp->dispatchResult.get();
                 while (start != nullptr) {
-                    if (start->main.method.exists() && !start->main.receiver->isUntyped()) {
+                    if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                         addLocIfExists(gs, result, start->main.method.data(gs)->loc());
                     }
                     start = start->secondary.get();

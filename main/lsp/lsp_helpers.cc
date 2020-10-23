@@ -68,7 +68,7 @@ constexpr int MAX_PRETTY_SIG_ARGS = 4;
 // iff a `def` would be this wide or wider, expand it to be a multi-line def.
 constexpr int MAX_PRETTY_WIDTH = 80;
 
-string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
+string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, const core::TypePtr &receiver,
                           core::TypePtr retType, const core::TypeConstraint *constraint) {
     ENFORCE(method.exists());
     ENFORCE(method.data(gs)->dealias(gs) == method);
@@ -210,8 +210,8 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
     return result;
 }
 
-string prettyTypeForMethod(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
-                           core::TypePtr retType, const core::TypeConstraint *constraint) {
+string prettyTypeForMethod(const core::GlobalState &gs, core::SymbolRef method, const core::TypePtr &receiver,
+                           const core::TypePtr &retType, const core::TypeConstraint *constraint) {
     return fmt::format("{}\n{}", prettySigForMethod(gs, method.data(gs)->dealias(gs), receiver, retType, constraint),
                        prettyDefForMethod(gs, method));
 }
@@ -240,13 +240,13 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     return result->showWithMoreInfo(gs);
 }
 
-core::TypePtr getResultType(const core::GlobalState &gs, core::TypePtr type, core::SymbolRef inWhat,
+core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr) {
     auto resultType = type;
-    if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {
+    if (auto *proxy = core::cast_type_const<core::ProxyType>(receiver)) {
         receiver = proxy->underlying();
     }
-    if (auto *applied = core::cast_type<core::AppliedType>(receiver.get())) {
+    if (auto *applied = core::cast_type_const<core::AppliedType>(receiver)) {
         /* instantiate generic classes */
         resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.data(gs)->enclosingClass(gs),
                                                        applied->klass, applied->targs);

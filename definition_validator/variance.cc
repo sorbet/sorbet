@@ -67,41 +67,41 @@ private:
 
     VarianceValidator(const core::Loc loc) : loc(loc) {}
 
-    void validate(const core::Context ctx, const Polarity polarity, const core::TypePtr type) {
+    void validate(const core::Context ctx, const Polarity polarity, const core::TypePtr &type) {
         typecase(
-            type.get(), [&](core::ClassType *klass) {},
+            type.get(), [&](const core::ClassType *klass) {},
 
-            [&](core::LiteralType *lit) {},
+            [&](const core::LiteralType *lit) {},
 
-            [&](core::SelfType *self) {},
+            [&](const core::SelfType *self) {},
 
-            [&](core::SelfTypeParam *sp) {},
+            [&](const core::SelfTypeParam *sp) {},
 
-            [&](core::TypeVar *tvar) {},
+            [&](const core::TypeVar *tvar) {},
 
-            [&](core::OrType *any) {
+            [&](const core::OrType *any) {
                 validate(ctx, polarity, any->left);
                 validate(ctx, polarity, any->right);
             },
 
-            [&](core::AndType *all) {
+            [&](const core::AndType *all) {
                 validate(ctx, polarity, all->left);
                 validate(ctx, polarity, all->right);
             },
 
-            [&](core::ShapeType *shape) {
+            [&](const core::ShapeType *shape) {
                 for (auto value : shape->values) {
                     validate(ctx, polarity, value);
                 }
             },
 
-            [&](core::TupleType *tuple) {
+            [&](const core::TupleType *tuple) {
                 for (auto value : tuple->elems) {
                     validate(ctx, polarity, value);
                 }
             },
 
-            [&](core::AppliedType *app) {
+            [&](const core::AppliedType *app) {
                 auto members = app->klass.data(ctx)->typeMembers();
                 auto params = app->targs;
 
@@ -136,7 +136,7 @@ private:
             },
 
             // This is where the actual variance checks are done.
-            [&](core::LambdaParam *param) {
+            [&](const core::LambdaParam *param) {
                 auto paramData = param->definition.data(ctx);
 
                 ENFORCE(paramData->isTypeMember());
@@ -166,7 +166,7 @@ private:
                 }
             },
 
-            [&](core::AliasType *alias) {
+            [&](const core::AliasType *alias) {
                 auto aliasSym = alias->symbol.data(ctx)->dealias(ctx);
 
                 // This can be introduced by `module_function`, which in its
@@ -179,14 +179,14 @@ private:
                 }
             },
 
-            [&](core::Type *skipped) {
+            [&](const core::Type *skipped) {
                 Exception::raise("Unexpected type in variance checking: {}", skipped->toString(ctx));
             });
     }
 
 public:
     static void validatePolarity(const core::Loc loc, const core::Context ctx, const Polarity polarity,
-                                 const core::TypePtr type) {
+                                 const core::TypePtr &type) {
         VarianceValidator validator(loc);
         return validator.validate(ctx, polarity, type);
     }

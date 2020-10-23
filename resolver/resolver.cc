@@ -427,7 +427,7 @@ private:
         core::TypePtr resultType = uaSym.data(ctx)->resultType;
         if (!resultType) {
             uaSym.data(ctx)->resultType = core::TupleType::build(ctx, {ancestorType});
-        } else if (auto tt = core::cast_type<core::TupleType>(resultType.get())) {
+        } else if (auto tt = core::cast_type<core::TupleType>(resultType)) {
             tt->elems.push_back(ancestorType);
         } else {
             ENFORCE(false);
@@ -965,14 +965,14 @@ class ResolveTypeMembersWalk {
         return tMod && tMod->symbol == core::Symbols::T();
     }
 
-    static bool isTodo(core::TypePtr type) {
-        auto *todo = core::cast_type<core::ClassType>(type.get());
+    static bool isTodo(const core::TypePtr &type) {
+        auto *todo = core::cast_type_const<core::ClassType>(type);
         return todo != nullptr && todo->symbol == core::Symbols::todo();
     }
 
     static bool isLHSResolved(core::MutableContext ctx, core::SymbolRef sym) {
         if (sym.data(ctx)->isTypeMember()) {
-            auto *lambdaParam = core::cast_type<core::LambdaParam>(sym.data(ctx)->resultType.get());
+            auto *lambdaParam = core::cast_type_const<core::LambdaParam>(sym.data(ctx)->resultType);
             ENFORCE(lambdaParam != nullptr);
 
             // both bounds are set to todo in the namer, so it's sufficient to
@@ -1000,7 +1000,7 @@ class ResolveTypeMembersWalk {
         auto parentMember = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
         if (parentMember.exists()) {
             if (parentMember.data(ctx)->isTypeMember()) {
-                parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType.get());
+                parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType);
                 ENFORCE(parentType != nullptr);
             } else if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
                 const auto parentShow = parentMember.data(ctx)->show(ctx);
@@ -1012,7 +1012,7 @@ class ResolveTypeMembersWalk {
         // Initialize the resultType to a LambdaParam with default bounds
         auto lambdaParam = core::make_type<core::LambdaParam>(lhs, core::Types::bottom(), core::Types::top());
         data->resultType = lambdaParam;
-        auto *memberType = core::cast_type<core::LambdaParam>(lambdaParam.get());
+        auto *memberType = core::cast_type<core::LambdaParam>(lambdaParam);
 
         // When no args are supplied, this implies that the upper and lower
         // bounds of the type parameter are top and bottom.
@@ -1107,7 +1107,7 @@ class ResolveTypeMembersWalk {
             return;
         }
 
-        auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType.get());
+        auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType);
         ENFORCE(lambdaParam != nullptr);
 
         if (isTodo(lambdaParam->lowerBound)) {
@@ -1406,7 +1406,7 @@ private:
                 if (typeSpec.type) {
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::TypeVarName, typeSpec.name, 1);
                     auto sym = ctx.state.enterTypeArgument(typeSpec.loc, method, name, core::Variance::CoVariant);
-                    auto asTypeVar = core::cast_type<core::TypeVar>(typeSpec.type.get());
+                    auto asTypeVar = core::cast_type<core::TypeVar>(typeSpec.type);
                     ENFORCE(asTypeVar != nullptr);
                     asTypeVar->sym = sym;
                     sym.data(ctx)->resultType = typeSpec.type;
@@ -1900,7 +1900,7 @@ private:
             return;
         }
 
-        auto literal = core::cast_type<core::LiteralType>(literalNode->value.get());
+        auto literal = core::cast_type_const<core::LiteralType>(literalNode->value);
         if (literal == nullptr) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("`{}` only accepts string literals", method);
@@ -1913,7 +1913,7 @@ private:
             return;
         }
 
-        core::LiteralType *package = nullptr;
+        const core::LiteralType *package = nullptr;
         optional<core::LocOffsets> packageLoc;
         if (send.args.size() == 3) {
             // this means we got the third package arg
@@ -1936,7 +1936,7 @@ private:
                 return;
             }
 
-            package = core::cast_type<core::LiteralType>(packageNode->value.get());
+            package = core::cast_type_const<core::LiteralType>(packageNode->value);
             if (package == nullptr || package->literalKind != core::LiteralType::LiteralTypeKind::String) {
                 // Infer will report a type error
                 return;
@@ -2077,7 +2077,7 @@ public:
                     asgn.rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
                                               core::Names::suggestType(), move(rhs));
                 }
-            } else if (!core::isa_type<core::AliasType>(data->resultType.get())) {
+            } else if (!core::isa_type<core::AliasType>(data->resultType)) {
                 // If we've already resolved a temporary constant, we still want to run resolveConstantType to
                 // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
                 // typechecking runs) but we only want to run this on constants that are value-level and not class

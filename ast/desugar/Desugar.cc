@@ -317,7 +317,7 @@ TreePtr symbol2Proc(DesugarContext dctx, TreePtr expr) {
     ENFORCE(lit && lit->isSymbol(dctx.ctx));
 
     // &:foo => {|temp| temp.foo() }
-    core::NameRef name(dctx.ctx, core::cast_type<core::LiteralType>(lit->value.get())->value);
+    core::NameRef name(dctx.ctx, core::cast_type_const<core::LiteralType>(lit->value)->value);
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
     auto zeroLengthLoc = loc.copyWithZeroLength();
     TreePtr recv = MK::Local(zeroLengthLoc, temp);

@@ -58,7 +58,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 auto start = sendResp->dispatchResult.get();
                 vector<unique_ptr<Location>> locations;
                 while (start != nullptr) {
-                    if (start->main.method.exists() && !start->main.receiver->isUntyped()) {
+                    if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                         locations = getReferencesToSymbol(typechecker, start->main.method, move(locations));
                     }
                     start = start->secondary.get();

@@ -16,7 +16,7 @@ void TypeConstraint::defineDomain(const GlobalState &gs, const InlinedVector<Sym
     // test/testdata/infer/generic_methods/countraints_crosstalk.rb
     for (const auto &tp : typeParams) {
         ENFORCE(tp.data(gs)->isTypeArgument());
-        auto typ = cast_type<TypeVar>(tp.data(gs)->resultType.get());
+        auto typ = cast_type_const<TypeVar>(tp.data(gs)->resultType);
         ENFORCE(typ != nullptr);
 
         if (tp.data(gs)->isCovariant()) {
@@ -97,7 +97,7 @@ bool TypeConstraint::solve(const GlobalState &gs) {
 
 bool TypeConstraint::rememberIsSubtype(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     ENFORCE(!wasSolved);
-    if (auto t1p = cast_type<TypeVar>(t1.get())) {
+    if (auto t1p = cast_type_const<TypeVar>(t1)) {
         auto &entry = findUpperBound(t1p->sym);
         if (!entry) {
             entry = t2;
@@ -107,7 +107,7 @@ bool TypeConstraint::rememberIsSubtype(const GlobalState &gs, const TypePtr &t1,
             entry = AndType::make_shared(entry, t2);
         }
     } else {
-        auto t2p = cast_type<TypeVar>(t2.get());
+        auto t2p = cast_type_const<TypeVar>(t2);
         ENFORCE(t2p != nullptr);
         auto &entry = findLowerBound(t2p->sym);
         if (!entry) {
@@ -122,13 +122,13 @@ bool TypeConstraint::rememberIsSubtype(const GlobalState &gs, const TypePtr &t1,
 }
 
 bool TypeConstraint::isAlreadyASubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) const {
-    if (auto t1p = cast_type<TypeVar>(t1.get())) {
+    if (auto t1p = cast_type_const<TypeVar>(t1)) {
         if (!hasLowerBound(t1p->sym)) {
             return Types::isSubType(gs, Types::top(), t2);
         }
         return Types::isSubType(gs, findLowerBound(t1p->sym), t2);
     } else {
-        auto t2p = cast_type<TypeVar>(t2.get());
+        auto t2p = cast_type_const<TypeVar>(t2);
         ENFORCE(t2p != nullptr);
         if (!hasUpperBound(t2p->sym)) {
             return Types::isSubType(gs, t1, Types::bottom());

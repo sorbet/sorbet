@@ -27,7 +27,8 @@ class SerializerImpl;
 }
 class IntrinsicMethod {
 public:
-    virtual void apply(const GlobalState &gs, DispatchArgs args, const Type *thisType, DispatchResult &res) const = 0;
+    virtual void apply(const GlobalState &gs, DispatchArgs args, const TypePtr &thisType,
+                       DispatchResult &res) const = 0;
 };
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };

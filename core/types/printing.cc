@@ -57,7 +57,7 @@ string LiteralType::show(const GlobalState &gs) const {
 }
 
 string LiteralType::showValue(const GlobalState &gs) const {
-    SymbolRef undSymbol = cast_type<ClassType>(this->underlying().get())->symbol;
+    SymbolRef undSymbol = cast_type_const<ClassType>(this->underlying())->symbol;
     if (undSymbol == Symbols::String()) {
         return fmt::format("\"{}\"", absl::CEscape(NameRef(gs, this->value).show(gs)));
     } else if (undSymbol == Symbols::Symbol()) {
@@ -124,9 +124,9 @@ string ShapeType::show(const GlobalState &gs) const {
         } else {
             fmt::format_to(buf, ", ");
         }
-        SymbolRef undSymbol = cast_type<ClassType>(cast_type<LiteralType>(key.get())->underlying().get())->symbol;
+        SymbolRef undSymbol = cast_type_const<ClassType>(cast_type_const<LiteralType>(key)->underlying())->symbol;
         if (undSymbol == Symbols::Symbol()) {
-            fmt::format_to(buf, "{}: {}", NameRef(gs, cast_type<LiteralType>(key.get())->value).show(gs),
+            fmt::format_to(buf, "{}: {}", NameRef(gs, cast_type_const<LiteralType>(key)->value).show(gs),
                            (*valueIterator)->show(gs));
         } else {
             fmt::format_to(buf, "{} => {}", key->show(gs), (*valueIterator)->show(gs));
@@ -146,24 +146,24 @@ string AliasType::show(const GlobalState &gs) const {
 }
 
 string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    bool leftBrace = isa_type<OrType>(this->left.get());
-    bool rightBrace = isa_type<OrType>(this->right.get());
+    bool leftBrace = isa_type<OrType>(this->left);
+    bool rightBrace = isa_type<OrType>(this->right);
 
     return fmt::format("{}{}{} & {}{}{}", leftBrace ? "(" : "", this->left->toStringWithTabs(gs, tabs + 2),
                        leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toStringWithTabs(gs, tabs + 2),
                        rightBrace ? ")" : "");
 }
 
-string showAnds(const GlobalState &, TypePtr, TypePtr);
+string showAnds(const GlobalState &, const TypePtr &, const TypePtr &);
 
-string showAndElem(const GlobalState &gs, TypePtr ty) {
-    if (auto andType = cast_type<AndType>(ty.get())) {
+string showAndElem(const GlobalState &gs, const TypePtr &ty) {
+    if (auto andType = cast_type_const<AndType>(ty)) {
         return showAnds(gs, andType->left, andType->right);
     }
     return ty->show(gs);
 }
 
-string showAnds(const GlobalState &gs, TypePtr left, TypePtr right) {
+string showAnds(const GlobalState &gs, const TypePtr &left, const TypePtr &right) {
     auto leftStr = showAndElem(gs, left);
     auto rightStr = showAndElem(gs, right);
     return fmt::format("{}, {}", leftStr, rightStr);
@@ -175,8 +175,8 @@ string AndType::show(const GlobalState &gs) const {
 }
 
 string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    bool leftBrace = isa_type<AndType>(this->left.get());
-    bool rightBrace = isa_type<AndType>(this->right.get());
+    bool leftBrace = isa_type<AndType>(this->left);
+    bool rightBrace = isa_type<AndType>(this->right);
 
     return fmt::format("{}{}{} | {}{}{}", leftBrace ? "(" : "", this->left->toStringWithTabs(gs, tabs + 2),
                        leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toStringWithTabs(gs, tabs + 2),
@@ -249,10 +249,10 @@ struct OrInfo {
     }
 };
 
-pair<OrInfo, optional<string>> showOrs(const GlobalState &, TypePtr, TypePtr);
+pair<OrInfo, optional<string>> showOrs(const GlobalState &, const TypePtr &, const TypePtr &);
 
-pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, TypePtr ty) {
-    if (auto classType = cast_type<ClassType>(ty.get())) {
+pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, const TypePtr &ty) {
+    if (auto classType = cast_type_const<ClassType>(ty)) {
         if (classType->symbol == Symbols::NilClass()) {
             return make_pair(OrInfo::nilInfo(), nullopt);
         } else if (classType->symbol == Symbols::TrueClass()) {
@@ -260,14 +260,14 @@ pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, TypePtr ty) {
         } else if (classType->symbol == Symbols::FalseClass()) {
             return make_pair(OrInfo::falseInfo(), make_optional(classType->show(gs)));
         }
-    } else if (auto orType = cast_type<OrType>(ty.get())) {
+    } else if (auto orType = cast_type_const<OrType>(ty)) {
         return showOrs(gs, orType->left, orType->right);
     }
 
     return make_pair(OrInfo::otherInfo(), make_optional(ty->show(gs)));
 }
 
-pair<OrInfo, optional<string>> showOrs(const GlobalState &gs, TypePtr left, TypePtr right) {
+pair<OrInfo, optional<string>> showOrs(const GlobalState &gs, const TypePtr &left, const TypePtr &right) {
     auto [leftInfo, leftStr] = showOrElem(gs, left);
     auto [rightInfo, rightStr] = showOrElem(gs, right);
 

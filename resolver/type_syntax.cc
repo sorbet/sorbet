@@ -215,10 +215,10 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
 
                     bool validBind = false;
                     auto bind = getResultTypeWithSelfTypeParams(ctx, send->args.front(), *parent, args);
-                    if (auto classType = core::cast_type<core::ClassType>(bind.get())) {
+                    if (auto classType = core::cast_type_const<core::ClassType>(bind)) {
                         sig.bind = classType->symbol;
                         validBind = true;
-                    } else if (auto appType = core::cast_type<core::AppliedType>(bind.get())) {
+                    } else if (auto appType = core::cast_type_const<core::AppliedType>(bind)) {
                         // When `T.proc.bind` is used with `T.class_of`, pass it
                         // through as long as it only has the AttachedClass type
                         // member.
@@ -612,7 +612,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 auto val = getResultTypeWithSelfTypeParams(ctx, vtree, sigBeingParsed, args.withoutSelfType());
                 auto lit = ast::cast_tree<ast::Literal>(ktree);
                 if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
-                    ENFORCE(core::cast_type<core::LiteralType>(lit->value.get()));
+                    ENFORCE(core::isa_type<core::LiteralType>(lit->value));
                     keys.emplace_back(lit->value);
                     values.emplace_back(val);
                 } else {
@@ -641,7 +641,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             // times as wanted, and assigned into different constants each time. As much as possible, we
             // want there to be one name for every type; making an alias for a type should always be
             // syntactically declared with T.type_alias.
-            if (auto resultType = core::cast_type<core::ClassType>(maybeAliased.data(ctx)->resultType.get())) {
+            if (auto resultType = core::cast_type_const<core::ClassType>(maybeAliased.data(ctx)->resultType)) {
                 if (resultType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
                     result.type = maybeAliased.data(ctx)->resultType;
                     return;
@@ -912,7 +912,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             core::DispatchArgs dispatchArgs{core::Names::squareBrackets(), locs, targs, ctype, ctype, nullptr};
             auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
 
-            if (out->isUntyped()) {
+            if (out.isUntyped()) {
                 // Using a generic untyped type here will lead to incorrect handling of global state hashing,
                 // where we won't see difference between types with generic arguments.
                 // Thus, while normally we would treat these as untyped, in `sig`s we treat them as proper types, so
@@ -925,7 +925,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 result.type = core::make_type<core::UnresolvedAppliedType>(correctedSingleton, move(targPtrs));
                 return;
             }
-            if (auto *mt = core::cast_type<core::MetaType>(out.get())) {
+            if (auto *mt = core::cast_type_const<core::MetaType>(out)) {
                 result.type = mt->wrapped;
                 return;
             }

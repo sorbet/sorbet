@@ -166,19 +166,19 @@ SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName left, SimilarMetho
     return result;
 }
 
-SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, const core::TypePtr receiver,
+SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, const core::TypePtr &receiver,
                                                string_view prefix) {
     auto result = SimilarMethodsByName{};
 
     typecase(
-        receiver.get(), [&](core::ClassType *type) { result = similarMethodsForClass(gs, type->symbol, prefix); },
-        [&](core::AppliedType *type) { result = similarMethodsForClass(gs, type->klass, prefix); },
-        [&](core::AndType *type) {
+        receiver.get(), [&](const core::ClassType *type) { result = similarMethodsForClass(gs, type->symbol, prefix); },
+        [&](const core::AppliedType *type) { result = similarMethodsForClass(gs, type->klass, prefix); },
+        [&](const core::AndType *type) {
             result = mergeSimilarMethods(similarMethodsForReceiver(gs, type->left, prefix),
                                          similarMethodsForReceiver(gs, type->right, prefix));
         },
-        [&](core::ProxyType *type) { result = similarMethodsForReceiver(gs, type->underlying(), prefix); },
-        [&](core::Type *type) { return; });
+        [&](const core::ProxyType *type) { result = similarMethodsForReceiver(gs, type->underlying(), prefix); },
+        [&](const core::Type *type) { return; });
 
     return result;
 }
@@ -237,7 +237,7 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
     return result;
 }
 
-string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiverType,
+string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const core::TypePtr &receiverType,
                      const core::TypeConstraint *constraint) {
     fmt::memory_buffer result;
     fmt::format_to(result, "{}", method.data(gs)->name.data(gs)->shortName(gs));
@@ -276,10 +276,10 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, core::
     auto &blkArg = method.data(gs)->arguments().back();
     ENFORCE(blkArg.flags.isBlock);
 
-    auto hasBlockType = blkArg.type != nullptr && !blkArg.type->isUntyped();
+    auto hasBlockType = blkArg.type != nullptr && !blkArg.type.isUntyped();
     if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkArg.type)) {
         string blkArgs;
-        if (auto *appliedType = core::cast_type<core::AppliedType>(blkArg.type.get())) {
+        if (auto *appliedType = core::cast_type_const<core::AppliedType>(blkArg.type)) {
             if (appliedType->targs.size() >= 2) {
                 // The first element in targs is the return type.
                 auto targs_it = appliedType->targs.begin();
@@ -536,9 +536,9 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
     }
 
     core::SymbolRef receiverSym;
-    if (auto classType = core::cast_type<core::ClassType>(receiverType.get())) {
+    if (auto classType = core::cast_type_const<core::ClassType>(receiverType)) {
         receiverSym = classType->symbol;
-    } else if (auto appliedType = core::cast_type<core::AppliedType>(receiverType.get())) {
+    } else if (auto appliedType = core::cast_type_const<core::AppliedType>(receiverType)) {
         receiverSym = appliedType->klass;
     } else {
         // receiverType is not a simple type. This can happen for any number of strange and uncommon reasons, like:
@@ -641,7 +641,7 @@ CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, uni
 
 unique_ptr<CompletionItem>
 CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::SymbolRef maybeAlias,
-                                           core::TypePtr receiverType, const core::TypeConstraint *constraint,
+                                           const core::TypePtr &receiverType, const core::TypeConstraint *constraint,
                                            core::Loc queryLoc, string_view prefix, size_t sortIdx) const {
     const auto &gs = typechecker.state();
     ENFORCE(maybeAlias.exists());

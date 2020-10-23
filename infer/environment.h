@@ -190,7 +190,7 @@ class Environment {
 
     // Extract the return value type from a proc. This should potentially be a
     // method on `Type` or otherwise handled there.
-    core::TypePtr getReturnType(core::Context ctx, core::TypePtr procType);
+    core::TypePtr getReturnType(core::Context ctx, const core::TypePtr &procType);
 
     void cloneFrom(const Environment &rhs);
 
