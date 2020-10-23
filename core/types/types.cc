@@ -308,9 +308,9 @@ ClassType::ClassType(SymbolRef symbol) : symbol(symbol) {
     ENFORCE(symbol.exists());
 }
 
-void ProxyType::_sanityCheck(const GlobalState &gs) {
+void ProxyType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(isa_type<ClassType>(this->underlying()) || isa_type<AppliedType>(this->underlying()));
-    this->underlying()->sanityCheck(gs);
+    this->underlying().sanityCheck(gs);
 }
 
 LiteralType::LiteralType(int64_t val) : value(val), literalKind(LiteralTypeKind::Integer) {
@@ -371,7 +371,7 @@ OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), ri
     categoryCounterInc("types.allocated", "ortype");
 }
 
-void TupleType::_sanityCheck(const GlobalState &gs) {
+void TupleType::_sanityCheck(const GlobalState &gs) const {
     ProxyType::_sanityCheck(gs);
     auto *applied = cast_type<AppliedType>(this->underlying());
     ENFORCE(applied);
@@ -396,14 +396,14 @@ TypePtr TupleType::underlying() const {
     return this->underlying_;
 }
 
-void ShapeType::_sanityCheck(const GlobalState &gs) {
+void ShapeType::_sanityCheck(const GlobalState &gs) const {
     ProxyType::_sanityCheck(gs);
     ENFORCE(this->values.size() == this->keys.size());
     for (auto &v : this->keys) {
-        v->_sanityCheck(gs);
+        v.sanityCheck(gs);
     }
     for (auto &e : this->values) {
-        e->_sanityCheck(gs);
+        e.sanityCheck(gs);
     }
 }
 
@@ -411,9 +411,9 @@ AliasType::AliasType(SymbolRef other) : symbol(other) {
     categoryCounterInc("types.allocated", "aliastype");
 }
 
-void AndType::_sanityCheck(const GlobalState &gs) {
-    left->_sanityCheck(gs);
-    right->_sanityCheck(gs);
+void AndType::_sanityCheck(const GlobalState &gs) const {
+    left.sanityCheck(gs);
+    right.sanityCheck(gs);
     /*
      * This is no longer true. Now we can construct types such as:
      * ShapeType(1 => 1), AppliedType{Array, Integer}
@@ -433,9 +433,9 @@ void AndType::_sanityCheck(const GlobalState &gs) {
     //            left->toString(gs));
 }
 
-void OrType::_sanityCheck(const GlobalState &gs) {
-    left->_sanityCheck(gs);
-    right->_sanityCheck(gs);
+void OrType::_sanityCheck(const GlobalState &gs) const {
+    left.sanityCheck(gs);
+    right.sanityCheck(gs);
     //    ENFORCE(!isa_type<ProxyType>(left.get()));
     //    ENFORCE(!isa_type<ProxyType>(right.get()));
     ENFORCE(!left.isUntyped());
@@ -449,7 +449,7 @@ void OrType::_sanityCheck(const GlobalState &gs) {
     //            left->toString(gs));
 }
 
-void ClassType::_sanityCheck(const GlobalState &gs) {
+void ClassType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(this->symbol.exists());
 }
 
@@ -546,11 +546,11 @@ TypeVar::TypeVar(SymbolRef sym) : sym(sym) {
     categoryCounterInc("types.allocated", "typevar");
 }
 
-void TypeVar::_sanityCheck(const GlobalState &gs) {
+void TypeVar::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(this->sym.exists());
 }
 
-void AppliedType::_sanityCheck(const GlobalState &gs) {
+void AppliedType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(this->klass.data(gs)->isClassOrModule());
     ENFORCE(this->klass != Symbols::untyped());
 
@@ -561,7 +561,7 @@ void AppliedType::_sanityCheck(const GlobalState &gs) {
                     this->klass.classOrModuleIndex() <= Symbols::last_proc().classOrModuleIndex(),
             this->klass.data(gs)->name.showRaw(gs));
     for (auto &targ : this->targs) {
-        targ->sanityCheck(gs);
+        targ.sanityCheck(gs);
     }
 }
 
@@ -598,8 +598,8 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, DispatchArgs a
     return untypedUntracked->dispatchCall(gs, args.withThisRef(untypedUntracked));
 }
 
-void LambdaParam::_sanityCheck(const GlobalState &gs) {}
-void SelfTypeParam::_sanityCheck(const GlobalState &gs) {}
+void LambdaParam::_sanityCheck(const GlobalState &gs) const {}
+void SelfTypeParam::_sanityCheck(const GlobalState &gs) const {}
 
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
     TypePtr res(TypePtr::Tag::OrType, new OrType(left, right));
@@ -654,7 +654,7 @@ DispatchResult SelfType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
     Exception::raise("should never happen");
 }
 
-void SelfType::_sanityCheck(const GlobalState &gs) {}
+void SelfType::_sanityCheck(const GlobalState &gs) const {}
 
 TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
     ENFORCE(type != nullptr);

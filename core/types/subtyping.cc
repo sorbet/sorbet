@@ -32,7 +32,7 @@ TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     //            "we do pointer comparisons in order to see if one is subtype of another " + t1->toString(gs) +
     //                " was lubbing with " + t2->toString(gs) + " got " + ret->toString(gs));
 
-    ret->sanityCheck(gs);
+    ret.sanityCheck(gs);
 
     return ret;
 }
@@ -563,7 +563,7 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
 }
 TypePtr Types::all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto ret = glb(gs, t1, t2);
-    ret->sanityCheck(gs);
+    ret.sanityCheck(gs);
 
     SLOW_ENFORCE(Types::isSubType(gs, ret, t1), "\n{}\nis not a subtype of\n{}\nwas glbbing with\n{}",
                  ret->toString(gs), t1->toString(gs), t2->toString(gs));
@@ -1341,7 +1341,7 @@ bool AliasType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise("AliasType.derivesfrom");
 }
 
-void AliasType::_sanityCheck(const GlobalState &gs) {
+void AliasType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(this->symbol.exists());
 }
 
@@ -1353,9 +1353,9 @@ string MetaType::show(const GlobalState &gs) const {
     return "<Type: " + wrapped->show(gs) + ">";
 }
 
-void MetaType::_sanityCheck(const GlobalState &gs) {
+void MetaType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(!core::isa_type<MetaType>(wrapped));
-    this->wrapped->sanityCheck(gs);
+    this->wrapped.sanityCheck(gs);
 }
 
 bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {

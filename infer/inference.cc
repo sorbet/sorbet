@@ -208,7 +208,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     }
                 }
                 ENFORCE(bind.bind.type);
-                bind.bind.type->sanityCheck(ctx);
+                bind.bind.type.sanityCheck(ctx);
                 if (bind.bind.type.isBottom()) {
                     current.isDead = true;
                     madeBlockDead = core::Loc(ctx.file, bind.loc);

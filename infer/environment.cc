@@ -765,7 +765,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
         auto &thisTO = pair.second.typeAndOrigins;
         if (thisTO.type.get() != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
-            thisTO.type->sanityCheck(ctx);
+            thisTO.type.sanityCheck(ctx);
             for (auto origin : otherTO.origins) {
                 if (!absl::c_linear_search(thisTO.origins, origin)) {
                     thisTO.origins.emplace_back(origin);
@@ -841,7 +841,7 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
                             tp.origins.emplace_back(origin);
                         }
                     }
-                    tp.type->sanityCheck(ctx);
+                    tp.type.sanityCheck(ctx);
                 } else {
                     tp = otherPin->second;
                 }
@@ -1285,7 +1285,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             });
 
         ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: {}", bind.value->toString(ctx, inWhat));
-        tp.type->sanityCheck(ctx);
+        tp.type.sanityCheck(ctx);
 
         if (checkFullyDefined && !tp.type.isFullyDefined()) {
             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncompleteType)) {
@@ -1435,7 +1435,7 @@ void Environment::setUninitializedVarsToNil(const core::Context &ctx, core::Loc 
             uninitialized.second.typeAndOrigins.type = core::Types::nilClass();
             uninitialized.second.typeAndOrigins.origins.emplace_back(origin);
         } else {
-            uninitialized.second.typeAndOrigins.type->sanityCheck(ctx);
+            uninitialized.second.typeAndOrigins.type.sanityCheck(ctx);
         }
     }
 }

@@ -96,6 +96,8 @@ private:
         }
     }
 
+    void _sanityCheck(const GlobalState &gs) const;
+
 public:
     constexpr TypePtr() noexcept : counter(nullptr), store(0) {}
 
@@ -193,6 +195,12 @@ public:
     bool isFullyDefined() const;
 
     bool hasUntyped() const;
+
+    void sanityCheck(const GlobalState &gs) const {
+        if (!debug_mode)
+            return;
+        _sanityCheck(gs);
+    }
 
     core::SymbolRef untypedBlame() const;
 

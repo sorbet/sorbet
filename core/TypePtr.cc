@@ -412,4 +412,38 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, const InlinedVector<SymbolR
     }
 }
 
+void TypePtr::_sanityCheck(const GlobalState &gs) const {
+    switch (tag()) {
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType:
+            return cast_type_nonnull<ClassType>(*this)._sanityCheck(gs);
+        case Tag::TypeVar:
+            return cast_type_nonnull<TypeVar>(*this)._sanityCheck(gs);
+        case Tag::LiteralType:
+            return cast_type_nonnull<LiteralType>(*this)._sanityCheck(gs);
+        case Tag::SelfTypeParam:
+            return cast_type_nonnull<SelfTypeParam>(*this)._sanityCheck(gs);
+        case Tag::SelfType:
+            return cast_type_nonnull<SelfType>(*this)._sanityCheck(gs);
+        case Tag::TupleType:
+            return cast_type_nonnull<TupleType>(*this)._sanityCheck(gs);
+        case Tag::ShapeType:
+            return cast_type_nonnull<ShapeType>(*this)._sanityCheck(gs);
+        case Tag::OrType:
+            return cast_type_nonnull<OrType>(*this)._sanityCheck(gs);
+        case Tag::AndType:
+            return cast_type_nonnull<AndType>(*this)._sanityCheck(gs);
+        case Tag::AppliedType:
+            return cast_type_nonnull<AppliedType>(*this)._sanityCheck(gs);
+        case Tag::LambdaParam:
+            return cast_type_nonnull<LambdaParam>(*this)._sanityCheck(gs);
+        case Tag::MetaType:
+            return cast_type_nonnull<MetaType>(*this)._sanityCheck(gs);
+        case Tag::AliasType:
+            return cast_type_nonnull<AliasType>(*this)._sanityCheck(gs);
+    }
+}
+
 } // namespace sorbet::core
