@@ -346,77 +346,108 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         p.putU4(0);
         return;
     }
-    if (auto *c = cast_type_const<ClassType>(what)) {
-        p.putU4(1);
-        p.putU4(c->symbol.rawId());
-    } else if (auto *o = cast_type_const<OrType>(what)) {
-        p.putU4(2);
-        pickle(p, o->left);
-        pickle(p, o->right);
-    } else if (auto *c = cast_type_const<LiteralType>(what)) {
-        p.putU4(3);
-        p.putU1((u1)c->literalKind);
-        p.putS8(c->value);
-    } else if (auto *a = cast_type_const<AndType>(what)) {
-        p.putU4(4);
-        pickle(p, a->left);
-        pickle(p, a->right);
-    } else if (auto *arr = cast_type_const<TupleType>(what)) {
-        p.putU4(5);
-        pickle(p, arr->underlying());
-        p.putU4(arr->elems.size());
-        for (auto &el : arr->elems) {
-            pickle(p, el);
+    p.putU4(static_cast<u4>(what.tag()));
+    switch (what.tag()) {
+        case TypePtr::Tag::UnresolvedAppliedType:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::ClassType: {
+            auto *c = cast_type_const<ClassType>(what);
+            p.putU4(c->symbol.rawId());
+            break;
         }
-    } else if (auto *hash = cast_type_const<ShapeType>(what)) {
-        p.putU4(6);
-        pickle(p, hash->underlying());
-        p.putU4(hash->keys.size());
-        ENFORCE(hash->keys.size() == hash->values.size());
-        for (auto &el : hash->keys) {
-            pickle(p, el);
+        case TypePtr::Tag::OrType: {
+            auto *o = cast_type_const<OrType>(what);
+            pickle(p, o->left);
+            pickle(p, o->right);
+            break;
         }
-        for (auto &el : hash->values) {
-            pickle(p, el);
+        case TypePtr::Tag::LiteralType: {
+            auto *c = cast_type_const<LiteralType>(what);
+            p.putU1((u1)c->literalKind);
+            p.putS8(c->value);
+            break;
         }
-    } else if (auto *alias = cast_type_const<AliasType>(what)) {
-        p.putU4(7);
-        p.putU4(alias->symbol.rawId());
-    } else if (auto *lp = cast_type_const<LambdaParam>(what)) {
-        p.putU4(8);
-        pickle(p, lp->lowerBound);
-        pickle(p, lp->upperBound);
-        p.putU4(lp->definition.rawId());
-    } else if (auto *at = cast_type_const<AppliedType>(what)) {
-        p.putU4(9);
-        p.putU4(at->klass.rawId());
-        p.putU4(at->targs.size());
-        for (auto &t : at->targs) {
-            pickle(p, t);
+        case TypePtr::Tag::AndType: {
+            auto *a = cast_type_const<AndType>(what);
+            pickle(p, a->left);
+            pickle(p, a->right);
+            break;
         }
-    } else if (auto *tp = cast_type_const<TypeVar>(what)) {
-        p.putU4(10);
-        p.putU4(tp->sym.rawId());
-    } else if (auto *st = cast_type_const<SelfType>(what)) {
-        p.putU4(11);
-    } else {
-        Exception::notImplemented();
+        case TypePtr::Tag::TupleType: {
+            auto *arr = cast_type_const<TupleType>(what);
+            pickle(p, arr->underlying());
+            p.putU4(arr->elems.size());
+            for (auto &el : arr->elems) {
+                pickle(p, el);
+            }
+            break;
+        }
+        case TypePtr::Tag::ShapeType: {
+            auto *hash = cast_type_const<ShapeType>(what);
+            pickle(p, hash->underlying());
+            p.putU4(hash->keys.size());
+            ENFORCE(hash->keys.size() == hash->values.size());
+            for (auto &el : hash->keys) {
+                pickle(p, el);
+            }
+            for (auto &el : hash->values) {
+                pickle(p, el);
+            }
+            break;
+        }
+        case TypePtr::Tag::AliasType: {
+            auto *alias = cast_type_const<AliasType>(what);
+            p.putU4(alias->symbol.rawId());
+            break;
+        }
+        case TypePtr::Tag::LambdaParam: {
+            auto *lp = cast_type_const<LambdaParam>(what);
+            pickle(p, lp->lowerBound);
+            pickle(p, lp->upperBound);
+            p.putU4(lp->definition.rawId());
+            break;
+        }
+        case TypePtr::Tag::AppliedType: {
+            auto *at = cast_type_const<AppliedType>(what);
+            p.putU4(at->klass.rawId());
+            p.putU4(at->targs.size());
+            for (auto &t : at->targs) {
+                pickle(p, t);
+            }
+            break;
+        }
+        case TypePtr::Tag::TypeVar: {
+            auto *tp = cast_type_const<TypeVar>(what);
+            p.putU4(tp->sym.rawId());
+            break;
+        }
+        case TypePtr::Tag::SelfType: {
+            break;
+        }
+        case TypePtr::Tag::MetaType:
+        case TypePtr::Tag::SelfTypeParam: {
+            Exception::notImplemented();
+        }
     }
 }
 
 TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
-    auto tag = p.getU4(); // though we formally need only u1 here, benchmarks suggest that size difference after
-                          // compression is small and u4 is 10% faster
-    switch (tag) {
-        case 0: {
-            TypePtr empty;
-            return empty;
-        }
-        case 1:
+    auto tag = p.getU4(); // though we formally need only u1 here, benchmarks suggest that
+                          // size difference after compression is small and u4 is 10% faster
+    if (tag == 0) {
+        return TypePtr();
+    }
+
+    switch (static_cast<TypePtr::Tag>(tag)) {
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::UnresolvedAppliedType:
+        case TypePtr::Tag::ClassType:
             return make_type<ClassType>(SymbolRef::fromRaw(p.getU4()));
-        case 2:
+        case TypePtr::Tag::OrType:
             return OrType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
-        case 3: {
+        case TypePtr::Tag::LiteralType: {
             auto kind = (core::LiteralType::LiteralTypeKind)p.getU1();
             auto value = p.getS8();
             switch (kind) {
@@ -435,9 +466,9 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             }
             Exception::notImplemented();
         }
-        case 4:
+        case TypePtr::Tag::AndType:
             return AndType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
-        case 5: {
+        case TypePtr::Tag::TupleType: {
             auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
             vector<TypePtr> elems(sz);
@@ -447,7 +478,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             auto result = make_type<TupleType>(underlying, std::move(elems));
             return result;
         }
-        case 6: {
+        case TypePtr::Tag::ShapeType: {
             auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
             vector<TypePtr> keys(sz);
@@ -461,14 +492,14 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             auto result = make_type<ShapeType>(underlying, keys, values);
             return result;
         }
-        case 7:
+        case TypePtr::Tag::AliasType:
             return make_type<AliasType>(SymbolRef::fromRaw(p.getU4()));
-        case 8: {
+        case TypePtr::Tag::LambdaParam: {
             auto lower = unpickleType(p, gs);
             auto upper = unpickleType(p, gs);
             return make_type<LambdaParam>(SymbolRef::fromRaw(p.getU4()), lower, upper);
         }
-        case 9: {
+        case TypePtr::Tag::AppliedType: {
             auto klass = SymbolRef::fromRaw(p.getU4());
             int sz = p.getU4();
             vector<TypePtr> targs(sz);
@@ -477,14 +508,15 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             }
             return make_type<AppliedType>(klass, targs);
         }
-        case 10: {
+        case TypePtr::Tag::TypeVar: {
             auto sym = SymbolRef::fromRaw(p.getU4());
             return make_type<TypeVar>(sym);
         }
-        case 11: {
+        case TypePtr::Tag::SelfType: {
             return make_type<SelfType>();
         }
-        default:
+        case TypePtr::Tag::MetaType:
+        case TypePtr::Tag::SelfTypeParam:
             Exception::raise("Unknown type tag {}", tag);
     }
 }
