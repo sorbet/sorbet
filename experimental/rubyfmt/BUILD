@@ -35,12 +35,9 @@ cc_library(
 cc_test(
     name = "rubyfmt_test",
     size = "small",
-    srcs = select({
-        ":enable_rubyfmt": glob([
-            "test/*.cc",
-        ]),
-        "//conditions:default": [],
-    }),
+    srcs = glob([
+        "test/*.cc",
+    ]),
     linkopts = select({
         "@com_stripe_ruby_typer//tools/config:darwin": ["-framework Foundation"],
         "//conditions:default": [],
