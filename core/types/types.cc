@@ -206,8 +206,8 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
         result = from;
     }
     SLOW_ENFORCE(Types::isSubType(gs, result, from),
-                 "dropSubtypesOf({}, {}) returned {}, which is not a subtype of the input", from->toString(gs),
-                 klass.data(gs)->showFullName(gs), result->toString(gs));
+                 "dropSubtypesOf({}, {}) returned {}, which is not a subtype of the input", from.toString(gs),
+                 klass.data(gs)->showFullName(gs), result.toString(gs));
     return result;
 }
 
@@ -751,7 +751,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
             }
         }
         case TypePtr::Tag::AliasType: {
-            ENFORCE(false, "Unhandled case: {}", type->toString(ctx));
+            ENFORCE(false, "Unhandled case: {}", type.toString(ctx));
             Exception::notImplemented();
         }
     }

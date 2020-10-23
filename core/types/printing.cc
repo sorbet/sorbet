@@ -49,7 +49,7 @@ string UnresolvedAppliedType::show(const GlobalState &gs) const {
 }
 
 string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return fmt::format("{}({})", this->underlying()->toStringWithTabs(gs, tabs), showValue(gs));
+    return fmt::format("{}({})", this->underlying().toStringWithTabs(gs, tabs), showValue(gs));
 }
 
 string LiteralType::show(const GlobalState &gs) const {
@@ -83,7 +83,7 @@ string TupleType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     int i = -1;
     for (auto &el : this->elems) {
         i++;
-        fmt::format_to(buf, "{}{} = {}\n", nestedTabs, i, el->toStringWithTabs(gs, tabs + 3));
+        fmt::format_to(buf, "{}{} = {}\n", nestedTabs, i, el.toStringWithTabs(gs, tabs + 3));
     }
     fmt::format_to(buf, "{}}}", thisTabs);
     return to_string(buf);
@@ -105,8 +105,8 @@ string ShapeType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     fmt::format_to(buf, "ShapeType {{\n");
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
-        fmt::format_to(buf, "{}{} => {}\n", nestedTabs, el->toStringWithTabs(gs, tabs + 2),
-                       (*valueIterator)->toStringWithTabs(gs, tabs + 3));
+        fmt::format_to(buf, "{}{} => {}\n", nestedTabs, el.toStringWithTabs(gs, tabs + 2),
+                       (*valueIterator).toStringWithTabs(gs, tabs + 3));
         ++valueIterator;
     }
     fmt::format_to(buf, "{}}}", thisTabs);
@@ -149,8 +149,8 @@ string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     bool leftBrace = isa_type<OrType>(this->left);
     bool rightBrace = isa_type<OrType>(this->right);
 
-    return fmt::format("{}{}{} & {}{}{}", leftBrace ? "(" : "", this->left->toStringWithTabs(gs, tabs + 2),
-                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toStringWithTabs(gs, tabs + 2),
+    return fmt::format("{}{}{} & {}{}{}", leftBrace ? "(" : "", this->left.toStringWithTabs(gs, tabs + 2),
+                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right.toStringWithTabs(gs, tabs + 2),
                        rightBrace ? ")" : "");
 }
 
@@ -178,8 +178,8 @@ string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     bool leftBrace = isa_type<AndType>(this->left);
     bool rightBrace = isa_type<AndType>(this->right);
 
-    return fmt::format("{}{}{} | {}{}{}", leftBrace ? "(" : "", this->left->toStringWithTabs(gs, tabs + 2),
-                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toStringWithTabs(gs, tabs + 2),
+    return fmt::format("{}{}{} | {}{}{}", leftBrace ? "(" : "", this->left.toStringWithTabs(gs, tabs + 2),
+                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right.toStringWithTabs(gs, tabs + 2),
                        rightBrace ? ")" : "");
 }
 
@@ -330,7 +330,7 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
         if (i < this->klass.data(gs)->typeMembers().size()) {
             auto tyMem = this->klass.data(gs)->typeMembers()[i];
             fmt::format_to(buf, "{}{} = {}\n", twiceNestedTabs, tyMem.data(gs)->name.showRaw(gs),
-                           targ->toStringWithTabs(gs, tabs + 3));
+                           targ.toStringWithTabs(gs, tabs + 3));
         } else {
             // this happens if we try to print type before resolver has processed stdlib
             fmt::format_to(buf, "{}EARLY_TYPE_MEMBER\n", twiceNestedTabs);
@@ -417,11 +417,11 @@ string AppliedType::show(const GlobalState &gs) const {
 
 string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
     auto defName = this->definition.data(gs)->toStringFullName(gs);
-    auto upperStr = this->upperBound->toString(gs);
+    auto upperStr = this->upperBound.toString(gs);
     if (this->definition.data(gs)->isFixed()) {
         return fmt::format("LambdaParam({}, fixed={})", defName, upperStr);
     } else {
-        auto lowerStr = this->lowerBound->toString(gs);
+        auto lowerStr = this->lowerBound.toString(gs);
         return fmt::format("LambdaParam({}, lower={}, upper={})", defName, lowerStr, upperStr);
     }
 }

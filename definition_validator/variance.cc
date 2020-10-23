@@ -179,12 +179,12 @@ private:
                 if (aliasSym.data(ctx)->isMethod()) {
                     validateMethod(ctx, polarity, aliasSym);
                 } else {
-                    Exception::raise("Unexpected type alias: {}", alias->toString(ctx));
+                    Exception::raise("Unexpected type alias: {}", type.toString(ctx));
                 }
                 break;
             }
             case core::TypePtr::Tag::MetaType: {
-                Exception::raise("Unexpected type in variance checking: {}", type->toString(ctx));
+                Exception::raise("Unexpected type in variance checking: {}", type.toString(ctx));
             }
         }
     }

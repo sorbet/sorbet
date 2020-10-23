@@ -705,7 +705,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
     if (this->resultType && !isClassOrModule()) {
         string resultType;
         if (showRaw) {
-            resultType = absl::StrReplaceAll(this->resultType->toStringWithTabs(gs, tabs), {{"\n", " "}});
+            resultType = absl::StrReplaceAll(this->resultType.toStringWithTabs(gs, tabs), {{"\n", " "}});
         } else {
             resultType = this->resultType->show(gs);
         }
@@ -1203,7 +1203,7 @@ SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
 
 u4 Symbol::hash(const GlobalState &gs) const {
     u4 result = _hash(name.data(gs)->shortName(gs));
-    result = mix(result, !this->resultType ? 0 : this->resultType->hash(gs));
+    result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
@@ -1224,7 +1224,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
         if (!type) {
             type = Types::untypedUntracked();
         }
-        result = mix(result, type->hash(gs));
+        result = mix(result, type.hash(gs));
         result = mix(result, _hash(arg.name.data(gs)->shortName(gs)));
     }
     for (const auto &e : typeParams) {
@@ -1252,7 +1252,7 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
         // This is a synthetic method that encodes the superclasses of its owning class in its return type.
         // If the return type changes, we must take the slow path.
         ENFORCE(resultType);
-        result = mix(result, resultType->hash(gs));
+        result = mix(result, resultType.hash(gs));
     }
 
     return result;

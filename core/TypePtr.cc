@@ -1,4 +1,5 @@
 #include "core/TypePtr.h"
+#include "core/Hashing.h"
 #include "core/Symbols.h"
 #include "core/Types.h"
 
@@ -508,6 +509,47 @@ void TypePtr::_sanityCheck(const GlobalState &gs) const {
         case Tag::AliasType:
             return cast_type_const<AliasType>(*this)->_sanityCheck(gs);
     }
+}
+
+string TypePtr::toStringWithTabs(const GlobalState &gs, int tabs) const {
+    switch (tag()) {
+        case Tag::BlamedUntyped:
+            return cast_type_const<BlamedUntyped>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::UnresolvedAppliedType:
+            return cast_type_const<UnresolvedAppliedType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::UnresolvedClassType:
+            return cast_type_const<UnresolvedClassType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::ClassType:
+            return cast_type_const<ClassType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::TypeVar:
+            return cast_type_const<TypeVar>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::LiteralType:
+            return cast_type_const<LiteralType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::SelfTypeParam:
+            return cast_type_const<SelfTypeParam>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::SelfType:
+            return cast_type_const<SelfType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::TupleType:
+            return cast_type_const<TupleType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::ShapeType:
+            return cast_type_const<ShapeType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::OrType:
+            return cast_type_const<OrType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::AndType:
+            return cast_type_const<AndType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::AppliedType:
+            return cast_type_const<AppliedType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::LambdaParam:
+            return cast_type_const<LambdaParam>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::MetaType:
+            return cast_type_const<MetaType>(*this)->toStringWithTabs(gs, tabs);
+        case Tag::AliasType:
+            return cast_type_const<AliasType>(*this)->toStringWithTabs(gs, tabs);
+    }
+}
+
+unsigned int TypePtr::hash(const GlobalState &gs) const {
+    return _hash(this->toString(gs)); // TODO: make something better
 }
 
 } // namespace sorbet::core
