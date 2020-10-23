@@ -45,11 +45,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     @hello = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
   end
 
-  module <emptyTree>::<C <PackageRegistry>>::<C MyPackage_Package><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<pkg <C MyPackage_Package>><<C <todo sym>>> < ()
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C MyPackage_Package><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<pkg <C MyPackage_Package>><<C <todo sym>>> < ()
     class ::<root>::<C PackageSpec><<C <todo sym>>> < (::<todo sym>)
       def self.some_method<<C <todo sym>>>(x, &<blk>)
         <emptyTree>

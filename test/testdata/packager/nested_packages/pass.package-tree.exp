@@ -2,17 +2,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Package>::<C Subpackage>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Package>::<C PackageClass>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<pkg <C Package_Package>>::<C PackageClass>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Package><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<pkg <C Package_Package>><<C <todo sym>>> < ()
     module <emptyTree>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
-      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package>::<C SubpackageClass>
+      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<pkg <C Package_Subpackage_Package>>::<C SubpackageClass>
     end
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Package><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<pkg <C Package_Package>><<C <todo sym>>> < ()
     class <emptyTree>::<C PackageClass><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>)
@@ -32,17 +32,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Package>::<C Subpackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
     <self>.import(<emptyTree>::<C Package>)
 
-    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package>::<C SubpackageClass>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<pkg <C Package_Subpackage_Package>>::<C SubpackageClass>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<pkg <C Package_Subpackage_Package>><<C <todo sym>>> < ()
     module <emptyTree>::<C Package><<C <todo sym>>> < ()
-      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package>::<C PackageClass>
+      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<pkg <C Package_Package>>::<C PackageClass>
     end
   end
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<pkg <C Package_Subpackage_Package>><<C <todo sym>>> < ()
     class <emptyTree>::<C SubpackageClass><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Package>::<C PackageClass>)
