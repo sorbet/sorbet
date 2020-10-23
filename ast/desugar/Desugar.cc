@@ -32,7 +32,7 @@ struct DesugarContext final {
 };
 
 core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
-    auto blkIdent = cast_tree_const<UnresolvedIdent>(blkArg.expr);
+    auto blkIdent = cast_tree<UnresolvedIdent>(blkArg.expr);
     ENFORCE(blkIdent != nullptr, "BlockArg must wrap UnresolvedIdent in desugar.");
     return blkIdent->name;
 }
@@ -178,7 +178,7 @@ TreePtr mergeStrings(DesugarContext dctx, core::LocOffsets loc, InlinedVector<Tr
                     if (isa_tree<EmptyTree>(expr))
                         return ""sv;
                     else
-                        return cast_tree_const<Literal>(expr)->asString(dctx.ctx).data(dctx.ctx)->shortName(dctx.ctx);
+                        return cast_tree<Literal>(expr)->asString(dctx.ctx).data(dctx.ctx)->shortName(dctx.ctx);
                 }))));
     }
 }
@@ -1325,7 +1325,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 UnorderedMap<core::NameRef, core::LocOffsets> hashKeyStrings;
                 auto &gs = dctx.ctx.state;
                 for (auto &key : keys) {
-                    auto lit = ast::cast_tree_const<ast::Literal>(key);
+                    auto lit = ast::cast_tree<ast::Literal>(key);
                     if (lit == nullptr) {
                         continue;
                     }

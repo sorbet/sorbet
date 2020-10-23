@@ -13,7 +13,7 @@ namespace {
 //
 // TODO: remove once https://github.com/sorbet/sorbet/issues/1715 is fixed
 bool isCopyableType(const ast::TreePtr &typeExpr) {
-    auto send = ast::cast_tree_const<ast::Send>(typeExpr);
+    auto send = ast::cast_tree<ast::Send>(typeExpr);
     if (send && send->fun == core::Names::typeParameter()) {
         return false;
     }
@@ -51,12 +51,12 @@ void maybeAddLet(core::MutableContext ctx, ast::TreePtr &expr,
 // exists; and otherwise returns a null pointer
 const ast::Hash *findParamHash(const ast::Send *send) {
     while (send && send->fun != core::Names::params()) {
-        send = ast::cast_tree_const<ast::Send>(send->recv);
+        send = ast::cast_tree<ast::Send>(send->recv);
     }
     if (!send || send->args.size() != 1) {
         return nullptr;
     }
-    return ast::cast_tree_const<ast::Hash>(send->args.front());
+    return ast::cast_tree<ast::Hash>(send->args.front());
 }
 
 } // namespace
@@ -74,13 +74,13 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
     if (sig == nullptr) {
         return;
     }
-    auto *block = ast::cast_tree_const<ast::Block>(sig->block);
+    auto *block = ast::cast_tree<ast::Block>(sig->block);
     if (block == nullptr) {
         return;
     }
 
     // walk through, find the `params()` invocation, and get its hash
-    auto *argHash = findParamHash(ast::cast_tree_const<ast::Send>(block->body));
+    auto *argHash = findParamHash(ast::cast_tree<ast::Send>(block->body));
     if (argHash == nullptr) {
         return;
     }
@@ -88,7 +88,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
     // build a lookup table that maps from names to the types they have
     UnorderedMap<core::NameRef, const ast::TreePtr *> argTypeMap;
     for (int i = 0; i < argHash->keys.size(); i++) {
-        auto *argName = ast::cast_tree_const<ast::Literal>(argHash->keys[i]);
+        auto *argName = ast::cast_tree<ast::Literal>(argHash->keys[i]);
         auto *argVal = &argHash->values[i];
         if (argName->isSymbol(ctx)) {
             argTypeMap[argName->asSymbol(ctx)] = argVal;

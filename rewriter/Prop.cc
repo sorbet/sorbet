@@ -163,7 +163,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         if (send->args.empty()) {
             return nullopt;
         }
-        auto *sym = ast::cast_tree_const<ast::Literal>(send->args[0]);
+        auto *sym = ast::cast_tree<ast::Literal>(send->args[0]);
         if (!sym || !sym->isSymbol(ctx)) {
             return nullopt;
         }
@@ -192,7 +192,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     // ----- Does the prop have any extra options? -----
     ast::TreePtr rulesTree;
     if (!send->args.empty()) {
-        if (auto back = ast::cast_tree_const<ast::Hash>(send->args.back())) {
+        if (auto back = ast::cast_tree<ast::Hash>(send->args.back())) {
             // Deep copy the rules hash so that we can destruct it at will to parse things,
             // without having to worry about whether we stole things from the tree.
             rulesTree = back->deepCopy();

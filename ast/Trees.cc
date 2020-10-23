@@ -364,15 +364,15 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
     auto *nested = this;
     {
         while (!nested->resolutionScopes.front().exists()) {
-            auto *orig = cast_tree_const<UnresolvedConstantLit>(nested->original);
+            auto *orig = cast_tree<UnresolvedConstantLit>(nested->original);
             ENFORCE(orig);
             namesFailedToResolve.emplace_back(orig->cnst);
-            nested = ast::cast_tree_const<ast::ConstantLit>(orig->scope);
+            nested = ast::cast_tree<ast::ConstantLit>(orig->scope);
             ENFORCE(nested);
             ENFORCE(nested->symbol == core::Symbols::StubModule());
             ENFORCE(!nested->resolutionScopes.empty());
         }
-        auto *orig = cast_tree_const<UnresolvedConstantLit>(nested->original);
+        auto *orig = cast_tree<UnresolvedConstantLit>(nested->original);
         ENFORCE(orig);
         namesFailedToResolve.emplace_back(orig->cnst);
         absl::c_reverse(namesFailedToResolve);

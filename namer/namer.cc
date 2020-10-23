@@ -373,12 +373,12 @@ class SymbolFinder {
 
     // Returns index to foundDefs containing the given name. Recursively inserts class refs for its owners.
     FoundDefinitionRef squashNames(core::Context ctx, const ast::TreePtr &node) {
-        if (auto *id = ast::cast_tree_const<ast::ConstantLit>(node)) {
+        if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol.data(ctx)->dealias(ctx);
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym);
-        } else if (auto constLit = ast::cast_tree_const<ast::UnresolvedConstantLit>(node)) {
+        } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             FoundClassRef found;
             found.owner = squashNames(ctx, constLit->scope);
             found.name = constLit->cnst;
@@ -535,8 +535,8 @@ public:
 
     FoundDefinitionRef handleTypeMemberDefinition(core::Context ctx, const ast::Send *send, const ast::Assign &asgn,
                                                   const ast::UnresolvedConstantLit *typeName) {
-        ENFORCE(ast::cast_tree_const<ast::UnresolvedConstantLit>(asgn.lhs) == typeName &&
-                ast::cast_tree_const<ast::Send>(asgn.rhs) ==
+        ENFORCE(ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs) == typeName &&
+                ast::cast_tree<ast::Send>(asgn.rhs) ==
                     send); // this method assumes that `asgn` owns `send` and `typeName`
 
         FoundTypeMember found;
@@ -560,15 +560,15 @@ public:
         }
 
         if (!send->args.empty()) {
-            auto *lit = ast::cast_tree_const<ast::Literal>(send->args[0]);
+            auto *lit = ast::cast_tree<ast::Literal>(send->args[0]);
             if (lit != nullptr && lit->isSymbol(ctx)) {
                 found.varianceName = lit->asSymbol(ctx);
                 found.litLoc = lit->loc;
             }
 
-            if (auto *hash = ast::cast_tree_const<ast::Hash>(send->args.back())) {
+            if (auto *hash = ast::cast_tree<ast::Hash>(send->args.back())) {
                 for (auto &keyExpr : hash->keys) {
-                    auto key = ast::cast_tree_const<ast::Literal>(keyExpr);
+                    auto key = ast::cast_tree<ast::Literal>(keyExpr);
                     core::NameRef name;
                     if (key != nullptr && key->isSymbol(ctx)) {
                         switch (key->asSymbol(ctx)._id) {
@@ -1455,7 +1455,7 @@ public:
         if (ast::isa_tree<ast::EmptyTree>(anc) || anc->isSelfReference()) {
             return false;
         }
-        auto rcl = ast::cast_tree_const<ast::ConstantLit>(anc);
+        auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
         if (rcl && rcl->symbol == core::Symbols::todo()) {
             return false;
         }

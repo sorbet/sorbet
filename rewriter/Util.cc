@@ -9,7 +9,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
-    auto send = ast::cast_tree_const<ast::Send>(orig);
+    auto send = ast::cast_tree<ast::Send>(orig);
     if (send) {
         ast::Send::ARGS_store args;
         auto dupRecv = dupType(send->recv);
@@ -23,7 +23,7 @@ ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
         }
 
         if (send->fun == core::Names::params() && send->args.size() == 1) {
-            if (auto hash = ast::cast_tree_const<ast::Hash>(send->args[0])) {
+            if (auto hash = ast::cast_tree<ast::Hash>(send->args[0])) {
                 // T.proc.params takes keyword arguments
                 ast::Hash::ENTRY_store values;
                 ast::Hash::ENTRY_store keys;
@@ -57,7 +57,7 @@ ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
         return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, std::move(args));
     }
 
-    auto *ident = ast::cast_tree_const<ast::ConstantLit>(orig);
+    auto *ident = ast::cast_tree<ast::ConstantLit>(orig);
     if (ident) {
         auto orig = dupType(ident->original);
         if (ident->original && !orig) {
@@ -66,17 +66,17 @@ ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
         return ast::make_tree<ast::ConstantLit>(ident->loc, ident->symbol, std::move(orig));
     }
 
-    auto *cons = ast::cast_tree_const<ast::UnresolvedConstantLit>(orig);
+    auto *cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
     if (!cons) {
         return nullptr;
     }
 
-    auto *scopeCnst = ast::cast_tree_const<ast::UnresolvedConstantLit>(cons->scope);
+    auto *scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
     if (!scopeCnst) {
         if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
             return ast::MK::UnresolvedConstant(cons->loc, ast::MK::EmptyTree(), cons->cnst);
         }
-        auto *id = ast::cast_tree_const<ast::ConstantLit>(cons->scope);
+        auto *id = ast::cast_tree<ast::ConstantLit>(cons->scope);
         if (id == nullptr) {
             return nullptr;
         }
@@ -92,7 +92,7 @@ ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
 
 bool ASTUtil::hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {
     for (const auto &keyExpr : hash.keys) {
-        auto *key = ast::cast_tree_const<ast::Literal>(keyExpr);
+        auto *key = ast::cast_tree<ast::Literal>(keyExpr);
         if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == name) {
             return true;
         }
@@ -104,9 +104,9 @@ bool ASTUtil::hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash
     int i = -1;
     for (const auto &keyExpr : hash.keys) {
         i++;
-        auto *key = ast::cast_tree_const<ast::Literal>(keyExpr);
+        auto *key = ast::cast_tree<ast::Literal>(keyExpr);
         if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == name) {
-            auto *val = ast::cast_tree_const<ast::Literal>(hash.values[i]);
+            auto *val = ast::cast_tree<ast::Literal>(hash.values[i]);
             if (!val) {
                 // All non-literals are truthy
                 return true;
@@ -194,7 +194,7 @@ namespace {
 
 // Returns `true` when the expression passed is an UnresolvedConstantLit with the name `Kernel` and no additional scope.
 bool isKernel(const ast::TreePtr &expr) {
-    if (auto *constRecv = ast::cast_tree_const<ast::UnresolvedConstantLit>(expr)) {
+    if (auto *constRecv = ast::cast_tree<ast::UnresolvedConstantLit>(expr)) {
         return ast::isa_tree<ast::EmptyTree>(constRecv->scope) && constRecv->cnst == core::Names::Constants::Kernel();
     }
     return false;

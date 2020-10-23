@@ -152,12 +152,12 @@ string to_s(core::Context ctx, ast::TreePtr &arg) {
 bool canMoveIntoMethodDef(const ast::TreePtr &exp) {
     if (ast::isa_tree<ast::Literal>(exp)) {
         return true;
-    } else if (auto *list = ast::cast_tree_const<ast::Array>(exp)) {
+    } else if (auto *list = ast::cast_tree<ast::Array>(exp)) {
         return absl::c_all_of(list->elems, [](auto &elem) { return canMoveIntoMethodDef(elem); });
-    } else if (auto *hash = ast::cast_tree_const<ast::Hash>(exp)) {
+    } else if (auto *hash = ast::cast_tree<ast::Hash>(exp)) {
         return absl::c_all_of(hash->keys, [](auto &elem) { return canMoveIntoMethodDef(elem); }) &&
                absl::c_all_of(hash->values, [](auto &elem) { return canMoveIntoMethodDef(elem); });
-    } else if (auto *send = ast::cast_tree_const<ast::Send>(exp)) {
+    } else if (auto *send = ast::cast_tree<ast::Send>(exp)) {
         return canMoveIntoMethodDef(send->recv) &&
                absl::c_all_of(send->args, [](auto &elem) { return canMoveIntoMethodDef(elem); });
     } else if (ast::isa_tree<ast::UnresolvedConstantLit>(exp)) {

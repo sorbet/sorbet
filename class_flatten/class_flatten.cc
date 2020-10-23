@@ -22,7 +22,7 @@ bool shouldExtract(core::Context ctx, const ast::TreePtr &what) {
         return false;
     }
 
-    if (auto *asgn = ast::cast_tree_const<ast::Assign>(what)) {
+    if (auto *asgn = ast::cast_tree<ast::Assign>(what)) {
         return !ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs);
     }
 

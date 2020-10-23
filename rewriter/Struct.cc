@@ -14,14 +14,14 @@ namespace sorbet::rewriter {
 namespace {
 
 bool isKeywordInitKey(const core::GlobalState &gs, const ast::TreePtr &node) {
-    if (auto *lit = ast::cast_tree_const<ast::Literal>(node)) {
+    if (auto *lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == core::Names::keywordInit();
     }
     return false;
 }
 
 bool isLiteralTrue(const core::GlobalState &gs, const ast::TreePtr &node) {
-    if (auto *lit = ast::cast_tree_const<ast::Literal>(node)) {
+    if (auto *lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isTrue(gs);
     }
     return false;

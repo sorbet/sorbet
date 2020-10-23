@@ -212,7 +212,7 @@ private:
             core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
             return result;
         }
-        if (auto *id = ast::cast_tree_const<ast::ConstantLit>(c.scope)) {
+        if (auto *id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
             auto sym = id->symbol;
             if (sym.exists() && sym.data(ctx)->isTypeAlias() && !resolutionFailed) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
@@ -961,7 +961,7 @@ class ResolveTypeMembersWalk {
     }
 
     static bool isT(const ast::TreePtr &expr) {
-        auto *tMod = ast::cast_tree_const<ast::ConstantLit>(expr);
+        auto *tMod = ast::cast_tree<ast::ConstantLit>(expr);
         return tMod && tMod->symbol == core::Symbols::T();
     }
 
@@ -1892,7 +1892,7 @@ private:
 
         auto stringLoc = send.args[1]->loc;
 
-        auto *literalNode = ast::cast_tree_const<ast::Literal>(send.args[1]);
+        auto *literalNode = ast::cast_tree<ast::Literal>(send.args[1]);
         if (literalNode == nullptr) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("`{}` only accepts string literals", method);
@@ -1917,17 +1917,17 @@ private:
         optional<core::LocOffsets> packageLoc;
         if (send.args.size() == 3) {
             // this means we got the third package arg
-            auto *kwargs = ast::cast_tree_const<ast::Hash>(send.args[2]);
+            auto *kwargs = ast::cast_tree<ast::Hash>(send.args[2]);
             if (!kwargs || kwargs->keys.size() != 1) {
                 // Infer will report an error
                 return;
             }
-            auto *key = ast::cast_tree_const<ast::Literal>(kwargs->keys.front());
+            auto *key = ast::cast_tree<ast::Literal>(kwargs->keys.front());
             if (!key || !key->isSymbol(ctx) || key->asSymbol(ctx) != ctx.state.lookupNameUTF8("package")) {
                 return;
             }
 
-            auto *packageNode = ast::cast_tree_const<ast::Literal>(kwargs->values.front());
+            auto *packageNode = ast::cast_tree<ast::Literal>(kwargs->values.front());
             packageLoc = std::optional<core::LocOffsets>{send.args[2]->loc};
             if (packageNode == nullptr) {
                 if (auto e = ctx.beginError(send.args[2]->loc, core::errors::Resolver::LazyResolve)) {

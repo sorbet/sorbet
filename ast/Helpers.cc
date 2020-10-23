@@ -50,20 +50,20 @@ bool definesBehavior(const TreePtr &expr) {
 }
 
 bool BehaviorHelpers::checkClassDefinesBehavior(const TreePtr &expr) {
-    auto *klass = ast::cast_tree_const<ast::ClassDef>(expr);
+    auto *klass = ast::cast_tree<ast::ClassDef>(expr);
     ENFORCE(klass);
     return BehaviorHelpers::checkClassDefinesBehavior(*klass);
 }
 
 bool BehaviorHelpers::checkClassDefinesBehavior(const ast::ClassDef &klass) {
     for (auto &ancst : klass.ancestors) {
-        auto *cnst = ast::cast_tree_const<ast::ConstantLit>(ancst);
+        auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst);
         if (cnst && cnst->original != nullptr) {
             return true;
         }
     }
     for (auto &ancst : klass.singletonAncestors) {
-        auto *cnst = ast::cast_tree_const<ast::ConstantLit>(ancst);
+        auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst);
         if (cnst && cnst->original != nullptr) {
             return true;
         }
