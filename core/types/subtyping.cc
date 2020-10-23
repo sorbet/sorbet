@@ -1357,7 +1357,7 @@ MetaType::MetaType(const TypePtr &wrapped) : wrapped(move(wrapped)) {
     categoryCounterInc("types.allocated", "metattype");
 }
 
-TypePtr MetaType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
+TypePtr MetaType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
     // dispatchCall is invoked on them in resolver
     return nullptr;
 }

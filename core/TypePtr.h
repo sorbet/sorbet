@@ -7,6 +7,7 @@
 
 namespace sorbet::core {
 class Type;
+class TypeConstraint;
 
 class TypePtr final {
 public:
@@ -202,6 +203,8 @@ public:
     core::SymbolRef untypedBlame() const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
+
+    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
 };

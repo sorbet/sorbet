@@ -359,4 +359,34 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
     }
 }
 
+TypePtr TypePtr::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
+    switch (tag()) {
+        case Tag::MetaType:
+            return cast_type_const<MetaType>(*this)->_approximate(gs, tc);
+        case Tag::TypeVar:
+            return cast_type_const<TypeVar>(*this)->_approximate(gs, tc);
+        case Tag::TupleType:
+            return cast_type_const<TupleType>(*this)->_approximate(gs, tc);
+        case Tag::ShapeType:
+            return cast_type_const<ShapeType>(*this)->_approximate(gs, tc);
+        case Tag::OrType:
+            return cast_type_const<OrType>(*this)->_approximate(gs, tc);
+        case Tag::AndType:
+            return cast_type_const<AndType>(*this)->_approximate(gs, tc);
+        case Tag::AppliedType:
+            return cast_type_const<AppliedType>(*this)->_approximate(gs, tc);
+
+        case Tag::UnresolvedClassType:
+        case Tag::UnresolvedAppliedType:
+        case Tag::BlamedUntyped:
+        case Tag::LiteralType:
+        case Tag::AliasType:
+        case Tag::SelfTypeParam:
+        case Tag::SelfType:
+        case Tag::LambdaParam:
+        case Tag::ClassType:
+            return nullptr;
+    }
+}
+
 } // namespace sorbet::core
