@@ -6,6 +6,15 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+config_setting(
+    name = "enable_rubyfmt_darwin",
+    values = {
+        "define": "rubyfmt=true",
+        "host_cpu": "darwin",
+    },
+    visibility = ["//visibility:public"],
+)
+
 # NOTE: If a target depends on this, that target **must** cargo cult the linkopts
 # from `rubyfmt_test`! Otherwise, it will not compile+link properly.
 cc_library(
@@ -39,9 +48,15 @@ cc_test(
         "test/*.cc",
     ]),
     linkopts = select({
-        "@com_stripe_ruby_typer//tools/config:darwin": ["-framework Foundation"],
         "//conditions:default": [],
         ":enable_rubyfmt": [
+            "-lcrypt",
+            "-lrt",
+            "-lz",
+            "-lgmp",
+        ],
+        ":enable_rubyfmt_darwin": [
+            "-framework Foundation",
             "-lcrypt",
             "-lrt",
             "-lz",

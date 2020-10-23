@@ -43,9 +43,15 @@ cc_library(
     # Required for compiling //experimental/rubyfmt on Mac with dynamic linking
     # webasm has no options specified since it links against a no-op rubyfmt
     linkopts = select({
-        "@com_stripe_ruby_typer//tools/config:darwin": ["-framework Foundation"],
         "//conditions:default": [],
         "//experimental/rubyfmt:enable_rubyfmt": [
+            "-lcrypt",
+            "-lrt",
+            "-lz",
+            "-lgmp",
+        ],
+        "//experimental/rubyfmt:enable_rubyfmt_darwin": [
+            "-framework Foundation",
             "-lcrypt",
             "-lrt",
             "-lz",
