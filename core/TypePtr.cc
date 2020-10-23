@@ -444,4 +444,36 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, const TypeConstraint &tc) c
     }
 }
 
+TypePtr TypePtr::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
+                              const std::vector<TypePtr> &targs) const {
+    switch (tag()) {
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType:
+        case Tag::TypeVar:
+        case Tag::LiteralType:
+        case Tag::SelfTypeParam:
+        case Tag::SelfType:
+            return nullptr;
+
+        case Tag::TupleType:
+            return cast_type_const<TupleType>(*this)->_instantiate(gs, params, targs);
+        case Tag::ShapeType:
+            return cast_type_const<ShapeType>(*this)->_instantiate(gs, params, targs);
+        case Tag::OrType:
+            return cast_type_const<OrType>(*this)->_instantiate(gs, params, targs);
+        case Tag::AndType:
+            return cast_type_const<AndType>(*this)->_instantiate(gs, params, targs);
+        case Tag::AppliedType:
+            return cast_type_const<AppliedType>(*this)->_instantiate(gs, params, targs);
+        case Tag::LambdaParam:
+            return cast_type_const<LambdaParam>(*this)->_instantiate(gs, params, targs);
+
+        case Tag::MetaType:
+        case Tag::AliasType:
+            Exception::raise("should never happen: _instantiate on `{}`", typeName());
+    }
+}
+
 } // namespace sorbet::core
