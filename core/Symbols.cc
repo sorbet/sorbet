@@ -707,7 +707,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         if (showRaw) {
             resultType = absl::StrReplaceAll(this->resultType.toStringWithTabs(gs, tabs), {{"\n", " "}});
         } else {
-            resultType = this->resultType->show(gs);
+            resultType = this->resultType.show(gs);
         }
         fmt::format_to(buf, " -> {}", resultType);
     }
@@ -795,7 +795,7 @@ string ArgInfo::toString(const GlobalState &gs) const {
     }
     fmt::format_to(buf, "<{}>", fmt::join(flagTexts, ", "));
     if (this->type) {
-        fmt::format_to(buf, " -> {}", this->type->show(gs));
+        fmt::format_to(buf, " -> {}", this->type.show(gs));
     }
 
     fmt::format_to(buf, " @ {}", loc.showRaw(gs));

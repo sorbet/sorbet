@@ -172,16 +172,16 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     if (auto e = gs.beginError(smallestLocWithin(callLoc, argTpe), errors::Infer::MethodArgumentMismatch)) {
         if (mayBeSetter && isSetter(gs, method.data(gs)->name)) {
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.argumentName(gs),
-                        expectedType->show(gs));
+                        expectedType.show(gs));
         } else {
-            e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType->show(gs), argTpe.type->show(gs),
+            e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs), argTpe.type.show(gs),
                         argSym.argumentName(gs));
             e.addErrorSection(ErrorSection({
                 ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`", method.data(gs)->show(gs),
-                                argSym.argumentName(gs), expectedType->show(gs)),
+                                argSym.argumentName(gs), expectedType.show(gs)),
             }));
         }
-        e.addErrorSection(ErrorSection("Got " + argTpe.type->show(gs) + " originating from:",
+        e.addErrorSection(ErrorSection("Got " + argTpe.type.show(gs) + " originating from:",
                                        argTpe.origins2Explanations(gs, originForUninitialized)));
         auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
         if (!withoutNil.isBottom() &&
@@ -523,10 +523,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
         // errors list of the result so that the caller can deal with the error.
         auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod);
         if (e) {
-            string thisStr = args.thisType->show(gs);
+            string thisStr = args.thisType.show(gs);
             if (args.fullType.get() != args.thisType.get()) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(gs)->show(gs),
-                            thisStr, args.fullType->show(gs));
+                            thisStr, args.fullType.show(gs));
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", args.name.data(gs)->show(gs), thisStr);
 
@@ -772,7 +772,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                             e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
                                         "arguments");
                             e.addErrorSection(
-                                ErrorSection("Got " + kwSplatType->show(gs) + " originating from:",
+                                ErrorSection("Got " + kwSplatType.show(gs) + " originating from:",
                                              kwSplatArg->origins2Explanations(gs, args.originForUninitialized)));
                             result.main.errors.emplace_back(e.build());
                         }
@@ -833,7 +833,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                     e.setHeader(
                         "Not enough arguments provided for method `{}` on `{}` component of `{}`. Expected: `{}`, got: "
                         "`{}`",
-                        data->show(gs), args.thisType->show(gs), args.fullType->show(gs), prettyArity(gs, method),
+                        data->show(gs), args.thisType.show(gs), args.fullType.show(gs), prettyArity(gs, method),
                         posArgs); // TODO: should use position and print the source tree, not the cfg one.
                 } else {
                     e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`",
@@ -1142,7 +1142,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
             auto loc = core::Loc(args.locs.file, args.locs.call);
             if (auto e = gs.beginError(loc, errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.data(gs)->show(gs),
-                            this->wrapped->show(gs));
+                            this->wrapped.show(gs));
                 if (args.name == core::Names::tripleEq()) {
                     if (auto appliedType = cast_type<AppliedType>(this->wrapped)) {
                         e.addErrorSection(
@@ -1197,14 +1197,14 @@ public:
         const auto loc = core::Loc(args.locs.file, args.locs.call);
         if (!args.args[0]->type.isFullyDefined()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type->show(gs));
+                e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type.show(gs));
             }
             return;
         }
         auto ret = Types::approximateSubtract(gs, args.args[0]->type, Types::nilClass());
         if (ret == args.args[0]->type) {
             if (auto e = gs.beginError(loc, errors::Infer::InvalidCast)) {
-                e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(gs));
+                e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type.show(gs));
                 const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
                 e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs));
             }
@@ -1259,7 +1259,7 @@ public:
         }
 
         if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::RevealType)) {
-            e.setHeader("Revealed type: `{}`", args.args[0]->type->showWithMoreInfo(gs));
+            e.setHeader("Revealed type: `{}`", args.args[0]->type.showWithMoreInfo(gs));
             e.addErrorSection(
                 ErrorSection("From:", args.args[0]->origins2Explanations(gs, args.originForUninitialized)));
         }
@@ -1420,11 +1420,11 @@ public:
                 if (!Types::isSubType(gs, argType, memType->upperBound)) {
                     validBounds = false;
                     if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
-                        auto argStr = argType->show(gs);
+                        auto argStr = argType.show(gs);
                         e.setHeader("`{}` is not a subtype of upper bound of type member `{}`", argStr,
                                     memData->showFullName(gs));
                         e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", memData->showFullName(gs),
-                                       "upper", memType->upperBound->show(gs));
+                                       "upper", memType->upperBound.show(gs));
                     }
                 }
 
@@ -1432,11 +1432,11 @@ public:
                     validBounds = false;
 
                     if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
-                        auto argStr = argType->show(gs);
+                        auto argStr = argType.show(gs);
                         e.setHeader("`{}` is not a supertype of lower bound of type member `{}`", argStr,
                                     memData->showFullName(gs));
                         e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", memData->showFullName(gs),
-                                       "lower", memType->lowerBound->show(gs));
+                                       "lower", memType->lowerBound.show(gs));
                     }
                 }
 
@@ -1800,7 +1800,7 @@ private:
         ENFORCE(bspec.flags.isBlock);
         e.addErrorSection(ErrorSection({
             ErrorLine::from(bspec.loc, "Method `{}` has specified `{}` as `{}`", dispatchComp.method.data(gs)->show(gs),
-                            bspec.argumentName(gs), blockType->show(gs)),
+                            bspec.argumentName(gs), blockType.show(gs)),
         }));
     }
 
@@ -1826,7 +1826,7 @@ private:
                 // raise an error in strict mode.
                 // This could occur, for example, when using Method#to_proc, since we type it as returning a `Proc`.
                 if (auto e = gs.beginError(blockLoc, errors::Infer::ProcArityUnknown)) {
-                    e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc", blockPreType->show(gs));
+                    e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc", blockPreType.show(gs));
                     if (!dispatched.secondary) {
                         Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
                     }
@@ -1841,8 +1841,8 @@ private:
                     passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, move(targs));
                 }
             } else if (auto e = gs.beginError(blockLoc, errors::Infer::MethodArgumentMismatch)) {
-                e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType->show(gs),
-                            passedInBlockType->show(gs));
+                e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType.show(gs),
+                            passedInBlockType.show(gs));
                 if (!dispatched.secondary) {
                     Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
                 }
@@ -2054,8 +2054,8 @@ public:
             e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                         "# typed: strict");
             if (!ty.isUntyped() && loc.exists()) {
-                e.replaceWith(fmt::format("Initialize as `{}`", ty->show(gs)), loc, "T.let({}, {})", loc.source(gs),
-                              ty->show(gs));
+                e.replaceWith(fmt::format("Initialize as `{}`", ty.show(gs)), loc, "T.let({}, {})", loc.source(gs),
+                              ty.show(gs));
             }
         }
         res.returnType = move(ty);
@@ -2373,7 +2373,7 @@ public:
         } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
             element = tuple->elementType();
         } else {
-            ENFORCE(false, "Array#flatten on unexpected type: {}", args.selfType->show(gs));
+            ENFORCE(false, "Array#flatten on unexpected type: {}", args.selfType.show(gs));
         }
 
         int64_t depth;
@@ -2426,7 +2426,7 @@ public:
         } else {
             // We will have only dispatched to this intrinsic when we knew the receiver.
             // Did we register this intrinsic on the wrong symbol?
-            ENFORCE(false, "Array#product on unexpected receiver type: {}", args.selfType->show(gs));
+            ENFORCE(false, "Array#product on unexpected receiver type: {}", args.selfType.show(gs));
             res.returnType = Types::untypedUntracked();
             return;
         }
@@ -2461,7 +2461,7 @@ public:
         } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
             element = tuple->elementType();
         } else {
-            ENFORCE(false, "Array#compact on unexpected type: {}", args.selfType->show(gs));
+            ENFORCE(false, "Array#compact on unexpected type: {}", args.selfType.show(gs));
         }
         auto ret = Types::approximateSubtract(gs, element, Types::nilClass());
         res.returnType = Types::arrayOf(gs, ret);

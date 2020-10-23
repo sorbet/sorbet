@@ -220,6 +220,11 @@ public:
         return toStringWithTabs(gs);
     }
 
+    // User visible type. Should exactly match what the user can write.
+    std::string show(const GlobalState &gs) const;
+    // Like show, but can include extra info. Does not necessarily match what the user can type.
+    std::string showWithMoreInfo(const GlobalState &gs) const;
+
     unsigned int hash(const GlobalState &gs) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);

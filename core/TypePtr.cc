@@ -488,4 +488,49 @@ unsigned int TypePtr::hash(const GlobalState &gs) const {
     return _hash(this->toString(gs)); // TODO: make something better
 }
 
+std::string TypePtr::show(const GlobalState &gs) const {
+    switch (tag()) {
+        case Tag::UnresolvedAppliedType:
+            return cast_type_nonnull<UnresolvedAppliedType>(*this).show(gs);
+        case Tag::UnresolvedClassType:
+            return cast_type_nonnull<UnresolvedClassType>(*this).show(gs);
+        case Tag::BlamedUntyped:
+        case Tag::ClassType:
+            return cast_type_nonnull<ClassType>(*this).show(gs);
+        case Tag::TypeVar:
+            return cast_type_nonnull<TypeVar>(*this).show(gs);
+        case Tag::LiteralType:
+            return cast_type_nonnull<LiteralType>(*this).show(gs);
+        case Tag::SelfTypeParam:
+            return cast_type_nonnull<SelfTypeParam>(*this).show(gs);
+        case Tag::SelfType:
+            return cast_type_nonnull<SelfType>(*this).show(gs);
+        case Tag::TupleType:
+            return cast_type_nonnull<TupleType>(*this).show(gs);
+        case Tag::ShapeType:
+            return cast_type_nonnull<ShapeType>(*this).show(gs);
+        case Tag::OrType:
+            return cast_type_nonnull<OrType>(*this).show(gs);
+        case Tag::AndType:
+            return cast_type_nonnull<AndType>(*this).show(gs);
+        case Tag::AppliedType:
+            return cast_type_nonnull<AppliedType>(*this).show(gs);
+        case Tag::LambdaParam:
+            return cast_type_nonnull<LambdaParam>(*this).show(gs);
+        case Tag::MetaType:
+            return cast_type_nonnull<MetaType>(*this).show(gs);
+        case Tag::AliasType:
+            return cast_type_nonnull<AliasType>(*this).show(gs);
+    }
+}
+
+std::string TypePtr::showWithMoreInfo(const GlobalState &gs) const {
+    switch (tag()) {
+        case Tag::TupleType:
+            return cast_type_nonnull<TupleType>(*this).showWithMoreInfo(gs);
+        default:
+            return show(gs);
+    }
+}
+
 } // namespace sorbet::core

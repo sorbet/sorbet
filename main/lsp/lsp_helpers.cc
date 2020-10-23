@@ -81,7 +81,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
         retType = getResultType(gs, method.data(gs)->resultType, method, receiver, constraint);
     }
     string methodReturnType =
-        (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType->show(gs), ")");
+        (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType.show(gs), ")");
     vector<string> typeAndArgNames;
 
     vector<string> flags;
@@ -105,7 +105,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
             if (!argSym.isSyntheticBlockArgument()) {
                 typeAndArgNames.emplace_back(
                     absl::StrCat(argSym.argumentName(gs), ": ",
-                                 getResultType(gs, argSym.type, method, receiver, constraint)->show(gs)));
+                                 getResultType(gs, argSym.type, method, receiver, constraint).show(gs)));
             }
         }
     }
@@ -237,7 +237,7 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
         // By wrapping the type in `MetaType`, it displays as `<Type: Foo>` rather than `Foo`.
         result = core::make_type<core::MetaType>(result);
     }
-    return result->showWithMoreInfo(gs);
+    return result.showWithMoreInfo(gs);
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
