@@ -221,7 +221,6 @@ public:
     virtual core::SymbolRef untypedBlame() const;
     virtual bool hasUntyped() const;
     virtual bool isFullyDefined() const = 0;
-    virtual int kind() const = 0;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc);
     unsigned int hash(const GlobalState &gs) const;
 };
@@ -342,7 +341,6 @@ TYPE(ClassType) : public GroundType {
 public:
     SymbolRef symbol;
     ClassType(SymbolRef symbol);
-    virtual int kind() const final;
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const override;
     virtual std::string show(const GlobalState &gs) const override;
@@ -386,7 +384,6 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual int kind() const final;
 };
 CheckSize(LambdaParam, 48, 8);
 
@@ -408,7 +405,6 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual int kind() const final;
 };
 CheckSize(SelfTypeParam, 16, 8);
 
@@ -428,7 +424,6 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual int kind() const final;
 };
 CheckSize(AliasType, 16, 8);
 
@@ -447,7 +442,6 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual int kind() const final;
     virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
 
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
@@ -481,7 +475,6 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual int kind() const final;
 };
 CheckSize(LiteralType, 24, 8);
 
@@ -503,7 +496,6 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual int kind() const final;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 };
@@ -513,7 +505,6 @@ TYPE(OrType) final : public GroundType {
 public:
     TypePtr left;
     TypePtr right;
-    virtual int kind() const final;
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
@@ -567,7 +558,6 @@ TYPE(AndType) final : public GroundType {
 public:
     TypePtr left;
     TypePtr right;
-    virtual int kind() const final;
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
@@ -625,7 +615,6 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual int kind() const final;
     virtual bool hasUntyped() const override;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
@@ -653,7 +642,6 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual int kind() const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     virtual bool hasUntyped() const override;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
@@ -680,7 +668,6 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual int kind() const final;
 
     virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
 
@@ -717,7 +704,6 @@ public:
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual int kind() const final;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr underlying() const override;
 };

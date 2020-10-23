@@ -181,6 +181,9 @@ public:
 
     bool isBottom() const;
 
+    // Used in subtyping.cc to order types.
+    int kind() const;
+
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     friend class TypePtrTestHelper;
 };
