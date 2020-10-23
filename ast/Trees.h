@@ -281,7 +281,7 @@ template <class To> To *cast_tree(TreePtr &what) {
     }
 }
 
-template <class To> To *cast_tree(const TreePtr &what) {
+template <class To> const To *cast_tree(const TreePtr &what) {
     if (isa_tree<To>(what)) {
         return reinterpret_cast<To *>(what.get());
     } else {
