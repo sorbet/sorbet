@@ -16,10 +16,15 @@ def __lldb_init_module(debugger, internal_dict):
     ci.HandleCommand("command script add -f lldbinit.cmd_dump_sorbet dumpsorbet", result)
     register_summary(ci, format_sorbet_core_Name.__name__, "sorbet::core::Name")
     register_summary(ci, format_sorbet_core_NameRef.__name__, "sorbet::core::NameRef")
+    register_summary(ci, format_sorbet_core_GlobalState.__name__, "sorbet::core::GlobalState")
     # LLDB will not automatically walk up inheritance chains to find a formatter so it needs to
     # be specified for every subclass of Instruction
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::Instruction")
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::Ident")
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::Send")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::CFG")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::VariableUseSite")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::LocalRef")
 
 def register_summary(ci, funcName, typeName):
     result = lldb.SBCommandReturnObject()
@@ -50,7 +55,7 @@ def get_variable_in_frames(frame, typeNames):
         result = next((v for v in all_vars if any(typeName in v.GetTypeName() for typeName in typeNames)), None)
         if not(result is None):
             resultType = result.GetType()
-            if resultType.IsPointerType():
+            if result.TypeIsPointerType():
                 result = result.Dereference()
             ## Parameters passed by reference are a bit special because they can't be dereferenced like a pointer would
             # be, but since they are really just pointers in disguise we can manually retrieve the underlying address
@@ -66,6 +71,14 @@ def get_variable_in_frames(frame, typeNames):
             return result
         frame = frame.get_parent_frame()
     return None
+
+def format_argument(valobj):
+    exprPath = valobj.get_expr_path()
+    # handle values that are smart pointer and need an extra manual indirection
+    typeName = valobj.GetTypeName()
+    if "::unique_ptr" in typeName or "::shared_ptr" in typeName:
+        return '(*(' + exprPath + '))'
+    return exprPath
 
 def sorbet_obj_toString(sorbetObj, error = None):
     if sorbetObj.TypeIsPointerType():
@@ -84,16 +97,18 @@ def sorbet_obj_toString(sorbetObj, error = None):
         if not(error is None):
             error.SetErrorString("Couldn't find a GS instance in the current frame")
         return None
-    cfg = get_variable_in_frames(frame, "sorbet::cfg::CFG")
-    if toStringMethod.GetNumberOfArguments() == 2 and cfg is None:
-        if not(error is None):
-            error.SetErrorString("Couldn't find a CFG instance in the current frame")
-        return None
-    globalStateAccess = "%s%s" % (gs.get_expr_path(), ".state" if "sorbet::core::Context" in gs.GetTypeName() else "")
+    cfg = None
+    if toStringMethod.GetNumberOfArguments() == 2:
+        cfg = get_variable_in_frames(frame, "sorbet::cfg::CFG")
+        if cfg is None:
+            if not(error is None):
+                error.SetErrorString("Couldn't find a CFG instance in the current frame")
+            return None
+    globalStateAccess = "%s%s" % (format_argument(gs), ".state" if "sorbet::core::Context" in gs.GetTypeName() else "")
     command = sorbetObj.get_expr_path()
     cmd = "(%s).toString(%s)" % (command, globalStateAccess)
     if toStringMethod.GetNumberOfArguments() == 2:
-        cmd = "(%s).toString(%s, %s)" % (command, globalStateAccess, cfg.get_expr_path())
+        cmd = "(%s).toString(%s, %s)" % (command, globalStateAccess, format_argument(cfg))
     finalExpr = frame.EvaluateExpression(cmd)
     if not(finalExpr.IsValid()):
         if not(error is None):
@@ -124,7 +139,9 @@ def format_sorbet_core_NameRef(valobj, internal_dict, options):
         name.SetFormat(lldb.eFormatCString)
         return name.GetValue()
     else:
-        return "Dynamic ID %d" % id
+        # Try to get the toString version of it
+        stringified = sorbet_obj_toString(valobj)
+        return ("Dynamic ID %d" % id) if stringified is None else stringified.GetSummary()
 
 def format_sorbet_core_Name(valobj, internal_dict, options):
     kind = valobj.GetChildMemberWithName("kind")
@@ -133,9 +150,25 @@ def format_sorbet_core_Name(valobj, internal_dict, options):
     else:
         return "Name kind=%s" % kind.GetSummary()
 
+def format_sorbet_core_GlobalState(valobj, internal_dict, options):
+    if valobj.TypeIsPointerType():
+        valobj = valobj.Dereference()
+    expr = "%s.toString().c_str()" % valobj.get_expr_path()
+    result = valobj.EvaluateExpression(expr)
+    data = result.GetData()
+    error = lldb.SBError()
+    str_ptr = data.GetAddress(error, 0)
+    str = valobj.GetProcess().ReadCStringFromMemory(str_ptr, 4096, error)
+    if len(str) >= 4095:
+        str = str + '...'
+    return str if error.Success () and not(result is None) else '<error:' + error.GetCString() + '>'
+
 def format_sorbet_object(valobj, internal_dict, options):
+    error = lldb.SBError()
     result = sorbet_obj_toString(valobj)
     if result is None:
+        if not(error.Success()):
+            return '<error:' + error.GetCString() + '>'
         return valobj.GetValue()
     else:
         return result.GetSummary()
