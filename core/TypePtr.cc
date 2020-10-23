@@ -1,5 +1,5 @@
 #include "core/TypePtr.h"
-#include "core/SymbolRef.h"
+#include "core/Symbols.h"
 #include "core/Types.h"
 
 using namespace std;
@@ -200,6 +200,97 @@ bool TypePtr::isFullyDefined() const {
         case Tag::AppliedType: {
             auto &app = cast_type_nonnull<AppliedType>(*this);
             return app.isFullyDefined();
+        }
+    }
+}
+
+bool TypePtr::hasUntyped() const {
+    switch (tag()) {
+        case Tag::TypeVar:
+        case Tag::LiteralType:
+        case Tag::SelfType:
+        case Tag::AliasType:
+        case Tag::SelfTypeParam:
+        case Tag::LambdaParam:
+        case Tag::MetaType:
+            // These cannot have untyped.
+            return false;
+
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType: {
+            auto &c = cast_type_nonnull<ClassType>(*this);
+            return c.hasUntyped();
+        }
+        case Tag::OrType: {
+            auto &o = cast_type_nonnull<OrType>(*this);
+            return o.hasUntyped();
+        }
+        case Tag::AndType: {
+            auto &a = cast_type_nonnull<AndType>(*this);
+            return a.hasUntyped();
+        }
+        case Tag::AppliedType: {
+            auto &app = cast_type_nonnull<AppliedType>(*this);
+            return app.hasUntyped();
+        }
+        case Tag::TupleType: {
+            auto &tuple = cast_type_nonnull<TupleType>(*this);
+            return tuple.hasUntyped();
+        }
+        case Tag::ShapeType: {
+            auto &shape = cast_type_nonnull<ShapeType>(*this);
+            return shape.hasUntyped();
+        }
+    }
+}
+
+core::SymbolRef TypePtr::untypedBlame() const {
+    ENFORCE(hasUntyped());
+    if (auto *blamed = cast_type<BlamedUntyped>(*this)) {
+        return blamed->blame;
+    }
+    return Symbols::noSymbol();
+}
+
+TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
+    switch (tag()) {
+        case Tag::MetaType:
+        case Tag::TupleType:
+        case Tag::ShapeType:
+        case Tag::LiteralType: {
+            auto &p = cast_type_nonnull<ProxyType>(*this);
+            return p.underlying().getCallArguments(gs, name);
+        }
+        case Tag::OrType: {
+            auto &orType = cast_type_nonnull<OrType>(*this);
+            return orType.getCallArguments(gs, name);
+        }
+        case Tag::AndType: {
+            auto &andType = cast_type_nonnull<AndType>(*this);
+            return andType.getCallArguments(gs, name);
+        }
+        case Tag::BlamedUntyped: {
+            auto &c = cast_type_nonnull<BlamedUntyped>(*this);
+            return c.getCallArguments(gs, name);
+        }
+        case Tag::UnresolvedClassType:
+        case Tag::UnresolvedAppliedType:
+        case Tag::ClassType: {
+            auto &c = cast_type_nonnull<ClassType>(*this);
+            return c.getCallArguments(gs, name);
+        }
+        case Tag::AppliedType: {
+            auto &app = cast_type_nonnull<AppliedType>(*this);
+            return app.getCallArguments(gs, name);
+        }
+        case Tag::SelfType:
+        case Tag::SelfTypeParam:
+        case Tag::LambdaParam:
+        case Tag::TypeVar:
+        case Tag::AliasType: {
+            Exception::raise("should never happen: getCallArguments on `{}`", typeName());
         }
     }
 }

@@ -1118,7 +1118,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 ENFORCE(insn->link->result);
                 ENFORCE(insn->link->result->main.blockPreType);
                 auto &procType = insn->link->result->main.blockPreType;
-                auto params = procType->getCallArguments(ctx, core::Names::call());
+                auto params = procType.getCallArguments(ctx, core::Names::call());
 
                 // A multi-arg proc, if provided a single arg which is an array,
                 // will implicitly splat it out.

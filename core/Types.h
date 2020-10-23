@@ -208,7 +208,6 @@ public:
     virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver);
 
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) = 0;
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) = 0;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const = 0;
     virtual void _sanityCheck(const GlobalState &gs) = 0;
     void sanityCheck(const GlobalState &gs) {
@@ -217,8 +216,6 @@ public:
         _sanityCheck(gs);
     }
 
-    virtual core::SymbolRef untypedBlame() const;
-    virtual bool hasUntyped() const;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc);
     unsigned int hash(const GlobalState &gs) const;
 };
@@ -328,7 +325,6 @@ public:
     ProxyType() = default;
 
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) override;
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) override;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const override;
 
     void _sanityCheck(const GlobalState &gs) override;
@@ -344,12 +340,12 @@ public:
     virtual std::string show(const GlobalState &gs) const override;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) override final;
 
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(const GlobalState &gs) final;
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override final;
-    virtual bool hasUntyped() const override final;
+    bool hasUntyped() const;
 };
 CheckSize(ClassType, 16, 8);
 
@@ -373,7 +369,7 @@ public:
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
+
     void _sanityCheck(const GlobalState &gs) final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
@@ -392,7 +388,7 @@ public:
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
+
     void _sanityCheck(const GlobalState &gs) final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
@@ -406,7 +402,7 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
+
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     SymbolRef symbol;
@@ -434,7 +430,7 @@ public:
 
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
+
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 };
 CheckSize(SelfType, 8, 8);
@@ -476,7 +472,6 @@ public:
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
     void _sanityCheck(const GlobalState &gs) final;
 
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
 
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
@@ -494,13 +489,13 @@ public:
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(const GlobalState &gs) final;
     bool isFullyDefined() const;
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual bool hasUntyped() const override;
+    bool hasUntyped() const;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
@@ -547,14 +542,14 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
 
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(const GlobalState &gs) final;
     bool isFullyDefined() const;
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) override;
-    virtual bool hasUntyped() const override;
+    bool hasUntyped() const;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 
@@ -596,7 +591,7 @@ public:
     bool isFullyDefined() const;
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
-    virtual bool hasUntyped() const override;
+    bool hasUntyped() const;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr underlying() const override;
@@ -622,7 +617,7 @@ public:
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
-    virtual bool hasUntyped() const override;
+    bool hasUntyped() const;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 
@@ -646,10 +641,10 @@ public:
     virtual TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                  const std::vector<TypePtr> &targs) override;
 
-    virtual TypePtr getCallArguments(const GlobalState &gs, NameRef name) final;
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
-    virtual bool hasUntyped() const override;
+    bool hasUntyped() const;
     virtual TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) override;
     virtual TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) override;
 };
@@ -788,7 +783,7 @@ public:
     const core::SymbolRef blame;
     BlamedUntyped(SymbolRef whoToBlame) : ClassType(core::Symbols::untyped()), blame(whoToBlame){};
 
-    core::SymbolRef untypedBlame() const override final;
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 };
 
 TYPE(UnresolvedClassType) final : public ClassType {
