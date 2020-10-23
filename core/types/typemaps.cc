@@ -34,7 +34,7 @@ TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, const Typ
 
 TypePtr Types::approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc) {
     ENFORCE(what.get());
-    auto t = what->_approximate(gs, tc);
+    auto t = what._approximate(gs, tc);
     if (t) {
         return t;
     }
@@ -50,7 +50,7 @@ TypePtr TypeVar::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
     return tc.getInstantiation(sym);
 }
 
-TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
+TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
     if (tc.hasUpperBound(sym)) {
         auto bound = tc.findUpperBound(sym);
         if (bound.isFullyDefined()) {
@@ -127,12 +127,12 @@ TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc)
     return nullptr;
 }
 
-TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
+TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
     bool changed = false;
     vector<TypePtr> newElems;
     newElems.reserve(this->elems.size());
     for (auto &a : this->elems) {
-        auto t = a->_approximate(gs, tc);
+        auto t = a._approximate(gs, tc);
         if (changed || t) {
             changed = true;
             if (!t) {
@@ -209,12 +209,12 @@ TypePtr ShapeType::_instantiate(const GlobalState &gs, const TypeConstraint &tc)
     return nullptr;
 }
 
-TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
+TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
     bool changed = false;
     vector<TypePtr> newValues;
     newValues.reserve(this->values.size());
     for (auto &a : this->values) {
-        auto t = a->_approximate(gs, tc);
+        auto t = a._approximate(gs, tc);
         if (changed || t) {
             changed = true;
             if (!t) {
@@ -267,9 +267,9 @@ TypePtr OrType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
     return nullptr;
 }
 
-TypePtr OrType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
-    auto left = this->left->_approximate(gs, tc);
-    auto right = this->right->_approximate(gs, tc);
+TypePtr OrType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
+    auto left = this->left._approximate(gs, tc);
+    auto right = this->right._approximate(gs, tc);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -313,9 +313,9 @@ TypePtr AndType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
     return nullptr;
 }
 
-TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
-    auto left = this->left->_approximate(gs, tc);
-    auto right = this->right->_approximate(gs, tc);
+TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
+    auto left = this->left._approximate(gs, tc);
+    auto right = this->right._approximate(gs, tc);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -387,13 +387,13 @@ TypePtr AppliedType::_instantiate(const GlobalState &gs, const TypeConstraint &t
     return nullptr;
 }
 
-TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
+TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
     bool changed = false;
     vector<TypePtr> newTargs;
     newTargs.reserve(this->targs.size());
     // TODO: make it not allocate if returns nullptr
     for (auto &a : this->targs) {
-        auto t = a->_approximate(gs, tc);
+        auto t = a._approximate(gs, tc);
         if (changed || t) {
             changed = true;
             if (!t) {
@@ -429,10 +429,6 @@ TypePtr LambdaParam::_instantiate(const GlobalState &gs, const InlinedVector<Sym
             return targs[&el - &params.front()];
         }
     }
-    return nullptr;
-}
-
-TypePtr Type::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
     return nullptr;
 }
 
