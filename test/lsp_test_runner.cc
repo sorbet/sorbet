@@ -261,9 +261,9 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
 
 void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
                             string_view testFile) {
-#ifndef RUBYFMT_ENABLED
-    return;
-#else
+    if (!rubyfmt_enabled) {
+        return;
+    }
     auto expectationFileName = test.expectations["document-formatting-rubyfmt"][testFile];
     if (expectationFileName.empty()) {
         // No .exp file found; nothing to do.
@@ -295,7 +295,6 @@ void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nex
 
     // Simple string comparison, just like other *.exp files.
     CHECK_EQ_DIFF(expectedFormattedText, formattedText, "Mismatch on: " + expectedFormattingPath);
-#endif
 }
 
 TEST_CASE("LSPTest") {

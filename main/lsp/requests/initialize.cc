@@ -27,11 +27,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->documentHighlightProvider = opts.lspDocumentHighlightEnabled;
     serverCap->hoverProvider = true;
     serverCap->referencesProvider = true;
-#ifdef RUBYFMT_ENABLED
-    serverCap->documentFormattingProvider = opts.lspDocumentFormatRubyfmtEnabled;
-#else
-    serverCap->documentFormattingProvider = false;
-#endif
+    serverCap->documentFormattingProvider = rubyfmt_enabled && opts.lspDocumentFormatRubyfmtEnabled;
 
     auto codeActionProvider = make_unique<CodeActionOptions>();
     codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::SourceFixAllSorbet};
