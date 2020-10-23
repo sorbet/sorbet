@@ -3,7 +3,6 @@
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "common/statsd/statsd.h"
-#include "common/typecase.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"

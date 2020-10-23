@@ -879,28 +879,19 @@ core::TypePtr Environment::getReturnType(core::Context ctx, const core::TypePtr 
 }
 
 core::TypePtr flattenArrays(core::Context ctx, const core::TypePtr &type) {
-    core::TypePtr result;
-
-    typecase(
-        type.get(),
-
-        [&](const core::OrType *o) {
-            result = core::Types::any(ctx, flattenArrays(ctx, o->left), flattenArrays(ctx, o->right));
-        },
-
-        [&](const core::AppliedType *a) {
-            if (a->klass != core::Symbols::Array()) {
-                result = type;
-                return;
-            }
-            ENFORCE(a->targs.size() == 1);
-            result = a->targs.front();
-        },
-
-        [&](const core::TupleType *t) { result = t->elementType(); },
-
-        [&](const core::Type *t) { result = std::move(type); });
-    return result;
+    if (auto *o = core::cast_type<core::OrType>(type)) {
+        return core::Types::any(ctx, flattenArrays(ctx, o->left), flattenArrays(ctx, o->right));
+    } else if (auto *a = core::cast_type<core::AppliedType>(type)) {
+        if (a->klass != core::Symbols::Array()) {
+            return type;
+        }
+        ENFORCE(a->targs.size() == 1);
+        return a->targs.front();
+    } else if (auto *t = core::cast_type<core::TupleType>(type)) {
+        return t->elementType();
+    } else {
+        return type;
+    }
 }
 
 core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, const core::TypePtr &returnType,

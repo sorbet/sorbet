@@ -1,6 +1,5 @@
 #include "ast/Trees.h"
 #include "common/formatting.h"
-#include "common/typecase.h"
 #include "core/Symbols.h"
 #include <sstream>
 #include <utility>
@@ -850,22 +849,21 @@ string Literal::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 string Literal::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    string res;
-    typecase(
-        this->value.get(), [&](core::LiteralType *l) { res = l->showValue(gs); },
-        [&](core::ClassType *l) {
-            if (l->symbol == core::Symbols::NilClass()) {
-                res = "nil";
-            } else if (l->symbol == core::Symbols::FalseClass()) {
-                res = "false";
-            } else if (l->symbol == core::Symbols::TrueClass()) {
-                res = "true";
-            } else {
-                res = "literal(" + this->value->toStringWithTabs(gs, tabs) + ")";
-            }
-        },
-        [&](core::Type *t) { res = "literal(" + this->value->toStringWithTabs(gs, tabs) + ")"; });
-    return res;
+    if (auto *l = core::cast_type<core::LiteralType>(this->value)) {
+        return l->showValue(gs);
+    } else if (auto *l = core::cast_type<core::ClassType>(this->value)) {
+        if (l->symbol == core::Symbols::NilClass()) {
+            return "nil";
+        } else if (l->symbol == core::Symbols::FalseClass()) {
+            return "false";
+        } else if (l->symbol == core::Symbols::TrueClass()) {
+            return "true";
+        } else {
+            return "literal(" + this->value->toStringWithTabs(gs, tabs) + ")";
+        }
+    } else {
+        return "literal(" + this->value->toStringWithTabs(gs, tabs) + ")";
+    }
 }
 
 string Assign::toStringWithTabs(const core::GlobalState &gs, int tabs) const {

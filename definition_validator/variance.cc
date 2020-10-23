@@ -1,5 +1,3 @@
-
-#include "common/typecase.h"
 #include "core/Symbols.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
@@ -68,42 +66,46 @@ private:
     VarianceValidator(const core::Loc loc) : loc(loc) {}
 
     void validate(const core::Context ctx, const Polarity polarity, const core::TypePtr &type) {
-        typecase(
-            type.get(), [&](const core::ClassType *klass) {},
-
-            [&](const core::LiteralType *lit) {},
-
-            [&](const core::SelfType *self) {},
-
-            [&](const core::SelfTypeParam *sp) {},
-
-            [&](const core::TypeVar *tvar) {},
-
-            [&](const core::OrType *any) {
-                validate(ctx, polarity, any->left);
-                validate(ctx, polarity, any->right);
-            },
-
-            [&](const core::AndType *all) {
-                validate(ctx, polarity, all->left);
-                validate(ctx, polarity, all->right);
-            },
-
-            [&](const core::ShapeType *shape) {
-                for (auto value : shape->values) {
+        switch (type.tag()) {
+            case core::TypePtr::Tag::UnresolvedAppliedType:
+            case core::TypePtr::Tag::UnresolvedClassType:
+            case core::TypePtr::Tag::BlamedUntyped:
+            case core::TypePtr::Tag::ClassType:
+            case core::TypePtr::Tag::LiteralType:
+            case core::TypePtr::Tag::SelfType:
+            case core::TypePtr::Tag::SelfTypeParam:
+            case core::TypePtr::Tag::TypeVar:
+                break;
+            case core::TypePtr::Tag::OrType: {
+                auto &any = core::cast_type_nonnull<core::OrType>(type);
+                validate(ctx, polarity, any.left);
+                validate(ctx, polarity, any.right);
+                break;
+            }
+            case core::TypePtr::Tag::AndType: {
+                auto &all = core::cast_type_nonnull<core::AndType>(type);
+                validate(ctx, polarity, all.left);
+                validate(ctx, polarity, all.right);
+                break;
+            }
+            case core::TypePtr::Tag::ShapeType: {
+                auto &shape = core::cast_type_nonnull<core::ShapeType>(type);
+                for (auto value : shape.values) {
                     validate(ctx, polarity, value);
                 }
-            },
-
-            [&](const core::TupleType *tuple) {
-                for (auto value : tuple->elems) {
+                break;
+            }
+            case core::TypePtr::Tag::TupleType: {
+                auto &tuple = core::cast_type_nonnull<core::TupleType>(type);
+                for (auto value : tuple.elems) {
                     validate(ctx, polarity, value);
                 }
-            },
-
-            [&](const core::AppliedType *app) {
-                auto members = app->klass.data(ctx)->typeMembers();
-                auto params = app->targs;
+                break;
+            }
+            case core::TypePtr::Tag::AppliedType: {
+                auto &app = core::cast_type_nonnull<core::AppliedType>(type);
+                auto members = app.klass.data(ctx)->typeMembers();
+                auto params = app.targs;
 
                 ENFORCE(members.size() == params.size(),
                         fmt::format("types should be fully saturated, but there are {} members and {} params",
@@ -133,11 +135,12 @@ private:
 
                     validate(ctx, paramPolarity, typeArg);
                 }
-            },
-
+                break;
+            }
             // This is where the actual variance checks are done.
-            [&](const core::LambdaParam *param) {
-                auto paramData = param->definition.data(ctx);
+            case core::TypePtr::Tag::LambdaParam: {
+                auto &param = core::cast_type_nonnull<core::LambdaParam>(type);
+                auto paramData = param.definition.data(ctx);
 
                 ENFORCE(paramData->isTypeMember());
 
@@ -164,10 +167,11 @@ private:
                         }
                     }
                 }
-            },
-
-            [&](const core::AliasType *alias) {
-                auto aliasSym = alias->symbol.data(ctx)->dealias(ctx);
+                break;
+            }
+            case core::TypePtr::Tag::AliasType: {
+                auto &alias = core::cast_type_nonnull<core::AliasType>(type);
+                auto aliasSym = alias.symbol.data(ctx)->dealias(ctx);
 
                 // This can be introduced by `module_function`, which in its
                 // current implementation will alias an instance method as a
@@ -175,13 +179,14 @@ private:
                 if (aliasSym.data(ctx)->isMethod()) {
                     validateMethod(ctx, polarity, aliasSym);
                 } else {
-                    Exception::raise("Unexpected type alias: {}", alias->toString(ctx));
+                    Exception::raise("Unexpected type alias: {}", alias.toString(ctx));
                 }
-            },
-
-            [&](const core::Type *skipped) {
-                Exception::raise("Unexpected type in variance checking: {}", skipped->toString(ctx));
-            });
+                break;
+            }
+            case core::TypePtr::Tag::MetaType: {
+                Exception::raise("Unexpected type in variance checking: {}", type->toString(ctx));
+            }
+        }
     }
 
 public:
