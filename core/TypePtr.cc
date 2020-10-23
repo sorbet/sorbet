@@ -351,4 +351,33 @@ TypePtr TypePtr::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver
     }
 }
 
+TypePtr TypePtr::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
+    switch (tag()) {
+        case Tag::TypeVar:
+            return cast_type_nonnull<TypeVar>(*this)._instantiate(gs, tc);
+        case Tag::TupleType:
+            return cast_type_nonnull<TupleType>(*this)._instantiate(gs, tc);
+        case Tag::ShapeType:
+            return cast_type_nonnull<ShapeType>(*this)._instantiate(gs, tc);
+        case Tag::OrType:
+            return cast_type_nonnull<OrType>(*this)._instantiate(gs, tc);
+        case Tag::AndType:
+            return cast_type_nonnull<AndType>(*this)._instantiate(gs, tc);
+        case Tag::AppliedType:
+            return cast_type_nonnull<AppliedType>(*this)._instantiate(gs, tc);
+
+        case Tag::UnresolvedClassType:
+        case Tag::UnresolvedAppliedType:
+        case Tag::BlamedUntyped:
+        case Tag::LiteralType:
+        case Tag::AliasType:
+        case Tag::SelfType:
+        case Tag::SelfTypeParam:
+        case Tag::LambdaParam:
+        case Tag::ClassType:
+        case Tag::MetaType:
+            return nullptr;
+    }
+}
+
 } // namespace sorbet::core

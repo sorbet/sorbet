@@ -202,6 +202,8 @@ public:
 
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
+    TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
+
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     friend class TypePtrTestHelper;
 };
