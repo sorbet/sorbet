@@ -1,10 +1,18 @@
+config_setting(
+    name = "enable_rubyfmt",
+    values = {
+        "define": "rubyfmt=true",
+    },
+    visibility = ["//visibility:public"],
+)
+
 # NOTE: If a target depends on this, that target **must** cargo cult the linkopts
 # from `rubyfmt_test`! Otherwise, it will not compile+link properly.
 cc_library(
     name = "rubyfmt",
     srcs = select({
-        "//tools/config:webasm": ["rubyfmt-emscripten.cc"],
-        "//conditions:default": ["rubyfmt.cc"],
+        ":enable_rubyfmt": ["rubyfmt.cc"],
+        "//conditions:default": ["rubyfmt-emscripten.cc"],
     }),
     hdrs = [
         "rubyfmt.h",
@@ -13,8 +21,8 @@ cc_library(
     linkstatic = True,
     visibility = ["//visibility:public"],
     deps = select({
-        "//tools/config:webasm": [],
-        "//conditions:default": [
+        "//conditions:default": [],
+        ":enable_rubyfmt": [
             "@ruby_2_6//:rubyfmt-static-deps",
             "@rubyfmt//:librubyfmt",
             "@rubyfmt//:rubyfmt_macro_wrappers",
@@ -32,8 +40,8 @@ cc_test(
     ]),
     linkopts = select({
         "@com_stripe_ruby_typer//tools/config:darwin": ["-framework Foundation"],
-        "//tools/config:webasm": [],
-        "//conditions:default": [
+        "//conditions:default": [],
+        ":enable_rubyfmt": [
             "-lcrypt",
             "-lrt",
             "-lz",
