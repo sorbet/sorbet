@@ -1345,11 +1345,6 @@ void AliasType::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->symbol.exists());
 }
 
-TypePtr AliasType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                                const vector<TypePtr> &targs) {
-    Exception::raise("should never happen");
-}
-
 string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return "MetaType";
 }
@@ -1365,11 +1360,6 @@ void MetaType::_sanityCheck(const GlobalState &gs) {
 
 bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return false;
-}
-
-TypePtr MetaType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                               const vector<TypePtr> &targs) {
-    Exception::raise("should never happen");
 }
 
 MetaType::MetaType(const TypePtr &wrapped) : wrapped(move(wrapped)) {
