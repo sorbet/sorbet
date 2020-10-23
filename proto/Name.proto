@@ -24,6 +24,7 @@ message Name {
          RESOLVER_MISSING_CLASS = 10;
          OPUS_ENUM = 11;
          DEFAULT_ARG = 12;
+         PACKAGE = 13;
     };
 
     Kind kind = 1;

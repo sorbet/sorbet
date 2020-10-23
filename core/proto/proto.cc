@@ -57,6 +57,9 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
                 case UniqueNameKind::TEnum:
                     protoName.set_unique(com::stripe::rubytyper::Name::OPUS_ENUM);
                     break;
+                case UniqueNameKind::Package:
+                    protoName.set_unique(com::stripe::rubytyper::Name::PACKAGE);
+                    break;
             }
             break;
         case NameKind::CONSTANT:
