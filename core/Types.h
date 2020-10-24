@@ -184,16 +184,6 @@ struct Intrinsic {
 };
 extern const std::vector<Intrinsic> intrinsicMethods;
 
-class Type {
-public:
-    Type() = default;
-    Type(const Type &obj) = delete;
-    virtual ~Type() = default;
-
-    friend TypePtr;
-};
-CheckSize(Type, 8, 8);
-
 template <class To> To const *cast_type_const(const TypePtr &what) {
     if (what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value) {
         return reinterpret_cast<To const *>(what.get());
@@ -271,13 +261,15 @@ template <class To> To *cast_type(TypePtr &what) {
 
 #define TYPE_FINAL(name) TYPE(name) final
 
-class GroundType : public Type {};
+class GroundType {};
 
-class ProxyType : public Type {
+class ProxyType {
 public:
     // TODO: use shared pointers that use inline counter
     virtual TypePtr underlying() const = 0;
     ProxyType() = default;
+    ProxyType(const ProxyType &obj) = delete;
+    virtual ~ProxyType() = default;
 
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
     bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
@@ -290,6 +282,8 @@ TYPE(ClassType) : public GroundType {
 public:
     SymbolRef symbol;
     ClassType(SymbolRef symbol);
+    ClassType(const ClassType &obj) = delete;
+    virtual ~ClassType() = default;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
@@ -304,7 +298,7 @@ CheckSize(ClassType, 16, 8);
  * This is the type used to represent a use of a type_member or type_template in
  * a signature.
  */
-TYPE_FINAL(LambdaParam) : public Type {
+TYPE_FINAL(LambdaParam) {
 public:
     SymbolRef definition;
 
@@ -314,6 +308,7 @@ public:
     TypePtr upperBound;
 
     LambdaParam(SymbolRef definition, TypePtr lower, TypePtr upper);
+    LambdaParam(const LambdaParam &obj) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
 
@@ -324,11 +319,12 @@ public:
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
 };
-CheckSize(LambdaParam, 48, 8);
+CheckSize(LambdaParam, 40, 8);
 
-TYPE_FINAL(SelfTypeParam) : public Type {
+TYPE_FINAL(SelfTypeParam) {
 public:
     SymbolRef definition;
+    SelfTypeParam(const SelfTypeParam &obj) = delete;
 
     SelfTypeParam(const SymbolRef definition);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -339,11 +335,12 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(SelfTypeParam, 16, 8);
+CheckSize(SelfTypeParam, 8, 8);
 
-TYPE_FINAL(AliasType) : public Type {
+TYPE_FINAL(AliasType) {
 public:
     AliasType(SymbolRef other);
+    AliasType(const AliasType &obj) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
@@ -351,15 +348,16 @@ public:
     SymbolRef symbol;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(AliasType, 16, 8);
+CheckSize(AliasType, 8, 8);
 
 /** This is a specific kind of self-type that should only be used in method return position.
  * It indicates that the method may(or will) return `self` or type that behaves equivalently
  * to self(e.g. in case of `.clone`).
  */
-TYPE_FINAL(SelfType) : public Type {
+TYPE_FINAL(SelfType) {
 public:
     SelfType();
+    SelfType(const SelfType &obj) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     virtual std::string showValue(const GlobalState &gs) const final;
@@ -384,6 +382,7 @@ public:
     LiteralType(double val);
     LiteralType(SymbolRef klass, NameRef val);
     LiteralType(bool val);
+    LiteralType(const LiteralType &obj) = delete;
     virtual TypePtr underlying() const override;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -397,10 +396,11 @@ CheckSize(LiteralType, 24, 8);
 /*
  * TypeVars are the used for the type parameters of generic methods.
  */
-TYPE_FINAL(TypeVar) : public Type {
+TYPE_FINAL(TypeVar) {
 public:
     SymbolRef sym;
     TypeVar(SymbolRef sym);
+    TypeVar(const TypeVar &obj) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -410,13 +410,14 @@ public:
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 };
-CheckSize(TypeVar, 16, 8);
+CheckSize(TypeVar, 8, 8);
 
 TYPE_FINAL(OrType) : public GroundType {
 public:
     TypePtr left;
     TypePtr right;
 
+    OrType(const OrType &obj) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
@@ -460,13 +461,14 @@ private:
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
-CheckSize(OrType, 40, 8);
+CheckSize(OrType, 32, 8);
 
 TYPE_FINAL(AndType) : public GroundType {
 public:
     TypePtr left;
     TypePtr right;
 
+    AndType(const AndType &obj) = delete;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
@@ -501,7 +503,7 @@ private:
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
-CheckSize(AndType, 40, 8);
+CheckSize(AndType, 32, 8);
 
 TYPE_FINAL(ShapeType) : public ProxyType {
 public:
@@ -510,6 +512,7 @@ public:
     const TypePtr underlying_;
     ShapeType();
     ShapeType(TypePtr underlying, std::vector<TypePtr> keys, std::vector<TypePtr> values);
+    ShapeType(const ShapeType &obj) = delete;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
@@ -533,6 +536,7 @@ public:
     const TypePtr underlying_;
 
     TupleType(TypePtr underlying, std::vector<TypePtr> elements);
+    TupleType(const TupleType &obj) = delete;
     static TypePtr build(const GlobalState &gs, std::vector<TypePtr> elements);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -552,11 +556,12 @@ public:
 };
 CheckSize(TupleType, 48, 8);
 
-TYPE_FINAL(AppliedType) : public Type {
+TYPE_FINAL(AppliedType) {
 public:
     SymbolRef klass;
     std::vector<TypePtr> targs;
     AppliedType(SymbolRef klass, std::vector<TypePtr> targs);
+    AppliedType(const AppliedType &obj) = delete;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
@@ -570,7 +575,7 @@ public:
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 };
-CheckSize(AppliedType, 40, 8);
+CheckSize(AppliedType, 32, 8);
 
 // MetaType is the type of a Type. You can think of it as generalization of
 // Ruby's singleton classes to Types; Just as `A.singleton_class` is the *type*
@@ -585,6 +590,7 @@ public:
     TypePtr wrapped;
 
     MetaType(const TypePtr &wrapped);
+    MetaType(const MetaType &obj) = delete;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
