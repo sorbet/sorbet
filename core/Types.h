@@ -210,10 +210,9 @@ template <> inline const ClassType *cast_type_const<ClassType>(const TypePtr &wh
     }
 };
 
-class GroundType;
-template <> inline const GroundType *cast_type_const<GroundType>(const TypePtr &what) {
+bool inline is_ground_type(const TypePtr &what) {
     if (what == nullptr) {
-        return nullptr;
+        return false;
     }
     switch (what.tag()) {
         case TypePtr::Tag::ClassType:
@@ -222,9 +221,9 @@ template <> inline const GroundType *cast_type_const<GroundType>(const TypePtr &
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::OrType:
         case TypePtr::Tag::AndType:
-            return reinterpret_cast<const GroundType *>(what.get());
+            return true;
         default:
-            return nullptr;
+            return false;
     }
 }
 
@@ -261,8 +260,6 @@ template <class To> To *cast_type(TypePtr &what) {
 
 #define TYPE_FINAL(name) TYPE(name) final
 
-class GroundType {};
-
 class ProxyType {
 public:
     // TODO: use shared pointers that use inline counter
@@ -278,7 +275,7 @@ public:
 };
 CheckSize(ProxyType, 8, 8);
 
-TYPE(ClassType) : public GroundType {
+TYPE(ClassType) {
 public:
     SymbolRef symbol;
     ClassType(SymbolRef symbol);
@@ -412,7 +409,7 @@ public:
 };
 CheckSize(TypeVar, 8, 8);
 
-TYPE_FINAL(OrType) : public GroundType {
+TYPE_FINAL(OrType) {
 public:
     TypePtr left;
     TypePtr right;
@@ -463,7 +460,7 @@ private:
 };
 CheckSize(OrType, 32, 8);
 
-TYPE_FINAL(AndType) : public GroundType {
+TYPE_FINAL(AndType) {
 public:
     TypePtr left;
     TypePtr right;
