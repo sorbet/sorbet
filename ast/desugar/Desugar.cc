@@ -488,6 +488,65 @@ TreePtr doUntil(DesugarContext dctx, core::LocOffsets loc, TreePtr cond, TreePtr
     return MK::While(loc, MK::True(loc), std::move(breakWithBody));
 }
 
+class DuplicateHashKeyCheck {
+    DesugarContext dctx;
+    const core::GlobalState &gs;
+    UnorderedMap<core::NameRef, core::LocOffsets> hashKeySymbols;
+    UnorderedMap<core::NameRef, core::LocOffsets> hashKeyStrings;
+
+public:
+    DuplicateHashKeyCheck(DesugarContext dctx) : dctx{dctx}, gs{dctx.ctx.state}, hashKeySymbols(), hashKeyStrings() {}
+
+    void check(const TreePtr &key) {
+        auto lit = ast::cast_tree<ast::Literal>(key);
+        if (lit == nullptr) {
+            return;
+        }
+
+        auto isSymbol = lit->isSymbol(gs);
+        core::NameRef nameRef;
+        if (!lit) {
+            return;
+        }
+        if (isSymbol) {
+            nameRef = lit->asSymbol(gs);
+        } else if (lit->isString(gs)) {
+            nameRef = lit->asString(gs);
+        } else {
+            return;
+        }
+
+        if (isSymbol && hashKeySymbols.find(nameRef) == hashKeySymbols.end()) {
+            hashKeySymbols[nameRef] = key->loc;
+        } else if (!isSymbol && hashKeyStrings.find(nameRef) == hashKeyStrings.end()) {
+            hashKeyStrings[nameRef] = key->loc;
+        } else {
+            if (auto e = dctx.ctx.beginError(key->loc, core::errors::Desugar::DuplicatedHashKeys)) {
+                core::LocOffsets originalLoc;
+                if (isSymbol) {
+                    originalLoc = hashKeySymbols[nameRef];
+                } else {
+                    originalLoc = hashKeyStrings[nameRef];
+                }
+
+                e.setHeader("Hash key `{}` is duplicated", nameRef.toString(gs));
+                e.addErrorLine(core::Loc(dctx.ctx.file, originalLoc), "First occurrence of `{}` hash key",
+                               nameRef.toString(gs));
+            }
+        }
+    }
+
+    // This is only used with Send::ARGS_store and Array::ELEMS_store
+    template <typename T> static void checkSendArgs(DesugarContext dctx, int numPosArgs, const T &args) {
+        DuplicateHashKeyCheck duplicateKeyCheck{dctx};
+
+        // increment by two so that a keyword args splat gets skipped.
+        for (int i = numPosArgs; i < args.size(); i += 2) {
+            duplicateKeyCheck.check(args[i]);
+        }
+    }
+};
+
 TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
     try {
         if (what.get() == nullptr) {
@@ -582,6 +641,10 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     auto method =
                         MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
 
+                    if (auto *array = cast_tree<Array>(kwargs)) {
+                        DuplicateHashKeyCheck::checkSendArgs(dctx, 0, array->elems);
+                    }
+
                     Send::ARGS_store sendargs;
                     sendargs.emplace_back(std::move(rec));
                     sendargs.emplace_back(std::move(method));
@@ -649,6 +712,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                             args.emplace_back(node2TreeImpl(dctx, std::move(stat)));
                         }
                     };
+
+                    DuplicateHashKeyCheck::checkSendArgs(dctx, numPosArgs, args);
 
                     TreePtr res;
                     if (block == nullptr) {
@@ -1412,46 +1477,9 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     }
                 };
 
-                UnorderedMap<core::NameRef, core::LocOffsets> hashKeySymbols;
-                UnorderedMap<core::NameRef, core::LocOffsets> hashKeyStrings;
-                auto &gs = dctx.ctx.state;
+                DuplicateHashKeyCheck duplicateKeyCheck{dctx};
                 for (auto &key : keys) {
-                    auto lit = ast::cast_tree<ast::Literal>(key);
-                    if (lit == nullptr) {
-                        continue;
-                    }
-
-                    auto isSymbol = lit->isSymbol(gs);
-                    core::NameRef nameRef;
-                    if (!lit) {
-                        continue;
-                    }
-                    if (isSymbol) {
-                        nameRef = lit->asSymbol(gs);
-                    } else if (lit->isString(gs)) {
-                        nameRef = lit->asString(gs);
-                    } else {
-                        continue;
-                    }
-
-                    if (isSymbol && hashKeySymbols.find(nameRef) == hashKeySymbols.end()) {
-                        hashKeySymbols[nameRef] = key->loc;
-                    } else if (!isSymbol && hashKeyStrings.find(nameRef) == hashKeyStrings.end()) {
-                        hashKeyStrings[nameRef] = key->loc;
-                    } else {
-                        if (auto e = dctx.ctx.beginError(key->loc, core::errors::Desugar::DuplicatedHashKeys)) {
-                            core::LocOffsets originalLoc;
-                            if (isSymbol) {
-                                originalLoc = hashKeySymbols[nameRef];
-                            } else {
-                                originalLoc = hashKeyStrings[nameRef];
-                            }
-
-                            e.setHeader("Hash key `{}` is duplicated", nameRef.toString(gs));
-                            e.addErrorLine(core::Loc(dctx.ctx.file, originalLoc), "First occurrence of `{}` hash key",
-                                           nameRef.toString(gs));
-                        }
-                    }
+                    duplicateKeyCheck.check(key);
                 }
 
                 TreePtr res;
