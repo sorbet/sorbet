@@ -8,6 +8,8 @@
 namespace sorbet::core {
 class Type;
 class TypeConstraint;
+struct DispatchResult;
+struct DispatchArgs;
 
 class TypePtr final {
 public:
@@ -228,6 +230,8 @@ public:
     bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
 
     unsigned int hash(const GlobalState &gs) const;
+
+    DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     friend class TypePtrTestHelper;

@@ -19,16 +19,16 @@ using namespace std;
 
 namespace sorbet::core {
 
-DispatchResult ProxyType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult ProxyType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
     categoryCounterInc("dispatch_call", "proxytype");
     auto und = underlying();
-    return und->dispatchCall(gs, args.withThisRef(und));
+    return und.dispatchCall(gs, args.withThisRef(und));
 }
 
-DispatchResult OrType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult OrType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
     categoryCounterInc("dispatch_call", "ortype");
-    auto leftRet = left->dispatchCall(gs, args.withSelfRef(left));
-    auto rightRet = right->dispatchCall(gs, args.withSelfRef(right));
+    auto leftRet = left.dispatchCall(gs, args.withSelfRef(left));
+    auto rightRet = right.dispatchCall(gs, args.withSelfRef(right));
     DispatchResult ret{Types::any(gs, leftRet.returnType, rightRet.returnType), move(leftRet.main),
                        make_unique<DispatchResult>(move(rightRet)), DispatchResult::Combinator::OR};
     return ret;
@@ -46,10 +46,6 @@ TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
     return Types::glb(gs, largs, rargs);
 }
 
-DispatchResult TypeVar::dispatchCall(const GlobalState &gs, DispatchArgs args) {
-    Exception::raise("should never happen");
-}
-
 bool allComponentsPresent(DispatchResult &res) {
     if (!res.main.method.exists()) {
         return false;
@@ -60,10 +56,10 @@ bool allComponentsPresent(DispatchResult &res) {
     return allComponentsPresent(*res.secondary);
 }
 
-DispatchResult AndType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult AndType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
     categoryCounterInc("dispatch_call", "andtype");
-    auto leftRet = left->dispatchCall(gs, args.withThisRef(left));
-    auto rightRet = right->dispatchCall(gs, args.withThisRef(right));
+    auto leftRet = left.dispatchCall(gs, args.withThisRef(left));
+    auto rightRet = right.dispatchCall(gs, args.withThisRef(right));
 
     // If either side is missing the method, dispatch to the other.
     auto leftOk = allComponentsPresent(leftRet);
@@ -94,7 +90,7 @@ TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name) const {
     return Types::any(gs, l, r);
 }
 
-DispatchResult ShapeType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult ShapeType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
@@ -108,7 +104,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, DispatchArgs args)
     return ProxyType::dispatchCall(gs, args);
 }
 
-DispatchResult TupleType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult TupleType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
@@ -156,8 +152,8 @@ core::Loc smallestLocWithin(core::Loc callLoc, const core::TypeAndOrigins &argTp
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
                                SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
-                               const TypePtr &selfType, vector<TypePtr> &targs, Loc loc, Loc originForUninitialized,
-                               bool mayBeSetter = false) {
+                               const TypePtr &selfType, const vector<TypePtr> &targs, Loc loc,
+                               Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(gs, method);
@@ -217,8 +213,8 @@ int getArity(const GlobalState &gs, SymbolRef method) {
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
 SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef primary, u2 numPosArgs,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType, vector<TypePtr> &targs,
-                        bool hasBlock) {
+                        InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType,
+                        const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
             "overload not permitted here");
@@ -483,7 +479,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalSta
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : untyped
 //    (with a subtype check on the key type, once we have generics)
 DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core::SymbolRef symbol,
-                                  vector<TypePtr> &targs) {
+                                  const vector<TypePtr> &targs) {
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noSymbol());
@@ -1065,13 +1061,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     return result;
 }
 
-DispatchResult ClassType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult ClassType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
     categoryCounterInc("dispatch_call", "classtype");
     vector<TypePtr> empty;
     return dispatchCallSymbol(gs, args, symbol, empty);
 }
 
-DispatchResult AppliedType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult AppliedType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
     categoryCounterInc("dispatch_call", "appliedType");
     return dispatchCallSymbol(gs, args, this->klass, this->targs);
 }
@@ -1117,11 +1113,7 @@ TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const
     return getMethodArguments(gs, klass, name, targs);
 }
 
-DispatchResult AliasType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
-    Exception::raise("AliasType::dispatchCall");
-}
-
-DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
     switch (args.name._id) {
         case Names::new_()._id: {
             auto innerArgs = DispatchArgs{Names::initialize(),
@@ -1133,7 +1125,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
                                           wrapped,
                                           args.block,
                                           args.originForUninitialized};
-            auto original = wrapped->dispatchCall(gs, innerArgs);
+            auto original = wrapped.dispatchCall(gs, innerArgs);
             original.returnType = wrapped;
             original.main.sendTp = wrapped;
             return original;
@@ -1319,7 +1311,7 @@ public:
         DispatchArgs innerArgs{Names::initialize(), args.locs,  args.numPosArgs,
                                args.args,           instanceTy, instanceTy,
                                instanceTy,          args.block, args.originForUninitialized};
-        auto dispatched = instanceTy->dispatchCall(gs, innerArgs);
+        auto dispatched = instanceTy.dispatchCall(gs, innerArgs);
 
         for (auto &err : res.main.errors) {
             dispatched.main.errors.emplace_back(std::move(err));
@@ -1481,8 +1473,8 @@ public:
         }
 
         auto recv = args.args[0]->type;
-        res = recv->dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv, recv, recv,
-                                      args.block, args.originForUninitialized});
+        res = recv.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv, recv, recv,
+                                     args.block, args.originForUninitialized});
     }
 } SorbetPrivateStatic_sig;
 
@@ -1711,7 +1703,7 @@ public:
                                receiver->type,
                                args.block,
                                args.originForUninitialized};
-        auto dispatched = receiver->type->dispatchCall(gs, innerArgs);
+        auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
@@ -1752,7 +1744,7 @@ private:
         DispatchArgs innerArgs{to_proc,         sendLocs,        0,
                                sendArgs,        nonNilBlockType, nonNilBlockType,
                                nonNilBlockType, nullptr,         originForUninitialized};
-        auto dispatched = nonNilBlockType->dispatchCall(gs, innerArgs);
+        auto dispatched = nonNilBlockType.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             gs._error(std::move(err));
         }
@@ -1807,7 +1799,7 @@ private:
     static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, DispatchArgs innerArgs,
                              shared_ptr<SendAndBlockLink> link, TypePtr passedInBlockType, Loc callLoc, Loc blockLoc,
                              DispatchResult &res) {
-        auto dispatched = receiver->type->dispatchCall(gs, innerArgs);
+        auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
@@ -2099,7 +2091,7 @@ public:
             DispatchArgs innerArgs{Names::new_(), sendLocs,   numPosArgs,
                                    sendArgStore,  selfTy,     selfTy,
                                    selfTy,        args.block, args.originForUninitialized};
-            dispatched = selfTy->dispatchCall(gs, innerArgs);
+            dispatched = selfTy.dispatchCall(gs, innerArgs);
             returnTy = dispatched.returnType;
         } else {
             // Otherwise, we know that this is the proper new intrinsic, and we
@@ -2113,7 +2105,7 @@ public:
             DispatchArgs innerArgs{Names::initialize(), sendLocs,   numPosArgs,
                                    sendArgStore,        instanceTy, instanceTy,
                                    instanceTy,          args.block, args.originForUninitialized};
-            dispatched = instanceTy->dispatchCall(gs, innerArgs);
+            dispatched = instanceTy.dispatchCall(gs, innerArgs);
 
             // The return type from dispatched is ignored, and we return
             // `T.attached_class` instead.
@@ -2503,7 +2495,7 @@ public:
 
         DispatchArgs dispatch{core::Names::enumerableToH(), locs, 1, innerArgs, hash, hash, hash, nullptr,
                               args.originForUninitialized};
-        auto dispatched = hash->dispatchCall(gs, dispatch);
+        auto dispatched = hash.dispatchCall(gs, dispatch);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
