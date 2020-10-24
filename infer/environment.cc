@@ -947,7 +947,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                 core::DispatchArgs dispatchArgs{send->fun,     locs,          args,      recvType.type,
                                                 recvType.type, recvType.type, send->link};
-                auto dispatched = recvType.type->dispatchCall(ctx, dispatchArgs);
+                auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
                 while (it != nullptr) {

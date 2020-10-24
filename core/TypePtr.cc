@@ -630,4 +630,37 @@ bool TypePtr::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
             return cast_type_const<SelfType>(*this)->derivesFrom(gs, klass);
     }
 }
+
+DispatchResult TypePtr::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+    switch (tag()) {
+        case Tag::LiteralType:
+            return cast_type_const<LiteralType>(*this)->dispatchCall(gs, move(args));
+        case Tag::OrType:
+            return cast_type_const<OrType>(*this)->dispatchCall(gs, move(args));
+        case Tag::AndType:
+            return cast_type_const<AndType>(*this)->dispatchCall(gs, move(args));
+        case Tag::ShapeType:
+            return cast_type_const<ShapeType>(*this)->dispatchCall(gs, move(args));
+        case Tag::TupleType:
+            return cast_type_const<TupleType>(*this)->dispatchCall(gs, move(args));
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType:
+            return cast_type_const<ClassType>(*this)->dispatchCall(gs, move(args));
+        case Tag::AppliedType:
+            return cast_type_const<AppliedType>(*this)->dispatchCall(gs, move(args));
+        case Tag::MetaType:
+            return cast_type_const<MetaType>(*this)->dispatchCall(gs, move(args));
+        case Tag::SelfTypeParam:
+            return cast_type_const<SelfTypeParam>(*this)->dispatchCall(gs, move(args));
+
+        case Tag::TypeVar:
+        case Tag::LambdaParam:
+        case Tag::SelfType:
+        case Tag::AliasType:
+            Exception::raise("should never happen: dispatchCall on `{}`", typeName());
+    }
+}
+
 } // namespace sorbet::core
