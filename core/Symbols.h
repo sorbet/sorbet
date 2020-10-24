@@ -14,7 +14,6 @@ namespace sorbet::core {
 class Symbol;
 class GlobalState;
 struct GlobalStateHash;
-class Type;
 class MutableContext;
 class Context;
 class TypeAndOrigins;

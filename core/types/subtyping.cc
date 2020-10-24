@@ -53,10 +53,10 @@ void fillInOrComponents(InlinedVector<TypePtr, 4> &orComponents, const TypePtr &
     }
 }
 
-TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type *, 4> &typeFilter) {
+TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<TypePtr, 4> &typeFilter) {
     auto *o = cast_type_const<OrType>(originalType);
     if (o == nullptr) {
-        if (absl::c_linear_search(typeFilter, originalType.get())) {
+        if (absl::c_linear_search(typeFilter, originalType)) {
             return nullptr;
         }
         return originalType;
@@ -72,13 +72,13 @@ TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type
         if (left == o->left && right == o->right) {
             return originalType;
         }
-        return OrType::make_shared(left, right);
+        return OrType::make_shared(move(left), move(right));
     }
 }
 
 TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     InlinedVector<TypePtr, 4> originalOrComponents;
-    InlinedVector<Type *, 4> typesConsumed;
+    InlinedVector<TypePtr, 4> typesConsumed;
     auto *o1 = cast_type_const<OrType>(t1);
     ENFORCE(o1 != nullptr);
     fillInOrComponents(originalOrComponents, o1->left);
@@ -86,14 +86,14 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
 
     for (auto &component : originalOrComponents) {
         auto lubbed = Types::any(gs, component, t2);
-        if (lubbed.get() == component.get()) {
+        if (lubbed == component) {
             // lubbed == component, so t2 <: component and t2 <: t1
             categoryCounterInc("lubDistributeOr.outcome", "t1");
             return t1;
-        } else if (lubbed.get() == t2.get()) {
+        } else if (lubbed == t2) {
             // lubbed == t2, so component <: t2
             // Thus, we don't need to include component in the final OrType; it's subsumed by t2.
-            typesConsumed.emplace_back(component.get());
+            typesConsumed.emplace_back(component);
         }
     }
     if (typesConsumed.empty()) {
@@ -116,20 +116,20 @@ TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr
     auto *a1 = cast_type_const<AndType>(t1);
     ENFORCE(t1 != nullptr);
     TypePtr n1 = Types::all(gs, a1->left, t2);
-    if (n1.get() == a1->left.get()) {
+    if (n1 == a1->left) {
         categoryCounterInc("lubDistributeOr.outcome", "t1");
         return t1;
     }
     TypePtr n2 = Types::all(gs, a1->right, t2);
-    if (n1.get() == t2.get()) {
+    if (n1 == t2) {
         categoryCounterInc("glbDistributeAnd.outcome", "Zn2");
         return n2;
     }
-    if (n2.get() == a1->right.get()) {
+    if (n2 == a1->right) {
         categoryCounterInc("glbDistributeAnd.outcome", "Zt1");
         return t1;
     }
-    if (n2.get() == t2.get()) {
+    if (n2 == t2) {
         categoryCounterInc("glbDistributeAnd.outcome", "Zn1");
         return n1;
     }
@@ -173,7 +173,7 @@ TypePtr dropLubComponents(const GlobalState &gs, const TypePtr &t1, const TypePt
 }
 
 TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    if (t1.get() == t2.get()) {
+    if (t1 == t2) {
         categoryCounterInc("lub", "ref-eq");
         return t1;
     }
@@ -471,7 +471,7 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     /** this implementation makes a bet that types are small and very likely to be collapsable.
      * The more complex types we have, the more likely this bet is to be wrong.
      */
-    if (t1.get() == t2.get()) {
+    if (t1 == t2) {
         categoryCounterInc("lub", "ref-eq2");
         return t1;
     }
@@ -516,7 +516,7 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     /** this implementation makes a bet that types are small and very likely to be collapsable.
      * The more complex types we have, the more likely this bet is to be wrong.
      */
-    if (t1.get() == t2.get()) {
+    if (t1 == t2) {
         categoryCounterInc("glb", "ref-eq2");
         return t1;
     }
@@ -579,7 +579,7 @@ TypePtr Types::all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 }
 
 TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    if (t1.get() == t2.get()) {
+    if (t1 == t2) {
         categoryCounterInc("glb", "ref-eq");
         return t1;
     }
@@ -968,7 +968,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     ENFORCE(t1 != nullptr);
     ENFORCE(t2 != nullptr);
 
-    if (t1.get() == t2.get()) {
+    if (t1 == t2) {
         return true;
     }
 
@@ -1209,7 +1209,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
 
 bool Types::isSubTypeUnderConstraint(const GlobalState &gs, TypeConstraint &constr, const TypePtr &t1,
                                      const TypePtr &t2, UntypedMode mode) {
-    if (t1.get() == t2.get()) {
+    if (t1 == t2) {
         return true;
     }
 

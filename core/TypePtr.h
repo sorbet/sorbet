@@ -6,7 +6,6 @@
 #include <memory>
 
 namespace sorbet::core {
-class Type;
 class TypeConstraint;
 struct DispatchResult;
 struct DispatchArgs;
@@ -92,6 +91,16 @@ private:
         return saved;
     }
 
+    void *get() const {
+        auto val = ptr & PTR_MASK;
+        if constexpr (sizeof(void *) == 4) {
+            return reinterpret_cast<void *>(val);
+        } else {
+            // sign extension for the upper 16 bits
+            return reinterpret_cast<void *>((val << 16) >> 16);
+        }
+    }
+
     void handleDelete() noexcept {
         if (counter != nullptr) {
             // fetch_sub returns value prior to subtract
@@ -160,22 +169,6 @@ public:
             return static_cast<Tag>(value >> 48);
         }
     }
-
-    Type *get() const {
-        auto val = ptr & PTR_MASK;
-        if constexpr (sizeof(void *) == 4) {
-            return reinterpret_cast<Type *>(val);
-        } else {
-            // sign extension for the upper 16 bits
-            return reinterpret_cast<Type *>((val << 16) >> 16);
-        }
-    }
-    Type *operator->() const {
-        return get();
-    }
-    Type &operator*() const {
-        return *get();
-    }
     bool operator!=(const TypePtr &other) const {
         return ptr != other.ptr;
     }
@@ -240,6 +233,8 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
+    template <class To> friend To const *cast_type_const(const TypePtr &what);
+    template <class To> friend To *cast_type(TypePtr &what);
 };
 CheckSize(TypePtr, 16, 8);
 } // namespace sorbet::core

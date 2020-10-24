@@ -10,7 +10,7 @@ namespace sorbet::core {
 
 TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, const InlinedVector<SymbolRef, 4> &params,
                            const vector<TypePtr> &targs) {
-    ENFORCE(what.get());
+    ENFORCE(what);
     auto t = what._instantiate(gs, params, targs);
     if (t) {
         return t;
@@ -23,7 +23,7 @@ TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, const Typ
     if (tc.isEmpty()) {
         return what;
     }
-    ENFORCE(what.get());
+    ENFORCE(what);
     auto t = what._instantiate(gs, tc);
     if (t) {
         return t;
@@ -32,7 +32,7 @@ TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, const Typ
 }
 
 TypePtr Types::approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc) {
-    ENFORCE(what.get());
+    ENFORCE(what);
     auto t = what._approximate(gs, tc);
     if (t) {
         return t;
@@ -412,7 +412,7 @@ TypePtr LambdaParam::_instantiate(const GlobalState &gs, const InlinedVector<Sym
 }
 
 TypePtr Types::replaceSelfType(const GlobalState &gs, const TypePtr &what, const TypePtr &receiver) {
-    ENFORCE(what.get());
+    ENFORCE(what);
     auto t = what._replaceSelfType(gs, receiver);
     if (t) {
         return t;

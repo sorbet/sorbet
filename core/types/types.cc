@@ -11,7 +11,6 @@
 #include "core/Types.h"
 
 // improve debugging.
-template class std::shared_ptr<sorbet::core::Type>;
 template class std::shared_ptr<sorbet::core::TypeConstraint>;
 template class std::shared_ptr<sorbet::core::SendAndBlockLink>;
 template class std::vector<sorbet::core::Loc>;
