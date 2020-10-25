@@ -440,11 +440,11 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    virtual std::string showValue(const GlobalState &gs) const final;
+    std::string showValue(const GlobalState &gs) const;
 
     bool equals(const LiteralType &rhs) const;
 };
-CheckSize(LiteralType, 24, 8);
+CheckSize(LiteralType, 16, 8);
 
 /*
  * TypeVars are the used for the type parameters of generic methods.
@@ -580,7 +580,7 @@ public:
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying() const;
 };
-CheckSize(ShapeType, 72, 8);
+CheckSize(ShapeType, 64, 8);
 
 TYPE_FINAL(TupleType) {
 private:
@@ -609,7 +609,7 @@ public:
     TypePtr elementType() const;
     TypePtr underlying() const;
 };
-CheckSize(TupleType, 48, 8);
+CheckSize(TupleType, 40, 8);
 
 TYPE_FINAL(AppliedType) {
 public:
@@ -658,7 +658,7 @@ public:
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying() const;
 };
-CheckSize(MetaType, 24, 8);
+CheckSize(MetaType, 16, 8);
 
 class SendAndBlockLink {
     SendAndBlockLink(const SendAndBlockLink &) = default;
