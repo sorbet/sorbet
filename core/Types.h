@@ -464,6 +464,8 @@ CheckSize(LiteralType, 24, 8);
 
 /*
  * TypeVars are the used for the type parameters of generic methods.
+ * It would be tempting to inline this, but resolver depends on the object being shared among references so that it
+ * can update the `sym` property later.
  */
 TYPE_FINAL(TypeVar) {
 public:
@@ -771,10 +773,21 @@ struct DispatchResult {
           secondaryKind(secondaryKind){};
 };
 
-TYPE_FINAL(BlamedUntyped) : public ClassType {
+TYPE_FINAL_INLINE(BlamedUntyped) : public ClassType {
+    static BlamedUntyped fromTypePtrValue(u4 value) {
+        return BlamedUntyped(SymbolRef::fromRaw(value));
+    }
+    u4 toTypePtrValue() const {
+        return blame.rawId();
+    }
+
 public:
     const core::SymbolRef blame;
     BlamedUntyped(SymbolRef whoToBlame) : ClassType(core::Symbols::untyped()), blame(whoToBlame){};
+
+    friend TypePtr;
+    template <class T, class... Args> friend TypePtr make_type(Args && ... args);
+    template <class To> friend To cast_inline_type_nonnull(const TypePtr &what);
 };
 
 TYPE_FINAL(UnresolvedClassType) : public ClassType {

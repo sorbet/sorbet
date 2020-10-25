@@ -53,7 +53,7 @@ TypePtr Types::untypedUntracked() {
 
 TypePtr Types::untyped(const sorbet::core::GlobalState &gs, sorbet::core::SymbolRef blame) {
     if (sorbet::debug_mode) {
-        return make_type<BlamedUntyped>(blame);
+        return make_inline_type<BlamedUntyped>(blame);
     } else {
         return untypedUntracked();
     }

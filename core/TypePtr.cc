@@ -41,6 +41,8 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
     switch (tag) {
         case Tag::SelfTypeParam:
         case Tag::ClassType:
+        case Tag::SelfType:
+        case Tag::BlamedUntyped:
             // Inlined; should not be called.
             ENFORCE(false);
             break;
@@ -51,10 +53,6 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
 
         case Tag::AliasType:
             delete reinterpret_cast<AliasType *>(ptr);
-            break;
-
-        case Tag::SelfType:
-            delete reinterpret_cast<SelfType *>(ptr);
             break;
 
         case Tag::LiteralType:
@@ -87,10 +85,6 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
 
         case Tag::MetaType:
             delete reinterpret_cast<MetaType *>(ptr);
-            break;
-
-        case Tag::BlamedUntyped:
-            delete reinterpret_cast<BlamedUntyped *>(ptr);
             break;
 
         case Tag::UnresolvedClassType:
@@ -292,8 +286,9 @@ bool TypePtr::hasUntyped() const {
 
 core::SymbolRef TypePtr::untypedBlame() const {
     ENFORCE(hasUntyped());
-    if (auto *blamed = cast_type_const<BlamedUntyped>(*this)) {
-        return blamed->blame;
+    if (isa_type<BlamedUntyped>(*this)) {
+        auto blamed = cast_inline_type_nonnull<BlamedUntyped>(*this);
+        return blamed.blame;
     }
     return Symbols::noSymbol();
 }
@@ -475,7 +470,7 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, const InlinedVector<SymbolR
 void TypePtr::_sanityCheck(const GlobalState &gs) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
-            return cast_type_const<BlamedUntyped>(*this)->_sanityCheck(gs);
+            return cast_inline_type_nonnull<BlamedUntyped>(*this)._sanityCheck(gs);
         case Tag::UnresolvedAppliedType:
             return cast_type_const<UnresolvedAppliedType>(*this)->_sanityCheck(gs);
         case Tag::UnresolvedClassType:
@@ -512,7 +507,7 @@ void TypePtr::_sanityCheck(const GlobalState &gs) const {
 string TypePtr::toStringWithTabs(const GlobalState &gs, int tabs) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
-            return cast_type_const<BlamedUntyped>(*this)->toStringWithTabs(gs, tabs);
+            return cast_inline_type_nonnull<BlamedUntyped>(*this).toStringWithTabs(gs, tabs);
         case Tag::UnresolvedAppliedType:
             return cast_type_const<UnresolvedAppliedType>(*this)->toStringWithTabs(gs, tabs);
         case Tag::UnresolvedClassType:
@@ -557,7 +552,7 @@ std::string TypePtr::show(const GlobalState &gs) const {
         case Tag::UnresolvedClassType:
             return cast_type_const<UnresolvedClassType>(*this)->show(gs);
         case Tag::BlamedUntyped:
-            return cast_type_const<BlamedUntyped>(*this)->show(gs);
+            return cast_inline_type_nonnull<BlamedUntyped>(*this).show(gs);
         case Tag::ClassType:
             return cast_inline_type_nonnull<ClassType>(*this).show(gs);
         case Tag::TypeVar:
