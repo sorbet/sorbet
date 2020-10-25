@@ -262,7 +262,7 @@ template <class To> bool isa_type(const TypePtr &what) {
 }
 
 template <class To> To cast_inline_type_nonnull(const TypePtr &what) {
-    static_assert(TypePtr::TypeToIsInline<To>::value == false,
+    static_assert(TypePtr::TypeToIsInline<To>::value == true,
                   "Cannot call `cast_inline_type_*` on non-inline types. Please use `cast_type_*`.");
     ENFORCE(isa_type<To>(what), "cast_inline_type_nonnull failed!");
     return To::fromTypePtrValue(what.untagValue());
@@ -285,6 +285,8 @@ template <class To> To *cast_type(TypePtr &what) {
 #define TYPE_INLINE(name) TYPE_IMPL(name, true)
 
 #define TYPE_FINAL(name) TYPE_IMPL(name, false) final
+
+#define TYPE_FINAL_INLINE(name) TYPE_IMPL(name, true) final
 
 class ProxyType {
 public:
@@ -355,7 +357,14 @@ public:
 };
 CheckSize(LambdaParam, 40, 8);
 
-TYPE_FINAL(SelfTypeParam) {
+TYPE_FINAL_INLINE(SelfTypeParam) {
+    static SelfTypeParam fromTypePtrValue(u4 value) {
+        return SelfTypeParam(SymbolRef::fromRaw(value));
+    }
+    u4 toTypePtrValue() const {
+        return definition.rawId();
+    }
+
 public:
     SymbolRef definition;
     SelfTypeParam(const SelfTypeParam &obj) = delete;
@@ -368,6 +377,10 @@ public:
 
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
     void _sanityCheck(const GlobalState &gs) const;
+
+    friend TypePtr;
+    template <class T, class... Args> friend TypePtr make_type(Args && ... args);
+    template <class To> friend To cast_inline_type_nonnull(const TypePtr &what);
 };
 CheckSize(SelfTypeParam, 8, 8);
 

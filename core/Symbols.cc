@@ -39,7 +39,7 @@ vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
             ENFORCE(lambdaParam != nullptr);
             targs.emplace_back(lambdaParam->upperBound);
         } else {
-            targs.emplace_back(make_type<SelfTypeParam>(tm));
+            targs.emplace_back(make_inline_type<SelfTypeParam>(tm));
         }
     }
     return targs;

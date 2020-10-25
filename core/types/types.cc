@@ -734,8 +734,8 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
             return make_type<AppliedType>(appliedType->klass, newTargs);
         }
         case TypePtr::Tag::SelfTypeParam: {
-            auto *param = cast_type_const<SelfTypeParam>(type);
-            auto sym = param->definition;
+            auto param = cast_inline_type_nonnull<SelfTypeParam>(type);
+            auto sym = param.definition;
             if (sym.data(ctx)->owner == ctx.owner) {
                 ENFORCE(isa_type<LambdaParam>(sym.data(ctx)->resultType));
                 return sym.data(ctx)->resultType;

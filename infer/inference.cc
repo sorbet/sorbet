@@ -28,7 +28,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         constr = _constr.get();
         for (core::SymbolRef typeArgument : cfg->symbol.data(ctx)->typeArguments()) {
             constr->rememberIsSubtype(ctx, typeArgument.data(ctx)->resultType,
-                                      core::make_type<core::SelfTypeParam>(typeArgument));
+                                      core::make_inline_type<core::SelfTypeParam>(typeArgument));
         }
         if (!constr->solve(ctx)) {
             Exception::raise("should never happen");

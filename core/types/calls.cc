@@ -1800,7 +1800,7 @@ public:
 
             // The return type from dispatched is ignored, and we return
             // `T.attached_class` instead.
-            returnTy = make_type<SelfTypeParam>(attachedClass);
+            returnTy = make_inline_type<SelfTypeParam>(attachedClass);
         }
 
         for (auto &err : res.main.errors) {

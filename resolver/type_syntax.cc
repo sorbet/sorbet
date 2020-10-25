@@ -735,7 +735,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                         // At this point, we maake a skolemized variable that will be unwrapped at the end of type
                         // parsing using Types::unwrapSkolemVariables. The justification for this is that type
                         // constructors like `Types::any` do not expect to see bound variables, and will panic.
-                        result.type = core::make_type<core::SelfTypeParam>(sym);
+                        result.type = core::make_inline_type<core::SelfTypeParam>(sym);
                     } else {
                         if (auto e = ctx.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
                             string typeSource = isTypeTemplate ? "type_template" : "type_member";

@@ -1037,7 +1037,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 ENFORCE(lambdaParam != nullptr);
                                 tp.type = core::make_type<core::MetaType>(lambdaParam->upperBound);
                             } else {
-                                tp.type = core::make_type<core::MetaType>(core::make_type<core::SelfTypeParam>(symbol));
+                                tp.type = core::make_type<core::MetaType>(
+                                    core::make_inline_type<core::SelfTypeParam>(symbol));
                             }
                         } else if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(

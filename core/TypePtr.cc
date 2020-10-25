@@ -39,16 +39,14 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
     ENFORCE(ptr != nullptr);
 
     switch (tag) {
+        case Tag::SelfTypeParam:
         case Tag::ClassType:
-            // Inlined.
+            // Inlined; should not be called.
+            ENFORCE(false);
             break;
 
         case Tag::LambdaParam:
             delete reinterpret_cast<LambdaParam *>(ptr);
-            break;
-
-        case Tag::SelfTypeParam:
-            delete reinterpret_cast<SelfTypeParam *>(ptr);
             break;
 
         case Tag::AliasType:
@@ -489,7 +487,7 @@ void TypePtr::_sanityCheck(const GlobalState &gs) const {
         case Tag::LiteralType:
             return cast_type_const<LiteralType>(*this)->_sanityCheck(gs);
         case Tag::SelfTypeParam:
-            return cast_type_const<SelfTypeParam>(*this)->_sanityCheck(gs);
+            return cast_inline_type_nonnull<SelfTypeParam>(*this)._sanityCheck(gs);
         case Tag::SelfType:
             return cast_type_const<SelfType>(*this)->_sanityCheck(gs);
         case Tag::TupleType:
@@ -526,7 +524,7 @@ string TypePtr::toStringWithTabs(const GlobalState &gs, int tabs) const {
         case Tag::LiteralType:
             return cast_type_const<LiteralType>(*this)->toStringWithTabs(gs, tabs);
         case Tag::SelfTypeParam:
-            return cast_type_const<SelfTypeParam>(*this)->toStringWithTabs(gs, tabs);
+            return cast_inline_type_nonnull<SelfTypeParam>(*this).toStringWithTabs(gs, tabs);
         case Tag::SelfType:
             return cast_type_const<SelfType>(*this)->toStringWithTabs(gs, tabs);
         case Tag::TupleType:
@@ -567,7 +565,7 @@ std::string TypePtr::show(const GlobalState &gs) const {
         case Tag::LiteralType:
             return cast_type_const<LiteralType>(*this)->show(gs);
         case Tag::SelfTypeParam:
-            return cast_type_const<SelfTypeParam>(*this)->show(gs);
+            return cast_inline_type_nonnull<SelfTypeParam>(*this).show(gs);
         case Tag::SelfType:
             return cast_type_const<SelfType>(*this)->show(gs);
         case Tag::TupleType:
@@ -626,7 +624,7 @@ bool TypePtr::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
         case Tag::LambdaParam:
             return cast_type_const<LambdaParam>(*this)->derivesFrom(gs, klass);
         case Tag::SelfTypeParam:
-            return cast_type_const<SelfTypeParam>(*this)->derivesFrom(gs, klass);
+            return cast_inline_type_nonnull<SelfTypeParam>(*this).derivesFrom(gs, klass);
         case Tag::SelfType:
             return cast_type_const<SelfType>(*this)->derivesFrom(gs, klass);
     }
@@ -654,7 +652,7 @@ DispatchResult TypePtr::dispatchCall(const GlobalState &gs, DispatchArgs args) c
         case Tag::MetaType:
             return cast_type_const<MetaType>(*this)->dispatchCall(gs, move(args));
         case Tag::SelfTypeParam:
-            return cast_type_const<SelfTypeParam>(*this)->dispatchCall(gs, move(args));
+            return cast_inline_type_nonnull<SelfTypeParam>(*this).dispatchCall(gs, move(args));
 
         case Tag::TypeVar:
         case Tag::LambdaParam:
