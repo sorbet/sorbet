@@ -372,7 +372,7 @@ void GlobalState::initEmpty() {
     {
         auto &importArg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
         // T.class_of(PackageSpec)
-        importArg.type = make_type<ClassType>(Symbols::PackageSpecSingleton());
+        importArg.type = make_inline_type<ClassType>(Symbols::PackageSpecSingleton());
         auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
         arg.flags.isBlock = true;
     }
@@ -621,7 +621,7 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    method.data(*this)->resultType = core::make_type<core::ClassType>(core::Symbols::Encoding());
+    method.data(*this)->resultType = core::make_inline_type<core::ClassType>(core::Symbols::Encoding());
 
     // Synthesize <DeclBuilderForProcs>.<params>(args: Hash) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());

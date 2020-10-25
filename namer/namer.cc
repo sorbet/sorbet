@@ -1226,7 +1226,7 @@ class SymbolDefiner {
                 ctx.state.enterTypeMember(core::Loc(ctx.file, typeMember.asgnLoc), onSymbol, typeMember.name, variance);
 
             // The todo bounds will be fixed by the resolver in ResolveTypeParamsWalk.
-            auto todo = core::make_type<core::ClassType>(core::Symbols::todo());
+            auto todo = core::make_inline_type<core::ClassType>(core::Symbols::todo());
             sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, todo, todo);
 
             if (isTypeTemplate) {

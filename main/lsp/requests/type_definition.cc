@@ -12,8 +12,9 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
     if (type.isUntyped()) {
         return result;
     }
-    if (auto *t = core::cast_type_const<core::ClassType>(type)) {
-        result.emplace_back(t->symbol.data(gs)->loc());
+    if (core::isa_type<core::ClassType>(type)) {
+        auto t = core::cast_inline_type_nonnull<core::ClassType>(type);
+        result.emplace_back(t.symbol.data(gs)->loc());
     } else if (auto *t = core::cast_type_const<core::AppliedType>(type)) {
         result.emplace_back(t->klass.data(gs)->loc());
     } else if (auto *t = core::cast_type_const<core::OrType>(type)) {

@@ -54,13 +54,13 @@ TEST_CASE("Infer") {
 
     SUBCASE("LiteralsSubtyping") {
         auto intLit = core::make_type<core::LiteralType>(int64_t(1));
-        auto intClass = core::make_type<core::ClassType>(core::Symbols::Integer());
+        auto intClass = core::make_inline_type<core::ClassType>(core::Symbols::Integer());
         auto floatLit = core::make_type<core::LiteralType>(1.0f);
-        auto floatClass = core::make_type<core::ClassType>(core::Symbols::Float());
+        auto floatClass = core::make_inline_type<core::ClassType>(core::Symbols::Float());
         auto trueLit = core::make_type<core::LiteralType>(true);
-        auto trueClass = core::make_type<core::ClassType>(core::Symbols::TrueClass());
+        auto trueClass = core::make_inline_type<core::ClassType>(core::Symbols::TrueClass());
         auto stringLit = core::make_type<core::LiteralType>(core::Symbols::String(), core::Names::assignTemp());
-        auto stringClass = core::make_type<core::ClassType>(core::Symbols::String());
+        auto stringClass = core::make_inline_type<core::ClassType>(core::Symbols::String());
         REQUIRE(core::Types::isSubType(gs, intLit, intClass));
         REQUIRE(core::Types::isSubType(gs, floatLit, floatClass));
         REQUIRE(core::Types::isSubType(gs, trueLit, trueClass));
@@ -85,8 +85,8 @@ TEST_CASE("Infer") {
         REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.data(gs)->showRaw(gs));
         REQUIRE_EQ("<C <U Foo>>", fooSymbol.data(gs)->name.data(gs)->showRaw(gs));
 
-        auto barType = core::make_type<core::ClassType>(barSymbol);
-        auto fooType = core::make_type<core::ClassType>(fooSymbol);
+        auto barType = core::make_inline_type<core::ClassType>(barSymbol);
+        auto fooType = core::make_inline_type<core::ClassType>(fooSymbol);
 
         REQUIRE(core::Types::isSubType(gs, fooType, barType));
         REQUIRE(core::Types::isSubType(gs, fooType, fooType));
@@ -105,9 +105,9 @@ TEST_CASE("Infer") {
         REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.data(gs)->showRaw(gs));
         REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.data(gs)->showRaw(gs));
 
-        auto barType = core::make_type<core::ClassType>(barSymbol);
-        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
-        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
+        auto barType = core::make_inline_type<core::ClassType>(barSymbol);
+        auto foo1Type = core::make_inline_type<core::ClassType>(foo1Symbol);
+        auto foo2Type = core::make_inline_type<core::ClassType>(foo2Symbol);
 
         auto barNfoo1 = core::Types::any(gs, barType, foo1Type);
         auto foo1Nbar = core::Types::any(gs, foo1Type, barType);
@@ -133,7 +133,7 @@ TEST_CASE("Infer") {
         REQUIRE(core::Types::equiv(gs, barNfoo1, foo1Nbar));
         REQUIRE(core::Types::equiv(gs, foo1Nfoo2, foo2Nfoo1));
 
-        auto intType = core::make_type<core::ClassType>(core::Symbols::Integer());
+        auto intType = core::make_inline_type<core::ClassType>(core::Symbols::Integer());
         auto intNfoo1 = core::Types::any(gs, foo1Type, intType);
         auto intNbar = core::Types::any(gs, barType, intType);
         auto intNfoo1Nbar = core::Types::any(gs, intNfoo1, barType);
@@ -154,9 +154,9 @@ TEST_CASE("Infer") {
         REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.data(gs)->showRaw(gs));
         REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.data(gs)->showRaw(gs));
 
-        auto barType = core::make_type<core::ClassType>(barSymbol);
-        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
-        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
+        auto barType = core::make_inline_type<core::ClassType>(barSymbol);
+        auto foo1Type = core::make_inline_type<core::ClassType>(foo1Symbol);
+        auto foo2Type = core::make_inline_type<core::ClassType>(foo2Symbol);
 
         auto barOrfoo1 = core::Types::all(gs, barType, foo1Type);
         auto foo1Orbar = core::Types::all(gs, foo1Type, barType);

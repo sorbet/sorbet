@@ -167,8 +167,8 @@ SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName left, SimilarMetho
 
 SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, const core::TypePtr &receiver,
                                                string_view prefix) {
-    if (auto *type = core::cast_type_const<core::ClassType>(receiver)) {
-        return similarMethodsForClass(gs, type->symbol, prefix);
+    if (core::isa_type<core::ClassType>(receiver)) {
+        return similarMethodsForClass(gs, core::cast_inline_type_nonnull<core::ClassType>(receiver).symbol, prefix);
     } else if (auto *type = core::cast_type_const<core::AppliedType>(receiver)) {
         return similarMethodsForClass(gs, type->klass, prefix);
     } else if (auto *type = core::cast_type_const<core::AndType>(receiver)) {
@@ -534,8 +534,9 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
     }
 
     core::SymbolRef receiverSym;
-    if (auto classType = core::cast_type_const<core::ClassType>(receiverType)) {
-        receiverSym = classType->symbol;
+    if (core::isa_type<core::ClassType>(receiverType)) {
+        auto classType = core::cast_inline_type_nonnull<core::ClassType>(receiverType);
+        receiverSym = classType.symbol;
     } else if (auto appliedType = core::cast_type_const<core::AppliedType>(receiverType)) {
         receiverSym = appliedType->klass;
     } else {

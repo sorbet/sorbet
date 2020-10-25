@@ -69,7 +69,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
     // this happens e.g. in case this is a stub class
     auto ref = this->ref(gs);
     if (typeMembers().empty()) {
-        resultType = make_type<ClassType>(ref);
+        resultType = make_inline_type<ClassType>(ref);
     } else {
         vector<TypePtr> targs;
         targs.reserve(typeMembers().size());
@@ -907,7 +907,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     // Initialize the bounds of AttachedClass as todo, as they will be updated
     // to the externalType of the attached class for the upper bound, and bottom
     // for the lower bound in the ResolveSignaturesWalk pass of the resolver.
-    auto todo = make_type<ClassType>(Symbols::todo());
+    auto todo = make_inline_type<ClassType>(Symbols::todo());
     tp.data(gs)->resultType = make_type<LambdaParam>(tp, todo, todo);
 
     selfRef.data(gs)->members()[Names::singleton()] = singleton;
@@ -973,21 +973,21 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     const TypePtr *iter = &currentClasses;
     const OrType *orT = nullptr;
     while ((orT = cast_type_const<OrType>(*iter))) {
-        auto right = cast_type_const<ClassType>(orT->right);
+        auto right = cast_inline_type_nonnull<ClassType>(orT->right);
         ENFORCE(left);
-        if (right->symbol == classOfSubclass) {
+        if (right.symbol == classOfSubclass) {
             return;
         }
         iter = &orT->left;
     }
     ENFORCE(isa_type<ClassType>(*iter));
-    if (cast_type_const<ClassType>(*iter)->symbol == classOfSubclass) {
+    if (cast_inline_type_nonnull<ClassType>(*iter).symbol == classOfSubclass) {
         return;
     }
     if (currentClasses != core::Types::bottom()) {
-        appliedType->targs[0] = OrType::make_shared(currentClasses, make_type<ClassType>(classOfSubclass));
+        appliedType->targs[0] = OrType::make_shared(currentClasses, make_inline_type<ClassType>(classOfSubclass));
     } else {
-        appliedType->targs[0] = make_type<ClassType>(classOfSubclass);
+        appliedType->targs[0] = make_inline_type<ClassType>(classOfSubclass);
     }
 }
 
@@ -1018,18 +1018,18 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto result = Types::bottom();
     while (auto orType = cast_type_const<OrType>(currentClasses)) {
-        auto classType = cast_type_const<ClassType>(orType->right);
-        ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
-        auto subclass = classType->symbol.data(gs)->attachedClass(gs);
+        ENFORCE(isa_type<ClassType>(orType->right), "Something in sealedSubclasses that's not a ClassType");
+        auto classType = cast_inline_type_nonnull<ClassType>(orType->right);
+        auto subclass = classType.symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
-        result = Types::any(gs, make_type<ClassType>(subclass), result);
+        result = Types::any(gs, make_inline_type<ClassType>(subclass), result);
         currentClasses = orType->left;
     }
-    auto lastClassType = cast_type_const<ClassType>(currentClasses);
-    ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
-    auto subclass = lastClassType->symbol.data(gs)->attachedClass(gs);
+    ENFORCE(isa_type<ClassType>(currentClasses), "Last element of sealedSubclasses must be ClassType");
+    auto lastClassType = cast_inline_type_nonnull<ClassType>(currentClasses);
+    auto subclass = lastClassType.symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
-    result = Types::any(gs, make_type<ClassType>(subclass), result);
+    result = Types::any(gs, make_inline_type<ClassType>(subclass), result);
 
     return result;
 }

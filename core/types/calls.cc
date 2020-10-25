@@ -315,14 +315,15 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         return metaType->wrapped;
     }
 
-    if (auto *classType = cast_type_const<ClassType>(tp)) {
-        if (classType->symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
+    if (isa_type<ClassType>(tp)) {
+        auto classType = cast_inline_type_nonnull<ClassType>(tp);
+        if (classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
             // T::Enum instances are allowed to stand for themselves in type syntax positions.
             // See the note in type_syntax.cc regarding T::Enum.
             return tp;
         }
 
-        SymbolRef attachedClass = classType->symbol.data(gs)->attachedClass(gs);
+        SymbolRef attachedClass = classType.symbol.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
@@ -701,7 +702,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 } else if (spec.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = cast_type_const<LiteralType>(*it);
-                        SymbolRef klass = cast_type_const<ClassType>(key->underlying())->symbol;
+                        SymbolRef klass = cast_inline_type_nonnull<ClassType>(key->underlying()).symbol;
                         if (klass != Symbols::Symbol()) {
                             continue;
                         }
@@ -728,7 +729,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
                     auto lit = cast_type_const<LiteralType>(litType);
-                    return cast_type_const<ClassType>(lit->underlying())->symbol == Symbols::Symbol() &&
+                    return cast_inline_type_nonnull<ClassType>(lit->underlying()).symbol == Symbols::Symbol() &&
                            lit->value == spec.name._id;
                 });
                 if (arg == hash->keys.end()) {
@@ -753,7 +754,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
             }
             for (auto &keyType : hash->keys) {
                 auto key = cast_type_const<LiteralType>(keyType);
-                SymbolRef klass = cast_type_const<ClassType>(key->underlying())->symbol;
+                SymbolRef klass = cast_inline_type_nonnull<ClassType>(key->underlying()).symbol;
                 if (klass == Symbols::Symbol() && consumed.find(NameRef(gs, key->value)) != consumed.end()) {
                     continue;
                 }
@@ -947,8 +948,9 @@ SymbolRef unwrapSymbol(const TypePtr &type) {
     const TypePtr *typePtr = &type;
     TypePtr tempHolder;
     while (!result.exists()) {
-        if (auto *klass = cast_type_const<ClassType>(*typePtr)) {
-            result = klass->symbol;
+        if (isa_type<ClassType>(*typePtr)) {
+            auto klass = cast_inline_type_nonnull<ClassType>(*typePtr);
+            result = klass.symbol;
         } else if (auto *app = cast_type_const<AppliedType>(*typePtr)) {
             result = app->klass;
         } else if (auto *proxy = cast_type_const<ProxyType>(*typePtr)) {
@@ -1535,9 +1537,9 @@ private:
         auto &blockPreType = dispatched.main.blockPreType;
         if (blockPreType && !Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, blockPreType,
                                                              UntypedMode::AlwaysCompatible)) {
-            auto *passedInProcClass = cast_type_const<ClassType>(passedInBlockType);
             auto nonNilableBlockType = Types::dropNil(gs, blockPreType);
-            if (passedInProcClass && passedInProcClass->symbol == Symbols::Proc() &&
+            if (isa_type<ClassType>(passedInBlockType) &&
+                cast_inline_type_nonnull<ClassType>(passedInBlockType).symbol == Symbols::Proc() &&
                 Types::isSubType(gs, nonNilableBlockType, passedInBlockType)) {
                 // If a block of unknown arity is passed in, but the function was declared with a known arity,
                 // raise an error in strict mode.
@@ -2132,7 +2134,8 @@ class Enumerable_toH : public IntrinsicMethod {
 public:
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
-        auto hash = make_type<ClassType>(core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs));
+        auto hash =
+            make_inline_type<ClassType>(core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs));
         InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
         CallLocs locs{
             args.locs.file,

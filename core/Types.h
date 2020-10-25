@@ -63,7 +63,14 @@ public:
 CheckSize(ArgInfo, 48, 8);
 
 template <class T, class... Args> TypePtr make_type(Args &&... args) {
+    static_assert(!TypePtr::TypeToIsInline<T>::value,
+                  "make_type cannot be used for inline types; use make_inline_type instead");
     return TypePtr(TypePtr::TypeToTag<T>::value, new T(std::forward<Args>(args)...));
+}
+
+template <class T, class... Args> TypePtr make_inline_type(Args &&... args) {
+    static_assert(TypePtr::TypeToIsInline<T>::value, "make_inline_type is for inline types; use make_type instead");
+    return TypePtr(TypePtr::TypeToTag<T>::value, T(std::forward<Args>(args)...), true);
 }
 
 enum class UntypedMode {
@@ -184,6 +191,8 @@ struct Intrinsic {
 extern const std::vector<Intrinsic> intrinsicMethods;
 
 template <class To> To const *cast_type_const(const TypePtr &what) {
+    static_assert(TypePtr::TypeToIsInline<To>::value == false,
+                  "Cannot call `cast_type_*` on inline types. Please use `cast_inline_type_nonnull`.");
     if (what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value) {
         return reinterpret_cast<To const *>(what.get());
     } else {
@@ -192,22 +201,6 @@ template <class To> To const *cast_type_const(const TypePtr &what) {
 }
 
 // Specializations to handle the class hierarchy.
-
-class ClassType;
-template <> inline const ClassType *cast_type_const<ClassType>(const TypePtr &what) {
-    if (what == nullptr) {
-        return nullptr;
-    }
-    switch (what.tag()) {
-        case TypePtr::Tag::ClassType:
-        case TypePtr::Tag::BlamedUntyped:
-        case TypePtr::Tag::UnresolvedClassType:
-        case TypePtr::Tag::UnresolvedAppliedType:
-            return reinterpret_cast<const ClassType *>(what.get());
-        default:
-            return nullptr;
-    }
-};
 
 bool inline is_ground_type(const TypePtr &what) {
     if (what == nullptr) {
@@ -226,24 +219,53 @@ bool inline is_ground_type(const TypePtr &what) {
     }
 }
 
-class ProxyType;
-template <> inline const ProxyType *cast_type_const<ProxyType>(const TypePtr &what) {
+bool inline is_proxy_type(const TypePtr &what) {
     if (what == nullptr) {
-        return nullptr;
+        return false;
     }
     switch (what.tag()) {
         case TypePtr::Tag::LiteralType:
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
         case TypePtr::Tag::MetaType:
-            return reinterpret_cast<const ProxyType *>(what.get());
+            return true;
         default:
-            return nullptr;
+            return false;
     }
 }
 
+class ProxyType;
+template <> inline const ProxyType *cast_type_const<ProxyType>(const TypePtr &what) {
+    if (is_proxy_type(what)) {
+        return reinterpret_cast<const ProxyType *>(what.get());
+    }
+    return nullptr;
+}
+
 template <class To> bool isa_type(const TypePtr &what) {
-    return cast_type_const<To>(what) != nullptr;
+    if (what == nullptr) {
+        return false;
+    }
+    if (TypePtr::TypeToTag<To>::value == TypePtr::Tag::ClassType) {
+        // Unfortunate special case.
+        switch (what.tag()) {
+            case TypePtr::Tag::ClassType:
+            case TypePtr::Tag::BlamedUntyped:
+            case TypePtr::Tag::UnresolvedClassType:
+            case TypePtr::Tag::UnresolvedAppliedType:
+                return true;
+            default:
+                return false;
+        }
+    }
+    return TypePtr::TypeToTag<To>::value == what.tag();
+}
+
+template <class To> To cast_inline_type_nonnull(const TypePtr &what) {
+    static_assert(TypePtr::TypeToIsInline<To>::value == false,
+                  "Cannot call `cast_inline_type_*` on non-inline types. Please use `cast_type_*`.");
+    ENFORCE(isa_type<To>(what), "cast_inline_type_nonnull failed!");
+    return To::fromTypePtrValue(what.untagValue());
 }
 
 template <class To> To *cast_type(TypePtr &what) {
@@ -251,13 +273,18 @@ template <class To> To *cast_type(TypePtr &what) {
     return const_cast<To *>(cast_type_const<To>(what));
 }
 
-#define TYPE(name)                                                                                             \
+#define TYPE_IMPL(name, isInline)                                                                              \
     class name;                                                                                                \
     template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
     template <> struct TypePtr::TagToType<TypePtr::Tag::name> { using value = name; };                         \
+    template <> struct TypePtr::TypeToIsInline<name> { static constexpr bool value = isInline; };              \
     class __attribute__((aligned(8))) name
 
-#define TYPE_FINAL(name) TYPE(name) final
+#define TYPE(name) TYPE_IMPL(name, false)
+
+#define TYPE_INLINE(name) TYPE_IMPL(name, true)
+
+#define TYPE_FINAL(name) TYPE_IMPL(name, false) final
 
 class ProxyType {
 public:
@@ -274,7 +301,14 @@ public:
 };
 CheckSize(ProxyType, 8, 8);
 
-TYPE(ClassType) {
+TYPE_INLINE(ClassType) {
+    static ClassType fromTypePtrValue(u4 value) {
+        return ClassType(SymbolRef::fromRaw(value));
+    }
+    u4 toTypePtrValue() const {
+        return symbol.rawId();
+    }
+
 public:
     SymbolRef symbol;
     ClassType(SymbolRef symbol);
@@ -287,6 +321,10 @@ public:
 
     bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
+
+    friend TypePtr;
+    template <class T, class... Args> friend TypePtr make_type(Args && ... args);
+    template <class To> friend To cast_inline_type_nonnull(const TypePtr &what);
 };
 CheckSize(ClassType, 16, 8);
 
@@ -723,6 +761,21 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
 };
+
+// Unfortunate override to handle the class hierarchy.
+template <> inline ClassType cast_inline_type_nonnull(const TypePtr &what) {
+    switch (what.tag()) {
+        case TypePtr::Tag::ClassType:
+            return ClassType::fromTypePtrValue(what.untagValue());
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::UnresolvedAppliedType:
+            return ClassType(Symbols::untyped());
+        default:
+            ENFORCE(false, "cast_inline_type_nonnull failed!");
+            return ClassType(Symbols::untyped());
+    }
+}
 
 } // namespace sorbet::core
 #endif // SORBET_TYPES_H

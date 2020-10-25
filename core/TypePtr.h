@@ -51,6 +51,9 @@ public:
     // A mapping from tag value to the type it represents.
     template <Tag T> struct TagToType;
 
+    // A mapping from tag value to whether or not the indicated type can be stored inline in a TypePtr.
+    template <typename T> struct TypeToIsInline;
+
 private:
     std::atomic<u4> *counter;
     tagged_storage ptr;
@@ -59,16 +62,24 @@ private:
 
     static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
 
-    static tagged_storage tagPtr(Tag tag, void *expr) {
+    static tagged_storage _tag(Tag tag, tagged_storage value) {
         auto val = static_cast<tagged_storage>(tag);
         if (val >= 8) {
             // Store the tag in the upper 16 bits of the pointer, as it won't fit in the lower three bits.
             val <<= 48;
         }
 
-        auto maskedPtr = reinterpret_cast<tagged_storage>(expr) & PTR_MASK;
+        auto maskedValue = value & PTR_MASK;
 
-        return maskedPtr | val;
+        return maskedValue | val;
+    }
+
+    static tagged_storage tagValue(Tag tag, u4 value) {
+        return _tag(tag, (static_cast<tagged_storage>(value) << 3));
+    }
+
+    static tagged_storage tagPtr(Tag tag, void *expr) {
+        return _tag(tag, reinterpret_cast<tagged_storage>(expr));
     }
 
     explicit TypePtr(Tag tag, std::atomic<u4> *counter, void *expr) : counter(counter), ptr(tagPtr(tag, expr)) {
@@ -76,7 +87,18 @@ private:
             counter->fetch_add(1);
         }
     }
+
+    template <class T>
+    explicit TypePtr(Tag tag, T type, bool) : counter(nullptr), ptr(tagValue(tag, type.toTypePtrValue())) {
+        ENFORCE_NO_TIMER(TypeToIsInline<T>::value);
+    }
+
     static void deleteTagged(Tag tag, void *ptr) noexcept;
+
+    u4 untagValue() const noexcept {
+        auto val = (ptr & PTR_MASK) >> 3;
+        return static_cast<u4>(val);
+    }
 
     // A version of release that doesn't mask the tag bits
     tagged_storage releaseTagged() noexcept {
@@ -235,6 +257,8 @@ public:
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     template <class To> friend To const *cast_type_const(const TypePtr &what);
     template <class To> friend To *cast_type(TypePtr &what);
+    template <class To> friend To cast_inline_type_nonnull(const TypePtr &what);
+    template <class T, class... Args> friend TypePtr make_inline_type(Args &&... args);
 };
 CheckSize(TypePtr, 16, 8);
 } // namespace sorbet::core

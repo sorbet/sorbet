@@ -352,8 +352,8 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         case TypePtr::Tag::UnresolvedClassType:
         case TypePtr::Tag::BlamedUntyped:
         case TypePtr::Tag::ClassType: {
-            auto *c = cast_type_const<ClassType>(what);
-            p.putU4(c->symbol.rawId());
+            auto c = cast_inline_type_nonnull<ClassType>(what);
+            p.putU4(c.symbol.rawId());
             break;
         }
         case TypePtr::Tag::OrType: {
@@ -444,7 +444,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
         case TypePtr::Tag::UnresolvedClassType:
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::ClassType:
-            return make_type<ClassType>(SymbolRef::fromRaw(p.getU4()));
+            return make_inline_type<ClassType>(SymbolRef::fromRaw(p.getU4()));
         case TypePtr::Tag::OrType:
             return OrType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
         case TypePtr::Tag::LiteralType: {

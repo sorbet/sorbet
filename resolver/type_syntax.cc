@@ -215,8 +215,9 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
 
                     bool validBind = false;
                     auto bind = getResultTypeWithSelfTypeParams(ctx, send->args.front(), *parent, args);
-                    if (auto classType = core::cast_type_const<core::ClassType>(bind)) {
-                        sig.bind = classType->symbol;
+                    if (core::isa_type<core::ClassType>(bind)) {
+                        auto classType = core::cast_inline_type_nonnull<core::ClassType>(bind);
+                        sig.bind = classType.symbol;
                         validBind = true;
                     } else if (auto appType = core::cast_type_const<core::AppliedType>(bind)) {
                         // When `T.proc.bind` is used with `T.class_of`, pass it
@@ -640,11 +641,15 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             // This is not the case for arbitrary singletons: MySingleton.instance can be called as many
             // times as wanted, and assigned into different constants each time. As much as possible, we
             // want there to be one name for every type; making an alias for a type should always be
-            // syntactically declared with T.type_alias.
-            if (auto resultType = core::cast_type_const<core::ClassType>(maybeAliased.data(ctx)->resultType)) {
-                if (resultType->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
-                    result.type = maybeAliased.data(ctx)->resultType;
-                    return;
+            // syntactically declared with T.type_alias
+            {
+                auto resultTypePtr = maybeAliased.data(ctx)->resultType;
+                if (core::isa_type<core::ClassType>(resultTypePtr)) {
+                    auto resultType = core::cast_inline_type_nonnull<core::ClassType>(resultTypePtr);
+                    if (resultType.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::T_Enum())) {
+                        result.type = maybeAliased.data(ctx)->resultType;
+                        return;
+                    }
                 }
             }
 
@@ -902,7 +907,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
             }
 
             auto correctedSingleton = corrected.data(ctx)->singletonClass(ctx);
-            auto ctype = core::make_type<core::ClassType>(correctedSingleton);
+            auto ctype = core::make_inline_type<core::ClassType>(correctedSingleton);
             core::CallLocs locs{
                 ctx.file,
                 s->loc,

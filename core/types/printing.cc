@@ -57,7 +57,7 @@ string LiteralType::show(const GlobalState &gs) const {
 }
 
 string LiteralType::showValue(const GlobalState &gs) const {
-    SymbolRef undSymbol = cast_type_const<ClassType>(this->underlying())->symbol;
+    SymbolRef undSymbol = cast_inline_type_nonnull<ClassType>(this->underlying()).symbol;
     if (undSymbol == Symbols::String()) {
         return fmt::format("\"{}\"", absl::CEscape(NameRef(gs, this->value).show(gs)));
     } else if (undSymbol == Symbols::Symbol()) {
@@ -123,7 +123,8 @@ string ShapeType::show(const GlobalState &gs) const {
         } else {
             fmt::format_to(buf, ", ");
         }
-        SymbolRef undSymbol = cast_type_const<ClassType>(cast_type_const<LiteralType>(key)->underlying())->symbol;
+        SymbolRef undSymbol =
+            cast_inline_type_nonnull<ClassType>(cast_type_const<LiteralType>(key)->underlying()).symbol;
         if (undSymbol == Symbols::Symbol()) {
             fmt::format_to(buf, "{}: {}", NameRef(gs, cast_type_const<LiteralType>(key)->value).show(gs),
                            (*valueIterator).show(gs));
@@ -251,13 +252,14 @@ struct OrInfo {
 pair<OrInfo, optional<string>> showOrs(const GlobalState &, const TypePtr &, const TypePtr &);
 
 pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, const TypePtr &ty) {
-    if (auto classType = cast_type_const<ClassType>(ty)) {
-        if (classType->symbol == Symbols::NilClass()) {
+    if (isa_type<ClassType>(ty)) {
+        auto classType = cast_inline_type_nonnull<ClassType>(ty);
+        if (classType.symbol == Symbols::NilClass()) {
             return make_pair(OrInfo::nilInfo(), nullopt);
-        } else if (classType->symbol == Symbols::TrueClass()) {
-            return make_pair(OrInfo::trueInfo(), make_optional(classType->show(gs)));
-        } else if (classType->symbol == Symbols::FalseClass()) {
-            return make_pair(OrInfo::falseInfo(), make_optional(classType->show(gs)));
+        } else if (classType.symbol == Symbols::TrueClass()) {
+            return make_pair(OrInfo::trueInfo(), make_optional(classType.show(gs)));
+        } else if (classType.symbol == Symbols::FalseClass()) {
+            return make_pair(OrInfo::falseInfo(), make_optional(classType.show(gs)));
         }
     } else if (auto orType = cast_type_const<OrType>(ty)) {
         return showOrs(gs, orType->left, orType->right);

@@ -178,9 +178,9 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::UnresolvedClassType:
         case TypePtr::Tag::ClassType: {
-            auto *t = core::cast_type_const<core::ClassType>(typ);
+            auto t = core::cast_inline_type_nonnull<core::ClassType>(typ);
             proto.set_kind(com::stripe::rubytyper::Type::CLASS);
-            proto.set_class_full_name(t->symbol.show(gs));
+            proto.set_class_full_name(t.symbol.show(gs));
             break;
         }
         case TypePtr::Tag::AndType: {

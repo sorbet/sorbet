@@ -32,22 +32,22 @@ TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &re
 }
 
 TypePtr Types::top() {
-    static auto res = make_type<ClassType>(Symbols::top());
+    static auto res = make_inline_type<ClassType>(Symbols::top());
     return res;
 }
 
 TypePtr Types::bottom() {
-    static auto res = make_type<ClassType>(Symbols::bottom());
+    static auto res = make_inline_type<ClassType>(Symbols::bottom());
     return res;
 }
 
 TypePtr Types::nilClass() {
-    static auto res = make_type<ClassType>(Symbols::NilClass());
+    static auto res = make_inline_type<ClassType>(Symbols::NilClass());
     return res;
 }
 
 TypePtr Types::untypedUntracked() {
-    static auto res = make_type<ClassType>(Symbols::untyped());
+    static auto res = make_inline_type<ClassType>(Symbols::untyped());
     return res;
 }
 
@@ -60,17 +60,17 @@ TypePtr Types::untyped(const sorbet::core::GlobalState &gs, sorbet::core::Symbol
 }
 
 TypePtr Types::void_() {
-    static auto res = make_type<ClassType>(Symbols::void_());
+    static auto res = make_inline_type<ClassType>(Symbols::void_());
     return res;
 }
 
 TypePtr Types::trueClass() {
-    static auto res = make_type<ClassType>(Symbols::TrueClass());
+    static auto res = make_inline_type<ClassType>(Symbols::TrueClass());
     return res;
 }
 
 TypePtr Types::falseClass() {
-    static auto res = make_type<ClassType>(Symbols::FalseClass());
+    static auto res = make_inline_type<ClassType>(Symbols::FalseClass());
     return res;
 }
 
@@ -80,12 +80,12 @@ TypePtr Types::Boolean() {
 }
 
 TypePtr Types::Integer() {
-    static auto res = make_type<ClassType>(Symbols::Integer());
+    static auto res = make_inline_type<ClassType>(Symbols::Integer());
     return res;
 }
 
 TypePtr Types::Float() {
-    static auto res = make_type<ClassType>(Symbols::Float());
+    static auto res = make_inline_type<ClassType>(Symbols::Float());
     return res;
 }
 
@@ -108,32 +108,32 @@ TypePtr Types::hashOfUntyped() {
 }
 
 TypePtr Types::procClass() {
-    static auto res = make_type<ClassType>(Symbols::Proc());
+    static auto res = make_inline_type<ClassType>(Symbols::Proc());
     return res;
 }
 
 TypePtr Types::classClass() {
-    static auto res = make_type<ClassType>(Symbols::Class());
+    static auto res = make_inline_type<ClassType>(Symbols::Class());
     return res;
 }
 
 TypePtr Types::declBuilderForProcsSingletonClass() {
-    static auto res = make_type<ClassType>(Symbols::DeclBuilderForProcsSingleton());
+    static auto res = make_inline_type<ClassType>(Symbols::DeclBuilderForProcsSingleton());
     return res;
 }
 
 TypePtr Types::String() {
-    static auto res = make_type<ClassType>(Symbols::String());
+    static auto res = make_inline_type<ClassType>(Symbols::String());
     return res;
 }
 
 TypePtr Types::Symbol() {
-    static auto res = make_type<ClassType>(Symbols::Symbol());
+    static auto res = make_inline_type<ClassType>(Symbols::Symbol());
     return res;
 }
 
 TypePtr Types::Object() {
-    static auto res = make_type<ClassType>(Symbols::Object());
+    static auto res = make_inline_type<ClassType>(Symbols::Object());
     return res;
 }
 
@@ -169,14 +169,15 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
         } else {
             result = from;
         }
-    } else if (auto *c = cast_type_const<ClassType>(from)) {
-        auto cdata = c->symbol.data(gs);
+    } else if (isa_type<ClassType>(from)) {
+        auto c = cast_inline_type_nonnull<ClassType>(from);
+        auto cdata = c.symbol.data(gs);
         if (from.hasUntyped()) {
             result = from;
-        } else if (c->symbol == klass || c->derivesFrom(gs, klass)) {
+        } else if (c.symbol == klass || c.derivesFrom(gs, klass)) {
             result = Types::bottom();
-        } else if (c->symbol.data(gs)->isClassOrModuleClass() && klass.data(gs)->isClassOrModuleClass() &&
-                   !klass.data(gs)->derivesFrom(gs, c->symbol)) {
+        } else if (c.symbol.data(gs)->isClassOrModuleClass() && klass.data(gs)->isClassOrModuleClass() &&
+                   !klass.data(gs)->derivesFrom(gs, c.symbol)) {
             // We have two classes (not modules), and if the class we're
             // removing doesn't derive from `c`, there's nothing to do,
             // because of ruby having single inheretance.
@@ -215,8 +216,9 @@ bool Types::canBeTruthy(const GlobalState &gs, const TypePtr &what) {
         return canBeTruthy(gs, o->left) || canBeTruthy(gs, o->right);
     } else if (auto *a = cast_type_const<AndType>(what)) {
         return canBeTruthy(gs, a->left) && canBeTruthy(gs, a->right);
-    } else if (auto *c = cast_type_const<ClassType>(what)) {
-        auto sym = c->symbol;
+    } else if (isa_type<ClassType>(what)) {
+        auto c = cast_inline_type_nonnull<ClassType>(what);
+        auto sym = c.symbol;
         return sym == core::Symbols::untyped() ||
                (sym != core::Symbols::FalseClass() && sym != core::Symbols::NilClass());
     } else if (auto *c = cast_type_const<AppliedType>(what)) {
@@ -240,8 +242,9 @@ bool Types::canBeFalsy(const GlobalState &gs, const TypePtr &what) {
 }
 
 TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what) {
-    if (auto *c = cast_type_const<ClassType>(what)) {
-        return Types::dropSubtypesOf(gs, from, c->symbol);
+    if (isa_type<ClassType>(what)) {
+        auto c = cast_inline_type_nonnull<ClassType>(what);
+        return Types::dropSubtypesOf(gs, from, c.symbol);
     } else if (auto *c = cast_type_const<AppliedType>(what)) {
         return Types::dropSubtypesOf(gs, from, c->klass);
     } else if (auto *o = cast_type_const<OrType>(what)) {
@@ -360,12 +363,12 @@ bool LiteralType::equals(const LiteralType &rhs) const {
     if (this->value != rhs.value) {
         return false;
     }
-    auto *lklass = cast_type_const<ClassType>(this->underlying());
-    auto *rklass = cast_type_const<ClassType>(rhs.underlying());
-    if (!lklass || !rklass) {
+    if (!isa_type<ClassType>(this->underlying()) || !isa_type<ClassType>(rhs.underlying())) {
         return false;
     }
-    return lklass->symbol == rklass->symbol;
+    auto lklass = cast_inline_type_nonnull<ClassType>(this->underlying());
+    auto rklass = cast_inline_type_nonnull<ClassType>(rhs.underlying());
+    return lklass.symbol == rklass.symbol;
 }
 
 OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
@@ -752,9 +755,9 @@ core::SymbolRef Types::getRepresentedClass(const GlobalState &gs, const TypePtr 
         return core::Symbols::noSymbol();
     }
     core::SymbolRef singleton;
-    auto *s = cast_type_const<ClassType>(ty);
-    if (s != nullptr) {
-        singleton = s->symbol;
+    if (isa_type<ClassType>(ty)) {
+        auto s = cast_inline_type_nonnull<ClassType>(ty);
+        singleton = s.symbol;
     } else {
         auto *at = cast_type_const<AppliedType>(ty);
         if (at == nullptr) {

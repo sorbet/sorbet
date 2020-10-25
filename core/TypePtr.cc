@@ -40,7 +40,7 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
 
     switch (tag) {
         case Tag::ClassType:
-            delete reinterpret_cast<ClassType *>(ptr);
+            // Inlined.
             break;
 
         case Tag::LambdaParam:
@@ -106,18 +106,15 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
 }
 
 bool TypePtr::isUntyped() const {
-    auto *t = cast_type_const<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::untyped();
+    return isa_type<ClassType>(*this) && cast_inline_type_nonnull<ClassType>(*this).symbol == Symbols::untyped();
 }
 
 bool TypePtr::isNilClass() const {
-    auto *t = cast_type_const<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::NilClass();
+    return isa_type<ClassType>(*this) && cast_inline_type_nonnull<ClassType>(*this).symbol == Symbols::NilClass();
 }
 
 bool TypePtr::isBottom() const {
-    auto *t = cast_type_const<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::bottom();
+    return isa_type<ClassType>(*this) && cast_inline_type_nonnull<ClassType>(*this).symbol == Symbols::bottom();
 }
 
 int TypePtr::typeKind() const {
@@ -254,8 +251,8 @@ bool TypePtr::hasUntyped() const {
         case Tag::UnresolvedAppliedType:
         case Tag::UnresolvedClassType:
         case Tag::ClassType: {
-            auto *c = cast_type_const<ClassType>(*this);
-            return c->symbol == Symbols::untyped();
+            auto c = cast_inline_type_nonnull<ClassType>(*this);
+            return c.symbol == Symbols::untyped();
         }
         case Tag::OrType: {
             auto *o = cast_type_const<OrType>(*this);
@@ -340,11 +337,11 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::UnresolvedClassType:
         case Tag::UnresolvedAppliedType:
         case Tag::ClassType: {
-            auto *c = cast_type_const<ClassType>(*this);
-            if (c->symbol == Symbols::untyped()) {
+            auto c = cast_inline_type_nonnull<ClassType>(*this);
+            if (c.symbol == Symbols::untyped()) {
                 return Types::untyped(gs, untypedBlame());
             }
-            return getMethodArguments(gs, c->symbol, name, vector<TypePtr>{});
+            return getMethodArguments(gs, c.symbol, name, vector<TypePtr>{});
         }
         case Tag::AppliedType: {
             auto *app = cast_type_const<AppliedType>(*this);
@@ -480,10 +477,13 @@ TypePtr TypePtr::_instantiate(const GlobalState &gs, const InlinedVector<SymbolR
 void TypePtr::_sanityCheck(const GlobalState &gs) const {
     switch (tag()) {
         case Tag::BlamedUntyped:
+            return cast_type_const<BlamedUntyped>(*this)->_sanityCheck(gs);
         case Tag::UnresolvedAppliedType:
+            return cast_type_const<UnresolvedAppliedType>(*this)->_sanityCheck(gs);
         case Tag::UnresolvedClassType:
+            return cast_type_const<UnresolvedClassType>(*this)->_sanityCheck(gs);
         case Tag::ClassType:
-            return cast_type_const<ClassType>(*this)->_sanityCheck(gs);
+            return cast_inline_type_nonnull<ClassType>(*this)._sanityCheck(gs);
         case Tag::TypeVar:
             return cast_type_const<TypeVar>(*this)->_sanityCheck(gs);
         case Tag::LiteralType:
@@ -520,7 +520,7 @@ string TypePtr::toStringWithTabs(const GlobalState &gs, int tabs) const {
         case Tag::UnresolvedClassType:
             return cast_type_const<UnresolvedClassType>(*this)->toStringWithTabs(gs, tabs);
         case Tag::ClassType:
-            return cast_type_const<ClassType>(*this)->toStringWithTabs(gs, tabs);
+            return cast_inline_type_nonnull<ClassType>(*this).toStringWithTabs(gs, tabs);
         case Tag::TypeVar:
             return cast_type_const<TypeVar>(*this)->toStringWithTabs(gs, tabs);
         case Tag::LiteralType:
@@ -559,8 +559,9 @@ std::string TypePtr::show(const GlobalState &gs) const {
         case Tag::UnresolvedClassType:
             return cast_type_const<UnresolvedClassType>(*this)->show(gs);
         case Tag::BlamedUntyped:
+            return cast_type_const<BlamedUntyped>(*this)->show(gs);
         case Tag::ClassType:
-            return cast_type_const<ClassType>(*this)->show(gs);
+            return cast_inline_type_nonnull<ClassType>(*this).show(gs);
         case Tag::TypeVar:
             return cast_type_const<TypeVar>(*this)->show(gs);
         case Tag::LiteralType:
@@ -609,7 +610,7 @@ bool TypePtr::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
         case Tag::UnresolvedClassType:
         case Tag::UnresolvedAppliedType:
         case Tag::ClassType:
-            return cast_type_const<ClassType>(*this)->derivesFrom(gs, klass);
+            return cast_inline_type_nonnull<ClassType>(*this).derivesFrom(gs, klass);
         case Tag::OrType:
             return cast_type_const<OrType>(*this)->derivesFrom(gs, klass);
         case Tag::AndType:
@@ -647,7 +648,7 @@ DispatchResult TypePtr::dispatchCall(const GlobalState &gs, DispatchArgs args) c
         case Tag::UnresolvedAppliedType:
         case Tag::UnresolvedClassType:
         case Tag::ClassType:
-            return cast_type_const<ClassType>(*this)->dispatchCall(gs, move(args));
+            return cast_inline_type_nonnull<ClassType>(*this).dispatchCall(gs, move(args));
         case Tag::AppliedType:
             return cast_type_const<AppliedType>(*this)->dispatchCall(gs, move(args));
         case Tag::MetaType:

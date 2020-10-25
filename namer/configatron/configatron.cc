@@ -117,7 +117,7 @@ struct Path {
             } else {
                 classSym.data(gs)->setSuperClass(core::Symbols::Configatron_Store());
             }
-            parent.data(gs)->resultType = core::make_type<core::ClassType>(classSym);
+            parent.data(gs)->resultType = core::make_inline_type<core::ClassType>(classSym);
             // DO NOT ADD METHODS HERE. add them to Configatron::Store shim
 
             for (auto &child : children) {

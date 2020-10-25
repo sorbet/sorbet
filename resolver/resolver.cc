@@ -373,7 +373,7 @@ private:
         }
         if (isFullyResolved(ctx, rhs)) {
             // this todo will be resolved during ResolveTypeMembersWalk below
-            job.lhs.data(ctx)->resultType = core::make_type<core::ClassType>(core::Symbols::todo());
+            job.lhs.data(ctx)->resultType = core::make_inline_type<core::ClassType>(core::Symbols::todo());
             return true;
         }
 
@@ -966,8 +966,8 @@ class ResolveTypeMembersWalk {
     }
 
     static bool isTodo(const core::TypePtr &type) {
-        auto *todo = core::cast_type_const<core::ClassType>(type);
-        return todo != nullptr && todo->symbol == core::Symbols::todo();
+        return core::isa_type<core::ClassType>(type) &&
+               core::cast_inline_type_nonnull<core::ClassType>(type).symbol == core::Symbols::todo();
     }
 
     static bool isLHSResolved(core::MutableContext ctx, core::SymbolRef sym) {
