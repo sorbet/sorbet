@@ -1240,7 +1240,7 @@ class SymbolDefiner {
                 }
                 auto alias =
                     ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, typeMember.asgnLoc), context, typeMember.name);
-                alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
+                alias.data(ctx)->resultType = core::make_inline_type<core::AliasType>(sym);
             }
         }
 

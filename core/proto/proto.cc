@@ -114,8 +114,9 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     }
 
     if (data->isStaticField()) {
-        if (auto type = core::cast_type_const<core::AliasType>(data->resultType)) {
-            symbolProto.set_aliasto(type->symbol.rawId());
+        if (core::isa_type<core::AliasType>(data->resultType)) {
+            auto type = core::cast_inline_type_nonnull<core::AliasType>(data->resultType);
+            symbolProto.set_aliasto(type.symbol.rawId());
         }
     }
 

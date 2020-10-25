@@ -384,7 +384,14 @@ public:
 };
 CheckSize(SelfTypeParam, 8, 8);
 
-TYPE_FINAL(AliasType) {
+TYPE_FINAL_INLINE(AliasType) {
+    static AliasType fromTypePtrValue(u4 value) {
+        return AliasType(SymbolRef::fromRaw(value));
+    }
+    u4 toTypePtrValue() const {
+        return symbol.rawId();
+    }
+
 public:
     AliasType(SymbolRef other);
     AliasType(const AliasType &obj) = delete;
@@ -394,6 +401,10 @@ public:
 
     SymbolRef symbol;
     void _sanityCheck(const GlobalState &gs) const;
+
+    friend TypePtr;
+    template <class T, class... Args> friend TypePtr make_type(Args && ... args);
+    template <class To> friend To cast_inline_type_nonnull(const TypePtr &what);
 };
 CheckSize(AliasType, 8, 8);
 

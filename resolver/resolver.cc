@@ -398,7 +398,7 @@ private:
             return true;
         } else {
             if (rhsData->dealias(ctx) != it.lhs) {
-                it.lhs.data(ctx)->resultType = core::make_type<core::AliasType>(rhsSym);
+                it.lhs.data(ctx)->resultType = core::make_inline_type<core::AliasType>(rhsSym);
             } else {
                 if (auto e =
                         ctx.state.beginError(it.lhs.data(ctx)->loc(), core::errors::Resolver::RecursiveClassAlias)) {
@@ -2256,7 +2256,7 @@ public:
             }
 
             core::SymbolRef alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, send.loc), owner, fromName);
-            alias.data(ctx)->resultType = core::make_type<core::AliasType>(toMethod);
+            alias.data(ctx)->resultType = core::make_inline_type<core::AliasType>(toMethod);
 
             return tree;
         } else {

@@ -397,8 +397,8 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             break;
         }
         case TypePtr::Tag::AliasType: {
-            auto *alias = cast_type_const<AliasType>(what);
-            p.putU4(alias->symbol.rawId());
+            auto alias = cast_inline_type_nonnull<AliasType>(what);
+            p.putU4(alias.symbol.rawId());
             break;
         }
         case TypePtr::Tag::LambdaParam: {
@@ -493,7 +493,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             return result;
         }
         case TypePtr::Tag::AliasType:
-            return make_type<AliasType>(SymbolRef::fromRaw(p.getU4()));
+            return make_inline_type<AliasType>(SymbolRef::fromRaw(p.getU4()));
         case TypePtr::Tag::LambdaParam: {
             auto lower = unpickleType(p, gs);
             auto upper = unpickleType(p, gs);

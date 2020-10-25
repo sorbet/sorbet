@@ -505,7 +505,7 @@ void TypePtr::_sanityCheck(const GlobalState &gs) const {
         case Tag::MetaType:
             return cast_type_const<MetaType>(*this)->_sanityCheck(gs);
         case Tag::AliasType:
-            return cast_type_const<AliasType>(*this)->_sanityCheck(gs);
+            return cast_inline_type_nonnull<AliasType>(*this)._sanityCheck(gs);
     }
 }
 
@@ -542,7 +542,7 @@ string TypePtr::toStringWithTabs(const GlobalState &gs, int tabs) const {
         case Tag::MetaType:
             return cast_type_const<MetaType>(*this)->toStringWithTabs(gs, tabs);
         case Tag::AliasType:
-            return cast_type_const<AliasType>(*this)->toStringWithTabs(gs, tabs);
+            return cast_inline_type_nonnull<AliasType>(*this).toStringWithTabs(gs, tabs);
     }
 }
 
@@ -583,7 +583,7 @@ std::string TypePtr::show(const GlobalState &gs) const {
         case Tag::MetaType:
             return cast_type_const<MetaType>(*this)->show(gs);
         case Tag::AliasType:
-            return cast_type_const<AliasType>(*this)->show(gs);
+            return cast_inline_type_nonnull<AliasType>(*this).show(gs);
     }
 }
 
@@ -614,7 +614,7 @@ bool TypePtr::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
         case Tag::AndType:
             return cast_type_const<AndType>(*this)->derivesFrom(gs, klass);
         case Tag::AliasType:
-            return cast_type_const<AliasType>(*this)->derivesFrom(gs, klass);
+            return cast_inline_type_nonnull<AliasType>(*this).derivesFrom(gs, klass);
         case Tag::MetaType:
             return cast_type_const<MetaType>(*this)->derivesFrom(gs, klass);
         case Tag::TypeVar:

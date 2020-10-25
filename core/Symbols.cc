@@ -1035,16 +1035,17 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 }
 
 SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
-    if (auto alias = cast_type_const<AliasType>(resultType)) {
+    if (isa_type<AliasType>(resultType)) {
+        auto alias = cast_inline_type_nonnull<AliasType>(resultType);
         if (depthLimit == 0) {
             if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
                 e.setHeader("Too many alias expansions for symbol {}, the alias is either too long or infinite. Next "
                             "expansion would have been to {}",
-                            showFullName(gs), alias->symbol.data(gs)->showFullName(gs));
+                            showFullName(gs), alias.symbol.data(gs)->showFullName(gs));
             }
             return def;
         }
-        return alias->symbol.data(gs)->dealiasWithDefault(gs, depthLimit - 1, def);
+        return alias.symbol.data(gs)->dealiasWithDefault(gs, depthLimit - 1, def);
     }
     return this->ref(gs);
 }
