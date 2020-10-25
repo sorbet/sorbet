@@ -513,7 +513,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             return make_type<TypeVar>(sym);
         }
         case TypePtr::Tag::SelfType: {
-            return make_type<SelfType>();
+            return make_inline_type<SelfType>();
         }
         case TypePtr::Tag::MetaType:
         case TypePtr::Tag::SelfTypeParam:

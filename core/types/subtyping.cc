@@ -443,11 +443,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     {
-        auto *self1 = cast_type_const<SelfType>(t1);
-        auto *self2 = cast_type_const<SelfType>(t2);
-
-        if (self1 != nullptr || self2 != nullptr) {
-            if (self1 == nullptr || self2 == nullptr) {
+        if (isa_type<SelfType>(t1) || isa_type<SelfType>(t2)) {
+            // Note: SelfTypes are inlined into TypePtr so TypePtr equivalence is type equivalence.
+            if (t1 != t2) {
                 return OrType::make_shared(t1, t2);
             } else {
                 return t1;
@@ -907,11 +905,9 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     {
-        auto *self1 = cast_type_const<SelfType>(t1);
-        auto *self2 = cast_type_const<SelfType>(t2);
-
-        if (self1 != nullptr || self2 != nullptr) {
-            if (self1 == nullptr || self2 == nullptr) {
+        if (isa_type<SelfType>(t1) || isa_type<SelfType>(t2)) {
+            // Note: SelfType is inlined into TypePtr, so TypePtr equivalence is type equivalence.
+            if (t1 != t2) {
                 return AndType::make_shared(t1, t2);
             } else {
                 return t1;
@@ -1062,13 +1058,9 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
 
     {
-        auto *self1 = cast_type_const<SelfType>(t1);
-        auto *self2 = cast_type_const<SelfType>(t2);
-        if (self1 != nullptr || self2 != nullptr) {
-            if (self1 == nullptr || self2 == nullptr) {
-                return false;
-            }
-            return true;
+        if (isa_type<SelfType>(t1) || isa_type<SelfType>(t2)) {
+            // Note: SelfType is inlined into TypePtr, so TypePtr equivalence is type equivalence.
+            return t1 == t2;
         }
     }
 

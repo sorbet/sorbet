@@ -388,7 +388,7 @@ TypePtr TypePtr::_approximate(const GlobalState &gs, const TypeConstraint &tc) c
 TypePtr TypePtr::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
     switch (tag()) {
         case Tag::SelfType:
-            return cast_type_const<SelfType>(*this)->_replaceSelfType(gs, receiver);
+            return cast_inline_type_nonnull<SelfType>(*this)._replaceSelfType(gs, receiver);
         case Tag::OrType:
             return cast_type_const<OrType>(*this)->_replaceSelfType(gs, receiver);
         case Tag::AndType:
@@ -489,7 +489,7 @@ void TypePtr::_sanityCheck(const GlobalState &gs) const {
         case Tag::SelfTypeParam:
             return cast_inline_type_nonnull<SelfTypeParam>(*this)._sanityCheck(gs);
         case Tag::SelfType:
-            return cast_type_const<SelfType>(*this)->_sanityCheck(gs);
+            return cast_inline_type_nonnull<SelfType>(*this)._sanityCheck(gs);
         case Tag::TupleType:
             return cast_type_const<TupleType>(*this)->_sanityCheck(gs);
         case Tag::ShapeType:
@@ -526,7 +526,7 @@ string TypePtr::toStringWithTabs(const GlobalState &gs, int tabs) const {
         case Tag::SelfTypeParam:
             return cast_inline_type_nonnull<SelfTypeParam>(*this).toStringWithTabs(gs, tabs);
         case Tag::SelfType:
-            return cast_type_const<SelfType>(*this)->toStringWithTabs(gs, tabs);
+            return cast_inline_type_nonnull<SelfType>(*this).toStringWithTabs(gs, tabs);
         case Tag::TupleType:
             return cast_type_const<TupleType>(*this)->toStringWithTabs(gs, tabs);
         case Tag::ShapeType:
@@ -567,7 +567,7 @@ std::string TypePtr::show(const GlobalState &gs) const {
         case Tag::SelfTypeParam:
             return cast_inline_type_nonnull<SelfTypeParam>(*this).show(gs);
         case Tag::SelfType:
-            return cast_type_const<SelfType>(*this)->show(gs);
+            return cast_inline_type_nonnull<SelfType>(*this).show(gs);
         case Tag::TupleType:
             return cast_type_const<TupleType>(*this)->show(gs);
         case Tag::ShapeType:
@@ -626,7 +626,7 @@ bool TypePtr::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
         case Tag::SelfTypeParam:
             return cast_inline_type_nonnull<SelfTypeParam>(*this).derivesFrom(gs, klass);
         case Tag::SelfType:
-            return cast_type_const<SelfType>(*this)->derivesFrom(gs, klass);
+            return cast_inline_type_nonnull<SelfType>(*this).derivesFrom(gs, klass);
     }
 }
 

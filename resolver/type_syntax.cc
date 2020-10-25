@@ -543,7 +543,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
             return core::Types::untyped(ctx, args.untypedBlame);
         case core::Names::selfType()._id:
             if (args.allowSelfType) {
-                return core::make_type<core::SelfType>();
+                return core::make_inline_type<core::SelfType>();
             }
             if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Only top-level T.self_type is supported");

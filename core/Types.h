@@ -412,7 +412,14 @@ CheckSize(AliasType, 8, 8);
  * It indicates that the method may(or will) return `self` or type that behaves equivalently
  * to self(e.g. in case of `.clone`).
  */
-TYPE_FINAL(SelfType) {
+TYPE_FINAL_INLINE(SelfType) {
+    static SelfType fromTypePtrValue(u4 value) {
+        return SelfType();
+    }
+    u4 toTypePtrValue() const {
+        return 0;
+    }
+
 public:
     SelfType();
     SelfType(const SelfType &obj) = delete;
@@ -424,6 +431,10 @@ public:
 
     void _sanityCheck(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+
+    friend TypePtr;
+    template <class T, class... Args> friend TypePtr make_type(Args && ... args);
+    template <class To> friend To cast_inline_type_nonnull(const TypePtr &what);
 };
 CheckSize(SelfType, 8, 8);
 
