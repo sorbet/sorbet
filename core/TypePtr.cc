@@ -299,8 +299,7 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::TupleType:
         case Tag::ShapeType:
         case Tag::LiteralType: {
-            auto *p = cast_type_const<ProxyType>(*this);
-            return p->underlying().getCallArguments(gs, name);
+            return this->underlying().getCallArguments(gs, name);
         }
         case Tag::OrType: {
             auto *orType = cast_type_const<OrType>(*this);
@@ -480,7 +479,7 @@ void TypePtr::_sanityCheck(const GlobalState &gs) const {
         case Tag::TypeVar:
             return cast_type_const<TypeVar>(*this)->_sanityCheck(gs);
         case Tag::LiteralType:
-            return cast_type_const<LiteralType>(*this)->_sanityCheck(gs);
+            return ProxyType::_sanityCheck(gs, underlying());
         case Tag::SelfTypeParam:
             return cast_inline_type_nonnull<SelfTypeParam>(*this)._sanityCheck(gs);
         case Tag::SelfType:
@@ -594,11 +593,9 @@ std::string TypePtr::showWithMoreInfo(const GlobalState &gs) const {
 bool TypePtr::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     switch (tag()) {
         case Tag::LiteralType:
-            return cast_type_const<LiteralType>(*this)->derivesFrom(gs, klass);
         case Tag::ShapeType:
-            return cast_type_const<ShapeType>(*this)->derivesFrom(gs, klass);
         case Tag::TupleType:
-            return cast_type_const<TupleType>(*this)->derivesFrom(gs, klass);
+            return ProxyType::derivesFrom(gs, underlying(), klass);
         case Tag::BlamedUntyped:
         case Tag::UnresolvedClassType:
         case Tag::UnresolvedAppliedType:
@@ -628,7 +625,7 @@ bool TypePtr::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
 DispatchResult TypePtr::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
     switch (tag()) {
         case Tag::LiteralType:
-            return cast_type_const<LiteralType>(*this)->dispatchCall(gs, move(args));
+            return ProxyType::dispatchCall(gs, underlying(), move(args));
         case Tag::OrType:
             return cast_type_const<OrType>(*this)->dispatchCall(gs, move(args));
         case Tag::AndType:
@@ -654,6 +651,22 @@ DispatchResult TypePtr::dispatchCall(const GlobalState &gs, DispatchArgs args) c
         case Tag::SelfType:
         case Tag::AliasType:
             Exception::raise("should never happen: dispatchCall on `{}`", typeName());
+    }
+}
+
+TypePtr TypePtr::underlying() const {
+    switch (tag()) {
+        case Tag::LiteralType:
+            return cast_type_const<LiteralType>(*this)->underlying();
+        case Tag::ShapeType:
+            return cast_type_const<ShapeType>(*this)->underlying();
+        case Tag::TupleType:
+            return cast_type_const<TupleType>(*this)->underlying();
+        case Tag::MetaType:
+            return cast_type_const<MetaType>(*this)->underlying();
+        default:
+            ENFORCE(false, "underlying is only valid for ground types");
+            return TypePtr();
     }
 }
 

@@ -174,8 +174,8 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
     } else if (auto *type = core::cast_type_const<core::AndType>(receiver)) {
         return mergeSimilarMethods(similarMethodsForReceiver(gs, type->left, prefix),
                                    similarMethodsForReceiver(gs, type->right, prefix));
-    } else if (auto *type = core::cast_type_const<core::ProxyType>(receiver)) {
-        return similarMethodsForReceiver(gs, type->underlying(), prefix);
+    } else if (is_proxy_type(receiver)) {
+        return similarMethodsForReceiver(gs, receiver.underlying(), prefix);
     } else {
         return {};
     }

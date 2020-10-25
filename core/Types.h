@@ -234,14 +234,6 @@ bool inline is_proxy_type(const TypePtr &what) {
     }
 }
 
-class ProxyType;
-template <> inline const ProxyType *cast_type_const<ProxyType>(const TypePtr &what) {
-    if (is_proxy_type(what)) {
-        return reinterpret_cast<const ProxyType *>(what.get());
-    }
-    return nullptr;
-}
-
 template <class To> bool isa_type(const TypePtr &what) {
     if (what == nullptr) {
         return false;
@@ -290,18 +282,10 @@ template <class To> To *cast_type(TypePtr &what) {
 
 class ProxyType {
 public:
-    // TODO: use shared pointers that use inline counter
-    virtual TypePtr underlying() const = 0;
-    ProxyType() = default;
-    ProxyType(const ProxyType &obj) = delete;
-    virtual ~ProxyType() = default;
-
-    DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
-
-    void _sanityCheck(const GlobalState &gs) const;
+    static DispatchResult dispatchCall(const GlobalState &gs, const TypePtr &underlying, DispatchArgs args);
+    static bool derivesFrom(const GlobalState &gs, const TypePtr &underlying, SymbolRef klass);
+    static void _sanityCheck(const GlobalState &gs, const TypePtr &underlying);
 };
-CheckSize(ProxyType, 8, 8);
 
 TYPE_INLINE(ClassType) {
     static ClassType fromTypePtrValue(u4 value) {
@@ -438,7 +422,7 @@ public:
 };
 CheckSize(SelfType, 8, 8);
 
-TYPE_FINAL(LiteralType) : public ProxyType {
+TYPE_FINAL(LiteralType) {
 public:
     union {
         const int64_t value;
@@ -452,7 +436,7 @@ public:
     LiteralType(SymbolRef klass, NameRef val);
     LiteralType(bool val);
     LiteralType(const LiteralType &obj) = delete;
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
@@ -576,7 +560,7 @@ private:
 };
 CheckSize(AndType, 32, 8);
 
-TYPE_FINAL(ShapeType) : public ProxyType {
+TYPE_FINAL(ShapeType) {
 public:
     std::vector<TypePtr> keys; // TODO: store sorted by whatever
     std::vector<TypePtr> values;
@@ -594,11 +578,11 @@ public:
                          const std::vector<TypePtr> &targs) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
 };
 CheckSize(ShapeType, 72, 8);
 
-TYPE_FINAL(TupleType) : public ProxyType {
+TYPE_FINAL(TupleType) {
 private:
     TupleType() = delete;
 
@@ -623,7 +607,7 @@ public:
 
     // Return the type of the underlying array that this tuple decays into
     TypePtr elementType() const;
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
 };
 CheckSize(TupleType, 48, 8);
 
@@ -656,7 +640,7 @@ CheckSize(AppliedType, 32, 8);
 //
 // These are used within the inferencer in places where we need to track
 // user-written types in the source code.
-TYPE_FINAL(MetaType) : public ProxyType {
+TYPE_FINAL(MetaType) {
 public:
     TypePtr wrapped;
 
@@ -672,7 +656,7 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
 
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
 };
 CheckSize(MetaType, 24, 8);
 

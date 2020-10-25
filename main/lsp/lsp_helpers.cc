@@ -243,8 +243,8 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
 core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr) {
     auto resultType = type;
-    if (auto *proxy = core::cast_type_const<core::ProxyType>(receiver)) {
-        receiver = proxy->underlying();
+    if (core::is_proxy_type(receiver)) {
+        receiver = receiver.underlying();
     }
     if (auto *applied = core::cast_type_const<core::AppliedType>(receiver)) {
         /* instantiate generic classes */

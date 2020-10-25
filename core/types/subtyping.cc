@@ -37,8 +37,8 @@ TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 }
 
 const TypePtr underlying(const TypePtr &t1) {
-    if (auto *f = cast_type_const<ProxyType>(t1)) {
-        return f->underlying();
+    if (is_proxy_type(t1)) {
+        return t1.underlying();
     }
     return t1;
 }
@@ -296,9 +296,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    if (auto *p1 = cast_type_const<ProxyType>(t1)) {
+    if (is_proxy_type(t1)) {
         categoryCounterInc("lub", "<proxy");
-        if (auto *p2 = cast_type_const<ProxyType>(t2)) {
+        if (is_proxy_type(t2)) {
             categoryCounterInc("lub", "proxy>");
             // both are proxy
             if (auto *a1 = cast_type_const<TupleType>(t1)) { // Warning: this implements COVARIANT arrays
@@ -325,7 +325,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         return Types::arrayOfUntyped();
                     }
                 } else {
-                    return lub(gs, p1->underlying(), p2->underlying());
+                    return lub(gs, t1.underlying(), t2.underlying());
                 }
             } else if (auto *h1 = cast_type_const<ShapeType>(t1)) { // Warning: this implements COVARIANT hashes
                 if (auto *h2 = cast_type_const<ShapeType>(t2)) {
@@ -365,7 +365,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         return Types::hashOfUntyped();
                     }
                 } else {
-                    return lub(gs, p1->underlying(), p2->underlying());
+                    return lub(gs, t1.underlying(), t2.underlying());
                 }
             } else if (auto *l1 = cast_type_const<LiteralType>(t1)) {
                 if (auto *l2 = cast_type_const<LiteralType>(t2)) {
@@ -381,7 +381,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         return lubGround(gs, l1->underlying(), l2->underlying());
                     }
                 } else {
-                    return lub(gs, p1->underlying(), p2->underlying());
+                    return lub(gs, t1.underlying(), t2.underlying());
                 }
             } else if (auto *m1 = cast_type_const<MetaType>(t1)) {
                 if (auto *m2 = cast_type_const<MetaType>(t2)) {
@@ -389,14 +389,14 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         return t1;
                     }
                 }
-                return lub(gs, p1->underlying(), p2->underlying());
+                return lub(gs, t1.underlying(), t2.underlying());
             }
             ENFORCE(false);
             return TypePtr();
         } else {
             bool allowProxyInLub = isa_type<TupleType>(t1) || isa_type<ShapeType>(t1);
             // only 1st is proxy
-            TypePtr und = p1->underlying();
+            TypePtr und = t1.underlying();
             if (isSubType(gs, und, t2)) {
                 return t2;
             } else if (allowProxyInLub) {
@@ -405,11 +405,11 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 return lub(gs, t2, und);
             }
         }
-    } else if (auto *p2 = cast_type_const<ProxyType>(t2)) {
+    } else if (is_proxy_type(t2)) {
         // only 2nd is proxy
         bool allowProxyInLub = isa_type<TupleType>(t2) || isa_type<ShapeType>(t2);
         // only 1st is proxy
-        TypePtr und = p2->underlying();
+        TypePtr und = t2.underlying();
         if (isSubType(gs, und, t1)) {
             return t1;
         } else if (allowProxyInLub) {
@@ -630,9 +630,9 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         return glbDistributeAnd(gs, t2, t1);
     }
 
-    if (auto *p1 = cast_type_const<ProxyType>(t1)) {
-        if (auto *p2 = cast_type_const<ProxyType>(t2)) {
-            if (typeid(*p1) != typeid(*p2)) {
+    if (is_proxy_type(t1)) {
+        if (is_proxy_type(t2)) {
+            if (t1.tag() != t2.tag()) {
                 return Types::bottom();
             }
             if (auto *a1 = cast_type_const<TupleType>(t1)) { // Warning: this implements COVARIANT arrays
@@ -925,8 +925,8 @@ bool classSymbolIsAsGoodAs(const GlobalState &gs, SymbolRef c1, SymbolRef c2) {
 
 void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypePtr &ty, const TypePtr &blame) {
     ENFORCE(blame.isUntyped());
-    if (auto *p = cast_type_const<ProxyType>(ty)) {
-        compareToUntyped(gs, constr, p->underlying(), blame);
+    if (is_proxy_type(ty)) {
+        compareToUntyped(gs, constr, ty.underlying(), blame);
     }
 
     if (auto *t = cast_type_const<AppliedType>(ty)) {
@@ -1114,14 +1114,14 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         return result;
     }
     if (isa_type<AppliedType>(t2)) {
-        if (auto *pt = cast_type_const<ProxyType>(t1)) {
-            return Types::isSubTypeUnderConstraint(gs, constr, pt->underlying(), t2, mode);
+        if (is_proxy_type(t1)) {
+            return Types::isSubTypeUnderConstraint(gs, constr, t1.underlying(), t2, mode);
         }
         return false;
     }
 
-    if (auto *p1 = cast_type_const<ProxyType>(t1)) {
-        if (auto *p2 = cast_type_const<ProxyType>(t2)) {
+    if (is_proxy_type(t1)) {
+        if (is_proxy_type(t2)) {
             // both are proxy
             // TODO: simply compare as memory regions
             if (auto *a1 = cast_type_const<TupleType>(t1)) { // Warning: this implements COVARIANT arrays
@@ -1184,7 +1184,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             return false;
         } else {
             // only 1st is proxy
-            TypePtr und = p1->underlying();
+            TypePtr und = t1.underlying();
             return isSubTypeUnderConstraintSingle(gs, constr, mode, und, t2);
         }
     } else if (is_proxy_type(t2)) {
@@ -1290,8 +1290,8 @@ bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypeP
     return isAsSpecificAs(gs, t1, t2) && isAsSpecificAs(gs, t2, t1);
 }
 
-bool ProxyType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    return underlying().derivesFrom(gs, klass);
+bool ProxyType::derivesFrom(const GlobalState &gs, const TypePtr &underlying, SymbolRef klass) {
+    return underlying.derivesFrom(gs, klass);
 }
 
 bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {

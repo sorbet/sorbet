@@ -18,10 +18,9 @@ using namespace std;
 
 namespace sorbet::core {
 
-DispatchResult ProxyType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult ProxyType::dispatchCall(const GlobalState &gs, const TypePtr &underlying, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "proxytype");
-    auto und = underlying();
-    return und.dispatchCall(gs, args.withThisRef(und));
+    return underlying.dispatchCall(gs, args.withThisRef(underlying));
 }
 
 DispatchResult OrType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
@@ -76,7 +75,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, DispatchArgs args)
             return res;
         }
     }
-    return ProxyType::dispatchCall(gs, args);
+    return ProxyType::dispatchCall(gs, underlying(), args);
 }
 
 DispatchResult TupleType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
@@ -90,7 +89,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, DispatchArgs args)
             return res;
         }
     }
-    return ProxyType::dispatchCall(gs, args);
+    return ProxyType::dispatchCall(gs, underlying(), args);
 }
 
 namespace {
@@ -939,7 +938,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
                     }
                 }
             }
-            return ProxyType::dispatchCall(gs, args);
+            return ProxyType::dispatchCall(gs, underlying(), args);
     }
 }
 
@@ -953,8 +952,8 @@ SymbolRef unwrapSymbol(const TypePtr &type) {
             result = klass.symbol;
         } else if (auto *app = cast_type_const<AppliedType>(*typePtr)) {
             result = app->klass;
-        } else if (auto *proxy = cast_type_const<ProxyType>(*typePtr)) {
-            tempHolder = proxy->underlying();
+        } else if (is_proxy_type(*typePtr)) {
+            tempHolder = typePtr->underlying();
             typePtr = &tempHolder;
         } else {
             ENFORCE(false, "Unexpected type: {}", (*typePtr).typeName());
@@ -1409,7 +1408,7 @@ public:
         }
 
         auto *lit = cast_type_const<LiteralType>(args.args[1]->type);
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+        if (!lit || !args.args[1]->type.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
         NameRef fn(gs, (u4)lit->value);
@@ -1632,7 +1631,7 @@ public:
         }
 
         auto *lit = cast_type_const<LiteralType>(args.args[1]->type);
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+        if (!lit || !args.args[1]->type.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
         NameRef fn(gs, (u4)lit->value);
@@ -1686,7 +1685,7 @@ public:
         }
 
         auto *lit = cast_type_const<LiteralType>(args.args[1]->type);
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+        if (!lit || !args.args[1]->type.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
         NameRef fn(gs, (u4)lit->value);

@@ -254,6 +254,9 @@ public:
 
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 
+    // Only relevant for proxy types.
+    TypePtr underlying() const;
+
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     template <class To> friend To const *cast_type_const(const TypePtr &what);
     template <class To> friend To *cast_type(TypePtr &what);
