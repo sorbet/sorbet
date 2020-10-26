@@ -168,6 +168,8 @@ public:
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     friend class TypePtrTestHelper;
+
+    std::string toString(const GlobalState &gs) const;
 };
 CheckSize(TypePtr, 16, 8);
 } // namespace sorbet::core
