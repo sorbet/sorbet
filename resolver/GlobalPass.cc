@@ -80,7 +80,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         if (auto e = gs.beginError(data->loc(), core::errors::Resolver::ParentVarianceMismatch)) {
             e.setHeader("Type variance mismatch with parent `{}`", parent.data(gs)->show(gs));
         }
-        return true;
+        return false;
     }
     typeAliases[sym.classOrModuleIndex()].emplace_back(parentTypeMember, my);
     return true;
