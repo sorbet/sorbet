@@ -61,7 +61,7 @@ TypePtr Symbol::externalType() const {
 
 TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
     ENFORCE_NO_TIMER(isClassOrModule());
-    if (resultType) {
+    if (resultType != nullptr) {
         return resultType;
     }
 
