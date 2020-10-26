@@ -53,6 +53,8 @@ public:
     const File &dataAllowingUnsafe(const GlobalState &gs) const;
     File &dataAllowingUnsafe(GlobalState &gs) const;
 
+    std::string toString(const core::GlobalState &gs) const;
+
 private:
     u4 _id;
 };
@@ -103,6 +105,8 @@ public:
 
     void setFileHash(std::unique_ptr<const FileHash> hash);
     const std::shared_ptr<const FileHash> &getFileHash() const;
+
+    std::string toString() const;
 
 private:
     const std::string path_;

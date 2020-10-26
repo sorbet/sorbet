@@ -25,6 +25,7 @@ def __lldb_init_module(debugger, internal_dict):
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::CFG")
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::VariableUseSite")
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::LocalRef")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::core::FileRef")
 
 def register_summary(ci, funcName, typeName):
     result = lldb.SBCommandReturnObject()

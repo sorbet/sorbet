@@ -151,6 +151,10 @@ File &FileRef::dataAllowingUnsafe(GlobalState &gs) const {
     return *(gs.files[_id]);
 }
 
+std::string FileRef::toString(const GlobalState &gs) const {
+    return data(gs).toString();
+}
+
 string_view File::path() const {
     return this->path_;
 }
@@ -201,6 +205,10 @@ string_view File::getLine(int i) {
     auto start = lineBreaks[i - 1] + 1;
     auto end = lineBreaks[i];
     return source().substr(start, end - start);
+}
+
+std::string File::toString() const {
+    return path_;
 }
 
 } // namespace sorbet::core

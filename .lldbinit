@@ -1,4 +1,4 @@
 command script import lldbinit.py
 type summary add --summary-string "[${var.beginLoc}..${var.endLoc}]" sorbet::core::LocOffsets
 type summary add --summary-string "(file ${var.storage.fileRef._id}):[${var.storage.offsets.beginLoc}..${var.storage.offsets.endLoc}]" sorbet::core::Loc
-
+type summary add --summary-string "${var.path_}" sorbet::core::File
