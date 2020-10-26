@@ -13,13 +13,13 @@ namespace sorbet::realmain::lsp::watchman {
 WatchmanProcess::WatchmanProcess(shared_ptr<spdlog::logger> logger, string_view watchmanPath, string_view workSpace,
                                  vector<string> extensions,
                                  function<void(unique_ptr<sorbet::realmain::lsp::WatchmanQueryResponse>)> processUpdate,
-                                 std::function<void(int)> processExit)
+                                 std::function<void(int, string const &)> processExit)
     : logger(std::move(logger)), watchmanPath(string(watchmanPath)), workSpace(string(workSpace)),
       extensions(std::move(extensions)), processUpdate(std::move(processUpdate)), processExit(std::move(processExit)),
       thread(runInAThread("watchmanReader", std::bind(&WatchmanProcess::start, this))) {}
 
 WatchmanProcess::~WatchmanProcess() {
-    exitWithCode(0);
+    exitWithCode(0, "");
     // Destructor of Joinable ensures Watchman thread exits before this destructor finishes.
 };
 
@@ -92,11 +92,13 @@ void WatchmanProcess::start() {
     } catch (exception e) {
         // Ignore exceptions thrown on forked process.
         if (getpid() == mainPid) {
-            logger->info("Error running Watchman (with `{} -j -p--no-pretty`).\nWatchman is required for Sorbet to "
-                         "detect changes to files made outside of your code editor.\nDon't need Watchman? Run Sorbet "
-                         "with `--disable-watchman`.",
-                         watchmanPath);
-            exitWithCode(1);
+            auto msg = fmt::format(
+                "Error running Watchman (with `{} -j -p--no-pretty`).\nWatchman is required for Sorbet to "
+                "detect changes to files made outside of your code editor.\nDon't need Watchman? Run Sorbet "
+                "with `--disable-watchman`.",
+                watchmanPath);
+            logger->info(msg);
+            exitWithCode(1, msg);
         } else {
             // The forked process failed to start, likely because Watchman wasn't found. Exit the process.
             exit(1);
@@ -109,11 +111,11 @@ bool WatchmanProcess::isStopped() {
     return stopped;
 }
 
-void WatchmanProcess::exitWithCode(int code) {
+void WatchmanProcess::exitWithCode(int code, string const &message) {
     absl::MutexLock lck(&mutex);
     if (!stopped) {
         stopped = true;
-        processExit(code);
+        processExit(code, message);
     }
 }
 
