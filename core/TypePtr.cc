@@ -43,6 +43,7 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
         case Tag::ClassType:
         case Tag::SelfType:
         case Tag::BlamedUntyped:
+        case Tag::LiteralType:
             // Inlined; should not be called.
             ENFORCE(false);
             break;
@@ -53,10 +54,6 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
 
         case Tag::AliasType:
             delete reinterpret_cast<AliasType *>(ptr);
-            break;
-
-        case Tag::LiteralType:
-            delete reinterpret_cast<LiteralType *>(ptr);
             break;
 
         case Tag::TypeVar:
@@ -516,7 +513,7 @@ string TypePtr::toStringWithTabs(const GlobalState &gs, int tabs) const {
         case Tag::TypeVar:
             return cast_type_const<TypeVar>(*this)->toStringWithTabs(gs, tabs);
         case Tag::LiteralType:
-            return cast_type_const<LiteralType>(*this)->toStringWithTabs(gs, tabs);
+            return cast_inline_type_nonnull<LiteralType>(*this).toStringWithTabs(gs, tabs);
         case Tag::SelfTypeParam:
             return cast_inline_type_nonnull<SelfTypeParam>(*this).toStringWithTabs(gs, tabs);
         case Tag::SelfType:
@@ -557,7 +554,7 @@ std::string TypePtr::show(const GlobalState &gs) const {
         case Tag::TypeVar:
             return cast_type_const<TypeVar>(*this)->show(gs);
         case Tag::LiteralType:
-            return cast_type_const<LiteralType>(*this)->show(gs);
+            return cast_inline_type_nonnull<LiteralType>(*this).show(gs);
         case Tag::SelfTypeParam:
             return cast_inline_type_nonnull<SelfTypeParam>(*this).show(gs);
         case Tag::SelfType:
@@ -657,7 +654,7 @@ DispatchResult TypePtr::dispatchCall(const GlobalState &gs, DispatchArgs args) c
 TypePtr TypePtr::underlying() const {
     switch (tag()) {
         case Tag::LiteralType:
-            return cast_type_const<LiteralType>(*this)->underlying();
+            return cast_inline_type_nonnull<LiteralType>(*this).underlying();
         case Tag::ShapeType:
             return cast_type_const<ShapeType>(*this)->underlying();
         case Tag::TupleType:

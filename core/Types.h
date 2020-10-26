@@ -1,6 +1,7 @@
 #ifndef SORBET_TYPES_H
 #define SORBET_TYPES_H
 
+#include "absl/base/casts.h"
 #include "common/Counters.h"
 #include "core/Context.h"
 #include "core/Error.h"
@@ -257,7 +258,7 @@ template <class To> To cast_inline_type_nonnull(const TypePtr &what) {
     static_assert(TypePtr::TypeToIsInline<To>::value == true,
                   "Cannot call `cast_inline_type_*` on non-inline types. Please use `cast_type_*`.");
     ENFORCE(isa_type<To>(what), "cast_inline_type_nonnull failed!");
-    return To::fromTypePtrValue(what.untagValue());
+    return To::fromTypePtrValue(what.untagValue(), what.inlineValue());
 }
 
 template <class To> To *cast_type(TypePtr &what) {
@@ -288,7 +289,7 @@ public:
 };
 
 TYPE_INLINE(ClassType) {
-    static ClassType fromTypePtrValue(u4 value) {
+    static ClassType fromTypePtrValue(u4 value, u8 val2) {
         return ClassType(SymbolRef::fromRaw(value));
     }
     u4 toTypePtrValue() const {
@@ -329,6 +330,7 @@ public:
 
     LambdaParam(SymbolRef definition, TypePtr lower, TypePtr upper);
     LambdaParam(const LambdaParam &obj) = delete;
+    ~LambdaParam() = default;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
 
@@ -342,7 +344,7 @@ public:
 CheckSize(LambdaParam, 40, 8);
 
 TYPE_FINAL_INLINE(SelfTypeParam) {
-    static SelfTypeParam fromTypePtrValue(u4 value) {
+    static SelfTypeParam fromTypePtrValue(u4 value, u8 val2) {
         return SelfTypeParam(SymbolRef::fromRaw(value));
     }
     u4 toTypePtrValue() const {
@@ -369,7 +371,7 @@ public:
 CheckSize(SelfTypeParam, 8, 8);
 
 TYPE_FINAL_INLINE(AliasType) {
-    static AliasType fromTypePtrValue(u4 value) {
+    static AliasType fromTypePtrValue(u4 value, u8 val2) {
         return AliasType(SymbolRef::fromRaw(value));
     }
     u4 toTypePtrValue() const {
@@ -397,7 +399,7 @@ CheckSize(AliasType, 8, 8);
  * to self(e.g. in case of `.clone`).
  */
 TYPE_FINAL_INLINE(SelfType) {
-    static SelfType fromTypePtrValue(u4 value) {
+    static SelfType fromTypePtrValue(u4 value, u8 val2) {
         return SelfType();
     }
     u4 toTypePtrValue() const {
@@ -422,20 +424,44 @@ public:
 };
 CheckSize(SelfType, 8, 8);
 
-TYPE_FINAL(LiteralType) {
+TYPE_FINAL_INLINE(LiteralType) {
 public:
+    enum class LiteralTypeKind : u1 { Integer, String, Symbol, True, False, Float };
     union {
         const int64_t value;
         const double floatval;
     };
-
-    enum class LiteralTypeKind : u1 { Integer, String, Symbol, True, False, Float };
     const LiteralTypeKind literalKind;
+
+private:
+    LiteralType(LiteralTypeKind kind, int64_t rawValue) : value(rawValue), literalKind(kind) {}
+    LiteralType(LiteralTypeKind kind, double floatValue) : floatval(floatValue), literalKind(kind) {}
+
+public:
+    static LiteralType fromTypePtrValue(u4 value, u8 val2) {
+        auto literalKind = static_cast<LiteralTypeKind>(value);
+        if (literalKind == LiteralTypeKind::Float) {
+            return LiteralType(literalKind, absl::bit_cast<double>(val2));
+        } else {
+            return LiteralType(literalKind, absl::bit_cast<int64_t>(val2));
+        }
+    }
+    u4 toTypePtrValue() const {
+        return static_cast<u4>(literalKind);
+    }
+    u8 toTypePtrExtraValue() const {
+        if (literalKind == LiteralTypeKind::Float) {
+            return absl::bit_cast<u8>(floatval);
+        } else {
+            return absl::bit_cast<u8>(value);
+        }
+    }
+
     LiteralType(int64_t val);
     LiteralType(double val);
     LiteralType(SymbolRef klass, NameRef val);
     LiteralType(bool val);
-    LiteralType(const LiteralType &obj) = delete;
+    // LiteralType(const LiteralType &obj) = delete;
     TypePtr underlying() const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -445,6 +471,12 @@ public:
     bool equals(const LiteralType &rhs) const;
 };
 CheckSize(LiteralType, 16, 8);
+
+template <>
+inline TypePtr::TypePtr(TypePtr::Tag tag, LiteralType type, bool)
+    : counterOrValue(type.toTypePtrExtraValue()), ptr(tagValue(tag, type.toTypePtrValue())) {
+    ENFORCE_NO_TIMER(TypeToIsInline<LiteralType>::value);
+}
 
 /*
  * TypeVars are the used for the type parameters of generic methods.
@@ -758,7 +790,7 @@ struct DispatchResult {
 };
 
 TYPE_FINAL_INLINE(BlamedUntyped) : public ClassType {
-    static BlamedUntyped fromTypePtrValue(u4 value) {
+    static BlamedUntyped fromTypePtrValue(u4 value, u8 val2) {
         return BlamedUntyped(SymbolRef::fromRaw(value));
     }
     u4 toTypePtrValue() const {
@@ -798,7 +830,7 @@ public:
 template <> inline ClassType cast_inline_type_nonnull(const TypePtr &what) {
     switch (what.tag()) {
         case TypePtr::Tag::ClassType:
-            return ClassType::fromTypePtrValue(what.untagValue());
+            return ClassType::fromTypePtrValue(what.untagValue(), what.inlineValue());
         case TypePtr::Tag::BlamedUntyped:
         case TypePtr::Tag::UnresolvedClassType:
         case TypePtr::Tag::UnresolvedAppliedType:

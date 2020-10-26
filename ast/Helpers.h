@@ -203,19 +203,19 @@ public:
     }
 
     static TreePtr Int(core::LocOffsets loc, int64_t val) {
-        return make_tree<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
+        return make_tree<ast::Literal>(loc, core::make_inline_type<core::LiteralType>(val));
     }
 
     static TreePtr Float(core::LocOffsets loc, double val) {
-        return make_tree<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
+        return make_tree<ast::Literal>(loc, core::make_inline_type<core::LiteralType>(val));
     }
 
     static TreePtr Symbol(core::LocOffsets loc, core::NameRef name) {
-        return make_tree<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), name));
+        return make_tree<ast::Literal>(loc, core::make_inline_type<core::LiteralType>(core::Symbols::Symbol(), name));
     }
 
     static TreePtr String(core::LocOffsets loc, core::NameRef value) {
-        return make_tree<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::String(), value));
+        return make_tree<ast::Literal>(loc, core::make_inline_type<core::LiteralType>(core::Symbols::String(), value));
     }
 
     static TreePtr Method(core::LocOffsets loc, core::Loc declLoc, core::NameRef name, MethodDef::ARGS_store args,

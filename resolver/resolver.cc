@@ -1900,20 +1900,20 @@ private:
             return;
         }
 
-        auto literal = core::cast_type_const<core::LiteralType>(literalNode->value);
-        if (literal == nullptr) {
+        if (!core::isa_type<core::LiteralType>(literalNode->value)) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("`{}` only accepts string literals", method);
             }
             return;
         }
 
-        if (literal->literalKind != core::LiteralType::LiteralTypeKind::String) {
+        auto literal = core::cast_inline_type_nonnull<core::LiteralType>(literalNode->value);
+        if (literal.literalKind != core::LiteralType::LiteralTypeKind::String) {
             // Infer will report a type error
             return;
         }
 
-        const core::LiteralType *package = nullptr;
+        unique_ptr<core::LiteralType> package = nullptr;
         optional<core::LocOffsets> packageLoc;
         if (send.args.size() == 3) {
             // this means we got the third package arg
@@ -1936,8 +1936,13 @@ private:
                 return;
             }
 
-            package = core::cast_type_const<core::LiteralType>(packageNode->value);
-            if (package == nullptr || package->literalKind != core::LiteralType::LiteralTypeKind::String) {
+            if (!core::isa_type<core::LiteralType>(packageNode->value)) {
+                // Infer will report a type error
+                return;
+            }
+            package =
+                make_unique<core::LiteralType>(core::cast_inline_type_nonnull<core::LiteralType>(packageNode->value));
+            if (package->literalKind != core::LiteralType::LiteralTypeKind::String) {
                 // Infer will report a type error
                 return;
             }
@@ -1945,7 +1950,7 @@ private:
         // if we got two args, then package should be null, and if we got three args, then package should be non-null
         ENFORCE((send.args.size() == 2 && !package) || (send.args.size() == 3 && package));
 
-        auto name = core::NameRef(ctx.state, literal->value);
+        auto name = core::NameRef(ctx.state, literal.value);
         auto shortName = name.data(ctx)->shortName(ctx);
         if (shortName.empty()) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {

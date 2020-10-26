@@ -87,8 +87,9 @@ Literal::Literal(const core::TypePtr &value) : value(move(value)) {
 }
 
 string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    if (auto *l = core::cast_type_const<core::LiteralType>(this->value)) {
-        return l->showValue(gs);
+    if (core::isa_type<core::LiteralType>(this->value)) {
+        auto l = core::cast_inline_type_nonnull<core::LiteralType>(this->value);
+        return l.showValue(gs);
     } else if (core::isa_type<core::ClassType>(this->value)) {
         auto l = core::cast_inline_type_nonnull<core::ClassType>(this->value);
         if (l.symbol == core::Symbols::NilClass()) {

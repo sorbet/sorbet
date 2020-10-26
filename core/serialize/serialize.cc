@@ -363,9 +363,9 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             break;
         }
         case TypePtr::Tag::LiteralType: {
-            auto *c = cast_type_const<LiteralType>(what);
-            p.putU1((u1)c->literalKind);
-            p.putS8(c->value);
+            auto c = cast_inline_type_nonnull<LiteralType>(what);
+            p.putU1((u1)c.literalKind);
+            p.putS8(c.value);
             break;
         }
         case TypePtr::Tag::AndType: {
@@ -452,17 +452,17 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             auto value = p.getS8();
             switch (kind) {
                 case LiteralType::LiteralTypeKind::Integer:
-                    return make_type<LiteralType>(value);
+                    return make_inline_type<LiteralType>(value);
                 case LiteralType::LiteralTypeKind::Float:
-                    return make_type<LiteralType>(absl::bit_cast<double>(value));
+                    return make_inline_type<LiteralType>(absl::bit_cast<double>(value));
                 case LiteralType::LiteralTypeKind::String:
-                    return make_type<LiteralType>(Symbols::String(), core::NameRef(NameRef::WellKnown{}, value));
+                    return make_inline_type<LiteralType>(Symbols::String(), core::NameRef(NameRef::WellKnown{}, value));
                 case LiteralType::LiteralTypeKind::Symbol:
-                    return make_type<LiteralType>(Symbols::Symbol(), core::NameRef(NameRef::WellKnown{}, value));
+                    return make_inline_type<LiteralType>(Symbols::Symbol(), core::NameRef(NameRef::WellKnown{}, value));
                 case LiteralType::LiteralTypeKind::True:
-                    return make_type<LiteralType>(true);
+                    return make_inline_type<LiteralType>(true);
                 case LiteralType::LiteralTypeKind::False:
-                    return make_type<LiteralType>(false);
+                    return make_inline_type<LiteralType>(false);
             }
             Exception::notImplemented();
         }

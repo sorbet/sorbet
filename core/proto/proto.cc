@@ -219,9 +219,9 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
             break;
         }
         case TypePtr::Tag::LiteralType: {
-            auto *t = core::cast_type_const<core::LiteralType>(typ);
+            auto t = core::cast_inline_type_nonnull<core::LiteralType>(typ);
             proto.set_kind(com::stripe::rubytyper::Type::LITERAL);
-            *proto.mutable_literal() = toProto(gs, *t);
+            *proto.mutable_literal() = toProto(gs, t);
             break;
         }
         case TypePtr::Tag::TupleType: {

@@ -847,8 +847,9 @@ string Literal::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 string Literal::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    if (auto *l = core::cast_type_const<core::LiteralType>(this->value)) {
-        return l->showValue(gs);
+    if (core::isa_type<core::LiteralType>(this->value)) {
+        auto l = core::cast_inline_type_nonnull<core::LiteralType>(this->value);
+        return l.showValue(gs);
     } else if (core::isa_type<core::ClassType>(this->value)) {
         auto l = core::cast_inline_type_nonnull<core::ClassType>(this->value);
         if (l.symbol == core::Symbols::NilClass()) {
@@ -1217,15 +1218,15 @@ string Literal::nodeName() {
 
 core::NameRef Literal::asString(const core::GlobalState &gs) const {
     ENFORCE(isString(gs));
-    auto t = core::cast_type_const<core::LiteralType>(value);
-    core::NameRef res(gs, t->value);
+    auto t = core::cast_inline_type_nonnull<core::LiteralType>(value);
+    core::NameRef res(gs, t.value);
     return res;
 }
 
 core::NameRef Literal::asSymbol(const core::GlobalState &gs) const {
     ENFORCE(isSymbol(gs));
-    auto t = core::cast_type_const<core::LiteralType>(value);
-    core::NameRef res(gs, t->value);
+    auto t = core::cast_inline_type_nonnull<core::LiteralType>(value);
+    core::NameRef res(gs, t.value);
     return res;
 }
 

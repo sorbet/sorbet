@@ -317,7 +317,7 @@ TreePtr symbol2Proc(DesugarContext dctx, TreePtr expr) {
     ENFORCE(lit && lit->isSymbol(dctx.ctx));
 
     // &:foo => {|temp| temp.foo() }
-    core::NameRef name(dctx.ctx, core::cast_type_const<core::LiteralType>(lit->value)->value);
+    core::NameRef name(dctx.ctx, core::cast_inline_type_nonnull<core::LiteralType>(lit->value).value);
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
     auto zeroLengthLoc = loc.copyWithZeroLength();
     TreePtr recv = MK::Local(zeroLengthLoc, temp);
@@ -532,8 +532,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     auto array = make_unique<parser::Array>(loc, std::move(argnodes));
 
                     auto args = node2TreeImpl(dctx, std::move(array));
-                    auto method =
-                        MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
+                    auto method = MK::Literal(
+                        loc, core::make_inline_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
 
                     Send::ARGS_store sendargs;
                     sendargs.emplace_back(std::move(rec));
@@ -573,8 +573,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     if (block == nullptr) {
                         res = MK::Send(loc, std::move(rec), send->method, std::move(args), flags);
                     } else {
-                        auto method =
-                            MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
+                        auto method = MK::Literal(
+                            loc, core::make_inline_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
                         auto convertedBlock = node2TreeImpl(dctx, std::move(block));
                         Literal *lit;
                         if ((lit = cast_tree<Literal>(convertedBlock)) && lit->isSymbol(dctx.ctx)) {

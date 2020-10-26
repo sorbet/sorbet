@@ -359,7 +359,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return TupleType::build(gs, unwrappedElems);
-    } else if (auto *litType = cast_type_const<LiteralType>(tp)) {
+    } else if (isa_type<LiteralType>(tp)) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unsupported usage of literal type");
         }
@@ -700,14 +700,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                     break;
                 } else if (spec.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
-                        auto key = cast_type_const<LiteralType>(*it);
-                        SymbolRef klass = cast_inline_type_nonnull<ClassType>(key->underlying()).symbol;
+                        auto key = cast_inline_type_nonnull<LiteralType>(*it);
+                        SymbolRef klass = cast_inline_type_nonnull<ClassType>(key.underlying()).symbol;
                         if (klass != Symbols::Symbol()) {
                             continue;
                         }
 
-                        NameRef arg(gs, key->value);
-                        if (consumed.find(NameRef(gs, key->value)) != consumed.end()) {
+                        NameRef arg(gs, key.value);
+                        if (consumed.find(NameRef(gs, key.value)) != consumed.end()) {
                             continue;
                         }
                         consumed.insert(arg);
@@ -727,9 +727,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 ++kwit;
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
-                    auto lit = cast_type_const<LiteralType>(litType);
-                    return cast_inline_type_nonnull<ClassType>(lit->underlying()).symbol == Symbols::Symbol() &&
-                           lit->value == spec.name._id;
+                    auto lit = cast_inline_type_nonnull<LiteralType>(litType);
+                    return cast_inline_type_nonnull<ClassType>(lit.underlying()).symbol == Symbols::Symbol() &&
+                           lit.value == spec.name._id;
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
@@ -752,12 +752,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 }
             }
             for (auto &keyType : hash->keys) {
-                auto key = cast_type_const<LiteralType>(keyType);
-                SymbolRef klass = cast_inline_type_nonnull<ClassType>(key->underlying()).symbol;
-                if (klass == Symbols::Symbol() && consumed.find(NameRef(gs, key->value)) != consumed.end()) {
+                auto key = cast_inline_type_nonnull<LiteralType>(keyType);
+                SymbolRef klass = cast_inline_type_nonnull<ClassType>(key.underlying()).symbol;
+                if (klass == Symbols::Symbol() && consumed.find(NameRef(gs, key.value)) != consumed.end()) {
                     continue;
                 }
-                NameRef arg(gs, key->value);
+                NameRef arg(gs, key.value);
 
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
@@ -1258,8 +1258,7 @@ public:
         keys.reserve(args.args.size() / 2);
         values.reserve(args.args.size() / 2);
         for (int i = 0; i < args.args.size(); i += 2) {
-            auto *key = cast_type_const<LiteralType>(args.args[i]->type);
-            if (key == nullptr) {
+            if (!isa_type<LiteralType>(args.args[i]->type)) {
                 res.returnType = Types::hashOfUntyped();
                 return;
             }
@@ -1357,15 +1356,15 @@ public:
             return;
         }
         auto val = args.args.front()->type;
-        auto *beforeLit = cast_type_const<LiteralType>(args.args[1]->type);
-        auto *afterLit = cast_type_const<LiteralType>(args.args[2]->type);
-        if (!(beforeLit->underlying().derivesFrom(gs, Symbols::Integer()) &&
-              afterLit->underlying().derivesFrom(gs, Symbols::Integer()))) {
+        auto beforeLit = cast_inline_type_nonnull<LiteralType>(args.args[1]->type);
+        auto afterLit = cast_inline_type_nonnull<LiteralType>(args.args[2]->type);
+        if (!(beforeLit.underlying().derivesFrom(gs, Symbols::Integer()) &&
+              afterLit.underlying().derivesFrom(gs, Symbols::Integer()))) {
             res.returnType = Types::untypedUntracked();
             return;
         }
-        int before = (int)beforeLit->value;
-        int after = (int)afterLit->value;
+        int before = (int)beforeLit.value;
+        int after = (int)afterLit.value;
         res.returnType = expandArray(gs, val, before + after);
     }
 } Magic_expandSplat;
@@ -1407,11 +1406,11 @@ public:
             return;
         }
 
-        auto *lit = cast_type_const<LiteralType>(args.args[1]->type);
-        if (!lit || !args.args[1]->type.derivesFrom(gs, Symbols::Symbol())) {
+        if (!isa_type<LiteralType>(args.args[1]->type) || !args.args[1]->type.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
-        NameRef fn(gs, (u4)lit->value);
+        auto lit = cast_inline_type_nonnull<LiteralType>(args.args[1]->type);
+        NameRef fn(gs, (u4)lit.value);
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
             return;
@@ -1630,11 +1629,11 @@ public:
             return;
         }
 
-        auto *lit = cast_type_const<LiteralType>(args.args[1]->type);
-        if (!lit || !args.args[1]->type.derivesFrom(gs, Symbols::Symbol())) {
+        if (!isa_type<LiteralType>(args.args[1]->type) || !args.args[1]->type.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
-        NameRef fn(gs, (u4)lit->value);
+        auto lit = cast_inline_type_nonnull<LiteralType>(args.args[1]->type);
+        NameRef fn(gs, (u4)lit.value);
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
         InlinedVector<LocOffsets, 2> sendArgLocs;
@@ -1684,11 +1683,11 @@ public:
             return;
         }
 
-        auto *lit = cast_type_const<LiteralType>(args.args[1]->type);
-        if (!lit || !args.args[1]->type.derivesFrom(gs, Symbols::Symbol())) {
+        if (!isa_type<LiteralType>(args.args[1]->type) || !args.args[1]->type.derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
-        NameRef fn(gs, (u4)lit->value);
+        auto lit = cast_inline_type_nonnull<LiteralType>(args.args[1]->type);
+        NameRef fn(gs, (u4)lit.value);
 
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
@@ -1849,9 +1848,9 @@ public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
         auto *tuple = cast_type_const<TupleType>(args.thisType);
         ENFORCE(tuple);
-        const LiteralType *lit = nullptr;
-        if (args.args.size() == 1) {
-            lit = cast_type_const<LiteralType>(args.args.front()->type);
+        unique_ptr<LiteralType> lit = nullptr;
+        if (args.args.size() == 1 && isa_type<LiteralType>(args.args.front()->type)) {
+            lit = make_unique<LiteralType>(cast_inline_type_nonnull<LiteralType>(args.args.front()->type));
         }
         if (!lit || !lit->underlying().derivesFrom(gs, Symbols::Integer())) {
             return;
@@ -1961,10 +1960,10 @@ public:
         auto keys = shape->keys;
         auto values = shape->values;
         for (auto &keyType : rhs->keys) {
-            auto key = cast_type_const<LiteralType>(keyType);
+            auto key = cast_inline_type_nonnull<LiteralType>(keyType);
             auto &value = rhs->values[&keyType - &rhs->keys.front()];
-            auto fnd =
-                absl::c_find_if(keys, [&key](auto &lit) { return key->equals(*cast_type_const<LiteralType>(lit)); });
+            auto fnd = absl::c_find_if(
+                keys, [&key](auto &lit) { return key.equals(cast_inline_type_nonnull<LiteralType>(lit)); });
             if (fnd == keys.end()) {
                 keys.emplace_back(keyType);
                 values.emplace_back(value);
@@ -2025,19 +2024,19 @@ public:
             ENFORCE(args.locs.args.size() == 1, "Mismatch between args.size() and args.locs.args.size(): {}",
                     args.locs.args.size());
             auto argLoc = args.locs.args[0];
-
-            auto lt = cast_type_const<LiteralType>(argTyp);
-            if (!lt) {
+            if (!isa_type<LiteralType>(argTyp)) {
                 if (auto e =
                         gs.beginError(core::Loc(args.locs.file, argLoc), core::errors::Infer::ExpectedLiteralType)) {
                     e.setHeader("You must pass an Integer literal to specify a depth with Array#flatten");
                 }
                 return;
             }
-            ENFORCE(lt->literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
 
-            if (lt->value >= 0) {
-                depth = lt->value;
+            auto lt = cast_inline_type_nonnull<LiteralType>(argTyp);
+            ENFORCE(lt.literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
+
+            if (lt.value >= 0) {
+                depth = lt.value;
             } else {
                 // Negative values behave like no depth was given
                 depth = INT64_MAX;

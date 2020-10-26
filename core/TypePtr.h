@@ -9,6 +9,7 @@ namespace sorbet::core {
 class TypeConstraint;
 struct DispatchResult;
 struct DispatchArgs;
+class LiteralType;
 
 class TypePtr final {
 public:
@@ -55,14 +56,16 @@ public:
     template <typename T> struct TypeToIsInline;
 
 private:
-    std::atomic<u4> *counter;
+    u8 counterOrValue;
     tagged_storage ptr;
 
-    static constexpr tagged_storage TAG_MASK = 0xffff000000000007;
+    // Top bit indicates if value is inlined into pointer.
+    static constexpr tagged_storage IS_PTR_MASK = 0x8000000000000000;
+    static constexpr tagged_storage TAG_MASK = 0x7FFF000000000007;
 
-    static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
+    static constexpr tagged_storage PTR_MASK = ~(IS_PTR_MASK | TAG_MASK);
 
-    static tagged_storage _tag(Tag tag, tagged_storage value) {
+    static tagged_storage _tag(Tag tag, tagged_storage extraMask, tagged_storage value) {
         auto val = static_cast<tagged_storage>(tag);
         if (val >= 8) {
             // Store the tag in the upper 16 bits of the pointer, as it won't fit in the lower three bits.
@@ -71,33 +74,44 @@ private:
 
         auto maskedValue = value & PTR_MASK;
 
-        return maskedValue | val;
+        return maskedValue | val | extraMask;
     }
 
     static tagged_storage tagValue(Tag tag, u4 value) {
-        return _tag(tag, (static_cast<tagged_storage>(value) << 3));
+        return _tag(tag, 0, (static_cast<tagged_storage>(value) << 3));
     }
 
     static tagged_storage tagPtr(Tag tag, void *expr) {
-        return _tag(tag, reinterpret_cast<tagged_storage>(expr));
+        return _tag(tag, IS_PTR_MASK, reinterpret_cast<tagged_storage>(expr));
     }
 
-    explicit TypePtr(Tag tag, std::atomic<u4> *counter, void *expr) : counter(counter), ptr(tagPtr(tag, expr)) {
-        if (counter != nullptr) {
-            counter->fetch_add(1);
-        }
+    explicit TypePtr(Tag tag, std::atomic<u4> *counter, void *expr)
+        : counterOrValue(reinterpret_cast<u8>(counter)), ptr(tagPtr(tag, expr)) {
+        ENFORCE(counterOrValue > 0);
+        counter->fetch_add(1);
     }
 
     template <class T>
-    explicit TypePtr(Tag tag, T type, bool) : counter(nullptr), ptr(tagValue(tag, type.toTypePtrValue())) {
+    explicit TypePtr(Tag tag, T type, bool) : counterOrValue(0), ptr(tagValue(tag, type.toTypePtrValue())) {
         ENFORCE_NO_TIMER(TypeToIsInline<T>::value);
     }
+
+    template <> explicit TypePtr(Tag tag, LiteralType type, bool);
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
     u4 untagValue() const noexcept {
         auto val = (ptr & PTR_MASK) >> 3;
         return static_cast<u4>(val);
+    }
+
+    bool isInline() const noexcept {
+        return (ptr & IS_PTR_MASK) == 0;
+    }
+
+    u8 inlineValue() const {
+        ENFORCE_NO_TIMER(isInline());
+        return counterOrValue;
     }
 
     // A version of release that doesn't mask the tag bits
@@ -107,9 +121,9 @@ private:
         return saved;
     }
 
-    std::atomic<u4> *releaseCounter() noexcept {
-        auto saved = counter;
-        counter = nullptr;
+    u8 releaseCounterOrValue() noexcept {
+        auto saved = counterOrValue;
+        counterOrValue = 0;
         return saved;
     }
 
@@ -124,28 +138,34 @@ private:
     }
 
     void handleDelete() noexcept {
-        if (counter != nullptr) {
+        if (!isInline()) {
+            ENFORCE(counterOrValue > 0);
             // fetch_sub returns value prior to subtract
+            auto *counter = reinterpret_cast<std::atomic<u4> *>(counterOrValue);
             const u4 counterVal = counter->fetch_sub(1) - 1;
             if (counterVal == 0) {
                 deleteTagged(tag(), get());
                 delete counter;
             }
+            counterOrValue = 0;
         }
+        ptr = 0;
     }
 
     void _sanityCheck(const GlobalState &gs) const;
 
 public:
     // Default: noSymbol class type.
-    constexpr TypePtr() noexcept : counter(nullptr), ptr(0) {}
+    constexpr TypePtr() noexcept : counterOrValue(0), ptr(0) {}
 
     TypePtr(std::nullptr_t) noexcept : TypePtr() {}
 
-    TypePtr(TypePtr &&other) : counter(other.releaseCounter()), ptr(other.releaseTagged()){};
+    TypePtr(TypePtr &&other) : counterOrValue(other.releaseCounterOrValue()), ptr(other.releaseTagged()){};
 
-    TypePtr(const TypePtr &other) : counter(other.counter), ptr(other.ptr) {
-        if (counter != nullptr) {
+    TypePtr(const TypePtr &other) : counterOrValue(other.counterOrValue), ptr(other.ptr) {
+        if (!isInline()) {
+            ENFORCE(counterOrValue > 0);
+            auto *counter = reinterpret_cast<std::atomic<u4> *>(counterOrValue);
             counter->fetch_add(1);
         }
     };
@@ -155,8 +175,12 @@ public:
     }
 
     TypePtr &operator=(TypePtr &&other) {
+        if (*this == other) {
+            return *this;
+        }
+
         handleDelete();
-        counter = other.releaseCounter();
+        counterOrValue = other.releaseCounterOrValue();
         ptr = other.releaseTagged();
         return *this;
     };
@@ -167,9 +191,11 @@ public:
         }
 
         handleDelete();
-        counter = other.counter;
+        counterOrValue = other.counterOrValue;
         ptr = other.ptr;
-        if (counter != nullptr) {
+        if (!isInline()) {
+            ENFORCE(counterOrValue > 0);
+            auto *counter = reinterpret_cast<std::atomic<u4> *>(counterOrValue);
             counter->fetch_add(1);
         }
         return *this;
@@ -192,10 +218,10 @@ public:
         }
     }
     bool operator!=(const TypePtr &other) const {
-        return ptr != other.ptr;
+        return ptr != other.ptr || counterOrValue != other.counterOrValue;
     }
     bool operator==(const TypePtr &other) const {
-        return ptr == other.ptr;
+        return ptr == other.ptr && counterOrValue == other.counterOrValue;
     }
     bool operator!=(std::nullptr_t n) const {
         return ptr != 0;
@@ -261,6 +287,7 @@ public:
     template <class To> friend To const *cast_type_const(const TypePtr &what);
     template <class To> friend To *cast_type(TypePtr &what);
     template <class To> friend To cast_inline_type_nonnull(const TypePtr &what);
+    template <class T, class... Args> friend TypePtr make_inline_type(Args &&... args);
     template <class T, class... Args> friend TypePtr make_inline_type(Args &&... args);
 };
 CheckSize(TypePtr, 16, 8);

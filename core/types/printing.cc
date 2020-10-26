@@ -124,9 +124,9 @@ string ShapeType::show(const GlobalState &gs) const {
             fmt::format_to(buf, ", ");
         }
         SymbolRef undSymbol =
-            cast_inline_type_nonnull<ClassType>(cast_type_const<LiteralType>(key)->underlying()).symbol;
+            cast_inline_type_nonnull<ClassType>(cast_inline_type_nonnull<LiteralType>(key).underlying()).symbol;
         if (undSymbol == Symbols::Symbol()) {
-            fmt::format_to(buf, "{}: {}", NameRef(gs, cast_type_const<LiteralType>(key)->value).show(gs),
+            fmt::format_to(buf, "{}: {}", NameRef(gs, cast_inline_type_nonnull<LiteralType>(key).value).show(gs),
                            (*valueIterator).show(gs));
         } else {
             fmt::format_to(buf, "{} => {}", key.show(gs), (*valueIterator).show(gs));
