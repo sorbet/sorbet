@@ -473,7 +473,7 @@ public:
 CheckSize(LiteralType, 16, 8);
 
 template <>
-inline TypePtr::TypePtr(TypePtr::Tag tag, LiteralType type, bool)
+inline TypePtr::TypePtr(TypePtr::Tag tag, LiteralType type, bool) noexcept
     : counterOrValue(type.toTypePtrExtraValue()), ptr(tagValue(tag, type.toTypePtrValue())) {
     ENFORCE_NO_TIMER(TypeToIsInline<LiteralType>::value);
 }

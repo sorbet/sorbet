@@ -85,18 +85,16 @@ private:
         return _tag(tag, IS_PTR_MASK, reinterpret_cast<tagged_storage>(expr));
     }
 
-    explicit TypePtr(Tag tag, std::atomic<u4> *counter, void *expr)
+    explicit TypePtr(Tag tag, std::atomic<u4> *counter, void *expr) noexcept
         : counterOrValue(reinterpret_cast<u8>(counter)), ptr(tagPtr(tag, expr)) {
         ENFORCE(counterOrValue > 0);
         counter->fetch_add(1);
     }
 
     template <class T>
-    explicit TypePtr(Tag tag, T type, bool) : counterOrValue(0), ptr(tagValue(tag, type.toTypePtrValue())) {
+    explicit TypePtr(Tag tag, T type, bool) noexcept : counterOrValue(0), ptr(tagValue(tag, type.toTypePtrValue())) {
         ENFORCE_NO_TIMER(TypeToIsInline<T>::value);
     }
-
-    template <> explicit TypePtr(Tag tag, LiteralType type, bool);
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
@@ -160,9 +158,9 @@ public:
 
     TypePtr(std::nullptr_t) noexcept : TypePtr() {}
 
-    TypePtr(TypePtr &&other) : counterOrValue(other.releaseCounterOrValue()), ptr(other.releaseTagged()){};
+    TypePtr(TypePtr &&other) noexcept : counterOrValue(other.releaseCounterOrValue()), ptr(other.releaseTagged()){};
 
-    TypePtr(const TypePtr &other) : counterOrValue(other.counterOrValue), ptr(other.ptr) {
+    TypePtr(const TypePtr &other) noexcept : counterOrValue(other.counterOrValue), ptr(other.ptr) {
         if (!isInline()) {
             ENFORCE(counterOrValue > 0);
             auto *counter = reinterpret_cast<std::atomic<u4> *>(counterOrValue);
@@ -174,7 +172,7 @@ public:
         handleDelete();
     }
 
-    TypePtr &operator=(TypePtr &&other) {
+    TypePtr &operator=(TypePtr &&other) noexcept {
         if (*this == other) {
             return *this;
         }
@@ -185,7 +183,7 @@ public:
         return *this;
     };
 
-    TypePtr &operator=(const TypePtr &other) {
+    TypePtr &operator=(const TypePtr &other) noexcept {
         if (*this == other) {
             return *this;
         }
@@ -201,7 +199,7 @@ public:
         return *this;
     };
 
-    explicit TypePtr(Tag tag, void *expr) : TypePtr(tag, new std::atomic<u4>(), expr) {}
+    explicit TypePtr(Tag tag, void *expr) noexcept : TypePtr(tag, new std::atomic<u4>(), expr) {}
 
     operator bool() const {
         return (bool)ptr;
