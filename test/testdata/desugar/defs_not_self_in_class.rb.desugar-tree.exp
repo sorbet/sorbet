@@ -1,0 +1,7 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    <self>.private_class_method(def self.a<<C <todo sym>>>(&<blk>)
+        5
+      end)
+  end
+end

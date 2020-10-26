@@ -1,3 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  <emptyTree>
+  def self.method<<C <todo sym>>>(&<blk>)
+    <emptyTree>
+  end
 end
