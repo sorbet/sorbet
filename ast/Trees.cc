@@ -249,7 +249,7 @@ string TreePtr::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 bool TreePtr::isSelfReference() const {
-    if (auto *local = cast_tree_const<Local>(*this)) {
+    if (auto *local = cast_tree<Local>(*this)) {
         return local->localVariable == core::LocalVariable::selfVariable();
     }
     return false;

@@ -568,7 +568,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     // 0-sized Loc, since `self.` doesn't appear in the original file.
                     rec = MK::Self(loc.copyWithZeroLength());
                     flags.isPrivateOk = true;
-                } else if (rec.get()->isSelfReference()) {
+                } else if (rec.isSelfReference()) {
                     // In Ruby 2.7 `self.foo()` is also allowed for private method calls,
                     // not only `foo()`. This pre-emptively allow the new syntax.
                     flags.isPrivateOk = true;
