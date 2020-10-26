@@ -885,12 +885,12 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     TypePtr ret;
 
     auto unwrapTypeVector = [&](const std::vector<TypePtr> &elems) -> std::vector<TypePtr> {
-      std::vector<TypePtr> unwrapped;
-      unwrapped.reserve(elems.size());
-      for (auto &e : elems) {
-        unwrapped.emplace_back(unwrapSelfTypeParam(ctx, e));
-      }
-      return unwrapped;
+        std::vector<TypePtr> unwrapped;
+        unwrapped.reserve(elems.size());
+        for (auto &e : elems) {
+            unwrapped.emplace_back(unwrapSelfTypeParam(ctx, e));
+        }
+        return unwrapped;
     };
 
     typecase(
@@ -905,7 +905,8 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
             ret = OrType::make_shared(unwrapSelfTypeParam(ctx, orType->left), unwrapSelfTypeParam(ctx, orType->right));
         },
         [&](ShapeType *shape) {
-            ret = make_type<ShapeType>(unwrapSelfTypeParam(ctx, shape->underlying_), shape->keys, unwrapTypeVector(shape->values));
+            ret = make_type<ShapeType>(unwrapSelfTypeParam(ctx, shape->underlying_), shape->keys,
+                                       unwrapTypeVector(shape->values));
         },
         [&](TupleType *tuple) {
             ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple->underlying_), unwrapTypeVector(tuple->elems));
