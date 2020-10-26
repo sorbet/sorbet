@@ -109,10 +109,11 @@ def sorbet_obj_toString(sorbetObj, error = None):
     sorbetType = sorbetObj.GetType()
     frame = sorbetObj.GetFrame()
     exprMethods = [sorbetType.GetMemberFunctionAtIndex(i) for i in range(sorbetType.GetNumberOfMemberFunctions())]
-    toStringMethod = next((m for m in exprMethods if m.GetName() == "toString"), None)
+    exprMethods.sort(key=lldb.SBTypeMemberFunction.GetName)
+    toStringMethod = next((m for m in exprMethods if m.GetName() in ["showRaw", "toString"]), None)
     if toStringMethod is None:
         if error is not None:
-            error.SetErrorString("Object of type %s doesn't have a toString method" % sorbetType)
+            error.SetErrorString("Object of type %s doesn't have a showRaw or toString method" % sorbetType)
         return None
     # Try to retrieve GS and CFG from the current context
     gs = get_variable_in_frames(frame, ["sorbet::core::GlobalState", "sorbet::core::Context"])
@@ -121,7 +122,7 @@ def sorbet_obj_toString(sorbetObj, error = None):
             error.SetErrorString("Couldn't find a GS instance in the current frame")
         return None
     cfg = None
-    if toStringMethod.GetNumberOfArguments() == 2:
+    if toStringMethod.GetNumberOfArguments() >= 2:
         cfg = get_variable_in_frames(frame, "sorbet::cfg::CFG")
         if cfg is None:
             if error is not None:
@@ -129,9 +130,22 @@ def sorbet_obj_toString(sorbetObj, error = None):
             return None
     globalStateAccess = "%s%s" % (format_argument(gs), ".state" if "sorbet::core::Context" in gs.GetTypeName() else "")
     command = sorbetObj.get_expr_path()
-    cmd = "(%s).toString(%s)" % (command, globalStateAccess)
-    if toStringMethod.GetNumberOfArguments() == 2:
-        cmd = "(%s).toString(%s, %s)" % (command, globalStateAccess, format_argument(cfg))
+    # Method argument types are assumed by convention to be:
+    #   - 1 argument: GlobalState
+    #   - 2 arguments: GlobalState and CFG
+    #   - 3 arguments: GlobalState, CFG and int
+    cmd = None
+    toStringArity = toStringMethod.GetNumberOfArguments()
+    if toStringArity == 1:
+        cmd = "(%s).%s(%s)" % (command, toStringMethod.GetName(), globalStateAccess)
+    elif toStringArity == 2:
+        cmd = "(%s).%s(%s, %s)" % (command, toStringMethod.GetName(), globalStateAccess, format_argument(cfg))
+    elif toStringArity == 3:
+        cmd = "(%s).%s(%s, %s, 0)" % (command, toStringMethod.GetName(), globalStateAccess, format_argument(cfg))
+    if cmd is None:
+        if error is not None:
+            error.SetErrorString("Arity of %s is wrong (should be 1, 2 or 3)" % toStringMethod.GetName())
+        return None
     finalExpr = frame.EvaluateExpression(cmd)
     if not finalExpr.IsValid():
         if error is not None:
