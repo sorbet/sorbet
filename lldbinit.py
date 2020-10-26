@@ -17,11 +17,25 @@ def __lldb_init_module(debugger, internal_dict):
     register_summary(ci, format_sorbet_core_Name.__name__, "sorbet::core::Name")
     register_summary(ci, format_sorbet_core_NameRef.__name__, "sorbet::core::NameRef")
     register_summary(ci, format_sorbet_core_GlobalState.__name__, "sorbet::core::GlobalState")
+
     # LLDB will not automatically walk up inheritance chains to find a formatter so it needs to
     # be specified for every subclass of Instruction
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::Instruction")
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::Ident")
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::Send")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::Alias")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::SolveConstraint")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::Return")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::BlockReturn")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::LoadSelf")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::Literal")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::GetCurrentException")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::LoadArg")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::ArgPresent")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::LoadYieldParams")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::Cast")
+    register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::TAbsurd")
+
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::CFG")
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::VariableUseSite")
     register_summary(ci, format_sorbet_object.__name__, "sorbet::cfg::LocalRef")
