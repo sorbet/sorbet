@@ -458,7 +458,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             for (auto &value : values) {
                 value = unpickleType(p, gs);
             }
-            auto result = make_type<ShapeType>(underlying, keys, values);
+            auto result = make_type<ShapeType>(underlying, move(keys), move(values));
             return result;
         }
         case 7:
@@ -475,7 +475,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             for (auto &t : targs) {
                 t = unpickleType(p, gs);
             }
-            return make_type<AppliedType>(klass, targs);
+            return make_type<AppliedType>(klass, move(targs));
         }
         case 10: {
             auto sym = SymbolRef::fromRaw(p.getU4());

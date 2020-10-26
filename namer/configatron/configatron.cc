@@ -154,7 +154,7 @@ void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> pre
                 elemType = core::Types::bottom();
             }
             vector<core::TypePtr> elems{elemType};
-            prefix->setType(gs, core::make_type<core::AppliedType>(core::Symbols::Array(), elems));
+            prefix->setType(gs, core::make_type<core::AppliedType>(core::Symbols::Array(), move(elems)));
             break;
         }
         case YAML::NodeType::Map:

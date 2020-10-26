@@ -95,19 +95,19 @@ TypePtr Types::Float() {
 
 TypePtr Types::arrayOfUntyped() {
     static vector<TypePtr> targs{Types::untypedUntracked()};
-    static auto res = make_type<AppliedType>(Symbols::Array(), targs);
+    static auto res = make_type<AppliedType>(Symbols::Array(), move(targs));
     return res;
 }
 
 TypePtr Types::rangeOfUntyped() {
     static vector<TypePtr> targs{Types::untypedUntracked()};
-    static auto res = make_type<AppliedType>(Symbols::Range(), targs);
+    static auto res = make_type<AppliedType>(Symbols::Range(), move(targs));
     return res;
 }
 
 TypePtr Types::hashOfUntyped() {
     static vector<TypePtr> targs{Types::untypedUntracked(), Types::untypedUntracked(), Types::untypedUntracked()};
-    static auto res = make_type<AppliedType>(Symbols::Hash(), targs);
+    static auto res = make_type<AppliedType>(Symbols::Hash(), move(targs));
     return res;
 }
 
@@ -277,18 +277,18 @@ TypePtr Types::lubAll(const GlobalState &gs, vector<TypePtr> &elements) {
 
 TypePtr Types::arrayOf(const GlobalState &gs, const TypePtr &elem) {
     vector<TypePtr> targs{move(elem)};
-    return make_type<AppliedType>(Symbols::Array(), targs);
+    return make_type<AppliedType>(Symbols::Array(), move(targs));
 }
 
 TypePtr Types::rangeOf(const GlobalState &gs, const TypePtr &elem) {
     vector<TypePtr> targs{move(elem)};
-    return make_type<AppliedType>(Symbols::Range(), targs);
+    return make_type<AppliedType>(Symbols::Range(), move(targs));
 }
 
 TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
     vector<TypePtr> tupleArgs{Types::Symbol(), elem};
     vector<TypePtr> targs{Types::Symbol(), elem, TupleType::build(gs, tupleArgs)};
-    return make_type<AppliedType>(Symbols::Hash(), targs);
+    return make_type<AppliedType>(Symbols::Hash(), move(targs));
 }
 
 TypePtr Types::dropNil(const GlobalState &gs, const TypePtr &from) {
@@ -872,7 +872,7 @@ TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
             for (const auto &t : appliedType->targs) {
                 newTargs.emplace_back(widen(gs, t));
             }
-            ret = make_type<AppliedType>(appliedType->klass, newTargs);
+            ret = make_type<AppliedType>(appliedType->klass, move(newTargs));
         },
         [&](Type *tp) { ret = type; });
     ENFORCE(ret);

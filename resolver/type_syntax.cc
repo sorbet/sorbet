@@ -621,7 +621,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                     }
                 }
             }
-            result.type = core::make_type<core::ShapeType>(core::Types::hashOfUntyped(), keys, values);
+            result.type = core::make_type<core::ShapeType>(core::Types::hashOfUntyped(), move(keys), move(values));
         },
         [&](ast::ConstantLit *i) {
             auto maybeAliased = i->symbol;
@@ -811,7 +811,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 }
                 auto sym = core::Symbols::Proc(arity);
 
-                result.type = core::make_type<core::AppliedType>(sym, targs);
+                result.type = core::make_type<core::AppliedType>(sym, move(targs));
                 return;
             }
 
