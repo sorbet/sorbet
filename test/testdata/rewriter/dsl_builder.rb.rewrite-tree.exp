@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:"implied_string", <emptyTree>::<C String>).returns(::NilClass)
     end
 
-    def self.implied_string<<C <todo sym>>>(implied_string = ::T.untyped(), &<blk>)
+    def self.implied_string<<C <todo sym>>>(implied_string = ::T.unsafe(::NilClass), &<blk>)
       <emptyTree>
     end
 
