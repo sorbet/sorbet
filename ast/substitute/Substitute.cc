@@ -10,7 +10,7 @@ class SubstWalk {
 private:
     const core::GlobalSubstitution &subst;
 
-    TreePtr substClassName(core::MutableContext ctx, TreePtr node) {
+    TreePtr substClassName(core::Context ctx, TreePtr node) {
         auto *constLit = cast_tree<UnresolvedConstantLit>(node);
         if (constLit == nullptr) { // uncommon case. something is strange
             if (isa_tree<EmptyTree>(node)) {
@@ -25,7 +25,7 @@ private:
         return make_tree<UnresolvedConstantLit>(constLit->loc, std::move(scope), cnst);
     }
 
-    TreePtr substArg(core::MutableContext ctx, TreePtr argp) {
+    TreePtr substArg(core::Context ctx, TreePtr argp) {
         Expression *arg = argp.get();
         while (arg != nullptr) {
             typecase(
@@ -44,7 +44,7 @@ private:
 public:
     SubstWalk(const core::GlobalSubstitution &subst) : subst(subst) {}
 
-    TreePtr preTransformClassDef(core::MutableContext ctx, TreePtr tree) {
+    TreePtr preTransformClassDef(core::Context ctx, TreePtr tree) {
         auto *original = cast_tree<ClassDef>(tree);
         original->name = substClassName(ctx, std::move(original->name));
         for (auto &anc : original->ancestors) {
@@ -53,7 +53,7 @@ public:
         return tree;
     }
 
-    TreePtr preTransformMethodDef(core::MutableContext ctx, TreePtr tree) {
+    TreePtr preTransformMethodDef(core::Context ctx, TreePtr tree) {
         auto *original = cast_tree<MethodDef>(tree);
         original->name = subst.substitute(original->name);
         for (auto &arg : original->args) {
@@ -62,7 +62,7 @@ public:
         return tree;
     }
 
-    TreePtr preTransformBlock(core::MutableContext ctx, TreePtr tree) {
+    TreePtr preTransformBlock(core::Context ctx, TreePtr tree) {
         auto *original = cast_tree<Block>(tree);
         for (auto &arg : original->args) {
             arg = substArg(ctx, std::move(arg));
@@ -70,22 +70,22 @@ public:
         return tree;
     }
 
-    TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, TreePtr original) {
+    TreePtr postTransformUnresolvedIdent(core::Context ctx, TreePtr original) {
         cast_tree<UnresolvedIdent>(original)->name = subst.substitute(cast_tree<UnresolvedIdent>(original)->name);
         return original;
     }
 
-    TreePtr postTransformLocal(core::MutableContext ctx, TreePtr local) {
+    TreePtr postTransformLocal(core::Context ctx, TreePtr local) {
         cast_tree<Local>(local)->localVariable._name = subst.substitute(cast_tree<Local>(local)->localVariable._name);
         return local;
     }
 
-    TreePtr preTransformSend(core::MutableContext ctx, TreePtr original) {
+    TreePtr preTransformSend(core::Context ctx, TreePtr original) {
         cast_tree<Send>(original)->fun = subst.substitute(cast_tree<Send>(original)->fun);
         return original;
     }
 
-    TreePtr postTransformLiteral(core::MutableContext ctx, TreePtr tree) {
+    TreePtr postTransformLiteral(core::Context ctx, TreePtr tree) {
         auto *original = cast_tree<Literal>(tree);
         if (original->isString(ctx)) {
             auto nameRef = original->asString(ctx);
@@ -112,7 +112,7 @@ public:
         return tree;
     }
 
-    TreePtr postTransformUnresolvedConstantLit(core::MutableContext ctx, TreePtr tree) {
+    TreePtr postTransformUnresolvedConstantLit(core::Context ctx, TreePtr tree) {
         auto *original = cast_tree<UnresolvedConstantLit>(tree);
         original->cnst = subst.substitute(original->cnst);
         original->scope = substClassName(ctx, std::move(original->scope));
@@ -121,7 +121,7 @@ public:
 };
 } // namespace
 
-TreePtr Substitute::run(core::MutableContext ctx, const core::GlobalSubstitution &subst, TreePtr what) {
+TreePtr Substitute::run(core::Context ctx, const core::GlobalSubstitution &subst, TreePtr what) {
     if (subst.useFastPath()) {
         return what;
     }

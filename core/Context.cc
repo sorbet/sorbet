@@ -142,26 +142,28 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
             }
         }
 
-        // Enforce that the symbol tables are the same
-        for (int i = 0; i < from.classAndModules.size(); ++i) {
-            ENFORCE(substitute(from.classAndModules[i].name) == from.classAndModules[i].name);
-            ENFORCE(from.classAndModules[i].name == to.classAndModules[i].name);
-        }
-        for (int i = 0; i < from.methods.size(); ++i) {
-            ENFORCE(substitute(from.methods[i].name) == from.methods[i].name);
-            ENFORCE(from.methods[i].name == to.methods[i].name);
-        }
-        for (int i = 0; i < from.fields.size(); ++i) {
-            ENFORCE(substitute(from.fields[i].name) == from.fields[i].name);
-            ENFORCE(from.fields[i].name == to.fields[i].name);
-        }
-        for (int i = 0; i < from.typeArguments.size(); ++i) {
-            ENFORCE(substitute(from.typeArguments[i].name) == from.typeArguments[i].name);
-            ENFORCE(from.typeArguments[i].name == to.typeArguments[i].name);
-        }
-        for (int i = 0; i < from.typeMembers.size(); ++i) {
-            ENFORCE(substitute(from.typeMembers[i].name) == from.typeMembers[i].name);
-            ENFORCE(from.typeMembers[i].name == to.typeMembers[i].name);
+        if (debug_mode) {
+            // Enforce that the symbol tables are the same
+            for (int i = 0; i < from.classAndModules.size(); ++i) {
+                ENFORCE(substitute(from.classAndModules[i].name) == from.classAndModules[i].name);
+                ENFORCE(from.classAndModules[i].name == to.classAndModules[i].name);
+            }
+            for (int i = 0; i < from.methods.size(); ++i) {
+                ENFORCE(substitute(from.methods[i].name) == from.methods[i].name);
+                ENFORCE(from.methods[i].name == to.methods[i].name);
+            }
+            for (int i = 0; i < from.fields.size(); ++i) {
+                ENFORCE(substitute(from.fields[i].name) == from.fields[i].name);
+                ENFORCE(from.fields[i].name == to.fields[i].name);
+            }
+            for (int i = 0; i < from.typeArguments.size(); ++i) {
+                ENFORCE(substitute(from.typeArguments[i].name) == from.typeArguments[i].name);
+                ENFORCE(from.typeArguments[i].name == to.typeArguments[i].name);
+            }
+            for (int i = 0; i < from.typeMembers.size(); ++i) {
+                ENFORCE(substitute(from.typeMembers[i].name) == from.typeMembers[i].name);
+                ENFORCE(from.typeMembers[i].name == to.typeMembers[i].name);
+            }
         }
     }
 

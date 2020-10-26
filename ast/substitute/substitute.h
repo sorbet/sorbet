@@ -7,7 +7,7 @@
 namespace sorbet::ast {
 class Substitute {
 public:
-    static TreePtr run(core::MutableContext ctx, const core::GlobalSubstitution &subst, TreePtr what);
+    static TreePtr run(core::Context ctx, const core::GlobalSubstitution &subst, TreePtr what);
 };
 } // namespace sorbet::ast
 #endif // SORBET_SUBSTITUTE_H
