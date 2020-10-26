@@ -884,6 +884,15 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
 
     TypePtr ret;
 
+    auto unwrapTypeVector = [&](const std::vector<TypePtr> &elems) -> std::vector<TypePtr> {
+      std::vector<TypePtr> unwrapped;
+      unwrapped.reserve(elems.size());
+      for (auto &e : elems) {
+        unwrapped.emplace_back(unwrapSelfTypeParam(ctx, e));
+      }
+      return unwrapped;
+    };
+
     typecase(
         type.get(), [&](ClassType *klass) { ret = type; }, [&](TypeVar *tv) { ret = type; },
         [&](LambdaParam *tv) { ret = type; }, [&](SelfType *self) { ret = type; },
@@ -896,33 +905,14 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
             ret = OrType::make_shared(unwrapSelfTypeParam(ctx, orType->left), unwrapSelfTypeParam(ctx, orType->right));
         },
         [&](ShapeType *shape) {
-            std::vector<TypePtr> values;
-            values.reserve(shape->values.size());
-
-            for (auto &value : shape->values) {
-                values.emplace_back(unwrapSelfTypeParam(ctx, value));
-            }
-
-            ret = make_type<ShapeType>(unwrapSelfTypeParam(ctx, shape->underlying_), shape->keys, std::move(values));
+            ret = make_type<ShapeType>(unwrapSelfTypeParam(ctx, shape->underlying_), shape->keys, unwrapTypeVector(shape->values));
         },
         [&](TupleType *tuple) {
-            std::vector<TypePtr> elems;
-            elems.reserve(tuple->elems.size());
-
-            for (auto &value : tuple->elems) {
-                elems.emplace_back(unwrapSelfTypeParam(ctx, value));
-            }
-
-            ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple->underlying_), std::move(elems));
+            ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple->underlying_), unwrapTypeVector(tuple->elems));
         },
         [&](MetaType *meta) { ret = make_type<MetaType>(unwrapSelfTypeParam(ctx, meta->wrapped)); },
         [&](AppliedType *appliedType) {
-            vector<TypePtr> newTargs;
-            newTargs.reserve(appliedType->targs.size());
-            for (const auto &t : appliedType->targs) {
-                newTargs.emplace_back(unwrapSelfTypeParam(ctx, t));
-            }
-            ret = make_type<AppliedType>(appliedType->klass, newTargs);
+            ret = make_type<AppliedType>(appliedType->klass, unwrapTypeVector(appliedType->targs));
         },
         [&](SelfTypeParam *param) {
             auto sym = param->definition;
