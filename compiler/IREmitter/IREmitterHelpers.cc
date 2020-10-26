@@ -167,10 +167,10 @@ findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
     for (auto &arg : mdef.args) {
         argId += 1;
         ast::Local const *local = nullptr;
-        if (auto *opt = ast::cast_tree_const<ast::OptionalArg>(arg)) {
-            local = ast::cast_tree_const<ast::Local>(opt->expr);
+        if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
+            local = ast::cast_tree<ast::Local>(opt->expr);
         } else {
-            local = ast::cast_tree_const<ast::Local>(arg);
+            local = ast::cast_tree<ast::Local>(arg);
         }
         ENFORCE(local);
         auto localRef = cfg.enterLocal(local->localVariable);
