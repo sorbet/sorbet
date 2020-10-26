@@ -287,7 +287,7 @@ TypePtr Types::rangeOf(const GlobalState &gs, const TypePtr &elem) {
 
 TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
     vector<TypePtr> tupleArgs{Types::Symbol(), elem};
-    vector<TypePtr> targs{Types::Symbol(), elem, TupleType::build(gs, tupleArgs)};
+    vector<TypePtr> targs{Types::Symbol(), elem, TupleType::build(gs, move(tupleArgs))};
     return make_type<AppliedType>(Symbols::Hash(), move(targs));
 }
 

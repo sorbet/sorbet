@@ -95,7 +95,7 @@ TypePtr TupleType::_instantiate(const GlobalState &gs, const InlinedVector<Symbo
             newElems[i] = this->elems[i];
             i++;
         }
-        return TupleType::build(gs, newElems);
+        return TupleType::build(gs, move(newElems));
     }
     return nullptr;
 }
@@ -122,7 +122,7 @@ TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc)
             newElems[i] = this->elems[i];
             i++;
         }
-        return TupleType::build(gs, newElems);
+        return TupleType::build(gs, move(newElems));
     }
     return nullptr;
 }
@@ -149,7 +149,7 @@ TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc)
             newElems[i] = this->elems[i];
             i++;
         }
-        return TupleType::build(gs, newElems);
+        return TupleType::build(gs, move(newElems));
     }
     return nullptr;
 };

@@ -321,7 +321,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             } else if (!differ2) {
                                 result = t2;
                             } else {
-                                result = TupleType::build(gs, elemLubs);
+                                result = TupleType::build(gs, move(elemLubs));
                             }
                         } else {
                             result = Types::arrayOfUntyped();
@@ -676,7 +676,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         } else if (absl::c_equal(a2->elems, elemGlbs)) {
                             result = t2;
                         } else {
-                            result = TupleType::build(gs, elemGlbs);
+                            result = TupleType::build(gs, move(elemGlbs));
                         }
                     } else {
                         result = Types::bottom();

@@ -970,7 +970,7 @@ TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name,
         }
         args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
     }
-    return TupleType::build(gs, args);
+    return TupleType::build(gs, move(args));
 }
 
 TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) {
@@ -1363,7 +1363,7 @@ public:
             }
         }
 
-        auto tuple = TupleType::build(gs, elems);
+        auto tuple = TupleType::build(gs, move(elems));
         if (isType) {
             tuple = make_type<MetaType>(move(tuple));
         }
@@ -1419,7 +1419,7 @@ class Magic_expandSplat : public IntrinsicMethod {
             types.resize(expandTo, Types::nilClass());
         }
 
-        return TupleType::build(gs, types);
+        return TupleType::build(gs, move(types));
     }
 
 public:
@@ -2168,7 +2168,7 @@ public:
             }
         }
 
-        res.returnType = Types::arrayOf(gs, TupleType::build(gs, unwrappedElems));
+        res.returnType = Types::arrayOf(gs, TupleType::build(gs, move(unwrappedElems)));
     }
 } Array_product;
 
