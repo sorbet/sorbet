@@ -383,14 +383,14 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         for (auto &value : shapeType->values) {
             unwrappedValues.emplace_back(unwrapType(gs, loc, value));
         }
-        return make_type<ShapeType>(Types::hashOfUntyped(), shapeType->keys, unwrappedValues);
+        return make_type<ShapeType>(Types::hashOfUntyped(), shapeType->keys, move(unwrappedValues));
     } else if (auto *tupleType = cast_type<TupleType>(tp.get())) {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(tupleType->elems.size());
         for (auto &elem : tupleType->elems) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
-        return TupleType::build(gs, unwrappedElems);
+        return TupleType::build(gs, move(unwrappedElems));
     } else if (auto *litType = cast_type<LiteralType>(tp.get())) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unsupported usage of literal type");
@@ -970,7 +970,7 @@ TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name,
         }
         args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
     }
-    return TupleType::build(gs, args);
+    return TupleType::build(gs, move(args));
 }
 
 TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) {
@@ -1363,7 +1363,7 @@ public:
             }
         }
 
-        auto tuple = TupleType::build(gs, elems);
+        auto tuple = TupleType::build(gs, move(elems));
         if (isType) {
             tuple = make_type<MetaType>(move(tuple));
         }
@@ -1419,7 +1419,7 @@ class Magic_expandSplat : public IntrinsicMethod {
             types.resize(expandTo, Types::nilClass());
         }
 
-        return TupleType::build(gs, types);
+        return TupleType::build(gs, move(types));
     }
 
 public:
@@ -1628,7 +1628,7 @@ private:
                 if (std::optional<int> procArity = Magic_callWithBlock::getArityForBlock(nonNilableBlockType)) {
                     vector<core::TypePtr> targs(*procArity + 1, core::Types::untypedUntracked());
                     auto procWithCorrectArity = core::Symbols::Proc(*procArity);
-                    passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, targs);
+                    passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, move(targs));
                 }
             } else if (auto e = gs.beginError(blockLoc, errors::Infer::MethodArgumentMismatch)) {
                 e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType->show(gs),
@@ -2168,7 +2168,7 @@ public:
             }
         }
 
-        res.returnType = Types::arrayOf(gs, TupleType::build(gs, unwrappedElems));
+        res.returnType = Types::arrayOf(gs, TupleType::build(gs, move(unwrappedElems)));
     }
 } Array_product;
 

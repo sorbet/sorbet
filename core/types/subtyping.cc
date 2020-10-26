@@ -291,7 +291,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         } else if (!changedFromT1) {
             return t1s;
         } else {
-            return make_type<AppliedType>(a2->klass, newTargs);
+            return make_type<AppliedType>(a2->klass, move(newTargs));
         }
     }
 
@@ -321,7 +321,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             } else if (!differ2) {
                                 result = t2;
                             } else {
-                                result = TupleType::build(gs, elemLubs);
+                                result = TupleType::build(gs, move(elemLubs));
                             }
                         } else {
                             result = Types::arrayOfUntyped();
@@ -364,7 +364,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             } else if (!differ2) {
                                 result = t2;
                             } else {
-                                result = make_type<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
+                                result = make_type<ShapeType>(Types::hashOfUntyped(), h2->keys, move(valueLubs));
                             }
                         } else {
                             result = Types::hashOfUntyped();
@@ -676,7 +676,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         } else if (absl::c_equal(a2->elems, elemGlbs)) {
                             result = t2;
                         } else {
-                            result = TupleType::build(gs, elemGlbs);
+                            result = TupleType::build(gs, move(elemGlbs));
                         }
                     } else {
                         result = Types::bottom();
@@ -724,7 +724,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         } else if (canReuseT2) {
                             result = t2;
                         } else {
-                            result = make_type<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
+                            result = make_type<ShapeType>(Types::hashOfUntyped(), h2->keys, move(valueLubs));
                         }
                     } else {
                         result = Types::bottom();
@@ -913,7 +913,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         } else if (absl::c_equal(a2->targs, newTargs) && a1->klass == a2->klass) {
             return ltr ? t1 : t2;
         } else {
-            return make_type<AppliedType>(a1->klass, newTargs);
+            return make_type<AppliedType>(a1->klass, move(newTargs));
         }
     }
     {

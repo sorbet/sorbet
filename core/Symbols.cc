@@ -98,7 +98,7 @@ TypePtr Symbol::externalType(const GlobalState &gs) const {
                 }
             }
 
-            newResultType = make_type<AppliedType>(ref, targs);
+            newResultType = make_type<AppliedType>(ref, move(targs));
         }
         {
             // this method is supposed to be idempotent. The lines below implement "safe publication" of a value that is
