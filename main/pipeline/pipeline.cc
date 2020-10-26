@@ -491,38 +491,52 @@ struct IndexThreadResultPack {
     CounterState counters;
     IndexResult res;
 };
+struct SubstitutionJob {
+    const core::GlobalSubstitution *substitution;
+    ast::ParsedFile tree;
+};
+
+struct SubstitutionThreadResultPack {
+    CounterState counters;
+    vector<ast::ParsedFile> trees;
+};
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
-                              shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
+                              WorkerPool &workers, shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
     Timer timeit(cgs->tracer(), "mergeIndexResults");
     IndexThreadResultPack threadResult;
+    // Owns the GlobalSubtitution objects
+    vector<unique_ptr<core::GlobalSubstitution>> substitutions;
+    vector<SubstitutionJob> toMerge;
+    toMerge.reserve(input->bound);
     IndexResult ret;
     for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer()); !result.done();
          result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer())) {
         if (result.gotItem()) {
             counterConsume(move(threadResult.counters));
             if (ret.gs == nullptr) {
+                // Adopt global state of first worker thread, and merge others into it.
                 ret.gs = move(threadResult.res.gs);
                 ENFORCE(ret.trees.empty());
                 ret.trees = move(threadResult.res.trees);
                 ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
             } else {
-                core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
-                {
-                    Timer timeit(cgs->tracer(), "substituteTrees");
-                    for (auto &tree : threadResult.res.trees) {
-                        auto file = tree.file;
-                        if (!file.data(*ret.gs).cached) {
-                            core::MutableContext ctx(*ret.gs, core::Symbols::root(), file);
-                            tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
-                        }
+                auto substitution = make_unique<core::GlobalSubstitution>(*threadResult.res.gs, *ret.gs, cgs.get());
+                for (auto &tree : threadResult.res.trees) {
+                    // Cached files don't need their names rewritten.
+                    if (!tree.file.data(*ret.gs).cached) {
+                        SubstitutionJob job{substitution.get(), move(tree)};
+                        toMerge.emplace_back(move(job));
+                    } else {
+                        ret.trees.emplace_back(move(tree));
                     }
                 }
-                ret.trees.insert(ret.trees.end(), make_move_iterator(threadResult.res.trees.begin()),
-                                 make_move_iterator(threadResult.res.trees.end()));
 
+                // Ensure substitution stays alive.
+                substitutions.emplace_back(move(substitution));
+                // Generated files aren't substituted here.
                 ret.pluginGeneratedFiles.insert(ret.pluginGeneratedFiles.end(),
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.begin()),
                                                 make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
@@ -530,6 +544,50 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
             progress.reportProgress(input->doneEstimate());
         }
     }
+
+    if (!toMerge.empty()) {
+        // Re-write trees in-parallel to use merged names.
+        auto mergeInput = make_shared<BlockingBoundedQueue<SubstitutionJob>>(toMerge.size());
+        auto mergeOutput = make_shared<BlockingBoundedQueue<SubstitutionThreadResultPack>>(toMerge.size());
+        ProgressIndicator progress(opts.showProgress, "Indexing: Merging name tables", mergeOutput->bound);
+        for (auto &merge : toMerge) {
+            mergeInput->push(move(merge), 1);
+        }
+        toMerge.clear();
+
+        const core::GlobalState &baseGs = *ret.gs;
+        workers.multiplexJob("substituteTrees", [&baseGs, mergeInput, mergeOutput]() {
+            Timer timeit(baseGs.tracer(), "substituteTreesWorker");
+            SubstitutionJob job;
+            SubstitutionThreadResultPack threadResult;
+            for (auto result = mergeInput->try_pop(job); !result.done(); result = mergeInput->try_pop(job)) {
+                if (result.gotItem()) {
+                    ENFORCE(!job.tree.file.data(baseGs).cached);
+                    core::Context ctx(baseGs, core::Symbols::root(), job.tree.file);
+                    job.tree.tree = ast::Substitute::run(ctx, *job.substitution, move(job.tree.tree));
+                    threadResult.trees.emplace_back(move(job.tree));
+                }
+            }
+            if (!threadResult.trees.empty()) {
+                threadResult.counters = getAndClearThreadCounters();
+                mergeOutput->push(move(threadResult), threadResult.trees.size());
+            }
+        });
+
+        // Merge trees rewritten in parallel
+        SubstitutionThreadResultPack threadResult;
+        for (auto result = mergeOutput->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer());
+             !result.done();
+             result = mergeOutput->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer())) {
+            if (result.gotItem()) {
+                counterConsume(move(threadResult.counters));
+                ret.trees.insert(ret.trees.end(), make_move_iterator(threadResult.trees.begin()),
+                                 make_move_iterator(threadResult.trees.end()));
+            }
+            progress.reportProgress(mergeOutput->doneEstimate());
+        }
+    }
+
     return ret;
 }
 
@@ -571,7 +629,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         }
     });
 
-    return mergeIndexResults(baseGs, opts, resultq, kvstore);
+    return mergeIndexResults(baseGs, opts, workers, resultq, kvstore);
 }
 
 IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts, WorkerPool &workers,
@@ -612,7 +670,7 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
             resultq->push(move(threadResult), sizeIncrement);
         }
     });
-    auto indexedPluginFiles = mergeIndexResults(protoGs, opts, resultq, kvstore);
+    auto indexedPluginFiles = mergeIndexResults(protoGs, opts, workers, resultq, kvstore);
     IndexResult suppliedFilesAndPluginFiles;
     if (indexedPluginFiles.trees.empty()) {
         return firstPass;
