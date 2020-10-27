@@ -199,14 +199,14 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
     packString("def_count");
     mpack_write_u32(&writer, pf.defs.size());
 
-    packString("refAttrs");
+    packString("ref_attrs");
     mpack_start_array(&writer, refAttrs.size());
     for (auto attr : refAttrs) {
         packString(attr);
     }
     mpack_finish_array(&writer);
 
-    packString("defAttrs");
+    packString("def_attrs");
     mpack_start_array(&writer, defAttrs.size());
     for (auto attr : defAttrs) {
         packString(attr);
