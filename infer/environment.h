@@ -127,6 +127,8 @@ public:
 class Environment {
     const core::TypeAndOrigins uninitialized;
 
+    const core::Loc ownerLoc;
+
     /*
      * These four vectors represent the core state store of the environment,
      * modeling a map from local variables to (type, knowledge, known-truthy)

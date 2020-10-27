@@ -89,8 +89,10 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
         snd->receiverLoc,
         snd->argLocs,
     };
-    core::DispatchArgs dispatchArgs{snd->fun,       locs,           snd->numPosArgs, args,
-                                    snd->recv.type, snd->recv.type, snd->recv.type,  snd->link};
+    auto originForUninitialized = core::Loc::none();
+    core::DispatchArgs dispatchArgs{snd->fun,       locs,           snd->numPosArgs,
+                                    args,           snd->recv.type, snd->recv.type,
+                                    snd->recv.type, snd->link,      originForUninitialized};
     auto dispatchInfo = snd->recv.type->dispatchCall(ctx, dispatchArgs);
 
     int i = -1;

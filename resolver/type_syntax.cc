@@ -931,6 +931,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
 
             auto correctedSingleton = corrected.data(ctx)->singletonClass(ctx);
             auto ctype = core::make_type<core::ClassType>(correctedSingleton);
+            auto originForUninitialized = core::Loc::none();
             core::CallLocs locs{
                 ctx.file,
                 s->loc,
@@ -938,7 +939,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 argLocs,
             };
             core::DispatchArgs dispatchArgs{
-                core::Names::squareBrackets(), locs, s->numPosArgs, targs, ctype, ctype, ctype, nullptr};
+                core::Names::squareBrackets(), locs, s->numPosArgs, targs, ctype, ctype, ctype, nullptr,
+                originForUninitialized};
             auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
 
             if (out->isUntyped()) {
