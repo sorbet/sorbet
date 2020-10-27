@@ -175,7 +175,7 @@ public:
         if (!representedClass.exists()) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
-        auto recvType = representedClass.data(cs)->externalType(cs);
+        auto recvType = representedClass.data(cs)->externalType();
         auto &arg0 = send->args[0];
 
         auto &builder = builderCast(mcctx.build);
