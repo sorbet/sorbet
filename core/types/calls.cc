@@ -727,7 +727,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 auto &key = *kwit++;
                 auto *lit = cast_type<LiteralType>(key->type.get());
                 if (!lit || lit->literalKind != LiteralType::LiteralTypeKind::Symbol) {
-                    // TODO(trevor) add an error
+                    // it's not possible to tell if this is hash will be used as kwargs yet, so we can't raise a useful
+                    // error here.
 
                     keys.clear();
                     values.clear();
