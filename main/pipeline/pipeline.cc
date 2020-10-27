@@ -727,6 +727,11 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         }
         ENFORCE(files.size() + pluginFileCount == ret.size());
     } else {
+        // Index larger files first to improve throughput
+        fast_sort(files, [&](const auto &lhs, const auto &rhs) -> bool {
+            // N.B.: Using `dataAllowingUnsafe` as file may be marked NotYetRead.
+            return lhs.dataAllowingUnsafe(*gs).source().size() > rhs.dataAllowingUnsafe(*gs).source().size();
+        });
         auto firstPass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore);
         auto pluginPass = indexPluginFiles(move(firstPass), opts, workers, kvstore);
         gs = move(pluginPass.gs);
