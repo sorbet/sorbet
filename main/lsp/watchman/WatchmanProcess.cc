@@ -97,7 +97,7 @@ void WatchmanProcess::start() {
                 "detect changes to files made outside of your code editor.\nDon't need Watchman? Run Sorbet "
                 "with `--disable-watchman`.",
                 watchmanPath);
-            logger->info(msg);
+            logger->error(msg);
             exitWithCode(1, msg);
         } else {
             // The forked process failed to start, likely because Watchman wasn't found. Exit the process.
