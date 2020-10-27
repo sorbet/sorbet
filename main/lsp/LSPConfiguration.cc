@@ -22,7 +22,7 @@ string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &
     if (opts.rawInputDirNames.size() != 1) {
         auto msg = "Sorbet's language server requires a single input directory.";
         logger->error(msg);
-        auto params = make_unique<ShowMessageParams>(MessageType(1 /* error */), msg);
+        auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
         output->write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
         throw options::EarlyReturnWithCode(1);

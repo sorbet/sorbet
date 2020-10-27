@@ -123,7 +123,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
             auto msg = "Watchman support currently only works when Sorbet is run with a single input directory. If "
                        "Watchman is not needed, run Sorbet with `--disable-watchman`.";
             logger->error(msg);
-            auto params = make_unique<ShowMessageParams>(MessageType(1 /* error */), msg);
+            auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
             config->output->write(make_unique<LSPMessage>(
                 make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
             throw options::EarlyReturnWithCode(1);
@@ -154,7 +154,7 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                         messageQueue.terminate = true;
                         messageQueue.errorCode = watchmanExitCode;
                         if (watchmanExitCode != 0) {
-                            auto params = make_unique<ShowMessageParams>(MessageType(1 /* error */), msg);
+                            auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
                             config->output->write(make_unique<LSPMessage>(
                                 make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
                         }
