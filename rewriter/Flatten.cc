@@ -390,7 +390,7 @@ public:
         auto insSeq = ast::cast_tree<ast::InsSeq>(tree);
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
-            tree = ast::make_tree<ast::InsSeq>(tree->loc, std::move(stats), std::move(tree));
+            tree = ast::make_tree<ast::InsSeq>(tree.loc(), std::move(stats), std::move(tree));
             return addTopLevelMethods(ctx, std::move(tree));
         }
 

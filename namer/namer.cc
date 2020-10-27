@@ -554,7 +554,7 @@ public:
             staticField.owner = found.owner;
             staticField.name = found.name;
             staticField.asgnLoc = found.asgnLoc;
-            staticField.lhsLoc = asgn.lhs->loc;
+            staticField.lhsLoc = asgn.lhs.loc();
             staticField.isTypeAlias = true;
             return foundDefs->addStaticField(move(staticField));
         }
@@ -1328,7 +1328,7 @@ class TreeSymbolizer {
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
-                    if (auto e = ctx.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
+                    if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
                         e.setHeader("Unsupported constant scope");
                     }
                 }
@@ -1338,7 +1338,7 @@ class TreeSymbolizer {
             } else if (node.isSelfReference()) {
                 // self::Foo
             } else {
-                if (auto e = ctx.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
+                if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
                     e.setHeader("Dynamic constant references are unsupported");
                 }
             }
@@ -1423,7 +1423,7 @@ class TreeSymbolizer {
             if (isValidAncestor(arg)) {
                 dest->emplace_back(arg.deepCopy());
             } else {
-                if (auto e = ctx.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
+                if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
                     e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
                 }
                 arg = ast::MK::EmptyTree();
@@ -1496,7 +1496,7 @@ public:
             /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
             for (auto &anc : klass.ancestors) {
                 if (!isValidAncestor(anc)) {
-                    if (auto e = ctx.beginError(anc->loc, core::errors::Namer::AncestorNotConstant)) {
+                    if (auto e = ctx.beginError(anc.loc(), core::errors::Namer::AncestorNotConstant)) {
                         e.setHeader("Superclasses must only contain constant literals");
                     }
                     anc = ast::MK::EmptyTree();
@@ -1659,7 +1659,7 @@ public:
 
                 // one of fixed or bounds were provided
                 if (fixed != bounded) {
-                    asgn.lhs = ast::MK::Constant(asgn.lhs->loc, sym);
+                    asgn.lhs = ast::MK::Constant(asgn.lhs.loc(), sym);
 
                     // Leave it in the tree for the resolver to chew on.
                     return tree;

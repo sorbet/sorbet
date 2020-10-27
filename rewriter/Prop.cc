@@ -230,7 +230,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                 ret.computedByMethodNameLoc = lit->loc;
                 ret.computedByMethodName = lit->asSymbol(ctx);
             } else {
-                if (auto e = ctx.beginError(val->loc, core::errors::Rewriter::ComputedBySymbol)) {
+                if (auto e = ctx.beginError(val.loc(), core::errors::Rewriter::ComputedBySymbol)) {
                     e.setHeader("Value for `{}` must be a symbol literal", "computed_by");
                 }
             }
@@ -242,10 +242,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             if (auto body = ASTUtil::thunkBody(ctx, ret.foreign)) {
                 ret.foreign = std::move(body);
             } else {
-                if (auto e = ctx.beginError(ret.foreign->loc, core::errors::Rewriter::PropForeignStrict)) {
+                if (auto e = ctx.beginError(ret.foreign.loc(), core::errors::Rewriter::PropForeignStrict)) {
                     e.setHeader("The argument to `{}` must be a lambda", "foreign:");
-                    e.replaceWith("Convert to lambda", core::Loc(ctx.file, ret.foreign->loc), "-> {{{}}}",
-                                  core::Loc(ctx.file, ret.foreign->loc).source(ctx));
+                    e.replaceWith("Convert to lambda", core::Loc(ctx.file, ret.foreign.loc()), "-> {{{}}}",
+                                  core::Loc(ctx.file, ret.foreign.loc()).source(ctx));
                 }
             }
         }

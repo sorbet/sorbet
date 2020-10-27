@@ -93,7 +93,7 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
 
     if (!skipGetter) {
         if (nilable) {
-            auto tyloc = type->loc;
+            auto tyloc = type.loc();
             type = ast::MK::Nilable(tyloc, move(type));
         }
         // def self.get_<prop>

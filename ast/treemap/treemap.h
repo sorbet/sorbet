@@ -611,7 +611,7 @@ private:
         if (what == nullptr) {
             return what;
         }
-        auto loc = what->loc;
+        auto loc = what.loc();
 
         try {
             // TODO: reorder by frequency
@@ -1107,7 +1107,7 @@ private:
         if (what == nullptr) {
             return what;
         }
-        auto loc = what->loc;
+        auto loc = what.loc();
 
         try {
             // TODO: reorder by frequency

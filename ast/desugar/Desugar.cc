@@ -119,7 +119,7 @@ TreePtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser
                     InsSeq::STATS_store destructures) {
     auto body = node2TreeImpl(dctx, std::move(bodynode));
     if (!destructures.empty()) {
-        auto bodyLoc = body->loc;
+        auto bodyLoc = body.loc();
         if (!bodyLoc.exists()) {
             bodyLoc = loc;
         }
@@ -247,16 +247,16 @@ TreePtr validateRBIBody(DesugarContext dctx, TreePtr body) {
     if (!dctx.enclosingMethodLoc.file().data(dctx.ctx).isRBI()) {
         return body;
     }
-    if (!body->loc.exists()) {
+    if (!body.loc().exists()) {
         return body;
     }
 
-    auto loc = core::Loc(dctx.enclosingMethodLoc.file(), body->loc);
+    auto loc = core::Loc(dctx.enclosingMethodLoc.file(), body.loc());
     if (isa_tree<EmptyTree>(body)) {
         return body;
     } else if (isa_tree<Assign>(body)) {
         if (!isIVarAssign(body)) {
-            if (auto e = dctx.ctx.beginError(body->loc, core::errors::Desugar::CodeInRBI)) {
+            if (auto e = dctx.ctx.beginError(body.loc(), core::errors::Desugar::CodeInRBI)) {
                 e.setHeader("RBI methods must not have code");
                 e.replaceWith("Delete the body", loc, "");
             }
@@ -264,20 +264,20 @@ TreePtr validateRBIBody(DesugarContext dctx, TreePtr body) {
     } else if (auto inseq = cast_tree<InsSeq>(body)) {
         for (auto &stat : inseq->stats) {
             if (!isIVarAssign(stat)) {
-                if (auto e = dctx.ctx.beginError(stat->loc, core::errors::Desugar::CodeInRBI)) {
+                if (auto e = dctx.ctx.beginError(stat.loc(), core::errors::Desugar::CodeInRBI)) {
                     e.setHeader("RBI methods must not have code");
                     e.replaceWith("Delete the body", loc, "");
                 }
             }
         }
         if (!isIVarAssign(inseq->expr)) {
-            if (auto e = dctx.ctx.beginError(inseq->expr->loc, core::errors::Desugar::CodeInRBI)) {
+            if (auto e = dctx.ctx.beginError(inseq->expr.loc(), core::errors::Desugar::CodeInRBI)) {
                 e.setHeader("RBI methods must not have code");
                 e.replaceWith("Delete the body", loc, "");
             }
         }
     } else {
-        if (auto e = dctx.ctx.beginError(body->loc, core::errors::Desugar::CodeInRBI)) {
+        if (auto e = dctx.ctx.beginError(body.loc(), core::errors::Desugar::CodeInRBI)) {
             e.setHeader("RBI methods must not have code");
             e.replaceWith("Delete the body", loc, "");
         }
@@ -311,7 +311,7 @@ TreePtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::Loc declLoc
 }
 
 TreePtr symbol2Proc(DesugarContext dctx, TreePtr expr) {
-    auto loc = expr->loc;
+    auto loc = expr.loc();
     core::NameRef temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::blockPassTemp(),
                                                         ++dctx.uniqueCounter);
     Literal *lit = cast_tree<Literal>(expr);
@@ -355,12 +355,12 @@ TreePtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlhs *lhs
             int left = i;
             int right = lhs->exprs.size() - left - 1;
             if (!isa_tree<EmptyTree>(lh)) {
-                auto exclusive = MK::True(lh->loc);
+                auto exclusive = MK::True(lh.loc());
                 if (right == 0) {
                     right = 1;
-                    exclusive = MK::False(lh->loc);
+                    exclusive = MK::False(lh.loc());
                 }
-                auto lhloc = lh->loc;
+                auto lhloc = lh.loc();
                 auto index = MK::Send3(lhloc, MK::Constant(lhloc, core::Symbols::Range()), core::Names::new_(),
                                        MK::Int(lhloc, left), MK::Int(lhloc, -right), std::move(exclusive));
                 stats.emplace_back(
@@ -381,12 +381,12 @@ TreePtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlhs *lhs
             } else {
                 TreePtr lh = node2TreeImpl(dctx, std::move(c));
                 if (auto restArg = cast_tree<RestArg>(lh)) {
-                    if (auto e = dctx.ctx.beginError(lh->loc, core::errors::Desugar::UnsupportedRestArgsDestructure)) {
+                    if (auto e = dctx.ctx.beginError(lh.loc(), core::errors::Desugar::UnsupportedRestArgsDestructure)) {
                         e.setHeader("Unsupported rest args in destructure");
                     }
                     lh = move(restArg->expr);
                 }
-                auto lhloc = lh->loc;
+                auto lhloc = lh.loc();
                 stats.emplace_back(MK::Assign(lhloc, std::move(lh), std::move(val)));
             }
 
@@ -465,7 +465,7 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
     assgnArgs.reserve(s->args.size() + 1);
 
     for (auto &arg : s->args) {
-        auto argLoc = arg->loc;
+        auto argLoc = arg.loc();
         core::NameRef name =
             dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
         stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
@@ -517,11 +517,11 @@ public:
         }
 
         if (isSymbol && hashKeySymbols.find(nameRef) == hashKeySymbols.end()) {
-            hashKeySymbols[nameRef] = key->loc;
+            hashKeySymbols[nameRef] = key.loc();
         } else if (!isSymbol && hashKeyStrings.find(nameRef) == hashKeyStrings.end()) {
-            hashKeyStrings[nameRef] = key->loc;
+            hashKeyStrings[nameRef] = key.loc();
         } else {
-            if (auto e = dctx.ctx.beginError(key->loc, core::errors::Desugar::DuplicatedHashKeys)) {
+            if (auto e = dctx.ctx.beginError(key.loc(), core::errors::Desugar::DuplicatedHashKeys)) {
                 core::LocOffsets originalLoc;
                 if (isSymbol) {
                     originalLoc = hashKeySymbols[nameRef];
@@ -1717,7 +1717,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 auto varExpr = node2TreeImpl(dctx, std::move(resbody->var));
                 auto body = node2TreeImpl(dctx, std::move(resbody->body));
 
-                auto varLoc = varExpr->loc;
+                auto varLoc = varExpr.loc();
                 auto var = core::NameRef::noName();
                 if (auto *id = cast_tree<UnresolvedIdent>(varExpr)) {
                     if (id->kind == UnresolvedIdent::Kind::Local) {
@@ -1800,7 +1800,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                         TreePtr test;
                         if (temp.exists()) {
                             auto local = MK::Local(cloc, temp);
-                            auto patternloc = ctree->loc;
+                            auto patternloc = ctree.loc();
                             test = MK::Send1(patternloc, std::move(ctree), core::Names::tripleEq(), std::move(local));
                         } else {
                             test = std::move(ctree);
@@ -1808,8 +1808,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                         if (cond == nullptr) {
                             cond = std::move(test);
                         } else {
-                            auto true_ = MK::True(test->loc);
-                            auto loc = test->loc;
+                            auto true_ = MK::True(test.loc());
+                            auto loc = test.loc();
                             cond = MK::If(loc, std::move(test), std::move(true_), std::move(cond));
                         }
                     }
@@ -1833,7 +1833,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
             },
             [&](parser::Defined *defined) {
                 auto value = node2TreeImpl(dctx, std::move(defined->value));
-                auto loc = value->loc;
+                auto loc = value.loc();
                 Send::ARGS_store args;
                 while (!isa_tree<EmptyTree>(value)) {
                     auto lit = cast_tree<UnresolvedConstantLit>(value);
