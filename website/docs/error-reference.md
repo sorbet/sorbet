@@ -73,8 +73,8 @@ To write a `sig` for this method, rename the method's parameters to have unique
 names:
 
 ```ruby
-sig {params(_1: String, _2: Integer).void} # ok
-def foo(_1, _2); end
+sig {params(_a: String, _b: Integer).void} # ok
+def foo(_a, _b); end
 ```
 
 ## 4002
