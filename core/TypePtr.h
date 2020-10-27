@@ -42,7 +42,6 @@ public:
     bool operator==(std::nullptr_t n) const {
         return store == nullptr;
     }
-    friend class Symbol;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
 };

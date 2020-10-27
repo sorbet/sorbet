@@ -115,7 +115,12 @@ public:
     // (which must be isClassOrModule()), if instantiated without specific type
     // parameters, as seen from inside or outside of the class, respectively.
     TypePtr selfType(const GlobalState &gs) const;
-    TypePtr externalType(const GlobalState &gs) const;
+    TypePtr externalType() const;
+
+    // !! THREAD UNSAFE !! operation that computes the external type of this symbol.
+    // Do not call this method from multi-threaded contexts (which, honestly, shouldn't
+    // have access to a mutable GlobalState and thus shouldn't be able to call it).
+    TypePtr unsafeComputeExternalType(GlobalState &gs);
 
     inline InlinedVector<SymbolRef, 4> &mixins() {
         ENFORCE_NO_TIMER(isClassOrModule());
