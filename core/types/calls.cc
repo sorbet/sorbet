@@ -743,10 +743,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
 
         // merge in the keyword splat argument if it's present
         if (hasKwsplat) {
-            if (hasKwargs) {
-                auto &kwSplatArg = *(aend - 1);
-                auto kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
+            auto &kwSplatArg = *(aend - 1);
+            auto kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
 
+            if (hasKwargs) {
                 if (auto *hash = cast_type<ShapeType>(kwSplatType.get())) {
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
@@ -777,9 +777,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                     --posArgs;
                 }
             } else {
-                // This function doesn't take keyword arguments, so consume the kwsplat and mark all the keyword args as
-                // an untyped hash.
-                kwargs = Types::hashOfUntyped();
+                // This function doesn't take keyword arguments, so consume the kwsplat and use the approximated type.
+                kwargs = kwSplatType;
                 --aend;
             }
         } else {
