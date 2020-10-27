@@ -289,6 +289,48 @@ core::LocOffsets TreePtr::loc() const {
 #undef CASE
 }
 
+string TreePtr::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+    auto *ptr = get();
+
+    ENFORCE(ptr != nullptr);
+
+#define CASE(name)  \
+    case Tag::name: \
+        return reinterpret_cast<name *>(ptr)->toStringWithTabs(gs, tabs);
+    switch (tag()) {
+        CASE(EmptyTree)
+        CASE(Send)
+        CASE(ClassDef)
+        CASE(MethodDef)
+        CASE(If)
+        CASE(While)
+        CASE(Break)
+        CASE(Retry)
+        CASE(Next)
+        CASE(Return)
+        CASE(RescueCase)
+        CASE(Rescue)
+        CASE(Local)
+        CASE(UnresolvedIdent)
+        CASE(RestArg)
+        CASE(KeywordArg)
+        CASE(OptionalArg)
+        CASE(BlockArg)
+        CASE(ShadowArg)
+        CASE(Assign)
+        CASE(Cast)
+        CASE(Hash)
+        CASE(Array)
+        CASE(Literal)
+        CASE(UnresolvedConstantLit)
+        CASE(ConstantLit)
+        CASE(ZSuperArgs)
+        CASE(Block)
+        CASE(InsSeq)
+    }
+#undef CASE
+}
+
 bool TreePtr::isSelfReference() const {
     if (auto *local = cast_tree<Local>(*this)) {
         return local->localVariable == core::LocalVariable::selfVariable();
@@ -573,7 +615,7 @@ template <class T> void printElems(const core::GlobalState &gs, fmt::memory_buff
             }
         }
         first = false;
-        fmt::format_to(buf, "{}", a->toStringWithTabs(gs, tabs + 1));
+        fmt::format_to(buf, "{}", a.toStringWithTabs(gs, tabs + 1));
     }
 };
 
@@ -592,7 +634,7 @@ string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     } else {
         fmt::format_to(buf, "class ");
     }
-    fmt::format_to(buf, "{}<{}> < ", name->toStringWithTabs(gs, tabs),
+    fmt::format_to(buf, "{}<{}> < ", name.toStringWithTabs(gs, tabs),
                    this->symbol.dataAllowingNone(gs)->name.data(gs)->toString(gs));
     printArgs(gs, buf, this->ancestors, tabs);
 
@@ -603,7 +645,7 @@ string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     for (auto &a : this->rhs) {
         fmt::format_to(buf, "{}", '\n');
         printTabs(buf, tabs + 1);
-        fmt::format_to(buf, "{}\n", a->toStringWithTabs(gs, tabs + 1));
+        fmt::format_to(buf, "{}\n", a.toStringWithTabs(gs, tabs + 1));
     }
 
     printTabs(buf, tabs);
@@ -653,11 +695,11 @@ string InsSeq::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::format_to(buf, "begin\n");
     for (auto &a : this->stats) {
         printTabs(buf, tabs + 1);
-        fmt::format_to(buf, "{}\n", a->toStringWithTabs(gs, tabs + 1));
+        fmt::format_to(buf, "{}\n", a.toStringWithTabs(gs, tabs + 1));
     }
 
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "{}\n", expr->toStringWithTabs(gs, tabs + 1));
+    fmt::format_to(buf, "{}\n", expr.toStringWithTabs(gs, tabs + 1));
     printTabs(buf, tabs);
     fmt::format_to(buf, "end");
     return fmt::to_string(buf);
@@ -703,7 +745,7 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
                 fmt::format_to(buf, ", ");
             }
             first = false;
-            fmt::format_to(buf, "{}", a->toStringWithTabs(gs, tabs + 1));
+            fmt::format_to(buf, "{}", a.toStringWithTabs(gs, tabs + 1));
         }
     } else {
         for (auto &a : data->arguments()) {
@@ -716,7 +758,7 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
     }
     fmt::format_to(buf, ")\n");
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "{}\n", this->rhs->toStringWithTabs(gs, tabs + 1));
+    fmt::format_to(buf, "{}\n", this->rhs.toStringWithTabs(gs, tabs + 1));
     printTabs(buf, tabs);
     fmt::format_to(buf, "end");
     return fmt::to_string(buf);
@@ -770,13 +812,13 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
 string If::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
 
-    fmt::format_to(buf, "if {}\n", this->cond->toStringWithTabs(gs, tabs + 1));
+    fmt::format_to(buf, "if {}\n", this->cond.toStringWithTabs(gs, tabs + 1));
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "{}\n", this->thenp->toStringWithTabs(gs, tabs + 1));
+    fmt::format_to(buf, "{}\n", this->thenp.toStringWithTabs(gs, tabs + 1));
     printTabs(buf, tabs);
     fmt::format_to(buf, "else\n");
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "{}\n", this->elsep->toStringWithTabs(gs, tabs + 1));
+    fmt::format_to(buf, "{}\n", this->elsep.toStringWithTabs(gs, tabs + 1));
     printTabs(buf, tabs);
     fmt::format_to(buf, "end");
     return fmt::to_string(buf);
@@ -813,9 +855,9 @@ string Assign::showRaw(const core::GlobalState &gs, int tabs) {
 string While::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
 
-    fmt::format_to(buf, "while {}\n", this->cond->toStringWithTabs(gs, tabs + 1));
+    fmt::format_to(buf, "while {}\n", this->cond.toStringWithTabs(gs, tabs + 1));
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "{}\n", this->body->toStringWithTabs(gs, tabs + 1));
+    fmt::format_to(buf, "{}\n", this->body.toStringWithTabs(gs, tabs + 1));
     printTabs(buf, tabs);
     fmt::format_to(buf, "end");
     return fmt::to_string(buf);
@@ -839,7 +881,7 @@ string EmptyTree::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
 }
 
 string UnresolvedConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("{}::{}", this->scope->toStringWithTabs(gs, tabs), this->cnst.data(gs)->toString(gs));
+    return fmt::format("{}::{}", this->scope.toStringWithTabs(gs, tabs), this->cnst.data(gs)->toString(gs));
 }
 
 string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
@@ -859,7 +901,7 @@ string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) cons
     if (symbol.exists() && symbol != core::Symbols::StubModule()) {
         return this->symbol.dataAllowingNone(gs)->showFullName(gs);
     }
-    return "Unresolved: " + this->original->toStringWithTabs(gs, tabs);
+    return "Unresolved: " + this->original.toStringWithTabs(gs, tabs);
 }
 
 string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
@@ -949,15 +991,15 @@ string Retry::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 string Return::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return "return " + this->expr->toStringWithTabs(gs, tabs + 1);
+    return "return " + this->expr.toStringWithTabs(gs, tabs + 1);
 }
 
 string Next::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return "next(" + this->expr->toStringWithTabs(gs, tabs + 1) + ")";
+    return "next(" + this->expr.toStringWithTabs(gs, tabs + 1) + ")";
 }
 
 string Break::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return "break(" + this->expr->toStringWithTabs(gs, tabs + 1) + ")";
+    return "break(" + this->expr.toStringWithTabs(gs, tabs + 1) + ")";
 }
 
 string Retry::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -988,7 +1030,7 @@ string Literal::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
 }
 
 string Assign::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->lhs->toStringWithTabs(gs, tabs) + " = " + this->rhs->toStringWithTabs(gs, tabs);
+    return this->lhs.toStringWithTabs(gs, tabs) + " = " + this->rhs.toStringWithTabs(gs, tabs);
 }
 
 string RescueCase::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -1002,11 +1044,11 @@ string RescueCase::toStringWithTabs(const core::GlobalState &gs, int tabs) const
         } else {
             fmt::format_to(buf, ", ");
         }
-        fmt::format_to(buf, "{}", exception->toStringWithTabs(gs, tabs));
+        fmt::format_to(buf, "{}", exception.toStringWithTabs(gs, tabs));
     }
-    fmt::format_to(buf, " => {}\n", this->var->toStringWithTabs(gs, tabs));
+    fmt::format_to(buf, " => {}\n", this->var.toStringWithTabs(gs, tabs));
     printTabs(buf, tabs);
-    fmt::format_to(buf, "{}", this->body->toStringWithTabs(gs, tabs));
+    fmt::format_to(buf, "{}", this->body.toStringWithTabs(gs, tabs));
     return fmt::to_string(buf);
 }
 
@@ -1032,25 +1074,25 @@ string RescueCase::showRaw(const core::GlobalState &gs, int tabs) {
 
 string Rescue::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}", this->body->toStringWithTabs(gs, tabs));
+    fmt::format_to(buf, "{}", this->body.toStringWithTabs(gs, tabs));
     for (auto &rescueCase : this->rescueCases) {
         fmt::format_to(buf, "\n");
         printTabs(buf, tabs - 1);
-        fmt::format_to(buf, "{}", rescueCase->toStringWithTabs(gs, tabs));
+        fmt::format_to(buf, "{}", rescueCase.toStringWithTabs(gs, tabs));
     }
     if (!isa_tree<EmptyTree>(this->else_)) {
         fmt::format_to(buf, "\n");
         printTabs(buf, tabs - 1);
         fmt::format_to(buf, "else\n");
         printTabs(buf, tabs);
-        fmt::format_to(buf, "{}", this->else_->toStringWithTabs(gs, tabs));
+        fmt::format_to(buf, "{}", this->else_.toStringWithTabs(gs, tabs));
     }
     if (!isa_tree<EmptyTree>(this->ensure)) {
         fmt::format_to(buf, "\n");
         printTabs(buf, tabs - 1);
         fmt::format_to(buf, "ensure\n");
         printTabs(buf, tabs);
-        fmt::format_to(buf, "{}", this->ensure->toStringWithTabs(gs, tabs));
+        fmt::format_to(buf, "{}", this->ensure.toStringWithTabs(gs, tabs));
     }
     return fmt::to_string(buf);
 }
@@ -1079,10 +1121,10 @@ string Rescue::showRaw(const core::GlobalState &gs, int tabs) {
 
 string Send::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}.{}", this->recv->toStringWithTabs(gs, tabs), this->fun.data(gs)->toString(gs));
+    fmt::format_to(buf, "{}.{}", this->recv.toStringWithTabs(gs, tabs), this->fun.data(gs)->toString(gs));
     printArgs(gs, buf, this->args, tabs);
     if (this->block != nullptr) {
-        fmt::format_to(buf, "{}", this->block->toStringWithTabs(gs, tabs));
+        fmt::format_to(buf, "{}", this->block.toStringWithTabs(gs, tabs));
     }
 
     return fmt::to_string(buf);
@@ -1121,7 +1163,7 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
 string Cast::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "T.{}", this->cast.toString(gs));
-    fmt::format_to(buf, "({}, {})", this->arg->toStringWithTabs(gs, tabs), this->type->toStringWithTabs(gs, tabs));
+    fmt::format_to(buf, "({}, {})", this->arg.toStringWithTabs(gs, tabs), this->type->toStringWithTabs(gs, tabs));
 
     return fmt::to_string(buf);
 }
@@ -1205,9 +1247,9 @@ string Hash::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
             fmt::format_to(buf, ", ");
         }
         first = false;
-        fmt::format_to(buf, "{}", key->toStringWithTabs(gs, tabs + 1));
+        fmt::format_to(buf, "{}", key.toStringWithTabs(gs, tabs + 1));
         fmt::format_to(buf, " => ");
-        fmt::format_to(buf, "{}", value->toStringWithTabs(gs, tabs + 1));
+        fmt::format_to(buf, "{}", value.toStringWithTabs(gs, tabs + 1));
     }
     fmt::format_to(buf, "}}");
     return fmt::to_string(buf);
@@ -1227,7 +1269,7 @@ string Block::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     printElems(gs, buf, this->args, tabs + 1);
     fmt::format_to(buf, "|\n");
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "{}\n", this->body->toStringWithTabs(gs, tabs + 1));
+    fmt::format_to(buf, "{}\n", this->body.toStringWithTabs(gs, tabs + 1));
     printTabs(buf, tabs);
     fmt::format_to(buf, "end");
     return fmt::to_string(buf);
@@ -1252,28 +1294,28 @@ string Block::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 string RestArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return "*" + this->expr->toStringWithTabs(gs, tabs);
+    return "*" + this->expr.toStringWithTabs(gs, tabs);
 }
 
 string KeywordArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->expr->toStringWithTabs(gs, tabs) + ":";
+    return this->expr.toStringWithTabs(gs, tabs) + ":";
 }
 
 string OptionalArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}", this->expr->toStringWithTabs(gs, tabs));
+    fmt::format_to(buf, "{}", this->expr.toStringWithTabs(gs, tabs));
     if (this->default_) {
-        fmt::format_to(buf, " = {}", this->default_->toStringWithTabs(gs, tabs));
+        fmt::format_to(buf, " = {}", this->default_.toStringWithTabs(gs, tabs));
     }
     return fmt::to_string(buf);
 }
 
 string ShadowArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->expr->toStringWithTabs(gs, tabs);
+    return this->expr.toStringWithTabs(gs, tabs);
 }
 
 string BlockArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return "&" + this->expr->toStringWithTabs(gs, tabs);
+    return "&" + this->expr.toStringWithTabs(gs, tabs);
 }
 
 string RescueCase::nodeName() {

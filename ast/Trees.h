@@ -227,6 +227,12 @@ public:
     void _sanityCheck() const;
 
     core::LocOffsets loc() const;
+
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+
+    std::string toString(const core::GlobalState &gs) const {
+        return toStringWithTabs(gs);
+    }
 };
 
 template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
@@ -236,12 +242,8 @@ template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
 class Expression {
 public:
     virtual ~Expression() = default;
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const = 0;
-    std::string toString(const core::GlobalState &gs) const {
-        return toStringWithTabs(gs);
-    }
 };
-CheckSize(Expression, 16, 8);
+CheckSize(Expression, 8, 8);
 
 struct ParsedFile {
     TreePtr tree;
@@ -333,8 +335,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -370,8 +372,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -390,8 +392,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -409,8 +411,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -427,8 +429,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -443,8 +445,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -461,8 +463,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -479,8 +481,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -505,8 +507,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -529,8 +531,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -547,8 +549,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -572,8 +574,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -590,8 +592,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -608,8 +610,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -627,8 +629,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -645,8 +647,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -663,8 +665,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -682,8 +684,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -740,8 +742,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     // Returned value is [start, end) indices into ast::Send::args.
@@ -781,8 +783,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -803,8 +805,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -824,8 +826,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -842,8 +844,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
     bool isString(const core::GlobalState &gs) const;
     bool isSymbol(const core::GlobalState &gs) const;
@@ -868,8 +870,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -891,8 +893,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
     std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(
         const core::GlobalState &gs) const;
@@ -910,8 +912,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -929,8 +931,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
     void _sanityCheck();
 };
@@ -952,8 +954,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();
@@ -968,8 +970,8 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     std::string nodeName();
 
     void _sanityCheck();

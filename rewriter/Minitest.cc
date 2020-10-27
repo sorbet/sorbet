@@ -143,7 +143,7 @@ string to_s(core::Context ctx, ast::TreePtr &arg) {
     if (argConstant != nullptr) {
         return argConstant->cnst.show(ctx);
     }
-    return arg->toString(ctx);
+    return arg.toString(ctx);
 }
 
 // This returns `true` for expressions which can be moved from class to method scope without changing their meaning, and

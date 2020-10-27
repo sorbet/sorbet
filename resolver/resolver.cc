@@ -2318,7 +2318,7 @@ public:
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
-                original.toString(ctx));
+                tree.toString(ctx));
         if (original.symbol == core::Symbols::root()) {
             ENFORCE(ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, original.loc)).exists());
         } else {
@@ -2329,18 +2329,17 @@ public:
     ast::TreePtr postTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
-                original.toString(ctx));
+                tree.toString(ctx));
         return tree;
     }
     ast::TreePtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
-        ENFORCE(false, "These should have all been removed: {}", original.toString(ctx));
+        ENFORCE(false, "These should have all been removed: {}", tree.toString(ctx));
         return tree;
     }
     ast::TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         ENFORCE(original.kind != ast::UnresolvedIdent::Kind::Local, "{} should have been removed by local_vars",
-                original.toString(ctx));
+                tree.toString(ctx));
         return tree;
     }
     ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
