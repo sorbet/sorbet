@@ -290,6 +290,8 @@ public:
 
 private:
     static TreePtr Params(core::LocOffsets loc, TreePtr recv, Send::ARGS_store args) {
+        ENFORCE(args.size() % 2 == 0, "Sig params must be arg name/type pairs");
+
         if (args.size() > 0) {
             recv = Send(loc, std::move(recv), core::Names::params(), 0, std::move(args));
         }
@@ -299,8 +301,6 @@ private:
 
 public:
     static TreePtr Sig(core::LocOffsets loc, Send::ARGS_store args, TreePtr ret) {
-        ENFORCE(args.size() % 2 == 0, "Sig params must be arg name/type pairs");
-
         auto params = Params(loc, Self(loc), std::move(args));
         auto returns = Send1(loc, std::move(params), core::Names::returns(), std::move(ret));
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
@@ -312,8 +312,6 @@ public:
     }
 
     static TreePtr SigVoid(core::LocOffsets loc, Send::ARGS_store args) {
-        ENFORCE(args.size() % 2 == 0, "Sig params must be arg name/type pairs");
-
         auto params = Params(loc, Self(loc), std::move(args));
         auto void_ = Send0(loc, std::move(params), core::Names::void_());
         auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet_Private_Static()), core::Names::sig(),
