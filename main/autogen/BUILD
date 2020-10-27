@@ -3,11 +3,13 @@ cc_library(
     srcs = [
         "autogen.cc",
         "autoloader.cc",
+        "msgpack.cc",
         "subclasses.cc",
     ],
     hdrs = [
         "autogen.h",
         "autoloader.h",
+        "msgpack.h",
         "subclasses.h",
     ],
     linkstatic = select({
