@@ -705,6 +705,24 @@ public:
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
     using ARGS_store = InlinedVector<TreePtr, EXPECTED_ARGS_COUNT>;
+
+    // The arguments vector has the following layout:
+    //
+    // for n = numPosArgs, m = number of keyword arg pairs
+    //
+    // +--------------------------+-------------------------------+------------------+
+    // | positional arguments     | interleaved keyword arg pairs | optional kwsplat |
+    // +--------------------------+-------------------------------+------------------+
+    // | pos_0, ... , pos_(n - 1) | sym_0, val_0, .. sym_m, val_m | value            |
+    // +--------------------------+-------------------------------+------------------+
+    //
+    // for the following send:
+    //
+    // > foo(a, b, c: 10, d: nil)
+    //
+    // the arguments vector would look like the following, with numPosArgs = 2:
+    //
+    // > <a, b, c, 10, d, nil>
     ARGS_store args;
 
     TreePtr block; // null if no block passed
