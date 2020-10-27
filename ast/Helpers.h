@@ -359,6 +359,10 @@ public:
         return Send0(loc, T(loc), core::Names::untyped());
     }
 
+    static TreePtr UntypedNil(core::LocOffsets loc) {
+        return Unsafe(loc, Nil(loc));
+    }
+
     static TreePtr Nilable(core::LocOffsets loc, TreePtr arg) {
         return Send1(loc, T(loc), core::Names::nilable(), std::move(arg));
     }
