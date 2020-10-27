@@ -36,7 +36,7 @@ constexpr ErrorClass UntypedConstantSuggestion{7027, StrictLevel::Strict};
 // constexpr ErrorClass LazyResolve{7029, StrictLevel::True};
 constexpr ErrorClass MetaTypeDispatchCall{7030, StrictLevel::True};
 constexpr ErrorClass PrivateMethod{7031, StrictLevel::True};
+constexpr ErrorClass GenericArgumentKeywordArgs{7032, StrictLevel::True};
 // N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
-constexpr ErrorClass GenericArgumentKeywordArgs{7031, StrictLevel::True};
 } // namespace sorbet::core::errors::Infer
 #endif
