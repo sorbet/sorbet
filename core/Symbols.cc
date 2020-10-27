@@ -815,7 +815,7 @@ string Symbol::show(const GlobalState &gs) const {
         }
     }
 
-    // Make sure that we get nice erorr messages for things involving the proc sig builders.
+    // Make sure that we get nice error messages for things involving the proc sig builders.
     if (this->name == core::Names::Constants::DeclBuilderForProcs()) {
         return "T.proc";
     }

@@ -649,8 +649,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     auto posArgs = args.numPosArgs;
     bool hasKwargs = absl::c_any_of(data->arguments(), [](const auto &arg) { return arg.flags.isKeyword; });
     auto nonPosArgs = (args.args.size() - args.numPosArgs);
-    auto numKwargs = nonPosArgs & ~0x1;
     bool hasKwsplat = nonPosArgs & 0x1;
+    auto numKwargs = hasKwsplat ? nonPosArgs - 1 : nonPosArgs;
 
     // p -> params, i.e., what was mentioned in the defintiion
     auto pit = data->arguments().begin();
@@ -664,9 +664,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     // a -> args, i.e., what was passed at the call site
     auto ait = args.args.begin();
     auto aend = args.args.end();
-    auto posEnd = args.args.begin() + args.numPosArgs;
+    auto aPosEnd = args.args.begin() + args.numPosArgs;
 
-    while (pit != pend && ait != posEnd) {
+    while (pit != pend && ait != aPosEnd) {
         const ArgInfo &spec = *pit;
         auto &arg = *ait;
         if (spec.flags.isKeyword) {
@@ -694,7 +694,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     // If positional arguments remain, the method accepts keyword arguments, and no keyword arguments were provided in
     // the send, assume that the last argument is an implicit keyword args hash.
     bool implicitKwsplat = false;
-    if (ait != posEnd && hasKwargs && args.args.size() == args.numPosArgs) {
+    if (ait != aPosEnd && hasKwargs && args.args.size() == args.numPosArgs) {
         // NOTE: this would be a good place for an autocorrect to using `**kwhash`
         hasKwsplat = true;
         implicitKwsplat = true;
@@ -1912,7 +1912,7 @@ public:
         // args[0] is the receiver
         // args[1] is the method
         // args[2] are the splat arguments
-        // args[3] are the splat arguments
+        // args[3] are the keyword arguments
         // args[4] is the block
 
         if (args.args.size() != 5) {

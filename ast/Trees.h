@@ -718,6 +718,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 
+    // Returned value is [start, end) indices into ast::Send::args.
     std::pair<int, int> kwArgsRange() const {
         auto res = std::make_pair<int, int>(numPosArgs, args.size());
         if (hasKwSplat()) {

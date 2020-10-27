@@ -574,7 +574,7 @@ public:
                 end -= 1;
             }
 
-            // Walk over the
+            // Walk over the keyword args to find bounds annotations
             for (auto i = send->numPosArgs; i < end; i += 2) {
                 auto *key = ast::cast_tree<ast::Literal>(send->args[i]);
                 core::NameRef name;

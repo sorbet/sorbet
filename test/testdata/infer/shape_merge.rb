@@ -48,7 +48,7 @@ def has_opts_hash(opts={}); end
 
 key = Key.new
 
-# guard against non-symbol values being used as keyword args
+# Exercise non-symbol values being used as keyword args
 has_opts_hash(**{a: 10}.merge(key => "value"))
 
 has_opts_hash(key => "value")

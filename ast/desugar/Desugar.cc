@@ -1846,7 +1846,6 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 }
                 absl::c_reverse(args);
 
-                // TODO(trevor) will these always be positional?
                 auto numPosArgs = args.size();
                 auto res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(),
                                     numPosArgs, std::move(args));
