@@ -74,6 +74,9 @@ Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, u2 nu
            const shared_ptr<core::SendAndBlockLink> &link)
     : recv(recv), fun(fun), receiverLoc(receiverLoc), numPosArgs{numPosArgs}, argLocs(std::move(argLocs)),
       isPrivateOk(isPrivateOk), link(move(link)) {
+    ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
+            args.size());
+
     this->args.resize(args.size());
     int i = 0;
     for (const auto &e : args) {
