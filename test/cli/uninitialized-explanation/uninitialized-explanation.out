@@ -1,0 +1,18 @@
+test/cli/uninitialized-explanation/uninitialized.rb:15: Expected `Integer` but found `T.nilable(Integer)` for argument `x` https://srb.help/7002
+    15 |  takes_int(x)
+          ^^^^^^^^^^^^
+    test/cli/uninitialized-explanation/uninitialized.rb:5: Method `Object#takes_int` has specified `x` as `Integer`
+     5 |sig {params(x: Integer).void}
+                    ^
+  Got T.nilable(Integer) originating from:
+    test/cli/uninitialized-explanation/uninitialized.rb:10:
+    10 |    x = 1
+                ^
+    test/cli/uninitialized-explanation/uninitialized.rb:8: Type may be `NilClass` due to uninitialized variables in:
+     8 |def uninitialized_loc_is_decl_loc
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/uninitialized-explanation/uninitialized.rb:15: Replace with `T.must(x)`
+    15 |  takes_int(x)
+                    ^
+Errors: 1
