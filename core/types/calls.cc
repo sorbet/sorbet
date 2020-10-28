@@ -160,7 +160,8 @@ core::Loc smallestLocWithin(core::Loc callLoc, const core::TypeAndOrigins &argTp
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
                                SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
-                               const TypePtr &selfType, vector<TypePtr> &targs, Loc loc, bool mayBeSetter = false) {
+                               const TypePtr &selfType, vector<TypePtr> &targs, Loc loc, Loc originForUninitialized,
+                               bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(gs, method);
@@ -184,8 +185,8 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
                                 argSym.argumentName(gs), expectedType->show(gs)),
             }));
         }
-        e.addErrorSection(
-            ErrorSection("Got " + argTpe.type->show(gs) + " originating from:", argTpe.origins2Explanations(gs)));
+        e.addErrorSection(ErrorSection("Got " + argTpe.type->show(gs) + " originating from:",
+                                       argTpe.origins2Explanations(gs, originForUninitialized)));
         auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
         if (!withoutNil->isBottom() &&
             Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
@@ -678,10 +679,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
         }
 
         auto offset = ait - args.args.begin();
-        if (auto e =
-                matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
-                             core::Loc(args.locs.file, args.locs.receiver), symbol, method, *arg, spec, args.selfType,
-                             targs, core::Loc(args.locs.file, args.locs.args[offset]), args.args.size() == 1)) {
+        if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
+                                  core::Loc(args.locs.file, args.locs.receiver), symbol, method, *arg, spec,
+                                  args.selfType, targs, core::Loc(args.locs.file, args.locs.args[offset]),
+                                  args.originForUninitialized, args.args.size() == 1)) {
             result.main.errors.emplace_back(std::move(e));
         }
 
@@ -763,8 +764,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                                 gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
                             e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
                                         "arguments");
-                            e.addErrorSection(ErrorSection("Got " + kwSplatType->show(gs) + " originating from:",
-                                                           kwSplatArg->origins2Explanations(gs)));
+                            e.addErrorSection(
+                                ErrorSection("Got " + kwSplatType->show(gs) + " originating from:",
+                                             kwSplatArg->origins2Explanations(gs, args.originForUninitialized)));
                             result.main.errors.emplace_back(e.build());
                         }
                         kwargs = Types::untypedUntracked();
@@ -797,7 +799,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
                                           core::Loc(args.locs.file, args.locs.receiver), symbol, method,
                                           TypeAndOrigins{kwargs, {kwargsLoc}}, *pit, args.selfType, targs, kwargsLoc,
-                                          args.args.size() == 1)) {
+                                          args.originForUninitialized, args.args.size() == 1)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
 
@@ -880,9 +882,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                         tpe.origins = {kwargsLoc};
                         auto offset = it - hash->keys.begin();
                         tpe.type = hash->values[offset];
-                        if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
-                                                  core::Loc(args.locs.file, args.locs.receiver), symbol, method, tpe,
-                                                  spec, args.selfType, targs, Loc::none())) {
+                        if (auto e =
+                                matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
+                                             core::Loc(args.locs.file, args.locs.receiver), symbol, method, tpe, spec,
+                                             args.selfType, targs, Loc::none(), args.originForUninitialized)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
@@ -911,7 +914,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 tpe.type = hash->values[offset];
                 if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
                                           core::Loc(args.locs.file, args.locs.receiver), symbol, method, tpe, spec,
-                                          args.selfType, targs, Loc::none())) {
+                                          args.selfType, targs, Loc::none(), args.originForUninitialized)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
@@ -1111,8 +1114,15 @@ TypePtr AliasType::getCallArguments(const GlobalState &gs, NameRef name) {
 DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
     switch (args.name._id) {
         case Names::new_()._id: {
-            auto innerArgs = DispatchArgs{
-                Names::initialize(), args.locs, args.numPosArgs, args.args, wrapped, wrapped, wrapped, args.block};
+            auto innerArgs = DispatchArgs{Names::initialize(),
+                                          args.locs,
+                                          args.numPosArgs,
+                                          args.args,
+                                          wrapped,
+                                          wrapped,
+                                          wrapped,
+                                          args.block,
+                                          args.originForUninitialized};
             auto original = wrapped->dispatchCall(gs, innerArgs);
             original.returnType = wrapped;
             original.main.sendTp = wrapped;
@@ -1232,7 +1242,8 @@ public:
 
         if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::RevealType)) {
             e.setHeader("Revealed type: `{}`", args.args[0]->type->showWithMoreInfo(gs));
-            e.addErrorSection(ErrorSection("From:", args.args[0]->origins2Explanations(gs)));
+            e.addErrorSection(
+                ErrorSection("From:", args.args[0]->origins2Explanations(gs, args.originForUninitialized)));
         }
         res.returnType = args.args[0]->type;
     }
@@ -1287,8 +1298,9 @@ public:
             }
         }
         auto instanceTy = attachedClass.data(gs)->externalType();
-        DispatchArgs innerArgs{Names::initialize(), args.locs,  args.numPosArgs, args.args,
-                               instanceTy,          instanceTy, instanceTy,      args.block};
+        DispatchArgs innerArgs{Names::initialize(), args.locs,  args.numPosArgs,
+                               args.args,           instanceTy, instanceTy,
+                               instanceTy,          args.block, args.originForUninitialized};
         auto dispatched = instanceTy->dispatchCall(gs, innerArgs);
 
         for (auto &err : res.main.errors) {
@@ -1451,8 +1463,8 @@ public:
         }
 
         auto recv = args.args[0]->type;
-        res = recv->dispatchCall(
-            gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv, recv, recv, args.block});
+        res = recv->dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv, recv, recv,
+                                      args.block, args.originForUninitialized});
     }
 } SorbetPrivateStatic_sig;
 
@@ -1671,8 +1683,15 @@ public:
             posTuple, kwTuple, sendArgStore, core::Loc(args.locs.file, args.locs.args[2]));
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
-        DispatchArgs innerArgs{
-            fn, sendLocs, numPosArgs, sendArgs, receiver->type, receiver->type, receiver->type, args.block};
+        DispatchArgs innerArgs{fn,
+                               sendLocs,
+                               numPosArgs,
+                               sendArgs,
+                               receiver->type,
+                               receiver->type,
+                               receiver->type,
+                               args.block,
+                               args.originForUninitialized};
         auto dispatched = receiver->type->dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
@@ -1695,7 +1714,7 @@ class Magic_callWithBlock : public IntrinsicMethod {
 
 private:
     static TypePtr typeToProc(const GlobalState &gs, TypePtr blockType, core::FileRef file, LocOffsets callLoc,
-                              LocOffsets receiverLoc) {
+                              LocOffsets receiverLoc, Loc originForUninitialized) {
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
         if (Types::isSubType(gs, Types::nilClass(), blockType)) {
@@ -1711,8 +1730,9 @@ private:
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;
         CallLocs sendLocs{file, callLoc, receiverLoc, sendArgLocs};
-        DispatchArgs innerArgs{to_proc,         sendLocs,        0,      sendArgs, nonNilBlockType,
-                               nonNilBlockType, nonNilBlockType, nullptr};
+        DispatchArgs innerArgs{to_proc,         sendLocs,        0,
+                               sendArgs,        nonNilBlockType, nonNilBlockType,
+                               nonNilBlockType, nullptr,         originForUninitialized};
         auto dispatched = nonNilBlockType->dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             gs._error(std::move(err));
@@ -1893,14 +1913,21 @@ public:
         }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
 
-        TypePtr finalBlockType =
-            Magic_callWithBlock::typeToProc(gs, args.args[2]->type, args.locs.file, args.locs.call, args.locs.args[2]);
+        TypePtr finalBlockType = Magic_callWithBlock::typeToProc(gs, args.args[2]->type, args.locs.file, args.locs.call,
+                                                                 args.locs.args[2], args.originForUninitialized);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
         res.main.constr = make_unique<TypeConstraint>();
 
-        DispatchArgs innerArgs{fn,  sendLocs, numPosArgs, sendArgs, receiver->type, receiver->type, receiver->type,
-                               link};
+        DispatchArgs innerArgs{fn,
+                               sendLocs,
+                               numPosArgs,
+                               sendArgs,
+                               receiver->type,
+                               receiver->type,
+                               receiver->type,
+                               link,
+                               args.originForUninitialized};
 
         Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType,
                                           core::Loc(args.locs.file, args.locs.args[2]),
@@ -1976,14 +2003,21 @@ public:
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
 
-        TypePtr finalBlockType =
-            Magic_callWithBlock::typeToProc(gs, args.args[4]->type, args.locs.file, args.locs.call, args.locs.args[4]);
+        TypePtr finalBlockType = Magic_callWithBlock::typeToProc(gs, args.args[4]->type, args.locs.file, args.locs.call,
+                                                                 args.locs.args[4], args.originForUninitialized);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
         res.main.constr = make_unique<TypeConstraint>();
 
-        DispatchArgs innerArgs{fn,  sendLocs, numPosArgs, sendArgs, receiver->type, receiver->type, receiver->type,
-                               link};
+        DispatchArgs innerArgs{fn,
+                               sendLocs,
+                               numPosArgs,
+                               sendArgs,
+                               receiver->type,
+                               receiver->type,
+                               receiver->type,
+                               link,
+                               args.originForUninitialized};
 
         Magic_callWithBlock::simulateCall(gs, receiver, innerArgs, link, finalBlockType,
                                           core::Loc(args.locs.file, args.locs.args[4]),
@@ -2043,8 +2077,9 @@ public:
             // In the case that `self` is not a singleton class, we know that
             // this was a call to `new` outside of a self context. Dispatch to
             // an instance method named new, and see what happens.
-            DispatchArgs innerArgs{Names::new_(), sendLocs, numPosArgs, sendArgStore,
-                                   selfTy,        selfTy,   selfTy,     args.block};
+            DispatchArgs innerArgs{Names::new_(), sendLocs,   numPosArgs,
+                                   sendArgStore,  selfTy,     selfTy,
+                                   selfTy,        args.block, args.originForUninitialized};
             dispatched = selfTy->dispatchCall(gs, innerArgs);
             returnTy = dispatched.returnType;
         } else {
@@ -2056,8 +2091,9 @@ public:
             ENFORCE(attachedClass.exists());
 
             auto instanceTy = self.data(gs)->attachedClass(gs).data(gs)->externalType();
-            DispatchArgs innerArgs{Names::initialize(), sendLocs,   numPosArgs, sendArgStore,
-                                   instanceTy,          instanceTy, instanceTy, args.block};
+            DispatchArgs innerArgs{Names::initialize(), sendLocs,   numPosArgs,
+                                   sendArgStore,        instanceTy, instanceTy,
+                                   instanceTy,          args.block, args.originForUninitialized};
             dispatched = instanceTy->dispatchCall(gs, innerArgs);
 
             // The return type from dispatched is ignored, and we return
@@ -2441,9 +2477,8 @@ public:
         TypeAndOrigins myType{args.selfType, {core::Loc(args.locs.file, args.locs.receiver)}};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs{&myType};
 
-        DispatchArgs dispatch{
-            core::Names::enumerableToH(), locs, 1, innerArgs, hash, hash, hash, nullptr,
-        };
+        DispatchArgs dispatch{core::Names::enumerableToH(), locs, 1, innerArgs, hash, hash, hash, nullptr,
+                              args.originForUninitialized};
         auto dispatched = hash->dispatchCall(gs, dispatch);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));

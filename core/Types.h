@@ -667,7 +667,7 @@ class TypeAndOrigins final {
 public:
     TypePtr type;
     InlinedVector<Loc, 1> origins;
-    std::vector<ErrorLine> origins2Explanations(const GlobalState &gs) const;
+    std::vector<ErrorLine> origins2Explanations(const GlobalState &gs, Loc originForUninitialized) const;
     ~TypeAndOrigins() noexcept;
     TypeAndOrigins() = default;
     TypeAndOrigins(const TypeAndOrigins &) = default;
@@ -710,6 +710,7 @@ struct DispatchArgs {
     const TypePtr &fullType;
     const TypePtr &thisType;
     const std::shared_ptr<const SendAndBlockLink> &block;
+    Loc originForUninitialized;
 
     DispatchArgs withSelfRef(const TypePtr &newSelfRef);
     DispatchArgs withThisRef(const TypePtr &newThisRef);
