@@ -18,7 +18,6 @@ class Test
   end
 end
 
-T.assert_type!(Test.test(T.untyped), M) # error: This code is unreachable
-                       # ^^^^^^^^^ error: Expected `T.all(M, T)` but found `<Type: T.untyped>` for argument `x`
+T.assert_type!(Test.test(T.unsafe(nil)), M)
 T.assert_type!(Test.test(A.new), A)
 T.assert_type!(Test.test(B.new), B)
