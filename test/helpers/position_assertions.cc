@@ -201,9 +201,9 @@ void assertLocationsMatch(const LSPConfiguration &config,
 }
 
 string updatedFilePath(string filename, string version) {
-    string fileExtension = FileOps::getExtension(filename);
+    auto fileExtension = FileOps::getExtension(filename);
 
-    return fmt::format("{}.{}.rbedited", filename.substr(0, filename.size() - fileExtension.size()), version);
+    return fmt::format("{}{}.rbedited", filename.substr(0, filename.size() - fileExtension.size()), version);
 }
 } // namespace
 
