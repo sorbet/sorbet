@@ -160,9 +160,7 @@ public:
             cs, builder, irctx, block, llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
             llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)), "to_proc");
 
-        auto numArgs = send->args.size() - 3;
-        auto *argc = llvm::ConstantInt::get(cs, llvm::APInt(32, numArgs, true));
-        auto *argv = IREmitterHelpers::fillSendArgArray(mcctx, 3, numArgs);
+        auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx, 3);
 
         auto slowFunctionName = "callWithProc" + (string)name;
         auto *cache = IREmitterHelpers::makeInlineCache(cs, slowFunctionName);
@@ -223,7 +221,7 @@ public:
         auto rubyBlockId = mcctx.rubyBlockId;
         auto *send = mcctx.send;
 
-        auto argv = IREmitterHelpers::fillSendArgArray(mcctx);
+        auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx);
 
         llvm::Value *recv;
         if (takesReciever == TakesReciever) {
@@ -239,7 +237,6 @@ public:
             blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
         }
 
-        auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
         auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
         return builder.CreateCall(cs.module->getFunction(cMethod),
                                   {recv, fun, argc, argv, blkPtr, irctx.localsOffset[rubyBlockId]}, "rawSendResult");

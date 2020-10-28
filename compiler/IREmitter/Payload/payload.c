@@ -299,6 +299,25 @@ VALUE sorbet_newRubyHash() {
 }
 
 SORBET_INLINE
+VALUE sorbet_hashBuild(int argc, const VALUE *argv) {
+    VALUE ret = rb_hash_new_with_size(argc / 2);
+    if (argc > 0) {
+        // We can use rb_hash_bulk_insert here because rb_hash_new_with_size freshly allocates.
+        // We have tried in the past to use rb_hash_bulk_insert after clearing an existing hash,
+        // and things broke wonderfully, because Ruby Hash objects are either backed by a small (<8 element)
+        // or large hash table implementation, and neither Hash#clear nor rb_hash_bulk_insert changes
+        // what kind of Hash object it is.
+        rb_hash_bulk_insert(argc, argv, ret);
+    }
+    return ret;
+}
+
+SORBET_INLINE
+VALUE sorbet_hashDup(VALUE hash) {
+    return rb_hash_dup(hash);
+}
+
+SORBET_INLINE
 void sorbet_hashStore(VALUE hash, VALUE key, VALUE value) {
     rb_hash_aset(hash, key, value);
 }
@@ -306,6 +325,12 @@ void sorbet_hashStore(VALUE hash, VALUE key, VALUE value) {
 SORBET_INLINE
 VALUE sorbet_hashGet(VALUE hash, VALUE key) {
     return rb_hash_aref(hash, key);
+}
+
+SORBET_INLINE
+void sorbet_hashUpdate(VALUE hash, VALUE other) {
+    // TODO(trevor) inline a definition of `merge!` here
+    rb_funcall(hash, rb_intern2("merge!", 6), 1, other);
 }
 
 // possible return values for `func`:
@@ -1169,16 +1194,7 @@ VALUE sorbet_boolToRuby(_Bool b) {
 
 VALUE sorbet_buildHashIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                                 VALUE closure) {
-    VALUE ret = rb_hash_new_with_size(argc / 2);
-    if (argc != 0) {
-        // We can use rb_hash_bulk_insert here because rb_hash_new was freshly allocated.
-        // We have tried in the past to use rb_hash_bulk_insert after clearing an existing hash,
-        // and things broke wonderfully, because Ruby Hash objects are either backed by a small (<8 element)
-        // or large hash table implementation, and neither Hash#clear nor rb_hash_bulk_insert doesn't
-        // change what kind of Hash object it is.
-        rb_hash_bulk_insert(argc, argv, ret);
-    }
-    return ret;
+    return sorbet_hashBuild(argc, argv);
 }
 
 VALUE sorbet_buildArrayIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,

@@ -68,7 +68,7 @@ public:
         auto *send = mcctx.send;
         auto rubyBlockId = mcctx.rubyBlockId;
 
-        auto argv = IREmitterHelpers::fillSendArgArray(mcctx);
+        auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx);
 
         auto recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, rubyBlockId);
         llvm::Value *blkPtr;
@@ -78,7 +78,6 @@ public:
             blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
         }
 
-        auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
         auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
         return builder.CreateCall(cs.module->getFunction(cMethod),
                                   {recv, fun, argc, argv, blkPtr, mcctx.irctx.localsOffset[rubyBlockId]},
@@ -280,9 +279,8 @@ public:
 
         auto &builder = builderCast(mcctx.build);
         auto self = Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, mcctx.irctx, mcctx.rubyBlockId);
-        auto args = IREmitterHelpers::fillSendArgArray(mcctx);
-        auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
-        return IREmitterHelpers::callViaRubyVMSimple(cs, mcctx.build, mcctx.irctx, self, args, argc, "new");
+        auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx);
+        return IREmitterHelpers::callViaRubyVMSimple(cs, mcctx.build, mcctx.irctx, self, argv, argc, "new");
     };
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {

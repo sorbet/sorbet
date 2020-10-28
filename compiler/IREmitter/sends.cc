@@ -118,47 +118,117 @@ llvm::Value *IREmitterHelpers::emitMethodCall(MethodCallContext &mcctx) {
     return trySymbolBasedIntrinsic(mcctx);
 }
 
-llvm::Value *IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset,
-                                                const std::size_t length) {
+std::size_t IREmitterHelpers::sendArgCount(cfg::Send *send) {
+    std::size_t numPosArgs = send->numPosArgs;
+    if (numPosArgs < send->args.size()) {
+        numPosArgs++;
+    }
+    return numPosArgs;
+}
+
+namespace {
+
+void setSendArgsEntry(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *sendArgs, int index,
+                      llvm::Value *val) {
+    auto &builder = builderCast(build);
+    // the sendArgArray is always a pointer to an array of VALUEs. That is, since the
+    // outermost type is a pointer, not an array, the first 0 in the instruction:
+    //   getelementptr inbounds <type>, <type>* %s, i64 0, i64 <argId>
+    // just means to offset 0 from the pointer's contents. Then the second index is into the
+    // array (so for this type of pointer-to-array, the first index will always be 0,
+    // unless you're trying to do something more powerful with GEP, like compute sizeof)
+    llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+                              llvm::ConstantInt::get(cs, llvm::APInt(64, index, true))};
+    builder.CreateStore(val, builder.CreateGEP(sendArgs, indices, fmt::format("callArgs{}Addr", index)));
+}
+
+llvm::Value *getSendArgsPointer(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *sendArgs) {
+    auto &builder = builderCast(build);
+    llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
+                              llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
+    return builder.CreateGEP(sendArgs, indices);
+}
+
+} // namespace
+
+pair<llvm::Value *, llvm::Value *> IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx,
+                                                                      const std::size_t offset) {
     auto &cs = mcctx.cs;
     auto &builder = builderCast(mcctx.build);
     auto &args = mcctx.send->args;
     auto irctx = mcctx.irctx;
     auto rubyBlockId = mcctx.rubyBlockId;
 
-    ENFORCE(offset + length <= args.size(), "Invalid range given to fillSendArgArray");
-
-    if (length == 0) {
-        return llvm::Constant::getNullValue(llvm::Type::getInt64PtrTy(cs));
+    auto posEnd = mcctx.send->numPosArgs;
+    auto kwEnd = mcctx.send->args.size();
+    bool hasKwSplat = (kwEnd - posEnd) & 0x1;
+    if (hasKwSplat) {
+        kwEnd--;
     }
 
-    // fill in args
+    ENFORCE(offset <= posEnd, "Invalid positional offset given to fillSendArgArray");
+
+    // compute the number of actual args that will be filled in
+    auto numPosArgs = posEnd - offset;
+    auto numKwArgs = kwEnd - posEnd;
+    auto length = numPosArgs;
+    bool hasKwArgs = numKwArgs > 0 || hasKwSplat;
+    if (hasKwArgs) {
+        length++;
+    }
+
+    auto *argc = llvm::ConstantInt::get(cs, llvm::APInt(32, length, true));
+    if (length == 0) {
+        return {argc, llvm::Constant::getNullValue(llvm::Type::getInt64PtrTy(cs))};
+    }
+
+    auto *sendArgs = irctx.sendArgArrayByBlock[rubyBlockId];
+
+    // fill in keyword args first, so that we can re-use the args vector to build the initial hash
+    if (hasKwArgs) {
+        llvm::Value *kwHash = nullptr;
+        if (numKwArgs == 0) {
+            // no inlined keyword args, lookup the hash to be splatted
+            auto *splat = Payload::varGet(cs, args.back().variable, builder, irctx, rubyBlockId);
+            kwHash = builder.CreateCall(cs.module->getFunction("sorbet_hashDup"), {splat});
+        } else {
+            // fill in inlined args (posEnd .. kwEnd)
+            auto it = args.begin() + posEnd;
+            for (auto argId = 0; argId < numKwArgs; ++argId, ++it) {
+                auto var = Payload::varGet(cs, it->variable, builder, irctx, rubyBlockId);
+                setSendArgsEntry(cs, builder, sendArgs, argId, var);
+            }
+
+            kwHash = builder.CreateCall(cs.module->getFunction("sorbet_hashBuild"),
+                                        {llvm::ConstantInt::get(cs, llvm::APInt(32, numKwArgs, true)),
+                                         getSendArgsPointer(cs, builder, sendArgs)},
+                                        "kwargsHash");
+
+            // merge in the splat if it's present (mcctx.send->args.back())
+            if (hasKwSplat) {
+                auto *splat = Payload::varGet(cs, args.back().variable, builder, irctx, rubyBlockId);
+                builder.CreateCall(cs.module->getFunction("sorbet_hashUpdate"), {kwHash, splat});
+            }
+        }
+
+        setSendArgsEntry(cs, builder, sendArgs, numPosArgs, kwHash);
+    }
+
+    // fill in positional args
     {
         int argId = 0;
         auto it = args.begin() + offset;
-        for (; argId < length; argId += 1, ++it) {
-            // the sendArgArray is always a pointer to an array of VALUEs. That is, since the
-            // outermost type is a pointer, not an array, the first 0 in the instruction:
-            //   getelementptr inbounds <type>, <type>* %s, i64 0, i64 <argId>
-            // just means to offset 0 from the pointer's contents. Then the second index is into the
-            // array (so for this type of pointer-to-array, the first index will always be 0,
-            // unless you're trying to do something more powerful with GEP, like compute sizeof)
-            llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                                      llvm::ConstantInt::get(cs, llvm::APInt(64, argId, true))};
+        for (; argId < numPosArgs; argId += 1, ++it) {
             auto var = Payload::varGet(cs, it->variable, builder, irctx, rubyBlockId);
-            builder.CreateStore(var, builder.CreateGEP(irctx.sendArgArrayByBlock[rubyBlockId], indices,
-                                                       fmt::format("callArgs{}Addr", argId)));
+            setSendArgsEntry(cs, builder, sendArgs, argId, var);
         }
     }
 
-    llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true)),
-                              llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true))};
-
-    return builder.CreateGEP(irctx.sendArgArrayByBlock[rubyBlockId], indices);
+    return {argc, getSendArgsPointer(cs, builder, sendArgs)};
 }
 
-llvm::Value *IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx) {
-    return fillSendArgArray(mcctx, 0, mcctx.send->args.size());
+pair<llvm::Value *, llvm::Value *> IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx) {
+    return fillSendArgArray(mcctx, 0);
 }
 
 llvm::Value *IREmitterHelpers::emitMethodCallDirrect(MethodCallContext &mcctx, core::SymbolRef funSym) {
@@ -171,12 +241,10 @@ llvm::Value *IREmitterHelpers::emitMethodCallDirrect(MethodCallContext &mcctx, c
     ENFORCE(llvmFunc != nullptr);
     // TODO: insert type guard
 
-    auto args = IREmitterHelpers::fillSendArgArray(mcctx);
+    auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx);
     auto var = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
     builder.CreateCall(cs.module->getFunction("sorbet_checkStack"), {});
-    llvm::Value *rawCall =
-        builder.CreateCall(llvmFunc, {llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true)), args, var},
-                           "directSendResult");
+    llvm::Value *rawCall = builder.CreateCall(llvmFunc, {argc, argv, var}, "directSendResult");
     return rawCall;
 }
 
@@ -189,14 +257,13 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     auto str = send->fun.data(cs)->shortName(cs);
 
     // fill in args
-    auto argv = IREmitterHelpers::fillSendArgArray(mcctx);
+    auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx);
 
     // TODO(perf): call
     // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
     // to get inline caching.
     // before this, perf will not be good
     auto *self = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
-    auto argc = llvm::ConstantInt::get(cs, llvm::APInt(32, send->args.size(), true));
     if (send->fun == core::Names::super()) {
         return builder.CreateCall(cs.module->getFunction("sorbet_callSuper"), {argc, argv}, "rawSendResult");
     } else {

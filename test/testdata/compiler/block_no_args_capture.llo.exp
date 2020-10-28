@@ -75,8 +75,8 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @.str.2 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @ruby_current_vm_ptr = external local_unnamed_addr global %struct.rb_vm_struct*, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
-@.str.17 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
-@.str.18 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
+@.str.18 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
+@.str.19 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
 @"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
@@ -124,10 +124,10 @@ declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #2
 
 declare void @rb_ary_detransient(i64) local_unnamed_addr #2
 
-declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #2
-
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #3
+
+declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #2
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #3
@@ -260,7 +260,7 @@ sorbet_isa_Array.exit:                            ; preds = %argArrayExpandArray
 define void @Init_block_no_args_capture() local_unnamed_addr #6 {
 entry:
   %0 = alloca %struct.sorbet_iterMethodArg, align 8
-  %1 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.17, i64 0, i64 0)) #8
+  %1 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.18, i64 0, i64 0)) #8
   %2 = and i64 %1, 7
   %3 = icmp ne i64 %2, 0
   %4 = and i64 %1, -9
@@ -278,11 +278,11 @@ entry:
 
 13:                                               ; preds = %7, %entry
   %14 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !4
-  tail call void (i64, i8*, ...) @rb_raise(i64 %14, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.18, i64 0, i64 0)) #7
+  tail call void (i64, i8*, ...) @rb_raise(i64 %14, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.19, i64 0, i64 0)) #7
   unreachable
 
 sorbet_readRealpath.exit:                         ; preds = %7
-  %15 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.17, i64 0, i64 0), i64 8) #8
+  %15 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.18, i64 0, i64 0), i64 8) #8
   %16 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #8
   store i64 %16, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %17 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"str_<self>", i64 0, i64 0), i64 6) #8

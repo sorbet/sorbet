@@ -74,8 +74,8 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @.str.2 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @ruby_current_vm_ptr = external local_unnamed_addr global %struct.rb_vm_struct*, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
-@.str.17 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
-@.str.18 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
+@.str.18 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
+@.str.19 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
 @"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
@@ -86,7 +86,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @str_a = private unnamed_addr constant [2 x i8] c"a\00", align 1
 @rubyIdPrecomputed_b = internal unnamed_addr global i64 0, align 8
 @str_b = private unnamed_addr constant [2 x i8] c"b\00", align 1
-@"str_<build-keyword-args>" = private unnamed_addr constant [21 x i8] c"<build-keyword-args>\00", align 1
+@"str_<build-hash>" = private unnamed_addr constant [13 x i8] c"<build-hash>\00", align 1
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
 @ic_callFunc_puts = internal global %struct.FunctionInlineCache zeroinitializer
@@ -112,6 +112,10 @@ declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #2
 
 declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #2
 
+declare i64 @rb_hash_new_with_size(i64) local_unnamed_addr #2
+
+declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #2
+
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #2
 
 declare i64 @rb_id2sym(i64) local_unnamed_addr #2
@@ -126,10 +130,6 @@ declare i64 @rb_gv_set(i8*, i64) local_unnamed_addr #2
 ; Function Attrs: noinline nounwind ssp uwtable
 declare void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* nocapture readnone, %struct.rb_control_frame_struct*, %struct.rb_iseq_struct* nocapture readonly) local_unnamed_addr #3
 
-declare i64 @rb_hash_new_with_size(i64) local_unnamed_addr #2
-
-declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #2
-
 ; Function Attrs: noinline nounwind ssp uwtable
 declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #3
 
@@ -137,7 +137,7 @@ declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, %st
 define void @Init_hashes() local_unnamed_addr #4 {
 entry:
   %callArgs.i = alloca [4 x i64], align 8
-  %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.17, i64 0, i64 0)) #7
+  %0 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.18, i64 0, i64 0)) #7
   %1 = and i64 %0, 7
   %2 = icmp ne i64 %1, 0
   %3 = and i64 %0, -9
@@ -155,18 +155,18 @@ entry:
 
 12:                                               ; preds = %6, %entry
   %13 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !4
-  tail call void (i64, i8*, ...) @rb_raise(i64 %13, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.18, i64 0, i64 0)) #6
+  tail call void (i64, i8*, ...) @rb_raise(i64 %13, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.19, i64 0, i64 0)) #6
   unreachable
 
 sorbet_readRealpath.exit:                         ; preds = %6
-  %14 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.17, i64 0, i64 0), i64 8) #7
+  %14 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.18, i64 0, i64 0), i64 8) #7
   %15 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #7
   store i64 %15, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %16 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_a, i64 0, i64 0), i64 1) #7
   store i64 %16, i64* @rubyIdPrecomputed_a, align 8
   %17 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_b, i64 0, i64 0), i64 1) #7
   store i64 %17, i64* @rubyIdPrecomputed_b, align 8
-  %18 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @"str_<build-keyword-args>", i64 0, i64 0), i64 20) #7
+  %18 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @"str_<build-hash>", i64 0, i64 0), i64 12) #7
   %19 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_puts, i64 0, i64 0), i64 4) #7
   store i64 %19, i64* @rubyIdPrecomputed_puts, align 8
   %20 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #7

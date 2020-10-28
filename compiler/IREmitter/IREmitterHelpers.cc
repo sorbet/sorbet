@@ -218,8 +218,17 @@ int getMaxSendArgCount(cfg::CFG &cfg) {
     for (auto &bb : cfg.basicBlocks) {
         for (cfg::Binding &bind : bb->exprs) {
             if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
-                if (maxSendArgCount < snd->args.size()) {
-                    maxSendArgCount = snd->args.size();
+                int numPosArgs = snd->numPosArgs;
+                int numKwArgs = snd->args.size() - numPosArgs;
+
+                // add one for the keyword arguments hash
+                if (numPosArgs < snd->args.size()) {
+                    numPosArgs++;
+                }
+
+                int numArgs = std::max(numPosArgs, numKwArgs);
+                if (maxSendArgCount < numArgs) {
+                    maxSendArgCount = numArgs;
                 }
             }
         }

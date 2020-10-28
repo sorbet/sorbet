@@ -80,8 +80,10 @@ public:
 
     static llvm::Function *getInitFunction(CompilerState &cs, core::SymbolRef sym);
 
-    static llvm::Value *fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset, const std::size_t length);
-    static llvm::Value *fillSendArgArray(MethodCallContext &mcctx);
+    static std::size_t sendArgCount(cfg::Send *send);
+
+    static std::pair<llvm::Value *, llvm::Value *> fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset);
+    static std::pair<llvm::Value *, llvm::Value *> fillSendArgArray(MethodCallContext &mcctx);
 
     static llvm::Value *emitMethodCall(MethodCallContext &mcctx);
 
