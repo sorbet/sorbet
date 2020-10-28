@@ -1320,7 +1320,7 @@ public:
 class TreeSymbolizer {
     friend class Namer;
 
-    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::TreePtr &node) {
+    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::TreePtr &node, bool firstName) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
@@ -1346,13 +1346,25 @@ class TreeSymbolizer {
             return owner;
         }
 
-        auto newOwner = squashNames(ctx, owner, constLit->scope);
-        core::SymbolRef existing = newOwner.data(ctx)->findMember(ctx, constLit->cnst);
+        const bool firstNameRecursive = false;
+        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
+        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner, constLit->cnst);
+        if (firstName && !existing.exists()) {
+            existing = ctx.state.lookupStaticFieldSymbol(newOwner, constLit->cnst);
+            if (existing.exists()) {
+                existing = existing.data(ctx.state)->dealias(ctx.state);
+            }
+        }
         // NameInserter should have created this symbol.
         ENFORCE(existing.exists());
 
         node = ast::make_tree<ast::ConstantLit>(constLit->loc, existing, std::move(node));
         return existing;
+    }
+
+    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::TreePtr &node) {
+        const bool firstName = true;
+        return squashNamesInner(ctx, owner, node, firstName);
     }
 
     ast::TreePtr arg2Symbol(core::Context ctx, int pos, ast::ParsedArg parsedArg, ast::TreePtr arg) {
