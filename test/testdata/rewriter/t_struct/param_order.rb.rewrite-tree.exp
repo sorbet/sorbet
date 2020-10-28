@@ -1,7 +1,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C ParamOrder><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"bar" => <emptyTree>::<C Integer>, :"foo" => <emptyTree>::<C Integer>}).void()
+      <self>.params(:"bar", <emptyTree>::<C Integer>, :"foo", <emptyTree>::<C Integer>).void()
     end
 
     def initialize<<C <todo sym>>>(bar:, foo: = 3, &<blk>)
@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).returns(<emptyTree>::<C Integer>)
+      <self>.returns(<emptyTree>::<C Integer>)
     end
 
     def foo<<C <todo sym>>>(&<blk>)
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"arg0" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
+      <self>.params(:"arg0", <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).returns(<emptyTree>::<C Integer>)
+      <self>.returns(<emptyTree>::<C Integer>)
     end
 
     def bar<<C <todo sym>>>(&<blk>)
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"arg0" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
+      <self>.params(:"arg0", <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
     def bar=<<C <todo sym>>>(arg0, &<blk>)
@@ -46,13 +46,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
 
-    <self>.prop(:"foo", <emptyTree>::<C Integer>, {:"default" => 3, :"without_accessors" => true})
+    <self>.prop(:"foo", <emptyTree>::<C Integer>, :"default", 3, :"without_accessors", true)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
 
-    <self>.prop(:"bar", <emptyTree>::<C Integer>, {:"without_accessors" => true})
+    <self>.prop(:"bar", <emptyTree>::<C Integer>, :"without_accessors", true)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 

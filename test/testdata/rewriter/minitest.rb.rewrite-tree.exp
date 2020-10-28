@@ -9,7 +9,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).void()
+      <self>.void()
     end
 
     def <it 'works outside'><<C <todo sym>>>(&<blk>)
@@ -17,7 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).void()
+      <self>.void()
     end
 
     def <it 'allows constants inside of IT'><<C <todo sym>>>(&<blk>)
@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).void()
+      <self>.void()
     end
 
     def <it 'allows let-ed constants inside of IT'><<C <todo sym>>>(&<blk>)
@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).void()
+      <self>.void()
     end
 
     def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
@@ -41,7 +41,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).void()
+      <self>.void()
     end
 
     def <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'><<C <todo sym>>>(&<blk>)
@@ -53,7 +53,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).void()
+      <self>.void()
     end
 
     def initialize<<C <todo sym>>>(&<blk>)
@@ -64,7 +64,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).void()
+      <self>.void()
     end
 
     def <after><<C <todo sym>>>(&<blk>)
@@ -75,7 +75,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).void()
+      <self>.void()
     end
 
     def <it 'can read foo'><<C <todo sym>>>(&<blk>)
@@ -135,7 +135,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.params({}).void()
+        <self>.void()
       end
 
       def <it 'works inside'><<C <todo sym>>>(&<blk>)
@@ -173,7 +173,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     class <emptyTree>::<C <describe 'Object'>><<C <todo sym>>> < (<self>)
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.params({}).void()
+        <self>.void()
       end
 
       def <it 'Object'><<C <todo sym>>>(&<blk>)
@@ -181,7 +181,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.params({}).void()
+        <self>.void()
       end
 
       def <it 'Object'><<C <todo sym>>>(&<blk>)
@@ -210,7 +210,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     class <emptyTree>::<C <describe 'a non-ideal situation'>><<C <todo sym>>> < (<self>)
       ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-        <self>.params({}).void()
+        <self>.void()
       end
 
       def <it 'contains nested describes'><<C <todo sym>>>(&<blk>)

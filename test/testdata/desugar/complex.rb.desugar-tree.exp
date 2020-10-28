@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <self>.sig() do ||
-      <self>.params({:"x" => <emptyTree>::<C Complex>}).void()
+      <self>.params(:"x", <emptyTree>::<C Complex>).void()
     end
 
     def foo<<C <todo sym>>>(x, &<blk>)
@@ -31,7 +31,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <self>.sig() do ||
-      <self>.params({:"x" => <emptyTree>::<C Complex>}).void()
+      <self>.params(:"x", <emptyTree>::<C Complex>).void()
     end
 
     def foo<<C <todo sym>>>(x, &<blk>)

@@ -27,6 +27,7 @@ ClassDef{
               }
               fun = <U let>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 42 }
                 Send{
@@ -36,6 +37,7 @@ ClassDef{
                   }
                   fun = <U untyped>
                   block = nullptr
+                  pos_args = 0
                   args = [
                   ]
                 }
@@ -54,6 +56,7 @@ ClassDef{
               }
               fun = <U let>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 42 }
                 Send{
@@ -63,6 +66,7 @@ ClassDef{
                   }
                   fun = <U nilable>
                   block = nullptr
+                  pos_args = 1
                   args = [
                     UnresolvedConstantLit{
                       scope = EmptyTree
@@ -85,6 +89,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 Literal{ value = 2 }
@@ -99,6 +104,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -118,6 +124,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 Literal{ value = 2 }
@@ -132,6 +139,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -151,6 +159,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 Literal{ value = nil }
@@ -165,6 +174,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -184,6 +194,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 Literal{ value = nil }
@@ -198,6 +209,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -217,6 +229,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 EmptyTree
@@ -231,6 +244,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -250,6 +264,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 EmptyTree
@@ -264,6 +279,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -283,6 +299,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 Literal{ value = "a" }
@@ -297,6 +314,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -316,6 +334,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = nil }
                 Literal{ value = 42 }
@@ -330,6 +349,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -349,6 +369,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = nil }
                 Literal{ value = 42 }
@@ -363,6 +384,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -382,6 +404,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = nil }
                 EmptyTree
@@ -396,6 +419,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -415,6 +439,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = nil }
                 EmptyTree
@@ -429,6 +454,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -448,6 +474,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = nil }
                 Literal{ value = nil }
@@ -462,6 +489,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -481,6 +509,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = nil }
                 Literal{ value = nil }
@@ -495,6 +524,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -514,6 +544,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
@@ -531,6 +562,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -550,6 +582,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 UnresolvedIdent{
@@ -567,6 +600,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -586,6 +620,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
@@ -606,6 +641,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -625,6 +661,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 UnresolvedIdent{
@@ -642,6 +679,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -661,6 +699,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
@@ -678,6 +717,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -697,6 +737,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 UnresolvedIdent{
                   kind = Local
@@ -717,6 +758,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -736,6 +778,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 EmptyTree
                 Literal{ value = 1 }
@@ -750,6 +793,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -769,6 +813,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 EmptyTree
                 Literal{ value = nil }
@@ -783,6 +828,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -802,6 +848,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 EmptyTree
                 UnresolvedIdent{
@@ -819,6 +866,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -838,6 +886,7 @@ ClassDef{
               }
               fun = <U <build-range>>
               block = nullptr
+              pos_args = 3
               args = [
                 EmptyTree
                 UnresolvedIdent{
@@ -855,6 +904,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -875,6 +925,7 @@ ClassDef{
                 }
                 fun = <U <build-range>>
                 block = nullptr
+                pos_args = 3
                 args = [
                   Literal{ value = 1 }
                   Literal{ value = 42 }
@@ -883,6 +934,7 @@ ClassDef{
               }
               fun = <U first>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -894,6 +946,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -914,6 +967,7 @@ ClassDef{
                 }
                 fun = <U <build-range>>
                 block = nullptr
+                pos_args = 3
                 args = [
                   Literal{ value = "a" }
                   Literal{ value = "z" }
@@ -922,6 +976,7 @@ ClassDef{
               }
               fun = <U last>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -933,6 +988,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -952,6 +1008,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -963,6 +1020,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -982,6 +1040,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 1
               args = [
                 Literal{ value = nil }
               ]
@@ -994,6 +1053,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1013,6 +1073,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 1 }
                 Literal{ value = 2 }
@@ -1026,6 +1087,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1045,6 +1107,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 Literal{ value = 2 }
@@ -1059,6 +1122,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1078,6 +1142,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 1 }
                 Literal{ value = nil }
@@ -1091,6 +1156,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1110,6 +1176,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 1 }
                 Literal{ value = true }
@@ -1123,6 +1190,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1142,6 +1210,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = nil }
                 Literal{ value = 42 }
@@ -1155,6 +1224,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1174,6 +1244,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = nil }
                 Literal{ value = nil }
@@ -1187,6 +1258,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1206,6 +1278,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 1 }
                 Literal{ value = "c" }
@@ -1219,6 +1292,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1238,6 +1312,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 UnresolvedIdent{
                   kind = Local
@@ -1254,6 +1329,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1273,6 +1349,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 1 }
                 UnresolvedIdent{
@@ -1289,6 +1366,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1308,6 +1386,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 UnresolvedIdent{
                   kind = Local
@@ -1327,6 +1406,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1347,6 +1427,7 @@ ClassDef{
                 }
                 fun = <U new>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Literal{ value = 1 }
                   Literal{ value = 42 }
@@ -1354,6 +1435,7 @@ ClassDef{
               }
               fun = <U first>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -1365,6 +1447,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1385,6 +1468,7 @@ ClassDef{
                 }
                 fun = <U new>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Literal{ value = "a" }
                   Literal{ value = "z" }
@@ -1392,6 +1476,7 @@ ClassDef{
               }
               fun = <U last>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -1403,6 +1488,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1425,6 +1511,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -1436,6 +1523,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1459,6 +1547,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   UnresolvedConstantLit{
                     scope = EmptyTree
@@ -1468,6 +1557,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -1479,6 +1569,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1502,6 +1593,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   UnresolvedConstantLit{
                     scope = EmptyTree
@@ -1511,6 +1603,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 1 }
                 Literal{ value = 2 }
@@ -1524,6 +1617,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1547,6 +1641,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   UnresolvedConstantLit{
                     scope = EmptyTree
@@ -1556,6 +1651,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 3
               args = [
                 Literal{ value = 1 }
                 Literal{ value = 2 }
@@ -1570,6 +1666,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1593,6 +1690,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   UnresolvedConstantLit{
                     scope = EmptyTree
@@ -1602,6 +1700,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 1 }
                 Literal{ value = nil }
@@ -1615,6 +1714,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1638,6 +1738,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   UnresolvedConstantLit{
                     scope = EmptyTree
@@ -1647,6 +1748,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 1 }
                 Literal{ value = true }
@@ -1660,6 +1762,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1683,6 +1786,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   UnresolvedConstantLit{
                     scope = EmptyTree
@@ -1692,6 +1796,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = nil }
                 Literal{ value = 42 }
@@ -1705,6 +1810,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1728,6 +1834,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   UnresolvedConstantLit{
                     scope = EmptyTree
@@ -1737,6 +1844,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = nil }
                 Literal{ value = nil }
@@ -1750,6 +1858,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1773,6 +1882,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   Send{
                     recv = UnresolvedConstantLit{
@@ -1781,6 +1891,7 @@ ClassDef{
                     }
                     fun = <U untyped>
                     block = nullptr
+                    pos_args = 0
                     args = [
                     ]
                   }
@@ -1788,6 +1899,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 1 }
                 Literal{ value = "c" }
@@ -1801,6 +1913,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1824,6 +1937,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   UnresolvedConstantLit{
                     scope = EmptyTree
@@ -1833,6 +1947,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 UnresolvedIdent{
                   kind = Local
@@ -1849,6 +1964,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1872,6 +1988,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   UnresolvedConstantLit{
                     scope = EmptyTree
@@ -1881,6 +1998,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 Literal{ value = 1 }
                 UnresolvedIdent{
@@ -1897,6 +2015,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1920,6 +2039,7 @@ ClassDef{
                 }
                 fun = <U []>
                 block = nullptr
+                pos_args = 1
                 args = [
                   UnresolvedConstantLit{
                     scope = EmptyTree
@@ -1929,6 +2049,7 @@ ClassDef{
               }
               fun = <U new>
               block = nullptr
+              pos_args = 2
               args = [
                 UnresolvedIdent{
                   kind = Local
@@ -1948,6 +2069,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -1972,6 +2094,7 @@ ClassDef{
                   }
                   fun = <U []>
                   block = nullptr
+                  pos_args = 1
                   args = [
                     UnresolvedConstantLit{
                       scope = EmptyTree
@@ -1981,6 +2104,7 @@ ClassDef{
                 }
                 fun = <U new>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Literal{ value = 1 }
                   Literal{ value = 42 }
@@ -1988,6 +2112,7 @@ ClassDef{
               }
               fun = <U first>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -1999,6 +2124,7 @@ ClassDef{
             }
             fun = <U reveal_type>
             block = nullptr
+            pos_args = 1
             args = [
               UnresolvedIdent{
                 kind = Local
@@ -2023,6 +2149,7 @@ ClassDef{
                   }
                   fun = <U []>
                   block = nullptr
+                  pos_args = 1
                   args = [
                     UnresolvedConstantLit{
                       scope = EmptyTree
@@ -2032,6 +2159,7 @@ ClassDef{
                 }
                 fun = <U new>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Literal{ value = "a" }
                   Literal{ value = "z" }
@@ -2039,6 +2167,7 @@ ClassDef{
               }
               fun = <U last>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -2051,6 +2180,7 @@ ClassDef{
           }
           fun = <U reveal_type>
           block = nullptr
+          pos_args = 1
           args = [
             UnresolvedIdent{
               kind = Local

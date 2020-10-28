@@ -147,6 +147,9 @@ void Retry::_sanityCheck() {}
 void Send::_sanityCheck() {
     ENFORCE(recv);
     ENFORCE(fun.exists());
+    ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
+            args.size());
+
     for (auto &node : args) {
         ENFORCE(node);
     }

@@ -29,16 +29,16 @@ begin
     def self.<static-init>(<blk>)
       begin
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"x" => ::String}).returns(::String)
+          <self>.params(:"x", ::String).returns(::String)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"y" => ::String}).returns(::String)
+          <self>.params(:"y", ::String).returns(::String)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"z" => ::String}).returns(::String)
+          <self>.params(:"z", ::String).returns(::String)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"w" => ::String}).returns(::String)
+          <self>.params(:"w", ::String).returns(::String)
         end
         <self>.extend(::T::Sig)
         ::Sorbet::Private::Static.keep_def(<self>, :"foo")

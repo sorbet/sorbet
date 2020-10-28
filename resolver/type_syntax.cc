@@ -247,31 +247,52 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     sig.seen.params = true;
 
                     if (send->args.empty()) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            auto paramsStr = send->fun.show(ctx);
+                            e.setHeader("`{}` must be given arguments", paramsStr);
+
+                            core::Loc loc{ctx.file, send->loc};
+                            auto orig = loc.source(ctx);
+                            auto dot = orig.rfind(".");
+                            if (orig.rfind(".") == string::npos) {
+                                e.replaceWith("Remove this use of `params`", loc, "");
+                            } else {
+                                e.replaceWith("Remove this use of `params`", loc, "{}", orig.substr(0, dot));
+                            }
+                        }
                         break;
                     }
 
-                    if (send->args.size() > 1) {
-                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
-                                        "0-1", send->args.size());
-                        }
-                    }
-
-                    auto *hash = ast::cast_tree<ast::Hash>(send->args[0]);
-                    if (hash == nullptr) {
+                    // `params` only accepts keyword args
+                    if (send->numPosArgs != 0) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             auto paramsStr = send->fun.show(ctx);
                             e.setHeader("`{}` expects keyword arguments", paramsStr);
                             e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
                                 "All parameters must be given names in `{}` even if they are positional", paramsStr)));
+
+                            // when the first argument is a hash, emit an autocorrect to remove the braces
+                            if (send->numPosArgs == 1) {
+                                if (auto *hash = ast::cast_tree<ast::Hash>(send->args.front())) {
+                                    auto loc = core::Loc(ctx.file, hash->loc.beginPos(), hash->loc.endPos());
+                                    auto source = loc.source(ctx);
+                                    e.replaceWith("Remove braces from keyword args", loc, "{}",
+                                                  source.substr(1, source.size() - 2));
+                                }
+                            }
                         }
                         break;
                     }
 
-                    int i = 0;
-                    for (auto &key : hash->keys) {
-                        auto &value = hash->values[i++];
-                        auto lit = ast::cast_tree<ast::Literal>(key);
+                    if (send->hasKwSplat()) {
+                        // TODO(trevor) add an error for this
+                    }
+
+                    auto [start, end] = send->kwArgsRange();
+                    for (auto i = start; i < end; i += 2) {
+                        auto &key = send->args[i];
+                        auto &value = send->args[i + 1];
+                        auto *lit = ast::cast_tree<ast::Literal>(key);
                         if (lit && lit->isSymbol(ctx)) {
                             core::NameRef name = lit->asSymbol(ctx);
                             auto resultAndBind =
@@ -291,26 +312,19 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                 case core::Names::override_()._id: {
                     sig.seen.override_ = true;
 
-                    if (send->args.size() > 1) {
+                    if (send->numPosArgs > 0) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.show(ctx),
-                                        "0-1", send->args.size());
+                            auto paramsStr = send->fun.show(ctx);
+                            e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
                         }
+                        break;
                     }
 
-                    if (send->args.size() == 1) {
-                        auto *hash = ast::cast_tree<ast::Hash>(send->args[0]);
-                        if (hash == nullptr) {
-                            if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                                auto paramsStr = send->fun.show(ctx);
-                                e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
-                            }
-                            break;
-                        }
-
-                        int i = 0;
-                        for (auto &key : hash->keys) {
-                            auto &value = hash->values[i++];
+                    if (!send->args.empty()) {
+                        auto [posEnd, kwEnd] = send->kwArgsRange();
+                        for (auto i = posEnd; i < kwEnd; i += 2) {
+                            auto &key = send->args[i];
+                            auto &value = send->args[i + 1];
                             auto lit = ast::cast_tree<ast::Literal>(key);
                             if (lit && lit->isSymbol(ctx)) {
                                 if (lit->asSymbol(ctx) == core::Names::allowIncompatible()) {
@@ -341,10 +355,24 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, ast::Send *sigSen
                     break;
                 case core::Names::returns()._id: {
                     sig.seen.returns = true;
-                    if (send->args.size() != 1) {
+                    if (send->numPosArgs != send->args.size()) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("`{}` does not accept keyword arguments", send->fun.show(ctx));
+                            if (!send->hasKwSplat()) {
+                                auto start = send->args[send->numPosArgs]->loc;
+                                auto end = send->args.back()->loc;
+                                core::Loc argsLoc(ctx.file, start.beginPos(), end.endPos());
+                                e.replaceWith("Wrap in braces to make a shape type", argsLoc, "{{{}}}",
+                                              argsLoc.source(ctx));
+                            }
+                        }
+                        break;
+                    }
+
+                    if (send->numPosArgs != 1) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", "returns", 1,
-                                        send->args.size());
+                                        send->numPosArgs);
                         }
                         break;
                     }
@@ -415,7 +443,7 @@ core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, co
                                    TypeSyntaxArgs args) {
     switch (send->fun._id) {
         case core::Names::nilable()._id:
-            if (send->args.size() != 1) {
+            if (send->numPosArgs != 1 || send->hasKwArgs()) {
                 return core::Types::untypedUntracked(); // error will be reported in infer.
             }
             return core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, send->args[0], sig, args),
@@ -909,7 +937,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 recvi->loc,
                 argLocs,
             };
-            core::DispatchArgs dispatchArgs{core::Names::squareBrackets(), locs, targs, ctype, ctype, ctype, nullptr};
+            core::DispatchArgs dispatchArgs{
+                core::Names::squareBrackets(), locs, s->numPosArgs, targs, ctype, ctype, ctype, nullptr};
             auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
 
             if (out->isUntyped()) {

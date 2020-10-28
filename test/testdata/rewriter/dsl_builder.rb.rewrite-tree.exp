@@ -1,7 +1,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C TestDSLBuilder><<C <todo sym>>> < (::<todo sym>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"opt_string" => <emptyTree>::<C String>}).returns(::NilClass)
+      <self>.params(:"opt_string", <emptyTree>::<C String>).returns(::NilClass)
     end
 
     def self.opt_string<<C <todo sym>>>(opt_string, &<blk>)
@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"opt_int_defaulted" => <emptyTree>::<C Integer>}).returns(::NilClass)
+      <self>.params(:"opt_int_defaulted", <emptyTree>::<C Integer>).returns(::NilClass)
     end
 
     def self.opt_int_defaulted<<C <todo sym>>>(opt_int_defaulted, &<blk>)
@@ -49,7 +49,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"req_string" => <emptyTree>::<C String>}).returns(::NilClass)
+      <self>.params(:"req_string", <emptyTree>::<C String>).returns(::NilClass)
     end
 
     def self.req_string<<C <todo sym>>>(req_string, &<blk>)
@@ -73,7 +73,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"implied_string" => <emptyTree>::<C String>}).returns(::NilClass)
+      <self>.params(:"implied_string", <emptyTree>::<C String>).returns(::NilClass)
     end
 
     def self.implied_string<<C <todo sym>>>(implied_string = ::T.untyped(), &<blk>)
@@ -97,7 +97,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"no_getter" => <emptyTree>::<C String>}).returns(::NilClass)
+      <self>.params(:"no_getter", <emptyTree>::<C String>).returns(::NilClass)
     end
 
     def self.no_getter<<C <todo sym>>>(no_getter, &<blk>)
@@ -121,7 +121,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"class_of" => <emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)}).returns(::NilClass)
+      <self>.params(:"class_of", <emptyTree>::<C T>.class_of(<emptyTree>::<C Integer>)).returns(::NilClass)
     end
 
     def self.class_of<<C <todo sym>>>(class_of, &<blk>)
@@ -145,7 +145,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"root_const" => ::<root>::<C Integer>}).returns(::NilClass)
+      <self>.params(:"root_const", ::<root>::<C Integer>).returns(::NilClass)
     end
 
     def self.root_const<<C <todo sym>>>(root_const, &<blk>)
@@ -198,7 +198,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"no_setter")
 
-    <self>.dsl_optional(:"no_getter_or_setter", <emptyTree>::<C String>, {:"skip_getter" => true, :"skip_setter" => true})
+    <self>.dsl_optional(:"no_getter_or_setter", <emptyTree>::<C String>, :"skip_getter", true, :"skip_setter", true)
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :"class_of")
 

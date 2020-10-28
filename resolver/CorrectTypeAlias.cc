@@ -18,28 +18,37 @@ std::string indented(const std::string &s) {
 }
 
 void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast::Send *send) {
-    if (send->args.size() != 1) {
-        return;
+    bool wrapHash = false;
+
+    if (send->hasKwArgs()) {
+        if (send->numPosArgs != 0) {
+            return;
+        }
+        wrapHash = true;
+    } else {
+        if (send->numPosArgs != 1) {
+            return;
+        }
     }
-    auto *arg = send->args[0].get();
-    auto *hash = ast::cast_tree<ast::Hash>(send->args[0]);
-    // Insert extra {}'s when a hash literal does not have them.
-    // Example: `T.type_alias(a: Integer,  b: String)`
-    bool wrapHash = hash != nullptr && core::Loc(ctx.file, hash->loc).source(ctx)[0] != '{';
+
+    auto *front = send->args.front().get();
+    auto *back = send->args.back().get();
+    core::Loc argsLoc{ctx.file, front->loc.join(back->loc)};
+
     auto [start, end] = core::Loc(ctx.file, send->loc).position(ctx);
+
     if (start.line == end.line) {
         if (wrapHash) {
             e.replaceWith("Convert to lazy type alias", core::Loc(ctx.file, send->loc), "T.type_alias {{{{{}}}}}",
-                          core::Loc(ctx.file, arg->loc).source(ctx));
+                          argsLoc.source(ctx));
         } else {
             e.replaceWith("Convert to lazy type alias", core::Loc(ctx.file, send->loc), "T.type_alias {{{}}}",
-                          core::Loc(ctx.file, arg->loc).source(ctx));
+                          argsLoc.source(ctx));
         }
     } else {
-        auto loc = core::Loc(ctx.file, arg->loc);
-        core::Loc endLoc(loc.file(), loc.endPos(), loc.endPos());
+        core::Loc endLoc(argsLoc.file(), argsLoc.endPos(), argsLoc.endPos());
         string argIndent = getIndent(ctx, endLoc);
-        string argSrc = fmt::format("{}{}", argIndent, core::Loc(ctx.file, arg->loc).source(ctx));
+        string argSrc = fmt::format("{}{}", argIndent, argsLoc.source(ctx));
         if (wrapHash) {
             argSrc = fmt::format("{}{{\n{}\n{}}}", argIndent, indented(argSrc), argIndent);
         }

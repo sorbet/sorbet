@@ -96,7 +96,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
     <self>.cattr_reader()
 
-    <self>.cattr_reader({:"instance_accessor" => false})
+    <self>.cattr_reader(:"instance_accessor", false)
 
     <self>.cattr_reader("foo")
   end

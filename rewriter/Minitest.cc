@@ -110,7 +110,7 @@ public:
 };
 
 ast::TreePtr addSigVoid(ast::TreePtr expr) {
-    return ast::MK::InsSeq1(expr->loc, ast::MK::SigVoid(expr->loc, ast::MK::Hash0(expr->loc)), std::move(expr));
+    return ast::MK::InsSeq1(expr->loc, ast::MK::SigVoid(expr->loc, {}), std::move(expr));
 }
 } // namespace
 
@@ -260,7 +260,7 @@ ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
         ast::Send::ARGS_store args;
         args.emplace_back(move(send->args.front()));
         return ast::MK::Send(
-            send->loc, ast::MK::Self(send->loc), send->fun, std::move(args), send->flags,
+            send->loc, ast::MK::Self(send->loc), send->fun, 1, std::move(args), send->flags,
             ast::MK::Block(send->block->loc,
                            prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, iteratee),
                            std::move(block->args)));

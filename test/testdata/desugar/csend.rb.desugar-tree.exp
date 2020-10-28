@@ -86,7 +86,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <self>.sig() do ||
-      <self>.params({:"x" => <emptyTree>::<C T>.any(<emptyTree>::<C FalseClass>, <emptyTree>::<C NilClass>)}).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C TrueClass>))
+      <self>.params(:"x", <emptyTree>::<C T>.any(<emptyTree>::<C FalseClass>, <emptyTree>::<C NilClass>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C TrueClass>))
     end
 
     def foo<<C <todo sym>>>(x, &<blk>)

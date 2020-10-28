@@ -1016,26 +1016,21 @@ class ResolveTypeMembersWalk {
 
         // When no args are supplied, this implies that the upper and lower
         // bounds of the type parameter are top and bottom.
-        ast::Hash *hash = nullptr;
-        if (rhs->args.size() == 1) {
-            hash = ast::cast_tree<ast::Hash>(rhs->args[0]);
-        } else if (rhs->args.size() == 2) {
-            hash = ast::cast_tree<ast::Hash>(rhs->args[1]);
-        }
+        auto [posEnd, kwEnd] = rhs->kwArgsRange();
+        if (kwEnd - posEnd > 0) {
+            for (auto i = posEnd; i < kwEnd; i += 2) {
+                auto &keyExpr = rhs->args[i];
 
-        if (hash) {
-            int i = -1;
-            for (auto &keyExpr : hash->keys) {
-                i++;
                 auto lit = ast::cast_tree<ast::Literal>(keyExpr);
                 if (lit && lit->isSymbol(ctx)) {
+                    auto &value = rhs->args[i + 1];
+
                     ParsedSig emptySig;
                     auto allowSelfType = true;
                     auto allowRebind = false;
                     auto allowTypeMember = false;
-                    core::TypePtr resTy =
-                        TypeSyntax::getResultType(ctx, hash->values[i], emptySig,
-                                                  TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
+                    core::TypePtr resTy = TypeSyntax::getResultType(
+                        ctx, value, emptySig, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
 
                     switch (lit->asSymbol(ctx)._id) {
                         case core::Names::fixed()._id:
@@ -1713,10 +1708,8 @@ private:
                     // behavior of the runtime.
                     ast::Send::ARGS_store args;
 
-                    ast::Hash::ENTRY_store keywordArgKeys;
-                    ast::Hash::ENTRY_store keywordArgVals;
-
                     auto argIdx = -1;
+                    auto numPosArgs = 0;
                     for (auto &arg : mdef->args) {
                         ++argIdx;
 
@@ -1729,25 +1722,21 @@ private:
 
                         auto &info = mdef->symbol.data(ctx)->arguments()[argIdx];
                         if (info.flags.isKeyword) {
-                            keywordArgKeys.emplace_back(ast::MK::Symbol(local->loc, info.name));
-                            keywordArgVals.emplace_back(local->deepCopy());
+                            args.emplace_back(ast::MK::Symbol(local->loc, info.name));
+                            args.emplace_back(local->deepCopy());
                         } else if (info.flags.isRepeated || info.flags.isBlock) {
                             // Explicitly skip for now.
                             // Involves synthesizing a call to callWithSplat, callWithBlock, or
                             // callWithSplatAndBlock
                         } else {
-                            ENFORCE(keywordArgKeys.empty());
                             args.emplace_back(local->deepCopy());
+                            ++numPosArgs;
                         }
                     }
 
-                    if (!keywordArgKeys.empty()) {
-                        args.emplace_back(
-                            ast::MK::Hash(mdef->loc, std::move(keywordArgKeys), std::move(keywordArgVals)));
-                    }
-
                     auto self = ast::MK::Self(mdef->loc);
-                    mdef->rhs = ast::MK::Send(mdef->loc, std::move(self), core::Names::super(), std::move(args));
+                    mdef->rhs =
+                        ast::MK::Send(mdef->loc, std::move(self), core::Names::super(), numPosArgs, std::move(args));
                 } else if (mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
                     if (auto e = ctx.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                         e.setHeader("All methods in an interface must be declared abstract");
@@ -1886,7 +1875,13 @@ private:
     void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
         constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
 
-        if (send.args.size() != 2 && send.args.size() != 3) {
+        if (send.numPosArgs != 2) {
+            return;
+        }
+
+        auto [posEnd, kwEnd] = send.kwArgsRange();
+        auto numKwArgs = (kwEnd - posEnd) >> 1;
+        if (numKwArgs > 1) {
             return;
         }
 
@@ -1915,22 +1910,17 @@ private:
 
         core::LiteralType *package = nullptr;
         optional<core::LocOffsets> packageLoc;
-        if (send.args.size() == 3) {
+        if (send.hasKwArgs()) {
             // this means we got the third package arg
-            auto *kwargs = ast::cast_tree<ast::Hash>(send.args[2]);
-            if (!kwargs || kwargs->keys.size() != 1) {
-                // Infer will report an error
-                return;
-            }
-            auto *key = ast::cast_tree<ast::Literal>(kwargs->keys.front());
+            auto *key = ast::cast_tree<ast::Literal>(send.args[posEnd]);
             if (!key || !key->isSymbol(ctx) || key->asSymbol(ctx) != ctx.state.lookupNameUTF8("package")) {
                 return;
             }
 
-            auto *packageNode = ast::cast_tree<ast::Literal>(kwargs->values.front());
-            packageLoc = std::optional<core::LocOffsets>{send.args[2]->loc};
+            auto *packageNode = ast::cast_tree<ast::Literal>(send.args[posEnd + 1]);
+            packageLoc = std::optional<core::LocOffsets>{send.args[posEnd + 1]->loc};
             if (packageNode == nullptr) {
-                if (auto e = ctx.beginError(send.args[2]->loc, core::errors::Resolver::LazyResolve)) {
+                if (auto e = ctx.beginError(send.args[posEnd + 1]->loc, core::errors::Resolver::LazyResolve)) {
                     e.setHeader("`{}` only accepts string literals", method);
                 }
                 return;
@@ -1942,8 +1932,9 @@ private:
                 return;
             }
         }
-        // if we got two args, then package should be null, and if we got three args, then package should be non-null
-        ENFORCE((send.args.size() == 2 && !package) || (send.args.size() == 3 && package));
+        // if we got no keyword args, then package should be null, and if we keyword args, then package should be
+        // non-null
+        ENFORCE((!send.hasKwArgs() && !package) || (send.hasKwArgs() && package));
 
         auto name = core::NameRef(ctx.state, literal->value);
         auto shortName = name.data(ctx)->shortName(ctx);

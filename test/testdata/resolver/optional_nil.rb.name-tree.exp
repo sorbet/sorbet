@@ -3,7 +3,7 @@ begin
     begin
       class ::Test<<C Test>> < (::<todo sym>)
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"x" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+          <self>.params(:"x", <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
         end
 
         def foo(x, <blk>)
@@ -11,7 +11,7 @@ begin
         end
 
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"y" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+          <self>.params(:"y", <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
         end
 
         def bar(y, <blk>)
@@ -19,7 +19,7 @@ begin
         end
 
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"z" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+          <self>.params(:"z", <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
         end
 
         def qux(z, <blk>)
@@ -27,7 +27,7 @@ begin
         end
 
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"w" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+          <self>.params(:"w", <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
         end
 
         def baz(w, <blk>)

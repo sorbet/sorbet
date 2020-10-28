@@ -810,9 +810,7 @@ class WEBrick::GenericServer
   # end
   # ```
   sig do
-    params(
-    )
-    .returns(T.untyped)
+    returns(T.untyped)
   end
   def start(); end
 
@@ -1510,9 +1508,7 @@ class WEBrick::HTTPRequest
 
   # Returns the request body.
   sig do
-    params(
-    )
-    .returns(T.untyped)
+    returns(T.untyped)
   end
   def body(); end
 

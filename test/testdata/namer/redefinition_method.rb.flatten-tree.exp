@@ -25,7 +25,7 @@ begin
     def self.<static-init>(<blk>)
       begin
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"a" => ::Integer}).returns(::Integer)
+          <self>.params(:"a", ::Integer).returns(::Integer)
         end
         <self>.extend(::T::Sig)
         ::Sorbet::Private::Static.keep_def(<self>, :"foo")

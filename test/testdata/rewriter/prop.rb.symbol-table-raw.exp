@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=2:1 end=145:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=2:1 end=148:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <C <U AdvancedODM>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=38:1 end=38:18}
     method <C <U AdvancedODM>><U array> (<blk>) -> AppliedType {       klass = <C <U Array>>       targs = [         <C <U Elem>> = T.untyped       ]     } @ Loc {file=test/testdata/rewriter/prop.rb start=43:5 end=43:23}
@@ -16,6 +16,11 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U default=> (default, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=40:5 end=40:39}
       argument default<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=40:11 end=40:18}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
+    method <C <U AdvancedODM>><U empty_hash_rules> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=60:5 end=60:39}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
+    method <C <U AdvancedODM>><U empty_hash_rules=> (empty_hash_rules, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=60:5 end=60:39}
+      argument empty_hash_rules<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=60:11 end=60:27}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U enum_prop> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=50:5 end=50:56}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
@@ -71,6 +76,11 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U AdvancedODM>><U hash_of=> (hash_of, <blk>) -> AppliedType {       klass = <C <U Hash>>       targs = [         <C <U K>> = Symbol         <C <U V>> = String         <C <U Elem>> = TupleType {             0 = Symbol             1 = String           }       ]     } @ Loc {file=test/testdata/rewriter/prop.rb start=45:5 end=45:43}
       argument hash_of<> -> T::Hash[Symbol, String] @ Loc {file=test/testdata/rewriter/prop.rb start=45:11 end=45:18}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
+    method <C <U AdvancedODM>><U hash_rules> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=61:5 end=61:62}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
+    method <C <U AdvancedODM>><U hash_rules=> (hash_rules, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=61:5 end=61:62}
+      argument hash_rules<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=61:11 end=61:21}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U ifunset> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=57:5 end=57:39}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U ifunset=> (ifunset, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=57:5 end=57:39}
@@ -93,29 +103,29 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <S <C <U AdvancedODM>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=38:7 end=38:18}
     type-member(+) <S <C <U AdvancedODM>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U AdvancedODM>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=AdvancedODM) @ Loc {file=test/testdata/rewriter/prop.rb start=38:7 end=38:18}
-    method <S <C <U AdvancedODM>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=38:1 end=59:4}
+    method <S <C <U AdvancedODM>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=38:1 end=62:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-  class <C <U EncryptedProp>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=83:1 end=83:20}
-    method <C <U EncryptedProp>><U bar> (<blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=87:3 end=87:56}
+  class <C <U EncryptedProp>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=86:1 end=86:20}
+    method <C <U EncryptedProp>><U bar> (<blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=90:3 end=90:56}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>><U encrypted_bar> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=87:3 end=87:56}
+    method <C <U EncryptedProp>><U encrypted_bar> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=90:3 end=90:56}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>><U encrypted_foo> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=86:3 end=86:22}
+    method <C <U EncryptedProp>><U encrypted_foo> (<blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=89:3 end=89:22}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>><U encrypted_foo=> (foo, <blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=86:3 end=86:22}
-      argument foo<> -> T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue) @ Loc {file=test/testdata/rewriter/prop.rb start=86:19 end=86:22}
+    method <C <U EncryptedProp>><U encrypted_foo=> (foo, <blk>) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=89:3 end=89:22}
+      argument foo<> -> T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue) @ Loc {file=test/testdata/rewriter/prop.rb start=89:19 end=89:22}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>><U foo> (<blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=86:3 end=86:22}
+    method <C <U EncryptedProp>><U foo> (<blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=89:3 end=89:22}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U EncryptedProp>><U foo=> (foo, <blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=86:3 end=86:22}
-      argument foo<> -> T.nilable(String) @ Loc {file=test/testdata/rewriter/prop.rb start=86:19 end=86:22}
+    method <C <U EncryptedProp>><U foo=> (foo, <blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=89:3 end=89:22}
+      argument foo<> -> T.nilable(String) @ Loc {file=test/testdata/rewriter/prop.rb start=89:19 end=89:22}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-  class <S <C <U EncryptedProp>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=83:7 end=83:20}
-    type-member(+) <S <C <U EncryptedProp>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U EncryptedProp>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=EncryptedProp) @ Loc {file=test/testdata/rewriter/prop.rb start=83:7 end=83:20}
-    method <S <C <U EncryptedProp>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=83:1 end=88:4}
+  class <S <C <U EncryptedProp>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=86:7 end=86:20}
+    type-member(+) <S <C <U EncryptedProp>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U EncryptedProp>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=EncryptedProp) @ Loc {file=test/testdata/rewriter/prop.rb start=86:7 end=86:20}
+    method <S <C <U EncryptedProp>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=86:1 end=91:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <S <C <U EncryptedProp>> $1><U encrypted_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=85:3 end=85:35}
-      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=85:27 end=85:31}
+    method <S <C <U EncryptedProp>> $1><U encrypted_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=88:3 end=88:35}
+      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=88:27 end=88:31}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <C <U ForeignClass>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/prop.rb start=35:1 end=35:19}
   class <S <C <U ForeignClass>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/prop.rb start=35:7 end=35:19}
@@ -131,56 +141,56 @@ class <C <U <root>>> < <C <U Object>> ()
       argument args<repeated> @ Loc {file=test/testdata/rewriter/prop.rb start=3:20 end=3:24}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <C <U Object>> < <C <U BasicObject>> (<C <U Kernel>>) @ Loc {file=https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi start=removed end=removed}
-    method <C <U Object>><U main> : private (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=90:1 end=90:9}
+    method <C <U Object>><U main> : private (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=93:1 end=93:9}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-  class <C <U PropHelpers>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=61:1 end=61:18}
-    method <C <U PropHelpers>><U created> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=66:3 end=66:15}
+  class <C <U PropHelpers>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=64:1 end=64:18}
+    method <C <U PropHelpers>><U created> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=69:3 end=69:15}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U PropHelpers>><U created=> (created, <blk>) -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=66:3 end=66:15}
-      argument created<> -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=66:3 end=66:10}
+    method <C <U PropHelpers>><U created=> (created, <blk>) -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=69:3 end=69:15}
+      argument created<> -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=69:3 end=69:10}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U PropHelpers>><U token> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=65:3 end=65:13}
+    method <C <U PropHelpers>><U token> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=68:3 end=68:13}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U PropHelpers>><U token=> (token, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=65:3 end=65:13}
-      argument token<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=65:3 end=65:8}
+    method <C <U PropHelpers>><U token=> (token, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=68:3 end=68:13}
+      argument token<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=68:3 end=68:8}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-  class <S <C <U PropHelpers>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=61:7 end=61:18}
-    type-member(+) <S <C <U PropHelpers>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U PropHelpers>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=PropHelpers) @ Loc {file=test/testdata/rewriter/prop.rb start=61:7 end=61:18}
-    method <S <C <U PropHelpers>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=61:1 end=67:4}
+  class <S <C <U PropHelpers>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=64:7 end=64:18}
+    type-member(+) <S <C <U PropHelpers>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U PropHelpers>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=PropHelpers) @ Loc {file=test/testdata/rewriter/prop.rb start=64:7 end=64:18}
+    method <S <C <U PropHelpers>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=64:1 end=70:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <S <C <U PropHelpers>> $1><U created_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=64:3 end=64:33}
-      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=64:25 end=64:29}
+    method <S <C <U PropHelpers>> $1><U created_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=67:3 end=67:33}
+      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=67:25 end=67:29}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <S <C <U PropHelpers>> $1><U token_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=63:3 end=63:31}
-      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=63:23 end=63:27}
+    method <S <C <U PropHelpers>> $1><U token_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=66:3 end=66:31}
+      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=66:23 end=66:27}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-  class <C <U PropHelpers2>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=69:1 end=69:19}
-    method <C <U PropHelpers2>><U created> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=74:3 end=74:32}
+  class <C <U PropHelpers2>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=72:1 end=72:19}
+    method <C <U PropHelpers2>><U created> (<blk>) -> Float @ Loc {file=test/testdata/rewriter/prop.rb start=77:3 end=77:32}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U PropHelpers2>><U token> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=73:3 end=73:25}
+    method <C <U PropHelpers2>><U token> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=76:3 end=76:25}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U PropHelpers2>><U token=> (token, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=73:3 end=73:25}
-      argument token<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=73:15 end=73:20}
+    method <C <U PropHelpers2>><U token=> (token, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=76:3 end=76:25}
+      argument token<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=76:15 end=76:20}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-  class <S <C <U PropHelpers2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=69:7 end=69:19}
-    type-member(+) <S <C <U PropHelpers2>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U PropHelpers2>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=PropHelpers2) @ Loc {file=test/testdata/rewriter/prop.rb start=69:7 end=69:19}
-    method <S <C <U PropHelpers2>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=69:1 end=75:4}
+  class <S <C <U PropHelpers2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=72:7 end=72:19}
+    type-member(+) <S <C <U PropHelpers2>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U PropHelpers2>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=PropHelpers2) @ Loc {file=test/testdata/rewriter/prop.rb start=72:7 end=72:19}
+    method <S <C <U PropHelpers2>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=72:1 end=78:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <S <C <U PropHelpers2>> $1><U created_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=72:3 end=72:33}
-      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=72:25 end=72:29}
+    method <S <C <U PropHelpers2>> $1><U created_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=75:3 end=75:33}
+      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=75:25 end=75:29}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <S <C <U PropHelpers2>> $1><U timestamped_token_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=71:3 end=71:43}
-      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=71:35 end=71:39}
+    method <S <C <U PropHelpers2>> $1><U timestamped_token_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=74:3 end=74:43}
+      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=74:35 end=74:39}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-  class <C <U ShardingProp>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=77:1 end=77:19}
-    method <C <U ShardingProp>><U merchant> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=80:3 end=80:16}
+  class <C <U ShardingProp>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=80:1 end=80:19}
+    method <C <U ShardingProp>><U merchant> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=83:3 end=83:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-  class <S <C <U ShardingProp>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=77:7 end=77:19}
-    type-member(+) <S <C <U ShardingProp>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U ShardingProp>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=ShardingProp) @ Loc {file=test/testdata/rewriter/prop.rb start=77:7 end=77:19}
-    method <S <C <U ShardingProp>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=77:1 end=81:4}
+  class <S <C <U ShardingProp>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=80:7 end=80:19}
+    type-member(+) <S <C <U ShardingProp>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U ShardingProp>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=ShardingProp) @ Loc {file=test/testdata/rewriter/prop.rb start=80:7 end=80:19}
+    method <S <C <U ShardingProp>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=80:1 end=84:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <S <C <U ShardingProp>> $1><U merchant_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=79:3 end=79:34}
-      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=79:26 end=79:30}
+    method <S <C <U ShardingProp>> $1><U merchant_prop> (opts, <blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=82:3 end=82:34}
+      argument opts<optional> @ Loc {file=test/testdata/rewriter/prop.rb start=82:26 end=82:30}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <C <U SomeODM>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=23:1 end=23:14}
     method <C <U SomeODM>><U foo> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=27:5 end=27:22}

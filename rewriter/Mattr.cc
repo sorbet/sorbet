@@ -1,6 +1,7 @@
 #include "rewriter/Mattr.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
+#include "rewriter/Util.h"
 
 using namespace std;
 
@@ -52,13 +53,14 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
     bool instanceReader = true;
     bool instanceWriter = true;
     bool instancePredicate = true;
-    auto symbolArgsBound = send->args.size();
+    auto symbolArgsBound = send->numPosArgs;
 
     if (send->args.empty()) {
         return empty;
     }
-    if (auto *options = ast::cast_tree<ast::Hash>(send->args.back())) {
-        symbolArgsBound--;
+
+    auto optionsTree = ASTUtil::mkKwArgsHash(send);
+    if (auto *options = ast::cast_tree<ast::Hash>(optionsTree)) {
         for (int i = 0; i < options->keys.size(); i++) {
             auto &key = options->keys[i];
             auto &value = options->values[i];

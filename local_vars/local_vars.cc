@@ -228,17 +228,19 @@ public:
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
         if (original.args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
+            original.numPosArgs = 0;
             original.args.clear();
             if (scopeStack.back().insideMethod) {
-                ast::Hash::ENTRY_store keywordArgKeys;
-                ast::Hash::ENTRY_store keywordArgVals;
+                bool seenKeywordArgs = false;
                 for (auto arg : scopeStack.back().args) {
                     if (arg.flags.isPositional()) {
-                        ENFORCE(keywordArgKeys.empty(), "Saw positional arg after keyword arg");
+                        ENFORCE(!seenKeywordArgs, "Saw positional arg after keyword arg");
                         original.args.emplace_back(ast::make_tree<ast::Local>(original.loc, arg.arg));
+                        ++original.numPosArgs;
                     } else if (arg.flags.isKeyword()) {
-                        keywordArgKeys.emplace_back(ast::MK::Symbol(original.loc, arg.arg._name));
-                        keywordArgVals.emplace_back(ast::make_tree<ast::Local>(original.loc, arg.arg));
+                        seenKeywordArgs = true;
+                        original.args.emplace_back(ast::MK::Symbol(original.loc, arg.arg._name));
+                        original.args.emplace_back(ast::make_tree<ast::Local>(original.loc, arg.arg));
                     } else if (arg.flags.repeated || arg.flags.block) {
                         // Explicitly skip for now.
                         // Involves synthesizing a call to callWithSplat, callWithBlock, or callWithSplatAndBlock
@@ -247,10 +249,6 @@ public:
                     } else {
                         ENFORCE(false, "Unhandled arg kind in ZSuperArgs");
                     }
-                }
-                if (!keywordArgKeys.empty()) {
-                    original.args.emplace_back(
-                        ast::MK::Hash(original.loc, std::move(keywordArgKeys), std::move(keywordArgVals)));
                 }
             } else {
                 if (auto e = ctx.beginError(original.loc, core::errors::Namer::SelfOutsideClass)) {

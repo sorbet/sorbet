@@ -1,7 +1,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Inexact><<C <todo sym>>> < (<emptyTree>::<C T>::<C InexactStruct>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).returns(<emptyTree>::<C Integer>)
+      <self>.returns(<emptyTree>::<C Integer>)
     end
 
     def foo<<C <todo sym>>>(&<blk>)
@@ -9,7 +9,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"arg0" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
+      <self>.params(:"arg0", <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
@@ -17,7 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).returns(<emptyTree>::<C String>)
+      <self>.returns(<emptyTree>::<C String>)
     end
 
     def bar<<C <todo sym>>>(&<blk>)
@@ -25,20 +25,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"arg0" => <emptyTree>::<C String>}).returns(<emptyTree>::<C String>)
+      <self>.params(:"arg0", <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
     def bar=<<C <todo sym>>>(arg0, &<blk>)
       <self>.instance_variable_set(:"@bar", arg0)
     end
 
-    <self>.prop(:"foo", <emptyTree>::<C Integer>, {:"without_accessors" => true})
+    <self>.prop(:"foo", <emptyTree>::<C Integer>, :"without_accessors", true)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
 
-    <self>.prop(:"bar", <emptyTree>::<C String>, {:"without_accessors" => true})
+    <self>.prop(:"bar", <emptyTree>::<C String>, :"without_accessors", true)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"bar")
 
@@ -47,13 +47,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C Inexact>.new()
 
-  <emptyTree>::<C Inexact>.new({:"foo" => 3, :"bar" => "hey"})
+  <emptyTree>::<C Inexact>.new(:"foo", 3, :"bar", "hey")
 
-  <emptyTree>::<C Inexact>.new({:"foo" => false, :"quz" => [1, 2, 5]})
+  <emptyTree>::<C Inexact>.new(:"foo", false, :"quz", [1, 2, 5])
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Inexact>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).returns(<emptyTree>::<C Symbol>)
+      <self>.returns(<emptyTree>::<C Symbol>)
     end
 
     def qux<<C <todo sym>>>(&<blk>)
@@ -64,7 +64,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"arg0" => <emptyTree>::<C Symbol>}).returns(<emptyTree>::<C Symbol>)
+      <self>.params(:"arg0", <emptyTree>::<C Symbol>).returns(<emptyTree>::<C Symbol>)
     end
 
     def qux=<<C <todo sym>>>(arg0, &<blk>)
@@ -78,7 +78,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    <self>.prop(:"qux", <emptyTree>::<C Symbol>, {:"without_accessors" => true})
+    <self>.prop(:"qux", <emptyTree>::<C Symbol>, :"without_accessors", true)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"qux")
 

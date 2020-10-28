@@ -699,14 +699,35 @@ public:
 
     Flags flags;
 
+    u2 numPosArgs;
+
     TreePtr recv;
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
     using ARGS_store = InlinedVector<TreePtr, EXPECTED_ARGS_COUNT>;
+
+    // The arguments vector has the following layout:
+    //
+    // for n = numPosArgs, m = number of keyword arg pairs
+    //
+    // +--------------------------+-------------------------------+------------------+
+    // | positional arguments     | interleaved keyword arg pairs | optional kwsplat |
+    // +--------------------------+-------------------------------+------------------+
+    // | pos_0, ... , pos_(n - 1) | sym_0, val_0, .. sym_m, val_m | value            |
+    // +--------------------------+-------------------------------+------------------+
+    //
+    // for the following send:
+    //
+    // > foo(a, b, c: 10, d: nil)
+    //
+    // the arguments vector would look like the following, with numPosArgs = 2:
+    //
+    // > <a, b, c, 10, d, nil>
     ARGS_store args;
+
     TreePtr block; // null if no block passed
 
-    Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, ARGS_store args, TreePtr block = nullptr,
+    Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, u2 numPosArgs, ARGS_store args, TreePtr block = nullptr,
          Flags flags = {});
 
     TreePtr deepCopy() const;
@@ -714,6 +735,25 @@ public:
     virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+    // Returned value is [start, end) indices into ast::Send::args.
+    std::pair<int, int> kwArgsRange() const {
+        auto res = std::make_pair<int, int>(numPosArgs, args.size());
+        if (hasKwSplat()) {
+            res.second = res.second - 1;
+        }
+        return res;
+    }
+
+    // True when there are either keyword args, or a keyword splat.
+    bool hasKwArgs() const {
+        return args.size() > numPosArgs;
+    }
+
+    // True when there is a keyword args splat present. hasKwSplat -> hasKwArgs, but not the other way around.
+    bool hasKwSplat() const {
+        return (args.size() - numPosArgs) & 0x1;
+    }
 
 private:
     virtual void _sanityCheck();

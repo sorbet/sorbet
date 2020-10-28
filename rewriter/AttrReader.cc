@@ -147,8 +147,9 @@ ast::TreePtr toWriterSigForName(core::MutableContext ctx, ast::Send *sharedSig, 
         auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv);
         if ((cur->recv->isSelfReference()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
             auto loc = resultType->loc;
-            auto hash = ast::MK::Hash1(cur->loc, ast::MK::Symbol(nameLoc, name), move(resultType));
-            auto params = ast::MK::Send1(loc, move(cur->recv), core::Names::params(), move(hash));
+            auto params = ast::MK::Send2(loc, move(cur->recv), core::Names::params(), ast::MK::Symbol(nameLoc, name),
+                                         move(resultType));
+            ast::cast_tree_nonnull<ast::Send>(params).numPosArgs = 0;
             cur->recv = move(params);
             break;
         }

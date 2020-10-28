@@ -23,7 +23,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package><<C <todo sym>>> < ()
     class <emptyTree>::<C Bar><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.params({:"value" => <emptyTree>::<C Integer>}).void()
+        <self>.params(:"value", <emptyTree>::<C Integer>).void()
       end
 
       def initialize<<C <todo sym>>>(value, &<blk>)
@@ -88,7 +88,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package><<C <todo sym>>> < ()
     class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.params({:"value" => <emptyTree>::<C Integer>}).void()
+        <self>.params(:"value", <emptyTree>::<C Integer>).void()
       end
 
       def initialize<<C <todo sym>>>(value, &<blk>)

@@ -2,7 +2,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
   <self>.sig() do ||
-    <self>.params({:"blk" => <emptyTree>::<C T>.proc().params({:"args" => <emptyTree>::<C Integer>}).void()}).void()
+    <self>.params(:"blk", <emptyTree>::<C T>.proc().params(:"args", <emptyTree>::<C Integer>).void()).void()
   end
 
   def foo<<C <todo sym>>>(&blk)

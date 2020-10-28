@@ -24,6 +24,7 @@ InsSeq{
                 }
                 fun = <U <define-top-class-or-module>>
                 block = nullptr
+                pos_args = 1
                 args = [
                   ConstantLit{
                     orig = nullptr
@@ -38,6 +39,7 @@ InsSeq{
                 }
                 fun = <U keep_for_ide>
                 block = nullptr
+                pos_args = 1
                 args = [
                   ConstantLit{
                     orig = UnresolvedConstantLit{
@@ -193,6 +195,7 @@ InsSeq{
                   ]
                 }
               }
+              pos_args = 0
               args = [
               ]
             }
@@ -212,6 +215,7 @@ InsSeq{
             }
             fun = <U keep_def>
             block = nullptr
+            pos_args = 2
             args = [
               Local{
                 localVariable = <U <self>>

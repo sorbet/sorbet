@@ -19,3 +19,8 @@ T.assert_type!(u, T::Array[T.nilable(T.any(Integer, Float, String))])
 
 w = "aãeéèbc".chars
 T.assert_type!(w, T::Array[String])
+
+# encoding overloadings
+"foo".encode("encoding", "other_encoding", fallback: {})
+"foo".encode("encoding", fallback: {})
+"foo".encode(fallback: {})
