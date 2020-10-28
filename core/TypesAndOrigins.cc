@@ -52,7 +52,7 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(const GlobalState &gs, Lo
         last = o;
 
         if (originForUninitialized.exists() && o == originForUninitialized) {
-            result.emplace_back(ErrorLine::from(o, "Type may be `{}` due to uninitialized variables in:", "NilClass"));
+            result.emplace_back(ErrorLine::from(o, "Possibly uninitialized (`{}`) in:", "NilClass"));
         } else {
             result.emplace_back(o, "");
         }

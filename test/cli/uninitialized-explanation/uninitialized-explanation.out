@@ -8,7 +8,7 @@ test/cli/uninitialized-explanation/uninitialized.rb:15: Expected `Integer` but f
     test/cli/uninitialized-explanation/uninitialized.rb:10:
     10 |    x = 1
                 ^
-    test/cli/uninitialized-explanation/uninitialized.rb:8: Type may be `NilClass` due to uninitialized variables in:
+    test/cli/uninitialized-explanation/uninitialized.rb:8: Possibly uninitialized (`NilClass`) in:
      8 |def uninitialized_loc_is_decl_loc
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect

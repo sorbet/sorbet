@@ -44,7 +44,7 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     test/cli/errors/errors.rb:31:
     .. |          2
                   ^
-    test/cli/errors/errors.rb:26: Type may be `NilClass` due to uninitialized variables in:
+    test/cli/errors/errors.rb:26: Possibly uninitialized (`NilClass`) in:
     .. |  def main(foo)
           ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -98,7 +98,7 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     test/cli/errors/errors.rb:31:
     .. |          2
                   ^
-    test/cli/errors/errors.rb:26: Type may be `NilClass` due to uninitialized variables in:
+    test/cli/errors/errors.rb:26: Possibly uninitialized (`NilClass`) in:
     .. |  def main(foo)
           ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
@@ -152,7 +152,7 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     test/cli/errors/errors.rb:31:
     .. |          2
                   ^
-    test/cli/errors/errors.rb:26: Type may be `NilClass` due to uninitialized variables in:
+    test/cli/errors/errors.rb:26: Possibly uninitialized (`NilClass`) in:
     .. |  def main(foo)
           ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
