@@ -874,6 +874,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                         }
                         consumed.insert(arg);
 
+                        // TODO(trevor) this location could be more precise, as we can track the location of the inlined
+                        // keyword arguments separately from the ones that come from the kwsplat
                         TypeAndOrigins tpe;
                         tpe.origins = {kwargsLoc};
                         auto offset = it - hash->keys.begin();
