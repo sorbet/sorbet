@@ -17,7 +17,7 @@ bazel_workspace = os.path.realpath(os.path.join(project_root, "bazel-sorbet"))
 if not(os.path.isdir(bazel_workspace)):
     print("You need to compile Sorbet first before loading this file")
 else:
-    print("(lldb) Mapping ./bazel-sorbet paths to the project root")
+    print("(lldb) Mapping paths in ./bazel-sorbet to the project root")
     source_map_command = 'settings set -- target.source-map "%s" "%s"' % (bazel_workspace, project_root)
     ci = lldb.debugger.GetCommandInterpreter()
     res = lldb.SBCommandReturnObject()
