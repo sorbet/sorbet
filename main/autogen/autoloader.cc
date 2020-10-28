@@ -16,7 +16,8 @@ namespace sorbet::autogen {
 
 // `true` if the definition should have autoloads generated for it based on the `AutoloaderConfig`
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
-    return !nd.nameParts.empty() && topLevelNamespaceRefs.find(nd.nameParts[0]) != topLevelNamespaceRefs.end();
+    return !nd.qname.nameParts.empty() &&
+           topLevelNamespaceRefs.find(nd.qname.nameParts[0]) != topLevelNamespaceRefs.end();
 }
 
 // `true` if the file should have autoloads generated for it (i.e. it's a ruby source file that's not ignored)
@@ -72,6 +73,16 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     return out;
 }
 
+QualifiedName QualifiedName::fromFullName(vector<core::NameRef> name) {
+    if (name.size() < 3 || name.front() != core::Names::Constants::PackageRegistry()) {
+        return {name, nullopt};
+    }
+    auto pkgName = std::optional<core::NameRef>{name[1]};
+    name.erase(name.begin());
+    name.erase(name.begin());
+    return {name, pkgName};
+}
+
 // Takes a name and, if it is a packaged name, "unpackages" it by modifying it in-place and returning the package name
 optional<core::NameRef> unpackageName(vector<core::NameRef> &name) {
     if (name.front() != core::Names::Constants::PackageRegistry()) {
@@ -95,27 +106,24 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
         } else {
             parentName = parentRef.name;
         }
-
-        unpackageName(parentName);
     }
     const auto &pathStr = parsedFile.tree.file.data(gs).path();
     u4 pathDepth = count(pathStr.begin(), pathStr.end(), '/'); // Pre-compute for comparison
 
-    auto fullName = parsedFile.showFullName(gs, def);
-    auto packageName = unpackageName(fullName);
+    auto fullName = QualifiedName::fromFullName(parsedFile.showFullName(gs, def));
 
-    return {def.data(parsedFile), fullName,  parentName, parsedFile.requires,
-            parsedFile.tree.file, pathDepth, packageName};
+    return {def.data(parsedFile), fullName, QualifiedName::fromFullName(parentName), parsedFile.requires,
+            parsedFile.tree.file, pathDepth};
 }
 
 // Used for sorting `NamedDefinition`
 bool NamedDefinition::preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs) {
-    ENFORCE(lhs.nameParts == rhs.nameParts, "Can only compare definitions with same name");
+    ENFORCE(lhs.qname.nameParts == rhs.qname.nameParts, "Can only compare definitions with same name");
     // Load defs with a parent name first since others will tend to depend on them.
     // Secondarily, the same idea for defs with less nesting in their path.
     // Finally, sort alphabetically by path to break any ties.
-    if (lhs.parentName.empty() != rhs.parentName.empty()) {
-        return rhs.parentName.empty();
+    if (lhs.parentName.nameParts.empty() != rhs.parentName.nameParts.empty()) {
+        return rhs.parentName.nameParts.empty();
     }
     if (lhs.pathDepth != rhs.pathDepth) {
         return lhs.pathDepth < rhs.pathDepth;
@@ -142,8 +150,8 @@ string DefTree::show(const core::GlobalState &gs, int level) const {
 }
 
 string DefTree::fullName(const core::GlobalState &gs) const {
-    return fmt::format("{}",
-                       fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.show(gs); }));
+    return fmt::format(
+        "{}", fmt::map_join(qname.nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.show(gs); }));
 }
 
 string join(string path, string file) {
@@ -193,12 +201,12 @@ bool DefTree::hasDifferentFile(core::FileRef file) const {
 }
 
 bool DefTree::root() const {
-    return nameParts.empty();
+    return qname.nameParts.empty();
 }
 
 core::NameRef DefTree::name() const {
-    ENFORCE(!nameParts.empty());
-    return nameParts.back();
+    ENFORCE(!qname.nameParts.empty());
+    return qname.nameParts.back();
 }
 
 string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
@@ -219,9 +227,10 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     string casgnArg;
     auto type = definitionType(gs);
     if (type == Definition::Type::Module || type == Definition::Type::Class) {
-        fullName = root() ? "Object" : fmt::format("{}", fmt::map_join(nameParts, "::", [&](const auto &nr) -> string {
-                                                       return nr.show(gs);
-                                                   }));
+        fullName =
+            root() ? "Object" : fmt::format("{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string {
+                                                return nr.show(gs);
+                                            }));
         if (!root()) {
             fmt::format_to(buf, "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
             predeclare(gs, fullName, buf);
@@ -239,11 +248,11 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
             fmt::format_to(buf, "}})\n", fullName);
         }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias) {
-        ENFORCE(nameParts.size() > 1);
+        ENFORCE(qname.nameParts.size() > 1);
         casgnArg = fmt::format(", [{}, :{}]",
-                               fmt::map_join(nameParts.begin(), --nameParts.end(),
+                               fmt::map_join(qname.nameParts.begin(), --qname.nameParts.end(),
                                              "::", [&](const auto &nr) -> string { return nr.show(gs); }),
-                               nameParts.back().show(gs));
+                               qname.nameParts.back().show(gs));
     }
 
     if (definingFile.exists()) {
@@ -276,9 +285,10 @@ void DefTree::predeclare(const core::GlobalState &gs, string_view fullName, fmt:
     if (hasDef() && definitionType(gs) == Definition::Type::Class) {
         fmt::format_to(buf, "\nclass {}", fullName);
         auto &def = definition(gs);
-        if (!def.parentName.empty()) {
-            fmt::format_to(buf, " < {}",
-                           fmt::map_join(def.parentName, "::", [&](const auto &nr) -> string { return nr.show(gs); }));
+        if (!def.parentName.nameParts.empty()) {
+            fmt::format_to(buf, " < {}", fmt::map_join(def.parentName.nameParts, "::", [&](const auto &nr) -> string {
+                               return nr.show(gs);
+                           }));
         }
     } else {
         fmt::format_to(buf, "\nmodule {}", fullName);
@@ -289,7 +299,7 @@ void DefTree::predeclare(const core::GlobalState &gs, string_view fullName, fmt:
 
 string DefTree::path(const core::GlobalState &gs) const {
     auto toPath = [&](const auto &fr) -> string { return fr.show(gs); };
-    return fmt::format("{}.rb", fmt::map_join(nameParts, "/", toPath));
+    return fmt::format("{}.rb", fmt::map_join(qname.nameParts, "/", toPath));
 }
 
 Definition::Type DefTree::definitionType(const core::GlobalState &gs) const {
@@ -335,12 +345,12 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
     }
 
     DefTree *node = root.get();
-    for (const auto &part : ndef.nameParts) {
+    for (const auto &part : ndef.qname.nameParts) {
         auto &child = node->children[part];
         if (!child) {
             child = make_unique<DefTree>();
-            child->nameParts = node->nameParts;
-            child->nameParts.emplace_back(part);
+            child->qname.nameParts = node->qname.nameParts;
+            child->qname.nameParts.emplace_back(part);
         }
         node = child.get();
     }
@@ -352,7 +362,7 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
 }
 
 DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs) {
-    ENFORCE(lhs.nameParts == rhs.nameParts, "Name mismatch for DefTreeBuilder::merge");
+    ENFORCE(lhs.qname.nameParts == rhs.qname.nameParts, "Name mismatch for DefTreeBuilder::merge");
     lhs.namedDefs.insert(lhs.namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
                          make_move_iterator(rhs.namedDefs.end()));
     if (rhs.nonBehaviorDef) {
@@ -385,7 +395,7 @@ void DefTreeBuilder::collapseSameFileDefs(const core::GlobalState &gs, const Aut
     if (!root.namedDefs.empty()) {
         definingFile = root.file();
     }
-    if (!alCfg.sameFileCollapsable(root.nameParts)) {
+    if (!alCfg.sameFileCollapsable(root.qname.nameParts)) {
         return;
     }
 
