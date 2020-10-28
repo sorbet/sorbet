@@ -19,7 +19,7 @@ class Sorbet::Private::FetchRBIs
   XDG_CACHE_HOME = ENV['XDG_CACHE_HOME'] || "#{ENV['HOME']}/.cache"
   RBI_CACHE_DIR = "#{XDG_CACHE_HOME}/sorbet/sorbet-typed"
 
-  SORBET_TYPED_REPO = 'https://github.com/sorbet/sorbet-typed.git'
+  SORBET_TYPED_REPO = ENV['SRB_SORBET_TYPED_REPO'] || 'https://github.com/sorbet/sorbet-typed.git'
   SORBET_TYPED_REVISION = ENV['SRB_SORBET_TYPED_REVISION'] || 'origin/master'
 
   HEADER = Sorbet::Private::Serialize.header(false, 'sorbet-typed')
@@ -29,7 +29,12 @@ class Sorbet::Private::FetchRBIs
   # Ensure our cache is up-to-date
   T::Sig::WithoutRuntime.sig {void}
   def self.fetch_sorbet_typed
-    if !File.directory?(RBI_CACHE_DIR)
+    if File.directory?(RBI_CACHE_DIR)
+      remote = IO.popen(["git", "-C", RBI_CACHE_DIR, "config", "--get", "remote.origin.url"]) {|pipe| pipe.read}.strip
+      if remote != SORBET_TYPED_REPO
+        raise "Cached remote #{remote} does not match #{SORBET_TYPED_REPO}. Delete #{RBI_CACHE_DIR} and try again."
+      end
+    else
       IO.popen(["git", "clone", SORBET_TYPED_REPO, RBI_CACHE_DIR]) {|pipe| pipe.read}
       raise "Failed to git pull" if $?.exitstatus != 0
     end
