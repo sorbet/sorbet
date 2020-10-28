@@ -59,6 +59,11 @@ std::optional<const PublishDiagnosticsParams *> getPublishDiagnosticParams(const
 std::unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, const Range &range, int &nextId,
                                                          std::string_view filename);
 
+/** Use the LSPWrapper to make a textDocument/prepareRename request.
+ */
+std::unique_ptr<PrepareRenameResult> doTextDocumentPrepareRename(LSPWrapper &lspWrapper, const Range &range,
+                                                                 int &nextId, std::string_view filename);
+
 /** Use the LSPWrapper to make a textDocument/rename request.
  */
 std::unique_ptr<WorkspaceEdit> doTextDocumentRename(LSPWrapper &lspWrapper, const Range &range, int &nextId,

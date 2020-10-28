@@ -315,12 +315,13 @@ public:
                          LSPWrapper &wrapper, int &nextId, std::string errorPrefix = "");
 
     ApplyRenameAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                         std::string_view version, std::string newName);
+                         std::string_view version, std::string newName, bool invalid);
 
     // The part between [..] in the assertion which specifies which `.[..].rbedited` file to compare against
     const std::string version;
     // New name for constant
     const std::string newName;
+    const bool invalid;
 
     void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
                int &nextId, std::string errorPrefix = "");

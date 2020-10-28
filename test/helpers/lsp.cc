@@ -282,13 +282,46 @@ optional<const PublishDiagnosticsParams *> getPublishDiagnosticParams(const Noti
     return (*publishDiagnosticParams).get();
 }
 
+unique_ptr<PrepareRenameResult> doTextDocumentPrepareRename(LSPWrapper &lspWrapper, const Range &range, int &nextId,
+                                                            string_view filename) {
+    auto uri = filePathToUri(lspWrapper.config(), filename);
+    auto id = nextId++;
+    auto params =
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(uri), range.start->copy());
+    auto msg = make_unique<LSPMessage>(
+        make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentPrepareRename, move(params)));
+    auto responses = getLSPResponsesFor(lspWrapper, move(msg));
+    if (responses.size() != 1) {
+        FAIL_CHECK("Expected to get 1 response");
+        return nullptr;
+    }
+
+    auto &responseMsg = responses.at(0);
+    if (!responseMsg->isResponse()) {
+        FAIL_CHECK("Expected response to actually be a response.");
+    }
+
+    auto &response = responseMsg->asResponse();
+    if (!response.result.has_value()) {
+        FAIL_CHECK("Expected result to have a value.");
+    }
+
+    auto &result = get<variant<JSONNullObject, unique_ptr<PrepareRenameResult>>>(*response.result);
+    if (get_if<JSONNullObject>(&result) != nullptr) {
+        return nullptr;
+    }
+
+    return move(get<unique_ptr<PrepareRenameResult>>(result));
+}
+
 unique_ptr<WorkspaceEdit> doTextDocumentRename(LSPWrapper &lspWrapper, const Range &range, int &nextId,
                                                string_view filename, std::string newName) {
     auto uri = filePathToUri(lspWrapper.config(), filename);
-    auto pos = make_unique<RenameParams>(make_unique<TextDocumentIdentifier>(uri), range.start->copy(), newName);
     auto id = nextId++;
+
+    auto params = make_unique<RenameParams>(make_unique<TextDocumentIdentifier>(uri), range.start->copy(), newName);
     auto msg =
-        make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentRename, move(pos)));
+        make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentRename, move(params)));
     auto responses = getLSPResponsesFor(lspWrapper, move(msg));
     if (responses.size() != 1) {
         FAIL_CHECK("Expected to get 1 response");
@@ -303,8 +336,12 @@ unique_ptr<WorkspaceEdit> doTextDocumentRename(LSPWrapper &lspWrapper, const Ran
         FAIL_CHECK("Expected result to have a value.");
     }
 
-    return move(
-        get<unique_ptr<WorkspaceEdit>>(get<variant<JSONNullObject, unique_ptr<WorkspaceEdit>>>(*response.result)));
+    auto &result = get<variant<JSONNullObject, unique_ptr<WorkspaceEdit>>>(*response.result);
+    if (get_if<JSONNullObject>(&result) != nullptr) {
+        return nullptr;
+    }
+
+    return move(get<unique_ptr<WorkspaceEdit>>(result));
 }
 
 unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, const Range &range, int &nextId,

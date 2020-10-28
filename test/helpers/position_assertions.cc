@@ -1226,27 +1226,30 @@ string ApplyCompletionAssertion::toString() const {
 shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename, unique_ptr<Range> &range,
                                                             int assertionLine, string_view assertionContents,
                                                             string_view assertionType) {
-    static const regex newNameRegex(R"(^\[(\w+)\]\s+newName:\s+(\w+)$)");
+    static const regex newNameRegex(R"(^\[(\w+)\]\s+(?:(?:newName:\s+(\w+))|(?:invalid:\s+(true)))$)");
 
     smatch matches;
     string assertionContentsString = string(assertionContents);
     if (regex_search(assertionContentsString, matches, newNameRegex)) {
         auto version = matches[1].str();
         auto newName = matches[2].str();
-        return make_shared<ApplyRenameAssertion>(filename, range, assertionLine, version, newName);
+        auto invalid = !matches[3].str().empty();
+        if (!newName.empty() || invalid) {
+            return make_shared<ApplyRenameAssertion>(filename, range, assertionLine, version, newName, invalid);
+        }
     }
 
-    ADD_FAIL_CHECK_AT(
-        string(filename).c_str(), assertionLine + 1,
-        fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] newName: <name>'. Found '{}'",
-                    assertionContents));
+    ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                      fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] newName: <name> "
+                                  "(invalid: true)'. Found '{}'",
+                                  assertionContents));
 
     return nullptr;
 }
 
 ApplyRenameAssertion::ApplyRenameAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
-                                           string_view version, string newName)
-    : RangeAssertion(filename, range, assertionLine), version(string(version)), newName(newName) {}
+                                           string_view version, string newName, bool invalid)
+    : RangeAssertion(filename, range, assertionLine), version(string(version)), newName(newName), invalid(invalid) {}
 
 void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
                                     const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
@@ -1260,9 +1263,23 @@ void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &as
 
 void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
                                  LSPWrapper &wrapper, int &nextId, std::string errorPrefix) {
-    REQUIRE_FALSE(this->newName.empty());
+    auto prepareRenameResponse = doTextDocumentPrepareRename(wrapper, *this->range, nextId, this->filename);
+    // TODO: test placeholder in prepareRenameResponse
+
+    // A rename at an invalid position
+    if (newName.empty() && invalid) {
+        REQUIRE_EQ(prepareRenameResponse, nullptr);
+    } else {
+        REQUIRE_NE(prepareRenameResponse, nullptr);
+    }
 
     auto renameList = doTextDocumentRename(wrapper, *this->range, nextId, this->filename, newName);
+    // A rename at a valid position but with an invalid new name
+    if (invalid) {
+        REQUIRE_EQ(renameList, nullptr);
+        return;
+    }
+
     {
         INFO("doTextDocumentRename failed; see error above.");
         REQUIRE_NE(renameList, nullptr);
