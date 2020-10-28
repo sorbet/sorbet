@@ -27,17 +27,17 @@ bool AutoloaderConfig::includePath(string_view path) const {
                                            relativeIgnorePatterns);
 }
 
-// `true` if the file should be required
+// `true` if the file should be required based on the provided configuration
 bool AutoloaderConfig::includeRequire(core::NameRef req) const {
     return excludedRequireRefs.find(req) == excludedRequireRefs.end();
 }
 
-// `true` if collapsible (???)
+// `true` if the file name cannot be collapsed based on the provided configuration
 bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) const {
     return nonCollapsableModuleNames.find(module) == nonCollapsableModuleNames.end();
 }
 
-// normalize the path relative to the prefixes (???)
+// normalize the path relative to the provided prefixes
 string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {
     auto path = file.data(gs).path();
     for (const auto &prefix : stripPrefixes) {
@@ -48,7 +48,8 @@ string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::F
     return path;
 }
 
-// Convert the autoloader config passed in from `realmain` to this `AutoloaderConfig`
+// Convert the autoloader config passed in from `realmain` to this `AutoloaderConfig`. Much of this is about converting
+// `string`s to `NameRef`s
 AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const realmain::options::AutoloaderConfig &cfg) {
     AutoloaderConfig out;
     out.rootDir = cfg.rootDir;
