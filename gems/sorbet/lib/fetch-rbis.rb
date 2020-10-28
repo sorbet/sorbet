@@ -30,9 +30,14 @@ class Sorbet::Private::FetchRBIs
   T::Sig::WithoutRuntime.sig {void}
   def self.fetch_sorbet_typed
     if File.directory?(RBI_CACHE_DIR)
-      remote = IO.popen(["git", "-C", RBI_CACHE_DIR, "config", "--get", "remote.origin.url"]) {|pipe| pipe.read}.strip
-      if remote != SORBET_TYPED_REPO
-        raise "Cached remote #{remote} does not match #{SORBET_TYPED_REPO}. Delete #{RBI_CACHE_DIR} and try again."
+      cached_remote = IO.popen(["git", "-C", RBI_CACHE_DIR, "config", "--get", "remote.origin.url"]) {|pipe| pipe.read}.strip
+
+      # Compare the <owner>/<repo>.git to be agnostic of https vs ssh urls
+      cached_remote_repo = cached_remote.split(%r{github.com[:/]}).last
+      requested_remote_repo = SORBET_TYPED_REPO.split(%r{github.com[:/]}).last
+
+      if cached_remote_repo != requested_remote_repo
+        raise "Cached remote #{cached_remote_repo} does not match requested remote #{requested_remote_repo}. Delete #{RBI_CACHE_DIR} and try again."
       end
     else
       IO.popen(["git", "clone", SORBET_TYPED_REPO, RBI_CACHE_DIR]) {|pipe| pipe.read}
