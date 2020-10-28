@@ -90,6 +90,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
     if (islower(params->newName[0])) {
         response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                                      "Constant names must begin with an uppercase letter.");
+        return response;
     }
 
     ShowOperation op(config, "References", "Renaming...");

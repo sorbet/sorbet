@@ -332,6 +332,10 @@ unique_ptr<WorkspaceEdit> doTextDocumentRename(LSPWrapper &lspWrapper, const Ran
         FAIL_CHECK("Expected response to actually be a response.");
     }
     auto &response = responseMsg->asResponse();
+    if (response.error.has_value()) {
+        return nullptr;
+    }
+
     if (!response.result.has_value()) {
         FAIL_CHECK("Expected result to have a value.");
     }

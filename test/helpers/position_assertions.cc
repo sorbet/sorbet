@@ -1226,7 +1226,7 @@ string ApplyCompletionAssertion::toString() const {
 shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename, unique_ptr<Range> &range,
                                                             int assertionLine, string_view assertionContents,
                                                             string_view assertionType) {
-    static const regex newNameRegex(R"(^\[(\w+)\]\s+(?:(?:newName:\s+(\w+))|(?:invalid:\s+(true)))$)");
+    static const regex newNameRegex(R"(^\[(\w+)\]\s+(?:(?:newName:\s+(\w+))?\s?(?:invalid:\s+(true))?)$)");
 
     smatch matches;
     string assertionContentsString = string(assertionContents);
@@ -1241,8 +1241,8 @@ shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename
 
     ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
                       fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] newName: <name> "
-                                  "(invalid: true)'. Found '{}'",
-                                  assertionContents));
+                                  "(invalid: true)'. Found '{}' in file {}",
+                                  assertionContents, filename));
 
     return nullptr;
 }

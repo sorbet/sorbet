@@ -691,6 +691,38 @@ foo = Bar.new
 #     ^ apply-rename: [A] newName: Bar
 ```
 
+You can test that invalid renames aren't applied by adding `invalid: true` to your
+test, like so:
+```ruby
+# -- test/testdata/lsp/refactor/mytest.rb --
+
+# typed: true
+# frozen_string_literal: true
+
+class Foo
+  class Foo
+  end
+end
+
+foo = Foo.new
+#     ^ apply-rename: [A] newName: foo invalid:true
+```
+
+```ruby
+
+# -- test/testdata/lsp/refactor/mytest.A.rbedited --
+# typed: true
+# frozen_string_literal: true
+
+class Foo
+  class Foo
+  end
+end
+
+foo = Foo.new
+#     ^ apply-rename: [A] newName: foo invalid:true
+```
+
 You can add more files that reference the constant you're renaming, just make sure
 to add a matching `.rbedited` file with the same version.
 
