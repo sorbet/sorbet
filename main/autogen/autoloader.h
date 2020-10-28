@@ -47,6 +47,7 @@ struct NamedDefinition {
     std::vector<core::NameRef> requires;
     core::FileRef fileRef;
     u4 pathDepth;
+    std::optional<core::NameRef> package;
 
     NamedDefinition() = default;
     NamedDefinition(const NamedDefinition &) = delete;

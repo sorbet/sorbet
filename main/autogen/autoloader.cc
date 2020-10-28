@@ -10,24 +10,33 @@
 using namespace std;
 namespace sorbet::autogen {
 
+// Like the rest of autogen, the `autoloader` pass works by walking an existing tree of data and converting it to a
+// different representation before using it. In this case, it takes the `autogen::ParsedFile` representation and
+// converts it to a `DefTree`, and then emits the autoloader files based on passed-in string fragments
+
+// `true` if the definition should have autoloads generated for it based on the `AutoloaderConfig`
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
     return !nd.nameParts.empty() && topLevelNamespaceRefs.find(nd.nameParts[0]) != topLevelNamespaceRefs.end();
 }
 
+// `true` if the file should have autoloads generated for it (i.e. it's a ruby source file that's not ignored)
 bool AutoloaderConfig::includePath(string_view path) const {
     return absl::EndsWith(path, ".rb") &&
            !sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absoluteIgnorePatterns,
                                            relativeIgnorePatterns);
 }
 
+// `true` if the file should be required
 bool AutoloaderConfig::includeRequire(core::NameRef req) const {
     return excludedRequireRefs.find(req) == excludedRequireRefs.end();
 }
 
+// `true` if collapsible (???)
 bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) const {
     return nonCollapsableModuleNames.find(module) == nonCollapsableModuleNames.end();
 }
 
+// normalize the path relative to the prefixes (???)
 string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {
     auto path = file.data(gs).path();
     for (const auto &prefix : stripPrefixes) {
@@ -38,6 +47,7 @@ string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::F
     return path;
 }
 
+// Convert the autoloader config passed in from `realmain` to this `AutoloaderConfig`
 AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const realmain::options::AutoloaderConfig &cfg) {
     AutoloaderConfig out;
     out.rootDir = cfg.rootDir;
@@ -62,6 +72,8 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     return out;
 }
 
+// Convert an `autogen::DefinitionRef` to a `NamedDefinition`: this pulls the name, the parent definitions' name, the
+// requirements, the path, and the _depth_ of the path (which can short-circuit comparison against another path)
 NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile &parsedFile, DefinitionRef def) {
     vector<core::NameRef> parentName;
     if (def.data(parsedFile).parent_ref.exists()) {
@@ -74,11 +86,25 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
     }
     const auto &pathStr = parsedFile.tree.file.data(gs).path();
     u4 pathDepth = count(pathStr.begin(), pathStr.end(), '/'); // Pre-compute for comparison
-    return {def.data(parsedFile), parsedFile.showFullName(gs, def),
+
+    auto fullName = parsedFile.showFullName(gs, def);
+    std::optional<core::NameRef> packageName;
+    // if the first thing here is <PackageRegistry>, then we're running in package mode: delete the package stuff and
+    // store it separately
+    if (fullName.front() == core::Names::Constants::PackageRegistry()) {
+        packageName = std::optional<core::NameRef>{fullName[1]};
+        // this is inelegant, but this deletes <PackageRegistry> and the package name one-by-one
+        fullName.erase(fullName.begin());
+        fullName.erase(fullName.begin());
+    }
+
+    return {def.data(parsedFile), fullName,
             parentName,           parsedFile.requires,
-            parsedFile.tree.file, pathDepth};
+            parsedFile.tree.file, pathDepth,
+            packageName};
 }
 
+// Used for sorting `NamedDefinition`
 bool NamedDefinition::preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs) {
     ENFORCE(lhs.nameParts == rhs.nameParts, "Can only compare definitions with same name");
     // Load defs with a parent name first since others will tend to depend on them.
@@ -303,6 +329,7 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
     if (!alCfg.include(ndef)) {
         return;
     }
+
     DefTree *node = root.get();
     for (const auto &part : ndef.nameParts) {
         auto &child = node->children[part];
