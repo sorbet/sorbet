@@ -89,6 +89,8 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
         snd->receiverLoc,
         snd->argLocs,
     };
+    // Since this is a "fake" dispatch and we are not going to display the errors anyway,
+    // core::Loc::none() should be okay here.
     auto originForUninitialized = core::Loc::none();
     core::DispatchArgs dispatchArgs{snd->fun,       locs,           snd->numPosArgs,
                                     args,           snd->recv.type, snd->recv.type,

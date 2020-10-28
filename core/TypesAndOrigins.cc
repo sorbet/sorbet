@@ -12,13 +12,14 @@ namespace sorbet::core {
 // origin that corresponds to the enclosing `def` itself, rather than to a
 // specific initializing statement. `originForUninitialized` is that loc, and
 // we test for equality against it to decide whether to print a special error
-// message. Note that it is safe to pass `Loc::none()` as
-// `originForUninitialized` if the information is not easily available, but the
-// resulting messages may be a bit confusing.
-vector<ErrorLine> TypeAndOrigins::origins2Explanations(const GlobalState &gs, const Loc &originForUninitialized) const {
+// message. Note that it is reasonable to pass `Loc::none()` as
+// `originForUninitialized` only if the information is truly not applicable
+// (e.g. in "fake" dispatches used to generate signature suggestions). In other
+// cases, passing `Loc::none()` will result in confusing error messages.
+vector<ErrorLine> TypeAndOrigins::origins2Explanations(const GlobalState &gs, Loc originForUninitialized) const {
     vector<ErrorLine> result;
 
-    auto compare = [&originForUninitialized](Loc left, Loc right) {
+    auto compare = [originForUninitialized](Loc left, Loc right) {
         // Put "uninitialized" origins towards the end, since the overall
         // message reads better that way.
         if (originForUninitialized.exists()) {

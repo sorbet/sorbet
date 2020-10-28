@@ -931,6 +931,8 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
 
             auto correctedSingleton = corrected.data(ctx)->singletonClass(ctx);
             auto ctype = core::make_type<core::ClassType>(correctedSingleton);
+            // In `dispatchArgs` this is ordinarily used to specify the origin tag for
+            // uninitialized variables. Inside of a signature we shouldn't need this:
             auto originForUninitialized = core::Loc::none();
             core::CallLocs locs{
                 ctx.file,

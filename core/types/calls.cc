@@ -1714,7 +1714,7 @@ class Magic_callWithBlock : public IntrinsicMethod {
 
 private:
     static TypePtr typeToProc(const GlobalState &gs, TypePtr blockType, core::FileRef file, LocOffsets callLoc,
-                              LocOffsets receiverLoc, const Loc &originForUninitialized) {
+                              LocOffsets receiverLoc, Loc originForUninitialized) {
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
         if (Types::isSubType(gs, Types::nilClass(), blockType)) {
