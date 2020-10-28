@@ -2,4 +2,4 @@
 # typed: true
 # compiled: true
 
-p T.untyped.class
+p T.unsafe(T).untyped.class
