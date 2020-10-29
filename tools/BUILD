@@ -77,6 +77,7 @@ compilation_database(
         "//main/autogen:autogen",
         "//main/options:options",
         "//third_party/licenses:licenses",
+        "//main/autogen/data:data",
         "//definition_validator:definition_validator",
         "//core/serialize:serialize_test",
         "//core/serialize:serialize",

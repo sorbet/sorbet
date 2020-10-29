@@ -1,7 +1,7 @@
 #ifndef AUTOGEN_AUTOLOADER_H
 #define AUTOGEN_AUTOLOADER_H
 #include "ast/ast.h"
-#include "main/autogen/autogen.h"
+#include "main/autogen/data/definitions.h"
 #include "main/options/options.h"
 #include <string_view>
 
