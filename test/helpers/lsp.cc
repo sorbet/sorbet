@@ -315,7 +315,7 @@ unique_ptr<PrepareRenameResult> doTextDocumentPrepareRename(LSPWrapper &lspWrapp
 }
 
 unique_ptr<WorkspaceEdit> doTextDocumentRename(LSPWrapper &lspWrapper, const Range &range, int &nextId,
-                                               string_view filename, std::string newName) {
+                                               string_view filename, string newName, string expectedErrorMessage) {
     auto uri = filePathToUri(lspWrapper.config(), filename);
     auto id = nextId++;
 
@@ -333,7 +333,12 @@ unique_ptr<WorkspaceEdit> doTextDocumentRename(LSPWrapper &lspWrapper, const Ran
     }
     auto &response = responseMsg->asResponse();
     if (response.error.has_value()) {
-        return nullptr;
+        if (expectedErrorMessage.empty()) {
+            return nullptr;
+        }
+
+        auto &e = *response.error;
+        CHECK_EQ(expectedErrorMessage, e->message);
     }
 
     if (!response.result.has_value()) {

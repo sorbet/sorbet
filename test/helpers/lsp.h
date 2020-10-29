@@ -67,7 +67,8 @@ std::unique_ptr<PrepareRenameResult> doTextDocumentPrepareRename(LSPWrapper &lsp
 /** Use the LSPWrapper to make a textDocument/rename request.
  */
 std::unique_ptr<WorkspaceEdit> doTextDocumentRename(LSPWrapper &lspWrapper, const Range &range, int &nextId,
-                                                    std::string_view filename, std::string newName);
+                                                    std::string_view filename, std::string newName,
+                                                    std::string expectedErrorMessage);
 
 /** Sends boilerplate initialization / initialized messages to start a new LSP session. */
 std::vector<std::unique_ptr<LSPMessage>>
