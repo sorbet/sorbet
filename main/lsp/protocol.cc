@@ -3,7 +3,9 @@
 #include "common/Timer.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPInput.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/LSPPreprocessor.h"
 #include "main/lsp/LSPTask.h"
 #include "main/lsp/json_types.h"
@@ -118,8 +120,12 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
     auto &logger = config->logger;
     if (!opts.disableWatchman) {
         if (opts.rawInputDirNames.size() != 1 || !opts.rawInputFileNames.empty()) {
-            logger->error("Watchman support currently only works when Sorbet is run with a single input directory. If "
-                          "Watchman is not needed, run Sorbet with `--disable-watchman`.");
+            auto msg = "Watchman support currently only works when Sorbet is run with a single input directory. If "
+                       "Watchman is not needed, run Sorbet with `--disable-watchman`.";
+            logger->error(msg);
+            auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
+            config->output->write(make_unique<LSPMessage>(
+                make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
             throw options::EarlyReturnWithCode(1);
         }
 
@@ -140,12 +146,18 @@ optional<unique_ptr<core::GlobalState>> LSPLoop::runLSP(shared_ptr<LSPInput> inp
                     messageQueue.pendingRequests.push_back(move(msg));
                 }
             },
-            [&messageQueue, &messageQueueMutex, logger = logger](int watchmanExitCode) {
+            [&messageQueue, &messageQueueMutex, logger = logger, config = this->config](int watchmanExitCode,
+                                                                                        string const &msg) {
                 {
                     absl::MutexLock lck(&messageQueueMutex);
                     if (!messageQueue.terminate) {
                         messageQueue.terminate = true;
                         messageQueue.errorCode = watchmanExitCode;
+                        if (watchmanExitCode != 0) {
+                            auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
+                            config->output->write(make_unique<LSPMessage>(
+                                make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
+                        }
                     }
                     logger->debug("Watchman terminating");
                 }

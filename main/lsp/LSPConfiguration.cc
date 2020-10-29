@@ -2,6 +2,8 @@
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
 #include "common/FileOps.h"
+#include "main/lsp/LSPMessage.h"
+#include "main/lsp/LSPOutput.h"
 #include "main/lsp/json_types.h"
 
 using namespace std;
@@ -15,9 +17,14 @@ constexpr string_view httpsScheme = "https"sv;
 
 namespace {
 
-string getRootPath(const options::Options &opts, const shared_ptr<spdlog::logger> &logger) {
+string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &opts,
+                   const shared_ptr<spdlog::logger> &logger) {
     if (opts.rawInputDirNames.size() != 1) {
-        logger->error("Sorbet's language server requires a single input directory.");
+        auto msg = "Sorbet's language server requires a single input directory.";
+        logger->error(msg);
+        auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
+        output->write(make_unique<LSPMessage>(
+            make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
         throw options::EarlyReturnWithCode(1);
     }
     return opts.rawInputDirNames.at(0);
@@ -35,7 +42,7 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<LSPOutput> &output,
                                    const shared_ptr<spdlog::logger> &logger, bool skipConfigatron, bool disableFastPath)
     : initialized(atomic<bool>(false)), opts(opts), output(output), logger(logger), skipConfigatron(skipConfigatron),
-      disableFastPath(disableFastPath), rootPath(getRootPath(opts, logger)) {}
+      disableFastPath(disableFastPath), rootPath(getRootPath(output, opts, logger)) {}
 
 void LSPConfiguration::assertHasClientConfig() const {
     if (!clientConfig) {
