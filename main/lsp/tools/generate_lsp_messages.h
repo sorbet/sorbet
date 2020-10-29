@@ -526,7 +526,7 @@ public:
         }
         fmt::format_to(out, "}};\n");
         fmt::format_to(out, "{0} get{0}(std::string_view value);\n", typeName);
-        fmt::format_to(out, "std::string convert{0}ToString({0} kind);", typeName);
+        fmt::format_to(out, "const std::string &convert{0}ToString({0} kind);", typeName);
     }
 
     void emitDefinition(fmt::memory_buffer &out) {
@@ -546,7 +546,7 @@ public:
         fmt::format_to(out, "}}\n");
         fmt::format_to(out, "return it->second;\n");
         fmt::format_to(out, "}}\n");
-        fmt::format_to(out, "std::string convert{0}ToString({0} kind) {{\n", typeName);
+        fmt::format_to(out, "const std::string &convert{0}ToString({0} kind) {{\n", typeName);
         fmt::format_to(out, "switch (kind) {{\n");
         for (std::string_view value : enumValues) {
             fmt::format_to(out, "case {}:\n", enumVar(value));
