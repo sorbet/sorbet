@@ -17,7 +17,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def self.call<<C <todo sym>>>(x, &<blk>)
-      ::T.untyped()
+      ::T.unsafe(nil)
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :"call")
@@ -41,7 +41,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def self.call<<C <todo sym>>>(x, &<blk>)
-      ::T.untyped()
+      ::T.unsafe(nil)
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :"call")

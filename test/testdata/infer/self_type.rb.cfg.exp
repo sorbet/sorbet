@@ -149,7 +149,7 @@ subgraph "cluster_::Generic#bad" {
     "bb::Generic#bad_1" [shape = parallelogram];
 
     "bb::Generic#bad_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Generic[Generic::TM] = cast(<self>: NilClass, AppliedType {\l  klass = <C <U Generic>>\l  targs = [\l    <C <U TM>> = SelfTypeParam(<C <U Generic>><C <U TM>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Generic) = alias <C Generic>\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$6: T.untyped = <cfgAlias>$8: T.class_of(T).untyped()\l<statTemp>$3: <Type: Generic[T.untyped]> = <cfgAlias>$5: T.class_of(Generic).[](<statTemp>$6: T.untyped)\l<returnMethodTemp>$2: Generic[T.untyped] = <statTemp>$3: <Type: Generic[T.untyped]>.new()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Generic[T.untyped]\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Generic[Generic::TM] = cast(<self>: NilClass, AppliedType {\l  klass = <C <U Generic>>\l  targs = [\l    <C <U TM>> = SelfTypeParam(<C <U Generic>><C <U TM>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Generic) = alias <C Generic>\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$6: <Type: T.untyped> = <cfgAlias>$8: T.class_of(T).untyped()\l<statTemp>$3: <Type: Generic[T.untyped]> = <cfgAlias>$5: T.class_of(Generic).[](<statTemp>$6: <Type: T.untyped>)\l<returnMethodTemp>$2: Generic[T.untyped] = <statTemp>$3: <Type: Generic[T.untyped]>.new()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Generic[T.untyped]\l<unconditional>\l"
     ];
 
     "bb::Generic#bad_0" -> "bb::Generic#bad_1" [style="bold"];

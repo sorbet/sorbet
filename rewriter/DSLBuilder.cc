@@ -82,7 +82,7 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
                                          ast::MK::Constant(loc, core::Symbols::NilClass())));
         auto arg = ast::MK::Local(nameLoc, name);
         if (implied) {
-            auto default_ = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
+            auto default_ = ast::MK::UntypedNil(loc);
             arg = ast::MK::OptionalArg(loc, move(arg), move(default_));
         }
         auto defSelfProp =
