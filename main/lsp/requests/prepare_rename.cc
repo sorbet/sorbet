@@ -56,6 +56,8 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerDelegate
             } else if (auto defResp = resp->isDefinition()) {
                 if (defResp->symbol.data(gs)->isClassOrModule()) {
                     response->result = getPrepareRenameResult(gs, defResp->symbol);
+                } else if (defResp->symbol.data(gs)->isMethod()) {
+                    response->result = getPrepareRenameResult(gs, defResp->symbol);
                 }
             }
         }
