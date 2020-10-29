@@ -12,11 +12,11 @@ class TestLet
   end
 
   def test_assign_before_let
-    x = "foo" # error: Assignment to a variable declared via `let` occurs before the `let` declaration has been reached
+    x = "foo" # error: Assignment to a variable declared via `T.let` occurs before the `T.let` declaration
     x = T.let("bar", String)
   end
 
-  def test_default_param_before_let(x = "foo") # error: Assignment to a variable declared via `let` occurs before the `let` declaration has been reached
+  def test_default_param_before_let(x = "foo") # error: Assignment to a variable declared via `T.let` occurs before the `T.let` declaration
     x = T.let("bar", String)
   end
 end
