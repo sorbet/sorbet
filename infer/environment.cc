@@ -1331,10 +1331,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             if (auto e =
                                     ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableAssignedBeforeLet)) {
                                 e.setHeader("Assignment to a variable declared via `{}` occurs before the `{}` "
-                                            "declaration has been reached",
-                                            "let", "let");
+                                            "declaration",
+                                            "T.let", "T.let");
                                 if (tp.origins.size() == 1) {
-                                    e.replaceWith(fmt::format("Use `{}` at initial assignment", "let"), tp.origins[0],
+                                    e.replaceWith(fmt::format("Use `{}` at initial assignment", "T.let"), tp.origins[0],
                                                   "T.let({}, {})", tp.origins[0].source(ctx),
                                                   core::Types::dropLiteral(tp.type)->show(ctx));
                                 }
