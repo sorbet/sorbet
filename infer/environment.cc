@@ -1327,7 +1327,19 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         }
                         break;
                     case cfg::CFG::MIN_LOOP_LET:
-                        if (!asGoodAs) {
+                        if (!hasType(ctx, bind.bind.variable)) {
+                            if (auto e =
+                                    ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableAssignedBeforeLet)) {
+                                e.setHeader("Assignment to a variable declared via `{}` occurs before the `{}` "
+                                            "declaration has been reached",
+                                            "let", "let");
+                                if (tp.origins.size() == 1) {
+                                    e.replaceWith(fmt::format("Use `{}` at initial assignment", "let"), tp.origins[0],
+                                                  "T.let({}, {})", tp.origins[0].source(ctx),
+                                                  core::Types::dropLiteral(tp.type)->show(ctx));
+                                }
+                            }
+                        } else if (!asGoodAs) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
                                 e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
                                             "subtype of `{}`",
