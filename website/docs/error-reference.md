@@ -986,3 +986,26 @@ See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 [report an issue]: https://github.com/sorbet/sorbet/issues
 
 <script src="/js/error-reference.js"></script>
+
+## 7033
+
+A local variable given an annotated type using `T.let` must not be assigned to
+before the assignment with the `T.let`. For example:
+
+```ruby
+# typed: true
+
+x = "foo"                  # error: Assignment occurs before the `T.let`
+x = T.let("bar", String)
+```
+
+Sometimes this error is caused when reusing a variable that was not meant to be
+reused. If both assignments are intentional, fix this by moving the `T.let` to
+the first assignment (and optionally removing the `T.let` from the second):
+
+```ruby
+# typed: true
+
+x = T.let("foo", String)   # ok: First assignment to `x` uses `T.let`
+x = T.let("bar", String)   # optional: Replace with `x = "bar"`
+```
