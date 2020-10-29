@@ -8,14 +8,19 @@ using namespace std;
 
 namespace sorbet::autogen {
 
+// Find the `Definition` associated with this `DefinitionRef`
 const Definition &DefinitionRef::data(const ParsedFile &pf) const {
     return pf.defs[_id];
 }
 
+// Find the `Reference` associated with this `ReferenceRef`
 const Reference &ReferenceRef::data(const ParsedFile &pf) const {
     return pf.refs[_id];
 }
 
+// Show the full qualified name of this `Definition`, if possible. (If for some reason there is no actual `defining_ref`
+// for this `DefinitionRef` (e.g. if this is called _during_ an `AutogenWalk` traversal and the defining ref has not yet
+// been set) then this will return an empty vector.
 vector<core::NameRef> ParsedFile::showFullName(const core::GlobalState &gs, DefinitionRef id) const {
     auto &def = id.data(*this);
     if (!def.defining_ref.exists()) {
@@ -27,6 +32,7 @@ vector<core::NameRef> ParsedFile::showFullName(const core::GlobalState &gs, Defi
     return scope;
 }
 
+// Pretty-print a `ParsedFile`, including all definitions and references and the pieces of metadata associated with them
 string ParsedFile::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer out;
     auto nameToString = [&](const auto &nm) -> string { return nm.data(gs)->show(gs); };
@@ -105,6 +111,7 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
     return to_string(out);
 }
 
+// List every class name defined in this `ParsedFile`.
 vector<string> ParsedFile::listAllClasses(core::Context ctx) {
     vector<string> out;
 
@@ -121,6 +128,7 @@ vector<string> ParsedFile::listAllClasses(core::Context ctx) {
     return out;
 }
 
+// Convert this parsedfile to a msgpack representation
 string ParsedFile::toMsgpack(core::Context ctx, int version) {
     MsgpackWriter write(version);
     return write.pack(ctx, *this);
