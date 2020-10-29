@@ -52,7 +52,7 @@ private:
         return maskedPtr | val;
     }
 
-    explicit TypePtr(Tag tag, std::atomic<u4> *counter, void *expr) : counter(counter), store(tagPtr(tag, expr)) {
+    TypePtr(Tag tag, std::atomic<u4> *counter, void *expr) : counter(counter), store(tagPtr(tag, expr)) {
         if (counter != nullptr) {
             counter->fetch_add(1);
         }
