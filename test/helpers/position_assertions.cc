@@ -1273,19 +1273,19 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         REQUIRE_NE(prepareRenameResponse, nullptr);
     }
 
-    auto renameList = doTextDocumentRename(wrapper, *this->range, nextId, this->filename, newName);
+    auto workspaceEdits = doTextDocumentRename(wrapper, *this->range, nextId, this->filename, newName);
     // A rename at a valid position but with an invalid new name
     if (invalid) {
-        REQUIRE_EQ(renameList, nullptr);
+        REQUIRE_EQ(workspaceEdits, nullptr);
         return;
     }
 
     {
         INFO("doTextDocumentRename failed; see error above.");
-        REQUIRE_NE(renameList, nullptr);
+        REQUIRE_NE(workspaceEdits, nullptr);
     }
 
-    auto &renameItems = *renameList->documentChanges;
+    auto &renameItems = *workspaceEdits->documentChanges;
     auto it = sourceFileContents.find(this->filename);
     {
         INFO(fmt::format("Unable to find source file `{}`", this->filename));

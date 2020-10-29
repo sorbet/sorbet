@@ -5,3 +5,8 @@ require_relative './constant__class_definition.rb'
 
 sig { params(foo: Bar::Foo).returns(Bar::Foo) }
 def foo(foo); end
+
+class Baz
+#     ^ apply-rename: [D] newName: Bar invalid: true
+
+end
