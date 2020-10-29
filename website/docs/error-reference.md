@@ -989,23 +989,23 @@ See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 ## 7033
 
-A variable is being assigned to before its type is declared with `T.let`. Sorbet
-does not support this. For example:
+A local variable given an annotated type using `T.let` must not be assigned to
+before the assignment with the `T.let`. For example:
 
 ```ruby
 # typed: true
 
-x = "foo"                  # <-- this will produce an error
+x = "foo"                  # error: Assignment occurs before the `T.let`
 x = T.let("bar", String)
 ```
 
-To fix this issue, first make sure that the error is not caused by, say, copying
-and pasting a code snippet whose variable names conflict with existing code.
-Then wrap the first assignment's expression with `T.let`:
+Sometimes this error is caused when reusing a variable that was not meant to be
+reused. If both assignments are intentional, fix this by moving the `T.let` to
+the first assignment (and optionally removing the `T.let` from the second):
 
 ```ruby
 # typed: true
 
-x = T.let("foo", String)   # <-- this will no longer produce an error
-x = T.let("bar", String)   # <-- optionally, can replace this with `x = "bar"'
+x = T.let("foo", String)   # ok: First assignment to `x` uses `T.let`
+x = T.let("bar", String)   # optional: Replace with `x = "bar"`
 ```
