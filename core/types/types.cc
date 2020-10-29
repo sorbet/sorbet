@@ -33,8 +33,6 @@ TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &re
     return move(dispatched.returnType);
 }
 
-TypePtr::TypePtr(shared_ptr<Type> &&store) : store(move(store)){};
-
 TypePtr Types::top() {
     static auto res = make_type<ClassType>(Symbols::top());
     return res;
@@ -764,7 +762,7 @@ bool OrType::hasUntyped() const {
 }
 
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
-    TypePtr res(new OrType(left, right));
+    TypePtr res(TypePtr::Tag::OrType, new OrType(left, right));
     return res;
 }
 
@@ -773,7 +771,7 @@ bool AndType::hasUntyped() const {
 }
 
 TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
-    TypePtr res(new AndType(left, right));
+    TypePtr res(TypePtr::Tag::AndType, new AndType(left, right));
     return res;
 }
 

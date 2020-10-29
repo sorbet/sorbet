@@ -64,7 +64,7 @@ public:
 CheckSize(ArgInfo, 48, 8);
 
 template <class T, class... Args> TypePtr make_type(Args &&... args) {
-    return TypePtr(std::make_shared<T>(std::forward<Args>(args)...));
+    return TypePtr(TypePtr::TypeToTag<T>::value, new T(std::forward<Args>(args)...));
 }
 
 enum class UntypedMode {
@@ -246,6 +246,11 @@ template <class To> bool isa_type(Type *what) {
     return cast_type<To>(what) != nullptr;
 }
 
+#define TYPE(name)                                                                                             \
+    class name;                                                                                                \
+    template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
+    class __attribute__((aligned(8))) name
+
 class GroundType : public Type {};
 
 class ProxyType : public Type {
@@ -262,7 +267,7 @@ public:
 };
 CheckSize(ProxyType, 8, 8);
 
-class ClassType : public GroundType {
+TYPE(ClassType) : public GroundType {
 public:
     SymbolRef symbol;
     ClassType(SymbolRef symbol);
@@ -287,7 +292,7 @@ CheckSize(ClassType, 16, 8);
  * This is the type used to represent a use of a type_member or type_template in
  * a signature.
  */
-class LambdaParam final : public Type {
+TYPE(LambdaParam) final : public Type {
 public:
     SymbolRef definition;
 
@@ -314,7 +319,7 @@ public:
 };
 CheckSize(LambdaParam, 48, 8);
 
-class SelfTypeParam final : public Type {
+TYPE(SelfTypeParam) final : public Type {
 public:
     SymbolRef definition;
 
@@ -336,7 +341,7 @@ public:
 };
 CheckSize(SelfTypeParam, 16, 8);
 
-class AliasType final : public Type {
+TYPE(AliasType) final : public Type {
 public:
     AliasType(SymbolRef other);
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
@@ -360,7 +365,7 @@ CheckSize(AliasType, 16, 8);
  * It indicates that the method may(or will) return `self` or type that behaves equivalently
  * to self(e.g. in case of `.clone`).
  */
-class SelfType final : public Type {
+TYPE(SelfType) final : public Type {
 public:
     SelfType();
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;
@@ -381,7 +386,7 @@ public:
 };
 CheckSize(SelfType, 8, 8);
 
-class LiteralType final : public ProxyType {
+TYPE(LiteralType) final : public ProxyType {
 public:
     union {
         const int64_t value;
@@ -413,7 +418,7 @@ CheckSize(LiteralType, 24, 8);
 /*
  * TypeVars are the used for the type parameters of generic methods.
  */
-class TypeVar final : public Type {
+TYPE(TypeVar) final : public Type {
 public:
     SymbolRef sym;
     TypeVar(SymbolRef sym);
@@ -434,7 +439,7 @@ public:
 };
 CheckSize(TypeVar, 16, 8);
 
-class OrType final : public GroundType {
+TYPE(OrType) final : public GroundType {
 public:
     TypePtr left;
     TypePtr right;
@@ -488,7 +493,7 @@ private:
 };
 CheckSize(OrType, 40, 8);
 
-class AndType final : public GroundType {
+TYPE(AndType) final : public GroundType {
 public:
     TypePtr left;
     TypePtr right;
@@ -533,7 +538,7 @@ private:
 };
 CheckSize(AndType, 40, 8);
 
-class ShapeType final : public ProxyType {
+TYPE(ShapeType) final : public ProxyType {
 public:
     std::vector<TypePtr> keys; // TODO: store sorted by whatever
     std::vector<TypePtr> values;
@@ -558,7 +563,7 @@ public:
 };
 CheckSize(ShapeType, 72, 8);
 
-class TupleType final : public ProxyType {
+TYPE(TupleType) final : public ProxyType {
 private:
     TupleType() = delete;
 
@@ -590,7 +595,7 @@ public:
 };
 CheckSize(TupleType, 48, 8);
 
-class AppliedType final : public Type {
+TYPE(AppliedType) final : public Type {
 public:
     SymbolRef klass;
     std::vector<TypePtr> targs;
@@ -624,7 +629,7 @@ CheckSize(AppliedType, 40, 8);
 //
 // These are used within the inferencer in places where we need to track
 // user-written types in the source code.
-class MetaType final : public ProxyType {
+TYPE(MetaType) final : public ProxyType {
 public:
     TypePtr wrapped;
 
@@ -747,13 +752,13 @@ struct DispatchResult {
           secondaryKind(secondaryKind){};
 };
 
-class BlamedUntyped final : public ClassType {
+TYPE(BlamedUntyped) final : public ClassType {
 public:
     const core::SymbolRef blame;
     BlamedUntyped(SymbolRef whoToBlame) : ClassType(core::Symbols::untyped()), blame(whoToBlame){};
 };
 
-class UnresolvedClassType final : public ClassType {
+TYPE(UnresolvedClassType) final : public ClassType {
 public:
     const core::SymbolRef scope;
     const std::vector<core::NameRef> names;
@@ -764,7 +769,7 @@ public:
     virtual std::string typeName() const final;
 };
 
-class UnresolvedAppliedType final : public ClassType {
+TYPE(UnresolvedAppliedType) final : public ClassType {
 public:
     const core::SymbolRef klass;
     const std::vector<TypePtr> targs;
