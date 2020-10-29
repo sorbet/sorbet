@@ -3,7 +3,7 @@ ClassDef{
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
       orig = nullptr
-      symbol = ::<todo sym>
+      symbol = (class ::<todo sym>)
     }]
   rhs = [
     MethodDef{
@@ -1018,7 +1018,7 @@ ClassDef{
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
         MethodDef{
@@ -1037,7 +1037,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -1288,13 +1288,13 @@ ClassDef{
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -1319,7 +1319,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -1389,7 +1389,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -1426,7 +1426,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -1447,7 +1447,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -1462,7 +1462,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -1498,7 +1498,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -1588,7 +1588,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -1714,7 +1714,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -1730,7 +1730,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -1746,7 +1746,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -1762,7 +1762,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -1785,7 +1785,7 @@ ClassDef{
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
       ]
@@ -1799,13 +1799,13 @@ ClassDef{
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -1830,7 +1830,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -1900,7 +1900,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -1937,7 +1937,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -1958,7 +1958,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -1973,7 +1973,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -2009,7 +2009,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -2045,7 +2045,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -2115,7 +2115,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -2174,7 +2174,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -2195,7 +2195,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -2210,7 +2210,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -2246,7 +2246,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -2271,7 +2271,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -2341,7 +2341,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -2378,7 +2378,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -2399,7 +2399,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -2414,7 +2414,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -2450,7 +2450,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -2489,7 +2489,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -2559,7 +2559,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -2624,7 +2624,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -2645,7 +2645,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -2660,7 +2660,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -2696,7 +2696,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -2739,7 +2739,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -2809,7 +2809,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -2882,7 +2882,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -2903,7 +2903,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -2918,7 +2918,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -2954,7 +2954,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -2979,7 +2979,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3049,7 +3049,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -3074,7 +3074,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3144,7 +3144,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -3169,7 +3169,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3239,7 +3239,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -3276,7 +3276,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3295,7 +3295,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -3303,7 +3303,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -3319,7 +3319,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -3344,7 +3344,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3414,7 +3414,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -3451,7 +3451,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3472,7 +3472,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -3487,7 +3487,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -3523,7 +3523,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -3542,7 +3542,7 @@ ClassDef{
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
-                      symbol = ::T
+                      symbol = (module ::T)
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -3559,7 +3559,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -3578,7 +3578,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3597,7 +3597,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -3605,7 +3605,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -3621,7 +3621,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -3640,7 +3640,7 @@ ClassDef{
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
-                      symbol = ::T
+                      symbol = (module ::T)
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -3665,7 +3665,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3684,7 +3684,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -3692,7 +3692,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -3708,7 +3708,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -3733,7 +3733,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3803,7 +3803,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -3840,7 +3840,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3861,7 +3861,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -3876,7 +3876,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -3912,7 +3912,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -3931,7 +3931,7 @@ ClassDef{
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
-                      symbol = ::T
+                      symbol = (module ::T)
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -3948,7 +3948,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -3967,7 +3967,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -3986,7 +3986,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -3994,7 +3994,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -4010,7 +4010,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4029,7 +4029,7 @@ ClassDef{
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
-                      symbol = ::T
+                      symbol = (module ::T)
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -4054,7 +4054,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -4073,7 +4073,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -4081,7 +4081,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -4097,7 +4097,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4122,7 +4122,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -4192,7 +4192,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4229,7 +4229,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -4250,7 +4250,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -4265,7 +4265,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -4301,7 +4301,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4320,7 +4320,7 @@ ClassDef{
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
-                      symbol = ::T
+                      symbol = (module ::T)
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -4337,7 +4337,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -4356,7 +4356,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -4375,7 +4375,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -4383,7 +4383,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -4399,7 +4399,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4418,7 +4418,7 @@ ClassDef{
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
-                      symbol = ::T
+                      symbol = (module ::T)
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -4443,7 +4443,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -4462,7 +4462,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -4470,7 +4470,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -4486,7 +4486,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4511,7 +4511,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -4581,7 +4581,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4618,7 +4618,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -4639,7 +4639,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -4654,7 +4654,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -4690,7 +4690,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4709,7 +4709,7 @@ ClassDef{
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
-                      symbol = ::T
+                      symbol = (module ::T)
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -4726,7 +4726,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U untyped>
                   block = nullptr
@@ -4741,7 +4741,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -4760,7 +4760,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -4768,7 +4768,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -4784,7 +4784,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4803,7 +4803,7 @@ ClassDef{
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
-                      symbol = ::T
+                      symbol = (module ::T)
                     }
                     fun = <U untyped>
                     block = nullptr
@@ -4820,7 +4820,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U untyped>
                   block = nullptr
@@ -4835,7 +4835,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -4854,7 +4854,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -4862,7 +4862,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -4878,7 +4878,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4903,7 +4903,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -4919,7 +4919,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -4927,7 +4927,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -4943,7 +4943,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -4980,7 +4980,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -5001,7 +5001,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -5016,7 +5016,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -5052,7 +5052,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -5088,7 +5088,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -5104,7 +5104,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -5112,7 +5112,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -5128,7 +5128,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -5187,7 +5187,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -5208,7 +5208,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -5223,7 +5223,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -5259,7 +5259,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -5284,7 +5284,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -5354,7 +5354,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -5391,7 +5391,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -5412,7 +5412,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -5427,7 +5427,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -5463,7 +5463,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -5488,7 +5488,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -5558,7 +5558,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -5595,7 +5595,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -5614,7 +5614,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -5622,7 +5622,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -5676,7 +5676,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -5692,7 +5692,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -5737,7 +5737,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -5753,7 +5753,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -5787,7 +5787,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -5803,7 +5803,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -5851,7 +5851,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -5867,7 +5867,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -5919,7 +5919,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -5935,7 +5935,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -5971,7 +5971,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6005,7 +6005,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6046,7 +6046,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6062,7 +6062,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6101,7 +6101,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6117,7 +6117,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6133,7 +6133,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6149,7 +6149,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6202,7 +6202,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6218,7 +6218,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6234,7 +6234,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6250,7 +6250,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6302,7 +6302,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6318,7 +6318,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6334,7 +6334,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6350,7 +6350,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6399,7 +6399,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6415,7 +6415,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6431,7 +6431,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6447,7 +6447,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6483,7 +6483,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6499,7 +6499,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6546,7 +6546,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6562,7 +6562,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6602,7 +6602,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6618,7 +6618,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6667,7 +6667,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6683,7 +6683,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -6706,7 +6706,7 @@ ClassDef{
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
         MethodDef{
@@ -6750,7 +6750,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -6766,7 +6766,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::String
+                  symbol = (class ::String)
                 }
               ]
             }
@@ -6775,7 +6775,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -6845,7 +6845,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -6863,7 +6863,7 @@ ClassDef{
                   Literal{ value = :"arg0" }
                   ConstantLit{
                     orig = nullptr
-                    symbol = ::String
+                    symbol = (class ::String)
                   }
                 ]
               }
@@ -6873,7 +6873,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::String
+                  symbol = (class ::String)
                 }
               ]
             }
@@ -6882,7 +6882,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -6903,7 +6903,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -6918,7 +6918,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -6954,7 +6954,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -6970,7 +6970,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Float
+                  symbol = (class ::Float)
                 }
               ]
             }
@@ -6979,7 +6979,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -7049,7 +7049,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -7067,7 +7067,7 @@ ClassDef{
                   Literal{ value = :"arg0" }
                   ConstantLit{
                     orig = nullptr
-                    symbol = ::Float
+                    symbol = (class ::Float)
                   }
                 ]
               }
@@ -7077,7 +7077,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Float
+                  symbol = (class ::Float)
                 }
               ]
             }
@@ -7086,7 +7086,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -7107,7 +7107,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -7122,7 +7122,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -7176,7 +7176,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -7192,7 +7192,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -7221,7 +7221,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -7237,7 +7237,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -7266,7 +7266,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -7282,7 +7282,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -7305,7 +7305,7 @@ ClassDef{
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
         MethodDef{
@@ -7349,7 +7349,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -7365,7 +7365,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::String
+                  symbol = (class ::String)
                 }
               ]
             }
@@ -7374,7 +7374,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -7444,7 +7444,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -7462,7 +7462,7 @@ ClassDef{
                   Literal{ value = :"arg0" }
                   ConstantLit{
                     orig = nullptr
-                    symbol = ::String
+                    symbol = (class ::String)
                   }
                 ]
               }
@@ -7472,7 +7472,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::String
+                  symbol = (class ::String)
                 }
               ]
             }
@@ -7481,7 +7481,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -7502,7 +7502,7 @@ ClassDef{
                 cond = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T::NonForcingConstants
+                    symbol = (module ::T::NonForcingConstants)
                   }
                   fun = <U non_forcing_is_a?>
                   block = nullptr
@@ -7517,7 +7517,7 @@ ClassDef{
                 thenp = Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::Chalk::ODM::DocumentDecoratorHelper
+                    symbol = (module ::Chalk::ODM::DocumentDecoratorHelper)
                   }
                   fun = <U soft_freeze_logic>
                   block = nullptr
@@ -7553,7 +7553,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -7569,7 +7569,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Float
+                  symbol = (class ::Float)
                 }
               ]
             }
@@ -7578,7 +7578,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -7666,7 +7666,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -7682,7 +7682,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -7711,7 +7711,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -7727,7 +7727,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -7758,7 +7758,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -7781,7 +7781,7 @@ ClassDef{
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
         MethodDef{
@@ -7806,7 +7806,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -7822,7 +7822,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::String
+                  symbol = (class ::String)
                 }
               ]
             }
@@ -7831,7 +7831,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -7919,7 +7919,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -7948,7 +7948,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -7971,7 +7971,7 @@ ClassDef{
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
         MethodDef{
@@ -7996,7 +7996,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -8013,7 +8013,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -8021,7 +8021,7 @@ ClassDef{
                   args = [
                     ConstantLit{
                       orig = nullptr
-                      symbol = ::String
+                      symbol = (class ::String)
                     }
                   ]
                 }
@@ -8032,7 +8032,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -8048,7 +8048,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -8056,7 +8056,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -8072,7 +8072,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -8089,7 +8089,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -8123,7 +8123,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -8139,7 +8139,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -8147,7 +8147,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -8163,7 +8163,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -8182,7 +8182,7 @@ ClassDef{
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
-                      symbol = ::T
+                      symbol = (module ::T)
                     }
                     fun = <U nilable>
                     block = nullptr
@@ -8190,7 +8190,7 @@ ClassDef{
                     args = [
                       ConstantLit{
                         orig = nullptr
-                        symbol = ::String
+                        symbol = (class ::String)
                       }
                     ]
                   }
@@ -8203,7 +8203,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -8211,7 +8211,7 @@ ClassDef{
                   args = [
                     ConstantLit{
                       orig = nullptr
-                      symbol = ::String
+                      symbol = (class ::String)
                     }
                   ]
                 }
@@ -8222,7 +8222,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -8241,7 +8241,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -8249,7 +8249,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -8265,7 +8265,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -8284,7 +8284,7 @@ ClassDef{
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
-                      symbol = ::T
+                      symbol = (module ::T)
                     }
                     fun = <U nilable>
                     block = nullptr
@@ -8320,7 +8320,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -8354,7 +8354,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -8373,7 +8373,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -8381,7 +8381,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -8397,7 +8397,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -8414,7 +8414,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -8422,7 +8422,7 @@ ClassDef{
                   args = [
                     ConstantLit{
                       orig = nullptr
-                      symbol = ::String
+                      symbol = (class ::String)
                     }
                   ]
                 }
@@ -8433,7 +8433,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -8449,7 +8449,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -8457,7 +8457,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -8473,7 +8473,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U sig>
           block = Block {
@@ -8490,7 +8490,7 @@ ClassDef{
                 Send{
                   recv = ConstantLit{
                     orig = nullptr
-                    symbol = ::T
+                    symbol = (module ::T)
                   }
                   fun = <U nilable>
                   block = nullptr
@@ -8524,7 +8524,7 @@ ClassDef{
           args = [
             ConstantLit{
               orig = nullptr
-              symbol = ::T::Sig::WithoutRuntime
+              symbol = (module ::T::Sig::WithoutRuntime)
             }
           ]
         }
@@ -8540,7 +8540,7 @@ ClassDef{
             recv = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::T
+                symbol = (module ::T)
               }
               fun = <U unsafe>
               block = nullptr
@@ -8548,7 +8548,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   orig = nullptr
-                  symbol = ::Kernel
+                  symbol = (module ::Kernel)
                 }
               ]
             }
@@ -8582,7 +8582,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_self_def>
           block = nullptr
@@ -8598,7 +8598,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -8614,7 +8614,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -8630,7 +8630,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -8646,7 +8646,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -8662,7 +8662,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -8678,7 +8678,7 @@ ClassDef{
         Send{
           recv = ConstantLit{
             orig = nullptr
-            symbol = ::Sorbet::Private::Static
+            symbol = (module ::Sorbet::Private::Static)
           }
           fun = <U keep_def>
           block = nullptr
@@ -8696,7 +8696,7 @@ ClassDef{
     Send{
       recv = ConstantLit{
         orig = nullptr
-        symbol = ::Sorbet::Private::Static
+        symbol = (module ::Sorbet::Private::Static)
       }
       fun = <U keep_def>
       block = nullptr
