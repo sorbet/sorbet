@@ -247,7 +247,8 @@ public:
         // Create new scope for temp var.
         fmt::format_to(out, "{{\n");
         fmt::format_to(out, "rapidjson::Value strCopy;\n");
-        fmt::format_to(out, "strCopy.SetString({0}.c_str(), {0}.length(), {1});\n", from, ALLOCATOR_VAR);
+        fmt::format_to(out, "const std::string &tmpStr = {0};\n", from);
+        fmt::format_to(out, "strCopy.SetString(tmpStr.c_str(), tmpStr.length(), {0});\n", ALLOCATOR_VAR);
         assign(out, "strCopy");
         fmt::format_to(out, "}}\n");
     }
