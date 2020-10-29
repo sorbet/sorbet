@@ -986,3 +986,26 @@ See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 [report an issue]: https://github.com/sorbet/sorbet/issues
 
 <script src="/js/error-reference.js"></script>
+
+## 7033
+
+A variable is being assigned to before its type is declared with `T.let`. Sorbet
+does not support this. For example:
+
+```ruby
+# typed: true
+
+x = "foo"                  # <-- this will produce an error
+x = T.let("bar", String)
+```
+
+To fix this issue, first make sure that the error is not caused by, say, copying
+and pasting a code snippet whose variable names conflict with existing code.
+Then wrap the first assignment's expression with `T.let`:
+
+```ruby
+# typed: true
+
+x = T.let("foo", String)   # <-- this will no longer produce an error
+x = T.let("bar", String)   # <-- optionally, can replace this with `x = "bar"'
+```
