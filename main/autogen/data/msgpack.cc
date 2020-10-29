@@ -1,8 +1,8 @@
 // has to go first because it violates our poisons
 #include "mpack/mpack.h"
 
-#include "main/autogen/autogen.h"
-#include "main/autogen/msgpack.h"
+#include "main/autogen/data/definitions.h"
+#include "main/autogen/data/msgpack.h"
 
 using namespace std;
 namespace sorbet::autogen {

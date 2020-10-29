@@ -1,7 +1,7 @@
 #ifndef AUTOGEN_SUBCLASSES_H
 #define AUTOGEN_SUBCLASSES_H
 #include "common/common.h"
-#include "main/autogen/autogen.h"
+#include "main/autogen/data/definitions.h"
 
 namespace sorbet::autogen {
 
