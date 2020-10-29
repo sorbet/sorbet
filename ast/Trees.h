@@ -63,9 +63,6 @@ enum class Tag {
 // A mapping from tree type to its corresponding tag.
 template <typename T> struct TreeToTag;
 
-// A mapping from tag value to the tree it represents.
-template <Tag T> struct TagToTree;
-
 class Expression;
 
 class TreePtr {
@@ -94,7 +91,7 @@ private:
         return maskedPtr | val;
     }
 
-    explicit TreePtr(Tag tag, void *expr) : ptr(tagPtr(tag, expr)) {}
+    TreePtr(Tag tag, void *expr) : ptr(tagPtr(tag, expr)) {}
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
@@ -317,7 +314,6 @@ CheckSize(Declaration, 32, 8);
 #define TREE(name)                                                                  \
     class name;                                                                     \
     template <> struct TreeToTag<name> { static constexpr Tag value = Tag::name; }; \
-    template <> struct TagToTree<Tag::name> { using value = name; };                \
     class __attribute__((aligned(8))) name final
 
 TREE(ClassDef) : public Declaration {
