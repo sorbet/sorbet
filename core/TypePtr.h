@@ -5,6 +5,7 @@
 
 namespace sorbet::core {
 class Type;
+class GlobalState;
 class TypePtr final {
 public:
     // We store tagged pointers as 64-bit values.
@@ -166,10 +167,10 @@ public:
         return store == 0;
     }
 
+    std::string toString(const GlobalState &gs) const;
+
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     friend class TypePtrTestHelper;
-
-    std::string toString(const GlobalState &gs) const;
 };
 CheckSize(TypePtr, 16, 8);
 } // namespace sorbet::core

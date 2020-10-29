@@ -33,10 +33,6 @@ TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &re
     return move(dispatched.returnType);
 }
 
-std::string TypePtr::toString(const GlobalState &gs) const {
-    return get()->toString(gs);
-}
-
 TypePtr Types::top() {
     static auto res = make_type<ClassType>(Symbols::top());
     return res;

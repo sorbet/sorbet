@@ -1,4 +1,5 @@
 #include "core/TypePtr.h"
+#include "core/GlobalState.h"
 #include "core/Types.h"
 
 namespace sorbet::core {
@@ -72,4 +73,9 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
             break;
     }
 }
+
+std::string TypePtr::toString(const GlobalState &gs) const {
+    return get()->toString(gs);
+}
+
 } // namespace sorbet::core
