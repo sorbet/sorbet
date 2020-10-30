@@ -93,7 +93,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
         return response;
     }
 
-    ShowOperation op(config, "References", "Renaming...");
+    ShowOperation op(config, ShowOperation::Kind::Rename);
 
     auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentRename);
     if (result.error) {

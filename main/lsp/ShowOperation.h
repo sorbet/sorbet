@@ -23,6 +23,7 @@ public:
         SlowPathNonBlocking,
         References,
         SymbolSearch,
+        Rename,
     };
     ShowOperation(const LSPConfiguration &config, Kind kind);
     ~ShowOperation();

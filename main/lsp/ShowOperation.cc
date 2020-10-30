@@ -28,6 +28,8 @@ string_view kindToOperationName(ShowOperation::Kind kind) {
             return "References";
         case ShowOperation::Kind::SymbolSearch:
             return "SymbolSearch";
+        case ShowOperation::Kind::Rename:
+            return "Rename";
     }
 }
 
@@ -43,6 +45,8 @@ string_view kindToDescription(ShowOperation::Kind kind) {
             return "Finding all references...";
         case ShowOperation::Kind::SymbolSearch:
             return "Workspace symbol search...";
+        case ShowOperation::Kind::Rename:
+            return "Renaming...";
     }
 }
 
