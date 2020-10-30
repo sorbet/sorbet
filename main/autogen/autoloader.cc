@@ -74,35 +74,13 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     return out;
 }
 
-QualifiedName QualifiedName::fromFullName(vector<core::NameRef> name) {
-    if (name.size() < 3 || name.front() != core::Names::Constants::PackageRegistry()) {
-        return {name, nullopt};
-    }
-    auto pkgName = std::optional<core::NameRef>{name[1]};
-    name.erase(name.begin());
-    name.erase(name.begin());
-    return {name, pkgName};
-}
-
-// Takes a name and, if it is a packaged name, "unpackages" it by modifying it in-place and returning the package name
-optional<core::NameRef> unpackageName(vector<core::NameRef> &name) {
-    if (name.front() != core::Names::Constants::PackageRegistry()) {
-        return nullopt;
-    }
-    auto pkgName = std::optional<core::NameRef>{name[1]};
-    // TODO(gdritter): do this more efficiently!
-    name.erase(name.begin());
-    name.erase(name.begin());
-    return pkgName;
-}
-
 // Convert an `autogen::DefinitionRef` to a `NamedDefinition`: this pulls the name, the parent definitions' name, the
 // requirements, the path, and the _depth_ of the path (which can short-circuit comparison against another path)
 NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile &parsedFile, DefinitionRef def) {
-    vector<core::NameRef> parentName;
+    QualifiedName parentName;
     if (def.data(parsedFile).parent_ref.exists()) {
         auto parentRef = def.data(parsedFile).parent_ref.data(parsedFile);
-        if (!parentRef.resolved.empty()) {
+        if (!parentRef.resolved.nameParts.empty()) {
             parentName = parentRef.resolved;
         } else {
             parentName = parentRef.name;
@@ -113,8 +91,7 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
 
     auto fullName = QualifiedName::fromFullName(parsedFile.showFullName(gs, def));
 
-    return {def.data(parsedFile), fullName, QualifiedName::fromFullName(parentName), parsedFile.requires,
-            parsedFile.tree.file, pathDepth};
+    return {def.data(parsedFile), fullName, parentName, parsedFile.requires, parsedFile.tree.file, pathDepth};
 }
 
 // Used for sorting `NamedDefinition`
