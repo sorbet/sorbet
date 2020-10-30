@@ -1244,7 +1244,7 @@ shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename
 
     ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
                       fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] newName: <name> "
-                                  "(invalid: true)'. Found '{}' in file {}",
+                                  "(invalid: true) (expectedErrorMessage: <message>)'. Found '{}' in file {}",
                                   assertionContents, filename));
 
     return nullptr;
