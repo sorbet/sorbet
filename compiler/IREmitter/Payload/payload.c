@@ -1367,7 +1367,7 @@ VALUE sorbet_rb_int_plus_slowpath(VALUE recv, VALUE y) {
             return rb_fix_plus_fix(recv, y);
         } else if (RB_TYPE_P(y, T_BIGNUM)) {
             return rb_big_plus(y, recv);
-        } else if (RB_TYPE_P(recv, T_FLOAT)) {
+        } else if (RB_TYPE_P(y, T_FLOAT)) {
             return DBL2NUM((double)FIX2LONG(recv) + RFLOAT_VALUE(y));
         } else if (RB_TYPE_P(y, T_COMPLEX)) {
             return rb_complex_plus(y, recv);
