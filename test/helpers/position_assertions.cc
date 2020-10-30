@@ -1300,8 +1300,10 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
 
     size_t index = this->filename.rfind("/", this->filename.length());
     auto testDataPath = this->filename.substr(0, index);
-    // map of all .rb and .rbi files
+    // map of all .rb and .rbi files before rename
     UnorderedMap<string, string> sourceFiles;
+    // map of all .rb and .rbi files after rename
+    UnorderedMap<string, string> actualEditedFiles;
     // map of all .rbedited files whose version equals `this->version`
     UnorderedMap<string, string> expectedEditedFiles;
     for (auto filePath : FileOps::listFilesInDir(testDataPath, {".rb", ".rbi", ".rbedited"}, false, {}, {})) {
@@ -1317,18 +1319,14 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         }
     }
 
-    string sourceFilePath;
-    string expectedEditedFilePath;
-    string expectedEditedFileContents;
-    string actualEditedFileContents;
     for (auto &renameItem : renameItems) {
         // Get the file path from the edited document's uri so we can determine the path to the .rbedited file
         index = renameItem->textDocument->uri.find(testDataPath, 0);
-        sourceFilePath = renameItem->textDocument->uri.substr(index, renameItem->textDocument->uri.length() - 1);
-        expectedEditedFilePath = updatedFilePath(sourceFilePath, this->version);
+        string sourceFilePath = renameItem->textDocument->uri.substr(index, renameItem->textDocument->uri.length() - 1);
+        string expectedEditedFilePath = updatedFilePath(sourceFilePath, this->version);
 
         auto &edits = renameItem->edits;
-        expectedEditedFileContents = expectedEditedFiles[expectedEditedFilePath];
+        string expectedEditedFileContents = expectedEditedFiles[expectedEditedFilePath];
         if (expectedEditedFileContents.empty()) {
             ADD_FAIL_CHECK_AT(filename.c_str(), this->assertionLine + 1,
                               fmt::format("Missing {} which should contain test file after applying code actions.",
@@ -1343,28 +1341,26 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         // Apply the edits in the reverse order so that the indices don't change.
         reverse(edits.begin(), edits.end());
 
-        actualEditedFileContents = string(sourceFiles[sourceFilePath]);
+        string actualEditedFileContents = string(sourceFiles[sourceFilePath]);
         for (auto &edit : edits) {
             auto file = core::File(string(sourceFilePath), string(actualEditedFileContents), core::File::Type::Normal);
 
             actualEditedFileContents = applyEdit(actualEditedFileContents, file, *edit->range, edit->newText);
         }
-        sourceFiles[sourceFilePath] = actualEditedFileContents;
+        actualEditedFiles[sourceFilePath] = actualEditedFileContents;
     }
 
     // Compare every source file to its .rbedited of the same version if one exists
-    // There are 3 cases we're handling
-    // 1. present in bothsource and edited maps and contents match => success
+    // There are 4 cases we're handling
+    // 1. present in both source and edited maps and contents match => success
     // 2. present in original content, but not edited => fails
-    // 3. unexpected edit => fails
-    for (auto &it : sourceFiles) {
-        string filePath = it.first;
-        actualEditedFileContents = it.second;
-        expectedEditedFilePath = updatedFilePath(filePath, this->version);
-        expectedEditedFileContents = expectedEditedFiles[expectedEditedFilePath];
-        if (expectedEditedFileContents.empty()) {
-            continue;
-        }
+    // 3. present in both source and edited maps and contents do not match => fails
+    // 4. unexpected edit => fails
+    for (auto &[filePath, _] : sourceFiles) {
+        string actualEditedFileContents = actualEditedFiles[filePath];
+        string expectedEditedFilePath = updatedFilePath(filePath, this->version);
+        string expectedEditedFileContents = expectedEditedFiles[expectedEditedFilePath];
+
         {
             INFO(fmt::format("The expected (rbedited) file contents for this rename did not match the actual file "
                              "contents post-edit of {} ",
