@@ -97,7 +97,7 @@ struct Path {
         return children.emplace_back(make_shared<Path>(this, string(name)));
     }
 
-    void setType(core::GlobalState &gs, core::TypePtr tp) {
+    void setType(core::GlobalState &gs, const core::TypePtr &tp) {
         if (myType) {
             myType = core::Types::any(gs, myType, tp);
         } else {

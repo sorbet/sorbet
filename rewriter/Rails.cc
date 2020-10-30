@@ -43,7 +43,7 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (!arg) {
         return;
     }
-    auto value = core::cast_type<core::LiteralType>(arg->value.get());
+    auto value = core::cast_type<core::LiteralType>(arg->value);
     if (value->literalKind != core::LiteralType::LiteralTypeKind::Float) {
         return;
     }

@@ -165,7 +165,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
             // with RuntimeProfiled.
             auto attachedClass = singleton.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
             if (attachedClass.exists()) {
-                auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(gs)->resultType.get());
+                auto *lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(gs)->resultType);
                 ENFORCE(lambdaParam != nullptr);
 
                 lambdaParam->lowerBound = core::Types::bottom();

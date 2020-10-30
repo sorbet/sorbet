@@ -188,7 +188,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
         e.addErrorSection(ErrorSection("Got " + argTpe.type->show(gs) + " originating from:",
                                        argTpe.origins2Explanations(gs, originForUninitialized)));
         auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
-        if (!withoutNil->isBottom() &&
+        if (!withoutNil.isBottom() &&
             Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
             if (loc.exists()) {
                 e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(gs));
@@ -351,11 +351,11 @@ SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef prim
  * expression back into a type-level one.
  */
 TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
-    if (auto *metaType = cast_type<MetaType>(tp.get())) {
+    if (auto *metaType = cast_type<MetaType>(tp)) {
         return metaType->wrapped;
     }
 
-    if (auto *classType = cast_type<ClassType>(tp.get())) {
+    if (auto *classType = cast_type<ClassType>(tp)) {
         if (classType->symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
             // T::Enum instances are allowed to stand for themselves in type syntax positions.
             // See the note in type_syntax.cc regarding T::Enum.
@@ -373,7 +373,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         return attachedClass.data(gs)->externalType();
     }
 
-    if (auto *appType = cast_type<AppliedType>(tp.get())) {
+    if (auto *appType = cast_type<AppliedType>(tp)) {
         SymbolRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
@@ -385,21 +385,21 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         return attachedClass.data(gs)->externalType();
     }
 
-    if (auto *shapeType = cast_type<ShapeType>(tp.get())) {
+    if (auto *shapeType = cast_type<ShapeType>(tp)) {
         vector<TypePtr> unwrappedValues;
         unwrappedValues.reserve(shapeType->values.size());
         for (auto &value : shapeType->values) {
             unwrappedValues.emplace_back(unwrapType(gs, loc, value));
         }
         return make_type<ShapeType>(Types::hashOfUntyped(), shapeType->keys, move(unwrappedValues));
-    } else if (auto *tupleType = cast_type<TupleType>(tp.get())) {
+    } else if (auto *tupleType = cast_type<TupleType>(tp)) {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(tupleType->elems.size());
         for (auto &elem : tupleType->elems) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return TupleType::build(gs, move(unwrappedElems));
-    } else if (auto *litType = cast_type<LiteralType>(tp.get())) {
+    } else if (auto *litType = cast_type<LiteralType>(tp)) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unsupported usage of literal type");
         }
@@ -726,7 +726,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
             while (kwit != kwend) {
                 // if the key isn't a symbol literal, break out as this is not a valid keyword
                 auto &key = *kwit++;
-                auto *lit = cast_type<LiteralType>(key->type.get());
+                auto *lit = cast_type<LiteralType>(key->type);
                 if (!lit || lit->literalKind != LiteralType::LiteralTypeKind::Symbol) {
                     // it's not possible to tell if this is hash will be used as kwargs yet, so we can't raise a useful
                     // error here.
@@ -748,13 +748,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
             auto kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
 
             if (hasKwargs) {
-                if (auto *hash = cast_type<ShapeType>(kwSplatType.get())) {
+                if (auto *hash = cast_type<ShapeType>(kwSplatType)) {
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
                     kwargs = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
                     --aend;
                 } else {
-                    if (kwSplatType->isUntyped()) {
+                    if (kwSplatType.isUntyped()) {
                         // Allow an untyped arg to satisfy all kwargs
                         --aend;
                         kwargs = Types::untypedUntracked();
@@ -846,7 +846,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     // keep this around so we know which keyword arguments have been supplied
     UnorderedSet<NameRef> consumed;
     if (hasKwargs) {
-        if (auto *hash = cast_type<ShapeType>(kwargs.get())) {
+        if (auto *hash = cast_type<ShapeType>(kwargs)) {
             // Mark the keyword args as consumed
             ait += nonPosArgs;
 
@@ -864,8 +864,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                     break;
                 } else if (spec.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
-                        auto key = cast_type<LiteralType>(it->get());
-                        SymbolRef klass = cast_type<ClassType>(key->underlying().get())->symbol;
+                        auto key = cast_type<LiteralType>(*it);
+                        SymbolRef klass = cast_type<ClassType>(key->underlying())->symbol;
                         if (klass != Symbols::Symbol()) {
                             continue;
                         }
@@ -894,8 +894,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 ++kwit;
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
-                    auto lit = cast_type<LiteralType>(litType.get());
-                    return cast_type<ClassType>(lit->underlying().get())->symbol == Symbols::Symbol() &&
+                    auto lit = cast_type<LiteralType>(litType);
+                    return cast_type<ClassType>(lit->underlying())->symbol == Symbols::Symbol() &&
                            lit->value == spec.name._id;
                 });
                 if (arg == hash->keys.end()) {
@@ -919,8 +919,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 }
             }
             for (auto &keyType : hash->keys) {
-                auto key = cast_type<LiteralType>(keyType.get());
-                SymbolRef klass = cast_type<ClassType>(key->underlying().get())->symbol;
+                auto key = cast_type<LiteralType>(keyType);
+                SymbolRef klass = cast_type<ClassType>(key->underlying())->symbol;
                 if (klass == Symbols::Symbol() && consumed.find(NameRef(gs, key->value)) != consumed.end()) {
                     continue;
                 }
@@ -1093,7 +1093,7 @@ TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name,
 }
 
 TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) {
-    if (isUntyped()) {
+    if (hasUntyped()) {
         return Types::untyped(gs, untypedBlame());
     }
     return getMethodArguments(gs, symbol, name, vector<TypePtr>{});
@@ -1134,7 +1134,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.data(gs)->show(gs),
                             this->wrapped->show(gs));
                 if (args.name == core::Names::tripleEq()) {
-                    if (auto appliedType = cast_type<AppliedType>(this->wrapped.get())) {
+                    if (auto appliedType = cast_type<AppliedType>(this->wrapped)) {
                         e.addErrorSection(
                             ErrorSection("It looks like you're trying to pattern match on a generic", {}));
                         e.replaceWith("Replace with class name", loc, "{}", appliedType->klass.data(gs)->show(gs));
@@ -1145,17 +1145,18 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
     }
 }
 
-SymbolRef unwrapSymbol(const Type *type) {
+SymbolRef unwrapSymbol(const TypePtr &type) {
     SymbolRef result;
+    const Type *rawTypePtr = type.get();
     while (!result.exists()) {
         typecase(
-            type,
+            rawTypePtr,
 
             [&](const ClassType *klass) { result = klass->symbol; },
 
             [&](const AppliedType *app) { result = app->klass; },
 
-            [&](const ProxyType *proxy) { type = proxy->underlying().get(); },
+            [&](const ProxyType *proxy) { rawTypePtr = proxy->underlying().get(); },
 
             [&](const Type *ty) { ENFORCE(false, "Unexpected type: {}", ty->typeName()); });
     }
@@ -1279,7 +1280,7 @@ public:
 class Object_class : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
-        SymbolRef self = unwrapSymbol(args.thisType.get());
+        SymbolRef self = unwrapSymbol(args.thisType);
         auto singleton = self.data(gs)->lookupSingletonClass(gs);
         if (singleton.exists()) {
             res.returnType = singleton.data(gs)->externalType();
@@ -1292,7 +1293,7 @@ public:
 class Class_new : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
-        SymbolRef self = unwrapSymbol(args.thisType.get());
+        SymbolRef self = unwrapSymbol(args.thisType);
 
         auto attachedClass = self.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
@@ -1331,7 +1332,7 @@ public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
         SymbolRef attachedClass;
 
-        SymbolRef self = unwrapSymbol(args.thisType.get());
+        SymbolRef self = unwrapSymbol(args.thisType);
         attachedClass = self.data(gs)->attachedClass(gs);
 
         if (!attachedClass.exists()) {
@@ -1393,7 +1394,7 @@ public:
 
             auto memData = mem.data(gs);
 
-            auto *memType = cast_type<LambdaParam>(memData->resultType.get());
+            auto *memType = cast_type<LambdaParam>(memData->resultType);
             ENFORCE(memType != nullptr);
 
             if (memData->isFixed()) {
@@ -1485,7 +1486,7 @@ public:
         keys.reserve(args.args.size() / 2);
         values.reserve(args.args.size() / 2);
         for (int i = 0; i < args.args.size(); i += 2) {
-            auto *key = cast_type<LiteralType>(args.args[i]->type.get());
+            auto *key = cast_type<LiteralType>(args.args[i]->type);
             if (key == nullptr) {
                 res.returnType = Types::hashOfUntyped();
                 return;
@@ -1507,7 +1508,7 @@ public:
         }
         vector<TypePtr> elems;
         elems.reserve(args.args.size());
-        bool isType = absl::c_any_of(args.args, [](auto ty) { return isa_type<MetaType>(ty->type.get()); });
+        bool isType = absl::c_any_of(args.args, [](auto ty) { return isa_type<MetaType>(ty->type); });
         int i = -1;
         for (auto &elem : args.args) {
             ++i;
@@ -1532,12 +1533,12 @@ public:
         ENFORCE(args.args.size() == 3, "Magic_buildRange called with missing arguments");
 
         auto rangeElemType = Types::dropLiteral(args.args[0]->type);
-        auto firstArgIsNil = rangeElemType->isNilClass();
+        auto firstArgIsNil = rangeElemType.isNilClass();
         if (!firstArgIsNil) {
             rangeElemType = Types::dropNil(gs, rangeElemType);
         }
         auto other = Types::dropLiteral(args.args[1]->type);
-        auto secondArgIsNil = other->isNilClass();
+        auto secondArgIsNil = other.isNilClass();
         if (firstArgIsNil) {
             if (secondArgIsNil) {
                 rangeElemType = Types::untypedUntracked();
@@ -1553,11 +1554,11 @@ public:
 
 class Magic_expandSplat : public IntrinsicMethod {
     static TypePtr expandArray(const GlobalState &gs, const TypePtr &type, int expandTo) {
-        if (auto *ot = cast_type<OrType>(type.get())) {
+        if (auto *ot = cast_type<OrType>(type)) {
             return Types::any(gs, expandArray(gs, ot->left, expandTo), expandArray(gs, ot->right, expandTo));
         }
 
-        auto *tuple = cast_type<TupleType>(type.get());
+        auto *tuple = cast_type<TupleType>(type);
         if (tuple == nullptr && core::Types::approximate(gs, type, core::TypeConstraint::EmptyFrozenConstraint)
                                     ->derivesFrom(gs, Symbols::Array())) {
             // If this is an array and not a tuple, just pass it through. We
@@ -1584,8 +1585,8 @@ public:
             return;
         }
         auto val = args.args.front()->type;
-        auto *beforeLit = cast_type<LiteralType>(args.args[1]->type.get());
-        auto *afterLit = cast_type<LiteralType>(args.args[2]->type.get());
+        auto *beforeLit = cast_type<LiteralType>(args.args[1]->type);
+        auto *afterLit = cast_type<LiteralType>(args.args[2]->type);
         if (!(beforeLit->underlying()->derivesFrom(gs, Symbols::Integer()) &&
               afterLit->underlying()->derivesFrom(gs, Symbols::Integer()))) {
             res.returnType = Types::untypedUntracked();
@@ -1601,7 +1602,8 @@ class Magic_callWithSplat : public IntrinsicMethod {
     friend class Magic_callWithSplatAndBlock;
 
 private:
-    static InlinedVector<const TypeAndOrigins *, 2> generateSendArgs(TupleType *posTuple, TupleType *kwTuple,
+    static InlinedVector<const TypeAndOrigins *, 2> generateSendArgs(const TupleType *posTuple,
+                                                                     const TupleType *kwTuple,
                                                                      InlinedVector<TypeAndOrigins, 2> &sendArgStore,
                                                                      Loc argsLoc) {
         auto numKwArgs = kwTuple != nullptr ? kwTuple->elems.size() : 0;
@@ -1645,7 +1647,7 @@ public:
             return;
         }
         auto &receiver = args.args[0];
-        if (receiver->type->isUntyped()) {
+        if (receiver->type.isUntyped()) {
             res.returnType = receiver->type;
             return;
         }
@@ -1654,16 +1656,16 @@ public:
             return;
         }
 
-        auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
+        auto *lit = cast_type<LiteralType>(args.args[1]->type);
         if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
         NameRef fn(gs, (u4)lit->value);
-        if (args.args[2]->type->isUntyped()) {
+        if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
             return;
         }
-        auto *posTuple = cast_type<TupleType>(args.args[2]->type.get());
+        auto *posTuple = cast_type<TupleType>(args.args[2]->type);
         if (posTuple == nullptr) {
             if (auto e =
                     gs.beginError(core::Loc(args.locs.file, args.locs.args[2]), core::errors::Infer::UntypedSplat)) {
@@ -1672,9 +1674,9 @@ public:
             return;
         }
 
-        auto kwArgsType = args.args[3]->type.get();
+        auto kwArgsType = args.args[3]->type;
         auto *kwTuple = cast_type<TupleType>(kwArgsType);
-        if (kwTuple == nullptr && !kwArgsType->isNilClass()) {
+        if (kwTuple == nullptr && !kwArgsType.isNilClass()) {
             if (auto e =
                     gs.beginError(core::Loc(args.locs.file, args.locs.args[2]), core::errors::Infer::UntypedSplat)) {
                 e.setHeader(
@@ -1728,7 +1730,7 @@ private:
             nonNilBlockType = Types::dropNil(gs, blockType);
             typeIsNilable = true;
 
-            if (nonNilBlockType->isBottom()) {
+            if (nonNilBlockType.isBottom()) {
                 return Types::nilClass();
             }
         }
@@ -1752,8 +1754,8 @@ private:
         }
     }
 
-    static std::optional<int> getArityForBlock(TypePtr blockType) {
-        if (AppliedType *appliedType = cast_type<AppliedType>(blockType.get())) {
+    static std::optional<int> getArityForBlock(const TypePtr &blockType) {
+        if (auto *appliedType = cast_type<AppliedType>(blockType)) {
             return Types::getProcArity(*appliedType);
         }
 
@@ -1772,7 +1774,7 @@ private:
         return res;
     }
 
-    static void showLocationOfArgDefn(const GlobalState &gs, ErrorBuilder &e, TypePtr blockType,
+    static void showLocationOfArgDefn(const GlobalState &gs, ErrorBuilder &e, const TypePtr &blockType,
                                       DispatchComponent &dispatchComp) {
         if (!dispatchComp.method.exists()) {
             return;
@@ -1806,7 +1808,7 @@ private:
         auto &blockPreType = dispatched.main.blockPreType;
         if (blockPreType && !Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, blockPreType,
                                                              UntypedMode::AlwaysCompatible)) {
-            ClassType *passedInProcClass = cast_type<ClassType>(passedInBlockType.get());
+            auto *passedInProcClass = cast_type<ClassType>(passedInBlockType);
             auto nonNilableBlockType = Types::dropNil(gs, blockPreType);
             if (passedInProcClass && passedInProcClass->symbol == Symbols::Proc() &&
                 Types::isSubType(gs, nonNilableBlockType, passedInBlockType)) {
@@ -1883,7 +1885,7 @@ public:
             return;
         }
         auto &receiver = args.args[0];
-        if (receiver->type->isUntyped()) {
+        if (receiver->type.isUntyped()) {
             res.returnType = receiver->type;
             return;
         }
@@ -1892,7 +1894,7 @@ public:
             return;
         }
 
-        if (core::cast_type<core::TypeVar>(args.args[2]->type.get())) {
+        if (isa_type<TypeVar>(args.args[2]->type)) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.args[2]),
                                        core::errors::Infer::GenericPassedAsBlock)) {
                 e.setHeader("Passing generics as block arguments is not supported");
@@ -1900,7 +1902,7 @@ public:
             return;
         }
 
-        auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
+        auto *lit = cast_type<LiteralType>(args.args[1]->type);
         if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
@@ -1955,7 +1957,7 @@ public:
             return;
         }
         auto &receiver = args.args[0];
-        if (receiver->type->isUntyped()) {
+        if (receiver->type.isUntyped()) {
             res.returnType = receiver->type;
             return;
         }
@@ -1964,17 +1966,17 @@ public:
             return;
         }
 
-        auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
+        auto *lit = cast_type<LiteralType>(args.args[1]->type);
         if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
             return;
         }
         NameRef fn(gs, (u4)lit->value);
 
-        if (args.args[2]->type->isUntyped()) {
+        if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
             return;
         }
-        auto *posTuple = cast_type<TupleType>(args.args[2]->type.get());
+        auto *posTuple = cast_type<TupleType>(args.args[2]->type);
         if (posTuple == nullptr) {
             if (auto e =
                     gs.beginError(core::Loc(args.locs.file, args.locs.args[2]), core::errors::Infer::UntypedSplat)) {
@@ -1985,9 +1987,9 @@ public:
 
         u2 numPosArgs = posTuple->elems.size();
 
-        auto kwType = args.args[3]->type.get();
+        auto kwType = args.args[3]->type;
         auto *kwTuple = cast_type<TupleType>(kwType);
-        if (kwTuple == nullptr && !kwType->isNilClass()) {
+        if (kwTuple == nullptr && !kwType.isNilClass()) {
             if (auto e =
                     gs.beginError(core::Loc(args.locs.file, args.locs.args[2]), core::errors::Infer::UntypedSplat)) {
                 e.setHeader(
@@ -1996,7 +1998,7 @@ public:
             return;
         }
 
-        if (core::cast_type<core::TypeVar>(args.args[4]->type.get())) {
+        if (isa_type<TypeVar>(args.args[4]->type)) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.args[4]),
                                        core::errors::Infer::GenericPassedAsBlock)) {
                 e.setHeader("Passing generics as block arguments is not supported");
@@ -2041,7 +2043,7 @@ public:
         if (auto e = gs.beginError(loc, core::errors::Infer::UntypedConstantSuggestion)) {
             e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                         "# typed: strict");
-            if (!ty->isUntyped() && loc.exists()) {
+            if (!ty.isUntyped() && loc.exists()) {
                 e.replaceWith(fmt::format("Initialize as `{}`", ty->show(gs)), loc, "T.let({}, {})", loc.source(gs),
                               ty->show(gs));
             }
@@ -2066,7 +2068,7 @@ public:
         }
 
         auto selfTy = args.args[0]->type;
-        SymbolRef self = unwrapSymbol(selfTy.get());
+        SymbolRef self = unwrapSymbol(selfTy);
 
         u2 numPosArgs = args.numPosArgs - 1;
 
@@ -2153,11 +2155,11 @@ public:
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType.get());
+        auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
-        LiteralType *lit = nullptr;
+        const LiteralType *lit = nullptr;
         if (args.args.size() == 1) {
-            lit = cast_type<LiteralType>(args.args.front()->type.get());
+            lit = cast_type<LiteralType>(args.args.front()->type);
         }
         if (!lit || !lit->underlying()->derivesFrom(gs, Symbols::Integer())) {
             return;
@@ -2178,7 +2180,7 @@ public:
 class Tuple_last : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType.get());
+        auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -2195,7 +2197,7 @@ public:
 class Tuple_first : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType.get());
+        auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -2212,7 +2214,7 @@ public:
 class Tuple_minMax : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
-        auto *tuple = cast_type<TupleType>(args.thisType.get());
+        auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
         if (!args.args.empty()) {
@@ -2237,11 +2239,11 @@ class Tuple_concat : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
         vector<TypePtr> elems;
-        auto *tuple = cast_type<TupleType>(args.thisType.get());
+        auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
         elems = tuple->elems;
         for (auto elem : args.args) {
-            if (auto *tuple = cast_type<TupleType>(elem->type.get())) {
+            if (auto *tuple = cast_type<TupleType>(elem->type)) {
                 elems.insert(elems.end(), tuple->elems.begin(), tuple->elems.end());
             } else {
                 return;
@@ -2254,7 +2256,7 @@ public:
 class Shape_merge : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
-        auto *shape = cast_type<ShapeType>(args.thisType.get());
+        auto *shape = cast_type<ShapeType>(args.thisType);
         ENFORCE(shape);
 
         if (args.args.empty() || args.block != nullptr) {
@@ -2265,9 +2267,9 @@ public:
         auto nonPosArgs = (args.args.size() - args.numPosArgs);
         auto numKwargs = nonPosArgs & ~0x1;
         bool hasKwsplat = nonPosArgs & 0x1;
-        ShapeType *kwsplat = nullptr;
+        const ShapeType *kwsplat = nullptr;
         if (hasKwsplat || (numKwargs == 0 && args.args.size() == 1)) {
-            kwsplat = cast_type<ShapeType>(args.args.back()->type.get());
+            kwsplat = cast_type<ShapeType>(args.args.back()->type);
             if (kwsplat == nullptr) {
                 return;
             }
@@ -2276,8 +2278,7 @@ public:
         auto keys = shape->keys;
         auto values = shape->values;
         auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType *key, const TypePtr &value) {
-            auto fnd =
-                absl::c_find_if(keys, [&key](auto &lit) { return key->equals(*cast_type<LiteralType>(lit.get())); });
+            auto fnd = absl::c_find_if(keys, [&key](auto &lit) { return key->equals(*cast_type<LiteralType>(lit)); });
             if (fnd == keys.end()) {
                 keys.emplace_back(keyType);
                 values.emplace_back(value);
@@ -2289,7 +2290,7 @@ public:
         // inlined keyword arguments first
         for (auto i = 0; i < numKwargs; i += 2) {
             auto &keyType = args.args[i]->type;
-            auto *key = cast_type<LiteralType>(keyType.get());
+            auto *key = cast_type<LiteralType>(keyType);
             if (!key || key->literalKind != LiteralType::LiteralTypeKind::Symbol) {
                 return;
             }
@@ -2300,7 +2301,7 @@ public:
         // then kwsplat
         if (kwsplat != nullptr) {
             for (auto &keyType : kwsplat->keys) {
-                auto *key = cast_type<LiteralType>(keyType.get());
+                auto *key = cast_type<LiteralType>(keyType);
                 addShapeEntry(keyType, key, kwsplat->values[&keyType - &kwsplat->keys.front()]);
             }
         }
@@ -2325,12 +2326,12 @@ class Array_flatten : public IntrinsicMethod {
 
             // This only shows up because t->elementType() for tuples returns an OrType of all its elements.
             // So to properly handle nested tuples, we have to descend into the OrType's.
-            [&](OrType *o) {
+            [&](const OrType *o) {
                 result = Types::any(gs, recursivelyFlattenArrays(gs, o->left, newDepth),
                                     recursivelyFlattenArrays(gs, o->right, newDepth));
             },
 
-            [&](AppliedType *a) {
+            [&](const AppliedType *a) {
                 if (a->klass != Symbols::Array()) {
                     result = type;
                     return;
@@ -2339,9 +2340,9 @@ class Array_flatten : public IntrinsicMethod {
                 result = recursivelyFlattenArrays(gs, a->targs.front(), newDepth);
             },
 
-            [&](TupleType *t) { result = recursivelyFlattenArrays(gs, t->elementType(), newDepth); },
+            [&](const TupleType *t) { result = recursivelyFlattenArrays(gs, t->elementType(), newDepth); },
 
-            [&](Type *t) { result = std::move(type); });
+            [&](const Type *t) { result = std::move(type); });
         return result;
     }
 
@@ -2349,11 +2350,11 @@ public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         TypePtr element;
-        if (auto *ap = cast_type<AppliedType>(args.thisType.get())) {
+        if (auto *ap = cast_type<AppliedType>(args.thisType)) {
             ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
             ENFORCE(!ap->targs.empty());
             element = ap->targs.front();
-        } else if (auto *tuple = cast_type<TupleType>(args.thisType.get())) {
+        } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
             element = tuple->elementType();
         } else {
             ENFORCE(false, "Array#flatten on unexpected type: {}", args.selfType->show(gs));
@@ -2366,7 +2367,7 @@ public:
                     args.locs.args.size());
             auto argLoc = args.locs.args[0];
 
-            auto lt = cast_type<LiteralType>(argTyp.get());
+            auto lt = cast_type<LiteralType>(argTyp);
             if (!lt) {
                 if (auto e =
                         gs.beginError(core::Loc(args.locs.file, argLoc), core::errors::Infer::ExpectedLiteralType)) {
@@ -2400,11 +2401,11 @@ public:
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
-        if (auto *ap = cast_type<AppliedType>(args.thisType.get())) {
+        if (auto *ap = cast_type<AppliedType>(args.thisType)) {
             ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
             ENFORCE(!ap->targs.empty());
             unwrappedElems.emplace_back(ap->targs.front());
-        } else if (auto *tuple = cast_type<TupleType>(args.thisType.get())) {
+        } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
             unwrappedElems.emplace_back(tuple->elementType());
         } else {
             // We will have only dispatched to this intrinsic when we knew the receiver.
@@ -2416,11 +2417,11 @@ public:
 
         for (auto arg : args.args) {
             auto argTyp = arg->type;
-            if (auto *ap = cast_type<AppliedType>(argTyp.get())) {
+            if (auto *ap = cast_type<AppliedType>(argTyp)) {
                 ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
                 ENFORCE(!ap->targs.empty());
                 unwrappedElems.emplace_back(ap->targs.front());
-            } else if (auto *tuple = cast_type<TupleType>(argTyp.get())) {
+            } else if (auto *tuple = cast_type<TupleType>(argTyp)) {
                 unwrappedElems.emplace_back(tuple->elementType());
             } else {
                 // Arg type didn't match; we already reported an error for the arg type; just return untyped to recover.
@@ -2437,11 +2438,11 @@ class Array_compact : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
         TypePtr element;
-        if (auto *ap = cast_type<AppliedType>(args.thisType.get())) {
+        if (auto *ap = cast_type<AppliedType>(args.thisType)) {
             ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
             ENFORCE(!ap->targs.empty());
             element = ap->targs.front();
-        } else if (auto *tuple = cast_type<TupleType>(args.thisType.get())) {
+        } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
             element = tuple->elementType();
         } else {
             ENFORCE(false, "Array#compact on unexpected type: {}", args.selfType->show(gs));
@@ -2503,23 +2504,23 @@ public:
             return;
         }
         auto rhs = args.args[0]->type;
-        if (rhs->isUntyped()) {
+        if (rhs.isUntyped()) {
             res.returnType = rhs;
             return;
         }
-        auto rc = Types::getRepresentedClass(gs, args.thisType.get());
+        auto rc = Types::getRepresentedClass(gs, args.thisType);
         // in most cases, thisType is T.class_of(rc). see test/testdata/class_not_class_of.rb for an edge case.
         if (rc == core::Symbols::noSymbol()) {
             res.returnType = Types::Boolean();
             return;
         }
         auto lhs = rc.data(gs)->externalType();
-        ENFORCE(!lhs->isUntyped(), "lhs of Module.=== must be typed");
+        ENFORCE(!lhs.isUntyped(), "lhs of Module.=== must be typed");
         if (Types::isSubType(gs, rhs, lhs)) {
             res.returnType = Types::trueClass();
             return;
         }
-        if (Types::glb(gs, rhs, lhs)->isBottom()) {
+        if (Types::glb(gs, rhs, lhs).isBottom()) {
             res.returnType = Types::falseClass();
             return;
         }

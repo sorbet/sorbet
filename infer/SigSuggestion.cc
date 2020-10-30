@@ -112,7 +112,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
         while (iter != nullptr) {
             if (iter->main.method.exists() && iter->main.method != core::Symbols::untyped()) {
                 auto argType = extractArgType(ctx, *snd, iter->main, i);
-                if (argType && !argType->isUntyped()) {
+                if (argType && !argType.isUntyped()) {
                     if (!thisType) {
                         thisType = argType;
                     } else {
@@ -320,7 +320,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             guessedReturnType = core::Types::untypedUntracked();
         }
 
-        guessedSomethingUseful |= !guessedReturnType->isUntyped();
+        guessedSomethingUseful |= !guessedReturnType.isUntyped();
     } else {
         guessedReturnType = methodReturnType;
     }
@@ -346,12 +346,12 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     fmt::memory_buffer ss;
     if (closestMethod.exists()) {
         auto closestReturnType = closestMethod.data(ctx)->resultType;
-        if (closestReturnType && !closestReturnType->isUntyped()) {
+        if (closestReturnType && !closestReturnType.isUntyped()) {
             guessedReturnType = closestReturnType;
         }
 
         for (const auto &arg : closestMethod.data(ctx)->arguments()) {
-            if (arg.type && !arg.type->isUntyped()) {
+            if (arg.type && !arg.type.isUntyped()) {
                 guessedArgumentTypes[arg.name] = arg.type;
             }
         }
@@ -401,8 +401,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             core::TypePtr chosenType;
 
             auto oldType = argSym.type;
-            if (!oldType || oldType->isUntyped()) {
-                if (!argType || argType->isBottom()) {
+            if (!oldType || oldType.isUntyped()) {
+                if (!argType || argType.isBottom()) {
                     chosenType = core::Types::untypedUntracked();
                 } else {
                     guessedSomethingUseful = true;
@@ -422,7 +422,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
 
     bool suggestsVoid = methodSymbol.data(ctx)->name == core::Names::initialize() ||
                         (core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType) &&
-                         !guessedReturnType->isUntyped() && !guessedReturnType->isBottom());
+                         !guessedReturnType.isUntyped() && !guessedReturnType.isBottom());
 
     if (suggestsVoid) {
         fmt::format_to(ss, "void}}");

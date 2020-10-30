@@ -124,8 +124,8 @@ public:
     static bool canBeFalsy(const GlobalState &gs, const TypePtr &what);
     enum class Combinator { OR, AND };
 
-    static TypePtr resultTypeAsSeenFrom(const GlobalState &gs, TypePtr what, SymbolRef fromWhat, SymbolRef inWhat,
-                                        const std::vector<TypePtr> &targs);
+    static TypePtr resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, SymbolRef fromWhat,
+                                        SymbolRef inWhat, const std::vector<TypePtr> &targs);
 
     static InlinedVector<SymbolRef, 4> alignBaseTypeArgs(const GlobalState &gs, SymbolRef what,
                                                          const std::vector<TypePtr> &targs, SymbolRef asIf);
@@ -169,7 +169,7 @@ public:
     // Given a type, return a SymbolRef for the Ruby class that has that type, or no symbol if no such class exists.
     // This is an internal method for implementing intrinsics. In the future we should make all updateKnowledge methods
     // be intrinsics so that this can become an anonymous helper function in calls.cc.
-    static core::SymbolRef getRepresentedClass(const GlobalState &gs, const core::Type *ty);
+    static core::SymbolRef getRepresentedClass(const GlobalState &gs, const core::TypePtr &ty);
 };
 
 struct Intrinsic {
@@ -218,10 +218,7 @@ public:
         _sanityCheck(gs);
     }
 
-    bool isUntyped() const;
-    bool isNilClass() const;
-    core::SymbolRef untypedBlame() const;
-    bool isBottom() const;
+    virtual core::SymbolRef untypedBlame() const;
     virtual bool hasUntyped() const;
     virtual bool isFullyDefined() const = 0;
     virtual int kind() const = 0;
@@ -230,20 +227,73 @@ public:
 };
 CheckSize(Type, 8, 8);
 
-template <class To> To *cast_type(Type *what) {
-    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Type *&, To *>::value, "Ill Formed To, has to be a subclass of Type");
-    return fast_cast<Type, To>(what);
+template <class To> To const *cast_type(const TypePtr &what) {
+    if (what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value) {
+        return reinterpret_cast<To const *>(what.get());
+    } else {
+        return nullptr;
+    }
 }
 
-template <class To> const To *cast_type(const Type *what) {
-    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Type *&, To *>::value, "Ill Formed To, has to be a subclass of Type");
-    return fast_cast<const Type, const To>(what);
+// Specializations to handle the class hierarchy.
+
+class ClassType;
+template <> inline const ClassType *cast_type<ClassType>(const TypePtr &what) {
+    if (what == nullptr) {
+        return nullptr;
+    }
+    switch (what.tag()) {
+        case TypePtr::Tag::ClassType:
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::UnresolvedAppliedType:
+            return reinterpret_cast<const ClassType *>(what.get());
+        default:
+            return nullptr;
+    }
 }
 
-template <class To> bool isa_type(Type *what) {
+class GroundType;
+template <> inline const GroundType *cast_type<GroundType>(const TypePtr &what) {
+    if (what == nullptr) {
+        return nullptr;
+    }
+    switch (what.tag()) {
+        case TypePtr::Tag::ClassType:
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::UnresolvedAppliedType:
+        case TypePtr::Tag::OrType:
+        case TypePtr::Tag::AndType:
+            return reinterpret_cast<const GroundType *>(what.get());
+        default:
+            return nullptr;
+    }
+}
+
+class ProxyType;
+template <> inline const ProxyType *cast_type<ProxyType>(const TypePtr &what) {
+    if (what == nullptr) {
+        return nullptr;
+    }
+    switch (what.tag()) {
+        case TypePtr::Tag::LiteralType:
+        case TypePtr::Tag::ShapeType:
+        case TypePtr::Tag::TupleType:
+        case TypePtr::Tag::MetaType:
+            return reinterpret_cast<const ProxyType *>(what.get());
+        default:
+            return nullptr;
+    }
+}
+
+template <class To> bool isa_type(const TypePtr &what) {
     return cast_type<To>(what) != nullptr;
+}
+
+template <class To> To *cast_type(TypePtr &what) {
+    // const To* -> To* to avoid reimplementing the same logic twice.
+    return const_cast<To *>(cast_type<To>(static_cast<const TypePtr &>(what)));
 }
 
 #define TYPE(name)                                                                                             \
@@ -743,7 +793,7 @@ struct DispatchResult {
     DispatchResult(TypePtr returnType, TypePtr receiverType, core::SymbolRef method)
         : returnType(returnType),
           main(DispatchComponent{
-              receiverType, method, {}, std::move(returnType), nullptr, nullptr, ArgInfo{}, nullptr}){};
+              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, ArgInfo{}, nullptr}){};
     DispatchResult(TypePtr returnType, DispatchComponent comp)
         : returnType(std::move(returnType)), main(std::move(comp)){};
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,
@@ -756,6 +806,8 @@ TYPE(BlamedUntyped) final : public ClassType {
 public:
     const core::SymbolRef blame;
     BlamedUntyped(SymbolRef whoToBlame) : ClassType(core::Symbols::untyped()), blame(whoToBlame){};
+
+    core::SymbolRef untypedBlame() const override final;
 };
 
 TYPE(UnresolvedClassType) final : public ClassType {
