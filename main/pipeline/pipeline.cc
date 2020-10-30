@@ -505,7 +505,13 @@ struct SubstitutionThreadResultPack {
 void beginSubstituteTreesWorkers(spdlog::logger &tracer, shared_ptr<BlockingBoundedQueue<SubstitutionJob>> mergeInput,
                                  shared_ptr<BlockingBoundedQueue<SubstitutionThreadResultPack>> mergeOutput,
                                  WorkerPool &workers) {
-    workers.multiplexJob("substituteTrees", [&tracer, mergeInput, mergeOutput]() {
+    auto counter = make_shared<atomic<u4>>(0);
+    workers.multiplexJob("substituteTrees", [counter, &workers, &tracer, mergeInput, mergeOutput]() {
+        if (counter->fetch_add(1) == 0 && workers.size() > 1) {
+            // Park the first worker thread to avoid starving the enqueueing thread.
+            return;
+        }
+
         Timer timeit(tracer, "substituteTreesWorker");
         SubstitutionJob job;
         SubstitutionThreadResultPack threadResult;
