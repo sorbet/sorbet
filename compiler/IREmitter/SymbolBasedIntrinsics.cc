@@ -40,9 +40,9 @@ core::SymbolRef removeRoot(core::SymbolRef sym) {
 
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     core::SymbolRef sym;
-    if (auto classType = core::cast_type<core::ClassType>(typ.get())) {
+    if (auto classType = core::cast_type<core::ClassType>(typ)) {
         sym = classType->symbol;
-    } else if (auto appliedType = core::cast_type<core::AppliedType>(typ.get())) {
+    } else if (auto appliedType = core::cast_type<core::AppliedType>(typ)) {
         sym = appliedType->klass;
     } else {
         ENFORCE(false);
@@ -104,7 +104,7 @@ public:
         ENFORCE(send->args.size() == 2, "Invariant established by rewriter/Flatten.cc");
         auto ownerSym = typeToSym(cs, send->args[0].type);
 
-        auto lit = core::cast_type<core::LiteralType>(send->args[1].type.get());
+        auto lit = core::cast_type<core::LiteralType>(send->args[1].type);
         ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         core::NameRef funcNameRef(cs, lit->value);
 
@@ -170,7 +170,7 @@ public:
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         auto &cs = mcctx.cs;
         auto *send = mcctx.send;
-        auto representedClass = core::Types::getRepresentedClass(cs, send->recv.type.get());
+        auto representedClass = core::Types::getRepresentedClass(cs, send->recv.type);
         if (!representedClass.exists()) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
@@ -232,7 +232,7 @@ public:
         auto options = 0;
         if (send->args.size() == 2) {
             auto &arg1 = send->args[1];
-            auto literalOptions = core::cast_type<core::LiteralType>(arg1.type.get());
+            auto literalOptions = core::cast_type<core::LiteralType>(arg1.type);
             if (literalOptions == nullptr ||
                 literalOptions->literalKind != core::LiteralType::LiteralTypeKind::Integer) {
                 return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
@@ -241,7 +241,7 @@ public:
         }
 
         auto &arg0 = send->args[0];
-        auto literal = core::cast_type<core::LiteralType>(arg0.type.get());
+        auto literal = core::cast_type<core::LiteralType>(arg0.type);
         if (literal == nullptr || literal->literalKind != core::LiteralType::LiteralTypeKind::String) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
@@ -266,7 +266,7 @@ public:
         auto *send = mcctx.send;
         // Instead of `MyEnum::X$1.new(...)`, we want to do `<self>.new(...)` to get back to what
         // would have happened at runtime. This is effecctively "undo-ing" the earlier DSL pass.
-        auto appliedType = core::cast_type<core::AppliedType>(send->recv.type.get());
+        auto appliedType = core::cast_type<core::AppliedType>(send->recv.type);
         if (appliedType == nullptr) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }

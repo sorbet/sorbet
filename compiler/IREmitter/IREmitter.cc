@@ -596,7 +596,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                             return;
                         }
 
-                        auto litType = core::cast_type<core::LiteralType>(i->value.get());
+                        auto litType = core::cast_type<core::LiteralType>(i->value);
                         ENFORCE(litType);
                         switch (litType->literalKind) {
                             case core::LiteralType::LiteralTypeKind::Integer: {
@@ -783,7 +783,7 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, var);
         return;
     }
-    auto ct = core::cast_type<core::ClassType>(expectedType.get());
+    auto ct = core::cast_type<core::ClassType>(expectedType);
     if (ct != nullptr && ct->symbol == core::Symbols::void_()) {
         auto void_ = Payload::getRubyConstant(cs, core::Symbols::T_Private_Types_Void_VOIDSingleton(), builder);
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, void_);

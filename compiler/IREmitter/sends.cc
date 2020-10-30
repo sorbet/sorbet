@@ -57,7 +57,7 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
     llvm::StringRef methodNameRef(methodName.data(), methodName.size());
     auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("symIntrinsicRawPhi_") + methodNameRef);
     builder.SetInsertPoint(rememberStart);
-    if (!remainingType->isUntyped()) {
+    if (!remainingType.isUntyped()) {
         for (auto symbolBasedIntrinsic : SymbolBasedIntrinsicMethod::definedIntrinsics()) {
             if (!absl::c_linear_search(symbolBasedIntrinsic->applicableMethods(cs), send->fun)) {
                 continue;

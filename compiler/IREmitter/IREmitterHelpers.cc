@@ -610,7 +610,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                     maybeCast->fun != core::Names::squareBrackets() || maybeCast->args.size() != 1) {
                     continue;
                 }
-                auto litType = core::cast_type<core::LiteralType>(maybeCast->args[0].type.get());
+                auto litType = core::cast_type<core::LiteralType>(maybeCast->args[0].type);
                 if (litType == nullptr) {
                     continue;
                 }

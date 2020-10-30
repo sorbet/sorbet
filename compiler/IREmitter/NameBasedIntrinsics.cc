@@ -35,9 +35,9 @@ core::SymbolRef removeRoot(core::SymbolRef sym) {
 
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     core::SymbolRef sym;
-    if (auto classType = core::cast_type<core::ClassType>(typ.get())) {
+    if (auto classType = core::cast_type<core::ClassType>(typ)) {
         sym = classType->symbol;
-    } else if (auto appliedType = core::cast_type<core::AppliedType>(typ.get())) {
+    } else if (auto appliedType = core::cast_type<core::AppliedType>(typ)) {
         sym = appliedType->klass;
     } else {
         ENFORCE(false);
@@ -150,7 +150,7 @@ public:
         // TODO: this implementation generates code that is stupidly slow, we should be able to reuse instrinsics here
         // one day
         auto recv = Payload::varGet(cs, send->args[0].variable, builder, irctx, rubyBlockId);
-        auto lit = core::cast_type<core::LiteralType>(send->args[1].type.get());
+        auto lit = core::cast_type<core::LiteralType>(send->args[1].type);
         ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         core::NameRef funName(cs, lit->value);
         auto name = funName.data(cs)->shortName(cs);
