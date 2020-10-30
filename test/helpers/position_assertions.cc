@@ -1308,7 +1308,7 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         auto extension = FileOps::getExtension(filePath);
         if (extension == "rbedited") {
             auto extensionIndex = filePath.rfind(".rbedited", filePath.length());
-            auto fileVersion = FileOps::getExtension(filePath.substr(0, extensionIndex));
+            auto fileVersion = string(FileOps::getExtension(filePath.substr(0, extensionIndex)));
             if (fileVersion == this->version) {
                 expectedEditedFiles[filePath] = FileOps::read(filePath);
             }
