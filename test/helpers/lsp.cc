@@ -337,8 +337,12 @@ unique_ptr<WorkspaceEdit> doTextDocumentRename(LSPWrapper &lspWrapper, const Ran
             return nullptr;
         }
 
-        auto &e = *response.error;
-        CHECK_EQ(expectedErrorMessage, e->message);
+        {
+            auto &error = *response.error;
+            INFO(fmt::format("Expected an error message containing `{}`, but received:\n{}", expectedErrorMessage,
+                             error->message));
+            REQUIRE_NE(error->message.find(expectedErrorMessage), string::npos);
+        }
     }
 
     if (!response.result.has_value()) {
