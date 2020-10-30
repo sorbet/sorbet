@@ -296,6 +296,11 @@ template <class To> To *cast_type(TypePtr &what) {
     return const_cast<To *>(cast_type<To>(static_cast<const TypePtr &>(what)));
 }
 
+template <class To> To const &cast_type_nonnull(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<To>(what));
+    return *reinterpret_cast<const To *>(what.get());
+}
+
 #define TYPE(name)                                                                                             \
     class name;                                                                                                \
     template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
