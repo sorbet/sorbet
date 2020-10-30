@@ -254,6 +254,10 @@ public:
         fmt::format_to(out, "}}\n");
     }
 
+    bool wantMove() const {
+        return true;
+    }
+
     BaseKind getCPPBaseKind() const {
         return BaseKind::StringKind;
     }
@@ -288,6 +292,10 @@ private:
 
 public:
     JSONStringConstantType(std::string_view value) : value(std::string(value)) {}
+
+    bool wantMove() const {
+        return true;
+    }
 
     BaseKind getCPPBaseKind() const {
         return BaseKind::StringKind;
