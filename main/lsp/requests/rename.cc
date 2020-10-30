@@ -86,6 +86,12 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.rename");
 
+    if (params->newName.empty()) {
+        response->error =
+            make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, "No new name provided for rename request.");
+        return response;
+    }
+
     // Sanity check the text.
     if (islower(params->newName[0])) {
         response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
