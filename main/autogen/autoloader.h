@@ -37,13 +37,6 @@ struct AutoloaderConfig {
     AutoloaderConfig &operator=(AutoloaderConfig &&) = default;
 };
 
-struct QualifiedName {
-    std::vector<core::NameRef> nameParts;
-    std::optional<core::NameRef> package;
-
-    static QualifiedName fromFullName(std::vector<core::NameRef> fullName);
-};
-
 struct NamedDefinition {
     static NamedDefinition fromDef(const core::GlobalState &, ParsedFile &, DefinitionRef);
     static bool preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs);

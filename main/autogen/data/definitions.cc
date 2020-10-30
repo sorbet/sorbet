@@ -8,6 +8,16 @@ using namespace std;
 
 namespace sorbet::autogen {
 
+QualifiedName QualifiedName::fromFullName(vector<core::NameRef> name) {
+    if (name.size() < 3 || name.front() != core::Names::Constants::PackageRegistry()) {
+        return {name, nullopt};
+    }
+    auto pkgName = std::optional<core::NameRef>{name[1]};
+    name.erase(name.begin());
+    name.erase(name.begin());
+    return {name, pkgName};
+}
+
 // Find the `Definition` associated with this `DefinitionRef`
 const Definition &DefinitionRef::data(const ParsedFile &pf) const {
     return pf.defs[_id];
@@ -28,7 +38,7 @@ vector<core::NameRef> ParsedFile::showFullName(const core::GlobalState &gs, Defi
     }
     auto &ref = def.defining_ref.data(*this);
     auto scope = showFullName(gs, ref.scope);
-    scope.insert(scope.end(), ref.name.begin(), ref.name.end());
+    scope.insert(scope.end(), ref.name.nameParts.begin(), ref.name.nameParts.end());
     return scope;
 }
 
@@ -69,15 +79,18 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
 
         if (def.defining_ref.exists()) {
             auto &ref = def.defining_ref.data(*this);
-            fmt::format_to(out, " defining_ref=[{}]\n", fmt::map_join(ref.name, " ", nameToString));
+            if (ref.name.package) {
+                fmt::format_to(out, " defining_pkg=[{}]\n", nameToString(*ref.name.package));
+            }
+            fmt::format_to(out, " defining_ref=[{}]\n", fmt::map_join(ref.name.nameParts, " ", nameToString));
         }
         if (def.parent_ref.exists()) {
             auto &ref = def.parent_ref.data(*this);
-            fmt::format_to(out, " parent_ref=[{}]\n", fmt::map_join(ref.name, " ", nameToString));
+            fmt::format_to(out, " parent_ref=[{}]\n", fmt::map_join(ref.name.nameParts, " ", nameToString));
         }
         if (def.aliased_ref.exists()) {
             auto &ref = def.aliased_ref.data(*this);
-            fmt::format_to(out, " aliased_ref=[{}]\n", fmt::map_join(ref.name, " ", nameToString));
+            fmt::format_to(out, " aliased_ref=[{}]\n", fmt::map_join(ref.name.nameParts, " ", nameToString));
         }
     }
     fmt::format_to(out, "## refs:\n");
@@ -99,8 +112,8 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
                        " is_defining_ref={}\n",
 
                        ref.id.id(), fmt::map_join(refFullName, " ", nameToString),
-                       fmt::map_join(ref.name, " ", nameToString), fmt::join(nestingStrings, " "),
-                       fmt::map_join(ref.resolved, " ", nameToString), ref.loc.filePosToString(gs),
+                       fmt::map_join(ref.name.nameParts, " ", nameToString), fmt::join(nestingStrings, " "),
+                       fmt::map_join(ref.resolved.nameParts, " ", nameToString), ref.loc.filePosToString(gs),
                        (int)ref.is_defining_ref);
 
         if (ref.parent_of.exists()) {

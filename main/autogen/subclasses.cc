@@ -54,7 +54,7 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
 
         // Get fully-qualified parent name as string
         string parentName =
-            fmt::format("{}", fmt::map_join(ref.resolved, "::", [&ctx](const core::NameRef &nm) -> string {
+            fmt::format("{}", fmt::map_join(ref.resolved.nameParts, "::", [&ctx](const core::NameRef &nm) -> string {
                             return nm.data(ctx)->show(ctx);
                         }));
 
