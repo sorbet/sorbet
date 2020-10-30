@@ -37,10 +37,15 @@ public:
     AbstractConcurrentBoundedQueue(const AbstractConcurrentBoundedQueue &other) = delete;
     AbstractConcurrentBoundedQueue(AbstractConcurrentBoundedQueue &&other) = delete;
 
-    inline void push(Elem &&elem, int count) noexcept {
-        _queue.enqueue(std::move(elem));
+    inline void reduceCapacity(int count) noexcept {
+        ENFORCE(count > 0);
         elementsLeftToPush.fetch_add(-count, std::memory_order_release);
         ENFORCE(elementsLeftToPush.load(std::memory_order_relaxed) >= 0);
+    }
+
+    inline void push(Elem &&elem, int count) noexcept {
+        _queue.enqueue(std::move(elem));
+        reduceCapacity(count);
     }
 
     inline DequeueResult try_pop(Elem &elem) noexcept {
