@@ -1291,8 +1291,6 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         REQUIRE_NE(workspaceEdits, nullptr);
     }
 
-    // if (workspaceEdits->error)
-
     auto &renameItems = *workspaceEdits->documentChanges;
     auto it = sourceFileContents.find(this->filename);
     {
@@ -1302,10 +1300,21 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
 
     size_t index = this->filename.rfind("/", this->filename.length());
     auto testDataPath = this->filename.substr(0, index);
+    // map of all .rb and .rbi files
     UnorderedMap<string, string> sourceFiles;
-    // Build a map of all the .rb and .rbi files
-    for (auto filePath : FileOps::listFilesInDir(testDataPath, {".rb", ".rbi"}, false, {}, {})) {
-        sourceFiles[filePath] = FileOps::read(filePath);
+    // map of all .rbedited files whose version equals `this->version`
+    UnorderedMap<string, string> expectedEditedFiles;
+    for (auto filePath : FileOps::listFilesInDir(testDataPath, {".rb", ".rbi", ".rbedited"}, false, {}, {})) {
+        auto extension = FileOps::getExtension(filePath);
+        if (extension == "rbedited") {
+            auto extensionIndex = filePath.rfind(".rbedited", filePath.length());
+            auto fileVersion = FileOps::getExtension(filePath.substr(0, extensionIndex));
+            if (fileVersion == this->version) {
+                expectedEditedFiles[filePath] = FileOps::read(filePath);
+            }
+        } else {
+            sourceFiles[filePath] = FileOps::read(filePath);
+        }
     }
 
     string sourceFilePath;
@@ -1319,14 +1328,14 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         expectedEditedFilePath = updatedFilePath(sourceFilePath, this->version);
 
         auto &edits = renameItem->edits;
-        try {
-            expectedEditedFileContents = FileOps::read(expectedEditedFilePath);
-        } catch (FileNotFoundException e) {
+        expectedEditedFileContents = expectedEditedFiles[expectedEditedFilePath];
+        if (expectedEditedFileContents.empty()) {
             ADD_FAIL_CHECK_AT(filename.c_str(), this->assertionLine + 1,
                               fmt::format("Missing {} which should contain test file after applying code actions.",
                                           expectedEditedFilePath));
             return;
         }
+
         REQUIRE_FALSE(edits.empty());
 
         // First, sort the edits by increasing starting location
@@ -1340,11 +1349,27 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
 
             actualEditedFileContents = applyEdit(actualEditedFileContents, file, *edit->range, edit->newText);
         }
+        sourceFiles[sourceFilePath] = actualEditedFileContents;
+    }
 
+    // Compare every source file to its .rbedited of the same version if one exists
+    // There are 3 cases we're handling
+    // 1. present in bothsource and edited maps and contents match => success
+    // 2. present in original content, but not edited => fails
+    // 3. unexpected edit => fails
+    for (auto &it : sourceFiles) {
+        string filePath = it.first;
+        actualEditedFileContents = it.second;
+        expectedEditedFilePath = updatedFilePath(filePath, this->version);
+        expectedEditedFileContents = expectedEditedFiles[expectedEditedFilePath];
+        if (expectedEditedFileContents.empty()) {
+            continue;
+        }
         {
             INFO(fmt::format("The expected (rbedited) file contents for this rename did not match the actual file "
                              "contents post-edit of {} ",
                              expectedEditedFilePath));
+            // TODO: change this to CHECK_EQ_DIFF for better user experience
             CHECK_EQ(expectedEditedFileContents, actualEditedFileContents);
         }
     }
