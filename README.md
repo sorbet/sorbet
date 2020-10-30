@@ -708,21 +708,6 @@ foo = Foo.new
 #     ^ apply-rename: [A] newName: foo invalid:true
 ```
 
-```ruby
-
-# -- test/testdata/lsp/refactor/mytest.A.rbedited --
-# typed: true
-# frozen_string_literal: true
-
-class Foo
-  class Foo
-  end
-end
-
-foo = Foo.new
-#     ^ apply-rename: [A] newName: foo invalid:true
-```
-
 To test for a specific error message, add an `expectedErrorMessage` argument to the test:
 ```ruby
 # typed: true
