@@ -1522,7 +1522,7 @@ private:
                 auto allowRebind = false;
                 auto allowTypeMember = true;
                 TypeSyntax::parseSig(
-                    ctx, sig, nullptr,
+                    ctx, *sig, nullptr,
                     TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::untyped()});
             }
 
@@ -1568,37 +1568,37 @@ private:
     }
 
     void processStatement(core::MutableContext ctx, ast::TreePtr &stat, InlinedVector<ast::Send *, 1> &lastSigs) {
-        typecase(
-            stat.get(),
+        tagTypecase(
+            stat,
 
-            [&](ast::Send *send) {
+            [&](ast::Send &send) {
                 if (TypeSyntax::isSig(ctx, send)) {
                     if (!lastSigs.empty()) {
                         if (!ctx.permitOverloadDefinitions(ctx.file)) {
                             if (auto e = ctx.beginError(lastSigs[0]->loc, core::errors::Resolver::OverloadNotAllowed)) {
                                 e.setHeader("Unused type annotation. No method def before next annotation");
-                                e.addErrorLine(core::Loc(ctx.file, send->loc),
+                                e.addErrorLine(core::Loc(ctx.file, send.loc),
                                                "Type annotation that will be used instead");
                             }
                         }
                     }
 
-                    lastSigs.emplace_back(send);
+                    lastSigs.emplace_back(&send);
                     return;
                 }
 
-                if (send->args.size() == 1 &&
-                    (send->fun == core::Names::public_() || send->fun == core::Names::private_() ||
-                     send->fun == core::Names::privateClassMethod() || send->fun == core::Names::protected_())) {
-                    processStatement(ctx, send->args[0], lastSigs);
+                if (send.args.size() == 1 &&
+                    (send.fun == core::Names::public_() || send.fun == core::Names::private_() ||
+                     send.fun == core::Names::privateClassMethod() || send.fun == core::Names::protected_())) {
+                    processStatement(ctx, send.args[0], lastSigs);
                     return;
                 }
             },
 
-            [&](ast::MethodDef *mdef) {
+            [&](ast::MethodDef &mdef) {
                 if (debug_mode) {
                     bool hasSig = !lastSigs.empty();
-                    bool rewriten = mdef->flags.isRewriterSynthesized;
+                    bool rewriten = mdef.flags.isRewriterSynthesized;
                     bool isRBI = ctx.file.data(ctx).isRBI();
                     if (hasSig) {
                         categoryCounterInc("method.sig", "true");
@@ -1634,9 +1634,9 @@ private:
                     }
 
                     bool isOverloaded = lastSigs.size() > 1 && ctx.permitOverloadDefinitions(ctx.file);
-                    auto originalName = mdef->symbol.data(ctx)->name;
+                    auto originalName = mdef.symbol.data(ctx)->name;
                     if (isOverloaded) {
-                        ctx.state.mangleRenameSymbol(mdef->symbol, originalName);
+                        ctx.state.mangleRenameSymbol(mdef.symbol, originalName);
                     }
                     int i = 0;
 
@@ -1644,7 +1644,7 @@ private:
                     // class, or the current singleton class, depending on if
                     // the current method is a self method.
                     core::SymbolRef sigOwner;
-                    if (mdef->flags.isSelfMethod) {
+                    if (mdef.flags.isSelfMethod) {
                         sigOwner = ctx.owner.data(ctx)->singletonClass(ctx);
                     } else {
                         sigOwner = ctx.owner;
@@ -1655,13 +1655,13 @@ private:
                         auto allowRebind = false;
                         auto allowTypeMember = true;
                         auto sig = TypeSyntax::parseSig(
-                            ctx.withOwner(sigOwner), lastSigs[i], nullptr,
-                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef->symbol});
+                            ctx.withOwner(sigOwner), *lastSigs[i], nullptr,
+                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
                         core::SymbolRef overloadSym;
                         if (isOverloaded) {
                             vector<int> argsToKeep;
                             int argId = -1;
-                            for (auto &argTree : mdef->args) {
+                            for (auto &argTree : mdef.args) {
                                 argId++;
                                 const auto local = ast::MK::arg2Local(argTree);
                                 auto treeArgName = local->localVariable._name;
@@ -1673,14 +1673,14 @@ private:
                                 }
                             }
                             overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, lastSigs[i]->loc),
-                                                                           mdef->symbol, originalName, i, argsToKeep);
+                                                                           mdef.symbol, originalName, i, argsToKeep);
                             if (i != lastSigs.size() - 1) {
                                 overloadSym.data(ctx)->setOverloaded();
                             }
                         } else {
-                            overloadSym = mdef->symbol;
+                            overloadSym = mdef.symbol;
                         }
-                        fillInInfoFromSig(ctx, overloadSym, lastSigs[i]->loc, move(sig), isOverloaded, *mdef);
+                        fillInInfoFromSig(ctx, overloadSym, lastSigs[i]->loc, move(sig), isOverloaded, mdef);
                         i++;
                     }
 
@@ -1688,17 +1688,17 @@ private:
                     lastSigs.clear();
                 }
 
-                if (mdef->symbol.data(ctx)->isAbstract()) {
-                    if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs)) {
-                        if (auto e = ctx.beginError(mdef->rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
+                if (mdef.symbol.data(ctx)->isAbstract()) {
+                    if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
+                        if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
                             e.setHeader("Abstract methods must not contain any code in their body");
-                            e.replaceWith("Delete the body", core::Loc(ctx.file, mdef->rhs.loc()), "");
+                            e.replaceWith("Delete the body", core::Loc(ctx.file, mdef.rhs.loc()), "");
                         }
 
-                        mdef->rhs = ast::MK::EmptyTree();
+                        mdef.rhs = ast::MK::EmptyTree();
                     }
-                    if (!mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
-                        if (auto e = ctx.beginError(mdef->loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
+                    if (!mdef.symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
+                        if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
                             e.setHeader("Before declaring an abstract method, you must mark your class/module "
                                         "as abstract using `abstract!` or `interface!`");
                         }
@@ -1710,17 +1710,17 @@ private:
 
                     auto argIdx = -1;
                     auto numPosArgs = 0;
-                    for (auto &arg : mdef->args) {
+                    for (auto &arg : mdef.args) {
                         ++argIdx;
 
-                        ast::Local *local = nullptr;
+                        const ast::Local *local = nullptr;
                         if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
                             local = ast::cast_tree<ast::Local>(opt->expr);
                         } else {
                             local = ast::cast_tree<ast::Local>(arg);
                         }
 
-                        auto &info = mdef->symbol.data(ctx)->arguments()[argIdx];
+                        auto &info = mdef.symbol.data(ctx)->arguments()[argIdx];
                         if (info.flags.isKeyword) {
                             args.emplace_back(ast::MK::Symbol(local->loc, info.name));
                             args.emplace_back(local->deepCopy());
@@ -1734,22 +1734,22 @@ private:
                         }
                     }
 
-                    auto self = ast::MK::Self(mdef->loc);
-                    mdef->rhs =
-                        ast::MK::Send(mdef->loc, std::move(self), core::Names::super(), numPosArgs, std::move(args));
-                } else if (mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
-                    if (auto e = ctx.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
+                    auto self = ast::MK::Self(mdef.loc);
+                    mdef.rhs =
+                        ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), numPosArgs, std::move(args));
+                } else if (mdef.symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
+                    if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                         e.setHeader("All methods in an interface must be declared abstract");
                     }
                 }
             },
-            [&](ast::ClassDef *cdef) {
+            [&](const ast::ClassDef &cdef) {
                 // Leave in place
             },
 
-            [&](ast::EmptyTree *e) { stat.reset(nullptr); },
+            [&](const ast::EmptyTree &e) { stat.reset(nullptr); },
 
-            [&](ast::Expression *e) {});
+            [&](const ast::Expression &e) {});
     }
 
     // Resolve the type of the rhs of a constant declaration. This logic is
@@ -1757,20 +1757,20 @@ private:
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    core::TypePtr resolveConstantType(core::Context ctx, ast::TreePtr &expr, core::SymbolRef ofSym) {
+    core::TypePtr resolveConstantType(core::Context ctx, const ast::TreePtr &expr, core::SymbolRef ofSym) {
         core::TypePtr result;
-        typecase(
-            expr.get(), [&](ast::Literal *a) { result = a->value; },
-            [&](ast::Cast *cast) {
-                if (cast->cast != core::Names::let() && cast->cast != core::Names::uncheckedLet()) {
-                    if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
+        tagTypecase(
+            expr, [&](const ast::Literal &a) { result = a.value; },
+            [&](const ast::Cast &cast) {
+                if (cast.cast != core::Names::let() && cast.cast != core::Names::uncheckedLet()) {
+                    if (auto e = ctx.beginError(cast.loc, core::errors::Resolver::ConstantAssertType)) {
                         e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
                 }
-                result = cast->type;
+                result = cast.type;
             },
-            [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr, ofSym); },
-            [&](ast::Expression *expr) {});
+            [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr, ofSym); },
+            [&](const ast::Expression &expr) {});
         return result;
     }
 

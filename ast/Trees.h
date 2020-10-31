@@ -70,6 +70,26 @@ public:
     // We store tagged pointers as 64-bit values.
     using tagged_storage = u8;
 
+    // Required for tagTypecase
+    template <class To> static bool isa(const TreePtr &tree);
+    template <> inline bool isa<Expression>(const TreePtr &tree) {
+        return true;
+    }
+    template <> inline bool isa<TreePtr>(const TreePtr &tree) {
+        return true;
+    }
+
+    template <class To> static const To &cast_nonnull(const TreePtr &tree);
+    template <> inline const Expression &cast_nonnull<Expression>(const TreePtr &tree) {
+        return *tree.get();
+    }
+    template <> inline const TreePtr &cast_nonnull<TreePtr>(const TreePtr &tree) {
+        return tree;
+    }
+    template <class To> static To &cast_nonnull(TreePtr &tree) {
+        return const_cast<To &>(cast_nonnull<To>(static_cast<const TreePtr &>(tree)));
+    }
+
 private:
     static constexpr tagged_storage TAG_MASK = 0xffff000000000007;
 
@@ -299,6 +319,14 @@ template <class To> To &cast_tree_nonnull(TreePtr &what) {
 template <class To> const To &cast_tree_nonnull(const TreePtr &what) {
     ENFORCE(isa_tree<To>(what), "cast_tree_nonnull failed!");
     return *reinterpret_cast<To *>(what.get());
+}
+
+template <class To> inline bool TreePtr::isa(const TreePtr &what) {
+    return isa_tree<To>(what);
+}
+
+template <class To> inline To const &TreePtr::cast_nonnull(const TreePtr &what) {
+    return cast_tree_nonnull<To>(what);
 }
 
 #define TREE(name)                                                                  \
