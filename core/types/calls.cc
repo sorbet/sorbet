@@ -1158,18 +1158,18 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
 
 SymbolRef unwrapSymbol(const TypePtr &type) {
     SymbolRef result;
-    const Type *rawTypePtr = type.get();
+    TypePtr typePtr = type;
     while (!result.exists()) {
-        typecase(
-            rawTypePtr,
+        tagTypecase(
+            typePtr,
 
-            [&](const ClassType *klass) { result = klass->symbol; },
+            [&](const ClassType &klass) { result = klass.symbol; },
 
-            [&](const AppliedType *app) { result = app->klass; },
+            [&](const AppliedType &app) { result = app.klass; },
 
-            [&](const ProxyType *proxy) { rawTypePtr = proxy->underlying().get(); },
+            [&](const ProxyType &proxy) { typePtr = proxy.underlying(); },
 
-            [&](const Type *ty) { ENFORCE(false, "Unexpected type: {}", ty->typeName()); });
+            [&](const TypePtr &ty) { ENFORCE(false, "Unexpected type: {}", ty->typeName()); });
     }
     return result;
 }
@@ -2332,28 +2332,28 @@ class Array_flatten : public IntrinsicMethod {
         const int newDepth = depth - 1;
 
         TypePtr result;
-        typecase(
-            type.get(),
+        tagTypecase(
+            type,
 
             // This only shows up because t->elementType() for tuples returns an OrType of all its elements.
             // So to properly handle nested tuples, we have to descend into the OrType's.
-            [&](const OrType *o) {
-                result = Types::any(gs, recursivelyFlattenArrays(gs, o->left, newDepth),
-                                    recursivelyFlattenArrays(gs, o->right, newDepth));
+            [&](const OrType &o) {
+                result = Types::any(gs, recursivelyFlattenArrays(gs, o.left, newDepth),
+                                    recursivelyFlattenArrays(gs, o.right, newDepth));
             },
 
-            [&](const AppliedType *a) {
-                if (a->klass != Symbols::Array()) {
+            [&](const AppliedType &a) {
+                if (a.klass != Symbols::Array()) {
                     result = type;
                     return;
                 }
-                ENFORCE(a->targs.size() == 1);
-                result = recursivelyFlattenArrays(gs, a->targs.front(), newDepth);
+                ENFORCE(a.targs.size() == 1);
+                result = recursivelyFlattenArrays(gs, a.targs.front(), newDepth);
             },
 
-            [&](const TupleType *t) { result = recursivelyFlattenArrays(gs, t->elementType(), newDepth); },
+            [&](const TupleType &t) { result = recursivelyFlattenArrays(gs, t.elementType(), newDepth); },
 
-            [&](const Type *t) { result = std::move(type); });
+            [&](const TypePtr &t) { result = std::move(type); });
         return result;
     }
 

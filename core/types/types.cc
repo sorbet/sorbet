@@ -151,12 +151,12 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
         return from;
     }
 
-    typecase(
-        from.get(),
-        [&](const OrType *o) {
-            auto lhs = dropSubtypesOf(gs, o->left, klass);
-            auto rhs = dropSubtypesOf(gs, o->right, klass);
-            if (lhs == o->left && rhs == o->right) {
+    tagTypecase(
+        from,
+        [&](const OrType &o) {
+            auto lhs = dropSubtypesOf(gs, o.left, klass);
+            auto rhs = dropSubtypesOf(gs, o.right, klass);
+            if (lhs == o.left && rhs == o.right) {
                 result = from;
             } else if (lhs.isBottom()) {
                 result = rhs;
@@ -166,23 +166,23 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
                 result = OrType::make_shared(lhs, rhs);
             }
         },
-        [&](const AndType *a) {
-            auto lhs = dropSubtypesOf(gs, a->left, klass);
-            auto rhs = dropSubtypesOf(gs, a->right, klass);
-            if (lhs != a->left || rhs != a->right) {
+        [&](const AndType &a) {
+            auto lhs = dropSubtypesOf(gs, a.left, klass);
+            auto rhs = dropSubtypesOf(gs, a.right, klass);
+            if (lhs != a.left || rhs != a.right) {
                 result = Types::all(gs, lhs, rhs);
             } else {
                 result = from;
             }
         },
-        [&](const ClassType *c) {
-            auto cdata = c->symbol.data(gs);
-            if (c->hasUntyped()) {
+        [&](const ClassType &c) {
+            auto cdata = c.symbol.data(gs);
+            if (c.hasUntyped()) {
                 result = from;
-            } else if (c->symbol == klass || c->derivesFrom(gs, klass)) {
+            } else if (c.symbol == klass || c.derivesFrom(gs, klass)) {
                 result = Types::bottom();
-            } else if (c->symbol.data(gs)->isClassOrModuleClass() && klass.data(gs)->isClassOrModuleClass() &&
-                       !klass.data(gs)->derivesFrom(gs, c->symbol)) {
+            } else if (c.symbol.data(gs)->isClassOrModuleClass() && klass.data(gs)->isClassOrModuleClass() &&
+                       !klass.data(gs)->derivesFrom(gs, c.symbol)) {
                 // We have two classes (not modules), and if the class we're
                 // removing doesn't derive from `c`, there's nothing to do,
                 // because of ruby having single inheretance.
@@ -196,21 +196,21 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
                 result = from;
             }
         },
-        [&](const AppliedType *c) {
-            if (c->klass == klass || c->derivesFrom(gs, klass)) {
+        [&](const AppliedType &c) {
+            if (c.klass == klass || c.derivesFrom(gs, klass)) {
                 result = Types::bottom();
             } else {
                 result = from;
             }
         },
-        [&](const ProxyType *c) {
-            if (dropSubtypesOf(gs, c->underlying(), klass).isBottom()) {
+        [&](const ProxyType &c) {
+            if (dropSubtypesOf(gs, c.underlying(), klass).isBottom()) {
                 result = Types::bottom();
             } else {
                 result = from;
             }
         },
-        [&](const Type *) { result = from; });
+        [&](const TypePtr &) { result = from; });
     SLOW_ENFORCE(Types::isSubType(gs, result, from),
                  "dropSubtypesOf({}, {}) returned {}, which is not a subtype of the input", from->toString(gs),
                  klass.data(gs)->showFullName(gs), result->toString(gs));
@@ -219,21 +219,21 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
 
 bool Types::canBeTruthy(const GlobalState &gs, const TypePtr &what) {
     bool isTruthy = true;
-    typecase(
-        what.get(), [&](OrType *o) { isTruthy = canBeTruthy(gs, o->left) || canBeTruthy(gs, o->right); },
-        [&](const AndType *a) { isTruthy = canBeTruthy(gs, a->left) && canBeTruthy(gs, a->right); },
-        [&](const ClassType *c) {
-            auto sym = c->symbol;
+    tagTypecase(
+        what, [&](const OrType &o) { isTruthy = canBeTruthy(gs, o.left) || canBeTruthy(gs, o.right); },
+        [&](const AndType &a) { isTruthy = canBeTruthy(gs, a.left) && canBeTruthy(gs, a.right); },
+        [&](const ClassType &c) {
+            auto sym = c.symbol;
             isTruthy = sym == core::Symbols::untyped() ||
                        (sym != core::Symbols::FalseClass() && sym != core::Symbols::NilClass());
         },
-        [&](const AppliedType *c) {
-            auto sym = c->klass;
+        [&](const AppliedType &c) {
+            auto sym = c.klass;
             isTruthy = sym == core::Symbols::untyped() ||
                        (sym != core::Symbols::FalseClass() && sym != core::Symbols::NilClass());
         },
-        [&](const ProxyType *c) { isTruthy = canBeTruthy(gs, c->underlying()); },
-        [&](const Type *) { isTruthy = true; });
+        [&](const ProxyType &c) { isTruthy = canBeTruthy(gs, c.underlying()); },
+        [&](const TypePtr &) { isTruthy = true; });
 
     return isTruthy;
 }
@@ -249,13 +249,13 @@ bool Types::canBeFalsy(const GlobalState &gs, const TypePtr &what) {
 
 TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what) {
     TypePtr result;
-    typecase(
-        what.get(), [&](ClassType *c) { result = Types::dropSubtypesOf(gs, from, c->symbol); },
-        [&](const AppliedType *c) { result = Types::dropSubtypesOf(gs, from, c->klass); },
-        [&](const OrType *o) {
-            result = Types::approximateSubtract(gs, Types::approximateSubtract(gs, from, o->left), o->right);
+    tagTypecase(
+        what, [&](const ClassType &c) { result = Types::dropSubtypesOf(gs, from, c.symbol); },
+        [&](const AppliedType &c) { result = Types::dropSubtypesOf(gs, from, c.klass); },
+        [&](const OrType &o) {
+            result = Types::approximateSubtract(gs, Types::approximateSubtract(gs, from, o.left), o.right);
         },
-        [&](const Type *) { result = from; });
+        [&](const TypePtr &) { result = from; });
     return result;
 }
 
@@ -837,19 +837,19 @@ void SelfType::_sanityCheck(const GlobalState &gs) {}
 TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
     ENFORCE(type != nullptr);
     TypePtr ret;
-    typecase(
-        type.get(), [&](const AndType *andType) { ret = all(gs, widen(gs, andType->left), widen(gs, andType->right)); },
-        [&](const OrType *orType) { ret = any(gs, widen(gs, orType->left), widen(gs, orType->right)); },
-        [&](const ProxyType *proxy) { ret = Types::widen(gs, proxy->underlying()); },
-        [&](const AppliedType *appliedType) {
+    tagTypecase(
+        type, [&](const AndType &andType) { ret = all(gs, widen(gs, andType.left), widen(gs, andType.right)); },
+        [&](const OrType &orType) { ret = any(gs, widen(gs, orType.left), widen(gs, orType.right)); },
+        [&](const ProxyType &proxy) { ret = Types::widen(gs, proxy.underlying()); },
+        [&](const AppliedType &appliedType) {
             vector<TypePtr> newTargs;
-            newTargs.reserve(appliedType->targs.size());
-            for (const auto &t : appliedType->targs) {
+            newTargs.reserve(appliedType.targs.size());
+            for (const auto &t : appliedType.targs) {
                 newTargs.emplace_back(widen(gs, t));
             }
-            ret = make_type<AppliedType>(appliedType->klass, move(newTargs));
+            ret = make_type<AppliedType>(appliedType.klass, move(newTargs));
         },
-        [&](const Type *tp) { ret = type; });
+        [&](const TypePtr &tp) { ret = type; });
     ENFORCE(ret);
     return ret;
 }
@@ -868,30 +868,29 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         return unwrapped;
     };
 
-    typecase(
-        type.get(), [&](const ClassType *klass) { ret = type; }, [&](TypeVar *tv) { ret = type; },
-        [&](const LambdaParam *tv) { ret = type; }, [&](SelfType *self) { ret = type; },
-        [&](const LiteralType *lit) { ret = type; },
-        [&](const AndType *andType) {
-            ret =
-                AndType::make_shared(unwrapSelfTypeParam(ctx, andType->left), unwrapSelfTypeParam(ctx, andType->right));
+    tagTypecase(
+        type, [&](const ClassType &klass) { ret = type; }, [&](const TypeVar &tv) { ret = type; },
+        [&](const LambdaParam &tv) { ret = type; }, [&](const SelfType &self) { ret = type; },
+        [&](const LiteralType &lit) { ret = type; },
+        [&](const AndType &andType) {
+            ret = AndType::make_shared(unwrapSelfTypeParam(ctx, andType.left), unwrapSelfTypeParam(ctx, andType.right));
         },
-        [&](const OrType *orType) {
-            ret = OrType::make_shared(unwrapSelfTypeParam(ctx, orType->left), unwrapSelfTypeParam(ctx, orType->right));
+        [&](const OrType &orType) {
+            ret = OrType::make_shared(unwrapSelfTypeParam(ctx, orType.left), unwrapSelfTypeParam(ctx, orType.right));
         },
-        [&](ShapeType *shape) {
-            ret = make_type<ShapeType>(unwrapSelfTypeParam(ctx, shape->underlying_), shape->keys,
-                                       unwrapTypeVector(shape->values));
+        [&](const ShapeType &shape) {
+            ret = make_type<ShapeType>(unwrapSelfTypeParam(ctx, shape.underlying_), shape.keys,
+                                       unwrapTypeVector(shape.values));
         },
-        [&](TupleType *tuple) {
-            ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple->underlying_), unwrapTypeVector(tuple->elems));
+        [&](const TupleType &tuple) {
+            ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple.underlying_), unwrapTypeVector(tuple.elems));
         },
-        [&](MetaType *meta) { ret = make_type<MetaType>(unwrapSelfTypeParam(ctx, meta->wrapped)); },
-        [&](AppliedType *appliedType) {
-            ret = make_type<AppliedType>(appliedType->klass, unwrapTypeVector(appliedType->targs));
+        [&](const MetaType &meta) { ret = make_type<MetaType>(unwrapSelfTypeParam(ctx, meta.wrapped)); },
+        [&](const AppliedType &appliedType) {
+            ret = make_type<AppliedType>(appliedType.klass, unwrapTypeVector(appliedType.targs));
         },
-        [&](const SelfTypeParam *param) {
-            auto sym = param->definition;
+        [&](const SelfTypeParam &param) {
+            auto sym = param.definition;
             if (sym.data(ctx)->owner == ctx.owner) {
                 ENFORCE(isa_type<LambdaParam>(sym.data(ctx)->resultType));
                 ret = sym.data(ctx)->resultType;
@@ -899,7 +898,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
                 ret = type;
             }
         },
-        [&](const Type *tp) {
+        [&](const TypePtr &tp) {
             ENFORCE(false, "Unhandled case: {}", type->toString(ctx));
             Exception::notImplemented();
         });

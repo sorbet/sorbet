@@ -32,6 +32,21 @@ public:
     // A mapping from type to its corresponding tag.
     template <typename T> struct TypeToTag;
 
+    // Required for tagTypecase.
+    template <class To> static bool isa(const TypePtr &what);
+    template <> inline bool isa<TypePtr>(const TypePtr &what) {
+        return true;
+    }
+
+    template <class To> static To const &cast_nonnull(const TypePtr &what);
+    template <> inline TypePtr const &cast_nonnull<TypePtr>(const TypePtr &what) {
+        return what;
+    }
+
+    template <class To> static To &cast_nonnull(TypePtr &what) {
+        return const_cast<To &>(cast_nonnull<To>(static_cast<const TypePtr &>(what)));
+    }
+
 private:
     std::atomic<u4> *counter;
     tagged_storage store;

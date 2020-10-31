@@ -68,42 +68,42 @@ private:
     VarianceValidator(const core::Loc loc) : loc(loc) {}
 
     void validate(const core::Context ctx, const Polarity polarity, const core::TypePtr &type) {
-        typecase(
-            type.get(), [&](const core::ClassType *klass) {},
+        tagTypecase(
+            type, [&](const core::ClassType &klass) {},
 
-            [&](const core::LiteralType *lit) {},
+            [&](const core::LiteralType &lit) {},
 
-            [&](const core::SelfType *self) {},
+            [&](const core::SelfType &self) {},
 
-            [&](const core::SelfTypeParam *sp) {},
+            [&](const core::SelfTypeParam &sp) {},
 
-            [&](const core::TypeVar *tvar) {},
+            [&](const core::TypeVar &tvar) {},
 
-            [&](const core::OrType *any) {
-                validate(ctx, polarity, any->left);
-                validate(ctx, polarity, any->right);
+            [&](const core::OrType &any) {
+                validate(ctx, polarity, any.left);
+                validate(ctx, polarity, any.right);
             },
 
-            [&](const core::AndType *all) {
-                validate(ctx, polarity, all->left);
-                validate(ctx, polarity, all->right);
+            [&](const core::AndType &all) {
+                validate(ctx, polarity, all.left);
+                validate(ctx, polarity, all.right);
             },
 
-            [&](const core::ShapeType *shape) {
-                for (auto value : shape->values) {
+            [&](const core::ShapeType &shape) {
+                for (auto value : shape.values) {
                     validate(ctx, polarity, value);
                 }
             },
 
-            [&](const core::TupleType *tuple) {
-                for (auto value : tuple->elems) {
+            [&](const core::TupleType &tuple) {
+                for (auto value : tuple.elems) {
                     validate(ctx, polarity, value);
                 }
             },
 
-            [&](const core::AppliedType *app) {
-                auto members = app->klass.data(ctx)->typeMembers();
-                auto params = app->targs;
+            [&](const core::AppliedType &app) {
+                auto members = app.klass.data(ctx)->typeMembers();
+                auto params = app.targs;
 
                 ENFORCE(members.size() == params.size(),
                         fmt::format("types should be fully saturated, but there are {} members and {} params",
@@ -136,8 +136,8 @@ private:
             },
 
             // This is where the actual variance checks are done.
-            [&](const core::LambdaParam *param) {
-                auto paramData = param->definition.data(ctx);
+            [&](const core::LambdaParam &param) {
+                auto paramData = param.definition.data(ctx);
 
                 ENFORCE(paramData->isTypeMember());
 
@@ -166,8 +166,8 @@ private:
                 }
             },
 
-            [&](const core::AliasType *alias) {
-                auto aliasSym = alias->symbol.data(ctx)->dealias(ctx);
+            [&](const core::AliasType &alias) {
+                auto aliasSym = alias.symbol.data(ctx)->dealias(ctx);
 
                 // This can be introduced by `module_function`, which in its
                 // current implementation will alias an instance method as a
@@ -175,11 +175,11 @@ private:
                 if (aliasSym.data(ctx)->isMethod()) {
                     validateMethod(ctx, polarity, aliasSym);
                 } else {
-                    Exception::raise("Unexpected type alias: {}", alias->toString(ctx));
+                    Exception::raise("Unexpected type alias: {}", alias.toString(ctx));
                 }
             },
 
-            [&](const core::Type *skipped) {
+            [&](const core::TypePtr &skipped) {
                 Exception::raise("Unexpected type in variance checking: {}", skipped->toString(ctx));
             });
     }
