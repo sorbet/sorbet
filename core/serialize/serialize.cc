@@ -39,8 +39,6 @@ public:
     static void pickleWithoutFile(Pickler &p, core::Loc loc);
     static void pickle(Pickler &p, shared_ptr<const FileHash> fh);
 
-    static void pickleTree(Pickler &p, ast::TreePtr &t);
-
     static shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);
     static TypePtr unpickleType(UnPickler &p, const GlobalState *gs);
@@ -899,7 +897,7 @@ u4 Serializer::loadGlobalStateUUID(const GlobalState &gs, const u1 *const data) 
 vector<u1> Serializer::storeFile(const core::File &file, ast::ParsedFile &tree) {
     Pickler p;
     SerializerImpl::pickle(p, file);
-    SerializerImpl::pickleTree(p, tree.tree);
+    SerializerImpl::pickle(p, tree.tree);
     return p.result(FILE_COMPRESSION_DEGREE);
 }
 
@@ -909,10 +907,6 @@ CachedFile Serializer::loadFile(const core::GlobalState &gs, core::FileRef fref,
     file->cached = true;
     auto tree = SerializerImpl::unpickleExpr(p, gs, fref);
     return CachedFile{move(file), move(tree)};
-}
-
-void SerializerImpl::pickleTree(Pickler &p, ast::TreePtr &t) {
-    pickle(p, t);
 }
 
 void SerializerImpl::pickleAstHeader(Pickler &p, u1 tag, core::LocOffsets loc) {
@@ -939,7 +933,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
             p.putU4(s->numPosArgs);
             p.putU4(s->args.size());
             pickle(p, s->recv);
-            pickleTree(p, s->block);
+            pickle(p, s->block);
             for (auto &arg : s->args) {
                 pickle(p, arg);
             }
@@ -1078,7 +1072,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
             pickle(p, a->else_);
             pickle(p, a->body);
             for (auto &rc : a->rescueCases) {
-                pickleTree(p, rc);
+                pickle(p, rc);
             }
         },
         [&](ast::RescueCase *a) {
@@ -1092,23 +1086,23 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
         },
         [&](ast::RestArg *a) {
             pickleAstHeader(p, 25, a->loc);
-            pickleTree(p, a->expr);
+            pickle(p, a->expr);
         },
         [&](ast::KeywordArg *a) {
             pickleAstHeader(p, 26, a->loc);
-            pickleTree(p, a->expr);
+            pickle(p, a->expr);
         },
         [&](ast::ShadowArg *a) {
             pickleAstHeader(p, 27, a->loc);
-            pickleTree(p, a->expr);
+            pickle(p, a->expr);
         },
         [&](ast::BlockArg *a) {
             pickleAstHeader(p, 28, a->loc);
-            pickleTree(p, a->expr);
+            pickle(p, a->expr);
         },
         [&](ast::OptionalArg *a) {
             pickleAstHeader(p, 29, a->loc);
-            pickleTree(p, a->expr);
+            pickle(p, a->expr);
             pickle(p, a->default_);
         },
         [&](ast::ZSuperArgs *a) { pickleAstHeader(p, 30, a->loc); },
@@ -1120,7 +1114,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
         [&](ast::ConstantLit *a) {
             pickleAstHeader(p, 32, a->loc);
             p.putU4(a->symbol.rawId());
-            pickleTree(p, a->original);
+            pickle(p, a->original);
         },
 
         [&](ast::Expression *n) { Exception::raise("Unimplemented AST Node: {}", what.nodeName()); });
