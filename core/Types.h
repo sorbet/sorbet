@@ -301,6 +301,15 @@ template <class To> To const &cast_type_nonnull(const TypePtr &what) {
     return *reinterpret_cast<const To *>(what.get());
 }
 
+// Simple forwarders defined on TypePtr which make `tagTypecase` work.
+template <class To> inline bool TypePtr::isa(const TypePtr &what) {
+    return isa_type<To>(what);
+}
+
+template <class To> inline To const &TypePtr::cast_nonnull(const TypePtr &what) {
+    return cast_type_nonnull<To>(what);
+}
+
 #define TYPE(name)                                                                                             \
     class name;                                                                                                \
     template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \

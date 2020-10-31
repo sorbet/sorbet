@@ -33,15 +33,14 @@ template <typename T> using get_signature = typename get_signature_impl<T>::type
 
 template <typename T> struct argtype_extractor : public argtype_extractor<decltype(&T::operator())> {};
 template <typename ClassType, typename ReturnType, typename ArgType>
-struct argtype_extractor<ReturnType (ClassType::*)(ArgType *) const>
-// we specialize for pointers to member function
-{
+struct argtype_extractor<ReturnType (ClassType::*)(ArgType) const> {
     using arg_type = ArgType;
 };
 
 template <typename Base, typename FUNC> bool typecaseHelper(Base *base, FUNC &&func) {
     using traits = argtype_extractor<std::function<get_signature<FUNC>>>;
-    using ArgType = typename traits::arg_type;
+    // we specialize for pointers to member function
+    using ArgType = typename std::remove_pointer<typename traits::arg_type>::type;
     if (ArgType *first = fast_cast<Base, ArgType>(base)) {
         func(first);
         return true;
@@ -62,6 +61,32 @@ template <typename Base, typename... Subclasses> void typecase(Base *base, Subcl
         sorbet::Exception::raise("not handled typecase case: {}", demangle(typeid(*base).name()));
     }
 }
+
+template <typename Base, typename FUNC> bool tagTypecaseHelper(Base &base, FUNC &&func) {
+    using traits = argtype_extractor<std::function<get_signature<FUNC>>>;
+    // We specialize (const and non-const) references
+    using ArgType = typename std::remove_const<typename std::remove_reference<typename traits::arg_type>::type>::type;
+    if (Base::template isa<ArgType>(base)) {
+        func(Base::template cast_nonnull<ArgType>(base));
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <typename Base, typename... Subclasses> void tagTypecase(Base &base, Subclasses &&... funcs) {
+    bool done = false;
+
+    bool UNUSED(dummy[sizeof...(Subclasses)]) = {(done = done || tagTypecaseHelper<Base>(base, funcs))...};
+
+    if (!done) {
+        if (!base) {
+            sorbet::Exception::raise("nullptr passed to typecase");
+        }
+        sorbet::Exception::raise("not handled typecase case: {}", demangle(typeid(*base).name()));
+    }
+}
+
 } // namespace sorbet
 
 // End typecase code
