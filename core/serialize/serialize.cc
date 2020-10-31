@@ -917,151 +917,151 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
 
     switch (tag) {
         case ast::Tag::Send: {
-            auto *s = ast::cast_tree<ast::Send>(what);
-            pickle(p, s->loc);
-            p.putU4(s->fun._id);
+            auto &s = ast::cast_tree_nonnull<ast::Send>(what);
+            pickle(p, s.loc);
+            p.putU4(s.fun._id);
             u1 flags;
-            static_assert(sizeof(flags) == sizeof(s->flags));
+            static_assert(sizeof(flags) == sizeof(s.flags));
             // Can replace this with std::bit_cast in C++20
-            memcpy(&flags, &s->flags, sizeof(flags));
+            memcpy(&flags, &s.flags, sizeof(flags));
             p.putU1(flags);
-            p.putU4(s->numPosArgs);
-            p.putU4(s->args.size());
-            pickle(p, s->recv);
-            pickle(p, s->block);
-            for (auto &arg : s->args) {
+            p.putU4(s.numPosArgs);
+            p.putU4(s.args.size());
+            pickle(p, s.recv);
+            pickle(p, s.block);
+            for (auto &arg : s.args) {
                 pickle(p, arg);
             }
             break;
         }
 
         case ast::Tag::Block: {
-            auto *a = ast::cast_tree<ast::Block>(what);
-            pickle(p, a->loc);
-            p.putU4(a->args.size());
-            pickle(p, a->body);
-            for (auto &arg : a->args) {
+            auto &a = ast::cast_tree_nonnull<ast::Block>(what);
+            pickle(p, a.loc);
+            p.putU4(a.args.size());
+            pickle(p, a.body);
+            for (auto &arg : a.args) {
                 pickle(p, arg);
             }
             break;
         }
 
         case ast::Tag::Literal: {
-            auto *a = ast::cast_tree<ast::Literal>(what);
-            pickle(p, a->loc);
-            pickle(p, a->value);
+            auto &a = ast::cast_tree_nonnull<ast::Literal>(what);
+            pickle(p, a.loc);
+            pickle(p, a.value);
             break;
         }
 
         case ast::Tag::While: {
-            auto *a = ast::cast_tree<ast::While>(what);
-            pickle(p, a->loc);
-            pickle(p, a->cond);
-            pickle(p, a->body);
+            auto &a = ast::cast_tree_nonnull<ast::While>(what);
+            pickle(p, a.loc);
+            pickle(p, a.cond);
+            pickle(p, a.body);
             break;
         }
 
         case ast::Tag::Return: {
-            auto *a = ast::cast_tree<ast::Return>(what);
-            pickle(p, a->loc);
-            pickle(p, a->expr);
+            auto &a = ast::cast_tree_nonnull<ast::Return>(what);
+            pickle(p, a.loc);
+            pickle(p, a.expr);
             break;
         }
 
         case ast::Tag::If: {
-            auto *a = ast::cast_tree<ast::If>(what);
-            pickle(p, a->loc);
-            pickle(p, a->cond);
-            pickle(p, a->thenp);
-            pickle(p, a->elsep);
+            auto &a = ast::cast_tree_nonnull<ast::If>(what);
+            pickle(p, a.loc);
+            pickle(p, a.cond);
+            pickle(p, a.thenp);
+            pickle(p, a.elsep);
             break;
         }
 
         case ast::Tag::UnresolvedConstantLit: {
-            auto *a = ast::cast_tree<ast::UnresolvedConstantLit>(what);
-            pickle(p, a->loc);
-            p.putU4(a->cnst._id);
-            pickle(p, a->scope);
+            auto &a = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(what);
+            pickle(p, a.loc);
+            p.putU4(a.cnst._id);
+            pickle(p, a.scope);
             break;
         }
 
         case ast::Tag::Local: {
-            auto *a = ast::cast_tree<ast::Local>(what);
-            pickle(p, a->loc);
-            p.putU4(a->localVariable._name._id);
-            p.putU4(a->localVariable.unique);
+            auto &a = ast::cast_tree_nonnull<ast::Local>(what);
+            pickle(p, a.loc);
+            p.putU4(a.localVariable._name._id);
+            p.putU4(a.localVariable.unique);
             break;
         }
 
         case ast::Tag::Assign: {
-            auto *a = ast::cast_tree<ast::Assign>(what);
-            pickle(p, a->loc);
-            pickle(p, a->lhs);
-            pickle(p, a->rhs);
+            auto &a = ast::cast_tree_nonnull<ast::Assign>(what);
+            pickle(p, a.loc);
+            pickle(p, a.lhs);
+            pickle(p, a.rhs);
             break;
         }
 
         case ast::Tag::InsSeq: {
-            auto *a = ast::cast_tree<ast::InsSeq>(what);
-            pickle(p, a->loc);
-            p.putU4(a->stats.size());
-            pickle(p, a->expr);
-            for (auto &st : a->stats) {
+            auto &a = ast::cast_tree_nonnull<ast::InsSeq>(what);
+            pickle(p, a.loc);
+            p.putU4(a.stats.size());
+            pickle(p, a.expr);
+            for (auto &st : a.stats) {
                 pickle(p, st);
             }
             break;
         }
 
         case ast::Tag::Next: {
-            auto *a = ast::cast_tree<ast::Next>(what);
-            pickle(p, a->loc);
-            pickle(p, a->expr);
+            auto &a = ast::cast_tree_nonnull<ast::Next>(what);
+            pickle(p, a.loc);
+            pickle(p, a.expr);
             break;
         }
 
         case ast::Tag::Break: {
-            auto *a = ast::cast_tree<ast::Break>(what);
-            pickle(p, a->loc);
-            pickle(p, a->expr);
+            auto &a = ast::cast_tree_nonnull<ast::Break>(what);
+            pickle(p, a.loc);
+            pickle(p, a.expr);
             break;
         }
 
         case ast::Tag::Retry: {
-            auto *a = ast::cast_tree<ast::Retry>(what);
-            pickle(p, a->loc);
+            auto &a = ast::cast_tree_nonnull<ast::Retry>(what);
+            pickle(p, a.loc);
             break;
         }
 
         case ast::Tag::Hash: {
-            auto *h = ast::cast_tree<ast::Hash>(what);
-            pickle(p, h->loc);
-            ENFORCE(h->values.size() == h->keys.size());
-            p.putU4(h->values.size());
-            for (auto &v : h->values) {
+            auto &h = ast::cast_tree_nonnull<ast::Hash>(what);
+            pickle(p, h.loc);
+            ENFORCE(h.values.size() == h.keys.size());
+            p.putU4(h.values.size());
+            for (auto &v : h.values) {
                 pickle(p, v);
             }
-            for (auto &k : h->keys) {
+            for (auto &k : h.keys) {
                 pickle(p, k);
             }
             break;
         }
 
         case ast::Tag::Array: {
-            auto *a = ast::cast_tree<ast::Array>(what);
-            pickle(p, a->loc);
-            p.putU4(a->elems.size());
-            for (auto &e : a->elems) {
+            auto &a = ast::cast_tree_nonnull<ast::Array>(what);
+            pickle(p, a.loc);
+            p.putU4(a.elems.size());
+            for (auto &e : a.elems) {
                 pickle(p, e);
             }
             break;
         }
 
         case ast::Tag::Cast: {
-            auto *c = ast::cast_tree<ast::Cast>(what);
-            pickle(p, c->loc);
-            p.putU4(c->cast._id);
-            pickle(p, c->type);
-            pickle(p, c->arg);
+            auto &c = ast::cast_tree_nonnull<ast::Cast>(what);
+            pickle(p, c.loc);
+            p.putU4(c.cast._id);
+            pickle(p, c.type);
+            pickle(p, c.arg);
             break;
         }
 
@@ -1070,125 +1070,125 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
         }
 
         case ast::Tag::ClassDef: {
-            auto *c = ast::cast_tree<ast::ClassDef>(what);
-            pickle(p, c->loc);
-            pickleWithoutFile(p, c->declLoc);
-            p.putU1(static_cast<u2>(c->kind));
-            p.putU4(c->symbol.rawId());
-            p.putU4(c->ancestors.size());
-            p.putU4(c->singletonAncestors.size());
-            p.putU4(c->rhs.size());
-            pickle(p, c->name);
-            for (auto &anc : c->ancestors) {
+            auto &c = ast::cast_tree_nonnull<ast::ClassDef>(what);
+            pickle(p, c.loc);
+            pickleWithoutFile(p, c.declLoc);
+            p.putU1(static_cast<u2>(c.kind));
+            p.putU4(c.symbol.rawId());
+            p.putU4(c.ancestors.size());
+            p.putU4(c.singletonAncestors.size());
+            p.putU4(c.rhs.size());
+            pickle(p, c.name);
+            for (auto &anc : c.ancestors) {
                 pickle(p, anc);
             }
-            for (auto &anc : c->singletonAncestors) {
+            for (auto &anc : c.singletonAncestors) {
                 pickle(p, anc);
             }
-            for (auto &anc : c->rhs) {
+            for (auto &anc : c.rhs) {
                 pickle(p, anc);
             }
             break;
         }
 
         case ast::Tag::MethodDef: {
-            auto *c = ast::cast_tree<ast::MethodDef>(what);
-            pickle(p, c->loc);
-            pickleWithoutFile(p, c->declLoc);
+            auto &c = ast::cast_tree_nonnull<ast::MethodDef>(what);
+            pickle(p, c.loc);
+            pickleWithoutFile(p, c.declLoc);
             u1 flags;
-            static_assert(sizeof(flags) == sizeof(c->flags));
+            static_assert(sizeof(flags) == sizeof(c.flags));
             // Can replace this with std::bit_cast in C++20
-            memcpy(&flags, &c->flags, sizeof(flags));
+            memcpy(&flags, &c.flags, sizeof(flags));
             p.putU1(flags);
-            p.putU4(c->name._id);
-            p.putU4(c->symbol.rawId());
-            p.putU4(c->args.size());
-            pickle(p, c->rhs);
-            for (auto &a : c->args) {
+            p.putU4(c.name._id);
+            p.putU4(c.symbol.rawId());
+            p.putU4(c.args.size());
+            pickle(p, c.rhs);
+            for (auto &a : c.args) {
                 pickle(p, a);
             }
             break;
         }
 
         case ast::Tag::Rescue: {
-            auto *a = ast::cast_tree<ast::Rescue>(what);
-            pickle(p, a->loc);
-            p.putU4(a->rescueCases.size());
-            pickle(p, a->ensure);
-            pickle(p, a->else_);
-            pickle(p, a->body);
-            for (auto &rc : a->rescueCases) {
+            auto &a = ast::cast_tree_nonnull<ast::Rescue>(what);
+            pickle(p, a.loc);
+            p.putU4(a.rescueCases.size());
+            pickle(p, a.ensure);
+            pickle(p, a.else_);
+            pickle(p, a.body);
+            for (auto &rc : a.rescueCases) {
                 pickle(p, rc);
             }
             break;
         }
         case ast::Tag::RescueCase: {
-            auto *a = ast::cast_tree<ast::RescueCase>(what);
-            pickle(p, a->loc);
-            p.putU4(a->exceptions.size());
-            pickle(p, a->var);
-            pickle(p, a->body);
-            for (auto &ex : a->exceptions) {
+            auto &a = ast::cast_tree_nonnull<ast::RescueCase>(what);
+            pickle(p, a.loc);
+            p.putU4(a.exceptions.size());
+            pickle(p, a.var);
+            pickle(p, a.body);
+            for (auto &ex : a.exceptions) {
                 pickle(p, ex);
             }
             break;
         }
 
         case ast::Tag::RestArg: {
-            auto *a = ast::cast_tree<ast::RestArg>(what);
-            pickle(p, a->loc);
-            pickle(p, a->expr);
+            auto &a = ast::cast_tree_nonnull<ast::RestArg>(what);
+            pickle(p, a.loc);
+            pickle(p, a.expr);
             break;
         }
 
         case ast::Tag::KeywordArg: {
-            auto *a = ast::cast_tree<ast::KeywordArg>(what);
-            pickle(p, a->loc);
-            pickle(p, a->expr);
+            auto &a = ast::cast_tree_nonnull<ast::KeywordArg>(what);
+            pickle(p, a.loc);
+            pickle(p, a.expr);
             break;
         }
 
         case ast::Tag::ShadowArg: {
-            auto *a = ast::cast_tree<ast::ShadowArg>(what);
-            pickle(p, a->loc);
-            pickle(p, a->expr);
+            auto &a = ast::cast_tree_nonnull<ast::ShadowArg>(what);
+            pickle(p, a.loc);
+            pickle(p, a.expr);
             break;
         }
 
         case ast::Tag::BlockArg: {
-            auto *a = ast::cast_tree<ast::BlockArg>(what);
-            pickle(p, a->loc);
-            pickle(p, a->expr);
+            auto &a = ast::cast_tree_nonnull<ast::BlockArg>(what);
+            pickle(p, a.loc);
+            pickle(p, a.expr);
             break;
         }
 
         case ast::Tag::OptionalArg: {
-            auto *a = ast::cast_tree<ast::OptionalArg>(what);
-            pickle(p, a->loc);
-            pickle(p, a->expr);
-            pickle(p, a->default_);
+            auto &a = ast::cast_tree_nonnull<ast::OptionalArg>(what);
+            pickle(p, a.loc);
+            pickle(p, a.expr);
+            pickle(p, a.default_);
             break;
         }
 
         case ast::Tag::ZSuperArgs: {
-            auto *a = ast::cast_tree<ast::ZSuperArgs>(what);
-            pickle(p, a->loc);
+            auto &a = ast::cast_tree_nonnull<ast::ZSuperArgs>(what);
+            pickle(p, a.loc);
             break;
         }
 
         case ast::Tag::UnresolvedIdent: {
-            auto *a = ast::cast_tree<ast::UnresolvedIdent>(what);
-            pickle(p, a->loc);
-            p.putU1(static_cast<u1>(a->kind));
-            p.putU4(a->name._id);
+            auto &a = ast::cast_tree_nonnull<ast::UnresolvedIdent>(what);
+            pickle(p, a.loc);
+            p.putU1(static_cast<u1>(a.kind));
+            p.putU4(a.name._id);
             break;
         }
 
         case ast::Tag::ConstantLit: {
-            auto *a = ast::cast_tree<ast::ConstantLit>(what);
-            pickle(p, a->loc);
-            p.putU4(a->symbol.rawId());
-            pickle(p, a->original);
+            auto &a = ast::cast_tree_nonnull<ast::ConstantLit>(what);
+            pickle(p, a.loc);
+            p.putU4(a.symbol.rawId());
+            pickle(p, a.original);
             break;
         }
 
