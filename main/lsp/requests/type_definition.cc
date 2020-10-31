@@ -13,7 +13,7 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
     if (type.isUntyped()) {
         return result;
     }
-    tagTypecase(
+    typecase(
         type, [&](const core::ClassType &t) { result.emplace_back(t.symbol.data(gs)->loc()); },
         [&](const core::AppliedType &t) { result.emplace_back(t.klass.data(gs)->loc()); },
         [&](const core::OrType &t) {

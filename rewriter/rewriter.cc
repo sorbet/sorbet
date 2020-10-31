@@ -52,7 +52,7 @@ public:
         ast::TreePtr *prevStat = nullptr;
         UnorderedMap<void *, vector<ast::TreePtr>> replaceNodes;
         for (auto &stat : classDef->rhs) {
-            tagTypecase(
+            typecase(
                 stat,
                 [&](ast::Assign &assign) {
                     vector<ast::TreePtr> nodes;

@@ -1160,7 +1160,7 @@ SymbolRef unwrapSymbol(const TypePtr &type) {
     SymbolRef result;
     TypePtr typePtr = type;
     while (!result.exists()) {
-        tagTypecase(
+        typecase(
             typePtr,
 
             [&](const ClassType &klass) { result = klass.symbol; },
@@ -2332,7 +2332,7 @@ class Array_flatten : public IntrinsicMethod {
         const int newDepth = depth - 1;
 
         TypePtr result;
-        tagTypecase(
+        typecase(
             type,
 
             // This only shows up because t->elementType() for tuples returns an OrType of all its elements.

@@ -53,7 +53,7 @@ TypeSyntax::ResultType TypeSyntax::getResultTypeAndBind(core::MutableContext ctx
 
 core::TypePtr getResultLiteral(core::Context ctx, const ast::TreePtr &expr) {
     core::TypePtr result;
-    tagTypecase(
+    typecase(
         expr, [&](const ast::Literal &lit) { result = lit.value; },
         [&](const ast::Expression &e) {
             if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -622,7 +622,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
     ENFORCE(ctxOwnerData->isClassOrModule(), "getResultTypeAndBind wasn't called with a class owner");
 
     TypeSyntax::ResultType result;
-    tagTypecase(
+    typecase(
         expr,
         [&](const ast::Array &arr) {
             vector<core::TypePtr> elems;

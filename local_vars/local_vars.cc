@@ -44,7 +44,7 @@ class LocalNameInserter {
     NamedArg nameArg(ast::TreePtr arg) {
         NamedArg named;
 
-        tagTypecase(
+        typecase(
             arg,
             [&](ast::UnresolvedIdent &nm) {
                 named.name = nm.name;

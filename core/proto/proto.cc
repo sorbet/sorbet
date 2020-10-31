@@ -166,7 +166,7 @@ com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, cons
 
 com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr &typ) {
     com::stripe::rubytyper::Type proto;
-    tagTypecase(
+    typecase(
         typ,
         [&](const ClassType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::CLASS);

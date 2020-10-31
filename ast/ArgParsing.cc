@@ -11,7 +11,7 @@ namespace {
 ParsedArg parseArg(const ast::TreePtr &arg) {
     ParsedArg parsedArg;
 
-    tagTypecase(
+    typecase(
         arg,
         [&](const ast::RestArg &rest) {
             parsedArg = parseArg(rest.expr);
@@ -43,7 +43,7 @@ ParsedArg parseArg(const ast::TreePtr &arg) {
 
 TreePtr getDefaultValue(TreePtr arg) {
     TreePtr default_;
-    tagTypecase(
+    typecase(
         arg, [&](ast::RestArg &rest) { default_ = getDefaultValue(move(rest.expr)); },
         [&](ast::KeywordArg &kw) { default_ = getDefaultValue(move(kw.expr)); },
         [&](ast::OptionalArg &opt) { default_ = move(opt.default_); },

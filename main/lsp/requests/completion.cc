@@ -170,7 +170,7 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
                                                string_view prefix) {
     auto result = SimilarMethodsByName{};
 
-    tagTypecase(
+    typecase(
         receiver, [&](const core::ClassType &type) { result = similarMethodsForClass(gs, type.symbol, prefix); },
         [&](const core::AppliedType &type) { result = similarMethodsForClass(gs, type.klass, prefix); },
         [&](const core::AndType &type) {
