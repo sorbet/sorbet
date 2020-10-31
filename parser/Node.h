@@ -69,11 +69,15 @@ public:
     NodePtr(const NodePtr &other) = delete;
 
     ~NodePtr() {
-        deleteTagged(this->tag(), this->get());
+        if (store != 0) {
+            deleteTagged(this->tag(), this->get());
+        }
     }
 
     NodePtr &operator=(NodePtr &&other) noexcept {
-        deleteTagged(this->tag(), this->get());
+        if (this->store != 0) {
+            deleteTagged(this->tag(), this->get());
+        }
         store = other.releaseTagged();
         return *this;
     };
@@ -123,16 +127,22 @@ public:
         n.store = temp;
     }
 
-    void printTabs(fmt::memory_buffer &to, int count) const;
+    static void printTabs(fmt::memory_buffer &to, int count);
     void printNode(fmt::memory_buffer &to, const core::GlobalState &gs, int tabs) const;
     void printNodeJSON(fmt::memory_buffer &to, const core::GlobalState &gs, int tabs);
     void printNodeWhitequark(fmt::memory_buffer &to, const core::GlobalState &gs, int tabs);
     core::LocOffsets loc() const;
-    std::string nodeName() const;
+    void setLoc(core::LocOffsets loc);
+    std::string nodeName();
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs) const {
+        return toStringWithTabs(gs);
+    }
     std::string toJSON(const core::GlobalState &gs, int tabs = 0);
     std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);
+
+    template <class T, class... Args> friend NodePtr make_node(Args &&... args);
 };
 CheckSize(NodePtr, 8, 8);
 

@@ -118,26 +118,26 @@ ast::TreePtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, const
     return nullptr;
 }
 
-unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print) {
+parser::NodePtr runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print) {
     Timer timeit(gs.tracer(), "runParser", {{"file", (string)file.data(gs).path()}});
-    unique_ptr<parser::Node> nodes;
+    parser::NodePtr nodes;
     {
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
         nodes = parser::Parser::run(gs, file);
     }
     if (print.ParseTree.enabled) {
-        print.ParseTree.fmt("{}\n", nodes->toStringWithTabs(gs, 0));
+        print.ParseTree.fmt("{}\n", nodes.toStringWithTabs(gs, 0));
     }
     if (print.ParseTreeJson.enabled) {
-        print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
+        print.ParseTreeJson.fmt("{}\n", nodes.toJSON(gs, 0));
     }
     if (print.ParseTreeWhitequark.enabled) {
-        print.ParseTreeWhitequark.fmt("{}\n", nodes->toWhitequark(gs, 0));
+        print.ParseTreeWhitequark.fmt("{}\n", nodes.toWhitequark(gs, 0));
     }
     return nodes;
 }
 
-ast::TreePtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
+ast::TreePtr runDesugar(core::GlobalState &gs, core::FileRef file, parser::NodePtr parseTree,
                         const options::Printers &print) {
     Timer timeit(gs.tracer(), "runDesugar", {{"file", (string)file.data(gs).path()}});
     ast::TreePtr ast;

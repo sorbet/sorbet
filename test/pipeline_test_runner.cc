@@ -221,7 +221,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             file.data(*gs).source().find("# typed:") == string::npos) {
             ADD_FAIL_CHECK_AT(file.data(*gs).path().data(), 1, "Add a `# typed: strict` line to the top of this file");
         }
-        unique_ptr<parser::Node> nodes;
+        parser::NodePtr nodes;
         {
             core::UnfreezeNameTable nameTableAccess(*gs); // enters original strings
 
@@ -229,9 +229,9 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
 
         handler.drainErrors(*gs);
-        handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
-        handler.addObserved(*gs, "parse-tree-whitequark", [&]() { return nodes->toWhitequark(*gs); });
-        handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        handler.addObserved(*gs, "parse-tree", [&]() { return nodes.toString(*gs); });
+        handler.addObserved(*gs, "parse-tree-whitequark", [&]() { return nodes.toWhitequark(*gs); });
+        handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes.toJSON(*gs); });
 
         // Desugarer
         ast::ParsedFile desugared;
@@ -489,8 +489,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         // this replicates the logic of pipeline::indexOne
         auto nodes = parser::Parser::run(*gs, f.file);
-        handler.addObserved(*gs, "parse-tree", [&]() { return nodes->toString(*gs); });
-        handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes->toJSON(*gs); });
+        handler.addObserved(*gs, "parse-tree", [&]() { return nodes.toString(*gs); });
+        handler.addObserved(*gs, "parse-tree-json", [&]() { return nodes.toJSON(*gs); });
 
         core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});

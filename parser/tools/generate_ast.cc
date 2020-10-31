@@ -709,7 +709,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         if (arg.type == FieldType::Loc) {
             continue;
         }
-        out << "    printTabs(buf, tabs + 1);" << '\n';
+        out << "    NodePtr::printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case FieldType::Name:
                 out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name
@@ -717,15 +717,15 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(buf, \"" << arg.name << " = \");\n";
-                out << "    Node::printNode(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    " << arg.name << ".printNode(buf, gs, tabs + 1);\n";
                 break;
             case FieldType::NodeVec:
                 out << "    fmt::format_to(buf, \"" << arg.name << " = [\\n\");\n";
                 out << "    for (auto &&a: " << arg.name << ") {\n";
-                out << "      Node::printTabs(buf, tabs + 2);\n";
-                out << "      Node::printNode(buf, a, gs, tabs + 2);\n";
+                out << "      NodePtr::printTabs(buf, tabs + 2);\n";
+                out << "      a.printNode(buf, gs, tabs + 2);\n";
                 out << "    }" << '\n';
-                out << "    Node::printTabs(buf, tabs + 1);\n";
+                out << "    NodePtr::printTabs(buf, tabs + 1);\n";
                 out << "    fmt::format_to(buf, \"]\\n\");\n";
                 break;
             case FieldType::String:
@@ -743,7 +743,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
         }
     }
-    out << "    Node::printTabs(buf, tabs);\n";
+    out << "    NodePtr::printTabs(buf, tabs);\n";
     out << "    fmt::format_to(buf, \"}}\");\n";
     out << "    return to_string(buf);\n";
     out << "  }" << '\n';
@@ -755,7 +755,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << "  std::string " << node.name << "::toJSON(const core::GlobalState &gs, int tabs) {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
     out << "    fmt::format_to(buf,  \"{{\\n\");\n";
-    out << "    Node::printTabs(buf, tabs + 1);" << '\n';
+    out << "    NodePtr::printTabs(buf, tabs + 1);" << '\n';
     auto maybeComma = "";
     if (!node.fields.empty()) {
         maybeComma = ",";
@@ -775,7 +775,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             }
         }
-        out << "    Node::printTabs(buf, tabs + 1);" << '\n';
+        out << "    NodePtr::printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case FieldType::Name:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma
@@ -783,7 +783,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \");\n";
-                out << "    Node::printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    " << arg.name << ".printNodeJSON(buf, gs, tabs + 1);\n";
                 out << "    fmt::format_to(buf,  \"" << maybeComma << "\\n\");\n";
                 break;
             case FieldType::NodeVec:
@@ -791,14 +791,14 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    int i = -1;" << '\n';
                 out << "    for (auto &&a: " << arg.name << ") { \n";
                 out << "      i++;\n";
-                out << "      Node::printTabs(buf, tabs + 2);\n";
-                out << "      Node::printNodeJSON(buf, a, gs, tabs + 2);\n";
+                out << "      NodePtr::printTabs(buf, tabs + 2);\n";
+                out << "      a.printNodeJSON(buf, gs, tabs + 2);\n";
                 out << "      if (i + 1 < " << arg.name << ".size()) {\n";
                 out << "        fmt::format_to(buf,  \",\");" << '\n';
                 out << "      }" << '\n';
                 out << "      fmt::format_to(buf,  \"\\n\");\n";
                 out << "    }" << '\n';
-                out << "    Node::printTabs(buf, tabs + 1);\n";
+                out << "    NodePtr::printTabs(buf, tabs + 1);\n";
                 out << "    fmt::format_to(buf,  \"]" << maybeComma << "\\n\")\n;";
                 break;
             case FieldType::String:
@@ -819,7 +819,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
         }
     }
-    out << "    Node::printTabs(buf, tabs);" << '\n';
+    out << "    NodePtr::printTabs(buf, tabs);" << '\n';
     out << "    fmt::format_to(buf,  \"}}\");\n";
     out << "    return to_string(buf);\n";
     out << "  }" << '\n';
@@ -843,8 +843,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    fmt::format_to(buf, \",\");\n";
                 out << "    if (" << arg.name << ") {\n";
                 out << "     fmt::format_to(buf, \"\\n\");\n";
-                out << "     Node::printTabs(buf, tabs + 1);" << '\n';
-                out << "     Node::printNodeWhitequark(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "     NodePtr::printTabs(buf, tabs + 1);" << '\n';
+                out << "     " << arg.name << ".printNodeWhitequark(buf, gs, tabs + 1);\n";
                 out << "    } else {\n";
                 out << "      fmt::format_to(buf, \" nil\");\n";
                 out << "    }\n";
@@ -854,8 +854,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "      fmt::format_to(buf, \",\");\n";
                 out << "      if (a) {\n";
                 out << "        fmt::format_to(buf, \"\\n\");\n";
-                out << "        Node::printTabs(buf, tabs + 1);" << '\n';
-                out << "        Node::printNodeWhitequark(buf, a, gs, tabs + 1);\n";
+                out << "        NodePtr::printTabs(buf, tabs + 1);" << '\n';
+                out << "        a.printNodeWhitequark(buf, gs, tabs + 1);\n";
                 out << "      } else {\n";
                 out << "        fmt::format_to(buf, \" nil\");\n";
                 out << "      }\n";
