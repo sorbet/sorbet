@@ -55,7 +55,7 @@ vector<ast::TreePtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) 
     auto *block = ast::cast_tree<ast::Block>(send->block);
     if (block != nullptr && block->args.size() == 1) {
         auto blockArg = move(block->args[0]);
-        body.emplace_back(ast::MK::Assign(blockArg->loc, move(blockArg), asgn->lhs.deepCopy()));
+        body.emplace_back(ast::MK::Assign(blockArg.loc(), move(blockArg), asgn->lhs.deepCopy()));
     }
 
     if (send->block != nullptr) {

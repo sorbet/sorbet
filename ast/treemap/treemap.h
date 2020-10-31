@@ -611,7 +611,7 @@ private:
         if (what == nullptr) {
             return what;
         }
-        auto loc = what->loc;
+        auto loc = what.loc();
 
         try {
             // TODO: reorder by frequency
@@ -652,7 +652,7 @@ private:
                     return mapReturn(std::move(what), ctx);
 
                 case Tag::RescueCase:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::Rescue:
@@ -665,23 +665,23 @@ private:
                     return mapUnresolvedIdent(std::move(what), ctx);
 
                 case Tag::RestArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::KeywordArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::OptionalArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::BlockArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::ShadowArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::Assign:
@@ -709,7 +709,7 @@ private:
                     return what;
 
                 case Tag::Block:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::InsSeq:
@@ -1107,7 +1107,7 @@ private:
         if (what == nullptr) {
             return what;
         }
-        auto loc = what->loc;
+        auto loc = what.loc();
 
         try {
             // TODO: reorder by frequency
@@ -1148,7 +1148,7 @@ private:
                     return mapReturn(std::move(what), ctx);
 
                 case Tag::RescueCase:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::Rescue:
@@ -1161,23 +1161,23 @@ private:
                     return mapUnresolvedIdent(std::move(what), ctx);
 
                 case Tag::RestArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::KeywordArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::OptionalArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::BlockArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::ShadowArg:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::Assign:
@@ -1205,7 +1205,7 @@ private:
                     return what;
 
                 case Tag::Block:
-                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what->nodeName());
+                    Exception::raise("should never happen. Forgot to add new tree kind? {}", what.nodeName());
                     break;
 
                 case Tag::InsSeq:

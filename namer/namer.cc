@@ -554,7 +554,7 @@ public:
             staticField.owner = found.owner;
             staticField.name = found.name;
             staticField.asgnLoc = found.asgnLoc;
-            staticField.lhsLoc = asgn.lhs->loc;
+            staticField.lhsLoc = asgn.lhs.loc();
             staticField.isTypeAlias = true;
             return foundDefs->addStaticField(move(staticField));
         }
@@ -610,7 +610,7 @@ public:
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             fillAssign(ctx, asgn);
-        } else if (!send->recv->isSelfReference()) {
+        } else if (!send->recv.isSelfReference()) {
             handleAssignment(ctx, asgn);
         } else {
             switch (send->fun._id) {
@@ -1328,17 +1328,17 @@ class TreeSymbolizer {
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
-                    if (auto e = ctx.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
+                    if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
                         e.setHeader("Unsupported constant scope");
                     }
                 }
                 // emitted via `class << self` blocks
             } else if (ast::isa_tree<ast::EmptyTree>(node)) {
                 // ::Foo
-            } else if (node->isSelfReference()) {
+            } else if (node.isSelfReference()) {
                 // self::Foo
             } else {
-                if (auto e = ctx.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
+                if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
                     e.setHeader("Dynamic constant references are unsupported");
                 }
             }
@@ -1391,7 +1391,7 @@ class TreeSymbolizer {
         } else {
             return;
         }
-        if (!send->recv->isSelfReference()) {
+        if (!send->recv.isSelfReference()) {
             // ignore `something.include`
             return;
         }
@@ -1416,14 +1416,14 @@ class TreeSymbolizer {
             if (ast::isa_tree<ast::EmptyTree>(arg)) {
                 continue;
             }
-            if (arg->isSelfReference()) {
+            if (arg.isSelfReference()) {
                 dest->emplace_back(arg.deepCopy());
                 continue;
             }
             if (isValidAncestor(arg)) {
                 dest->emplace_back(arg.deepCopy());
             } else {
-                if (auto e = ctx.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
+                if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
                     e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
                 }
                 arg = ast::MK::EmptyTree();
@@ -1432,7 +1432,7 @@ class TreeSymbolizer {
     }
 
     bool isValidAncestor(ast::TreePtr &exp) {
-        if (ast::isa_tree<ast::EmptyTree>(exp) || exp->isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
+        if (ast::isa_tree<ast::EmptyTree>(exp) || exp.isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
             return true;
         }
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
@@ -1472,7 +1472,7 @@ public:
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
     bool shouldLeaveAncestorForIDE(const ast::TreePtr &anc) {
         // used in Desugar <-> resolver to signal classes that did not have explicit superclass
-        if (ast::isa_tree<ast::EmptyTree>(anc) || anc->isSelfReference()) {
+        if (ast::isa_tree<ast::EmptyTree>(anc) || anc.isSelfReference()) {
             return false;
         }
         auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
@@ -1496,7 +1496,7 @@ public:
             /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
             for (auto &anc : klass.ancestors) {
                 if (!isValidAncestor(anc)) {
-                    if (auto e = ctx.beginError(anc->loc, core::errors::Namer::AncestorNotConstant)) {
+                    if (auto e = ctx.beginError(anc.loc(), core::errors::Namer::AncestorNotConstant)) {
                         e.setHeader("Superclasses must only contain constant literals");
                     }
                     anc = ast::MK::EmptyTree();
@@ -1659,7 +1659,7 @@ public:
 
                 // one of fixed or bounds were provided
                 if (fixed != bounded) {
-                    asgn.lhs = ast::MK::Constant(asgn.lhs->loc, sym);
+                    asgn.lhs = ast::MK::Constant(asgn.lhs.loc(), sym);
 
                     // Leave it in the tree for the resolver to chew on.
                     return tree;
@@ -1701,7 +1701,7 @@ public:
             return handleAssignment(ctx, std::move(tree));
         }
 
-        if (!send->recv->isSelfReference()) {
+        if (!send->recv.isSelfReference()) {
             return handleAssignment(ctx, std::move(tree));
         }
 

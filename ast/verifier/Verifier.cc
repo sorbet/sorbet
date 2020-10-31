@@ -10,10 +10,10 @@ class VerifierWalker {
 public:
     TreePtr preTransformExpression(core::Context ctx, TreePtr original) {
         if (!isa_tree<EmptyTree>(original)) {
-            ENFORCE(original->loc.exists(), "location is unset");
+            ENFORCE(original.loc().exists(), "location is unset");
         }
 
-        original->_sanityCheck();
+        original._sanityCheck();
 
         return original;
     }
@@ -37,7 +37,7 @@ public:
     }
 
     TreePtr preTransformBlock(core::Context ctx, TreePtr original) {
-        original->_sanityCheck();
+        original._sanityCheck();
         return original;
     }
 };

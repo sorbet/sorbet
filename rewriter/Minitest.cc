@@ -70,7 +70,7 @@ public:
     // we treat those the same way we treat classes
     ast::TreePtr preTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
-        if (send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
+        if (send->recv.isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
             classDepth++;
         }
         return tree;
@@ -78,7 +78,7 @@ public:
 
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
-        if (send->recv->isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
+        if (send->recv.isSelfReference() && send->args.size() == 1 && send->fun == core::Names::describe()) {
             classDepth--;
             if (classDepth == 0) {
                 movedConstants.emplace_back(move(tree));
@@ -110,7 +110,7 @@ public:
 };
 
 ast::TreePtr addSigVoid(ast::TreePtr expr) {
-    return ast::MK::InsSeq1(expr->loc, ast::MK::SigVoid(expr->loc, {}), std::move(expr));
+    return ast::MK::InsSeq1(expr.loc(), ast::MK::SigVoid(expr.loc(), {}), std::move(expr));
 }
 } // namespace
 
@@ -143,7 +143,7 @@ string to_s(core::Context ctx, ast::TreePtr &arg) {
     if (argConstant != nullptr) {
         return argConstant->cnst.show(ctx);
     }
-    return arg->toString(ctx);
+    return arg.toString(ctx);
 }
 
 // This returns `true` for expressions which can be moved from class to method scope without changing their meaning, and
@@ -172,7 +172,7 @@ ast::TreePtr getIteratee(ast::TreePtr &exp) {
     if (canMoveIntoMethodDef(exp)) {
         return exp.deepCopy();
     } else {
-        return ast::MK::RaiseUnimplemented(exp->loc);
+        return ast::MK::RaiseUnimplemented(exp.loc());
     }
 }
 
@@ -209,7 +209,7 @@ ast::TreePtr runUnderEach(core::MutableContext ctx, core::NameRef eachName, ast:
         }
     }
     // if any of the above tests were not satisfied, then mark this statement as being invalid here
-    if (auto e = ctx.beginError(stmt->loc, core::errors::Rewriter::BadTestEach)) {
+    if (auto e = ctx.beginError(stmt.loc(), core::errors::Rewriter::BadTestEach)) {
         e.setHeader("Only valid `{}`-blocks can appear within `{}`", "it", eachName.show(ctx));
     }
 
@@ -240,14 +240,14 @@ ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
 
     auto *block = ast::cast_tree<ast::Block>(send->block);
 
-    if (!send->recv->isSelfReference()) {
+    if (!send->recv.isSelfReference()) {
         return nullptr;
     }
 
     if ((send->fun == core::Names::testEach() || send->fun == core::Names::testEachHash()) && send->args.size() == 1) {
         if ((send->fun == core::Names::testEach() && block->args.size() != 1) ||
             (send->fun == core::Names::testEachHash() && block->args.size() != 2)) {
-            if (auto e = ctx.beginError(send->block->loc, core::errors::Rewriter::BadTestEach)) {
+            if (auto e = ctx.beginError(send->block.loc(), core::errors::Rewriter::BadTestEach)) {
                 e.setHeader("Wrong number of parameters for `{}` block: expected `{}`, got `{}`", send->fun.show(ctx),
                             1, block->args.size());
             }
@@ -261,7 +261,7 @@ ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
         args.emplace_back(move(send->args.front()));
         return ast::MK::Send(
             send->loc, ast::MK::Self(send->loc), send->fun, 1, std::move(args), send->flags,
-            ast::MK::Block(send->block->loc,
+            ast::MK::Block(send->block.loc(),
                            prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, iteratee),
                            std::move(block->args)));
     }
@@ -283,10 +283,10 @@ ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
 
     if (send->fun == core::Names::describe()) {
         ast::ClassDef::ANCESTORS_store ancestors;
-        ancestors.emplace_back(ast::MK::Self(arg->loc));
+        ancestors.emplace_back(ast::MK::Self(arg.loc()));
         ast::ClassDef::RHS_store rhs;
         rhs.emplace_back(prepareBody(ctx, std::move(block->body)));
-        auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(),
+        auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
         return ast::MK::Class(send->loc, core::Loc(ctx.file, send->loc), std::move(name), std::move(ancestors),
                               std::move(rhs));

@@ -32,7 +32,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Tre
             if (validAttr) {
                 res = nameRef;
             } else {
-                if (auto e = ctx.beginError(name->loc, core::errors::Rewriter::BadAttrArg)) {
+                if (auto e = ctx.beginError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
                     e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
                 }
                 res = core::Names::empty();
@@ -41,7 +41,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Tre
         }
     }
     if (!res.exists()) {
-        if (auto e = ctx.beginError(name->loc, core::errors::Rewriter::BadAttrArg)) {
+        if (auto e = ctx.beginError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
             e.setHeader("arg must be a Symbol or String");
         }
     }
@@ -118,7 +118,7 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
             if (auto e = ctx.beginError(sig->loc, core::errors::Rewriter::BadAttrType)) {
                 e.setHeader("The type for an `{}` cannot contain `{}`", attrFun.show(ctx), "type_parameters");
             }
-            body->args[0] = ast::MK::Untyped(body->args[0]->loc);
+            body->args[0] = ast::MK::Untyped(body->args[0].loc());
         }
         cur = ast::cast_tree<ast::Send>(cur->recv);
     }
@@ -145,8 +145,8 @@ ast::TreePtr toWriterSigForName(core::MutableContext ctx, ast::Send *sharedSig, 
     ast::Send *cur = body;
     while (cur != nullptr) {
         auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv);
-        if ((cur->recv->isSelfReference()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
-            auto loc = resultType->loc;
+        if ((cur->recv.isSelfReference()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
+            auto loc = resultType.loc();
             auto params = ast::MK::Send2(loc, move(cur->recv), core::Names::params(), ast::MK::Symbol(nameLoc, name),
                                          move(resultType));
             ast::cast_tree_nonnull<ast::Send>(params).numPosArgs = 0;

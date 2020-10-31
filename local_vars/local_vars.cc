@@ -49,37 +49,37 @@ class LocalNameInserter {
             [&](ast::UnresolvedIdent *nm) {
                 named.name = nm->name;
                 named.local = enterLocal(named.name);
-                named.loc = arg->loc;
-                named.expr = ast::make_tree<ast::Local>(arg->loc, named.local);
+                named.loc = arg.loc();
+                named.expr = ast::make_tree<ast::Local>(arg.loc(), named.local);
             },
             [&](ast::RestArg *rest) {
                 named = nameArg(move(rest->expr));
-                named.expr = ast::MK::RestArg(arg->loc, move(named.expr));
+                named.expr = ast::MK::RestArg(arg.loc(), move(named.expr));
                 named.flags.repeated = true;
             },
             [&](ast::KeywordArg *kw) {
                 named = nameArg(move(kw->expr));
-                named.expr = ast::MK::KeywordArg(arg->loc, move(named.expr));
+                named.expr = ast::MK::KeywordArg(arg.loc(), move(named.expr));
                 named.flags.keyword = true;
             },
             [&](ast::OptionalArg *opt) {
                 named = nameArg(move(opt->expr));
-                named.expr = ast::MK::OptionalArg(arg->loc, move(named.expr), move(opt->default_));
+                named.expr = ast::MK::OptionalArg(arg.loc(), move(named.expr), move(opt->default_));
             },
             [&](ast::BlockArg *blk) {
                 named = nameArg(move(blk->expr));
-                named.expr = ast::MK::BlockArg(arg->loc, move(named.expr));
+                named.expr = ast::MK::BlockArg(arg.loc(), move(named.expr));
                 named.flags.block = true;
             },
             [&](ast::ShadowArg *shadow) {
                 named = nameArg(move(shadow->expr));
-                named.expr = ast::MK::ShadowArg(arg->loc, move(named.expr));
+                named.expr = ast::MK::ShadowArg(arg.loc(), move(named.expr));
                 named.flags.shadow = true;
             },
             [&](ast::Local *local) {
                 named.name = local->localVariable._name;
                 named.local = enterLocal(named.name);
-                named.loc = arg->loc;
+                named.loc = arg.loc();
                 named.expr = ast::make_tree<ast::Local>(local->loc, named.local);
             });
 

@@ -239,7 +239,7 @@ ast::TreePtr ASTUtil::thunkBody(core::MutableContext ctx, ast::TreePtr &node) {
         return nullptr;
     }
     // Valid receivers for lambda/proc are either a self reference or `Kernel`
-    if (!send->recv->isSelfReference() && !isKernel(send->recv)) {
+    if (!send->recv.isSelfReference() && !isKernel(send->recv)) {
         return nullptr;
     }
     if (send->block == nullptr) {

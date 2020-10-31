@@ -32,7 +32,7 @@ bool SigRewriter::run(core::MutableContext &ctx, ast::Send *send) {
         return false;
     }
 
-    if (!(send->recv->isSelfReference() || isTSigWithoutRuntime(send->recv))) {
+    if (!(send->recv.isSelfReference() || isTSigWithoutRuntime(send->recv))) {
         return false;
     }
 

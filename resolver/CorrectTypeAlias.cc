@@ -31,9 +31,9 @@ void CorrectTypeAlias::eagerToLazy(core::Context ctx, core::ErrorBuilder &e, ast
         }
     }
 
-    auto *front = send->args.front().get();
-    auto *back = send->args.back().get();
-    core::Loc argsLoc{ctx.file, front->loc.join(back->loc)};
+    auto &front = send->args.front();
+    auto &back = send->args.back();
+    core::Loc argsLoc{ctx.file, front.loc().join(back.loc())};
 
     auto [start, end] = core::Loc(ctx.file, send->loc).position(ctx);
 

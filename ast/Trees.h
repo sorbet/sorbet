@@ -217,6 +217,22 @@ public:
     }
 
     TreePtr deepCopy() const;
+
+    std::string nodeName() const;
+
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+
+    bool isSelfReference() const;
+
+    void _sanityCheck() const;
+
+    core::LocOffsets loc() const;
+
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+
+    std::string toString(const core::GlobalState &gs) const {
+        return toStringWithTabs(gs);
+    }
 };
 
 template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
@@ -225,20 +241,9 @@ template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
 
 class Expression {
 public:
-    Expression(core::LocOffsets loc);
     virtual ~Expression() = default;
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const = 0;
-    std::string toString(const core::GlobalState &gs) const {
-        return toStringWithTabs(gs);
-    }
-    virtual std::string nodeName() = 0;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) = 0;
-    virtual void _sanityCheck() = 0;
-    const core::LocOffsets loc;
-
-    bool isSelfReference() const;
 };
-CheckSize(Expression, 16, 8);
+CheckSize(Expression, 8, 8);
 
 struct ParsedFile {
     TreePtr tree;
@@ -296,28 +301,17 @@ template <class To> const To &cast_tree_nonnull(const TreePtr &what) {
     return *reinterpret_cast<To *>(what.get());
 }
 
-class Reference : public Expression {
-public:
-    Reference(core::LocOffsets loc);
-};
-CheckSize(Reference, 16, 8);
-
-class Declaration : public Expression {
-public:
-    core::Loc declLoc;
-    core::SymbolRef symbol;
-
-    Declaration(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol);
-};
-CheckSize(Declaration, 32, 8);
-
 #define TREE(name)                                                                  \
     class name;                                                                     \
     template <> struct TreeToTag<name> { static constexpr Tag value = Tag::name; }; \
     class __attribute__((aligned(8))) name final
 
-TREE(ClassDef) : public Declaration {
+TREE(ClassDef) : public Expression {
 public:
+    const core::LocOffsets loc;
+    core::Loc declLoc;
+    core::SymbolRef symbol;
+
     enum class Kind : u1 {
         Module,
         Class,
@@ -341,17 +335,20 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(ClassDef, 136, 8);
 
-TREE(MethodDef) : public Declaration {
+TREE(MethodDef) : public Expression {
 public:
+    const core::LocOffsets loc;
+    core::Loc declLoc;
+    core::SymbolRef symbol;
+
     TreePtr rhs;
 
     using ARGS_store = InlinedVector<TreePtr, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
@@ -375,17 +372,18 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(MethodDef, 72, 8);
 
 TREE(If) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr cond;
     TreePtr thenp;
     TreePtr elsep;
@@ -394,17 +392,18 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(If, 40, 8);
 
 TREE(While) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr cond;
     TreePtr body;
 
@@ -412,83 +411,88 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(While, 32, 8);
 
 TREE(Break) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr expr;
 
     Break(core::LocOffsets loc, TreePtr expr);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Break, 24, 8);
 
 TREE(Retry) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     Retry(core::LocOffsets loc);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Retry, 16, 8);
 
 TREE(Next) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr expr;
 
     Next(core::LocOffsets loc, TreePtr expr);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Next, 24, 8);
 
 TREE(Return) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr expr;
 
     Return(core::LocOffsets loc, TreePtr expr);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Return, 24, 8);
 
 TREE(RescueCase) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     static constexpr int EXPECTED_EXCEPTION_COUNT = 2;
     using EXCEPTION_store = InlinedVector<TreePtr, EXPECTED_EXCEPTION_COUNT>;
 
@@ -503,17 +507,18 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(RescueCase, 56, 8);
 
 TREE(Rescue) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     static constexpr int EXPECTED_RESCUE_CASE_COUNT = 2;
     using RESCUE_CASE_store = InlinedVector<TreePtr, EXPECTED_RESCUE_CASE_COUNT>;
 
@@ -526,34 +531,36 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Rescue, 64, 8);
 
-TREE(Local) : public Reference {
+TREE(Local) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     core::LocalVariable localVariable;
 
     Local(core::LocOffsets loc, core::LocalVariable localVariable1);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Local, 24, 8);
 
-TREE(UnresolvedIdent) : public Reference {
+TREE(UnresolvedIdent) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     enum class Kind : u1 {
         Local,
         Instance,
@@ -567,51 +574,54 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(UnresolvedIdent, 24, 8);
 
-TREE(RestArg) : public Reference {
+TREE(RestArg) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr expr;
 
     RestArg(core::LocOffsets loc, TreePtr arg);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(RestArg, 24, 8);
 
-TREE(KeywordArg) : public Reference {
+TREE(KeywordArg) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr expr;
 
     KeywordArg(core::LocOffsets loc, TreePtr expr);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(KeywordArg, 24, 8);
 
-TREE(OptionalArg) : public Reference {
+TREE(OptionalArg) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr expr;
     TreePtr default_;
 
@@ -619,51 +629,54 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(OptionalArg, 32, 8);
 
-TREE(BlockArg) : public Reference {
+TREE(BlockArg) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr expr;
 
     BlockArg(core::LocOffsets loc, TreePtr expr);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(BlockArg, 24, 8);
 
-TREE(ShadowArg) : public Reference {
+TREE(ShadowArg) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr expr;
 
     ShadowArg(core::LocOffsets loc, TreePtr expr);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(ShadowArg, 24, 8);
 
 TREE(Assign) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     TreePtr lhs;
     TreePtr rhs;
 
@@ -671,17 +684,18 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Assign, 32, 8);
 
 TREE(Send) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     core::NameRef fun;
 
     struct Flags {
@@ -728,9 +742,9 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
     // Returned value is [start, end) indices into ast::Send::args.
     std::pair<int, int> kwArgsRange() const {
@@ -751,13 +765,14 @@ public:
         return (args.size() - numPosArgs) & 0x1;
     }
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Send, 64, 8);
 
 TREE(Cast) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     // The name of the cast operator.
     core::NameRef cast;
 
@@ -768,17 +783,18 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Cast, 48, 8);
 
 TREE(Hash) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     static constexpr int EXPECTED_ENTRY_COUNT = 2;
     using ENTRY_store = InlinedVector<TreePtr, EXPECTED_ENTRY_COUNT>;
 
@@ -789,17 +805,18 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Hash, 64, 8);
 
 TREE(Array) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     static constexpr int EXPECTED_ENTRY_COUNT = 4;
     using ENTRY_store = InlinedVector<TreePtr, EXPECTED_ENTRY_COUNT>;
 
@@ -809,26 +826,27 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Array, 56, 8);
 
 TREE(Literal) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     core::TypePtr value;
 
     Literal(core::LocOffsets loc, const core::TypePtr &value);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
     bool isString(const core::GlobalState &gs) const;
     bool isSymbol(const core::GlobalState &gs) const;
     bool isNil(const core::GlobalState &gs) const;
@@ -837,13 +855,14 @@ public:
     bool isTrue(const core::GlobalState &gs) const;
     bool isFalse(const core::GlobalState &gs) const;
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(Literal, 32, 8);
 
 TREE(UnresolvedConstantLit) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     core::NameRef cnst;
     TreePtr scope;
 
@@ -851,17 +870,18 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(UnresolvedConstantLit, 32, 8);
 
 TREE(ConstantLit) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
     // For constants that failed resolution, symbol will be set to StubModule and resolutionScopes
     // will be set to whatever nesting scope we estimate the constant could have been defined in.
@@ -873,35 +893,37 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
     std::optional<std::pair<core::SymbolRef, std::vector<core::NameRef>>> fullUnresolvedPath(
         const core::GlobalState &gs) const;
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(ConstantLit, 56, 8);
 
 TREE(ZSuperArgs) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     // null if no block passed
     ZSuperArgs(core::LocOffsets loc);
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(ZSuperArgs, 16, 8);
 
 TREE(Block) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     MethodDef::ARGS_store args;
     TreePtr body;
 
@@ -909,15 +931,17 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-    virtual void _sanityCheck();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
+    void _sanityCheck();
 };
 CheckSize(Block, 48, 8);
 
 TREE(InsSeq) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     static constexpr int EXPECTED_STATS_COUNT = 4;
     using STATS_store = InlinedVector<TreePtr, EXPECTED_STATS_COUNT>;
     // Statements
@@ -930,27 +954,27 @@ public:
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(InsSeq, 64, 8);
 
 TREE(EmptyTree) : public Expression {
 public:
+    const core::LocOffsets loc;
+
     EmptyTree();
 
     TreePtr deepCopy() const;
 
-    virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    std::string nodeName();
 
-private:
-    virtual void _sanityCheck();
+    void _sanityCheck();
 };
 CheckSize(EmptyTree, 16, 8);
 

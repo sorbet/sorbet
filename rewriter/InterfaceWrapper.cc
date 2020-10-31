@@ -21,7 +21,7 @@ ast::TreePtr InterfaceWrapper::run(core::MutableContext ctx, ast::Send *send) {
     }
 
     if (!ast::isa_tree<ast::UnresolvedConstantLit>(send->recv)) {
-        if (auto e = ctx.beginError(send->recv->loc, core::errors::Rewriter::BadWrapInstance)) {
+        if (auto e = ctx.beginError(send->recv.loc(), core::errors::Rewriter::BadWrapInstance)) {
             e.setHeader("Unsupported wrap_instance() on a non-constant-literal");
         }
         return nullptr;

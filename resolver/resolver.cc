@@ -249,7 +249,7 @@ private:
                 auto loc = resolved.data(ctx)->loc();
                 if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
                     e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.data(ctx)->show(ctx));
-                    e.addErrorLine(core::Loc(ctx.file, job.out->original->loc), "Type alias used here");
+                    e.addErrorLine(core::Loc(ctx.file, job.out->original.loc()), "Type alias used here");
                 }
                 resolved.data(ctx)->resultType =
                     core::Types::untyped(ctx, resolved); // <<-- This is the reason this takes a MutableContext
@@ -300,7 +300,7 @@ private:
 
         auto customAutogenError = original.cnst == core::Symbols::Subclasses().data(ctx)->name;
         if (!alreadyReported || customAutogenError) {
-            if (auto e = ctx.beginError(job.out->original->loc, core::errors::Resolver::StubConstant)) {
+            if (auto e = ctx.beginError(job.out->original.loc(), core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
 
                 auto suggestScope = job.out->resolutionScopes.front();
@@ -364,7 +364,7 @@ private:
         }
         auto &rhs = *job.rhs;
         if (enclosingTypeMember.exists()) {
-            if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::TypeAliasInGenericClass)) {
+            if (auto e = ctx.beginError(rhs.loc(), core::errors::Resolver::TypeAliasInGenericClass)) {
                 e.setHeader("Type aliases are not allowed in generic classes");
                 e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
             }
@@ -557,8 +557,8 @@ private:
                 return;
             }
             job.ancestor = cnst;
-        } else if (ancestor->isSelfReference()) {
-            auto loc = ancestor->loc;
+        } else if (ancestor.isSelfReference()) {
+            auto loc = ancestor.loc();
             auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
             auto out = ast::make_tree<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
@@ -633,7 +633,7 @@ public:
                 // Untyped and report an error here: otherwise, we end up in a state at the end of constant resolution
                 // that won't match our expected invariants (and in fact will fail our sanity checks)
                 // auto temporaryUntyped = ast::MK::Untyped(asgn->lhs.get()->loc);
-                auto temporaryUntyped = ast::MK::Block0(asgn.lhs->loc, ast::MK::Untyped(asgn.lhs->loc));
+                auto temporaryUntyped = ast::MK::Block0(asgn.lhs.loc(), ast::MK::Untyped(asgn.lhs.loc()));
                 send->block = std::move(temporaryUntyped);
 
                 // because we're synthesizing a fake "untyped" here and actually adding it to the AST, we won't report
@@ -792,10 +792,10 @@ public:
             return locCompare(core::Loc(lhs.file, lhs.rhs->loc), core::Loc(rhs.file, rhs.rhs->loc));
         });
         fast_sort(todoTypeAliases, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, (*lhs.rhs)->loc), core::Loc(rhs.file, (*rhs.rhs)->loc));
+            return locCompare(core::Loc(lhs.file, (*lhs.rhs).loc()), core::Loc(rhs.file, (*rhs.rhs).loc()));
         });
         fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.tree->loc), core::Loc(rhs.file, rhs.tree->loc));
+            return locCompare(core::Loc(lhs.file, lhs.tree.loc()), core::Loc(rhs.file, rhs.tree.loc()));
         });
 
         Timer timeit1(gs.tracer(), "resolver.resolve_constants.fixed_point");
@@ -1275,7 +1275,7 @@ public:
         auto sym = id->symbol;
         auto data = sym.data(ctx);
         if (data->isTypeAlias() || data->isTypeMember()) {
-            ENFORCE(!data->isTypeMember() || send->recv->isSelfReference());
+            ENFORCE(!data->isTypeMember() || send->recv.isSelfReference());
 
             // This is for a special case that happens with the generation of
             // reflection.rbi: it re-creates the type aliases of the payload,
@@ -1690,9 +1690,9 @@ private:
 
                 if (mdef->symbol.data(ctx)->isAbstract()) {
                     if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs)) {
-                        if (auto e = ctx.beginError(mdef->rhs->loc, core::errors::Resolver::AbstractMethodWithBody)) {
+                        if (auto e = ctx.beginError(mdef->rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
                             e.setHeader("Abstract methods must not contain any code in their body");
-                            e.replaceWith("Delete the body", core::Loc(ctx.file, mdef->rhs->loc), "");
+                            e.replaceWith("Delete the body", core::Loc(ctx.file, mdef->rhs.loc()), "");
                         }
 
                         mdef->rhs = ast::MK::EmptyTree();
@@ -1885,7 +1885,7 @@ private:
             return;
         }
 
-        auto stringLoc = send.args[1]->loc;
+        auto stringLoc = send.args[1].loc();
 
         auto *literalNode = ast::cast_tree<ast::Literal>(send.args[1]);
         if (literalNode == nullptr) {
@@ -1918,9 +1918,9 @@ private:
             }
 
             auto *packageNode = ast::cast_tree<ast::Literal>(send.args[posEnd + 1]);
-            packageLoc = std::optional<core::LocOffsets>{send.args[posEnd + 1]->loc};
+            packageLoc = std::optional<core::LocOffsets>{send.args[posEnd + 1].loc()};
             if (packageNode == nullptr) {
-                if (auto e = ctx.beginError(send.args[posEnd + 1]->loc, core::errors::Resolver::LazyResolve)) {
+                if (auto e = ctx.beginError(send.args[posEnd + 1].loc(), core::errors::Resolver::LazyResolve)) {
                     e.setHeader("`{}` only accepts string literals", method);
                 }
                 return;
@@ -2064,7 +2064,7 @@ public:
                 if (data->resultType == nullptr) {
                     // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
                     auto rhs = move(asgn.rhs);
-                    auto loc = rhs->loc;
+                    auto loc = rhs.loc();
                     asgn.rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
                                               core::Names::suggestType(), move(rhs));
                 }
@@ -2075,7 +2075,8 @@ public:
                 // or type aliases. The check for isa_type<AliasType> makes sure that we skip aliases of the form `X
                 // = Integer` and only run this over constant value assignments like `X = 5` or `Y = 5; X = Y`.
                 if (resolveConstantType(ctx, asgn.rhs, sym) == nullptr) {
-                    if (auto e = ctx.beginError(asgn.rhs->loc, core::errors::Resolver::ConstantMissingTypeAnnotation)) {
+                    if (auto e =
+                            ctx.beginError(asgn.rhs.loc(), core::errors::Resolver::ConstantMissingTypeAnnotation)) {
                         e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                                     "# typed: strict");
                     }
@@ -2183,7 +2184,7 @@ public:
                 default:
                     return tree;
             }
-        } else if (send.recv.get()->isSelfReference()) {
+        } else if (send.recv.isSelfReference()) {
             if (send.fun != core::Names::aliasMethod()) {
                 return tree;
             }
@@ -2215,7 +2216,7 @@ public:
             }
 
             if (!toMethod.exists()) {
-                if (auto e = ctx.beginError(send.args[1]->loc, core::errors::Resolver::BadAliasMethod)) {
+                if (auto e = ctx.beginError(send.args[1].loc(), core::errors::Resolver::BadAliasMethod)) {
                     e.setHeader("Can't make method alias from `{}` to non existing method `{}`", fromName.show(ctx),
                                 toName.show(ctx));
                 }
@@ -2305,7 +2306,7 @@ class ResolveMixesInClassMethodsWalk {
 public:
     ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.recv->isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
+        if (send.recv.isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
             processMixesInClassMethods(ctx, send);
         }
         return tree;
@@ -2317,7 +2318,7 @@ public:
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
-                original.toString(ctx));
+                tree.toString(ctx));
         if (original.symbol == core::Symbols::root()) {
             ENFORCE(ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, original.loc)).exists());
         } else {
@@ -2328,18 +2329,17 @@ public:
     ast::TreePtr postTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
-                original.toString(ctx));
+                tree.toString(ctx));
         return tree;
     }
     ast::TreePtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
-        ENFORCE(false, "These should have all been removed: {}", original.toString(ctx));
+        ENFORCE(false, "These should have all been removed: {}", tree.toString(ctx));
         return tree;
     }
     ast::TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         ENFORCE(original.kind != ast::UnresolvedIdent::Kind::Local, "{} should have been removed by local_vars",
-                original.toString(ctx));
+                tree.toString(ctx));
         return tree;
     }
     ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {

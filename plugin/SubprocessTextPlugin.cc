@@ -67,7 +67,7 @@ struct SpawningWalker {
 
             optional<string> output;
             {
-                string className = core::Loc(ctx.file, klass->name->loc).source(ctx);
+                string className = core::Loc(ctx.file, klass->name.loc()).source(ctx);
                 string_view shortName = send->fun.data(ctx)->shortName(ctx);
                 string sendSource = core::Loc(ctx.file, send->loc).source(ctx);
 

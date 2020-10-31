@@ -20,7 +20,7 @@ void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     for (auto &stat : cdef->rhs) {
         if (auto send = ast::cast_tree<ast::Send>(stat)) {
             // we only care about sends if they're `module_function`
-            if (send->fun == core::Names::moduleFunction() && send->recv->isSelfReference()) {
+            if (send->fun == core::Names::moduleFunction() && send->recv.isSelfReference()) {
                 if (send->args.size() == 0) {
                     // a `module_function` with no args changes the way that every subsequent method definition works so
                     // we set this flag so we know that the rest of the defns should be rewritten
@@ -78,7 +78,7 @@ vector<ast::TreePtr> ModuleFunction::rewriteDefn(core::MutableContext ctx, const
         return stats;
     }
 
-    auto loc = expr->loc;
+    auto loc = expr.loc();
 
     // this creates a private copy of the method
     auto privateCopy = expr.deepCopy();
@@ -140,7 +140,7 @@ vector<ast::TreePtr> ModuleFunction::run(core::MutableContext ctx, ast::Send *se
             ast::cast_tree_nonnull<ast::MethodDef>(methodDef).flags.isSelfMethod = true;
             stats.emplace_back(std::move(methodDef));
         } else {
-            if (auto e = ctx.beginError(arg->loc, core::errors::Rewriter::BadModuleFunction)) {
+            if (auto e = ctx.beginError(arg.loc(), core::errors::Rewriter::BadModuleFunction)) {
                 e.setHeader("Bad argument to `{}`: must be a symbol, string, method definition, or nothing",
                             "module_function");
             }

@@ -137,7 +137,7 @@ public:
             ast::InsSeq::STATS_store stats;
             auto sorted = sortedClasses();
             stats.insert(stats.begin(), make_move_iterator(sorted.begin()), make_move_iterator(sorted.end()));
-            return ast::MK::InsSeq(tree->loc, std::move(stats), std::move(tree));
+            return ast::MK::InsSeq(tree.loc(), std::move(stats), std::move(tree));
         }
 
         for (auto &clas : sortedClasses()) {

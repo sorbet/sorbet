@@ -222,7 +222,7 @@ ast::TreePtr FullyQualifiedName::toLiteral(core::LocOffsets loc) const {
 ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::TreePtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
-        if (auto e = ctx.beginError(expr->loc, core::errors::Packager::InvalidImportOrExport)) {
+        if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidImportOrExport)) {
             e.setHeader("Argument to `{}` must be a constant", fun.show(ctx));
         }
     }
@@ -256,7 +256,7 @@ struct PackageInfoFinder {
             send.fun != core::Names::exportMethods()) {
             for (const auto &arg : send.args) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
-                    if (auto e = ctx.beginError(arg->loc, core::errors::Packager::InvalidPackageExpression)) {
+                    if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
                         e.setHeader("Invalid expression in package: Arguments to functions must be literals");
                     }
                 }
@@ -438,72 +438,72 @@ struct PackageInfoFinder {
     }
 
     ast::TreePtr preTransformIf(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "`if`");
+        illegalNode(ctx, original.loc(), "`if`");
         return original;
     }
 
     ast::TreePtr preTransformWhile(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "`while`");
+        illegalNode(ctx, original.loc(), "`while`");
         return original;
     }
 
     ast::TreePtr postTransformBreak(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "`break`");
+        illegalNode(ctx, original.loc(), "`break`");
         return original;
     }
 
     ast::TreePtr postTransformRetry(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "`retry`");
+        illegalNode(ctx, original.loc(), "`retry`");
         return original;
     }
 
     ast::TreePtr postTransformNext(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "`next`");
+        illegalNode(ctx, original.loc(), "`next`");
         return original;
     }
 
     ast::TreePtr preTransformReturn(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "`return`");
+        illegalNode(ctx, original.loc(), "`return`");
         return original;
     }
 
     ast::TreePtr preTransformRescueCase(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "`rescue case`");
+        illegalNode(ctx, original.loc(), "`rescue case`");
         return original;
     }
 
     ast::TreePtr preTransformRescue(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "`rescue`");
+        illegalNode(ctx, original.loc(), "`rescue`");
         return original;
     }
 
     ast::TreePtr preTransformAssign(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "`=`");
+        illegalNode(ctx, original.loc(), "`=`");
         return original;
     }
 
     ast::TreePtr preTransformHash(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "hash literals");
+        illegalNode(ctx, original.loc(), "hash literals");
         return original;
     }
 
     ast::TreePtr preTransformArray(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "array literals");
+        illegalNode(ctx, original.loc(), "array literals");
         return original;
     }
 
     ast::TreePtr preTransformMethodDef(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "method definitions");
+        illegalNode(ctx, original.loc(), "method definitions");
         return original;
     }
 
     ast::TreePtr preTransformBlock(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "blocks");
+        illegalNode(ctx, original.loc(), "blocks");
         return original;
     }
 
     ast::TreePtr preTransformInsSeq(core::MutableContext ctx, ast::TreePtr original) {
-        illegalNode(ctx, original->loc, "`begin` and `end`");
+        illegalNode(ctx, original.loc(), "`begin` and `end`");
         return original;
     }
 };

@@ -6,7 +6,7 @@
 namespace sorbet::rewriter {
 
 ast::TreePtr SelfNew::run(core::MutableContext ctx, ast::Send *send) {
-    if (send->fun != core::Names::new_() || !send->recv->isSelfReference()) {
+    if (send->fun != core::Names::new_() || !send->recv.isSelfReference()) {
         return nullptr;
     }
 
