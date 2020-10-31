@@ -39,7 +39,7 @@ public:
     static void pickleWithoutFile(Pickler &p, core::Loc loc);
     static void pickle(Pickler &p, shared_ptr<const FileHash> fh);
 
-    static void pickleTree(Pickler &p, ast::TreePtr &t);
+    static void pickleTree(Pickler &p, const ast::TreePtr &t);
 
     static shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);
@@ -911,7 +911,7 @@ CachedFile Serializer::loadFile(const core::GlobalState &gs, core::FileRef fref,
     return CachedFile{move(file), move(tree)};
 }
 
-void SerializerImpl::pickleTree(Pickler &p, ast::TreePtr &t) {
+void SerializerImpl::pickleTree(Pickler &p, const ast::TreePtr &t) {
     pickle(p, t);
 }
 
@@ -926,204 +926,204 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
         return;
     }
 
-    typecase(
-        what.get(),
-        [&](ast::Send *s) {
-            pickleAstHeader(p, 2, s->loc);
-            p.putU4(s->fun._id);
+    tagTypecase(
+        what,
+        [&](const ast::Send &s) {
+            pickleAstHeader(p, 2, s.loc);
+            p.putU4(s.fun._id);
             u1 flags;
-            static_assert(sizeof(flags) == sizeof(s->flags));
+            static_assert(sizeof(flags) == sizeof(s.flags));
             // Can replace this with std::bit_cast in C++20
-            memcpy(&flags, &s->flags, sizeof(flags));
+            memcpy(&flags, &s.flags, sizeof(flags));
             p.putU1(flags);
-            p.putU4(s->numPosArgs);
-            p.putU4(s->args.size());
-            pickle(p, s->recv);
-            pickleTree(p, s->block);
-            for (auto &arg : s->args) {
+            p.putU4(s.numPosArgs);
+            p.putU4(s.args.size());
+            pickle(p, s.recv);
+            pickleTree(p, s.block);
+            for (auto &arg : s.args) {
                 pickle(p, arg);
             }
         },
-        [&](ast::Block *a) {
-            pickleAstHeader(p, 3, a->loc);
-            p.putU4(a->args.size());
-            pickle(p, a->body);
-            for (auto &arg : a->args) {
+        [&](const ast::Block &a) {
+            pickleAstHeader(p, 3, a.loc);
+            p.putU4(a.args.size());
+            pickle(p, a.body);
+            for (auto &arg : a.args) {
                 pickle(p, arg);
             };
         },
-        [&](ast::Literal *a) {
-            pickleAstHeader(p, 4, a->loc);
-            pickle(p, a->value);
+        [&](const ast::Literal &a) {
+            pickleAstHeader(p, 4, a.loc);
+            pickle(p, a.value);
         },
-        [&](ast::While *a) {
-            pickleAstHeader(p, 5, a->loc);
-            pickle(p, a->cond);
-            pickle(p, a->body);
+        [&](const ast::While &a) {
+            pickleAstHeader(p, 5, a.loc);
+            pickle(p, a.cond);
+            pickle(p, a.body);
         },
-        [&](ast::Return *a) {
-            pickleAstHeader(p, 6, a->loc);
-            pickle(p, a->expr);
+        [&](const ast::Return &a) {
+            pickleAstHeader(p, 6, a.loc);
+            pickle(p, a.expr);
         },
-        [&](ast::If *a) {
-            pickleAstHeader(p, 7, a->loc);
-            pickle(p, a->cond);
-            pickle(p, a->thenp);
-            pickle(p, a->elsep);
+        [&](const ast::If &a) {
+            pickleAstHeader(p, 7, a.loc);
+            pickle(p, a.cond);
+            pickle(p, a.thenp);
+            pickle(p, a.elsep);
         },
 
-        [&](ast::UnresolvedConstantLit *a) {
-            pickleAstHeader(p, 8, a->loc);
-            p.putU4(a->cnst._id);
-            pickle(p, a->scope);
+        [&](const ast::UnresolvedConstantLit &a) {
+            pickleAstHeader(p, 8, a.loc);
+            p.putU4(a.cnst._id);
+            pickle(p, a.scope);
         },
-        [&](ast::Local *a) {
-            pickleAstHeader(p, 10, a->loc);
-            p.putU4(a->localVariable._name._id);
-            p.putU4(a->localVariable.unique);
+        [&](const ast::Local &a) {
+            pickleAstHeader(p, 10, a.loc);
+            p.putU4(a.localVariable._name._id);
+            p.putU4(a.localVariable.unique);
         },
-        [&](ast::Assign *a) {
-            pickleAstHeader(p, 12, a->loc);
-            pickle(p, a->lhs);
-            pickle(p, a->rhs);
+        [&](const ast::Assign &a) {
+            pickleAstHeader(p, 12, a.loc);
+            pickle(p, a.lhs);
+            pickle(p, a.rhs);
         },
-        [&](ast::InsSeq *a) {
-            pickleAstHeader(p, 13, a->loc);
-            p.putU4(a->stats.size());
-            pickle(p, a->expr);
-            for (auto &st : a->stats) {
+        [&](const ast::InsSeq &a) {
+            pickleAstHeader(p, 13, a.loc);
+            p.putU4(a.stats.size());
+            pickle(p, a.expr);
+            for (auto &st : a.stats) {
                 pickle(p, st);
             }
         },
 
-        [&](ast::Next *a) {
-            pickleAstHeader(p, 14, a->loc);
-            pickle(p, a->expr);
+        [&](const ast::Next &a) {
+            pickleAstHeader(p, 14, a.loc);
+            pickle(p, a.expr);
         },
 
-        [&](ast::Break *a) {
-            pickleAstHeader(p, 15, a->loc);
-            pickle(p, a->expr);
+        [&](const ast::Break &a) {
+            pickleAstHeader(p, 15, a.loc);
+            pickle(p, a.expr);
         },
 
-        [&](ast::Retry *a) { pickleAstHeader(p, 16, a->loc); },
+        [&](const ast::Retry &a) { pickleAstHeader(p, 16, a.loc); },
 
-        [&](ast::Hash *h) {
-            pickleAstHeader(p, 17, h->loc);
-            ENFORCE(h->values.size() == h->keys.size());
-            p.putU4(h->values.size());
-            for (auto &v : h->values) {
+        [&](const ast::Hash &h) {
+            pickleAstHeader(p, 17, h.loc);
+            ENFORCE(h.values.size() == h.keys.size());
+            p.putU4(h.values.size());
+            for (auto &v : h.values) {
                 pickle(p, v);
             }
-            for (auto &k : h->keys) {
+            for (auto &k : h.keys) {
                 pickle(p, k);
             }
         },
 
-        [&](ast::Array *a) {
-            pickleAstHeader(p, 18, a->loc);
-            p.putU4(a->elems.size());
-            for (auto &e : a->elems) {
+        [&](const ast::Array &a) {
+            pickleAstHeader(p, 18, a.loc);
+            p.putU4(a.elems.size());
+            for (auto &e : a.elems) {
                 pickle(p, e);
             }
         },
 
-        [&](ast::Cast *c) {
-            pickleAstHeader(p, 19, c->loc);
-            p.putU4(c->cast._id);
-            pickle(p, c->type);
-            pickle(p, c->arg);
+        [&](const ast::Cast &c) {
+            pickleAstHeader(p, 19, c.loc);
+            p.putU4(c.cast._id);
+            pickle(p, c.type);
+            pickle(p, c.arg);
         },
 
-        [&](ast::EmptyTree *n) { pickleAstHeader(p, 20, n->loc); },
-        [&](ast::ClassDef *c) {
-            pickleAstHeader(p, 21, c->loc);
-            pickleWithoutFile(p, c->declLoc);
-            p.putU1(static_cast<u2>(c->kind));
-            p.putU4(c->symbol.rawId());
-            p.putU4(c->ancestors.size());
-            p.putU4(c->singletonAncestors.size());
-            p.putU4(c->rhs.size());
-            pickle(p, c->name);
-            for (auto &anc : c->ancestors) {
+        [&](const ast::EmptyTree &n) { pickleAstHeader(p, 20, n.loc); },
+        [&](const ast::ClassDef &c) {
+            pickleAstHeader(p, 21, c.loc);
+            pickleWithoutFile(p, c.declLoc);
+            p.putU1(static_cast<u2>(c.kind));
+            p.putU4(c.symbol.rawId());
+            p.putU4(c.ancestors.size());
+            p.putU4(c.singletonAncestors.size());
+            p.putU4(c.rhs.size());
+            pickle(p, c.name);
+            for (auto &anc : c.ancestors) {
                 pickle(p, anc);
             }
-            for (auto &anc : c->singletonAncestors) {
+            for (auto &anc : c.singletonAncestors) {
                 pickle(p, anc);
             }
-            for (auto &anc : c->rhs) {
+            for (auto &anc : c.rhs) {
                 pickle(p, anc);
             }
         },
-        [&](ast::MethodDef *c) {
-            pickleAstHeader(p, 22, c->loc);
-            pickleWithoutFile(p, c->declLoc);
+        [&](const ast::MethodDef &c) {
+            pickleAstHeader(p, 22, c.loc);
+            pickleWithoutFile(p, c.declLoc);
             u1 flags;
-            static_assert(sizeof(flags) == sizeof(c->flags));
+            static_assert(sizeof(flags) == sizeof(c.flags));
             // Can replace this with std::bit_cast in C++20
-            memcpy(&flags, &c->flags, sizeof(flags));
+            memcpy(&flags, &c.flags, sizeof(flags));
             p.putU1(flags);
-            p.putU4(c->name._id);
-            p.putU4(c->symbol.rawId());
-            p.putU4(c->args.size());
-            pickle(p, c->rhs);
-            for (auto &a : c->args) {
+            p.putU4(c.name._id);
+            p.putU4(c.symbol.rawId());
+            p.putU4(c.args.size());
+            pickle(p, c.rhs);
+            for (auto &a : c.args) {
                 pickle(p, a);
             }
         },
-        [&](ast::Rescue *a) {
-            pickleAstHeader(p, 23, a->loc);
-            p.putU4(a->rescueCases.size());
-            pickle(p, a->ensure);
-            pickle(p, a->else_);
-            pickle(p, a->body);
-            for (auto &rc : a->rescueCases) {
+        [&](const ast::Rescue &a) {
+            pickleAstHeader(p, 23, a.loc);
+            p.putU4(a.rescueCases.size());
+            pickle(p, a.ensure);
+            pickle(p, a.else_);
+            pickle(p, a.body);
+            for (auto &rc : a.rescueCases) {
                 pickleTree(p, rc);
             }
         },
-        [&](ast::RescueCase *a) {
-            pickleAstHeader(p, 24, a->loc);
-            p.putU4(a->exceptions.size());
-            pickle(p, a->var);
-            pickle(p, a->body);
-            for (auto &ex : a->exceptions) {
+        [&](const ast::RescueCase &a) {
+            pickleAstHeader(p, 24, a.loc);
+            p.putU4(a.exceptions.size());
+            pickle(p, a.var);
+            pickle(p, a.body);
+            for (auto &ex : a.exceptions) {
                 pickle(p, ex);
             }
         },
-        [&](ast::RestArg *a) {
-            pickleAstHeader(p, 25, a->loc);
-            pickleTree(p, a->expr);
+        [&](const ast::RestArg &a) {
+            pickleAstHeader(p, 25, a.loc);
+            pickleTree(p, a.expr);
         },
-        [&](ast::KeywordArg *a) {
-            pickleAstHeader(p, 26, a->loc);
-            pickleTree(p, a->expr);
+        [&](const ast::KeywordArg &a) {
+            pickleAstHeader(p, 26, a.loc);
+            pickleTree(p, a.expr);
         },
-        [&](ast::ShadowArg *a) {
-            pickleAstHeader(p, 27, a->loc);
-            pickleTree(p, a->expr);
+        [&](const ast::ShadowArg &a) {
+            pickleAstHeader(p, 27, a.loc);
+            pickleTree(p, a.expr);
         },
-        [&](ast::BlockArg *a) {
-            pickleAstHeader(p, 28, a->loc);
-            pickleTree(p, a->expr);
+        [&](const ast::BlockArg &a) {
+            pickleAstHeader(p, 28, a.loc);
+            pickleTree(p, a.expr);
         },
-        [&](ast::OptionalArg *a) {
-            pickleAstHeader(p, 29, a->loc);
-            pickleTree(p, a->expr);
-            pickle(p, a->default_);
+        [&](const ast::OptionalArg &a) {
+            pickleAstHeader(p, 29, a.loc);
+            pickleTree(p, a.expr);
+            pickle(p, a.default_);
         },
-        [&](ast::ZSuperArgs *a) { pickleAstHeader(p, 30, a->loc); },
-        [&](ast::UnresolvedIdent *a) {
-            pickleAstHeader(p, 31, a->loc);
-            p.putU1(static_cast<u1>(a->kind));
-            p.putU4(a->name._id);
+        [&](const ast::ZSuperArgs &a) { pickleAstHeader(p, 30, a.loc); },
+        [&](const ast::UnresolvedIdent &a) {
+            pickleAstHeader(p, 31, a.loc);
+            p.putU1(static_cast<u1>(a.kind));
+            p.putU4(a.name._id);
         },
-        [&](ast::ConstantLit *a) {
-            pickleAstHeader(p, 32, a->loc);
-            p.putU4(a->symbol.rawId());
-            pickleTree(p, a->original);
+        [&](const ast::ConstantLit &a) {
+            pickleAstHeader(p, 32, a.loc);
+            p.putU4(a.symbol.rawId());
+            pickleTree(p, a.original);
         },
 
-        [&](ast::Expression *n) { Exception::raise("Unimplemented AST Node: {}", what.nodeName()); });
+        [&](const ast::Expression &n) { Exception::raise("Unimplemented AST Node: {}", what.nodeName()); });
 }
 
 ast::TreePtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs, FileRef file) {

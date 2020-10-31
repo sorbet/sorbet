@@ -11,31 +11,31 @@ namespace {
 ParsedArg parseArg(const ast::TreePtr &arg) {
     ParsedArg parsedArg;
 
-    typecase(
-        arg.get(),
-        [&](const ast::RestArg *rest) {
-            parsedArg = parseArg(rest->expr);
+    tagTypecase(
+        arg,
+        [&](const ast::RestArg &rest) {
+            parsedArg = parseArg(rest.expr);
             parsedArg.flags.isRepeated = true;
         },
-        [&](const ast::KeywordArg *kw) {
-            parsedArg = parseArg(kw->expr);
+        [&](const ast::KeywordArg &kw) {
+            parsedArg = parseArg(kw.expr);
             parsedArg.flags.isKeyword = true;
         },
-        [&](const ast::OptionalArg *opt) {
-            parsedArg = parseArg(opt->expr);
+        [&](const ast::OptionalArg &opt) {
+            parsedArg = parseArg(opt.expr);
             parsedArg.flags.isDefault = true;
         },
-        [&](const ast::BlockArg *blk) {
-            parsedArg = parseArg(blk->expr);
+        [&](const ast::BlockArg &blk) {
+            parsedArg = parseArg(blk.expr);
             parsedArg.flags.isBlock = true;
         },
-        [&](const ast::ShadowArg *shadow) {
-            parsedArg = parseArg(shadow->expr);
+        [&](const ast::ShadowArg &shadow) {
+            parsedArg = parseArg(shadow.expr);
             parsedArg.flags.isShadow = true;
         },
-        [&](const ast::Local *local) {
-            parsedArg.local = local->localVariable;
-            parsedArg.loc = local->loc;
+        [&](const ast::Local &local) {
+            parsedArg.local = local.localVariable;
+            parsedArg.loc = local.loc;
         });
 
     return parsedArg;
@@ -43,13 +43,13 @@ ParsedArg parseArg(const ast::TreePtr &arg) {
 
 TreePtr getDefaultValue(TreePtr arg) {
     TreePtr default_;
-    typecase(
-        arg.get(), [&](ast::RestArg *rest) { default_ = getDefaultValue(move(rest->expr)); },
-        [&](ast::KeywordArg *kw) { default_ = getDefaultValue(move(kw->expr)); },
-        [&](ast::OptionalArg *opt) { default_ = move(opt->default_); },
-        [&](ast::BlockArg *blk) { default_ = getDefaultValue(move(blk->expr)); },
-        [&](ast::ShadowArg *shadow) { default_ = getDefaultValue(move(shadow->expr)); },
-        [&](ast::Local *local) {
+    tagTypecase(
+        arg, [&](ast::RestArg &rest) { default_ = getDefaultValue(move(rest.expr)); },
+        [&](ast::KeywordArg &kw) { default_ = getDefaultValue(move(kw.expr)); },
+        [&](ast::OptionalArg &opt) { default_ = move(opt.default_); },
+        [&](ast::BlockArg &blk) { default_ = getDefaultValue(move(blk.expr)); },
+        [&](ast::ShadowArg &shadow) { default_ = getDefaultValue(move(shadow.expr)); },
+        [&](ast::Local &local) {
             // No default.
         });
     ENFORCE(default_ != nullptr);
