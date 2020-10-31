@@ -55,9 +55,6 @@ public:
     static unique_ptr<const FileHash> unpickleFileHash(UnPickler &p);
 
     SerializerImpl() = delete;
-
-private:
-    static void pickleAstHeader(Pickler &p, u1 tag, core::LocOffsets loc);
 };
 
 void Pickler::putStr(string_view s) {
@@ -907,11 +904,6 @@ CachedFile Serializer::loadFile(const core::GlobalState &gs, core::FileRef fref,
     file->cached = true;
     auto tree = SerializerImpl::unpickleExpr(p, gs, fref);
     return CachedFile{move(file), move(tree)};
-}
-
-void SerializerImpl::pickleAstHeader(Pickler &p, u1 tag, core::LocOffsets loc) {
-    p.putU1(tag);
-    pickle(p, loc);
 }
 
 void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
