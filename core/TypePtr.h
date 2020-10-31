@@ -32,7 +32,7 @@ public:
     // A mapping from type to its corresponding tag.
     template <typename T> struct TypeToTag;
 
-    // Required for tagTypecase.
+    // Required for typecase.
     template <class To> static bool isa(const TypePtr &what);
     template <> inline bool isa<TypePtr>(const TypePtr &what) {
         return true;

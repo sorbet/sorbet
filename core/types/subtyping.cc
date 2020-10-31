@@ -301,7 +301,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             categoryCounterInc("lub", "proxy>");
             // both are proxy
             TypePtr result;
-            tagTypecase(
+            typecase(
                 t1,
                 [&](const TupleType &a1) { // Warning: this implements COVARIANT arrays
                     if (auto *a2 = cast_type<TupleType>(t2)) {
@@ -647,7 +647,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 return Types::bottom();
             }
             TypePtr result;
-            tagTypecase(
+            typecase(
                 t1,
                 [&](const TupleType &a1) { // Warning: this implements COVARIANT arrays
                     auto &a2 = cast_type_nonnull<TupleType>(t2);
@@ -1144,7 +1144,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
         if (auto *p2 = cast_type<ProxyType>(t2)) {
             bool result;
             // TODO: simply compare as memory regions
-            tagTypecase(
+            typecase(
                 t1,
                 [&](const TupleType &a1) { // Warning: this implements COVARIANT arrays
                     auto *a2 = cast_type<TupleType>(t2);

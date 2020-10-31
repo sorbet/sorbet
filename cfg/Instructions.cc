@@ -93,7 +93,7 @@ Literal::Literal(const core::TypePtr &value) : value(move(value)) {
 
 string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
     string res;
-    tagTypecase(
+    typecase(
         this->value, [&](const core::LiteralType &l) { res = l.showValue(gs); },
         [&](const core::ClassType &l) {
             if (l.symbol == core::Symbols::NilClass()) {

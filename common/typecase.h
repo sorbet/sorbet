@@ -37,6 +37,18 @@ struct argtype_extractor<ReturnType (ClassType::*)(ArgType) const> {
     using arg_type = ArgType;
 };
 
+namespace Sfinae {
+// Check if .tag() exists (from https://stackoverflow.com/a/9154394)
+// Indicates that type is a tagged pointer.
+template <class> struct sfinae_true : std::true_type {};
+
+template <class T> static auto test_has_tag(int) -> sfinae_true<decltype(std::declval<T>().tag())>;
+template <class> static auto test_has_tag(long) -> std::false_type;
+template <class T> struct has_tag : decltype(test_has_tag<T>(0)) {};
+} // namespace Sfinae
+
+// fast_cast-based typecase
+
 template <typename Base, typename FUNC> bool typecaseHelper(Base *base, FUNC &&func) {
     using traits = argtype_extractor<std::function<get_signature<FUNC>>>;
     // we specialize for pointers to member function
@@ -50,6 +62,8 @@ template <typename Base, typename FUNC> bool typecaseHelper(Base *base, FUNC &&f
 }
 
 template <typename Base, typename... Subclasses> void typecase(Base *base, Subclasses &&... funcs) {
+    static_assert(Sfinae::has_tag<Base>() != true,
+                  "For tagged pointers, please call typecase on a reference to the object not a pointer.");
     bool done = false;
 
     bool UNUSED(dummy[sizeof...(Subclasses)]) = {(done = done || typecaseHelper<Base>(base, funcs))...};
@@ -62,7 +76,9 @@ template <typename Base, typename... Subclasses> void typecase(Base *base, Subcl
     }
 }
 
-template <typename Base, typename FUNC> bool tagTypecaseHelper(Base &base, FUNC &&func) {
+// Tagged-pointer based typecase
+
+template <typename Base, typename FUNC> bool typecaseHelper(Base &base, FUNC &&func) {
     using traits = argtype_extractor<std::function<get_signature<FUNC>>>;
     // We specialize (const and non-const) references
     using ArgType = typename std::remove_const<typename std::remove_reference<typename traits::arg_type>::type>::type;
@@ -74,10 +90,12 @@ template <typename Base, typename FUNC> bool tagTypecaseHelper(Base &base, FUNC 
     }
 }
 
-template <typename Base, typename... Subclasses> void tagTypecase(Base &base, Subclasses &&... funcs) {
+template <typename Base, typename... Subclasses> void typecase(Base &base, Subclasses &&... funcs) {
+    static_assert(Sfinae::has_tag<Base>() == true,
+                  "typecase used on reference type without .tag()! Did you mean to use it on a pointer type?");
     bool done = false;
 
-    bool UNUSED(dummy[sizeof...(Subclasses)]) = {(done = done || tagTypecaseHelper<Base>(base, funcs))...};
+    bool UNUSED(dummy[sizeof...(Subclasses)]) = {(done = done || typecaseHelper<Base>(base, funcs))...};
 
     if (!done) {
         if (!base) {

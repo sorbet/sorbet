@@ -151,7 +151,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
         return from;
     }
 
-    tagTypecase(
+    typecase(
         from,
         [&](const OrType &o) {
             auto lhs = dropSubtypesOf(gs, o.left, klass);
@@ -219,7 +219,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
 
 bool Types::canBeTruthy(const GlobalState &gs, const TypePtr &what) {
     bool isTruthy = true;
-    tagTypecase(
+    typecase(
         what, [&](const OrType &o) { isTruthy = canBeTruthy(gs, o.left) || canBeTruthy(gs, o.right); },
         [&](const AndType &a) { isTruthy = canBeTruthy(gs, a.left) && canBeTruthy(gs, a.right); },
         [&](const ClassType &c) {
@@ -249,7 +249,7 @@ bool Types::canBeFalsy(const GlobalState &gs, const TypePtr &what) {
 
 TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what) {
     TypePtr result;
-    tagTypecase(
+    typecase(
         what, [&](const ClassType &c) { result = Types::dropSubtypesOf(gs, from, c.symbol); },
         [&](const AppliedType &c) { result = Types::dropSubtypesOf(gs, from, c.klass); },
         [&](const OrType &o) {
@@ -846,7 +846,7 @@ void SelfType::_sanityCheck(const GlobalState &gs) {}
 TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
     ENFORCE(type != nullptr);
     TypePtr ret;
-    tagTypecase(
+    typecase(
         type, [&](const AndType &andType) { ret = all(gs, widen(gs, andType.left), widen(gs, andType.right)); },
         [&](const OrType &orType) { ret = any(gs, widen(gs, orType.left), widen(gs, orType.right)); },
         [&](const ProxyType &proxy) { ret = Types::widen(gs, proxy.underlying()); },
@@ -877,7 +877,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         return unwrapped;
     };
 
-    tagTypecase(
+    typecase(
         type, [&](const ClassType &klass) { ret = type; }, [&](const TypeVar &tv) { ret = type; },
         [&](const LambdaParam &tv) { ret = type; }, [&](const SelfType &self) { ret = type; },
         [&](const LiteralType &lit) { ret = type; },

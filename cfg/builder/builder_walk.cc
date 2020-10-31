@@ -190,7 +190,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::TreePtr &what, BasicBlock *cu
 
     try {
         BasicBlock *ret = nullptr;
-        tagTypecase(
+        typecase(
             what,
             [&](ast::While &a) {
                 auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, current->rubyBlockId);

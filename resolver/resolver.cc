@@ -1568,7 +1568,7 @@ private:
     }
 
     void processStatement(core::MutableContext ctx, ast::TreePtr &stat, InlinedVector<ast::Send *, 1> &lastSigs) {
-        tagTypecase(
+        typecase(
             stat,
 
             [&](ast::Send &send) {
@@ -1759,7 +1759,7 @@ private:
     // type (once we have generics) will be nontrivial.
     core::TypePtr resolveConstantType(core::Context ctx, const ast::TreePtr &expr, core::SymbolRef ofSym) {
         core::TypePtr result;
-        tagTypecase(
+        typecase(
             expr, [&](const ast::Literal &a) { result = a.value; },
             [&](const ast::Cast &cast) {
                 if (cast.cast != core::Names::let() && cast.cast != core::Names::uncheckedLet()) {

@@ -881,7 +881,7 @@ core::TypePtr Environment::getReturnType(core::Context ctx, const core::TypePtr 
 core::TypePtr flattenArrays(core::Context ctx, const core::TypePtr &type) {
     core::TypePtr result;
 
-    tagTypecase(
+    typecase(
         type,
 
         [&](const core::OrType &o) {

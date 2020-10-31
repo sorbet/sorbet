@@ -443,7 +443,7 @@ public:
             }
 
             // Recurse into structure to find the Local
-            tagTypecase(
+            typecase(
                 *cursor, [&](const class RestArg &rest) { cursor = &rest.expr; },
                 [&](const class KeywordArg &kw) { cursor = &kw.expr; },
                 [&](const class OptionalArg &opt) { cursor = &opt.expr; },

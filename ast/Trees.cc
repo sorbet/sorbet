@@ -1012,7 +1012,7 @@ string Literal::showRaw(const core::GlobalState &gs, int tabs) {
 
 string Literal::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     string res;
-    tagTypecase(
+    typecase(
         this->value, [&](const core::LiteralType &l) { res = l.showValue(gs); },
         [&](const core::ClassType &l) {
             if (l.symbol == core::Symbols::NilClass()) {

@@ -28,7 +28,7 @@ private:
     TreePtr substArg(core::MutableContext ctx, TreePtr argp) {
         TreePtr *arg = &argp;
         while (arg != nullptr) {
-            tagTypecase(
+            typecase(
                 *arg, [&](RestArg &rest) { arg = &rest.expr; }, [&](KeywordArg &kw) { arg = &kw.expr; },
                 [&](OptionalArg &opt) { arg = &opt.expr; }, [&](BlockArg &opt) { arg = &opt.expr; },
                 [&](ShadowArg &opt) { arg = &opt.expr; },

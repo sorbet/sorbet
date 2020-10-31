@@ -70,7 +70,7 @@ public:
     // We store tagged pointers as 64-bit values.
     using tagged_storage = u8;
 
-    // Required for tagTypecase
+    // Required for typecase
     template <class To> static bool isa(const TreePtr &tree);
     template <> inline bool isa<Expression>(const TreePtr &tree) {
         return true;

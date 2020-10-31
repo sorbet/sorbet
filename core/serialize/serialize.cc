@@ -926,7 +926,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
         return;
     }
 
-    tagTypecase(
+    typecase(
         what,
         [&](const ast::Send &s) {
             pickleAstHeader(p, 2, s.loc);

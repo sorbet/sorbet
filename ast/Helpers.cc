@@ -10,7 +10,7 @@ bool definesBehavior(const TreePtr &expr) {
     }
     bool result = true;
 
-    tagTypecase(
+    typecase(
         expr,
 
         [&](const ast::ClassDef &klass) {
@@ -74,7 +74,7 @@ bool BehaviorHelpers::checkClassDefinesBehavior(const ast::ClassDef &klass) {
 bool BehaviorHelpers::checkEmptyDeep(const TreePtr &expr) {
     bool result = false;
 
-    tagTypecase(
+    typecase(
         expr,
 
         [&](const ast::Send &send) {

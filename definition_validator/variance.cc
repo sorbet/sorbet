@@ -68,7 +68,7 @@ private:
     VarianceValidator(const core::Loc loc) : loc(loc) {}
 
     void validate(const core::Context ctx, const Polarity polarity, const core::TypePtr &type) {
-        tagTypecase(
+        typecase(
             type, [&](const core::ClassType &klass) {},
 
             [&](const core::LiteralType &lit) {},
