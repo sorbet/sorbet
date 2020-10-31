@@ -10,7 +10,7 @@
 
 namespace sorbet::parser {
 
-class Node;
+class NodePtr;
 
 class Builder final {
 public:
@@ -19,7 +19,7 @@ public:
 
     static ruby_parser::builder interface;
 
-    std::unique_ptr<Node> build(ruby_parser::base_driver *driver);
+    NodePtr build(ruby_parser::base_driver *driver);
 
     class Impl;
 

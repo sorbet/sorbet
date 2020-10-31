@@ -632,7 +632,7 @@ string fieldType(FieldType arg) {
         case FieldType::Name:
             return "core::NameRef";
         case FieldType::Node:
-            return "std::unique_ptr<Node>";
+            return "NodePtr";
         case FieldType::NodeVec:
             return "NodeVec";
         case FieldType::String:
@@ -647,7 +647,13 @@ string fieldType(FieldType arg) {
 }
 
 void emitNodeHeader(ostream &out, NodeDef &node) {
-    out << "class " << node.name << " final : public Node {" << '\n';
+    // Forward decl + tag mapping for NodePtr
+    out << "class " << node.name << ";";
+
+    out << "template <> struct NodePtr::TypeToTag<" << node.name
+        << "> { static constexpr NodePtr::Tag value = NodePtr::Tag::" << node.name << "; };\n";
+
+    out << "class " << node.name << " final {" << '\n';
     out << "public:" << '\n';
 
     // generate constructor
@@ -656,7 +662,7 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
         out << ", " << fieldType(arg.type) << " " << arg.name;
     }
     out << ")" << '\n';
-    out << "        : Node(loc)";
+    out << "        : loc(loc)";
     for (auto &arg : node.fields) {
         out << ", " << arg.name << "(";
         if (arg.type == FieldType::Node || arg.type == FieldType::NodeVec) {
@@ -671,18 +677,20 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     out << '\n';
     out << "{";
     out << R"(    categoryCounterInc("nodes", ")" << node.name << "\");" << '\n';
+    out << "ENFORCE(this->loc.exists(), \"Location of parser node is none\");\n";
     out << "}" << '\n';
     out << '\n';
 
     // Generate fields
+    out << "    core::LocOffsets loc;\n";
     for (auto &arg : node.fields) {
         out << "    " << fieldType(arg.type) << " " << arg.name << ";" << '\n';
     }
     out << '\n';
-    out << "  virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
-    out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
-    out << "  virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
-    out << "  virtual std::string nodeName();" << '\n';
+    out << "  std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
+    out << "  std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  std::string nodeName();" << '\n';
 
     out << "};" << '\n';
     out << '\n';
@@ -709,15 +717,15 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(buf, \"" << arg.name << " = \");\n";
-                out << "    printNode(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    Node::printNode(buf, " << arg.name << ", gs, tabs + 1);\n";
                 break;
             case FieldType::NodeVec:
                 out << "    fmt::format_to(buf, \"" << arg.name << " = [\\n\");\n";
                 out << "    for (auto &&a: " << arg.name << ") {\n";
-                out << "      printTabs(buf, tabs + 2);\n";
-                out << "      printNode(buf, a, gs, tabs + 2);\n";
+                out << "      Node::printTabs(buf, tabs + 2);\n";
+                out << "      Node::printNode(buf, a, gs, tabs + 2);\n";
                 out << "    }" << '\n';
-                out << "    printTabs(buf, tabs + 1);\n";
+                out << "    Node::printTabs(buf, tabs + 1);\n";
                 out << "    fmt::format_to(buf, \"]\\n\");\n";
                 break;
             case FieldType::String:
@@ -735,7 +743,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
         }
     }
-    out << "    printTabs(buf, tabs);\n";
+    out << "    Node::printTabs(buf, tabs);\n";
     out << "    fmt::format_to(buf, \"}}\");\n";
     out << "    return to_string(buf);\n";
     out << "  }" << '\n';
@@ -747,7 +755,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
     out << "  std::string " << node.name << "::toJSON(const core::GlobalState &gs, int tabs) {" << '\n'
         << "    fmt::memory_buffer buf;" << '\n';
     out << "    fmt::format_to(buf,  \"{{\\n\");\n";
-    out << "    printTabs(buf, tabs + 1);" << '\n';
+    out << "    Node::printTabs(buf, tabs + 1);" << '\n';
     auto maybeComma = "";
     if (!node.fields.empty()) {
         maybeComma = ",";
@@ -767,7 +775,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             }
         }
-        out << "    printTabs(buf, tabs + 1);" << '\n';
+        out << "    Node::printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case FieldType::Name:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma
@@ -775,7 +783,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \");\n";
-                out << "    printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    Node::printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);\n";
                 out << "    fmt::format_to(buf,  \"" << maybeComma << "\\n\");\n";
                 break;
             case FieldType::NodeVec:
@@ -783,14 +791,14 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    int i = -1;" << '\n';
                 out << "    for (auto &&a: " << arg.name << ") { \n";
                 out << "      i++;\n";
-                out << "      printTabs(buf, tabs + 2);\n";
-                out << "      printNodeJSON(buf, a, gs, tabs + 2);\n";
+                out << "      Node::printTabs(buf, tabs + 2);\n";
+                out << "      Node::printNodeJSON(buf, a, gs, tabs + 2);\n";
                 out << "      if (i + 1 < " << arg.name << ".size()) {\n";
                 out << "        fmt::format_to(buf,  \",\");" << '\n';
                 out << "      }" << '\n';
                 out << "      fmt::format_to(buf,  \"\\n\");\n";
                 out << "    }" << '\n';
-                out << "    printTabs(buf, tabs + 1);\n";
+                out << "    Node::printTabs(buf, tabs + 1);\n";
                 out << "    fmt::format_to(buf,  \"]" << maybeComma << "\\n\")\n;";
                 break;
             case FieldType::String:
@@ -811,7 +819,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
         }
     }
-    out << "    printTabs(buf, tabs);" << '\n';
+    out << "    Node::printTabs(buf, tabs);" << '\n';
     out << "    fmt::format_to(buf,  \"}}\");\n";
     out << "    return to_string(buf);\n";
     out << "  }" << '\n';
@@ -835,8 +843,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    fmt::format_to(buf, \",\");\n";
                 out << "    if (" << arg.name << ") {\n";
                 out << "     fmt::format_to(buf, \"\\n\");\n";
-                out << "     printTabs(buf, tabs + 1);" << '\n';
-                out << "     printNodeWhitequark(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "     Node::printTabs(buf, tabs + 1);" << '\n';
+                out << "     Node::printNodeWhitequark(buf, " << arg.name << ", gs, tabs + 1);\n";
                 out << "    } else {\n";
                 out << "      fmt::format_to(buf, \" nil\");\n";
                 out << "    }\n";
@@ -846,8 +854,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "      fmt::format_to(buf, \",\");\n";
                 out << "      if (a) {\n";
                 out << "        fmt::format_to(buf, \"\\n\");\n";
-                out << "        printTabs(buf, tabs + 1);" << '\n';
-                out << "        printNodeWhitequark(buf, a, gs, tabs + 1);\n";
+                out << "        Node::printTabs(buf, tabs + 1);" << '\n';
+                out << "        Node::printNodeWhitequark(buf, a, gs, tabs + 1);\n";
                 out << "      } else {\n";
                 out << "        fmt::format_to(buf, \" nil\");\n";
                 out << "      }\n";
@@ -879,6 +887,20 @@ int main(int argc, char **argv) {
         if (!header.good()) {
             cerr << "unable to open " << argv[1] << '\n';
             return 1;
+        }
+        {
+            // Emit enum type for NodePtr::Tag.
+            bool first = true;
+            header << "enum class NodePtr::Tag {\n";
+            for (auto &node : nodes) {
+                header << "  " << node.name;
+                if (first) {
+                    header << " = 1";
+                    first = false;
+                }
+                header << ",\n";
+            }
+            header << "};\n";
         }
         for (auto &node : nodes) {
             emitNodeHeader(header, node);
