@@ -93,8 +93,7 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
         auto loc = lit->loc;
         if (doReaders) {
             auto sig = ast::MK::Sig0(loc, ast::MK::Untyped(loc));
-            auto def =
-                ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), lit->asSymbol(ctx), ast::MK::EmptyTree());
+            auto def = ast::MK::SyntheticMethod0(loc, loc, lit->asSymbol(ctx), ast::MK::EmptyTree());
             ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceReader) {
                 addInstanceCounterPart(result, sig, def);
@@ -105,7 +104,7 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
         if (doWriters) {
             auto sig = ast::MK::Sig1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
                                      ast::MK::Untyped(loc));
-            auto def = ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), lit->asSymbol(ctx).addEq(ctx),
+            auto def = ast::MK::SyntheticMethod1(loc, loc, lit->asSymbol(ctx).addEq(ctx),
                                                  ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree());
             ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceWriter) {
@@ -119,8 +118,7 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
             // from being generated.
             auto sig = ast::MK::Sig0(
                 loc, ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean()));
-            auto def = ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), lit->asSymbol(ctx).addQuestion(ctx),
-                                                 ast::MK::False(loc));
+            auto def = ast::MK::SyntheticMethod0(loc, loc, lit->asSymbol(ctx).addQuestion(ctx), ast::MK::False(loc));
             ast::cast_tree_nonnull<ast::MethodDef>(def).flags.isSelfMethod = true;
             if (instanceReader && instancePredicate) {
                 addInstanceCounterPart(result, sig, def);

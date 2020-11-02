@@ -1599,7 +1599,7 @@ private:
                 if (debug_mode) {
                     bool hasSig = !lastSigs.empty();
                     bool rewriten = mdef->flags.isRewriterSynthesized;
-                    bool isRBI = mdef->declLoc.file().data(ctx).isRBI();
+                    bool isRBI = ctx.file.data(ctx).isRBI();
                     if (hasSig) {
                         categoryCounterInc("method.sig", "true");
                     } else {

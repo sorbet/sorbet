@@ -96,7 +96,7 @@ struct FoundClass final {
     FoundDefinitionRef owner;
     FoundDefinitionRef klass;
     core::LocOffsets loc;
-    core::Loc declLoc;
+    core::LocOffsets declLoc;
     ast::ClassDef::Kind classKind;
 };
 
@@ -124,7 +124,7 @@ struct FoundMethod final {
     FoundDefinitionRef owner;
     core::NameRef name;
     core::LocOffsets loc;
-    core::Loc declLoc;
+    core::LocOffsets declLoc;
     ast::MethodDef::Flags flags;
     vector<ast::ParsedArg> parsedArgs;
     vector<u4> argsHash;
@@ -929,7 +929,8 @@ class SymbolDefiner {
         // enough in the file to see any other definition of `f`.
         auto &parsedArgs = method.parsedArgs;
         auto symTableSize = ctx.state.methodsUsed();
-        auto sym = ctx.state.enterMethodSymbol(method.declLoc, owner, method.name);
+        auto declLoc = core::Loc(ctx.file, method.declLoc);
+        auto sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
         const bool isNewSymbol = symTableSize != ctx.state.methodsUsed();
         if (!isNewSymbol) {
             // See if this is == to the method we're defining now, or if we have a redefinition error.
@@ -938,14 +939,14 @@ class SymbolDefiner {
                 // we don't have a method definition with the right argument structure, so we need to mangle the
                 // existing one and create a new one
                 if (!isIntrinsic(sym.data(ctx))) {
-                    paramMismatchErrors(ctx.withOwner(sym), method.declLoc, parsedArgs);
+                    paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedArgs);
                     ctx.state.mangleRenameSymbol(sym, method.name);
                     // Re-enter a new symbol.
-                    sym = ctx.state.enterMethodSymbol(method.declLoc, owner, method.name);
+                    sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
                 } else {
                     // ...unless it's an intrinsic, because we allow multiple incompatible definitions of those in code
                     // TODO(jvilk): Wouldn't this always fail since `!sym.exists()`?
-                    matchingSym.data(ctx)->addLoc(ctx, method.declLoc);
+                    matchingSym.data(ctx)->addLoc(ctx, declLoc);
                 }
             } else {
                 // if the symbol does exist, then we're running in incremental mode, and we need to compare it to
@@ -953,14 +954,14 @@ class SymbolDefiner {
                 auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym);
                 if (replacedSym.exists() && !paramsMatch(ctx, replacedSym, parsedArgs) &&
                     !isIntrinsic(replacedSym.data(ctx))) {
-                    paramMismatchErrors(ctx.withOwner(replacedSym), method.declLoc, parsedArgs);
+                    paramMismatchErrors(ctx.withOwner(replacedSym), declLoc, parsedArgs);
                 }
                 sym = matchingSym;
             }
         }
 
         defineArgs(ctx.withOwner(sym), parsedArgs);
-        sym.data(ctx)->addLoc(ctx, method.declLoc);
+        sym.data(ctx)->addLoc(ctx, declLoc);
         if (method.flags.isRewriterSynthesized) {
             sym.data(ctx)->setRewriterSynthesized();
         }
@@ -1012,6 +1013,7 @@ class SymbolDefiner {
         ENFORCE(symbol.exists());
 
         const bool isModule = klass.classKind == ast::ClassDef::Kind::Module;
+        auto declLoc = core::Loc(ctx.file, klass.declLoc);
         if (!symbol.data(ctx)->isClassOrModule()) {
             // we might have already mangled the class symbol, so see if we have a symbol that is a class already
             auto klassSymbol = ctx.state.lookupClassSymbol(symbol.data(ctx)->owner, symbol.data(ctx)->name);
@@ -1024,7 +1026,7 @@ class SymbolDefiner {
 
             auto origName = symbol.data(ctx)->name;
             ctx.state.mangleRenameSymbol(symbol, symbol.data(ctx)->name);
-            symbol = ctx.state.enterClassSymbol(klass.declLoc, symbol.data(ctx)->owner, origName);
+            symbol = ctx.state.enterClassSymbol(declLoc, symbol.data(ctx)->owner, origName);
             symbol.data(ctx)->setIsModule(isModule);
 
             auto oldSymCount = ctx.state.classAndModulesUsed();
@@ -1033,12 +1035,12 @@ class SymbolDefiner {
                     "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
             return symbol;
         } else if (symbol.data(ctx)->isClassModuleSet() && isModule != symbol.data(ctx)->isClassOrModuleModule()) {
-            if (auto e = ctx.state.beginError(klass.declLoc, core::errors::Namer::ModuleKindRedefinition)) {
+            if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.data(ctx)->show(ctx),
                             symbol.data(ctx)->isClassOrModuleModule() ? "module" : "class");
 
                 for (auto loc : symbol.data(ctx)->locs()) {
-                    if (loc != klass.declLoc) {
+                    if (loc != declLoc) {
                         e.addErrorLine(loc, "Previous definition");
                     }
                 }
@@ -1072,7 +1074,7 @@ class SymbolDefiner {
         // project) locs!
         if (symbol != core::Symbols::root() && symbol != core::Symbols::PackageRegistry() &&
             symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
-            symbol.data(ctx)->addLoc(ctx, klass.declLoc);
+            symbol.data(ctx)->addLoc(ctx, core::Loc(ctx.file, klass.declLoc));
         }
         symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
@@ -1512,16 +1514,17 @@ public:
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass.ancestors.front().deepCopy()));
         }
 
-        if (klass.symbol != core::Symbols::root() && !klass.declLoc.file().data(ctx).isRBI() &&
+        if (klass.symbol != core::Symbols::root() && !ctx.file.data(ctx).isRBI() &&
             ast::BehaviorHelpers::checkClassDefinesBehavior(klass)) {
             // TODO(dmitry) This won't find errors in fast-incremental mode.
             auto prevLoc = classBehaviorLocs.find(klass.symbol);
             if (prevLoc == classBehaviorLocs.end()) {
-                classBehaviorLocs[klass.symbol] = klass.declLoc;
-            } else if (prevLoc->second.file() != klass.declLoc.file() &&
+                classBehaviorLocs[klass.symbol] = core::Loc(ctx.file, klass.declLoc);
+            } else if (prevLoc->second.file() != ctx.file &&
                        // Ignore packages, which have 'behavior defined in multiple files'.
                        klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
-                if (auto e = ctx.state.beginError(klass.declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
+                if (auto e = ctx.state.beginError(core::Loc(ctx.file, klass.declLoc),
+                                                  core::errors::Namer::MultipleBehaviorDefs)) {
                     e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.data(ctx)->show(ctx));
                     e.addErrorLine(prevLoc->second, "Previous definition");
                 }
@@ -1534,7 +1537,7 @@ public:
         for (auto &stat : ideSeqs) {
             retSeqs.emplace_back(std::move(stat));
         }
-        return ast::MK::InsSeq(loc.offsets(), std::move(retSeqs), ast::MK::EmptyTree());
+        return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
     ast::MethodDef::ARGS_store fillInArgs(core::Context ctx, vector<ast::ParsedArg> parsedArgs,

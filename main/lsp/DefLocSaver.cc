@@ -10,7 +10,8 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    bool lspQueryMatch = lspQuery.matchesLoc(methodDef.declLoc) || lspQuery.matchesSymbol(methodDef.symbol);
+    bool lspQueryMatch =
+        lspQuery.matchesLoc(core::Loc(ctx.file, methodDef.declLoc)) || lspQuery.matchesSymbol(methodDef.symbol);
 
     if (lspQueryMatch) {
         // Query matches against the method definition as a whole.
@@ -39,9 +40,10 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
         }
 
         tp.type = symbolData->resultType;
-        tp.origins.emplace_back(methodDef.declLoc);
+        tp.origins.emplace_back(core::Loc(ctx.file, methodDef.declLoc));
         core::lsp::QueryResponse::pushQueryResponse(
-            ctx, core::lsp::DefinitionResponse(methodDef.symbol, methodDef.declLoc, methodDef.name, tp));
+            ctx, core::lsp::DefinitionResponse(methodDef.symbol, core::Loc(ctx.file, methodDef.declLoc), methodDef.name,
+                                               tp));
     }
 
     return tree;

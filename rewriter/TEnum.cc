@@ -119,7 +119,7 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
         if (auto e = ctx.beginError(stat.loc(), core::errors::Rewriter::TEnumOutsideEnumsDo)) {
             e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}`",
                         lhs->cnst.show(ctx), "enums do", "T::Enum");
-            e.addErrorLine(klass->declLoc, "Enclosing definition here");
+            e.addErrorLine(core::Loc(ctx.file, klass->declLoc), "Enclosing definition here");
         }
     }
 
@@ -128,8 +128,8 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name.deepCopy());
     ast::ClassDef::RHS_store classRhs;
-    auto classDef = ast::MK::Class(stat.loc(), core::Loc(ctx.file, stat.loc()), classCnst.deepCopy(), std::move(parent),
-                                   std::move(classRhs));
+    auto classDef =
+        ast::MK::Class(stat.loc(), stat.loc(), classCnst.deepCopy(), std::move(parent), std::move(classRhs));
 
     ast::Send::ARGS_store args;
     auto first = true;
@@ -187,11 +187,10 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.clear();
     klass->rhs.reserve(oldRHS.size());
     auto loc = klass->declLoc;
-    klass->rhs.emplace_back(ast::MK::Send1(loc.offsets(), ast::MK::Self(loc.offsets()), core::Names::extend(),
-                                           ast::MK::Constant(loc.offsets(), core::Symbols::T_Helpers())));
-    klass->rhs.emplace_back(
-        ast::MK::Send0(loc.offsets(), ast::MK::Self(loc.offsets()), core::Names::declareAbstract()));
-    klass->rhs.emplace_back(ast::MK::Send0(loc.offsets(), ast::MK::Self(loc.offsets()), core::Names::declareSealed()));
+    klass->rhs.emplace_back(ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::extend(),
+                                           ast::MK::Constant(loc, core::Symbols::T_Helpers())));
+    klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareAbstract()));
+    klass->rhs.emplace_back(ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::declareSealed()));
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
             auto &block = ast::cast_tree_nonnull<ast::Block>(enumsDo->block);

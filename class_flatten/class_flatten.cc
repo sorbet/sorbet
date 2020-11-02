@@ -50,7 +50,7 @@ ast::TreePtr extractClassInit(core::Context ctx, ast::ClassDef *klass) {
     if (inits.size() == 1) {
         return std::move(inits.front());
     }
-    return ast::MK::InsSeq(klass->declLoc.offsets(), std::move(inits), ast::MK::EmptyTree());
+    return ast::MK::InsSeq(klass->declLoc, std::move(inits), ast::MK::EmptyTree());
 }
 
 class ClassFlattenWalk {
@@ -77,7 +77,7 @@ public:
         auto inits = extractClassInit(ctx, classDef);
 
         core::SymbolRef sym;
-        auto loc = classDef->declLoc;
+        auto loc = core::Loc(ctx.file, classDef->declLoc);
         ast::TreePtr replacement;
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
@@ -94,7 +94,7 @@ public:
 
             // Replace the class definition with a call to <Magic>.<define-top-class-or-module> to make its definition
             // available to the containing static-init
-            replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc.offsets(), classDef->symbol);
+            replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
         }
         ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.data(ctx)->show(ctx));
@@ -109,8 +109,8 @@ public:
         ast::MethodDef::ARGS_store args;
         args.emplace_back(ast::make_tree<ast::Local>(blkLoc, blkLocalVar));
 
-        auto init = ast::make_tree<ast::MethodDef>(loc.offsets(), loc, sym, core::Names::staticInit(), std::move(args),
-                                                   std::move(inits), ast::MethodDef::Flags());
+        auto init = ast::make_tree<ast::MethodDef>(loc.offsets(), loc.offsets(), sym, core::Names::staticInit(),
+                                                   std::move(args), std::move(inits), ast::MethodDef::Flags());
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
 

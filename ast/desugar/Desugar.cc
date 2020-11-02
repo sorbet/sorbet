@@ -22,11 +22,11 @@ struct DesugarContext final {
     core::MutableContext ctx;
     u4 &uniqueCounter;
     core::NameRef enclosingBlockArg;
-    core::Loc enclosingMethodLoc;
+    core::LocOffsets enclosingMethodLoc;
     core::NameRef enclosingMethodName;
 
     DesugarContext(core::MutableContext ctx, u4 &uniqueCounter, core::NameRef enclosingBlockArg,
-                   core::Loc enclosingMethodLoc, core::NameRef enclosingMethodName)
+                   core::LocOffsets enclosingMethodLoc, core::NameRef enclosingMethodName)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg),
           enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName){};
 };
@@ -244,14 +244,14 @@ bool isIVarAssign(TreePtr &stat) {
 }
 
 TreePtr validateRBIBody(DesugarContext dctx, TreePtr body) {
-    if (!dctx.enclosingMethodLoc.file().data(dctx.ctx).isRBI()) {
+    if (!dctx.ctx.file.data(dctx.ctx).isRBI()) {
         return body;
     }
     if (!body.loc().exists()) {
         return body;
     }
 
-    auto loc = core::Loc(dctx.enclosingMethodLoc.file(), body.loc());
+    auto loc = core::Loc(dctx.ctx.file, body.loc());
     if (isa_tree<EmptyTree>(body)) {
         return body;
     } else if (isa_tree<Assign>(body)) {
@@ -285,7 +285,7 @@ TreePtr validateRBIBody(DesugarContext dctx, TreePtr body) {
     return body;
 }
 
-TreePtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::Loc declLoc, core::NameRef name,
+TreePtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                     unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
     u4 uniqueCounter = 1;
@@ -1097,9 +1097,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
             [&](parser::Module *module) {
                 ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
-                TreePtr res =
-                    MK::Module(module->loc, core::Loc(dctx.ctx.file, module->declLoc),
-                               node2TreeImpl(dctx, std::move(module->name)), std::move(ancestors), std::move(body));
+                TreePtr res = MK::Module(module->loc, module->declLoc, node2TreeImpl(dctx, std::move(module->name)),
+                                         std::move(ancestors), std::move(body));
                 result = std::move(res);
             },
             [&](parser::Class *claz) {
@@ -1110,9 +1109,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 } else {
                     ancestors.emplace_back(node2TreeImpl(dctx, std::move(claz->superclass)));
                 }
-                TreePtr res =
-                    MK::Class(claz->loc, core::Loc(dctx.ctx.file, claz->declLoc),
-                              node2TreeImpl(dctx, std::move(claz->name)), std::move(ancestors), std::move(body));
+                TreePtr res = MK::Class(claz->loc, claz->declLoc, node2TreeImpl(dctx, std::move(claz->name)),
+                                        std::move(ancestors), std::move(body));
                 result = std::move(res);
             },
             [&](parser::Arg *arg) {
@@ -1151,8 +1149,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
             },
             [&](parser::DefMethod *method) {
                 bool isSelf = false;
-                TreePtr res = buildMethod(dctx, method->loc, core::Loc(dctx.ctx.file, method->declLoc), method->name,
-                                          method->args, method->body, isSelf);
+                TreePtr res =
+                    buildMethod(dctx, method->loc, method->declLoc, method->name, method->args, method->body, isSelf);
                 result = std::move(res);
             },
             [&](parser::DefS *method) {
@@ -1164,8 +1162,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     }
                 }
                 bool isSelf = true;
-                TreePtr res = buildMethod(dctx, method->loc, core::Loc(dctx.ctx.file, method->declLoc), method->name,
-                                          method->args, method->body, isSelf);
+                TreePtr res =
+                    buildMethod(dctx, method->loc, method->declLoc, method->name, method->args, method->body, isSelf);
                 result = std::move(res);
             },
             [&](parser::SClass *sclass) {
@@ -1183,7 +1181,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
 
                 ClassDef::RHS_store body = scopeNodeToBody(dctx, std::move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
-                TreePtr res = MK::Class(sclass->loc, core::Loc(dctx.ctx.file, sclass->declLoc),
+                TreePtr res = MK::Class(sclass->loc, sclass->declLoc,
                                         make_tree<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Kind::Class,
                                                                    core::Names::singleton()),
                                         std::move(emptyAncestors), std::move(body));
@@ -1666,7 +1664,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     // strict mode
                     auto blockArgName = dctx.enclosingBlockArg;
                     if (blockArgName == core::Names::blkArg()) {
-                        if (auto e = dctx.ctx.state.beginError(dctx.enclosingMethodLoc,
+                        if (auto e = dctx.ctx.state.beginError(core::Loc(dctx.ctx.file, dctx.enclosingMethodLoc),
                                                                core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
                                         dctx.enclosingMethodName.data(dctx.ctx)->show(dctx.ctx), "yield");
@@ -1941,8 +1939,8 @@ TreePtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, TreePtr what) {
     } else {
         rhs.emplace_back(std::move(what));
     }
-    return make_tree<ClassDef>(loc, core::Loc(dctx.ctx.file, loc), core::Symbols::root(), MK::EmptyTree(),
-                               std::move(ancestors), std::move(rhs), ClassDef::Kind::Class);
+    return make_tree<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(), std::move(ancestors), std::move(rhs),
+                               ClassDef::Kind::Class);
 }
 } // namespace
 
@@ -1950,7 +1948,7 @@ TreePtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what) {
     try {
         u4 uniqueCounter = 1;
         // We don't have an enclosing block arg to start off.
-        DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::Loc::none(ctx.file),
+        DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::LocOffsets::none(),
                             core::NameRef::noName());
         auto loc = what->loc;
         auto result = node2TreeImpl(dctx, std::move(what));
