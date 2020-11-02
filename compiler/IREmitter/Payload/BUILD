@@ -50,6 +50,7 @@ cc_library(
     name = "pseudo_lib",
     srcs = [
         "PayloadIntrinsics.c",
+        "code-payload.c",
         "payload.c",
     ],
     copts = [

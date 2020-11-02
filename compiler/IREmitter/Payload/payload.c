@@ -65,28 +65,6 @@ void sorbet_stopInDebugger() {
     __asm__("int $3");
 }
 
-// ****
-// ****                       sorbet_ruby version information fallback
-// ****
-#ifdef SORBET_LLVM_PAYLOAD
-
-// A strong version of these functions will be linked into libruby.so when Ruby is built as sorbet_ruby.
-// When our compiled C extensions are loaded by sorbet_ruby, calls will resolve to the symbol inside libruby.so.
-// When our compiled C extensions are loaded by a system Ruby or an rbenv-built Ruby, these weak symbols act as
-// a fallback so that we can gracefully exit (Ruby exception) when not run under sorbet_ruby instead of
-// ungracefully exit (dynamic symbol resolution error + corrupt Ruby VM).
-const char *sorbet_getBuildSCMRevision() __attribute__((weak)) {
-    rb_raise(rb_eRuntimeError,
-             "sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.");
-}
-
-const int sorbet_getIsReleaseBuild() __attribute__((weak)) {
-    rb_raise(rb_eRuntimeError,
-             "sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.");
-}
-
-#endif
-
 // Ruby passes the RTLD_LAZY flag to the dlopen(3) call (which is supported by both macOS and Linux).
 // That flag says, "Only resolve symbols as the code that references them is executed. If the symbol
 // is never referenced, then it is never resolved."
@@ -119,25 +97,10 @@ void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_ti
 // ****                       Singletons
 // ****
 
-SORBET_INLINE
-VALUE sorbet_rubyTrue() {
-    return RUBY_Qtrue;
-}
-
-SORBET_INLINE
-VALUE sorbet_rubyFalse() {
-    return RUBY_Qfalse;
-}
-
 // use this undefined value when you have a variable that should _never_ escape to ruby.
 SORBET_INLINE
 VALUE sorbet_rubyUndef() {
     return RUBY_Qundef;
-}
-
-SORBET_INLINE
-VALUE sorbet_rubyNil() {
-    return RUBY_Qnil;
 }
 
 SORBET_INLINE
@@ -174,50 +137,6 @@ double sorbet_rubyValueToDouble(VALUE val) {
 SORBET_INLINE
 VALUE sorbet_doubleToRubyValue(double u) {
     return DBL2NUM(u);
-}
-
-// ****
-// ****                       Integer
-// ****
-
-SORBET_INLINE
-VALUE sorbet_Integer_plus_Integer(VALUE a, VALUE b) {
-    return sorbet_longToRubyValue(sorbet_rubyValueToLong(a) + sorbet_rubyValueToLong(b));
-}
-
-SORBET_INLINE
-VALUE sorbet_Integer_minus_Integer(VALUE a, VALUE b) {
-    return sorbet_longToRubyValue(sorbet_rubyValueToLong(a) - sorbet_rubyValueToLong(b));
-}
-
-SORBET_INLINE
-VALUE sorbet_Integer_less_Integer(VALUE a, VALUE b) {
-    return (sorbet_rubyValueToLong(a) < sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
-}
-
-SORBET_INLINE
-VALUE sorbet_Integer_greater_Integer(VALUE a, VALUE b) {
-    return (sorbet_rubyValueToLong(a) > sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
-}
-
-SORBET_INLINE
-VALUE sorbet_Integer_greatereq_Integer(VALUE a, VALUE b) {
-    return (sorbet_rubyValueToLong(a) >= sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
-}
-
-SORBET_INLINE
-VALUE sorbet_Integer_lesseq_Integer(VALUE a, VALUE b) {
-    return (sorbet_rubyValueToLong(a) <= sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
-}
-
-SORBET_INLINE
-VALUE sorbet_Integer_eq_Integer(VALUE a, VALUE b) {
-    return (sorbet_rubyValueToLong(a) == sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
-}
-
-SORBET_INLINE
-VALUE sorbet_Integer_neq_Integer(VALUE a, VALUE b) {
-    return (sorbet_rubyValueToLong(a) != sorbet_rubyValueToLong(b)) ? RUBY_Qtrue : RUBY_Qfalse;
 }
 
 // ****
@@ -384,48 +303,8 @@ _Bool sorbet_testIsTruthy(VALUE value) {
 }
 
 SORBET_INLINE
-_Bool sorbet_testIsTrue(VALUE value) {
-    return value == RUBY_Qtrue;
-}
-
-SORBET_INLINE
-_Bool sorbet_testIsFalse(VALUE value) {
-    return value == RUBY_Qfalse;
-}
-
-SORBET_INLINE
-_Bool sorbet_testIsNil(VALUE value) {
-    return value == RUBY_Qnil;
-}
-
-SORBET_INLINE
 _Bool sorbet_testIsUndef(VALUE value) {
     return value == RUBY_Qundef;
-}
-
-SORBET_INLINE
-_Bool sorbet_testIsSymbol(VALUE value) {
-    return RB_SYMBOL_P(value);
-}
-
-SORBET_INLINE
-_Bool sorbet_testIsFloat(VALUE value) {
-    return RB_FLOAT_TYPE_P(value);
-}
-
-SORBET_INLINE
-_Bool sorbet_testIsHash(VALUE value) {
-    return TYPE(value) == RUBY_T_HASH;
-}
-
-SORBET_INLINE
-_Bool sorbet_testIsArray(VALUE value) {
-    return TYPE(value) == RUBY_T_ARRAY;
-}
-
-SORBET_INLINE
-_Bool sorbet_testIsString(VALUE value) {
-    return TYPE(value) == RUBY_T_STRING;
 }
 
 // https://ruby-doc.org/core-2.6.3/Object.html#method-i-eql-3F
@@ -834,7 +713,7 @@ const VALUE sorbet_readRealpath() {
         rb_raise(rb_eRuntimeError, "Invalid '$__sorbet_ruby_realpath' when loading compiled module");
     }
 
-    rb_gv_set("$__sorbet_ruby_realpath", sorbet_rubyNil());
+    rb_gv_set("$__sorbet_ruby_realpath", RUBY_Qnil);
     return realpath;
 }
 
@@ -1082,66 +961,6 @@ VALUE sorbet_readRestArgs(int maxPositionalArgCount, int actualArgCount, VALUE *
 // ****                       Implementation helpers for type tests
 // ****
 
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_Integer(VALUE obj) {
-    return RB_FIXNUM_P(obj);
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_TrueClass(VALUE obj) {
-    return obj == RUBY_Qtrue;
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_FalseClass(VALUE obj) {
-    return obj == RUBY_Qfalse;
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_NilClass(VALUE obj) {
-    return obj == RUBY_Qnil;
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_Symbol(VALUE obj) {
-    return RB_SYMBOL_P(obj);
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_Float(VALUE obj) {
-    return RB_FLOAT_TYPE_P(obj);
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_Untyped(VALUE obj) {
-    return 1;
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_Hash(VALUE obj) {
-    return RB_TYPE_P(obj, T_HASH);
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_Array(VALUE obj) {
-    return RB_TYPE_P(obj, T_ARRAY);
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_Regexp(VALUE obj) {
-    return RB_TYPE_P(obj, T_REGEXP);
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_Rational(VALUE obj) {
-    return RB_TYPE_P(obj, T_RATIONAL);
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_String(VALUE obj) {
-    return RB_TYPE_P(obj, T_STRING);
-}
-
 /*
 _Bool sorbet_isa_Method(VALUE obj) __attribute__((const))  {
     return rb_obj_is_method(obj) == Qtrue;
@@ -1225,7 +1044,7 @@ VALUE sorbet_splatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const res
     if (missing > 0) {
         VALUE newArr = rb_ary_dup(arr);
         for (int i = 0; i < missing; i++) {
-            sorbet_arrayPush(newArr, sorbet_rubyNil());
+            sorbet_arrayPush(newArr, RUBY_Qnil);
         }
         return newArr;
     }
@@ -1237,14 +1056,14 @@ VALUE sorbet_splatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const res
 VALUE sorbet_definedIntinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                              VALUE closure) {
     if (argc == 0) {
-        return sorbet_rubyNil();
+        return RUBY_Qnil;
     }
     VALUE klass = sorbet_rb_cObject();
     for (int i = 0; i < argc; i++) {
         VALUE str = argv[i];
         ID id = rb_intern(sorbet_rubyStringToCPtr(str));
         if (!rb_const_defined_at(klass, id)) {
-            return sorbet_rubyNil();
+            return RUBY_Qnil;
         }
         klass = sorbet_getConstantAt(klass, id);
     }
@@ -1513,7 +1332,7 @@ VALUE sorbet_rb_int_equal(VALUE recv, ID fun, int argc, const VALUE *const restr
 VALUE sorbet_rb_int_neq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                         VALUE closure) {
     sorbet_ensure_arity(argc, 1);
-    return sorbet_boolToRuby(rb_int_equal(recv, argv[0]) == sorbet_rubyFalse());
+    return sorbet_boolToRuby(rb_int_equal(recv, argv[0]) == RUBY_Qfalse);
 }
 
 VALUE sorbet_rb_int_to_s(VALUE x, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
@@ -1780,24 +1599,3 @@ void sorbet_raiseIfNotNil(VALUE exception) {
 VALUE sorbet_blockReturnUndef(VALUE **pc, VALUE *iseq_encoded, VALUE closure) {
     return sorbet_rubyUndef();
 }
-
-// ****
-// ****                       Compile-time only intrinsics. These should be eliminated by passes.
-// ****
-
-#ifdef SORBET_LLVM_PAYLOAD
-// These forward declarations don't actually exist except in the LLVM IR we generate for each C extension,
-// so this function fails to link when compiling the payload into libruby.so.
-//
-// We don't actually need this function to be present in that shared object, so we can omit it.
-
-VALUE sorbet_i_getRubyClass(const char *const className, long classNameLen) __attribute__((const));
-VALUE sorbet_i_getRubyConstant(const char *const className, long classNameLen) __attribute__((const));
-
-VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) {
-    // this function will be nuked but it exists to keep forward definitions alive for clang
-    return (long)&sorbet_i_getRubyClass + (long)&sorbet_i_getRubyConstant + (long)&sorbet_getConstantEpoch +
-           (long)&sorbet_getConstant;
-}
-
-#endif
