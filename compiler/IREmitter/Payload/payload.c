@@ -65,34 +65,6 @@ void sorbet_stopInDebugger() {
     __asm__("int $3");
 }
 
-// Ruby passes the RTLD_LAZY flag to the dlopen(3) call (which is supported by both macOS and Linux).
-// That flag says, "Only resolve symbols as the code that references them is executed. If the symbol
-// is never referenced, then it is never resolved."
-//
-// Thus, by putting our version check first before any other code in the C extension runs, and backing
-// up the symbols our version check relies on with weak symbols, we can guarantee that the user never
-// sees a symbol resolution error from loading a shared object when they shouldn't have.
-SORBET_INLINE
-void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_time_build_scm_revision) {
-    if (!compile_time_is_release_build) {
-        // Skipping version check: This shared object was compiled by a non-release version of SorbetLLVM
-        return;
-    }
-
-    const int runtime_is_release_build = sorbet_getIsReleaseBuild();
-    if (!runtime_is_release_build) {
-        // Skipping version check: sorbet_ruby is a non-release version
-        return;
-    }
-
-    const char *runtime_build_scm_revision = sorbet_getBuildSCMRevision();
-    if (strcmp(compile_time_build_scm_revision, runtime_build_scm_revision) != 0) {
-        rb_raise(rb_eRuntimeError,
-                 "SorbetLLVM runtime version mismatch: sorbet_ruby compiled with %s but shared object compiled with %s",
-                 runtime_build_scm_revision, compile_time_build_scm_revision);
-    }
-}
-
 // ****
 // ****                       Singletons
 // ****
@@ -113,68 +85,6 @@ SORBET_INLINE
 SORBET_ATTRIBUTE(pure)
 VALUE sorbet_rubyException() {
     return rb_eException;
-}
-
-// ****
-// ****                       Conversions between Ruby values and C values
-// ****
-
-SORBET_INLINE
-long sorbet_rubyValueToLong(VALUE val) {
-    return FIX2LONG(val);
-}
-
-SORBET_INLINE
-VALUE sorbet_longToRubyValue(long i) {
-    return LONG2FIX(i);
-}
-
-SORBET_INLINE
-double sorbet_rubyValueToDouble(VALUE val) {
-    return RFLOAT_VALUE(val);
-}
-
-SORBET_INLINE
-VALUE sorbet_doubleToRubyValue(double u) {
-    return DBL2NUM(u);
-}
-
-// ****
-// ****                       Operations on Strings
-// ****
-
-SORBET_INLINE
-const char *sorbet_rubyStringToCPtr(VALUE value) {
-    return RSTRING_PTR(value);
-}
-
-SORBET_INLINE
-long sorbet_rubyStringLength(VALUE value) {
-    return RSTRING_LEN(value);
-}
-
-SORBET_INLINE
-VALUE sorbet_cPtrToRubyString(const char *ptr, long length) {
-    return rb_str_new(ptr, length);
-}
-
-SORBET_INLINE
-VALUE sorbet_cPtrToRubyStringFrozen(const char *ptr, long length) {
-    VALUE ret = rb_fstring_new(ptr, length);
-    rb_gc_register_mark_object(ret);
-    return ret;
-}
-
-SORBET_INLINE
-VALUE sorbet_cPtrToRubyRegexpFrozen(const char *ptr, long length, int options) {
-    VALUE ret = rb_reg_new(ptr, length, options);
-    rb_gc_register_mark_object(ret);
-    return ret;
-}
-
-SORBET_INLINE
-VALUE sorbet_stringPlus(VALUE str1, VALUE str2) {
-    return rb_str_plus(str1, str2);
 }
 
 // ****
@@ -266,66 +176,8 @@ VALUE in), VALUE closure) { return rb_hash_foreach(hash, func, closure);
 */
 
 // ****
-// ****                       Operations on Ruby ID's
-// ****
-
-SORBET_INLINE
-ID sorbet_idIntern(const char *value, long length) {
-    return rb_intern2(value, length);
-}
-
-SORBET_INLINE
-ID sorbet_symToID(VALUE sym) {
-    return SYM2ID(sym);
-}
-
-SORBET_INLINE
-VALUE sorbet_IDToSym(ID id) {
-    return ID2SYM(id);
-}
-
-SORBET_INLINE
-VALUE sorbet_getRubyClassOf(VALUE value) {
-    return CLASS_OF(value);
-}
-
-SORBET_INLINE
-const char *sorbet_getRubyClassName(VALUE object) {
-    return rb_obj_classname(object);
-}
-// ****
-// ****                       Tests
-// ****
-
-SORBET_INLINE
-_Bool sorbet_testIsTruthy(VALUE value) {
-    return RB_TEST(value);
-}
-
-SORBET_INLINE
-_Bool sorbet_testIsUndef(VALUE value) {
-    return value == RUBY_Qundef;
-}
-
-// https://ruby-doc.org/core-2.6.3/Object.html#method-i-eql-3F
-SORBET_INLINE
-_Bool sorbet_testObjectEqual_p(VALUE obj1, VALUE obj2) {
-    return obj1 == obj2;
-}
-
-// ****
 // ****                       Variables
 // ****
-
-SORBET_INLINE
-VALUE sorbet_instanceVariableGet(VALUE receiver, ID name) {
-    return rb_ivar_get(receiver, name);
-}
-
-SORBET_INLINE
-VALUE sorbet_instanceVariableSet(VALUE receiver, ID name, VALUE newValue) {
-    return rb_ivar_set(receiver, name, newValue);
-}
 
 VALUE sorbet_globalVariableGet(ID name) {
     return rb_gvar_get(rb_global_entry(name));
@@ -335,32 +187,12 @@ void sorbet_globalVariableSet(ID name, VALUE newValue) {
     rb_gvar_set(rb_global_entry(name), newValue);
 }
 
-SORBET_INLINE
-VALUE sorbet_classVariableGet(VALUE _class, ID name) {
-    return rb_cvar_get(_class, name);
-}
-
-SORBET_INLINE
-void sorbet_classVariableSet(VALUE _class, ID name, VALUE newValue) {
-    rb_cvar_set(_class, name, newValue);
-}
-
 // ****
 // ****                       Constants, Classes and Modules
 // ****
 
 VALUE sorbet_rb_cObject() {
     return rb_cObject;
-}
-
-SORBET_INLINE
-void sorbet_defineTopLevelConstant(const char *name, VALUE value) {
-    rb_define_global_const(name, value);
-}
-
-SORBET_INLINE
-void sorbet_defineNestedCosntant(VALUE owner, const char *name, VALUE value) {
-    rb_define_const(owner, name, value);
 }
 
 VALUE sorbet_getMethodBlockAsProc() {
@@ -464,38 +296,6 @@ SORBET_ATTRIBUTE(noinline)
 void sorbet_setConstant(VALUE mod, const char *name, long nameLen, VALUE value) {
     ID id = rb_intern2(name, nameLen);
     return rb_const_set(mod, id, value);
-}
-
-SORBET_INLINE
-VALUE sorbet_defineTopLevelModule(const char *name) {
-    return rb_define_module(name);
-}
-
-SORBET_INLINE
-VALUE sorbet_defineNestedModule(VALUE owner, const char *name) {
-    return rb_define_module_under(owner, name);
-}
-
-SORBET_INLINE
-VALUE sorbet_defineTopClassOrModule(const char *name, VALUE super) {
-    return rb_define_class(name, super);
-}
-
-SORBET_INLINE
-VALUE sorbet_defineNestedClass(VALUE owner, const char *name, VALUE super) {
-    return rb_define_class_under(owner, name, super);
-}
-
-// this DOES override existing methods
-SORBET_INLINE
-void sorbet_defineMethod(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc) {
-    rb_define_method(klass, name, methodPtr, argc);
-}
-
-// this DOES override existing methods
-SORBET_INLINE
-void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc) {
-    rb_define_singleton_method(klass, name, methodPtr, argc);
 }
 
 // ****
@@ -612,26 +412,6 @@ struct iseq_insn_info_entry {
 
 void rb_iseq_insns_info_encode_positions(const rb_iseq_t *iseq);
 /* End from inseq.h */
-
-SORBET_INLINE
-int sorbet_rubyIseqTypeMethod() {
-    return ISEQ_TYPE_METHOD;
-}
-
-SORBET_INLINE
-int sorbet_rubyIseqTypeBlock() {
-    return ISEQ_TYPE_BLOCK;
-}
-
-SORBET_INLINE
-int sorbet_rubyIseqTypeRescue() {
-    return ISEQ_TYPE_RESCUE;
-}
-
-SORBET_INLINE
-int sorbet_rubyIseqTypeEnsure() {
-    return ISEQ_TYPE_ENSURE;
-}
 
 // NOTE: parent is the immediate parent frame, so for the rescue clause of a
 // top-level method the parent would be the method iseq, but for a rescue clause
@@ -1039,7 +819,7 @@ VALUE sorbet_splatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const res
     sorbet_ensure_arity(argc, 3);
     VALUE arr = argv[0];
     long len = sorbet_rubyArrayLen(arr);
-    int size = sorbet_rubyValueToLong(argv[1]) + sorbet_rubyValueToLong(argv[2]);
+    int size = FIX2LONG(argv[1]) + FIX2LONG(argv[2]);
     int missing = size - len;
     if (missing > 0) {
         VALUE newArr = rb_ary_dup(arr);
@@ -1053,15 +833,15 @@ VALUE sorbet_splatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const res
 
 // This doesn't do exactly the right thing because that is done by the parser in Ruby. Ruby will return the String
 // "expression" if the RHS is an expression.
-VALUE sorbet_definedIntinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                             VALUE closure) {
+VALUE sorbet_definedIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                              VALUE closure) {
     if (argc == 0) {
         return RUBY_Qnil;
     }
     VALUE klass = sorbet_rb_cObject();
     for (int i = 0; i < argc; i++) {
         VALUE str = argv[i];
-        ID id = rb_intern(sorbet_rubyStringToCPtr(str));
+        ID id = rb_intern(RSTRING_PTR(str));
         if (!rb_const_defined_at(klass, id)) {
             return RUBY_Qnil;
         }
@@ -1092,7 +872,7 @@ VALUE sorbet_T_must(VALUE recv, ID fun, int argc, const VALUE *const restrict ar
 VALUE sorbet_rb_array_len(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                           VALUE closure) {
     sorbet_ensure_arity(argc, 0);
-    return sorbet_longToRubyValue(rb_array_len(recv));
+    return LONG2FIX(rb_array_len(recv));
 }
 
 VALUE sorbet_rb_array_square_br_slowpath(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
@@ -1421,13 +1201,7 @@ VALUE sorbet_int_bool_nand(VALUE recv, ID fun, int argc, const VALUE *const rest
 // ****                       Used to implement inline caches
 // ****
 
-RUBY_EXTERN rb_serial_t ruby_vm_global_constant_state;
 RUBY_EXTERN rb_serial_t ruby_vm_global_method_state;
-
-SORBET_INLINE
-rb_serial_t sorbet_getConstantEpoch() {
-    return ruby_vm_global_constant_state;
-}
 
 // Marked `static inline` because this is expected to only exist in the ruby vm
 static inline rb_serial_t sorbet_getMethodEpoch() {

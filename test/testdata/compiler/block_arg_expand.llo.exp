@@ -69,17 +69,17 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.anon.19 = type { i64, i64, i64, i64 }
 %struct.FunctionInlineCache = type { %struct.rb_callable_method_entry_struct*, i64, i64 }
 %struct.sorbet_iterMethodArg = type { i64, i64, i32, i64*, %struct.FunctionInlineCache* }
-%struct.RArray = type { %struct.RBasic, %union.anon.26 }
-%union.anon.26 = type { %struct.anon.27 }
-%struct.anon.27 = type { i64, %union.anon.0, i64* }
+%struct.RArray = type { %struct.RBasic, %union.anon.24 }
+%union.anon.24 = type { %struct.anon.25 }
+%struct.anon.25 = type { i64, %union.anon.0, i64* }
 
 @rb_eRuntimeError = external local_unnamed_addr global i64, align 8
-@.str = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
-@.str.1 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
+@.str.1 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
+@.str.2 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @ruby_current_vm_ptr = external local_unnamed_addr global %struct.rb_vm_struct*, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
-@.str.16 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
-@.str.17 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
+@.str.15 = private unnamed_addr constant [24 x i8] c"$__sorbet_ruby_realpath\00", align 1
+@.str.16 = private unnamed_addr constant [63 x i8] c"Invalid '$__sorbet_ruby_realpath' when loading compiled module\00", align 1
 @"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
@@ -100,35 +100,35 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @str_Integer = private unnamed_addr constant [8 x i8] c"Integer\00", align 1
 @"str_+" = private unnamed_addr constant [2 x i8] c"+\00", align 1
 
+declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #0
+
+declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #0
+
+declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #0
+
 ; Function Attrs: nounwind ssp uwtable
-define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #0 {
+define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #1 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !4
-  tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* getelementptr inbounds ([95 x i8], [95 x i8]* @.str, i64 0, i64 0)) #10
+  tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* getelementptr inbounds ([93 x i8], [93 x i8]* @.str.2, i64 0, i64 0)) #10
+  unreachable
+}
+
+; Function Attrs: nounwind ssp uwtable
+define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #1 {
+  %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !4
+  tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* getelementptr inbounds ([95 x i8], [95 x i8]* @.str.1, i64 0, i64 0)) #10
   unreachable
 }
 
 ; Function Attrs: noreturn
-declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #1
+declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #2
 
-; Function Attrs: nounwind ssp uwtable
-define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #0 {
-  %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !4
-  tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* getelementptr inbounds ([93 x i8], [93 x i8]* @.str.1, i64 0, i64 0)) #10
-  unreachable
-}
+declare void @rb_ary_detransient(i64) local_unnamed_addr #0
 
-declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #2
-
-declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #2
-
-declare void @rb_ary_detransient(i64) local_unnamed_addr #2
-
-declare i64 @rb_ary_new_from_values(i64, i64*) local_unnamed_addr #2
+declare i64 @rb_ary_new_from_values(i64, i64*) local_unnamed_addr #0
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #3
-
-declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #2
 
 ; Function Attrs: argmemonly nounwind
 declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #3
@@ -137,11 +137,11 @@ declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #3
 declare void @sorbet_cast_failure(i64, i8*, i8*) local_unnamed_addr #4
 
 ; Function Attrs: nounwind ssp uwtable
-declare i8* @sorbet_allocateRubyStackFrame(i64, i64, i64, i64, i8*, i32, i32, i32, i64* nocapture readonly, i32) local_unnamed_addr #0
+declare i8* @sorbet_allocateRubyStackFrame(i64, i64, i64, i64, i8*, i32, i32, i32, i64* nocapture readonly, i32) local_unnamed_addr #1
 
-declare i64 @rb_gv_get(i8*) local_unnamed_addr #2
+declare i64 @rb_gv_get(i8*) local_unnamed_addr #0
 
-declare i64 @rb_gv_set(i8*, i64) local_unnamed_addr #2
+declare i64 @rb_gv_set(i8*, i64) local_unnamed_addr #0
 
 ; Function Attrs: noinline nounwind ssp uwtable
 define internal fastcc void @vm_env_write_slowpath(i64* nocapture, i64) unnamed_addr #5 {
@@ -156,24 +156,24 @@ define internal fastcc void @vm_env_write_slowpath(i64* nocapture, i64) unnamed_
   ret void
 }
 
-declare void @rb_gc_writebarrier_remember(i64) local_unnamed_addr #2
+declare void @rb_gc_writebarrier_remember(i64) local_unnamed_addr #0
 
 ; Function Attrs: noinline nounwind ssp uwtable
 declare void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* nocapture readnone, %struct.rb_control_frame_struct*, %struct.rb_iseq_struct* nocapture readonly) local_unnamed_addr #5
 
 ; Function Attrs: nounwind ssp uwtable
-declare i64 @sorbet_rb_int_plus_slowpath(i64, i64) local_unnamed_addr #0
+declare i64 @sorbet_rb_int_plus_slowpath(i64, i64) local_unnamed_addr #1
 
 ; Function Attrs: nounwind readnone speculatable
 declare { i64, i1 } @llvm.sadd.with.overflow.i64(i64, i64) #6
 
-declare i64 @rb_int2big(i64) local_unnamed_addr #2
+declare i64 @rb_int2big(i64) local_unnamed_addr #0
 
 ; Function Attrs: noinline nounwind ssp uwtable
 declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #5
 
 ; Function Attrs: nounwind ssp uwtable
-define internal i64 @sorbet_iterMethod(i64) #0 {
+define internal i64 @sorbet_iterMethod(i64) #1 {
   %2 = inttoptr i64 %0 to %struct.sorbet_iterMethodArg*
   %3 = getelementptr inbounds %struct.sorbet_iterMethodArg, %struct.sorbet_iterMethodArg* %2, i64 0, i32 0
   %4 = load i64, i64* %3, align 8, !tbaa !8
@@ -189,7 +189,7 @@ define internal i64 @sorbet_iterMethod(i64) #0 {
   ret i64 %13
 }
 
-declare i64 @rb_iterate(i64 (i64)*, i64, i64 (...)*, i64) local_unnamed_addr #2
+declare i64 @rb_iterate(i64 (i64)*, i64, i64 (...)*, i64) local_unnamed_addr #0
 
 ; Function Attrs: nounwind ssp
 define internal i64 @"func_<root>.<static-init>$153$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #7 !dbg !16 {
@@ -346,7 +346,7 @@ define void @Init_block_arg_expand() local_unnamed_addr #8 {
 entry:
   %0 = alloca %struct.sorbet_iterMethodArg, align 8
   %callArgs.i = alloca <2 x i64>, align 16
-  %1 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.16, i64 0, i64 0)) #11
+  %1 = tail call i64 @rb_gv_get(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.15, i64 0, i64 0)) #11
   %2 = and i64 %1, 7
   %3 = icmp ne i64 %2, 0
   %4 = and i64 %1, -9
@@ -364,11 +364,11 @@ entry:
 
 13:                                               ; preds = %7, %entry
   %14 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !4
-  tail call void (i64, i8*, ...) @rb_raise(i64 %14, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.17, i64 0, i64 0)) #10
+  tail call void (i64, i8*, ...) @rb_raise(i64 %14, i8* getelementptr inbounds ([63 x i8], [63 x i8]* @.str.16, i64 0, i64 0)) #10
   unreachable
 
 sorbet_readRealpath.exit:                         ; preds = %7
-  %15 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.16, i64 0, i64 0), i64 8) #11
+  %15 = tail call i64 @rb_gv_set(i8* getelementptr inbounds ([24 x i8], [24 x i8]* @.str.15, i64 0, i64 0), i64 8) #11
   %16 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #11
   store i64 %16, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %17 = tail call i64 @rb_intern2(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @"str_<self>", i64 0, i64 0), i64 6) #11
@@ -496,9 +496,9 @@ newFuncRoot:
   unreachable, !dbg !44
 }
 
-attributes #0 = { nounwind ssp uwtable }
-attributes #1 = { noreturn }
-attributes #2 = { "addedToSilenceEmptyAttrsError" }
+attributes #0 = { "addedToSilenceEmptyAttrsError" }
+attributes #1 = { nounwind ssp uwtable }
+attributes #2 = { noreturn }
 attributes #3 = { argmemonly nounwind }
 attributes #4 = { cold noreturn nounwind optsize ssp uwtable }
 attributes #5 = { noinline nounwind ssp uwtable }
