@@ -1,0 +1,28 @@
+test/cli/error-kwarg-hash-without-splat/goodsplat.rb:15: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+    15 |takes_kwargs(99, **arghash)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got T::Hash[T.untyped, T.untyped] originating from:
+    test/cli/error-kwarg-hash-without-splat/goodsplat.rb:15:
+    15 |takes_kwargs(99, **arghash)
+                         ^^^^^^^^^
+Errors: 1
+test/cli/error-kwarg-hash-without-splat/goodsplat.rb:15: Passing a hash where the specific keys are unknown to a method taking keyword arguments https://srb.help/7019
+    15 |takes_kwargs(99, **arghash)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got T::Hash[T.untyped, T.untyped] originating from:
+    test/cli/error-kwarg-hash-without-splat/goodsplat.rb:15:
+    15 |takes_kwargs(99, **arghash)
+                         ^^^^^^^^^
+Errors: 1
+test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: Keyword argument hash without `**` is deprecated https://srb.help/7033
+    10 |takes_kwargs(99, arghash)
+                         ^^^^^^^
+    test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: This produces a runtime warning in Ruby 2.7, and will be an error in Ruby 3.0
+    10 |takes_kwargs(99, arghash)
+                         ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: Replace with `**arghash`
+    10 |takes_kwargs(99, arghash)
+                         ^^^^^^^
+Errors: 1
+No errors! Great job.
