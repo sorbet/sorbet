@@ -61,26 +61,6 @@ LSPIndexer::~LSPIndexer() {
     }
 }
 
-void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, WorkerPool &workers) const {
-    // Fast abort if all files have hashes.
-    bool allFilesHaveHashes = true;
-    for (const auto &f : files) {
-        if (f != nullptr && f->getFileHash() == nullptr) {
-            allFilesHaveHashes = false;
-            break;
-        }
-    }
-    if (allFilesHaveHashes) {
-        return;
-    }
-
-    pipeline::computeFileHashes(files, *config->logger, workers);
-}
-
-void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) const {
-    computeFileHashes(files, *emptyWorkers);
-}
-
 bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
                                  bool containsPendingTypecheckUpdates) const {
     Timer timeit(config->logger, "fast_path_decision");
@@ -179,7 +159,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
         }
     }
 
-    pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers);
+    pipeline::computeFileHashes(*initialGS, indexed, workers);
     cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
                                          workers, indexed);
 
@@ -204,11 +184,8 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     LSPFileUpdates update;
     update.epoch = edit.epoch;
     update.editCount = edit.mergeCount + 1;
-    // Ensure all files have hashes.
-    computeFileHashes(edit.updates);
 
     update.updatedFiles = move(edit.updates);
-    update.canTakeFastPath = canTakeFastPath(update, /* containsPendingTypecheckUpdate */ false);
     update.cancellationExpected = edit.sorbetCancellationExpected;
     update.preemptionsExpected = edit.sorbetPreemptionsExpected;
 
@@ -255,6 +232,10 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
         initialGS->errorQueue = make_shared<core::ErrorQueue>(
             initialGS->errorQueue->logger, initialGS->errorQueue->tracer, make_shared<core::NullFlusher>());
         auto trees = pipeline::index(initialGS, frefs, config->opts, *emptyWorkers, kvstore);
+        pipeline::computeFileHashes(*initialGS, trees, *emptyWorkers);
+
+        // Now that we have computed the needed file hashes, determine if we can take the fast path.
+        update.canTakeFastPath = canTakeFastPath(update, /* containsPendingTypecheckUpdate */ false);
         update.updatedFileIndexes.resize(trees.size());
         for (auto &ast : trees) {
             const int i = fileToPos[ast.file.id()];

@@ -119,7 +119,6 @@ bool SorbetWorkspaceEditTask::canTakeFastPath(const LSPIndexer &index) const {
         return updates->canTakeFastPath;
     }
     if (!cachedFastPathDecisionValid) {
-        index.computeFileHashes(params->updates);
         cachedFastPathDecision = index.canTakeFastPath(params->updates);
         cachedFastPathDecisionValid = true;
     }

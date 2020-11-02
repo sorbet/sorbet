@@ -517,6 +517,10 @@ int realmain(int argc, char *argv[]) {
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
+            if (!opts.storeState.empty()) {
+                // Store file hashes for LSP.
+                pipeline::computeFileHashes(*gs, indexed, *workers);
+            }
         }
         cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
 
@@ -595,9 +599,7 @@ int realmain(int argc, char *argv[]) {
 
         if (!opts.storeState.empty()) {
             gs->markAsPayload();
-            // Store file hashes for LSP.
-            pipeline::computeFileHashes(gs->getFiles(), *logger, *workers);
-            FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
+            FileOps::write(opts.storeState, core::serialize::Serializer::store(*gs));
         }
 
         auto untypedSources = getAndClearHistogram("untyped.sources");

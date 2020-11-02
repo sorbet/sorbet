@@ -40,8 +40,6 @@ class LSPIndexer final {
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
 
-    void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
-
     /** Determines if the given edit can take the fast path relative to the most recently committed edit. If
      * `containsPendingTypecheckUpdates` is `true`, it will make the determination in the immediate past (just prior to
      * the currently running slow path) using `evictedFiles`. */
@@ -58,11 +56,6 @@ public:
      * Determines if the given files can take the fast path relative to the latest committed edit.
      */
     bool canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
-
-    /**
-     * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.
-     */
-    void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files) const;
 
     /** Initializes the indexer by indexing and hashing all files in the workspace. Mutates the LSPFileUpdates so it can
      * be passed to the typechecker to initialize it. */
