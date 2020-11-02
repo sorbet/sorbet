@@ -701,10 +701,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
         // If --error-kwarg-hash-without-splat is set, we will treat "**-less" keyword hash argument as an error.
         if (gs.errorKwargHashWithoutSplat) {
             if (auto e = gs.beginError(splatLoc, errors::Infer::KeywordArgHashWithoutSplat)) {
-                e.setHeader("(`{}`) Supplying a keyword argument hash as the last "
-                            "positional argument without using `{}` is deprecated "
-                            "in Ruby 2.7, and will be an error in Ruby 3.0",
-                            "--error-kwarg-hash-without-splat", "**");
+                e.setHeader("Keyword argument hash without `{}` is deprecated", "**");
+                e.addErrorLine(splatLoc, "This produces a runtime warning in Ruby 2.7, "
+                                         "and will be an error in Ruby 3.0");
+                e.addErrorLine(splatLoc, "Note: disabling `{}` will suppress this error",
+                               "--error-kwarg-hash-without-splat");
                 e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc, "**{}",
                               splatLoc.source(gs));
             }

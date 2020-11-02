@@ -14,7 +14,13 @@ test/cli/error-kwarg-hash-without-splat/goodsplat.rb:15: Passing a hash where th
     15 |takes_kwargs(99, **arghash)
                          ^^^^^^^^^
 Errors: 1
-test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: (`--error-kwarg-hash-without-splat`) Supplying a keyword argument hash as the last positional argument without using `**` is deprecated in Ruby 2.7, and will be an error in Ruby 3.0 https://srb.help/7033
+test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: Keyword argument hash without `**` is deprecated https://srb.help/7033
+    10 |takes_kwargs(99, arghash)
+                         ^^^^^^^
+    test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: This produces a runtime warning in Ruby 2.7, and will be an error in Ruby 3.0
+    10 |takes_kwargs(99, arghash)
+                         ^^^^^^^
+    test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: Note: disabling `--error-kwarg-hash-without-splat` will suppress this error
     10 |takes_kwargs(99, arghash)
                          ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
