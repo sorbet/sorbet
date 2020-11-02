@@ -60,13 +60,13 @@ public:
     static bool isFileOrClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym);
 
     // Returns a core::Loc whose start and end positions containt the bounds of the method sym.
-    static core::Loc getMethodLineBounds(const core::GlobalState &gs, core::SymbolRef sym, core::Loc declLoc,
+    static core::Loc getMethodLineBounds(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef file,
                                          core::LocOffsets offsets);
 
     // Returns a core::Loc whose begin pos contains the start line of the method.
     static core::Loc getMethodStart(const core::GlobalState &gs, core::SymbolRef sym) {
         auto loc = sym.data(gs)->loc();
-        return getMethodLineBounds(gs, sym, loc, loc.offsets());
+        return getMethodLineBounds(gs, sym, loc.file(), loc.offsets());
     }
 
     static llvm::GlobalVariable *getStaticInitLocalsOffset(CompilerState &cs, core::SymbolRef sym);
@@ -75,7 +75,7 @@ public:
     static llvm::Function *lookupFunction(CompilerState &cs, core::SymbolRef sym);
     static llvm::Function *getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym);
     static llvm::Function *cleanFunctionBody(CompilerState &cs, llvm::Function *func);
-    static llvm::Function *getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::Loc loc);
+    static llvm::Function *getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::LocOffsets loc);
     static llvm::Function *getOrCreateFunction(CompilerState &cs, core::SymbolRef sym);
 
     static llvm::Function *getInitFunction(CompilerState &cs, core::SymbolRef sym);

@@ -135,8 +135,7 @@ public:
     };
 
     virtual void typecheck(const core::GlobalState &gs, cfg::CFG &cfg, ast::MethodDef &md) const override {
-        auto loc = md.declLoc;
-        if (!shouldCompile(gs, loc.file())) {
+        if (!shouldCompile(gs, cfg.file)) {
             return;
         }
 
@@ -163,7 +162,7 @@ public:
         // TODO: Figure out why this isn't true
         // ENFORCE(absl::c_find(cfg.symbol.data(gs)->locs(), md->loc) != cfg.symbol.data(gs)->locs().end(),
         // loc.toString(gs));
-        ENFORCE(loc.file().exists());
+        ENFORCE(cfg.file.exists());
         if (!module) {
             ENFORCE(threadState->globalConstructorsEntry == nullptr);
             ENFORCE(debug == nullptr);
@@ -181,14 +180,14 @@ public:
 
             // NOTE: we use C here because our generated functions follow its abi
             auto language = llvm::dwarf::DW_LANG_C;
-            auto filename = loc.file().data(gs).path();
+            auto filename = cfg.file.data(gs).path();
             auto isOptimized = false;
             auto runtimeVersion = 0;
             compUnit = debug->createCompileUnit(
                 language, debug->createFile(llvm::StringRef(filename.data(), filename.size()), "."), "Sorbet LLVM",
                 isOptimized, "", runtimeVersion);
 
-            threadState->file = loc.file();
+            threadState->file = cfg.file;
 
             {
                 auto linkageType = llvm::Function::InternalLinkage;
@@ -204,7 +203,7 @@ public:
             }
 
         } else {
-            ENFORCE(threadState->file == loc.file());
+            ENFORCE(threadState->file == cfg.file);
             ENFORCE(threadState->globalConstructorsEntry != nullptr);
         }
         ENFORCE(threadState->file.exists());
@@ -213,7 +212,7 @@ public:
                                       threadState->globalConstructorsEntry);
         try {
             compiler::IREmitter::run(state, cfg, md);
-            string fileName = objectFileName(gs, loc.file());
+            string fileName = objectFileName(gs, cfg.file);
             compiler::IREmitter::buildInitFor(state, cfg.symbol, fileName);
         } catch (sorbet::compiler::AbortCompilation &) {
             threadState->aborted = true;

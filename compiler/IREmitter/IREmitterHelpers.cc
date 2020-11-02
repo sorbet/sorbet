@@ -744,12 +744,12 @@ bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &cs, core
            core::Names::staticInit();
 }
 
-core::Loc IREmitterHelpers::getMethodLineBounds(const core::GlobalState &gs, core::SymbolRef sym, core::Loc declLoc,
+core::Loc IREmitterHelpers::getMethodLineBounds(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef file,
                                                 core::LocOffsets offsets) {
     if (IREmitterHelpers::isFileOrClassStaticInit(gs, sym)) {
-        return core::Loc(declLoc.file(), core::LocOffsets{0, offsets.endLoc});
+        return core::Loc(file, core::LocOffsets{0, offsets.endLoc});
     } else {
-        return core::Loc(declLoc.file(), offsets);
+        return core::Loc(file, offsets);
     }
 }
 
@@ -806,7 +806,7 @@ llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::S
                                        getFunctionLinkageType(cs, sym), true);
 }
 
-llvm::Function *IREmitterHelpers::getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::Loc loc) {
+llvm::Function *IREmitterHelpers::getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::LocOffsets loc) {
     ENFORCE(sym.data(cs)->name == core::Names::staticInit(), "use general helper instead");
     auto name = IREmitterHelpers::getFunctionName(cs, sym) + "L" + to_string(loc.beginPos());
     return getOrCreateFunctionWithName(cs, name, cs.getRubyFFIType(), getFunctionLinkageType(cs, sym), true);

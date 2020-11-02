@@ -109,7 +109,7 @@ public:
                 builder.CreateCall(cs.module->getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
             }
         }
-        builder.CreateCall(IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, core::Loc(cs.file, send->receiverLoc)),
+        builder.CreateCall(IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc),
                            {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
                             Payload::getRubyConstant(cs, sym, builder)});

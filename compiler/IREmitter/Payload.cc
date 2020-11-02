@@ -667,7 +667,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
     // We are building a new function. We should redefine where do function initializers go
     auto cs1 = cs.withFunctionEntry(bei);
 
-    auto loc = IREmitterHelpers::getMethodLineBounds(cs, md.symbol, md.declLoc, md.loc);
+    auto loc = IREmitterHelpers::getMethodLineBounds(cs, md.symbol, cs.file, md.loc);
     auto *iseqType = getIseqType(cs1, builder, irctx, rubyBlockId);
     auto [funcName, parent] = getIseqInfo(cs1, builder, irctx, md, rubyBlockId);
     auto funcNameId = Payload::idIntern(cs1, builder, funcName);
