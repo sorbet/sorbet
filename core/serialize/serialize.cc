@@ -35,8 +35,7 @@ public:
     static void pickle(Pickler &p, const Symbol &what);
     static void pickle(Pickler &p, const ast::TreePtr &what);
     static void pickle(Pickler &p, core::LocOffsets loc);
-    static void pickleWithFile(Pickler &p, core::Loc loc);
-    static void pickleWithoutFile(Pickler &p, core::Loc loc);
+    static void pickle(Pickler &p, core::Loc loc);
     static void pickle(Pickler &p, shared_ptr<const FileHash> fh);
 
     static shared_ptr<File> unpickleFile(UnPickler &p);
@@ -46,7 +45,6 @@ public:
     static Symbol unpickleSymbol(UnPickler &p, const GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
     static u4 unpickleGSUUID(UnPickler &p);
-    static Loc unpickleLocInFile(UnPickler &p, FileRef file);
     static LocOffsets unpickleLocOffsets(UnPickler &p);
     static Loc unpickleLoc(UnPickler &p);
     static ast::TreePtr unpickleExpr(UnPickler &p, const GlobalState &, FileRef file);
@@ -519,7 +517,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
 void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
     p.putU4(a.name._id);
     p.putU4(a.rebind.rawId());
-    pickleWithFile(p, a.loc);
+    pickle(p, a.loc);
     p.putU1(a.flags.toU1());
     pickle(p, a.type);
 }
@@ -574,7 +572,7 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     pickle(p, what.resultType);
     p.putU4(what.locs().size());
     for (auto &loc : what.locs()) {
-        pickleWithFile(p, loc);
+        pickle(p, loc);
     }
 }
 
@@ -842,11 +840,8 @@ void SerializerImpl::pickle(Pickler &p, LocOffsets loc) {
     p.putU4(loc.endLoc);
 }
 
-void SerializerImpl::pickleWithFile(Pickler &p, Loc loc) {
+void SerializerImpl::pickle(Pickler &p, Loc loc) {
     p.putU4(loc.file().id());
-    pickle(p, loc.storage.offsets);
-}
-void SerializerImpl::pickleWithoutFile(Pickler &p, Loc loc) {
     pickle(p, loc.storage.offsets);
 }
 
@@ -854,14 +849,6 @@ Loc SerializerImpl::unpickleLoc(UnPickler &p) {
     FileRef file(p.getU4());
     auto offsets = unpickleLocOffsets(p);
     return Loc(file, offsets);
-}
-
-Loc SerializerImpl::unpickleLocInFile(UnPickler &p, FileRef file) {
-    Loc loc;
-    LocOffsets offsets = unpickleLocOffsets(p);
-    loc.setFile(file);
-    loc.storage.offsets = offsets;
-    return loc;
 }
 
 LocOffsets SerializerImpl::unpickleLocOffsets(UnPickler &p) {
@@ -1072,7 +1059,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
         case ast::Tag::ClassDef: {
             auto &c = ast::cast_tree_nonnull<ast::ClassDef>(what);
             pickle(p, c.loc);
-            pickleWithoutFile(p, c.declLoc);
+            pickle(p, c.declLoc);
             p.putU1(static_cast<u2>(c.kind));
             p.putU4(c.symbol.rawId());
             p.putU4(c.ancestors.size());
@@ -1094,7 +1081,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
         case ast::Tag::MethodDef: {
             auto &c = ast::cast_tree_nonnull<ast::MethodDef>(what);
             pickle(p, c.loc);
-            pickleWithoutFile(p, c.declLoc);
+            pickle(p, c.declLoc);
             u1 flags;
             static_assert(sizeof(flags) == sizeof(c.flags));
             // Can replace this with std::bit_cast in C++20
@@ -1337,7 +1324,7 @@ ast::TreePtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalS
 
         case ast::Tag::ClassDef: {
             auto loc = unpickleLocOffsets(p);
-            auto declLoc = unpickleLocInFile(p, file);
+            auto declLoc = unpickleLocOffsets(p);
             auto kind = p.getU1();
             auto symbol = SymbolRef::fromRaw(p.getU4());
             auto ancestorsSize = p.getU4();
@@ -1367,7 +1354,7 @@ ast::TreePtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalS
         }
         case ast::Tag::MethodDef: {
             auto loc = unpickleLocOffsets(p);
-            auto declLoc = unpickleLocInFile(p, file);
+            auto declLoc = unpickleLocOffsets(p);
             auto flagsU1 = p.getU1();
             ast::MethodDef::Flags flags;
             static_assert(sizeof(flags) == sizeof(flagsU1));

@@ -106,10 +106,9 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
         }
         newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
 
-        body.emplace_back(
-            ast::MK::SyntheticMethod0(symLoc, core::Loc(ctx.file, symLoc), name, ast::MK::RaiseUnimplemented(loc)));
-        body.emplace_back(ast::MK::SyntheticMethod1(symLoc, core::Loc(ctx.file, symLoc), name.addEq(ctx),
-                                                    ast::MK::Local(symLoc, name), ast::MK::RaiseUnimplemented(loc)));
+        body.emplace_back(ast::MK::SyntheticMethod0(symLoc, symLoc, name, ast::MK::RaiseUnimplemented(loc)));
+        body.emplace_back(ast::MK::SyntheticMethod1(symLoc, symLoc, name.addEq(ctx), ast::MK::Local(symLoc, name),
+                                                    ast::MK::RaiseUnimplemented(loc)));
     }
 
     // Elem = type_member(fixed: T.untyped)
@@ -139,16 +138,15 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
     }
 
     body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
-    body.emplace_back(ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), core::Names::initialize(),
-                                               std::move(newArgs), ast::MK::RaiseUnimplemented(loc)));
+    body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
+                                               ast::MK::RaiseUnimplemented(loc)));
 
     ast::ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
                                                        core::Names::Constants::Struct()));
 
     vector<ast::TreePtr> stats;
-    stats.emplace_back(
-        ast::MK::Class(loc, core::Loc(ctx.file, loc), std::move(asgn->lhs), std::move(ancestors), std::move(body)));
+    stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
     return stats;
 }
 

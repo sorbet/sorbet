@@ -245,8 +245,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
                 }
             }
 
-            stats.emplace_back(
-                ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), name, ast::MK::Instance(argLoc, varName)));
+            stats.emplace_back(ast::MK::SyntheticMethod0(loc, loc, name, ast::MK::Instance(argLoc, varName)));
         }
     }
 
@@ -279,8 +278,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
             } else {
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
             }
-            stats.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), setName,
-                                                         ast::MK::Local(argLoc, name), move(body)));
+            stats.emplace_back(ast::MK::SyntheticMethod1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body)));
         }
     }
 

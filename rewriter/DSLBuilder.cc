@@ -85,8 +85,7 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
             auto default_ = ast::MK::UntypedNil(loc);
             arg = ast::MK::OptionalArg(loc, move(arg), move(default_));
         }
-        auto defSelfProp =
-            ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), name, move(arg), ast::MK::EmptyTree());
+        auto defSelfProp = ast::MK::SyntheticMethod1(loc, loc, name, move(arg), ast::MK::EmptyTree());
         ast::cast_tree<ast::MethodDef>(defSelfProp)->flags.isSelfMethod = true;
         stats.emplace_back(move(defSelfProp));
     }
@@ -99,15 +98,13 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
         // def self.get_<prop>
         core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx)->show(ctx));
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type)));
-        auto defSelfGetProp =
-            ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), getName, {}, ast::MK::RaiseUnimplemented(loc));
+        auto defSelfGetProp = ast::MK::SyntheticMethod(loc, loc, getName, {}, ast::MK::RaiseUnimplemented(loc));
         ast::cast_tree<ast::MethodDef>(defSelfGetProp)->flags.isSelfMethod = true;
         stats.emplace_back(move(defSelfGetProp));
 
         // def <prop>()
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type)));
-        stats.emplace_back(
-            ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), name, {}, ast::MK::RaiseUnimplemented(loc)));
+        stats.emplace_back(ast::MK::SyntheticMethod(loc, loc, name, {}, ast::MK::RaiseUnimplemented(loc)));
     }
 
     return stats;

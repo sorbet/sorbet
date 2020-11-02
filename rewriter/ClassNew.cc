@@ -78,8 +78,7 @@ vector<ast::TreePtr> ClassNew::run(core::MutableContext ctx, ast::Assign *asgn) 
     }
 
     vector<ast::TreePtr> stats;
-    stats.emplace_back(
-        ast::MK::Class(loc, core::Loc(ctx.file, loc), std::move(asgn->lhs), std::move(ancestors), std::move(body)));
+    stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
     return stats;
 }
 

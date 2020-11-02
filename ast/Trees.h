@@ -309,7 +309,7 @@ template <class To> const To &cast_tree_nonnull(const TreePtr &what) {
 TREE(ClassDef) : public Expression {
 public:
     const core::LocOffsets loc;
-    core::Loc declLoc;
+    core::LocOffsets declLoc;
     core::SymbolRef symbol;
 
     enum class Kind : u1 {
@@ -330,8 +330,8 @@ public:
     ANCESTORS_store ancestors;
     ANCESTORS_store singletonAncestors;
 
-    ClassDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, TreePtr name, ANCESTORS_store ancestors,
-             RHS_store rhs, ClassDef::Kind kind);
+    ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::SymbolRef symbol, TreePtr name,
+             ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
 
     TreePtr deepCopy() const;
 
@@ -341,12 +341,12 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(ClassDef, 136, 8);
+CheckSize(ClassDef, 128, 8);
 
 TREE(MethodDef) : public Expression {
 public:
     const core::LocOffsets loc;
-    core::Loc declLoc;
+    core::LocOffsets declLoc;
     core::SymbolRef symbol;
 
     TreePtr rhs;
@@ -367,8 +367,8 @@ public:
 
     Flags flags;
 
-    MethodDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
-              TreePtr rhs, Flags flags);
+    MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::SymbolRef symbol, core::NameRef name,
+              ARGS_store args, TreePtr rhs, Flags flags);
 
     TreePtr deepCopy() const;
 

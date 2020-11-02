@@ -124,8 +124,7 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
         args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
         args.emplace_back(ast::make_tree<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
 
-        methodStubs.push_back(
-            ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), methodName, std::move(args), ast::MK::EmptyTree()));
+        methodStubs.push_back(ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::EmptyTree()));
     }
 
     return methodStubs;

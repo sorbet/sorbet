@@ -363,7 +363,7 @@ struct PackageInfoFinder {
 
         // Use the loc of the `export_methods` call so `include` errors goes to the right place.
         classDef.rhs.emplace_back(ast::MK::Module(
-            exportMethodsLoc, core::Loc(ctx.file, exportMethodsLoc),
+            exportMethodsLoc, exportMethodsLoc,
             name2Expr(core::Names::Constants::PackageMethods(),
                       name2Expr(this->info->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry()))),
             {}, std::move(includeStatements)));
@@ -580,7 +580,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 // Create a module for the imported package that sets up constant references to exported items.
                 // Use proper loc information on the module name so that `import Foo` displays in the results of LSP
                 // Find All References on `Foo`.
-                importedPackages.emplace_back(ast::MK::Module(imported.loc, core::Loc(ctx.file, imported.loc),
+                importedPackages.emplace_back(ast::MK::Module(imported.loc, imported.loc,
                                                               imported.fullName.toLiteral(imported.loc), {},
                                                               std::move(exportedItemsCopy)));
             }
@@ -588,7 +588,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
     }
 
     auto packageNamespace =
-        ast::MK::Module(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
+        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
                         name2Expr(package->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
                         std::move(importedPackages));
 
@@ -605,7 +605,7 @@ ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, cor
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     auto moduleWrapper =
-        ast::MK::Module(core::LocOffsets::none(), core::Loc(ctx.file, core::LocOffsets::none()),
+        ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
                         name2Expr(packageMangledName, name2Expr(core::Names::Constants::PackageRegistry())), {},
                         std::move(rootKlass.rhs));
     rootKlass.rhs.clear();

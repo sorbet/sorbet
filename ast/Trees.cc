@@ -374,7 +374,7 @@ bool isa_declaration(const TreePtr &what) {
  * Desugar string concatenation into series of .to_s calls and string concatenations
  */
 
-ClassDef::ClassDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, TreePtr name,
+ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::SymbolRef symbol, TreePtr name,
                    ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind)
     : loc(loc), declLoc(declLoc), symbol(symbol), kind(kind), rhs(std::move(rhs)), name(std::move(name)),
       ancestors(std::move(ancestors)) {
@@ -384,7 +384,7 @@ ClassDef::ClassDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symb
     _sanityCheck();
 }
 
-MethodDef::MethodDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name,
+MethodDef::MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::SymbolRef symbol, core::NameRef name,
                      ARGS_store args, TreePtr rhs, Flags flags)
     : loc(loc), declLoc(declLoc), symbol(symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), flags(flags) {
     categoryCounterInc("trees", "methoddef");

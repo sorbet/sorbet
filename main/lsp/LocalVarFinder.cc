@@ -53,8 +53,9 @@ ast::TreePtr LocalVarFinder::preTransformClassDef(core::Context ctx, ast::TreePt
     ENFORCE(classDef.symbol.exists());
     ENFORCE(classDef.symbol != core::Symbols::todo());
 
-    auto currentMethod = classDef.symbol == core::Symbols::root() ? ctx.state.lookupStaticInitForFile(classDef.declLoc)
-                                                                  : ctx.state.lookupStaticInitForClass(classDef.symbol);
+    auto currentMethod = classDef.symbol == core::Symbols::root()
+                             ? ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, classDef.declLoc))
+                             : ctx.state.lookupStaticInitForClass(classDef.symbol);
 
     this->methodStack.emplace_back(currentMethod);
 

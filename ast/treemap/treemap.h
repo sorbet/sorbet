@@ -269,8 +269,7 @@ private:
         // We intentionally do not walk v->ancestors nor v->singletonAncestors.
         // They are guaranteed to be simple trees in the desugarer.
         for (auto &def : cast_tree<ClassDef>(v)->rhs) {
-            def = mapIt(std::move(def),
-                        ctx.withOwner(cast_tree<ClassDef>(v)->symbol).withFile(cast_tree<ClassDef>(v)->declLoc.file()));
+            def = mapIt(std::move(def), ctx.withOwner(cast_tree<ClassDef>(v)->symbol).withFile(ctx.file));
         }
 
         if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>::value) {
@@ -292,9 +291,8 @@ private:
                 optArg->default_ = mapIt(std::move(optArg->default_), ctx.withOwner(cast_tree<MethodDef>(v)->symbol));
             }
         }
-        cast_tree<MethodDef>(v)->rhs =
-            mapIt(std::move(cast_tree<MethodDef>(v)->rhs),
-                  ctx.withOwner(cast_tree<MethodDef>(v)->symbol).withFile(cast_tree<MethodDef>(v)->declLoc.file()));
+        cast_tree<MethodDef>(v)->rhs = mapIt(std::move(cast_tree<MethodDef>(v)->rhs),
+                                             ctx.withOwner(cast_tree<MethodDef>(v)->symbol).withFile(ctx.file));
 
         if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
             return PostPonePostTransform_MethodDef<FUNC, CTX, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(

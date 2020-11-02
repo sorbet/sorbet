@@ -219,8 +219,8 @@ public:
         return make_tree<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::String(), value));
     }
 
-    static TreePtr Method(core::LocOffsets loc, core::Loc declLoc, core::NameRef name, MethodDef::ARGS_store args,
-                          TreePtr rhs) {
+    static TreePtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
+                          MethodDef::ARGS_store args, TreePtr rhs) {
         if (args.empty() || (!isa_tree<ast::Local>(args.back()) && !isa_tree<ast::BlockArg>(args.back()))) {
             auto blkLoc = core::LocOffsets::none();
             args.emplace_back(make_tree<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
@@ -229,39 +229,39 @@ public:
         return make_tree<MethodDef>(loc, declLoc, core::Symbols::todo(), name, std::move(args), std::move(rhs), flags);
     }
 
-    static TreePtr SyntheticMethod(core::LocOffsets loc, core::Loc declLoc, core::NameRef name,
+    static TreePtr SyntheticMethod(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                                    MethodDef::ARGS_store args, TreePtr rhs) {
         auto mdef = Method(loc, declLoc, name, std::move(args), std::move(rhs));
         cast_tree<MethodDef>(mdef)->flags.isRewriterSynthesized = true;
         return mdef;
     }
 
-    static TreePtr SyntheticMethod0(core::LocOffsets loc, core::Loc declLoc, core::NameRef name, TreePtr rhs) {
+    static TreePtr SyntheticMethod0(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name, TreePtr rhs) {
         MethodDef::ARGS_store args;
         return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
-    static TreePtr SyntheticMethod1(core::LocOffsets loc, core::Loc declLoc, core::NameRef name, TreePtr arg0,
+    static TreePtr SyntheticMethod1(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name, TreePtr arg0,
                                     TreePtr rhs) {
         MethodDef::ARGS_store args;
         args.emplace_back(std::move(arg0));
         return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
-    static TreePtr ClassOrModule(core::LocOffsets loc, core::Loc declLoc, TreePtr name,
+    static TreePtr ClassOrModule(core::LocOffsets loc, core::LocOffsets declLoc, TreePtr name,
                                  ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs, ClassDef::Kind kind) {
         return make_tree<ClassDef>(loc, declLoc, core::Symbols::todo(), std::move(name), std::move(ancestors),
                                    std::move(rhs), kind);
     }
 
-    static TreePtr Class(core::LocOffsets loc, core::Loc declLoc, TreePtr name, ClassDef::ANCESTORS_store ancestors,
-                         ClassDef::RHS_store rhs) {
+    static TreePtr Class(core::LocOffsets loc, core::LocOffsets declLoc, TreePtr name,
+                         ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
         return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
                                  ClassDef::Kind::Class);
     }
 
-    static TreePtr Module(core::LocOffsets loc, core::Loc declLoc, TreePtr name, ClassDef::ANCESTORS_store ancestors,
-                          ClassDef::RHS_store rhs) {
+    static TreePtr Module(core::LocOffsets loc, core::LocOffsets declLoc, TreePtr name,
+                          ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
         return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
                                  ClassDef::Kind::Module);
     }

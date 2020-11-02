@@ -407,8 +407,8 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
 
         ast::TreePtr arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        nodes.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), fkMethod, std::move(arg),
-                                                     ast::MK::RaiseUnimplemented(loc)));
+        nodes.emplace_back(
+            ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
 
         // sig {params(opts: T.untyped).returns($foreign)}
         nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
@@ -421,8 +421,8 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
         auto fkMethodBang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
         ast::TreePtr arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        nodes.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), fkMethodBang, std::move(arg2),
-                                                     ast::MK::RaiseUnimplemented(loc)));
+        nodes.emplace_back(
+            ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::RaiseUnimplemented(loc)));
     }
 
     return nodes;
@@ -505,8 +505,8 @@ vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffset
 
     vector<ast::TreePtr> result;
     result.emplace_back(ast::MK::SigVoid(klassLoc, std::move(sigArgs)));
-    result.emplace_back(ast::MK::SyntheticMethod(klassLoc, core::Loc(ctx.file, klassLoc), core::Names::initialize(),
-                                                 std::move(args), std::move(body)));
+    result.emplace_back(
+        ast::MK::SyntheticMethod(klassLoc, klassLoc, core::Names::initialize(), std::move(args), std::move(body)));
     return result;
 }
 
