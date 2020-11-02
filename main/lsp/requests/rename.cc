@@ -45,20 +45,17 @@ RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef 
 
         auto loc = location->range->toLoc(gs, fref);
         auto source = loc.source(gs);
+        // TODO(soam): this doesn't handle other ways of defining methods, like attr_reader etc
         if (absl::StartsWith(source, "def")) {
             auto newdef = absl::StrReplaceAll(source, {{originalName, newName}});
             edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newdef));
         } else {
-            // Changes: A::B.c.originalName -> A::B.c.newName
+            // Changes: A::B.c.originalName(x) -> A::B.c.newName(x)
             std::vector<std::string> strs = absl::StrSplit(source, "::");
             std::vector<std::string> dots = absl::StrSplit(strs[strs.size() - 1], ".");
-            if (dots[dots.size() - 1] == originalName) {
-                dots[dots.size() - 1] = string(newName);
-                strs[strs.size() - 1] = absl::StrJoin(dots, ".");
-                edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), absl::StrJoin(strs, "::")));
-            } else {
-                // TODO(soam): error? what should we do here?
-            }
+            dots[dots.size() - 1] = absl::StrReplaceAll(dots[dots.size() - 1], {{originalName, newName}});
+            strs[strs.size() - 1] = absl::StrJoin(dots, ".");
+            edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), absl::StrJoin(strs, "::")));
         }
     }
 

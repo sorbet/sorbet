@@ -3,20 +3,20 @@
 
 module M
   class Foo
-    def bar
+    def bar(a)
 #     ^ apply-rename: [A] newName: baz
     end
 
     def caller
-      bar
+      bar(1)
     end
   end
 end
 
 f = M::Foo.new
-f.bar
+f.bar(2)
 
-M::Foo.new.bar
+M::Foo.new.bar 3
 
 class Unrelated
   # this should be left unchanged
