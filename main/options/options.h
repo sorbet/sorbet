@@ -211,6 +211,7 @@ struct Options {
     bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
     bool lspSignatureHelpEnabled = false;
+    bool lspGoToImplementationEnabled = true;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;
