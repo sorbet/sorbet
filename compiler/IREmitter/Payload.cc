@@ -70,7 +70,7 @@ llvm::Value *Payload::longToRubyValue(CompilerState &cs, llvm::IRBuilderBase &bu
 
 llvm::Value *Payload::doubleToRubyValue(CompilerState &cs, llvm::IRBuilderBase &builder, double num) {
     return builderCast(builder).CreateCall(cs.module->getFunction("sorbet_doubleToRubyValue"),
-                                           {llvm::ConstantFP::get(llvm::Type::getDoubleTy(cs), num)}, "rawRubyInt");
+                                           {llvm::ConstantFP::get(llvm::Type::getDoubleTy(cs), num)}, "rawRubyDouble");
 }
 
 llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &build, std::string_view str,
