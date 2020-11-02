@@ -857,4 +857,23 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build,
     builder.CreateRet(retVal);
 }
 
+void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *value,
+                                    const core::TypePtr &expectedType, std::string_view description) {
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+    auto passedTypeTest = Payload::typeTest(cs, builder, value, expectedType);
+    auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
+
+    auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
+
+    auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
+    builder.CreateCondBr(expected, successBlock, failBlock);
+    builder.SetInsertPoint(failBlock);
+    // this will throw exception
+    builder.CreateCall(
+        cs.module->getFunction("sorbet_cast_failure"),
+        {value, Payload::toCString(cs, description, builder), Payload::toCString(cs, expectedType->show(cs), builder)});
+    builder.CreateUnreachable();
+    builder.SetInsertPoint(successBlock);
+}
+
 } // namespace sorbet::compiler

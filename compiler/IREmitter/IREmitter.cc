@@ -650,22 +650,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         auto local = irctx.rubyBlockArgs[0][i->argId];
                         auto var = Payload::varGet(cs, local, builder, irctx, 0);
                         if (auto &expectedType = argInfo.type) {
-                            auto passedTypeTest = Payload::typeTest(cs, builder, var, expectedType);
-                            auto successBlock =
-                                llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
-
-                            auto failBlock =
-                                llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
-
-                            auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
-                            builder.CreateCondBr(expected, successBlock, failBlock);
-                            builder.SetInsertPoint(failBlock);
-                            // this will throw exception
-                            builder.CreateCall(cs.module->getFunction("sorbet_cast_failure"),
-                                               {var, Payload::toCString(cs, "sig", builder),
-                                                Payload::toCString(cs, expectedType->show(cs), builder)});
-                            builder.CreateUnreachable();
-                            builder.SetInsertPoint(successBlock);
+                            IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "sig");
                         }
                     },
                     [&](cfg::LoadYieldParams *i) {
@@ -682,22 +667,8 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         auto skipTypeTest = bind.bind.variable.data(cfg) == core::LocalVariable::selfVariable();
 
                         if (!skipTypeTest) {
-                            auto passedTypeTest = Payload::typeTest(cs, builder, val, bind.bind.type);
-                            auto successBlock =
-                                llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
-
-                            auto failBlock =
-                                llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
-
-                            auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
-                            builder.CreateCondBr(expected, successBlock, failBlock);
-                            builder.SetInsertPoint(failBlock);
-                            // this will throw exception
-                            builder.CreateCall(cs.module->getFunction("sorbet_cast_failure"),
-                                               {val, Payload::toCString(cs, i->cast.data(cs)->shortName(cs), builder),
-                                                Payload::toCString(cs, bind.bind.type->show(cs), builder)});
-                            builder.CreateUnreachable();
-                            builder.SetInsertPoint(successBlock);
+                            IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type,
+                                                           i->cast.data(cs)->shortName(cs));
                         }
 
                         if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
@@ -789,21 +760,7 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, void_);
         return;
     }
-    auto passedTypeTest = Payload::typeTest(cs, builder, var, expectedType);
-    auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
-
-    auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
-
-    auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
-    builder.CreateCondBr(expected, successBlock, failBlock);
-    builder.SetInsertPoint(failBlock);
-    // this will throw exception
-    builder.CreateCall(cs.module->getFunction("sorbet_cast_failure"),
-                       {var, Payload::toCString(cs, "Return value", builder),
-                        Payload::toCString(cs, expectedType->show(cs), builder)});
-    builder.CreateUnreachable();
-    builder.SetInsertPoint(successBlock);
-
+    IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "Return value");
     IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, var);
 }
 

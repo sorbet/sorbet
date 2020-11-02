@@ -109,6 +109,11 @@ public:
 
     static void emitReturn(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                            int rubyBlockId, llvm::Value *retVal);
+
+    // Emit a type test.  The insertion point of the builder is set to the start of
+    // the block following a successful test.
+    static void emitTypeTest(CompilerState &gs, llvm::IRBuilderBase &builder, llvm::Value *value,
+                             const core::TypePtr &expectedType, std::string_view description);
 };
 } // namespace sorbet::compiler
 #endif
