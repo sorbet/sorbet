@@ -1,6 +1,7 @@
 #include "main/lsp/requests/rename.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_join.h"
+#include "absl/strings/str_replace.h"
 #include "absl/strings/str_split.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/ShowOperation.h"
@@ -44,9 +45,21 @@ RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef 
 
         auto loc = location->range->toLoc(gs, fref);
         auto source = loc.source(gs);
-        std::vector<std::string> strs = absl::StrSplit(source, "::");
-        strs[strs.size() - 1] = string(newName);
-        edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), absl::StrJoin(strs, "::")));
+        if (absl::StartsWith(source, "def")) {
+            auto newdef = absl::StrReplaceAll(source, {{originalName, newName}});
+            edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newdef));
+        } else {
+            // Changes: A::B.c.originalName -> A::B.c.newName
+            std::vector<std::string> strs = absl::StrSplit(source, "::");
+            std::vector<std::string> dots = absl::StrSplit(strs[strs.size() - 1], ".");
+            if (dots[dots.size() - 1] == originalName) {
+                dots[dots.size() - 1] = string(newName);
+                strs[strs.size() - 1] = absl::StrJoin(dots, ".");
+                edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), absl::StrJoin(strs, "::")));
+            } else {
+                // TODO(soam): error? what should we do here?
+            }
+        }
     }
 
     vector<unique_ptr<TextDocumentEdit>> textDocEdits;
@@ -103,15 +116,24 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             auto resp = move(queryResponses[0]);
             // Only supports rename requests from constants and class definitions.
             if (auto constResp = resp->isConstant()) {
+                // Sanity check the text.
+                if (islower(params->newName[0])) {
+                    response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                                 "Constant names must begin with an uppercase letter.");
+                    return response;
+                }
                 if (isValidRenameLocation(constResp->symbol, gs, response)) {
                     response->result = getRenameEdits(typechecker, constResp->symbol, params->newName);
                 }
             } else if (auto defResp = resp->isDefinition()) {
-                if (defResp->symbol.data(gs)->isClassOrModule()) {
+                if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
                     if (isValidRenameLocation(defResp->symbol, gs, response)) {
                         response->result = getRenameEdits(typechecker, defResp->symbol, params->newName);
                     }
                 }
+            } else if (auto sendResp = resp->isSend()) {
+                auto method = sendResp->dispatchResult->main.method;
+                response->result = getRenameEdits(typechecker, method, params->newName);
             }
         }
     }

@@ -1,11 +1,24 @@
 # typed: true
 # frozen_string_literal: true
 
-class Foo
-  def baz
+module M
+  class Foo
+    def baz
 #     ^ apply-rename: [A] newName: baz
+    end
+
+    def caller
+      baz
+    end
   end
 end
 
-f = Foo.new
+f = M::Foo.new
 f.baz
+
+M::Foo.new.baz
+
+class Unrelated
+  # this should be left unchanged
+  def bar; end
+end
