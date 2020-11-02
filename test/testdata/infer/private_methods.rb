@@ -58,12 +58,10 @@ TestChild.new.using_symbol # error: Non-private call to private method `Test#usi
 
 T.unsafe(Test.new).using_symbol
 
-# TODO: The following methods should also error out. The do not currently do that since the the IR
-# of these calls are through the magic calls: splat-call, splat-and-block-call and block-call.
-# They don't contain the visibility information of the original method.
-Test.new.splat_call(*T.unsafe(nil))
-Test.new.splat_and_block_call(*[1, 'a'], &nil)
-Test.new.block_call(&nil)
+# TODO: The following methods should also error out. They currently do not do that due to issues with the instrinsics.
+Test.new.splat_call(*T.unsafe(nil)) # Currently no Error, since T.unsafe makes Magic_callWithSplat#apply return prematurely due to the untyped argument.
+Test.new.splat_and_block_call(*[1, 'a'], &nil) # Currently no Error, since the nil block makes Magic_callWithSplatAndBlock return prematurely.
+Test.new.block_call(&nil) # Currently no Error, since the nil block makes Magic_callWithBlock return prematurely.
 
 # TODO: The following method should contain an error. Sorbet currently does not support setting method
 # visibility using the private/protected keywords that affect the visibility of subsequent methods.

@@ -56,11 +56,8 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
         return empty;
     }
 
-    ast::Hash *opts = nullptr;
-    if (send->args.size() > 2) {
-        opts = ast::cast_tree<ast::Hash>(send->args[2]);
-    }
-    if (opts != nullptr) {
+    ast::TreePtr optsTree = ASTUtil::mkKwArgsHash(send);
+    if (auto *opts = ast::cast_tree<ast::Hash>(optsTree)) {
         if (ASTUtil::hasHashValue(ctx, *opts, core::Names::default_())) {
             nilable = false;
         }
@@ -85,7 +82,7 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
                                          ast::MK::Constant(loc, core::Symbols::NilClass())));
         auto arg = ast::MK::Local(nameLoc, name);
         if (implied) {
-            auto default_ = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
+            auto default_ = ast::MK::UntypedNil(loc);
             arg = ast::MK::OptionalArg(loc, move(arg), move(default_));
         }
         auto defSelfProp =
@@ -96,7 +93,7 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
 
     if (!skipGetter) {
         if (nilable) {
-            auto tyloc = type->loc;
+            auto tyloc = type.loc();
             type = ast::MK::Nilable(tyloc, move(type));
         }
         // def self.get_<prop>

@@ -1,7 +1,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Default><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"foo" => <emptyTree>::<C Integer>}).void()
+      <self>.params(:"foo", <emptyTree>::<C Integer>).void()
     end
 
     def initialize<<C <todo sym>>>(foo: = 3, &<blk>)
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).returns(<emptyTree>::<C Integer>)
+      <self>.returns(<emptyTree>::<C Integer>)
     end
 
     def foo<<C <todo sym>>>(&<blk>)
@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"arg0" => <emptyTree>::<C Integer>}).returns(<emptyTree>::<C Integer>)
+      <self>.params(:"arg0", <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
 
-    <self>.prop(:"foo", <emptyTree>::<C Integer>, {:"default" => 3, :"without_accessors" => true})
+    <self>.prop(:"foo", <emptyTree>::<C Integer>, :"default", 3, :"without_accessors", true)
 
     ::Sorbet::Private::Static.keep_def(<self>, :"foo")
 
@@ -38,15 +38,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Default>.new().foo())
 
-  <emptyTree>::<C Default>.new({:"foo" => "no"})
+  <emptyTree>::<C Default>.new(:"foo", "no")
 
-  <emptyTree>::<C Default>.new({:"foo" => 3, :"bar" => 4})
+  <emptyTree>::<C Default>.new(:"foo", 3, :"bar", 4)
 
-  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Default>.new({:"foo" => 3}).foo())
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Default>.new(:"foo", 3).foo())
 
   class <emptyTree>::<C Bad><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({}).void()
+      <self>.void()
     end
 
     def initialize<<C <todo sym>>>(&<blk>)

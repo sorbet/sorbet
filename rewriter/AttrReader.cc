@@ -32,7 +32,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Tre
             if (validAttr) {
                 res = nameRef;
             } else {
-                if (auto e = ctx.beginError(name->loc, core::errors::Rewriter::BadAttrArg)) {
+                if (auto e = ctx.beginError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
                     e.setHeader("Bad attribute name \"{}\"", absl::CEscape(shortName));
                 }
                 res = core::Names::empty();
@@ -41,7 +41,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Tre
         }
     }
     if (!res.exists()) {
-        if (auto e = ctx.beginError(name->loc, core::errors::Rewriter::BadAttrArg)) {
+        if (auto e = ctx.beginError(name.loc(), core::errors::Rewriter::BadAttrArg)) {
             e.setHeader("arg must be a Symbol or String");
         }
     }
@@ -52,7 +52,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Tre
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
 // users, but we don't know that information in the Rewriter passes.
 bool isT(const ast::TreePtr &expr) {
-    auto *t = ast::cast_tree_const<ast::UnresolvedConstantLit>(expr);
+    auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (t == nullptr || t->cnst != core::Names::Constants::T()) {
         return false;
     }
@@ -60,12 +60,12 @@ bool isT(const ast::TreePtr &expr) {
     if (ast::isa_tree<ast::EmptyTree>(scope)) {
         return true;
     }
-    auto root = ast::cast_tree_const<ast::ConstantLit>(scope);
+    auto root = ast::cast_tree<ast::ConstantLit>(scope);
     return root != nullptr && root->symbol == core::Symbols::root();
 }
 
 bool isTNilableOrUntyped(const ast::TreePtr &expr) {
-    auto *send = ast::cast_tree_const<ast::Send>(expr);
+    auto *send = ast::cast_tree<ast::Send>(expr);
     return send != nullptr && (send->fun == core::Names::nilable() || send->fun == core::Names::untyped()) &&
            isT(send->recv);
 }
@@ -118,7 +118,7 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
             if (auto e = ctx.beginError(sig->loc, core::errors::Rewriter::BadAttrType)) {
                 e.setHeader("The type for an `{}` cannot contain `{}`", attrFun.show(ctx), "type_parameters");
             }
-            body->args[0] = ast::MK::Untyped(body->args[0]->loc);
+            body->args[0] = ast::MK::Untyped(body->args[0].loc());
         }
         cur = ast::cast_tree<ast::Send>(cur->recv);
     }
@@ -145,10 +145,11 @@ ast::TreePtr toWriterSigForName(core::MutableContext ctx, ast::Send *sharedSig, 
     ast::Send *cur = body;
     while (cur != nullptr) {
         auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv);
-        if ((cur->recv->isSelfReference()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
-            auto loc = resultType->loc;
-            auto hash = ast::MK::Hash1(cur->loc, ast::MK::Symbol(nameLoc, name), move(resultType));
-            auto params = ast::MK::Send1(loc, move(cur->recv), core::Names::params(), move(hash));
+        if ((cur->recv.isSelfReference()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
+            auto loc = resultType.loc();
+            auto params = ast::MK::Send2(loc, move(cur->recv), core::Names::params(), ast::MK::Symbol(nameLoc, name),
+                                         move(resultType));
+            ast::cast_tree_nonnull<ast::Send>(params).numPosArgs = 0;
             cur->recv = move(params);
             break;
         }

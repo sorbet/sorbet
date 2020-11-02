@@ -18,6 +18,13 @@ class HasAbstract
     14 # error: Abstract methods must not contain any code in their body
   end
 
+  sig {abstract.params(x: T.untyped).void}
+  def abstract_with_splat(*x)
+  end
+
+  sig {abstract.params(blk: T.proc.void).void}
+  def abstract_with_block(&blk)
+  end
 end
 
 class InterfaceClass

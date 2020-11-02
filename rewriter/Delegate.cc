@@ -1,6 +1,7 @@
 #include "rewriter/Delegate.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
+#include "rewriter/Util.h"
 #include <optional>
 
 using namespace std;
@@ -8,21 +9,21 @@ using namespace std;
 namespace sorbet::rewriter {
 
 static bool literalSymbolEqual(const core::GlobalState &gs, const ast::TreePtr &node, core::NameRef name) {
-    if (auto lit = ast::cast_tree_const<ast::Literal>(node)) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == name;
     }
     return false;
 }
 
 static bool isLiteralTrue(const core::GlobalState &gs, const ast::TreePtr &node) {
-    if (auto lit = ast::cast_tree_const<ast::Literal>(node)) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isTrue(gs);
     }
     return false;
 }
 
 static optional<core::NameRef> stringOrSymbolNameRef(const core::GlobalState &gs, const ast::TreePtr &node) {
-    auto lit = ast::cast_tree_const<ast::Literal>(node);
+    auto lit = ast::cast_tree<ast::Literal>(node);
     if (!lit) {
         return nullopt;
     }
@@ -47,12 +48,13 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
         return empty;
     }
 
-    auto options = ast::cast_tree_const<ast::Hash>(send->args.back());
+    auto optionsTree = ASTUtil::mkKwArgsHash(send);
+    auto options = ast::cast_tree<ast::Hash>(optionsTree);
     if (!options) {
         return empty;
     }
 
-    if (send->args.size() == 1) {
+    if (send->numPosArgs == 0) {
         // there has to be at least one positional argument
         return empty;
     }
@@ -91,8 +93,8 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
     }
 
     vector<ast::TreePtr> methodStubs;
-    for (int i = 0; i < send->args.size() - 1; i++) {
-        auto *lit = ast::cast_tree_const<ast::Literal>(send->args[i]);
+    for (int i = 0; i < send->numPosArgs; i++) {
+        auto *lit = ast::cast_tree<ast::Literal>(send->args[i]);
         if (!lit || !lit->isSymbol(ctx)) {
             return empty;
         }
@@ -108,16 +110,14 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
             methodName = lit->asSymbol(ctx);
         }
         // sig {params(arg0: T.untyped, blk: Proc).returns(T.untyped)}
-        ast::Hash::ENTRY_store paramsKeys;
-        paramsKeys.emplace_back(ast::MK::Symbol(loc, core::Names::arg0()));
-        paramsKeys.emplace_back(ast::MK::Symbol(loc, core::Names::blkArg()));
+        ast::Send::ARGS_store sigArgs;
+        sigArgs.emplace_back(ast::MK::Symbol(loc, core::Names::arg0()));
+        sigArgs.emplace_back(ast::MK::Untyped(loc));
 
-        ast::Hash::ENTRY_store paramsValues;
-        paramsValues.emplace_back(ast::MK::Untyped(loc));
-        paramsValues.emplace_back(ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
+        sigArgs.emplace_back(ast::MK::Symbol(loc, core::Names::blkArg()));
+        sigArgs.emplace_back(ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
 
-        methodStubs.push_back(ast::MK::Sig(loc, ast::MK::Hash(loc, std::move(paramsKeys), std::move(paramsValues)),
-                                           ast::MK::Untyped(loc)));
+        methodStubs.push_back(ast::MK::Sig(loc, std::move(sigArgs), ast::MK::Untyped(loc)));
 
         // def $methodName(*arg0, &blk); end
         ast::MethodDef::ARGS_store args;

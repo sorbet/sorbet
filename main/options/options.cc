@@ -354,9 +354,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     "directory passed to Sorbet, if any.",
                                     cxxopts::value<string>()->default_value(empty.pathPrefix), "prefix");
     options.add_options("advanced")("a,autocorrect", "Auto-correct source files with suggested fixes");
-    options.add_options("advanced")(
-        "suggest-runtime-profiled",
-        "When suggesting signatures in `typed: strict` mode, suggest `::T::Utils::RuntimeProfiled`");
     options.add_options("advanced")("P,progress", "Draw progressbar");
     options.add_options("advanced")("license", "Show license");
     options.add_options("advanced")("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
@@ -370,12 +367,15 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.watchmanPath));
     options.add_options("advanced")("enable-experimental-lsp-document-symbol",
                                     "Enable experimental LSP feature: Document Symbol");
+    options.add_options("advanced")("enable-experimental-lsp-document-formatting-rubyfmt",
+                                    "Enable experimental LSP feature: Document Formatting with Rubyfmt");
     options.add_options("advanced")("enable-experimental-lsp-document-highlight",
                                     "Enable experimental LSP feature: Document Highlight");
     options.add_options("advanced")("enable-experimental-lsp-signature-help",
                                     "Enable experimental LSP feature: Signature Help");
     options.add_options("advanced")("enable-experimental-lsp-go-to-implementation",
                                     "Enable experimental LSP feature: Go To Implementation");
+    options.add_options("advanced")("enable-experimental-lsp-rename", "Enable experimental LSP feature: Rename");
     options.add_options("advanced")(
         "enable-all-experimental-lsp-features",
         "Enable every experimental LSP feature. (WARNING: can be crashy; for developer use only. "
@@ -722,6 +722,9 @@ void readOptions(Options &opts,
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
         opts.lspGoToImplementationEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-go-to-implementation"].as<bool>();
+        opts.lspDocumentFormatRubyfmtEnabled =
+            enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
+        opts.lspRenameEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-rename"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
@@ -826,7 +829,6 @@ void readOptions(Options &opts,
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
         opts.sleepInSlowPath = raw["sleep-in-slow-path"].as<bool>();
-        opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
         opts.censorForSnapshotTests = raw["censor-for-snapshot-tests"].as<bool>();

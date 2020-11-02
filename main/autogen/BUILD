@@ -19,8 +19,8 @@ cc_library(
         "//ast",
         "//ast/treemap",
         "//core",
+        "//main/autogen/data",
         "//main/options",
         "@com_github_d_bahr_crcpp",
-        "@com_github_ludocode_mpack",
     ],
 )

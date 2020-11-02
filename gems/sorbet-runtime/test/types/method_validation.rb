@@ -276,17 +276,6 @@ module Opus::Types::Test
         assert_equal(7, @mod.foo {self + 4})
       end
 
-      it "rejects T::Utils::RuntimeProfiled" do
-        @mod.sig {returns(T::Utils::RuntimeProfiled)}
-        def @mod.foo; end
-
-        err = assert_raises(TypeError) do
-          @mod.foo
-        end
-
-        assert_match("Expected type T::Utils::RuntimeProfiled, got type NilClass", err.message)
-      end
-
       it "gets the locations right with the second call" do
         @mod.sig {returns(String)}
         def @mod.foo
@@ -506,6 +495,22 @@ module Opus::Types::Test
           @mod.foo(a: 2, b: 3, bar: 'hi', c: 'bye')
         end
         assert_match(/\AParameter 'c': Expected type Integer, got type String with value "bye"/, err.message)
+      end
+
+
+      it 'raises an error when two parameters have the same name' do
+
+        @mod.sig { params(_: Integer, _: Integer).returns(String) }
+        def @mod.bar(_, _)
+          ""
+        end
+
+        err = assert_raises(RuntimeError) do
+          @mod.bar(0, 0)
+        end
+
+        lines = err.message.split("\n")
+        assert_equal("The declaration for `bar` has arguments with duplicate names", lines[0])
       end
     end
 

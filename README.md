@@ -202,13 +202,19 @@ sudo xcodebuild -license
 bazel clean --expunge
 ```
 
-**(Mac) `fatal error: 'stdio.h' file not found`** (or some other system header)
+**(Mac) `fatal error: 'math.h' file not found`** (or some other system header)
 
 This error can happen on Macs when the `/usr/include` folder is missing. The
 solution is to install macOS headers via the following package:
 
+macOS Mojave:
 ```shell
 open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
+```
+
+macOS Catalina:
+```shell
+sudo ln -s /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/* /usr/local/include/
 ```
 
 ## Running Sorbet
@@ -645,6 +651,81 @@ class Project::Foo
 #     ^^^ symbol-search: "Foo", rank = 1
 end
 ```
+
+#### Testing rename constant
+
+To write a test for renaming constants, you need to make at least two files:
+
+```ruby
+# -- test/testdata/lsp/refactor/mytest.rb --
+
+# typed: true
+# frozen_string_literal: true
+
+class Foo
+  class Foo
+  end
+end
+
+foo = Foo.new
+#     ^ apply-rename: [A] newName: Bar
+```
+
+The `apply-rename` assertion here says "simulate a user starting a rename from
+the position of this caret." You'll need to add an `.rbedited` file that reflects
+what the result of the changes should look like. In this case, the file would look
+like this:
+
+```ruby
+# -- test/testdata/lsp/refactor/mytest.A.rbedited --
+
+# typed: true
+# frozen_string_literal: true
+
+class Bar
+  class Foo
+  end
+end
+
+foo = Bar.new
+#     ^ apply-rename: [A] newName: Bar
+```
+
+You can test that invalid renames aren't applied by adding `invalid: true` to your
+test, like so:
+```ruby
+# -- test/testdata/lsp/refactor/mytest.rb --
+
+# typed: true
+# frozen_string_literal: true
+
+class Foo
+  class Foo
+  end
+end
+
+foo = Foo.new
+#     ^ apply-rename: [A] newName: foo invalid:true
+```
+
+To test for a specific error message, add an `expectedErrorMessage` argument to the test:
+```ruby
+# typed: true
+# frozen_string_literal: true
+
+require_relative './constant__class_definition.rb'
+
+sig { params(foo: Foo::Foo).returns(Foo::Foo) }
+def foo(foo); end
+
+class Baz
+#     ^ apply-rename: [D] newName: Bar invalid: true expectedErrorMessage: Renaming constants defined in .rbi files is not supported; symbol Baz is defined at test/testdata/lsp/rename/constant__rbi_class_reference.rbi
+
+end
+```
+
+You can add more files that reference the constant you're renaming, just make sure
+to add a matching `.rbedited` file with the same version.
 
 #### Testing incremental type checking
 

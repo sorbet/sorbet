@@ -22,7 +22,7 @@ bool shouldExtract(core::Context ctx, const ast::TreePtr &what) {
         return false;
     }
 
-    if (auto *asgn = ast::cast_tree_const<ast::Assign>(what)) {
+    if (auto *asgn = ast::cast_tree<ast::Assign>(what)) {
         return !ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs);
     }
 
@@ -137,7 +137,7 @@ public:
             ast::InsSeq::STATS_store stats;
             auto sorted = sortedClasses();
             stats.insert(stats.begin(), make_move_iterator(sorted.begin()), make_move_iterator(sorted.end()));
-            return ast::MK::InsSeq(tree->loc, std::move(stats), std::move(tree));
+            return ast::MK::InsSeq(tree.loc(), std::move(stats), std::move(tree));
         }
 
         for (auto &clas : sortedClasses()) {

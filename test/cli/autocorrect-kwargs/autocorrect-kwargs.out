@@ -1,0 +1,16 @@
+6c6
+< sig {returns(foo: Integer, bar: String)}
+---
+> sig {returns({foo: Integer, bar: String})}
+13c13
+< sig {returns(T::Array[foo: Integer])}
+---
+> sig {returns(T::Array[{foo: Integer}])}
+18c18
+< foo = T::Array[foo: Integer, bar: String].new
+---
+> foo = T::Array[{foo: Integer, bar: String}].new
+21c21
+< sig {params({a: Integer, b: String}).void}
+---
+> sig {params(a: Integer, b: String).void}

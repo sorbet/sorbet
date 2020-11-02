@@ -47,6 +47,7 @@ const UnorderedMap<
         {"apply-code-action", ApplyCodeActionAssertion::make},
         {"no-stdlib", BooleanPropertyAssertion::make},
         {"symbol-search", SymbolSearchAssertion::make},
+        {"apply-rename", ApplyRenameAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
@@ -199,21 +200,11 @@ void assertLocationsMatch(const LSPConfiguration &config,
     }
 }
 
-string applyEdit(string_view source, const core::File &file, const Range &range, string_view newText) {
-    auto beginLine = static_cast<u4>(range.start->line + 1);
-    auto beginCol = static_cast<u4>(range.start->character + 1);
-    auto beginOffset = core::Loc::pos2Offset(file, {beginLine, beginCol}).value();
+string updatedFilePath(string filename, string version) {
+    auto fileExtension = FileOps::getExtension(filename);
 
-    auto endLine = static_cast<u4>(range.end->line + 1);
-    auto endCol = static_cast<u4>(range.end->character + 1);
-    auto endOffset = core::Loc::pos2Offset(file, {endLine, endCol}).value();
-
-    string actualEditedFileContents = string(source);
-    actualEditedFileContents.replace(beginOffset, endOffset - beginOffset, newText);
-
-    return actualEditedFileContents;
+    return fmt::format("{}{}.rbedited", filename.substr(0, filename.size() - fileExtension.size()), version);
 }
-
 } // namespace
 
 RangeAssertion::RangeAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine)
@@ -1204,8 +1195,7 @@ void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared
     }
     auto &file = it->second;
 
-    auto expectedUpdatedFilePath =
-        fmt::format("{}.{}.rbedited", this->filename.substr(0, this->filename.size() - strlen(".rb")), this->version);
+    auto expectedUpdatedFilePath = updatedFilePath(this->filename, this->version);
 
     string expectedEditedFileContents;
     try {
@@ -1231,6 +1221,158 @@ void ApplyCompletionAssertion::check(const UnorderedMap<std::string, std::shared
 
 string ApplyCompletionAssertion::toString() const {
     return fmt::format("apply-completion: [{}] item: {}", version, index);
+}
+
+shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename, unique_ptr<Range> &range,
+                                                            int assertionLine, string_view assertionContents,
+                                                            string_view assertionType) {
+    static const regex newNameRegex(
+        R"(^\[(\w+)\]\s+(?:(?:newName:\s+(\w+))?\s?(?:invalid:\s+(true))??\s?(?:expectedErrorMessage:\s+(.+))?)$)");
+
+    smatch matches;
+    string assertionContentsString = string(assertionContents);
+    if (regex_search(assertionContentsString, matches, newNameRegex)) {
+        auto version = matches[1].str();
+        auto newName = matches[2].str();
+        auto invalid = !matches[3].str().empty();
+        auto expectedErrorMessage = matches[4].str();
+        if (!newName.empty() || invalid) {
+            return make_shared<ApplyRenameAssertion>(filename, range, assertionLine, version, newName, invalid,
+                                                     expectedErrorMessage);
+        }
+    }
+
+    ADD_FAIL_CHECK_AT(string(filename).c_str(), assertionLine + 1,
+                      fmt::format("Improperly formatted apply-rename assertion. Expected '[<version>] newName: <name> "
+                                  "(invalid: true) (expectedErrorMessage: <message>)'. Found '{}' in file {}",
+                                  assertionContents, filename));
+
+    return nullptr;
+}
+
+ApplyRenameAssertion::ApplyRenameAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                           string_view version, string newName, bool invalid,
+                                           string expectedErrorMessage)
+    : RangeAssertion(filename, range, assertionLine), version(string(version)), newName(newName), invalid(invalid),
+      expectedErrorMessage(expectedErrorMessage) {}
+
+void ApplyRenameAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertions,
+                                    const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                                    LSPWrapper &wrapper, int &nextId, string errorPrefix) {
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<ApplyRenameAssertion>(assertion)) {
+            assertionOfType->check(sourceFileContents, wrapper, nextId, errorPrefix);
+        }
+    }
+}
+
+void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                                 LSPWrapper &wrapper, int &nextId, std::string errorPrefix) {
+    auto prepareRenameResponse = doTextDocumentPrepareRename(wrapper, *this->range, nextId, this->filename);
+    // TODO: test placeholder in prepareRenameResponse
+
+    // A rename at an invalid position
+    if (newName.empty() && invalid) {
+        REQUIRE_EQ(prepareRenameResponse, nullptr);
+    } else {
+        REQUIRE_NE(prepareRenameResponse, nullptr);
+    }
+
+    auto workspaceEdits =
+        doTextDocumentRename(wrapper, *this->range, nextId, this->filename, newName, expectedErrorMessage);
+    // A rename at a valid position but with an invalid new name
+    if (invalid) {
+        REQUIRE_EQ(workspaceEdits, nullptr);
+        return;
+    }
+
+    {
+        INFO("doTextDocumentRename failed; see error above.");
+        REQUIRE_NE(workspaceEdits, nullptr);
+    }
+
+    auto &renameItems = *workspaceEdits->documentChanges;
+    auto it = sourceFileContents.find(this->filename);
+    {
+        INFO(fmt::format("Unable to find source file `{}`", this->filename));
+        REQUIRE_NE(it, sourceFileContents.end());
+    }
+
+    size_t index = this->filename.rfind("/", this->filename.length());
+    auto testDataPath = this->filename.substr(0, index);
+    // map of all .rb and .rbi files before rename
+    UnorderedMap<string, string> sourceFiles;
+    // map of all .rb and .rbi files after rename
+    UnorderedMap<string, string> actualEditedFiles;
+    // map of all .rbedited files whose version equals `this->version`
+    UnorderedMap<string, string> expectedEditedFiles;
+    for (auto filePath : FileOps::listFilesInDir(testDataPath, {".rb", ".rbi", ".rbedited"}, false, {}, {})) {
+        auto extension = FileOps::getExtension(filePath);
+        if (extension == "rbedited") {
+            auto extensionIndex = filePath.rfind(".rbedited", filePath.length());
+            auto fileVersion = string(FileOps::getExtension(filePath.substr(0, extensionIndex)));
+            if (fileVersion == this->version) {
+                expectedEditedFiles[filePath] = FileOps::read(filePath);
+            }
+        } else {
+            sourceFiles[filePath] = FileOps::read(filePath);
+        }
+    }
+
+    for (auto &renameItem : renameItems) {
+        // Get the file path from the edited document's uri so we can determine the path to the .rbedited file
+        index = renameItem->textDocument->uri.find(testDataPath, 0);
+        string sourceFilePath = renameItem->textDocument->uri.substr(index, renameItem->textDocument->uri.length() - 1);
+        string expectedEditedFilePath = updatedFilePath(sourceFilePath, this->version);
+
+        auto &edits = renameItem->edits;
+        string expectedEditedFileContents = expectedEditedFiles[expectedEditedFilePath];
+        if (expectedEditedFileContents.empty()) {
+            ADD_FAIL_CHECK_AT(filename.c_str(), this->assertionLine + 1,
+                              fmt::format("Missing {} which should contain test file after applying code actions.",
+                                          expectedEditedFilePath));
+            return;
+        }
+
+        REQUIRE_FALSE(edits.empty());
+
+        // First, sort the edits by increasing starting location
+        fast_sort(edits, [](const auto &l, const auto &r) -> bool { return l->range->cmp(*r->range) < 0; });
+        // Apply the edits in the reverse order so that the indices don't change.
+        reverse(edits.begin(), edits.end());
+
+        string actualEditedFileContents = string(sourceFiles[sourceFilePath]);
+        for (auto &edit : edits) {
+            auto file = core::File(string(sourceFilePath), string(actualEditedFileContents), core::File::Type::Normal);
+
+            actualEditedFileContents = applyEdit(actualEditedFileContents, file, *edit->range, edit->newText);
+        }
+        actualEditedFiles[sourceFilePath] = actualEditedFileContents;
+    }
+
+    // Compare every source file to its .rbedited of the same version if one exists
+    // There are 4 cases we're handling
+    // 1. present in both source and edited maps and contents match => success
+    // 2. present in original content, but not edited => fails
+    // 3. present in both source and edited maps and contents do not match => fails
+    // 4. unexpected edit => fails
+    for (auto &[filePath, _] : sourceFiles) {
+        string actualEditedFileContents = actualEditedFiles[filePath];
+        string expectedEditedFilePath = updatedFilePath(filePath, this->version);
+        string expectedEditedFileContents = expectedEditedFiles[expectedEditedFilePath];
+
+        {
+            INFO(fmt::format("The expected (rbedited) file contents for this rename did not match the actual file "
+                             "contents post-edit of {} ",
+                             expectedEditedFilePath));
+            // TODO: change this to CHECK_EQ_DIFF for better user experience
+            CHECK_EQ(expectedEditedFileContents, actualEditedFileContents);
+        }
+    }
+}
+
+string ApplyRenameAssertion::toString() const {
+    return fmt::format("apply-rename: [{}] newName: {}", version, newName);
 }
 
 shared_ptr<ApplyCodeActionAssertion> ApplyCodeActionAssertion::make(string_view filename, unique_ptr<Range> &range,
@@ -1271,8 +1413,7 @@ void ApplyCodeActionAssertion::check(const UnorderedMap<std::string, std::shared
         }
         auto &file = it->second;
 
-        auto expectedUpdatedFilePath =
-            fmt::format("{}.{}.rbedited", filename.substr(0, filename.size() - strlen(".rb")), version);
+        auto expectedUpdatedFilePath = updatedFilePath(this->filename, this->version);
         string expectedEditedFileContents;
         try {
             expectedEditedFileContents = FileOps::read(expectedUpdatedFilePath);

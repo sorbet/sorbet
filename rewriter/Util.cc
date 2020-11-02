@@ -9,7 +9,7 @@ using namespace std;
 namespace sorbet::rewriter {
 
 ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
-    auto send = ast::cast_tree_const<ast::Send>(orig);
+    auto send = ast::cast_tree<ast::Send>(orig);
     if (send) {
         ast::Send::ARGS_store args;
         auto dupRecv = dupType(send->recv);
@@ -22,28 +22,23 @@ ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
             return send->deepCopy();
         }
 
-        if (send->fun == core::Names::params() && send->args.size() == 1) {
-            if (auto hash = ast::cast_tree_const<ast::Hash>(send->args[0])) {
-                // T.proc.params takes keyword arguments
-                ast::Hash::ENTRY_store values;
-                ast::Hash::ENTRY_store keys;
+        if (send->fun == core::Names::params() && send->numPosArgs == 0 && send->args.size() % 2 == 0) {
+            // T.proc.params takes inlined keyword argument pairs, and can't handle kwsplat
+            ast::Send::ARGS_store args;
 
-                for (auto &value : hash->values) {
-                    auto dupedValue = ASTUtil::dupType(value);
-                    if (dupedValue == nullptr) {
-                        return nullptr;
-                    }
+            for (auto i = 0; i < send->args.size(); i += 2) {
+                ENFORCE(ast::isa_tree<ast::Literal>(send->args[i]));
+                args.emplace_back(send->args[i].deepCopy());
 
-                    values.emplace_back(std::move(dupedValue));
+                auto dupedValue = ASTUtil::dupType(send->args[i + 1]);
+                if (dupedValue == nullptr) {
+                    return nullptr;
                 }
 
-                for (auto &key : hash->keys) {
-                    keys.emplace_back(key.deepCopy());
-                }
-
-                auto arg = ast::MK::Hash(hash->loc, std::move(keys), std::move(values));
-                return ast::MK::Send1(send->loc, std::move(dupRecv), send->fun, std::move(arg));
+                args.emplace_back(std::move(dupedValue));
             }
+
+            return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, 0, std::move(args));
         }
 
         for (auto &arg : send->args) {
@@ -54,10 +49,10 @@ ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
             }
             args.emplace_back(std::move(dupArg));
         }
-        return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, std::move(args));
+        return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, send->numPosArgs, std::move(args));
     }
 
-    auto *ident = ast::cast_tree_const<ast::ConstantLit>(orig);
+    auto *ident = ast::cast_tree<ast::ConstantLit>(orig);
     if (ident) {
         auto orig = dupType(ident->original);
         if (ident->original && !orig) {
@@ -66,17 +61,17 @@ ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
         return ast::make_tree<ast::ConstantLit>(ident->loc, ident->symbol, std::move(orig));
     }
 
-    auto *cons = ast::cast_tree_const<ast::UnresolvedConstantLit>(orig);
+    auto *cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
     if (!cons) {
         return nullptr;
     }
 
-    auto *scopeCnst = ast::cast_tree_const<ast::UnresolvedConstantLit>(cons->scope);
+    auto *scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
     if (!scopeCnst) {
         if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
             return ast::MK::UnresolvedConstant(cons->loc, ast::MK::EmptyTree(), cons->cnst);
         }
-        auto *id = ast::cast_tree_const<ast::ConstantLit>(cons->scope);
+        auto *id = ast::cast_tree<ast::ConstantLit>(cons->scope);
         if (id == nullptr) {
             return nullptr;
         }
@@ -92,7 +87,7 @@ ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
 
 bool ASTUtil::hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name) {
     for (const auto &keyExpr : hash.keys) {
-        auto *key = ast::cast_tree_const<ast::Literal>(keyExpr);
+        auto *key = ast::cast_tree<ast::Literal>(keyExpr);
         if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == name) {
             return true;
         }
@@ -104,9 +99,9 @@ bool ASTUtil::hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash
     int i = -1;
     for (const auto &keyExpr : hash.keys) {
         i++;
-        auto *key = ast::cast_tree_const<ast::Literal>(keyExpr);
+        auto *key = ast::cast_tree<ast::Literal>(keyExpr);
         if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == name) {
-            auto *val = ast::cast_tree_const<ast::Literal>(hash.values[i]);
+            auto *val = ast::cast_tree<ast::Literal>(hash.values[i]);
             if (!val) {
                 // All non-literals are truthy
                 return true;
@@ -176,6 +171,39 @@ ast::Send *ASTUtil::castSig(ast::Send *send) {
     }
 }
 
+ast::TreePtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
+    if (send->args.empty()) {
+        return nullptr;
+    }
+
+    ast::Hash::ENTRY_store keys;
+    ast::Hash::ENTRY_store values;
+
+    auto [kwStart, kwEnd] = send->kwArgsRange();
+    for (auto i = kwStart; i < kwEnd; i += 2) {
+        keys.emplace_back(send->args[i].deepCopy());
+        values.emplace_back(send->args[i + 1].deepCopy());
+    }
+
+    // handle a double-splat or a hash literal as the last argument
+    bool explicitEmptyHash = false;
+    if (send->hasKwSplat() || !send->hasKwArgs()) {
+        if (auto *hash = ast::cast_tree<ast::Hash>(send->args.back())) {
+            explicitEmptyHash = hash->keys.empty();
+            for (auto i = 0; i < hash->keys.size(); ++i) {
+                keys.emplace_back(hash->keys[i].deepCopy());
+                values.emplace_back(hash->values[i].deepCopy());
+            }
+        }
+    }
+
+    if (!keys.empty() || explicitEmptyHash) {
+        return ast::MK::Hash(send->loc, std::move(keys), std::move(values));
+    } else {
+        return nullptr;
+    }
+}
+
 ast::TreePtr ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs) {
     return ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), name, move(rhs));
 }
@@ -194,7 +222,7 @@ namespace {
 
 // Returns `true` when the expression passed is an UnresolvedConstantLit with the name `Kernel` and no additional scope.
 bool isKernel(const ast::TreePtr &expr) {
-    if (auto *constRecv = ast::cast_tree_const<ast::UnresolvedConstantLit>(expr)) {
+    if (auto *constRecv = ast::cast_tree<ast::UnresolvedConstantLit>(expr)) {
         return ast::isa_tree<ast::EmptyTree>(constRecv->scope) && constRecv->cnst == core::Names::Constants::Kernel();
     }
     return false;
@@ -211,7 +239,7 @@ ast::TreePtr ASTUtil::thunkBody(core::MutableContext ctx, ast::TreePtr &node) {
         return nullptr;
     }
     // Valid receivers for lambda/proc are either a self reference or `Kernel`
-    if (!send->recv->isSelfReference() && !isKernel(send->recv)) {
+    if (!send->recv.isSelfReference() && !isKernel(send->recv)) {
         return nullptr;
     }
     if (send->block == nullptr) {

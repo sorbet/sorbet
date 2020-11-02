@@ -77,9 +77,6 @@ Usage:
                                 passed to Sorbet, if any. (default: "")
   -a, --autocorrect             Auto-correct source files with suggested
                                 fixes
-      --suggest-runtime-profiled
-                                When suggesting signatures in `typed: strict`
-                                mode, suggest `::T::Utils::RuntimeProfiled`
   -P, --progress                Draw progressbar
       --license                 Show license
       --color {always,never,[auto]}
@@ -94,12 +91,17 @@ Usage:
       --enable-experimental-lsp-document-symbol
                                 Enable experimental LSP feature: Document
                                 Symbol
+      --enable-experimental-lsp-document-formatting-rubyfmt
+                                Enable experimental LSP feature: Document
+                                Formatting with Rubyfmt
       --enable-experimental-lsp-document-highlight
                                 Enable experimental LSP feature: Document
                                 Highlight
       --enable-experimental-lsp-signature-help
                                 Enable experimental LSP feature: Signature
                                 Help
+      --enable-experimental-lsp-rename
+                                Enable experimental LSP feature: Rename
       --enable-all-experimental-lsp-features
                                 Enable every experimental LSP feature.
                                 (WARNING: can be crashy; for developer use only. End

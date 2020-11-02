@@ -94,7 +94,7 @@ public:
     SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
     }
-    SymbolRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, std::vector<u4> methodHash) const;
+    SymbolRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const std::vector<u4> &methodHash) const;
     SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
     }
@@ -175,7 +175,6 @@ public:
     int globalStateId;
     bool silenceErrors = false;
     bool autocorrect = false;
-    bool suggestRuntimeProfiledType = false;
 
     // We have a lot of internal names of form `<something>` that's chosen with `<` and `>` as you can't make
     // this into a valid ruby identifier without suffering.

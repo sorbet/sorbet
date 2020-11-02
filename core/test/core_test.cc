@@ -4,6 +4,7 @@
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
+#include "core/TypePtr.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"
 #include "core/errors/internal.h"
@@ -134,4 +135,85 @@ TEST_CASE("Substitute") { // NOLINT
     REQUIRE(other2.data(gs2)->kind == NameKind::UTF8);
     REQUIRE_EQ("<U other>", other2.showRaw(gs2));
 }
+
+// Privileged class that is friends with TypePtr
+class TypePtrTestHelper {
+public:
+    static std::atomic<u4> *counter(const TypePtr &ptr) {
+        return ptr.counter;
+    }
+
+    static TypePtr::tagged_storage store(const TypePtr &ptr) {
+        return ptr.store;
+    }
+
+    static TypePtr create(TypePtr::Tag tag, Type *type) {
+        return TypePtr(tag, type);
+    }
+};
+
+TEST_SUITE("TypePtr") {
+    TEST_CASE("Does not allocate a counter for null type") {
+        TypePtr ptr;
+        CHECK_EQ(nullptr, TypePtrTestHelper::counter(ptr));
+    }
+
+    TEST_CASE("Properly manages counter") {
+        auto ptr = make_type<ClassType>(Symbols::untyped());
+        auto counter = TypePtrTestHelper::counter(ptr);
+        REQUIRE_NE(nullptr, counter);
+        CHECK_EQ(1, counter->load());
+
+        {
+            // Copy should increment counter
+            TypePtr ptrCopy(ptr);
+            REQUIRE_EQ(counter, TypePtrTestHelper::counter(ptrCopy));
+            CHECK_EQ(2, counter->load());
+        }
+
+        // Destruction of copy should decrement counter
+        CHECK_EQ(1, counter->load());
+
+        {
+            TypePtr ptrCopy(ptr);
+            // Assigning/overwriting should decrement counter
+            ptr = TypePtr();
+            CHECK_EQ(1, counter->load());
+
+            // Moving should keep counter the same
+            ptr = move(ptrCopy);
+            CHECK_EQ(1, counter->load());
+
+            // Moving should clear counter from ptrCopy and make it an empty TypePtr
+            CHECK_EQ(nullptr, TypePtrTestHelper::counter(ptrCopy));
+            CHECK_EQ(0, TypePtrTestHelper::store(ptrCopy));
+            CHECK_EQ(TypePtr(), ptrCopy);
+
+            // Assigning to nullptr should increment counter (and not try to increment the null counter field in
+            // ptrCopy)
+            ptrCopy = ptr;
+            CHECK_EQ(2, counter->load());
+        }
+        CHECK_EQ(1, counter->load());
+    }
+
+    TEST_CASE("Tagging works as expected") {
+        // This tag is < 8. Will be deleted / managed by TypePtr.
+        {
+            auto rawPtr = new ClassType(Symbols::untyped());
+            auto ptr = TypePtrTestHelper::create(TypePtr::Tag::ClassType, rawPtr);
+            CHECK_EQ(TypePtr::Tag::ClassType, ptr.tag());
+            CHECK_EQ(rawPtr, ptr.get());
+        }
+
+        // This tag is > 8
+        {
+            auto rawPtr = new BlamedUntyped(Symbols::untyped());
+            auto ptr = TypePtrTestHelper::create(TypePtr::Tag::BlamedUntyped, rawPtr);
+            CHECK_EQ(TypePtr::Tag::BlamedUntyped, ptr.tag());
+            CHECK_EQ(rawPtr, ptr.get());
+        }
+    }
+}
+
 } // namespace sorbet::core

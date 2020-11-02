@@ -40,6 +40,20 @@ cc_library(
         "lsp.h",
         "wrapper.h",
     ],
+    # Required for compiling //experimental/rubyfmt on Mac with dynamic linking
+    # webasm has no options specified since it links against a no-op rubyfmt
+    linkopts = select({
+        "//conditions:default": [],
+        "//experimental/rubyfmt:enable_rubyfmt": [
+            "-lcrypt",
+            "-lrt",
+            "-lz",
+            "-lgmp",
+        ],
+        "//experimental/rubyfmt:enable_rubyfmt_darwin": [
+            "-framework Foundation",
+        ],
+    }),
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -53,6 +67,7 @@ cc_library(
         "//core",
         "//core/proto",
         "//core/serialize",
+        "//experimental/rubyfmt",
         "//main/cache",
         "//main/options",
         "//main/pipeline",

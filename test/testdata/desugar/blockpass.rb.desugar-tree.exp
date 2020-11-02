@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <block-pass>$2.meth()
       end
       <self>.calls_with_object() do |*args|
-        ::<Magic>.<call-with-splat>(:"meth".to_proc(), :"call", args.to_a())
+        ::<Magic>.<call-with-splat>(:"meth".to_proc(), :"call", args.to_a(), nil)
       end
       <self>.calls_with_object() do |x|
         :"meth".to_proc().call(x)
@@ -55,7 +55,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::<Magic>.<call-with-block>(<self>, :"calls_with_object", <self>.returns_lambda())
       ::<Magic>.<call-with-block>(<self>, :"calls_with_object", <emptyTree>::<C HasToProc>.new())
       <self>.calls_with_object() do |*args|
-        ::<Magic>.<call-with-splat>(<emptyTree>::<C HasToProc>.new().to_proc(), :"call", args.to_a())
+        ::<Magic>.<call-with-splat>(<emptyTree>::<C HasToProc>.new().to_proc(), :"call", args.to_a(), nil)
       end
       <emptyTree>::<C CallsWithObject>.calls_with_object() do |<block-pass>$3|
         <block-pass>$3.meth()

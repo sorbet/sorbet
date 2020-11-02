@@ -24,6 +24,7 @@ InsSeq{
                 }
                 fun = <U <define-top-class-or-module>>
                 block = nullptr
+                pos_args = 1
                 args = [
                   ConstantLit{
                     orig = nullptr
@@ -38,6 +39,7 @@ InsSeq{
                 }
                 fun = <U keep_for_ide>
                 block = nullptr
+                pos_args = 1
                 args = [
                   ConstantLit{
                     orig = UnresolvedConstantLit{
@@ -82,6 +84,7 @@ InsSeq{
               }
               fun = <U has_while>
               block = nullptr
+              pos_args = 0
               args = [
               ]
             }
@@ -144,6 +147,7 @@ InsSeq{
               ]
               body = Next{ expr = EmptyTree }
             }
+            pos_args = 0
             args = [
             ]
           }
@@ -165,6 +169,7 @@ InsSeq{
               ]
               body = Break{ expr = EmptyTree }
             }
+            pos_args = 0
             args = [
             ]
           }
@@ -194,6 +199,7 @@ InsSeq{
                 }
                 fun = <U keep_for_typechecking>
                 block = nullptr
+                pos_args = 1
                 args = [
                   Send{
                     recv = ConstantLit{
@@ -205,6 +211,7 @@ InsSeq{
                     }
                     fun = <U nilable>
                     block = nullptr
+                    pos_args = 1
                     args = [
                       ConstantLit{
                         orig = UnresolvedConstantLit{
@@ -242,6 +249,7 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Local{
                     localVariable = <U <self>>
@@ -256,6 +264,7 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Local{
                     localVariable = <U <self>>
@@ -270,6 +279,7 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Local{
                     localVariable = <U <self>>
@@ -284,6 +294,7 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Local{
                     localVariable = <U <self>>
@@ -298,6 +309,7 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Local{
                     localVariable = <U <self>>
@@ -312,6 +324,7 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Local{
                     localVariable = <U <self>>
@@ -326,6 +339,7 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Local{
                     localVariable = <U <self>>
@@ -340,6 +354,7 @@ InsSeq{
                 }
                 fun = <U keep_def>
                 block = nullptr
+                pos_args = 2
                 args = [
                   Local{
                     localVariable = <U <self>>

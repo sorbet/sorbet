@@ -334,7 +334,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             "runSlowPath can only be called from the typechecker thread.");
 
     auto &logger = config->logger;
-    unique_ptr<ShowOperation> slowPathOp = make_unique<ShowOperation>(*config, "SlowPathBlocking", "Typechecking...");
+    unique_ptr<ShowOperation> slowPathOp = make_unique<ShowOperation>(*config, ShowOperation::Kind::SlowPathBlocking);
     Timer timeit(logger, "slow_path");
     ENFORCE(!updates.canTakeFastPath || config->disableFastPath);
     ENFORCE(updates.updatedGS.has_value());
@@ -406,7 +406,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
             // Inform users that Sorbet should be responsive now.
             // Explicitly end previous operation before beginning next operation.
             slowPathOp = nullptr;
-            slowPathOp = make_unique<ShowOperation>(*config, "SlowPathNonBlocking", "Typechecking in background");
+            slowPathOp = make_unique<ShowOperation>(*config, ShowOperation::Kind::SlowPathNonBlocking);
         }
         // Report how long the slow path blocks preemption.
         timeit.clone("slow_path.blocking_time");

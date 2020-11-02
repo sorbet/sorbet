@@ -35,7 +35,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+      <self>.params(:"arg0", ::T.untyped()).returns(::T.untyped())
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
@@ -51,7 +51,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+      <self>.params(:"arg0", ::T.untyped()).returns(::T.untyped())
     end
 
     def bar=<<C <todo sym>>>(arg0, &<blk>)
@@ -67,7 +67,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params({:"arg0" => ::T.untyped()}).returns(::T.untyped())
+      <self>.params(:"arg0", ::T.untyped()).returns(::T.untyped())
     end
 
     def baz=<<C <todo sym>>>(arg0, &<blk>)

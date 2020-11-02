@@ -95,7 +95,7 @@ TypePtr TupleType::_instantiate(const GlobalState &gs, const InlinedVector<Symbo
             newElems[i] = this->elems[i];
             i++;
         }
-        return TupleType::build(gs, newElems);
+        return TupleType::build(gs, move(newElems));
     }
     return nullptr;
 }
@@ -122,7 +122,7 @@ TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc)
             newElems[i] = this->elems[i];
             i++;
         }
-        return TupleType::build(gs, newElems);
+        return TupleType::build(gs, move(newElems));
     }
     return nullptr;
 }
@@ -149,7 +149,7 @@ TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc)
             newElems[i] = this->elems[i];
             i++;
         }
-        return TupleType::build(gs, newElems);
+        return TupleType::build(gs, move(newElems));
     }
     return nullptr;
 };
@@ -177,7 +177,7 @@ TypePtr ShapeType::_instantiate(const GlobalState &gs, const InlinedVector<Symbo
             newValues[i] = this->values[i];
             i++;
         }
-        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, newValues);
+        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(newValues));
     }
     return nullptr;
 }
@@ -204,7 +204,7 @@ TypePtr ShapeType::_instantiate(const GlobalState &gs, const TypeConstraint &tc)
             newValues[i] = this->values[i];
             i++;
         }
-        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, newValues);
+        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(newValues));
     }
     return nullptr;
 }
@@ -231,7 +231,7 @@ TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc)
             newValues[i] = this->values[i];
             i++;
         }
-        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, newValues);
+        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(newValues));
     }
     return nullptr;
 }
@@ -352,7 +352,7 @@ TypePtr AppliedType::_instantiate(const GlobalState &gs, const InlinedVector<Sym
             newTargs[i] = this->targs[i];
             i++;
         }
-        return make_type<AppliedType>(this->klass, newTargs);
+        return make_type<AppliedType>(this->klass, move(newTargs));
     }
 
     return nullptr;
@@ -381,7 +381,7 @@ TypePtr AppliedType::_instantiate(const GlobalState &gs, const TypeConstraint &t
             newTargs[i] = this->targs[i];
             i++;
         }
-        return make_type<AppliedType>(this->klass, newTargs);
+        return make_type<AppliedType>(this->klass, move(newTargs));
     }
 
     return nullptr;
@@ -410,7 +410,7 @@ TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &t
             newTargs[i] = this->targs[i];
             i++;
         }
-        return make_type<AppliedType>(this->klass, newTargs);
+        return make_type<AppliedType>(this->klass, move(newTargs));
     }
 
     return nullptr;

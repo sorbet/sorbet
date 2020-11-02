@@ -985,7 +985,7 @@ class Array < Object
   sig do
     params(
         arg0: Elem,
-        blk: T.proc.params().returns(Elem),
+        blk: T.proc.returns(Elem),
     )
     .returns(Elem)
   end

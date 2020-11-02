@@ -36,14 +36,14 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     if (name2->cnst != core::Names::Constants::ActiveRecord()) {
         return;
     }
-    if (send->args.size() != 1) {
+    if (send->args.size() != 1 && !send->hasKwArgs()) {
         return;
     }
     auto arg = ast::cast_tree<ast::Literal>(send->args[0]);
     if (!arg) {
         return;
     }
-    auto value = core::cast_type<core::LiteralType>(arg->value.get());
+    auto value = core::cast_type<core::LiteralType>(arg->value);
     if (value->literalKind != core::LiteralType::LiteralTypeKind::Float) {
         return;
     }

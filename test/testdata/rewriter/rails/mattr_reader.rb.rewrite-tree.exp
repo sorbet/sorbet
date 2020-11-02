@@ -96,7 +96,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
     <self>.mattr_reader()
 
-    <self>.mattr_reader({:"instance_accessor" => false})
+    <self>.mattr_reader(:"instance_accessor", false)
 
     <self>.mattr_reader("foo")
   end

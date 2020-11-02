@@ -87,13 +87,14 @@ public:
     VariableUseSite recv;
     core::NameRef fun;
     core::LocOffsets receiverLoc;
+    u2 numPosArgs;
     InlinedVector<VariableUseSite, 2> args;
     InlinedVector<core::LocOffsets, 2> argLocs;
     bool isPrivateOk;
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, const InlinedVector<LocalRef, 2> &args,
-         InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk = false,
+    Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, u2 numPosArgs,
+         const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk = false,
          const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;

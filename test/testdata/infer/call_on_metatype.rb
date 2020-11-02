@@ -7,11 +7,9 @@ T.nilable(Integer).class # error: mistakes a type for a value
 
 T::Array[Integer].===(0) # error: mistakes a type for a value
 
-# This is a bug; there's a missing error here, hidden by https://github.com/sorbet/sorbet/issues/3426
-T.noreturn.to_s
+T.noreturn.to_s # error: Call to method `to_s` on `T.noreturn` mistakes a type for a value
 
-# This is also a bug; hidden by https://github.com/sorbet/sorbet/issues/3428
-T.untyped.to_s
+T.untyped.to_s # error: Call to method `to_s` on `T.untyped` mistakes a type for a value
 
 # And another one
 T.self_type.to_s
@@ -20,4 +18,4 @@ T.self_type.to_s
 T.class_of(Integer).foo
 
 # This one is weird and kind of tricky to change: https://github.com/sorbet/sorbet/issues/3427
-puts (T.proc.void + 1) # error: Method `+` does not exist on `T.class_of(<DeclBuilderForProcs>)`
+puts (T.proc.void + 1) # error: Method `+` does not exist on `T.class_of(T.proc)`

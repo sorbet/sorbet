@@ -148,14 +148,14 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         int i = 0;
         for (cfg::Binding &bind : bb->exprs) {
             i++;
-            if (!current.isDead) {
+            if (!current.isDead || !ctx.state.lspQuery.isEmpty()) {
                 current.ensureGoodAssignTarget(ctx, bind.bind.variable);
                 bind.bind.type =
                     current.processBinding(ctx, *cfg, bind, bb->outerLoops, bind.bind.variable.minLoops(*cfg),
                                            knowledgeFilter, *constr, methodReturnType);
                 if (cfg::isa_instruction<cfg::Send>(bind.value.get())) {
                     totalSendCount++;
-                    if (bind.bind.type && !bind.bind.type->isUntyped()) {
+                    if (bind.bind.type && !bind.bind.type.isUntyped()) {
                         typedSendCount++;
                     } else if (bind.bind.type->hasUntyped()) {
                         DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type->untypedBlame().rawId()););
@@ -166,15 +166,15 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 }
                 ENFORCE(bind.bind.type);
                 bind.bind.type->sanityCheck(ctx);
-                if (bind.bind.type->isBottom()) {
+                if (bind.bind.type.isBottom()) {
                     current.isDead = true;
                     madeBlockDead = core::Loc(ctx.file, bind.loc);
                 }
-                if (current.isDead) {
+                if (current.isDead && bb->firstDeadInstructionIdx == -1) {
                     // this can also be result of evaluating an instruction, e.g. an always false hard_assert
                     bb->firstDeadInstructionIdx = i;
                 }
-            } else if (current.isDead && !bind.value->isSynthetic) {
+            } else if (ctx.state.lspQuery.isEmpty() && current.isDead && !bind.value->isSynthetic) {
                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
                     e.setHeader("This code is unreachable");
                     e.addErrorLine(madeBlockDead, "This expression always raises or can never be computed");

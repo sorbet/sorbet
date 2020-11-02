@@ -30,25 +30,29 @@ module T::NonForcingConstants
 
         current_klass = Object
         current_prefix = ''
-      else
-        if current_klass.autoload?(part)
-          # There's an autoload registered for that constant, which means it's not
-          # yet loaded. `value` can't be an instance of something not yet loaded.
-          return false
-        end
 
-        # Sorbet guarantees that the string is an absolutely resolved name.
-        search_inheritance_chain = false
-        if !current_klass.const_defined?(part, search_inheritance_chain)
-          return false
-        end
+        # if this had a :: prefix, then there's no more loading to
+        # do---skip to the next one
+        next if part == ""
+      end
 
-        current_klass = current_klass.const_get(part)
-        current_prefix = "#{current_prefix}::#{part}"
+      if current_klass.autoload?(part)
+        # There's an autoload registered for that constant, which means it's not
+        # yet loaded. `value` can't be an instance of something not yet loaded.
+        return false
+      end
 
-        if !Module.===(current_klass)
-          raise ArgumentError.new("#{current_prefix} is not a class or module")
-        end
+      # Sorbet guarantees that the string is an absolutely resolved name.
+      search_inheritance_chain = false
+      if !current_klass.const_defined?(part, search_inheritance_chain)
+        return false
+      end
+
+      current_klass = current_klass.const_get(part)
+      current_prefix = "#{current_prefix}::#{part}"
+
+      if !Module.===(current_klass)
+        raise ArgumentError.new("#{current_prefix} is not a class or module")
       end
     end
 

@@ -83,7 +83,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             presentCont = joinBlocks(cctx, presentCont, defaultCont);
         }
 
-        cont = walk(cctx.withTarget(retSym), md.rhs.get(), presentCont);
+        cont = walk(cctx.withTarget(retSym), md.rhs, presentCont);
     }
     // Past this point, res->localVariables is a fixed size.
 

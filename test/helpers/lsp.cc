@@ -214,12 +214,16 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     CHECK(capabilities.documentSymbolProvider.value_or(false));
     CHECK(capabilities.workspaceSymbolProvider.value_or(false));
     CHECK(capabilities.codeActionProvider.has_value());
+    CHECK(capabilities.renameProvider.has_value());
     CHECK_FALSE(capabilities.codeLensProvider.has_value());
-    CHECK_FALSE(capabilities.documentFormattingProvider.has_value());
+    if (rubyfmt_enabled) {
+        CHECK(capabilities.documentFormattingProvider.value_or(false));
+    } else {
+        CHECK_FALSE(capabilities.documentFormattingProvider.value_or(false));
+    }
     CHECK_FALSE(capabilities.documentRangeFormattingProvider.has_value());
     CHECK_FALSE(capabilities.documentRangeFormattingProvider.has_value());
     CHECK_FALSE(capabilities.documentOnTypeFormattingProvider.has_value());
-    CHECK_FALSE(capabilities.renameProvider.has_value());
     CHECK_FALSE(capabilities.documentLinkProvider.has_value());
     CHECK_FALSE(capabilities.executeCommandProvider.has_value());
     CHECK_FALSE(capabilities.workspace.has_value());
@@ -276,6 +280,81 @@ optional<const PublishDiagnosticsParams *> getPublishDiagnosticParams(const Noti
         return nullopt;
     }
     return (*publishDiagnosticParams).get();
+}
+
+unique_ptr<PrepareRenameResult> doTextDocumentPrepareRename(LSPWrapper &lspWrapper, const Range &range, int &nextId,
+                                                            string_view filename) {
+    auto uri = filePathToUri(lspWrapper.config(), filename);
+    auto id = nextId++;
+    auto params =
+        make_unique<TextDocumentPositionParams>(make_unique<TextDocumentIdentifier>(uri), range.start->copy());
+    auto msg = make_unique<LSPMessage>(
+        make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentPrepareRename, move(params)));
+    auto responses = getLSPResponsesFor(lspWrapper, move(msg));
+    if (responses.size() != 1) {
+        FAIL_CHECK("Expected to get 1 response");
+        return nullptr;
+    }
+
+    auto &responseMsg = responses.at(0);
+    if (!responseMsg->isResponse()) {
+        FAIL_CHECK("Expected response to actually be a response.");
+    }
+
+    auto &response = responseMsg->asResponse();
+    if (!response.result.has_value()) {
+        FAIL_CHECK("Expected result to have a value.");
+    }
+
+    auto &result = get<variant<JSONNullObject, unique_ptr<PrepareRenameResult>>>(*response.result);
+    if (get_if<JSONNullObject>(&result) != nullptr) {
+        return nullptr;
+    }
+
+    return move(get<unique_ptr<PrepareRenameResult>>(result));
+}
+
+unique_ptr<WorkspaceEdit> doTextDocumentRename(LSPWrapper &lspWrapper, const Range &range, int &nextId,
+                                               string_view filename, string newName, string expectedErrorMessage) {
+    auto uri = filePathToUri(lspWrapper.config(), filename);
+    auto id = nextId++;
+
+    auto params = make_unique<RenameParams>(make_unique<TextDocumentIdentifier>(uri), range.start->copy(), newName);
+    auto msg =
+        make_unique<LSPMessage>(make_unique<RequestMessage>("2.0", id, LSPMethod::TextDocumentRename, move(params)));
+    auto responses = getLSPResponsesFor(lspWrapper, move(msg));
+    if (responses.size() != 1) {
+        FAIL_CHECK("Expected to get 1 response");
+        return nullptr;
+    }
+    auto &responseMsg = responses.at(0);
+    if (!responseMsg->isResponse()) {
+        FAIL_CHECK("Expected response to actually be a response.");
+    }
+    auto &response = responseMsg->asResponse();
+    if (response.error.has_value()) {
+        if (expectedErrorMessage.empty()) {
+            return nullptr;
+        }
+
+        {
+            auto &error = *response.error;
+            INFO(fmt::format("Expected an error message containing `{}`, but received:\n{}", expectedErrorMessage,
+                             error->message));
+            REQUIRE_NE(error->message.find(expectedErrorMessage), string::npos);
+        }
+    }
+
+    if (!response.result.has_value()) {
+        FAIL_CHECK("Expected result to have a value.");
+    }
+
+    auto &result = get<variant<JSONNullObject, unique_ptr<WorkspaceEdit>>>(*response.result);
+    if (get_if<JSONNullObject>(&result) != nullptr) {
+        return nullptr;
+    }
+
+    return move(get<unique_ptr<WorkspaceEdit>>(result));
 }
 
 unique_ptr<CompletionList> doTextDocumentCompletion(LSPWrapper &lspWrapper, const Range &range, int &nextId,
@@ -423,6 +502,21 @@ vector<unique_ptr<LSPMessage>> getLSPResponsesFor(LSPWrapper &wrapper, unique_pt
     vector<unique_ptr<LSPMessage>> messages;
     messages.push_back(move(message));
     return getLSPResponsesFor(wrapper, move(messages));
+}
+
+string applyEdit(string_view source, const core::File &file, const Range &range, string_view newText) {
+    auto beginLine = static_cast<u4>(range.start->line + 1);
+    auto beginCol = static_cast<u4>(range.start->character + 1);
+    auto beginOffset = core::Loc::pos2Offset(file, {beginLine, beginCol}).value();
+
+    auto endLine = static_cast<u4>(range.end->line + 1);
+    auto endCol = static_cast<u4>(range.end->character + 1);
+    auto endOffset = core::Loc::pos2Offset(file, {endLine, endCol}).value();
+
+    string actualEditedFileContents = string(source);
+    actualEditedFileContents.replace(beginOffset, endOffset - beginOffset, newText);
+
+    return actualEditedFileContents;
 }
 
 } // namespace sorbet::test

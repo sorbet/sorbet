@@ -27,7 +27,8 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->documentHighlightProvider = opts.lspDocumentHighlightEnabled;
     serverCap->hoverProvider = true;
     serverCap->referencesProvider = true;
-    serverCap->implementationProvider = true;
+    serverCap->implementationProvider = opts.lspGoToImplementationEnabled;
+    serverCap->documentFormattingProvider = rubyfmt_enabled && opts.lspDocumentFormatRubyfmtEnabled;
 
     auto codeActionProvider = make_unique<CodeActionOptions>();
     codeActionProvider->codeActionKinds = {CodeActionKind::Quickfix, CodeActionKind::SourceFixAllSorbet};
@@ -37,6 +38,10 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
         auto sigHelpProvider = make_unique<SignatureHelpOptions>();
         sigHelpProvider->triggerCharacters = {"(", ","};
         serverCap->signatureHelpProvider = move(sigHelpProvider);
+    }
+
+    if (opts.lspRenameEnabled) {
+        serverCap->renameProvider = make_unique<RenameOptions>(true);
     }
 
     auto completionProvider = make_unique<CompletionOptions>();

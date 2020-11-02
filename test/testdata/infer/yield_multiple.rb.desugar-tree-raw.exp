@@ -12,6 +12,7 @@ ClassDef{
       }
       fun = <U extend>
       block = nullptr
+      pos_args = 1
       args = [
         UnresolvedConstantLit{
           scope = UnresolvedConstantLit{
@@ -38,66 +39,58 @@ ClassDef{
             }
             fun = <U params>
             block = nullptr
+            pos_args = 0
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"blk" }
-                    value = Send{
-                      recv = Send{
-                        recv = Send{
-                          recv = UnresolvedConstantLit{
-                            scope = EmptyTree
-                            cnst = <C <U T>>
-                          }
-                          fun = <U proc>
-                          block = nullptr
-                          args = [
-                          ]
-                        }
-                        fun = <U params>
-                        block = nullptr
-                        args = [
-                          Hash{
-                            pairs = [
-                              [
-                                key = Literal{ value = :"x" }
-                                value = UnresolvedConstantLit{
-                                  scope = EmptyTree
-                                  cnst = <C <U Integer>>
-                                }
-                              ]
-                              [
-                                key = Literal{ value = :"y" }
-                                value = UnresolvedConstantLit{
-                                  scope = EmptyTree
-                                  cnst = <C <U Symbol>>
-                                }
-                              ]
-                            ]
-                          }
-                        ]
-                      }
-                      fun = <U returns>
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <C <U Integer>>
-                        }
-                      ]
+              Literal{ value = :"blk" }
+              Send{
+                recv = Send{
+                  recv = Send{
+                    recv = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U T>>
+                    }
+                    fun = <U proc>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                  fun = <U params>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                    Literal{ value = :"x" }
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U Integer>>
+                    }
+                    Literal{ value = :"y" }
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U Symbol>>
                     }
                   ]
+                }
+                fun = <U returns>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U Integer>>
+                  }
                 ]
               }
             ]
           }
           fun = <U void>
           block = nullptr
+          pos_args = 0
           args = [
           ]
         }
       }
+      pos_args = 0
       args = [
       ]
     }
@@ -118,6 +111,7 @@ ClassDef{
             }
             fun = <U call>
             block = nullptr
+            pos_args = 2
             args = [
               Literal{ value = 1 }
               Literal{ value = :"hi" }
@@ -131,6 +125,7 @@ ClassDef{
           }
           fun = <U call>
           block = nullptr
+          pos_args = 2
           args = [
             Literal{ value = 1 }
             Literal{ value = :"hi" }

@@ -23,7 +23,9 @@ class TestProc
     params(
       x: T.proc, # error: Malformed T.proc: You must specify a return type
       y: T.proc(0).returns(Integer), # error: Too many arguments provided for method `T.proc`. Expected: `0`, got: `1`
-      z: T.proc.params({x: Integer}).returns(0), # error: Unsupported type syntax
+      z: T.proc.params({x: Integer}).returns(0),
+                                           # ^ error: Unsupported type syntax
+       # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `params` expects keyword arguments
       w: T.proc.params(x: :f).returns(Integer), # error: Unsupported type syntax
     ).returns(NilClass)
   end

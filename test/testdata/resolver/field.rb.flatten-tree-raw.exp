@@ -41,6 +41,7 @@ InsSeq{
             }
             fun = <U keep_def>
             block = nullptr
+            pos_args = 2
             args = [
               Local{
                 localVariable = <U <self>>

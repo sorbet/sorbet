@@ -43,7 +43,7 @@ Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method
 
 // This returns true if `sub` is a subtype of `super`, but it also returns true if either one is `nullptr` or if either
 // one is not fully defined. This is really just a useful helper function for this module: do not use it elsewhere.
-bool checkSubtype(const core::Context ctx, core::TypePtr sub, core::TypePtr super) {
+bool checkSubtype(const core::Context ctx, const core::TypePtr &sub, const core::TypePtr &super) {
     if (sub == nullptr || super == nullptr) {
         return true;
     }
@@ -349,15 +349,15 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
 core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef *classDef,
                                 const core::SymbolRef ancestor) {
     for (const auto &anc : classDef->ancestors) {
-        const auto ancConst = ast::cast_tree_const<ast::ConstantLit>(anc);
+        const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
         if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
-            return anc->loc;
+            return anc.loc();
         }
     }
     for (const auto &anc : classDef->singletonAncestors) {
-        const auto ancConst = ast::cast_tree_const<ast::ConstantLit>(anc);
+        const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
         if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
-            return anc->loc;
+            return anc.loc();
         }
     }
     // give up
@@ -581,7 +581,7 @@ private:
 
 public:
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto *classDef = ast::cast_tree_const<ast::ClassDef>(tree);
+        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
         auto sym = classDef->symbol;
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         validateTStructNotGrandparent(ctx, sym);

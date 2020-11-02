@@ -78,34 +78,34 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
 
     auto *rhs = ast::cast_tree<ast::Send>(asgn->rhs);
     if (rhs == nullptr) {
-        return badConst(ctx, stat->loc, klass->loc);
+        return badConst(ctx, stat.loc(), klass->loc);
     }
 
     if (rhs->fun != core::Names::selfNew() && rhs->fun != core::Names::let()) {
-        return badConst(ctx, stat->loc, klass->loc);
+        return badConst(ctx, stat.loc(), klass->loc);
     }
 
     if (rhs->fun == core::Names::selfNew() && !ast::MK::isMagicClass(rhs->recv)) {
-        return badConst(ctx, stat->loc, klass->loc);
+        return badConst(ctx, stat.loc(), klass->loc);
     }
 
     if (rhs->fun == core::Names::let()) {
         auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(rhs->recv);
         if (recv == nullptr) {
-            return badConst(ctx, stat->loc, klass->loc);
+            return badConst(ctx, stat.loc(), klass->loc);
         }
 
         if (rhs->args.size() != 2) {
-            return badConst(ctx, stat->loc, klass->loc);
+            return badConst(ctx, stat.loc(), klass->loc);
         }
 
         auto arg0 = ast::cast_tree<ast::Send>(rhs->args[0]);
         if (arg0 == nullptr) {
-            return badConst(ctx, stat->loc, klass->loc);
+            return badConst(ctx, stat.loc(), klass->loc);
         }
 
         if (!ast::MK::isSelfNew(arg0)) {
-            return badConst(ctx, stat->loc, klass->loc);
+            return badConst(ctx, stat.loc(), klass->loc);
         }
     }
 
@@ -116,7 +116,7 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
     // So we're good to process this thing as a new T::Enum value.
 
     if (fromWhere != FromWhere::Inside) {
-        if (auto e = ctx.beginError(stat->loc, core::errors::Rewriter::TEnumOutsideEnumsDo)) {
+        if (auto e = ctx.beginError(stat.loc(), core::errors::Rewriter::TEnumOutsideEnumsDo)) {
             e.setHeader("Definition of enum value `{}` must be within the `{}` block for this `{}`",
                         lhs->cnst.show(ctx), "enums do", "T::Enum");
             e.addErrorLine(klass->declLoc, "Enclosing definition here");
@@ -128,7 +128,7 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
     ast::ClassDef::ANCESTORS_store parent;
     parent.emplace_back(klass->name.deepCopy());
     ast::ClassDef::RHS_store classRhs;
-    auto classDef = ast::MK::Class(stat->loc, core::Loc(ctx.file, stat->loc), classCnst.deepCopy(), std::move(parent),
+    auto classDef = ast::MK::Class(stat.loc(), core::Loc(ctx.file, stat.loc()), classCnst.deepCopy(), std::move(parent),
                                    std::move(classRhs));
 
     ast::Send::ARGS_store args;
@@ -143,13 +143,17 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
         args.emplace_back(std::move(arg));
     }
 
+    // Remove one from the number of positional arguments to account for the self param to <Magic>.<self-new>
+    auto numPosArgs = rhs->numPosArgs - 1;
+
     ast::Send::Flags flags = {};
     flags.isPrivateOk = true;
     auto singletonAsgn = ast::MK::Assign(
-        stat->loc, std::move(asgn->lhs),
-        ast::MK::Send2(stat->loc, ast::MK::Constant(stat->loc, core::Symbols::T()), core::Names::uncheckedLet(),
-                       ast::MK::Send(stat->loc, classCnst.deepCopy(), core::Names::new_(), std::move(args), flags),
-                       std::move(classCnst)));
+        stat.loc(), std::move(asgn->lhs),
+        ast::MK::Send2(
+            stat.loc(), ast::MK::Constant(stat.loc(), core::Symbols::T()), core::Names::uncheckedLet(),
+            ast::MK::Send(stat.loc(), classCnst.deepCopy(), core::Names::new_(), numPosArgs, std::move(args), flags),
+            std::move(classCnst)));
     vector<ast::TreePtr> result;
     result.emplace_back(std::move(classDef));
     result.emplace_back(std::move(singletonAsgn));

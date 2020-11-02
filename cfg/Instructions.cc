@@ -69,10 +69,14 @@ string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) 
     return fmt::format("LoadSelf {{}}", spacesForTabLevel(tabs));
 }
 
-Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, const InlinedVector<LocalRef, 2> &args,
-           InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk, const shared_ptr<core::SendAndBlockLink> &link)
-    : recv(recv), fun(fun), receiverLoc(receiverLoc), argLocs(std::move(argLocs)), isPrivateOk(isPrivateOk),
-      link(move(link)) {
+Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, u2 numPosArgs,
+           const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk,
+           const shared_ptr<core::SendAndBlockLink> &link)
+    : recv(recv), fun(fun), receiverLoc(receiverLoc), numPosArgs{numPosArgs}, argLocs(std::move(argLocs)),
+      isPrivateOk(isPrivateOk), link(move(link)) {
+    ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
+            args.size());
+
     this->args.resize(args.size());
     int i = 0;
     for (const auto &e : args) {
@@ -91,7 +95,7 @@ string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
     string res;
     typecase(
         this->value.get(), [&](core::LiteralType *l) { res = l->showValue(gs); },
-        [&](core::ClassType *l) {
+        [&](const core::ClassType *l) {
             if (l->symbol == core::Symbols::NilClass()) {
                 res = "nil";
             } else if (l->symbol == core::Symbols::FalseClass()) {
@@ -102,7 +106,7 @@ string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
                 res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0));
             }
         },
-        [&](core::Type *t) { res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0)); });
+        [&](const core::Type *t) { res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0)); });
     return res;
 }
 

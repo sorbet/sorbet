@@ -40,3 +40,15 @@ def has_kwargs(a:, b:, c:)
 end
 
 has_kwargs({}.merge(a: 1).merge(b: 3).merge(c: 4))
+
+
+class Key; end
+
+def has_opts_hash(opts={}); end
+
+key = Key.new
+
+# Exercise non-symbol values being used as keyword args
+has_opts_hash(**{a: 10}.merge(key => "value"))
+
+has_opts_hash(key => "value")

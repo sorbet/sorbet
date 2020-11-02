@@ -36,7 +36,6 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.autocorrect, opts.autocorrect);
     CHECK_EQ(empty.waitForDebugger, opts.waitForDebugger);
     CHECK_EQ(empty.skipRewriterPasses, opts.skipRewriterPasses);
-    CHECK_EQ(empty.suggestRuntimeProfiledType, opts.suggestRuntimeProfiledType);
     CHECK_EQ(empty.threads, opts.threads);
     CHECK_EQ(empty.logLevel, opts.logLevel);
     CHECK_EQ(empty.autogenVersion, opts.autogenVersion);
@@ -76,9 +75,11 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.lspDocumentHighlightEnabled, opts.lspDocumentHighlightEnabled);
     CHECK_EQ(empty.lspSignatureHelpEnabled, opts.lspSignatureHelpEnabled);
     CHECK_EQ(empty.lspGoToImplementationEnabled, opts.lspGoToImplementationEnabled);
+    CHECK_EQ(empty.lspDocumentFormatRubyfmtEnabled, opts.lspDocumentFormatRubyfmtEnabled);
     CHECK_EQ(empty.inlineInput, opts.inlineInput);
     CHECK_EQ(empty.debugLogFile, opts.debugLogFile);
     CHECK_EQ(empty.webTraceFile, opts.webTraceFile);
     CHECK_EQ(empty.stripeMode, opts.stripeMode);
     CHECK_EQ(empty.stripePackages, opts.stripePackages);
+    CHECK_EQ(empty.lspRenameEnabled, opts.lspRenameEnabled);
 }

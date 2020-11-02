@@ -144,7 +144,6 @@ struct Options {
     bool autocorrect = false;
     bool waitForDebugger = false;
     bool skipRewriterPasses = false;
-    bool suggestRuntimeProfiledType = false;
     bool censorForSnapshotTests = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
@@ -210,8 +209,10 @@ struct Options {
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspDocumentHighlightEnabled = false;
     bool lspDocumentSymbolEnabled = false;
+    bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspGoToImplementationEnabled = true;
+    bool lspRenameEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;

@@ -56,13 +56,13 @@ vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send
     auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     enc_name = name.prepend(ctx, "encrypted_");
 
-    ast::Hash *rules = nullptr;
+    ast::TreePtr rules;
     if (!send->args.empty()) {
-        rules = ast::cast_tree<ast::Hash>(send->args.back());
+        rules = ASTUtil::mkKwArgsHash(send);
     }
 
-    if (rules) {
-        if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
+    if (auto *hash = ast::cast_tree<ast::Hash>(rules)) {
+        if (ASTUtil::hasTruthyHashValue(ctx, *hash, core::Names::immutable())) {
             isImmutable = true;
         }
     }
@@ -71,24 +71,22 @@ vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send
 
     // Compute the getters
 
-    stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), mkNilableString(loc)));
+    stats.emplace_back(ast::MK::Sig(loc, {}, mkNilableString(loc)));
     stats.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
 
-    stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), mkNilableEncryptedValue(ctx, loc)));
+    stats.emplace_back(ast::MK::Sig(loc, {}, mkNilableEncryptedValue(ctx, loc)));
     stats.emplace_back(ASTUtil::mkGet(ctx, loc, enc_name, ast::MK::RaiseUnimplemented(loc)));
     core::NameRef setName = name.addEq(ctx);
     core::NameRef setEncName = enc_name.addEq(ctx);
 
     // Compute the setter
     if (!isImmutable) {
-        stats.emplace_back(
-            ast::MK::Sig(loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableString(loc)),
-                         mkNilableString(loc)));
+        stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableString(loc),
+                                         mkNilableString(loc)));
         stats.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
 
-        stats.emplace_back(ast::MK::Sig(
-            loc, ast::MK::Hash1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()), mkNilableEncryptedValue(ctx, loc)),
-            mkNilableEncryptedValue(ctx, loc)));
+        stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::arg0()),
+                                         mkNilableEncryptedValue(ctx, loc), mkNilableEncryptedValue(ctx, loc)));
         stats.emplace_back(ASTUtil::mkSet(ctx, loc, setEncName, nameLoc, ast::MK::RaiseUnimplemented(loc)));
     }
 

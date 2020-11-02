@@ -78,7 +78,7 @@ module Kernel
     )
     .returns(T.nilable(T::Array[String]))
   end
-  sig {params.returns(T::Array[String])}
+  sig {returns(T::Array[String])}
   def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
 
   # Returns the current execution stack---an array containing strings in the
@@ -420,7 +420,7 @@ module Kernel
   sig {returns(T.nilable(Integer))}
   sig do
     params(
-        blk: T.proc.params().returns(BasicObject),
+        blk: T.proc.returns(BasicObject),
     )
     .returns(T.nilable(Integer))
   end
@@ -1027,7 +1027,7 @@ module Kernel
   # ```
   sig do
     params(
-        blk: T.proc.params.returns(BasicObject),
+        blk: T.proc.returns(BasicObject),
     )
     .returns(Proc)
   end
@@ -1561,7 +1561,7 @@ module Kernel
   #   puts enum.next
   # } #=> :ok
   # ```
-  sig {params(blk: T.proc.params.returns(T.untyped)).returns(T.noreturn)}
+  sig {params(blk: T.proc.returns(T.untyped)).returns(T.noreturn)}
   sig {returns(T::Enumerator[T.untyped])}
   def loop(&blk); end
 

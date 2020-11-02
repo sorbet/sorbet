@@ -35,7 +35,7 @@ vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     for (auto tm : typeMembers()) {
         auto tmData = tm.data(gs);
         if (tmData->isFixed()) {
-            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
+            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
             ENFORCE(lambdaParam != nullptr);
             targs.emplace_back(lambdaParam->upperBound);
         } else {
@@ -48,66 +48,64 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
     ENFORCE(isClassOrModule());
     // todo: in dotty it made sense to cache those.
     if (typeMembers().empty()) {
-        return externalType(gs);
+        return externalType();
     } else {
         return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
     }
 }
 
-TypePtr Symbol::externalType(const GlobalState &gs) const {
-    ENFORCE(isClassOrModule());
-    if (!resultType) {
-        // note that sometimes resultType is set externally to not be a result of this computation
-        // this happens e.g. in case this is a stub class
-        TypePtr newResultType;
-        auto ref = this->ref(gs);
-        if (typeMembers().empty()) {
-            newResultType = make_type<ClassType>(ref);
-        } else {
-            vector<TypePtr> targs;
-            targs.reserve(typeMembers().size());
+TypePtr Symbol::externalType() const {
+    ENFORCE_NO_TIMER(resultType);
+    return resultType;
+}
 
-            // Special-case covariant stdlib generics to have their types
-            // defaulted to `T.untyped`. This set *should not* grow over time.
-            bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
-                                   ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
-                                   ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
+TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
+    ENFORCE_NO_TIMER(isClassOrModule());
+    if (resultType != nullptr) {
+        return resultType;
+    }
 
-            for (auto &tm : typeMembers()) {
-                auto tmData = tm.data(gs);
-                auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType.get());
-                ENFORCE(lambdaParam != nullptr);
+    // note that sometimes resultType is set externally to not be a result of this computation
+    // this happens e.g. in case this is a stub class
+    auto ref = this->ref(gs);
+    if (typeMembers().empty()) {
+        resultType = make_type<ClassType>(ref);
+    } else {
+        vector<TypePtr> targs;
+        targs.reserve(typeMembers().size());
 
-                if (isStdlibGeneric) {
-                    // For backwards compatibility, instantiate stdlib generics
-                    // with T.untyped.
-                    targs.emplace_back(Types::untyped(gs, ref));
-                } else if (tmData->isFixed() || tmData->isCovariant()) {
-                    // Default fixed or covariant parameters to their upper
-                    // bound.
-                    targs.emplace_back(lambdaParam->upperBound);
-                } else if (tmData->isInvariant()) {
-                    // We instantiate Invariant type members as T.untyped as
-                    // this will behave a bit like a unification variable with
-                    // Types::glb.
-                    targs.emplace_back(Types::untyped(gs, ref));
-                } else {
-                    // The remaining case is a contravariant parameter, which
-                    // gets defaulted to its lower bound.
-                    targs.emplace_back(lambdaParam->lowerBound);
-                }
+        // Special-case covariant stdlib generics to have their types
+        // defaulted to `T.untyped`. This set *should not* grow over time.
+        bool isStdlibGeneric = ref == core::Symbols::Hash() || ref == core::Symbols::Array() ||
+                               ref == core::Symbols::Set() || ref == core::Symbols::Range() ||
+                               ref == core::Symbols::Enumerable() || ref == core::Symbols::Enumerator();
+
+        for (auto &tm : typeMembers()) {
+            auto tmData = tm.data(gs);
+            auto *lambdaParam = cast_type<LambdaParam>(tmData->resultType);
+            ENFORCE(lambdaParam != nullptr);
+
+            if (isStdlibGeneric) {
+                // For backwards compatibility, instantiate stdlib generics
+                // with T.untyped.
+                targs.emplace_back(Types::untyped(gs, ref));
+            } else if (tmData->isFixed() || tmData->isCovariant()) {
+                // Default fixed or covariant parameters to their upper
+                // bound.
+                targs.emplace_back(lambdaParam->upperBound);
+            } else if (tmData->isInvariant()) {
+                // We instantiate Invariant type members as T.untyped as
+                // this will behave a bit like a unification variable with
+                // Types::glb.
+                targs.emplace_back(Types::untyped(gs, ref));
+            } else {
+                // The remaining case is a contravariant parameter, which
+                // gets defaulted to its lower bound.
+                targs.emplace_back(lambdaParam->lowerBound);
             }
+        }
 
-            newResultType = make_type<AppliedType>(ref, targs);
-        }
-        {
-            // this method is supposed to be idempotent. The lines below implement "safe publication" of a value that is
-            // safe to be used in presence of multiple threads running this tion concurrently
-            auto mutableThis = const_cast<Symbol *>(this);
-            shared_ptr<core::Type> current(nullptr);
-            atomic_compare_exchange_weak(&mutableThis->resultType.store, &current, newResultType.store);
-        }
-        return externalType(gs);
+        resultType = make_type<AppliedType>(ref, targs);
     }
     return resultType;
 }
@@ -817,6 +815,11 @@ string Symbol::show(const GlobalState &gs) const {
         }
     }
 
+    // Make sure that we get nice error messages for things involving the proc sig builders.
+    if (this->name == core::Names::Constants::DeclBuilderForProcs()) {
+        return "T.proc";
+    }
+
     if (!this->owner.exists() || this->owner == Symbols::root()) {
         return this->name.data(gs)->show(gs);
     }
@@ -967,23 +970,23 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
 
     auto data = sealedSubclasses.data(ctx);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
-    auto appliedType = cast_type<AppliedType>(data->resultType.get());
+    auto appliedType = cast_type<AppliedType>(data->resultType);
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
     ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
     auto currentClasses = appliedType->targs[0];
 
-    auto iter = currentClasses.get();
-    OrType *orT = nullptr;
-    while ((orT = cast_type<OrType>(iter))) {
-        auto right = cast_type<ClassType>(orT->right.get());
+    const TypePtr *iter = &currentClasses;
+    const OrType *orT = nullptr;
+    while ((orT = cast_type<OrType>(*iter))) {
+        auto right = cast_type<ClassType>(orT->right);
         ENFORCE(left);
         if (right->symbol == classOfSubclass) {
             return;
         }
-        iter = orT->left.get();
+        iter = &orT->left;
     }
-    ENFORCE(isa_type<ClassType>(iter));
-    if (cast_type<ClassType>(iter)->symbol == classOfSubclass) {
+    ENFORCE(isa_type<ClassType>(*iter));
+    if (cast_type<ClassType>(*iter)->symbol == classOfSubclass) {
         return;
     }
     if (currentClasses != core::Types::bottom()) {
@@ -1008,26 +1011,26 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto data = sealedSubclasses.data(gs);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
-    auto appliedType = cast_type<AppliedType>(data->resultType.get());
+    auto appliedType = cast_type<AppliedType>(data->resultType);
     ENFORCE(appliedType != nullptr, "sealedSubclasses should always be AppliedType");
     ENFORCE(appliedType->klass == core::Symbols::Set(), "sealedSubclasses should always be Set");
 
     auto currentClasses = appliedType->targs[0];
-    if (currentClasses->isBottom()) {
+    if (currentClasses.isBottom()) {
         // Declared sealed parent class, but never saw any children.
         return Types::bottom();
     }
 
     auto result = Types::bottom();
-    while (auto orType = cast_type<OrType>(currentClasses.get())) {
-        auto classType = cast_type<ClassType>(orType->right.get());
+    while (auto orType = cast_type<OrType>(currentClasses)) {
+        auto classType = cast_type<ClassType>(orType->right);
         ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
         auto subclass = classType->symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
         result = Types::any(gs, make_type<ClassType>(subclass), result);
         currentClasses = orType->left;
     }
-    auto lastClassType = cast_type<ClassType>(currentClasses.get());
+    auto lastClassType = cast_type<ClassType>(currentClasses);
     ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
     auto subclass = lastClassType->symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
@@ -1037,7 +1040,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 }
 
 SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
-    if (auto alias = cast_type<AliasType>(resultType.get())) {
+    if (auto alias = cast_type<AliasType>(resultType)) {
         if (depthLimit == 0) {
             if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
                 e.setHeader("Too many alias expansions for symbol {}, the alias is either too long or infinite. Next "
@@ -1172,7 +1175,7 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         }
     }
     if (this->isMethod()) {
-        if (isa_type<AliasType>(this->resultType.get())) {
+        if (isa_type<AliasType>(this->resultType)) {
             // If we have an alias method, we should never look at it's arguments;
             // we should instead look at the arguments of whatever we're aliasing.
             ENFORCE_NO_TIMER(this->arguments().empty(), this->show(gs));

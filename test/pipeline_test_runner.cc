@@ -75,11 +75,29 @@ public:
     }
 };
 
-UnorderedSet<string> knownExpectations = {
-    "parse-tree",       "parse-tree-json", "parse-tree-whitequark", "desugar-tree", "desugar-tree-raw", "rewrite-tree",
-    "rewrite-tree-raw", "index-tree",      "index-tree-raw",        "symbol-table", "symbol-table-raw", "name-tree",
-    "name-tree-raw",    "resolve-tree",    "resolve-tree-raw",      "flatten-tree", "flatten-tree-raw", "cfg",
-    "cfg-raw",          "autogen",         "document-symbols",      "package-tree"};
+UnorderedSet<string> knownExpectations = {"parse-tree",
+                                          "parse-tree-json",
+                                          "parse-tree-whitequark",
+                                          "desugar-tree",
+                                          "desugar-tree-raw",
+                                          "rewrite-tree",
+                                          "rewrite-tree-raw",
+                                          "index-tree",
+                                          "index-tree-raw",
+                                          "symbol-table",
+                                          "symbol-table-raw",
+                                          "name-tree",
+                                          "name-tree-raw",
+                                          "resolve-tree",
+                                          "resolve-tree-raw",
+                                          "flatten-tree",
+                                          "flatten-tree-raw",
+                                          "cfg",
+                                          "cfg-raw",
+                                          "autogen",
+                                          "document-symbols",
+                                          "package-tree",
+                                          "document-formatting-rubyfmt"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -224,8 +242,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             desugared = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
         }
 
-        handler.addObserved(*gs, "desugar-tree", [&]() { return desugared.tree->toString(*gs); });
-        handler.addObserved(*gs, "desugar-tree-raw", [&]() { return desugared.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "desugar-tree", [&]() { return desugared.tree.toString(*gs); });
+        handler.addObserved(*gs, "desugar-tree-raw", [&]() { return desugared.tree.showRaw(*gs); });
 
         ast::ParsedFile localNamed;
 
@@ -240,14 +258,14 @@ TEST_CASE("PerPhaseTest") { // NOLINT
                     *gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(desugared.tree)), desugared.file});
             }
 
-            handler.addObserved(*gs, "rewrite-tree", [&]() { return rewriten.tree->toString(*gs); });
-            handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewriten.tree->showRaw(*gs); });
+            handler.addObserved(*gs, "rewrite-tree", [&]() { return rewriten.tree.toString(*gs); });
+            handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return rewriten.tree.showRaw(*gs); });
 
             core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(rewriten)));
 
-            handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree->toString(*gs); });
-            handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree->showRaw(*gs); });
+            handler.addObserved(*gs, "index-tree", [&]() { return localNamed.tree.toString(*gs); });
+            handler.addObserved(*gs, "index-tree-raw", [&]() { return localNamed.tree.showRaw(*gs); });
         } else {
             core::MutableContext ctx(*gs, core::Symbols::root(), desugared.file);
             localNamed = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(desugared)));
@@ -263,7 +281,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         // Packager runs over all trees.
         trees = packager::Packager::run(*gs, *workers, move(trees));
         for (auto &tree : trees) {
-            handler.addObserved(*gs, "package-tree", [&]() { return tree.tree->toString(*gs); });
+            handler.addObserved(*gs, "package-tree", [&]() { return tree.tree.toString(*gs); });
         }
     }
 
@@ -279,8 +297,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             namedTree = testSerialize(*gs, move(vTmp[0]));
         }
 
-        handler.addObserved(*gs, "name-tree", [&]() { return namedTree.tree->toString(*gs); });
-        handler.addObserved(*gs, "name-tree-raw", [&]() { return namedTree.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "name-tree", [&]() { return namedTree.tree.toString(*gs); });
+        handler.addObserved(*gs, "name-tree-raw", [&]() { return namedTree.tree.showRaw(*gs); });
 
         tree = move(namedTree);
     }
@@ -319,8 +337,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     handler.addObserved(*gs, "symbol-table-raw", [&]() { return gs->showRaw(); });
 
     for (auto &resolvedTree : trees) {
-        handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
+        handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
     }
 
     // Simulate what pipeline.cc does: We want to start typeckecking big files first because it helps with better work
@@ -338,8 +356,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         resolvedTree = class_flatten::runOne(ctx, move(resolvedTree));
 
-        handler.addObserved(*gs, "flatten-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.addObserved(*gs, "flatten-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "flatten-tree", [&]() { return resolvedTree.tree.toString(*gs); });
+        handler.addObserved(*gs, "flatten-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
 
         // Don't run typecheck on RBI files.
         if (resolvedTree.file.data(ctx).isRBI()) {
@@ -476,18 +494,18 @@ TEST_CASE("PerPhaseTest") { // NOLINT
 
         core::MutableContext ctx(*gs, core::Symbols::root(), f.file);
         ast::ParsedFile file = testSerialize(*gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), f.file});
-        handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "desguar-tree", [&]() { return file.tree.toString(*gs); });
+        handler.addObserved(*gs, "desugar-tree-raw", [&]() { return file.tree.showRaw(*gs); });
 
         // Rewriter pass
         file = testSerialize(*gs, ast::ParsedFile{rewriter::Rewriter::run(ctx, move(file.tree)), file.file});
-        handler.addObserved(*gs, "rewrite-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "rewrite-tree", [&]() { return file.tree.toString(*gs); });
+        handler.addObserved(*gs, "rewrite-tree-raw", [&]() { return file.tree.showRaw(*gs); });
 
         // local vars
         file = testSerialize(*gs, local_vars::LocalVars::run(ctx, move(file)));
-        handler.addObserved(*gs, "index-tree", [&]() { return file.tree->toString(*gs); });
-        handler.addObserved(*gs, "index-tree-raw", [&]() { return file.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "index-tree", [&]() { return file.tree.toString(*gs); });
+        handler.addObserved(*gs, "index-tree-raw", [&]() { return file.tree.showRaw(*gs); });
 
         newTrees.emplace_back(move(file));
     }
@@ -496,7 +514,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     if (enablePackager) {
         trees = packager::Packager::runIncremental(*gs, move(trees));
         for (auto &tree : trees) {
-            handler.addObserved(*gs, "package-tree", [&]() { return tree.tree->toString(*gs); });
+            handler.addObserved(*gs, "package-tree", [&]() { return tree.tree.toString(*gs); });
         }
     }
 
@@ -509,8 +527,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
             vTmp = move(namer::Namer::run(*gs, move(vTmp), *workers).result());
             tree = testSerialize(*gs, move(vTmp[0]));
 
-            handler.addObserved(*gs, "name-tree", [&]() { return tree.tree->toString(*gs); });
-            handler.addObserved(*gs, "name-tree-raw", [&]() { return tree.tree->showRaw(*gs); });
+            handler.addObserved(*gs, "name-tree", [&]() { return tree.tree.toString(*gs); });
+            handler.addObserved(*gs, "name-tree-raw", [&]() { return tree.tree.showRaw(*gs); });
         }
     }
 
@@ -518,8 +536,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     trees = move(resolver::Resolver::runTreePasses(*gs, move(trees)).result());
 
     for (auto &resolvedTree : trees) {
-        handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree->toString(*gs); });
-        handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree->showRaw(*gs); });
+        handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
+        handler.addObserved(*gs, "resolve-tree-raw", [&]() { return resolvedTree.tree.showRaw(*gs); });
     }
 
     handler.checkExpectations("[stress-incremental] ");

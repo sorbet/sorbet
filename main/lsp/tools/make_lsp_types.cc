@@ -1254,6 +1254,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     // Empty object.
     auto InitializedParams = makeObject("InitializedParams", {}, classTypes);
 
+    auto PrepareRenameResult = makeObject("PrepareRenameResult",
+                                          {
+                                              makeField("range", Range),
+                                              makeField("placeholder", makeOptional(JSONString)),
+                                          },
+                                          classTypes);
+
     /* Sorbet LSP extensions */
     auto SorbetOperationStatus = makeStrEnum("SorbetOperationStatus", {"start", "end"}, enumTypes);
     auto SorbetShowOperationParams = makeObject("SorbetShowOperationParams",
@@ -1315,37 +1322,42 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
     // N.B.: Only contains LSP methods that Sorbet actually cares about.
     // All others are ignored.
     auto LSPMethod = makeStrEnum("LSPMethod",
-                                 {"__GETCOUNTERS__",
-                                  "__PAUSE__",
-                                  "__RESUME__",
-                                  "$/cancelRequest",
-                                  "exit",
-                                  "initialize",
-                                  "initialized",
-                                  "shutdown",
-                                  "sorbet/error",
-                                  "sorbet/fence",
-                                  "sorbet/readFile",
-                                  "sorbet/showOperation",
-                                  "sorbet/typecheckRunInfo",
-                                  "sorbet/watchmanFileChange",
-                                  "sorbet/workspaceEdit",
-                                  "textDocument/codeAction",
-                                  "textDocument/completion",
-                                  "textDocument/definition",
-                                  "textDocument/typeDefinition",
-                                  "textDocument/didChange",
-                                  "textDocument/didClose",
-                                  "textDocument/didOpen",
-                                  "textDocument/documentHighlight",
-                                  "textDocument/documentSymbol",
-                                  "textDocument/hover",
-                                  "textDocument/publishDiagnostics",
-                                  "textDocument/references",
-                                  "textDocument/signatureHelp",
-                                  "window/showMessage",
-                                  "workspace/symbol",
-                                  "textDocument/implementation"},
+                                 {
+                                     "__GETCOUNTERS__",
+                                     "__PAUSE__",
+                                     "__RESUME__",
+                                     "$/cancelRequest",
+                                     "exit",
+                                     "initialize",
+                                     "initialized",
+                                     "shutdown",
+                                     "sorbet/error",
+                                     "sorbet/fence",
+                                     "sorbet/readFile",
+                                     "sorbet/showOperation",
+                                     "sorbet/typecheckRunInfo",
+                                     "sorbet/watchmanFileChange",
+                                     "sorbet/workspaceEdit",
+                                     "textDocument/codeAction",
+                                     "textDocument/completion",
+                                     "textDocument/definition",
+                                     "textDocument/typeDefinition",
+                                     "textDocument/didChange",
+                                     "textDocument/didClose",
+                                     "textDocument/didOpen",
+                                     "textDocument/documentHighlight",
+                                     "textDocument/documentSymbol",
+                                     "textDocument/formatting",
+                                     "textDocument/hover",
+                                     "textDocument/prepareRename",
+                                     "textDocument/publishDiagnostics",
+                                     "textDocument/references",
+                                     "textDocument/rename",
+                                     "textDocument/signatureHelp",
+                                     "window/showMessage",
+                                     "workspace/symbol",
+                                     "textDocument/implementation",
+                                 },
                                  enumTypes);
 
     auto methodField = makeField("method", LSPMethod);
@@ -1360,10 +1372,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                                 {"textDocument/typeDefinition", TextDocumentPositionParams},
                                                 {"textDocument/hover", TextDocumentPositionParams},
                                                 {"textDocument/completion", CompletionParams},
+                                                {"textDocument/prepareRename", TextDocumentPositionParams},
                                                 {"textDocument/references", ReferenceParams},
+                                                {"textDocument/rename", RenameParams},
                                                 {"textDocument/signatureHelp", TextDocumentPositionParams},
                                                 {"textDocument/codeAction", CodeActionParams},
                                                 {"textDocument/implementation", ImplementationParams},
+                                                {"textDocument/formatting", DocumentFormattingParams},
                                                 {"workspace/symbol", WorkspaceSymbolParams},
                                                 {"sorbet/error", SorbetErrorParams},
                                                 {"sorbet/readFile", TextDocumentIdentifier},
@@ -1394,8 +1409,11 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
             // CompletionItem[] | CompletionList | null
             // Sorbet only sends CompletionList.
             {"textDocument/completion", CompletionList},
+            {"textDocument/prepareRename", makeVariant({JSONNull, PrepareRenameResult})},
             {"textDocument/references", makeVariant({JSONNull, makeArray(Location)})},
+            {"textDocument/rename", makeVariant({JSONNull, WorkspaceEdit})},
             {"textDocument/signatureHelp", makeVariant({JSONNull, SignatureHelp})},
+            {"textDocument/formatting", makeVariant({JSONNull, makeArray(TextEdit)})},
             // (CodeAction | Command)[] | null
             // Sorbet only sends CodeAction[].
             {"textDocument/codeAction", makeVariant({JSONNull, makeArray(CodeAction)})},

@@ -164,7 +164,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
 
     vector<ast::ParsedFile> indexed;
     Timer timeit(config->logger, "initial_index");
-    ShowOperation op(*config, "Indexing", "Indexing files...");
+    ShowOperation op(*config, ShowOperation::Kind::Indexing);
     vector<core::FileRef> inputFiles;
     unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
     {
@@ -319,6 +319,15 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     pendingTypecheckUpdates.preemptionsExpected = 0;
 
     return update;
+}
+
+core::FileRef LSPIndexer::uri2FileRef(string_view uri) const {
+    return config->uri2FileRef(*initialGS, uri);
+}
+
+const core::File &LSPIndexer::getFile(core::FileRef fref) const {
+    ENFORCE(fref.exists());
+    return fref.data(*initialGS);
 }
 
 } // namespace sorbet::realmain::lsp

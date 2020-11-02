@@ -373,12 +373,12 @@ class SymbolFinder {
 
     // Returns index to foundDefs containing the given name. Recursively inserts class refs for its owners.
     FoundDefinitionRef squashNames(core::Context ctx, const ast::TreePtr &node) {
-        if (auto *id = ast::cast_tree_const<ast::ConstantLit>(node)) {
+        if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol.data(ctx)->dealias(ctx);
             ENFORCE(sym.exists());
             return foundDefs->addSymbol(sym);
-        } else if (auto constLit = ast::cast_tree_const<ast::UnresolvedConstantLit>(node)) {
+        } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
             FoundClassRef found;
             found.owner = squashNames(ctx, constLit->scope);
             found.name = constLit->cnst;
@@ -522,7 +522,7 @@ public:
     }
 
     FoundDefinitionRef fillAssign(core::Context ctx, const ast::Assign &asgn) {
-        auto &lhs = ast::cast_tree_nonnull_const<ast::UnresolvedConstantLit>(asgn.lhs);
+        auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         FoundStaticField found;
         found.owner = getOwner();
@@ -535,8 +535,8 @@ public:
 
     FoundDefinitionRef handleTypeMemberDefinition(core::Context ctx, const ast::Send *send, const ast::Assign &asgn,
                                                   const ast::UnresolvedConstantLit *typeName) {
-        ENFORCE(ast::cast_tree_const<ast::UnresolvedConstantLit>(asgn.lhs) == typeName &&
-                ast::cast_tree_const<ast::Send>(asgn.rhs) ==
+        ENFORCE(ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs) == typeName &&
+                ast::cast_tree<ast::Send>(asgn.rhs) ==
                     send); // this method assumes that `asgn` owns `send` and `typeName`
 
         FoundTypeMember found;
@@ -548,34 +548,41 @@ public:
         found.varianceName = core::NameRef();
         found.isTypeTemplete = send->fun == core::Names::typeTemplate();
 
-        if (send->args.size() > 2) {
+        if (send->numPosArgs > 1) {
             // Too many arguments. Define a static field that we'll use for this type åmember later.
             FoundStaticField staticField;
             staticField.owner = found.owner;
             staticField.name = found.name;
             staticField.asgnLoc = found.asgnLoc;
-            staticField.lhsLoc = asgn.lhs->loc;
+            staticField.lhsLoc = asgn.lhs.loc();
             staticField.isTypeAlias = true;
             return foundDefs->addStaticField(move(staticField));
         }
 
         if (!send->args.empty()) {
-            auto *lit = ast::cast_tree_const<ast::Literal>(send->args[0]);
-            if (lit != nullptr && lit->isSymbol(ctx)) {
-                found.varianceName = lit->asSymbol(ctx);
-                found.litLoc = lit->loc;
+            // If there are positional arguments, there might be a variance annotation
+            if (send->numPosArgs > 0) {
+                auto *lit = ast::cast_tree<ast::Literal>(send->args[0]);
+                if (lit != nullptr && lit->isSymbol(ctx)) {
+                    found.varianceName = lit->asSymbol(ctx);
+                    found.litLoc = lit->loc;
+                }
             }
 
-            if (auto *hash = ast::cast_tree_const<ast::Hash>(send->args.back())) {
-                for (auto &keyExpr : hash->keys) {
-                    auto key = ast::cast_tree_const<ast::Literal>(keyExpr);
-                    core::NameRef name;
-                    if (key != nullptr && key->isSymbol(ctx)) {
-                        switch (key->asSymbol(ctx)._id) {
-                            case core::Names::fixed()._id:
-                                found.isFixed = true;
-                                break;
-                        }
+            auto end = send->args.size();
+            if (send->hasKwSplat()) {
+                end -= 1;
+            }
+
+            // Walk over the keyword args to find bounds annotations
+            for (auto i = send->numPosArgs; i < end; i += 2) {
+                auto *key = ast::cast_tree<ast::Literal>(send->args[i]);
+                core::NameRef name;
+                if (key != nullptr && key->isSymbol(ctx)) {
+                    switch (key->asSymbol(ctx)._id) {
+                        case core::Names::fixed()._id:
+                            found.isFixed = true;
+                            break;
                     }
                 }
             }
@@ -584,7 +591,7 @@ public:
     }
 
     FoundDefinitionRef handleAssignment(core::Context ctx, const ast::Assign &asgn) {
-        auto &send = ast::cast_tree_nonnull_const<ast::Send>(asgn.rhs);
+        auto &send = ast::cast_tree_nonnull<ast::Send>(asgn.rhs);
         auto foundRef = fillAssign(ctx, asgn);
         ENFORCE(foundRef.kind() == DefinitionKind::StaticField);
         auto &staticField = foundRef.staticField(*foundDefs);
@@ -603,7 +610,7 @@ public:
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
         if (send == nullptr) {
             fillAssign(ctx, asgn);
-        } else if (!send->recv->isSelfReference()) {
+        } else if (!send->recv.isSelfReference()) {
             handleAssignment(ctx, asgn);
         } else {
             switch (send->fun._id) {
@@ -1100,7 +1107,8 @@ class SymbolDefiner {
             // T.noreturn here represents the zero-length list of subclasses of this sealed class.
             // We will use T.any to record subclasses when they're resolved.
             vector<core::TypePtr> targs{core::Types::bottom()};
-            sealedSubclasses.data(ctx)->resultType = core::make_type<core::AppliedType>(core::Symbols::Set(), targs);
+            sealedSubclasses.data(ctx)->resultType =
+                core::make_type<core::AppliedType>(core::Symbols::Set(), move(targs));
         }
         if (fun == core::Names::declareInterface() || fun == core::Names::declareAbstract()) {
             symbolData->setClassOrModuleAbstract();
@@ -1312,7 +1320,7 @@ public:
 class TreeSymbolizer {
     friend class Namer;
 
-    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::TreePtr &node) {
+    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::TreePtr &node, bool firstName) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
@@ -1320,17 +1328,17 @@ class TreeSymbolizer {
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
                 if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
-                    if (auto e = ctx.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
+                    if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
                         e.setHeader("Unsupported constant scope");
                     }
                 }
                 // emitted via `class << self` blocks
             } else if (ast::isa_tree<ast::EmptyTree>(node)) {
                 // ::Foo
-            } else if (node->isSelfReference()) {
+            } else if (node.isSelfReference()) {
                 // self::Foo
             } else {
-                if (auto e = ctx.beginError(node->loc, core::errors::Namer::DynamicConstant)) {
+                if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
                     e.setHeader("Dynamic constant references are unsupported");
                 }
             }
@@ -1338,13 +1346,25 @@ class TreeSymbolizer {
             return owner;
         }
 
-        auto newOwner = squashNames(ctx, owner, constLit->scope);
-        core::SymbolRef existing = newOwner.data(ctx)->findMember(ctx, constLit->cnst);
+        const bool firstNameRecursive = false;
+        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
+        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner, constLit->cnst);
+        if (firstName && !existing.exists()) {
+            existing = ctx.state.lookupStaticFieldSymbol(newOwner, constLit->cnst);
+            if (existing.exists()) {
+                existing = existing.data(ctx.state)->dealias(ctx.state);
+            }
+        }
         // NameInserter should have created this symbol.
         ENFORCE(existing.exists());
 
         node = ast::make_tree<ast::ConstantLit>(constLit->loc, existing, std::move(node));
         return existing;
+    }
+
+    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::TreePtr &node) {
+        const bool firstName = true;
+        return squashNamesInner(ctx, owner, node, firstName);
     }
 
     ast::TreePtr arg2Symbol(core::Context ctx, int pos, ast::ParsedArg parsedArg, ast::TreePtr arg) {
@@ -1371,7 +1391,7 @@ class TreeSymbolizer {
         } else {
             return;
         }
-        if (!send->recv->isSelfReference()) {
+        if (!send->recv.isSelfReference()) {
             // ignore `something.include`
             return;
         }
@@ -1396,14 +1416,14 @@ class TreeSymbolizer {
             if (ast::isa_tree<ast::EmptyTree>(arg)) {
                 continue;
             }
-            if (arg->isSelfReference()) {
+            if (arg.isSelfReference()) {
                 dest->emplace_back(arg.deepCopy());
                 continue;
             }
             if (isValidAncestor(arg)) {
                 dest->emplace_back(arg.deepCopy());
             } else {
-                if (auto e = ctx.beginError(arg->loc, core::errors::Namer::AncestorNotConstant)) {
+                if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
                     e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
                 }
                 arg = ast::MK::EmptyTree();
@@ -1412,7 +1432,7 @@ class TreeSymbolizer {
     }
 
     bool isValidAncestor(ast::TreePtr &exp) {
-        if (ast::isa_tree<ast::EmptyTree>(exp) || exp->isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
+        if (ast::isa_tree<ast::EmptyTree>(exp) || exp.isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
             return true;
         }
         if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
@@ -1452,10 +1472,10 @@ public:
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
     bool shouldLeaveAncestorForIDE(const ast::TreePtr &anc) {
         // used in Desugar <-> resolver to signal classes that did not have explicit superclass
-        if (ast::isa_tree<ast::EmptyTree>(anc) || anc->isSelfReference()) {
+        if (ast::isa_tree<ast::EmptyTree>(anc) || anc.isSelfReference()) {
             return false;
         }
-        auto rcl = ast::cast_tree_const<ast::ConstantLit>(anc);
+        auto rcl = ast::cast_tree<ast::ConstantLit>(anc);
         if (rcl && rcl->symbol == core::Symbols::todo()) {
             return false;
         }
@@ -1476,7 +1496,7 @@ public:
             /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
             for (auto &anc : klass.ancestors) {
                 if (!isValidAncestor(anc)) {
-                    if (auto e = ctx.beginError(anc->loc, core::errors::Namer::AncestorNotConstant)) {
+                    if (auto e = ctx.beginError(anc.loc(), core::errors::Namer::AncestorNotConstant)) {
                         e.setHeader("Superclasses must only contain constant literals");
                     }
                     anc = ast::MK::EmptyTree();
@@ -1599,7 +1619,7 @@ public:
         }
 
         if (!send->args.empty()) {
-            if (send->args.size() > 2) {
+            if (send->numPosArgs > 1) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, send->loc),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many args in type definition");
@@ -1615,13 +1635,14 @@ public:
             ENFORCE(onSymbol.exists());
             core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
             ENFORCE(sym.exists());
-            auto lit = ast::cast_tree<ast::Literal>(send->args.front());
-            if (auto *hash = ast::cast_tree<ast::Hash>(send->args.back())) {
+
+            if (send->hasKwArgs()) {
                 bool fixed = false;
                 bool bounded = false;
 
-                for (auto &keyExpr : hash->keys) {
-                    auto key = ast::cast_tree<ast::Literal>(keyExpr);
+                auto [start, end] = send->kwArgsRange();
+                for (auto i = start; i < end; i += 2) {
+                    auto key = ast::cast_tree<ast::Literal>(send->args[i]);
                     if (key != nullptr && key->isSymbol(ctx)) {
                         switch (key->asSymbol(ctx)._id) {
                             case core::Names::fixed()._id:
@@ -1638,7 +1659,7 @@ public:
 
                 // one of fixed or bounds were provided
                 if (fixed != bounded) {
-                    asgn.lhs = ast::MK::Constant(asgn.lhs->loc, sym);
+                    asgn.lhs = ast::MK::Constant(asgn.lhs.loc(), sym);
 
                     // Leave it in the tree for the resolver to chew on.
                     return tree;
@@ -1652,9 +1673,14 @@ public:
                         e.setHeader("Missing required param `{}`", "fixed");
                     }
                 }
-            } else if (send->args.size() != 1 || !lit || !lit->isSymbol(ctx)) {
-                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Invalid param, must be a :symbol");
+            }
+
+            if (send->numPosArgs > 0) {
+                auto *lit = ast::cast_tree<ast::Literal>(send->args.front());
+                if (!lit || !lit->isSymbol(ctx)) {
+                    if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Invalid param, must be a :symbol");
+                    }
                 }
             }
         }
@@ -1675,7 +1701,7 @@ public:
             return handleAssignment(ctx, std::move(tree));
         }
 
-        if (!send->recv->isSelfReference()) {
+        if (!send->recv.isSelfReference()) {
             return handleAssignment(ctx, std::move(tree));
         }
 

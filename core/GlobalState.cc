@@ -623,12 +623,13 @@ void GlobalState::initEmpty() {
     }
     method.data(*this)->resultType = core::make_type<core::ClassType>(core::Symbols::Encoding());
 
-    // Synthesize <DeclBuilderForProcs>.<params>(args: Hash) => DeclBuilderForProcs
+    // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.flags.isDefault = true;
-        arg.type = Types::hashOfUntyped();
+        arg.flags.isKeyword = true;
+        arg.flags.isRepeated = true;
+        arg.type = Types::untyped(*this, method);
     }
     method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
     {
@@ -682,10 +683,6 @@ void GlobalState::initEmpty() {
     // Synthesize T::Utils
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Utils());
     id.data(*this)->setIsModule(true);
-
-    // Synthesize T::Utils::RuntimeProfiled
-    id = enterStaticFieldSymbol(Loc::none(), id, core::Names::Constants::RuntimeProfiled());
-    id.data(*this)->resultType = make_type<core::AliasType>(Symbols::untyped());
 
     int reservedCount = 0;
 
@@ -818,7 +815,7 @@ void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 f
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, vector<u4> methodHash) const {
+SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const vector<u4> &methodHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     SymbolData ownerScope = owner.dataAllowingNone(*this);
@@ -1715,7 +1712,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
 
     result->silenceErrors = this->silenceErrors;
     result->autocorrect = this->autocorrect;
-    result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
     result->ensureCleanStrings = this->ensureCleanStrings;
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;

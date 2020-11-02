@@ -1,20 +1,21 @@
 #include "rewriter/Mattr.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
+#include "rewriter/Util.h"
 
 using namespace std;
 
 namespace sorbet::rewriter {
 
 static bool literalSymbolEqual(const core::GlobalState &gs, const ast::TreePtr &node, core::NameRef name) {
-    if (auto lit = ast::cast_tree_const<ast::Literal>(node)) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == name;
     }
     return false;
 }
 
 static bool isLiteralFalse(const core::GlobalState &gs, const ast::TreePtr &node) {
-    if (auto lit = ast::cast_tree_const<ast::Literal>(node)) {
+    if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isFalse(gs);
     }
     return false;
@@ -52,13 +53,14 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
     bool instanceReader = true;
     bool instanceWriter = true;
     bool instancePredicate = true;
-    auto symbolArgsBound = send->args.size();
+    auto symbolArgsBound = send->numPosArgs;
 
     if (send->args.empty()) {
         return empty;
     }
-    if (auto *options = ast::cast_tree_const<ast::Hash>(send->args.back())) {
-        symbolArgsBound--;
+
+    auto optionsTree = ASTUtil::mkKwArgsHash(send);
+    if (auto *options = ast::cast_tree<ast::Hash>(optionsTree)) {
         for (int i = 0; i < options->keys.size(); i++) {
             auto &key = options->keys[i];
             auto &value = options->values[i];
@@ -84,7 +86,7 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
 
     vector<ast::TreePtr> result;
     for (int i = 0; i < symbolArgsBound; i++) {
-        auto *lit = ast::cast_tree_const<ast::Literal>(send->args[i]);
+        auto *lit = ast::cast_tree<ast::Literal>(send->args[i]);
         if (!lit || !lit->isSymbol(ctx)) {
             return empty;
         }

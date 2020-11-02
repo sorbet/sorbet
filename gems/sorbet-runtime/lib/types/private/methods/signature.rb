@@ -67,6 +67,10 @@ class T::Private::Methods::Signature
     if !extra_names.empty?
       raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}"
     end
+    
+    if parameters.size != raw_arg_types.size
+      raise "The declaration for `#{method.name}` has arguments with duplicate names"
+    end
 
     parameters.zip(raw_arg_types) do |(param_kind, param_name), (type_name, raw_type)|
       if type_name != param_name

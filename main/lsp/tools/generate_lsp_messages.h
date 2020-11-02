@@ -58,9 +58,10 @@ public:
     virtual BaseKind getJSONBaseKind() const = 0;
 
     /**
-     * Returns `true` if the underlying C++ type cannot be copied and must be moved.
+     * Returns `true` if the underlying C++ type would prefer to be moved rather than
+     * copied where possible.
      */
-    virtual bool cannotBeCopied() const {
+    virtual bool wantMove() const {
         return false;
     }
 
@@ -247,9 +248,14 @@ public:
         // Create new scope for temp var.
         fmt::format_to(out, "{{\n");
         fmt::format_to(out, "rapidjson::Value strCopy;\n");
-        fmt::format_to(out, "strCopy.SetString({0}.c_str(), {0}.length(), {1});\n", from, ALLOCATOR_VAR);
+        fmt::format_to(out, "const std::string &tmpStr = {0};\n", from);
+        fmt::format_to(out, "strCopy.SetString(tmpStr.c_str(), tmpStr.length(), {0});\n", ALLOCATOR_VAR);
         assign(out, "strCopy");
         fmt::format_to(out, "}}\n");
+    }
+
+    bool wantMove() const {
+        return true;
     }
 
     BaseKind getCPPBaseKind() const {
@@ -286,6 +292,10 @@ private:
 
 public:
     JSONStringConstantType(std::string_view value) : value(std::string(value)) {}
+
+    bool wantMove() const {
+        return true;
+    }
 
     BaseKind getCPPBaseKind() const {
         return BaseKind::StringKind;
@@ -350,8 +360,8 @@ public:
         return fmt::format("Array<{}>", componentType->getJSONType());
     }
 
-    bool cannotBeCopied() const {
-        return componentType->cannotBeCopied();
+    bool wantMove() const {
+        return componentType->wantMove();
     }
 
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
@@ -525,7 +535,7 @@ public:
         }
         fmt::format_to(out, "}};\n");
         fmt::format_to(out, "{0} get{0}(std::string_view value);\n", typeName);
-        fmt::format_to(out, "std::string convert{0}ToString({0} kind);", typeName);
+        fmt::format_to(out, "const std::string &convert{0}ToString({0} kind);", typeName);
     }
 
     void emitDefinition(fmt::memory_buffer &out) {
@@ -545,7 +555,7 @@ public:
         fmt::format_to(out, "}}\n");
         fmt::format_to(out, "return it->second;\n");
         fmt::format_to(out, "}}\n");
-        fmt::format_to(out, "std::string convert{0}ToString({0} kind) {{\n", typeName);
+        fmt::format_to(out, "const std::string &convert{0}ToString({0} kind) {{\n", typeName);
         fmt::format_to(out, "switch (kind) {{\n");
         for (std::string_view value : enumValues) {
             fmt::format_to(out, "case {}:\n", enumVar(value));
@@ -597,8 +607,8 @@ public:
         return fmt::format("({})?", innerType->getJSONType());
     }
 
-    bool cannotBeCopied() const {
-        return innerType->cannotBeCopied();
+    bool wantMove() const {
+        return innerType->wantMove();
     }
 
     void emitFromJSONValue(fmt::memory_buffer &out, std::string_view from, AssignLambda assign,
@@ -663,7 +673,7 @@ public:
         return typeName;
     }
 
-    bool cannotBeCopied() const {
+    bool wantMove() const {
         return true;
     }
 
@@ -714,7 +724,7 @@ public:
                                              return fmt::format("{} {}", field->type->getCPPType(), field->cppName);
                                          }),
                            fmt::map_join(reqFields, ", ", [](auto field) -> std::string {
-                               if (field->type->cannotBeCopied()) {
+                               if (field->type->wantMove()) {
                                    return fmt::format("{}(move({}))", field->cppName, field->cppName);
                                }
                                return fmt::format("{}({})", field->cppName, field->cppName);
@@ -740,7 +750,7 @@ public:
         }
         fmt::format_to(out, "{} rv = std::make_unique<{}>({});\n", getCPPType(), typeName,
                        fmt::map_join(reqFields, ", ", [](auto field) -> std::string {
-                           if (field->type->cannotBeCopied()) {
+                           if (field->type->wantMove()) {
                                return fmt::format("move({})", field->cppName);
                            } else {
                                return field->cppName;
@@ -826,9 +836,9 @@ public:
             "{}", fmt::map_join(variants, " | ", [](auto variant) -> std::string { return variant->getJSONType(); }));
     }
 
-    bool cannotBeCopied() const {
+    bool wantMove() const {
         for (auto &variant : variants) {
-            if (variant->cannotBeCopied()) {
+            if (variant->wantMove()) {
                 return true;
             }
         }

@@ -37,10 +37,10 @@ begin
     def self.<static-init>(<blk>)
       begin
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"arg0" => ::Integer}).void()
+          <self>.params(:"arg0", ::Integer).void()
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params({:"arg0" => ::Integer}).void()
+          <self>.params(:"arg0", ::Integer).void()
         end
         <self>.extend(::T::Sig)
         ::Sorbet::Private::Static.keep_self_def(<self>, :"private")

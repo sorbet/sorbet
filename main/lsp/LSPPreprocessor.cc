@@ -190,6 +190,9 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
                 return make_unique<CompletionTask>(*config, id, move(get<unique_ptr<CompletionParams>>(rawParams)));
             case LSPMethod::TextDocumentCodeAction:
                 return make_unique<CodeActionTask>(*config, id, move(get<unique_ptr<CodeActionParams>>(rawParams)));
+            case LSPMethod::TextDocumentFormatting:
+                return make_unique<DocumentFormattingTask>(*config, id,
+                                                           move(get<unique_ptr<DocumentFormattingParams>>(rawParams)));
             case LSPMethod::TextDocumentSignatureHelp:
                 return make_unique<SignatureHelpTask>(*config, id,
                                                       move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
@@ -207,6 +210,11 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
                 return make_unique<SorbetErrorTask>(*config, move(get<unique_ptr<SorbetErrorParams>>(rawParams)), id);
             case LSPMethod::GETCOUNTERS:
                 return make_unique<GetCountersTask>(*config, id);
+            case LSPMethod::TextDocumentPrepareRename:
+                return make_unique<PrepareRenameTask>(*config, id,
+                                                      move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
+            case LSPMethod::TextDocumentRename:
+                return make_unique<RenameTask>(*config, id, move(get<unique_ptr<RenameParams>>(rawParams)));
             default:
                 return make_unique<SorbetErrorTask>(
                     *config,

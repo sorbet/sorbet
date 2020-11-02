@@ -38,15 +38,15 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     .. |  sig {params(a: Integer).returns(Integer)}
                       ^
   Got T.nilable(Integer) originating from:
-    test/cli/errors/errors.rb:26:
-    .. |  def main(foo)
-          ^^^^^^^^^^^^^
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^
     test/cli/errors/errors.rb:31:
     .. |          2
                   ^
+    test/cli/errors/errors.rb:26: Possibly uninitialized (`NilClass`) in:
+    .. |  def main(foo)
+          ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/errors/errors.rb:33: Replace with `T.must(a)`
     .. |    bar(a)
@@ -92,15 +92,15 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     .. |  sig {params(a: Integer).returns(Integer)}
                       ^
   Got T.nilable(Integer) originating from:
-    test/cli/errors/errors.rb:26:
-    .. |  def main(foo)
-          ^^^^^^^^^^^^^
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^
     test/cli/errors/errors.rb:31:
     .. |          2
                   ^
+    test/cli/errors/errors.rb:26: Possibly uninitialized (`NilClass`) in:
+    .. |  def main(foo)
+          ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/errors/errors.rb:33: Replace with `T.must(a)`
     .. |    bar(a)
@@ -146,15 +146,15 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     .. |  sig {params(a: Integer).returns(Integer)}
                       ^
   Got T.nilable(Integer) originating from:
-    test/cli/errors/errors.rb:26:
-    .. |  def main(foo)
-          ^^^^^^^^^^^^^
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^
     test/cli/errors/errors.rb:31:
     .. |          2
                   ^
+    test/cli/errors/errors.rb:26: Possibly uninitialized (`NilClass`) in:
+    .. |  def main(foo)
+          ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/errors/errors.rb:33: Replace with `T.must(a)`
     .. |    bar(a)
