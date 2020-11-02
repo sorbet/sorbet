@@ -3,7 +3,7 @@
 
 module M
   class Foo
-    def baz(a)
+    def baz(a=1)
 #     ^ apply-rename: [A] newName: baz
     end
 
@@ -15,6 +15,7 @@ end
 
 f = M::Foo.new
 f.baz(2)
+f.baz
 
 M::Foo.new.baz 3
 
