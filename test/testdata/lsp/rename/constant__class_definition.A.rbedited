@@ -1,0 +1,14 @@
+# typed: true
+# frozen_string_literal: true
+
+FOO = 1
+# ^ apply-rename: [C] newName: BAZ
+
+class Bar
+#     ^ apply-rename: [B] newName: foo invalid: true
+  class Foo
+  end
+end
+
+foo = Bar.new
+#     ^ apply-rename: [A] newName: Bar

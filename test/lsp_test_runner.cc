@@ -532,6 +532,9 @@ TEST_CASE("LSPTest") {
     CompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
     ApplyCompletionAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 
+    // Rename assertion
+    ApplyRenameAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
+
     // Workspace Symbol assertions
     SymbolSearchAssertion::checkAll(assertions, test.sourceFileContents, *lspWrapper, nextId);
 

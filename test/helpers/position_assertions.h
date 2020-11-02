@@ -302,6 +302,34 @@ public:
     std::string toString() const override;
 };
 
+// ^ apply-rename: [version] newName
+class ApplyRenameAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<ApplyRenameAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                      int assertionLine, std::string_view assertionContents,
+                                                      std::string_view assertionType);
+
+    /** Checks all ApplyRenameAssertions within the assertion vector. Skips over non-ApplyRenameAssertions. */
+    static void checkAll(const std::vector<std::shared_ptr<RangeAssertion>> &assertions,
+                         const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                         LSPWrapper &wrapper, int &nextId, std::string errorPrefix = "");
+
+    ApplyRenameAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                         std::string_view version, std::string newName, bool invalid, std::string expectedErrorMessage);
+
+    // The part between [..] in the assertion which specifies which `.[..].rbedited` file to compare against
+    const std::string version;
+    // New name for constant
+    const std::string newName;
+    const bool invalid;
+    const std::string expectedErrorMessage;
+
+    void check(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents, LSPWrapper &wrapper,
+               int &nextId, std::string errorPrefix = "");
+
+    std::string toString() const override;
+};
+
 // # ^^^ symbol-search: "query" [, optional_key = value ]*
 // Checks that a `workspace/symbol` result for the given "query" returns a result
 // that matches the indicated range in the given file.  Options:
