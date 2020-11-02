@@ -20,9 +20,6 @@ test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: Keyword argument hash wi
     test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: This produces a runtime warning in Ruby 2.7, and will be an error in Ruby 3.0
     10 |takes_kwargs(99, arghash)
                          ^^^^^^^
-    test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: Note: disabling `--error-kwarg-hash-without-splat` will suppress this error
-    10 |takes_kwargs(99, arghash)
-                         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/error-kwarg-hash-without-splat/badsplat.rb:10: Replace with `**arghash`
     10 |takes_kwargs(99, arghash)

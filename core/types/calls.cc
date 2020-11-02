@@ -704,8 +704,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 e.setHeader("Keyword argument hash without `{}` is deprecated", "**");
                 e.addErrorLine(splatLoc, "This produces a runtime warning in Ruby 2.7, "
                                          "and will be an error in Ruby 3.0");
-                e.addErrorLine(splatLoc, "Note: disabling `{}` will suppress this error",
-                               "--error-kwarg-hash-without-splat");
                 e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc, "**{}",
                               splatLoc.source(gs));
             }
