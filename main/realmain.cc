@@ -451,6 +451,7 @@ int realmain(int argc, char *argv[]) {
     for (auto code : opts.errorCodeBlackList) {
         gs->suppressErrorClass(code);
     }
+    gs->errorKwargHashWithoutSplat = opts.errorKwargHashWithoutSplat;
     for (auto &plugin : opts.dslPluginTriggers) {
         core::UnfreezeNameTable nameTableAccess(*gs);
         gs->addDslPlugin(plugin.first, plugin.second);

@@ -223,6 +223,10 @@ public:
     // Contains a string to be used as the base of the error URL.
     // The error code is appended to this string.
     std::string errorUrlBase;
+
+    // If 'true', issue an error for pre-Ruby 2.7-style keyword hash argument (without '**').
+    bool errorKwargHashWithoutSplat = false;
+
     void ignoreErrorClassForSuggestTyped(int code);
     void suppressErrorClass(int code);
     void onlyShowErrorClass(int code);

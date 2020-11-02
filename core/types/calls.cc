@@ -696,7 +696,19 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     // the send, assume that the last argument is an implicit keyword args hash.
     bool implicitKwsplat = false;
     if (ait != aPosEnd && hasKwargs && args.args.size() == args.numPosArgs) {
-        // NOTE: this would be a good place for an autocorrect to using `**kwhash`
+        auto splatLoc = core::Loc(args.locs.file, args.locs.args[args.args.size() - 1]);
+
+        // If --error-kwarg-hash-without-splat is set, we will treat "**-less" keyword hash argument as an error.
+        if (gs.errorKwargHashWithoutSplat) {
+            if (auto e = gs.beginError(splatLoc, errors::Infer::KeywordArgHashWithoutSplat)) {
+                e.setHeader("(`{}`) Supplying a keyword argument hash as the last "
+                            "positional argument without using `{}` is deprecated "
+                            "in Ruby 2.7, and will be an error in Ruby 3.0",
+                            "--error-kwarg-hash-without-splat", "**");
+                e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc, "**{}",
+                              splatLoc.source(gs));
+            }
+        }
         hasKwsplat = true;
         implicitKwsplat = true;
     }
