@@ -16,16 +16,6 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 namespace {
-const core::File &getOldFile(core::FileRef fref, const core::GlobalState &gs,
-                             const UnorderedMap<int, shared_ptr<core::File>> &evictedFiles) {
-    const auto &it = evictedFiles.find(fref.id());
-    if (it != evictedFiles.end()) {
-        return *it->second;
-    }
-    ENFORCE(fref.exists());
-    return fref.data(gs);
-}
-
 // Merges *oldEvictedFiles* into *newlyEvictedFiles*. Mutates newlyEvictedFiles.
 void mergeEvictedFiles(const UnorderedMap<int, shared_ptr<core::File>> &oldEvictedFiles,
                        UnorderedMap<int, shared_ptr<core::File>> &newlyEvictedFiles) {
@@ -61,74 +51,64 @@ LSPIndexer::~LSPIndexer() {
     }
 }
 
-bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                                 bool containsPendingTypecheckUpdates) const {
-    Timer timeit(config->logger, "fast_path_decision");
+bool LSPIndexer::canTakeFastPath(const LSPFileUpdates &edit,
+                                 const UnorderedMap<int, shared_ptr<core::File>> &evictedFiles) const {
+    // These files should be indexed _before_ this method is called.
+    ENFORCE_NO_TIMER(edit.updatedFiles.size() == edit.updatedFileIndexes.size());
+
     auto &logger = *config->logger;
-    logger.debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
+
+    if (edit.hasNewFiles) {
+        logger.debug("Taking slow path because update has a new file");
+        prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
+        return false;
+    }
+
+    Timer timeit(config->logger, "fast_path_decision");
+    logger.debug("Trying to see if fast path is available after {} file changes", edit.updatedFiles.size());
     if (config->disableFastPath) {
         logger.debug("Taking slow path because fast path is disabled.");
         prodCategoryCounterInc("lsp.slow_path_reason", "fast_path_disabled");
         return false;
     }
 
-    const UnorderedMap<int, shared_ptr<core::File>> emptyMap;
-    const UnorderedMap<int, shared_ptr<core::File>> &evictedFilesRef =
-        containsPendingTypecheckUpdates ? evictedFiles : emptyMap;
-    for (auto &f : changedFiles) {
+    for (auto &f : edit.updatedFiles) {
         auto fref = initialGS->findFileByPath(f->path());
-        if (!fref.exists()) {
-            logger.debug("Taking slow path because {} is a new file", f->path());
-            prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
+        // We checked earlier that the edit has no new files.
+        ENFORCE_NO_TIMER(fref.exists());
+        const auto &it = evictedFiles.find(fref.id());
+        ENFORCE_NO_TIMER(it != evictedFiles.end());
+        const auto &oldFile = *it->second;
+        // We don't yet have a content hash that works for package files yet. Instead, we check if the package file
+        // source text has changed at all. If it does, we take the slow path.
+        // Only relevant in `--stripe-packages` mode. This prevents LSP editing features like autocomplete from
+        // working in `__package.rb` since every edit causes a slow path.
+        // TODO(jvilk): We could use `PackageInfo` as a `__package.rb` hash -- but we would have to stash it
+        // somewhere. Currently, we discard them after `packager` runs.
+        if (oldFile.sourceType == core::File::Type::Package && oldFile.source() != f->source()) {
+            logger.debug("Taking slow path because {} is a package file", f->path());
+            prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
             return false;
-        } else {
-            const auto &oldFile = getOldFile(fref, *initialGS, evictedFilesRef);
-            // We don't yet have a content hash that works for package files yet. Instead, we check if the package file
-            // source text has changed at all. If it does, we take the slow path.
-            // Only relevant in `--stripe-packages` mode. This prevents LSP editing features like autocomplete from
-            // working in `__package.rb` since every edit causes a slow path.
-            // TODO(jvilk): We could use `PackageInfo` as a `__package.rb` hash -- but we would have to stash it
-            // somewhere. Currently, we discard them after `packager` runs.
-            if (oldFile.sourceType == core::File::Type::Package && oldFile.source() != f->source()) {
-                logger.debug("Taking slow path because {} is a package file", f->path());
-                prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
-                return false;
-            }
-            ENFORCE(oldFile.getFileHash() != nullptr);
-            ENFORCE(f->getFileHash() != nullptr);
-            auto oldHash = *oldFile.getFileHash();
-            auto newHash = *f->getFileHash();
-            ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
-            if (newHash.definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
-                logger.debug("Taking slow path because {} has a syntax error", f->path());
-                prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
-                return false;
-            } else if (newHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
-                       newHash.definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
-                logger.debug("Taking slow path because {} has changed definitions", f->path());
-                prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
-                return false;
-            }
+        }
+        ENFORCE(oldFile.getFileHash() != nullptr);
+        ENFORCE(f->getFileHash() != nullptr);
+        auto oldHash = *oldFile.getFileHash();
+        auto newHash = *f->getFileHash();
+        ENFORCE(oldHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_NOT_COMPUTED);
+        if (newHash.definitions.hierarchyHash == core::GlobalStateHash::HASH_STATE_INVALID) {
+            logger.debug("Taking slow path because {} has a syntax error", f->path());
+            prodCategoryCounterInc("lsp.slow_path_reason", "syntax_error");
+            return false;
+        } else if (newHash.definitions.hierarchyHash != core::GlobalStateHash::HASH_STATE_INVALID &&
+                   newHash.definitions.hierarchyHash != oldHash.definitions.hierarchyHash) {
+            logger.debug("Taking slow path because {} has changed definitions", f->path());
+            prodCategoryCounterInc("lsp.slow_path_reason", "changed_definition");
+            return false;
         }
     }
 
     logger.debug("Taking fast path");
     return true;
-}
-
-bool LSPIndexer::canTakeFastPath(const LSPFileUpdates &edit, bool containsPendingTypecheckUpdates) const {
-    auto &logger = *config->logger;
-    // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
-    if (edit.hasNewFiles) {
-        logger.debug("Taking slow path because update has a new file");
-        prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
-        return false;
-    }
-    return canTakeFastPath(edit.updatedFiles, containsPendingTypecheckUpdates);
-}
-
-bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const {
-    return canTakeFastPath(changedFiles, false);
 }
 
 void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
@@ -145,30 +125,25 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     vector<ast::ParsedFile> indexed;
     Timer timeit(config->logger, "initial_index");
     ShowOperation op(*config, ShowOperation::Kind::Indexing);
-    vector<core::FileRef> inputFiles;
     unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
     {
         Timer timeit(config->logger, "reIndexFromFileSystem");
-        inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
-        for (auto &t : pipeline::index(initialGS, inputFiles, config->opts, workers, ownedKvstore)) {
-            int id = t.file.id();
-            if (id >= indexed.size()) {
-                indexed.resize(id + 1);
-            }
-            indexed[id] = move(t);
+        pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
+        vector<core::FileRef> inputFiles;
+        for (u4 i = 1; i < initialGS->filesUsed(); i++) {
+            inputFiles.emplace_back(i);
         }
+
+        indexed = pipeline::index(initialGS, inputFiles, config->opts, workers, ownedKvstore);
+        inputFiles.insert(inputFiles.begin(), core::FileRef(0));
+        indexed.insert(indexed.begin(), {nullptr, core::FileRef(0)});
     }
 
     pipeline::computeFileHashes(*initialGS, indexed, workers);
     cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
                                          workers, indexed);
 
-    // When inputFileNames is 0 (as in tests), indexed ends up being size 0 because we don't index payload files.
-    // At the same time, we expect indexed to be the same size as GlobalStateHash, which _does_ have payload files.
-    // Resize the indexed array accordingly.
-    if (indexed.size() < initialGS->getFiles().size()) {
-        indexed.resize(initialGS->getFiles().size());
-    }
+    ENFORCE(indexed.size() == initialGS->filesUsed());
 
     updates.epoch = 0;
     updates.canTakeFastPath = false;
@@ -234,13 +209,13 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
         auto trees = pipeline::index(initialGS, frefs, config->opts, *emptyWorkers, kvstore);
         pipeline::computeFileHashes(*initialGS, trees, *emptyWorkers);
 
-        // Now that we have computed the needed file hashes, determine if we can take the fast path.
-        update.canTakeFastPath = canTakeFastPath(update, /* containsPendingTypecheckUpdate */ false);
         update.updatedFileIndexes.resize(trees.size());
         for (auto &ast : trees) {
             const int i = fileToPos[ast.file.id()];
             update.updatedFileIndexes[i] = move(ast);
         }
+        // Now that we have computed the needed file hashes, determine if we can take the fast path.
+        update.canTakeFastPath = canTakeFastPath(update, newlyEvictedFiles);
     }
 
     auto runningSlowPath = initialGS->epochManager->getStatus();
@@ -256,10 +231,10 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
         if (!update.canTakeFastPath && initialGS->epochManager->tryCancelSlowPath(update.epoch)) {
             // Cancelation succeeded! Merge the updates from the cancelled run into the current update.
             update.mergeOlder(pendingTypecheckUpdates);
-            // The two updates together could end up taking the fast path.
-            update.canTakeFastPath = canTakeFastPath(update, true);
-            update.canceledSlowPath = true;
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
+            // The two updates together could end up taking the fast path.
+            update.canTakeFastPath = canTakeFastPath(update, newlyEvictedFiles);
+            update.canceledSlowPath = true;
         }
     }
 

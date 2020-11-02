@@ -227,7 +227,7 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
             continue;
         }
 
-        ENFORCE(oldFile->getFileHash() != nullptr);
+        ENFORCE(oldFile->getFileHash() != nullptr, oldFile->path());
         const auto &oldHash = *oldFile->getFileHash();
         vector<core::NameHash> intersection;
         std::set_intersection(changedHashes.begin(), changedHashes.end(), oldHash.usages.sends.begin(),
@@ -440,6 +440,17 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         // No need to keep around cancelation state!
         cancellationUndoState = nullptr;
         logger->debug("[Typechecker] Typecheck run for epoch {} successfully finished.", updates.epoch);
+        for (auto &oldFile : gs->getFiles()) {
+            if (oldFile == nullptr) {
+                continue;
+            }
+
+            if (oldFile->sourceType == core::File::Type::Package) {
+                continue;
+            }
+
+            ENFORCE(oldFile->getFileHash() != nullptr, oldFile->path());
+        }
     } else {
         prodCategoryCounterInc("lsp.updates", "slowpath_canceled");
         timeit.setTag("canceled", "true");

@@ -39,12 +39,6 @@ void SorbetWorkspaceEditTask::mergeNewer(SorbetWorkspaceEditTask &task) {
     if (task.latencyCancelSlowPath) {
         task.latencyCancelSlowPath->cancel();
     }
-
-    // This cached information is now invalid.
-    task.cachedFastPathDecisionValid = false;
-    task.cachedFastPathDecision = false;
-    cachedFastPathDecisionValid = false;
-    cachedFastPathDecision = false;
 }
 
 void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
@@ -114,23 +108,14 @@ void SorbetWorkspaceEditTask::schedulerWaitUntilReady() {
     startedNotification.WaitForNotification();
 }
 
-bool SorbetWorkspaceEditTask::canTakeFastPath(const LSPIndexer &index) const {
-    if (updates != nullptr) {
-        return updates->canTakeFastPath;
-    }
-    if (!cachedFastPathDecisionValid) {
-        cachedFastPathDecision = index.canTakeFastPath(params->updates);
-        cachedFastPathDecisionValid = true;
-    }
-    return cachedFastPathDecision;
-}
-
 bool SorbetWorkspaceEditTask::canPreempt(const LSPIndexer &index) const {
-    return canTakeFastPath(index);
+    ENFORCE_NO_TIMER(updates != nullptr);
+    return updates->canTakeFastPath;
 }
 
 bool SorbetWorkspaceEditTask::needsMultithreading(const LSPIndexer &index) const {
-    return !canTakeFastPath(index);
+    ENFORCE_NO_TIMER(updates != nullptr);
+    return !updates->canTakeFastPath;
 }
 
 const SorbetWorkspaceEditParams &SorbetWorkspaceEditTask::getParams() const {

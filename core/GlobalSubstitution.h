@@ -54,18 +54,15 @@ class LazyGlobalSubstitution final {
     UnorderedMap<core::NameRef, core::NameRef> nameSubstitution;
     core::UsageHash acc;
 
-    void defineName(NameRef from, NameRef &to);
+    void defineName(NameRef from, NameRef &to, bool allowSameFromTo);
 
 public:
     LazyGlobalSubstitution(const GlobalState &fromGS, GlobalState &toGS);
 
     NameRef substitute(NameRef from, bool allowSameFromTo = false) {
-        if (!allowSameFromTo) {
-            // from.sanityCheckSubstitution(*this);
-        }
         auto &ref = nameSubstitution[from];
         if (!ref.exists() && from.exists()) {
-            defineName(from, ref);
+            defineName(from, ref, allowSameFromTo);
         }
         return ref;
     }

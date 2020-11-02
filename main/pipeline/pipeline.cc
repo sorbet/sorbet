@@ -1214,20 +1214,11 @@ core::FileHash computeFileHash(const core::GlobalState &gs, ast::ParsedFile pars
     lgs->silenceErrors = true;
     {
         core::UnfreezeFileTable fileTableAccess(*lgs);
-
-        // TODO: loc files have to match???
-        while (lgs->filesUsed() < parsedFile.file.id()) {
-            lgs->enterFile("", "");
-        }
-
-        lgs->enterNewFileAt(gs.getFiles()[parsedFile.file.id()], parsedFile.file.id());
-
         parsedFile.file = lgs->enterFile(gs.getFiles()[parsedFile.file.id()]);
-        parsedFile.file.data(*lgs).strictLevel = pipeline::decideStrictLevel(*lgs, parsedFile.file, emptyOpts);
     }
     core::UsageHash hash;
-    core::MutableContext ctx(*lgs, core::Symbols::root(), parsedFile.file);
     {
+        core::MutableContext ctx(*lgs, core::Symbols::root(), parsedFile.file);
         core::UnfreezeNameTable unfreeze(*lgs);
         core::LazyGlobalSubstitution substitution(gs, *lgs);
         parsedFile.tree = ast::Substitute::run(ctx, substitution, move(parsedFile.tree));

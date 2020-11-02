@@ -7,8 +7,9 @@ namespace sorbet::core {
 LazyGlobalSubstitution::LazyGlobalSubstitution(const GlobalState &fromGS, GlobalState &toGS)
     : fromGS(fromGS), toGS(toGS){};
 
-void LazyGlobalSubstitution::defineName(NameRef from, NameRef &to) {
-    auto &nm = from.data(this->fromGS);
+void LazyGlobalSubstitution::defineName(NameRef from, NameRef &to, bool allowSameFromTo) {
+    // Avoid failures in debug builds.
+    auto &nm = allowSameFromTo ? core::NameRef(fromGS, from.id()).data(this->fromGS) : from.data(this->fromGS);
     switch (nm->kind) {
         case NameKind::UNIQUE:
             to = this->toGS.freshNameUnique(nm->unique.uniqueNameKind, substitute(nm->unique.original), nm->unique.num);
