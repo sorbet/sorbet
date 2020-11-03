@@ -23,6 +23,7 @@ void populateRBIsInto(unique_ptr<core::GlobalState> &gs) {
     unique_ptr<const OwnedKeyValueStore> kvstore;
     auto workers = WorkerPool::create(emptyOpts.threads, gs->tracer());
     auto indexed = realmain::pipeline::index(gs, payloadFiles, emptyOpts, *workers, kvstore);
+    realmain::pipeline::computeFileHashes(*gs, indexed, *workers);
     realmain::pipeline::resolve(gs, move(indexed), emptyOpts, *workers); // result is thrown away
     gs->ensureCleanStrings = false;
 }

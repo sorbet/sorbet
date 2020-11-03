@@ -128,22 +128,26 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     unique_ptr<const OwnedKeyValueStore> ownedKvstore = cache::ownIfUnchanged(*initialGS, move(kvstore));
     {
         Timer timeit(config->logger, "reIndexFromFileSystem");
-        pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
-        vector<core::FileRef> inputFiles;
-        for (u4 i = 1; i < initialGS->filesUsed(); i++) {
-            inputFiles.emplace_back(i);
+        auto inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
+        for (auto &t : pipeline::index(initialGS, inputFiles, config->opts, workers, ownedKvstore)) {
+            int id = t.file.id();
+            if (id >= indexed.size()) {
+                indexed.resize(id + 1);
+            }
+            indexed[id] = move(t);
         }
-
-        indexed = pipeline::index(initialGS, inputFiles, config->opts, workers, ownedKvstore);
-        inputFiles.insert(inputFiles.begin(), core::FileRef(0));
-        indexed.insert(indexed.begin(), {nullptr, core::FileRef(0)});
     }
 
     pipeline::computeFileHashes(*initialGS, indexed, workers);
     cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
                                          workers, indexed);
 
-    ENFORCE(indexed.size() == initialGS->filesUsed());
+    // When inputFileNames is 0 (as in tests), indexed ends up being size 0 because we don't index payload files.
+    // At the same time, we expect indexed to be the same size as GlobalStateHash, which _does_ have payload files.
+    // Resize the indexed array accordingly.
+    if (indexed.size() < initialGS->getFiles().size()) {
+        indexed.resize(initialGS->getFiles().size());
+    }
 
     updates.epoch = 0;
     updates.canTakeFastPath = false;
