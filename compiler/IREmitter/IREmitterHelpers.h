@@ -114,6 +114,11 @@ public:
     // the block following a successful test.
     static void emitTypeTest(CompilerState &gs, llvm::IRBuilderBase &builder, llvm::Value *value,
                              const core::TypePtr &expectedType, std::string_view description);
+
+    // Return a value representing the literalish thing, which is either a LiteralType
+    // or a type representing nil, false, or true.
+    static llvm::Value *emitLiteralish(CompilerState &gs, llvm::IRBuilderBase &builder,
+                                       const core::TypePtr &literalish);
 };
 } // namespace sorbet::compiler
 #endif

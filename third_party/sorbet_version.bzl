@@ -1,4 +1,4 @@
-SORBET_VERSION = "64ea847f7192b3f0c39088834ca09e6b4a1d3424"
+SORBET_VERSION = "4573352068cf651d0a1f400a2ee85cf9cfdbbe4b"
 
 # The sha256 of https://github.com/sorbet/sorbet/archive/{sorbet-version}.zip
-SORBET_SHA256 = "a9aa58e90287e94e4c699587da3f83a7fc275c2108431d0609952b8b6eac8a53"
+SORBET_SHA256 = "4c459a6cbd970c606b9c815ec97dd16ee65005346beaa64361162ce9c83c975e"

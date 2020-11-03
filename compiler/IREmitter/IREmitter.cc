@@ -5,7 +5,6 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Verifier.h"
 
-#include "absl/base/casts.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
@@ -580,53 +579,8 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         // it's done in function setup, no need to do anything here
                     },
                     [&](cfg::Literal *i) {
-                        if (i->value->derivesFrom(cs, core::Symbols::FalseClass())) {
-                            Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, irctx,
-                                            bb->rubyBlockId);
-                            return;
-                        }
-                        if (i->value->derivesFrom(cs, core::Symbols::TrueClass())) {
-                            Payload::varSet(cs, bind.bind.variable, Payload::rubyTrue(cs, builder), builder, irctx,
-                                            bb->rubyBlockId);
-                            return;
-                        }
-                        if (i->value->derivesFrom(cs, core::Symbols::NilClass())) {
-                            Payload::varSet(cs, bind.bind.variable, Payload::rubyNil(cs, builder), builder, irctx,
-                                            bb->rubyBlockId);
-                            return;
-                        }
-
-                        auto litType = core::cast_type<core::LiteralType>(i->value);
-                        ENFORCE(litType);
-                        switch (litType->literalKind) {
-                            case core::LiteralType::LiteralTypeKind::Integer: {
-                                auto rawInt = Payload::longToRubyValue(cs, builder, litType->value);
-                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, irctx, bb->rubyBlockId);
-                                break;
-                            }
-                            case core::LiteralType::LiteralTypeKind::Float: {
-                                auto rawInt =
-                                    Payload::doubleToRubyValue(cs, builder, absl::bit_cast<double>(litType->value));
-                                Payload::varSet(cs, bind.bind.variable, rawInt, builder, irctx, bb->rubyBlockId);
-                                break;
-                            }
-                            case core::LiteralType::LiteralTypeKind::Symbol: {
-                                auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
-                                auto rawId = Payload::idIntern(cs, builder, str);
-                                auto rawRubySym =
-                                    builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
-                                Payload::varSet(cs, bind.bind.variable, rawRubySym, builder, irctx, bb->rubyBlockId);
-                                break;
-                            }
-                            case core::LiteralType::LiteralTypeKind::String: {
-                                auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
-                                auto rawRubyString = Payload::cPtrToRubyString(cs, builder, str, true);
-                                Payload::varSet(cs, bind.bind.variable, rawRubyString, builder, irctx, bb->rubyBlockId);
-                                break;
-                            }
-                            default:
-                                cs.failCompilation(core::Loc(cs.file, bind.loc), "UnsupportedLiteral");
-                        }
+                        auto rawValue = IREmitterHelpers::emitLiteralish(cs, builder, i->value);
+                        Payload::varSet(cs, bind.bind.variable, rawValue, builder, irctx, bb->rubyBlockId);
                     },
                     [&](cfg::GetCurrentException *i) {
                         // if this block isn't an exception block header, there's nothing to do here.

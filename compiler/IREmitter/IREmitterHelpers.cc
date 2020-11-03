@@ -4,6 +4,7 @@
 #include "llvm/IR/IRBuilder.h"
 
 #include "Payload.h"
+#include "absl/base/casts.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
@@ -874,6 +875,37 @@ void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &buil
         {value, Payload::toCString(cs, description, builder), Payload::toCString(cs, expectedType->show(cs), builder)});
     builder.CreateUnreachable();
     builder.SetInsertPoint(successBlock);
+}
+
+llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilderBase &build, const core::TypePtr &lit) {
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+    if (lit->derivesFrom(cs, core::Symbols::FalseClass())) {
+        return Payload::rubyFalse(cs, builder);
+    }
+    if (lit->derivesFrom(cs, core::Symbols::TrueClass())) {
+        return Payload::rubyTrue(cs, builder);
+    }
+    if (lit->derivesFrom(cs, core::Symbols::NilClass())) {
+        return Payload::rubyNil(cs, builder);
+    }
+
+    auto litType = core::cast_type<core::LiteralType>(lit);
+    ENFORCE(litType);
+    switch (litType->literalKind) {
+        case core::LiteralType::LiteralTypeKind::Integer:
+            return Payload::longToRubyValue(cs, builder, litType->value);
+        case core::LiteralType::LiteralTypeKind::Float:
+            return Payload::doubleToRubyValue(cs, builder, absl::bit_cast<double>(litType->value));
+        case core::LiteralType::LiteralTypeKind::Symbol: {
+            auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
+            auto rawId = Payload::idIntern(cs, builder, str);
+            return builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
+        }
+        case core::LiteralType::LiteralTypeKind::String: {
+            auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
+            return Payload::cPtrToRubyString(cs, builder, str, true);
+        }
+    }
 }
 
 } // namespace sorbet::compiler
