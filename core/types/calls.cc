@@ -769,14 +769,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 } else {
                     if (kwSplatType.isUntyped()) {
                         // Allow an untyped arg to satisfy all kwargs
-                        if (implicitKwsplat) {
-                            --aend;
-                        }
+                        --aend;
                         kwargs = Types::untypedUntracked();
                     } else if (kwSplatType->derivesFrom(gs, Symbols::Hash())) {
-                        if (implicitKwsplat) {
-                            --aend;
-                        }
+                        --aend;
                         if (auto e =
                                 gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
                             e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
