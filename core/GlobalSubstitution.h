@@ -58,6 +58,7 @@ class LazyGlobalSubstitution final {
 
 public:
     LazyGlobalSubstitution(const GlobalState &fromGS, GlobalState &toGS);
+    ~LazyGlobalSubstitution() = default;
 
     NameRef substitute(NameRef from, bool allowSameFromTo = false) {
         auto &ref = nameSubstitution[from];
