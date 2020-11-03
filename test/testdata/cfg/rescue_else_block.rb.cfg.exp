@@ -56,7 +56,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_10" -> "bb::Object#foo_9" [style="bold"];
     "bb::Object#foo_11" [
-        label = "block[id=11, rubyBlockId=2](<returnMethodTemp>$2: T.nilable(Integer))\l<gotoDeadTemp>$10: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=11, rubyBlockId=2](<returnMethodTemp>$2: T.nilable(Integer))\l<gotoDeadTemp>$10: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::Object#foo_11" -> "bb::Object#foo_9" [style="bold"];

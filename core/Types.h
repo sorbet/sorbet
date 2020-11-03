@@ -448,12 +448,11 @@ public:
         const double floatval;
     };
 
-    enum class LiteralTypeKind : u1 { Integer, String, Symbol, True, False, Float };
+    enum class LiteralTypeKind : u1 { Integer, String, Symbol, Float };
     const LiteralTypeKind literalKind;
     LiteralType(int64_t val);
     LiteralType(double val);
     LiteralType(SymbolRef klass, NameRef val);
-    LiteralType(bool val);
     virtual TypePtr underlying() const override;
 
     virtual std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const final;

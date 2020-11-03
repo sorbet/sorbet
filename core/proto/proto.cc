@@ -156,14 +156,6 @@ com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, cons
             proto.set_kind(com::stripe::rubytyper::Type::Literal::SYMBOL);
             proto.set_symbol(NameRef(gs, lit.value).show(gs));
             break;
-        case LiteralType::LiteralTypeKind::True:
-            proto.set_kind(com::stripe::rubytyper::Type::Literal::TRUE);
-            proto.set_bool_(true);
-            break;
-        case LiteralType::LiteralTypeKind::False:
-            proto.set_kind(com::stripe::rubytyper::Type::Literal::FALSE);
-            proto.set_bool_(false);
-            break;
         case LiteralType::LiteralTypeKind::Float:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::FLOAT);
             proto.set_float_(lit.floatval);

@@ -67,7 +67,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
 
     "bb::ModuleMethods#instrumented_request_7" -> "bb::ModuleMethods#instrumented_request_6" [style="bold"];
     "bb::ModuleMethods#instrumented_request_8" [
-        label = "block[id=8, rubyBlockId=2](final_attempt: T.untyped, foo: T.untyped)\l<gotoDeadTemp>$10: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](final_attempt: T.untyped, foo: T.untyped)\l<gotoDeadTemp>$10: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_8" -> "bb::ModuleMethods#instrumented_request_6" [style="bold"];

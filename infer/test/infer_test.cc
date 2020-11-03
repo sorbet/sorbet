@@ -57,7 +57,7 @@ TEST_CASE("Infer") {
         auto intClass = core::make_type<core::ClassType>(core::Symbols::Integer());
         auto floatLit = core::make_type<core::LiteralType>(1.0f);
         auto floatClass = core::make_type<core::ClassType>(core::Symbols::Float());
-        auto trueLit = core::make_type<core::LiteralType>(true);
+        auto trueLit = core::Types::trueClass();
         auto trueClass = core::make_type<core::ClassType>(core::Symbols::TrueClass());
         auto stringLit = core::make_type<core::LiteralType>(core::Symbols::String(), core::Names::assignTemp());
         auto stringClass = core::make_type<core::ClassType>(core::Symbols::String());

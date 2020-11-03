@@ -84,7 +84,7 @@ subgraph "cluster_::A#initialize" {
 
     "bb::A#initialize_11" -> "bb::A#initialize_10" [style="bold"];
     "bb::A#initialize_12" [
-        label = "block[id=12, rubyBlockId=3](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$9: T.nilable(Integer))\louterLoops: 1\l<gotoDeadTemp>$16: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=12, rubyBlockId=3](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$9: T.nilable(Integer))\louterLoops: 1\l<gotoDeadTemp>$16: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::A#initialize_12" -> "bb::A#initialize_10" [style="bold"];

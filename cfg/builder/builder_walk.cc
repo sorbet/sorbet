@@ -725,7 +725,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, const ast::TreePtr &what, BasicBlo
                 // since in Ruby the exception would propagate up the statck.
                 auto gotoDeadTemp = cctx.newTemporary(core::Names::gotoDeadTemp());
                 synthesizeExpr(rescueHandlersBlock, gotoDeadTemp, a->loc,
-                               make_unique<Literal>(core::make_type<core::LiteralType>(true)));
+                               make_unique<Literal>(core::Types::trueClass()));
                 unconditionalJump(rescueHandlersBlock, ensureBody, cctx.inWhat, a->loc);
 
                 auto throwAway = cctx.newTemporary(core::Names::throwAwayTemp());
