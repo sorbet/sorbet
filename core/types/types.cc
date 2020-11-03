@@ -327,11 +327,6 @@ LiteralType::LiteralType(SymbolRef klass, NameRef val)
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
-LiteralType::LiteralType(bool val)
-    : value(val ? 1 : 0), literalKind(val ? LiteralTypeKind::True : LiteralTypeKind::False) {
-    categoryCounterInc("types.allocated", "literaltype");
-}
-
 TypePtr LiteralType::underlying() const {
     switch (literalKind) {
         case LiteralTypeKind::Integer:
@@ -342,10 +337,6 @@ TypePtr LiteralType::underlying() const {
             return Types::String();
         case LiteralTypeKind::Symbol:
             return Types::Symbol();
-        case LiteralTypeKind::True:
-            return Types::trueClass();
-        case LiteralTypeKind::False:
-            return Types::falseClass();
     }
     Exception::raise("should never be reached");
 }

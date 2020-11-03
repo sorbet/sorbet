@@ -30,7 +30,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_6" [
-        label = "block[id=6, rubyBlockId=3](<self>: Object, <gotoDeadTemp>$12: TrueClass(true))\l<gotoDeadTemp>$12: TrueClass(true)\l"
+        label = "block[id=6, rubyBlockId=3](<self>: Object, <gotoDeadTemp>$12: TrueClass)\l<gotoDeadTemp>$12: TrueClass\l"
     ];
 
     "bb::Object#foo_6" -> "bb::Object#foo_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_7" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_8" [
-        label = "block[id=8, rubyBlockId=2](<self>: Object)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<self>: Object)\l<gotoDeadTemp>$12: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_6" [style="bold"];

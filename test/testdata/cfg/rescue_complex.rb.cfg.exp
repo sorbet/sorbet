@@ -187,7 +187,7 @@ subgraph "cluster_::TestRescue#multiple_rescue" {
 
     "bb::TestRescue#multiple_rescue_9" -> "bb::TestRescue#multiple_rescue_6" [style="bold"];
     "bb::TestRescue#multiple_rescue_10" [
-        label = "block[id=10, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$16: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=10, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$16: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#multiple_rescue_10" -> "bb::TestRescue#multiple_rescue_6" [style="bold"];
@@ -255,7 +255,7 @@ subgraph "cluster_::TestRescue#multiple_rescue_classes" {
     "bb::TestRescue#multiple_rescue_classes_8" -> "bb::TestRescue#multiple_rescue_classes_9" [style="tapered"];
 
     "bb::TestRescue#multiple_rescue_classes_9" [
-        label = "block[id=9, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$13: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#multiple_rescue_classes_9" -> "bb::TestRescue#multiple_rescue_classes_6" [style="bold"];
@@ -316,7 +316,7 @@ subgraph "cluster_::TestRescue#parse_rescue_ensure" {
 
     "bb::TestRescue#parse_rescue_ensure_7" -> "bb::TestRescue#parse_rescue_ensure_6" [style="bold"];
     "bb::TestRescue#parse_rescue_ensure_8" [
-        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_ensure_8" -> "bb::TestRescue#parse_rescue_ensure_6" [style="bold"];
@@ -377,7 +377,7 @@ subgraph "cluster_::TestRescue#parse_bug_rescue_empty_else" {
 
     "bb::TestRescue#parse_bug_rescue_empty_else_7" -> "bb::TestRescue#parse_bug_rescue_empty_else_6" [style="bold"];
     "bb::TestRescue#parse_bug_rescue_empty_else_8" [
-        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$9: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$9: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_bug_rescue_empty_else_8" -> "bb::TestRescue#parse_bug_rescue_empty_else_6" [style="bold"];
@@ -438,7 +438,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12686" {
 
     "bb::TestRescue#parse_ruby_bug_12686_7" -> "bb::TestRescue#parse_ruby_bug_12686_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12686_8" [
-        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <statTemp>$4: T.untyped)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <statTemp>$4: T.untyped)\l<gotoDeadTemp>$12: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12686_8" -> "bb::TestRescue#parse_ruby_bug_12686_6" [style="bold"];
@@ -499,7 +499,7 @@ subgraph "cluster_::TestRescue#parse_rescue_mod" {
 
     "bb::TestRescue#parse_rescue_mod_7" -> "bb::TestRescue#parse_rescue_mod_6" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_mod_8" -> "bb::TestRescue#parse_rescue_mod_6" [style="bold"];
@@ -560,7 +560,7 @@ subgraph "cluster_::TestRescue#parse_resbody_list_var" {
 
     "bb::TestRescue#parse_resbody_list_var_7" -> "bb::TestRescue#parse_resbody_list_var_6" [style="bold"];
     "bb::TestRescue#parse_resbody_list_var_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_resbody_list_var_8" -> "bb::TestRescue#parse_resbody_list_var_6" [style="bold"];
@@ -621,7 +621,7 @@ subgraph "cluster_::TestRescue#parse_rescue_else_ensure" {
 
     "bb::TestRescue#parse_rescue_else_ensure_7" -> "bb::TestRescue#parse_rescue_else_ensure_6" [style="bold"];
     "bb::TestRescue#parse_rescue_else_ensure_8" [
-        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$12: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_else_ensure_8" -> "bb::TestRescue#parse_rescue_else_ensure_6" [style="bold"];
@@ -682,7 +682,7 @@ subgraph "cluster_::TestRescue#parse_rescue" {
 
     "bb::TestRescue#parse_rescue_7" -> "bb::TestRescue#parse_rescue_6" [style="bold"];
     "bb::TestRescue#parse_rescue_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_8" -> "bb::TestRescue#parse_rescue_6" [style="bold"];
@@ -743,7 +743,7 @@ subgraph "cluster_::TestRescue#parse_resbody_var" {
 
     "bb::TestRescue#parse_resbody_var_7" -> "bb::TestRescue#parse_resbody_var_6" [style="bold"];
     "bb::TestRescue#parse_resbody_var_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_resbody_var_8" -> "bb::TestRescue#parse_resbody_var_6" [style="bold"];
@@ -804,7 +804,7 @@ subgraph "cluster_::TestRescue#parse_resbody_var_1" {
 
     "bb::TestRescue#parse_resbody_var_1_7" -> "bb::TestRescue#parse_resbody_var_1_6" [style="bold"];
     "bb::TestRescue#parse_resbody_var_1_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$13: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_resbody_var_1_8" -> "bb::TestRescue#parse_resbody_var_1_6" [style="bold"];
@@ -865,7 +865,7 @@ subgraph "cluster_::TestRescue#parse_rescue_mod_op_assign" {
 
     "bb::TestRescue#parse_rescue_mod_op_assign_7" -> "bb::TestRescue#parse_rescue_mod_op_assign_6" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_op_assign_8" [
-        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: T.untyped)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: T.untyped)\l<gotoDeadTemp>$13: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_8" -> "bb::TestRescue#parse_rescue_mod_op_assign_6" [style="bold"];
@@ -926,7 +926,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402" {
 
     "bb::TestRescue#parse_ruby_bug_12402_7" -> "bb::TestRescue#parse_ruby_bug_12402_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_8" [
-        label = "block[id=8, rubyBlockId=2](foo: NilClass)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](foo: NilClass)\l<gotoDeadTemp>$12: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_8" -> "bb::TestRescue#parse_ruby_bug_12402_6" [style="bold"];
@@ -987,7 +987,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_1" {
 
     "bb::TestRescue#parse_ruby_bug_12402_1_7" -> "bb::TestRescue#parse_ruby_bug_12402_1_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_1_8" [
-        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: NilClass)\l<gotoDeadTemp>$14: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: NilClass)\l<gotoDeadTemp>$14: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_8" -> "bb::TestRescue#parse_ruby_bug_12402_1_6" [style="bold"];
@@ -1048,7 +1048,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_2" {
 
     "bb::TestRescue#parse_ruby_bug_12402_2_7" -> "bb::TestRescue#parse_ruby_bug_12402_2_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_8" [
-        label = "block[id=8, rubyBlockId=2]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass)\l<gotoDeadTemp>$22: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass)\l<gotoDeadTemp>$22: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_8" -> "bb::TestRescue#parse_ruby_bug_12402_2_6" [style="bold"];

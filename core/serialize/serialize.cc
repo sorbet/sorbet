@@ -452,10 +452,6 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
                     return make_type<LiteralType>(Symbols::String(), core::NameRef(NameRef::WellKnown{}, value));
                 case LiteralType::LiteralTypeKind::Symbol:
                     return make_type<LiteralType>(Symbols::Symbol(), core::NameRef(NameRef::WellKnown{}, value));
-                case LiteralType::LiteralTypeKind::True:
-                    return make_type<LiteralType>(true);
-                case LiteralType::LiteralTypeKind::False:
-                    return make_type<LiteralType>(false);
             }
             Exception::notImplemented();
         }

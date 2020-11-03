@@ -42,7 +42,7 @@ subgraph "cluster_::Object#a" {
 
     "bb::Object#a_7" -> "bb::Object#a_6" [style="bold"];
     "bb::Object#a_8" [
-        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::Object#a_8" -> "bb::Object#a_6" [style="bold"];
