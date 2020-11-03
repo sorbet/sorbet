@@ -2321,6 +2321,12 @@ public:
     }
 } Shape_merge;
 
+class Shape_to_hash : public IntrinsicMethod {
+    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+        res.returnType = args.selfType;
+    }
+} Shape_to_hash;
+
 class Array_flatten : public IntrinsicMethod {
     // Flattens a (nested) array all way down to its (inner) element type, stopping if we hit the depth limit first.
     static TypePtr recursivelyFlattenArrays(const GlobalState &gs, const TypePtr &type, const int64_t depth) {
@@ -2594,6 +2600,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
 
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
