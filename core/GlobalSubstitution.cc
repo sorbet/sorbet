@@ -5,11 +5,15 @@ using namespace std;
 namespace sorbet::core {
 
 LazyGlobalSubstitution::LazyGlobalSubstitution(const GlobalState &fromGS, GlobalState &toGS)
-    : fromGS(fromGS), toGS(toGS){};
+    : fromGS(fromGS), toGS(toGS) {
+    // Pre-define an entry for the empty name.
+    nameSubstitution[core::NameRef()] = core::NameRef();
+};
 
-void LazyGlobalSubstitution::defineName(NameRef from, NameRef &to, bool allowSameFromTo) {
+NameRef LazyGlobalSubstitution::defineName(NameRef from, bool allowSameFromTo) {
     // Avoid failures in debug builds.
     auto &nm = allowSameFromTo ? core::NameRef(fromGS, from.id()).data(this->fromGS) : from.data(this->fromGS);
+    NameRef to;
     switch (nm->kind) {
         case NameKind::UNIQUE:
             to = this->toGS.freshNameUnique(nm->unique.uniqueNameKind, substitute(nm->unique.original), nm->unique.num);
@@ -22,7 +26,10 @@ void LazyGlobalSubstitution::defineName(NameRef from, NameRef &to, bool allowSam
             break;
         default:
             ENFORCE(false, "NameKind missing");
+            break;
     }
+    nameSubstitution[from] = to;
+    return to;
 }
 
 core::UsageHash LazyGlobalSubstitution::getAllNames() {
