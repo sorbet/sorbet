@@ -7,6 +7,7 @@
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
+#include <iostream>
 #include <stdio.h>
 
 using namespace std;
@@ -25,14 +26,28 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
     }
     return true;
 }
+
+// Replaces originalName with newName in the last dotted component if the string is of the form x.y.z; otherwise does a
+// simple ReplaceAll.
+std::string replaceLastDotted(std::string_view input, std::string_view originalName, std::string_view newName) {
+    if (absl::StrContains(input, ".")) {
+        std::vector<std::string> dotted = absl::StrSplit(input, ".");
+        dotted[dotted.size() - 1] = absl::StrReplaceAll(dotted[dotted.size() - 1], {{originalName, newName}});
+        return absl::StrJoin(dotted, ".");
+    }
+    return absl::StrReplaceAll(input, {{originalName, newName}});
+}
+
 } // namespace
 
 variant<JSONNullObject, unique_ptr<WorkspaceEdit>>
 RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string_view newName) {
     const core::GlobalState &gs = typechecker.state();
     vector<unique_ptr<Location>> references = getReferencesToSymbol(typechecker, symbol);
-    auto originalName = symbol.data(gs)->name.toString(gs);
+    auto originalName = symbol.data(gs)->name.show(gs);
     auto we = make_unique<WorkspaceEdit>();
+
+    cout << "originalName/newName: " << originalName << "/" << newName << "\n";
 
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
     for (auto &location : references) {
@@ -45,17 +60,19 @@ RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef 
 
         auto loc = location->range->toLoc(gs, fref);
         auto source = loc.source(gs);
-        // TODO(soam): this doesn't handle other ways of defining methods, like attr_reader etc
-        if (absl::StartsWith(source, "def")) {
-            auto newdef = absl::StrReplaceAll(source, {{originalName, newName}});
-            edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newdef));
-        } else {
-            // Changes: A::B.c.originalName(x) -> A::B.c.newName(x)
+
+        if (absl::StrContains(source, "::")) {
             std::vector<std::string> strs = absl::StrSplit(source, "::");
-            std::vector<std::string> dots = absl::StrSplit(strs[strs.size() - 1], ".");
-            dots[dots.size() - 1] = absl::StrReplaceAll(dots[dots.size() - 1], {{originalName, newName}});
-            strs[strs.size() - 1] = absl::StrJoin(dots, ".");
-            edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), absl::StrJoin(strs, "::")));
+
+            strs[strs.size() - 1] = replaceLastDotted(strs[strs.size() - 1], originalName, newName);
+
+            auto newsrc = absl::StrJoin(strs, "::");
+            cout << "Replace: " << source << "/" << newsrc << "\n";
+            edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+        } else {
+            auto newsrc = replaceLastDotted(source, originalName, newName);
+            cout << "Replace: " << source << "/" << newsrc << "\n";
+            edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
         }
     }
 
