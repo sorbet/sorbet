@@ -108,13 +108,6 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
         return response;
     }
 
-    // Sanity check the text.
-    if (islower(params->newName[0])) {
-        response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                     "Constant names must begin with an uppercase letter.");
-        return response;
-    }
-
     ShowOperation op(config, ShowOperation::Kind::Rename);
 
     auto result = queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentRename);
