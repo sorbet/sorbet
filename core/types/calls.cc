@@ -763,14 +763,20 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
                     kwargs = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
-                    --aend;
+                    if (implicitKwsplat) {
+                        --aend;
+                    }
                 } else {
                     if (kwSplatType.isUntyped()) {
                         // Allow an untyped arg to satisfy all kwargs
-                        --aend;
+                        if (implicitKwsplat) {
+                            --aend;
+                        }
                         kwargs = Types::untypedUntracked();
                     } else if (kwSplatType->derivesFrom(gs, Symbols::Hash())) {
-                        --aend;
+                        if (implicitKwsplat) {
+                            --aend;
+                        }
                         if (auto e =
                                 gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
                             e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
