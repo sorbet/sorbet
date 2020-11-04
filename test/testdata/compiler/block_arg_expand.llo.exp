@@ -425,7 +425,6 @@ sorbet_readRealpath.exit:                         ; preds = %7
   %46 = load i64*, i64** %45, align 8, !tbaa !30
   %47 = getelementptr inbounds i64, i64* %46, i64 5
   store i64* %47, i64** %41, align 8, !tbaa !21
-  %rubyId_each.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !61
   %48 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !61, !tbaa !21
   %49 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %48, i64 0, i32 2, !dbg !61
   %50 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %49, align 8, !dbg !61, !tbaa !22
@@ -469,6 +468,7 @@ sorbet_writeLocal.exit.i:                         ; preds = %58, %56
   %70 = call i64 @rb_ary_new_from_values(i64 2, i64* nonnull %callArgs0Addr.i) #11, !dbg !63
   store i64 %70, i64* %callArgs0Addr.i, align 16, !dbg !61
   %71 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgs0Addr.i) #11, !dbg !61
+  %rubyId_each.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !61
   %72 = bitcast %struct.sorbet_iterMethodArg* %0 to i8*, !dbg !61
   call void @llvm.lifetime.start.p0i8(i64 40, i8* nonnull %72) #11, !dbg !61, !noalias !64
   %73 = getelementptr inbounds %struct.sorbet_iterMethodArg, %struct.sorbet_iterMethodArg* %0, i64 0, i32 0, !dbg !61

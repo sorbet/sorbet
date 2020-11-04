@@ -212,33 +212,34 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %44 = load i64*, i64** %43, align 8, !tbaa !30
   %45 = getelementptr inbounds i64, i64* %44, i64 4
   store i64* %45, i64** %39, align 8, !tbaa !10
-  %rubyId_map.i = load i64, i64* @rubyIdPrecomputed_map, align 8, !dbg !39
-  %rubyId_to_proc.i = load i64, i64* @rubyIdPrecomputed_to_proc, align 8, !dbg !39
-  %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !44
-  %callArgs0Addr.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0, !dbg !45
-  %46 = bitcast [3 x i64]* %callArgs.i to <2 x i64>*, !dbg !45
-  store <2 x i64> <i64 3, i64 5>, <2 x i64>* %46, align 16, !dbg !45
-  %47 = tail call i64 @rb_hash_new_with_size(i64 1) #7, !dbg !45, !noalias !46
-  call void @rb_hash_bulk_insert(i64 2, i64* nonnull %callArgs0Addr.i, i64 %47) #7, !dbg !45
-  %48 = getelementptr inbounds i64, i64* %44, i64 6, !dbg !49
-  store i64* %48, i64** %39, align 8, !dbg !49, !tbaa !10
-  store i64 3, i64* %callArgs0Addr.i, align 16, !dbg !39
-  %49 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgs0Addr.i) #7, !dbg !39
-  %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_map.i) #7, !dbg !39
-  %callFunc_to_proc.i = call i64 @sorbet_callFuncWithCache(i64 %47, i64 %rubyId_to_proc.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_callFunc_to_proc) #7, !dbg !39
-  %50 = icmp eq i64 %callFunc_to_proc.i, 8, !dbg !39
-  br i1 %50, label %"func_<root>.<static-init>$153.exit", label %51, !dbg !39
+  %callArgs0Addr.i = getelementptr inbounds [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0, !dbg !39
+  %46 = bitcast [3 x i64]* %callArgs.i to <2 x i64>*, !dbg !39
+  store <2 x i64> <i64 3, i64 5>, <2 x i64>* %46, align 16, !dbg !39
+  %47 = tail call i64 @rb_hash_new_with_size(i64 1) #7, !dbg !39, !noalias !44
+  call void @rb_hash_bulk_insert(i64 2, i64* nonnull %callArgs0Addr.i, i64 %47) #7, !dbg !39
+  %48 = getelementptr inbounds i64, i64* %44, i64 6, !dbg !47
+  store i64* %48, i64** %39, align 8, !dbg !47, !tbaa !10
+  store i64 3, i64* %callArgs0Addr.i, align 16, !dbg !48
+  %49 = call i64 @rb_ary_new_from_values(i64 1, i64* nonnull %callArgs0Addr.i) #7, !dbg !48
+  %rubyId_map.i = load i64, i64* @rubyIdPrecomputed_map, align 8, !dbg !48
+  %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_map.i) #7, !dbg !48
+  %rubyId_map43.i = load i64, i64* @rubyIdPrecomputed_map, align 8, !dbg !48
+  %rubyId_to_proc.i = load i64, i64* @rubyIdPrecomputed_to_proc, align 8, !dbg !48
+  %callFunc_to_proc.i = call i64 @sorbet_callFuncWithCache(i64 %47, i64 %rubyId_to_proc.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_callFunc_to_proc) #7, !dbg !48
+  %50 = icmp eq i64 %callFunc_to_proc.i, 8, !dbg !48
+  br i1 %50, label %"func_<root>.<static-init>$153.exit", label %51, !dbg !48
 
 51:                                               ; preds = %sorbet_readRealpath.exit
-  %52 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !39, !tbaa !10
-  %53 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %52, i64 0, i32 17, !dbg !39
-  store i64 %callFunc_to_proc.i, i64* %53, align 8, !dbg !39, !tbaa !50, !noalias !51
-  br label %"func_<root>.<static-init>$153.exit", !dbg !39
+  %52 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !48, !tbaa !10
+  %53 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %52, i64 0, i32 17, !dbg !48
+  store i64 %callFunc_to_proc.i, i64* %53, align 8, !dbg !48, !tbaa !49, !noalias !50
+  br label %"func_<root>.<static-init>$153.exit", !dbg !48
 
 "func_<root>.<static-init>$153.exit":             ; preds = %sorbet_readRealpath.exit, %51
-  %54 = call i64 @sorbet_callFuncWithCache(i64 %49, i64 %rubyId_map.i, i32 0, i64* nocapture null, %struct.FunctionInlineCache* nonnull @ic_callWithProcmap) #7, !dbg !39
-  store i64 %54, i64* %callArgs0Addr.i, align 16, !dbg !44
-  %callFunc_puts.i = call i64 @sorbet_callFuncWithCache(i64 %27, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts) #7, !dbg !44
+  %54 = call i64 @sorbet_callFuncWithCache(i64 %49, i64 %rubyId_map43.i, i32 0, i64* nocapture null, %struct.FunctionInlineCache* nonnull @ic_callWithProcmap) #7, !dbg !48
+  store i64 %54, i64* %callArgs0Addr.i, align 16, !dbg !53
+  %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !53
+  %callFunc_puts.i = call i64 @sorbet_callFuncWithCache(i64 %27, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts) #7, !dbg !53
   call void @llvm.lifetime.end.p0i8(i64 24, i8* nonnull %28)
   ret void
 }
@@ -300,18 +301,18 @@ attributes #7 = { nounwind }
 !36 = !{!"rb_code_position_struct", !17, i64 0, !17, i64 4}
 !37 = !{!"iseq_insn_info", !11, i64 0, !11, i64 8, !17, i64 16, !11, i64 24}
 !38 = !{!"", !5, i64 0, !5, i64 8, !5, i64 16, !11, i64 24}
-!39 = !DILocation(line: 6, column: 6, scope: !40)
+!39 = !DILocation(line: 4, column: 14, scope: !40)
 !40 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$153", scope: null, file: !2, line: 4, type: !41, scopeLine: 4, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
 !41 = !DISubroutineType(types: !42)
 !42 = !{!43}
 !43 = !DIBasicType(name: "VALUE", size: 64, encoding: DW_ATE_signed)
-!44 = !DILocation(line: 6, column: 1, scope: !40)
-!45 = !DILocation(line: 4, column: 14, scope: !40)
-!46 = !{!47}
-!47 = distinct !{!47, !48, !"sorbet_buildHashIntrinsic: argument 0"}
-!48 = distinct !{!48, !"sorbet_buildHashIntrinsic"}
-!49 = !DILocation(line: 4, column: 5, scope: !40)
-!50 = !{!23, !5, i64 128}
-!51 = !{!52}
-!52 = distinct !{!52, !53, !"sorbet_callFuncProcWithCache: argument 0"}
-!53 = distinct !{!53, !"sorbet_callFuncProcWithCache"}
+!44 = !{!45}
+!45 = distinct !{!45, !46, !"sorbet_buildHashIntrinsic: argument 0"}
+!46 = distinct !{!46, !"sorbet_buildHashIntrinsic"}
+!47 = !DILocation(line: 4, column: 5, scope: !40)
+!48 = !DILocation(line: 6, column: 6, scope: !40)
+!49 = !{!23, !5, i64 128}
+!50 = !{!51}
+!51 = distinct !{!51, !52, !"sorbet_callFuncProcWithCache: argument 0"}
+!52 = distinct !{!52, !"sorbet_callFuncProcWithCache"}
+!53 = !DILocation(line: 6, column: 1, scope: !40)

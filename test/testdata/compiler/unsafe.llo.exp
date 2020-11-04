@@ -190,10 +190,10 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %40 = load i64*, i64** %39, align 8, !tbaa !30
   %41 = getelementptr inbounds i64, i64* %40, i64 4
   store i64* %41, i64** %35, align 8, !tbaa !10
-  %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !39
-  %callArgs0Addr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0, !dbg !44
-  store i64 3, i64* %callArgs0Addr.i, align 8, !dbg !39
-  %callFunc_puts.i = call i64 @sorbet_callFuncWithCache(i64 %23, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts) #7, !dbg !39
+  %callArgs0Addr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0, !dbg !39
+  store i64 3, i64* %callArgs0Addr.i, align 8, !dbg !44
+  %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !44
+  %callFunc_puts.i = call i64 @sorbet_callFuncWithCache(i64 %23, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts) #7, !dbg !44
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %24)
   ret void
 }
@@ -255,9 +255,9 @@ attributes #7 = { nounwind }
 !36 = !{!"rb_code_position_struct", !17, i64 0, !17, i64 4}
 !37 = !{!"iseq_insn_info", !11, i64 0, !11, i64 8, !17, i64 16, !11, i64 24}
 !38 = !{!"", !5, i64 0, !5, i64 8, !5, i64 16, !11, i64 24}
-!39 = !DILocation(line: 4, column: 1, scope: !40)
+!39 = !DILocation(line: 4, column: 6, scope: !40)
 !40 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$153", scope: null, file: !2, line: 4, type: !41, scopeLine: 4, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
 !41 = !DISubroutineType(types: !42)
 !42 = !{!43}
 !43 = !DIBasicType(name: "VALUE", size: 64, encoding: DW_ATE_signed)
-!44 = !DILocation(line: 4, column: 6, scope: !40)
+!44 = !DILocation(line: 4, column: 1, scope: !40)

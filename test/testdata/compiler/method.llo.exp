@@ -180,156 +180,111 @@ functionEntryInitializers:
   %15 = load i64*, i64** %14, align 8, !tbaa !23
   %16 = getelementptr inbounds i64, i64* %15, i64 1
   store i64* %16, i64** %10, align 8, !tbaa !12
-  %"rubyId_<" = load i64, i64* @"rubyIdPrecomputed_<", align 8, !dbg !32
-  %"rubyStr_hello " = load i64, i64* @"rubyStrFrozen_hello ", align 8, !dbg !33
-  %"rubyId_+" = load i64, i64* @"rubyIdPrecomputed_+", align 8, !dbg !33
-  %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !34
-  %17 = icmp eq i32 %argc, 1, !dbg !35
-  br i1 %17, label %fillRequiredArgs, label %argCountFailBlock, !dbg !35, !prof !36
+  %17 = icmp eq i32 %argc, 1, !dbg !32
+  br i1 %17, label %fillRequiredArgs, label %argCountFailBlock, !dbg !32, !prof !33
 
-BB2:                                              ; preds = %fillRequiredArgs, %BB2.backedge
-  %i.sroa.0.0 = phi i64 [ %i.sroa.0.0.be, %BB2.backedge ], [ 1, %fillRequiredArgs ], !dbg !37
-  store i64* %24, i64** %10, align 8, !tbaa !12
-  %18 = and i64 %i.sroa.0.0, 1, !dbg !32
-  %19 = icmp ne i64 %18, 0, !dbg !32
-  store i64 21, i64* %callArgs0Addr, align 8, !dbg !32
-  br i1 %19, label %"fastSymCallIntrinsic_Integer_<", label %"alternativeCallIntrinsic_Integer_<", !dbg !32, !prof !38
+BB2:                                              ; preds = %BB2.backedge, %fillRequiredArgs
+  %i.sroa.0.0 = phi i64 [ 1, %fillRequiredArgs ], [ %i.sroa.0.0.be, %BB2.backedge ], !dbg !34
+  store i64* %31, i64** %10, align 8, !tbaa !12
+  %18 = and i64 %i.sroa.0.0, 1, !dbg !35
+  %19 = icmp ne i64 %18, 0, !dbg !35
+  store i64 21, i64* %callArgs0Addr, align 8, !dbg !35
+  br i1 %19, label %"fastSymCallIntrinsic_Integer_<", label %"alternativeCallIntrinsic_Integer_<", !dbg !35, !prof !36
 
-BB3:                                              ; preds = %afterSend, %afterSend.us
-  store i64* %16, i64** %10, align 8, !dbg !39, !tbaa !12
+BB3:                                              ; preds = %afterSend
+  store i64* %16, i64** %10, align 8, !dbg !37, !tbaa !12
   ret i64 8
 
 BB5:                                              ; preds = %afterSend
-  store i64* %25, i64** %10, align 8, !tbaa !12
-  %20 = load i64, i64* %32, align 8, !dbg !33, !tbaa !40
-  %21 = and i64 %20, 31, !dbg !33
-  %22 = icmp eq i64 %21, 5, !dbg !33
-  store i64 %rawArg_name, i64* %callArgs0Addr, align 8, !dbg !33
-  br i1 %22, label %"fastSymCallIntrinsic_String_+", label %"alternativeCallIntrinsic_String_+", !dbg !33, !prof !38
+  store i64* %32, i64** %10, align 8, !tbaa !12
+  %"rubyStr_hello " = load i64, i64* @"rubyStrFrozen_hello ", align 8, !dbg !38
+  %20 = and i64 %"rubyStr_hello ", 7, !dbg !38
+  %21 = icmp ne i64 %20, 0, !dbg !38
+  %22 = and i64 %"rubyStr_hello ", -9, !dbg !38
+  %23 = icmp eq i64 %22, 0, !dbg !38
+  %24 = or i1 %21, %23, !dbg !38
+  br i1 %24, label %sorbet_isa_String.exit.thread, label %sorbet_isa_String.exit, !dbg !38, !prof !39
+
+sorbet_isa_String.exit.thread:                    ; preds = %BB5
+  store i64 %rawArg_name, i64* %callArgs0Addr, align 8, !dbg !38
+  br label %"alternativeCallIntrinsic_String_+", !dbg !38
+
+sorbet_isa_String.exit:                           ; preds = %BB5
+  %25 = inttoptr i64 %"rubyStr_hello " to %struct.RBasic*, !dbg !38
+  %26 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %25, i64 0, i32 0, !dbg !38
+  %27 = load i64, i64* %26, align 8, !dbg !38, !tbaa !40
+  %28 = and i64 %27, 31, !dbg !38
+  %29 = icmp eq i64 %28, 5, !dbg !38
+  store i64 %rawArg_name, i64* %callArgs0Addr, align 8, !dbg !38
+  br i1 %29, label %"fastSymCallIntrinsic_String_+", label %"alternativeCallIntrinsic_String_+", !dbg !38, !prof !36
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call void @sorbet_raiseArity(i32 %argc, i32 1, i32 1), !dbg !35
-  unreachable, !dbg !35
+  tail call void @sorbet_raiseArity(i32 %argc, i32 1, i32 1), !dbg !32
+  unreachable, !dbg !32
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %rawArg_name = load i64, i64* %argArray, align 8, !dbg !35
-  %23 = getelementptr inbounds i64, i64* %15, i64 2, !dbg !42
-  store i64* %23, i64** %10, align 8, !dbg !42, !tbaa !12
-  %24 = getelementptr inbounds i64, i64* %15, i64 3
-  %callArgs0Addr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !37
-  %25 = getelementptr inbounds i64, i64* %15, i64 4
-  %26 = and i64 %"rubyStr_hello ", 7, !dbg !37
-  %27 = icmp ne i64 %26, 0, !dbg !37
-  %28 = and i64 %"rubyStr_hello ", -9, !dbg !37
-  %29 = icmp eq i64 %28, 0, !dbg !37
-  %30 = or i1 %27, %29, !dbg !37
-  %31 = inttoptr i64 %"rubyStr_hello " to %struct.RBasic*, !dbg !37
-  %32 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %31, i64 0, i32 0, !dbg !37
-  %33 = getelementptr inbounds i64, i64* %15, i64 5, !dbg !37
-  br i1 %30, label %BB2.us, label %BB2, !dbg !43, !prof !44
-
-BB2.us:                                           ; preds = %fillRequiredArgs, %BB2.us.backedge
-  %i.sroa.0.0.us = phi i64 [ %i.sroa.0.0.us.be, %BB2.us.backedge ], [ 1, %fillRequiredArgs ], !dbg !37
-  store i64* %24, i64** %10, align 8, !tbaa !12
-  %34 = and i64 %i.sroa.0.0.us, 1, !dbg !32
-  %35 = icmp ne i64 %34, 0, !dbg !32
-  store i64 21, i64* %callArgs0Addr, align 8, !dbg !32
-  br i1 %35, label %"fastSymCallIntrinsic_Integer_<.us", label %"alternativeCallIntrinsic_Integer_<.us", !dbg !32, !prof !38
-
-"alternativeCallIntrinsic_Integer_<.us":          ; preds = %BB2.us
-  %"callFunc_<.us" = call i64 @sorbet_callFuncWithCache(i64 %i.sroa.0.0.us, i64 %"rubyId_<", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_callFunc_<"), !dbg !32
-  br label %afterSend.us, !dbg !32
-
-"fastSymCallIntrinsic_Integer_<.us":              ; preds = %BB2.us
-  %36 = icmp slt i64 %i.sroa.0.0.us, 20, !dbg !32
-  %37 = select i1 %36, i64 20, i64 0, !dbg !32
-  br label %afterSend.us, !dbg !32
-
-afterSend.us:                                     ; preds = %"fastSymCallIntrinsic_Integer_<.us", %"alternativeCallIntrinsic_Integer_<.us"
-  %"symIntrinsicRawPhi_<.us" = phi i64 [ %"callFunc_<.us", %"alternativeCallIntrinsic_Integer_<.us" ], [ %37, %"fastSymCallIntrinsic_Integer_<.us" ], !dbg !32
-  %38 = and i64 %"symIntrinsicRawPhi_<.us", -9, !dbg !32
-  %39 = icmp eq i64 %38, 0, !dbg !32
-  br i1 %39, label %BB3, label %BB5.us, !dbg !32
-
-BB5.us:                                           ; preds = %afterSend.us
-  store i64* %25, i64** %10, align 8, !tbaa !12
-  store i64 %rawArg_name, i64* %callArgs0Addr, align 8, !dbg !33
-  %"callFunc_+.us" = call i64 @sorbet_callFuncWithCache(i64 %"rubyStr_hello ", i64 %"rubyId_+", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_callFunc_+"), !dbg !33
-  store i64 %"callFunc_+.us", i64* %callArgs0Addr, align 8, !dbg !34
-  %callFunc_puts.us = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts), !dbg !34
-  store i64* %33, i64** %10, align 8, !dbg !34, !tbaa !12
-  store i64 3, i64* %callArgs0Addr, align 8, !dbg !45
-  br i1 %35, label %"fastSymCallIntrinsic_Integer_+.us", label %"alternativeCallIntrinsic_Integer_+.us", !dbg !45
-
-"alternativeCallIntrinsic_Integer_+.us":          ; preds = %BB5.us
-  %"callFunc_+56.us" = call i64 @sorbet_callFuncWithCache(i64 %i.sroa.0.0.us, i64 %"rubyId_+", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_callFunc_+.1"), !dbg !45
-  br label %BB2.us.backedge, !dbg !45
-
-"fastSymCallIntrinsic_Integer_+.us":              ; preds = %BB5.us
-  %40 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0.us, i64 2) #10, !dbg !45
-  %41 = extractvalue { i64, i1 } %40, 1, !dbg !45
-  %42 = extractvalue { i64, i1 } %40, 0, !dbg !45
-  br i1 %41, label %43, label %BB2.us.backedge, !dbg !45
-
-43:                                               ; preds = %"fastSymCallIntrinsic_Integer_+.us"
-  %44 = ashr i64 %42, 1, !dbg !45
-  %45 = xor i64 %44, -9223372036854775808, !dbg !45
-  %46 = tail call i64 @rb_int2big(i64 %45) #10, !dbg !45
-  br label %BB2.us.backedge, !dbg !45
-
-BB2.us.backedge:                                  ; preds = %43, %"fastSymCallIntrinsic_Integer_+.us", %"alternativeCallIntrinsic_Integer_+.us"
-  %i.sroa.0.0.us.be = phi i64 [ %"callFunc_+56.us", %"alternativeCallIntrinsic_Integer_+.us" ], [ %46, %43 ], [ %42, %"fastSymCallIntrinsic_Integer_+.us" ]
-  br label %BB2.us
+  %rawArg_name = load i64, i64* %argArray, align 8, !dbg !32
+  %30 = getelementptr inbounds i64, i64* %15, i64 2, !dbg !42
+  store i64* %30, i64** %10, align 8, !dbg !42, !tbaa !12
+  %31 = getelementptr inbounds i64, i64* %15, i64 3
+  %callArgs0Addr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !34
+  %32 = getelementptr inbounds i64, i64* %15, i64 4
+  %33 = getelementptr inbounds i64, i64* %15, i64 5, !dbg !34
+  br label %BB2, !dbg !43
 
 afterSend:                                        ; preds = %"fastSymCallIntrinsic_Integer_<", %"alternativeCallIntrinsic_Integer_<"
-  %"symIntrinsicRawPhi_<" = phi i64 [ %"callFunc_<", %"alternativeCallIntrinsic_Integer_<" ], [ %50, %"fastSymCallIntrinsic_Integer_<" ], !dbg !32
-  %47 = and i64 %"symIntrinsicRawPhi_<", -9, !dbg !32
-  %48 = icmp eq i64 %47, 0, !dbg !32
-  br i1 %48, label %BB3, label %BB5, !dbg !32
+  %"symIntrinsicRawPhi_<" = phi i64 [ %"callFunc_<", %"alternativeCallIntrinsic_Integer_<" ], [ %37, %"fastSymCallIntrinsic_Integer_<" ], !dbg !35
+  %34 = and i64 %"symIntrinsicRawPhi_<", -9, !dbg !35
+  %35 = icmp eq i64 %34, 0, !dbg !35
+  br i1 %35, label %BB3, label %BB5, !dbg !35
 
 "alternativeCallIntrinsic_Integer_<":             ; preds = %BB2
-  %"callFunc_<" = call i64 @sorbet_callFuncWithCache(i64 %i.sroa.0.0, i64 %"rubyId_<", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_callFunc_<"), !dbg !32
-  br label %afterSend, !dbg !32
+  %"rubyId_<" = load i64, i64* @"rubyIdPrecomputed_<", align 8, !dbg !35
+  %"callFunc_<" = call i64 @sorbet_callFuncWithCache(i64 %i.sroa.0.0, i64 %"rubyId_<", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_callFunc_<"), !dbg !35
+  br label %afterSend, !dbg !35
 
 "fastSymCallIntrinsic_Integer_<":                 ; preds = %BB2
-  %49 = icmp slt i64 %i.sroa.0.0, 20, !dbg !32
-  %50 = select i1 %49, i64 20, i64 0, !dbg !32
-  br label %afterSend, !dbg !32
+  %36 = icmp slt i64 %i.sroa.0.0, 20, !dbg !35
+  %37 = select i1 %36, i64 20, i64 0, !dbg !35
+  br label %afterSend, !dbg !35
 
 afterSend28:                                      ; preds = %"alternativeCallIntrinsic_String_+", %"fastSymCallIntrinsic_String_+"
-  %"symIntrinsicRawPhi_+" = phi i64 [ %51, %"fastSymCallIntrinsic_String_+" ], [ %"callFunc_+", %"alternativeCallIntrinsic_String_+" ], !dbg !33
-  store i64 %"symIntrinsicRawPhi_+", i64* %callArgs0Addr, align 8, !dbg !34
-  %callFunc_puts = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts), !dbg !34
-  store i64* %33, i64** %10, align 8, !dbg !34, !tbaa !12
+  %"symIntrinsicRawPhi_+" = phi i64 [ %38, %"fastSymCallIntrinsic_String_+" ], [ %"callFunc_+", %"alternativeCallIntrinsic_String_+" ], !dbg !38
+  store i64 %"symIntrinsicRawPhi_+", i64* %callArgs0Addr, align 8, !dbg !44
+  %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !44
+  %callFunc_puts = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts), !dbg !44
+  store i64* %33, i64** %10, align 8, !dbg !44, !tbaa !12
   store i64 3, i64* %callArgs0Addr, align 8, !dbg !45
   br i1 %19, label %"fastSymCallIntrinsic_Integer_+", label %"alternativeCallIntrinsic_Integer_+", !dbg !45
 
-"alternativeCallIntrinsic_String_+":              ; preds = %BB5
-  %"callFunc_+" = call i64 @sorbet_callFuncWithCache(i64 %"rubyStr_hello ", i64 %"rubyId_+", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_callFunc_+"), !dbg !33
-  br label %afterSend28, !dbg !33
+"alternativeCallIntrinsic_String_+":              ; preds = %sorbet_isa_String.exit.thread, %sorbet_isa_String.exit
+  %"rubyId_+79" = load i64, i64* @"rubyIdPrecomputed_+", align 8, !dbg !38
+  %"callFunc_+" = call i64 @sorbet_callFuncWithCache(i64 %"rubyStr_hello ", i64 %"rubyId_+79", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_callFunc_+"), !dbg !38
+  br label %afterSend28, !dbg !38
 
-"fastSymCallIntrinsic_String_+":                  ; preds = %BB5
-  %51 = tail call i64 @rb_str_plus(i64 %"rubyStr_hello ", i64 %rawArg_name) #10, !dbg !33, !noalias !46
-  br label %afterSend28, !dbg !33
+"fastSymCallIntrinsic_String_+":                  ; preds = %sorbet_isa_String.exit
+  %38 = tail call i64 @rb_str_plus(i64 %"rubyStr_hello ", i64 %rawArg_name) #10, !dbg !38, !noalias !46
+  br label %afterSend28, !dbg !38
 
 "alternativeCallIntrinsic_Integer_+":             ; preds = %afterSend28
-  %"callFunc_+56" = call i64 @sorbet_callFuncWithCache(i64 %i.sroa.0.0, i64 %"rubyId_+", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_callFunc_+.1"), !dbg !45
+  %"rubyId_+50" = load i64, i64* @"rubyIdPrecomputed_+", align 8, !dbg !45
+  %"callFunc_+56" = call i64 @sorbet_callFuncWithCache(i64 %i.sroa.0.0, i64 %"rubyId_+50", i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @"ic_callFunc_+.1"), !dbg !45
   br label %BB2.backedge, !dbg !45
 
 "fastSymCallIntrinsic_Integer_+":                 ; preds = %afterSend28
-  %52 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0, i64 2) #10, !dbg !45
-  %53 = extractvalue { i64, i1 } %52, 1, !dbg !45
-  %54 = extractvalue { i64, i1 } %52, 0, !dbg !45
-  br i1 %53, label %55, label %BB2.backedge, !dbg !45
+  %39 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0, i64 2) #10, !dbg !45
+  %40 = extractvalue { i64, i1 } %39, 1, !dbg !45
+  %41 = extractvalue { i64, i1 } %39, 0, !dbg !45
+  br i1 %40, label %42, label %BB2.backedge, !dbg !45
 
-55:                                               ; preds = %"fastSymCallIntrinsic_Integer_+"
-  %56 = ashr i64 %54, 1, !dbg !45
-  %57 = xor i64 %56, -9223372036854775808, !dbg !45
-  %58 = tail call i64 @rb_int2big(i64 %57) #10, !dbg !45
+42:                                               ; preds = %"fastSymCallIntrinsic_Integer_+"
+  %43 = ashr i64 %41, 1, !dbg !45
+  %44 = xor i64 %43, -9223372036854775808, !dbg !45
+  %45 = tail call i64 @rb_int2big(i64 %44) #10, !dbg !45
   br label %BB2.backedge, !dbg !45
 
-BB2.backedge:                                     ; preds = %55, %"fastSymCallIntrinsic_Integer_+", %"alternativeCallIntrinsic_Integer_+"
-  %i.sroa.0.0.be = phi i64 [ %"callFunc_+56", %"alternativeCallIntrinsic_Integer_+" ], [ %58, %55 ], [ %54, %"fastSymCallIntrinsic_Integer_+" ]
+BB2.backedge:                                     ; preds = %42, %"fastSymCallIntrinsic_Integer_+", %"alternativeCallIntrinsic_Integer_+"
+  %i.sroa.0.0.be = phi i64 [ %"callFunc_+56", %"alternativeCallIntrinsic_Integer_+" ], [ %45, %42 ], [ %41, %"fastSymCallIntrinsic_Integer_+" ]
   br label %BB2
 }
 
@@ -426,15 +381,16 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %49 = getelementptr inbounds i64, i64* %48, i64 4
   store i64* %49, i64** %43, align 8, !tbaa !12
   %rubyId_hello.i = load i64, i64* @rubyIdPrecomputed_hello, align 8, !dbg !58
-  %rubyStr_sorbet.i = load i64, i64* @rubyStrFrozen_sorbet, align 8, !dbg !60
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_hello.i) #10, !dbg !58
   %50 = load i64, i64* @rb_cObject, align 8, !dbg !58
   tail call void @rb_define_method(i64 %50, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_hello, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#hello" to i64 (...)*), i32 -1) #10, !dbg !58
   %51 = getelementptr inbounds i64, i64* %48, i64 11, !dbg !58
   store i64* %51, i64** %43, align 8, !dbg !58, !tbaa !12
+  %rubyStr_sorbet.i = load i64, i64* @rubyStrFrozen_sorbet, align 8, !dbg !60
   %callArgs0Addr17.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0, !dbg !61
   store i64 %rubyStr_sorbet.i, i64* %callArgs0Addr17.i, align 8, !dbg !61
-  %callFunc_hello.i = call i64 @sorbet_callFuncWithCache(i64 %31, i64 %rubyId_hello.i, i32 1, i64* nonnull %callArgs0Addr17.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_hello) #10, !dbg !61
+  %rubyId_hello19.i = load i64, i64* @rubyIdPrecomputed_hello, align 8, !dbg !61
+  %callFunc_hello.i = call i64 @sorbet_callFuncWithCache(i64 %31, i64 %rubyId_hello19.i, i32 1, i64* nonnull %callArgs0Addr17.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_hello) #10, !dbg !61
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %32)
   ret void
 }
@@ -492,19 +448,19 @@ attributes #10 = { nounwind }
 !29 = !{!"rb_code_position_struct", !16, i64 0, !16, i64 4}
 !30 = !{!"iseq_insn_info", !13, i64 0, !13, i64 8, !16, i64 16, !13, i64 24}
 !31 = !{!"", !5, i64 0, !5, i64 8, !5, i64 16, !13, i64 24}
-!32 = !DILocation(line: 6, column: 11, scope: !8)
-!33 = !DILocation(line: 7, column: 11, scope: !8)
-!34 = !DILocation(line: 7, column: 6, scope: !8)
-!35 = !DILocation(line: 4, column: 1, scope: !8)
-!36 = !{!"branch_weights", i32 4000000, i32 4001}
-!37 = !DILocation(line: 0, scope: !8)
-!38 = !{!"branch_weights", i32 2000, i32 1}
-!39 = !DILocation(line: 6, column: 4, scope: !8)
+!32 = !DILocation(line: 4, column: 1, scope: !8)
+!33 = !{!"branch_weights", i32 4000000, i32 4001}
+!34 = !DILocation(line: 0, scope: !8)
+!35 = !DILocation(line: 6, column: 11, scope: !8)
+!36 = !{!"branch_weights", i32 2000, i32 1}
+!37 = !DILocation(line: 6, column: 4, scope: !8)
+!38 = !DILocation(line: 7, column: 11, scope: !8)
+!39 = !{!"branch_weights", i32 1073205, i32 2146410443}
 !40 = !{!41, !5, i64 0}
 !41 = !{!"RBasic", !5, i64 0, !5, i64 8}
 !42 = !DILocation(line: 4, column: 11, scope: !8)
 !43 = !DILocation(line: 5, column: 8, scope: !8)
-!44 = !{!"branch_weights", i32 1073205, i32 2146410443}
+!44 = !DILocation(line: 7, column: 6, scope: !8)
 !45 = !DILocation(line: 8, column: 6, scope: !8)
 !46 = !{!47}
 !47 = distinct !{!47, !48, !"sorbet_int_rb_str_plus: argument 0"}

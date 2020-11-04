@@ -166,16 +166,10 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
         return ret;
     }));
 
-    ENFORCE(cs.functionEntryInitializers->getParent() == builder.GetInsertBlock()->getParent(),
-            "you're calling this function from something low-level that passed a IRBuilder that points outside of "
-            "function currently being generated");
-    auto oldInsertPoint = builder.saveIP();
-    builder.SetInsertPoint(cs.functionEntryInitializers);
     auto name = llvm::StringRef(str.data(), str.length());
     auto global = builder.CreateLoad(
         llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
         {"rubyStr_", name});
-    builder.restoreIP(oldInsertPoint);
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
@@ -222,15 +216,9 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &build, st
         return ret;
     }));
 
-    ENFORCE(cs.functionEntryInitializers->getParent() == builder.GetInsertBlock()->getParent(),
-            "you're calling this function from something low-level that passed a IRBuilder that points outside of "
-            "function currently being generated");
-    auto oldInsertPoint = builder.saveIP();
-    builder.SetInsertPoint(cs.functionEntryInitializers);
     auto global = builder.CreateLoad(
         llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
         {"rubyId_", name});
-    builder.restoreIP(oldInsertPoint);
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
