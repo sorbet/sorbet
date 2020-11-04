@@ -224,8 +224,8 @@ public:
     // The error code is appended to this string.
     std::string errorUrlBase;
 
-    // If 'true', issue an error for pre-Ruby 2.7-style keyword hash argument (without '**').
-    bool errorKwargHashWithoutSplat = false;
+    // If 'true', enforce use of Ruby 3.0-style keyword args.
+    bool ruby3KeywordArgs = false;
 
     void ignoreErrorClassForSuggestTyped(int code);
     void suppressErrorClass(int code);
