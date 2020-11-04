@@ -698,8 +698,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     if (ait != aPosEnd && hasKwargs && args.args.size() == args.numPosArgs) {
         auto splatLoc = core::Loc(args.locs.file, args.locs.args[args.args.size() - 1]);
 
-        // If --error-kwarg-hash-without-splat is set, we will treat "**-less" keyword hash argument as an error.
-        if (gs.errorKwargHashWithoutSplat) {
+        // If --ruby3-keyword-args is set, we will treat "**-less" keyword hash argument as an error.
+        if (gs.ruby3KeywordArgs) {
             if (auto e = gs.beginError(splatLoc, errors::Infer::KeywordArgHashWithoutSplat)) {
                 e.setHeader("Keyword argument hash without `{}` is deprecated", "**");
                 e.addErrorLine(splatLoc, "This produces a runtime warning in Ruby 2.7, "

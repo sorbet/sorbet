@@ -160,7 +160,7 @@ struct Options {
     std::string storeState = "";
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";
-    bool errorKwargHashWithoutSplat = false;
+    bool ruby3KeywordArgs = false;
     std::set<int> errorCodeWhiteList;
     std::set<int> errorCodeBlackList;
     /** Prefix to remove from all printed paths. */
