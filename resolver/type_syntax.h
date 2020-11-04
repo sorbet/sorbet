@@ -70,8 +70,9 @@ struct TypeSyntaxArgs {
 
 class TypeSyntax {
 public:
-    static bool isSig(core::Context ctx, ast::Send *send);
-    static ParsedSig parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent, TypeSyntaxArgs args);
+    static bool isSig(core::Context ctx, const ast::Send &send);
+    static ParsedSig parseSig(core::MutableContext ctx, const ast::Send &send, const ParsedSig *parent,
+                              TypeSyntaxArgs args);
 
     struct ResultType {
         core::TypePtr type;

@@ -9,7 +9,6 @@
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/sort.h"
-#include "common/typecase.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/Symbols.h"

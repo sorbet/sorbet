@@ -33,15 +33,26 @@ template <typename T> using get_signature = typename get_signature_impl<T>::type
 
 template <typename T> struct argtype_extractor : public argtype_extractor<decltype(&T::operator())> {};
 template <typename ClassType, typename ReturnType, typename ArgType>
-struct argtype_extractor<ReturnType (ClassType::*)(ArgType *) const>
-// we specialize for pointers to member function
-{
+struct argtype_extractor<ReturnType (ClassType::*)(ArgType) const> {
     using arg_type = ArgType;
 };
 
+namespace Sfinae {
+// Check if .tag() exists (from https://stackoverflow.com/a/9154394)
+// Indicates that type is a tagged pointer.
+template <class> struct sfinae_true : std::true_type {};
+
+template <class T> static auto test_has_tag(int) -> sfinae_true<decltype(std::declval<T>().tag())>;
+template <class> static auto test_has_tag(long) -> std::false_type;
+template <class T> struct has_tag : decltype(test_has_tag<T>(0)) {};
+} // namespace Sfinae
+
+// fast_cast-based typecase
+
 template <typename Base, typename FUNC> bool typecaseHelper(Base *base, FUNC &&func) {
     using traits = argtype_extractor<std::function<get_signature<FUNC>>>;
-    using ArgType = typename traits::arg_type;
+    // we specialize for pointers to member function
+    using ArgType = typename std::remove_pointer<typename traits::arg_type>::type;
     if (ArgType *first = fast_cast<Base, ArgType>(base)) {
         func(first);
         return true;
@@ -51,6 +62,8 @@ template <typename Base, typename FUNC> bool typecaseHelper(Base *base, FUNC &&f
 }
 
 template <typename Base, typename... Subclasses> void typecase(Base *base, Subclasses &&... funcs) {
+    static_assert(Sfinae::has_tag<Base>() != true,
+                  "For tagged pointers, please call typecase on a reference to the object not a pointer.");
     bool done = false;
 
     bool UNUSED(dummy[sizeof...(Subclasses)]) = {(done = done || typecaseHelper<Base>(base, funcs))...};
@@ -62,6 +75,36 @@ template <typename Base, typename... Subclasses> void typecase(Base *base, Subcl
         sorbet::Exception::raise("not handled typecase case: {}", demangle(typeid(*base).name()));
     }
 }
+
+// Tagged-pointer based typecase
+
+template <typename Base, typename FUNC> bool typecaseHelper(Base &base, FUNC &&func) {
+    using traits = argtype_extractor<std::function<get_signature<FUNC>>>;
+    // We specialize (const and non-const) references
+    using ArgType = typename std::remove_const<typename std::remove_reference<typename traits::arg_type>::type>::type;
+    if (Base::template isa<ArgType>(base)) {
+        func(Base::template cast<ArgType>(base));
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <typename Base, typename... Subclasses> void typecase(Base &base, Subclasses &&... funcs) {
+    static_assert(Sfinae::has_tag<Base>() == true,
+                  "typecase used on reference type without .tag()! Did you mean to use it on a pointer type?");
+    bool done = false;
+
+    bool UNUSED(dummy[sizeof...(Subclasses)]) = {(done = done || typecaseHelper<Base>(base, funcs))...};
+
+    if (!done) {
+        if (!base) {
+            sorbet::Exception::raise("nullptr passed to typecase");
+        }
+        sorbet::Exception::raise("not handled typecase case: {}", demangle(typeid(*base).name()));
+    }
+}
+
 } // namespace sorbet
 
 // End typecase code

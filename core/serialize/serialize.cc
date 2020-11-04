@@ -4,7 +4,6 @@
 #include "ast/Helpers.h"
 #include "common/Timer.h"
 #include "common/sort.h"
-#include "common/typecase.h"
 #include "core/Error.h"
 #include "core/GlobalState.h"
 #include "core/NameHash.h"

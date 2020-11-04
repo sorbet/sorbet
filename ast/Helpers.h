@@ -444,13 +444,14 @@ public:
 
             // Recurse into structure to find the Local
             typecase(
-                cursor->get(), [&](class RestArg *rest) { cursor = &rest->expr; },
-                [&](class KeywordArg *kw) { cursor = &kw->expr; }, [&](class OptionalArg *opt) { cursor = &opt->expr; },
-                [&](class BlockArg *blk) { cursor = &blk->expr; },
-                [&](class ShadowArg *shadow) { cursor = &shadow->expr; },
+                *cursor, [&](const class RestArg &rest) { cursor = &rest.expr; },
+                [&](const class KeywordArg &kw) { cursor = &kw.expr; },
+                [&](const class OptionalArg &opt) { cursor = &opt.expr; },
+                [&](const class BlockArg &blk) { cursor = &blk.expr; },
+                [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
-                [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
-                [&](Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+                [&](const UnresolvedIdent &opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
+                [&](const TreePtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
         }
     }
 };

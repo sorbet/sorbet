@@ -26,17 +26,17 @@ private:
     }
 
     TreePtr substArg(core::MutableContext ctx, TreePtr argp) {
-        Expression *arg = argp.get();
+        TreePtr *arg = &argp;
         while (arg != nullptr) {
             typecase(
-                arg, [&](RestArg *rest) { arg = rest->expr.get(); }, [&](KeywordArg *kw) { arg = kw->expr.get(); },
-                [&](OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *opt) { arg = opt->expr.get(); },
-                [&](ShadowArg *opt) { arg = opt->expr.get(); },
-                [&](Local *local) {
-                    local->localVariable._name = subst.substitute(local->localVariable._name);
+                *arg, [&](RestArg &rest) { arg = &rest.expr; }, [&](KeywordArg &kw) { arg = &kw.expr; },
+                [&](OptionalArg &opt) { arg = &opt.expr; }, [&](BlockArg &opt) { arg = &opt.expr; },
+                [&](ShadowArg &opt) { arg = &opt.expr; },
+                [&](Local &local) {
+                    local.localVariable._name = subst.substitute(local.localVariable._name);
                     arg = nullptr;
                 },
-                [&](UnresolvedIdent *nm) { Exception::raise("UnresolvedIdent remaining after local_vars"); });
+                [&](const UnresolvedIdent &nm) { Exception::raise("UnresolvedIdent remaining after local_vars"); });
         }
         return argp;
     }

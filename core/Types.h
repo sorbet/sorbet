@@ -227,36 +227,31 @@ public:
 };
 CheckSize(Type, 8, 8);
 
-template <class To> To const *cast_type(const TypePtr &what) {
-    if (what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value) {
-        return reinterpret_cast<To const *>(what.get());
-    } else {
-        return nullptr;
-    }
+template <class To> bool isa_type(const TypePtr &what) {
+    return what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value;
 }
 
 // Specializations to handle the class hierarchy.
-
 class ClassType;
-template <> inline const ClassType *cast_type<ClassType>(const TypePtr &what) {
+template <> inline bool isa_type<ClassType>(const TypePtr &what) {
     if (what == nullptr) {
-        return nullptr;
+        return false;
     }
     switch (what.tag()) {
         case TypePtr::Tag::ClassType:
         case TypePtr::Tag::BlamedUntyped:
         case TypePtr::Tag::UnresolvedClassType:
         case TypePtr::Tag::UnresolvedAppliedType:
-            return reinterpret_cast<const ClassType *>(what.get());
+            return true;
         default:
-            return nullptr;
+            return false;
     }
 }
 
 class GroundType;
-template <> inline const GroundType *cast_type<GroundType>(const TypePtr &what) {
+template <> inline bool isa_type<GroundType>(const TypePtr &what) {
     if (what == nullptr) {
-        return nullptr;
+        return false;
     }
     switch (what.tag()) {
         case TypePtr::Tag::ClassType:
@@ -265,30 +260,34 @@ template <> inline const GroundType *cast_type<GroundType>(const TypePtr &what) 
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::OrType:
         case TypePtr::Tag::AndType:
-            return reinterpret_cast<const GroundType *>(what.get());
+            return true;
         default:
-            return nullptr;
+            return false;
     }
 }
 
 class ProxyType;
-template <> inline const ProxyType *cast_type<ProxyType>(const TypePtr &what) {
+template <> inline bool isa_type<ProxyType>(const TypePtr &what) {
     if (what == nullptr) {
-        return nullptr;
+        return false;
     }
     switch (what.tag()) {
         case TypePtr::Tag::LiteralType:
         case TypePtr::Tag::ShapeType:
         case TypePtr::Tag::TupleType:
         case TypePtr::Tag::MetaType:
-            return reinterpret_cast<const ProxyType *>(what.get());
+            return true;
         default:
-            return nullptr;
+            return false;
     }
 }
 
-template <class To> bool isa_type(const TypePtr &what) {
-    return cast_type<To>(what) != nullptr;
+template <class To> To const *cast_type(const TypePtr &what) {
+    if (isa_type<To>(what)) {
+        return reinterpret_cast<To const *>(what.get());
+    } else {
+        return nullptr;
+    }
 }
 
 template <class To> To *cast_type(TypePtr &what) {
@@ -299,6 +298,23 @@ template <class To> To *cast_type(TypePtr &what) {
 template <class To> To const &cast_type_nonnull(const TypePtr &what) {
     ENFORCE_NO_TIMER(isa_type<To>(what));
     return *reinterpret_cast<const To *>(what.get());
+}
+
+// Simple forwarders defined on TypePtr which make `typecase` work.
+template <class To> inline bool TypePtr::isa(const TypePtr &what) {
+    return isa_type<To>(what);
+}
+
+template <class To> inline To const &TypePtr::cast(const TypePtr &what) {
+    return cast_type_nonnull<To>(what);
+}
+
+template <> inline bool TypePtr::isa<TypePtr>(const TypePtr &what) {
+    return true;
+}
+
+template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
+    return what;
 }
 
 #define TYPE(name)                                                                                             \

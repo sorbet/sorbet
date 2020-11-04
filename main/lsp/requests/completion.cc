@@ -171,14 +171,14 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
     auto result = SimilarMethodsByName{};
 
     typecase(
-        receiver.get(), [&](const core::ClassType *type) { result = similarMethodsForClass(gs, type->symbol, prefix); },
-        [&](const core::AppliedType *type) { result = similarMethodsForClass(gs, type->klass, prefix); },
-        [&](const core::AndType *type) {
-            result = mergeSimilarMethods(similarMethodsForReceiver(gs, type->left, prefix),
-                                         similarMethodsForReceiver(gs, type->right, prefix));
+        receiver, [&](const core::ClassType &type) { result = similarMethodsForClass(gs, type.symbol, prefix); },
+        [&](const core::AppliedType &type) { result = similarMethodsForClass(gs, type.klass, prefix); },
+        [&](const core::AndType &type) {
+            result = mergeSimilarMethods(similarMethodsForReceiver(gs, type.left, prefix),
+                                         similarMethodsForReceiver(gs, type.right, prefix));
         },
-        [&](const core::ProxyType *type) { result = similarMethodsForReceiver(gs, type->underlying(), prefix); },
-        [&](const core::Type *type) { return; });
+        [&](const core::ProxyType &type) { result = similarMethodsForReceiver(gs, type.underlying(), prefix); },
+        [&](const core::TypePtr &type) { return; });
 
     return result;
 }

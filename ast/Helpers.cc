@@ -11,10 +11,10 @@ bool definesBehavior(const TreePtr &expr) {
     bool result = true;
 
     typecase(
-        expr.get(),
+        expr,
 
-        [&](ast::ClassDef *klass) {
-            auto *id = ast::cast_tree<ast::UnresolvedIdent>(klass->name);
+        [&](const ast::ClassDef &klass) {
+            auto *id = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
             if (id && id->name == core::Names::singleton()) {
                 // class << self; We consider this
                 // behavior-defining. We could opt to recurse inside
@@ -27,25 +27,25 @@ bool definesBehavior(const TreePtr &expr) {
             }
         },
 
-        [&](ast::Assign *asgn) {
-            if (ast::isa_tree<ast::ConstantLit>(asgn->lhs)) {
+        [&](const ast::Assign &asgn) {
+            if (ast::isa_tree<ast::ConstantLit>(asgn.lhs)) {
                 result = false;
             } else {
                 result = true;
             }
         },
 
-        [&](ast::InsSeq *seq) {
-            result = absl::c_any_of(seq->stats, [](auto &child) { return definesBehavior(child); }) ||
-                     definesBehavior(seq->expr);
+        [&](const ast::InsSeq &seq) {
+            result = absl::c_any_of(seq.stats, [](auto &child) { return definesBehavior(child); }) ||
+                     definesBehavior(seq.expr);
         },
 
         // Ignore code synthesized by Rewriter pass.
-        [&](ast::Send *send) { result = !send->flags.isRewriterSynthesized; },
-        [&](ast::MethodDef *methodDef) { result = !methodDef->flags.isRewriterSynthesized; },
-        [&](ast::Literal *methodDef) { result = false; },
+        [&](const ast::Send &send) { result = !send.flags.isRewriterSynthesized; },
+        [&](const ast::MethodDef &methodDef) { result = !methodDef.flags.isRewriterSynthesized; },
+        [&](const ast::Literal &methodDef) { result = false; },
 
-        [&](ast::Expression *klass) { result = true; });
+        [&](const TreePtr &klass) { result = true; });
     return result;
 }
 
@@ -75,22 +75,22 @@ bool BehaviorHelpers::checkEmptyDeep(const TreePtr &expr) {
     bool result = false;
 
     typecase(
-        expr.get(),
+        expr,
 
-        [&](ast::Send *send) {
-            result = send->fun == core::Names::keepForIde() || send->fun == core::Names::keepDef() ||
-                     send->fun == core::Names::keepSelfDef() || send->fun == core::Names::include() ||
-                     send->fun == core::Names::extend();
+        [&](const ast::Send &send) {
+            result = send.fun == core::Names::keepForIde() || send.fun == core::Names::keepDef() ||
+                     send.fun == core::Names::keepSelfDef() || send.fun == core::Names::include() ||
+                     send.fun == core::Names::extend();
         },
 
-        [&](ast::EmptyTree *) { result = true; },
+        [&](const ast::EmptyTree &) { result = true; },
 
-        [&](ast::InsSeq *seq) {
-            result = absl::c_all_of(seq->stats, [](auto &child) { return checkEmptyDeep(child); }) &&
-                     checkEmptyDeep(seq->expr);
+        [&](const ast::InsSeq &seq) {
+            result = absl::c_all_of(seq.stats, [](auto &child) { return checkEmptyDeep(child); }) &&
+                     checkEmptyDeep(seq.expr);
         },
 
-        [&](ast::Expression *klass) { result = false; });
+        [&](const TreePtr &klass) { result = false; });
     return result;
 }
 

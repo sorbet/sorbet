@@ -882,24 +882,24 @@ core::TypePtr flattenArrays(core::Context ctx, const core::TypePtr &type) {
     core::TypePtr result;
 
     typecase(
-        type.get(),
+        type,
 
-        [&](const core::OrType *o) {
-            result = core::Types::any(ctx, flattenArrays(ctx, o->left), flattenArrays(ctx, o->right));
+        [&](const core::OrType &o) {
+            result = core::Types::any(ctx, flattenArrays(ctx, o.left), flattenArrays(ctx, o.right));
         },
 
-        [&](const core::AppliedType *a) {
-            if (a->klass != core::Symbols::Array()) {
+        [&](const core::AppliedType &a) {
+            if (a.klass != core::Symbols::Array()) {
                 result = type;
                 return;
             }
-            ENFORCE(a->targs.size() == 1);
-            result = a->targs.front();
+            ENFORCE(a.targs.size() == 1);
+            result = a.targs.front();
         },
 
-        [&](const core::TupleType *t) { result = t->elementType(); },
+        [&](const core::TupleType &t) { result = t.elementType(); },
 
-        [&](const core::Type *t) { result = std::move(type); });
+        [&](const core::TypePtr &t) { result = std::move(type); });
     return result;
 }
 
