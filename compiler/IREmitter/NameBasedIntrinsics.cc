@@ -157,15 +157,16 @@ public:
         auto block = Payload::varGet(cs, send->args[2].variable, builder, irctx, rubyBlockId);
         auto blockAsProc = IREmitterHelpers::callViaRubyVMSimple(
             cs, builder, irctx, block, llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
-            llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)), "to_proc");
+            llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)), llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+            "to_proc");
 
-        auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx, 3);
+        auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx, 3);
 
         auto slowFunctionName = "callWithProc" + (string)name;
         auto *cache = IREmitterHelpers::makeInlineCache(cs, slowFunctionName);
 
         return builder.CreateCall(cs.module->getFunction("sorbet_callFuncProcWithCache"),
-                                  {recv, rawId, argc, argv, blockAsProc, cache}, slowFunctionName);
+                                  {recv, rawId, argc, argv, kw_splat, blockAsProc, cache}, slowFunctionName);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::callWithBlock()};
@@ -220,7 +221,7 @@ public:
         auto rubyBlockId = mcctx.rubyBlockId;
         auto *send = mcctx.send;
 
-        auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx);
+        auto [argc, argv, _] = IREmitterHelpers::fillSendArgArray(mcctx);
 
         llvm::Value *recv;
         if (takesReciever == TakesReciever) {

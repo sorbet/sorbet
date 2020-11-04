@@ -67,7 +67,7 @@ public:
         auto *send = mcctx.send;
         auto rubyBlockId = mcctx.rubyBlockId;
 
-        auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx);
+        auto [argc, argv, _] = IREmitterHelpers::fillSendArgArray(mcctx);
 
         auto recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, rubyBlockId);
         llvm::Value *blkPtr;
@@ -278,8 +278,8 @@ public:
 
         auto &builder = builderCast(mcctx.build);
         auto self = Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, mcctx.irctx, mcctx.rubyBlockId);
-        auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx);
-        return IREmitterHelpers::callViaRubyVMSimple(cs, mcctx.build, mcctx.irctx, self, argv, argc, "new");
+        auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx);
+        return IREmitterHelpers::callViaRubyVMSimple(cs, mcctx.build, mcctx.irctx, self, argv, argc, kw_splat, "new");
     };
 
     virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {

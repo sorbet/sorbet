@@ -82,8 +82,16 @@ public:
 
     static std::size_t sendArgCount(cfg::Send *send);
 
-    static std::pair<llvm::Value *, llvm::Value *> fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset);
-    static std::pair<llvm::Value *, llvm::Value *> fillSendArgArray(MethodCallContext &mcctx);
+    struct SendArgInfo {
+        SendArgInfo(llvm::Value *argc, llvm::Value *argv, llvm::Value *kw_splat);
+
+        llvm::Value *argc;
+        llvm::Value *argv;
+        llvm::Value *kw_splat;
+    };
+
+    static SendArgInfo fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset);
+    static SendArgInfo fillSendArgArray(MethodCallContext &mcctx);
 
     static llvm::Value *emitMethodCall(MethodCallContext &mcctx);
 
@@ -91,10 +99,8 @@ public:
 
     static llvm::Value *callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build,
                                             const IREmitterContext &irctx, llvm::Value *self, llvm::Value *argv,
-                                            llvm::Value *argc, std::string_view name, llvm::Function *blkFun = nullptr,
-                                            llvm::Value *localsOffset = nullptr);
-
-    static llvm::Value *emitMethodCallDirrect(MethodCallContext &mcctx, core::SymbolRef funSym);
+                                            llvm::Value *argc, llvm::Value *kw_splat, std::string_view name,
+                                            llvm::Function *blkFun = nullptr, llvm::Value *localsOffset = nullptr);
 
     static llvm::Value *emitMethodCallViaRubyVM(MethodCallContext &mcctx);
 

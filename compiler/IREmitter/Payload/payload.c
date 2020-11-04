@@ -310,7 +310,7 @@ VALUE sorbet_callBlock(VALUE array) {
 }
 
 SORBET_INLINE
-VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv) {
+VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat) {
     // Mostly an implementation of return rb_call_super(argc, argv);
     rb_execution_context_t *ec = GET_EC();
     VALUE recv = ec->cfp->self;
@@ -1237,9 +1237,10 @@ static inline void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInli
     cache->class_serial = sorbet_getClassSerial(recv);
 }
 
+// NOTE: kw_splat is 1 when keyword arguments are present in the argument list. This will be used in ruby-2.7.
 SORBET_ATTRIBUTE(noinline)
 VALUE sorbet_callFuncWithCache(VALUE recv, ID func, int argc,
-                               SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv,
+                               SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
                                struct FunctionInlineCache *cache) {
     if (UNLIKELY(sorbet_getMethodEpoch() != cache->method_state) ||
         UNLIKELY(sorbet_getClassSerial(recv) != cache->class_serial)) {
@@ -1250,15 +1251,15 @@ VALUE sorbet_callFuncWithCache(VALUE recv, ID func, int argc,
 
 SORBET_INLINE
 VALUE sorbet_callFuncProcWithCache(VALUE recv, ID func, int argc,
-                                   SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, VALUE proc,
-                                   struct FunctionInlineCache *cache) {
+                                   SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
+                                   VALUE proc, struct FunctionInlineCache *cache) {
     if (!NIL_P(proc)) {
         // this is an inlined version of vm_passed_block_handler_set(GET_EC(), proc);
         vm_block_handler_verify(proc);
         GET_EC()->passed_block_handler = proc;
     }
 
-    return sorbet_callFuncWithCache(recv, func, argc, argv, cache);
+    return sorbet_callFuncWithCache(recv, func, argc, argv, kw_splat, cache);
 }
 
 struct sorbet_iterMethodArg {
@@ -1266,6 +1267,7 @@ struct sorbet_iterMethodArg {
     ID func;
     int argc;
     const VALUE *argv;
+    int kw_splat;
     struct FunctionInlineCache *cache;
 };
 
@@ -1273,18 +1275,19 @@ struct sorbet_iterMethodArg {
 // end up with an inlined version of rb_iterate, it would be good to inline this.
 static VALUE sorbet_iterMethod(VALUE obj) {
     struct sorbet_iterMethodArg *arg = (struct sorbet_iterMethodArg *)obj;
-    return sorbet_callFuncWithCache(arg->recv, arg->func, arg->argc, arg->argv, arg->cache);
+    return sorbet_callFuncWithCache(arg->recv, arg->func, arg->argc, arg->argv, arg->kw_splat, arg->cache);
 }
 
 SORBET_INLINE
 VALUE sorbet_callFuncBlockWithCache(VALUE recv, ID func, int argc,
-                                    SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, BlockFFIType blockImpl,
-                                    VALUE closure, struct FunctionInlineCache *cache) {
+                                    SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
+                                    BlockFFIType blockImpl, VALUE closure, struct FunctionInlineCache *cache) {
     struct sorbet_iterMethodArg arg;
     arg.recv = recv;
     arg.func = func;
     arg.argc = argc;
     arg.argv = argv;
+    arg.kw_splat = kw_splat;
     arg.cache = cache;
 
     return rb_iterate(sorbet_iterMethod, (VALUE)&arg, blockImpl, closure);

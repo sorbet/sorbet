@@ -150,8 +150,10 @@ llvm::Value *getSendArgsPointer(CompilerState &cs, llvm::IRBuilderBase &build, l
 
 } // namespace
 
-pair<llvm::Value *, llvm::Value *> IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx,
-                                                                      const std::size_t offset) {
+IREmitterHelpers::SendArgInfo::SendArgInfo(llvm::Value *argc, llvm::Value *argv, llvm::Value *kw_splat)
+    : argc{argc}, argv{argv}, kw_splat{kw_splat} {}
+
+IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset) {
     auto &cs = mcctx.cs;
     auto &builder = builderCast(mcctx.build);
     auto &args = mcctx.send->args;
@@ -172,13 +174,17 @@ pair<llvm::Value *, llvm::Value *> IREmitterHelpers::fillSendArgArray(MethodCall
     auto numKwArgs = kwEnd - posEnd;
     auto length = numPosArgs;
     bool hasKwArgs = numKwArgs > 0 || hasKwSplat;
+    llvm::Value *kw_splat;
     if (hasKwArgs) {
         length++;
+        kw_splat = llvm::ConstantInt::get(cs, llvm::APInt(32, 1, true));
+    } else {
+        kw_splat = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true));
     }
 
     auto *argc = llvm::ConstantInt::get(cs, llvm::APInt(32, length, true));
     if (length == 0) {
-        return {argc, llvm::Constant::getNullValue(llvm::Type::getInt64PtrTy(cs))};
+        return SendArgInfo{argc, llvm::Constant::getNullValue(llvm::Type::getInt64PtrTy(cs)), kw_splat};
     }
 
     auto *sendArgs = irctx.sendArgArrayByBlock[rubyBlockId];
@@ -223,28 +229,11 @@ pair<llvm::Value *, llvm::Value *> IREmitterHelpers::fillSendArgArray(MethodCall
         }
     }
 
-    return {argc, getSendArgsPointer(cs, builder, sendArgs)};
+    return SendArgInfo{argc, getSendArgsPointer(cs, builder, sendArgs), kw_splat};
 }
 
-pair<llvm::Value *, llvm::Value *> IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx) {
+IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallContext &mcctx) {
     return fillSendArgArray(mcctx, 0);
-}
-
-llvm::Value *IREmitterHelpers::emitMethodCallDirrect(MethodCallContext &mcctx, core::SymbolRef funSym) {
-    auto &cs = mcctx.cs;
-    auto &builder = builderCast(mcctx.build);
-    auto &irctx = mcctx.irctx;
-    auto rubyBlockId = mcctx.rubyBlockId;
-    auto *send = mcctx.send;
-    auto llvmFunc = IREmitterHelpers::lookupFunction(cs, funSym);
-    ENFORCE(llvmFunc != nullptr);
-    // TODO: insert type guard
-
-    auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx);
-    auto var = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
-    builder.CreateCall(cs.module->getFunction("sorbet_checkStack"), {});
-    llvm::Value *rawCall = builder.CreateCall(llvmFunc, {argc, argv, var}, "directSendResult");
-    return rawCall;
 }
 
 llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx) {
@@ -256,7 +245,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     auto str = send->fun.data(cs)->shortName(cs);
 
     // fill in args
-    auto [argc, argv] = IREmitterHelpers::fillSendArgArray(mcctx);
+    auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx);
 
     // TODO(perf): call
     // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
@@ -264,9 +253,9 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     // before this, perf will not be good
     auto *self = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
     if (send->fun == core::Names::super()) {
-        return builder.CreateCall(cs.module->getFunction("sorbet_callSuper"), {argc, argv}, "rawSendResult");
+        return builder.CreateCall(cs.module->getFunction("sorbet_callSuper"), {argc, argv, kw_splat}, "rawSendResult");
     } else {
-        return callViaRubyVMSimple(cs, mcctx.build, irctx, self, argv, argc, str, mcctx.blk,
+        return callViaRubyVMSimple(cs, mcctx.build, irctx, self, argv, argc, kw_splat, str, mcctx.blk,
                                    irctx.localsOffset[rubyBlockId]);
     }
 };
@@ -292,8 +281,8 @@ llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, string slowFun
 
 llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build,
                                                    const IREmitterContext &irctx, llvm::Value *self, llvm::Value *argv,
-                                                   llvm::Value *argc, string_view name, llvm::Function *blkFun,
-                                                   llvm::Value *localsOffset) {
+                                                   llvm::Value *argc, llvm::Value *kw_splat, string_view name,
+                                                   llvm::Function *blkFun, llvm::Value *localsOffset) {
     auto &builder = builderCast(build);
 
     auto rawId = Payload::idIntern(cs, builder, name);
@@ -304,12 +293,12 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBu
         auto slowFunctionName = "callFuncWithBlock_" + (string)name;
         auto *cache = makeInlineCache(cs, slowFunctionName);
         return builder.CreateCall(cs.module->getFunction("sorbet_callFuncBlockWithCache"),
-                                  {self, rawId, argc, argv, blkFun, localsOffset, cache}, slowFunctionName);
+                                  {self, rawId, argc, argv, kw_splat, blkFun, localsOffset, cache}, slowFunctionName);
     } else {
         auto slowFunctionName = "callFunc_" + (string)name;
         auto *cache = makeInlineCache(cs, slowFunctionName);
-        return builder.CreateCall(cs.module->getFunction("sorbet_callFuncWithCache"), {self, rawId, argc, argv, cache},
-                                  slowFunctionName);
+        return builder.CreateCall(cs.module->getFunction("sorbet_callFuncWithCache"),
+                                  {self, rawId, argc, argv, kw_splat, cache}, slowFunctionName);
     }
 }
 

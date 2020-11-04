@@ -148,7 +148,7 @@ declare i64 @rb_gv_set(i8*, i64) local_unnamed_addr #0
 declare void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* nocapture readnone, %struct.rb_control_frame_struct*, %struct.rb_iseq_struct* nocapture readonly) local_unnamed_addr #3
 
 ; Function Attrs: noinline nounwind ssp uwtable
-declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #3
+declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, i32, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @"func_Object#foo"(i32 %argc, i64* nocapture readnone %argArray, i64 %selfRaw) #5 !dbg !8 {
@@ -204,22 +204,22 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %callArgs0Addr = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs, i64 0, i64 0, !dbg !34
   store i64 %22, i64* %callArgs0Addr, align 8, !dbg !34
   %rubyId_puts = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !34
-  %callFunc_puts = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts), !dbg !34
+  %callFunc_puts = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts, i32 1, i64* nonnull %callArgs0Addr, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts), !dbg !34
   %25 = getelementptr inbounds i64, i64* %15, i64 3, !dbg !34
   store i64* %25, i64** %10, align 8, !dbg !34, !tbaa !12
   store i64 %22, i64* %callArgs0Addr, align 8, !dbg !38
   %rubyId_puts21 = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !38
-  %callFunc_puts22 = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts21, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.1), !dbg !38
+  %callFunc_puts22 = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts21, i32 1, i64* nonnull %callArgs0Addr, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.1), !dbg !38
   %26 = getelementptr inbounds i64, i64* %15, i64 4, !dbg !38
   store i64* %26, i64** %10, align 8, !dbg !38, !tbaa !12
   store i64 %22, i64* %callArgs0Addr, align 8, !dbg !39
   %rubyId_puts27 = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !39
-  %callFunc_puts28 = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts27, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.2), !dbg !39
+  %callFunc_puts28 = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts27, i32 1, i64* nonnull %callArgs0Addr, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.2), !dbg !39
   %27 = getelementptr inbounds i64, i64* %15, i64 5, !dbg !39
   store i64* %27, i64** %10, align 8, !dbg !39, !tbaa !12
   store i64 %22, i64* %callArgs0Addr, align 8, !dbg !40
   %rubyId_puts33 = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !40
-  %callFunc_puts34 = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts33, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.3), !dbg !40
+  %callFunc_puts34 = call i64 @sorbet_callFuncWithCache(i64 %selfRaw, i64 %rubyId_puts33, i32 1, i64* nonnull %callArgs0Addr, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.3), !dbg !40
   ret i64 %callFunc_puts34
 }
 
@@ -330,7 +330,7 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %60 = getelementptr inbounds i64, i64* %44, i64 12, !dbg !53
   store i64* %60, i64** %39, align 8, !dbg !53, !tbaa !12
   %rubyId_foo31.i = load i64, i64* @rubyIdPrecomputed_foo, align 8, !dbg !54
-  %callFunc_foo.i = tail call i64 @sorbet_callFuncWithCache(i64 %28, i64 %rubyId_foo31.i, i32 0, i64* null, %struct.FunctionInlineCache* nonnull @ic_callFunc_foo) #8, !dbg !54
+  %callFunc_foo.i = tail call i64 @sorbet_callFuncWithCache(i64 %28, i64 %rubyId_foo31.i, i32 0, i64* null, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_foo) #8, !dbg !54
   ret void
 }
 

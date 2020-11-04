@@ -132,7 +132,7 @@ declare i64 @rb_gv_set(i8*, i64) local_unnamed_addr #0
 declare void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* nocapture readnone, %struct.rb_control_frame_struct*, %struct.rb_iseq_struct* nocapture readonly) local_unnamed_addr #3
 
 ; Function Attrs: noinline nounwind ssp uwtable
-declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #3
+declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, i32, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq
 define void @Init_literals() local_unnamed_addr #4 {
@@ -209,40 +209,40 @@ sorbet_readRealpath.exit:                         ; preds = %6
   %callArgs0Addr.i = getelementptr inbounds [1 x i64], [1 x i64]* %callArgs.i, i64 0, i64 0, !dbg !39
   store i64 85, i64* %callArgs0Addr.i, align 8, !dbg !39
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !39
-  %callFunc_puts.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts) #7, !dbg !39
+  %callFunc_puts.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts.i, i32 1, i64* nonnull %callArgs0Addr.i, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts) #7, !dbg !39
   %43 = getelementptr inbounds i64, i64* %41, i64 5, !dbg !39
   store i64* %43, i64** %36, align 8, !dbg !39, !tbaa !10
   store i64 56565211319773434, i64* %callArgs0Addr.i, align 8, !dbg !44
   %rubyId_puts38.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !44
-  %callFunc_puts39.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts38.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.1) #7, !dbg !44
+  %callFunc_puts39.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts38.i, i32 1, i64* nonnull %callArgs0Addr.i, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.1) #7, !dbg !44
   %44 = getelementptr inbounds i64, i64* %41, i64 6, !dbg !44
   store i64* %44, i64** %36, align 8, !dbg !44, !tbaa !10
   %rubyStr_str.i = load i64, i64* @rubyStrFrozen_str, align 8, !dbg !45
   store i64 %rubyStr_str.i, i64* %callArgs0Addr.i, align 8, !dbg !46
   %rubyId_puts45.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !46
-  %callFunc_puts46.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts45.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.2) #7, !dbg !46
+  %callFunc_puts46.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts45.i, i32 1, i64* nonnull %callArgs0Addr.i, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.2) #7, !dbg !46
   %45 = getelementptr inbounds i64, i64* %41, i64 7, !dbg !46
   store i64* %45, i64** %36, align 8, !dbg !46, !tbaa !10
   %rubyId_sym.i = load i64, i64* @rubyIdPrecomputed_sym, align 8, !dbg !47
   %rawSym.i = tail call i64 @rb_id2sym(i64 %rubyId_sym.i) #7, !dbg !47
   store i64 %rawSym.i, i64* %callArgs0Addr.i, align 8, !dbg !48
   %rubyId_puts52.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !48
-  %callFunc_puts53.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts52.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.3) #7, !dbg !48
+  %callFunc_puts53.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts52.i, i32 1, i64* nonnull %callArgs0Addr.i, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.3) #7, !dbg !48
   %46 = getelementptr inbounds i64, i64* %41, i64 8, !dbg !48
   store i64* %46, i64** %36, align 8, !dbg !48, !tbaa !10
   store i64 0, i64* %callArgs0Addr.i, align 8, !dbg !49
   %rubyId_puts59.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !49
-  %callFunc_puts60.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts59.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.4) #7, !dbg !49
+  %callFunc_puts60.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts59.i, i32 1, i64* nonnull %callArgs0Addr.i, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.4) #7, !dbg !49
   %47 = getelementptr inbounds i64, i64* %41, i64 9, !dbg !49
   store i64* %47, i64** %36, align 8, !dbg !49, !tbaa !10
   store i64 20, i64* %callArgs0Addr.i, align 8, !dbg !50
   %rubyId_puts66.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !50
-  %callFunc_puts67.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts66.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.5) #7, !dbg !50
+  %callFunc_puts67.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts66.i, i32 1, i64* nonnull %callArgs0Addr.i, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.5) #7, !dbg !50
   %48 = getelementptr inbounds i64, i64* %41, i64 10, !dbg !50
   store i64* %48, i64** %36, align 8, !dbg !50, !tbaa !10
   store i64 8, i64* %callArgs0Addr.i, align 8, !dbg !51
   %rubyId_puts74.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !51
-  %callFunc_puts75.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts74.i, i32 1, i64* nonnull %callArgs0Addr.i, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.6) #7, !dbg !51
+  %callFunc_puts75.i = call i64 @sorbet_callFuncWithCache(i64 %24, i64 %rubyId_puts74.i, i32 1, i64* nonnull %callArgs0Addr.i, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_puts.6) #7, !dbg !51
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %25)
   ret void
 }

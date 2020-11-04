@@ -186,7 +186,7 @@ declare void @rb_gc_writebarrier_remember(i64) local_unnamed_addr #0
 declare void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* nocapture readnone, %struct.rb_control_frame_struct*, %struct.rb_iseq_struct* nocapture readonly) local_unnamed_addr #4
 
 ; Function Attrs: noinline nounwind ssp uwtable
-declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #4
+declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* noalias nocapture, i32, %struct.FunctionInlineCache* nocapture) local_unnamed_addr #4
 
 ; Function Attrs: nounwind sspreq
 define void @Init_call_final() local_unnamed_addr #7 {
@@ -545,7 +545,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %guardUpdated = icmp eq i64 %24, %25, !dbg !58
   tail call void @llvm.assume(i1 %guardUpdated), !dbg !58
   %rubyId_foo = load i64, i64* @rubyIdPrecomputed_foo, align 8, !dbg !58
-  %callFunc_foo = call i64 @sorbet_callFuncWithCache(i64 %23, i64 %rubyId_foo, i32 1, i64* nonnull %callArgs0Addr, %struct.FunctionInlineCache* nonnull @ic_callFunc_foo), !dbg !58
+  %callFunc_foo = call i64 @sorbet_callFuncWithCache(i64 %23, i64 %rubyId_foo, i32 1, i64* nonnull %callArgs0Addr, i32 0, %struct.FunctionInlineCache* nonnull @ic_callFunc_foo), !dbg !58
   ret i64 %callFunc_foo
 }
 
