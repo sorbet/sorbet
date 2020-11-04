@@ -18,9 +18,19 @@ namespace {
 bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalState &gs,
                            unique_ptr<ResponseMessage> &response) {
     auto locs = symbol.data(gs)->locs();
-
+    string filetype;
     for (auto loc : locs) {
-        if (loc.file().data(gs).isRBI() || loc.file().data(gs).isPayload()) {
+        if (loc.file().data(gs).isRBI()) {
+            filetype = ".rbi";
+        } else if (loc.file().data(gs).isPayload()) {
+            filetype = "payload";
+        }
+
+        if (!filetype.empty()) {
+            auto error =
+                fmt::format("Renaming constants defined in {} files is not supported; symbol {} is defined at {}",
+                            filetype, symbol.data(gs)->name.show(gs), loc.filePosToString(gs));
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, error);
             return false;
         }
     }

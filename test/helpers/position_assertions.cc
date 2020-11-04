@@ -1333,6 +1333,7 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
                                           expectedEditedFilePath));
             return;
         }
+
         REQUIRE_FALSE(edits.empty());
 
         // First, sort the edits by increasing starting location
