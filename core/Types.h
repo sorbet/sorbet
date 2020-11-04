@@ -305,7 +305,7 @@ template <class To> inline bool TypePtr::isa(const TypePtr &what) {
     return isa_type<To>(what);
 }
 
-template <class To> inline To const &TypePtr::cast_nonnull(const TypePtr &what) {
+template <class To> inline To const &TypePtr::cast(const TypePtr &what) {
     return cast_type_nonnull<To>(what);
 }
 
@@ -313,7 +313,7 @@ template <> inline bool TypePtr::isa<TypePtr>(const TypePtr &what) {
     return true;
 }
 
-template <> inline TypePtr const &TypePtr::cast_nonnull<TypePtr>(const TypePtr &what) {
+template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
     return what;
 }
 

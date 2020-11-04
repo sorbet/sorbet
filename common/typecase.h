@@ -83,7 +83,7 @@ template <typename Base, typename FUNC> bool typecaseHelper(Base &base, FUNC &&f
     // We specialize (const and non-const) references
     using ArgType = typename std::remove_const<typename std::remove_reference<typename traits::arg_type>::type>::type;
     if (Base::template isa<ArgType>(base)) {
-        func(Base::template cast_nonnull<ArgType>(base));
+        func(Base::template cast<ArgType>(base));
         return true;
     } else {
         return false;

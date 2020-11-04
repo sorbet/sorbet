@@ -35,10 +35,10 @@ public:
     // Required for typecase.
     template <class To> static bool isa(const TypePtr &what);
 
-    template <class To> static To const &cast_nonnull(const TypePtr &what);
+    template <class To> static To const &cast(const TypePtr &what);
 
-    template <class To> static To &cast_nonnull(TypePtr &what) {
-        return const_cast<To &>(cast_nonnull<To>(static_cast<const TypePtr &>(what)));
+    template <class To> static To &cast(TypePtr &what) {
+        return const_cast<To &>(cast<To>(static_cast<const TypePtr &>(what)));
     }
 
 private:

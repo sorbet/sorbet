@@ -72,9 +72,9 @@ public:
 
     // Required for typecase
     template <class To> static bool isa(const TreePtr &tree);
-    template <class To> static const To &cast_nonnull(const TreePtr &tree);
-    template <class To> static To &cast_nonnull(TreePtr &tree) {
-        return const_cast<To &>(cast_nonnull<To>(static_cast<const TreePtr &>(tree)));
+    template <class To> static const To &cast(const TreePtr &tree);
+    template <class To> static To &cast(TreePtr &tree) {
+        return const_cast<To &>(cast<To>(static_cast<const TreePtr &>(tree)));
     }
 
 private:
@@ -312,17 +312,15 @@ template <class To> inline bool TreePtr::isa(const TreePtr &what) {
     return isa_tree<To>(what);
 }
 
-template <class To> inline To const &TreePtr::cast_nonnull(const TreePtr &what) {
+template <class To> inline To const &TreePtr::cast(const TreePtr &what) {
     return cast_tree_nonnull<To>(what);
 }
 
 template <> inline bool TreePtr::isa<TreePtr>(const TreePtr &tree) {
     return true;
 }
-template <> inline const Expression &TreePtr::cast_nonnull<Expression>(const TreePtr &tree) {
-    return *tree.get();
-}
-template <> inline const TreePtr &TreePtr::cast_nonnull<TreePtr>(const TreePtr &tree) {
+
+template <> inline const TreePtr &TreePtr::cast<TreePtr>(const TreePtr &tree) {
     return tree;
 }
 
