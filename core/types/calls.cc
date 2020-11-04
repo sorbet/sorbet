@@ -819,10 +819,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 }
 
                 // Clear out the kwargs hash so that no keyword argument processing is triggered below, and also mark
-                // the keyword args as consumed.
+                // the keyword args as consumed when this method does not accept keyword arguments.
                 kwargs = nullptr;
-                ait += numKwargs;
                 posArgs++;
+                if (!hasKwargs) {
+                    ait += numKwargs;
+                }
             }
         }
     }
@@ -857,10 +859,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     // keep this around so we know which keyword arguments have been supplied
     UnorderedSet<NameRef> consumed;
     if (hasKwargs) {
-        if (auto *hash = cast_type<ShapeType>(kwargs)) {
-            // Mark the keyword args as consumed
-            ait += nonPosArgs;
+        // Mark the keyword args as consumed
+        ait += numKwargs;
 
+        if (auto *hash = cast_type<ShapeType>(kwargs)) {
             // find keyword arguments and advance `pend` before them; We'll walk
             // `kwit` ahead below
             auto kwit = pit;
@@ -2321,6 +2323,12 @@ public:
     }
 } Shape_merge;
 
+class Shape_to_hash : public IntrinsicMethod {
+    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+        res.returnType = args.selfType;
+    }
+} Shape_to_hash;
+
 class Array_flatten : public IntrinsicMethod {
     // Flattens a (nested) array all way down to its (inner) element type, stopping if we hit the depth limit first.
     static TypePtr recursivelyFlattenArrays(const GlobalState &gs, const TypePtr &type, const int64_t depth) {
@@ -2594,6 +2602,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
 
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},

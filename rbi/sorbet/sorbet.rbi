@@ -90,6 +90,7 @@ class Sorbet::Private::Static::Shape < Hash
   Elem = type_member(:out)
 
   def merge(other); end
+  def to_hash(); end
 end
 
 class Sorbet::Private::Static::ENVClass
