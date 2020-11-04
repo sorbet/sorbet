@@ -622,7 +622,13 @@ class Numeric < Object
   # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) and invoking
   # [`Float#truncate`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-truncate).
   sig {returns(Integer)}
-  def truncate(); end
+  sig do
+    params(
+      arg0: Integer
+    )
+    .returns(T.any(Integer, Float))
+  end
+  def truncate(arg0=T.unsafe(nil)); end
 
   # Returns `true` if `num` has a zero value.
   sig {returns(T::Boolean)}
