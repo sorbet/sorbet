@@ -10,7 +10,6 @@
 #include "cfg/CFG.h"
 #include "common/FileOps.h"
 #include "common/sort.h"
-#include "common/typecase.h"
 #include "compiler/Core/CompilerState.h"
 #include "compiler/Errors/Errors.h"
 #include "compiler/IREmitter/IREmitter.h"

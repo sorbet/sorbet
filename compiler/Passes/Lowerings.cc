@@ -7,7 +7,6 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
 #include "Passes.h"
-#include "common/typecase.h"
 #include "compiler/Core/CompilerState.h"
 #include "core/core.h"
 #include <string>

@@ -315,48 +315,48 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
     auto &builder = builderCast(b);
     llvm::Value *ret = nullptr;
     typecase(
-        type.get(),
-        [&](core::ClassType *ct) {
+        type,
+        [&](const core::ClassType &ct) {
             for (const auto &[candidate, specializedCall] : optimizedTypeTests) {
-                if (ct->symbol == candidate) {
+                if (ct.symbol == candidate) {
                     ret = builder.CreateCall(cs.module->getFunction(specializedCall), {val});
                     return;
                 }
             }
 
-            if (ct->symbol.data(cs)->name.data(cs)->isTEnumName(cs)) {
+            if (ct.symbol.data(cs)->name.data(cs)->isTEnumName(cs)) {
                 // T.let(..., MyEnum::X$1) is special. These are singleton values, so we can do a type
                 // test with an object (reference) equality check.
                 ret = builder.CreateCall(cs.module->getFunction("sorbet_testObjectEqual_p"),
-                                         {Payload::getRubyConstant(cs, ct->symbol, builder), val});
+                                         {Payload::getRubyConstant(cs, ct.symbol, builder), val});
                 return;
             }
 
-            auto attachedClass = ct->symbol.data(cs)->attachedClass(cs);
+            auto attachedClass = ct.symbol.data(cs)->attachedClass(cs);
             // todo: handle attached of attached class
             if (attachedClass.exists()) {
                 ret = builder.CreateCall(cs.module->getFunction("sorbet_isa_class_of"),
                                          {val, Payload::getRubyConstant(cs, attachedClass, builder)});
                 return;
             }
-            auto sym = isProc(ct->symbol) ? core::Symbols::Proc() : ct->symbol;
+            auto sym = isProc(ct.symbol) ? core::Symbols::Proc() : ct.symbol;
             ret = builder.CreateCall(cs.module->getFunction("sorbet_isa"),
                                      {val, Payload::getRubyConstant(cs, sym, builder)});
         },
-        [&](core::AppliedType *at) {
-            auto base = typeTest(cs, builder, val, core::make_type<core::ClassType>(at->klass));
+        [&](const core::AppliedType &at) {
+            auto base = typeTest(cs, builder, val, core::make_type<core::ClassType>(at.klass));
             ret = base;
             // todo: ranges, hashes, sets, enumerator, and, overall, enumerables
         },
-        [&](core::OrType *ct) {
+        [&](const core::OrType &ct) {
             // TODO: reoder types so that cheap test is done first
-            auto left = typeTest(cs, builder, val, ct->left);
+            auto left = typeTest(cs, builder, val, ct.left);
             auto rightBlockStart = llvm::BasicBlock::Create(cs, "orRight", builder.GetInsertBlock()->getParent());
             auto contBlock = llvm::BasicBlock::Create(cs, "orContinue", builder.GetInsertBlock()->getParent());
             auto leftEnd = builder.GetInsertBlock();
             builder.CreateCondBr(left, contBlock, rightBlockStart);
             builder.SetInsertPoint(rightBlockStart);
-            auto right = typeTest(cs, builder, val, ct->right);
+            auto right = typeTest(cs, builder, val, ct.right);
             auto rightEnd = builder.GetInsertBlock();
             builder.CreateBr(contBlock);
             builder.SetInsertPoint(contBlock);
@@ -365,15 +365,15 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
             phi->addIncoming(right, rightEnd);
             ret = phi;
         },
-        [&](core::AndType *ct) {
+        [&](const core::AndType &ct) {
             // TODO: reoder types so that cheap test is done first
-            auto left = typeTest(cs, builder, val, ct->left);
+            auto left = typeTest(cs, builder, val, ct.left);
             auto rightBlockStart = llvm::BasicBlock::Create(cs, "andRight", builder.GetInsertBlock()->getParent());
             auto contBlock = llvm::BasicBlock::Create(cs, "andContinue", builder.GetInsertBlock()->getParent());
             auto leftEnd = builder.GetInsertBlock();
             builder.CreateCondBr(left, rightBlockStart, contBlock);
             builder.SetInsertPoint(rightBlockStart);
-            auto right = typeTest(cs, builder, val, ct->right);
+            auto right = typeTest(cs, builder, val, ct.right);
             auto rightEnd = builder.GetInsertBlock();
             builder.CreateBr(contBlock);
             builder.SetInsertPoint(contBlock);
@@ -382,7 +382,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
             phi->addIncoming(right, rightEnd);
             ret = phi;
         },
-        [&](core::Type *_default) { ret = builder.getInt1(true); });
+        [&](const core::TypePtr &_default) { ret = builder.getInt1(true); });
     ENFORCE(ret != nullptr);
     return ret;
 }
