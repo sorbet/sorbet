@@ -1749,7 +1749,7 @@ private:
 
             [&](const ast::EmptyTree &e) { stat.reset(nullptr); },
 
-            [&](const ast::Expression &e) {});
+            [&](const ast::TreePtr &e) {});
     }
 
     // Resolve the type of the rhs of a constant declaration. This logic is
@@ -1770,7 +1770,7 @@ private:
                 result = cast.type;
             },
             [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr, ofSym); },
-            [&](const ast::Expression &expr) {});
+            [&](const ast::TreePtr &expr) {});
         return result;
     }
 

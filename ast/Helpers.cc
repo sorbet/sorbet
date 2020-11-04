@@ -45,7 +45,7 @@ bool definesBehavior(const TreePtr &expr) {
         [&](const ast::MethodDef &methodDef) { result = !methodDef.flags.isRewriterSynthesized; },
         [&](const ast::Literal &methodDef) { result = false; },
 
-        [&](const ast::Expression &klass) { result = true; });
+        [&](const TreePtr &klass) { result = true; });
     return result;
 }
 
@@ -90,7 +90,7 @@ bool BehaviorHelpers::checkEmptyDeep(const TreePtr &expr) {
                      checkEmptyDeep(seq.expr);
         },
 
-        [&](const ast::Expression &klass) { result = false; });
+        [&](const TreePtr &klass) { result = false; });
     return result;
 }
 

@@ -776,7 +776,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::TreePtr &what, BasicBlock *cu
             [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
 
-            [&](const ast::Expression &n) { Exception::raise("Unimplemented AST Node: {}", what.nodeName()); });
+            [&](const ast::TreePtr &n) { Exception::raise("Unimplemented AST Node: {}", what.nodeName()); });
 
         // For, Rescue,
         // Symbol, Array,

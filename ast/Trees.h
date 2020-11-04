@@ -316,9 +316,6 @@ template <class To> inline To const &TreePtr::cast_nonnull(const TreePtr &what) 
     return cast_tree_nonnull<To>(what);
 }
 
-template <> inline bool TreePtr::isa<Expression>(const TreePtr &tree) {
-    return true;
-}
 template <> inline bool TreePtr::isa<TreePtr>(const TreePtr &tree) {
     return true;
 }

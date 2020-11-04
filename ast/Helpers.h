@@ -451,7 +451,7 @@ public:
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
                 [&](const UnresolvedIdent &opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
-                [&](const Expression &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+                [&](const TreePtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
         }
     }
 };

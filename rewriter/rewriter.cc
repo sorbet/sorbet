@@ -126,7 +126,7 @@ public:
 
                 [&](ast::MethodDef &mdef) { Initializer::run(ctx, &mdef, prevStat); },
 
-                [&](const ast::Expression &e) {});
+                [&](const ast::TreePtr &e) {});
 
             prevStat = &stat;
         }

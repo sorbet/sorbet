@@ -55,7 +55,7 @@ core::TypePtr getResultLiteral(core::Context ctx, const ast::TreePtr &expr) {
     core::TypePtr result;
     typecase(
         expr, [&](const ast::Literal &lit) { result = lit.value; },
-        [&](const ast::Expression &e) {
+        [&](const ast::TreePtr &e) {
             if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported type literal");
             }
@@ -978,7 +978,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 result.type = core::Types::untypedUntracked();
             }
         },
-        [&](const ast::Expression &e) {
+        [&](const ast::TreePtr &e) {
             if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported type syntax");
             }
