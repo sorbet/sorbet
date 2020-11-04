@@ -763,9 +763,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
                     kwargs = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
-                    if (implicitKwsplat) {
-                        --aend;
-                    }
+                    --aend;
                 } else {
                     if (kwSplatType.isUntyped()) {
                         // Allow an untyped arg to satisfy all kwargs
@@ -821,10 +819,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 }
 
                 // Clear out the kwargs hash so that no keyword argument processing is triggered below, and also mark
-                // the keyword args as consumed.
+                // the keyword args as consumed when this method does not accept keyword arguments.
                 kwargs = nullptr;
-                ait += numKwargs;
                 posArgs++;
+                if (!hasKwargs) {
+                    ait += numKwargs;
+                }
             }
         }
     }
@@ -859,10 +859,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     // keep this around so we know which keyword arguments have been supplied
     UnorderedSet<NameRef> consumed;
     if (hasKwargs) {
-        if (auto *hash = cast_type<ShapeType>(kwargs)) {
-            // Mark the keyword args as consumed
-            ait += nonPosArgs;
+        // Mark the keyword args as consumed
+        ait += numKwargs;
 
+        if (auto *hash = cast_type<ShapeType>(kwargs)) {
             // find keyword arguments and advance `pend` before them; We'll walk
             // `kwit` ahead below
             auto kwit = pit;
