@@ -574,6 +574,7 @@ class Pathname < Object
     )
     .returns(T.untyped)
   end
+  sig {returns(T::Enumerator[Pathname])}
   def descend(&blk); end
 
   # See
