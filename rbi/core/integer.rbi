@@ -477,6 +477,14 @@ class Integer < Numeric
   # 50.downto(0) {|n| print a[n] }
   # #=> 000101110110100000111000011110010100111100010111001
   # ```
+  #
+  # Range operations n[i, len] and n[i..j] are naturally extended.
+  # - `n[i, len]` equals to `(n >> i) & ((1 << len) - 1)`.
+  # - `n[i..j]` equals to `(n >> i) & ((1 << (j - i + 1)) - 1)`.
+  # - `n[i...j]`` equals to `(n >> i) & ((1 << (j - i)) - 1)`.
+  # - `n[i..]`` equals to `(n >> i)`.
+  # - `n[..j]` is zero if `n & ((1 << (j + 1)) - 1)` is zero. Otherwise, raises an `ArgumentError`.
+  # - `n[...j]` is zero if `n & ((1 << j) - 1)` is zero. Otherwise, raises an `ArgumentError`.
   sig do
     params(
         arg0: Integer,
@@ -501,7 +509,20 @@ class Integer < Numeric
     )
     .returns(Integer)
   end
-  def [](arg0); end
+  sig do
+    params(
+        arg0: T::Range[T.any(Integer, Float, Rational)],
+    )
+    .returns(Integer)
+  end
+  sig do
+    params(
+        arg0: Numeric,
+        arg1: Numeric,
+    )
+    .returns(Integer)
+  end
+  def [](arg0, arg1=T.unsafe(nil)); end
 
   # Bitwise EXCLUSIVE OR.
   sig do
