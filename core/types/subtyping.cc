@@ -179,7 +179,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         return t1;
     }
 
-    if (t1->kind() > t2->kind()) { // force the relation to be symmentric and half the implementation
+    if (t1.kind() > t2.kind()) { // force the relation to be symmentric and half the implementation
         return lub(gs, t2, t1);
     }
 
@@ -518,7 +518,7 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     ENFORCE(isa_type<GroundType>(t1));
     ENFORCE(isa_type<GroundType>(t2));
 
-    if (t1->kind() > t2->kind()) { // force the relation to be symmentric and half the implementation
+    if (t1.kind() > t1.kind()) { // force the relation to be symmentric and half the implementation
         return glbGround(gs, t2, t1);
     }
     /** this implementation makes a bet that types are small and very likely to be collapsable.
@@ -630,7 +630,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
 
-    if (t1->kind() > t2->kind()) { // force the relation to be symmentric and half the implementation
+    if (t1.kind() > t2.kind()) { // force the relation to be symmentric and half the implementation
         return glb(gs, t2, t1);
     }
     if (isa_type<AndType>(t1)) { // 4, 5
@@ -1224,7 +1224,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                 return classSymbolIsAsGoodAs(gs, c1->symbol, c2->symbol);
             }
         }
-        Exception::raise("isSubTypeUnderConstraint({}, {}): unreachable", t1->typeName(), t2->typeName());
+        Exception::raise("isSubTypeUnderConstraint({}, {}): unreachable", t1.typeName(), t2.typeName());
     }
 }
 
@@ -1345,11 +1345,6 @@ void AliasType::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->symbol.exists());
 }
 
-TypePtr AliasType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                                const vector<TypePtr> &targs) {
-    Exception::raise("should never happen");
-}
-
 string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return "MetaType";
 }
@@ -1358,33 +1353,20 @@ string MetaType::show(const GlobalState &gs) const {
     return "<Type: " + wrapped->show(gs) + ">";
 }
 
-string MetaType::typeName() const {
-    return "MetaType";
-}
-
 void MetaType::_sanityCheck(const GlobalState &gs) {
     ENFORCE(!core::isa_type<MetaType>(wrapped));
     this->wrapped->sanityCheck(gs);
-}
-
-bool MetaType::isFullyDefined() const {
-    return true; // this is kinda true but kinda false. it's false for subtyping but true for inferencer.
 }
 
 bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return false;
 }
 
-TypePtr MetaType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                               const vector<TypePtr> &targs) {
-    Exception::raise("should never happen");
-}
-
 MetaType::MetaType(const TypePtr &wrapped) : wrapped(move(wrapped)) {
     categoryCounterInc("types.allocated", "metattype");
 }
 
-TypePtr MetaType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
+TypePtr MetaType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
     // dispatchCall is invoked on them in resolver
     return nullptr;
 }

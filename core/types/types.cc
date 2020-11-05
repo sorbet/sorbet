@@ -453,84 +453,20 @@ void ClassType::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->symbol.exists());
 }
 
-int AppliedType::kind() const {
-    return 1;
-}
-
-int ClassType::kind() const {
-    return 2;
-}
-
-int LiteralType::kind() const {
-    return 3;
-}
-
-int ShapeType::kind() const {
-    return 4;
-}
-
-int TupleType::kind() const {
-    return 5;
-}
-
-int LambdaParam::kind() const {
-    return 6;
-}
-
-int SelfTypeParam::kind() const {
-    return 6;
-}
-
-int MetaType::kind() const {
-    return 7;
-}
-
-int TypeVar::kind() const {
-    return 8;
-}
-
-int AliasType::kind() const {
-    return 9;
-}
-
-int OrType::kind() const {
-    return 10;
-}
-
-int AndType::kind() const {
-    return 11;
-}
-
-int SelfType::kind() const {
-    return 12;
-}
-
-bool ClassType::isFullyDefined() const {
-    return true;
-}
-
-bool LiteralType::isFullyDefined() const {
-    return true;
-}
-
 bool ShapeType::isFullyDefined() const {
-    return absl::c_all_of(values, [](const TypePtr &t) { return t->isFullyDefined(); });
+    return absl::c_all_of(values, [](const TypePtr &t) { return t.isFullyDefined(); });
 }
 
 bool TupleType::isFullyDefined() const {
-    return absl::c_all_of(elems, [](const TypePtr &t) { return t->isFullyDefined(); });
-}
-
-bool AliasType::isFullyDefined() const {
-    return true;
+    return absl::c_all_of(elems, [](const TypePtr &t) { return t.isFullyDefined(); });
 }
 
 bool AndType::isFullyDefined() const {
-    return this->left->isFullyDefined() && this->right->isFullyDefined();
+    return this->left.isFullyDefined() && this->right.isFullyDefined();
 }
 
 bool OrType::isFullyDefined() const {
-    return this->left->isFullyDefined() && this->right->isFullyDefined();
+    return this->left.isFullyDefined() && this->right.isFullyDefined();
 }
 
 /** Returns type parameters of what reordered in the order of type parameters of asIf
@@ -618,14 +554,6 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
-bool TypeVar::isFullyDefined() const {
-    return false;
-}
-
-TypePtr TypeVar::getCallArguments(const GlobalState &gs, NameRef name) {
-    Exception::raise("should never happen");
-}
-
 bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
 }
@@ -640,7 +568,7 @@ void TypeVar::_sanityCheck(const GlobalState &gs) {
 
 bool AppliedType::isFullyDefined() const {
     for (auto &targ : this->targs) {
-        if (!targ->isFullyDefined()) {
+        if (!targ.isFullyDefined()) {
             return false;
         }
     }
@@ -685,16 +613,6 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return false;
 }
 
-TypePtr LambdaParam::getCallArguments(const GlobalState &gs, NameRef name) {
-    Exception::raise(
-        "LambdaParam::getCallArguments not implemented, not clear what it should do. Let's see this fire first.");
-}
-
-TypePtr SelfTypeParam::getCallArguments(const GlobalState &gs, NameRef name) {
-    Exception::raise(
-        "SelfTypeParam::getCallArguments not implemented, not clear what it should do. Let's see this fire first.");
-}
-
 DispatchResult LambdaParam::dispatchCall(const GlobalState &gs, DispatchArgs args) {
     Exception::raise(
         "LambdaParam::dispatchCall not implemented, not clear what it should do. Let's see this fire first.");
@@ -708,33 +626,12 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, DispatchArgs a
 void LambdaParam::_sanityCheck(const GlobalState &gs) {}
 void SelfTypeParam::_sanityCheck(const GlobalState &gs) {}
 
-bool LambdaParam::isFullyDefined() const {
-    return false;
-}
-
-bool SelfTypeParam::isFullyDefined() const {
-    return true;
-}
-
-bool Type::hasUntyped() const {
-    return false;
-}
-
 bool ClassType::hasUntyped() const {
     return this->symbol == Symbols::untyped();
 }
 
 bool OrType::hasUntyped() const {
-    return left->hasUntyped() || right->hasUntyped();
-}
-
-core::SymbolRef Type::untypedBlame() const {
-    ENFORCE(hasUntyped());
-    return Symbols::noSymbol();
-}
-
-core::SymbolRef BlamedUntyped::untypedBlame() const {
-    return this->blame;
+    return left.hasUntyped() || right.hasUntyped();
 }
 
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
@@ -743,7 +640,7 @@ TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
 }
 
 bool AndType::hasUntyped() const {
-    return left->hasUntyped() || right->hasUntyped();
+    return left.hasUntyped() || right.hasUntyped();
 }
 
 TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
@@ -753,7 +650,7 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
 
 bool AppliedType::hasUntyped() const {
     for (auto &arg : this->targs) {
-        if (arg->hasUntyped()) {
+        if (arg.hasUntyped()) {
             return true;
         }
     }
@@ -762,7 +659,7 @@ bool AppliedType::hasUntyped() const {
 
 bool TupleType::hasUntyped() const {
     for (auto &arg : this->elems) {
-        if (arg->hasUntyped()) {
+        if (arg.hasUntyped()) {
             return true;
         }
     }
@@ -771,12 +668,13 @@ bool TupleType::hasUntyped() const {
 
 bool ShapeType::hasUntyped() const {
     for (auto &arg : this->values) {
-        if (arg->hasUntyped()) {
+        if (arg.hasUntyped()) {
             return true;
         }
     }
     return false;
-};
+}
+
 SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags, int rubyBlockId)
     : argFlags(move(argFlags)), fun(fun), rubyBlockId(rubyBlockId) {}
 
@@ -810,18 +708,6 @@ SelfType::SelfType() {
 };
 AppliedType::AppliedType(SymbolRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     categoryCounterInc("types.allocated", "appliedtype");
-}
-
-string SelfType::typeName() const {
-    return "SelfType";
-}
-
-bool SelfType::isFullyDefined() const {
-    return false;
-}
-
-TypePtr SelfType::getCallArguments(const GlobalState &gs, NameRef name) {
-    Exception::raise("should never happen");
 }
 
 bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {

@@ -1,10 +1,14 @@
 #ifndef SORBET_TYPEPTR_H
 #define SORBET_TYPEPTR_H
 #include "common/common.h"
+#include "core/NameRef.h"
+#include "core/SymbolRef.h"
 #include <memory>
 
 namespace sorbet::core {
 class Type;
+class TypeConstraint;
+
 class TypePtr final {
 public:
     // We store tagged pointers as 64-bit values.
@@ -180,6 +184,28 @@ public:
     bool isNilClass() const;
 
     bool isBottom() const;
+
+    // Used in subtyping.cc to order types.
+    int kind() const;
+
+    std::string typeName() const;
+
+    bool isFullyDefined() const;
+
+    bool hasUntyped() const;
+
+    core::SymbolRef untypedBlame() const;
+
+    TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
+
+    TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
+
+    TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
+
+    TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
+
+    TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
+                         const std::vector<TypePtr> &targs) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     friend class TypePtrTestHelper;

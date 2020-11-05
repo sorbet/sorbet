@@ -116,16 +116,16 @@ TEST_CASE("Infer") {
         auto foo1Nfoo2 = core::Types::any(gs, foo1Type, foo2Type);
         auto foo2Nfoo1 = core::Types::any(gs, foo2Type, foo1Type);
 
-        REQUIRE_EQ("ClassType", barNfoo1->typeName());
+        REQUIRE_EQ("ClassType", barNfoo1.typeName());
         REQUIRE(core::Types::isSubType(gs, barType, barNfoo1));
         REQUIRE(core::Types::isSubType(gs, foo1Type, barNfoo1));
-        REQUIRE_EQ("ClassType", barNfoo2->typeName());
+        REQUIRE_EQ("ClassType", barNfoo2.typeName());
         REQUIRE(core::Types::isSubType(gs, barType, barNfoo2));
         REQUIRE(core::Types::isSubType(gs, foo2Type, barNfoo2));
-        REQUIRE_EQ("ClassType", foo1Nbar->typeName());
+        REQUIRE_EQ("ClassType", foo1Nbar.typeName());
         REQUIRE(core::Types::isSubType(gs, barType, foo1Nbar));
         REQUIRE(core::Types::isSubType(gs, foo1Type, foo1Nbar));
-        REQUIRE_EQ("ClassType", foo2Nbar->typeName());
+        REQUIRE_EQ("ClassType", foo2Nbar.typeName());
         REQUIRE(core::Types::isSubType(gs, barType, foo2Nbar));
         REQUIRE(core::Types::isSubType(gs, foo2Type, foo2Nbar));
 
@@ -165,16 +165,16 @@ TEST_CASE("Infer") {
         auto foo1Orfoo2 = core::Types::all(gs, foo1Type, foo2Type);
         auto foo2Orfoo1 = core::Types::all(gs, foo2Type, foo1Type);
 
-        REQUIRE_EQ("ClassType", barOrfoo1->typeName());
+        REQUIRE_EQ("ClassType", barOrfoo1.typeName());
         REQUIRE(core::Types::isSubType(gs, barOrfoo1, barType));
         REQUIRE(core::Types::isSubType(gs, barOrfoo1, foo1Type));
-        REQUIRE_EQ("ClassType", barOrfoo2->typeName());
+        REQUIRE_EQ("ClassType", barOrfoo2.typeName());
         REQUIRE(core::Types::isSubType(gs, barOrfoo2, barType));
         REQUIRE(core::Types::isSubType(gs, barOrfoo2, foo2Type));
-        REQUIRE_EQ("ClassType", foo1Orbar->typeName());
+        REQUIRE_EQ("ClassType", foo1Orbar.typeName());
         REQUIRE(core::Types::isSubType(gs, foo1Orbar, barType));
         REQUIRE(core::Types::isSubType(gs, foo1Orbar, foo1Type));
-        REQUIRE_EQ("ClassType", foo2Orbar->typeName());
+        REQUIRE_EQ("ClassType", foo2Orbar.typeName());
         REQUIRE(core::Types::isSubType(gs, foo2Orbar, barType));
         REQUIRE(core::Types::isSubType(gs, foo2Orbar, foo2Type));
 
