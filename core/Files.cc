@@ -178,7 +178,7 @@ bool File::isStdlib() const {
 }
 
 bool File::isPackage() const {
-    return absl::EndsWith(path(), "__package.rb");
+    return sourceType == File::Type::Package;
 }
 
 vector<int> &File::lineBreaks() const {
