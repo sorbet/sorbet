@@ -42,10 +42,48 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
 std::string replaceLastDotted(std::string_view input, std::string_view originalName, std::string_view newName) {
     if (absl::StrContains(input, ".")) {
         std::vector<std::string> dotted = absl::StrSplit(input, ".");
+        // TODO: check for exactly one match
         dotted[dotted.size() - 1] = absl::StrReplaceAll(dotted[dotted.size() - 1], {{originalName, newName}});
         return absl::StrJoin(dotted, ".");
     }
     return absl::StrReplaceAll(input, {{originalName, newName}});
+}
+
+// returns true if s is subclass of root; also updates isSubclass, visited, and subclasses vectors
+bool updateSubclass(const core::GlobalState &gs, core::SymbolRef root, core::SymbolRef s, vector<bool> &isSubclass,
+                    vector<bool> &visited, vector<core::SymbolRef> &subclasses) {
+    if (visited[s.rawId()] == true) {
+        return isSubclass[s.rawId()];
+    }
+    visited[s.rawId()] = true;
+    if (s.rawId() == root.rawId()) {
+        subclasses.push_back(s);
+        isSubclass[s.rawId()] = true;
+        return true;
+    }
+    auto super = s.data(gs)->superClass();
+    if (super.exists()) {
+        if (updateSubclass(gs, root, super, isSubclass, visited, subclasses)) {
+            subclasses.push_back(s);
+            isSubclass[super.rawId()] = true;
+            return true;
+        }
+    }
+    isSubclass[s.rawId()] = false;
+    return false;
+}
+
+// returns all subclasses of root (including root)
+vector<core::SymbolRef> getSubclasses(LSPTypecheckerDelegate &typechecker, core::SymbolRef root) {
+    const core::GlobalState &gs = typechecker.state();
+    vector<bool> isSubclass(gs.classAndModulesUsed());
+    vector<bool> visited(gs.classAndModulesUsed());
+    vector<core::SymbolRef> subclasses;
+    for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
+        auto s = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
+        updateSubclass(gs, root, s, isSubclass, visited, subclasses);
+    }
+    return subclasses;
 }
 
 } // namespace
@@ -53,39 +91,78 @@ std::string replaceLastDotted(std::string_view input, std::string_view originalN
 variant<JSONNullObject, unique_ptr<WorkspaceEdit>>
 RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string_view newName) {
     const core::GlobalState &gs = typechecker.state();
-    vector<unique_ptr<Location>> references = getReferencesToSymbol(typechecker, symbol);
     auto originalName = symbol.data(gs)->name.show(gs);
     auto we = make_unique<WorkspaceEdit>();
 
     cout << "originalName/newName: " << originalName << "/" << newName << "\n";
 
-    UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
-    for (auto &location : references) {
-        // Get text at location.
-        auto fref = config.uri2FileRef(gs, location->uri);
-        if (fref.data(gs).isPayload()) {
-            // We don't support renaming things in payload files.
-            return JSONNullObject();
+    // check for this symbol as part of a class hierarchy: follow superClass() links till we find the root; then find
+    // the full tree; then look for methods with the same name as ours; then find all references to all those methods.
+    // Rename all defs and references and we're done.
+
+    auto symbolClass = symbol.data(gs)->enclosingClass(gs);
+
+    // find root
+    auto root = symbolClass;
+    while (true) {
+        cout << "Path to root: " << root.data(gs)->show(gs) << "\n";
+        auto tmp = root.data(gs)->superClass();
+        // TODO is there a better way to do this check for the base object class?
+        if (!tmp.exists() || tmp.data(gs)->show(gs) == "Object") {
+            break;
         }
+        root = tmp;
+    }
+    cout << "Root: " << root.data(gs)->show(gs) << "\n";
 
-        auto loc = location->range->toLoc(gs, fref);
-        auto source = loc.source(gs);
+    // and the tree
+    auto subclasses = getSubclasses(typechecker, root);
 
-        if (absl::StrContains(source, "::")) {
-            std::vector<std::string> strs = absl::StrSplit(source, "::");
-
-            strs[strs.size() - 1] = replaceLastDotted(strs[strs.size() - 1], originalName, newName);
-
-            auto newsrc = absl::StrJoin(strs, "::");
-            cout << "Replace: " << source << "/" << newsrc << "\n";
-            edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
-        } else {
-            auto newsrc = replaceLastDotted(source, originalName, newName);
-            cout << "Replace: " << source << "/" << newsrc << "\n";
-            edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+    // find the target method definition in each subclass
+    vector<core::SymbolRef> methods;
+    for (auto c : subclasses) {
+        cout << "class: " << c.data(gs)->show(gs) << "\n";
+        auto classSymbol = c.data(gs);
+        auto member = classSymbol->findMember(gs, symbol.data(gs)->name);
+        if (member.exists()) {
+            cout << "method: " << member.data(gs)->show(gs) << "\n";
+            methods.push_back(member);
         }
     }
 
+    UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
+
+    // find all references to each symbol
+    // TODO is it possible to do one query with many symbols, and would that be faster?
+    for (auto method : methods) {
+        vector<unique_ptr<Location>> references = getReferencesToSymbol(typechecker, method);
+
+        for (auto &location : references) {
+            // Get text at location.
+            auto fref = config.uri2FileRef(gs, location->uri);
+            if (fref.data(gs).isPayload()) {
+                // We don't support renaming things in payload files.
+                return JSONNullObject();
+            }
+
+            auto loc = location->range->toLoc(gs, fref);
+            auto source = loc.source(gs);
+
+            if (absl::StrContains(source, "::")) {
+                std::vector<std::string> strs = absl::StrSplit(source, "::");
+
+                strs[strs.size() - 1] = replaceLastDotted(strs[strs.size() - 1], originalName, newName);
+
+                auto newsrc = absl::StrJoin(strs, "::");
+                cout << "Replace: " << source << "/" << newsrc << "\n";
+                edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+            } else {
+                auto newsrc = replaceLastDotted(source, originalName, newName);
+                cout << "Replace: " << source << "/" << newsrc << "\n";
+                edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+            }
+        }
+    }
     vector<unique_ptr<TextDocumentEdit>> textDocEdits;
     for (auto &item : edits) {
         // TODO: Version.
