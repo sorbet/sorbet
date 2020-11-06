@@ -20,6 +20,7 @@ require 'set'
 # These are pre-reqs for almost everything in here.
 require_relative 'types/configuration'
 require_relative 'types/profile'
+require_relative 'types/private/bind_call'
 require_relative 'types/_types'
 require_relative 'types/private/decl_state'
 require_relative 'types/private/class_utils'

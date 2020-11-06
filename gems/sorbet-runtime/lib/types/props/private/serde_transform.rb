@@ -185,7 +185,7 @@ module T::Props
 
       sig {params(type: Module).returns(T.nilable(String)).checked(:never)}
       private_class_method def self.module_name(type)
-        MODULE_NAME.bind(type).call
+        T::Private::BindCall.bind_call0(MODULE_NAME, type)
       end
     end
   end

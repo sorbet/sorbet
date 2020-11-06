@@ -123,7 +123,7 @@ module T::Private::Methods::CallValidation
     # this code is sig validation code.
     # Please issue `finish` to step out of it
 
-    return_value = original_method.bind(instance).call(*args, &blk)
+    return_value = T::Private::BindCall.bind_call_argv(original_method, instance, args, &blk)
     if should_sample
       t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     end
@@ -266,7 +266,7 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      return_value = original_method.bind(self).call(&blk)
+      return_value = T::Private::BindCall.bind_call0(original_method, self, &blk)
       if should_sample
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
@@ -351,7 +351,7 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      return_value = original_method.bind(self).call(arg0, &blk)
+      return_value = T::Private::BindCall.bind_call1(original_method, self, arg0, &blk)
       if should_sample
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
@@ -448,7 +448,7 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      return_value = original_method.bind(self).call(arg0, arg1, &blk)
+      return_value = T::Private::BindCall.bind_call2(original_method, self, arg0, arg1, &blk)
       if should_sample
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
@@ -557,7 +557,7 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      return_value = original_method.bind(self).call(arg0, arg1, arg2, &blk)
+      return_value = T::Private::BindCall.bind_call3(original_method, self, arg0, arg1, arg2, &blk)
       if should_sample
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
@@ -679,7 +679,7 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      return_value = original_method.bind(self).call(arg0, arg1, arg2, arg3, &blk)
+      return_value = T::Private::BindCall.bind_call4(original_method, self, arg0, arg1, arg2, arg3, &blk)
       if should_sample
         t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
@@ -780,7 +780,7 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind(self).call(&blk)
+      T::Private::BindCall.bind_call0(original_method, self, &blk)
       T::Private::Types::Void::VOID
     end
   end
@@ -844,7 +844,7 @@ module T::Private::Methods::CallValidation
       # PRY note:
       # this code is sig validation code.
       # Please issue `finish` to step out of it
-      original_method.bind(self).call(arg0, &blk)
+      T::Private::BindCall.bind_call1(original_method, self, arg0, &blk)
       T::Private::Types::Void::VOID
     end
   end
@@ -920,7 +920,7 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind(self).call(arg0, arg1, &blk)
+      T::Private::BindCall.bind_call2(original_method, self, arg0, arg1, &blk)
       T::Private::Types::Void::VOID
     end
   end
@@ -1008,7 +1008,7 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind(self).call(arg0, arg1, arg2, &blk)
+      T::Private::BindCall.bind_call3(original_method, self, arg0, arg1, arg2, &blk)
       T::Private::Types::Void::VOID
     end
   end
@@ -1109,7 +1109,7 @@ module T::Private::Methods::CallValidation
       # this code is sig validation code.
       # Please issue `finish` to step out of it
 
-      original_method.bind(self).call(arg0, arg1, arg2, arg3, &blk)
+      T::Private::BindCall.bind_call4(original_method, self, arg0, arg1, arg2, arg3, &blk)
       T::Private::Types::Void::VOID
     end
   end

@@ -51,6 +51,8 @@ module T::Private::ClassUtils
       @old_method.bind(obj)
     end
 
+    # TODO(jez) We might want to implement bind_call here too?
+
     def to_s
       @old_method.to_s
     end

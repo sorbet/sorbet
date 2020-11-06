@@ -150,7 +150,7 @@ module T::Types
         obj.class
       else
         # This is a specialized enumerable type, just return the class.
-        Object.instance_method(:class).bind(obj).call
+        T::Private::BindCall.bind_call0(Object.instance_method(:class), obj)
       end
     end
 

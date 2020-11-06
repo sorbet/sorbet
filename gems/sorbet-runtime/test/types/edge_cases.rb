@@ -827,7 +827,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
       mutex = Mutex.new
       replaced = T::Private::ClassUtils.replace_method(T::Private::Methods.singleton_class, :run_sig_block_for_method) do |*args|
         barrier.wait
-        mutex.synchronize { replaced.bind(T::Private::Methods).call(*args) }
+        mutex.synchronize { T::Private::BindCall.bind_call_args(replaced, T::Private::Methods, args) }
       end
 
       klass = Class.new do

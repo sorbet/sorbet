@@ -227,7 +227,7 @@ module T::Private::Methods
       elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
         CallValidation.validate_call(self, original_method, method_sig, args, blk)
       else
-        original_method.bind(self).call(*args, &blk)
+        T::Private::BindCall.bind_call_argv(original_method, self, args, &blk)
       end
     end
 
@@ -433,14 +433,17 @@ module T::Private::Methods
       @old_hooks = nil
     else
       old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
+        # TODO(jez) This is a T::Private::ClassUtils::ReplacedMethod, not an UnboundMethod, which doesn't yet have bind_call
         old_included.bind(self).call(arg)
         ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
       end
       old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
+        # TODO(jez) This is a T::Private::ClassUtils::ReplacedMethod, not an UnboundMethod, which doesn't yet have bind_call
         old_extended.bind(self).call(arg)
         ::T::Private::Methods._hook_impl(arg, arg.singleton_class.ancestors, self)
       end
       old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited) do |arg|
+        # TODO(jez) This is a T::Private::ClassUtils::ReplacedMethod, not an UnboundMethod, which doesn't yet have bind_call
         old_inherited.bind(self).call(arg)
         ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
       end
