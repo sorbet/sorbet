@@ -19,7 +19,7 @@ def main
 
   # Safenav
   dog = Dog.new
-  breed = dog&.breed # error: Used `&.` accessor on a receiver which can never be nil
+  breed = dog&.breed # error: Used `&.` operator on a receiver which can never be nil
 # ^ hover: String
         # ^ hover: Dog
             # ^ hover: sig {returns(String)}

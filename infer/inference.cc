@@ -169,7 +169,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (dueToSafeNavigation && send != nullptr) {
                         if (auto e =
                                 ctx.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
-                            e.setHeader("Used `{}` accessor on a receiver which can never be nil", "&.");
+                            e.setHeader("Used `{}` operator on a receiver which can never be nil", "&.");
 
                             // Just a failsafe check; args.size() should always be 1.
                             if (send->args.size() > 0) {
