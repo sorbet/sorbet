@@ -7,7 +7,6 @@
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
-#include <iostream>
 #include <stdio.h>
 
 using namespace std;
@@ -153,11 +152,9 @@ RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef 
                 strs[strs.size() - 1] = replaceLastDotted(strs[strs.size() - 1], originalName, newName);
 
                 auto newsrc = absl::StrJoin(strs, "::");
-                cout << "Replace: " << source << "/" << newsrc << "\n";
                 edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
             } else {
                 auto newsrc = replaceLastDotted(source, originalName, newName);
-                cout << "Replace: " << source << "/" << newsrc << "\n";
                 edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
             }
         }
