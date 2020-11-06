@@ -49,7 +49,7 @@ std::string replaceLastDotted(std::string_view input, std::string_view originalN
     return absl::StrReplaceAll(input, {{originalName, newName}});
 }
 
-// returns true if s is subclass of root; also updates isSubclass, visited, and subclasses vectors
+// Checks if s is a subclass of root, and updates isSubclass, visited, and subclasses vectors.
 bool updateSubclass(const core::GlobalState &gs, core::SymbolRef root, core::SymbolRef s, vector<bool> &isSubclass,
                     vector<bool> &visited, vector<core::SymbolRef> &subclasses) {
     if (visited[s.rawId()] == true) {
@@ -73,7 +73,7 @@ bool updateSubclass(const core::GlobalState &gs, core::SymbolRef root, core::Sym
     return false;
 }
 
-// returns all subclasses of root (including root)
+// Returns all subclasses of root (including root)
 vector<core::SymbolRef> getSubclasses(LSPTypecheckerDelegate &typechecker, core::SymbolRef root) {
     const core::GlobalState &gs = typechecker.state();
     vector<bool> isSubclass(gs.classAndModulesUsed());
@@ -86,56 +86,55 @@ vector<core::SymbolRef> getSubclasses(LSPTypecheckerDelegate &typechecker, core:
     return subclasses;
 }
 
-} // namespace
-
-variant<JSONNullObject, unique_ptr<WorkspaceEdit>>
-RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string_view newName) {
-    const core::GlobalState &gs = typechecker.state();
-    auto originalName = symbol.data(gs)->name.show(gs);
-    auto we = make_unique<WorkspaceEdit>();
-
-    cout << "originalName/newName: " << originalName << "/" << newName << "\n";
-
-    // check for this symbol as part of a class hierarchy: follow superClass() links till we find the root; then find
-    // the full tree; then look for methods with the same name as ours; then find all references to all those methods.
-    // Rename all defs and references and we're done.
-
-    auto symbolClass = symbol.data(gs)->enclosingClass(gs);
-
-    // find root
-    auto root = symbolClass;
+// Follow superClass links to find the root of a class hierarchy.
+core::SymbolRef findRootSuperclass(const core::GlobalState &gs, core::SymbolRef klass) {
+    auto root = klass;
     while (true) {
-        cout << "Path to root: " << root.data(gs)->show(gs) << "\n";
         auto tmp = root.data(gs)->superClass();
+        ENFORCE(tmp.exists()); // everything derives from Kernel::Object
         // TODO is there a better way to do this check for the base object class?
         if (!tmp.exists() || tmp.data(gs)->show(gs) == "Object") {
             break;
         }
         root = tmp;
     }
-    cout << "Root: " << root.data(gs)->show(gs) << "\n";
+    return root;
+}
 
-    // and the tree
-    auto subclasses = getSubclasses(typechecker, root);
+} // namespace
 
-    // find the target method definition in each subclass
-    vector<core::SymbolRef> methods;
-    for (auto c : subclasses) {
-        cout << "class: " << c.data(gs)->show(gs) << "\n";
-        auto classSymbol = c.data(gs);
-        auto member = classSymbol->findMember(gs, symbol.data(gs)->name);
-        if (member.exists()) {
-            cout << "method: " << member.data(gs)->show(gs) << "\n";
-            methods.push_back(member);
+variant<JSONNullObject, unique_ptr<WorkspaceEdit>>
+RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string_view newName) {
+    const core::GlobalState &gs = typechecker.state();
+    auto symbolData = symbol.data(gs);
+    auto originalName = symbolData->name.show(gs);
+    auto we = make_unique<WorkspaceEdit>();
+
+    vector<core::SymbolRef> symbolsToRename;
+    if (symbolData->isMethod()) {
+        // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
+        // then find the full tree; then look for methods with the same name as ours; then find all references to all
+        // those methods and rename them.
+        auto symbolClass = symbolData->enclosingClass(gs);
+        auto root = findRootSuperclass(gs, symbolClass);
+        auto subclasses = getSubclasses(typechecker, root);
+
+        // find the target method definition in each subclass
+        for (auto c : subclasses) {
+            auto classSymbol = c.data(gs);
+            auto member = classSymbol->findMember(gs, symbol.data(gs)->name);
+            if (member.exists()) {
+                symbolsToRename.push_back(member);
+            }
         }
+    } else {
+        symbolsToRename.push_back(symbol);
     }
-
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
 
-    // find all references to each symbol
     // TODO is it possible to do one query with many symbols, and would that be faster?
-    for (auto method : methods) {
-        vector<unique_ptr<Location>> references = getReferencesToSymbol(typechecker, method);
+    for (auto sym : symbolsToRename) {
+        vector<unique_ptr<Location>> references = getReferencesToSymbol(typechecker, sym);
 
         for (auto &location : references) {
             // Get text at location.
