@@ -110,7 +110,7 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
     packRange(ref.loc.beginPos(), ref.loc.endPos());
 
     // resolved
-    if (ref.resolved.nameParts.empty()) {
+    if (ref.resolved.empty()) {
         mpack_write_nil(&writer);
     } else {
         packNames(ref.resolved.nameParts);
