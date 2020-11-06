@@ -177,7 +177,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
         },
         [&](const ClassType &c) {
             auto cdata = c.symbol.data(gs);
-            if (c.hasUntyped()) {
+            if (c.symbol == core::Symbols::untyped()) {
                 result = from;
             } else if (c.symbol == klass || c.derivesFrom(gs, klass)) {
                 result = Types::bottom();
@@ -601,53 +601,14 @@ DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, DispatchArgs a
 void LambdaParam::_sanityCheck(const GlobalState &gs) {}
 void SelfTypeParam::_sanityCheck(const GlobalState &gs) {}
 
-bool ClassType::hasUntyped() const {
-    return this->symbol == Symbols::untyped();
-}
-
-bool OrType::hasUntyped() const {
-    return left.hasUntyped() || right.hasUntyped();
-}
-
 TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
     TypePtr res(TypePtr::Tag::OrType, new OrType(left, right));
     return res;
 }
 
-bool AndType::hasUntyped() const {
-    return left.hasUntyped() || right.hasUntyped();
-}
-
 TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
     TypePtr res(TypePtr::Tag::AndType, new AndType(left, right));
     return res;
-}
-
-bool AppliedType::hasUntyped() const {
-    for (auto &arg : this->targs) {
-        if (arg.hasUntyped()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool TupleType::hasUntyped() const {
-    for (auto &arg : this->elems) {
-        if (arg.hasUntyped()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool ShapeType::hasUntyped() const {
-    for (auto &arg : this->values) {
-        if (arg.hasUntyped()) {
-            return true;
-        }
-    }
-    return false;
 }
 
 SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags, int rubyBlockId)

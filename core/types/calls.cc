@@ -1102,17 +1102,15 @@ TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name,
 }
 
 TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
-    if (hasUntyped()) {
+    if (symbol == core::Symbols::untyped()) {
         return Types::untyped(gs, Symbols::noSymbol());
     }
     return getMethodArguments(gs, symbol, name, vector<TypePtr>{});
 }
 
 TypePtr BlamedUntyped::getCallArguments(const GlobalState &gs, NameRef name) const {
-    if (hasUntyped()) {
-        return Types::untyped(gs, blame);
-    }
-    return ClassType::getCallArguments(gs, name);
+    // BlamedUntyped are always untyped.
+    return Types::untyped(gs, blame);
 }
 
 TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const {

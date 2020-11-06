@@ -336,7 +336,6 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
     void _sanityCheck(const GlobalState &gs) final;
-    bool hasUntyped() const;
 };
 CheckSize(ClassType, 16, 8);
 
@@ -468,7 +467,6 @@ public:
     void _sanityCheck(const GlobalState &gs) final;
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
-    bool hasUntyped() const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
@@ -521,7 +519,6 @@ public:
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
-    bool hasUntyped() const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 
@@ -562,7 +559,6 @@ public:
     void _sanityCheck(const GlobalState &gs) final;
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
-    bool hasUntyped() const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
     virtual TypePtr underlying() const override;
@@ -587,7 +583,6 @@ public:
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
     virtual DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) final;
-    bool hasUntyped() const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 
@@ -613,7 +608,6 @@ public:
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) const final;
-    bool hasUntyped() const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 };

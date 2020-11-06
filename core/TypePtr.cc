@@ -226,27 +226,42 @@ bool TypePtr::hasUntyped() const {
         case Tag::UnresolvedClassType:
         case Tag::ClassType: {
             auto &c = cast_type_nonnull<ClassType>(*this);
-            return c.hasUntyped();
+            return c.symbol == Symbols::untyped();
         }
         case Tag::OrType: {
             auto &o = cast_type_nonnull<OrType>(*this);
-            return o.hasUntyped();
+            return o.left.hasUntyped() || o.right.hasUntyped();
         }
         case Tag::AndType: {
             auto &a = cast_type_nonnull<AndType>(*this);
-            return a.hasUntyped();
+            return a.left.hasUntyped() || a.right.hasUntyped();
         }
         case Tag::AppliedType: {
             auto &app = cast_type_nonnull<AppliedType>(*this);
-            return app.hasUntyped();
+            for (auto &arg : app.targs) {
+                if (arg.hasUntyped()) {
+                    return true;
+                }
+            }
+            return false;
         }
         case Tag::TupleType: {
             auto &tuple = cast_type_nonnull<TupleType>(*this);
-            return tuple.hasUntyped();
+            for (auto &arg : tuple.elems) {
+                if (arg.hasUntyped()) {
+                    return true;
+                }
+            }
+            return false;
         }
         case Tag::ShapeType: {
             auto &shape = cast_type_nonnull<ShapeType>(*this);
-            return shape.hasUntyped();
+            for (auto &arg : shape.values) {
+                if (arg.hasUntyped()) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
