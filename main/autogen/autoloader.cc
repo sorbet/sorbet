@@ -80,7 +80,7 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
     QualifiedName parentName;
     if (def.data(parsedFile).parent_ref.exists()) {
         auto parentRef = def.data(parsedFile).parent_ref.data(parsedFile);
-        if (!parentRef.resolved.nameParts.empty()) {
+        if (!parentRef.resolved.empty()) {
             parentName = parentRef.resolved;
         } else {
             parentName = parentRef.name;
@@ -96,12 +96,12 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
 
 // Used for sorting `NamedDefinition`
 bool NamedDefinition::preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs) {
-    ENFORCE(lhs.qname.nameParts == rhs.qname.nameParts, "Can only compare definitions with same name");
+    ENFORCE(lhs.qname == rhs.qname, "Can only compare definitions with same name");
     // Load defs with a parent name first since others will tend to depend on them.
     // Secondarily, the same idea for defs with less nesting in their path.
     // Finally, sort alphabetically by path to break any ties.
-    if (lhs.parentName.nameParts.empty() != rhs.parentName.nameParts.empty()) {
-        return rhs.parentName.nameParts.empty();
+    if (lhs.parentName.empty() != rhs.parentName.empty()) {
+        return rhs.parentName.empty();
     }
     if (lhs.pathDepth != rhs.pathDepth) {
         return lhs.pathDepth < rhs.pathDepth;
@@ -179,12 +179,12 @@ bool DefTree::hasDifferentFile(core::FileRef file) const {
 }
 
 bool DefTree::root() const {
-    return qname.nameParts.empty();
+    return qname.empty();
 }
 
 core::NameRef DefTree::name() const {
-    ENFORCE(!qname.nameParts.empty());
-    return qname.nameParts.back();
+    ENFORCE(!qname.empty());
+    return qname.name();
 }
 
 string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
@@ -226,11 +226,11 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
             fmt::format_to(buf, "}})\n", fullName);
         }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias) {
-        ENFORCE(qname.nameParts.size() > 1);
+        ENFORCE(qname.size() > 1);
         casgnArg = fmt::format(", [{}, :{}]",
                                fmt::map_join(qname.nameParts.begin(), --qname.nameParts.end(),
                                              "::", [&](const auto &nr) -> string { return nr.show(gs); }),
-                               qname.nameParts.back().show(gs));
+                               qname.name().show(gs));
     }
 
     if (definingFile.exists()) {
@@ -263,7 +263,7 @@ void DefTree::predeclare(const core::GlobalState &gs, string_view fullName, fmt:
     if (hasDef() && definitionType(gs) == Definition::Type::Class) {
         fmt::format_to(buf, "\nclass {}", fullName);
         auto &def = definition(gs);
-        if (!def.parentName.nameParts.empty()) {
+        if (!def.parentName.empty()) {
             fmt::format_to(buf, " < {}", fmt::map_join(def.parentName.nameParts, "::", [&](const auto &nr) -> string {
                                return nr.show(gs);
                            }));
@@ -340,7 +340,7 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
 }
 
 DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs) {
-    ENFORCE(lhs.qname.nameParts == rhs.qname.nameParts, "Name mismatch for DefTreeBuilder::merge");
+    ENFORCE(lhs.qname == rhs.qname, "Name mismatch for DefTreeBuilder::merge");
     lhs.namedDefs.insert(lhs.namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
                          make_move_iterator(rhs.namedDefs.end()));
     if (rhs.nonBehaviorDef) {
