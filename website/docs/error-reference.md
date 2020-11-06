@@ -985,8 +985,6 @@ See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
 
-<script src="/js/error-reference.js"></script>
-
 ## 7034
 
 Sorbet detected that the safe navigation operator (`&.`) was being used on a
@@ -1006,3 +1004,5 @@ def foo(x, y)
   puts y&.to_s  # no error: y may be nil
 end
 ```
+
+<script src="/js/error-reference.js"></script>
