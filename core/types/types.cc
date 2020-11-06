@@ -453,22 +453,6 @@ void ClassType::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->symbol.exists());
 }
 
-bool ShapeType::isFullyDefined() const {
-    return absl::c_all_of(values, [](const TypePtr &t) { return t.isFullyDefined(); });
-}
-
-bool TupleType::isFullyDefined() const {
-    return absl::c_all_of(elems, [](const TypePtr &t) { return t.isFullyDefined(); });
-}
-
-bool AndType::isFullyDefined() const {
-    return this->left.isFullyDefined() && this->right.isFullyDefined();
-}
-
-bool OrType::isFullyDefined() const {
-    return this->left.isFullyDefined() && this->right.isFullyDefined();
-}
-
 /** Returns type parameters of what reordered in the order of type parameters of asIf
  * If some typeArgs are not present, return NoSymbol
  * */
@@ -564,15 +548,6 @@ TypeVar::TypeVar(SymbolRef sym) : sym(sym) {
 
 void TypeVar::_sanityCheck(const GlobalState &gs) {
     ENFORCE(this->sym.exists());
-}
-
-bool AppliedType::isFullyDefined() const {
-    for (auto &targ : this->targs) {
-        if (!targ.isFullyDefined()) {
-            return false;
-        }
-    }
-    return true;
 }
 
 void AppliedType::_sanityCheck(const GlobalState &gs) {

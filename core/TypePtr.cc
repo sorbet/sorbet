@@ -183,23 +183,28 @@ bool TypePtr::isFullyDefined() const {
         // Composite types
         case Tag::ShapeType: {
             auto &shape = cast_type_nonnull<ShapeType>(*this);
-            return shape.isFullyDefined();
+            return absl::c_all_of(shape.values, [](const TypePtr &t) { return t.isFullyDefined(); });
         }
         case Tag::TupleType: {
             auto &tuple = cast_type_nonnull<TupleType>(*this);
-            return tuple.isFullyDefined();
+            return absl::c_all_of(tuple.elems, [](const TypePtr &t) { return t.isFullyDefined(); });
         }
         case Tag::AndType: {
             auto &andType = cast_type_nonnull<AndType>(*this);
-            return andType.isFullyDefined();
+            return andType.left.isFullyDefined() && andType.right.isFullyDefined();
         }
         case Tag::OrType: {
             auto &orType = cast_type_nonnull<OrType>(*this);
-            return orType.isFullyDefined();
+            return orType.left.isFullyDefined() && orType.right.isFullyDefined();
         }
         case Tag::AppliedType: {
             auto &app = cast_type_nonnull<AppliedType>(*this);
-            return app.isFullyDefined();
+            for (auto &targ : app.targs) {
+                if (!targ.isFullyDefined()) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
