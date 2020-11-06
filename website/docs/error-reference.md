@@ -988,8 +988,8 @@ See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 ## 7034
 
 Sorbet detected that the safe navigation operator (`&.`) was being used on a
-receiver that can never be nil. Replace the offending occurrence of `&.` with
-a normal method call (`.`).
+receiver that can never be nil. Replace the offending occurrence of `&.` with a
+normal method call (`.`).
 
 ```ruby
 # typed: true
