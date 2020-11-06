@@ -15,6 +15,22 @@ struct QualifiedName {
     std::optional<core::NameRef> package;
 
     static QualifiedName fromFullName(std::vector<core::NameRef> fullName);
+
+    bool empty() const {
+        return nameParts.empty();
+    }
+
+    u4 size() const {
+        return nameParts.size();
+    }
+
+    bool operator==(const QualifiedName &rhs) const {
+        return nameParts == rhs.nameParts && package == rhs.package;
+    }
+
+    core::NameRef name() const {
+        return nameParts.back();
+    }
 };
 
 const u4 NONE_ID = (u4)-1;
