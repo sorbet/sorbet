@@ -960,13 +960,17 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
     ENFORCE(subclass.data(ctx)->isClassOrModule(), "Sealed subclass {} must be class", subclass.show(ctx));
 
+    // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
+    auto selfRef = this->ref(ctx);
+
     // We record sealed subclasses on a magical method called core::Names::sealedSubclasses(). This is so we don't
     // bloat the `sizeof class Symbol` with an extra field that most class sybmols will never use.
     // Note: We had hoped to ALSO implement this method in the runtime, but we couldn't think of a way to make it work
     // that didn't require running with the help of Stripe's autoloader, specifically because we might want to allow
     // subclassing a sealed class across multiple files, not just one file.
     auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
-    auto sealedSubclasses = this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
+    auto sealedSubclasses =
+        selfRef.data(ctx)->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
 
     auto data = sealedSubclasses.data(ctx);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
