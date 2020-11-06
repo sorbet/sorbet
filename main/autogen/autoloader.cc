@@ -14,30 +14,25 @@ namespace sorbet::autogen {
 // different representation before using it. In this case, it takes the `autogen::ParsedFile` representation and
 // converts it to a `DefTree`, and then emits the autoloader files based on passed-in string fragments
 
-// `true` if the definition should have autoloads generated for it based on the `AutoloaderConfig`
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
     return !nd.qname.nameParts.empty() &&
            topLevelNamespaceRefs.find(nd.qname.nameParts[0]) != topLevelNamespaceRefs.end();
 }
 
-// `true` if the file should have autoloads generated for it (i.e. it's a ruby source file that's not ignored)
 bool AutoloaderConfig::includePath(string_view path) const {
     return absl::EndsWith(path, ".rb") &&
            !sorbet::FileOps::isFileIgnored("", fmt::format("/{}", path), absoluteIgnorePatterns,
                                            relativeIgnorePatterns);
 }
 
-// `true` if the file should be required based on the provided configuration
 bool AutoloaderConfig::includeRequire(core::NameRef req) const {
     return excludedRequireRefs.find(req) == excludedRequireRefs.end();
 }
 
-// `true` if the file name cannot be collapsed based on the provided configuration
 bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) const {
     return nonCollapsableModuleNames.find(module) == nonCollapsableModuleNames.end();
 }
 
-// normalize the path relative to the provided prefixes
 string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {
     auto path = file.data(gs).path();
     for (const auto &prefix : stripPrefixes) {
@@ -48,8 +43,6 @@ string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::F
     return path;
 }
 
-// Convert the autoloader config passed in from `realmain` to this `AutoloaderConfig`. Much of this is about converting
-// `string`s to `NameRef`s
 AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const realmain::options::AutoloaderConfig &cfg) {
     AutoloaderConfig out;
     out.rootDir = cfg.rootDir;
@@ -74,8 +67,6 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     return out;
 }
 
-// Convert an `autogen::DefinitionRef` to a `NamedDefinition`: this pulls the name, the parent definitions' name, the
-// requirements, the path, and the _depth_ of the path (which can short-circuit comparison against another path)
 NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile &parsedFile, DefinitionRef def) {
     QualifiedName parentName;
     if (def.data(parsedFile).parent_ref.exists()) {
@@ -94,7 +85,6 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
     return {def.data(parsedFile), fullName, parentName, parsedFile.requires, parsedFile.tree.file, pathDepth};
 }
 
-// Used for sorting `NamedDefinition`
 bool NamedDefinition::preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs) {
     ENFORCE(lhs.qname == rhs.qname, "Can only compare definitions with same name");
     // Load defs with a parent name first since others will tend to depend on them.
