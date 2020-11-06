@@ -1,0 +1,20 @@
+# typed: true
+# frozen_string_literal: true
+
+class Base
+  def bar
+  end
+end
+
+class A < Base
+  def bar
+#     ^ apply-rename: [A] newName: bar
+  end
+end
+
+class B < Base
+  def bar
+  end
+end
+
+A.new.bar
