@@ -14,8 +14,17 @@ vector<core::Loc> locsForType(const core::GlobalState &gs, const core::TypePtr &
         return result;
     }
     typecase(
-        type, [&](const core::ClassType &t) { result.emplace_back(t.symbol.data(gs)->loc()); },
-        [&](const core::AppliedType &t) { result.emplace_back(t.klass.data(gs)->loc()); },
+        type,
+        [&](const core::ClassType &t) {
+            for (auto loc : t.symbol.data(gs)->locs()) {
+                result.emplace_back(loc);
+            }
+        },
+        [&](const core::AppliedType &t) {
+            for (auto loc : t.klass.data(gs)->locs()) {
+                result.emplace_back(loc);
+            }
+        },
         [&](const core::OrType &t) {
             for (auto loc : locsForType(gs, t.left)) {
                 result.emplace_back(loc);
