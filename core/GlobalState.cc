@@ -563,6 +563,17 @@ void GlobalState::initEmpty() {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
+    // Synthesize <Magic>.<nil-for-safe-navigation>(recv: T.untyped) => NilClass
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::nilForSafeNavigation());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::nilClass();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
     // Synthesize <Magic>.<string-interpolate>(arg: *T.untyped) => String
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::stringInterpolate());
     {

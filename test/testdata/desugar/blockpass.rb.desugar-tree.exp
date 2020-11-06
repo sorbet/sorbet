@@ -60,21 +60,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C CallsWithObject>.calls_with_object() do |<block-pass>$3|
         <block-pass>$3.meth()
       end
-      begin
-        <assignTemp>$4 = <emptyTree>::<C CallsWithObject>
-        if ::NilClass.===(<assignTemp>$4)
-          nil
-        else
-          <assignTemp>$4.calls_with_object() do |<block-pass>$5|
-            <block-pass>$5.meth()
-          end
-        end
+      <emptyTree>::<C CallsWithObjectChild>.calls_with_object() do |<block-pass>$4|
+        <block-pass>$4.meth()
       end
-      <emptyTree>::<C CallsWithObjectChild>.calls_with_object() do |<block-pass>$6|
-        <block-pass>$6.meth()
-      end
-      <self>.calls_arg_with_object(<emptyTree>::<C HasMeth>.new()) do |<block-pass>$7|
-        <block-pass>$7.meth()
+      <self>.calls_arg_with_object(<emptyTree>::<C HasMeth>.new()) do |<block-pass>$5|
+        <block-pass>$5.meth()
       end
       <self>.calls_arg_with_object(<emptyTree>::<C HasMeth>.new()) do |x|
         x.meth()

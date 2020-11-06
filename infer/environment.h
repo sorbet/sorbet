@@ -127,8 +127,6 @@ public:
 class Environment {
     const core::TypeAndOrigins uninitialized;
 
-    const core::Loc ownerLoc;
-
     /*
      * These four vectors represent the core state store of the environment,
      * modeling a map from local variables to (type, knowledge, known-truthy)
@@ -203,6 +201,8 @@ public:
 
     bool isDead = false;
     cfg::BasicBlock *bb;
+
+    const core::Loc ownerLoc;
 
     const UnorderedMap<cfg::LocalRef, VariableState> &vars() const {
         return _vars;

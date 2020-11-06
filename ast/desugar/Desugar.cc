@@ -1041,7 +1041,8 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method, std::move(csend->args));
                 auto send = node2TreeImpl(dctx, std::move(sendNode));
 
-                TreePtr nil = MK::Nil(zeroLengthLoc);
+                TreePtr nil = MK::Send1(zeroLengthRecvLoc, ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
+                                        core::Names::nilForSafeNavigation(), MK::Local(zeroLengthRecvLoc, tempRecv));
                 auto iff = MK::If(zeroLengthLoc, std::move(cond), std::move(nil), std::move(send));
                 auto res = MK::InsSeq1(zeroLengthLoc, std::move(assgn), std::move(iff));
                 result = std::move(res);

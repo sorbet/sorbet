@@ -2130,6 +2130,14 @@ public:
     }
 } Magic_selfNew;
 
+class Magic_nilForSafeNavigation : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+        ENFORCE(args.args.size() == 1);
+        res.returnType = Types::nilClass();
+    }
+} Magic_nilForSafeNavigation;
+
 class DeclBuilderForProcs_void : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
@@ -2583,6 +2591,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::nilForSafeNavigation(), &Magic_nilForSafeNavigation},
 
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::void_(), &DeclBuilderForProcs_void},
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::returns(),
