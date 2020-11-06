@@ -202,6 +202,34 @@ enum ShouldTakeReciever {
     NoReciever,
 };
 
+llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, ShouldTakeReciever takesReciever) {
+    auto &cs = mcctx.cs;
+    auto &builder = builderCast(mcctx.build);
+    auto &irctx = mcctx.irctx;
+    auto rubyBlockId = mcctx.rubyBlockId;
+    auto *send = mcctx.send;
+
+    auto [argc, argv, _] = IREmitterHelpers::fillSendArgArray(mcctx);
+
+    llvm::Value *recv;
+    if (takesReciever == TakesReciever) {
+        recv = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
+    } else {
+        recv = Payload::rubyNil(cs, builder);
+    }
+
+    llvm::Value *blkPtr;
+    if (mcctx.blk != nullptr) {
+        blkPtr = mcctx.blk;
+    } else {
+        blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
+    }
+
+    auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
+    return builder.CreateCall(cs.module->getFunction(cMethod),
+                              {recv, fun, argc, argv, blkPtr, irctx.localsOffset[rubyBlockId]}, "rawSendResult");
+}
+
 class CallCMethod : public NameBasedIntrinsicMethod {
 protected:
     string_view rubyMethod;
@@ -215,41 +243,106 @@ public:
           takesReciever(takesReciever){};
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
-        auto &cs = mcctx.cs;
-        auto &builder = builderCast(mcctx.build);
-        auto &irctx = mcctx.irctx;
-        auto rubyBlockId = mcctx.rubyBlockId;
-        auto *send = mcctx.send;
-
-        auto [argc, argv, _] = IREmitterHelpers::fillSendArgArray(mcctx);
-
-        llvm::Value *recv;
-        if (takesReciever == TakesReciever) {
-            recv = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
-        } else {
-            recv = Payload::rubyNil(cs, builder);
-        }
-
-        llvm::Value *blkPtr;
-        if (mcctx.blk != nullptr) {
-            blkPtr = mcctx.blk;
-        } else {
-            blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
-        }
-
-        auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
-        return builder.CreateCall(cs.module->getFunction(cMethod),
-                                  {recv, fun, argc, argv, blkPtr, irctx.localsOffset[rubyBlockId]}, "rawSendResult");
+        return buildCMethodCall(mcctx, cMethod, takesReciever);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {cs.gs.lookupNameUTF8(rubyMethod)};
     }
 };
 
+class BuildHash : public NameBasedIntrinsicMethod {
+public:
+    BuildHash() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled) {}
+
+    bool isLiteralish(CompilerState &cs, const core::TypePtr &t) const {
+        // See IREmitterHelpers::emitLiteralish; we put the expected fast test first.
+        return core::isa_type<core::LiteralType>(t) || t->derivesFrom(cs, core::Symbols::FalseClass()) ||
+               t->derivesFrom(cs, core::Symbols::TrueClass()) || t->derivesFrom(cs, core::Symbols::NilClass());
+    }
+
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        bool literalHash = absl::c_all_of(mcctx.send->args, [&](auto &v) { return isLiteralish(mcctx.cs, v.type); });
+
+        // Building an empty hash at runtime is just as cheap as duplicating an
+        // empty hash, and we don't have to waste space on the extra pre-built
+        // hash.
+        if (mcctx.send->args.empty() || !literalHash) {
+            return buildCMethodCall(mcctx, "sorbet_buildHashIntrinsic", NoReciever);
+        }
+
+        // We're going to build a literal hash at initialization time, and then
+        // duplicate that hash wherever we need it.  This arrangement saves
+        // re-hashing the keys every time the hash literal is constructed.
+        static unsigned int counter = 0;
+        auto &builder = builderCast(mcctx.build);
+        string rawName = fmt::format("ruby_hashLiteral{}", ++counter);
+        auto tp = llvm::Type::getInt64Ty(mcctx.cs);
+        auto zero = llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, 0));
+        llvm::Constant *indices[] = {zero};
+
+        auto oldInsertPoint = builder.saveIP();
+        auto globalDeclaration =
+            static_cast<llvm::GlobalVariable *>(mcctx.cs.module->getOrInsertGlobal(rawName, tp, [&] {
+                llvm::IRBuilder<> globalInitBuilder(mcctx.cs);
+                auto ret = new llvm::GlobalVariable(*mcctx.cs.module, tp, false, llvm::GlobalVariable::InternalLinkage,
+                                                    zero, rawName);
+                ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+                ret->setAlignment(8);
+
+                auto voidTy = llvm::Type::getVoidTy(mcctx.cs);
+                std::vector<llvm::Type *> NoArgs(0, voidTy);
+                auto ft = llvm::FunctionType::get(voidTy, NoArgs, false);
+                auto constr =
+                    llvm::Function::Create(ft, llvm::Function::InternalLinkage, {"Constr_", rawName}, *mcctx.cs.module);
+
+                auto bb = llvm::BasicBlock::Create(mcctx.cs, "constrHashLiteral", constr);
+                globalInitBuilder.SetInsertPoint(bb);
+                auto argArray = globalInitBuilder.CreateAlloca(llvm::ArrayType::get(tp, mcctx.send->args.size()),
+                                                               nullptr, "argArray");
+
+                int i = -1;
+                for (auto &v : mcctx.send->args) {
+                    i++;
+                    llvm::Value *argIndices[] = {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(32, 0, true)),
+                                                 llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, i, true))};
+                    llvm::Value *val = IREmitterHelpers::emitLiteralish(mcctx.cs, globalInitBuilder, v.type);
+                    globalInitBuilder.CreateStore(
+                        val, globalInitBuilder.CreateGEP(argArray, argIndices, fmt::format("hashArgs{}Addr", i)));
+                }
+
+                llvm::Value *argIndices[] = {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, 0, true)),
+                                             llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, 0, true))};
+                auto hashValue = globalInitBuilder.CreateCall(
+                    mcctx.cs.module->getFunction("sorbet_hashBuild"),
+                    {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(32, mcctx.send->args.size(), true)),
+                     globalInitBuilder.CreateGEP(argArray, argIndices)},
+                    "builtHash");
+
+                globalInitBuilder.CreateStore(
+                    hashValue, llvm::ConstantExpr::getInBoundsGetElementPtr(ret->getValueType(), ret, indices));
+                globalInitBuilder.CreateRetVoid();
+                globalInitBuilder.SetInsertPoint(mcctx.cs.globalConstructorsEntry);
+                globalInitBuilder.CreateCall(constr, {});
+
+                return ret;
+            }));
+        builder.restoreIP(oldInsertPoint);
+
+        auto global = builder.CreateLoad(
+            llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
+            "hashLiteral");
+        auto copy = builder.CreateCall(mcctx.cs.module->getFunction("sorbet_hashDup"), {global}, "duplicatedHash");
+        return copy;
+    }
+
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::buildHash()};
+    }
+} BuildHash;
+
 static const vector<CallCMethod> knownCMethods{
     {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
     {"defined?", "sorbet_definedIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
-    {"<build-hash>", "sorbet_buildHashIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
     {"<build-keyword-args>", "sorbet_buildHashIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
     {"<build-array>", "sorbet_buildArrayIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
     {"<build-range>", "sorbet_buildRangeIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
@@ -261,7 +354,7 @@ static const vector<CallCMethod> knownCMethods{
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     vector<const NameBasedIntrinsicMethod *> ret{
-        &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic, &CallWithBlock, &ExceptionRetry,
+        &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic, &CallWithBlock, &ExceptionRetry, &BuildHash,
     };
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
@@ -269,9 +362,10 @@ vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
     return ret;
 }
 
-}; // namespace
+} // namespace
+
 const vector<const NameBasedIntrinsicMethod *> &NameBasedIntrinsicMethod::definedIntrinsics() {
     static vector<const NameBasedIntrinsicMethod *> ret = computeNameBasedIntrinsics();
     return ret;
 }
-}; // namespace sorbet::compiler
+} // namespace sorbet::compiler
