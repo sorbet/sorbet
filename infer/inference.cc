@@ -176,7 +176,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                 auto ty = current.getAndFillTypeAndOrigin(ctx, send->args[0]);
                                 e.addErrorSection(core::ErrorSection(
                                     core::ErrorColors::format("Type of receiver is `{}`, from:", ty.type->show(ctx)),
-                                    ty.origins2Explanations(ctx, current.ownerLoc)));
+                                    ty.origins2Explanations(ctx, current.locForUninitialized())));
                             }
                         }
                     } else if (auto e = ctx.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
