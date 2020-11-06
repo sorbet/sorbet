@@ -960,6 +960,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
     ENFORCE(subclass.data(ctx)->isClassOrModule(), "Sealed subclass {} must be class", subclass.show(ctx));
 
+    // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
     auto selfRef = this->ref(ctx);
 
     // We record sealed subclasses on a magical method called core::Names::sealedSubclasses(). This is so we don't
