@@ -41,126 +41,57 @@ using namespace std;
 
 namespace sorbet::ast {
 
+#define CASE_STATEMENT(CASE_BODY, T) \
+    case Tag::T: {                   \
+        CASE_BODY(T)                 \
+    }
+
+#define GENERATE_TAG_SWITCH(tag, CASE_BODY)              \
+    switch (tag) {                                       \
+        CASE_STATEMENT(CASE_BODY, EmptyTree)             \
+        CASE_STATEMENT(CASE_BODY, Send)                  \
+        CASE_STATEMENT(CASE_BODY, ClassDef)              \
+        CASE_STATEMENT(CASE_BODY, MethodDef)             \
+        CASE_STATEMENT(CASE_BODY, If)                    \
+        CASE_STATEMENT(CASE_BODY, While)                 \
+        CASE_STATEMENT(CASE_BODY, Break)                 \
+        CASE_STATEMENT(CASE_BODY, Retry)                 \
+        CASE_STATEMENT(CASE_BODY, Next)                  \
+        CASE_STATEMENT(CASE_BODY, Return)                \
+        CASE_STATEMENT(CASE_BODY, RescueCase)            \
+        CASE_STATEMENT(CASE_BODY, Rescue)                \
+        CASE_STATEMENT(CASE_BODY, Local)                 \
+        CASE_STATEMENT(CASE_BODY, UnresolvedIdent)       \
+        CASE_STATEMENT(CASE_BODY, RestArg)               \
+        CASE_STATEMENT(CASE_BODY, KeywordArg)            \
+        CASE_STATEMENT(CASE_BODY, OptionalArg)           \
+        CASE_STATEMENT(CASE_BODY, BlockArg)              \
+        CASE_STATEMENT(CASE_BODY, ShadowArg)             \
+        CASE_STATEMENT(CASE_BODY, Assign)                \
+        CASE_STATEMENT(CASE_BODY, Cast)                  \
+        CASE_STATEMENT(CASE_BODY, Hash)                  \
+        CASE_STATEMENT(CASE_BODY, Array)                 \
+        CASE_STATEMENT(CASE_BODY, Literal)               \
+        CASE_STATEMENT(CASE_BODY, UnresolvedConstantLit) \
+        CASE_STATEMENT(CASE_BODY, ConstantLit)           \
+        CASE_STATEMENT(CASE_BODY, ZSuperArgs)            \
+        CASE_STATEMENT(CASE_BODY, Block)                 \
+        CASE_STATEMENT(CASE_BODY, InsSeq)                \
+    }
+
 void TreePtr::deleteTagged(Tag tag, void *ptr) noexcept {
     ENFORCE(ptr != nullptr);
+#define DELETE_TYPE(T)                                      \
+    if (tag == Tag::EmptyTree) {                            \
+        /* explicitly not deleting the empty tree pointer*/ \
+        break;                                              \
+    }                                                       \
+    delete reinterpret_cast<T *>(ptr);                      \
+    break;
 
-    switch (tag) {
-        case Tag::EmptyTree:
-            // explicitly not deleting the empty tree pointer
-            break;
+    GENERATE_TAG_SWITCH(tag, DELETE_TYPE)
 
-        case Tag::Send:
-            delete reinterpret_cast<Send *>(ptr);
-            break;
-
-        case Tag::ClassDef:
-            delete reinterpret_cast<ClassDef *>(ptr);
-            break;
-
-        case Tag::MethodDef:
-            delete reinterpret_cast<MethodDef *>(ptr);
-            break;
-
-        case Tag::If:
-            delete reinterpret_cast<If *>(ptr);
-            break;
-
-        case Tag::While:
-            delete reinterpret_cast<While *>(ptr);
-            break;
-
-        case Tag::Break:
-            delete reinterpret_cast<Break *>(ptr);
-            break;
-
-        case Tag::Retry:
-            delete reinterpret_cast<Retry *>(ptr);
-            break;
-
-        case Tag::Next:
-            delete reinterpret_cast<Next *>(ptr);
-            break;
-
-        case Tag::Return:
-            delete reinterpret_cast<Return *>(ptr);
-            break;
-
-        case Tag::RescueCase:
-            delete reinterpret_cast<RescueCase *>(ptr);
-            break;
-
-        case Tag::Rescue:
-            delete reinterpret_cast<Rescue *>(ptr);
-            break;
-
-        case Tag::Local:
-            delete reinterpret_cast<Local *>(ptr);
-            break;
-
-        case Tag::UnresolvedIdent:
-            delete reinterpret_cast<UnresolvedIdent *>(ptr);
-            break;
-
-        case Tag::RestArg:
-            delete reinterpret_cast<RestArg *>(ptr);
-            break;
-
-        case Tag::KeywordArg:
-            delete reinterpret_cast<KeywordArg *>(ptr);
-            break;
-
-        case Tag::OptionalArg:
-            delete reinterpret_cast<OptionalArg *>(ptr);
-            break;
-
-        case Tag::BlockArg:
-            delete reinterpret_cast<BlockArg *>(ptr);
-            break;
-
-        case Tag::ShadowArg:
-            delete reinterpret_cast<ShadowArg *>(ptr);
-            break;
-
-        case Tag::Assign:
-            delete reinterpret_cast<Assign *>(ptr);
-            break;
-
-        case Tag::Cast:
-            delete reinterpret_cast<Cast *>(ptr);
-            break;
-
-        case Tag::Hash:
-            delete reinterpret_cast<Hash *>(ptr);
-            break;
-
-        case Tag::Array:
-            delete reinterpret_cast<Array *>(ptr);
-            break;
-
-        case Tag::Literal:
-            delete reinterpret_cast<Literal *>(ptr);
-            break;
-
-        case Tag::UnresolvedConstantLit:
-            delete reinterpret_cast<UnresolvedConstantLit *>(ptr);
-            break;
-
-        case Tag::ConstantLit:
-            delete reinterpret_cast<ConstantLit *>(ptr);
-            break;
-
-        case Tag::ZSuperArgs:
-            delete reinterpret_cast<ZSuperArgs *>(ptr);
-            break;
-
-        case Tag::Block:
-            delete reinterpret_cast<Block *>(ptr);
-            break;
-
-        case Tag::InsSeq:
-            delete reinterpret_cast<InsSeq *>(ptr);
-            break;
-    }
+#undef DELETE_TYPE
 }
 
 string TreePtr::nodeName() const {
@@ -168,40 +99,8 @@ string TreePtr::nodeName() const {
 
     ENFORCE(ptr != nullptr);
 
-#define NODE_NAME(name) \
-    case Tag::name:     \
-        return reinterpret_cast<name *>(ptr)->nodeName();
-    switch (tag()) {
-        NODE_NAME(EmptyTree)
-        NODE_NAME(Send)
-        NODE_NAME(ClassDef)
-        NODE_NAME(MethodDef)
-        NODE_NAME(If)
-        NODE_NAME(While)
-        NODE_NAME(Break)
-        NODE_NAME(Retry)
-        NODE_NAME(Next)
-        NODE_NAME(Return)
-        NODE_NAME(RescueCase)
-        NODE_NAME(Rescue)
-        NODE_NAME(Local)
-        NODE_NAME(UnresolvedIdent)
-        NODE_NAME(RestArg)
-        NODE_NAME(KeywordArg)
-        NODE_NAME(OptionalArg)
-        NODE_NAME(BlockArg)
-        NODE_NAME(ShadowArg)
-        NODE_NAME(Assign)
-        NODE_NAME(Cast)
-        NODE_NAME(Hash)
-        NODE_NAME(Array)
-        NODE_NAME(Literal)
-        NODE_NAME(UnresolvedConstantLit)
-        NODE_NAME(ConstantLit)
-        NODE_NAME(ZSuperArgs)
-        NODE_NAME(Block)
-        NODE_NAME(InsSeq)
-    }
+#define NODE_NAME(name) return reinterpret_cast<name *>(ptr)->nodeName();
+    GENERATE_TAG_SWITCH(tag(), NODE_NAME)
 #undef NODE_NAME
 }
 
@@ -210,40 +109,8 @@ string TreePtr::showRaw(const core::GlobalState &gs, int tabs) {
 
     ENFORCE(ptr != nullptr);
 
-#define SHOW_RAW(name) \
-    case Tag::name:    \
-        return reinterpret_cast<name *>(ptr)->showRaw(gs, tabs);
-    switch (tag()) {
-        SHOW_RAW(EmptyTree)
-        SHOW_RAW(Send)
-        SHOW_RAW(ClassDef)
-        SHOW_RAW(MethodDef)
-        SHOW_RAW(If)
-        SHOW_RAW(While)
-        SHOW_RAW(Break)
-        SHOW_RAW(Retry)
-        SHOW_RAW(Next)
-        SHOW_RAW(Return)
-        SHOW_RAW(RescueCase)
-        SHOW_RAW(Rescue)
-        SHOW_RAW(Local)
-        SHOW_RAW(UnresolvedIdent)
-        SHOW_RAW(RestArg)
-        SHOW_RAW(KeywordArg)
-        SHOW_RAW(OptionalArg)
-        SHOW_RAW(BlockArg)
-        SHOW_RAW(ShadowArg)
-        SHOW_RAW(Assign)
-        SHOW_RAW(Cast)
-        SHOW_RAW(Hash)
-        SHOW_RAW(Array)
-        SHOW_RAW(Literal)
-        SHOW_RAW(UnresolvedConstantLit)
-        SHOW_RAW(ConstantLit)
-        SHOW_RAW(ZSuperArgs)
-        SHOW_RAW(Block)
-        SHOW_RAW(InsSeq)
-    }
+#define SHOW_RAW(name) return reinterpret_cast<name *>(ptr)->showRaw(gs, tabs);
+    GENERATE_TAG_SWITCH(tag(), SHOW_RAW)
 #undef SHOW_RAW
 }
 
@@ -252,40 +119,8 @@ core::LocOffsets TreePtr::loc() const {
 
     ENFORCE(ptr != nullptr);
 
-#define CASE(name)  \
-    case Tag::name: \
-        return reinterpret_cast<name *>(ptr)->loc;
-    switch (tag()) {
-        CASE(EmptyTree)
-        CASE(Send)
-        CASE(ClassDef)
-        CASE(MethodDef)
-        CASE(If)
-        CASE(While)
-        CASE(Break)
-        CASE(Retry)
-        CASE(Next)
-        CASE(Return)
-        CASE(RescueCase)
-        CASE(Rescue)
-        CASE(Local)
-        CASE(UnresolvedIdent)
-        CASE(RestArg)
-        CASE(KeywordArg)
-        CASE(OptionalArg)
-        CASE(BlockArg)
-        CASE(ShadowArg)
-        CASE(Assign)
-        CASE(Cast)
-        CASE(Hash)
-        CASE(Array)
-        CASE(Literal)
-        CASE(UnresolvedConstantLit)
-        CASE(ConstantLit)
-        CASE(ZSuperArgs)
-        CASE(Block)
-        CASE(InsSeq)
-    }
+#define CASE(name) return reinterpret_cast<name *>(ptr)->loc;
+    GENERATE_TAG_SWITCH(tag(), CASE)
 #undef CASE
 }
 
@@ -294,40 +129,8 @@ string TreePtr::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
 
     ENFORCE(ptr != nullptr);
 
-#define CASE(name)  \
-    case Tag::name: \
-        return reinterpret_cast<name *>(ptr)->toStringWithTabs(gs, tabs);
-    switch (tag()) {
-        CASE(EmptyTree)
-        CASE(Send)
-        CASE(ClassDef)
-        CASE(MethodDef)
-        CASE(If)
-        CASE(While)
-        CASE(Break)
-        CASE(Retry)
-        CASE(Next)
-        CASE(Return)
-        CASE(RescueCase)
-        CASE(Rescue)
-        CASE(Local)
-        CASE(UnresolvedIdent)
-        CASE(RestArg)
-        CASE(KeywordArg)
-        CASE(OptionalArg)
-        CASE(BlockArg)
-        CASE(ShadowArg)
-        CASE(Assign)
-        CASE(Cast)
-        CASE(Hash)
-        CASE(Array)
-        CASE(Literal)
-        CASE(UnresolvedConstantLit)
-        CASE(ConstantLit)
-        CASE(ZSuperArgs)
-        CASE(Block)
-        CASE(InsSeq)
-    }
+#define CASE(name) return reinterpret_cast<name *>(ptr)->toStringWithTabs(gs, tabs);
+    GENERATE_TAG_SWITCH(tag(), CASE)
 #undef CASE
 }
 
