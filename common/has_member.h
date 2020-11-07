@@ -1,5 +1,5 @@
-#ifndef SORBET_COMMON_HAS_METHOD_H
-#define SORBET_COMMON_HAS_METHOD_H
+#ifndef SORBET_COMMON_HAS_MEMBER_H
+#define SORBET_COMMON_HAS_MEMBER_H
 
 #include <typeinfo>
 
