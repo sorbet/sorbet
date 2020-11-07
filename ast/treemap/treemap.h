@@ -2,6 +2,7 @@
 #define SORBET_TREEMAP_H
 
 #include "ast/Trees.h"
+#include "common/has_member.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
 #include "core/errors/internal.h"
@@ -69,80 +70,59 @@ public:
     TreePtr postTransformInsSeq(core::MutableContext ctx, TreePtr original);
 };
 
-/**
- * GENERATE_HAS_MEMBER(att)  // Creates 'has_member_att'.
- * `HAS_MEMBER_att<C>::value` can be used to statically test if C has a member att
- */
-#define GENERATE_HAS_MEMBER(X)                                                          \
-    template <typename T> class HAS_MEMBER_##X {                                        \
-        struct Fallback {                                                               \
-            int X;                                                                      \
-        };                                                                              \
-        struct Derived : T, Fallback {};                                                \
-                                                                                        \
-        template <typename U, U> struct Check;                                          \
-                                                                                        \
-        using ArrayOfOne = char[1];                                                     \
-        using ArrayOfTwo = char[2];                                                     \
-                                                                                        \
-        template <typename U> static ArrayOfOne &func(Check<int Fallback::*, &U::X> *); \
-        template <typename U> static ArrayOfTwo &func(...);                             \
-                                                                                        \
-    public:                                                                             \
-        using type = HAS_MEMBER_##X;                                                    \
-        static constexpr std::size_t value = sizeof(func<Derived>(0)) == 2;             \
-    };
+#define GENERATE_HAS_MEMBER_VISITOR(X) \
+    GENERATE_HAS_MEMBER(X, std::declval<core::MutableContext>(), std::declval<TreePtr>())
 
-GENERATE_HAS_MEMBER(preTransformExpression);
-GENERATE_HAS_MEMBER(preTransformClassDef);
-GENERATE_HAS_MEMBER(preTransformMethodDef);
-GENERATE_HAS_MEMBER(preTransformIf);
-GENERATE_HAS_MEMBER(preTransformWhile);
-GENERATE_HAS_MEMBER(preTransformBreak);
-GENERATE_HAS_MEMBER(preTransformRetry);
-GENERATE_HAS_MEMBER(preTransformNext);
-GENERATE_HAS_MEMBER(preTransformReturn);
-GENERATE_HAS_MEMBER(preTransformRescueCase);
-GENERATE_HAS_MEMBER(preTransformRescue);
-GENERATE_HAS_MEMBER(preTransformAssign);
-GENERATE_HAS_MEMBER(preTransformSend);
-GENERATE_HAS_MEMBER(preTransformHash);
-GENERATE_HAS_MEMBER(preTransformArray);
-GENERATE_HAS_MEMBER(preTransformBlock);
-GENERATE_HAS_MEMBER(preTransformInsSeq);
+GENERATE_HAS_MEMBER_VISITOR(preTransformExpression);
+GENERATE_HAS_MEMBER_VISITOR(preTransformClassDef);
+GENERATE_HAS_MEMBER_VISITOR(preTransformMethodDef);
+GENERATE_HAS_MEMBER_VISITOR(preTransformIf);
+GENERATE_HAS_MEMBER_VISITOR(preTransformWhile);
+GENERATE_HAS_MEMBER_VISITOR(preTransformBreak);
+GENERATE_HAS_MEMBER_VISITOR(preTransformRetry);
+GENERATE_HAS_MEMBER_VISITOR(preTransformNext);
+GENERATE_HAS_MEMBER_VISITOR(preTransformReturn);
+GENERATE_HAS_MEMBER_VISITOR(preTransformRescueCase);
+GENERATE_HAS_MEMBER_VISITOR(preTransformRescue);
+GENERATE_HAS_MEMBER_VISITOR(preTransformAssign);
+GENERATE_HAS_MEMBER_VISITOR(preTransformSend);
+GENERATE_HAS_MEMBER_VISITOR(preTransformHash);
+GENERATE_HAS_MEMBER_VISITOR(preTransformArray);
+GENERATE_HAS_MEMBER_VISITOR(preTransformBlock);
+GENERATE_HAS_MEMBER_VISITOR(preTransformInsSeq);
 
 // used to check for ABSENCE of method
-GENERATE_HAS_MEMBER(preTransformUnresolvedIdent);
-GENERATE_HAS_MEMBER(preTransformLocal);
-GENERATE_HAS_MEMBER(preTransformUnresolvedConstantLit);
-GENERATE_HAS_MEMBER(preTransformConstantLit);
-GENERATE_HAS_MEMBER(preTransformLiteral);
-GENERATE_HAS_MEMBER(preTransformCast);
+GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedIdent);
+GENERATE_HAS_MEMBER_VISITOR(preTransformLocal);
+GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedConstantLit);
+GENERATE_HAS_MEMBER_VISITOR(preTransformConstantLit);
+GENERATE_HAS_MEMBER_VISITOR(preTransformLiteral);
+GENERATE_HAS_MEMBER_VISITOR(preTransformCast);
 
-GENERATE_HAS_MEMBER(postTransformClassDef);
-GENERATE_HAS_MEMBER(postTransformMethodDef);
-GENERATE_HAS_MEMBER(postTransformIf);
-GENERATE_HAS_MEMBER(postTransformWhile);
-GENERATE_HAS_MEMBER(postTransformBreak);
-GENERATE_HAS_MEMBER(postTransformRetry);
-GENERATE_HAS_MEMBER(postTransformNext);
-GENERATE_HAS_MEMBER(postTransformReturn);
-GENERATE_HAS_MEMBER(postTransformRescueCase);
-GENERATE_HAS_MEMBER(postTransformRescue);
-GENERATE_HAS_MEMBER(postTransformUnresolvedIdent);
-GENERATE_HAS_MEMBER(postTransformAssign);
-GENERATE_HAS_MEMBER(postTransformSend);
-GENERATE_HAS_MEMBER(postTransformHash);
-GENERATE_HAS_MEMBER(postTransformLocal);
-GENERATE_HAS_MEMBER(postTransformArray);
-GENERATE_HAS_MEMBER(postTransformLiteral);
-GENERATE_HAS_MEMBER(postTransformUnresolvedConstantLit);
-GENERATE_HAS_MEMBER(postTransformConstantLit);
-GENERATE_HAS_MEMBER(postTransformArraySplat);
-GENERATE_HAS_MEMBER(postTransformHashSplat);
-GENERATE_HAS_MEMBER(postTransformBlock);
-GENERATE_HAS_MEMBER(postTransformInsSeq);
-GENERATE_HAS_MEMBER(postTransformCast);
+GENERATE_HAS_MEMBER_VISITOR(postTransformClassDef);
+GENERATE_HAS_MEMBER_VISITOR(postTransformMethodDef);
+GENERATE_HAS_MEMBER_VISITOR(postTransformIf);
+GENERATE_HAS_MEMBER_VISITOR(postTransformWhile);
+GENERATE_HAS_MEMBER_VISITOR(postTransformBreak);
+GENERATE_HAS_MEMBER_VISITOR(postTransformRetry);
+GENERATE_HAS_MEMBER_VISITOR(postTransformNext);
+GENERATE_HAS_MEMBER_VISITOR(postTransformReturn);
+GENERATE_HAS_MEMBER_VISITOR(postTransformRescueCase);
+GENERATE_HAS_MEMBER_VISITOR(postTransformRescue);
+GENERATE_HAS_MEMBER_VISITOR(postTransformUnresolvedIdent);
+GENERATE_HAS_MEMBER_VISITOR(postTransformAssign);
+GENERATE_HAS_MEMBER_VISITOR(postTransformSend);
+GENERATE_HAS_MEMBER_VISITOR(postTransformHash);
+GENERATE_HAS_MEMBER_VISITOR(postTransformLocal);
+GENERATE_HAS_MEMBER_VISITOR(postTransformArray);
+GENERATE_HAS_MEMBER_VISITOR(postTransformLiteral);
+GENERATE_HAS_MEMBER_VISITOR(postTransformUnresolvedConstantLit);
+GENERATE_HAS_MEMBER_VISITOR(postTransformConstantLit);
+GENERATE_HAS_MEMBER_VISITOR(postTransformArraySplat);
+GENERATE_HAS_MEMBER_VISITOR(postTransformHashSplat);
+GENERATE_HAS_MEMBER_VISITOR(postTransformBlock);
+GENERATE_HAS_MEMBER_VISITOR(postTransformInsSeq);
+GENERATE_HAS_MEMBER_VISITOR(postTransformCast);
 
 #define GENERATE_POSTPONE_PRECLASS(X)                                                   \
                                                                                         \
@@ -252,17 +232,17 @@ private:
 
     FUNC &func;
 
-    static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformLiteral<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformUnresolvedConstantLit<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformLocal<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>(), "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformLiteral<FUNC>(), "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformUnresolvedConstantLit<FUNC>(), "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>(), "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformLocal<FUNC>(), "use post*Transform instead");
 
     TreeMapper(FUNC &func) : func(func) {}
 
     TreePtr mapClassDef(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
-            v = PostPonePreTransform_ClassDef<FUNC, CTX, HAS_MEMBER_preTransformClassDef<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_preTransformClassDef<FUNC>()) {
+            v = PostPonePreTransform_ClassDef<FUNC, CTX, HAS_MEMBER_preTransformClassDef<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -272,16 +252,16 @@ private:
             def = mapIt(std::move(def), ctx.withOwner(cast_tree<ClassDef>(v)->symbol).withFile(ctx.file));
         }
 
-        if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>::value) {
-            return PostPonePostTransform_ClassDef<FUNC, CTX, HAS_MEMBER_postTransformClassDef<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>()) {
+            return PostPonePostTransform_ClassDef<FUNC, CTX, HAS_MEMBER_postTransformClassDef<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapMethodDef(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformMethodDef<FUNC>::value) {
-            v = PostPonePreTransform_MethodDef<FUNC, CTX, HAS_MEMBER_preTransformMethodDef<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_preTransformMethodDef<FUNC>()) {
+            v = PostPonePreTransform_MethodDef<FUNC, CTX, HAS_MEMBER_preTransformMethodDef<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -294,8 +274,8 @@ private:
         cast_tree<MethodDef>(v)->rhs = mapIt(std::move(cast_tree<MethodDef>(v)->rhs),
                                              ctx.withOwner(cast_tree<MethodDef>(v)->symbol).withFile(ctx.file));
 
-        if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
-            return PostPonePostTransform_MethodDef<FUNC, CTX, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>()) {
+            return PostPonePostTransform_MethodDef<FUNC, CTX, HAS_MEMBER_postTransformMethodDef<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -303,82 +283,81 @@ private:
     }
 
     TreePtr mapIf(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformIf<FUNC>::value) {
-            v = PostPonePreTransform_If<FUNC, CTX, HAS_MEMBER_preTransformIf<FUNC>::value>::call(ctx, std::move(v),
-                                                                                                 func);
+        if constexpr (HAS_MEMBER_preTransformIf<FUNC>()) {
+            v = PostPonePreTransform_If<FUNC, CTX, HAS_MEMBER_preTransformIf<FUNC>()>::call(ctx, std::move(v), func);
         }
         cast_tree<If>(v)->cond = mapIt(std::move(cast_tree<If>(v)->cond), ctx);
         cast_tree<If>(v)->thenp = mapIt(std::move(cast_tree<If>(v)->thenp), ctx);
         cast_tree<If>(v)->elsep = mapIt(std::move(cast_tree<If>(v)->elsep), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformIf<FUNC>::value) {
-            return PostPonePostTransform_If<FUNC, CTX, HAS_MEMBER_postTransformIf<FUNC>::value>::call(ctx, std::move(v),
-                                                                                                      func);
+        if constexpr (HAS_MEMBER_postTransformIf<FUNC>()) {
+            return PostPonePostTransform_If<FUNC, CTX, HAS_MEMBER_postTransformIf<FUNC>()>::call(ctx, std::move(v),
+                                                                                                 func);
         }
         return v;
     }
 
     TreePtr mapWhile(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformWhile<FUNC>::value) {
-            v = PostPonePreTransform_While<FUNC, CTX, HAS_MEMBER_preTransformWhile<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformWhile<FUNC>()) {
+            v = PostPonePreTransform_While<FUNC, CTX, HAS_MEMBER_preTransformWhile<FUNC>()>::call(ctx, std::move(v),
+                                                                                                  func);
         }
         cast_tree<While>(v)->cond = mapIt(std::move(cast_tree<While>(v)->cond), ctx);
         cast_tree<While>(v)->body = mapIt(std::move(cast_tree<While>(v)->body), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformWhile<FUNC>::value) {
-            return PostPonePostTransform_While<FUNC, CTX, HAS_MEMBER_postTransformWhile<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformWhile<FUNC>()) {
+            return PostPonePostTransform_While<FUNC, CTX, HAS_MEMBER_postTransformWhile<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapBreak(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformBreak<FUNC>::value) {
-            return PostPonePreTransform_Break<FUNC, CTX, HAS_MEMBER_preTransformBreak<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformBreak<FUNC>()) {
+            return PostPonePreTransform_Break<FUNC, CTX, HAS_MEMBER_preTransformBreak<FUNC>()>::call(ctx, std::move(v),
+                                                                                                     func);
         }
 
         cast_tree<Break>(v)->expr = mapIt(std::move(cast_tree<Break>(v)->expr), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformBreak<FUNC>::value) {
-            return PostPonePostTransform_Break<FUNC, CTX, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformBreak<FUNC>()) {
+            return PostPonePostTransform_Break<FUNC, CTX, HAS_MEMBER_postTransformBreak<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
     TreePtr mapRetry(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformRetry<FUNC>::value) {
-            return PostPonePostTransform_Retry<FUNC, CTX, HAS_MEMBER_postTransformRetry<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformRetry<FUNC>()) {
+            return PostPonePostTransform_Retry<FUNC, CTX, HAS_MEMBER_postTransformRetry<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapNext(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformNext<FUNC>::value) {
-            return PostPonePreTransform_Next<FUNC, CTX, HAS_MEMBER_preTransformNext<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformNext<FUNC>()) {
+            return PostPonePreTransform_Next<FUNC, CTX, HAS_MEMBER_preTransformNext<FUNC>()>::call(ctx, std::move(v),
+                                                                                                   func);
         }
 
         cast_tree<Next>(v)->expr = mapIt(std::move(cast_tree<Next>(v)->expr), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformNext<FUNC>::value) {
-            return PostPonePostTransform_Next<FUNC, CTX, HAS_MEMBER_postTransformNext<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_postTransformNext<FUNC>()) {
+            return PostPonePostTransform_Next<FUNC, CTX, HAS_MEMBER_postTransformNext<FUNC>()>::call(ctx, std::move(v),
+                                                                                                     func);
         }
         return v;
     }
 
     TreePtr mapReturn(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformReturn<FUNC>::value) {
-            v = PostPonePreTransform_Return<FUNC, CTX, HAS_MEMBER_preTransformReturn<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformReturn<FUNC>()) {
+            v = PostPonePreTransform_Return<FUNC, CTX, HAS_MEMBER_preTransformReturn<FUNC>()>::call(ctx, std::move(v),
+                                                                                                    func);
         }
         cast_tree<Return>(v)->expr = mapIt(std::move(cast_tree<Return>(v)->expr), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformReturn<FUNC>::value) {
-            return PostPonePostTransform_Return<FUNC, CTX, HAS_MEMBER_postTransformReturn<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformReturn<FUNC>()) {
+            return PostPonePostTransform_Return<FUNC, CTX, HAS_MEMBER_postTransformReturn<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -386,8 +365,8 @@ private:
     }
 
     TreePtr mapRescueCase(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformRescueCase<FUNC>::value) {
-            v = PostPonePreTransform_RescueCase<FUNC, CTX, HAS_MEMBER_preTransformRescueCase<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_preTransformRescueCase<FUNC>()) {
+            v = PostPonePreTransform_RescueCase<FUNC, CTX, HAS_MEMBER_preTransformRescueCase<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -399,17 +378,17 @@ private:
 
         cast_tree<RescueCase>(v)->body = mapIt(std::move(cast_tree<RescueCase>(v)->body), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformRescueCase<FUNC>::value) {
-            return PostPonePostTransform_RescueCase<FUNC, CTX, HAS_MEMBER_postTransformRescueCase<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformRescueCase<FUNC>()) {
+            return PostPonePostTransform_RescueCase<FUNC, CTX, HAS_MEMBER_postTransformRescueCase<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
         return v;
     }
     TreePtr mapRescue(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformRescue<FUNC>::value) {
-            v = PostPonePreTransform_Rescue<FUNC, CTX, HAS_MEMBER_preTransformRescue<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformRescue<FUNC>()) {
+            v = PostPonePreTransform_Rescue<FUNC, CTX, HAS_MEMBER_preTransformRescue<FUNC>()>::call(ctx, std::move(v),
+                                                                                                    func);
         }
 
         cast_tree<Rescue>(v)->body = mapIt(std::move(cast_tree<Rescue>(v)->body), ctx);
@@ -423,8 +402,8 @@ private:
         cast_tree<Rescue>(v)->else_ = mapIt(std::move(cast_tree<Rescue>(v)->else_), ctx);
         cast_tree<Rescue>(v)->ensure = mapIt(std::move(cast_tree<Rescue>(v)->ensure), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformRescue<FUNC>::value) {
-            return PostPonePostTransform_Rescue<FUNC, CTX, HAS_MEMBER_postTransformRescue<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformRescue<FUNC>()) {
+            return PostPonePostTransform_Rescue<FUNC, CTX, HAS_MEMBER_postTransformRescue<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -432,24 +411,24 @@ private:
     }
 
     TreePtr mapUnresolvedIdent(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value) {
+        if constexpr (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>()) {
             return PostPonePostTransform_UnresolvedIdent<
-                FUNC, CTX, HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value>::call(ctx, std::move(v), func);
+                FUNC, CTX, HAS_MEMBER_postTransformUnresolvedIdent<FUNC>()>::call(ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapAssign(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformAssign<FUNC>::value) {
-            v = PostPonePreTransform_Assign<FUNC, CTX, HAS_MEMBER_preTransformAssign<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformAssign<FUNC>()) {
+            v = PostPonePreTransform_Assign<FUNC, CTX, HAS_MEMBER_preTransformAssign<FUNC>()>::call(ctx, std::move(v),
+                                                                                                    func);
         }
 
         cast_tree<Assign>(v)->lhs = mapIt(std::move(cast_tree<Assign>(v)->lhs), ctx);
         cast_tree<Assign>(v)->rhs = mapIt(std::move(cast_tree<Assign>(v)->rhs), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformAssign<FUNC>::value) {
-            return PostPonePostTransform_Assign<FUNC, CTX, HAS_MEMBER_postTransformAssign<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformAssign<FUNC>()) {
+            return PostPonePostTransform_Assign<FUNC, CTX, HAS_MEMBER_postTransformAssign<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -457,9 +436,9 @@ private:
     }
 
     TreePtr mapSend(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformSend<FUNC>::value) {
-            v = PostPonePreTransform_Send<FUNC, CTX, HAS_MEMBER_preTransformSend<FUNC>::value>::call(ctx, std::move(v),
-                                                                                                     func);
+        if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
+            v = PostPonePreTransform_Send<FUNC, CTX, HAS_MEMBER_preTransformSend<FUNC>()>::call(ctx, std::move(v),
+                                                                                                func);
         }
         cast_tree<Send>(v)->recv = mapIt(std::move(cast_tree<Send>(v)->recv), ctx);
         for (auto &arg : cast_tree<Send>(v)->args) {
@@ -473,18 +452,18 @@ private:
             cast_tree<Send>(v)->block = std::move(nblock);
         }
 
-        if constexpr (HAS_MEMBER_postTransformSend<FUNC>::value) {
-            return PostPonePostTransform_Send<FUNC, CTX, HAS_MEMBER_postTransformSend<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
+            return PostPonePostTransform_Send<FUNC, CTX, HAS_MEMBER_postTransformSend<FUNC>()>::call(ctx, std::move(v),
+                                                                                                     func);
         }
 
         return v;
     }
 
     TreePtr mapHash(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformHash<FUNC>::value) {
-            v = PostPonePreTransform_Hash<FUNC, CTX, HAS_MEMBER_preTransformHash<FUNC>::value>::call(ctx, std::move(v),
-                                                                                                     func);
+        if constexpr (HAS_MEMBER_preTransformHash<FUNC>()) {
+            v = PostPonePreTransform_Hash<FUNC, CTX, HAS_MEMBER_preTransformHash<FUNC>()>::call(ctx, std::move(v),
+                                                                                                func);
         }
         for (auto &key : cast_tree<Hash>(v)->keys) {
             key = mapIt(std::move(key), ctx);
@@ -494,57 +473,57 @@ private:
             value = mapIt(std::move(value), ctx);
         }
 
-        if constexpr (HAS_MEMBER_postTransformArray<FUNC>::value) {
-            return PostPonePostTransform_Hash<FUNC, CTX, HAS_MEMBER_postTransformHash<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_postTransformArray<FUNC>()) {
+            return PostPonePostTransform_Hash<FUNC, CTX, HAS_MEMBER_postTransformHash<FUNC>()>::call(ctx, std::move(v),
+                                                                                                     func);
         }
         return v;
     }
 
     TreePtr mapArray(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformArray<FUNC>::value) {
-            v = PostPonePreTransform_Array<FUNC, CTX, HAS_MEMBER_preTransformArray<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformArray<FUNC>()) {
+            v = PostPonePreTransform_Array<FUNC, CTX, HAS_MEMBER_preTransformArray<FUNC>()>::call(ctx, std::move(v),
+                                                                                                  func);
         }
         for (auto &elem : cast_tree<Array>(v)->elems) {
             elem = mapIt(std::move(elem), ctx);
         }
 
-        if constexpr (HAS_MEMBER_postTransformArray<FUNC>::value) {
-            return PostPonePostTransform_Array<FUNC, CTX, HAS_MEMBER_postTransformArray<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformArray<FUNC>()) {
+            return PostPonePostTransform_Array<FUNC, CTX, HAS_MEMBER_postTransformArray<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapLiteral(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>::value) {
-            return PostPonePostTransform_Literal<FUNC, CTX, HAS_MEMBER_postTransformLiteral<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>()) {
+            return PostPonePostTransform_Literal<FUNC, CTX, HAS_MEMBER_postTransformLiteral<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapUnresolvedConstantLit(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value) {
+        if constexpr (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>()) {
             return PostPonePostTransform_UnresolvedConstantLit<
-                FUNC, CTX, HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value>::call(ctx, std::move(v), func);
+                FUNC, CTX, HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>()>::call(ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapConstantLit(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
-            return PostPonePostTransform_ConstantLit<FUNC, CTX, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformConstantLit<FUNC>()) {
+            return PostPonePostTransform_ConstantLit<FUNC, CTX, HAS_MEMBER_postTransformConstantLit<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapBlock(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformBlock<FUNC>::value) {
-            v = PostPonePreTransform_Block<FUNC, CTX, HAS_MEMBER_preTransformBlock<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformBlock<FUNC>()) {
+            v = PostPonePreTransform_Block<FUNC, CTX, HAS_MEMBER_preTransformBlock<FUNC>()>::call(ctx, std::move(v),
+                                                                                                  func);
         }
 
         for (auto &arg : cast_tree<Block>(v)->args) {
@@ -555,17 +534,17 @@ private:
         }
         cast_tree<Block>(v)->body = mapIt(std::move(cast_tree<Block>(v)->body), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformBlock<FUNC>::value) {
-            return PostPonePostTransform_Block<FUNC, CTX, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformBlock<FUNC>()) {
+            return PostPonePostTransform_Block<FUNC, CTX, HAS_MEMBER_postTransformBlock<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapInsSeq(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformInsSeq<FUNC>::value) {
-            v = PostPonePreTransform_InsSeq<FUNC, CTX, HAS_MEMBER_preTransformInsSeq<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformInsSeq<FUNC>()) {
+            v = PostPonePreTransform_InsSeq<FUNC, CTX, HAS_MEMBER_preTransformInsSeq<FUNC>()>::call(ctx, std::move(v),
+                                                                                                    func);
         }
 
         for (auto &stat : cast_tree<InsSeq>(v)->stats) {
@@ -574,8 +553,8 @@ private:
 
         cast_tree<InsSeq>(v)->expr = mapIt(std::move(cast_tree<InsSeq>(v)->expr), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformInsSeq<FUNC>::value) {
-            return PostPonePostTransform_InsSeq<FUNC, CTX, HAS_MEMBER_postTransformInsSeq<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformInsSeq<FUNC>()) {
+            return PostPonePostTransform_InsSeq<FUNC, CTX, HAS_MEMBER_postTransformInsSeq<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -583,23 +562,23 @@ private:
     }
 
     TreePtr mapLocal(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformLocal<FUNC>::value) {
-            return PostPonePostTransform_Local<FUNC, CTX, HAS_MEMBER_postTransformLocal<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformLocal<FUNC>()) {
+            return PostPonePostTransform_Local<FUNC, CTX, HAS_MEMBER_postTransformLocal<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapCast(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformCast<FUNC>::value) {
-            v = PostPonePreTransform_Cast<FUNC, CTX, HAS_MEMBER_preTransformCast<FUNC>::value>::call(ctx, std::move(v),
-                                                                                                     func);
+        if constexpr (HAS_MEMBER_preTransformCast<FUNC>()) {
+            v = PostPonePreTransform_Cast<FUNC, CTX, HAS_MEMBER_preTransformCast<FUNC>()>::call(ctx, std::move(v),
+                                                                                                func);
         }
         cast_tree<Cast>(v)->arg = mapIt(std::move(cast_tree<Cast>(v)->arg), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformCast<FUNC>::value) {
-            return PostPonePostTransform_Cast<FUNC, CTX, HAS_MEMBER_postTransformCast<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_postTransformCast<FUNC>()) {
+            return PostPonePostTransform_Cast<FUNC, CTX, HAS_MEMBER_postTransformCast<FUNC>()>::call(ctx, std::move(v),
+                                                                                                     func);
         }
 
         return v;
@@ -613,8 +592,8 @@ private:
 
         try {
             // TODO: reorder by frequency
-            if constexpr (HAS_MEMBER_preTransformExpression<FUNC>::value) {
-                what = PostPonePreTransform_Expression<FUNC, CTX, HAS_MEMBER_preTransformExpression<FUNC>::value>::call(
+            if constexpr (HAS_MEMBER_preTransformExpression<FUNC>()) {
+                what = PostPonePreTransform_Expression<FUNC, CTX, HAS_MEMBER_preTransformExpression<FUNC>()>::call(
                     ctx, std::move(what), func);
             }
 
@@ -749,17 +728,17 @@ private:
 
     FUNC &func;
 
-    static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformLiteral<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformUnresolvedConstantLit<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformLocal<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>(), "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformLiteral<FUNC>(), "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformUnresolvedConstantLit<FUNC>(), "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>(), "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformLocal<FUNC>(), "use post*Transform instead");
 
     ShallowMapper(FUNC &func) : func(func) {}
 
     TreePtr mapClassDef(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
-            v = PostPonePreTransform_ClassDef<FUNC, CTX, HAS_MEMBER_preTransformClassDef<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_preTransformClassDef<FUNC>()) {
+            v = PostPonePreTransform_ClassDef<FUNC, CTX, HAS_MEMBER_preTransformClassDef<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -769,16 +748,16 @@ private:
             def = mapIt(std::move(def), ctx.withOwner(cast_tree<ClassDef>(v)->symbol));
         }
 
-        if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>::value) {
-            return PostPonePostTransform_ClassDef<FUNC, CTX, HAS_MEMBER_postTransformClassDef<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>()) {
+            return PostPonePostTransform_ClassDef<FUNC, CTX, HAS_MEMBER_postTransformClassDef<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapMethodDef(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformMethodDef<FUNC>::value) {
-            v = PostPonePreTransform_MethodDef<FUNC, CTX, HAS_MEMBER_preTransformMethodDef<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_preTransformMethodDef<FUNC>()) {
+            v = PostPonePreTransform_MethodDef<FUNC, CTX, HAS_MEMBER_preTransformMethodDef<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -790,8 +769,8 @@ private:
         }
         // because this is a ShallowMap, we do not map over the body of the method
 
-        if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
-            return PostPonePostTransform_MethodDef<FUNC, CTX, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>()) {
+            return PostPonePostTransform_MethodDef<FUNC, CTX, HAS_MEMBER_postTransformMethodDef<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -799,82 +778,81 @@ private:
     }
 
     TreePtr mapIf(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformIf<FUNC>::value) {
-            v = PostPonePreTransform_If<FUNC, CTX, HAS_MEMBER_preTransformIf<FUNC>::value>::call(ctx, std::move(v),
-                                                                                                 func);
+        if constexpr (HAS_MEMBER_preTransformIf<FUNC>()) {
+            v = PostPonePreTransform_If<FUNC, CTX, HAS_MEMBER_preTransformIf<FUNC>()>::call(ctx, std::move(v), func);
         }
         cast_tree<If>(v)->cond = mapIt(std::move(cast_tree<If>(v)->cond), ctx);
         cast_tree<If>(v)->thenp = mapIt(std::move(cast_tree<If>(v)->thenp), ctx);
         cast_tree<If>(v)->elsep = mapIt(std::move(cast_tree<If>(v)->elsep), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformIf<FUNC>::value) {
-            return PostPonePostTransform_If<FUNC, CTX, HAS_MEMBER_postTransformIf<FUNC>::value>::call(ctx, std::move(v),
-                                                                                                      func);
+        if constexpr (HAS_MEMBER_postTransformIf<FUNC>()) {
+            return PostPonePostTransform_If<FUNC, CTX, HAS_MEMBER_postTransformIf<FUNC>()>::call(ctx, std::move(v),
+                                                                                                 func);
         }
         return v;
     }
 
     TreePtr mapWhile(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformWhile<FUNC>::value) {
-            v = PostPonePreTransform_While<FUNC, CTX, HAS_MEMBER_preTransformWhile<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformWhile<FUNC>()) {
+            v = PostPonePreTransform_While<FUNC, CTX, HAS_MEMBER_preTransformWhile<FUNC>()>::call(ctx, std::move(v),
+                                                                                                  func);
         }
         cast_tree<While>(v)->cond = mapIt(std::move(cast_tree<While>(v)->cond), ctx);
         cast_tree<While>(v)->body = mapIt(std::move(cast_tree<While>(v)->body), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformWhile<FUNC>::value) {
-            return PostPonePostTransform_While<FUNC, CTX, HAS_MEMBER_postTransformWhile<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformWhile<FUNC>()) {
+            return PostPonePostTransform_While<FUNC, CTX, HAS_MEMBER_postTransformWhile<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapBreak(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformBreak<FUNC>::value) {
-            return PostPonePreTransform_Break<FUNC, CTX, HAS_MEMBER_preTransformBreak<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformBreak<FUNC>()) {
+            return PostPonePreTransform_Break<FUNC, CTX, HAS_MEMBER_preTransformBreak<FUNC>()>::call(ctx, std::move(v),
+                                                                                                     func);
         }
 
         cast_tree<Break>(v)->expr = mapIt(std::move(cast_tree<Break>(v)->expr), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformBreak<FUNC>::value) {
-            return PostPonePostTransform_Break<FUNC, CTX, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformBreak<FUNC>()) {
+            return PostPonePostTransform_Break<FUNC, CTX, HAS_MEMBER_postTransformBreak<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
     TreePtr mapRetry(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformRetry<FUNC>::value) {
-            return PostPonePostTransform_Retry<FUNC, CTX, HAS_MEMBER_postTransformRetry<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformRetry<FUNC>()) {
+            return PostPonePostTransform_Retry<FUNC, CTX, HAS_MEMBER_postTransformRetry<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapNext(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformNext<FUNC>::value) {
-            return PostPonePreTransform_Next<FUNC, CTX, HAS_MEMBER_preTransformNext<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformNext<FUNC>()) {
+            return PostPonePreTransform_Next<FUNC, CTX, HAS_MEMBER_preTransformNext<FUNC>()>::call(ctx, std::move(v),
+                                                                                                   func);
         }
 
         cast_tree<Next>(v)->expr = mapIt(std::move(cast_tree<Next>(v)->expr), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformNext<FUNC>::value) {
-            return PostPonePostTransform_Next<FUNC, CTX, HAS_MEMBER_postTransformNext<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_postTransformNext<FUNC>()) {
+            return PostPonePostTransform_Next<FUNC, CTX, HAS_MEMBER_postTransformNext<FUNC>()>::call(ctx, std::move(v),
+                                                                                                     func);
         }
         return v;
     }
 
     TreePtr mapReturn(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformReturn<FUNC>::value) {
-            v = PostPonePreTransform_Return<FUNC, CTX, HAS_MEMBER_preTransformReturn<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformReturn<FUNC>()) {
+            v = PostPonePreTransform_Return<FUNC, CTX, HAS_MEMBER_preTransformReturn<FUNC>()>::call(ctx, std::move(v),
+                                                                                                    func);
         }
         cast_tree<Return>(v)->expr = mapIt(std::move(cast_tree<Return>(v)->expr), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformReturn<FUNC>::value) {
-            return PostPonePostTransform_Return<FUNC, CTX, HAS_MEMBER_postTransformReturn<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformReturn<FUNC>()) {
+            return PostPonePostTransform_Return<FUNC, CTX, HAS_MEMBER_postTransformReturn<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -882,8 +860,8 @@ private:
     }
 
     TreePtr mapRescueCase(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformRescueCase<FUNC>::value) {
-            v = PostPonePreTransform_RescueCase<FUNC, CTX, HAS_MEMBER_preTransformRescueCase<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_preTransformRescueCase<FUNC>()) {
+            v = PostPonePreTransform_RescueCase<FUNC, CTX, HAS_MEMBER_preTransformRescueCase<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -895,17 +873,17 @@ private:
 
         cast_tree<RescueCase>(v)->body = mapIt(std::move(cast_tree<RescueCase>(v)->body), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformRescueCase<FUNC>::value) {
-            return PostPonePostTransform_RescueCase<FUNC, CTX, HAS_MEMBER_postTransformRescueCase<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformRescueCase<FUNC>()) {
+            return PostPonePostTransform_RescueCase<FUNC, CTX, HAS_MEMBER_postTransformRescueCase<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
         return v;
     }
     TreePtr mapRescue(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformRescue<FUNC>::value) {
-            v = PostPonePreTransform_Rescue<FUNC, CTX, HAS_MEMBER_preTransformRescue<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformRescue<FUNC>()) {
+            v = PostPonePreTransform_Rescue<FUNC, CTX, HAS_MEMBER_preTransformRescue<FUNC>()>::call(ctx, std::move(v),
+                                                                                                    func);
         }
 
         cast_tree<Rescue>(v)->body = mapIt(std::move(cast_tree<Rescue>(v)->body), ctx);
@@ -919,8 +897,8 @@ private:
         cast_tree<Rescue>(v)->else_ = mapIt(std::move(cast_tree<Rescue>(v)->else_), ctx);
         cast_tree<Rescue>(v)->ensure = mapIt(std::move(cast_tree<Rescue>(v)->ensure), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformRescue<FUNC>::value) {
-            return PostPonePostTransform_Rescue<FUNC, CTX, HAS_MEMBER_postTransformRescue<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformRescue<FUNC>()) {
+            return PostPonePostTransform_Rescue<FUNC, CTX, HAS_MEMBER_postTransformRescue<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -928,24 +906,24 @@ private:
     }
 
     TreePtr mapUnresolvedIdent(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value) {
+        if constexpr (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>()) {
             return PostPonePostTransform_UnresolvedIdent<
-                FUNC, CTX, HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value>::call(ctx, std::move(v), func);
+                FUNC, CTX, HAS_MEMBER_postTransformUnresolvedIdent<FUNC>()>::call(ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapAssign(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformAssign<FUNC>::value) {
-            v = PostPonePreTransform_Assign<FUNC, CTX, HAS_MEMBER_preTransformAssign<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformAssign<FUNC>()) {
+            v = PostPonePreTransform_Assign<FUNC, CTX, HAS_MEMBER_preTransformAssign<FUNC>()>::call(ctx, std::move(v),
+                                                                                                    func);
         }
 
         cast_tree<Assign>(v)->lhs = mapIt(std::move(cast_tree<Assign>(v)->lhs), ctx);
         cast_tree<Assign>(v)->rhs = mapIt(std::move(cast_tree<Assign>(v)->rhs), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformAssign<FUNC>::value) {
-            return PostPonePostTransform_Assign<FUNC, CTX, HAS_MEMBER_postTransformAssign<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformAssign<FUNC>()) {
+            return PostPonePostTransform_Assign<FUNC, CTX, HAS_MEMBER_postTransformAssign<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -953,9 +931,9 @@ private:
     }
 
     TreePtr mapSend(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformSend<FUNC>::value) {
-            v = PostPonePreTransform_Send<FUNC, CTX, HAS_MEMBER_preTransformSend<FUNC>::value>::call(ctx, std::move(v),
-                                                                                                     func);
+        if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
+            v = PostPonePreTransform_Send<FUNC, CTX, HAS_MEMBER_preTransformSend<FUNC>()>::call(ctx, std::move(v),
+                                                                                                func);
         }
         cast_tree<Send>(v)->recv = mapIt(std::move(cast_tree<Send>(v)->recv), ctx);
         for (auto &arg : cast_tree<Send>(v)->args) {
@@ -969,18 +947,18 @@ private:
             cast_tree<Send>(v)->block = std::move(nblock);
         }
 
-        if constexpr (HAS_MEMBER_postTransformSend<FUNC>::value) {
-            return PostPonePostTransform_Send<FUNC, CTX, HAS_MEMBER_postTransformSend<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_postTransformSend<FUNC>()) {
+            return PostPonePostTransform_Send<FUNC, CTX, HAS_MEMBER_postTransformSend<FUNC>()>::call(ctx, std::move(v),
+                                                                                                     func);
         }
 
         return v;
     }
 
     TreePtr mapHash(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformHash<FUNC>::value) {
-            v = PostPonePreTransform_Hash<FUNC, CTX, HAS_MEMBER_preTransformHash<FUNC>::value>::call(ctx, std::move(v),
-                                                                                                     func);
+        if constexpr (HAS_MEMBER_preTransformHash<FUNC>()) {
+            v = PostPonePreTransform_Hash<FUNC, CTX, HAS_MEMBER_preTransformHash<FUNC>()>::call(ctx, std::move(v),
+                                                                                                func);
         }
         for (auto &key : cast_tree<Hash>(v)->keys) {
             key = mapIt(std::move(key), ctx);
@@ -990,57 +968,57 @@ private:
             value = mapIt(std::move(value), ctx);
         }
 
-        if constexpr (HAS_MEMBER_postTransformArray<FUNC>::value) {
-            return PostPonePostTransform_Hash<FUNC, CTX, HAS_MEMBER_postTransformHash<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_postTransformArray<FUNC>()) {
+            return PostPonePostTransform_Hash<FUNC, CTX, HAS_MEMBER_postTransformHash<FUNC>()>::call(ctx, std::move(v),
+                                                                                                     func);
         }
         return v;
     }
 
     TreePtr mapArray(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformArray<FUNC>::value) {
-            v = PostPonePreTransform_Array<FUNC, CTX, HAS_MEMBER_preTransformArray<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformArray<FUNC>()) {
+            v = PostPonePreTransform_Array<FUNC, CTX, HAS_MEMBER_preTransformArray<FUNC>()>::call(ctx, std::move(v),
+                                                                                                  func);
         }
         for (auto &elem : cast_tree<Array>(v)->elems) {
             elem = mapIt(std::move(elem), ctx);
         }
 
-        if constexpr (HAS_MEMBER_postTransformArray<FUNC>::value) {
-            return PostPonePostTransform_Array<FUNC, CTX, HAS_MEMBER_postTransformArray<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformArray<FUNC>()) {
+            return PostPonePostTransform_Array<FUNC, CTX, HAS_MEMBER_postTransformArray<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapLiteral(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>::value) {
-            return PostPonePostTransform_Literal<FUNC, CTX, HAS_MEMBER_postTransformLiteral<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>()) {
+            return PostPonePostTransform_Literal<FUNC, CTX, HAS_MEMBER_postTransformLiteral<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapUnresolvedConstantLit(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value) {
+        if constexpr (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>()) {
             return PostPonePostTransform_UnresolvedConstantLit<
-                FUNC, CTX, HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value>::call(ctx, std::move(v), func);
+                FUNC, CTX, HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>()>::call(ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapConstantLit(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
-            return PostPonePostTransform_ConstantLit<FUNC, CTX, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformConstantLit<FUNC>()) {
+            return PostPonePostTransform_ConstantLit<FUNC, CTX, HAS_MEMBER_postTransformConstantLit<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapBlock(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformBlock<FUNC>::value) {
-            v = PostPonePreTransform_Block<FUNC, CTX, HAS_MEMBER_preTransformBlock<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformBlock<FUNC>()) {
+            v = PostPonePreTransform_Block<FUNC, CTX, HAS_MEMBER_preTransformBlock<FUNC>()>::call(ctx, std::move(v),
+                                                                                                  func);
         }
 
         for (auto &arg : cast_tree<Block>(v)->args) {
@@ -1051,17 +1029,17 @@ private:
         }
         cast_tree<Block>(v)->body = mapIt(std::move(cast_tree<Block>(v)->body), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformBlock<FUNC>::value) {
-            return PostPonePostTransform_Block<FUNC, CTX, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformBlock<FUNC>()) {
+            return PostPonePostTransform_Block<FUNC, CTX, HAS_MEMBER_postTransformBlock<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapInsSeq(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformInsSeq<FUNC>::value) {
-            v = PostPonePreTransform_InsSeq<FUNC, CTX, HAS_MEMBER_preTransformInsSeq<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_preTransformInsSeq<FUNC>()) {
+            v = PostPonePreTransform_InsSeq<FUNC, CTX, HAS_MEMBER_preTransformInsSeq<FUNC>()>::call(ctx, std::move(v),
+                                                                                                    func);
         }
 
         for (auto &stat : cast_tree<InsSeq>(v)->stats) {
@@ -1070,8 +1048,8 @@ private:
 
         cast_tree<InsSeq>(v)->expr = mapIt(std::move(cast_tree<InsSeq>(v)->expr), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformInsSeq<FUNC>::value) {
-            return PostPonePostTransform_InsSeq<FUNC, CTX, HAS_MEMBER_postTransformInsSeq<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformInsSeq<FUNC>()) {
+            return PostPonePostTransform_InsSeq<FUNC, CTX, HAS_MEMBER_postTransformInsSeq<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
 
@@ -1079,23 +1057,23 @@ private:
     }
 
     TreePtr mapLocal(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_postTransformLocal<FUNC>::value) {
-            return PostPonePostTransform_Local<FUNC, CTX, HAS_MEMBER_postTransformLocal<FUNC>::value>::call(
+        if constexpr (HAS_MEMBER_postTransformLocal<FUNC>()) {
+            return PostPonePostTransform_Local<FUNC, CTX, HAS_MEMBER_postTransformLocal<FUNC>()>::call(
                 ctx, std::move(v), func);
         }
         return v;
     }
 
     TreePtr mapCast(TreePtr v, CTX ctx) {
-        if constexpr (HAS_MEMBER_preTransformCast<FUNC>::value) {
-            v = PostPonePreTransform_Cast<FUNC, CTX, HAS_MEMBER_preTransformCast<FUNC>::value>::call(ctx, std::move(v),
-                                                                                                     func);
+        if constexpr (HAS_MEMBER_preTransformCast<FUNC>()) {
+            v = PostPonePreTransform_Cast<FUNC, CTX, HAS_MEMBER_preTransformCast<FUNC>()>::call(ctx, std::move(v),
+                                                                                                func);
         }
         cast_tree<Cast>(v)->arg = mapIt(std::move(cast_tree<Cast>(v)->arg), ctx);
 
-        if constexpr (HAS_MEMBER_postTransformCast<FUNC>::value) {
-            return PostPonePostTransform_Cast<FUNC, CTX, HAS_MEMBER_postTransformCast<FUNC>::value>::call(
-                ctx, std::move(v), func);
+        if constexpr (HAS_MEMBER_postTransformCast<FUNC>()) {
+            return PostPonePostTransform_Cast<FUNC, CTX, HAS_MEMBER_postTransformCast<FUNC>()>::call(ctx, std::move(v),
+                                                                                                     func);
         }
 
         return v;
@@ -1109,8 +1087,8 @@ private:
 
         try {
             // TODO: reorder by frequency
-            if constexpr (HAS_MEMBER_preTransformExpression<FUNC>::value) {
-                what = PostPonePreTransform_Expression<FUNC, CTX, HAS_MEMBER_preTransformExpression<FUNC>::value>::call(
+            if constexpr (HAS_MEMBER_preTransformExpression<FUNC>()) {
+                what = PostPonePreTransform_Expression<FUNC, CTX, HAS_MEMBER_preTransformExpression<FUNC>()>::call(
                     ctx, std::move(what), func);
             }
 
