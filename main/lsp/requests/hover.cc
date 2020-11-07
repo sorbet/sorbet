@@ -1,5 +1,7 @@
 #include "main/lsp/requests/hover.h"
 #include "absl/strings/ascii.h"
+#include "absl/strings/str_join.h"
+#include "common/sort.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
@@ -49,55 +51,80 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         }
 
         auto resp = move(queryResponses[0]);
+        auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
+        vector<core::Loc> documentationLocations;
+        string typeString;
 
-        optional<string> documentation = nullopt;
-        if (resp->isConstant() || resp->isField() || resp->isDefinition()) {
-            auto origins = resp->getTypeAndOrigins().origins;
-            if (!origins.empty()) {
-                auto loc = origins[0];
+        if (auto c = resp->isConstant()) {
+            for (auto loc : c->symbol.data(gs)->locs()) {
                 if (loc.exists()) {
-                    documentation = findDocumentation(loc.file().data(gs).source(), loc.beginPos());
+                    documentationLocations.emplace_back(loc);
+                }
+            }
+        } else if (auto d = resp->isDefinition()) {
+            for (auto loc : d->symbol.data(gs)->locs()) {
+                if (loc.exists()) {
+                    documentationLocations.emplace_back(loc);
+                }
+            }
+        } else if (resp->isField()) {
+            auto origins = resp->getTypeAndOrigins().origins;
+            for (auto loc : origins) {
+                if (loc.exists()) {
+                    documentationLocations.emplace_back(loc);
                 }
             }
         }
 
-        auto clientHoverMarkupKind = config.getClientConfig().clientHoverMarkupKind;
         if (auto sendResp = resp->isSend()) {
             auto retType = sendResp->dispatchResult->returnType;
             auto start = sendResp->dispatchResult.get();
             if (start != nullptr && start->main.method.exists() && !start->main.receiver.isUntyped()) {
                 auto loc = start->main.method.data(gs)->loc();
                 if (loc.exists()) {
-                    documentation = findDocumentation(loc.file().data(gs).source(), loc.beginPos());
+                    documentationLocations.emplace_back(loc);
                 }
             }
             auto &constraint = sendResp->dispatchResult->main.constr;
             if (constraint) {
                 retType = core::Types::instantiate(gs, retType, *constraint);
             }
-            string typeString;
             if (sendResp->dispatchResult->main.method.exists() && sendResp->dispatchResult->main.method.isSynthetic()) {
                 // For synthetic methods, just show the return type
                 typeString = retType->showWithMoreInfo(gs);
             } else {
                 typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint);
             }
-            response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, documentation));
         } else if (auto defResp = resp->isDefinition()) {
-            string typeString = prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
-            response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, documentation));
+            typeString = prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
         } else if (auto constResp = resp->isConstant()) {
-            auto prettyType = prettyTypeForConstant(gs, constResp->symbol);
-            response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, prettyType, documentation));
+            typeString = prettyTypeForConstant(gs, constResp->symbol);
         } else {
             core::TypePtr retType = resp->getRetType();
             // Some untyped arguments have null types.
             if (!retType) {
                 retType = core::Types::untypedUntracked();
             }
-            response->result = make_unique<Hover>(
-                formatRubyMarkup(clientHoverMarkupKind, retType->showWithMoreInfo(gs), documentation));
+            typeString = retType->showWithMoreInfo(gs);
         }
+
+        // Sort so documentation order is deterministic.
+        fast_sort(documentationLocations,
+                  [](const auto a, const auto b) -> bool { return a.beginPos() < b.beginPos(); });
+
+        vector<string> documentation;
+        for (auto loc : documentationLocations) {
+            auto doc = findDocumentation(loc.file().data(gs).source(), loc.beginPos());
+            if (!doc->empty() && !(*doc).empty()) {
+                documentation.emplace_back(move(*doc));
+            }
+        }
+        optional<string> docString;
+        if (!documentation.empty()) {
+            docString = absl::StrJoin(documentation, "\n\n");
+        }
+
+        response->result = make_unique<Hover>(formatRubyMarkup(clientHoverMarkupKind, typeString, docString));
     }
     return response;
 }

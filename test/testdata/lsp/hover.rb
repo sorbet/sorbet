@@ -5,8 +5,8 @@ class BigFoo; extend T::Sig
 
 # The docs for FOO_CONSTANT
   FOO_CONSTANT = 1
-# ^^^^^^^^^^^^ The docs for FOO_CONSTANT
-# ^^^^^^^^^^^^ Integer(1)
+# ^^^^^^^^^^^^ hover: The docs for FOO_CONSTANT
+# ^^^^^^^^^^^^ hover: Integer(1)
 
   # Docs for Bar#static_variable
   @@static_variable = T.let('asdf', String)
