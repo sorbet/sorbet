@@ -47,6 +47,8 @@ public:
         return const_cast<To &>(cast<To>(static_cast<const TypePtr &>(what)));
     }
 
+    static std::string tagToString(Tag tag);
+
 private:
     std::atomic<u4> *counter;
     tagged_storage store;
