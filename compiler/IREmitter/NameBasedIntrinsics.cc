@@ -197,12 +197,12 @@ public:
     }
 } ExceptionRetry;
 
-enum ShouldTakeReciever {
-    TakesReciever,
-    NoReciever,
+enum ShouldTakeReceiver {
+    TakesReceiver,
+    NoReceiver,
 };
 
-llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, ShouldTakeReciever takesReciever) {
+llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, ShouldTakeReceiver takesReceiver) {
     auto &cs = mcctx.cs;
     auto &builder = builderCast(mcctx.build);
     auto &irctx = mcctx.irctx;
@@ -212,7 +212,7 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
     auto [argc, argv, _] = IREmitterHelpers::fillSendArgArray(mcctx);
 
     llvm::Value *recv;
-    if (takesReciever == TakesReciever) {
+    if (takesReceiver == TakesReceiver) {
         recv = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
     } else {
         recv = Payload::rubyNil(cs, builder);
@@ -234,16 +234,16 @@ class CallCMethod : public NameBasedIntrinsicMethod {
 protected:
     string_view rubyMethod;
     string cMethod;
-    ShouldTakeReciever takesReciever;
+    ShouldTakeReceiver takesReceiver;
 
 public:
-    CallCMethod(string_view rubyMethod, string cMethod, ShouldTakeReciever takesReciever,
+    CallCMethod(string_view rubyMethod, string cMethod, ShouldTakeReceiver takesReceiver,
                 Intrinsics::HandleBlock supportsBlocks)
         : NameBasedIntrinsicMethod(supportsBlocks), rubyMethod(rubyMethod), cMethod(cMethod),
-          takesReciever(takesReciever){};
+          takesReceiver(takesReceiver){};
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
-        return buildCMethodCall(mcctx, cMethod, takesReciever);
+        return buildCMethodCall(mcctx, cMethod, takesReceiver);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {cs.gs.lookupNameUTF8(rubyMethod)};
@@ -267,7 +267,7 @@ public:
         // empty hash, and we don't have to waste space on the extra pre-built
         // hash.
         if (mcctx.send->args.empty() || !literalHash) {
-            return buildCMethodCall(mcctx, "sorbet_buildHashIntrinsic", NoReciever);
+            return buildCMethodCall(mcctx, "sorbet_buildHashIntrinsic", NoReceiver);
         }
 
         // We're going to build a literal hash at initialization time, and then
@@ -341,15 +341,15 @@ public:
 } BuildHash;
 
 static const vector<CallCMethod> knownCMethods{
-    {"<expand-splat>", "sorbet_splatIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
-    {"defined?", "sorbet_definedIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
-    {"<build-keyword-args>", "sorbet_buildHashIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
-    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
-    {"<build-range>", "sorbet_buildRangeIntrinsic", NoReciever, Intrinsics::HandleBlock::Unhandled},
-    {"<string-interpolate>", "sorbet_stringInterpolate", NoReciever, Intrinsics::HandleBlock::Unhandled},
-    {"<self-new>", "sorbet_selfNew", NoReciever, Intrinsics::HandleBlock::Unhandled},
-    {"<block-break>", "sorbet_block_break", NoReciever, Intrinsics::HandleBlock::Unhandled},
-    {"!", "sorbet_bang", TakesReciever, Intrinsics::HandleBlock::Unhandled},
+    {"<expand-splat>", "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"defined?", "sorbet_definedIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<build-keyword-args>", "sorbet_buildHashIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<build-range>", "sorbet_buildRangeIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<string-interpolate>", "sorbet_stringInterpolate", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<self-new>", "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<block-break>", "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"!", "sorbet_bang", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
