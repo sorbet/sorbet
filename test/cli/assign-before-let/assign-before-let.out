@@ -1,0 +1,7 @@
+test/cli/assign-before-let/assign-before-let.rb:3: Incompatible assignment to variable declared via `let`: `String("hello")` is not a subtype of `NilClass` https://srb.help/7001
+     3 |x = "hello"                   # Error on this line should include a link to GitHub issue
+            ^^^^^^^
+    test/cli/assign-before-let/assign-before-let.rb:3: This may be caused by a known Sorbet limitation when `T.let` is in use. See `https://github.com/sorbet/sorbet/issues/3482` for more details.
+     3 |x = "hello"                   # Error on this line should include a link to GitHub issue
+            ^^^^^^^
+Errors: 1
