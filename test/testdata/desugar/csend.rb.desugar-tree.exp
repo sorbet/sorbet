@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <assignTemp>$2 = <self>.foo()
         if ::NilClass.===(<assignTemp>$2)
-          nil
+          ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
         else
           <assignTemp>$2.bar()
         end
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <assignTemp>$3 = <self>.foo()
         if ::NilClass.===(<assignTemp>$3)
-          nil
+          ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$3)
         else
           <assignTemp>$3.bar() do |x|
             x
@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <assignTemp>$4 = <self>.foo()
         if ::NilClass.===(<assignTemp>$4)
-          nil
+          ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$4)
         else
           <assignTemp>$4.bar=(5)
         end
@@ -30,7 +30,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <assignTemp>$5 = <self>.foo()
         if ::NilClass.===(<assignTemp>$5)
-          nil
+          ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$5)
         else
           begin
             bar$6 = <assignTemp>$5
@@ -41,7 +41,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <assignTemp>$7 = <self>.foo()
         if ::NilClass.===(<assignTemp>$7)
-          nil
+          ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$7)
         else
           begin
             bar$8 = <assignTemp>$7
@@ -57,7 +57,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <assignTemp>$10 = <self>.foo()
         if ::NilClass.===(<assignTemp>$10)
-          nil
+          ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$10)
         else
           begin
             bar$11 = <assignTemp>$10
@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   begin
     <assignTemp>$2 = <emptyTree>::<C BasicObject>.new()
     if ::NilClass.===(<assignTemp>$2)
-      nil
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
     else
       <assignTemp>$2.__id__()
     end
@@ -93,7 +93,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <assignTemp>$2 = x
         if ::NilClass.===(<assignTemp>$2)
-          nil
+          ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
         else
           <assignTemp>$2.|(true)
         end

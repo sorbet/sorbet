@@ -128,6 +128,21 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             bb->firstDeadInstructionIdx = 0;
             // this block is unreachable.
             if (!bb->exprs.empty()) {
+                // This is a bit complicated:
+                //
+                //   1. If the block consists only of synthetic bindings or T.absurd, we don't
+                //      want to issue an error.
+                //   2. If the block contains a send of the form <Magic>.<nil-for-safe-navigation>(x),
+                //      we want to issue an UnnecessarySafeNavigationError, extracting
+                //      type-and-origin info from x. (This magic form is inserted by the desugarer
+                //      for a "safe navigation" operation, e.g., `x&.foo`.)
+                //   3. Otherwise, we want to issue a DeadBranchInferencer error, taking the first
+                //      (non-synthetic, non-"T.absurd") instruction in the block as the loc of the
+                //      error.
+                cfg::Instruction *unreachableInstruction = nullptr;
+                core::LocOffsets locForUnreachable;
+                bool dueToSafeNavigation = false;
+
                 for (auto &expr : bb->exprs) {
                     if (expr.value->isSynthetic) {
                         continue;
@@ -135,10 +150,38 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (cfg::isa_instruction<cfg::TAbsurd>(expr.value.get())) {
                         continue;
                     }
-                    if (auto e = ctx.beginError(expr.loc, core::errors::Infer::DeadBranchInferencer)) {
+
+                    auto send = cfg::cast_instruction<cfg::Send>(expr.value.get());
+                    if (send != nullptr && send->fun == core::Names::nilForSafeNavigation()) {
+                        unreachableInstruction = expr.value.get();
+                        locForUnreachable = expr.loc;
+                        dueToSafeNavigation = true;
+                        break;
+                    } else if (unreachableInstruction == nullptr) {
+                        unreachableInstruction = expr.value.get();
+                        locForUnreachable = expr.loc;
+                    }
+                }
+
+                if (unreachableInstruction != nullptr) {
+                    auto send = cfg::cast_instruction<cfg::Send>(unreachableInstruction);
+
+                    if (dueToSafeNavigation && send != nullptr) {
+                        if (auto e =
+                                ctx.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
+                            e.setHeader("Used `{}` operator on a receiver which can never be nil", "&.");
+
+                            // Just a failsafe check; args.size() should always be 1.
+                            if (send->args.size() > 0) {
+                                auto ty = current.getAndFillTypeAndOrigin(ctx, send->args[0]);
+                                e.addErrorSection(core::ErrorSection(
+                                    core::ErrorColors::format("Type of receiver is `{}`, from:", ty.type->show(ctx)),
+                                    ty.origins2Explanations(ctx, current.locForUninitialized())));
+                            }
+                        }
+                    } else if (auto e = ctx.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
                         e.setHeader("This code is unreachable");
                     }
-                    break;
                 }
             }
             continue;

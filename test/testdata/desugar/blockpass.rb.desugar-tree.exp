@@ -63,7 +63,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <assignTemp>$4 = <emptyTree>::<C CallsWithObject>
         if ::NilClass.===(<assignTemp>$4)
-          nil
+          ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$4)
         else
           <assignTemp>$4.calls_with_object() do |<block-pass>$5|
             <block-pass>$5.meth()

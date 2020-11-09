@@ -985,4 +985,24 @@ See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
 
+## 7034
+
+Sorbet detected that the safe navigation operator (`&.`) was being used on a
+receiver that can never be nil. Replace the offending occurrence of `&.` with a
+normal method call (`.`).
+
+```ruby
+# typed: true
+
+extend T::Sig
+
+sig {params(x: Integer, y: T.nilable(Integer)).void}
+def foo(x, y)
+  puts x&.to_s  # error: x can never be nil
+  puts x.to_s   # no error
+
+  puts y&.to_s  # no error: y may be nil
+end
+```
+
 <script src="/js/error-reference.js"></script>
