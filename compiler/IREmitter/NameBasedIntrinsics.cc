@@ -57,7 +57,8 @@ public:
         return Payload::rubyNil(mcctx.cs, mcctx.build);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::keepForIde(), core::Names::keepForTypechecking(), core::Names::keepForCfg()};
+        return {core::Names::keepForIde(), core::Names::keepForTypechecking(), core::Names::keepForCfg(),
+                core::Names::nilForSafeNavigation()};
     }
 } DoNothingIntrinsic;
 
