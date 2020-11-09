@@ -1333,6 +1333,12 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
                                             "subtype of `{}`",
                                             "let", tp.type->show(ctx), cur.type->show(ctx));
+                                if (!hasType(ctx, bind.bind.variable) && cur.type.isNilClass()) {
+                                    e.addErrorLine(core::Loc(ctx.file, bind.loc),
+                                                   "This may be caused by a known Sorbet limitation when `{}` is in "
+                                                   "use. See `{}` for more details.",
+                                                   "T.let", "https://github.com/sorbet/sorbet/issues/3482");
+                                }
                             }
                             tp = cur;
                         }
