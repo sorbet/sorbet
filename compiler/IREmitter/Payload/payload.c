@@ -27,15 +27,7 @@
 // This is for the enum definition for YARV instructions
 #include "insns.inc"
 
-// SORBET_ATTRIBUTE is for specifying attributes that are used for their effects
-// on llvm optimization. Usually this is for attributes like `alwaysinline`,
-// which will cause build failures in libruby as these functions will never
-// appear to be called.
-#ifdef SORBET_LLVM_PAYLOAD
 #define SORBET_ATTRIBUTE(...) __attribute__((__VA_ARGS__))
-#else
-#define SORBET_ATTRIBUTE(...) /* empty */
-#endif
 
 #define SORBET_INLINE SORBET_ATTRIBUTE(always_inline)
 
@@ -70,121 +62,13 @@ void sorbet_stopInDebugger() {
 // ****
 
 // use this undefined value when you have a variable that should _never_ escape to ruby.
+//
+// Note that we have `sorbet_rubyUndef` in the code payload, because the compiler
+// occasionally needs to construct undefined values.  We have this here to call out
+// the uses of `RUBY_Qundef` a little more noticeably.
 SORBET_INLINE
-VALUE sorbet_rubyUndef() {
+static VALUE sorbet_payload_rubyUndef() {
     return RUBY_Qundef;
-}
-
-SORBET_INLINE
-SORBET_ATTRIBUTE(pure)
-VALUE sorbet_rubyTopSelf() {
-    return GET_VM()->top_self;
-}
-
-SORBET_INLINE
-SORBET_ATTRIBUTE(pure)
-VALUE sorbet_rubyException() {
-    return rb_eException;
-}
-
-// ****
-// ****                       Operations on Arrays
-// ****
-
-SORBET_INLINE
-int sorbet_rubyArrayLen(VALUE array) {
-    return RARRAY_LEN(array);
-}
-
-SORBET_INLINE
-const VALUE *sorbet_rubyArrayInnerPtr(VALUE array) {
-    // there's also a transient version of this function if we ever decide to want more speed. transient stands for that
-    // we _should not_ allow to execute any code between getting these pointers and reading elements from
-    return RARRAY_CONST_PTR(array);
-}
-
-SORBET_INLINE
-VALUE sorbet_newRubyArray(long size) {
-    return rb_ary_new2(size);
-}
-
-SORBET_INLINE
-VALUE sorbet_newRubyArrayWithElems(long size, const VALUE *elems) {
-    return rb_ary_new4(size, elems);
-}
-
-SORBET_INLINE
-void sorbet_arrayPush(VALUE array, VALUE element) {
-    rb_ary_push(array, element);
-}
-
-// ****
-// ****                       Operations on Hashes
-// ****
-
-SORBET_INLINE
-VALUE sorbet_newRubyHash() {
-    return rb_hash_new();
-}
-
-SORBET_INLINE
-VALUE sorbet_hashBuild(int argc, const VALUE *argv) {
-    VALUE ret = rb_hash_new_with_size(argc / 2);
-    if (argc > 0) {
-        // We can use rb_hash_bulk_insert here because rb_hash_new_with_size freshly allocates.
-        // We have tried in the past to use rb_hash_bulk_insert after clearing an existing hash,
-        // and things broke wonderfully, because Ruby Hash objects are either backed by a small (<8 element)
-        // or large hash table implementation, and neither Hash#clear nor rb_hash_bulk_insert changes
-        // what kind of Hash object it is.
-        rb_hash_bulk_insert(argc, argv, ret);
-    }
-    return ret;
-}
-
-SORBET_INLINE
-VALUE sorbet_hashDup(VALUE hash) {
-    return rb_hash_dup(hash);
-}
-
-SORBET_INLINE
-void sorbet_hashStore(VALUE hash, VALUE key, VALUE value) {
-    rb_hash_aset(hash, key, value);
-}
-
-SORBET_INLINE
-VALUE sorbet_hashGet(VALUE hash, VALUE key) {
-    return rb_hash_aref(hash, key);
-}
-
-SORBET_INLINE
-void sorbet_hashUpdate(VALUE hash, VALUE other) {
-    // TODO(trevor) inline a definition of `merge!` here
-    rb_funcall(hash, rb_intern2("merge!", 6), 1, other);
-}
-
-// possible return values for `func`:
-//  - ST_CONTINUE, then the rest of the hash is processed as normal.
-//  - ST_STOP, then no further processing of the hash is done.
-//  - ST_DELETE, then the current hash key is deleted from the hash and the rest
-//  of the hash is processed
-//  - ST_CHECK, then the hash is checked to see if it has been modified during
-//  this operation. If so, processing of the hash stops.
-/*
-void sorbet_hashEach(VALUE hash, int(*func)(VALUE key, VALUE val,
-VALUE in), VALUE closure) { return rb_hash_foreach(hash, func, closure);
-}
-*/
-
-// ****
-// ****                       Variables
-// ****
-
-VALUE sorbet_globalVariableGet(ID name) {
-    return rb_gvar_get(rb_global_entry(name));
-}
-
-void sorbet_globalVariableSet(ID name, VALUE newValue) {
-    rb_gvar_set(rb_global_entry(name), newValue);
 }
 
 // ****
@@ -193,13 +77,6 @@ void sorbet_globalVariableSet(ID name, VALUE newValue) {
 
 VALUE sorbet_rb_cObject() {
     return rb_cObject;
-}
-
-VALUE sorbet_getMethodBlockAsProc() {
-    if (rb_block_given_p()) {
-        return rb_block_proc();
-    }
-    return Qnil;
 }
 
 // Trying to be a copy of rb_mod_const_get
@@ -302,38 +179,6 @@ void sorbet_setConstant(VALUE mod, const char *name, long nameLen, VALUE value) 
 // ****                       Calls
 // ****
 
-SORBET_INLINE
-VALUE sorbet_callBlock(VALUE array) {
-    // TODO: one day we should use rb_yield_values, as it saves an allocation, but
-    // for now, do the easy thing
-    return rb_yield_splat(array);
-}
-
-SORBET_INLINE
-VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat) {
-    // Mostly an implementation of return rb_call_super(argc, argv);
-    rb_execution_context_t *ec = GET_EC();
-    VALUE recv = ec->cfp->self;
-    VALUE klass;
-    ID id;
-    rb_control_frame_t *cfp = ec->cfp;
-    const rb_callable_method_entry_t *me = rb_vm_frame_method_entry(cfp);
-
-    klass = RCLASS_ORIGIN(me->defined_class);
-    klass = RCLASS_SUPER(klass);
-    id = me->def->original_id;
-    me = rb_callable_method_entry(klass, id);
-
-    if (!me) {
-        // TODO do something here
-        // return rb_method_missing(recv, id, argc, argv, MISSING_SUPER);
-        rb_raise(rb_eRuntimeError, "unimplemented super with a missing method");
-        return Qnil;
-    } else {
-        return rb_vm_call(ec, recv, id, argc, argv, me);
-    }
-}
-
 // defining a way to allocate storage for custom class:
 //      VALUE allocate(VALUE klass);
 //      rb_define_alloc_func(class, &allocate)
@@ -372,11 +217,6 @@ __attribute__((__noreturn__)) void sorbet_raiseExtraKeywords(VALUE hash) {
 __attribute__((__cold__)) VALUE sorbet_t_absurd(VALUE val) {
     VALUE t = rb_const_get(rb_cObject, rb_intern("T"));
     return rb_funcall(t, rb_intern("absurd"), 1, val);
-}
-
-void sorbet_checkStack() {
-    // This is actually pretty slow. We should probably use guard pages instead.
-    ruby_stack_check();
 }
 
 // ****
@@ -497,76 +337,19 @@ const VALUE sorbet_readRealpath() {
     return realpath;
 }
 
-// https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.h#L123
-#define GET_PREV_EP(ep) ((VALUE *)((ep)[VM_ENV_DATA_INDEX_SPECVAL] & ~0x03))
-
-// https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L2919-L2928
-static const VALUE *vm_get_ep(const VALUE *const reg_ep, rb_num_t lv) {
-    rb_num_t i;
-    const VALUE *ep = reg_ep;
-    for (i = 0; i < lv; i++) {
-        ep = GET_PREV_EP(ep);
-    }
-    return ep;
-}
-
-SORBET_INLINE
-static int computeLocalIndex(long baseOffset, long index) {
-    // Local offset calculation needs to take into account the fixed values that
-    // are present on the stack:
-    // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L1509
-    return baseOffset + index + VM_ENV_DATA_SIZE;
-}
-
-// Read a value from the locals from this stack frame.
-//
-// * localsOffset - Offset into the locals (for static-init)
-// * index - local var index
-// * level - the number of blocks that need to be crossed to reach the
-//           outer-most stack frame.
-SORBET_INLINE
-VALUE sorbet_readLocal(long localsOffset, long index, long level) {
-    int offset = computeLocalIndex(localsOffset, index);
-    return *(vm_get_ep(GET_EC()->cfp->ep, level) - offset);
-}
-
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L349-L359
 SORBET_ATTRIBUTE(noinline)
-static void vm_env_write_slowpath(const VALUE *ep, int index, VALUE v) {
+void sorbet_vm_env_write_slowpath(const VALUE *ep, int index, VALUE v) {
     /* remember env value forcely */
     rb_gc_writebarrier_remember(VM_ENV_ENVVAL(ep));
     VM_FORCE_WRITE(&ep[index], v);
     VM_ENV_FLAGS_UNSET(ep, VM_ENV_FLAG_WB_REQUIRED);
 }
 
-// https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L361-L371
-SORBET_INLINE
-static inline void vm_env_write(const VALUE *ep, int index, VALUE v) {
-    VALUE flags = ep[VM_ENV_DATA_INDEX_FLAGS];
-    if (LIKELY((flags & VM_ENV_FLAG_WB_REQUIRED) == 0)) {
-        VM_STACK_ENV_WRITE(ep, index, v);
-    } else {
-        vm_env_write_slowpath(ep, index, v);
-    }
-}
-
-// Write a value into the locals from this stack frame.
-//
-// * localsOffset - Offset into the locals (for static-init)
-// * index - local var index
-// * level - the number of blocks that need to be crossed to reach the
-//           outer-most stack frame.
-// * value - the value to write
-SORBET_INLINE
-void sorbet_writeLocal(long localsOffset, long index, long level, VALUE value) {
-    int offset = computeLocalIndex(localsOffset, index);
-    vm_env_write(vm_get_ep(GET_EC()->cfp->ep, level), -offset, value);
-}
-
 // This is an inlined version of c_stack_overflow(GET_EC(), TRUE).
 //
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L34-L48
-SORBET_ATTRIBUTE(__noreturn__, always_inline)
+SORBET_ATTRIBUTE(__noreturn__)
 static void sorbet_stackoverflow() {
     // visible, but not exported through a header
     extern VALUE rb_ec_backtrace_object(const rb_execution_context_t *);
@@ -656,85 +439,10 @@ void sorbet_setMethodStackFrame(rb_execution_context_t *ec, rb_control_frame_t *
     cfp->sp = sp + 1;
 }
 
-SORBET_INLINE
-const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isClassOrModuleStaticInit, int iseq_type,
-                                                   unsigned char *iseqchar) {
-    const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
-    rb_execution_context_t *ec = GET_EC();
-    rb_control_frame_t *cfp = ec->cfp;
-
-    // Depending on what kind of iseq we're switching to, we need to push a frame on the ruby stack.
-    if (iseq_type == ISEQ_TYPE_RESCUE || iseq_type == ISEQ_TYPE_ENSURE) {
-        sorbet_setExceptionStackFrame(ec, cfp, iseq);
-    } else if (!isClassOrModuleStaticInit) {
-        cfp->iseq = iseq;
-        VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
-
-        // For methods, allocate their locals on the ruby stack. This mirrors the implementation in vm_push_frame:
-        // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L214-L248
-        if (iseq_type == ISEQ_TYPE_METHOD) {
-            sorbet_setMethodStackFrame(ec, cfp, iseq);
-        }
-    }
-
-    return cfp;
-}
-
 extern void rb_vm_pop_frame(rb_execution_context_t *ec);
 
 void sorbet_popRubyStack() {
     rb_vm_pop_frame(GET_EC());
-}
-
-const VALUE **sorbet_getPc(rb_control_frame_t *cfp) {
-    return &cfp->pc;
-}
-
-const VALUE *sorbet_getIseqEncoded(rb_control_frame_t *cfp) {
-    return cfp->iseq->body->iseq_encoded;
-}
-
-void sorbet_setLineNumber(int offset, VALUE *iseq_encoded, VALUE **storeLocation) {
-    // use pos+1 because PC should point at the next instruction
-    (*storeLocation) = iseq_encoded + offset + 1;
-}
-
-VALUE sorbet_getKWArg(VALUE maybeHash, VALUE key) {
-    if (maybeHash == RUBY_Qundef) {
-        return RUBY_Qundef;
-    }
-
-    // TODO: ruby seems to do something smarter here:
-    //  https://github.com/ruby/ruby/blob/5aa0e6bee916f454ecf886252e1b025d824f7bd8/class.c#L1901
-    //
-    return rb_hash_delete_entry(maybeHash, key);
-}
-
-VALUE sorbet_assertNoExtraKWArg(VALUE maybeHash) {
-    if (maybeHash == RUBY_Qundef) {
-        return RUBY_Qundef;
-    }
-    if (RHASH_EMPTY_P(maybeHash)) {
-        return RUBY_Qundef;
-    }
-
-    sorbet_raiseExtraKeywords(maybeHash);
-}
-
-VALUE sorbet_readKWRestArgs(VALUE maybeHash) {
-    // This is similar to what the Ruby VM does:
-    // https://github.com/ruby/ruby/blob/37c2cd3fa47c709570e22ec4dac723ca211f423a/vm_args.c#L483-L487
-    if (maybeHash == RUBY_Qundef) {
-        return rb_hash_new();
-    }
-    return rb_hash_dup(maybeHash);
-}
-
-VALUE sorbet_readRestArgs(int maxPositionalArgCount, int actualArgCount, VALUE *argArray) {
-    if (maxPositionalArgCount >= actualArgCount) {
-        return rb_ary_new();
-    }
-    return rb_ary_new_from_values(actualArgCount - maxPositionalArgCount, argArray + maxPositionalArgCount);
 }
 
 // ****
@@ -747,84 +455,31 @@ _Bool sorbet_isa_Method(VALUE obj) __attribute__((const))  {
 }
 */
 
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_Proc(VALUE obj) {
-    return rb_obj_is_proc(obj) == Qtrue;
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_RootSingleton(VALUE obj) {
-    return obj == sorbet_rubyTopSelf();
-}
-
-SORBET_ATTRIBUTE(const) VALUE rb_obj_is_kind_of(VALUE, VALUE);
-SORBET_ATTRIBUTE(const) VALUE rb_class_inherited_p(VALUE, VALUE);
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa(VALUE obj, VALUE class) {
-    return rb_obj_is_kind_of(obj, class) == Qtrue;
-}
-
-SORBET_ATTRIBUTE(const)
-_Bool sorbet_isa_class_of(VALUE obj, VALUE class) {
-    return (obj == class) || (rb_obj_is_kind_of(obj, rb_cModule) && rb_class_inherited_p(obj, class));
-}
-
 // ****
 // ****                       Helpers for Intrinsics
 // ****
 
-void sorbet_ensure_arity(int argc, int expected) {
-    if (argc != expected) {
+void sorbet_ensure_arity_payload(int argc, int expected) {
+    if (UNLIKELY(argc != expected)) {
         sorbet_raiseArity(argc, expected, expected);
     }
-}
-
-VALUE sorbet_boolToRuby(_Bool b) {
-    if (b) {
-        return RUBY_Qtrue;
-    }
-    return RUBY_Qfalse;
 }
 
 // ****
 // ****                       Name Based Intrinsics
 // ****
 
-VALUE sorbet_buildHashIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                VALUE closure) {
-    return sorbet_hashBuild(argc, argv);
-}
-
-VALUE sorbet_buildArrayIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                 VALUE closure) {
-    if (argc == 0) {
-        return rb_ary_new();
-    }
-    return rb_ary_new_from_values(argc, argv);
-}
-
-VALUE sorbet_buildRangeIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                 VALUE closure) {
-    sorbet_ensure_arity(argc, 3);
-
-    VALUE start = argv[0];
-    VALUE end = argv[1];
-    VALUE excludeEnd = argv[2];
-    return rb_range_new(start, end, excludeEnd);
-}
-
 VALUE sorbet_splatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                             VALUE closure) {
-    sorbet_ensure_arity(argc, 3);
+    sorbet_ensure_arity_payload(argc, 3);
     VALUE arr = argv[0];
-    long len = sorbet_rubyArrayLen(arr);
+    long len = RARRAY_LEN(arr);
     int size = FIX2LONG(argv[1]) + FIX2LONG(argv[2]);
     int missing = size - len;
     if (missing > 0) {
         VALUE newArr = rb_ary_dup(arr);
         for (int i = 0; i < missing; i++) {
-            sorbet_arrayPush(newArr, RUBY_Qnil);
+            rb_ary_push(newArr, RUBY_Qnil);
         }
         return newArr;
     }
@@ -854,27 +509,6 @@ VALUE sorbet_definedIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const r
 // ****                       Symbol Intrinsics. See CallCMethod in SymbolIntrinsics.cc
 // ****
 
-// TODO: add many from https://github.com/ruby/ruby/blob/ruby_2_6/include/ruby/intern.h#L55
-VALUE sorbet_T_unsafe(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    return argv[0];
-}
-
-VALUE sorbet_T_must(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    if (UNLIKELY(argv[0] == Qnil)) {
-        rb_raise(rb_eTypeError, "Passed `nil` into T.must");
-    } else {
-        return argv[0];
-    }
-}
-
-VALUE sorbet_rb_array_len(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                          VALUE closure) {
-    sorbet_ensure_arity(argc, 0);
-    return LONG2FIX(rb_array_len(recv));
-}
-
 VALUE sorbet_rb_array_square_br_slowpath(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
                                          BlockFFIType blk, VALUE closure) {
     VALUE ary = recv;
@@ -896,68 +530,8 @@ VALUE sorbet_rb_array_square_br_slowpath(VALUE recv, ID fun, int argc, const VAL
     }
     return rb_ary_entry(ary, NUM2LONG(arg));
 }
-VALUE sorbet_rb_array_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                VALUE closure) {
-    VALUE ary = recv;
-    rb_check_arity(argc, 1, 2);
-    if (LIKELY(argc == 1)) {
-        VALUE arg = argv[0];
-        if (LIKELY(FIXNUM_P(arg))) {
-            return rb_ary_entry(ary, FIX2LONG(arg));
-        }
-    }
-    return sorbet_rb_array_square_br_slowpath(recv, fun, argc, argv, blk, closure);
-}
-
-// This is an adjusted version of the intrinsic from the ruby vm. The major change is that instead of handling the case
-// where a range is used as the key, we defer back to the VM.
-// https://github.com/ruby/ruby/blob/ruby_2_6/array.c#L1980-L2005
-VALUE sorbet_rb_array_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                   VALUE closure) {
-    long offset, beg, len;
-
-    if (UNLIKELY(argc == 3)) {
-        goto range;
-    }
-    rb_check_arity(argc, 2, 2);
-    rb_check_frozen(recv);
-    if (LIKELY(FIXNUM_P(argv[0]))) {
-        offset = FIX2LONG(argv[0]);
-        goto fixnum;
-    }
-    if (UNLIKELY(rb_range_beg_len(argv[0], &beg, &len, RARRAY_LEN(recv), 1))) {
-    range:
-        return rb_funcallv(recv, fun, argc, argv);
-    }
-    offset = NUM2LONG(argv[0]);
-fixnum:
-    rb_ary_store(recv, offset, argv[1]);
-    return argv[1];
-}
-
-VALUE sorbet_rb_array_empty(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                            VALUE closure) {
-    rb_check_arity(argc, 0, 0);
-    if (RARRAY_LEN(recv) == 0) {
-        return Qtrue;
-    }
-    return Qfalse;
-}
-
 VALUE sorbet_enumerator_size_func_array_length(VALUE array, VALUE args, VALUE eobj) {
     return RARRAY_LEN(array);
-}
-
-VALUE sorbet_rb_hash_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                               VALUE closure) {
-    rb_check_arity(argc, 1, 1);
-    return rb_hash_aref(recv, argv[0]);
-}
-
-VALUE sorbet_rb_hash_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                  VALUE closure) {
-    rb_check_arity(argc, 2, 2);
-    return rb_hash_aset(recv, argv[0], argv[1]);
 }
 
 VALUE sorbet_rb_int_plus_slowpath(VALUE recv, VALUE y) {
@@ -978,19 +552,6 @@ VALUE sorbet_rb_int_plus_slowpath(VALUE recv, VALUE y) {
     return rb_num_coerce_bin(recv, y, '+');
 }
 
-SORBET_INLINE
-VALUE sorbet_rb_int_plus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                         VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    VALUE y = argv[0];
-    if (LIKELY(FIXNUM_P(recv))) {
-        if (LIKELY(FIXNUM_P(y))) {
-            return rb_fix_plus_fix(recv, y);
-        }
-    }
-    return sorbet_rb_int_plus_slowpath(recv, y);
-}
-
 VALUE sorbet_rb_int_minus_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
         if (LIKELY(FIXNUM_P(y))) {
@@ -1008,36 +569,7 @@ VALUE sorbet_rb_int_minus_slowpath(VALUE recv, VALUE y) {
     return rb_num_coerce_bin(recv, y, '-');
 }
 
-SORBET_INLINE
-VALUE sorbet_rb_int_minus(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                          VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    // optimized version from numeric.c
-    VALUE y = argv[0];
-    if (LIKELY(FIXNUM_P(recv))) {
-        if (LIKELY(FIXNUM_P(y))) {
-            return rb_fix_minus_fix(recv, y);
-        }
-    }
-    return sorbet_rb_int_minus_slowpath(recv, y);
-}
-
-VALUE sorbet_rb_int_mul(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                        VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    return rb_int_mul(recv, argv[0]);
-}
-
-VALUE sorbet_rb_int_div(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                        VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    return rb_int_div(recv, argv[0]);
-}
-
-VALUE sorbet_rb_int_gt(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                       VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    VALUE y = argv[0];
+VALUE sorbet_rb_int_gt_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
         if (LIKELY(FIXNUM_P(y))) {
             if (FIX2LONG(recv) > FIX2LONG(y)) {
@@ -1073,79 +605,40 @@ VALUE sorbet_rb_int_lt_slowpath(VALUE recv, VALUE y) {
     return rb_num_coerce_relop(recv, y, '<');
 }
 
-SORBET_INLINE
-VALUE sorbet_rb_int_lt(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                       VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    VALUE y = argv[0];
+VALUE sorbet_rb_int_ge_slowpath(VALUE recv, VALUE y) {
     if (LIKELY(FIXNUM_P(recv))) {
         if (LIKELY(FIXNUM_P(y))) {
-            if (FIX2LONG(recv) < FIX2LONG(y)) {
+            if (FIX2LONG(recv) >= FIX2LONG(y)) {
                 return Qtrue;
             }
             return Qfalse;
+        } else if (RB_TYPE_P(y, T_BIGNUM)) {
+            return rb_big_cmp(y, recv) == INT2FIX(+1) ? Qfalse : Qtrue;
+        } else if (RB_TYPE_P(y, T_FLOAT)) {
+            return rb_integer_float_cmp(recv, y) == INT2FIX(-1) ? Qfalse : Qtrue;
         }
+    } else if (RB_TYPE_P(recv, T_BIGNUM)) {
+        return rb_big_ge(recv, y);
     }
-    return sorbet_rb_int_lt_slowpath(recv, y);
+    return rb_num_coerce_relop(recv, y, idGE);
 }
 
-VALUE sorbet_rb_int_ge(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                       VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    VALUE res = sorbet_rb_int_lt(recv, fun, argc, argv, blk, closure);
-    return res == Qtrue ? Qfalse : Qtrue;
-}
-
-VALUE sorbet_rb_int_le(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                       VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    VALUE res = sorbet_rb_int_gt(recv, fun, argc, argv, blk, closure);
-    return res == Qtrue ? Qfalse : Qtrue;
-}
-
-VALUE sorbet_rb_int_equal(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                          VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    return rb_int_equal(recv, argv[0]);
-}
-
-VALUE sorbet_rb_int_neq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                        VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    return sorbet_boolToRuby(rb_int_equal(recv, argv[0]) == RUBY_Qfalse);
-}
-
-VALUE sorbet_rb_int_to_s(VALUE x, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
-    int base;
-
-    rb_check_arity(argc, 0, 1);
-    if (argc == 1) {
-        base = NUM2INT(argv[0]);
-    } else {
-        base = 10;
-    }
-    if (LIKELY(FIXNUM_P(x))) {
-        return rb_fix2str(x, base);
-    }
-    if (RB_TYPE_P(x, T_BIGNUM)) {
-        return rb_big2str(x, base);
-    }
-
-    return rb_any_to_s(x);
-}
-
-VALUE sorbet_bang(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
-    // RTEST is false when the value is Qfalse or Qnil
-    if (RTEST(recv)) {
-        if (recv == Qtrue) {
+VALUE sorbet_rb_int_le_slowpath(VALUE recv, VALUE y) {
+    if (LIKELY(FIXNUM_P(recv))) {
+        if (LIKELY(FIXNUM_P(y))) {
+            if (FIX2LONG(recv) <= FIX2LONG(y)) {
+                return Qtrue;
+            }
             return Qfalse;
-        } else {
-            // slow path - dispatch via the VM
-            return rb_funcallv(recv, rb_intern("!"), argc, argv);
+        } else if (RB_TYPE_P(y, T_BIGNUM)) {
+            return rb_big_cmp(y, recv) == INT2FIX(-1) ? Qfalse : Qtrue;
+        } else if (RB_TYPE_P(y, T_FLOAT)) {
+            return rb_integer_float_cmp(recv, y) == INT2FIX(+1) ? Qfalse : Qtrue;
         }
-    } else {
-        return Qtrue;
+    } else if (RB_TYPE_P(recv, T_BIGNUM)) {
+        return rb_big_le(recv, y);
     }
+    return rb_num_coerce_relop(recv, y, idLE);
 }
 
 extern VALUE rb_obj_as_string_result(VALUE, VALUE);
@@ -1161,40 +654,6 @@ VALUE sorbet_stringInterpolate(VALUE recv, ID fun, int argc, VALUE *argv, BlockF
     }
 
     return rb_str_concat_literals(argc, argv);
-}
-
-VALUE sorbet_selfNew(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk, VALUE closure) {
-    rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
-    VALUE obj = argv[0];
-    return rb_funcallv(obj, rb_intern("new"), argc - 1, argv + 1);
-}
-
-VALUE sorbet_int_bool_true(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                           VALUE closure) {
-    return Qtrue;
-}
-
-VALUE sorbet_int_bool_false(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                            VALUE closure) {
-    return Qfalse;
-}
-
-VALUE sorbet_int_bool_and(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                          VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    if (argv[0] != Qnil && argv[0] != Qfalse) {
-        return Qtrue;
-    }
-    return Qfalse;
-}
-
-VALUE sorbet_int_bool_nand(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                           VALUE closure) {
-    sorbet_ensure_arity(argc, 1);
-    if (argv[0] != Qnil && argv[0] != Qfalse) {
-        return Qfalse;
-    }
-    return Qtrue;
 }
 
 // ****
@@ -1223,8 +682,7 @@ struct FunctionInlineCache {
     rb_serial_t class_serial;
 };
 
-// Marked `static inline` because this is expected to only exist in the ruby vm
-static inline void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache, ID mid) {
+void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache, ID mid) {
     // cargo cult https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_eval.c#L289
     const rb_callable_method_entry_t *me;
     me = rb_callable_method_entry(CLASS_OF(recv), mid);
@@ -1249,130 +707,11 @@ VALUE sorbet_callFuncWithCache(VALUE recv, ID func, int argc,
     return rb_vm_call(GET_EC(), recv, func, argc, argv, cache->me);
 }
 
-SORBET_INLINE
-VALUE sorbet_callFuncProcWithCache(VALUE recv, ID func, int argc,
-                                   SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-                                   VALUE proc, struct FunctionInlineCache *cache) {
-    if (!NIL_P(proc)) {
-        // this is an inlined version of vm_passed_block_handler_set(GET_EC(), proc);
-        vm_block_handler_verify(proc);
-        GET_EC()->passed_block_handler = proc;
-    }
-
-    return sorbet_callFuncWithCache(recv, func, argc, argv, kw_splat, cache);
-}
-
-struct sorbet_iterMethodArg {
-    VALUE recv;
-    ID func;
-    int argc;
-    const VALUE *argv;
-    int kw_splat;
-    struct FunctionInlineCache *cache;
-};
-
-// This function doesn't benefit from inlining, as it's always indirectly used through rb_iterate. In the future, if we
-// end up with an inlined version of rb_iterate, it would be good to inline this.
-static VALUE sorbet_iterMethod(VALUE obj) {
-    struct sorbet_iterMethodArg *arg = (struct sorbet_iterMethodArg *)obj;
-    return sorbet_callFuncWithCache(arg->recv, arg->func, arg->argc, arg->argv, arg->kw_splat, arg->cache);
-}
-
-SORBET_INLINE
-VALUE sorbet_callFuncBlockWithCache(VALUE recv, ID func, int argc,
-                                    SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-                                    BlockFFIType blockImpl, VALUE closure, struct FunctionInlineCache *cache) {
-    struct sorbet_iterMethodArg arg;
-    arg.recv = recv;
-    arg.func = func;
-    arg.argc = argc;
-    arg.argv = argv;
-    arg.kw_splat = kw_splat;
-    arg.cache = cache;
-
-    return rb_iterate(sorbet_iterMethod, (VALUE)&arg, blockImpl, closure);
-}
-
 // ****
 // ****                       Exceptions
 // ****
 
-VALUE sorbet_getTRetry() {
-    return sorbet_getConstant("T::Private::Retry::RETRY", 24);
-}
-
-struct ExceptionClosure {
-    ExceptionFFIType body;
-    VALUE **pc;
-    VALUE *iseq_encoded;
-    VALUE methodClosure;
-    VALUE *returnValue;
-};
-
-static VALUE sorbet_applyExceptionClosure(VALUE arg) {
-    struct ExceptionClosure *closure = (struct ExceptionClosure *)arg;
-    VALUE res = closure->body(closure->pc, closure->iseq_encoded, closure->methodClosure);
-    if (res != sorbet_rubyUndef()) {
-        *closure->returnValue = res;
-    }
-    return sorbet_rubyUndef();
-}
-
-static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr) {
-    VALUE *exceptionValue = (VALUE *)exceptionValuePtr;
-
-    // fetch the last exception, and store it in the dest var passed in;
-    *exceptionValue = rb_errinfo();
-
-    return sorbet_rubyUndef();
-}
-
-extern void rb_set_errinfo(VALUE);
-
-// Run a function with a closure, and populate an exceptionValue pointer if an exception is raised.
-VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE methodClosure, VALUE exceptionContext,
-                 VALUE *exceptionValue) {
-    VALUE returnValue = sorbet_rubyUndef();
-
-    struct ExceptionClosure closure;
-    closure.body = body;
-    closure.pc = pc;
-    closure.iseq_encoded = iseq_encoded;
-    closure.methodClosure = methodClosure;
-    closure.returnValue = &returnValue;
-
-    *exceptionValue = RUBY_Qnil;
-
-    // Restore the exception context. When running the body of a begin/end the
-    // value of exceptionContext is nil, indicating that no exception is being
-    // handled by this function. However, when the rescue function is being run,
-    // the exception value will be non-nil, ensuring that the exception state
-    // is restored in the context of the rescue function.
-    if (exceptionContext != RUBY_Qnil) {
-        rb_set_errinfo(exceptionContext);
-    }
-
-    rb_rescue2(sorbet_applyExceptionClosure, (VALUE)(&closure), sorbet_rescueStoreException, (VALUE)exceptionValue,
-               rb_eException, 0);
-
-    return returnValue;
-}
-
-__attribute__((__noreturn__)) VALUE sorbet_block_break(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
-                                                       BlockFFIType blk, VALUE closure) {
-    rb_iter_break_value(argv[0]);
-}
-
-// Raise the exception value, unless it's nil.
-void sorbet_raiseIfNotNil(VALUE exception) {
-    if (exception == RUBY_Qnil) {
-        return;
-    }
-
-    rb_exc_raise(exception);
-}
-
 // This is a function that can be used in place of any exception function, and does nothing except for return nil.
 VALUE sorbet_blockReturnUndef(VALUE **pc, VALUE *iseq_encoded, VALUE closure) {
-    return sorbet_rubyUndef();
+    return sorbet_payload_rubyUndef();
 }
