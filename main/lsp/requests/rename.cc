@@ -46,41 +46,37 @@ string replaceLastDotted(string_view input, string_view originalName, string_vie
 }
 
 // Checks if s is a subclass of root, and updates isSubclass, visited, and subclasses vectors.
-bool updateSubclass(const core::GlobalState &gs, core::SymbolRef root, core::SymbolRef s, vector<bool> &isSubclass,
-                    vector<bool> &visited, vector<core::SymbolRef> &subclasses) {
+bool isSubclass(const core::GlobalState &gs, core::SymbolRef root, core::SymbolRef s, vector<bool> &memoized,
+                vector<bool> &visited) {
     // don't visit the same class twice
     if (visited[s.classOrModuleIndex()] == true) {
-        return isSubclass[s.classOrModuleIndex()];
+        return memoized[s.classOrModuleIndex()];
     }
     visited[s.classOrModuleIndex()] = true;
 
-    // s is a subclass of root if it's equal to root, or if its parent is a subclass of root
-    if (s == root) {
-        subclasses.emplace_back(s);
-        isSubclass[s.classOrModuleIndex()] = true;
-        return true;
-    }
     auto super = s.data(gs)->superClass();
     if (super.exists()) {
-        if (updateSubclass(gs, root, super, isSubclass, visited, subclasses)) {
-            subclasses.emplace_back(s);
-            isSubclass[super.classOrModuleIndex()] = true;
-            return true;
-        }
+        memoized[s.classOrModuleIndex()] = isSubclass(gs, root, super, memoized, visited);
+    } else {
+        memoized[s.classOrModuleIndex()] = false;
     }
-    isSubclass[s.classOrModuleIndex()] = false;
-    return false;
+    return memoized[s.classOrModuleIndex()];
 }
 
 // Returns all subclasses of root (including root)
 vector<core::SymbolRef> getSubclasses(LSPTypecheckerDelegate &typechecker, core::SymbolRef root) {
     const core::GlobalState &gs = typechecker.state();
-    vector<bool> isSubclass(gs.classAndModulesUsed());
+    vector<bool> memoized(gs.classAndModulesUsed());
     vector<bool> visited(gs.classAndModulesUsed());
+    memoized[root.classOrModuleIndex()] = true;
+    visited[root.classOrModuleIndex()] = true;
+
     vector<core::SymbolRef> subclasses;
     for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
         auto s = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
-        updateSubclass(gs, root, s, isSubclass, visited, subclasses);
+        if (isSubclass(gs, root, s, memoized, visited)) {
+            subclasses.emplace_back(s);
+        }
     }
     return subclasses;
 }
