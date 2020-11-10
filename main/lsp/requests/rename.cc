@@ -38,37 +38,37 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
 
 // Replaces originalName with newName in the last dotted component if the string is of the form x.y.z; otherwise does a
 // simple ReplaceAll.
-std::string replaceLastDotted(std::string_view input, std::string_view originalName, std::string_view newName) {
-    if (absl::StrContains(input, ".")) {
-        std::vector<std::string> dotted = absl::StrSplit(input, ".");
-        // TODO: check for exactly one match
-        dotted[dotted.size() - 1] = absl::StrReplaceAll(dotted[dotted.size() - 1], {{originalName, newName}});
-        return absl::StrJoin(dotted, ".");
-    }
-    return absl::StrReplaceAll(input, {{originalName, newName}});
+string replaceLastDotted(string_view input, string_view originalName, string_view newName) {
+    vector<string> dotted = absl::StrSplit(input, ".");
+    // TODO: check for exactly one match
+    dotted[dotted.size() - 1] = absl::StrReplaceAll(dotted[dotted.size() - 1], {{originalName, newName}});
+    return absl::StrJoin(dotted, ".");
 }
 
 // Checks if s is a subclass of root, and updates isSubclass, visited, and subclasses vectors.
 bool updateSubclass(const core::GlobalState &gs, core::SymbolRef root, core::SymbolRef s, vector<bool> &isSubclass,
                     vector<bool> &visited, vector<core::SymbolRef> &subclasses) {
-    if (visited[s.rawId()] == true) {
-        return isSubclass[s.rawId()];
+    // don't visit the same class twice
+    if (visited[s.classOrModuleIndex()] == true) {
+        return isSubclass[s.classOrModuleIndex()];
     }
-    visited[s.rawId()] = true;
-    if (s.rawId() == root.rawId()) {
-        subclasses.push_back(s);
-        isSubclass[s.rawId()] = true;
+    visited[s.classOrModuleIndex()] = true;
+
+    // s is a subclass of root if it's equal to root, or if its parent is a subclass of root
+    if (s == root) {
+        subclasses.emplace_back(s);
+        isSubclass[s.classOrModuleIndex()] = true;
         return true;
     }
     auto super = s.data(gs)->superClass();
     if (super.exists()) {
         if (updateSubclass(gs, root, super, isSubclass, visited, subclasses)) {
-            subclasses.push_back(s);
-            isSubclass[super.rawId()] = true;
+            subclasses.emplace_back(s);
+            isSubclass[super.classOrModuleIndex()] = true;
             return true;
         }
     }
-    isSubclass[s.rawId()] = false;
+    isSubclass[s.classOrModuleIndex()] = false;
     return false;
 }
 
@@ -85,14 +85,15 @@ vector<core::SymbolRef> getSubclasses(LSPTypecheckerDelegate &typechecker, core:
     return subclasses;
 }
 
-// Follow superClass links to find the root of a class hierarchy.
-core::SymbolRef findRootSuperclass(const core::GlobalState &gs, core::SymbolRef klass) {
+// Follow superClass links until we find the highest class that contains the given method. In other words we find the
+// "root" of the tree of classes that define a method.
+core::SymbolRef findRootClassWithMethod(const core::GlobalState &gs, core::SymbolRef klass, core::NameRef methodName) {
     auto root = klass;
+    ENFORCE(klass.data(gs)->isClassOrModule());
     while (true) {
         auto tmp = root.data(gs)->superClass();
-        ENFORCE(tmp.exists()); // everything derives from Kernel::Object
-        // TODO is there a better way to do this check for the base object class?
-        if (!tmp.exists() || tmp.data(gs)->show(gs) == "Object") {
+        ENFORCE(tmp.exists()); // everything derives from Kernel::Object so we can't ever reach the actual top type
+        if (!tmp.exists() || !(tmp.data(gs)->findMember(gs, methodName).exists())) {
             break;
         }
         root = tmp;
@@ -102,36 +103,97 @@ core::SymbolRef findRootSuperclass(const core::GlobalState &gs, core::SymbolRef 
 
 } // namespace
 
+class Renamer {
+public:
+    Renamer(const string_view oldName, const string_view newName) : oldName(oldName), newName(newName) {}
+    virtual ~Renamer() = default;
+    virtual void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) = 0;
+    unique_ptr<WorkspaceEdit> buildEdit();
+
+protected:
+    string_view oldName;
+    string_view newName;
+    UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
+};
+
+unique_ptr<WorkspaceEdit> Renamer::buildEdit() {
+    auto we = make_unique<WorkspaceEdit>();
+    vector<unique_ptr<TextDocumentEdit>> textDocEdits;
+    for (auto &item : edits) {
+        // TODO: Version.
+        textDocEdits.push_back(make_unique<TextDocumentEdit>(
+            make_unique<VersionedTextDocumentIdentifier>(item.first, JSONNullObject()), move(item.second)));
+    }
+    we->documentChanges = move(textDocEdits);
+    return we;
+}
+
+class MethodRenamer : public Renamer {
+public:
+    MethodRenamer(const string_view oldName, const string_view newName) : Renamer(oldName, newName) {}
+    ~MethodRenamer() {}
+    void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref);
+};
+
+void MethodRenamer::rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) {
+    auto loc = location->range->toLoc(gs, fref);
+    auto source = loc.source(gs);
+    auto newsrc = replaceLastDotted(source, oldName, newName);
+    edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+}
+class ConstRenamer : public Renamer {
+public:
+    ConstRenamer(const string_view oldName, const string_view newName) : Renamer(oldName, newName) {}
+    ~ConstRenamer() {}
+    void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref);
+};
+
+void ConstRenamer::rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) {
+    auto loc = location->range->toLoc(gs, fref);
+    auto source = loc.source(gs);
+    vector<string> strs = absl::StrSplit(source, "::");
+    strs[strs.size() - 1] = string(newName);
+    auto newsrc = absl::StrJoin(strs, "::");
+    edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+}
+
 variant<JSONNullObject, unique_ptr<WorkspaceEdit>>
-RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string_view newName) {
+RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, string_view newName) {
     const core::GlobalState &gs = typechecker.state();
     auto symbolData = symbol.data(gs);
     auto originalName = symbolData->name.show(gs);
     auto we = make_unique<WorkspaceEdit>();
+    unique_ptr<Renamer> renamer;
 
     vector<core::SymbolRef> symbolsToRename;
     if (symbolData->isMethod()) {
+        renamer = make_unique<MethodRenamer>(originalName, newName);
         // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
         // then find the full tree; then look for methods with the same name as ours; then find all references to all
         // those methods and rename them.
         auto symbolClass = symbolData->enclosingClass(gs);
-        auto root = findRootSuperclass(gs, symbolClass);
+
+        // We have to be careful to follow superclass links only as long as we find a method that `symbol` overrides.
+        // Otherwise we will find unrelated methods and rename them even though they don't need to be (see the
+        // method_class_hierarchy test case for an example).
+        auto root = findRootClassWithMethod(gs, symbolClass, symbolData->name);
+
         auto subclasses = getSubclasses(typechecker, root);
 
         // find the target method definition in each subclass
         for (auto c : subclasses) {
             auto classSymbol = c.data(gs);
-            auto member = classSymbol->findMember(gs, symbol.data(gs)->name);
+            auto member = classSymbol->findMember(gs, symbolData->name);
             if (member.exists()) {
                 symbolsToRename.push_back(member);
             }
         }
     } else {
+        renamer = make_unique<ConstRenamer>(originalName, newName);
         symbolsToRename.push_back(symbol);
     }
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
 
-    // TODO is it possible to do one query with many symbols, and would that be faster?
     for (auto sym : symbolsToRename) {
         vector<unique_ptr<Location>> references = getReferencesToSymbol(typechecker, sym);
 
@@ -143,31 +205,10 @@ RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef 
                 return JSONNullObject();
             }
 
-            auto loc = location->range->toLoc(gs, fref);
-            auto source = loc.source(gs);
-
-            if (absl::StrContains(source, "::")) {
-                std::vector<std::string> strs = absl::StrSplit(source, "::");
-
-                strs[strs.size() - 1] = replaceLastDotted(strs[strs.size() - 1], originalName, newName);
-
-                auto newsrc = absl::StrJoin(strs, "::");
-                edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
-            } else {
-                auto newsrc = replaceLastDotted(source, originalName, newName);
-                edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
-            }
+            renamer->rename(gs, location, fref);
         }
     }
-    vector<unique_ptr<TextDocumentEdit>> textDocEdits;
-    for (auto &item : edits) {
-        // TODO: Version.
-        textDocEdits.push_back(make_unique<TextDocumentEdit>(
-            make_unique<VersionedTextDocumentIdentifier>(item.first, JSONNullObject()), move(item.second)));
-    }
-    we->documentChanges = move(textDocEdits);
-
-    return we;
+    return renamer->buildEdit();
 }
 
 RenameTask::RenameTask(const LSPConfiguration &config, MessageId id, unique_ptr<RenameParams> params)
