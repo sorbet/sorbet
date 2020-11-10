@@ -1,8 +1,8 @@
 #!/bin/bash
 set -eu
 
-main/sorbet --silence-dev-message --stop-after namer --autogen-version=2 \
-  -p autogen:autogen.txt -p autogen-msgpack:autogen.msgpack \
+main/sorbet --silence-dev-message --stop-after namer --stripe-packages \
+  -p autogen:autogen.txt \
   test/cli/print_to_file/*.rb
 
 echo "--- autogen.txt start ---"
