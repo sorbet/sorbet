@@ -39,6 +39,9 @@
 #include <csignal>
 #include <poll.h>
 
+
+#include "absl/strings/str_replace.h"
+
 namespace spd = spdlog;
 
 using namespace std;
@@ -215,6 +218,23 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                 ++n;
                 auto &tree = indexed[idx];
+                if (tree.file.data(gs).isPackage()) {
+                    autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, "who cares", tree.tree);
+                    // gs.tracer().error("Can we look up the package somehow?");
+                    // auto insSeq = ast::cast_tree<ast::InsSeq>(tree.tree);
+                    // auto rootClass = ast::cast_tree<ast::ClassDef>(insSeq->stats.front());
+                    // auto rootSeq = ast::cast_tree<ast::InsSeq>(rootClass->rhs.front());
+                    // auto actualClass = ast::cast_tree<ast::ClassDef>(rootSeq->stats.front());
+                    // auto name = ast::cast_tree<ast::ConstantLit>(actualClass->name);
+
+                    // auto nameStr = name->symbol.show(gs);
+                    // // constexpr string_view packageNameSuffix = "_Package"sv;
+                    // auto pkgName = gs.lookupNameConstant(fmt::format("{}_Package", absl::StrReplaceAll(nameStr, {{"::", "_"}})));
+                    // auto package = core::Symbols::PackageRegistry().data(gs)->findMemberNoDealias(gs, pkgName);
+                    // for (auto [n, _] : package.data(gs)->members()) {
+                    //     gs.tracer().error("  Package contains: {}", n.toString(gs));
+                    // }
+                }
                 if (tree.file.data(gs).isRBI() || tree.file.data(gs).isPackage()) {
                     continue;
                 }

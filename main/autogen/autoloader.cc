@@ -7,6 +7,8 @@
 #include "core/GlobalState.h"
 #include "core/Names.h"
 
+#include "absl/strings/str_replace.h"
+
 using namespace std;
 namespace sorbet::autogen {
 
@@ -410,6 +412,48 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
             write(gs, alCfg, subdir, toDelete, *child);
         }
     }
+}
+
+
+void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path, const ast::TreePtr &pkgTree) {
+    // extract the name of this package from the file
+    auto insSeq = ast::cast_tree<ast::InsSeq>(pkgTree);
+    if (!insSeq) {
+        return;
+    }
+
+    auto rootClass = ast::cast_tree<ast::ClassDef>(insSeq->stats.front());
+    if (!rootClass) {
+        return;
+    }
+
+    auto rootSeq = ast::cast_tree<ast::InsSeq>(rootClass->rhs.front());
+    if (!rootSeq) {
+        return;
+    }
+
+    auto actualClass = ast::cast_tree<ast::ClassDef>(rootSeq->stats.front());
+    if (!actualClass) {
+        return;
+    }
+
+    auto name = ast::cast_tree<ast::ConstantLit>(actualClass->name);
+
+    // find the mangled name
+    auto nameStr = name->symbol.show(gs);
+    auto pkgName = gs.lookupNameConstant(fmt::format("{}_Package", absl::StrReplaceAll(nameStr, {{"::", "_"}})));
+    // find the package from the registry
+    auto package = core::Symbols::PackageRegistry().data(gs)->findMemberNoDealias(gs, pkgName);
+
+    // grab all the defined members
+    for (auto [n, sym] : package.data(gs)->members()) {
+        if (sym.data(gs)->isClassOrModule() && sym.data(gs)->isSingletonClass(gs)) {
+            continue;
+        }
+
+        gs.tracer().error("Package contains {} in {}", n.toString(gs), sym.data(gs)->loc().file().data(gs).path());
+    }
+    gs.tracer().error("Writing to {}", path);
 }
 
 } // namespace sorbet::autogen

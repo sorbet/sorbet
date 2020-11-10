@@ -123,6 +123,8 @@ public:
     static void writeAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
                                const DefTree &root);
 
+    static void writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path, const ast::TreePtr &pkgTree);
+
 private:
     static void write(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
                       UnorderedSet<std::string> &toDelete, const DefTree &node);
