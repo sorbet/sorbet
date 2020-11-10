@@ -156,10 +156,23 @@ private:
         const TypeAliasResolutionItem &operator=(const TypeAliasResolutionItem &) = delete;
     };
 
+    struct ClassMethodsResolutionItem {
+        core::FileRef file;
+        core::SymbolRef owner;
+        ast::Send *send;
+
+        ClassMethodsResolutionItem(ClassMethodsResolutionItem &&) noexcept = default;
+        ClassMethodsResolutionItem &operator=(ClassMethodsResolutionItem &&rhs) noexcept = default;
+
+        ClassMethodsResolutionItem(const ClassMethodsResolutionItem &) = delete;
+        const ClassMethodsResolutionItem &operator=(const ClassMethodsResolutionItem &) = delete;
+    };
+
     vector<ResolutionItem> todo_;
     vector<AncestorResolutionItem> todoAncestors_;
     vector<ClassAliasResolutionItem> todoClassAliases_;
     vector<TypeAliasResolutionItem> todoTypeAliases_;
+    vector<ClassMethodsResolutionItem> todoClassMethods_;
 
     static core::SymbolRef resolveLhs(core::Context ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
@@ -513,6 +526,56 @@ private:
         return true;
     }
 
+    static void resolveClassMethodsJob(core::GlobalState &gs, const ClassMethodsResolutionItem &todo) {
+        auto owner = todo.owner;
+        auto send = todo.send;
+        if (!owner.data(gs)->isClassOrModule() || !owner.data(gs)->isClassOrModuleModule()) {
+            if (auto e =
+                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.data(gs)->show(gs));
+            }
+            // Keep processing it anyways
+        }
+
+        if (send->args.size() != 1) {
+            // The arity mismatch error will be emitted later by infer.
+            return;
+        }
+        auto &front = send->args.front();
+        auto *id = ast::cast_tree<ast::ConstantLit>(front);
+        if (id == nullptr || !id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
+            if (auto e =
+                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.data(gs)->show(gs));
+            }
+            return;
+        }
+        if (id->symbol.data(gs)->isClassOrModuleClass()) {
+            if (auto e =
+                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("`{}` is a class, not a module; Only modules may be mixins", id->symbol.data(gs)->show(gs));
+            }
+            return;
+        }
+        if (id->symbol == owner) {
+            if (auto e =
+                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Must not pass your self to `{}`", send->fun.data(gs)->show(gs));
+            }
+            return;
+        }
+        auto existing = owner.data(gs)->findMember(gs, core::Names::classMethods());
+        if (existing.exists() && existing != id->symbol) {
+            if (auto e =
+                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send->fun.data(gs)->show(gs),
+                            existing.data(gs)->show(gs), id->symbol.data(gs)->show(gs));
+            }
+            return;
+        }
+        owner.data(gs)->members()[core::Names::classMethods()] = id->symbol;
+    }
+
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
         ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
         auto ancestorSym = job.ancestor->symbol.data(ctx)->dealias(ctx);
@@ -667,6 +730,15 @@ public:
         return tree;
     }
 
+    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
+        if (send.recv.isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
+            auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
+            this->todoClassMethods_.emplace_back(move(item));
+        }
+        return tree;
+    }
+
     static bool compareLocs(const core::GlobalState &gs, core::Loc lhs, core::Loc rhs) {
         core::StrictLevel left = core::StrictLevel::Strong;
         core::StrictLevel right = core::StrictLevel::Strong;
@@ -705,6 +777,7 @@ public:
         vector<AncestorResolutionItem> todoAncestors_;
         vector<ClassAliasResolutionItem> todoClassAliases_;
         vector<TypeAliasResolutionItem> todoTypeAliases_;
+        vector<ClassMethodsResolutionItem> todoClassMethods_;
         vector<ast::ParsedFile> trees;
     };
 
@@ -747,8 +820,11 @@ public:
                 }
             }
             if (!partiallyResolvedTrees.empty()) {
-                ResolveWalkResult result{move(constants.todo_), move(constants.todoAncestors_),
-                                         move(constants.todoClassAliases_), move(constants.todoTypeAliases_),
+                ResolveWalkResult result{move(constants.todo_),
+                                         move(constants.todoAncestors_),
+                                         move(constants.todoClassAliases_),
+                                         move(constants.todoTypeAliases_),
+                                         move(constants.todoClassMethods_),
                                          move(partiallyResolvedTrees)};
                 auto computedTreesCount = result.trees.size();
                 resultq->push(move(result), computedTreesCount);
@@ -759,6 +835,7 @@ public:
         vector<AncestorResolutionItem> todoAncestors;
         vector<ClassAliasResolutionItem> todoClassAliases;
         vector<TypeAliasResolutionItem> todoTypeAliases;
+        vector<ClassMethodsResolutionItem> todoClassMethods;
 
         {
             ResolveWalkResult threadResult;
@@ -776,6 +853,9 @@ public:
                     todoTypeAliases.insert(todoTypeAliases.end(),
                                            make_move_iterator(threadResult.todoTypeAliases_.begin()),
                                            make_move_iterator(threadResult.todoTypeAliases_.end()));
+                    todoClassMethods.insert(todoClassMethods.end(),
+                                            make_move_iterator(threadResult.todoClassMethods_.begin()),
+                                            make_move_iterator(threadResult.todoClassMethods_.end()));
                     trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
                                  make_move_iterator(threadResult.trees.end()));
                 }
@@ -793,6 +873,9 @@ public:
         });
         fast_sort(todoTypeAliases, [](const auto &lhs, const auto &rhs) -> bool {
             return locCompare(core::Loc(lhs.file, (*lhs.rhs).loc()), core::Loc(rhs.file, (*rhs.rhs).loc()));
+        });
+        fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool {
+            return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
         });
         fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool {
             return locCompare(core::Loc(lhs.file, lhs.tree.loc()), core::Loc(rhs.file, rhs.tree.loc()));
@@ -866,6 +949,15 @@ public:
                 categoryCounterAdd("resolve.constants.typealiases", "retry", origSize - todoTypeAliases.size());
             }
         }
+
+        {
+            Timer timeit(gs.tracer(), "resolver.mixes_in_class_methods");
+            for (auto &todo : todoClassMethods) {
+                resolveClassMethodsJob(gs, todo);
+            }
+            todoClassMethods.clear();
+        }
+
         // We can no longer resolve new constants. All the code below reports errors
 
         categoryCounterAdd("resolve.constants.nonancestor", "failure", todo.size());
@@ -2257,62 +2349,6 @@ public:
     }
 };
 
-class ResolveMixesInClassMethodsWalk {
-    void processMixesInClassMethods(core::MutableContext ctx, ast::Send &send) {
-        if (!ctx.owner.data(ctx)->isClassOrModule() || !ctx.owner.data(ctx)->isClassOrModuleModule()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` can only be declared inside a module, not a class", send.fun.data(ctx)->show(ctx));
-            }
-            // Keep processing it anyways
-        }
-
-        if (send.args.size() != 1) {
-            // The arity mismatch error will be emitted later by infer.
-            return;
-        }
-        auto &front = send.args.front();
-        auto *id = ast::cast_tree<ast::ConstantLit>(front);
-        if (id == nullptr || !id->symbol.exists() || !id->symbol.data(ctx)->isClassOrModule()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Argument to `{}` must be statically resolvable to a module",
-                            send.fun.data(ctx)->show(ctx));
-            }
-            return;
-        }
-        if (id->symbol.data(ctx)->isClassOrModuleClass()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
-                            id->symbol.data(ctx)->show(ctx));
-            }
-            return;
-        }
-        if (id->symbol == ctx.owner) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Must not pass your self to `{}`", send.fun.data(ctx)->show(ctx));
-            }
-            return;
-        }
-        auto existing = ctx.owner.data(ctx)->findMember(ctx, core::Names::classMethods());
-        if (existing.exists() && existing != id->symbol) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send.fun.data(ctx)->show(ctx),
-                            existing.data(ctx)->show(ctx), id->symbol.data(ctx)->show(ctx));
-            }
-            return;
-        }
-        ctx.owner.data(ctx)->members()[core::Names::classMethods()] = id->symbol;
-    }
-
-public:
-    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.recv.isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
-            processMixesInClassMethods(ctx, send);
-        }
-        return tree;
-    }
-};
-
 class ResolveSanityCheckWalk {
 public:
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
@@ -2360,11 +2396,6 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-    auto result = resolveMixesInClassMethods(gs, std::move(trees));
-    if (!result.hasResult()) {
-        return result;
-    }
-    trees = move(result.result());
     finalizeSymbols(gs);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
@@ -2382,7 +2413,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
         }
     }
 
-    result = resolveSigs(gs, std::move(trees));
+    auto result = resolveSigs(gs, std::move(trees));
     if (!result.hasResult()) {
         return result;
     }
@@ -2409,23 +2440,6 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     return trees;
 }
 
-ast::ParsedFilesOrCancelled Resolver::resolveMixesInClassMethods(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
-    ResolveMixesInClassMethodsWalk mixesInClassMethods;
-    const auto &epochManager = gs.epochManager;
-    Timer timeit(gs.tracer(), "resolver.mixes_in_class_methods");
-    u4 count = 0;
-    for (auto &tree : trees) {
-        count++;
-        // Don't check every turn of the loop. We want to be responsive to cancelation without harming throughput.
-        if (count % 250 == 0 && epochManager->wasTypecheckingCanceled()) {
-            return ast::ParsedFilesOrCancelled();
-        }
-        core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
-        tree.tree = ast::TreeMap::apply(ctx, mixesInClassMethods, std::move(tree.tree));
-    }
-    return trees;
-}
-
 void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
     if (debug_mode) {
         Timer timeit(gs.tracer(), "resolver.sanity_check");
@@ -2440,14 +2454,9 @@ void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees
 ast::ParsedFilesOrCancelled Resolver::runTreePasses(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
     auto workers = WorkerPool::create(0, gs.tracer());
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
-    auto result = resolveMixesInClassMethods(gs, std::move(trees));
-    if (!result.hasResult()) {
-        return result;
-    }
-    trees = move(result.result());
     computeLinearization(gs);
     trees = ResolveTypeMembersWalk::run(gs, std::move(trees));
-    result = resolveSigs(gs, std::move(trees));
+    auto result = resolveSigs(gs, std::move(trees));
     if (!result.hasResult()) {
         return result;
     }
