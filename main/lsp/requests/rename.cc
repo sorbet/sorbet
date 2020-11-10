@@ -158,7 +158,6 @@ RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef 
     const core::GlobalState &gs = typechecker.state();
     auto symbolData = symbol.data(gs);
     auto originalName = symbolData->name.show(gs);
-    auto we = make_unique<WorkspaceEdit>();
     unique_ptr<Renamer> renamer;
 
     vector<core::SymbolRef> symbolsToRename;
@@ -188,7 +187,6 @@ RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef 
         renamer = make_unique<ConstRenamer>(originalName, newName);
         symbolsToRename.push_back(symbol);
     }
-    UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
 
     for (auto sym : symbolsToRename) {
         vector<unique_ptr<Location>> references = getReferencesToSymbol(typechecker, sym);
