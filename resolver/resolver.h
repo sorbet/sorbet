@@ -27,8 +27,6 @@ private:
     static void finalizeSymbols(core::GlobalState &gs);
     static void computeLinearization(core::GlobalState &gs);
     static ast::ParsedFilesOrCancelled resolveSigs(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
-    static ast::ParsedFilesOrCancelled resolveMixesInClassMethods(core::GlobalState &gs,
-                                                                  std::vector<ast::ParsedFile> trees);
     static void sanityCheck(core::GlobalState &gs, std::vector<ast::ParsedFile> &trees);
 };
 
