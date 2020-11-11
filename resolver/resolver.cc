@@ -2384,6 +2384,14 @@ public:
         return tree;
     }
 };
+
+void computeExternalTypes(core::GlobalState &gs) {
+    Timer timeit(gs.tracer(), "resolver.computeExternalType");
+    // Ensure all symbols have `externalType` computed.
+    for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
+        core::SymbolRef(gs, core::SymbolRef::Kind::ClassOrModule, i).data(gs)->unsafeComputeExternalType(gs);
+    }
+}
 }; // namespace
 
 ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
@@ -2432,14 +2440,6 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     }
 
     return trees;
-}
-
-void Resolver::computeExternalTypes(core::GlobalState &gs) {
-    Timer timeit(gs.tracer(), "resolver.computeExternalType");
-    // Ensure all symbols have `externalType` computed.
-    for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
-        core::SymbolRef(gs, core::SymbolRef::Kind::ClassOrModule, i).data(gs)->unsafeComputeExternalType(gs);
-    }
 }
 
 void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
