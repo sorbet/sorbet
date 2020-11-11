@@ -872,20 +872,20 @@ void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &buil
     // this will throw exception
     builder.CreateCall(
         cs.module->getFunction("sorbet_cast_failure"),
-        {value, Payload::toCString(cs, description, builder), Payload::toCString(cs, expectedType->show(cs), builder)});
+        {value, Payload::toCString(cs, description, builder), Payload::toCString(cs, expectedType.show(cs), builder)});
     builder.CreateUnreachable();
     builder.SetInsertPoint(successBlock);
 }
 
 llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilderBase &build, const core::TypePtr &lit) {
     auto &builder = static_cast<llvm::IRBuilder<> &>(build);
-    if (lit->derivesFrom(cs, core::Symbols::FalseClass())) {
+    if (lit.derivesFrom(cs, core::Symbols::FalseClass())) {
         return Payload::rubyFalse(cs, builder);
     }
-    if (lit->derivesFrom(cs, core::Symbols::TrueClass())) {
+    if (lit.derivesFrom(cs, core::Symbols::TrueClass())) {
         return Payload::rubyTrue(cs, builder);
     }
-    if (lit->derivesFrom(cs, core::Symbols::NilClass())) {
+    if (lit.derivesFrom(cs, core::Symbols::NilClass())) {
         return Payload::rubyNil(cs, builder);
     }
 

@@ -257,8 +257,8 @@ public:
 
     bool isLiteralish(CompilerState &cs, const core::TypePtr &t) const {
         // See IREmitterHelpers::emitLiteralish; we put the expected fast test first.
-        return core::isa_type<core::LiteralType>(t) || t->derivesFrom(cs, core::Symbols::FalseClass()) ||
-               t->derivesFrom(cs, core::Symbols::TrueClass()) || t->derivesFrom(cs, core::Symbols::NilClass());
+        return core::isa_type<core::LiteralType>(t) || t.derivesFrom(cs, core::Symbols::FalseClass()) ||
+               t.derivesFrom(cs, core::Symbols::TrueClass()) || t.derivesFrom(cs, core::Symbols::NilClass());
     }
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
