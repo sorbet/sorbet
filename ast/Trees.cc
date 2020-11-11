@@ -44,6 +44,7 @@ namespace sorbet::ast {
 #define CASE_STATEMENT(CASE_BODY, T) \
     case Tag::T: {                   \
         CASE_BODY(T)                 \
+        break;                       \
     }
 
 #define GENERATE_TAG_SWITCH(tag, CASE_BODY)              \
