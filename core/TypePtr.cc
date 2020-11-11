@@ -55,9 +55,7 @@ GENERATE_CALL_MEMBER(_approximate, return nullptr, declval<const GlobalState &>(
 void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
     ENFORCE(ptr != nullptr);
 
-#define DELETE_TYPE(T)                 \
-    delete reinterpret_cast<T *>(ptr); \
-    break;
+#define DELETE_TYPE(T) delete reinterpret_cast<T *>(ptr);
 
     GENERATE_TAG_SWITCH(tag, DELETE_TYPE)
 

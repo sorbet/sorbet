@@ -83,12 +83,10 @@ namespace sorbet::ast {
 void TreePtr::deleteTagged(Tag tag, void *ptr) noexcept {
     ENFORCE(ptr != nullptr);
 #define DELETE_TYPE(T)                                      \
-    if (tag == Tag::EmptyTree) {                            \
+    if (tag != Tag::EmptyTree) {                            \
         /* explicitly not deleting the empty tree pointer*/ \
-        break;                                              \
-    }                                                       \
-    delete reinterpret_cast<T *>(ptr);                      \
-    break;
+        delete reinterpret_cast<T *>(ptr);                  \
+    }
 
     GENERATE_TAG_SWITCH(tag, DELETE_TYPE)
 
