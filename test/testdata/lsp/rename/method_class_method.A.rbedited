@@ -1,0 +1,15 @@
+# typed: true
+# frozen_string_literal: true
+
+class Foo
+  def self.bar
+#          ^ apply-rename: [A] newName: bar
+  end
+
+  def foo
+    # this is a separate method
+  end
+end
+
+Foo.bar
+Foo.new.foo

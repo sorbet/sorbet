@@ -9,7 +9,7 @@ class RenameParams;
 class RenameTask final : public LSPRequestTask {
     std::unique_ptr<RenameParams> params;
     absl::variant<JSONNullObject, std::unique_ptr<WorkspaceEdit>>
-    getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string_view newName);
+    getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string newName);
 
 public:
     RenameTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<RenameParams> params);

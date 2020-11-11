@@ -7,8 +7,8 @@
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
+#include <iostream>
 #include <stdio.h>
-
 using namespace std;
 
 namespace sorbet::realmain::lsp {
@@ -34,15 +34,6 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
         }
     }
     return true;
-}
-
-// Replaces originalName with newName in the last dotted component if the string is of the form x.y.z; otherwise does a
-// simple ReplaceAll.
-string replaceLastDotted(string_view input, string_view originalName, string_view newName) {
-    vector<string> dotted = absl::StrSplit(input, ".");
-    // TODO: check for exactly one match
-    dotted[dotted.size() - 1] = absl::StrReplaceAll(dotted[dotted.size() - 1], {{originalName, newName}});
-    return absl::StrJoin(dotted, ".");
 }
 
 // Checks if s is a subclass of root, and updates isSubclass, visited, and subclasses vectors.
@@ -97,18 +88,16 @@ core::SymbolRef findRootClassWithMethod(const core::GlobalState &gs, core::Symbo
     return root;
 }
 
-} // namespace
-
 class Renamer {
 public:
-    Renamer(const string_view oldName, const string_view newName) : oldName(oldName), newName(newName) {}
+    Renamer(const string oldName, const string newName) : oldName(oldName), newName(newName) {}
     virtual ~Renamer() = default;
     virtual void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) = 0;
     unique_ptr<WorkspaceEdit> buildEdit();
 
 protected:
-    string_view oldName;
-    string_view newName;
+    string oldName;
+    string newName;
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
 };
 
@@ -123,38 +112,78 @@ unique_ptr<WorkspaceEdit> Renamer::buildEdit() {
     we->documentChanges = move(textDocEdits);
     return we;
 }
-
 class MethodRenamer : public Renamer {
 public:
-    MethodRenamer(const string_view oldName, const string_view newName) : Renamer(oldName, newName) {}
+    MethodRenamer(const string oldName, const string newName) : Renamer(oldName, newName) {}
     ~MethodRenamer() {}
-    void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref);
-};
+    void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) override {
+        auto loc = location->range->toLoc(gs, fref);
+        auto source = loc.source(gs);
+        string newsrc;
+        if (absl::StartsWith(source, "def ") || absl::StartsWith(source, "attr_reader") ||
+            absl::StartsWith(source, "attr_accessor")) {
+            newsrc = replaceMethodNameInDef(source);
+        } else { // send
+            newsrc = replaceMethodNameInSend(source);
+        }
+        cout << "MethodRename: old/new: " << source << "/" << newsrc << "\n";
+        edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+    }
 
-void MethodRenamer::rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) {
-    auto loc = location->range->toLoc(gs, fref);
-    auto source = loc.source(gs);
-    auto newsrc = replaceLastDotted(source, oldName, newName);
-    edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
-}
+private:
+    // Parse a method name from a send (call), replace it with the new name, and return the full send source with the
+    // new name
+    string replaceMethodNameInSend(string send) {
+        // Split into method and args
+        string methodExpr, args;
+        for (string::size_type i = 0; i < send.size(); i++) {
+            if (send[i] == ' ' || send[i] == '(') {
+                methodExpr = send.substr(0, i);
+                args = send.substr(i, send.size() - i);
+            }
+        }
+        // no args passed
+        if (methodExpr.size() == 0) {
+            methodExpr = send;
+            args = "";
+        }
+        ENFORCE(send == (methodExpr + args));
+
+        // The method name must be at the end of the methodExpr; if so, replace it and reconstruct the send
+        auto prefixLen = methodExpr.size() - oldName.size();
+        if (oldName == methodExpr.substr(prefixLen, oldName.size())) {
+            auto newMethodExpr = methodExpr.substr(0, prefixLen) + newName;
+            return (newMethodExpr + args);
+        } else {
+            // If this happens we parsed the send incorrectly (or we parsed something that's not a send), so give up and
+            // return the unmodified source
+            ENFORCE(0);
+            return send;
+        }
+    }
+
+    string replaceMethodNameInDef(string def) {
+        return absl::StrReplaceAll(def, {{oldName, newName}});
+    }
+};
 class ConstRenamer : public Renamer {
 public:
-    ConstRenamer(const string_view oldName, const string_view newName) : Renamer(oldName, newName) {}
+    ConstRenamer(const string oldName, const string newName) : Renamer(oldName, newName) {}
     ~ConstRenamer() {}
-    void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref);
+    void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) override {
+        auto loc = location->range->toLoc(gs, fref);
+        auto source = loc.source(gs);
+        vector<string> strs = absl::StrSplit(source, "::");
+        strs[strs.size() - 1] = string(newName);
+        auto newsrc = absl::StrJoin(strs, "::");
+        edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+    }
 };
 
-void ConstRenamer::rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) {
-    auto loc = location->range->toLoc(gs, fref);
-    auto source = loc.source(gs);
-    vector<string> strs = absl::StrSplit(source, "::");
-    strs[strs.size() - 1] = string(newName);
-    auto newsrc = absl::StrJoin(strs, "::");
-    edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
-}
+} // namespace
 
-variant<JSONNullObject, unique_ptr<WorkspaceEdit>>
-RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, string_view newName) {
+variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker,
+                                                                              core::SymbolRef symbol, string newName) {
     const core::GlobalState &gs = typechecker.state();
     auto symbolData = symbol.data(gs);
     auto originalName = symbolData->name.show(gs);
@@ -251,6 +280,19 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
                     response->result = getRenameEdits(typechecker, constResp->symbol, params->newName);
                 }
             } else if (auto defResp = resp->isDefinition()) {
+                if (defResp->symbol.data(gs)->isClassOrModule() && islower(params->newName[0])) {
+                    response->error =
+                        make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                   "Class and Module names must begin with an uppercase letter.");
+                    return response;
+                }
+
+                if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
+                    response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                                 "Method names must begin with an lowercase letter.");
+                    return response;
+                }
+
                 if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
                     if (isValidRenameLocation(defResp->symbol, gs, response)) {
                         response->result = getRenameEdits(typechecker, defResp->symbol, params->newName);

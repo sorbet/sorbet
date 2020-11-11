@@ -10,11 +10,15 @@ module M
     def caller
       bar(1)
     end
+
+    def x
+      42
+    end
   end
 end
 
 f = M::Foo.new
-f.bar(2)
+f.bar(f.x)
 f.bar
 
 M::Foo.new.bar 3
