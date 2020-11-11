@@ -678,8 +678,8 @@ struct DispatchArgs {
     const std::shared_ptr<const SendAndBlockLink> &block;
     Loc originForUninitialized;
 
-    DispatchArgs withSelfRef(const TypePtr &newSelfRef);
-    DispatchArgs withThisRef(const TypePtr &newThisRef);
+    DispatchArgs withSelfRef(const TypePtr &newSelfRef) const;
+    DispatchArgs withThisRef(const TypePtr &newThisRef) const;
 };
 
 struct DispatchComponent {

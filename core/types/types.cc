@@ -740,11 +740,11 @@ core::SymbolRef Types::getRepresentedClass(const GlobalState &gs, const TypePtr 
     return singleton.data(gs)->attachedClass(gs);
 }
 
-DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) {
+DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) const {
     return DispatchArgs{name, locs, numPosArgs, args, newSelfRef, fullType, newSelfRef, block, originForUninitialized};
 }
 
-DispatchArgs DispatchArgs::withThisRef(const TypePtr &newThisRef) {
+DispatchArgs DispatchArgs::withThisRef(const TypePtr &newThisRef) const {
     return DispatchArgs{name, locs, numPosArgs, args, selfType, fullType, newThisRef, block, originForUninitialized};
 }
 } // namespace sorbet::core
