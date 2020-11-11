@@ -414,8 +414,15 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
     }
 }
 
+string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const core::SymbolRef pkg) {
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "{}\n", alCfg.preamble);
 
-void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path, const ast::TreePtr &pkgTree) {
+    return to_string(buf);
+}
+
+
+void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const std::string &path, const ast::TreePtr &pkgTree) {
     // extract the name of this package from the file
     auto insSeq = ast::cast_tree<ast::InsSeq>(pkgTree);
     if (!insSeq) {
@@ -444,6 +451,8 @@ void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const Au
     auto pkgName = gs.lookupNameConstant(fmt::format("{}_Package", absl::StrReplaceAll(nameStr, {{"::", "_"}})));
     // find the package from the registry
     auto package = core::Symbols::PackageRegistry().data(gs)->findMemberNoDealias(gs, pkgName);
+
+    renderPackageAutoloadSrc(gs, alCfg, package);
 
     // grab all the defined members
     for (auto [n, sym] : package.data(gs)->members()) {
