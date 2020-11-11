@@ -201,7 +201,7 @@ public:
     bool hasUntyped() const;
 
     void sanityCheck(const GlobalState &gs) const {
-        if (!debug_mode)
+        if constexpr (!debug_mode)
             return;
         _sanityCheck(gs);
     }
