@@ -7,7 +7,6 @@
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
-#include <iostream>
 #include <stdio.h>
 using namespace std;
 
@@ -126,7 +125,6 @@ public:
         } else { // send
             newsrc = replaceMethodNameInSend(source);
         }
-        cout << "MethodRename: old/new: " << source << "/" << newsrc << "\n";
         edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
     }
 
