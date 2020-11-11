@@ -199,12 +199,7 @@ bool TypePtr::isFullyDefined() const {
         }
         case Tag::AppliedType: {
             auto &app = cast_type_nonnull<AppliedType>(*this);
-            for (auto &targ : app.targs) {
-                if (!targ.isFullyDefined()) {
-                    return false;
-                }
-            }
-            return true;
+            return absl::c_all_of(app.targs, [](const TypePtr &t) { return t.isFullyDefined(); });
         }
     }
 }
@@ -238,30 +233,15 @@ bool TypePtr::hasUntyped() const {
         }
         case Tag::AppliedType: {
             auto &app = cast_type_nonnull<AppliedType>(*this);
-            for (auto &arg : app.targs) {
-                if (arg.hasUntyped()) {
-                    return true;
-                }
-            }
-            return false;
+            return absl::c_any_of(app.targs, [](const TypePtr &t) { return t.hasUntyped(); });
         }
         case Tag::TupleType: {
             auto &tuple = cast_type_nonnull<TupleType>(*this);
-            for (auto &arg : tuple.elems) {
-                if (arg.hasUntyped()) {
-                    return true;
-                }
-            }
-            return false;
+            return absl::c_any_of(tuple.elems, [](const TypePtr &t) { return t.hasUntyped(); });
         }
         case Tag::ShapeType: {
             auto &shape = cast_type_nonnull<ShapeType>(*this);
-            for (auto &arg : shape.values) {
-                if (arg.hasUntyped()) {
-                    return true;
-                }
-            }
-            return false;
+            return absl::c_any_of(shape.values, [](const TypePtr &t) { return t.hasUntyped(); });
         }
     }
 }
