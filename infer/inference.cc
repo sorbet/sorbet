@@ -175,7 +175,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                             if (send->args.size() > 0) {
                                 auto ty = current.getAndFillTypeAndOrigin(ctx, send->args[0]);
                                 e.addErrorSection(core::ErrorSection(
-                                    core::ErrorColors::format("Type of receiver is `{}`, from:", ty.type->show(ctx)),
+                                    core::ErrorColors::format("Type of receiver is `{}`, from:", ty.type.show(ctx)),
                                     ty.origins2Explanations(ctx, current.locForUninitialized())));
                             }
                         }
