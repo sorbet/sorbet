@@ -2405,13 +2405,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
         return ast::ParsedFilesOrCancelled();
     }
 
-    {
-        Timer timeit(gs.tracer(), "resolver.computeExternalType");
-        // Ensure all symbols have `externalType` computed.
-        for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
-            core::SymbolRef(gs, core::SymbolRef::Kind::ClassOrModule, i).data(gs)->unsafeComputeExternalType(gs);
-        }
-    }
+    computeExternalTypes(gs);
 
     auto result = resolveSigs(gs, std::move(trees));
     if (!result.hasResult()) {
@@ -2440,6 +2434,14 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     return trees;
 }
 
+void Resolver::computeExternalTypes(core::GlobalState &gs) {
+    Timer timeit(gs.tracer(), "resolver.computeExternalType");
+    // Ensure all symbols have `externalType` computed.
+    for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
+        core::SymbolRef(gs, core::SymbolRef::Kind::ClassOrModule, i).data(gs)->unsafeComputeExternalType(gs);
+    }
+}
+
 void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
     if (debug_mode) {
         Timer timeit(gs.tracer(), "resolver.sanity_check");
@@ -2456,6 +2458,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     computeLinearization(gs);
     trees = ResolveTypeMembersWalk::run(gs, std::move(trees));
+    // computeExternalTypes(gs);
     auto result = resolveSigs(gs, std::move(trees));
     if (!result.hasResult()) {
         return result;
