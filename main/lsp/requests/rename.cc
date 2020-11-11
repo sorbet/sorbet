@@ -120,7 +120,7 @@ public:
         auto source = loc.source(gs);
         string newsrc;
         if (absl::StartsWith(source, "def ") || absl::StartsWith(source, "attr_reader") ||
-            absl::StartsWith(source, "attr_accessor")) {
+            absl::StartsWith(source, "attr_writer") || absl::StartsWith(source, "attr_accessor")) {
             newsrc = replaceMethodNameInDef(source);
         } else { // send
             newsrc = replaceMethodNameInSend(source);
@@ -138,6 +138,7 @@ private:
             if (send[i] == ' ' || send[i] == '(') {
                 methodExpr = send.substr(0, i);
                 args = send.substr(i, send.size() - i);
+                break;
             }
         }
         // no args passed
