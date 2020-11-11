@@ -135,6 +135,7 @@ NameDef names[] = {
     {"declareAbstract", "abstract!"},
     {"declareFinal", "final!"},
     {"declareSealed", "sealed!"},
+    {"declarePenultimate", "penultimate!"},
     {"revealType", "reveal_type"},
     {"absurd"},
     {"nonForcingIsA_p", "non_forcing_is_a?"},
