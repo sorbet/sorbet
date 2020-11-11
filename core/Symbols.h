@@ -77,6 +77,7 @@ public:
         static constexpr u4 CLASS_OR_MODULE_LINEARIZATION_COMPUTED = 0x0000'0100;
         static constexpr u4 CLASS_OR_MODULE_FINAL = 0x0000'0200;
         static constexpr u4 CLASS_OR_MODULE_SEALED = 0x0000'0400;
+        static constexpr u4 CLASS_OR_MODULE_PENULTIMATE = 0x0000'0800;
 
         // Method flags
         static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
@@ -307,6 +308,11 @@ public:
         return (flags & Symbol::Flags::CLASS_OR_MODULE_FINAL) != 0;
     }
 
+    inline bool isClassOrModulePenultimate() const {
+        ENFORCE_NO_TIMER(isClassOrModule());
+        return (flags & Symbol::Flags::CLASS_OR_MODULE_PENULTIMATE) != 0;
+    }
+
     inline bool isClassOrModuleSealed() const {
         ENFORCE_NO_TIMER(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_OR_MODULE_SEALED) != 0;
@@ -450,6 +456,11 @@ public:
     inline void setClassOrModuleFinal() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_FINAL;
+    }
+
+    inline void setClassOrModulePenultimate() {
+        ENFORCE(isClassOrModule());
+        flags |= Symbol::Flags::CLASS_OR_MODULE_PENULTIMATE;
     }
 
     inline void setClassOrModuleSealed() {
