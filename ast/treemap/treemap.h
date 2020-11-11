@@ -70,8 +70,8 @@ public:
     TreePtr postTransformInsSeq(core::MutableContext ctx, TreePtr original);
 };
 
-// NOTE: Implementations don't have to use MutableContext (they can use Context too), but we use MutableContext
-// in these preprocessor templates to detect if the type has a function that can be called with a MutableContext.
+// NOTE: Implementations must use a context type parameter that `MutableContext` is convertable to.
+// That is, either `Context` or `MutableContext`.
 #define GENERATE_HAS_MEMBER_VISITOR(X) \
     GENERATE_HAS_MEMBER(X, std::declval<core::MutableContext>(), std::declval<TreePtr>())
 
