@@ -347,6 +347,7 @@ class SymbolFinder {
 
         switch (send->fun._id) {
             case core::Names::declareFinal()._id:
+            case core::Names::declarePenultimate()._id:
             case core::Names::declareSealed()._id:
             case core::Names::declareInterface()._id:
             case core::Names::declareAbstract()._id: {
@@ -1094,6 +1095,10 @@ class SymbolDefiner {
         if (fun == core::Names::declareFinal()) {
             symbolData->setClassOrModuleFinal();
             symbolData->singletonClass(ctx).data(ctx)->setClassOrModuleFinal();
+        }
+        if (fun == core::Names::declarePenultimate()) {
+            symbolData->setClassOrModulePenultimate();
+            symbolData->singletonClass(ctx).data(ctx)->setClassOrModulePenultimate();
         }
         if (fun == core::Names::declareSealed()) {
             symbolData->setClassOrModuleSealed();

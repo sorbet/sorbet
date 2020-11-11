@@ -367,13 +367,18 @@ core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef
 void validateFinalAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef,
                                  const core::SymbolRef errMsgClass, const string_view verb) {
     for (const auto &mixin : klass.data(ctx)->mixins()) {
-        if (!mixin.data(ctx)->isClassOrModuleFinal()) {
-            continue;
+        if (mixin.data(ctx)->isClassOrModuleFinal()) {
+            if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
+                e.setHeader("`{}` was declared as final and cannot be {} in `{}`", mixin.data(ctx)->show(ctx), verb,
+                            errMsgClass.data(ctx)->show(ctx));
+                e.addErrorLine(mixin.data(ctx)->loc(), "`{}` defined here", mixin.data(ctx)->show(ctx));
+            }
         }
-        if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
-            e.setHeader("`{}` was declared as final and cannot be {} in `{}`", mixin.data(ctx)->show(ctx), verb,
-                        errMsgClass.data(ctx)->show(ctx));
-            e.addErrorLine(mixin.data(ctx)->loc(), "`{}` defined here", mixin.data(ctx)->show(ctx));
+        if (mixin.data(ctx)->isClassOrModulePenultimate() && !errMsgClass.data(ctx)->isClassOrModuleFinal()) {
+            if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, mixin), core::errors::Resolver::FinalAncestor)) {
+                e.setHeader("`{}` is not final, but {} the penultimate module `{}`", errMsgClass.data(ctx)->show(ctx), verb, mixin.data(ctx)->show(ctx));
+                e.addErrorLine(mixin.data(ctx)->loc(), "`{}` defined here", mixin.data(ctx)->show(ctx));
+            }
         }
     }
 }
@@ -410,6 +415,14 @@ void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::Cl
                         klass.data(ctx)->show(ctx));
             e.addErrorLine(superClass.data(ctx)->loc(), "`{}` defined here", superClass.data(ctx)->show(ctx));
         }
+    }
+    if (superClass.exists() && superClass.data(ctx)->isClassOrModulePenultimate() && !klass.data(ctx)->isClassOrModuleFinal()) {
+        if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
+            e.setHeader("`{}` was declared as penultimate but its child `{}` was not declared final", superClass.data(ctx)->show(ctx),
+                        klass.data(ctx)->show(ctx));
+            e.addErrorLine(superClass.data(ctx)->loc(), "`{}` defined here", superClass.data(ctx)->show(ctx));
+        }
+
     }
     validateFinalAncestorHelper(ctx, klass, classDef, klass, "included");
     validateFinalMethodHelper(ctx, klass, klass);
