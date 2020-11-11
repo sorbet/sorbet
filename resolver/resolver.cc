@@ -2458,7 +2458,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     computeLinearization(gs);
     trees = ResolveTypeMembersWalk::run(gs, std::move(trees));
-    // computeExternalTypes(gs);
+    computeExternalTypes(gs);
     auto result = resolveSigs(gs, std::move(trees));
     if (!result.hasResult()) {
         return result;
