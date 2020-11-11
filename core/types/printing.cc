@@ -45,15 +45,15 @@ string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) 
 
 string UnresolvedAppliedType::show(const GlobalState &gs) const {
     return fmt::format("{}[{}] (unresolved)", this->klass.data(gs)->show(gs),
-                       fmt::map_join(targs, ", ", [&](auto targ) { return targ->show(gs); }));
+                       fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs); }));
 }
 
 string LiteralType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return fmt::format("{}({})", this->underlying()->toStringWithTabs(gs, tabs), showValue(gs));
+    return fmt::format("{}({})", this->underlying().toStringWithTabs(gs, tabs), showValue(gs));
 }
 
 string LiteralType::show(const GlobalState &gs) const {
-    return fmt::format("{}({})", this->underlying()->show(gs), showValue(gs));
+    return fmt::format("{}({})", this->underlying().show(gs), showValue(gs));
 }
 
 string LiteralType::showValue(const GlobalState &gs) const {
@@ -83,15 +83,14 @@ string TupleType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     int i = -1;
     for (auto &el : this->elems) {
         i++;
-        fmt::format_to(buf, "{}{} = {}\n", nestedTabs, i, el->toStringWithTabs(gs, tabs + 3));
+        fmt::format_to(buf, "{}{} = {}\n", nestedTabs, i, el.toStringWithTabs(gs, tabs + 3));
     }
     fmt::format_to(buf, "{}}}", thisTabs);
     return to_string(buf);
 }
 
 string TupleType::show(const GlobalState &gs) const {
-    return fmt::format("[{}]",
-                       fmt::map_join(this->elems, ", ", [&](const auto &el) -> string { return el->show(gs); }));
+    return fmt::format("[{}]", fmt::map_join(this->elems, ", ", [&](const auto &el) -> string { return el.show(gs); }));
 }
 
 string TupleType::showWithMoreInfo(const GlobalState &gs) const {
@@ -105,8 +104,8 @@ string ShapeType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     fmt::format_to(buf, "ShapeType {{\n");
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
-        fmt::format_to(buf, "{}{} => {}\n", nestedTabs, el->toStringWithTabs(gs, tabs + 2),
-                       (*valueIterator)->toStringWithTabs(gs, tabs + 3));
+        fmt::format_to(buf, "{}{} => {}\n", nestedTabs, el.toStringWithTabs(gs, tabs + 2),
+                       (*valueIterator).toStringWithTabs(gs, tabs + 3));
         ++valueIterator;
     }
     fmt::format_to(buf, "{}}}", thisTabs);
@@ -127,9 +126,9 @@ string ShapeType::show(const GlobalState &gs) const {
         SymbolRef undSymbol = cast_type<ClassType>(cast_type<LiteralType>(key)->underlying())->symbol;
         if (undSymbol == Symbols::Symbol()) {
             fmt::format_to(buf, "{}: {}", NameRef(gs, cast_type<LiteralType>(key)->value).show(gs),
-                           (*valueIterator)->show(gs));
+                           (*valueIterator).show(gs));
         } else {
-            fmt::format_to(buf, "{} => {}", key->show(gs), (*valueIterator)->show(gs));
+            fmt::format_to(buf, "{} => {}", key.show(gs), (*valueIterator).show(gs));
         }
         ++valueIterator;
     }
@@ -149,8 +148,8 @@ string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     bool leftBrace = isa_type<OrType>(this->left);
     bool rightBrace = isa_type<OrType>(this->right);
 
-    return fmt::format("{}{}{} & {}{}{}", leftBrace ? "(" : "", this->left->toStringWithTabs(gs, tabs + 2),
-                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toStringWithTabs(gs, tabs + 2),
+    return fmt::format("{}{}{} & {}{}{}", leftBrace ? "(" : "", this->left.toStringWithTabs(gs, tabs + 2),
+                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right.toStringWithTabs(gs, tabs + 2),
                        rightBrace ? ")" : "");
 }
 
@@ -160,7 +159,7 @@ string showAndElem(const GlobalState &gs, const TypePtr &ty) {
     if (auto andType = cast_type<AndType>(ty)) {
         return showAnds(gs, andType->left, andType->right);
     }
-    return ty->show(gs);
+    return ty.show(gs);
 }
 
 string showAnds(const GlobalState &gs, const TypePtr &left, const TypePtr &right) {
@@ -178,8 +177,8 @@ string OrType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     bool leftBrace = isa_type<AndType>(this->left);
     bool rightBrace = isa_type<AndType>(this->right);
 
-    return fmt::format("{}{}{} | {}{}{}", leftBrace ? "(" : "", this->left->toStringWithTabs(gs, tabs + 2),
-                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toStringWithTabs(gs, tabs + 2),
+    return fmt::format("{}{}{} | {}{}{}", leftBrace ? "(" : "", this->left.toStringWithTabs(gs, tabs + 2),
+                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right.toStringWithTabs(gs, tabs + 2),
                        rightBrace ? ")" : "");
 }
 
@@ -264,7 +263,7 @@ pair<OrInfo, optional<string>> showOrElem(const GlobalState &gs, const TypePtr &
         return showOrs(gs, orType->left, orType->right);
     }
 
-    return make_pair(OrInfo::otherInfo(), make_optional(ty->show(gs)));
+    return make_pair(OrInfo::otherInfo(), make_optional(ty.show(gs)));
 }
 
 pair<OrInfo, optional<string>> showOrs(const GlobalState &gs, const TypePtr &left, const TypePtr &right) {
@@ -330,7 +329,7 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
         if (i < this->klass.data(gs)->typeMembers().size()) {
             auto tyMem = this->klass.data(gs)->typeMembers()[i];
             fmt::format_to(buf, "{}{} = {}\n", twiceNestedTabs, tyMem.data(gs)->name.showRaw(gs),
-                           targ->toStringWithTabs(gs, tabs + 3));
+                           targ.toStringWithTabs(gs, tabs + 3));
         } else {
             // this happens if we try to print type before resolver has processed stdlib
             fmt::format_to(buf, "{}EARLY_TYPE_MEMBER\n", twiceNestedTabs);
@@ -374,7 +373,7 @@ string AppliedType::show(const GlobalState &gs) const {
             fmt::format_to(buf, "{}",
                            fmt::map_join(
                                targs_it, this->targs.end(), ", ", [&](auto targ) -> auto {
-                                   return fmt::format("arg{}: {}", arg_num++, targ->show(gs));
+                                   return fmt::format("arg{}: {}", arg_num++, targ.show(gs));
                                }));
 
             if (*procArity > 0) {
@@ -384,7 +383,7 @@ string AppliedType::show(const GlobalState &gs) const {
             if (return_type == core::Types::void_()) {
                 fmt::format_to(buf, ".void");
             } else {
-                fmt::format_to(buf, ".returns({})", return_type->show(gs));
+                fmt::format_to(buf, ".returns({})", return_type.show(gs));
             }
             return to_string(buf);
         } else {
@@ -410,18 +409,18 @@ string AppliedType::show(const GlobalState &gs) const {
     }
 
     if (!targs.empty()) {
-        fmt::format_to(buf, "[{}]", fmt::map_join(targs, ", ", [&](auto targ) { return targ->show(gs); }));
+        fmt::format_to(buf, "[{}]", fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs); }));
     }
     return to_string(buf);
 }
 
 string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
     auto defName = this->definition.data(gs)->toStringFullName(gs);
-    auto upperStr = this->upperBound->toString(gs);
+    auto upperStr = this->upperBound.toString(gs);
     if (this->definition.data(gs)->isFixed()) {
         return fmt::format("LambdaParam({}, fixed={})", defName, upperStr);
     } else {
-        auto lowerStr = this->lowerBound->toString(gs);
+        auto lowerStr = this->lowerBound.toString(gs);
         return fmt::format("LambdaParam({}, lower={}, upper={})", defName, lowerStr, upperStr);
     }
 }

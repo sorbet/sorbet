@@ -95,7 +95,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
     core::DispatchArgs dispatchArgs{snd->fun,       locs,           snd->numPosArgs,
                                     args,           snd->recv.type, snd->recv.type,
                                     snd->recv.type, snd->link,      originForUninitialized};
-    auto dispatchInfo = snd->recv.type->dispatchCall(ctx, dispatchArgs);
+    auto dispatchInfo = snd->recv.type.dispatchCall(ctx, dispatchArgs);
 
     int i = -1;
 
@@ -412,7 +412,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 // TODO: maybe combine the old and new types in some way?
                 chosenType = oldType;
             }
-            fmt::format_to(ss, "{}: {}", argSym.argumentName(ctx), chosenType->show(ctx));
+            fmt::format_to(ss, "{}: {}", argSym.argumentName(ctx), chosenType.show(ctx));
         }
         fmt::format_to(ss, ").");
     }
@@ -427,7 +427,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     if (suggestsVoid) {
         fmt::format_to(ss, "void}}");
     } else {
-        fmt::format_to(ss, "returns({})}}", guessedReturnType->show(ctx));
+        fmt::format_to(ss, "returns({})}}", guessedReturnType.show(ctx));
     }
 
     auto [replacementLoc, padding] = loc.findStartOfLine(ctx);

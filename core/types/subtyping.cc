@@ -15,9 +15,9 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto ret = lub(gs, t1, t2);
     SLOW_ENFORCE(Types::isSubType(gs, t1, ret), "\n{}\nis not a super type of\n{}\nwas lubbing with {}",
-                 ret->toString(gs), t1->toString(gs), t2->toString(gs));
+                 ret.toString(gs), t1.toString(gs), t2.toString(gs));
     SLOW_ENFORCE(Types::isSubType(gs, t2, ret), "\n{}\nis not a super type of\n{}\nwas lubbing with {}",
-                 ret->toString(gs), t2->toString(gs), t1->toString(gs));
+                 ret.toString(gs), t2.toString(gs), t1.toString(gs));
 
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
@@ -32,7 +32,7 @@ TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     //            "we do pointer comparisons in order to see if one is subtype of another " + t1->toString(gs) +
     //                " was lubbing with " + t2->toString(gs) + " got " + ret->toString(gs));
 
-    ret->sanityCheck(gs);
+    ret.sanityCheck(gs);
 
     return ret;
 }
@@ -563,13 +563,13 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
 }
 TypePtr Types::all(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto ret = glb(gs, t1, t2);
-    ret->sanityCheck(gs);
+    ret.sanityCheck(gs);
 
-    SLOW_ENFORCE(Types::isSubType(gs, ret, t1), "\n{}\nis not a subtype of\n{}\nwas glbbing with\n{}",
-                 ret->toString(gs), t1->toString(gs), t2->toString(gs));
+    SLOW_ENFORCE(Types::isSubType(gs, ret, t1), "\n{}\nis not a subtype of\n{}\nwas glbbing with\n{}", ret.toString(gs),
+                 t1.toString(gs), t2.toString(gs));
 
     SLOW_ENFORCE(Types::isSubType(gs, ret, t2), "\n{}\n is not a subtype of\n{}\nwas glbbing with\n{}",
-                 ret->toString(gs), t2->toString(gs), t1->toString(gs));
+                 ret.toString(gs), t2.toString(gs), t1.toString(gs));
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
     //                !Types::isSubTypeUnderConstraint(gs, t1, t2) || ret == t1 || ret->isUntyped(),
@@ -1319,7 +1319,7 @@ bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypeP
 }
 
 bool ProxyType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    return underlying()->derivesFrom(gs, klass);
+    return underlying().derivesFrom(gs, klass);
 }
 
 bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
@@ -1330,18 +1330,18 @@ bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
 }
 
 bool OrType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    return left->derivesFrom(gs, klass) && right->derivesFrom(gs, klass);
+    return left.derivesFrom(gs, klass) && right.derivesFrom(gs, klass);
 }
 
 bool AndType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    return left->derivesFrom(gs, klass) || right->derivesFrom(gs, klass);
+    return left.derivesFrom(gs, klass) || right.derivesFrom(gs, klass);
 }
 
 bool AliasType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     Exception::raise("AliasType.derivesfrom");
 }
 
-void AliasType::_sanityCheck(const GlobalState &gs) {
+void AliasType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(this->symbol.exists());
 }
 
@@ -1350,12 +1350,12 @@ string MetaType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string MetaType::show(const GlobalState &gs) const {
-    return "<Type: " + wrapped->show(gs) + ">";
+    return "<Type: " + wrapped.show(gs) + ">";
 }
 
-void MetaType::_sanityCheck(const GlobalState &gs) {
+void MetaType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(!core::isa_type<MetaType>(wrapped));
-    this->wrapped->sanityCheck(gs);
+    this->wrapped.sanityCheck(gs);
 }
 
 bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {

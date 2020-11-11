@@ -260,7 +260,7 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const 
             fmt::format_to(argBuf, "{}: ", argSym.name.data(gs)->shortName(gs));
         }
         if (argSym.type) {
-            auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint)->show(gs);
+            auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
             fmt::format_to(argBuf, "${{{}:{}}}", nextTabstop++, resultType);
         } else {
             fmt::format_to(argBuf, "${{{}}}", nextTabstop++);
@@ -286,7 +286,7 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const 
                 targs_it++;
                 blkArgs = fmt::format(" |{}|", fmt::map_join(targs_it, appliedType->targs.end(), ", ", [&](auto targ) {
                                           auto resultType = getResultType(gs, targ, method, receiverType, constraint);
-                                          return fmt::format("${{{}:{}}}", nextTabstop++, resultType->show(gs));
+                                          return fmt::format("${{{}:{}}}", nextTabstop++, resultType.show(gs));
                                       }));
             }
         }

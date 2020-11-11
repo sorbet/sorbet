@@ -103,15 +103,15 @@ string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
             } else if (l.symbol == core::Symbols::TrueClass()) {
                 res = "true";
             } else {
-                res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0));
+                res = fmt::format("literal({})", this->value.toStringWithTabs(gs, 0));
             }
         },
-        [&](const core::TypePtr &t) { res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0)); });
+        [&](const core::TypePtr &t) { res = fmt::format("literal({})", this->value.toStringWithTabs(gs, 0)); });
     return res;
 }
 
 string Literal::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("Literal {{ value = {} }}", this->value->show(gs));
+    return fmt::format("Literal {{ value = {} }}", this->value.show(gs));
 }
 
 Ident::Ident(LocalRef what) : what(what) {
@@ -202,13 +202,13 @@ string GetCurrentException::showRaw(const core::GlobalState &gs, const CFG &cfg,
 }
 
 string Cast::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("cast({}, {});", this->value.toString(gs, cfg), this->type->toString(gs));
+    return fmt::format("cast({}, {});", this->value.toString(gs, cfg), this->type.toString(gs));
 }
 
 string Cast::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("Cast {{\n{0}&nbsp;cast = T.{1},\n{0}&nbsp;value = {2},\n{0}&nbsp;type = {3},\n{0}}}",
                        spacesForTabLevel(tabs), this->cast.data(gs)->show(gs), this->value.showRaw(gs, cfg, tabs + 1),
-                       this->type->show(gs));
+                       this->type.show(gs));
 }
 
 string TAbsurd::toString(const core::GlobalState &gs, const CFG &cfg) const {
@@ -224,7 +224,7 @@ string VariableUseSite::toString(const core::GlobalState &gs, const CFG &cfg) co
     if (this->variable == LocalRef::unconditional() || this->type == nullptr) {
         return this->variable.toString(gs, cfg);
     } else {
-        return fmt::format("{}: {}", this->variable.toString(gs, cfg), this->type->show(gs));
+        return fmt::format("{}: {}", this->variable.toString(gs, cfg), this->type.show(gs));
     }
 }
 
@@ -233,7 +233,7 @@ string VariableUseSite::showRaw(const core::GlobalState &gs, const CFG &cfg, int
         return fmt::format("VariableUseSite {{ variable = {} }}", this->variable.showRaw(gs, cfg));
     } else {
         return fmt::format("VariableUseSite {{\n{0}&nbsp;variable = {1},\n{0}&nbsp;type = {2},\n{0}}}",
-                           spacesForTabLevel(tabs), this->variable.showRaw(gs, cfg), this->type->show(gs));
+                           spacesForTabLevel(tabs), this->variable.showRaw(gs, cfg), this->type.show(gs));
     }
 }
 

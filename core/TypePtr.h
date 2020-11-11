@@ -8,6 +8,8 @@
 namespace sorbet::core {
 class Type;
 class TypeConstraint;
+struct DispatchResult;
+struct DispatchArgs;
 
 class TypePtr final {
 public:
@@ -44,6 +46,8 @@ public:
     template <class To> static To &cast(TypePtr &what) {
         return const_cast<To &>(cast<To>(static_cast<const TypePtr &>(what)));
     }
+
+    static std::string tagToString(Tag tag);
 
 private:
     std::atomic<u4> *counter;
@@ -95,6 +99,8 @@ private:
             }
         }
     }
+
+    void _sanityCheck(const GlobalState &gs) const;
 
 public:
     constexpr TypePtr() noexcept : counter(nullptr), store(0) {}
@@ -194,6 +200,12 @@ public:
 
     bool hasUntyped() const;
 
+    void sanityCheck(const GlobalState &gs) const {
+        if constexpr (!debug_mode)
+            return;
+        _sanityCheck(gs);
+    }
+
     core::SymbolRef untypedBlame() const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
@@ -206,6 +218,22 @@ public:
 
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
+
+    std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
+    std::string toString(const GlobalState &gs) const {
+        return toStringWithTabs(gs);
+    }
+
+    // User visible type. Should exactly match what the user can write.
+    std::string show(const GlobalState &gs) const;
+    // Like show, but can include extra info. Does not necessarily match what the user can type.
+    std::string showWithMoreInfo(const GlobalState &gs) const;
+
+    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+
+    unsigned int hash(const GlobalState &gs) const;
+
+    DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     friend class TypePtrTestHelper;
