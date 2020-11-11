@@ -16,7 +16,7 @@ public:
     /** Only runs tree passes, used for incremental changes that do not affect global state. Assumes that `run` was
      * called on a tree that contains same definitions before (LSP uses heuristics that should only have false negatives
      * to find this) */
-    static ast::ParsedFilesOrCancelled runTreePasses(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
+    static ast::ParsedFilesOrCancelled runIncremental(core::GlobalState &gs, std::vector<ast::ParsedFile> trees);
 
     // used by autogen only
     static std::vector<ast::ParsedFile> runConstantResolution(core::GlobalState &gs, std::vector<ast::ParsedFile> trees,

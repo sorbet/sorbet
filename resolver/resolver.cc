@@ -2451,7 +2451,7 @@ void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees
     }
 }
 
-ast::ParsedFilesOrCancelled Resolver::runTreePasses(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
+ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
     auto workers = WorkerPool::create(0, gs.tracer());
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     computeLinearization(gs);

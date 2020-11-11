@@ -320,7 +320,7 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            auto result = sorbet::resolver::Resolver::runTreePasses(gs, move(what));
+            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what));
             // incrementalResolve is not cancelable.
             ENFORCE(result.hasResult());
             what = move(result.result());

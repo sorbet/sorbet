@@ -533,7 +533,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     }
 
     // resolver
-    trees = move(resolver::Resolver::runTreePasses(*gs, move(trees)).result());
+    trees = move(resolver::Resolver::runIncremental(*gs, move(trees)).result());
 
     for (auto &resolvedTree : trees) {
         handler.addObserved(*gs, "resolve-tree", [&]() { return resolvedTree.tree.toString(*gs); });
