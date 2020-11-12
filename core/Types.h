@@ -205,8 +205,7 @@ template <> inline bool isa_type<ClassType>(const TypePtr &what) {
     }
 }
 
-class GroundType;
-template <> inline bool isa_type<GroundType>(const TypePtr &what) {
+inline bool is_ground_type(const TypePtr &what) {
     if (what == nullptr) {
         return false;
     }
@@ -279,8 +278,6 @@ template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
     template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
     class __attribute__((aligned(8))) name
 
-class GroundType {};
-
 class ProxyType {
 public:
     // TODO: use shared pointers that use inline counter
@@ -294,7 +291,7 @@ public:
 };
 CheckSize(ProxyType, 8, 8);
 
-TYPE(ClassType) : public GroundType {
+TYPE(ClassType) {
 public:
     SymbolRef symbol;
     ClassType(SymbolRef symbol);
@@ -420,7 +417,7 @@ public:
 };
 CheckSize(TypeVar, 8, 8);
 
-TYPE(OrType) final : public GroundType {
+TYPE(OrType) final {
 public:
     TypePtr left;
     TypePtr right;
@@ -470,7 +467,7 @@ private:
 };
 CheckSize(OrType, 32, 8);
 
-TYPE(AndType) final : public GroundType {
+TYPE(AndType) final {
 public:
     TypePtr left;
     TypePtr right;

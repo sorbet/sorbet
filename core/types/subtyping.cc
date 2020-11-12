@@ -470,8 +470,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 }
 
 TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    ENFORCE(isa_type<GroundType>(t1));
-    ENFORCE(isa_type<GroundType>(t2));
+    ENFORCE(is_ground_type(t1));
+    ENFORCE(is_ground_type(t2));
 
     //    if (g1->kind() > g2->kind()) { // force the relation to be symmentric and half the implementation
     //        return lubGround(gs, t2, t1);
@@ -515,8 +515,8 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
 }
 
 TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
-    ENFORCE(isa_type<GroundType>(t1));
-    ENFORCE(isa_type<GroundType>(t2));
+    ENFORCE(is_ground_type(t1));
+    ENFORCE(is_ground_type(t2));
 
     if (t1.kind() > t1.kind()) { // force the relation to be symmentric and half the implementation
         return glbGround(gs, t2, t1);
