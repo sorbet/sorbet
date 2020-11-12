@@ -16,11 +16,11 @@ namespace sorbet::rewriter {
  * into
  *
  *    class MyClass
- *      sig {params(arg0: T.untyped).returns(T.untyped)}
- *      def foo(*arg0); end
+ *      sig {params(arg0: T.untyped, blk: T.nilable(Proc)).returns(T.untyped)}
+ *      def foo(*arg0, &blk); end
  *
- *      sig {params(arg0: T.untyped).returns(T.untyped)}
- *      def aliased_bar(*arg0); end
+ *      sig {params(arg0: T.untyped, blk: T.nilable(Proc)).returns(T.untyped)}
+ *      def aliased_bar(*arg0, &blk); end
  *    end
  */
 class DefDelegator final {
