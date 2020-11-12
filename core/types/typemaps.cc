@@ -84,7 +84,7 @@ optional<vector<TypePtr>> mungeArgs(const vector<TypePtr> &elems,
         }
 
         ENFORCE(newArgs->size() == i);
-        newArgs->emplace_back(t);
+        newArgs->emplace_back(move(t));
     }
     return newArgs;
 }
