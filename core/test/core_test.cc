@@ -147,7 +147,11 @@ public:
         return ptr.store;
     }
 
-    static TypePtr create(TypePtr::Tag tag, Type *type) {
+    static void *get(const TypePtr &ptr) {
+        return ptr.get();
+    }
+
+    static TypePtr create(TypePtr::Tag tag, void *type) {
         return TypePtr(tag, type);
     }
 };
@@ -203,7 +207,7 @@ TEST_SUITE("TypePtr") {
             auto rawPtr = new ClassType(Symbols::untyped());
             auto ptr = TypePtrTestHelper::create(TypePtr::Tag::ClassType, rawPtr);
             CHECK_EQ(TypePtr::Tag::ClassType, ptr.tag());
-            CHECK_EQ(rawPtr, ptr.get());
+            CHECK_EQ(rawPtr, TypePtrTestHelper::get(ptr));
         }
 
         // This tag is > 8
@@ -211,7 +215,7 @@ TEST_SUITE("TypePtr") {
             auto rawPtr = new BlamedUntyped(Symbols::untyped());
             auto ptr = TypePtrTestHelper::create(TypePtr::Tag::BlamedUntyped, rawPtr);
             CHECK_EQ(TypePtr::Tag::BlamedUntyped, ptr.tag());
-            CHECK_EQ(rawPtr, ptr.get());
+            CHECK_EQ(rawPtr, TypePtrTestHelper::get(ptr));
         }
     }
 }

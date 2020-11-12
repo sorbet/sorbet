@@ -184,14 +184,6 @@ struct Intrinsic {
 };
 extern const std::vector<Intrinsic> intrinsicMethods;
 
-class Type {
-public:
-    Type() = default;
-    Type(const Type &obj) = delete;
-    virtual ~Type() = default;
-};
-CheckSize(Type, 8, 8);
-
 template <class To> bool isa_type(const TypePtr &what) {
     return what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value;
 }
@@ -287,9 +279,9 @@ template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
     template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
     class __attribute__((aligned(8))) name
 
-class GroundType : public Type {};
+class GroundType {};
 
-class ProxyType : public Type {
+class ProxyType {
 public:
     // TODO: use shared pointers that use inline counter
     virtual TypePtr underlying() const = 0;
@@ -315,13 +307,13 @@ public:
     bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(ClassType, 16, 8);
+CheckSize(ClassType, 8, 8);
 
 /*
  * This is the type used to represent a use of a type_member or type_template in
  * a signature.
  */
-TYPE(LambdaParam) final : public Type {
+TYPE(LambdaParam) final {
 public:
     SymbolRef definition;
 
@@ -341,9 +333,9 @@ public:
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
 };
-CheckSize(LambdaParam, 48, 8);
+CheckSize(LambdaParam, 40, 8);
 
-TYPE(SelfTypeParam) final : public Type {
+TYPE(SelfTypeParam) final {
 public:
     SymbolRef definition;
 
@@ -356,9 +348,9 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(SelfTypeParam, 16, 8);
+CheckSize(SelfTypeParam, 8, 8);
 
-TYPE(AliasType) final : public Type {
+TYPE(AliasType) final {
 public:
     AliasType(SymbolRef other);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -368,13 +360,13 @@ public:
     SymbolRef symbol;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(AliasType, 16, 8);
+CheckSize(AliasType, 8, 8);
 
 /** This is a specific kind of self-type that should only be used in method return position.
  * It indicates that the method may(or will) return `self` or type that behaves equivalently
  * to self(e.g. in case of `.clone`).
  */
-TYPE(SelfType) final : public Type {
+TYPE(SelfType) final {
 public:
     SelfType();
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -413,7 +405,7 @@ CheckSize(LiteralType, 24, 8);
 /*
  * TypeVars are the used for the type parameters of generic methods.
  */
-TYPE(TypeVar) final : public Type {
+TYPE(TypeVar) final {
 public:
     SymbolRef sym;
     TypeVar(SymbolRef sym);
@@ -426,7 +418,7 @@ public:
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 };
-CheckSize(TypeVar, 16, 8);
+CheckSize(TypeVar, 8, 8);
 
 TYPE(OrType) final : public GroundType {
 public:
@@ -468,7 +460,7 @@ private:
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type *, 4> &typeFilter);
+    friend TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<TypePtr, 4> &typeFilter);
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, SymbolRef klass);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
     friend class Symbol; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef
@@ -476,7 +468,7 @@ private:
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
-CheckSize(OrType, 40, 8);
+CheckSize(OrType, 32, 8);
 
 TYPE(AndType) final : public GroundType {
 public:
@@ -517,7 +509,7 @@ private:
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
-CheckSize(AndType, 40, 8);
+CheckSize(AndType, 32, 8);
 
 TYPE(ShapeType) final : public ProxyType {
 public:
@@ -566,7 +558,7 @@ public:
 };
 CheckSize(TupleType, 48, 8);
 
-TYPE(AppliedType) final : public Type {
+TYPE(AppliedType) final {
 public:
     SymbolRef klass;
     std::vector<TypePtr> targs;
@@ -585,7 +577,7 @@ public:
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 };
-CheckSize(AppliedType, 40, 8);
+CheckSize(AppliedType, 32, 8);
 
 // MetaType is the type of a Type. You can think of it as generalization of
 // Ruby's singleton classes to Types; Just as `A.singleton_class` is the *type*

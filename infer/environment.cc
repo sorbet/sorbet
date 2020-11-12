@@ -145,7 +145,7 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, core
         auto fnd = absl::c_find_if(copy->yesTypeTests, [&](auto const &e) -> bool { return e.first == local; });
         if (fnd == copy->yesTypeTests.end()) {
             // add info from env to knowledge
-            ENFORCE(state.typeAndOrigins.type.get() != nullptr);
+            ENFORCE(state.typeAndOrigins.type != nullptr);
             // This handles code snippets such as
             //
             //    if (...)
@@ -219,11 +219,11 @@ void KnowledgeFact::sanityCheck() const {
         return;
     }
     for (auto &a : yesTypeTests) {
-        ENFORCE(a.second.get() != nullptr);
+        ENFORCE(a.second != nullptr);
         ENFORCE(!a.second.isUntyped());
     }
     for (auto &a : noTypeTests) {
-        ENFORCE(a.second.get() != nullptr);
+        ENFORCE(a.second != nullptr);
         ENFORCE(!a.second.isUntyped());
     }
 }
@@ -395,7 +395,7 @@ bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
         return false;
     }
     // We don't distinguish between nullptr and "not set"
-    return fnd->second.typeAndOrigins.type.get() != nullptr;
+    return fnd->second.typeAndOrigins.type != nullptr;
 }
 
 const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const {
@@ -403,7 +403,7 @@ const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg
     if (fnd == _vars.end()) {
         return uninitialized;
     }
-    ENFORCE(fnd->second.typeAndOrigins.type.get() != nullptr);
+    ENFORCE(fnd->second.typeAndOrigins.type != nullptr);
     return fnd->second.typeAndOrigins;
 }
 
@@ -430,10 +430,10 @@ void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::L
         toState.knownTruthy = fromState.knownTruthy;
         auto &toKnowledge = toState.knowledge;
         auto &fromKnowledge = fromState.knowledge;
-        if (fromState.typeAndOrigins.type.get() == nullptr) {
+        if (fromState.typeAndOrigins.type == nullptr) {
             fromState.typeAndOrigins.type = core::Types::nilClass();
         }
-        if (toState.typeAndOrigins.type.get() == nullptr) {
+        if (toState.typeAndOrigins.type == nullptr) {
             toState.typeAndOrigins.type = core::Types::nilClass();
         }
 
@@ -585,8 +585,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &truthy = funIsEq ? whoKnows.truthy() : whoKnows.falsy();
         auto &falsy = funIsEq ? whoKnows.falsy() : whoKnows.truthy();
 
-        ENFORCE(argType.get() != nullptr);
-        ENFORCE(recvType.get() != nullptr);
+        ENFORCE(argType != nullptr);
+        ENFORCE(recvType != nullptr);
         if (!argType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
         }
@@ -662,7 +662,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 }
 
 void Environment::setTypeAndOrigin(cfg::LocalRef symbol, const core::TypeAndOrigins &typeAndOrigins) {
-    ENFORCE(typeAndOrigins.type.get() != nullptr);
+    ENFORCE(typeAndOrigins.type != nullptr);
     _vars[symbol].typeAndOrigins = typeAndOrigins;
 }
 
@@ -763,7 +763,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
         auto var = pair.first;
         const auto &otherTO = other.getTypeAndOrigin(ctx, var);
         auto &thisTO = pair.second.typeAndOrigins;
-        if (thisTO.type.get() != nullptr) {
+        if (thisTO.type != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
             thisTO.type.sanityCheck(ctx);
             for (auto origin : otherTO.origins) {
@@ -1035,7 +1035,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     tp.type = singletonClass.data(ctx)->externalType();
                     tp.origins.emplace_back(symbol.data(ctx)->loc());
                 } else if (data->isField() || (data->isStaticField() && !data->isTypeAlias()) || data->isTypeMember()) {
-                    if (data->resultType.get() != nullptr) {
+                    if (data->resultType != nullptr) {
                         if (data->isTypeMember()) {
                             if (data->isFixed()) {
                                 // pick the upper bound here, as
@@ -1060,7 +1060,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         tp.type = core::Types::untyped(ctx, symbol);
                     }
                 } else if (data->isTypeAlias()) {
-                    ENFORCE(data->resultType.get() != nullptr);
+                    ENFORCE(data->resultType != nullptr);
                     tp.origins.emplace_back(data->loc());
                     tp.type = core::make_type<core::MetaType>(data->resultType);
                 } else {
@@ -1284,7 +1284,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
             });
 
-        ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: {}", bind.value->toString(ctx, inWhat));
+        ENFORCE(tp.type != nullptr, "Inferencer did not assign type: {}", bind.value->toString(ctx, inWhat));
         tp.type.sanityCheck(ctx);
 
         if (checkFullyDefined && !tp.type.isFullyDefined()) {
@@ -1431,7 +1431,7 @@ void Environment::initializeBasicBlockArgs(const cfg::BasicBlock &bb) {
 
 void Environment::setUninitializedVarsToNil(const core::Context &ctx, core::Loc origin) {
     for (auto &uninitialized : _vars) {
-        if (uninitialized.second.typeAndOrigins.type.get() == nullptr) {
+        if (uninitialized.second.typeAndOrigins.type == nullptr) {
             uninitialized.second.typeAndOrigins.type = core::Types::nilClass();
             uninitialized.second.typeAndOrigins.origins.emplace_back(origin);
         } else {

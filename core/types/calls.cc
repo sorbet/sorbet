@@ -520,7 +520,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod);
         if (e) {
             string thisStr = args.thisType.show(gs);
-            if (args.fullType.get() != args.thisType.get()) {
+            if (args.fullType != args.thisType) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(gs)->show(gs),
                             thisStr, args.fullType.show(gs));
             } else {
@@ -825,7 +825,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                        errors::Infer::MethodArgumentCountMismatch)) {
-                if (args.fullType.get() != args.thisType.get()) {
+                if (args.fullType != args.thisType) {
                     e.setHeader(
                         "Not enough arguments provided for method `{}` on `{}` component of `{}`. Expected: `{}`, got: "
                         "`{}`",
