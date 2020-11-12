@@ -741,10 +741,17 @@ core::SymbolRef Types::getRepresentedClass(const GlobalState &gs, const TypePtr 
 }
 
 DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) const {
-    return DispatchArgs{name, locs, numPosArgs, args, newSelfRef, fullType, newSelfRef, block, originForUninitialized};
+    return DispatchArgs{
+        name, locs, numPosArgs, args, newSelfRef, fullType, newSelfRef, block, originForUninitialized, suppressErrors};
 }
 
 DispatchArgs DispatchArgs::withThisRef(const TypePtr &newThisRef) const {
-    return DispatchArgs{name, locs, numPosArgs, args, selfType, fullType, newThisRef, block, originForUninitialized};
+    return DispatchArgs{
+        name, locs, numPosArgs, args, selfType, fullType, newThisRef, block, originForUninitialized, suppressErrors};
+}
+
+DispatchArgs DispatchArgs::withErrorsSuppressed() const {
+    return DispatchArgs{name, locs, numPosArgs, args, selfType, fullType, thisType, block, originForUninitialized,
+                        true};
 }
 } // namespace sorbet::core

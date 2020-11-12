@@ -58,8 +58,9 @@ bool allComponentsPresent(DispatchResult &res) {
 
 DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "andtype");
-    auto leftRet = left.dispatchCall(gs, args.withThisRef(left));
-    auto rightRet = right.dispatchCall(gs, args.withThisRef(right));
+    // Tell dispatchCall to not produce any dispatch-related errors. They are very expensive to produce.
+    auto leftRet = left.dispatchCall(gs, args.withThisRef(left).withErrorsSuppressed());
+    auto rightRet = right.dispatchCall(gs, args.withThisRef(right).withErrorsSuppressed());
 
     // If either side is missing the method, dispatch to the other.
     auto leftOk = allComponentsPresent(leftRet);
@@ -69,6 +70,11 @@ DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &
     }
     if (rightOk && !leftOk) {
         return rightRet;
+    }
+    if (!rightOk && !leftOk) {
+        // Expensive case. Re-dispatch the calls with errors enabled so we can give the user an error.
+        leftRet = left.dispatchCall(gs, args.withThisRef(left));
+        rightRet = right.dispatchCall(gs, args.withThisRef(right));
     }
     DispatchResult ret{Types::all(gs, leftRet.returnType, rightRet.returnType), move(leftRet.main),
                        make_unique<DispatchResult>(move(rightRet)),
@@ -484,8 +490,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noSymbol());
     } else if (symbol == Symbols::void_()) {
-        if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
-            e.setHeader("Can not call method `{}` on void type", args.name.data(gs)->show(gs));
+        if (!args.suppressErrors) {
+            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
+                e.setHeader("Can not call method `{}` on void type", args.name.data(gs)->show(gs));
+            }
         }
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
     }
@@ -499,7 +507,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // putting it there will inadvertently shadow real definitions in
             // some cases, so we special-case it here as a last resort.
             auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
-            if (!args.args.empty()) {
+            if (!args.args.empty() && !args.suppressErrors) {
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0,
@@ -512,6 +520,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+        if (args.suppressErrors) {
+            // Short circuit here to avoid constructing an expensive error message.
+            return result;
+        }
         // This is a hack. We want to always be able to build the error object
         // so that it is not immediately sent to GlobalState::_error
         // and recorded.
