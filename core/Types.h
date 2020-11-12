@@ -677,9 +677,14 @@ struct DispatchArgs {
     const TypePtr &thisType;
     const std::shared_ptr<const SendAndBlockLink> &block;
     Loc originForUninitialized;
+    // Do not produce dispatch-related errors while evaluating the call. This is a performance optimization, as there
+    // are cases where we call dispatchCall with no intention of showing the errors to the user. Producing those
+    // unreported errors is expensive!
+    bool suppressErrors = false;
 
     DispatchArgs withSelfRef(const TypePtr &newSelfRef) const;
     DispatchArgs withThisRef(const TypePtr &newThisRef) const;
+    DispatchArgs withErrorsSuppressed() const;
 };
 
 struct DispatchComponent {
