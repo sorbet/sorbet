@@ -19,13 +19,13 @@ using namespace std;
 
 namespace sorbet::core {
 
-DispatchResult ProxyType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult ProxyType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "proxytype");
     auto und = underlying();
     return und.dispatchCall(gs, args.withThisRef(und));
 }
 
-DispatchResult OrType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "ortype");
     auto leftRet = left.dispatchCall(gs, args.withSelfRef(left));
     auto rightRet = right.dispatchCall(gs, args.withSelfRef(right));
@@ -56,7 +56,7 @@ bool allComponentsPresent(DispatchResult &res) {
     return allComponentsPresent(*res.secondary);
 }
 
-DispatchResult AndType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "andtype");
     auto leftRet = left.dispatchCall(gs, args.withThisRef(left));
     auto rightRet = right.dispatchCall(gs, args.withThisRef(right));
@@ -90,7 +90,7 @@ TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name) const {
     return Types::any(gs, l, r);
 }
 
-DispatchResult ShapeType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
@@ -104,7 +104,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, DispatchArgs args)
     return ProxyType::dispatchCall(gs, args);
 }
 
-DispatchResult TupleType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
@@ -478,7 +478,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalSta
 //  - We never allow a non-shaped Hash to satisfy keyword arguments;
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : untyped
 //    (with a subtype check on the key type, once we have generics)
-DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core::SymbolRef symbol,
+DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::SymbolRef symbol,
                                   const vector<TypePtr> &targs) {
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
@@ -1061,13 +1061,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     return result;
 }
 
-DispatchResult ClassType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult ClassType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "classtype");
     vector<TypePtr> empty;
     return dispatchCallSymbol(gs, args, symbol, empty);
 }
 
-DispatchResult AppliedType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "appliedType");
     return dispatchCallSymbol(gs, args, this->klass, this->targs);
 }
@@ -1113,7 +1113,7 @@ TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const
     return getMethodArguments(gs, klass, name, targs);
 }
 
-DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     switch (args.name._id) {
         case Names::new_()._id: {
             auto innerArgs = DispatchArgs{Names::initialize(),

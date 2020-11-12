@@ -21,8 +21,8 @@ namespace sorbet::core {
 
 using namespace std;
 
-TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &recv, DispatchArgs args) {
-    auto dispatched = recv.dispatchCall(gs, move(args));
+TypePtr Types::dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &recv, const DispatchArgs &args) {
+    auto dispatched = recv.dispatchCall(gs, args);
     auto link = &dispatched;
     while (link != nullptr) {
         for (auto &err : link->main.errors) {
@@ -588,7 +588,7 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     return false;
 }
 
-DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+DispatchResult SelfTypeParam::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     auto untypedUntracked = Types::untypedUntracked();
     return untypedUntracked.dispatchCall(gs, args.withThisRef(untypedUntracked));
 }
