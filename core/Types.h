@@ -677,9 +677,9 @@ struct DispatchArgs {
     const TypePtr &thisType;
     const std::shared_ptr<const SendAndBlockLink> &block;
     Loc originForUninitialized;
-    // Special option used for AndType::dispatchCall: Do not produce dispatch-related errors while evaluating the call.
-    // AndTypes only require one of their component types to handle the call, so failure is the common case -- and
-    // producing good error messages is expensive!
+    // Do not produce dispatch-related errors while evaluating the call. This is a performance optimization, as there
+    // are cases where we call dispatchCall with no intention of showing the errors to the user. Producing those
+    // unreported errors is expensive!
     bool suppressErrors = false;
 
     DispatchArgs withSelfRef(const TypePtr &newSelfRef) const;
