@@ -217,7 +217,16 @@ inline bool is_ground_type(const TypePtr &what) {
         case TypePtr::Tag::OrType:
         case TypePtr::Tag::AndType:
             return true;
-        default:
+        case TypePtr::Tag::LiteralType:
+        case TypePtr::Tag::ShapeType:
+        case TypePtr::Tag::TupleType:
+        case TypePtr::Tag::MetaType:
+        case TypePtr::Tag::LambdaParam:
+        case TypePtr::Tag::SelfTypeParam:
+        case TypePtr::Tag::SelfType:
+        case TypePtr::Tag::AliasType:
+        case TypePtr::Tag::AppliedType:
+        case TypePtr::Tag::TypeVar:
             return false;
     }
 }
@@ -232,7 +241,18 @@ inline bool is_proxy_type(const TypePtr &what) {
         case TypePtr::Tag::TupleType:
         case TypePtr::Tag::MetaType:
             return true;
-        default:
+        case TypePtr::Tag::ClassType:
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::UnresolvedAppliedType:
+        case TypePtr::Tag::OrType:
+        case TypePtr::Tag::AndType:
+        case TypePtr::Tag::LambdaParam:
+        case TypePtr::Tag::SelfTypeParam:
+        case TypePtr::Tag::SelfType:
+        case TypePtr::Tag::AliasType:
+        case TypePtr::Tag::AppliedType:
+        case TypePtr::Tag::TypeVar:
             return false;
     }
 }
