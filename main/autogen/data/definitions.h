@@ -8,6 +8,31 @@ namespace sorbet::autogen {
 // The types defined here are simplified views of class and constant definitions in a Ruby codebase, which we use to
 // create static output information and autoloader files
 
+// A `QualifiedName` is a vector of namerefs that includes the fully-qualified name as well as an optional package name
+// (if we're running in `--stripe-packages` mode)
+struct QualifiedName {
+    std::vector<core::NameRef> nameParts;
+    std::optional<core::NameRef> package;
+
+    static QualifiedName fromFullName(std::vector<core::NameRef> fullName);
+
+    bool empty() const {
+        return nameParts.empty();
+    }
+
+    u4 size() const {
+        return nameParts.size();
+    }
+
+    bool operator==(const QualifiedName &rhs) const {
+        return nameParts == rhs.nameParts && package == rhs.package;
+    }
+
+    core::NameRef name() const {
+        return nameParts.back();
+    }
+};
+
 const u4 NONE_ID = (u4)-1;
 
 struct ParsedFile;
@@ -97,11 +122,11 @@ struct Reference {
     DefinitionRef scope;
 
     // its full qualified name
-    std::vector<core::NameRef> name;
+    QualifiedName name;
     // the full nesting of this constant. If it's a constant resolved from the root, this will be an empty vector
     std::vector<DefinitionRef> nesting;
     // the resolved name iff we have it from Sorbet
-    std::vector<core::NameRef> resolved;
+    QualifiedName resolved;
 
     // loc and definitionLoc will differ if this is a defining ref, otherwise they will be the same
     core::Loc loc;

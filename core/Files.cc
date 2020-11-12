@@ -177,6 +177,10 @@ bool File::isStdlib() const {
     return fileSigil(source()) == StrictLevel::Stdlib;
 }
 
+bool File::isPackage() const {
+    return sourceType == File::Type::Package;
+}
+
 vector<int> &File::lineBreaks() const {
     ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);

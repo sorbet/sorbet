@@ -10,14 +10,20 @@ namespace sorbet::autogen {
 // Contains same information as `realmain::options::AutoloaderConfig` except with `core::NameRef`s
 // instead of strings.
 struct AutoloaderConfig {
+    // Convert the autoloader config passed in from `realmain` to this `AutoloaderConfig`. Much of this is about
+    // converting `string`s to `NameRef`s
     static AutoloaderConfig enterConfig(core::GlobalState &gs, const realmain::options::AutoloaderConfig &cfg);
 
+    // `true` if the definition should have autoloads generated for it based on the `AutoloaderConfig`
     bool include(const NamedDefinition &) const;
+    // `true` if the file should have autoloads generated for it (i.e. it's a ruby source file that's not ignored)
     bool includePath(std::string_view path) const;
+    // `true` if the file should be required based on the provided configuration
     bool includeRequire(core::NameRef req) const;
     // Should definitions in this namespace be collapsed into their
     // parent if they all are from the same file?
     bool sameFileCollapsable(const std::vector<core::NameRef> &module) const;
+    // normalize the path relative to the provided prefixes
     std::string_view normalizePath(const core::GlobalState &gs, core::FileRef file) const;
 
     std::string rootDir;
@@ -38,12 +44,15 @@ struct AutoloaderConfig {
 };
 
 struct NamedDefinition {
+    // Convert an `autogen::DefinitionRef` to a `NamedDefinition`: this pulls the name, the parent definitions' name,
+    // the requirements, the path, and the _depth_ of the path (which can short-circuit comparison against another path)
     static NamedDefinition fromDef(const core::GlobalState &, ParsedFile &, DefinitionRef);
+    // Used for sorting `NamedDefinition`
     static bool preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs);
 
     Definition def;
-    std::vector<core::NameRef> nameParts;
-    std::vector<core::NameRef> parentName;
+    QualifiedName qname;
+    QualifiedName parentName;
     std::vector<core::NameRef> requires;
     core::FileRef fileRef;
     u4 pathDepth;
@@ -66,7 +75,7 @@ public:
     // rules.
     std::vector<NamedDefinition> namedDefs;
     std::unique_ptr<NamedDefinition> nonBehaviorDef;
-    std::vector<core::NameRef> nameParts;
+    QualifiedName qname;
 
     bool root() const;
     core::NameRef name() const;

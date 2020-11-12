@@ -215,7 +215,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                 ++n;
                 auto &tree = indexed[idx];
-                if (tree.file.data(gs).isRBI()) {
+                if (tree.file.data(gs).isRBI() || tree.file.data(gs).isPackage()) {
                     continue;
                 }
 
@@ -532,7 +532,9 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
 
+            indexed = pipeline::package(*gs, move(indexed), opts, *workers);
             indexed = move(pipeline::name(*gs, move(indexed), opts, *workers).result());
+
             autogen::AutoloaderConfig autoloaderCfg;
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);

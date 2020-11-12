@@ -94,7 +94,7 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
     packDefinitionRef(ref.scope.id());
 
     // name
-    packNames(ref.name);
+    packNames(ref.name.nameParts);
 
     // nesting
     mpack_start_array(&writer, ref.nesting.size());
@@ -113,7 +113,7 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
     if (ref.resolved.empty()) {
         mpack_write_nil(&writer);
     } else {
-        packNames(ref.resolved);
+        packNames(ref.resolved.nameParts);
     }
 
     // is_defining_ref

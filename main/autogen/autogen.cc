@@ -65,6 +65,11 @@ public:
         }
         scopeTypes.emplace_back(ScopeType::Class);
 
+        if (original.symbol.data(ctx)->owner == core::Symbols::PackageRegistry()) {
+            // this is a package, so do not enter a definition for it
+            return tree;
+        }
+
         // create a new `Definition`
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
@@ -216,10 +221,10 @@ public:
         // to the definition of the constant, because in that case we'll later on extend the location to cover the whole
         // class or assignment
         ref.definitionLoc = core::Loc(ctx.file, original->loc);
-        ref.name = constantName(ctx, original);
+        ref.name = QualifiedName::fromFullName(constantName(ctx, original));
         auto sym = original->symbol;
         if (!sym.data(ctx)->isClassOrModule() || sym != core::Symbols::StubModule()) {
-            ref.resolved = symbolName(ctx, sym);
+            ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
         }
         ref.is_resolved_statically = true;
         ref.is_defining_ref = false;
