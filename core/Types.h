@@ -222,8 +222,7 @@ inline bool is_ground_type(const TypePtr &what) {
     }
 }
 
-class ProxyType;
-template <> inline bool isa_type<ProxyType>(const TypePtr &what) {
+inline bool is_proxy_type(const TypePtr &what) {
     if (what == nullptr) {
         return false;
     }
@@ -277,19 +276,6 @@ template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
     class name;                                                                                                \
     template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
     class __attribute__((aligned(8))) name
-
-class ProxyType {
-public:
-    // TODO: use shared pointers that use inline counter
-    virtual TypePtr underlying() const = 0;
-    ProxyType() = default;
-
-    DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
-
-    void _sanityCheck(const GlobalState &gs) const;
-};
-CheckSize(ProxyType, 8, 8);
 
 TYPE(ClassType) {
 public:
@@ -377,7 +363,7 @@ public:
 };
 CheckSize(SelfType, 8, 8);
 
-TYPE(LiteralType) final : public ProxyType {
+TYPE(LiteralType) final {
 public:
     union {
         const int64_t value;
@@ -389,13 +375,16 @@ public:
     LiteralType(int64_t val);
     LiteralType(double val);
     LiteralType(SymbolRef klass, NameRef val);
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
+    bool derivesFrom(const GlobalState &gs, core::SymbolRef klass) const;
+    DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     virtual std::string showValue(const GlobalState &gs) const final;
 
     bool equals(const LiteralType &rhs) const;
+    void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(LiteralType, 24, 8);
 
@@ -508,7 +497,7 @@ private:
 };
 CheckSize(AndType, 32, 8);
 
-TYPE(ShapeType) final : public ProxyType {
+TYPE(ShapeType) final {
 public:
     std::vector<TypePtr> keys; // TODO: store sorted by whatever
     std::vector<TypePtr> values;
@@ -524,11 +513,12 @@ public:
                          const std::vector<TypePtr> &targs) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
+    bool derivesFrom(const GlobalState &gs, core::SymbolRef klass) const;
 };
-CheckSize(ShapeType, 72, 8);
+CheckSize(ShapeType, 64, 8);
 
-TYPE(TupleType) final : public ProxyType {
+TYPE(TupleType) final {
 private:
     TupleType() = delete;
 
@@ -551,9 +541,10 @@ public:
 
     // Return the type of the underlying array that this tuple decays into
     TypePtr elementType() const;
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
+    bool derivesFrom(const GlobalState &gs, core::SymbolRef klass) const;
 };
-CheckSize(TupleType, 48, 8);
+CheckSize(TupleType, 40, 8);
 
 TYPE(AppliedType) final {
 public:
@@ -584,7 +575,7 @@ CheckSize(AppliedType, 32, 8);
 //
 // These are used within the inferencer in places where we need to track
 // user-written types in the source code.
-TYPE(MetaType) final : public ProxyType {
+TYPE(MetaType) final {
 public:
     TypePtr wrapped;
 
@@ -599,9 +590,9 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
 
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
 };
-CheckSize(MetaType, 24, 8);
+CheckSize(MetaType, 16, 8);
 
 class SendAndBlockLink {
     SendAndBlockLink(const SendAndBlockLink &) = default;

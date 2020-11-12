@@ -50,6 +50,11 @@ GENERATE_CALL_MEMBER(_replaceSelfType, return nullptr, declval<const GlobalState
 
 GENERATE_CALL_MEMBER(_approximate, return nullptr, declval<const GlobalState &>(), declval<const TypeConstraint &>())
 
+GENERATE_CALL_MEMBER(underlying,
+                     Exception::raise("should never happen: underlying on {}",
+                                      TypePtr::tagToString(TypePtr::TypeToTag<typename remove_const<T>::type>::value));
+                     return nullptr);
+
 } // namespace
 
 void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
@@ -219,8 +224,7 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::TupleType:
         case Tag::ShapeType:
         case Tag::LiteralType: {
-            auto &p = cast_type_nonnull<ProxyType>(*this);
-            return p.underlying().getCallArguments(gs, name);
+            return this->underlying().getCallArguments(gs, name);
         }
         case Tag::OrType: {
             auto &orType = cast_type_nonnull<OrType>(*this);
@@ -343,6 +347,12 @@ DispatchResult TypePtr::dispatchCall(const GlobalState &gs, DispatchArgs args) c
 #define DISPATCH_CALL(T) return CALL_MEMBER_dispatchCall<const T>::call(cast_type_nonnull<T>(*this), gs, args);
     GENERATE_TAG_SWITCH(tag(), DISPATCH_CALL)
 #undef DISPATCH_CALL
+}
+
+TypePtr TypePtr::underlying() const {
+#define UNDERLYING(T) return CALL_MEMBER_underlying<const T>::call(cast_type_nonnull<T>(*this));
+    GENERATE_TAG_SWITCH(tag(), UNDERLYING)
+#undef UNDERLYING
 }
 
 } // namespace sorbet::core
