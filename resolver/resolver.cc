@@ -1462,7 +1462,7 @@ public:
             }
         }
 
-        // Sort items for deterministic execution.
+        // Put files into a consistent order for subsequent passes.
         fast_sort(combined.files, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
 
         for (auto &job : combined.todoAttachedClassItems) {
