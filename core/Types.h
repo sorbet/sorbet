@@ -184,14 +184,6 @@ struct Intrinsic {
 };
 extern const std::vector<Intrinsic> intrinsicMethods;
 
-class Type {
-public:
-    Type() = default;
-    Type(const Type &obj) = delete;
-    virtual ~Type() = default;
-};
-CheckSize(Type, 8, 8);
-
 template <class To> bool isa_type(const TypePtr &what) {
     return what != nullptr && what.tag() == TypePtr::TypeToTag<To>::value;
 }
@@ -213,8 +205,7 @@ template <> inline bool isa_type<ClassType>(const TypePtr &what) {
     }
 }
 
-class GroundType;
-template <> inline bool isa_type<GroundType>(const TypePtr &what) {
+inline bool is_ground_type(const TypePtr &what) {
     if (what == nullptr) {
         return false;
     }
@@ -226,13 +217,21 @@ template <> inline bool isa_type<GroundType>(const TypePtr &what) {
         case TypePtr::Tag::OrType:
         case TypePtr::Tag::AndType:
             return true;
-        default:
+        case TypePtr::Tag::LiteralType:
+        case TypePtr::Tag::ShapeType:
+        case TypePtr::Tag::TupleType:
+        case TypePtr::Tag::MetaType:
+        case TypePtr::Tag::LambdaParam:
+        case TypePtr::Tag::SelfTypeParam:
+        case TypePtr::Tag::SelfType:
+        case TypePtr::Tag::AliasType:
+        case TypePtr::Tag::AppliedType:
+        case TypePtr::Tag::TypeVar:
             return false;
     }
 }
 
-class ProxyType;
-template <> inline bool isa_type<ProxyType>(const TypePtr &what) {
+inline bool is_proxy_type(const TypePtr &what) {
     if (what == nullptr) {
         return false;
     }
@@ -242,7 +241,18 @@ template <> inline bool isa_type<ProxyType>(const TypePtr &what) {
         case TypePtr::Tag::TupleType:
         case TypePtr::Tag::MetaType:
             return true;
-        default:
+        case TypePtr::Tag::ClassType:
+        case TypePtr::Tag::BlamedUntyped:
+        case TypePtr::Tag::UnresolvedClassType:
+        case TypePtr::Tag::UnresolvedAppliedType:
+        case TypePtr::Tag::OrType:
+        case TypePtr::Tag::AndType:
+        case TypePtr::Tag::LambdaParam:
+        case TypePtr::Tag::SelfTypeParam:
+        case TypePtr::Tag::SelfType:
+        case TypePtr::Tag::AliasType:
+        case TypePtr::Tag::AppliedType:
+        case TypePtr::Tag::TypeVar:
             return false;
     }
 }
@@ -287,22 +297,7 @@ template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
     template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
     class __attribute__((aligned(8))) name
 
-class GroundType : public Type {};
-
-class ProxyType : public Type {
-public:
-    // TODO: use shared pointers that use inline counter
-    virtual TypePtr underlying() const = 0;
-    ProxyType() = default;
-
-    DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
-
-    void _sanityCheck(const GlobalState &gs) const;
-};
-CheckSize(ProxyType, 8, 8);
-
-TYPE(ClassType) : public GroundType {
+TYPE(ClassType) {
 public:
     SymbolRef symbol;
     ClassType(SymbolRef symbol);
@@ -315,13 +310,13 @@ public:
     bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(ClassType, 16, 8);
+CheckSize(ClassType, 8, 8);
 
 /*
  * This is the type used to represent a use of a type_member or type_template in
  * a signature.
  */
-TYPE(LambdaParam) final : public Type {
+TYPE(LambdaParam) final {
 public:
     SymbolRef definition;
 
@@ -341,9 +336,9 @@ public:
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
 };
-CheckSize(LambdaParam, 48, 8);
+CheckSize(LambdaParam, 40, 8);
 
-TYPE(SelfTypeParam) final : public Type {
+TYPE(SelfTypeParam) final {
 public:
     SymbolRef definition;
 
@@ -356,9 +351,9 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(SelfTypeParam, 16, 8);
+CheckSize(SelfTypeParam, 8, 8);
 
-TYPE(AliasType) final : public Type {
+TYPE(AliasType) final {
 public:
     AliasType(SymbolRef other);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -368,13 +363,13 @@ public:
     SymbolRef symbol;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(AliasType, 16, 8);
+CheckSize(AliasType, 8, 8);
 
 /** This is a specific kind of self-type that should only be used in method return position.
  * It indicates that the method may(or will) return `self` or type that behaves equivalently
  * to self(e.g. in case of `.clone`).
  */
-TYPE(SelfType) final : public Type {
+TYPE(SelfType) final {
 public:
     SelfType();
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -388,7 +383,7 @@ public:
 };
 CheckSize(SelfType, 8, 8);
 
-TYPE(LiteralType) final : public ProxyType {
+TYPE(LiteralType) final {
 public:
     union {
         const int64_t value;
@@ -400,20 +395,23 @@ public:
     LiteralType(int64_t val);
     LiteralType(double val);
     LiteralType(SymbolRef klass, NameRef val);
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
+    bool derivesFrom(const GlobalState &gs, core::SymbolRef klass) const;
+    DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     virtual std::string showValue(const GlobalState &gs) const final;
 
     bool equals(const LiteralType &rhs) const;
+    void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(LiteralType, 24, 8);
 
 /*
  * TypeVars are the used for the type parameters of generic methods.
  */
-TYPE(TypeVar) final : public Type {
+TYPE(TypeVar) final {
 public:
     SymbolRef sym;
     TypeVar(SymbolRef sym);
@@ -426,9 +424,9 @@ public:
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 };
-CheckSize(TypeVar, 16, 8);
+CheckSize(TypeVar, 8, 8);
 
-TYPE(OrType) final : public GroundType {
+TYPE(OrType) final {
 public:
     TypePtr left;
     TypePtr right;
@@ -468,7 +466,7 @@ private:
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<Type *, 4> &typeFilter);
+    friend TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<TypePtr, 4> &typeFilter);
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, SymbolRef klass);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
     friend class Symbol; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef
@@ -476,9 +474,9 @@ private:
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
-CheckSize(OrType, 40, 8);
+CheckSize(OrType, 32, 8);
 
-TYPE(AndType) final : public GroundType {
+TYPE(AndType) final {
 public:
     TypePtr left;
     TypePtr right;
@@ -517,9 +515,9 @@ private:
 
     static TypePtr make_shared(const TypePtr &left, const TypePtr &right);
 };
-CheckSize(AndType, 40, 8);
+CheckSize(AndType, 32, 8);
 
-TYPE(ShapeType) final : public ProxyType {
+TYPE(ShapeType) final {
 public:
     std::vector<TypePtr> keys; // TODO: store sorted by whatever
     std::vector<TypePtr> values;
@@ -535,11 +533,12 @@ public:
                          const std::vector<TypePtr> &targs) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
+    bool derivesFrom(const GlobalState &gs, core::SymbolRef klass) const;
 };
-CheckSize(ShapeType, 72, 8);
+CheckSize(ShapeType, 64, 8);
 
-TYPE(TupleType) final : public ProxyType {
+TYPE(TupleType) final {
 private:
     TupleType() = delete;
 
@@ -562,11 +561,12 @@ public:
 
     // Return the type of the underlying array that this tuple decays into
     TypePtr elementType() const;
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
+    bool derivesFrom(const GlobalState &gs, core::SymbolRef klass) const;
 };
-CheckSize(TupleType, 48, 8);
+CheckSize(TupleType, 40, 8);
 
-TYPE(AppliedType) final : public Type {
+TYPE(AppliedType) final {
 public:
     SymbolRef klass;
     std::vector<TypePtr> targs;
@@ -585,7 +585,7 @@ public:
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 };
-CheckSize(AppliedType, 40, 8);
+CheckSize(AppliedType, 32, 8);
 
 // MetaType is the type of a Type. You can think of it as generalization of
 // Ruby's singleton classes to Types; Just as `A.singleton_class` is the *type*
@@ -595,7 +595,7 @@ CheckSize(AppliedType, 40, 8);
 //
 // These are used within the inferencer in places where we need to track
 // user-written types in the source code.
-TYPE(MetaType) final : public ProxyType {
+TYPE(MetaType) final {
 public:
     TypePtr wrapped;
 
@@ -610,9 +610,9 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
 
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
-    virtual TypePtr underlying() const override;
+    TypePtr underlying() const;
 };
-CheckSize(MetaType, 24, 8);
+CheckSize(MetaType, 16, 8);
 
 class SendAndBlockLink {
     SendAndBlockLink(const SendAndBlockLink &) = default;

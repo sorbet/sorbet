@@ -19,10 +19,27 @@ using namespace std;
 
 namespace sorbet::core {
 
-DispatchResult ProxyType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+namespace {
+DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "proxytype");
-    auto und = underlying();
     return und.dispatchCall(gs, args.withThisRef(und));
+}
+} // namespace
+
+bool LiteralType::derivesFrom(const GlobalState &gs, core::SymbolRef klass) const {
+    return underlying().derivesFrom(gs, klass);
+}
+
+bool ShapeType::derivesFrom(const GlobalState &gs, core::SymbolRef klass) const {
+    return underlying().derivesFrom(gs, klass);
+}
+
+bool TupleType::derivesFrom(const GlobalState &gs, core::SymbolRef klass) const {
+    return underlying().derivesFrom(gs, klass);
+}
+
+DispatchResult LiteralType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+    return dispatchCallProxyType(gs, underlying(), args);
 }
 
 DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
@@ -101,7 +118,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
             return res;
         }
     }
-    return ProxyType::dispatchCall(gs, args);
+    return dispatchCallProxyType(gs, underlying(), args);
 }
 
 DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
@@ -115,7 +132,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
             return res;
         }
     }
-    return ProxyType::dispatchCall(gs, args);
+    return dispatchCallProxyType(gs, underlying(), args);
 }
 
 namespace {
@@ -520,7 +537,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod);
         if (e) {
             string thisStr = args.thisType.show(gs);
-            if (args.fullType.get() != args.thisType.get()) {
+            if (args.fullType != args.thisType) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(gs)->show(gs),
                             thisStr, args.fullType.show(gs));
             } else {
@@ -825,7 +842,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                        errors::Infer::MethodArgumentCountMismatch)) {
-                if (args.fullType.get() != args.thisType.get()) {
+                if (args.fullType != args.thisType) {
                     e.setHeader(
                         "Not enough arguments provided for method `{}` on `{}` component of `{}`. Expected: `{}`, got: "
                         "`{}`",
@@ -1143,7 +1160,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                     }
                 }
             }
-            return ProxyType::dispatchCall(gs, args);
+            return dispatchCallProxyType(gs, underlying(), args);
     }
 }
 
@@ -1158,9 +1175,13 @@ SymbolRef unwrapSymbol(const TypePtr &type) {
 
             [&](const AppliedType &app) { result = app.klass; },
 
-            [&](const ProxyType &proxy) { typePtr = proxy.underlying(); },
-
-            [&](const TypePtr &ty) { ENFORCE(false, "Unexpected type: {}", ty.typeName()); });
+            [&](const TypePtr &ty) {
+                if (is_proxy_type(ty)) {
+                    typePtr = ty.underlying();
+                } else {
+                    ENFORCE(false, "Unexpected type: {}", ty.typeName());
+                }
+            });
     }
     return result;
 }

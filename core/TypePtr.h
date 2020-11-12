@@ -102,6 +102,16 @@ private:
 
     void _sanityCheck(const GlobalState &gs) const;
 
+    void *get() const {
+        auto val = store & PTR_MASK;
+        if constexpr (sizeof(void *) == 4) {
+            return reinterpret_cast<void *>(val);
+        } else {
+            // sign extension for the upper 16 bits
+            return reinterpret_cast<void *>((val << 16) >> 16);
+        }
+    }
+
 public:
     constexpr TypePtr() noexcept : counter(nullptr), store(0) {}
 
@@ -157,21 +167,6 @@ public:
         }
     }
 
-    Type *get() const {
-        auto val = store & PTR_MASK;
-        if constexpr (sizeof(void *) == 4) {
-            return reinterpret_cast<Type *>(val);
-        } else {
-            // sign extension for the upper 16 bits
-            return reinterpret_cast<Type *>((val << 16) >> 16);
-        }
-    }
-    Type *operator->() const {
-        return get();
-    }
-    Type &operator*() const {
-        return *get();
-    }
     bool operator!=(const TypePtr &other) const {
         return store != other.store;
     }
@@ -219,6 +214,9 @@ public:
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
 
+    // If this TypePtr `is_proxy_type`, returns its underlying type.
+    TypePtr underlying() const;
+
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string toString(const GlobalState &gs) const {
         return toStringWithTabs(gs);
@@ -236,6 +234,8 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
+    template <class To> friend To const *cast_type(const TypePtr &what);
+    template <class To> friend To const &cast_type_nonnull(const TypePtr &what);
     friend class TypePtrTestHelper;
 };
 CheckSize(TypePtr, 16, 8);
