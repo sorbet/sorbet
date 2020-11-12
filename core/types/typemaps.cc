@@ -57,15 +57,15 @@ TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc) c
 }
 
 namespace {
-template <typename... TransformArgs>
-optional<vector<TypePtr>> mungeArgs(const vector<TypePtr> &elems,
-                                    TypePtr (TypePtr::*method)(const TransformArgs &...) const,
-                                    const TransformArgs &... transformArgs) {
+template <typename... MethodArgs>
+optional<vector<TypePtr>> mungeElems(const vector<TypePtr> &elems,
+                                     TypePtr (TypePtr::*method)(const MethodArgs &...) const,
+                                     const MethodArgs &... methodArgs) {
     optional<vector<TypePtr>> newArgs;
     int i = -1;
     for (auto &e : elems) {
         ++i;
-        auto t = (e.*method)(transformArgs...);
+        auto t = (e.*method)(methodArgs...);
         if (!newArgs.has_value() && !t) {
             continue;
         }
@@ -92,7 +92,7 @@ optional<vector<TypePtr>> mungeArgs(const vector<TypePtr> &elems,
 
 TypePtr TupleType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                 const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newElems = mungeArgs(this->elems, &TypePtr::_instantiate, gs, params, targs);
+    optional<vector<TypePtr>> newElems = mungeElems(this->elems, &TypePtr::_instantiate, gs, params, targs);
     if (!newElems) {
         return nullptr;
     }
@@ -100,7 +100,7 @@ TypePtr TupleType::_instantiate(const GlobalState &gs, const InlinedVector<Symbo
 }
 
 TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    optional<vector<TypePtr>> newElems = mungeArgs(this->elems, &TypePtr::_instantiate, gs, tc);
+    optional<vector<TypePtr>> newElems = mungeElems(this->elems, &TypePtr::_instantiate, gs, tc);
     if (!newElems) {
         return nullptr;
     }
@@ -108,7 +108,7 @@ TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc)
 }
 
 TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
-    optional<vector<TypePtr>> newElems = mungeArgs(this->elems, &TypePtr::_approximate, gs, tc);
+    optional<vector<TypePtr>> newElems = mungeElems(this->elems, &TypePtr::_approximate, gs, tc);
     if (!newElems) {
         return nullptr;
     }
@@ -117,7 +117,7 @@ TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc)
 
 TypePtr ShapeType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                 const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newValues = mungeArgs(this->values, &TypePtr::_instantiate, gs, params, targs);
+    optional<vector<TypePtr>> newValues = mungeElems(this->values, &TypePtr::_instantiate, gs, params, targs);
     if (!newValues) {
         return nullptr;
     }
@@ -125,7 +125,7 @@ TypePtr ShapeType::_instantiate(const GlobalState &gs, const InlinedVector<Symbo
 }
 
 TypePtr ShapeType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    optional<vector<TypePtr>> newValues = mungeArgs(this->values, &TypePtr::_instantiate, gs, tc);
+    optional<vector<TypePtr>> newValues = mungeElems(this->values, &TypePtr::_instantiate, gs, tc);
     if (!newValues) {
         return nullptr;
     }
@@ -133,7 +133,7 @@ TypePtr ShapeType::_instantiate(const GlobalState &gs, const TypeConstraint &tc)
 }
 
 TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
-    optional<vector<TypePtr>> newValues = mungeArgs(this->values, &TypePtr::_approximate, gs, tc);
+    optional<vector<TypePtr>> newValues = mungeElems(this->values, &TypePtr::_approximate, gs, tc);
     if (!newValues) {
         return nullptr;
     }
@@ -234,7 +234,7 @@ TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc) c
 
 TypePtr AppliedType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                   const vector<TypePtr> &targs) const {
-    optional<vector<TypePtr>> newTargs = mungeArgs(this->targs, &TypePtr::_instantiate, gs, params, targs);
+    optional<vector<TypePtr>> newTargs = mungeElems(this->targs, &TypePtr::_instantiate, gs, params, targs);
     if (!newTargs) {
         return nullptr;
     }
@@ -242,7 +242,7 @@ TypePtr AppliedType::_instantiate(const GlobalState &gs, const InlinedVector<Sym
 }
 
 TypePtr AppliedType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    optional<vector<TypePtr>> newTargs = mungeArgs(this->targs, &TypePtr::_instantiate, gs, tc);
+    optional<vector<TypePtr>> newTargs = mungeElems(this->targs, &TypePtr::_instantiate, gs, tc);
     if (!newTargs) {
         return nullptr;
     }
@@ -250,7 +250,7 @@ TypePtr AppliedType::_instantiate(const GlobalState &gs, const TypeConstraint &t
 }
 
 TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
-    optional<vector<TypePtr>> newTargs = mungeArgs(this->targs, &TypePtr::_approximate, gs, tc);
+    optional<vector<TypePtr>> newTargs = mungeElems(this->targs, &TypePtr::_approximate, gs, tc);
     if (!newTargs) {
         return nullptr;
     }
