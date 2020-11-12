@@ -23,6 +23,7 @@
 #include "rewriter/Regexp.h"
 #include "rewriter/SelfNew.h"
 #include "rewriter/SigRewriter.h"
+#include "rewriter/Singleton.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
@@ -118,6 +119,12 @@ public:
 
                     // This one is also a little different: it gets the ClassDef kind
                     nodes = Mattr::run(ctx, &send, classDef->kind);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = Singleton::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
