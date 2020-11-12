@@ -1038,7 +1038,14 @@ class ResolveTypeMembersWalk {
         core::FileRef file;
     };
 
+    struct ResolveAttachedClassItem {
+        core::SymbolRef owner;
+        core::SymbolRef klass;
+        core::FileRef file;
+    };
+
     vector<ResolveAssignItem> todoAssigns_;
+    vector<ResolveAttachedClassItem> todoAttachedClassItems_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
@@ -1062,7 +1069,7 @@ class ResolveTypeMembersWalk {
         return todo != nullptr && todo->symbol == core::Symbols::todo();
     }
 
-    static bool isLHSResolved(core::MutableContext ctx, core::SymbolRef sym) {
+    static bool isLHSResolved(core::Context ctx, core::SymbolRef sym) {
         if (sym.data(ctx)->isTypeMember()) {
             auto *lambdaParam = core::cast_type<core::LambdaParam>(sym.data(ctx)->resultType);
             ENFORCE(lambdaParam != nullptr);
@@ -1075,7 +1082,7 @@ class ResolveTypeMembersWalk {
         }
     }
 
-    static bool isGenericResolved(core::MutableContext ctx, core::SymbolRef sym) {
+    static bool isGenericResolved(core::Context ctx, core::SymbolRef sym) {
         if (sym.data(ctx)->isClassOrModule()) {
             return absl::c_all_of(sym.data(ctx)->typeMembers(),
                                   [&](core::SymbolRef tm) { return isLHSResolved(ctx, tm); });
@@ -1258,20 +1265,20 @@ class ResolveTypeMembersWalk {
     }
 
 public:
-    ast::TreePtr preTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         // If this is a class with no type members defined, resolve attached
-        // class immediately. Otherwise, it will be resolved once all type
-        // members have been resolved as well.
+        // class. Otherwise, it will be resolved once all type members have been
+        // resolved as well.
         if (isGenericResolved(ctx, klass.symbol)) {
-            resolveAttachedClass(ctx, klass.symbol);
+            todoAttachedClassItems_.emplace_back(ResolveAttachedClassItem{ctx.owner, klass.symbol, ctx.file});
         }
 
         return tree;
     }
 
-    ast::TreePtr preTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         switch (send.fun._id) {
             case core::Names::typeAlias()._id:
@@ -1298,7 +1305,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
         if (trackDependencies_) {
@@ -1331,7 +1338,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (send.fun._id) {
@@ -1351,7 +1358,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformAssign(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
@@ -1385,10 +1392,7 @@ public:
             ENFORCE(send->fun == core::Names::typeAlias() || send->fun == core::Names::typeMember() ||
                     send->fun == core::Names::typeTemplate());
 
-            auto job = ResolveAssignItem{ctx.owner, sym, send, dependencies_, ctx.file};
-            if (!resolveJob(ctx, job)) {
-                todoAssigns_.emplace_back(std::move(job));
-            }
+            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, dependencies_, ctx.file});
         }
 
         trackDependencies_ = false;
@@ -1403,8 +1407,13 @@ public:
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         for (auto &tree : trees) {
-            core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
+            core::Context ctx(gs, core::Symbols::root(), tree.file);
             tree.tree = ast::ShallowMap::apply(ctx, walk, std::move(tree.tree));
+        }
+
+        for (auto &job : walk.todoAttachedClassItems_) {
+            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+            walk.resolveAttachedClass(ctx, job.klass);
         }
 
         // loop over any out-of-order type_member/type_alias references
