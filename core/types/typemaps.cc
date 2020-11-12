@@ -56,168 +56,88 @@ TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc) c
     return Types::top();
 }
 
+namespace {
+template <typename... TransformArgs>
+optional<vector<TypePtr>> mungeArgs(const vector<TypePtr> &elems,
+                                    TypePtr (TypePtr::*method)(const TransformArgs &...) const,
+                                    const TransformArgs &... transformArgs) {
+    optional<vector<TypePtr>> newArgs;
+    int i = -1;
+    for (auto &e : elems) {
+        ++i;
+        auto t = (e.*method)(transformArgs...);
+        if (!newArgs.has_value() && !t) {
+            continue;
+        }
+
+        if (!newArgs.has_value()) {
+            // Oops, need to fixup all the elements that should be there.
+            newArgs.emplace();
+            newArgs->reserve(elems.size());
+            for (int j = 0; j < i; ++j) {
+                newArgs->emplace_back(elems[j]);
+            }
+        }
+
+        if (!t) {
+            t = e;
+        }
+
+        ENFORCE(newArgs->size() == i);
+        newArgs->emplace_back(t);
+    }
+    return newArgs;
+}
+} // anonymous namespace
+
 TypePtr TupleType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                 const vector<TypePtr> &targs) const {
-    bool changed = false;
-    vector<TypePtr> newElems;
-    newElems.reserve(this->elems.size());
-    for (auto &a : this->elems) {
-        auto t = a._instantiate(gs, params, targs);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newElems.emplace_back(t);
-        } else {
-            newElems.emplace_back(nullptr);
-        }
+    optional<vector<TypePtr>> newElems = mungeArgs(this->elems, &TypePtr::_instantiate, gs, params, targs);
+    if (!newElems) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newElems[i]) {
-            newElems[i] = this->elems[i];
-            i++;
-        }
-        return TupleType::build(gs, move(newElems));
-    }
-    return nullptr;
+    return TupleType::build(gs, move(*newElems));
 }
 
 TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    bool changed = false;
-    vector<TypePtr> newElems;
-    newElems.reserve(this->elems.size());
-    for (auto &a : this->elems) {
-        auto t = a._instantiate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newElems.emplace_back(t);
-        } else {
-            newElems.emplace_back(nullptr);
-        }
+    optional<vector<TypePtr>> newElems = mungeArgs(this->elems, &TypePtr::_instantiate, gs, tc);
+    if (!newElems) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newElems[i]) {
-            newElems[i] = this->elems[i];
-            i++;
-        }
-        return TupleType::build(gs, move(newElems));
-    }
-    return nullptr;
+    return TupleType::build(gs, move(*newElems));
 }
 
 TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
-    bool changed = false;
-    vector<TypePtr> newElems;
-    newElems.reserve(this->elems.size());
-    for (auto &a : this->elems) {
-        auto t = a._approximate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newElems.emplace_back(t);
-        } else {
-            newElems.emplace_back(nullptr);
-        }
+    optional<vector<TypePtr>> newElems = mungeArgs(this->elems, &TypePtr::_approximate, gs, tc);
+    if (!newElems) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newElems[i]) {
-            newElems[i] = this->elems[i];
-            i++;
-        }
-        return TupleType::build(gs, move(newElems));
-    }
-    return nullptr;
+    return TupleType::build(gs, move(*newElems));
 };
 
 TypePtr ShapeType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                 const vector<TypePtr> &targs) const {
-    bool changed = false;
-    vector<TypePtr> newValues;
-    newValues.reserve(this->values.size());
-    for (auto &a : this->values) {
-        auto t = a._instantiate(gs, params, targs);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newValues.emplace_back(t);
-        } else {
-            newValues.emplace_back(nullptr);
-        }
+    optional<vector<TypePtr>> newValues = mungeArgs(this->values, &TypePtr::_instantiate, gs, params, targs);
+    if (!newValues) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newValues[i]) {
-            newValues[i] = this->values[i];
-            i++;
-        }
-        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(newValues));
-    }
-    return nullptr;
+    return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(*newValues));
 }
 
 TypePtr ShapeType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    bool changed = false;
-    vector<TypePtr> newValues;
-    newValues.reserve(this->values.size());
-    for (auto &a : this->values) {
-        auto t = a._instantiate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newValues.emplace_back(t);
-        } else {
-            newValues.emplace_back(nullptr);
-        }
+    optional<vector<TypePtr>> newValues = mungeArgs(this->values, &TypePtr::_instantiate, gs, tc);
+    if (!newValues) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newValues[i]) {
-            newValues[i] = this->values[i];
-            i++;
-        }
-        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(newValues));
-    }
-    return nullptr;
+    return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(*newValues));
 }
 
 TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
-    bool changed = false;
-    vector<TypePtr> newValues;
-    newValues.reserve(this->values.size());
-    for (auto &a : this->values) {
-        auto t = a._approximate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newValues.emplace_back(t);
-        } else {
-            newValues.emplace_back(nullptr);
-        }
+    optional<vector<TypePtr>> newValues = mungeArgs(this->values, &TypePtr::_approximate, gs, tc);
+    if (!newValues) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newValues[i]) {
-            newValues[i] = this->values[i];
-            i++;
-        }
-        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(newValues));
-    }
-    return nullptr;
+    return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(*newValues));
 }
 
 TypePtr OrType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
@@ -314,90 +234,27 @@ TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc) c
 
 TypePtr AppliedType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                                   const vector<TypePtr> &targs) const {
-    bool changed = false;
-    vector<TypePtr> newTargs;
-    newTargs.reserve(this->targs.size());
-    // TODO: make it not allocate if returns nullptr
-    for (auto &a : this->targs) {
-        auto t = a._instantiate(gs, params, targs);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newTargs.emplace_back(t);
-        } else {
-            newTargs.emplace_back(nullptr);
-        }
+    optional<vector<TypePtr>> newTargs = mungeArgs(this->targs, &TypePtr::_instantiate, gs, params, targs);
+    if (!newTargs) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newTargs[i]) {
-            newTargs[i] = this->targs[i];
-            i++;
-        }
-        return make_type<AppliedType>(this->klass, move(newTargs));
-    }
-
-    return nullptr;
+    return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
 TypePtr AppliedType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
-    bool changed = false;
-    vector<TypePtr> newTargs;
-    newTargs.reserve(this->targs.size());
-    // TODO: make it not allocate if returns nullptr
-    for (auto &a : this->targs) {
-        auto t = a._instantiate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newTargs.emplace_back(t);
-        } else {
-            newTargs.emplace_back(nullptr);
-        }
+    optional<vector<TypePtr>> newTargs = mungeArgs(this->targs, &TypePtr::_instantiate, gs, tc);
+    if (!newTargs) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newTargs[i]) {
-            newTargs[i] = this->targs[i];
-            i++;
-        }
-        return make_type<AppliedType>(this->klass, move(newTargs));
-    }
-
-    return nullptr;
+    return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
 TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
-    bool changed = false;
-    vector<TypePtr> newTargs;
-    newTargs.reserve(this->targs.size());
-    // TODO: make it not allocate if returns nullptr
-    for (auto &a : this->targs) {
-        auto t = a._approximate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newTargs.emplace_back(t);
-        } else {
-            newTargs.emplace_back(nullptr);
-        }
+    optional<vector<TypePtr>> newTargs = mungeArgs(this->targs, &TypePtr::_approximate, gs, tc);
+    if (!newTargs) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newTargs[i]) {
-            newTargs[i] = this->targs[i];
-            i++;
-        }
-        return make_type<AppliedType>(this->klass, move(newTargs));
-    }
-
-    return nullptr;
+    return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
 TypePtr LambdaParam::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
