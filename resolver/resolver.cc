@@ -1038,7 +1038,20 @@ class ResolveTypeMembersWalk {
         core::FileRef file;
     };
 
+    struct ResolveAttachedClassItem {
+        core::SymbolRef owner;
+        core::SymbolRef klass;
+        core::FileRef file;
+    };
+
+    struct ResolveTypeMembersResult {
+        vector<ast::ParsedFile> files;
+        vector<ResolveAssignItem> todoAssigns;
+        vector<ResolveAttachedClassItem> todoAttachedClassItems;
+    };
+
     vector<ResolveAssignItem> todoAssigns_;
+    vector<ResolveAttachedClassItem> todoAttachedClassItems_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
@@ -1062,7 +1075,7 @@ class ResolveTypeMembersWalk {
         return todo != nullptr && todo->symbol == core::Symbols::todo();
     }
 
-    static bool isLHSResolved(core::MutableContext ctx, core::SymbolRef sym) {
+    static bool isLHSResolved(core::Context ctx, core::SymbolRef sym) {
         if (sym.data(ctx)->isTypeMember()) {
             auto *lambdaParam = core::cast_type<core::LambdaParam>(sym.data(ctx)->resultType);
             ENFORCE(lambdaParam != nullptr);
@@ -1075,7 +1088,7 @@ class ResolveTypeMembersWalk {
         }
     }
 
-    static bool isGenericResolved(core::MutableContext ctx, core::SymbolRef sym) {
+    static bool isGenericResolved(core::Context ctx, core::SymbolRef sym) {
         if (sym.data(ctx)->isClassOrModule()) {
             return absl::c_all_of(sym.data(ctx)->typeMembers(),
                                   [&](core::SymbolRef tm) { return isLHSResolved(ctx, tm); });
@@ -1258,20 +1271,20 @@ class ResolveTypeMembersWalk {
     }
 
 public:
-    ast::TreePtr preTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         // If this is a class with no type members defined, resolve attached
-        // class immediately. Otherwise, it will be resolved once all type
-        // members have been resolved as well.
+        // class. Otherwise, it will be resolved once all type members have been
+        // resolved as well.
         if (isGenericResolved(ctx, klass.symbol)) {
-            resolveAttachedClass(ctx, klass.symbol);
+            todoAttachedClassItems_.emplace_back(ResolveAttachedClassItem{ctx.owner, klass.symbol, ctx.file});
         }
 
         return tree;
     }
 
-    ast::TreePtr preTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         switch (send.fun._id) {
             case core::Names::typeAlias()._id:
@@ -1298,7 +1311,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
         if (trackDependencies_) {
@@ -1331,7 +1344,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (send.fun._id) {
@@ -1351,7 +1364,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformAssign(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
@@ -1385,10 +1398,7 @@ public:
             ENFORCE(send->fun == core::Names::typeAlias() || send->fun == core::Names::typeMember() ||
                     send->fun == core::Names::typeTemplate());
 
-            auto job = ResolveAssignItem{ctx.owner, sym, send, dependencies_, ctx.file};
-            if (!resolveJob(ctx, job)) {
-                todoAssigns_.emplace_back(std::move(job));
-            }
+            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, dependencies_, ctx.file});
         }
 
         trackDependencies_ = false;
@@ -1398,33 +1408,87 @@ public:
         return tree;
     }
 
-    static vector<ast::ParsedFile> run(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
-        ResolveTypeMembersWalk walk;
+    static vector<ast::ParsedFile> run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
         Timer timeit(gs.tracer(), "resolver.type_params");
 
+        auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+        auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersResult>>(trees.size());
         for (auto &tree : trees) {
-            core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
-            tree.tree = ast::ShallowMap::apply(ctx, walk, std::move(tree.tree));
+            inputq->push(move(tree), 1);
+        }
+        trees.clear();
+
+        workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
+            Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
+            ResolveTypeMembersWalk walk;
+            ResolveTypeMembersResult output;
+            ast::ParsedFile job;
+            for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+                if (result.gotItem()) {
+                    core::Context ctx(gs, core::Symbols::root(), job.file);
+                    job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));
+                    output.files.emplace_back(move(job));
+                }
+            }
+            if (!output.files.empty()) {
+                output.todoAssigns = move(walk.todoAssigns_);
+                output.todoAttachedClassItems = move(walk.todoAttachedClassItems_);
+                auto count = output.files.size();
+                outputq->push(move(output), count);
+            }
+        });
+
+        ResolveTypeMembersResult combined;
+        {
+            ResolveTypeMembersResult threadResult;
+            for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+                 !result.done();
+                 result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+                if (result.gotItem()) {
+                    if (combined.files.empty()) {
+                        combined = move(threadResult);
+                    } else {
+                        combined.files.insert(combined.files.end(), make_move_iterator(threadResult.files.begin()),
+                                              make_move_iterator(threadResult.files.end()));
+                        combined.todoAssigns.insert(combined.todoAssigns.end(),
+                                                    make_move_iterator(threadResult.todoAssigns.begin()),
+                                                    make_move_iterator(threadResult.todoAssigns.end()));
+                        combined.todoAttachedClassItems.insert(
+                            combined.todoAttachedClassItems.end(),
+                            make_move_iterator(threadResult.todoAttachedClassItems.begin()),
+                            make_move_iterator(threadResult.todoAttachedClassItems.end()));
+                    }
+                }
+            }
+        }
+
+        // Put files into a consistent order for subsequent passes.
+        fast_sort(combined.files, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
+
+        for (auto &job : combined.todoAttachedClassItems) {
+            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+            resolveAttachedClass(ctx, job.klass);
         }
 
         // loop over any out-of-order type_member/type_alias references
         bool progress = true;
-        while (progress && !walk.todoAssigns_.empty()) {
-            auto origSize = walk.todoAssigns_.size();
-            auto it = std::remove_if(walk.todoAssigns_.begin(), walk.todoAssigns_.end(), [&](ResolveAssignItem &job) {
-                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                return resolveJob(ctx, job);
-            });
-            walk.todoAssigns_.erase(it, walk.todoAssigns_.end());
-            progress = walk.todoAssigns_.size() != origSize;
+        while (progress && !combined.todoAssigns.empty()) {
+            auto origSize = combined.todoAssigns.size();
+            auto it =
+                std::remove_if(combined.todoAssigns.begin(), combined.todoAssigns.end(), [&](ResolveAssignItem &job) {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    return resolveJob(ctx, job);
+                });
+            combined.todoAssigns.erase(it, combined.todoAssigns.end());
+            progress = combined.todoAssigns.size() != origSize;
         }
 
         // If there was a step with no progress, there's a cycle in the
         // type member/alias declarations. This is handled by reporting an error
         // at `typed: false`, and marking all of the involved type
         // members/aliases as T.untyped.
-        if (!walk.todoAssigns_.empty()) {
-            for (auto &job : walk.todoAssigns_) {
+        if (!combined.todoAssigns.empty()) {
+            for (auto &job : combined.todoAssigns) {
                 auto data = job.lhs.data(gs);
 
                 if (data->isTypeMember()) {
@@ -1441,7 +1505,7 @@ public:
             }
         }
 
-        return trees;
+        return move(combined.files);
     }
 };
 
@@ -2408,7 +2472,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-    trees = ResolveTypeMembersWalk::run(gs, std::move(trees));
+    trees = ResolveTypeMembersWalk::run(gs, std::move(trees), workers);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
@@ -2457,7 +2521,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     auto workers = WorkerPool::create(0, gs.tracer());
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     computeLinearization(gs);
-    trees = ResolveTypeMembersWalk::run(gs, std::move(trees));
+    trees = ResolveTypeMembersWalk::run(gs, std::move(trees), *workers);
     computeExternalTypes(gs);
     auto result = resolveSigs(gs, std::move(trees));
     if (!result.hasResult()) {
