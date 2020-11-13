@@ -523,6 +523,7 @@ template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &wha
 
 /*
  * TypeVars are the used for the type parameters of generic methods.
+ * Note: These are mutated post-construction and cannot be inlined.
  */
 TYPE(TypeVar) final {
 public:
