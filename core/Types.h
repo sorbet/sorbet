@@ -374,9 +374,9 @@ public:
 };
 CheckSize(LambdaParam, 40, 8);
 
-TYPE(SelfTypeParam) final {
+TYPE_INLINED(SelfTypeParam) final {
 public:
-    SymbolRef definition;
+    const SymbolRef definition;
 
     SelfTypeParam(const SymbolRef definition);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -388,6 +388,15 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(SelfTypeParam, 8, 8);
+
+template <> inline TypePtr make_type<SelfTypeParam, core::SymbolRef &>(core::SymbolRef &definition) {
+    return TypePtr(TypePtr::Tag::SelfTypeParam, definition.rawId(), 0);
+}
+
+template <> inline SelfTypeParam cast_type_nonnull<SelfTypeParam>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<SelfTypeParam>(what));
+    return SelfTypeParam(core::SymbolRef::fromRaw(what.inlinedValue()));
+}
 
 TYPE(AliasType) final {
 public:

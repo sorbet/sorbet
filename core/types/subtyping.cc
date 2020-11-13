@@ -441,11 +441,12 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     }
 
     {
-        auto *s1 = cast_type<SelfTypeParam>(t1);
-        auto *s2 = cast_type<SelfTypeParam>(t2);
+        auto isSelfTypeT1 = isa_type<SelfTypeParam>(t1);
+        auto isSelfTypeT2 = isa_type<SelfTypeParam>(t2);
 
-        if (s1 != nullptr || s2 != nullptr) {
-            if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+        if (isSelfTypeT1 || isSelfTypeT2) {
+            // NOTE: SelfTypeParam is an inlined type, so TypePtr equality is type equality.
+            if (t1 != t2) {
                 return OrType::make_shared(t1, t2);
             } else {
                 return t1;
@@ -914,11 +915,12 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         }
     }
     {
-        auto *s1 = cast_type<SelfTypeParam>(t1);
-        auto *s2 = cast_type<SelfTypeParam>(t2);
+        auto isSelfTypeT1 = isa_type<SelfTypeParam>(t1);
+        auto isSelfTypeT2 = isa_type<SelfTypeParam>(t2);
 
-        if (s1 != nullptr || s2 != nullptr) {
-            if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+        if (isSelfTypeT1 || isSelfTypeT2) {
+            // NOTE: SelfTypeParam is an inlined type, so TypePtr equality is type equality.
+            if (t1 != t2) {
                 return AndType::make_shared(t1, t2);
             } else {
                 return t1;
@@ -1047,30 +1049,34 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
 
     {
-        auto *self1 = cast_type<SelfTypeParam>(t1);
-        auto *self2 = cast_type<SelfTypeParam>(t2);
-        if (self1 != nullptr || self2 != nullptr) {
+        auto isSelfTypeT1 = isa_type<SelfTypeParam>(t1);
+        auto isSelfTypeT2 = isa_type<SelfTypeParam>(t2);
+        if (isSelfTypeT1 || isSelfTypeT2) {
             // NOTE: SelfTypeParam is used both with LambdaParam and TypeVar, so
             // we can only check bounds when a LambdaParam is present.
-            if (self1 == nullptr) {
-                if (auto *lambdaParam = cast_type<LambdaParam>(self2->definition.data(gs)->resultType)) {
+            if (!isSelfTypeT1) {
+                auto self2 = cast_type_nonnull<SelfTypeParam>(t2);
+                if (auto *lambdaParam = cast_type<LambdaParam>(self2.definition.data(gs)->resultType)) {
                     return Types::isSubTypeUnderConstraint(gs, constr, t1, lambdaParam->lowerBound, mode);
                 } else {
                     return false;
                 }
-            } else if (self2 == nullptr) {
-                if (auto *lambdaParam = cast_type<LambdaParam>(self1->definition.data(gs)->resultType)) {
+            } else if (!isSelfTypeT2) {
+                auto self1 = cast_type_nonnull<SelfTypeParam>(t1);
+                if (auto *lambdaParam = cast_type<LambdaParam>(self1.definition.data(gs)->resultType)) {
                     return Types::isSubTypeUnderConstraint(gs, constr, lambdaParam->upperBound, t2, mode);
                 } else {
                     return false;
                 }
             } else {
-                if (self1->definition == self2->definition) {
+                auto self1 = cast_type_nonnull<SelfTypeParam>(t1);
+                auto self2 = cast_type_nonnull<SelfTypeParam>(t2);
+                if (self1.definition == self2.definition) {
                     return true;
                 }
 
-                auto *lambda1 = cast_type<LambdaParam>(self1->definition.data(gs)->resultType);
-                auto *lambda2 = cast_type<LambdaParam>(self2->definition.data(gs)->resultType);
+                auto *lambda1 = cast_type<LambdaParam>(self1.definition.data(gs)->resultType);
+                auto *lambda2 = cast_type<LambdaParam>(self2.definition.data(gs)->resultType);
                 return lambda1 && lambda2 &&
                        Types::isSubTypeUnderConstraint(gs, constr, lambda1->upperBound, lambda2->lowerBound, mode);
             }
