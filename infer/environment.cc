@@ -593,17 +593,19 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         if (!recvType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
         }
-        if (auto s = core::cast_type<core::ClassType>(argType)) {
+        if (core::isa_type<core::ClassType>(argType)) {
+            auto s = core::cast_type_nonnull<core::ClassType>(argType);
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s->symbol)) {
+            if (isSingleton(ctx, s.symbol)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
             }
         }
-        if (auto s = core::cast_type<core::ClassType>(recvType)) {
+        if (core::isa_type<core::ClassType>(recvType)) {
+            auto s = core::cast_type_nonnull<core::ClassType>(recvType);
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s->symbol)) {
+            if (isSingleton(ctx, s.symbol)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
         }
@@ -626,10 +628,11 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         // `when` against singleton
-        if (auto s = core::cast_type<core::ClassType>(recvType)) {
+        if (core::isa_type<core::ClassType>(recvType)) {
+            auto s = core::cast_type_nonnull<core::ClassType>(recvType);
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s->symbol)) {
+            if (isSingleton(ctx, s.symbol)) {
                 whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
                 whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
@@ -640,9 +643,10 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         const auto &recvKlass = send->recv.type;
         const auto &argType = send->args[0].type;
 
-        if (auto *argClass = core::cast_type<core::ClassType>(argType)) {
+        if (core::isa_type<core::ClassType>(argType)) {
+            auto argClass = core::cast_type_nonnull<core::ClassType>(argType);
             if (!recvKlass.derivesFrom(ctx, core::Symbols::Class()) ||
-                !argClass->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
+                !argClass.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
         } else if (auto *argClass = core::cast_type<core::AppliedType>(argType)) {

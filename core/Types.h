@@ -260,6 +260,9 @@ inline bool is_proxy_type(const TypePtr &what) {
 }
 
 template <class To> To const *cast_type(const TypePtr &what) {
+    static_assert(TypePtr::TypeToIsInlined<To>::value == false,
+                  "Cast inlined type objects with `cast_type_nonnull`, and use `isa_type` to check if the TypePtr "
+                  "contains the type you expect.");
     if (isa_type<To>(what)) {
         return reinterpret_cast<To const *>(what.get());
     } else {
@@ -310,9 +313,11 @@ template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
 
 #define TYPE_INLINED(name) TYPE_IMPL(name, true)
 
-TYPE(ClassType) {
+TYPE_INLINED(ClassType) {
 public:
-    SymbolRef symbol;
+    // `const` because this is an inlined type; the symbol is inlined into the TypePtr. The TypePtr must be modified
+    // to update the type.
+    const SymbolRef symbol;
     ClassType(SymbolRef symbol);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -324,6 +329,24 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(ClassType, 8, 8);
+
+template <> inline TypePtr make_type<ClassType, core::SymbolRef &>(core::SymbolRef &ref) {
+    return TypePtr(TypePtr::Tag::ClassType, ref.rawId(), 0);
+}
+
+template <> inline TypePtr make_type<ClassType, core::SymbolRef>(core::SymbolRef &&ref) {
+    return TypePtr(TypePtr::Tag::ClassType, ref.rawId(), 0);
+}
+
+template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<ClassType>(what));
+    if (what.tag() == TypePtr::Tag::ClassType) {
+        return ClassType(core::SymbolRef::fromRaw(what.inlinedValue()));
+    } else {
+        // Subclasses of ClassType contain untyped with metadata.
+        return ClassType(core::Symbols::untyped());
+    }
+}
 
 /*
  * This is the type used to represent a use of a type_member or type_template in

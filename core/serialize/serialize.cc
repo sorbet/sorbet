@@ -344,7 +344,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         case TypePtr::Tag::UnresolvedClassType:
         case TypePtr::Tag::BlamedUntyped:
         case TypePtr::Tag::ClassType: {
-            auto &c = cast_type_nonnull<ClassType>(what);
+            auto c = cast_type_nonnull<ClassType>(what);
             p.putU4(c.symbol.rawId());
             break;
         }

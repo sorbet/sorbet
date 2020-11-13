@@ -12,6 +12,13 @@ struct DispatchResult;
 struct DispatchArgs;
 
 class TypePtr final {
+    template <class To> static To &const_cast_type(const To &what) {
+        return const_cast<To &>(what);
+    }
+    template <class To> static To const_cast_type(To &&what) {
+        return std::move(what);
+    }
+
 public:
     // We store tagged pointers as 64-bit values.
     using tagged_storage = u8;
@@ -52,7 +59,7 @@ public:
     template <class To> static typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast(const TypePtr &what);
 
     template <class To> static auto cast(TypePtr &what) {
-        return const_cast<To &>(cast<To>(static_cast<const TypePtr &>(what)));
+        return const_cast_type<To>(cast<To>(static_cast<const TypePtr &>(what)));
     }
 
     static std::string tagToString(Tag tag);
@@ -245,7 +252,7 @@ public:
     }
 
     bool operator!=(const TypePtr &other) const {
-        return store != other.store && counter != other.counter;
+        return store != other.store || counter != other.counter;
     }
     bool operator==(const TypePtr &other) const {
         return store == other.store && counter == other.counter;

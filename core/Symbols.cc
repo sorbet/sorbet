@@ -982,15 +982,14 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     const TypePtr *iter = &currentClasses;
     const OrType *orT = nullptr;
     while ((orT = cast_type<OrType>(*iter))) {
-        auto right = cast_type<ClassType>(orT->right);
+        auto right = cast_type_nonnull<ClassType>(orT->right);
         ENFORCE(left);
-        if (right->symbol == classOfSubclass) {
+        if (right.symbol == classOfSubclass) {
             return;
         }
         iter = &orT->left;
     }
-    ENFORCE(isa_type<ClassType>(*iter));
-    if (cast_type<ClassType>(*iter)->symbol == classOfSubclass) {
+    if (cast_type_nonnull<ClassType>(*iter).symbol == classOfSubclass) {
         return;
     }
     if (currentClasses != core::Types::bottom()) {
@@ -1027,16 +1026,17 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto result = Types::bottom();
     while (auto orType = cast_type<OrType>(currentClasses)) {
-        auto classType = cast_type<ClassType>(orType->right);
-        ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
-        auto subclass = classType->symbol.data(gs)->attachedClass(gs);
+        ENFORCE(isa_type<ClassType>(orType->right), "Something in sealedSubclasses that's not a ClassType");
+        auto classType = cast_type_nonnull<ClassType>(orType->right);
+        auto subclass = classType.symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
         result = Types::any(gs, make_type<ClassType>(subclass), result);
         currentClasses = orType->left;
     }
-    auto lastClassType = cast_type<ClassType>(currentClasses);
-    ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
-    auto subclass = lastClassType->symbol.data(gs)->attachedClass(gs);
+
+    ENFORCE(isa_type<ClassType>(currentClasses), "Last element of sealedSubclasses must be ClassType");
+    auto lastClassType = cast_type_nonnull<ClassType>(currentClasses);
+    auto subclass = lastClassType.symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
     result = Types::any(gs, make_type<ClassType>(subclass), result);
 

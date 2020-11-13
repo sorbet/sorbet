@@ -68,18 +68,15 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
 }
 
 bool TypePtr::isUntyped() const {
-    auto *t = cast_type<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::untyped();
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::untyped();
 }
 
 bool TypePtr::isNilClass() const {
-    auto *t = cast_type<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::NilClass();
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::NilClass();
 }
 
 bool TypePtr::isBottom() const {
-    auto *t = cast_type<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::bottom();
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::bottom();
 }
 
 int TypePtr::kind() const {
@@ -184,7 +181,7 @@ bool TypePtr::hasUntyped() const {
         case Tag::UnresolvedAppliedType:
         case Tag::UnresolvedClassType:
         case Tag::ClassType: {
-            auto &c = cast_type_nonnull<ClassType>(*this);
+            auto c = cast_type_nonnull<ClassType>(*this);
             return c.symbol == Symbols::untyped();
         }
         case Tag::OrType: {
@@ -241,7 +238,7 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::UnresolvedClassType:
         case Tag::UnresolvedAppliedType:
         case Tag::ClassType: {
-            auto &c = cast_type_nonnull<ClassType>(*this);
+            auto c = cast_type_nonnull<ClassType>(*this);
             return c.getCallArguments(gs, name);
         }
         case Tag::AppliedType: {

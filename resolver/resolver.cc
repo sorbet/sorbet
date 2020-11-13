@@ -1058,8 +1058,8 @@ class ResolveTypeMembersWalk {
     }
 
     static bool isTodo(const core::TypePtr &type) {
-        auto *todo = core::cast_type<core::ClassType>(type);
-        return todo != nullptr && todo->symbol == core::Symbols::todo();
+        return core::isa_type<core::ClassType>(type) &&
+               core::cast_type_nonnull<core::ClassType>(type).symbol == core::Symbols::todo();
     }
 
     static bool isLHSResolved(core::MutableContext ctx, core::SymbolRef sym) {
