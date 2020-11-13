@@ -496,6 +496,10 @@ template <> inline TypePtr make_type<LiteralType, long &>(long &val) {
     return make_type<LiteralType>(static_cast<int64_t>(val));
 }
 
+template <> inline TypePtr make_type<LiteralType, long long &>(long long &val) {
+    return make_type<LiteralType>(static_cast<int64_t>(val));
+}
+
 template <> inline TypePtr make_type<LiteralType, float>(float &&val) {
     return make_type<LiteralType>(static_cast<double>(val));
 }
