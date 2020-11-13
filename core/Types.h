@@ -827,13 +827,22 @@ struct DispatchResult {
           secondaryKind(secondaryKind){};
 };
 
-TYPE(BlamedUntyped) final : public ClassType {
+TYPE_INLINED(BlamedUntyped) final : public ClassType {
 public:
     const core::SymbolRef blame;
     BlamedUntyped(SymbolRef whoToBlame) : ClassType(core::Symbols::untyped()), blame(whoToBlame){};
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 };
+
+template <> inline TypePtr make_type<BlamedUntyped, core::SymbolRef &>(core::SymbolRef &whoToBlame) {
+    return TypePtr(TypePtr::Tag::BlamedUntyped, whoToBlame.rawId(), 0);
+}
+
+template <> inline BlamedUntyped cast_type_nonnull<BlamedUntyped>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<BlamedUntyped>(what));
+    return BlamedUntyped(core::SymbolRef::fromRaw(what.inlinedValue()));
+}
 
 TYPE(UnresolvedClassType) final : public ClassType {
 public:

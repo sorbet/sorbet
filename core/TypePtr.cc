@@ -209,8 +209,8 @@ bool TypePtr::hasUntyped() const {
 
 core::SymbolRef TypePtr::untypedBlame() const {
     ENFORCE(hasUntyped());
-    if (auto *blamed = cast_type<BlamedUntyped>(*this)) {
-        return blamed->blame;
+    if (isa_type<BlamedUntyped>(*this)) {
+        return cast_type_nonnull<BlamedUntyped>(*this).blame;
     }
     return Symbols::noSymbol();
 }
@@ -232,7 +232,7 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
             return andType.getCallArguments(gs, name);
         }
         case Tag::BlamedUntyped: {
-            auto &c = cast_type_nonnull<BlamedUntyped>(*this);
+            auto c = cast_type_nonnull<BlamedUntyped>(*this);
             return c.getCallArguments(gs, name);
         }
         case Tag::UnresolvedClassType:
