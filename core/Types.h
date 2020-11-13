@@ -398,17 +398,30 @@ template <> inline SelfTypeParam cast_type_nonnull<SelfTypeParam>(const TypePtr 
     return SelfTypeParam(core::SymbolRef::fromRaw(what.inlinedValue()));
 }
 
-TYPE(AliasType) final {
+TYPE_INLINED(AliasType) final {
 public:
     AliasType(SymbolRef other);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
 
-    SymbolRef symbol;
+    const SymbolRef symbol;
     void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(AliasType, 8, 8);
+
+template <> inline TypePtr make_type<AliasType, core::SymbolRef &>(core::SymbolRef &other) {
+    return TypePtr(TypePtr::Tag::AliasType, other.rawId(), 0);
+}
+
+template <> inline TypePtr make_type<AliasType, core::SymbolRef>(core::SymbolRef &&other) {
+    return TypePtr(TypePtr::Tag::AliasType, other.rawId(), 0);
+}
+
+template <> inline AliasType cast_type_nonnull<AliasType>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<AliasType>(what));
+    return AliasType(core::SymbolRef::fromRaw(what.inlinedValue()));
+}
 
 /** This is a specific kind of self-type that should only be used in method return position.
  * It indicates that the method may(or will) return `self` or type that behaves equivalently

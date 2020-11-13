@@ -389,7 +389,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             break;
         }
         case TypePtr::Tag::AliasType: {
-            auto &alias = cast_type_nonnull<AliasType>(what);
+            auto alias = cast_type_nonnull<AliasType>(what);
             p.putU4(alias.symbol.rawId());
             break;
         }
