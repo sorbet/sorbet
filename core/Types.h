@@ -272,7 +272,8 @@ template <class To> To *cast_type(TypePtr &what) {
     return const_cast<To *>(cast_type<To>(static_cast<const TypePtr &>(what)));
 }
 
-template <class To> To const &cast_type_nonnull(const TypePtr &what) {
+template <class To>
+typename TypePtr::TypeToCastType<To, TypePtr::TypeToIsInlined<To>::value>::type cast_type_nonnull(const TypePtr &what) {
     ENFORCE_NO_TIMER(isa_type<To>(what));
     return *reinterpret_cast<const To *>(what.get());
 }
@@ -282,13 +283,18 @@ template <class To> inline bool TypePtr::isa(const TypePtr &what) {
     return isa_type<To>(what);
 }
 
-template <class To> inline To const &TypePtr::cast(const TypePtr &what) {
+template <class To>
+inline typename TypePtr::TypeToCastType<To, TypePtr::TypeToIsInlined<To>::value>::type
+TypePtr::cast(const TypePtr &what) {
     return cast_type_nonnull<To>(what);
 }
 
 template <> inline bool TypePtr::isa<TypePtr>(const TypePtr &what) {
     return true;
 }
+
+// Required to support cast<TypePtr> specialization.
+template <> struct TypePtr::TypeToIsInlined<TypePtr> { static constexpr bool value = false; };
 
 template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
     return what;

@@ -41,12 +41,17 @@ public:
     // A mapping from type to whether or not that type is inlined into TypePtr.
     template <typename T> struct TypeToIsInlined;
 
+    // A mapping from type to the type returned by `cast_type_nonnull`.
+    template <typename T, bool isInlined> struct TypeToCastType {};
+    template <typename T> struct TypeToCastType<T, true> { using type = T; };
+    template <typename T> struct TypeToCastType<T, false> { using type = const T &; };
+
     // Required for typecase.
     template <class To> static bool isa(const TypePtr &what);
 
-    template <class To> static To const &cast(const TypePtr &what);
+    template <class To> static typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast(const TypePtr &what);
 
-    template <class To> static To &cast(TypePtr &what) {
+    template <class To> static auto cast(TypePtr &what) {
         return const_cast<To &>(cast<To>(static_cast<const TypePtr &>(what)));
     }
 
@@ -307,7 +312,8 @@ public:
 
     template <class T, class... Args> friend TypePtr make_type(Args &&... args);
     template <class To> friend To const *cast_type(const TypePtr &what);
-    template <class To> friend To const &cast_type_nonnull(const TypePtr &what);
+    template <class To>
+    friend typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast_type_nonnull(const TypePtr &what);
     friend class TypePtrTestHelper;
 };
 CheckSize(TypePtr, 16, 8);
