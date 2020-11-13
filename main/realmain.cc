@@ -330,7 +330,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
     }
 
-    if (true) {
+    if (opts.autoloaderConfig.packagedAutoloader) {
         autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath);
     }
 }

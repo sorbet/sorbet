@@ -68,6 +68,7 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
     out.stripPrefixes = cfg.stripPrefixes;
+    out.packagedAutoloader = cfg.packagedAutoloader;
     return out;
 }
 
@@ -403,7 +404,9 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
                            UnorderedSet<std::string> &toDelete, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
     string filePath = join(path, fmt::format("{}.rb", name));
-    FileOps::writeIfDifferent(filePath, node.renderAutoloadSrc(gs, alCfg));
+    if (!alCfg.packagedAutoloader || !node.root()) {
+        FileOps::writeIfDifferent(filePath, node.renderAutoloadSrc(gs, alCfg));
+    }
     toDelete.erase(filePath);
     if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
@@ -420,10 +423,12 @@ string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderCon
                                 const string_view mangledName) {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
-    fmt::format_to(buf, "\n{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule, mangledName);
-    for (auto [_, member] : pkg.data(gs)->members()) {
-        if (!member.data(gs)->isClassOrModule() || member.data(gs)->isSingletonClass(gs)) {
-            // we'll get singleton classes redundantly elsewhere
+    fmt::format_to(buf, "{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule, mangledName);
+    for (auto [name, member] : pkg.data(gs)->members()) {
+        if (!member.data(gs)->isClassOrModule() || member.data(gs)->isSingletonClass(gs) ||
+            member.data(gs)->name == core::Names::Constants::PackageMethods()) {
+            // we'll get singleton classes redundantly elsewhere, and we should handle the exported names elsewhere as
+            // well
             continue;
         }
 
@@ -436,11 +441,10 @@ string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderCon
 
 void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
                                            const std::string &path) {
-    FileOps::ensureDir(join(path, "_pkg"));
     // we're going to be building up the root package map as we walk all the other packages, so make that first
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
-    fmt::format_to(buf, "\n{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
+    fmt::format_to(buf, "{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
 
     // walk over all the packages
     for (auto [_, pkg] : core::Symbols::PackageRegistry().data(gs)->members()) {

@@ -14,6 +14,7 @@ main/sorbet --silence-dev-message --stop-after=namer \
   --autogen-autoloader-modules={Foo,Bar} \
   --autogen-autoloader-ignore=scripts/ \
   --autogen-autoloader-preamble "$preamble" \
+  --autogen-autoloader-packaged \
   test/cli/autogen-multipkg-autoloader/foo/*.rb \
   test/cli/autogen-multipkg-autoloader/bar/*.rb 2>&1
 
