@@ -264,8 +264,9 @@ TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, c
 }
 
 TypePtr Types::dropLiteral(const TypePtr &tp) {
-    if (auto *a = cast_type<LiteralType>(tp)) {
-        return a->underlying();
+    if (isa_type<LiteralType>(tp)) {
+        auto a = cast_type_nonnull<LiteralType>(tp);
+        return a.underlying();
     }
     return tp;
 }

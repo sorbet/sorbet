@@ -355,7 +355,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             break;
         }
         case TypePtr::Tag::LiteralType: {
-            auto &c = cast_type_nonnull<LiteralType>(what);
+            auto c = cast_type_nonnull<LiteralType>(what);
             p.putU1((u1)c.literalKind);
             p.putS8(c.value);
             break;

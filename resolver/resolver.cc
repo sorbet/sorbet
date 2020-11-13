@@ -1987,20 +1987,20 @@ private:
             return;
         }
 
-        auto literal = core::cast_type<core::LiteralType>(literalNode->value);
-        if (literal == nullptr) {
+        if (!core::isa_type<core::LiteralType>(literalNode->value)) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("`{}` only accepts string literals", method);
             }
             return;
         }
 
-        if (literal->literalKind != core::LiteralType::LiteralTypeKind::String) {
+        auto literal = core::cast_type_nonnull<core::LiteralType>(literalNode->value);
+        if (literal.literalKind != core::LiteralType::LiteralTypeKind::String) {
             // Infer will report a type error
             return;
         }
 
-        const core::LiteralType *package = nullptr;
+        core::TypePtr packageType = nullptr;
         optional<core::LocOffsets> packageLoc;
         if (send.hasKwArgs()) {
             // this means we got the third package arg
@@ -2018,17 +2018,19 @@ private:
                 return;
             }
 
-            package = core::cast_type<core::LiteralType>(packageNode->value);
-            if (package == nullptr || package->literalKind != core::LiteralType::LiteralTypeKind::String) {
+            if (!core::isa_type<core::LiteralType>(packageNode->value) ||
+                core::cast_type_nonnull<core::LiteralType>(packageNode->value).literalKind !=
+                    core::LiteralType::LiteralTypeKind::String) {
                 // Infer will report a type error
                 return;
             }
+            packageType = packageNode->value;
         }
         // if we got no keyword args, then package should be null, and if we keyword args, then package should be
         // non-null
-        ENFORCE((!send.hasKwArgs() && !package) || (send.hasKwArgs() && package));
+        ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
 
-        auto name = core::NameRef(ctx.state, literal->value);
+        auto name = core::NameRef(ctx.state, literal.value);
         auto shortName = name.data(ctx)->shortName(ctx);
         if (shortName.empty()) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
@@ -2045,7 +2047,7 @@ private:
         for (auto part : parts) {
             if (!current.exists()) {
                 // First iteration
-                if (!package) {
+                if (!packageType) {
                     if (part != "") {
                         if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                             e.setHeader(
@@ -2066,7 +2068,8 @@ private:
                         return;
                     }
 
-                    auto packageName = core::NameRef(ctx.state, package->value);
+                    auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
+                    auto packageName = core::NameRef(ctx.state, package.value);
                     auto mangledName = packageName.lookupMangledPackageName(ctx.state);
                     // if the mangled name doesn't exist, then this means probably there's no package named this
                     if (!mangledName.exists()) {

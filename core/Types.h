@@ -1,6 +1,7 @@
 #ifndef SORBET_TYPES_H
 #define SORBET_TYPES_H
 
+#include "absl/base/casts.h"
 #include "common/Counters.h"
 #include "core/Context.h"
 #include "core/Error.h"
@@ -451,7 +452,7 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
     return SelfType();
 }
 
-TYPE(LiteralType) final {
+TYPE_INLINED(LiteralType) final {
 public:
     union {
         const int64_t value;
@@ -475,6 +476,50 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(LiteralType, 24, 8);
+
+template <> inline TypePtr make_type<LiteralType, double &>(double &val) {
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Float),
+                   absl::bit_cast<u8>(val));
+}
+
+template <> inline TypePtr make_type<LiteralType, double>(double &&val) {
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Float),
+                   absl::bit_cast<u8>(val));
+}
+
+template <> inline TypePtr make_type<LiteralType, int64_t>(int64_t &&val) {
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Integer),
+                   absl::bit_cast<u8>(val));
+}
+
+template <> inline TypePtr make_type<LiteralType, long &>(long &val) {
+    return make_type<LiteralType>(static_cast<int64_t>(val));
+}
+
+template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef &>(SymbolRef &&klass, NameRef &val) {
+    LiteralType type(klass, val);
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), absl::bit_cast<u8>(type.value));
+}
+
+template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef>(SymbolRef &&klass, NameRef &&val) {
+    LiteralType type(klass, val);
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), absl::bit_cast<u8>(type.value));
+}
+
+template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<LiteralType>(what));
+    auto literalKind = static_cast<LiteralType::LiteralTypeKind>(what.inlinedValue());
+    switch (literalKind) {
+        case LiteralType::LiteralTypeKind::Float:
+            return LiteralType(absl::bit_cast<double>(what.value));
+        case LiteralType::LiteralTypeKind::Integer:
+            return LiteralType(absl::bit_cast<int64_t>(what.value));
+        case LiteralType::LiteralTypeKind::String:
+            return LiteralType(Symbols::String(), NameRef(NameRef::WellKnown{}, static_cast<u4>(what.value)));
+        case LiteralType::LiteralTypeKind::Symbol:
+            return LiteralType(Symbols::Symbol(), NameRef(NameRef::WellKnown{}, static_cast<u4>(what.value)));
+    }
+}
 
 /*
  * TypeVars are the used for the type parameters of generic methods.

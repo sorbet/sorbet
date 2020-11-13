@@ -1185,21 +1185,21 @@ string Literal::nodeName() {
 
 core::NameRef Literal::asString(const core::GlobalState &gs) const {
     ENFORCE(isString(gs));
-    auto t = core::cast_type<core::LiteralType>(value);
-    core::NameRef res(gs, t->value);
+    auto t = core::cast_type_nonnull<core::LiteralType>(value);
+    core::NameRef res(gs, t.value);
     return res;
 }
 
 core::NameRef Literal::asSymbol(const core::GlobalState &gs) const {
     ENFORCE(isSymbol(gs));
-    auto t = core::cast_type<core::LiteralType>(value);
-    core::NameRef res(gs, t->value);
+    auto t = core::cast_type_nonnull<core::LiteralType>(value);
+    core::NameRef res(gs, t.value);
     return res;
 }
 
 bool Literal::isSymbol(const core::GlobalState &gs) const {
-    auto t = core::cast_type<core::LiteralType>(value);
-    return t && t->derivesFrom(gs, core::Symbols::Symbol());
+    return core::isa_type<core::LiteralType>(value) &&
+           core::cast_type_nonnull<core::LiteralType>(value).derivesFrom(gs, core::Symbols::Symbol());
 }
 
 bool Literal::isNil(const core::GlobalState &gs) const {
@@ -1207,8 +1207,8 @@ bool Literal::isNil(const core::GlobalState &gs) const {
 }
 
 bool Literal::isString(const core::GlobalState &gs) const {
-    auto t = core::cast_type<core::LiteralType>(value);
-    return t && t->derivesFrom(gs, core::Symbols::String());
+    return core::isa_type<core::LiteralType>(value) &&
+           core::cast_type_nonnull<core::LiteralType>(value).derivesFrom(gs, core::Symbols::String());
 }
 
 bool Literal::isTrue(const core::GlobalState &gs) const {

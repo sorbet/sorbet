@@ -343,12 +343,12 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             bool differ2 = false;
                             for (auto &el2 : h2->keys) {
                                 ++i;
-                                auto el2l = cast_type<LiteralType>(el2);
-                                auto u2 = cast_type_nonnull<ClassType>(el2l->underlying());
+                                auto el2l = cast_type_nonnull<LiteralType>(el2);
+                                auto u2 = cast_type_nonnull<ClassType>(el2l.underlying());
                                 auto fnd = absl::c_find_if(h1.keys, [&](auto &candidate) -> bool {
-                                    auto el1l = cast_type<LiteralType>(candidate);
-                                    auto u1 = cast_type_nonnull<ClassType>(el1l->underlying());
-                                    return el1l->value == el2l->value && u1.symbol == u2.symbol; // from lambda
+                                    auto el1l = cast_type_nonnull<LiteralType>(candidate);
+                                    auto u1 = cast_type_nonnull<ClassType>(el1l.underlying());
+                                    return el1l.value == el2l.value && u1.symbol == u2.symbol; // from lambda
                                 });
                                 if (fnd != h1.keys.end()) {
                                     auto &inserted = valueLubs.emplace_back(
@@ -375,17 +375,18 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     }
                 },
                 [&](const LiteralType &l1) {
-                    if (auto *l2 = cast_type<LiteralType>(t2)) {
+                    if (isa_type<LiteralType>(t2)) {
+                        auto l2 = cast_type_nonnull<LiteralType>(t2);
                         auto u1 = cast_type_nonnull<ClassType>(l1.underlying());
-                        auto u2 = cast_type_nonnull<ClassType>(l2->underlying());
+                        auto u2 = cast_type_nonnull<ClassType>(l2.underlying());
                         if (u1.symbol == u2.symbol) {
-                            if (l1.value == l2->value) {
+                            if (l1.value == l2.value) {
                                 result = t1;
                             } else {
                                 result = l1.underlying();
                             }
                         } else {
-                            result = lubGround(gs, l1.underlying(), l2->underlying());
+                            result = lubGround(gs, l1.underlying(), l2.underlying());
                         }
                     } else {
                         result = lub(gs, l1.underlying(), t2.underlying());
@@ -689,12 +690,12 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         bool canReuseT2 = true;
                         for (auto &el2 : h2.keys) {
                             ++i;
-                            auto el2l = cast_type<LiteralType>(el2);
-                            auto u2 = cast_type_nonnull<ClassType>(el2l->underlying());
+                            auto el2l = cast_type_nonnull<LiteralType>(el2);
+                            auto u2 = cast_type_nonnull<ClassType>(el2l.underlying());
                             auto fnd = absl::c_find_if(h1.keys, [&](auto &candidate) -> bool {
-                                auto el1l = cast_type<LiteralType>(candidate);
-                                auto u1 = cast_type_nonnull<ClassType>(el1l->underlying());
-                                return el1l->value == el2l->value && u1.symbol == u2.symbol; // from lambda
+                                auto el1l = cast_type_nonnull<LiteralType>(candidate);
+                                auto u1 = cast_type_nonnull<ClassType>(el1l.underlying());
+                                return el1l.value == el2l.value && u1.symbol == u2.symbol; // from lambda
                             });
                             if (fnd != h1.keys.end()) {
                                 auto left = h1.values[fnd - h1.keys.begin()];
@@ -725,7 +726,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 
                 },
                 [&](const LiteralType &l1) {
-                    auto &l2 = cast_type_nonnull<LiteralType>(t2);
+                    auto l2 = cast_type_nonnull<LiteralType>(t2);
                     auto u1 = cast_type_nonnull<ClassType>(l1.underlying());
                     auto u2 = cast_type_nonnull<ClassType>(l2.underlying());
                     if (u1.symbol == u2.symbol) {
@@ -1175,12 +1176,12 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     int i = -1;
                     for (auto &el2 : h2->keys) {
                         ++i;
-                        auto el2l = cast_type<LiteralType>(el2);
-                        auto u2 = cast_type_nonnull<ClassType>(el2l->underlying());
+                        auto el2l = cast_type_nonnull<LiteralType>(el2);
+                        auto u2 = cast_type_nonnull<ClassType>(el2l.underlying());
                         auto fnd = absl::c_find_if(h1.keys, [&](auto &candidate) -> bool {
-                            auto el1l = cast_type<LiteralType>(candidate);
-                            auto u1 = cast_type_nonnull<ClassType>(el1l->underlying());
-                            return el1l->value == el2l->value && u1.symbol == u2.symbol; // from lambda
+                            auto el1l = cast_type_nonnull<LiteralType>(candidate);
+                            auto u1 = cast_type_nonnull<ClassType>(el1l.underlying());
+                            return el1l.value == el2l.value && u1.symbol == u2.symbol; // from lambda
                         });
                         result = fnd != h1.keys.end() &&
                                  Types::isSubTypeUnderConstraint(gs, constr, h1.values[fnd - h1.keys.begin()],
@@ -1191,15 +1192,16 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     }
                 },
                 [&](const LiteralType &l1) {
-                    auto *l2 = cast_type<LiteralType>(t2);
-                    if (l2 == nullptr) {
+                    if (!isa_type<LiteralType>(t2)) {
                         // is a literal a subtype of a different kind of proxy
                         result = false;
                         return;
                     }
+
+                    auto l2 = cast_type_nonnull<LiteralType>(t2);
                     auto u1 = cast_type_nonnull<ClassType>(l1.underlying());
-                    auto u2 = cast_type_nonnull<ClassType>(l2->underlying());
-                    result = u1.symbol == u2.symbol && l1.value == l2->value;
+                    auto u2 = cast_type_nonnull<ClassType>(l2.underlying());
+                    result = u1.symbol == u2.symbol && l1.value == l2.value;
                 },
                 [&](const MetaType &m1) {
                     auto *m2 = cast_type<MetaType>(t2);
