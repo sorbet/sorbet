@@ -37,7 +37,12 @@ module T::Private::Methods
         raise BuilderError.new("You can't call .params twice")
       end
 
-      decl.params = params
+      case params
+      when Hash
+        decl.params = params
+      else
+        raise BuilderError.new("params expects keyword arguments. All parameters must be given names in params even if they are positional")
+      end
 
       self
     end
