@@ -427,7 +427,7 @@ template <> inline AliasType cast_type_nonnull<AliasType>(const TypePtr &what) {
  * It indicates that the method may(or will) return `self` or type that behaves equivalently
  * to self(e.g. in case of `.clone`).
  */
-TYPE(SelfType) final {
+TYPE_INLINED(SelfType) final {
 public:
     SelfType();
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -440,6 +440,16 @@ public:
     bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
 };
 CheckSize(SelfType, 8, 8);
+
+template <> inline TypePtr make_type<SelfType>() {
+    // static_cast required to disambiguate TypePtr constructor.
+    return TypePtr(TypePtr::Tag::SelfType, static_cast<u4>(0), 0);
+}
+
+template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<SelfType>(what));
+    return SelfType();
+}
 
 TYPE(LiteralType) final {
 public:
