@@ -7,7 +7,9 @@
 #include "core/GlobalState.h"
 #include "core/Names.h"
 
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
+#include "absl/strings/str_split.h"
 
 using namespace std;
 namespace sorbet::autogen {
@@ -414,55 +416,57 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
     }
 }
 
-string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const core::SymbolRef pkg) {
+string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const core::SymbolRef pkg,
+                                const string_view mangledName) {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
+    fmt::format_to(buf, "\n{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule, mangledName);
+    for (auto [_, member] : pkg.data(gs)->members()) {
+        if (!member.data(gs)->isClassOrModule() || member.data(gs)->isSingletonClass(gs)) {
+            // we'll get singleton classes redundantly elsewhere
+            continue;
+        }
+
+        fmt::format_to(buf, "  {}: \"{}.rb\",\n", member.data(gs)->name.show(gs), member.data(gs)->name.show(gs));
+    }
+    fmt::format_to(buf, "}})\n");
 
     return to_string(buf);
 }
 
+void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
+                                           const std::string &path) {
+    FileOps::ensureDir(join(path, "_pkg"));
+    // we're going to be building up the root package map as we walk all the other packages, so make that first
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "{}\n", alCfg.preamble);
+    fmt::format_to(buf, "\n{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
 
-void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const std::string &path, const ast::TreePtr &pkgTree) {
-    // extract the name of this package from the file
-    auto insSeq = ast::cast_tree<ast::InsSeq>(pkgTree);
-    if (!insSeq) {
-        return;
-    }
-
-    auto rootClass = ast::cast_tree<ast::ClassDef>(insSeq->stats.front());
-    if (!rootClass) {
-        return;
-    }
-
-    auto rootSeq = ast::cast_tree<ast::InsSeq>(rootClass->rhs.front());
-    if (!rootSeq) {
-        return;
-    }
-
-    auto actualClass = ast::cast_tree<ast::ClassDef>(rootSeq->stats.front());
-    if (!actualClass) {
-        return;
-    }
-
-    auto name = ast::cast_tree<ast::ConstantLit>(actualClass->name);
-
-    // find the mangled name
-    auto nameStr = name->symbol.show(gs);
-    auto pkgName = gs.lookupNameConstant(fmt::format("{}_Package", absl::StrReplaceAll(nameStr, {{"::", "_"}})));
-    // find the package from the registry
-    auto package = core::Symbols::PackageRegistry().data(gs)->findMemberNoDealias(gs, pkgName);
-
-    renderPackageAutoloadSrc(gs, alCfg, package);
-
-    // grab all the defined members
-    for (auto [n, sym] : package.data(gs)->members()) {
-        if (sym.data(gs)->isClassOrModule() && sym.data(gs)->isSingletonClass(gs)) {
+    // walk over all the packages
+    for (auto [_, pkg] : core::Symbols::PackageRegistry().data(gs)->members()) {
+        if (!pkg.data(gs)->isClassOrModule() || pkg.data(gs)->isSingletonClass(gs)) {
+            // this means it's either T.class_of(<PkgRegistry>) or a singleton class of a package, so skip it
             continue;
         }
 
-        gs.tracer().error("Package contains {} in {}", n.toString(gs), sym.data(gs)->loc().file().data(gs).path());
+        auto mangledName = absl::StrJoin(absl::StrSplit(pkg.show(gs), "::"), "_");
+        auto source = renderPackageAutoloadSrc(gs, alCfg, pkg, mangledName);
+        // gs.tracer().error("For package {}, we got {}\n\n", pkg.show(gs), source);
+        auto pkgName = pkg.data(gs)->name.show(gs);
+
+        FileOps::ensureDir(join(path, mangledName));
+        auto targetPath = join(path, join(mangledName, "_root.rb"));
+
+        // write the package autoload into the appropriate file
+        FileOps::writeIfDifferent(targetPath, source);
+
+        // and add the entry for this file to the root autoload
+        fmt::format_to(buf, "  {}: \"{}\",\n", pkgName, targetPath);
     }
-    gs.tracer().error("Writing to {}", path);
+
+    fmt::format_to(buf, "}})\n");
+    auto rootSrc = to_string(buf);
+    FileOps::writeIfDifferent(join(path, "_root.rb"), rootSrc);
 }
 
 } // namespace sorbet::autogen

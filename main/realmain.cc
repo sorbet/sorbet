@@ -39,7 +39,6 @@
 #include <csignal>
 #include <poll.h>
 
-
 #include "absl/strings/str_replace.h"
 
 namespace spd = spdlog;
@@ -218,10 +217,6 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                 ++n;
                 auto &tree = indexed[idx];
-                if (tree.file.data(gs).isPackage()) {
-                    autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath, tree.tree);
-                    continue;
-                }
                 if (tree.file.data(gs).isRBI() || tree.file.data(gs).isPackage()) {
                     continue;
                 }
@@ -333,6 +328,10 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
         opts.print.AutogenSubclasses.fmt(
             "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
+    }
+
+    if (true) {
+        autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath);
     }
 }
 #endif

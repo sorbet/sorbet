@@ -123,7 +123,7 @@ public:
     static void writeAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
                                const DefTree &root);
 
-    static void writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path, const ast::TreePtr &pkgTree);
+    static void writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path);
 
 private:
     static void write(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
