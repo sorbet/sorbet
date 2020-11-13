@@ -37,7 +37,7 @@ module Opus::Types::Test
           def self.foo; end; foo
         end
       end
-      assert_includes(ex.message, "params expects keyword arguments")
+      assert_includes(ex.message, "wrong number of arguments (given 1, expected 0)")
     end
 
     it 'requires params have an arg' do
@@ -48,7 +48,7 @@ module Opus::Types::Test
           def self.foo; end; foo
         end
       end
-      assert_includes(ex.message, "wrong number of arguments (given 0, expected 1)")
+      assert_includes(ex.message, "params expects keyword arguments")
     end
 
     describe 'modes' do
