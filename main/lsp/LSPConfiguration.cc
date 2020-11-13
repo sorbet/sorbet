@@ -25,7 +25,7 @@ string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &
         auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
         output->write(make_unique<LSPMessage>(
             make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
-        throw options::EarlyReturnWithCode(1);
+        throw EarlyReturnWithCode(1);
     }
     return opts.rawInputDirNames.at(0);
 }
