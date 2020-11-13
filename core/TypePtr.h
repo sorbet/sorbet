@@ -38,6 +38,9 @@ public:
     // A mapping from type to its corresponding tag.
     template <typename T> struct TypeToTag;
 
+    // A mapping from type to whether or not that type is inlined into TypePtr.
+    template <typename T> struct TypeToIsInlined;
+
     // Required for typecase.
     template <class To> static bool isa(const TypePtr &what);
 
@@ -50,31 +53,64 @@ public:
     static std::string tagToString(Tag tag);
 
 private:
-    std::atomic<u4> *counter;
+    union {
+        // If containsPtr()
+        std::atomic<u4> *counter;
+        // If !containsPtr()
+        u8 value;
+    };
     tagged_storage store;
 
-    static constexpr tagged_storage TAG_MASK = 0xffff000000000007;
+    // Top bit indicates if value is inlined into pointer.
+    // We use a 0 in top bit to indicate not inlined so that nullptr (which has counter value 0) is naturally viewed as
+    // 'inlined'.
+    static constexpr tagged_storage NOT_INLINED_MASK = 0x8000000000000000;
+    static constexpr tagged_storage TAG_MASK = 0x7FFF000000000007;
 
-    static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
+    static constexpr tagged_storage PTR_MASK = ~(NOT_INLINED_MASK | TAG_MASK);
 
-    static tagged_storage tagPtr(Tag tag, void *expr) {
+    static tagged_storage tagToMask(Tag tag) {
         auto val = static_cast<tagged_storage>(tag);
         if (val >= 8) {
             // Store the tag in the upper 16 bits of the pointer, as it won't fit in the lower three bits.
             val <<= 48;
         }
+        return val;
+    }
+
+    static tagged_storage tagValue(Tag tag, u4 inlinedValue) {
+        auto val = tagToMask(tag);
+
+        // Store value into val.
+        val |= static_cast<tagged_storage>(inlinedValue) << 3;
+
+        // Asserts that tag isn't using top bit which we use to indicate that value is _not_ inlined.
+        ENFORCE((val & NOT_INLINED_MASK) == 0);
+
+        return val;
+    }
+
+    static tagged_storage tagPtr(Tag tag, void *expr) {
+        auto val = tagToMask(tag);
 
         auto maskedPtr = reinterpret_cast<tagged_storage>(expr) & PTR_MASK;
 
-        return maskedPtr | val;
+        return maskedPtr | val | NOT_INLINED_MASK;
     }
 
     TypePtr(Tag tag, std::atomic<u4> *counter, void *expr) : counter(counter), store(tagPtr(tag, expr)) {
-        if (counter != nullptr) {
-            counter->fetch_add(1);
-        }
+        ENFORCE_NO_TIMER(counter != nullptr);
+        counter->fetch_add(1);
     }
+
+    // Inlined TypePtr constructor
+    TypePtr(Tag tag, u4 value1, u8 value2) : value(value2), store(tagValue(tag, value1)) {}
+
     static void deleteTagged(Tag tag, void *ptr) noexcept;
+
+    bool containsPtr() const noexcept {
+        return (store & NOT_INLINED_MASK) > 0;
+    }
 
     // A version of release that doesn't mask the tag bits
     tagged_storage releaseTagged() noexcept {
@@ -84,13 +120,21 @@ private:
     }
 
     std::atomic<u4> *releaseCounter() noexcept {
+        ENFORCE_NO_TIMER(containsPtr());
         auto saved = counter;
         counter = nullptr;
         return saved;
     }
 
+    u8 releaseValue() noexcept {
+        ENFORCE_NO_TIMER(!containsPtr());
+        auto saved = value;
+        value = 0;
+        return saved;
+    }
+
     void handleDelete() noexcept {
-        if (counter != nullptr) {
+        if (containsPtr()) {
             // fetch_sub returns value prior to subtract
             const u4 counterVal = counter->fetch_sub(1) - 1;
             if (counterVal == 0) {
@@ -101,6 +145,12 @@ private:
     }
 
     void _sanityCheck(const GlobalState &gs) const;
+
+    u4 inlinedValue() const {
+        ENFORCE_NO_TIMER(!containsPtr());
+        auto val = (store & PTR_MASK) >> 3;
+        return static_cast<u4>(val);
+    }
 
     void *get() const {
         auto val = store & PTR_MASK;
@@ -113,15 +163,28 @@ private:
     }
 
 public:
-    constexpr TypePtr() noexcept : counter(nullptr), store(0) {}
+    constexpr TypePtr() noexcept : value(0), store(0) {}
 
     TypePtr(std::nullptr_t) noexcept : TypePtr() {}
 
-    TypePtr(TypePtr &&other) noexcept : counter(other.releaseCounter()), store(other.releaseTagged()){};
+    TypePtr(TypePtr &&other) noexcept {
+        if (other.containsPtr()) {
+            counter = other.releaseCounter();
+            ENFORCE_NO_TIMER(counter != nullptr);
+        } else {
+            value = other.releaseValue();
+        }
+        // Has to happen last to avoid releaseCounter() triggering an ENFORCE.
+        store = other.releaseTagged();
+    }
 
-    TypePtr(const TypePtr &other) noexcept : counter(other.counter), store(other.store) {
-        if (counter != nullptr) {
+    TypePtr(const TypePtr &other) noexcept : store(other.store) {
+        if (other.containsPtr()) {
+            counter = other.counter;
+            ENFORCE_NO_TIMER(counter != nullptr);
             counter->fetch_add(1);
+        } else {
+            value = other.value;
         }
     };
 
@@ -131,7 +194,11 @@ public:
 
     TypePtr &operator=(TypePtr &&other) noexcept {
         handleDelete();
-        counter = other.releaseCounter();
+        if (other.containsPtr()) {
+            counter = other.releaseCounter();
+        } else {
+            value = other.releaseValue();
+        }
         store = other.releaseTagged();
         return *this;
     };
@@ -142,11 +209,16 @@ public:
         }
 
         handleDelete();
-        counter = other.counter;
-        store = other.store;
-        if (counter != nullptr) {
-            counter->fetch_add(1);
+
+        if (other.containsPtr()) {
+            counter = other.counter;
+            if (counter != nullptr) {
+                counter->fetch_add(1);
+            }
+        } else {
+            value = other.value;
         }
+        store = other.store;
         return *this;
     };
 
@@ -168,10 +240,10 @@ public:
     }
 
     bool operator!=(const TypePtr &other) const {
-        return store != other.store;
+        return store != other.store && counter != other.counter;
     }
     bool operator==(const TypePtr &other) const {
-        return store == other.store;
+        return store == other.store && counter == other.counter;
     }
     bool operator!=(std::nullptr_t n) const {
         return store != 0;

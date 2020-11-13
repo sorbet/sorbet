@@ -64,6 +64,8 @@ public:
 CheckSize(ArgInfo, 48, 8);
 
 template <class T, class... Args> TypePtr make_type(Args &&... args) {
+    // Every inlined type must specialize `make_type`.
+    static_assert(!TypePtr::TypeToIsInlined<T>::value);
     return TypePtr(TypePtr::TypeToTag<T>::value, new T(std::forward<Args>(args)...));
 }
 
@@ -292,10 +294,15 @@ template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
     return what;
 }
 
-#define TYPE(name)                                                                                             \
+#define TYPE_IMPL(name, isInlined)                                                                             \
     class name;                                                                                                \
     template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
+    template <> struct TypePtr::TypeToIsInlined<name> { static constexpr bool value = isInlined; };            \
     class __attribute__((aligned(8))) name
+
+#define TYPE(name) TYPE_IMPL(name, false)
+
+#define TYPE_INLINED(name) TYPE_IMPL(name, true)
 
 TYPE(ClassType) {
 public:
