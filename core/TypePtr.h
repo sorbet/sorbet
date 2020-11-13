@@ -252,10 +252,16 @@ public:
     }
 
     bool operator!=(const TypePtr &other) const {
-        return store != other.store || counter != other.counter;
+        // There's a lot going on in this line.
+        // * If store == other.store, both `this` and `other` have the same value of `containsPtr()`.
+        // * If store == other.store and both contain a pointer, there's no need to compare `counter`; they point to the
+        // same Type object.
+        // * If store == other.store and both do not contain a pointer, then we need to compare the inlined values.
+        return store != other.store || (!containsPtr() && value != other.value);
     }
     bool operator==(const TypePtr &other) const {
-        return store == other.store && counter == other.counter;
+        // Inverse of !=
+        return store == other.store && (containsPtr() || value == other.value);
     }
     bool operator!=(std::nullptr_t n) const {
         return store != 0;
