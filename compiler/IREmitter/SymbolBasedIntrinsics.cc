@@ -39,8 +39,8 @@ core::SymbolRef removeRoot(core::SymbolRef sym) {
 
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     core::SymbolRef sym;
-    if (auto classType = core::cast_type<core::ClassType>(typ)) {
-        sym = classType->symbol;
+    if (core::isa_type<core::ClassType>(typ)) {
+        sym = core::cast_type_nonnull<core::ClassType>(typ).symbol;
     } else if (auto appliedType = core::cast_type<core::AppliedType>(typ)) {
         sym = appliedType->klass;
     } else {
@@ -103,9 +103,9 @@ public:
         ENFORCE(send->args.size() == 2, "Invariant established by rewriter/Flatten.cc");
         auto ownerSym = typeToSym(cs, send->args[0].type);
 
-        auto lit = core::cast_type<core::LiteralType>(send->args[1].type);
-        ENFORCE(lit->literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        core::NameRef funcNameRef(cs, lit->value);
+        auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
+        ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        core::NameRef funcNameRef(cs, lit.value);
 
         auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
         if (ownerSym == core::Symbols::Object() && !isSelf) {
@@ -231,21 +231,27 @@ public:
         auto options = 0;
         if (send->args.size() == 2) {
             auto &arg1 = send->args[1];
-            auto literalOptions = core::cast_type<core::LiteralType>(arg1.type);
-            if (literalOptions == nullptr ||
-                literalOptions->literalKind != core::LiteralType::LiteralTypeKind::Integer) {
+            if (!core::isa_type<core::LiteralType>(arg1.type)) {
                 return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
             }
-            options = literalOptions->value;
+            auto literalOptions = core::cast_type_nonnull<core::LiteralType>(arg1.type);
+            if (literalOptions.literalKind != core::LiteralType::LiteralTypeKind::Integer) {
+                return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+            }
+            options = literalOptions.value;
         }
 
         auto &arg0 = send->args[0];
-        auto literal = core::cast_type<core::LiteralType>(arg0.type);
-        if (literal == nullptr || literal->literalKind != core::LiteralType::LiteralTypeKind::String) {
+        if (!core::isa_type<core::LiteralType>(arg0.type)) {
+            return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+        }
+
+        auto literal = core::cast_type_nonnull<core::LiteralType>(arg0.type);
+        if (literal.literalKind != core::LiteralType::LiteralTypeKind::String) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
         auto &builder = builderCast(mcctx.build);
-        auto str = core::NameRef(cs, literal->value).data(cs)->shortName(cs);
+        auto str = core::NameRef(cs, literal.value).data(cs)->shortName(cs);
         return Payload::cPtrToRubyRegexp(cs, builder, str, options);
     };
 

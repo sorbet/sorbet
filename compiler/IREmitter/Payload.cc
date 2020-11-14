@@ -344,7 +344,8 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
                                      {val, Payload::getRubyConstant(cs, sym, builder)});
         },
         [&](const core::AppliedType &at) {
-            auto base = typeTest(cs, builder, val, core::make_type<core::ClassType>(at.klass));
+            core::SymbolRef klass = at.klass;
+            auto base = typeTest(cs, builder, val, core::make_type<core::ClassType>(klass));
             ret = base;
             // todo: ranges, hashes, sets, enumerator, and, overall, enumerables
         },

@@ -708,8 +708,9 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, var);
         return;
     }
-    auto ct = core::cast_type<core::ClassType>(expectedType);
-    if (ct != nullptr && ct->symbol == core::Symbols::void_()) {
+
+    if (core::isa_type<core::ClassType>(expectedType) &&
+        core::cast_type_nonnull<core::ClassType>(expectedType).symbol == core::Symbols::void_()) {
         auto void_ = Payload::getRubyConstant(cs, core::Symbols::T_Private_Types_Void_VOIDSingleton(), builder);
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, void_);
         return;

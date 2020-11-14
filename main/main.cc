@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
         sorbet::compiler::ObjectFileEmitter::init();
         auto code = sorbet::realmain::realmain(argc, argv);
         return code;
-    } catch (sorbet::realmain::options::EarlyReturnWithCode &c) {
+    } catch (sorbet::EarlyReturnWithCode &c) {
         return c.returnCode;
     } catch (sorbet::SorbetException &e) {
         return 1;

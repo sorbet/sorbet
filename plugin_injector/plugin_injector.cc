@@ -299,7 +299,7 @@ public:
     virtual std::unique_ptr<SemanticExtension> readOptions(cxxopts::ParseResult &providedOptions) const override {
         if (providedOptions["version"].as<bool>()) {
             fmt::print("Sorbet compiler {}\n", sorbet_full_version_string);
-            throw realmain::options::EarlyReturnWithCode(0);
+            throw EarlyReturnWithCode(0);
         }
 
         optional<string> irOutputDir;
@@ -309,7 +309,7 @@ public:
 
             if (!FileOps::dirExists(outputDir)) {
                 fmt::print("Missing output directory {}\n", outputDir);
-                throw realmain::options::EarlyReturnWithCode(1);
+                throw EarlyReturnWithCode(1);
             }
 
             irOutputDir = outputDir;

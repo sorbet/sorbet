@@ -611,11 +611,11 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                     maybeCast->fun != core::Names::squareBrackets() || maybeCast->args.size() != 1) {
                     continue;
                 }
-                auto litType = core::cast_type<core::LiteralType>(maybeCast->args[0].type);
-                if (litType == nullptr) {
+                if (!core::isa_type<core::LiteralType>(maybeCast->args[0].type)) {
                     continue;
                 }
-                rubyBlockArgs[b->rubyBlockId][litType->value] = maybeCallOnLoadYieldArg.bind.variable;
+                auto litType = core::cast_type_nonnull<core::LiteralType>(maybeCast->args[0].type);
+                rubyBlockArgs[b->rubyBlockId][litType.value] = maybeCallOnLoadYieldArg.bind.variable;
             }
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
             if (exceptionHandlingBlockHeaders[b->id] == 0) {
@@ -889,20 +889,19 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
         return Payload::rubyNil(cs, builder);
     }
 
-    auto litType = core::cast_type<core::LiteralType>(lit);
-    ENFORCE(litType);
-    switch (litType->literalKind) {
+    auto litType = core::cast_type_nonnull<core::LiteralType>(lit);
+    switch (litType.literalKind) {
         case core::LiteralType::LiteralTypeKind::Integer:
-            return Payload::longToRubyValue(cs, builder, litType->value);
+            return Payload::longToRubyValue(cs, builder, litType.value);
         case core::LiteralType::LiteralTypeKind::Float:
-            return Payload::doubleToRubyValue(cs, builder, absl::bit_cast<double>(litType->value));
+            return Payload::doubleToRubyValue(cs, builder, absl::bit_cast<double>(litType.value));
         case core::LiteralType::LiteralTypeKind::Symbol: {
-            auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
+            auto str = core::NameRef(cs, litType.value).data(cs)->shortName(cs);
             auto rawId = Payload::idIntern(cs, builder, str);
             return builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
         }
         case core::LiteralType::LiteralTypeKind::String: {
-            auto str = core::NameRef(cs, litType->value).data(cs)->shortName(cs);
+            auto str = core::NameRef(cs, litType.value).data(cs)->shortName(cs);
             return Payload::cPtrToRubyString(cs, builder, str, true);
         }
     }
