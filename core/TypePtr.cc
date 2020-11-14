@@ -68,18 +68,15 @@ void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
 }
 
 bool TypePtr::isUntyped() const {
-    auto *t = cast_type<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::untyped();
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::untyped();
 }
 
 bool TypePtr::isNilClass() const {
-    auto *t = cast_type<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::NilClass();
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::NilClass();
 }
 
 bool TypePtr::isBottom() const {
-    auto *t = cast_type<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::bottom();
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::bottom();
 }
 
 int TypePtr::kind() const {
@@ -184,7 +181,7 @@ bool TypePtr::hasUntyped() const {
         case Tag::UnresolvedAppliedType:
         case Tag::UnresolvedClassType:
         case Tag::ClassType: {
-            auto &c = cast_type_nonnull<ClassType>(*this);
+            auto c = cast_type_nonnull<ClassType>(*this);
             return c.symbol == Symbols::untyped();
         }
         case Tag::OrType: {
@@ -212,8 +209,8 @@ bool TypePtr::hasUntyped() const {
 
 core::SymbolRef TypePtr::untypedBlame() const {
     ENFORCE(hasUntyped());
-    if (auto *blamed = cast_type<BlamedUntyped>(*this)) {
-        return blamed->blame;
+    if (isa_type<BlamedUntyped>(*this)) {
+        return cast_type_nonnull<BlamedUntyped>(*this).blame;
     }
     return Symbols::noSymbol();
 }
@@ -235,13 +232,13 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
             return andType.getCallArguments(gs, name);
         }
         case Tag::BlamedUntyped: {
-            auto &c = cast_type_nonnull<BlamedUntyped>(*this);
+            auto c = cast_type_nonnull<BlamedUntyped>(*this);
             return c.getCallArguments(gs, name);
         }
         case Tag::UnresolvedClassType:
         case Tag::UnresolvedAppliedType:
         case Tag::ClassType: {
-            auto &c = cast_type_nonnull<ClassType>(*this);
+            auto c = cast_type_nonnull<ClassType>(*this);
             return c.getCallArguments(gs, name);
         }
         case Tag::AppliedType: {

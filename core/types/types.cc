@@ -264,8 +264,9 @@ TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, c
 }
 
 TypePtr Types::dropLiteral(const TypePtr &tp) {
-    if (auto *a = cast_type<LiteralType>(tp)) {
-        return a->underlying();
+    if (isa_type<LiteralType>(tp)) {
+        auto a = cast_type_nonnull<LiteralType>(tp);
+        return a.underlying();
     }
     return tp;
 }
@@ -369,12 +370,12 @@ bool LiteralType::equals(const LiteralType &rhs) const {
     if (this->value != rhs.value) {
         return false;
     }
-    auto *lklass = cast_type<ClassType>(this->underlying());
-    auto *rklass = cast_type<ClassType>(rhs.underlying());
-    if (!lklass || !rklass) {
+    if (!isa_type<ClassType>(this->underlying()) || !isa_type<ClassType>(rhs.underlying())) {
         return false;
     }
-    return lklass->symbol == rklass->symbol;
+    auto lklass = cast_type_nonnull<ClassType>(this->underlying());
+    auto rklass = cast_type_nonnull<ClassType>(rhs.underlying());
+    return lklass.symbol == rklass.symbol;
 }
 
 OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
@@ -741,9 +742,9 @@ core::SymbolRef Types::getRepresentedClass(const GlobalState &gs, const TypePtr 
         return core::Symbols::noSymbol();
     }
     core::SymbolRef singleton;
-    auto *s = cast_type<ClassType>(ty);
-    if (s != nullptr) {
-        singleton = s->symbol;
+    if (isa_type<ClassType>(ty)) {
+        auto s = cast_type_nonnull<ClassType>(ty);
+        singleton = s.symbol;
     } else {
         auto *at = cast_type<AppliedType>(ty);
         if (at == nullptr) {

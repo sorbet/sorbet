@@ -539,8 +539,9 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
     }
 
     core::SymbolRef receiverSym;
-    if (auto classType = core::cast_type<core::ClassType>(receiverType)) {
-        receiverSym = classType->symbol;
+    if (core::isa_type<core::ClassType>(receiverType)) {
+        auto classType = core::cast_type_nonnull<core::ClassType>(receiverType);
+        receiverSym = classType.symbol;
     } else if (auto appliedType = core::cast_type<core::AppliedType>(receiverType)) {
         receiverSym = appliedType->klass;
     } else {

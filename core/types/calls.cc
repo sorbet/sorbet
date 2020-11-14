@@ -370,14 +370,15 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         return metaType->wrapped;
     }
 
-    if (auto *classType = cast_type<ClassType>(tp)) {
-        if (classType->symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
+    if (isa_type<ClassType>(tp)) {
+        auto classType = cast_type_nonnull<ClassType>(tp);
+        if (classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
             // T::Enum instances are allowed to stand for themselves in type syntax positions.
             // See the note in type_syntax.cc regarding T::Enum.
             return tp;
         }
 
-        SymbolRef attachedClass = classType->symbol.data(gs)->attachedClass(gs);
+        SymbolRef attachedClass = classType.symbol.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
@@ -414,7 +415,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return TupleType::build(gs, move(unwrappedElems));
-    } else if (auto *litType = cast_type<LiteralType>(tp)) {
+    } else if (isa_type<LiteralType>(tp)) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unsupported usage of literal type");
         }
@@ -758,8 +759,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             while (kwit != kwend) {
                 // if the key isn't a symbol literal, break out as this is not a valid keyword
                 auto &key = *kwit++;
-                auto *lit = cast_type<LiteralType>(key->type);
-                if (!lit || lit->literalKind != LiteralType::LiteralTypeKind::Symbol) {
+                if (!isa_type<LiteralType>(key->type) ||
+                    cast_type_nonnull<LiteralType>(key->type).literalKind != LiteralType::LiteralTypeKind::Symbol) {
                     // it's not possible to tell if this is hash will be used as kwargs yet, so we can't raise a useful
                     // error here.
 
@@ -898,14 +899,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     break;
                 } else if (spec.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
-                        auto key = cast_type<LiteralType>(*it);
-                        SymbolRef klass = cast_type<ClassType>(key->underlying())->symbol;
+                        auto key = cast_type_nonnull<LiteralType>(*it);
+                        SymbolRef klass = cast_type_nonnull<ClassType>(key.underlying()).symbol;
                         if (klass != Symbols::Symbol()) {
                             continue;
                         }
 
-                        NameRef arg(gs, key->value);
-                        if (consumed.find(NameRef(gs, key->value)) != consumed.end()) {
+                        NameRef arg(gs, key.value);
+                        if (consumed.find(NameRef(gs, key.value)) != consumed.end()) {
                             continue;
                         }
                         consumed.insert(arg);
@@ -928,9 +929,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 ++kwit;
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
-                    auto lit = cast_type<LiteralType>(litType);
-                    return cast_type<ClassType>(lit->underlying())->symbol == Symbols::Symbol() &&
-                           lit->value == spec.name._id;
+                    auto lit = cast_type_nonnull<LiteralType>(litType);
+                    return cast_type_nonnull<ClassType>(lit.underlying()).symbol == Symbols::Symbol() &&
+                           lit.value == spec.name._id;
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
@@ -953,12 +954,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 }
             }
             for (auto &keyType : hash->keys) {
-                auto key = cast_type<LiteralType>(keyType);
-                SymbolRef klass = cast_type<ClassType>(key->underlying())->symbol;
-                if (klass == Symbols::Symbol() && consumed.find(NameRef(gs, key->value)) != consumed.end()) {
+                auto key = cast_type_nonnull<LiteralType>(keyType);
+                SymbolRef klass = cast_type_nonnull<ClassType>(key.underlying()).symbol;
+                if (klass == Symbols::Symbol() && consumed.find(NameRef(gs, key.value)) != consumed.end()) {
                     continue;
                 }
-                NameRef arg(gs, key->value);
+                NameRef arg(gs, key.value);
 
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
@@ -1521,8 +1522,7 @@ public:
         keys.reserve(args.args.size() / 2);
         values.reserve(args.args.size() / 2);
         for (int i = 0; i < args.args.size(); i += 2) {
-            auto *key = cast_type<LiteralType>(args.args[i]->type);
-            if (key == nullptr) {
+            if (!isa_type<LiteralType>(args.args[i]->type)) {
                 res.returnType = Types::hashOfUntyped();
                 return;
             }
@@ -1620,15 +1620,15 @@ public:
             return;
         }
         auto val = args.args.front()->type;
-        auto *beforeLit = cast_type<LiteralType>(args.args[1]->type);
-        auto *afterLit = cast_type<LiteralType>(args.args[2]->type);
-        if (!(beforeLit->underlying().derivesFrom(gs, Symbols::Integer()) &&
-              afterLit->underlying().derivesFrom(gs, Symbols::Integer()))) {
+        auto beforeLit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        auto afterLit = cast_type_nonnull<LiteralType>(args.args[2]->type);
+        if (!(beforeLit.underlying().derivesFrom(gs, Symbols::Integer()) &&
+              afterLit.underlying().derivesFrom(gs, Symbols::Integer()))) {
             res.returnType = Types::untypedUntracked();
             return;
         }
-        int before = (int)beforeLit->value;
-        int after = (int)afterLit->value;
+        int before = (int)beforeLit.value;
+        int after = (int)afterLit.value;
         res.returnType = expandArray(gs, val, before + after);
     }
 } Magic_expandSplat;
@@ -1691,11 +1691,15 @@ public:
             return;
         }
 
-        auto *lit = cast_type<LiteralType>(args.args[1]->type);
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+        if (!isa_type<LiteralType>(args.args[1]->type)) {
             return;
         }
-        NameRef fn(gs, (u4)lit->value);
+        auto lit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        if (!lit.derivesFrom(gs, Symbols::Symbol())) {
+            return;
+        }
+
+        NameRef fn(gs, (u4)lit.value);
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
             return;
@@ -1843,9 +1847,9 @@ private:
         auto &blockPreType = dispatched.main.blockPreType;
         if (blockPreType && !Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, blockPreType,
                                                              UntypedMode::AlwaysCompatible)) {
-            auto *passedInProcClass = cast_type<ClassType>(passedInBlockType);
             auto nonNilableBlockType = Types::dropNil(gs, blockPreType);
-            if (passedInProcClass && passedInProcClass->symbol == Symbols::Proc() &&
+            if (isa_type<ClassType>(passedInBlockType) &&
+                cast_type_nonnull<ClassType>(passedInBlockType).symbol == Symbols::Proc() &&
                 Types::isSubType(gs, nonNilableBlockType, passedInBlockType)) {
                 // If a block of unknown arity is passed in, but the function was declared with a known arity,
                 // raise an error in strict mode.
@@ -1937,11 +1941,15 @@ public:
             return;
         }
 
-        auto *lit = cast_type<LiteralType>(args.args[1]->type);
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+        if (!isa_type<LiteralType>(args.args[1]->type)) {
             return;
         }
-        NameRef fn(gs, (u4)lit->value);
+        auto lit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        if (!lit.derivesFrom(gs, Symbols::Symbol())) {
+            return;
+        }
+
+        NameRef fn(gs, (u4)lit.value);
 
         u2 numPosArgs = args.numPosArgs - 3;
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
@@ -2001,11 +2009,15 @@ public:
             return;
         }
 
-        auto *lit = cast_type<LiteralType>(args.args[1]->type);
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+        if (!isa_type<LiteralType>(args.args[1]->type)) {
             return;
         }
-        NameRef fn(gs, (u4)lit->value);
+        auto lit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        if (!lit.derivesFrom(gs, Symbols::Symbol())) {
+            return;
+        }
+
+        NameRef fn(gs, (u4)lit.value);
 
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
@@ -2192,15 +2204,20 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
-        const LiteralType *lit = nullptr;
+        TypePtr argType = nullptr;
         if (args.args.size() == 1) {
-            lit = cast_type<LiteralType>(args.args.front()->type);
+            argType = args.args.front()->type;
         }
-        if (!lit || !lit->underlying().derivesFrom(gs, Symbols::Integer())) {
+        if (!isa_type<LiteralType>(argType)) {
             return;
         }
 
-        auto idx = lit->value;
+        auto lit = cast_type_nonnull<LiteralType>(argType);
+        if (!lit.underlying().derivesFrom(gs, Symbols::Integer())) {
+            return;
+        }
+
+        auto idx = lit.value;
         if (idx < 0) {
             idx = tuple->elems.size() + idx;
         }
@@ -2312,8 +2329,9 @@ public:
 
         auto keys = shape->keys;
         auto values = shape->values;
-        auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType *key, const TypePtr &value) {
-            auto fnd = absl::c_find_if(keys, [&key](auto &lit) { return key->equals(*cast_type<LiteralType>(lit)); });
+        auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType &key, const TypePtr &value) {
+            auto fnd =
+                absl::c_find_if(keys, [&key](auto &lit) { return key.equals(cast_type_nonnull<LiteralType>(lit)); });
             if (fnd == keys.end()) {
                 keys.emplace_back(keyType);
                 values.emplace_back(value);
@@ -2325,8 +2343,12 @@ public:
         // inlined keyword arguments first
         for (auto i = 0; i < numKwargs; i += 2) {
             auto &keyType = args.args[i]->type;
-            auto *key = cast_type<LiteralType>(keyType);
-            if (!key || key->literalKind != LiteralType::LiteralTypeKind::Symbol) {
+            if (!isa_type<LiteralType>(keyType)) {
+                return;
+            }
+
+            auto key = cast_type_nonnull<LiteralType>(keyType);
+            if (key.literalKind != LiteralType::LiteralTypeKind::Symbol) {
                 return;
             }
 
@@ -2336,7 +2358,7 @@ public:
         // then kwsplat
         if (kwsplat != nullptr) {
             for (auto &keyType : kwsplat->keys) {
-                auto *key = cast_type<LiteralType>(keyType);
+                auto key = cast_type_nonnull<LiteralType>(keyType);
                 addShapeEntry(keyType, key, kwsplat->values[&keyType - &kwsplat->keys.front()]);
             }
         }
@@ -2408,18 +2430,19 @@ public:
                     args.locs.args.size());
             auto argLoc = args.locs.args[0];
 
-            auto lt = cast_type<LiteralType>(argTyp);
-            if (!lt) {
+            if (!isa_type<LiteralType>(argTyp)) {
                 if (auto e =
                         gs.beginError(core::Loc(args.locs.file, argLoc), core::errors::Infer::ExpectedLiteralType)) {
                     e.setHeader("You must pass an Integer literal to specify a depth with Array#flatten");
                 }
                 return;
             }
-            ENFORCE(lt->literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
 
-            if (lt->value >= 0) {
-                depth = lt->value;
+            auto lt = cast_type_nonnull<LiteralType>(argTyp);
+            ENFORCE(lt.literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
+
+            if (lt.value >= 0) {
+                depth = lt.value;
             } else {
                 // Negative values behave like no depth was given
                 depth = INT64_MAX;

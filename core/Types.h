@@ -1,6 +1,7 @@
 #ifndef SORBET_TYPES_H
 #define SORBET_TYPES_H
 
+#include "absl/base/casts.h"
 #include "common/Counters.h"
 #include "core/Context.h"
 #include "core/Error.h"
@@ -64,6 +65,8 @@ public:
 CheckSize(ArgInfo, 48, 8);
 
 template <class T, class... Args> TypePtr make_type(Args &&... args) {
+    static_assert(!TypePtr::TypeToIsInlined<T>::value, "Inlined types must specialize `make_type` for each combination "
+                                                       "of argument types; is one specialization missing?");
     return TypePtr(TypePtr::TypeToTag<T>::value, new T(std::forward<Args>(args)...));
 }
 
@@ -258,6 +261,9 @@ inline bool is_proxy_type(const TypePtr &what) {
 }
 
 template <class To> To const *cast_type(const TypePtr &what) {
+    static_assert(TypePtr::TypeToIsInlined<To>::value == false,
+                  "Cast inlined type objects with `cast_type_nonnull`, and use `isa_type` to check if the TypePtr "
+                  "contains the type you expect.");
     if (isa_type<To>(what)) {
         return reinterpret_cast<To const *>(what.get());
     } else {
@@ -270,7 +276,8 @@ template <class To> To *cast_type(TypePtr &what) {
     return const_cast<To *>(cast_type<To>(static_cast<const TypePtr &>(what)));
 }
 
-template <class To> To const &cast_type_nonnull(const TypePtr &what) {
+template <class To>
+typename TypePtr::TypeToCastType<To, TypePtr::TypeToIsInlined<To>::value>::type cast_type_nonnull(const TypePtr &what) {
     ENFORCE_NO_TIMER(isa_type<To>(what));
     return *reinterpret_cast<const To *>(what.get());
 }
@@ -280,7 +287,9 @@ template <class To> inline bool TypePtr::isa(const TypePtr &what) {
     return isa_type<To>(what);
 }
 
-template <class To> inline To const &TypePtr::cast(const TypePtr &what) {
+template <class To>
+inline typename TypePtr::TypeToCastType<To, TypePtr::TypeToIsInlined<To>::value>::type
+TypePtr::cast(const TypePtr &what) {
     return cast_type_nonnull<To>(what);
 }
 
@@ -288,18 +297,28 @@ template <> inline bool TypePtr::isa<TypePtr>(const TypePtr &what) {
     return true;
 }
 
+// Required to support cast<TypePtr> specialization.
+template <> struct TypePtr::TypeToIsInlined<TypePtr> { static constexpr bool value = false; };
+
 template <> inline TypePtr const &TypePtr::cast<TypePtr>(const TypePtr &what) {
     return what;
 }
 
-#define TYPE(name)                                                                                             \
+#define TYPE_IMPL(name, isInlined)                                                                             \
     class name;                                                                                                \
     template <> struct TypePtr::TypeToTag<name> { static constexpr TypePtr::Tag value = TypePtr::Tag::name; }; \
+    template <> struct TypePtr::TypeToIsInlined<name> { static constexpr bool value = isInlined; };            \
     class __attribute__((aligned(8))) name
 
-TYPE(ClassType) {
+#define TYPE(name) TYPE_IMPL(name, false)
+
+#define TYPE_INLINED(name) TYPE_IMPL(name, true)
+
+TYPE_INLINED(ClassType) {
 public:
-    SymbolRef symbol;
+    // `const` because this is an inlined type; the symbol is inlined into the TypePtr. The TypePtr must be modified
+    // to update the type.
+    const SymbolRef symbol;
     ClassType(SymbolRef symbol);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -311,6 +330,24 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(ClassType, 8, 8);
+
+template <> inline TypePtr make_type<ClassType, core::SymbolRef &>(core::SymbolRef &ref) {
+    return TypePtr(TypePtr::Tag::ClassType, ref.rawId(), 0);
+}
+
+template <> inline TypePtr make_type<ClassType, core::SymbolRef>(core::SymbolRef &&ref) {
+    return TypePtr(TypePtr::Tag::ClassType, ref.rawId(), 0);
+}
+
+template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<ClassType>(what));
+    if (what.tag() == TypePtr::Tag::ClassType) {
+        return ClassType(core::SymbolRef::fromRaw(what.inlinedValue()));
+    } else {
+        // Subclasses of ClassType contain untyped with metadata.
+        return ClassType(core::Symbols::untyped());
+    }
+}
 
 /*
  * This is the type used to represent a use of a type_member or type_template in
@@ -338,9 +375,9 @@ public:
 };
 CheckSize(LambdaParam, 40, 8);
 
-TYPE(SelfTypeParam) final {
+TYPE_INLINED(SelfTypeParam) final {
 public:
-    SymbolRef definition;
+    const SymbolRef definition;
 
     SelfTypeParam(const SymbolRef definition);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -353,23 +390,45 @@ public:
 };
 CheckSize(SelfTypeParam, 8, 8);
 
-TYPE(AliasType) final {
+template <> inline TypePtr make_type<SelfTypeParam, core::SymbolRef &>(core::SymbolRef &definition) {
+    return TypePtr(TypePtr::Tag::SelfTypeParam, definition.rawId(), 0);
+}
+
+template <> inline SelfTypeParam cast_type_nonnull<SelfTypeParam>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<SelfTypeParam>(what));
+    return SelfTypeParam(core::SymbolRef::fromRaw(what.inlinedValue()));
+}
+
+TYPE_INLINED(AliasType) final {
 public:
     AliasType(SymbolRef other);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
 
-    SymbolRef symbol;
+    const SymbolRef symbol;
     void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(AliasType, 8, 8);
+
+template <> inline TypePtr make_type<AliasType, core::SymbolRef &>(core::SymbolRef &other) {
+    return TypePtr(TypePtr::Tag::AliasType, other.rawId(), 0);
+}
+
+template <> inline TypePtr make_type<AliasType, core::SymbolRef>(core::SymbolRef &&other) {
+    return TypePtr(TypePtr::Tag::AliasType, other.rawId(), 0);
+}
+
+template <> inline AliasType cast_type_nonnull<AliasType>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<AliasType>(what));
+    return AliasType(core::SymbolRef::fromRaw(what.inlinedValue()));
+}
 
 /** This is a specific kind of self-type that should only be used in method return position.
  * It indicates that the method may(or will) return `self` or type that behaves equivalently
  * to self(e.g. in case of `.clone`).
  */
-TYPE(SelfType) final {
+TYPE_INLINED(SelfType) final {
 public:
     SelfType();
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
@@ -383,7 +442,17 @@ public:
 };
 CheckSize(SelfType, 8, 8);
 
-TYPE(LiteralType) final {
+template <> inline TypePtr make_type<SelfType>() {
+    // static_cast required to disambiguate TypePtr constructor.
+    return TypePtr(TypePtr::Tag::SelfType, static_cast<u4>(0), 0);
+}
+
+template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<SelfType>(what));
+    return SelfType();
+}
+
+TYPE_INLINED(LiteralType) final {
 public:
     union {
         const int64_t value;
@@ -408,8 +477,61 @@ public:
 };
 CheckSize(LiteralType, 24, 8);
 
+template <> inline TypePtr make_type<LiteralType, double &>(double &val) {
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Float),
+                   absl::bit_cast<u8>(val));
+}
+
+template <> inline TypePtr make_type<LiteralType, double>(double &&val) {
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Float),
+                   absl::bit_cast<u8>(val));
+}
+
+template <> inline TypePtr make_type<LiteralType, int64_t>(int64_t &&val) {
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Integer),
+                   absl::bit_cast<u8>(val));
+}
+
+template <> inline TypePtr make_type<LiteralType, long &>(long &val) {
+    return make_type<LiteralType>(static_cast<int64_t>(val));
+}
+
+template <> inline TypePtr make_type<LiteralType, long long &>(long long &val) {
+    return make_type<LiteralType>(static_cast<int64_t>(val));
+}
+
+template <> inline TypePtr make_type<LiteralType, float>(float &&val) {
+    return make_type<LiteralType>(static_cast<double>(val));
+}
+
+template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef &>(SymbolRef &&klass, NameRef &val) {
+    LiteralType type(klass, val);
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), absl::bit_cast<u8>(type.value));
+}
+
+template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef>(SymbolRef &&klass, NameRef &&val) {
+    LiteralType type(klass, val);
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), absl::bit_cast<u8>(type.value));
+}
+
+template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<LiteralType>(what));
+    auto literalKind = static_cast<LiteralType::LiteralTypeKind>(what.inlinedValue());
+    switch (literalKind) {
+        case LiteralType::LiteralTypeKind::Float:
+            return LiteralType(absl::bit_cast<double>(what.value));
+        case LiteralType::LiteralTypeKind::Integer:
+            return LiteralType(absl::bit_cast<int64_t>(what.value));
+        case LiteralType::LiteralTypeKind::String:
+            return LiteralType(Symbols::String(), NameRef(NameRef::WellKnown{}, static_cast<u4>(what.value)));
+        case LiteralType::LiteralTypeKind::Symbol:
+            return LiteralType(Symbols::Symbol(), NameRef(NameRef::WellKnown{}, static_cast<u4>(what.value)));
+    }
+}
+
 /*
  * TypeVars are the used for the type parameters of generic methods.
+ * Note: These are mutated post-construction and cannot be inlined.
  */
 TYPE(TypeVar) final {
 public:
@@ -718,13 +840,22 @@ struct DispatchResult {
           secondaryKind(secondaryKind){};
 };
 
-TYPE(BlamedUntyped) final : public ClassType {
+TYPE_INLINED(BlamedUntyped) final : public ClassType {
 public:
     const core::SymbolRef blame;
     BlamedUntyped(SymbolRef whoToBlame) : ClassType(core::Symbols::untyped()), blame(whoToBlame){};
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 };
+
+template <> inline TypePtr make_type<BlamedUntyped, core::SymbolRef &>(core::SymbolRef &whoToBlame) {
+    return TypePtr(TypePtr::Tag::BlamedUntyped, whoToBlame.rawId(), 0);
+}
+
+template <> inline BlamedUntyped cast_type_nonnull<BlamedUntyped>(const TypePtr &what) {
+    ENFORCE_NO_TIMER(isa_type<BlamedUntyped>(what));
+    return BlamedUntyped(core::SymbolRef::fromRaw(what.inlinedValue()));
+}
 
 TYPE(UnresolvedClassType) final : public ClassType {
 public:
