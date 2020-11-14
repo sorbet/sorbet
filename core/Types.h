@@ -65,8 +65,8 @@ public:
 CheckSize(ArgInfo, 48, 8);
 
 template <class T, class... Args> TypePtr make_type(Args &&... args) {
-    // Every inlined type must specialize `make_type`.
-    static_assert(!TypePtr::TypeToIsInlined<T>::value);
+    static_assert(!TypePtr::TypeToIsInlined<T>::value, "Inlined types must specialize `make_type` for each combination "
+                                                       "of argument types; is one specialization missing?");
     return TypePtr(TypePtr::TypeToTag<T>::value, new T(std::forward<Args>(args)...));
 }
 
