@@ -1270,14 +1270,14 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
 vector<u4> Symbol::methodArgumentHash(const GlobalState &gs) const {
     vector<u4> result;
     result.reserve(params().size());
-    for (const auto &e : params()) {
+    for (const auto &p : params()) {
         u4 arg = 0;
         // Changing name of keyword arg is a shape change.
-        if (e.flags.isKeyword) {
-            arg = mix(arg, _hash(e.name.data(gs)->shortName(gs)));
+        if (p.flags.isKeyword) {
+            arg = mix(arg, _hash(p.name.data(gs)->shortName(gs)));
         }
         // Changing an argument from e.g. keyword to position-based is a shape change.
-        result.push_back(mix(arg, e.flags.toU1()));
+        result.push_back(mix(arg, p.flags.toU1()));
     }
     return result;
 }

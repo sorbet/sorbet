@@ -82,7 +82,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
     }
     string methodReturnType =
         (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType.show(gs), ")");
-    vector<string> typeAndArgNames;
+    vector<string> typeAndParamNames;
 
     vector<string> flags;
     const core::SymbolData &sym = method.data(gs);
@@ -100,12 +100,12 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
         if (sym->isOverride()) {
             flags.emplace_back("override");
         }
-        for (auto &argSym : method.data(gs)->params()) {
-            // Don't display synthetic arguments (like blk).
-            if (!argSym.isSyntheticBlockArgument()) {
-                typeAndArgNames.emplace_back(
-                    absl::StrCat(argSym.argumentName(gs), ": ",
-                                 getResultType(gs, argSym.type, method, receiver, constraint).show(gs)));
+        for (auto &param : method.data(gs)->params()) {
+            // Don't display synthetic params (like blk).
+            if (!param.isSyntheticBlockArgument()) {
+                typeAndParamNames.emplace_back(
+                    absl::StrCat(param.argumentName(gs), ": ",
+                                 getResultType(gs, param.type, method, receiver, constraint).show(gs)));
             }
         }
     }
@@ -115,20 +115,20 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
         flagString = fmt::format("{}.", fmt::join(flags, "."));
     }
     string paramsString = "";
-    if (!typeAndArgNames.empty()) {
-        paramsString = fmt::format("params({}).", fmt::join(typeAndArgNames, ", "));
+    if (!typeAndParamNames.empty()) {
+        paramsString = fmt::format("params({}).", fmt::join(typeAndParamNames, ", "));
     }
 
     auto oneline = fmt::format("{} {{{}{}{}}}", sigCall, flagString, paramsString, methodReturnType);
-    if (oneline.size() <= MAX_PRETTY_WIDTH && typeAndArgNames.size() <= MAX_PRETTY_SIG_ARGS) {
+    if (oneline.size() <= MAX_PRETTY_WIDTH && typeAndParamNames.size() <= MAX_PRETTY_SIG_ARGS) {
         return oneline;
     }
 
     if (!flags.empty()) {
         flagString = fmt::format("{}\n  .", fmt::join(flags, "\n  ."));
     }
-    if (!typeAndArgNames.empty()) {
-        paramsString = fmt::format("params(\n    {}\n  )\n  .", fmt::join(typeAndArgNames, ",\n    "));
+    if (!typeAndParamNames.empty()) {
+        paramsString = fmt::format("params(\n    {}\n  )\n  .", fmt::join(typeAndParamNames, ",\n    "));
     }
     return fmt::format("{} do\n  {}{}{}\nend", sigCall, flagString, paramsString, methodReturnType);
 }
@@ -160,33 +160,33 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
         methodNamePrefix = "self.";
     }
     vector<string> prettyArgs;
-    const auto &arguments = methodData->dealias(gs).data(gs)->params();
-    ENFORCE(!arguments.empty(), "Should have at least a block arg");
-    for (const auto &argSym : arguments) {
-        // Don't display synthetic arguments (like blk).
-        if (argSym.isSyntheticBlockArgument()) {
+    const auto &params = methodData->dealias(gs).data(gs)->params();
+    ENFORCE(!params.empty(), "Should have at least a block arg");
+    for (const auto &param : params) {
+        // Don't display synthetic params (like blk).
+        if (param.isSyntheticBlockArgument()) {
             continue;
         }
         string prefix = "";
         string suffix = "";
-        if (argSym.flags.isRepeated) {
-            if (argSym.flags.isKeyword) {
+        if (param.flags.isRepeated) {
+            if (param.flags.isKeyword) {
                 prefix = "**"; // variadic keyword args
             } else {
                 prefix = "*"; // rest args
             }
-        } else if (argSym.flags.isKeyword) {
-            if (argSym.flags.isDefault) {
+        } else if (param.flags.isKeyword) {
+            if (param.flags.isDefault) {
                 suffix = ": …"; // optional keyword (has a default value)
             } else {
                 suffix = ":"; // required keyword
             }
-        } else if (argSym.flags.isBlock) {
+        } else if (param.flags.isBlock) {
             prefix = "&";
-        } else if (argSym.flags.isDefault) {
+        } else if (param.flags.isDefault) {
             suffix = "=…";
         }
-        prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, argSym.argumentName(gs), suffix));
+        prettyArgs.emplace_back(fmt::format("{}{}{}", prefix, param.argumentName(gs), suffix));
     }
 
     string argListPrefix = "";

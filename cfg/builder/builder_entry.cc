@@ -39,7 +39,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         BasicBlock *presentCont = entry;
         BasicBlock *defaultCont = nullptr;
 
-        auto &argInfos = md.symbol.data(ctx)->params();
+        auto &paramInfos = md.symbol.data(ctx)->params();
         bool isAbstract = md.symbol.data(ctx)->isAbstract();
         bool seenKeyword = false;
         int i = -1;
@@ -47,7 +47,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             i++;
             auto *a = ast::MK::arg2Local(argExpr);
             auto local = res->enterLocal(a->localVariable);
-            auto &argInfo = argInfos[i];
+            auto &argInfo = paramInfos[i];
 
             seenKeyword = seenKeyword || argInfo.flags.isKeyword;
 

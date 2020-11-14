@@ -20,22 +20,22 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
     vector<unique_ptr<ParameterInformation>> parameters;
     // Documentation is set to be a markdown element that highlights which parameter you are currently typing in.
     string methodDocumentation = "(";
-    auto &args = method.data(gs)->params();
+    auto &params = method.data(gs)->params();
     int i = 0;
-    for (const auto &arg : args) {
+    for (const auto &param : params) {
         // label field is populated with the name of the variable.
         // Not sure why VSCode does not display this for now.
-        auto parameter = make_unique<ParameterInformation>(arg.argumentName(gs));
+        auto parameter = make_unique<ParameterInformation>(param.argumentName(gs));
         if (i == activeParameter) {
             // this bolds the active parameter in markdown
-            methodDocumentation += "**_" + arg.argumentName(gs) + "_**";
+            methodDocumentation += "**_" + param.argumentName(gs) + "_**";
         } else {
-            methodDocumentation += arg.argumentName(gs);
+            methodDocumentation += param.argumentName(gs);
         }
-        if (i != args.size() - 1) {
+        if (i != params.size() - 1) {
             methodDocumentation += ", ";
         }
-        parameter->documentation = getResultType(gs, arg.type, method, resp.dispatchResult->main.receiver,
+        parameter->documentation = getResultType(gs, param.type, method, resp.dispatchResult->main.receiver,
                                                  resp.dispatchResult->main.constr.get())
                                        .show(gs);
         parameters.push_back(move(parameter));
@@ -63,8 +63,8 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
     }
 
     const core::GlobalState &gs = typechecker.state();
-    auto result =
-        queryByLoc(typechecker, params->textDocument->uri, *params->position, LSPMethod::TextDocumentSignatureHelp);
+    auto result = queryByLoc(typechecker, this->params->textDocument->uri, *this->params->position,
+                             LSPMethod::TextDocumentSignatureHelp);
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
@@ -78,15 +78,15 @@ unique_ptr<ResponseMessage> SignatureHelpTask::runRequest(LSPTypecheckerDelegate
             if (auto sendResp = resp->isSend()) {
                 auto sendLocIndex = sendResp->termLoc.beginPos();
 
-                auto fref = config.uri2FileRef(gs, params->textDocument->uri);
+                auto fref = config.uri2FileRef(gs, this->params->textDocument->uri);
                 if (!fref.exists()) {
                     response->error =
                         make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                   fmt::format("Unknown file: `{}`", params->textDocument->uri));
+                                                   fmt::format("Unknown file: `{}`", this->params->textDocument->uri));
                     return response;
                 }
                 auto src = fref.data(gs).source();
-                auto loc = config.lspPos2Loc(fref, *params->position, gs);
+                auto loc = config.lspPos2Loc(fref, *this->params->position, gs);
                 string_view call_str = src.substr(sendLocIndex, loc.endPos() - sendLocIndex);
                 int numberCommas = absl::c_count(call_str, ',');
                 // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =

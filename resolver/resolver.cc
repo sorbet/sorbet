@@ -1521,10 +1521,10 @@ private:
             // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
             // we roundtrip through original symbol that is stored in mdef.
             auto internalNameToLookFor = argSym.name;
-            auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->params(),
-                                                 [&](const auto &arg) { return arg.name == internalNameToLookFor; });
-            ENFORCE(originalArgIt != mdef.symbol.data(ctx)->params().end());
-            auto realPos = originalArgIt - mdef.symbol.data(ctx)->params().begin();
+            auto originalParamIt = absl::c_find_if(mdef.symbol.data(ctx)->params(),
+                                                   [&](const auto &arg) { return arg.name == internalNameToLookFor; });
+            ENFORCE(originalParamIt != mdef.symbol.data(ctx)->params().end());
+            auto realPos = originalParamIt - mdef.symbol.data(ctx)->params().begin();
             return ast::MK::arg2Local(mdef.args[realPos]);
         }
     }
@@ -1589,19 +1589,19 @@ private:
         auto methodInfo = method.data(ctx);
         methodInfo->resultType = sig.returns;
         int i = -1;
-        for (auto &arg : methodInfo->params()) {
+        for (auto &param : methodInfo->params()) {
             ++i;
-            auto local = getArgLocal(ctx, arg, mdef, i, isOverloaded);
+            auto local = getArgLocal(ctx, param, mdef, i, isOverloaded);
             auto treeArgName = local->localVariable._name;
             ENFORCE(local != nullptr);
 
             // Check that optional keyword parameters are after all the required ones
-            bool isKwd = arg.flags.isKeyword;
-            bool isReq = !arg.flags.isBlock && !arg.flags.isRepeated && !arg.flags.isDefault;
+            bool isKwd = param.flags.isKeyword;
+            bool isReq = !param.flags.isBlock && !param.flags.isRepeated && !param.flags.isDefault;
             if (isKwd && !isReq) {
                 seenOptional = true;
             } else if (isKwd && seenOptional && isReq) {
-                if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::BadParameterOrdering)) {
+                if (auto e = ctx.state.beginError(param.loc, core::errors::Resolver::BadParameterOrdering)) {
                     e.setHeader("Malformed `{}`. Required parameter `{}` must be declared before all the optional ones",
                                 "sig", treeArgName.show(ctx));
                     e.addErrorLine(core::Loc(ctx.file, exprLoc), "Signature");
@@ -1614,20 +1614,20 @@ private:
 
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
-                arg.type = spec->type;
-                arg.loc = spec->loc;
-                arg.rebind = spec->rebind;
+                param.type = spec->type;
+                param.loc = spec->loc;
+                param.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
             } else {
-                if (arg.type == nullptr) {
-                    arg.type = core::Types::untyped(ctx, method);
+                if (param.type == nullptr) {
+                    param.type = core::Types::untyped(ctx, method);
                 }
 
-                // We silence the "type not specified" error when a sig does not mention the synthesized block arg.
-                bool isBlkArg = arg.name == core::Names::blkArg();
+                // We silence the "type not specified" error when a sig does not mention the synthesized block param.
+                bool isBlkArg = param.name == core::Names::blkArg();
                 if (!isOverloaded && !isBlkArg && (sig.seen.params || sig.seen.returns || sig.seen.void_)) {
                     // Only error if we have any types
-                    if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    if (auto e = ctx.state.beginError(param.loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
                                     treeArgName.show(ctx));
                         e.addErrorLine(core::Loc(ctx.file, exprLoc), "Signature");
@@ -1635,8 +1635,8 @@ private:
                 }
             }
 
-            if (isOverloaded && arg.flags.isKeyword) {
-                if (auto e = ctx.state.beginError(arg.loc, core::errors::Resolver::InvalidMethodSignature)) {
+            if (isOverloaded && param.flags.isKeyword) {
+                if (auto e = ctx.state.beginError(param.loc, core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
                                 treeArgName.show(ctx));
                 }

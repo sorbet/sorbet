@@ -547,8 +547,8 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     }
     if (what.isMethod()) {
         p.putU4(what.params().size());
-        for (const auto &a : what.params()) {
-            pickle(p, a);
+        for (const auto &param : what.params()) {
+            pickle(p, param);
         }
     }
     p.putU4(what.members().size());

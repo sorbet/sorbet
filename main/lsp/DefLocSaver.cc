@@ -16,21 +16,21 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
     if (lspQueryMatch) {
         // Query matches against the method definition as a whole.
         auto &symbolData = methodDef.symbol.data(ctx);
-        auto &argTypes = symbolData->params();
+        auto &paramTypes = symbolData->params();
         core::TypeAndOrigins tp;
 
-        // Check if it matches against a specific argument. If it does, send that instead;
+        // Check if it matches against a specific param. If it does, send that instead;
         // it's more specific.
-        const int numArgs = methodDef.args.size();
+        const int numParams = methodDef.args.size();
 
-        ENFORCE(numArgs == argTypes.size());
-        for (int i = 0; i < numArgs; i++) {
+        ENFORCE(numParams == paramTypes.size());
+        for (int i = 0; i < numParams; i++) {
             auto &arg = methodDef.args[i];
-            auto &argType = argTypes[i];
+            auto &paramType = paramTypes[i];
             auto *localExp = ast::MK::arg2Local(arg);
             // localExp should never be null, but guard against the possibility.
             if (localExp && lspQuery.matchesLoc(core::Loc(ctx.file, localExp->loc))) {
-                tp.type = argType.type;
+                tp.type = paramType.type;
                 tp.origins.emplace_back(core::Loc(ctx.file, localExp->loc));
                 core::lsp::QueryResponse::pushQueryResponse(
                     ctx, core::lsp::IdentResponse(core::Loc(ctx.file, localExp->loc), localExp->localVariable, tp,

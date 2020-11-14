@@ -58,11 +58,11 @@ optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
     ENFORCE(component.method.exists() && component.method != core::Symbols::untyped());
-    const auto &args = component.method.data(ctx)->params();
-    if (argId >= args.size()) {
+    const auto &params = component.method.data(ctx)->params();
+    if (argId >= params.size()) {
         return nullptr;
     }
-    const auto &to = args[argId].type;
+    const auto &to = params[argId].type;
     if (!to || !to.isFullyDefined()) {
         return nullptr;
     }
@@ -325,16 +325,16 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         guessedReturnType = methodReturnType;
     }
 
-    auto isBadArg = [&](const core::ParamInfo &arg) -> bool {
+    auto isBadParam = [&](const core::ParamInfo &param) -> bool {
         return
             // runtime does not support rest args and key-rest args
-            arg.flags.isRepeated ||
+            param.flags.isRepeated ||
 
             // sometimes variable does not have a name e.g. `def initialize (*)`
-            arg.name.data(ctx)->shortName(ctx).empty();
+            param.name.data(ctx)->shortName(ctx).empty();
     };
-    bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->params(), isBadArg);
-    if (hasBadArg) {
+    bool hasBadParam = absl::c_any_of(methodSymbol.data(ctx)->params(), isBadParam);
+    if (hasBadParam) {
         return nullopt;
     }
 
@@ -350,9 +350,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
             guessedReturnType = closestReturnType;
         }
 
-        for (const auto &arg : closestMethod.data(ctx)->params()) {
-            if (arg.type && !arg.type.isUntyped()) {
-                guessedArgumentTypes[arg.name] = arg.type;
+        for (const auto &param : closestMethod.data(ctx)->params()) {
+            if (param.type && !param.type.isUntyped()) {
+                guessedArgumentTypes[param.name] = param.type;
             }
         }
     }
@@ -366,9 +366,9 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
 
     fmt::format_to(ss, "sig {{");
 
-    ENFORCE(!methodSymbol.data(ctx)->params().empty(), "There should always be at least one arg (the block arg).");
-    bool onlyArgumentIsBlkArg = methodSymbol.data(ctx)->params().size() == 1 &&
-                                methodSymbol.data(ctx)->params()[0].isSyntheticBlockArgument();
+    ENFORCE(!methodSymbol.data(ctx)->params().empty(), "There should always be at least one param (the block param).");
+    bool onlyParamIsBlockParam =
+        methodSymbol.data(ctx)->params().size() == 1 && methodSymbol.data(ctx)->params()[0].isSyntheticBlockArgument();
 
     if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
         // Only need override / implementation if the parent has a sig
@@ -379,16 +379,16 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         }
     }
 
-    if (!onlyArgumentIsBlkArg) {
+    if (!onlyParamIsBlockParam) {
         fmt::format_to(ss, "params(");
 
         bool first = true;
-        for (auto &argSym : methodSymbol.data(ctx)->params()) {
+        for (auto &param : methodSymbol.data(ctx)->params()) {
             // WARNING: This is doing raw string equality--don't cargo cult this!
             // You almost certainly want to compare NameRef's for equality instead.
             // We need to compare strings here because we're running with a frozen global state
             // (and thus can't take the string that we get from `argumentName` and enter it as a name).
-            if (argSym.argumentName(ctx) == core::Names::blkArg().data(ctx)->shortName(ctx)) {
+            if (param.argumentName(ctx) == core::Names::blkArg().data(ctx)->shortName(ctx)) {
                 // Never write "<blk>: ..." in the params of a generated sig, because this doesn't parse.
                 // (We add a block argument to every method if it doesn't mention one.)
                 continue;
@@ -397,10 +397,10 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 fmt::format_to(ss, ", ");
             }
             first = false;
-            auto argType = guessedArgumentTypes[argSym.name];
+            auto argType = guessedArgumentTypes[param.name];
             core::TypePtr chosenType;
 
-            auto oldType = argSym.type;
+            auto oldType = param.type;
             if (!oldType || oldType.isUntyped()) {
                 if (!argType || argType.isBottom()) {
                     chosenType = core::Types::untypedUntracked();
@@ -412,7 +412,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
                 // TODO: maybe combine the old and new types in some way?
                 chosenType = oldType;
             }
-            fmt::format_to(ss, "{}: {}", argSym.argumentName(ctx), chosenType.show(ctx));
+            fmt::format_to(ss, "{}: {}", param.argumentName(ctx), chosenType.show(ctx));
         }
         fmt::format_to(ss, ").");
     }

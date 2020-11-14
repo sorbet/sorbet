@@ -23,19 +23,19 @@ struct Signature {
 
 Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method) {
     Signature sig;
-    for (auto &arg : method.data(gs)->params()) {
-        if (arg.flags.isBlock) {
-            sig.syntheticBlk = arg.isSyntheticBlockArgument();
+    for (auto &param : method.data(gs)->params()) {
+        if (param.flags.isBlock) {
+            sig.syntheticBlk = param.isSyntheticBlockArgument();
             continue;
         }
 
-        auto &dst = arg.flags.isKeyword ? sig.kw : sig.pos;
-        if (arg.flags.isRepeated) {
-            dst.rest = std::optional<reference_wrapper<const core::ParamInfo>>{arg};
-        } else if (arg.flags.isDefault) {
-            dst.optional.push_back(arg);
+        auto &dst = param.flags.isKeyword ? sig.kw : sig.pos;
+        if (param.flags.isRepeated) {
+            dst.rest = std::optional<reference_wrapper<const core::ParamInfo>>{param};
+        } else if (param.flags.isDefault) {
+            dst.optional.push_back(param);
         } else {
-            dst.required.push_back(arg);
+            dst.required.push_back(param);
         }
     }
     return sig;
@@ -69,7 +69,8 @@ string supermethodKind(const core::Context ctx, core::SymbolRef method) {
 
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
-void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &superArgs,
+void matchPositional(const core::Context ctx,
+                     absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &superArgs,
                      core::SymbolRef superMethod,
                      absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &methodArgs,
                      core::SymbolRef method) {

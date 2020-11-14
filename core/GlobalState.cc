@@ -1086,21 +1086,21 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, co
     if (res.data(*this)->params().size() != original.data(*this)->params().size()) {
         ENFORCE(res.data(*this)->params().empty());
         res.data(*this)->params().reserve(original.data(*this)->params().size());
-        const auto &originalArguments = original.data(*this)->params();
+        const auto &originalParams = original.data(*this)->params();
         int i = -1;
-        for (auto &arg : originalArguments) {
+        for (auto &param : originalParams) {
             i += 1;
-            Loc loc = arg.loc;
+            Loc loc = param.loc;
             if (!absl::c_linear_search(argsToKeep, i)) {
-                if (arg.flags.isBlock) {
+                if (param.flags.isBlock) {
                     loc = Loc::none();
                 } else {
                     continue;
                 }
             }
-            NameRef nm = arg.name;
+            NameRef nm = param.name;
             auto &newArg = enterMethodArgumentSymbol(loc, res, nm);
-            newArg = arg.deepCopy();
+            newArg = param.deepCopy();
             newArg.loc = loc;
         }
     }
@@ -1179,9 +1179,9 @@ ParamInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, Name
     ENFORCE(name.exists(), "entering symbol with non-existing name");
     SymbolData ownerScope = owner.dataAllowingNone(*this);
 
-    for (auto &arg : ownerScope->params()) {
-        if (arg.name == name) {
-            return arg;
+    for (auto &param : ownerScope->params()) {
+        if (param.name == name) {
+            return param;
         }
     }
     auto &store = ownerScope->params().emplace_back();

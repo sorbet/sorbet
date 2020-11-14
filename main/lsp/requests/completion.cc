@@ -246,55 +246,56 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const 
     fmt::format_to(result, "{}", method.data(gs)->name.data(gs)->shortName(gs));
     auto nextTabstop = 1;
 
-    vector<string> typeAndArgNames;
-    for (auto &argSym : method.data(gs)->params()) {
-        fmt::memory_buffer argBuf;
-        if (argSym.flags.isBlock) {
+    vector<string> typeAndParamNames;
+    for (auto &param : method.data(gs)->params()) {
+        fmt::memory_buffer paramBuf;
+        if (param.flags.isBlock) {
             // Blocks are handled below
             continue;
         }
-        if (argSym.flags.isDefault) {
+        if (param.flags.isDefault) {
             continue;
         }
-        if (argSym.flags.isRepeated) {
+        if (param.flags.isRepeated) {
             continue;
         }
-        if (argSym.flags.isKeyword) {
-            fmt::format_to(argBuf, "{}: ", argSym.name.data(gs)->shortName(gs));
+        if (param.flags.isKeyword) {
+            fmt::format_to(paramBuf, "{}: ", param.name.data(gs)->shortName(gs));
         }
-        if (argSym.type) {
-            auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
-            fmt::format_to(argBuf, "${{{}:{}}}", nextTabstop++, resultType);
+        if (param.type) {
+            auto resultType = getResultType(gs, param.type, method, receiverType, constraint).show(gs);
+            fmt::format_to(paramBuf, "${{{}:{}}}", nextTabstop++, resultType);
         } else {
-            fmt::format_to(argBuf, "${{{}}}", nextTabstop++);
+            fmt::format_to(paramBuf, "${{{}}}", nextTabstop++);
         }
-        typeAndArgNames.emplace_back(to_string(argBuf));
+        typeAndParamNames.emplace_back(to_string(paramBuf));
     }
 
-    if (!typeAndArgNames.empty()) {
-        fmt::format_to(result, "({})", fmt::join(typeAndArgNames, ", "));
+    if (!typeAndParamNames.empty()) {
+        fmt::format_to(result, "({})", fmt::join(typeAndParamNames, ", "));
     }
 
     ENFORCE(!method.data(gs)->params().empty());
-    auto &blkArg = method.data(gs)->params().back();
-    ENFORCE(blkArg.flags.isBlock);
+    auto &blkParam = method.data(gs)->params().back();
+    ENFORCE(blkParam.flags.isBlock);
 
-    auto hasBlockType = blkArg.type != nullptr && !blkArg.type.isUntyped();
-    if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkArg.type)) {
-        string blkArgs;
-        if (auto *appliedType = core::cast_type<core::AppliedType>(blkArg.type)) {
+    auto hasBlockType = blkParam.type != nullptr && !blkParam.type.isUntyped();
+    if (hasBlockType && !core::Types::isSubType(gs, core::Types::nilClass(), blkParam.type)) {
+        string blkParams;
+        if (auto *appliedType = core::cast_type<core::AppliedType>(blkParam.type)) {
             if (appliedType->targs.size() >= 2) {
                 // The first element in targs is the return type.
                 auto targs_it = appliedType->targs.begin();
                 targs_it++;
-                blkArgs = fmt::format(" |{}|", fmt::map_join(targs_it, appliedType->targs.end(), ", ", [&](auto targ) {
-                                          auto resultType = getResultType(gs, targ, method, receiverType, constraint);
-                                          return fmt::format("${{{}:{}}}", nextTabstop++, resultType.show(gs));
-                                      }));
+                blkParams =
+                    fmt::format(" |{}|", fmt::map_join(targs_it, appliedType->targs.end(), ", ", [&](auto targ) {
+                                    auto resultType = getResultType(gs, targ, method, receiverType, constraint);
+                                    return fmt::format("${{{}:{}}}", nextTabstop++, resultType.show(gs));
+                                }));
             }
         }
 
-        fmt::format_to(result, " do{}\n  ${{{}}}\nend", blkArgs, nextTabstop++);
+        fmt::format_to(result, " do{}\n  ${{{}}}\nend", blkParams, nextTabstop++);
     }
 
     fmt::format_to(result, "${{0}}");
@@ -756,13 +757,13 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
     auto emptyResult = make_unique<CompletionList>(false, vector<unique_ptr<CompletionItem>>{});
 
     const auto &gs = typechecker.state();
-    auto uri = params->textDocument->uri;
+    auto uri = this->params->textDocument->uri;
     auto fref = config.uri2FileRef(gs, uri);
     if (!fref.exists()) {
         response->result = std::move(emptyResult);
         return response;
     }
-    auto pos = *params->position;
+    auto pos = *this->params->position;
     auto queryLoc = config.lspPos2Loc(fref, pos, gs);
     if (!queryLoc.exists()) {
         response->result = std::move(emptyResult);

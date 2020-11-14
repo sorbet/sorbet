@@ -763,35 +763,36 @@ class SymbolDefiner {
         }
         // we know right now that pos >= params().size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &argInfo = ctx.state.enterMethodArgumentSymbol(core::Loc(ctx.file, parsedArg.loc), ctx.owner, name);
-        // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
-        // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
+        auto &paramInfo = ctx.state.enterMethodArgumentSymbol(core::Loc(ctx.file, parsedArg.loc), ctx.owner, name);
+        // if enterMethodArgumentSymbol did not emplace a new param into the list, then it means it's reusing an
+        // existing one, which means we've seen a repeated kwparam (as it treats identically named kwparams as
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
-        // arguments as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
+        // params as we expect, clone the one we got back from enterMethodArgumentSymbol in the position we expect
         if (methodData->params().size() == pos) {
-            auto argCopy = argInfo.deepCopy();
-            argCopy.name = ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, argInfo.name, pos + 1);
-            methodData->params().emplace_back(move(argCopy));
+            auto paramCopy = paramInfo.deepCopy();
+            paramCopy.name =
+                ctx.state.freshNameUnique(core::UniqueNameKind::MangledKeywordArg, paramInfo.name, pos + 1);
+            methodData->params().emplace_back(move(paramCopy));
             return;
         }
-        // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
+        // at this point, we should have at least pos + 1 params, and params[pos] should be the thing we got back
         // from enterMethodArgumentSymbol
         ENFORCE(methodData->params().size() >= pos + 1);
 
-        argInfo.flags = parsedArg.flags;
+        paramInfo.flags = parsedArg.flags;
     }
 
     void defineArgs(core::MutableContext ctx, const vector<ast::ParsedArg> &parsedArgs) {
         auto methodData = ctx.owner.data(ctx);
         bool inShadows = false;
         bool intrinsic = isIntrinsic(methodData);
-        bool swapArgs = intrinsic && (methodData->params().size() == 1);
-        core::ParamInfo swappedArg;
-        if (swapArgs) {
+        bool swapParams = intrinsic && (methodData->params().size() == 1);
+        core::ParamInfo swappedParam;
+        if (swapParams) {
             // When we're filling in an intrinsic method, we want to overwrite the block arg that used
             // to exist with the block arg that we got from desugaring the method def in the RBI files.
             ENFORCE(methodData->params()[0].flags.isBlock);
-            swappedArg = move(methodData->params()[0]);
+            swappedParam = move(methodData->params()[0]);
             methodData->params().clear();
         }
 
@@ -803,9 +804,9 @@ class SymbolDefiner {
             } else {
                 ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
 
-                if (swapArgs && arg.flags.isBlock) {
-                    // see commnent on if (swapArgs) above
-                    methodData->params().emplace_back(move(swappedArg));
+                if (swapParams && arg.flags.isBlock) {
+                    // see commnent on if (swapParams) above
+                    methodData->params().emplace_back(move(swappedParam));
                 }
 
                 defineArg(ctx, methodData, i, arg);
@@ -821,12 +822,12 @@ class SymbolDefiner {
         }
         for (int i = 0; i < parsedArgs.size(); i++) {
             auto &methodArg = parsedArgs[i];
-            auto &symArg = sym.data(ctx)->params()[i];
+            auto &symParam = sym.data(ctx)->params()[i];
 
-            if (symArg.flags.isKeyword != methodArg.flags.isKeyword ||
-                symArg.flags.isBlock != methodArg.flags.isBlock ||
-                symArg.flags.isRepeated != methodArg.flags.isRepeated ||
-                (symArg.flags.isKeyword && symArg.name != methodArg.local._name)) {
+            if (symParam.flags.isKeyword != methodArg.flags.isKeyword ||
+                symParam.flags.isBlock != methodArg.flags.isBlock ||
+                symParam.flags.isRepeated != methodArg.flags.isRepeated ||
+                (symParam.flags.isKeyword && symParam.name != methodArg.local._name)) {
                 return false;
             }
         }
@@ -861,16 +862,16 @@ class SymbolDefiner {
         }
         for (int i = 0; i < parsedArgs.size(); i++) {
             auto &methodArg = parsedArgs[i];
-            auto &symArg = sym.data(ctx)->params()[i];
+            auto &symParam = sym.data(ctx)->params()[i];
 
-            if (symArg.flags.isKeyword != methodArg.flags.isKeyword) {
+            if (symParam.flags.isKeyword != methodArg.flags.isKeyword) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
                                 methodArg.local.toString(ctx), methodArg.flags.isKeyword ? "keyword" : "non-keyword");
                     e.addErrorLine(
                         sym.data(ctx)->loc(),
                         "The corresponding argument `{}` in the previous definition was {}a keyword argument",
-                        symArg.show(ctx), symArg.flags.isKeyword ? "" : "not ");
+                        symParam.show(ctx), symParam.flags.isKeyword ? "" : "not ");
                 }
                 return;
             }
@@ -882,22 +883,22 @@ class SymbolDefiner {
             // already with the "without matching argument count" error above. So, as long as we have maintained the
             // intended invariants around methods and arguments, we do not need to ever issue an error about
             // non-matching isBlock-ness.
-            ENFORCE(symArg.flags.isBlock == methodArg.flags.isBlock);
-            if (symArg.flags.isRepeated != methodArg.flags.isRepeated) {
+            ENFORCE(symParam.flags.isBlock == methodArg.flags.isBlock);
+            if (symParam.flags.isRepeated != methodArg.flags.isRepeated) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("Method `{}` redefined with argument `{}` as a {} argument", sym.show(ctx),
                                 methodArg.local.toString(ctx), methodArg.flags.isRepeated ? "splat" : "non-splat");
                     e.addErrorLine(sym.data(ctx)->loc(),
                                    "The corresponding argument `{}` in the previous definition was {}a splat argument",
-                                   symArg.show(ctx), symArg.flags.isRepeated ? "" : "not ");
+                                   symParam.show(ctx), symParam.flags.isRepeated ? "" : "not ");
                 }
                 return;
             }
-            if (symArg.flags.isKeyword && symArg.name != methodArg.local._name) {
+            if (symParam.flags.isKeyword && symParam.name != methodArg.local._name) {
                 if (auto e = ctx.state.beginError(loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader(
                         "Method `{}` redefined with mismatched keyword argument name. Expected: `{}`, got: `{}`",
-                        sym.show(ctx), symArg.name.show(ctx), methodArg.local._name.show(ctx));
+                        sym.show(ctx), symParam.name.show(ctx), methodArg.local._name.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                 }
                 return;
