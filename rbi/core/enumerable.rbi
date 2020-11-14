@@ -745,8 +745,8 @@ module Enumerable
   # longest                                        #=> "sheep"
   # ```
   sig do
-    type_parameters(:Any).params(
-        initial: T.type_parameter(:Any),
+    type_parameters(:U).params(
+        initial: T.type_parameter(:U),
         arg0: Symbol,
     )
     .returns(T.untyped)
@@ -1752,8 +1752,8 @@ module Enumerable
   # longest                                        #=> "sheep"
   # ```
   sig do
-    type_parameters(:Any).params(
-        initial: T.type_parameter(:Any),
+    type_parameters(:U).params(
+        initial: T.type_parameter(:U),
         arg0: Symbol,
     )
     .returns(T.untyped)

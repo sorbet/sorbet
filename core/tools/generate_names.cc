@@ -372,7 +372,7 @@ NameDef names[] = {
     {"PackageMethods", "<PackageMethods>", true},
 
     // GlobalState initEmpty()
-    {"Top", "<any>", true},
+    {"Top", "<top>", true},
     {"Bottom", "T.noreturn", true},
     {"Untyped", "T.untyped", true},
     {"Root", "<root>", true},
