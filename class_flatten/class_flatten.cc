@@ -96,9 +96,9 @@ public:
             // available to the containing static-init
             replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
         }
-        ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
+        ENFORCE(!sym.data(ctx)->params().empty(), "<static-init> method should already have a block arg symbol: {}",
                 sym.data(ctx)->show(ctx));
-        ENFORCE(sym.data(ctx)->arguments().back().flags.isBlock,
+        ENFORCE(sym.data(ctx)->params().back().flags.isBlock,
                 "Last argument symbol is not a block arg: {}" + sym.data(ctx)->show(ctx));
 
         // Synthesize a block argument for this <static-init> block. This is rather fiddly,

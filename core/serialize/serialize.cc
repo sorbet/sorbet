@@ -546,8 +546,8 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
         p.putU4(s.rawId());
     }
     if (what.isMethod()) {
-        p.putU4(what.arguments().size());
-        for (const auto &a : what.arguments()) {
+        p.putU4(what.params().size());
+        for (const auto &a : what.params()) {
             pickle(p, a);
         }
     }
@@ -594,7 +594,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     if (result.isMethod()) {
         int argsSize = p.getU4();
         for (int i = 0; i < argsSize; i++) {
-            result.arguments().emplace_back(unpickleArgInfo(p, gs));
+            result.params().emplace_back(unpickleArgInfo(p, gs));
         }
     }
     int membersSize = p.getU4();

@@ -104,7 +104,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
                 symbolProto.add_mixins(thing.rawId());
             }
         } else {
-            for (auto &thing : data->arguments()) {
+            for (auto &thing : data->params()) {
                 *symbolProto.add_arguments() = toProto(gs, thing);
             }
         }

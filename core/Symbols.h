@@ -584,12 +584,12 @@ public:
         return members_;
     };
 
-    ParamsStore &arguments() {
+    ParamsStore &params() {
         ENFORCE_NO_TIMER(isMethod());
         return arguments_;
     }
 
-    const ParamsStore &arguments() const {
+    const ParamsStore &params() const {
         ENFORCE_NO_TIMER(isMethod());
         return arguments_;
     }

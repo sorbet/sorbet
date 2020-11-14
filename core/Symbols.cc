@@ -697,7 +697,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                            }));
 
         } else {
-            fmt::format_to(buf, " ({})", fmt::map_join(this->arguments(), ", ", [&](const auto &symb) {
+            fmt::format_to(buf, " ({})", fmt::map_join(this->params(), ", ", [&](const auto &symb) {
                                return symb.argumentName(gs);
                            }));
         }
@@ -759,7 +759,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         fmt::format_to(buf, "{}", move(str));
     }
     if (isMethod()) {
-        for (auto &arg : arguments()) {
+        for (auto &arg : params()) {
             auto str = arg.toString(gs);
             ENFORCE(!str.empty());
             printTabs(buf, tabs + 1);
@@ -1182,9 +1182,9 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         if (isa_type<AliasType>(this->resultType)) {
             // If we have an alias method, we should never look at it's arguments;
             // we should instead look at the arguments of whatever we're aliasing.
-            ENFORCE_NO_TIMER(this->arguments().empty(), this->show(gs));
+            ENFORCE_NO_TIMER(this->params().empty(), this->show(gs));
         } else {
-            ENFORCE_NO_TIMER(!this->arguments().empty(), this->show(gs));
+            ENFORCE_NO_TIMER(!this->params().empty(), this->show(gs));
         }
     }
 }
@@ -1269,8 +1269,8 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
 
 vector<u4> Symbol::methodArgumentHash(const GlobalState &gs) const {
     vector<u4> result;
-    result.reserve(arguments().size());
-    for (const auto &e : arguments()) {
+    result.reserve(params().size());
+    for (const auto &e : params()) {
         u4 arg = 0;
         // Changing name of keyword arg is a shape change.
         if (e.flags.isKeyword) {

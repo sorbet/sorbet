@@ -16,7 +16,7 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
     if (lspQueryMatch) {
         // Query matches against the method definition as a whole.
         auto &symbolData = methodDef.symbol.data(ctx);
-        auto &argTypes = symbolData->arguments();
+        auto &argTypes = symbolData->params();
         core::TypeAndOrigins tp;
 
         // Check if it matches against a specific argument. If it does, send that instead;

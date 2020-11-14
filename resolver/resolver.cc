@@ -1521,10 +1521,10 @@ private:
             // we cannot rely on method and symbol arguments being aligned, as method could have more arguments.
             // we roundtrip through original symbol that is stored in mdef.
             auto internalNameToLookFor = argSym.name;
-            auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->arguments(),
+            auto originalArgIt = absl::c_find_if(mdef.symbol.data(ctx)->params(),
                                                  [&](const auto &arg) { return arg.name == internalNameToLookFor; });
-            ENFORCE(originalArgIt != mdef.symbol.data(ctx)->arguments().end());
-            auto realPos = originalArgIt - mdef.symbol.data(ctx)->arguments().begin();
+            ENFORCE(originalArgIt != mdef.symbol.data(ctx)->params().end());
+            auto realPos = originalArgIt - mdef.symbol.data(ctx)->params().begin();
             return ast::MK::arg2Local(mdef.args[realPos]);
         }
     }
@@ -1532,7 +1532,7 @@ private:
     void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, core::LocOffsets exprLoc, ParsedSig sig,
                            bool isOverloaded, const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
-        ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
+        ENFORCE(isOverloaded || method.data(ctx)->params().size() == mdef.args.size());
 
         if (!sig.seen.returns && !sig.seen.void_) {
             if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -1589,7 +1589,7 @@ private:
         auto methodInfo = method.data(ctx);
         methodInfo->resultType = sig.returns;
         int i = -1;
-        for (auto &arg : methodInfo->arguments()) {
+        for (auto &arg : methodInfo->params()) {
             ++i;
             auto local = getArgLocal(ctx, arg, mdef, i, isOverloaded);
             auto treeArgName = local->localVariable._name;
@@ -1876,7 +1876,7 @@ private:
                             local = ast::cast_tree<ast::Local>(arg);
                         }
 
-                        auto &info = mdef.symbol.data(ctx)->arguments()[argIdx];
+                        auto &info = mdef.symbol.data(ctx)->params()[argIdx];
                         if (info.flags.isKeyword) {
                             args.emplace_back(ast::MK::Symbol(local->loc, info.name));
                             args.emplace_back(local->deepCopy());

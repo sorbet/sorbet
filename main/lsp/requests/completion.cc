@@ -247,7 +247,7 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const 
     auto nextTabstop = 1;
 
     vector<string> typeAndArgNames;
-    for (auto &argSym : method.data(gs)->arguments()) {
+    for (auto &argSym : method.data(gs)->params()) {
         fmt::memory_buffer argBuf;
         if (argSym.flags.isBlock) {
             // Blocks are handled below
@@ -275,8 +275,8 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const 
         fmt::format_to(result, "({})", fmt::join(typeAndArgNames, ", "));
     }
 
-    ENFORCE(!method.data(gs)->arguments().empty());
-    auto &blkArg = method.data(gs)->arguments().back();
+    ENFORCE(!method.data(gs)->params().empty());
+    auto &blkArg = method.data(gs)->params().back();
     ENFORCE(blkArg.flags.isBlock);
 
     auto hasBlockType = blkArg.type != nullptr && !blkArg.type.isUntyped();

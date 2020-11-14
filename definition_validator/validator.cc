@@ -23,7 +23,7 @@ struct Signature {
 
 Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method) {
     Signature sig;
-    for (auto &arg : method.data(gs)->arguments()) {
+    for (auto &arg : method.data(gs)->params()) {
         if (arg.flags.isBlock) {
             sig.syntheticBlk = arg.isSyntheticBlockArgument();
             continue;
