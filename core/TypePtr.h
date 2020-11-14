@@ -205,6 +205,10 @@ public:
     }
 
     TypePtr &operator=(TypePtr &&other) noexcept {
+        if (*this == other) {
+            return *this;
+        }
+
         handleDelete();
         if (other.containsPtr()) {
             counter = other.releaseCounter();
