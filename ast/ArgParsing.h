@@ -5,7 +5,7 @@ namespace sorbet::ast {
 struct ParsedArg {
     core::LocOffsets loc;
     core::LocalVariable local;
-    core::ArgInfo::ArgFlags flags;
+    core::ParamInfo::ArgFlags flags;
 };
 class ArgParsing {
 public:

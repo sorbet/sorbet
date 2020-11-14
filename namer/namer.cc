@@ -786,7 +786,7 @@ class SymbolDefiner {
         bool inShadows = false;
         bool intrinsic = isIntrinsic(methodData);
         bool swapArgs = intrinsic && (methodData->arguments().size() == 1);
-        core::ArgInfo swappedArg;
+        core::ParamInfo swappedArg;
         if (swapArgs) {
             // When we're filling in an intrinsic method, we want to overwrite the block arg that used
             // to exist with the block arg that we got from desugaring the method def in the RBI files.

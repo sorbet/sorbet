@@ -616,7 +616,7 @@ TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
     return res;
 }
 
-SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ArgInfo::ArgFlags> &&argFlags, int rubyBlockId)
+SendAndBlockLink::SendAndBlockLink(NameRef fun, vector<ParamInfo::ArgFlags> &&argFlags, int rubyBlockId)
     : argFlags(move(argFlags)), fun(fun), rubyBlockId(rubyBlockId) {}
 
 shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {

@@ -117,7 +117,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ParamInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -131,7 +131,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ParamInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -174,7 +174,7 @@ core::Loc smallestLocWithin(core::Loc callLoc, const core::TypeAndOrigins &argTp
 }
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
-                               SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
+                               SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe, const ParamInfo &argSym,
                                const TypePtr &selfType, const vector<TypePtr> &targs, Loc loc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
@@ -215,7 +215,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 }
 
 unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc, SymbolRef method,
-                             const ArgInfo &arg) {
+                             const ParamInfo &arg) {
     if (auto e = gs.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
         e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.name.show(gs),
                     method.data(gs)->show(gs));
@@ -689,7 +689,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto aPosEnd = args.args.begin() + args.numPosArgs;
 
     while (pit != pend && ait != aPosEnd) {
-        const ArgInfo &spec = *pit;
+        const ParamInfo &spec = *pit;
         auto &arg = *ait;
         if (spec.flags.isKeyword) {
             break;
@@ -893,7 +893,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             pend = kwit;
 
             while (kwit != data->arguments().end()) {
-                const ArgInfo &spec = *kwit;
+                const ParamInfo &spec = *kwit;
                 if (spec.flags.isBlock) {
                     break;
                 } else if (spec.flags.isRepeated) {
@@ -1001,7 +1001,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
                 // explicitly
-                auto firstKeyword = absl::c_find_if(data->arguments(), [&consumed](const ArgInfo &arg) {
+                auto firstKeyword = absl::c_find_if(data->arguments(), [&consumed](const ParamInfo &arg) {
                     return arg.flags.isKeyword && arg.flags.isDefault && consumed.count(arg.name) == 0;
                 });
                 if (firstKeyword != data->arguments().end()) {
@@ -1797,8 +1797,8 @@ private:
         return std::nullopt;
     }
 
-    static std::vector<ArgInfo::ArgFlags> argInfoByArity(std::optional<int> fixedArity) {
-        std::vector<ArgInfo::ArgFlags> res;
+    static std::vector<ParamInfo::ArgFlags> argInfoByArity(std::optional<int> fixedArity) {
+        std::vector<ParamInfo::ArgFlags> res;
         if (fixedArity) {
             for (int i = 0; i < *fixedArity; i++) {
                 res.emplace_back();

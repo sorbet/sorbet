@@ -162,7 +162,7 @@ public:
         categoryCounterInc("cfg", "loadarg");
     };
 
-    const core::ArgInfo &argument(const core::GlobalState &gs) const;
+    const core::ParamInfo &argument(const core::GlobalState &gs) const;
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
@@ -177,7 +177,7 @@ public:
         categoryCounterInc("cfg", "argpresent");
     }
 
-    const core::ArgInfo &argument(const core::GlobalState &gs) const;
+    const core::ParamInfo &argument(const core::GlobalState &gs) const;
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };

@@ -574,7 +574,7 @@ public:
 
     UnorderedMap<NameRef, SymbolRef> members_;
 
-    using ArgumentsStore = InlinedVector<ArgInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
+    using ArgumentsStore = InlinedVector<ParamInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
     ArgumentsStore arguments_;
 
     UnorderedMap<NameRef, SymbolRef> &members() {

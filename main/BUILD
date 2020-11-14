@@ -36,6 +36,7 @@ cc_binary(
     ],
 )
 
+# TODO(jez) Can we build payload in parallel?
 cc_binary(
     name = "sorbet-orig",
     srcs = [

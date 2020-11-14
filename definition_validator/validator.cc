@@ -14,9 +14,9 @@ namespace sorbet::definition_validator {
 
 struct Signature {
     struct {
-        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> required;
-        absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> optional;
-        std::optional<reference_wrapper<const core::ArgInfo>> rest;
+        absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> required;
+        absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> optional;
+        std::optional<reference_wrapper<const core::ParamInfo>> rest;
     } pos, kw;
     bool syntheticBlk;
 } left, right;
@@ -31,7 +31,7 @@ Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method
 
         auto &dst = arg.flags.isKeyword ? sig.kw : sig.pos;
         if (arg.flags.isRepeated) {
-            dst.rest = std::optional<reference_wrapper<const core::ArgInfo>>{arg};
+            dst.rest = std::optional<reference_wrapper<const core::ParamInfo>>{arg};
         } else if (arg.flags.isDefault) {
             dst.optional.push_back(arg);
         } else {
@@ -69,9 +69,9 @@ string supermethodKind(const core::Context ctx, core::SymbolRef method) {
 
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
-void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
+void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &superArgs,
                      core::SymbolRef superMethod,
-                     absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
+                     absl::InlinedVector<reference_wrapper<const core::ParamInfo>, 4> &methodArgs,
                      core::SymbolRef method) {
     auto idx = 0;
     auto maxLen = min(superArgs.size(), methodArgs.size());

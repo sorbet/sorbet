@@ -24,7 +24,7 @@ class TypeVar;
 class SendAndBlockLink;
 class TypeAndOrigins;
 
-class ArgInfo {
+class ParamInfo {
 public:
     struct ArgFlags {
         bool isKeyword = false;
@@ -55,13 +55,13 @@ public:
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
     std::string argumentName(const GlobalState &gs) const;
-    ArgInfo(const ArgInfo &) = delete;
-    ArgInfo() = default;
-    ArgInfo(ArgInfo &&) noexcept = default;
-    ArgInfo &operator=(ArgInfo &&) noexcept = default;
-    ArgInfo deepCopy() const;
+    ParamInfo(const ParamInfo &) = delete;
+    ParamInfo() = default;
+    ParamInfo(ParamInfo &&) noexcept = default;
+    ParamInfo &operator=(ParamInfo &&) noexcept = default;
+    ParamInfo deepCopy() const;
 };
-CheckSize(ArgInfo, 48, 8);
+CheckSize(ParamInfo, 48, 8);
 
 template <class T, class... Args> TypePtr make_type(Args &&... args) {
     return TypePtr(TypePtr::TypeToTag<T>::value, new T(std::forward<Args>(args)...));
@@ -619,12 +619,12 @@ class SendAndBlockLink {
 
 public:
     SendAndBlockLink(SendAndBlockLink &&) = default;
-    std::vector<ArgInfo::ArgFlags> argFlags;
+    std::vector<ParamInfo::ArgFlags> argFlags;
     core::NameRef fun;
     int rubyBlockId;
     std::shared_ptr<DispatchResult> result;
 
-    SendAndBlockLink(NameRef fun, std::vector<ArgInfo::ArgFlags> &&argFlags, int rubyBlockId);
+    SendAndBlockLink(NameRef fun, std::vector<ParamInfo::ArgFlags> &&argFlags, int rubyBlockId);
     std::optional<int> fixedArity() const;
     std::shared_ptr<SendAndBlockLink> duplicate();
 };
@@ -694,7 +694,7 @@ struct DispatchComponent {
     TypePtr sendTp;
     TypePtr blockReturnType;
     TypePtr blockPreType;
-    ArgInfo blockSpec; // used only by LoadSelf to change type of self inside method.
+    ParamInfo blockSpec; // used only by LoadSelf to change type of self inside method.
     std::unique_ptr<TypeConstraint> constr;
 };
 
@@ -709,7 +709,7 @@ struct DispatchResult {
     DispatchResult(TypePtr returnType, TypePtr receiverType, core::SymbolRef method)
         : returnType(returnType),
           main(DispatchComponent{
-              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, ArgInfo{}, nullptr}){};
+              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, ParamInfo{}, nullptr}){};
     DispatchResult(TypePtr returnType, DispatchComponent comp)
         : returnType(std::move(returnType)), main(std::move(comp)){};
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,

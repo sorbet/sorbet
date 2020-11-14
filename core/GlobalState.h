@@ -80,7 +80,7 @@ public:
                                      const std::vector<int> &argsToKeep);
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
-    ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
+    ParamInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
 
     SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, 0);

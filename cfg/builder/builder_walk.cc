@@ -146,7 +146,7 @@ BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b
 }
 
 tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext cctx, int argIndex,
-                                                                    const core::ArgInfo &argInfo, LocalRef argLocal,
+                                                                    const core::ParamInfo &argInfo, LocalRef argLocal,
                                                                     core::LocOffsets argLoc, ast::TreePtr &def,
                                                                     BasicBlock *presentCont, BasicBlock *defaultCont) {
     auto defLoc = def.loc();
@@ -420,7 +420,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::TreePtr &what, BasicBlock *cu
                     auto newRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
                     vector<ast::ParsedArg> blockArgs =
                         ast::ArgParsing::parseArgs(ast::cast_tree<ast::Block>(s.block)->args);
-                    vector<core::ArgInfo::ArgFlags> argFlags;
+                    vector<core::ParamInfo::ArgFlags> argFlags;
                     for (auto &e : blockArgs) {
                         auto &target = argFlags.emplace_back();
                         target.isKeyword = e.flags.isKeyword;

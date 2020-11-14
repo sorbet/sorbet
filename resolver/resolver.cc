@@ -1513,7 +1513,7 @@ class ResolveSignaturesWalk {
 private:
     std::vector<int> nestedBlockCounts;
 
-    ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef, int pos,
+    ast::Local const *getArgLocal(core::Context ctx, const core::ParamInfo &argSym, const ast::MethodDef &mdef, int pos,
                                   bool isOverloaded) {
         if (!isOverloaded) {
             return ast::MK::arg2Local(mdef.args[pos]);

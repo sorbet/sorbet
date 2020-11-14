@@ -1173,7 +1173,7 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef 
     return ret;
 }
 
-ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name) {
+ParamInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name) {
     ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE(owner.data(*this)->isMethod(), "entering method argument symbol into not-a-method");
     ENFORCE(name.exists(), "entering symbol with non-existing name");

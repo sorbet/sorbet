@@ -30,7 +30,7 @@ public:
     static void pickle(Pickler &p, const File &what);
     static void pickle(Pickler &p, const Name &what);
     static void pickle(Pickler &p, const TypePtr &what);
-    static void pickle(Pickler &p, const ArgInfo &a);
+    static void pickle(Pickler &p, const ParamInfo &a);
     static void pickle(Pickler &p, const Symbol &what);
     static void pickle(Pickler &p, const ast::TreePtr &what);
     static void pickle(Pickler &p, core::LocOffsets loc);
@@ -40,7 +40,7 @@ public:
     static shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);
     static TypePtr unpickleType(UnPickler &p, const GlobalState *gs);
-    static ArgInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
+    static ParamInfo unpickleArgInfo(UnPickler &p, const GlobalState *gs);
     static Symbol unpickleSymbol(UnPickler &p, const GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
     static u4 unpickleGSUUID(UnPickler &p);
@@ -509,7 +509,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
     }
 }
 
-void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
+void SerializerImpl::pickle(Pickler &p, const ParamInfo &a) {
     p.putU4(a.name._id);
     p.putU4(a.rebind.rawId());
     pickle(p, a.loc);
@@ -517,8 +517,8 @@ void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
     pickle(p, a.type);
 }
 
-ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
-    ArgInfo result;
+ParamInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
+    ParamInfo result;
     result.name = core::NameRef(*gs, p.getU4());
     result.rebind = core::SymbolRef::fromRaw(p.getU4());
     result.loc = unpickleLoc(p);

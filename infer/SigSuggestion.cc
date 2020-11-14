@@ -325,7 +325,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         guessedReturnType = methodReturnType;
     }
 
-    auto isBadArg = [&](const core::ArgInfo &arg) -> bool {
+    auto isBadArg = [&](const core::ParamInfo &arg) -> bool {
         return
             // runtime does not support rest args and key-rest args
             arg.flags.isRepeated ||

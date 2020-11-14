@@ -246,7 +246,7 @@ string SymbolRef::show(const GlobalState &gs) const {
     return dataAllowingNone(gs)->show(gs);
 }
 
-TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
+TypePtr ParamInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner;
     auto klass = owner.data(ctx)->enclosingClass(ctx);
     ENFORCE(klass.data(ctx)->isClassOrModule());
@@ -770,11 +770,11 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
     return to_string(buf);
 }
 
-string ArgInfo::show(const GlobalState &gs) const {
+string ParamInfo::show(const GlobalState &gs) const {
     return fmt::format("{}", this->argumentName(gs));
 }
 
-string ArgInfo::toString(const GlobalState &gs) const {
+string ParamInfo::toString(const GlobalState &gs) const {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "argument {}", show(gs));
     vector<string_view> flagTexts;
@@ -851,7 +851,7 @@ string Symbol::show(const GlobalState &gs) const {
                        this->name.data(gs)->show(gs));
 }
 
-string ArgInfo::argumentName(const GlobalState &gs) const {
+string ParamInfo::argumentName(const GlobalState &gs) const {
     if (flags.isKeyword) {
         return (string)name.data(gs)->shortName(gs);
     } else {
@@ -1058,13 +1058,13 @@ SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, Symb
     return this->ref(gs);
 }
 
-bool ArgInfo::isSyntheticBlockArgument() const {
+bool ParamInfo::isSyntheticBlockArgument() const {
     // Every block argument that we synthesize in desugar or enter manually into global state uses Loc::none().
     return flags.isBlock && !loc.exists();
 }
 
-ArgInfo ArgInfo::deepCopy() const {
-    ArgInfo result;
+ParamInfo ParamInfo::deepCopy() const {
+    ParamInfo result;
     result.flags = this->flags;
     result.type = this->type;
     result.loc = this->loc;
@@ -1073,7 +1073,7 @@ ArgInfo ArgInfo::deepCopy() const {
     return result;
 }
 
-u1 ArgInfo::ArgFlags::toU1() const {
+u1 ParamInfo::ArgFlags::toU1() const {
     u1 flags = 0;
     if (isKeyword) {
         flags += 1;
@@ -1093,7 +1093,7 @@ u1 ArgInfo::ArgFlags::toU1() const {
     return flags;
 }
 
-void ArgInfo::ArgFlags::setFromU1(u1 flags) {
+void ParamInfo::ArgFlags::setFromU1(u1 flags) {
     isKeyword = flags & 1;
     isRepeated = flags & 2;
     isDefault = flags & 4;
