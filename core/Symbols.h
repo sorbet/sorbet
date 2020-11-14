@@ -574,8 +574,8 @@ public:
 
     UnorderedMap<NameRef, SymbolRef> members_;
 
-    using ArgumentsStore = InlinedVector<ParamInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
-    ArgumentsStore arguments_;
+    using ParamsStore = InlinedVector<ParamInfo, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
+    ParamsStore arguments_;
 
     UnorderedMap<NameRef, SymbolRef> &members() {
         return members_;
@@ -584,12 +584,12 @@ public:
         return members_;
     };
 
-    ArgumentsStore &arguments() {
+    ParamsStore &arguments() {
         ENFORCE_NO_TIMER(isMethod());
         return arguments_;
     }
 
-    const ArgumentsStore &arguments() const {
+    const ParamsStore &arguments() const {
         ENFORCE_NO_TIMER(isMethod());
         return arguments_;
     }
