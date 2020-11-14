@@ -1178,10 +1178,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
                 bool isSubtype;
                 if (i->link->result->main.constr) {
-                    isSubtype = core::Types::isSubTypeUnderConstraint(ctx, *i->link->result->main.constr,
-
-                                                                      typeAndOrigin.type, expectedType,
-                                                                      core::UntypedMode::AlwaysCompatible);
+                    isSubtype =
+                        core::Types::isSubTypeUnderConstraint(ctx, *i->link->result->main.constr, typeAndOrigin.type,
+                                                              expectedType, core::UntypedMode::AlwaysCompatible);
                 } else {
                     isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType);
                 }
