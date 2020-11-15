@@ -295,16 +295,17 @@ vector<ErrorLine> TypeConstraint::toExplanation(const core::GlobalState &gs) con
     for (const auto &[sym, bounds] : boundsFor) {
         const auto &[lowerBound, upperBound] = bounds;
         if (lowerBound == nullptr && upperBound == nullptr) {
-            result.emplace_back(ErrorLine::from("`{}` is not constrained", sym.data(gs)->show(gs)));
+            result.emplace_back(ErrorLine::fromWithoutLoc("`{}` is not constrained", sym.data(gs)->show(gs)));
         } else if (lowerBound == nullptr) {
-            result.emplace_back(
-                ErrorLine::from("`{}` must be a subtype of `{}`", sym.data(gs)->show(gs), upperBound.show(gs)));
+            result.emplace_back(ErrorLine::fromWithoutLoc("`{}` must be a subtype of `{}`", sym.data(gs)->show(gs),
+                                                          upperBound.show(gs)));
         } else if (upperBound == nullptr) {
-            result.emplace_back(
-                ErrorLine::from("`{}` must be a subtype of `{}`", lowerBound.show(gs), sym.data(gs)->show(gs)));
+            result.emplace_back(ErrorLine::fromWithoutLoc("`{}` must be a subtype of `{}`", lowerBound.show(gs),
+                                                          sym.data(gs)->show(gs)));
         } else {
-            result.emplace_back(ErrorLine::from("`{}` must be a subtype of `{}` which must be a subtype of `{}`",
-                                                lowerBound.show(gs), sym.data(gs)->show(gs), upperBound.show(gs)));
+            result.emplace_back(
+                ErrorLine::fromWithoutLoc("`{}` must be a subtype of `{}` which must be a subtype of `{}`",
+                                          lowerBound.show(gs), sym.data(gs)->show(gs), upperBound.show(gs)));
         }
     }
 

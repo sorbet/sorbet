@@ -51,14 +51,20 @@ struct ErrorLine {
         Hidden,
     };
     LocDisplay displayLoc;
+
     ErrorLine(Loc loc, std::string formattedMessage, LocDisplay displayLoc = LocDisplay::Shown)
         : loc(loc), formattedMessage(move(formattedMessage)), displayLoc(displayLoc){};
 
+    // Use this (instead of the constructor) if you want `{}` to mean "turn this cyan if should use
+    // colors, or just backticks otherwise".
     template <typename... Args> static ErrorLine from(Loc loc, std::string_view msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg, args...);
         return ErrorLine(loc, move(formatted));
     }
-    template <typename... Args> static ErrorLine from(std::string_view msg, const Args &... args) {
+
+    // You should ALMOST ALWAYS prefer the variant above that takes a Loc.
+    // The best error messages show context associated with locations.
+    template <typename... Args> static ErrorLine fromWithoutLoc(std::string_view msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg, args...);
         return ErrorLine(core::Loc::none(), move(formatted), LocDisplay::Hidden);
     }
