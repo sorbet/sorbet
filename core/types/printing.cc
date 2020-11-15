@@ -1,5 +1,6 @@
 #include "absl/base/casts.h"
 #include "absl/strings/escaping.h"
+#include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/formatting.h"
 #include "core/Context.h"
@@ -61,7 +62,12 @@ string LiteralType::showValue(const GlobalState &gs) const {
     if (undSymbol == Symbols::String()) {
         return fmt::format("\"{}\"", absl::CEscape(NameRef(gs, this->value).show(gs)));
     } else if (undSymbol == Symbols::Symbol()) {
-        return fmt::format(":\"{}\"", absl::CEscape(NameRef(gs, this->value).show(gs)));
+        auto shown = NameRef(gs, this->value).show(gs);
+        if (absl::StrContains(shown, " ")) {
+            return fmt::format(":\"{}\"", absl::CEscape(shown));
+        } else {
+            return fmt::format(":{}", shown);
+        }
     } else if (undSymbol == Symbols::Integer()) {
         return to_string(this->value);
     } else if (undSymbol == Symbols::Float()) {
@@ -313,7 +319,12 @@ string TypeVar::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string TypeVar::show(const GlobalState &gs) const {
-    return sym.data(gs)->name.show(gs);
+    auto shown = sym.data(gs)->name.show(gs);
+    if (absl::StrContains(shown, " ")) {
+        return fmt::format("T.type_parameter(:{})", absl::CEscape(shown));
+    } else {
+        return fmt::format("T.type_parameter(:{})", shown);
+    }
 }
 
 string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
