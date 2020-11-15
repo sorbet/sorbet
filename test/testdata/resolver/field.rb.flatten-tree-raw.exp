@@ -46,7 +46,7 @@ InsSeq{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :"foo" }
+              Literal{ value = :foo }
             ]
           }
         }

@@ -5,29 +5,29 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def my_parent_method<<C <todo sym>>>(&<blk>)
-      <self>.instance_variable_get(:"@my_parent_method")
+      <self>.instance_variable_get(:@my_parent_method)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:"arg0", <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
     def my_parent_method=<<C <todo sym>>>(arg0, &<blk>)
       begin
         if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"my_parent_method")
+          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :my_parent_method)
         else
           <emptyTree>
         end
-        <self>.instance_variable_set(:"@my_parent_method", arg0)
+        <self>.instance_variable_set(:@my_parent_method, arg0)
       end
     end
 
-    <self>.prop(:"my_parent_method", <emptyTree>::<C String>, :"without_accessors", true)
+    <self>.prop(:my_parent_method, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"my_parent_method")
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"my_parent_method=")
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method=)
   end
 
   class <emptyTree>::<C MyChildDocument><<C <todo sym>>> < (<emptyTree>::<C MyParentDocument>)
@@ -37,38 +37,38 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def my_child_method<<C <todo sym>>>(&<blk>)
       begin
-        arg2 = <self>.instance_variable_get(:"@my_child_method")
-        <self>.class().decorator().prop_get_logic(<self>, :"my_child_method", arg2)
+        arg2 = <self>.instance_variable_get(:@my_child_method)
+        <self>.class().decorator().prop_get_logic(<self>, :my_child_method, arg2)
       end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:"arg0", <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+      <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
     end
 
     def my_child_method=<<C <todo sym>>>(arg0, &<blk>)
       begin
         if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
-          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :"my_child_method")
+          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :my_child_method)
         else
           <emptyTree>
         end
-        <self>.instance_variable_set(:"@my_child_method", arg0)
+        <self>.instance_variable_set(:@my_child_method, arg0)
       end
     end
 
-    <self>.prop(:"my_child_method", <emptyTree>::<C Integer>, :"without_accessors", true)
+    <self>.prop(:my_child_method, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"my_child_method")
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"my_child_method=")
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method=)
   end
 
   <emptyTree>::<C MyParentDocument>.new()
 
   <emptyTree>::<C MyChildDocument>.new()
 
-  <self>.p(<emptyTree>::<C MyParentDocument>.new(:"my_parent_method", "hello").my_parent_method())
+  <self>.p(<emptyTree>::<C MyParentDocument>.new(:my_parent_method, "hello").my_parent_method())
 
-  <self>.p(<emptyTree>::<C MyChildDocument>.new(:"my_child_method", 42).my_child_method())
+  <self>.p(<emptyTree>::<C MyChildDocument>.new(:my_child_method, 42).my_child_method())
 end

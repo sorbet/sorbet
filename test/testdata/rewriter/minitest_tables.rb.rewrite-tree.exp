@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
+    ::Sorbet::Private::Static.keep_def(<self>, :foo)
   end
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)
@@ -16,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.type_parameters(:"U").params(:"arg", <emptyTree>::<C T>::<C Enumerable>.[](<emptyTree>::<C T>.type_parameter(:"U")), :"blk", <emptyTree>::<C T>.proc().params(:"arg0", <emptyTree>::<C T>.type_parameter(:"U")).void()).void()
+      <self>.type_parameters(:U).params(:arg, <emptyTree>::<C T>::<C Enumerable>.[](<emptyTree>::<C T>.type_parameter(:U)), :blk, <emptyTree>::<C T>.proc().params(:arg0, <emptyTree>::<C T>.type_parameter(:U)).void()).void()
     end
 
     def self.test_each<<C <todo sym>>>(arg, &blk)
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.type_parameters(:"K", :"V").params(:"arg", <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.type_parameter(:"K"), <emptyTree>::<C T>.type_parameter(:"V")), :"blk", <emptyTree>::<C T>.proc().params(:"arg0", <emptyTree>::<C T>.type_parameter(:"K"), :"arg1", <emptyTree>::<C T>.type_parameter(:"V")).void()).void()
+      <self>.type_parameters(:K, :V).params(:arg, <emptyTree>::<C T>::<C Hash>.[](<emptyTree>::<C T>.type_parameter(:K), <emptyTree>::<C T>.type_parameter(:V)), :blk, <emptyTree>::<C T>.proc().params(:arg0, <emptyTree>::<C T>.type_parameter(:K), :arg1, <emptyTree>::<C T>.type_parameter(:V)).void()).void()
     end
 
     def self.test_each_hash<<C <todo sym>>>(arg, &blk)
@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
-      <self>.params(:"name", <emptyTree>::<C String>, :"blk", <emptyTree>::<C T>.proc().void()).void()
+      <self>.params(:name, <emptyTree>::<C String>, :blk, <emptyTree>::<C T>.proc().void()).void()
     end
 
     def self.it<<C <todo sym>>>(name, &blk)
@@ -107,7 +107,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <it 'handles lists with several types'><<C <todo sym>>>(&<blk>)
-      ["foo", 5, {:"x" => false}].each() do |v|
+      ["foo", 5, {:x => false}].each() do |v|
         <emptyTree>::<C T>.reveal_type(v)
       end
     end
@@ -117,7 +117,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <it 'handles lists with several types'><<C <todo sym>>>(&<blk>)
-      {:"foo" => 1, :"bar" => 2, :"baz" => 3}.each() do |k, v|
+      {:foo => 1, :bar => 2, :baz => 3}.each() do |k, v|
         begin
           <emptyTree>::<C T>.reveal_type(k)
           <emptyTree>::<C T>.reveal_type(v)
@@ -137,13 +137,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"outside_method")
+    ::Sorbet::Private::Static.keep_def(<self>, :outside_method)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"test_each")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :test_each)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"test_each_hash")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :test_each_hash)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"it")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :it)
 
     <self>.test_each([<emptyTree>::<C Parent>.new(), <emptyTree>::<C Child>.new()]) do |value|
       ::Sorbet::Private::Static.keep_def(<self>, :"<it \'works with instance methods\'>")
@@ -182,7 +182,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    <self>.test_each(["foo", 5, {:"x" => false}]) do |v|
+    <self>.test_each(["foo", 5, {:x => false}]) do |v|
       ::Sorbet::Private::Static.keep_def(<self>, :"<it \'handles lists with several types\'>")
     end
 
@@ -198,7 +198,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    <self>.test_each_hash({:"foo" => 1, :"bar" => 2, :"baz" => 3}) do |k, v|
+    <self>.test_each_hash({:foo => 1, :bar => 2, :baz => 3}) do |k, v|
       ::Sorbet::Private::Static.keep_def(<self>, :"<it \'handles lists with several types\'>")
     end
 
@@ -206,7 +206,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Sorbet::Private::Static.keep_def(<self>, :"<it \'fails to typecheck with non-hash arguments to `test_each-hash`\'>")
     end
 
-    <self>.test_each_hash({:"foo" => 1, :"bar" => 2}) do |x|
+    <self>.test_each_hash({:foo => 1, :bar => 2}) do |x|
       <self>.it("does not handle more than one argument") do ||
         <emptyTree>
       end

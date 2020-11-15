@@ -254,7 +254,7 @@ InsSeq{
                   Local{
                     localVariable = <U <self>>
                   }
-                  Literal{ value = :"has_while" }
+                  Literal{ value = :has_while }
                 ]
               }
               Send{
@@ -269,7 +269,7 @@ InsSeq{
                   Local{
                     localVariable = <U <self>>
                   }
-                  Literal{ value = :"has_constant_with_resolution_scope" }
+                  Literal{ value = :has_constant_with_resolution_scope }
                 ]
               }
               Send{
@@ -284,7 +284,7 @@ InsSeq{
                   Local{
                     localVariable = <U <self>>
                   }
-                  Literal{ value = :"has_global_field" }
+                  Literal{ value = :has_global_field }
                 ]
               }
               Send{
@@ -299,7 +299,7 @@ InsSeq{
                   Local{
                     localVariable = <U <self>>
                   }
-                  Literal{ value = :"has_class_field" }
+                  Literal{ value = :has_class_field }
                 ]
               }
               Send{
@@ -314,7 +314,7 @@ InsSeq{
                   Local{
                     localVariable = <U <self>>
                   }
-                  Literal{ value = :"has_next" }
+                  Literal{ value = :has_next }
                 ]
               }
               Send{
@@ -329,7 +329,7 @@ InsSeq{
                   Local{
                     localVariable = <U <self>>
                   }
-                  Literal{ value = :"has_break" }
+                  Literal{ value = :has_break }
                 ]
               }
               Send{
@@ -344,7 +344,7 @@ InsSeq{
                   Local{
                     localVariable = <U <self>>
                   }
-                  Literal{ value = :"has_return" }
+                  Literal{ value = :has_return }
                 ]
               }
               Send{
@@ -359,7 +359,7 @@ InsSeq{
                   Local{
                     localVariable = <U <self>>
                   }
-                  Literal{ value = :"has_cast" }
+                  Literal{ value = :has_cast }
                 ]
               }
             ],

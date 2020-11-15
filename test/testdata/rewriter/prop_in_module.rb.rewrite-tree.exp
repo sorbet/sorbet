@@ -9,7 +9,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:"arg0", <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
@@ -18,11 +18,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
-    <self>.prop(:"foo", <emptyTree>::<C String>, :"without_accessors", true)
+    <self>.prop(:foo, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
+    ::Sorbet::Private::Static.keep_def(<self>, :foo)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=)
   end
 
   class <emptyTree>::<C MyClass><<C <todo sym>>> < (::<todo sym>)

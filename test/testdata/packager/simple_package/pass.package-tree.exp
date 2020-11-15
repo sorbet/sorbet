@@ -23,7 +23,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package><<C <todo sym>>> < ()
     class <emptyTree>::<C Bar><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.params(:"value", <emptyTree>::<C Integer>).void()
+        <self>.params(:value, <emptyTree>::<C Integer>).void()
       end
 
       def initialize<<C <todo sym>>>(value, &<blk>)
@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+      ::Sorbet::Private::Static.keep_def(<self>, :initialize)
     end
   end
 end
@@ -57,9 +57,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"build_foo")
+      ::Sorbet::Private::Static.keep_def(<self>, :build_foo)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"build_bar")
+      ::Sorbet::Private::Static.keep_def(<self>, :build_bar)
     end
   end
 end
@@ -88,7 +88,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package><<C <todo sym>>> < ()
     class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
       ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.params(:"value", <emptyTree>::<C Integer>).void()
+        <self>.params(:value, <emptyTree>::<C Integer>).void()
       end
 
       def initialize<<C <todo sym>>>(value, &<blk>)
@@ -97,7 +97,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+      ::Sorbet::Private::Static.keep_def(<self>, :initialize)
     end
   end
 end
@@ -122,9 +122,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"build_bar")
+      ::Sorbet::Private::Static.keep_def(<self>, :build_bar)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"build_foo")
+      ::Sorbet::Private::Static.keep_def(<self>, :build_foo)
     end
   end
 end

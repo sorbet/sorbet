@@ -220,7 +220,7 @@ InsSeq{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :"take_arguments" }
+              Literal{ value = :take_arguments }
             ]
           }
         }

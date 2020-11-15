@@ -41,7 +41,7 @@ ClassDef{
             block = nullptr
             pos_args = 0
             args = [
-              Literal{ value = :"blk" }
+              Literal{ value = :blk }
               Send{
                 recv = Send{
                   recv = Send{
@@ -59,12 +59,12 @@ ClassDef{
                   block = nullptr
                   pos_args = 0
                   args = [
-                    Literal{ value = :"x" }
+                    Literal{ value = :x }
                     UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <C <U Integer>>
                     }
-                    Literal{ value = :"y" }
+                    Literal{ value = :y }
                     UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <C <U Symbol>>
@@ -114,7 +114,7 @@ ClassDef{
             pos_args = 2
             args = [
               Literal{ value = 1 }
-              Literal{ value = :"hi" }
+              Literal{ value = :hi }
             ]
           }
         ],
@@ -128,7 +128,7 @@ ClassDef{
           pos_args = 2
           args = [
             Literal{ value = 1 }
-            Literal{ value = :"hi" }
+            Literal{ value = :hi }
           ]
         }
       }

@@ -29,7 +29,7 @@ begin
     def example(a, <blk>)
       begin
         if a
-          a = :"a"
+          a = :a
         else
           a
         end
@@ -37,7 +37,7 @@ begin
           b$2 = <self>
           b$3 = b$2.b()
           if b$3
-            b$2.b=(:"b")
+            b$2.b=(:b)
           else
             b$3
           end
@@ -56,7 +56,7 @@ begin
         if a
           a
         else
-          a = :"a"
+          a = :a
         end
         begin
           b$8 = <self>
@@ -64,7 +64,7 @@ begin
           if b$9
             b$9
           else
-            b$8.b=(:"b")
+            b$8.b=(:b)
           end
         end
         begin
@@ -83,11 +83,11 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"b")
-        ::Sorbet::Private::Static.keep_def(<self>, :"b=")
-        ::Sorbet::Private::Static.keep_def(<self>, :"y")
-        ::Sorbet::Private::Static.keep_def(<self>, :"z")
-        ::Sorbet::Private::Static.keep_def(<self>, :"example")
+        ::Sorbet::Private::Static.keep_def(<self>, :b)
+        ::Sorbet::Private::Static.keep_def(<self>, :b=)
+        ::Sorbet::Private::Static.keep_def(<self>, :y)
+        ::Sorbet::Private::Static.keep_def(<self>, :z)
+        ::Sorbet::Private::Static.keep_def(<self>, :example)
         <emptyTree>
       end
     end

@@ -30,21 +30,21 @@ begin
     def self.<static-init>(<blk>)
       begin
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params(:"x", ::Integer).void()
+          <self>.params(:x, ::Integer).void()
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params(:"x", ::Integer).void()
+          <self>.params(:x, ::Integer).void()
         end
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_self_def(<self>, :"takes_integer_static")
-        ::Sorbet::Private::Static.keep_def(<self>, :"takes_integer_instance")
+        ::Sorbet::Private::Static.keep_self_def(<self>, :takes_integer_static)
+        ::Sorbet::Private::Static.keep_def(<self>, :takes_integer_instance)
         <emptyTree>
       end
     end
   end
   class ::Child<<C Child>> < (::Parent)
     def self.outer_static(<blk>)
-      <self>.takes_integer_static(::Sorbet::Private::Static.keep_self_def(<self>, :"inner_static"))
+      <self>.takes_integer_static(::Sorbet::Private::Static.keep_self_def(<self>, :inner_static))
     end
 
     def self.inner_static(<blk>)
@@ -52,7 +52,7 @@ begin
     end
 
     def outer_instance(<blk>)
-      <self>.takes_integer_instance(::Sorbet::Private::Static.keep_def(<self>, :"inner_instance"))
+      <self>.takes_integer_instance(::Sorbet::Private::Static.keep_def(<self>, :inner_instance))
     end
 
     def inner_instance(<blk>)
@@ -61,8 +61,8 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        <self>.takes_integer_static(::Sorbet::Private::Static.keep_self_def(<self>, :"outer_static"))
-        <self>.takes_integer_static(::Sorbet::Private::Static.keep_def(<self>, :"outer_instance"))
+        <self>.takes_integer_static(::Sorbet::Private::Static.keep_self_def(<self>, :outer_static))
+        <self>.takes_integer_static(::Sorbet::Private::Static.keep_def(<self>, :outer_instance))
         <emptyTree>
       end
     end

@@ -70,21 +70,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"both")
+    ::Sorbet::Private::Static.keep_def(<self>, :both)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"both")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :both)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
+    ::Sorbet::Private::Static.keep_def(<self>, :foo)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"foo")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :foo)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"bar")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :bar)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_reader")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :no_reader)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"usages")
+    ::Sorbet::Private::Static.keep_def(<self>, :usages)
 
     <self>.both()
 
@@ -96,7 +96,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
     <self>.cattr_reader()
 
-    <self>.cattr_reader(:"instance_accessor", false)
+    <self>.cattr_reader(:instance_accessor, false)
 
     <self>.cattr_reader("foo")
   end

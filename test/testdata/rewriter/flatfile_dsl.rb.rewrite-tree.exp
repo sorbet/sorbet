@@ -16,13 +16,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"flatfile")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :flatfile)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"from")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :from)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"pattern")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :pattern)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"field")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :field)
   end
 
   class <emptyTree>::<C Flatfile><<C <todo sym>>> < (<emptyTree>::<C Record>)
@@ -35,7 +35,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:"arg0", ::T.untyped()).returns(::T.untyped())
+      <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
@@ -51,7 +51,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:"arg0", ::T.untyped()).returns(::T.untyped())
+      <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
     def bar=<<C <todo sym>>>(arg0, &<blk>)
@@ -67,7 +67,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:"arg0", ::T.untyped()).returns(::T.untyped())
+      <self>.params(:arg0, ::T.untyped()).returns(::T.untyped())
     end
 
     def baz=<<C <todo sym>>>(arg0, &<blk>)
@@ -76,23 +76,23 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.flatfile() do ||
       begin
-        <self>.from(::<Magic>.<build-range>(1, 2, false), :"foo")
-        <self>.pattern(::Regexp.new("A-Za-z", 0), :"bar")
-        <self>.field(:"baz")
+        <self>.from(::<Magic>.<build-range>(1, 2, false), :foo)
+        <self>.pattern(::Regexp.new("A-Za-z", 0), :bar)
+        <self>.field(:baz)
       end
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
+    ::Sorbet::Private::Static.keep_def(<self>, :foo)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"bar")
+    ::Sorbet::Private::Static.keep_def(<self>, :bar)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"bar=")
+    ::Sorbet::Private::Static.keep_def(<self>, :bar=)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"baz")
+    ::Sorbet::Private::Static.keep_def(<self>, :baz)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"baz=")
+    ::Sorbet::Private::Static.keep_def(<self>, :baz=)
   end
 
   t = <emptyTree>::<C Flatfile>.new()

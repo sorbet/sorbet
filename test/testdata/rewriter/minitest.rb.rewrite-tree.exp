@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <it 'allows constants inside of IT'><<C <todo sym>>>(&<blk>)
-      ::Module.const_set(:"CONST", 10)
+      ::Module.const_set(:CONST, 10)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <it 'allows let-ed constants inside of IT'><<C <todo sym>>>(&<blk>)
-      ::Module.const_set(:"C2", <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
+      ::Module.const_set(:C2, <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -93,7 +93,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"outside_method")
+    ::Sorbet::Private::Static.keep_def(<self>, :outside_method)
 
     begin
       "works outside"
@@ -146,7 +146,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"inside_method")
+        ::Sorbet::Private::Static.keep_def(<self>, :inside_method)
         begin
           "works inside"
           ::Sorbet::Private::Static.keep_def(<self>, :"<it \'works inside\'>")
@@ -154,18 +154,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"instance_helper")
+    ::Sorbet::Private::Static.keep_def(<self>, :instance_helper)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"<after>")
+    ::Sorbet::Private::Static.keep_def(<self>, :<after>)
 
     begin
       "can read foo"
       ::Sorbet::Private::Static.keep_def(<self>, :"<it \'can read foo\'>")
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"random_method")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :random_method)
 
     <self>.random_method() do ||
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
@@ -200,7 +200,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"it")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :it)
 
     <self>.it("ignores methods without a block")
 
@@ -228,7 +228,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  ::Sorbet::Private::Static.keep_def(<self>, :"junk")
+  ::Sorbet::Private::Static.keep_def(<self>, :junk)
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
     class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
