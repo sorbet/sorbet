@@ -628,7 +628,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 ErrorLine::from(alternative.symbol.data(gs)->loc(), "`{}`", suggestedName));
                         }
                     }
-                    e.addErrorSection(ErrorSection("Did you mean:", lines));
+                    if (!lines.empty()) {
+                        e.addErrorSection(ErrorSection("Did you mean:", lines));
+                    }
                 }
 
                 auto attached = symbol.data(gs)->attachedClass(gs);
