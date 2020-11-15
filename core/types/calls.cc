@@ -1062,7 +1062,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (!constr->solve(gs)) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                        errors::Infer::GenericMethodConstaintUnsolved)) {
-                e.setHeader("Could not find valid instantiation of type parameters");
+                e.setHeader("Could not find valid instantiation of type parameters for `{}`",
+                            method.data(gs)->show(gs));
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.data(gs)->show(gs));
+                e.addErrorSection(ErrorSection("Found no solution for these constraints:", constr->toExplanation(gs)));
                 result.main.errors.emplace_back(e.build());
             }
         }

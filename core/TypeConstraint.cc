@@ -244,7 +244,7 @@ InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
     return ret;
 }
 
-std::string TypeConstraint::toString(const core::GlobalState &gs) const {
+string TypeConstraint::toString(const core::GlobalState &gs) const {
     auto bounds = UnorderedMap<SymbolRef, pair<TypePtr, TypePtr>>{};
 
     for (const auto &[sym, lowerBound] : this->lowerBounds) {
@@ -274,6 +274,41 @@ std::string TypeConstraint::toString(const core::GlobalState &gs) const {
                            return fmt::format("{}: {}", pair.first.show(gs), pair.second.show(gs));
                        }));
     return to_string(buf);
+}
+
+vector<ErrorLine> TypeConstraint::toExplanation(const core::GlobalState &gs) const {
+    auto boundsFor = UnorderedMap<SymbolRef, pair<TypePtr, TypePtr>>{};
+
+    for (const auto &[sym, lowerBound] : this->lowerBounds) {
+        auto &[lowerRef, _upperRef] = boundsFor[sym];
+        ENFORCE(lowerRef == nullptr, "{} in lowerBounds twice?", sym.show(gs));
+        lowerRef = lowerBound;
+    }
+    for (const auto &[sym, upperBound] : this->upperBounds) {
+        auto &[_lowerRef, upperRef] = boundsFor[sym];
+        ENFORCE(upperRef == nullptr, "{} in upperBounds twice?", sym.show(gs));
+        upperRef = upperBound;
+    }
+
+    auto result = vector<ErrorLine>{};
+
+    for (const auto &[sym, bounds] : boundsFor) {
+        const auto &[lowerBound, upperBound] = bounds;
+        if (lowerBound == nullptr && upperBound == nullptr) {
+            result.emplace_back(ErrorLine::from("`{}` is not constrained", sym.data(gs)->show(gs)));
+        } else if (lowerBound == nullptr) {
+            result.emplace_back(
+                ErrorLine::from("`{}` must be a subtype of `{}`", sym.data(gs)->show(gs), upperBound.show(gs)));
+        } else if (upperBound == nullptr) {
+            result.emplace_back(
+                ErrorLine::from("`{}` must be a subtype of `{}`", lowerBound.show(gs), sym.data(gs)->show(gs)));
+        } else {
+            result.emplace_back(ErrorLine::from("`{}` must be a subtype of `{}` which must be a subtype of `{}`",
+                                                lowerBound.show(gs), sym.data(gs)->show(gs), upperBound.show(gs)));
+        }
+    }
+
+    return result;
 }
 
 } // namespace sorbet::core

@@ -46,11 +46,21 @@ public:
 struct ErrorLine {
     const Loc loc;
     const std::string formattedMessage;
-    ErrorLine(Loc loc, std::string formattedMessage) : loc(loc), formattedMessage(move(formattedMessage)){};
+    enum class LocDisplay {
+        Shown,
+        Hidden,
+    };
+    LocDisplay displayLoc;
+    ErrorLine(Loc loc, std::string formattedMessage, LocDisplay displayLoc = LocDisplay::Shown)
+        : loc(loc), formattedMessage(move(formattedMessage)), displayLoc(displayLoc){};
 
     template <typename... Args> static ErrorLine from(Loc loc, std::string_view msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg, args...);
         return ErrorLine(loc, move(formatted));
+    }
+    template <typename... Args> static ErrorLine from(std::string_view msg, const Args &... args) {
+        std::string formatted = ErrorColors::format(msg, args...);
+        return ErrorLine(core::Loc::none(), move(formatted), LocDisplay::Hidden);
     }
     std::string toString(const GlobalState &gs, bool color = true) const;
 };

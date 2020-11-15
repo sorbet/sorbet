@@ -53,7 +53,14 @@ string restoreColors(string_view formatted, rang::fg color) {
 string ErrorLine::toString(const GlobalState &gs, bool color) const {
     stringstream buf;
     string indent = "  ";
-    buf << indent << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ":";
+    buf << indent;
+    switch (this->displayLoc) {
+        case LocDisplay::Shown:
+            buf << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ":";
+            break;
+        case LocDisplay::Hidden:
+            break;
+    }
     if (!formattedMessage.empty()) {
         buf << " ";
         if (color) {
