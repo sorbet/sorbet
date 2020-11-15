@@ -1155,6 +1155,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         auto ownerData = ctx.owner.data(ctx);
                         e.setHeader("Returning value that does not conform to method result type");
+                        // TODO(jez) This error isn't as good as the other similar ones
                         e.addErrorSection(core::ErrorSection(
                             "Expected " + methodReturnType.show(ctx),
                             {
@@ -1191,6 +1192,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         e.setHeader("Returning value that does not conform to block result type");
+                        // TODO(jez) Or maybe it's this one?
                         e.addErrorSection(core::ErrorSection("Expected " + expectedType.show(ctx)));
                         e.addErrorSection(
                             core::ErrorSection("Got " + typeAndOrigin.type.show(ctx) + " originating from:",
@@ -1261,7 +1263,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             e.setHeader("The typechecker was unable to infer the type of the asserted value");
                             e.addErrorSection(core::ErrorSection("Got " + ty.type.show(ctx) + " originating from:",
                                                                  ty.origins2Explanations(ctx, ownerLoc)));
-                            e.addErrorSection(core::ErrorSection("You may need to add additional `sig` annotations"));
+                            e.addErrorNote("You may need to add additional `{}` annotations", "sig");
                         }
                     } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
@@ -1359,6 +1361,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             }
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
                                 e.setHeader("Changing the type of a variable in a loop is not permitted");
+                                // TODO(jez) Why don't we show the TypeAndOrigins (`cur`) here?
                                 e.addErrorSection(core::ErrorSection(
                                     core::ErrorColors::format("Existing variable has type: `{}`", cur.type.show(ctx))));
                                 e.addErrorSection(core::ErrorSection(core::ErrorColors::format(

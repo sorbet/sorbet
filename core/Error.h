@@ -150,6 +150,9 @@ public:
         std::string formatted = ErrorColors::format(msg.str, args...);
         addErrorSection(ErrorSection({ErrorLine(loc, formatted)}));
     }
+    template <typename... Args> void addErrorNote(ConstExprStr msg, const Args &... args) {
+        addErrorSection(ErrorSection("Note:", {ErrorLine::fromWithoutLoc(msg.str, args...)}));
+    }
 
     template <typename... Args> void setHeader(ConstExprStr msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg.str, args...);
