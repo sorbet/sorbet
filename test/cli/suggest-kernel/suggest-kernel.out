@@ -1,8 +1,10 @@
 test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Foo` https://srb.help/7003
      .. |    raise "hi"
             ^^^^^^^^^^
-  Did you mean to `include Kernel` in this module?
-    ...: `Kernel#raise`?
+  Note:
+    Did you mean to `include Kernel` in this module?
+  Did you mean:
+    ...: `Kernel#raise`
     .. |  def raise(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1
