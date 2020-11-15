@@ -62,7 +62,13 @@ string ErrorLine::toString(const GlobalState &gs, bool color) const {
             break;
     }
     if (!formattedMessage.empty()) {
-        buf << " ";
+        switch (this->displayLoc) {
+            case LocDisplay::Shown:
+                buf << " ";
+                break;
+            case LocDisplay::Hidden:
+                break;
+        }
         if (color) {
             buf << DETAIL_COLOR << restoreColors(formattedMessage, DETAIL_COLOR) << RESET_COLOR;
         } else {
