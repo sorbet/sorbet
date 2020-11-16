@@ -451,12 +451,12 @@ core::FileRef bestNonRBIFile(core::Context ctx, const core::SymbolRef klass) {
 
 void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef,
                                   const core::SymbolRef errMsgClass, const string_view verb) {
-    auto klassFile = bestNonRBIFile(ctx, klass);
     for (const auto &mixin : klass.data(ctx)->mixins()) {
         if (!mixin.data(ctx)->isClassOrModuleSealed()) {
             continue;
         }
-        // TODO(jez) sealedLocs is actually always one loc. We should add an ENFORCE or error message for this.
+
+        auto klassFile = bestNonRBIFile(ctx, klass);
         if (absl::c_any_of(mixin.data(ctx)->sealedLocs(ctx),
                            [klassFile](auto loc) { return loc.file() == klassFile; })) {
             continue;
@@ -474,16 +474,17 @@ void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass
 
 void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef) {
     const auto superClass = klass.data(ctx)->superClass();
-    auto file = bestNonRBIFile(ctx, klass);
-    if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed() &&
-        !absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx), [file](auto loc) { return loc.file() == file; })) {
-        if (auto e =
-                ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
-            e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.data(ctx)->show(ctx),
-                        klass.data(ctx)->show(ctx));
-            for (auto loc : superClass.data(ctx)->sealedLocs(ctx)) {
-                e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
-                               superClass.data(ctx)->show(ctx));
+    if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed()) {
+        auto file = bestNonRBIFile(ctx, klass);
+        if (!absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx), [file](auto loc) { return loc.file() == file; })) {
+            if (auto e =
+                    ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
+                e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.data(ctx)->show(ctx),
+                            klass.data(ctx)->show(ctx));
+                for (auto loc : superClass.data(ctx)->sealedLocs(ctx)) {
+                    e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
+                                   superClass.data(ctx)->show(ctx));
+                }
             }
         }
     }
