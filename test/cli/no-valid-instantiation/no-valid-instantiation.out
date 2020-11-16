@@ -5,5 +5,5 @@ test/cli/no-valid-instantiation/no-valid-instantiation.rb:26: Could not find val
     12 |def foo(f, x)
         ^^^^^^^^^^^^^
   Found no solution for these constraints:
-    `Integer(0)` must be a subtype of `U` which must be a subtype of `String`
+    `Integer(0)` must be a subtype of `T.type_parameter(:U)` which must be a subtype of `String`
 Errors: 1
