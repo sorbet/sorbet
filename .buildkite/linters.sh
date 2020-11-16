@@ -50,6 +50,13 @@ if [ "$err" -ne 0 ]; then
 fi
 
 err=0
+./tools/scripts/add_27_bindcall.sh -c &> add_27_bindcall || err=$?
+if [ "$err" -ne 0 ]; then
+    buildkite-agent annotate --context tools/scripts/add_27_bindcall.sh --style error --append < add_27_bindcall
+    globalErr=$err
+fi
+
+err=0
 echo $'```' > format_website
 ./tools/scripts/format_website.sh -t &>> format_website || err=$?
 echo $'```' >> format_website

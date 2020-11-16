@@ -12,10 +12,14 @@ module T::Private; end
 module T::Private::Abstract; end
 module T::Private::Types; end
 
+USE_RUBY_27 = Gem::Version::new(RUBY_VERSION) >= Gem::Version.new('2.7')
+
 require 'set'
 
 # Each section is a group that I believe need a fixed ordering. There is also
 # an ordering between groups.
+#
+# Using single quotes is required for other scripts to work.
 
 # These are pre-reqs for almost everything in here.
 require_relative 'types/configuration'
@@ -24,7 +28,7 @@ require_relative 'types/_types'
 require_relative 'types/private/decl_state'
 require_relative 'types/private/class_utils'
 require_relative 'types/private/runtime_levels'
-require_relative 'types/private/methods/_methods'
+require_relative USE_RUBY_27 ? 'types/private/methods/_methods_27' : 'types/private/methods/_methods'
 require_relative 'types/sig'
 require_relative 'types/helpers'
 require_relative 'types/private/final'
@@ -32,7 +36,7 @@ require_relative 'types/private/sealed'
 
 # The types themselves. First base classes
 require_relative 'types/types/base'
-require_relative 'types/types/typed_enumerable'
+require_relative USE_RUBY_27 ? 'types/types/typed_enumerable_27' : 'types/types/typed_enumerable'
 # Everything else
 require_relative 'types/types/class_of'
 require_relative 'types/types/enum'
@@ -64,7 +68,7 @@ require_relative 'types/types/type_template'
 
 # Call validation
 require_relative 'types/private/methods/modes'
-require_relative 'types/private/methods/call_validation'
+require_relative USE_RUBY_27 ? 'types/private/methods/call_validation_27' : 'types/private/methods/call_validation'
 
 # Signature validation
 require_relative 'types/private/methods/signature_validation'
@@ -101,7 +105,7 @@ require_relative 'types/props/optional'
 require_relative 'types/props/weak_constructor'
 require_relative 'types/props/constructor'
 require_relative 'types/props/pretty_printable'
-require_relative 'types/props/private/serde_transform'
+require_relative USE_RUBY_27 ? 'types/props/private/serde_transform_27' : 'types/props/private/serde_transform'
 require_relative 'types/props/private/deserializer_generator'
 require_relative 'types/props/private/serializer_generator'
 require_relative 'types/props/serializable'
@@ -112,4 +116,4 @@ require_relative 'types/props/generated_code_validation'
 require_relative 'types/struct'
 require_relative 'types/non_forcing_constants'
 
-require_relative 'types/compatibility_patches'
+require_relative USE_RUBY_27 ? 'types/compatibility_patches_27' : 'types/compatibility_patches'
