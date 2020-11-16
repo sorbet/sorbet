@@ -60,21 +60,21 @@ namespace {
 
 template <typename... MethodArgs>
 optional<vector<TypePtr>> instantiateElems(const vector<TypePtr> &elems, const MethodArgs &... methodArgs) {
-    optional<vector<TypePtr>> newArgs;
+    optional<vector<TypePtr>> newElems;
     int i = -1;
     for (auto &e : elems) {
         ++i;
         auto t = e._instantiate(methodArgs...);
-        if (!newArgs.has_value() && !t) {
+        if (!newElems.has_value() && !t) {
             continue;
         }
 
-        if (!newArgs.has_value()) {
+        if (!newElems.has_value()) {
             // Oops, need to fixup all the elements that should be there.
-            newArgs.emplace();
-            newArgs->reserve(elems.size());
+            newElems.emplace();
+            newElems->reserve(elems.size());
             for (int j = 0; j < i; ++j) {
-                newArgs->emplace_back(elems[j]);
+                newElems->emplace_back(elems[j]);
             }
         }
 
@@ -82,29 +82,29 @@ optional<vector<TypePtr>> instantiateElems(const vector<TypePtr> &elems, const M
             t = e;
         }
 
-        ENFORCE(newArgs->size() == i);
-        newArgs->emplace_back(move(t));
+        ENFORCE(newElems->size() == i);
+        newElems->emplace_back(move(t));
     }
-    return newArgs;
+    return newElems;
 }
 
 optional<vector<TypePtr>> approximateElems(const vector<TypePtr> &elems, const GlobalState &gs,
                                            const TypeConstraint &tc) {
-    optional<vector<TypePtr>> newArgs;
+    optional<vector<TypePtr>> newElems;
     int i = -1;
     for (auto &e : elems) {
         ++i;
         auto t = e._approximate(gs, tc);
-        if (!newArgs.has_value() && !t) {
+        if (!newElems.has_value() && !t) {
             continue;
         }
 
-        if (!newArgs.has_value()) {
+        if (!newElems.has_value()) {
             // Oops, need to fixup all the elements that should be there.
-            newArgs.emplace();
-            newArgs->reserve(elems.size());
+            newElems.emplace();
+            newElems->reserve(elems.size());
             for (int j = 0; j < i; ++j) {
-                newArgs->emplace_back(elems[j]);
+                newElems->emplace_back(elems[j]);
             }
         }
 
@@ -112,10 +112,10 @@ optional<vector<TypePtr>> approximateElems(const vector<TypePtr> &elems, const G
             t = e;
         }
 
-        ENFORCE(newArgs->size() == i);
-        newArgs->emplace_back(move(t));
+        ENFORCE(newElems->size() == i);
+        newElems->emplace_back(move(t));
     }
-    return newArgs;
+    return newElems;
 }
 } // anonymous namespace
 
