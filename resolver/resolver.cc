@@ -1097,7 +1097,8 @@ class ResolveTypeMembersWalk {
         }
     }
 
-    static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs) {
+    static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs,
+                                  vector<bool> &resolvedAttachedClasses) {
         auto data = lhs.data(ctx);
         auto owner = data->owner;
 
@@ -1187,12 +1188,20 @@ class ResolveTypeMembersWalk {
         // Once the owner has had all of its type members resolved, resolve the
         // AttachedClass on its singleton.
         if (isGenericResolved(ctx, owner)) {
-            resolveAttachedClass(ctx, owner);
+            resolveAttachedClass(ctx, owner, resolvedAttachedClasses);
         }
     }
 
-    static void resolveAttachedClass(core::MutableContext ctx, core::SymbolRef sym) {
+    static void resolveAttachedClass(core::MutableContext ctx, core::SymbolRef sym,
+                                     vector<bool> &resolvedAttachedClasses) {
         ENFORCE(sym.data(ctx)->isClassOrModule());
+        // Avoid trying to re-resolve symbols that are already resolved.
+        // This avoids (relatively) expensive findMember operations.
+        if (resolvedAttachedClasses[sym.classOrModuleIndex()] == true) {
+            return;
+        }
+
+        resolvedAttachedClasses[sym.classOrModuleIndex()] = true;
 
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         if (!singleton.exists()) {
@@ -1224,7 +1233,7 @@ class ResolveTypeMembersWalk {
             // to see if there's another singleton above that must also be resolved.
             auto parent = singleton.data(ctx)->lookupSingletonClass(ctx);
             if (parent.exists()) {
-                resolveAttachedClass(ctx, singleton);
+                resolveAttachedClass(ctx, singleton, resolvedAttachedClasses);
             }
         }
     }
@@ -1242,7 +1251,7 @@ class ResolveTypeMembersWalk {
             ctx, block.body, ParsedSig{}, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
     }
 
-    static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job) {
+    static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
         ENFORCE(job.lhs.data(ctx)->isTypeAlias() || job.lhs.data(ctx)->isTypeMember());
 
         if (isLHSResolved(ctx, job.lhs)) {
@@ -1262,7 +1271,7 @@ class ResolveTypeMembersWalk {
                 return false;
             }
 
-            resolveTypeMember(ctx.withOwner(job.owner), job.lhs, job.rhs);
+            resolveTypeMember(ctx.withOwner(job.owner), job.lhs, job.rhs, resolvedAttachedClasses);
         } else {
             resolveTypeAlias(ctx.withOwner(job.owner), job.lhs, job.rhs);
         }
@@ -1465,9 +1474,10 @@ public:
         // Put files into a consistent order for subsequent passes.
         fast_sort(combined.files, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
 
+        vector<bool> resolvedAttachedClasses(gs.classAndModulesUsed());
         for (auto &job : combined.todoAttachedClassItems) {
             core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-            resolveAttachedClass(ctx, job.klass);
+            resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
         }
 
         // loop over any out-of-order type_member/type_alias references
@@ -1477,7 +1487,7 @@ public:
             auto it =
                 std::remove_if(combined.todoAssigns.begin(), combined.todoAssigns.end(), [&](ResolveAssignItem &job) {
                     core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                    return resolveJob(ctx, job);
+                    return resolveJob(ctx, job, resolvedAttachedClasses);
                 });
             combined.todoAssigns.erase(it, combined.todoAssigns.end());
             progress = combined.todoAssigns.size() != origSize;
