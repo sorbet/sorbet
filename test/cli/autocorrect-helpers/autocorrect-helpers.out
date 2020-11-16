@@ -33,7 +33,8 @@ autocorrect-helpers.rb:16: Method `sealed!` does not exist on `T.class_of(S4)` h
 `
     16 |  sealed!
         ^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2135: Did you mean: `Kernel#select`?
+  Did you mean:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2135: `Kernel#select`
     2135 |  def select(read, write=T.unsafe(nil), error=T.unsafe(nil), timeout=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -72,7 +73,8 @@ autocorrect-helpers.rb:26: Method `sealed!` does not exist on `T.class_of(S6)` h
 `
     25 |  abstract!
         ^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2135: Did you mean: `Kernel#select`?
+  Did you mean:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2135: `Kernel#select`
     2135 |  def select(read, write=T.unsafe(nil), error=T.unsafe(nil), timeout=T.unsafe(nil)); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -84,7 +86,8 @@ autocorrect-helpers.rb:30: Method `mixes_in_class_methods` does not exist on `T.
 `
     30 |  mixes_in_class_methods(S1)
         ^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L1419: Did you mean: `Module#public_class_method`?
+  Did you mean:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/module.rbi#L1419: `Module#public_class_method`
     1419 |  def public_class_method(*arg0); end
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 9

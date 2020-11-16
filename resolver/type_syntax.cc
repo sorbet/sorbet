@@ -270,8 +270,8 @@ ParsedSig parseSigWithSelfTypeParams(core::MutableContext ctx, const ast::Send &
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             auto paramsStr = send->fun.show(ctx);
                             e.setHeader("`{}` expects keyword arguments", paramsStr);
-                            e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
-                                "All parameters must be given names in `{}` even if they are positional", paramsStr)));
+                            e.addErrorNote("All parameters must be given names in `{}` even if they are positional",
+                                           paramsStr);
 
                             // when the first argument is a hash, emit an autocorrect to remove the braces
                             if (send->numPosArgs == 1) {
@@ -909,9 +909,9 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::MutableConte
                 if (auto e = ctx.beginError(s.loc, core::errors::Resolver::BadStdlibGeneric)) {
                     e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.data(ctx)->show(ctx) + "[...]",
                                 recvi->symbol.data(ctx)->show(ctx) + "[...]", recvi->symbol.data(ctx)->show(ctx));
-                    e.addErrorSection(
-                        core::ErrorSection(core::ErrorColors::format("`{}` will not work in the runtime type system.",
-                                                                     recvi->symbol.data(ctx)->show(ctx) + "[...]")));
+                    e.addErrorNote(
+                        "`{}` will raise at runtime because this generic was defined in the standard library",
+                        recvi->symbol.data(ctx)->show(ctx) + "[...]");
                     e.replaceWith(fmt::format("Change `{}` to `{}`", recvi->symbol.data(ctx)->show(ctx),
                                               corrected.data(ctx)->show(ctx)),
                                   core::Loc(ctx.file, recvi->loc), "{}", corrected.data(ctx)->show(ctx));

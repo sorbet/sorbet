@@ -1261,7 +1261,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             e.setHeader("The typechecker was unable to infer the type of the asserted value");
                             e.addErrorSection(core::ErrorSection("Got " + ty.type.show(ctx) + " originating from:",
                                                                  ty.origins2Explanations(ctx, ownerLoc)));
-                            e.addErrorSection(core::ErrorSection("You may need to add additional `sig` annotations"));
+                            e.addErrorNote("You may need to add additional `{}` annotations", "sig");
                         }
                     } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
