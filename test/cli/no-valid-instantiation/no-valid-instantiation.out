@@ -1,0 +1,9 @@
+test/cli/no-valid-instantiation/no-valid-instantiation.rb:26: Could not find valid instantiation of type parameters for `Object#foo` https://srb.help/7020
+    26 |foo(f, 0) # error: Could not find valid instantiation of type parameters
+        ^^^^^^^^^
+    test/cli/no-valid-instantiation/no-valid-instantiation.rb:12: `Object#foo` defined here
+    12 |def foo(f, x)
+        ^^^^^^^^^^^^^
+  Found no solution for these constraints:
+    `Integer(0)` must be a subtype of `U` which must be a subtype of `String`
+Errors: 1
