@@ -347,25 +347,25 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     }
 }
 
-core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef *classDef,
+core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef &classDef,
                                 const core::SymbolRef ancestor) {
-    for (const auto &anc : classDef->ancestors) {
+    for (const auto &anc : classDef.ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
         if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
-    for (const auto &anc : classDef->singletonAncestors) {
+    for (const auto &anc : classDef.singletonAncestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
         if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
     // give up
-    return classDef->loc;
+    return classDef.loc;
 }
 
-void validateFinalAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef,
+void validateFinalAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef,
                                  const core::SymbolRef errMsgClass, const string_view verb) {
     for (const auto &mixin : klass.data(ctx)->mixins()) {
         if (!mixin.data(ctx)->isClassOrModuleFinal()) {
@@ -403,7 +403,7 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
     }
 }
 
-void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef) {
+void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
     if (superClass.exists() && superClass.data(ctx)->isClassOrModuleFinal()) {
         if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
@@ -450,7 +450,7 @@ core::FileRef bestNonRBIFile(core::Context ctx, const core::SymbolRef klass) {
     return bestFile;
 }
 
-void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef,
+void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef,
                                   const core::SymbolRef errMsgClass, const string_view verb) {
     for (const auto &mixin : klass.data(ctx)->mixins()) {
         if (!mixin.data(ctx)->isClassOrModuleSealed()) {
@@ -473,7 +473,7 @@ void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass
     }
 }
 
-void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef) {
+void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
     if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed()) {
         auto file = bestNonRBIFile(ctx, klass);
@@ -583,8 +583,8 @@ private:
 
 public:
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
-        auto sym = classDef->symbol;
+        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        auto sym = classDef.symbol;
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         validateTStructNotGrandparent(ctx, sym);
         validateAbstract(ctx, sym);
@@ -595,8 +595,8 @@ public:
     }
 
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        auto *methodDef = ast::cast_tree<ast::MethodDef>(tree);
-        auto methodData = methodDef->symbol.data(ctx);
+        auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        auto methodData = methodDef.symbol.data(ctx);
         auto ownerData = methodData->owner.data(ctx);
 
         // Only perform this check if this isn't a module from the stdlib, and
@@ -605,10 +605,10 @@ public:
         // Array and Hash are defined with their parameters as covariant, and as
         // a result most of their methods would fail this check.
         if (!methodData->loc().file().data(ctx).isStdlib() && !ownerData->typeMembers().empty()) {
-            variance::validateMethodVariance(ctx, methodDef->symbol);
+            variance::validateMethodVariance(ctx, methodDef.symbol);
         }
 
-        validateOverriding(ctx, methodDef->symbol);
+        validateOverriding(ctx, methodDef.symbol);
         return tree;
     }
 };
