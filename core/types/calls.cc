@@ -117,7 +117,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -131,7 +131,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -517,9 +517,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     // TODO(jez) findMemberTransitive resolves through method aliases and skips over ZSuper methods
-    auto mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
+    auto mayBeZSuper = symbol.data(gs)->findMemberTransitiveIncludingZSuperMethods(gs, args.name);
 
-    if (!mayBeOverloaded.exists()) {
+    if (!mayBeZSuper.exists()) {
         if (args.name == Names::initialize()) {
             // Special-case initialize(). We should define this on
             // `BasicObject`, but our method-resolution order is wrong, and
@@ -647,6 +647,19 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
+    SymbolRef mayBeOverloaded = mayBeZSuper;
+    if (mayBeZSuper.data(gs)->isMethodZSuper()) {
+        mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
+        if (!mayBeOverloaded.exists()) {
+            // This happens when using `private :foo` in a class where there is no `foo` in that
+            // class or any parents. An error will have already been omitted by defintion_validator,
+            // we just need to recover.
+            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+        }
+
+        ENFORCE(!mayBeOverloaded.data(gs)->isMethodZSuper());
+    }
+
     auto method = mayBeOverloaded.data(gs)->isOverloaded()
                       ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, args.fullType, targs,
                                       args.block != nullptr)
@@ -656,6 +669,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto &component = result.main;
     component.receiver = args.selfType;
     component.method = method;
+    if (mayBeOverloaded == mayBeZSuper) {
+        // Upgrade mayBeZSuper to method post-overload checking.
+        component.visibilityMethod = method;
+    } else {
+        // Keep the one before overload checking, because it's important that we use this method's
+        // visibility checks.
+        component.visibilityMethod = mayBeZSuper;
+    }
 
     const SymbolData data = method.data(gs);
     unique_ptr<TypeConstraint> &maybeConstraint = result.main.constr;

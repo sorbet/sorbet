@@ -9,17 +9,18 @@ module MakesFooPrivate
   private :foo # error: No method called `foo` exists to be made `private` in `MakesFooPrivate`
 end
 
-# -- everything that happens after doesn't matter to me --
+# -- everything that happens after doesn't matter to me, because above is nonsense --
 
 class A
   include DefinesFoo
   include MakesFooPrivate
 end
 
-A.new.foo # error: TODO(jez) figure out whether there should be an error here
+A.new.foo # error: Non-private call to private method `DefinesFo#foo`
 
 class B
   include MakesFooPrivate
 end
 
-B.new.foo # error: TODO(jez) figure out whether there should be an error here
+B.new.foo
+B.new.foo(0, '')

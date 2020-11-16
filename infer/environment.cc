@@ -980,11 +980,16 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     // TODO(jez) Need some way to record that even though we dispatched to something
                     // like `Class#new`, that we went through a different method visibility to get
                     // there.
-                    if (it->main.method.exists() && it->main.method.data(ctx)->isMethodPrivate() &&
+                    if (it->main.visibilityMethod.exists() && it->main.visibilityMethod.data(ctx)->isMethodPrivate() &&
                         !send->isPrivateOk) {
+                        ENFORCE(it->main.method.exists());
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
                             e.setHeader("Non-private call to private method `{}`", it->main.method.show(ctx));
-                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined as");
+                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined here");
+                            if (it->main.method != it->main.visibilityMethod) {
+                                e.addErrorLine(it->main.visibilityMethod.data(ctx)->loc(), "Made private in `{}` here",
+                                               it->main.visibilityMethod.data(ctx)->owner.data(ctx)->show(ctx));
+                            }
                         }
                     }
 
