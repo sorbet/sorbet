@@ -127,7 +127,7 @@ public:
         string newsrc;
         if (auto sendResp = response->isSend()) {
             // sendResp->dispatchResult->main.receiver;
-            auto newsrc = replaceMethodNameInSend(source);
+            newsrc = replaceMethodNameInSend(source);
         } else {
             newsrc = replaceMethodNameInStr(source);
         }
@@ -199,7 +199,7 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
 
     vector<core::SymbolRef> symbolsToRename;
     if (symbolData->isMethod()) {
-        renamer = make_unique<MethodRenamer>(originalName, newName);
+        renamer = make_unique<MethodRenamer>(gs, config, originalName, newName);
         // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
         // then find the full tree; then look for methods with the same name as ours; then find all references to all
         // those methods and rename them.
@@ -221,7 +221,7 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
             }
         }
     } else {
-        renamer = make_unique<ConstRenamer>(originalName, newName);
+        renamer = make_unique<ConstRenamer>(gs, config, originalName, newName);
         symbolsToRename.push_back(symbol);
     }
 
