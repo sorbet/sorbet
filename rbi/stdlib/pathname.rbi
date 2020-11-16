@@ -375,6 +375,7 @@ class Pathname < Object
     )
     .returns(T.untyped)
   end
+  sig {returns(T::Enumerator[Pathname])}
   def ascend(&blk); end
 
   # Returns the last access time for the file.
