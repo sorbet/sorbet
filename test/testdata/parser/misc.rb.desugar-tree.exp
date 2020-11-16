@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  <self>.alias_method(:"afoo", :"bar")
+  <self>.alias_method(:afoo, :bar)
 
   @iv = 1
 
@@ -167,7 +167,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  {x => y, :"foo" => 1}
+  {x => y, :foo => 1}
 
   <emptyTree>
 
@@ -190,7 +190,7 @@ rescue <emptyTree>::<C E> => x
 
   ::<Magic>.<string-interpolate>("foo", <self>.bar()).intern()
 
-  [:"sym"]
+  [:sym]
 
   if x
     1
@@ -198,7 +198,7 @@ rescue <emptyTree>::<C E> => x
     7
   end
 
-  ::Kernel.undef(:"x", :"y")
+  ::Kernel.undef(:x, :y)
 
   ["a", "b"]
 

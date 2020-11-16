@@ -10,7 +10,7 @@ T.assert_type!(
   T::Hash[Symbol, Integer]
 )
 
-["hi"].to_h # error: Expected `T::Enumerable[[U, V]]`
+["hi"].to_h # error: Expected `T::Enumerable[[T.type_parameter(:U), T.type_parameter(:V)]]`
 
 T.assert_type!(
   T.cast([], T::Enumerable[[String, Symbol]]).to_h,

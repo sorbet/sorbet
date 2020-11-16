@@ -56,8 +56,8 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"untyped")
-        ::Sorbet::Private::Static.keep_def(<self>, :"test_casts")
+        ::Sorbet::Private::Static.keep_def(<self>, :untyped)
+        ::Sorbet::Private::Static.keep_def(<self>, :test_casts)
         <emptyTree>
       end
     end

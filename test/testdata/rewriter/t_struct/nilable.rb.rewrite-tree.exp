@@ -1,7 +1,7 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C Nilable><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:"foo", <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).void()
+      <self>.params(:foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).void()
     end
 
     def initialize<<C <todo sym>>>(foo: = nil, &<blk>)
@@ -20,29 +20,29 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:"arg0", <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
+      <self>.params(:arg0, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
     def foo=<<C <todo sym>>>(arg0, &<blk>)
       @foo = arg0
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize)
 
-    <self>.prop(:"foo", <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>), :"without_accessors", true)
+    <self>.prop(:foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>), :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
+    ::Sorbet::Private::Static.keep_def(<self>, :foo)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"foo=")
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=)
   end
 
   <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new().foo())
 
-  <emptyTree>::<C Nilable>.new(:"foo", "no")
+  <emptyTree>::<C Nilable>.new(:foo, "no")
 
-  <emptyTree>::<C Nilable>.new(:"foo", 3, :"bar", 4)
+  <emptyTree>::<C Nilable>.new(:foo, 3, :bar, 4)
 
-  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new(:"foo", 3).foo())
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new(:foo, 3).foo())
 
-  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new(:"foo", nil).foo())
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Nilable>.new(:foo, nil).foo())
 end

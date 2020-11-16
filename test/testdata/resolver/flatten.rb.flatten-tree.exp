@@ -27,8 +27,8 @@ begin
   class ::A<<C A>> < (::<todo sym>)
     def foo(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"food")
-        ::Sorbet::Private::Static.keep_self_def(<self>, :"foos")
+        ::Sorbet::Private::Static.keep_def(<self>, :food)
+        ::Sorbet::Private::Static.keep_self_def(<self>, :foos)
       end
     end
 
@@ -42,8 +42,8 @@ begin
 
     def self.sfoo(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"sfood")
-        ::Sorbet::Private::Static.keep_self_def(<self>, :"sfoos")
+        ::Sorbet::Private::Static.keep_def(<self>, :sfood)
+        ::Sorbet::Private::Static.keep_self_def(<self>, :sfoos)
       end
     end
 
@@ -57,8 +57,8 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"foo")
-        ::Sorbet::Private::Static.keep_self_def(<self>, :"sfoo")
+        ::Sorbet::Private::Static.keep_def(<self>, :foo)
+        ::Sorbet::Private::Static.keep_self_def(<self>, :sfoo)
         <emptyTree>
       end
     end

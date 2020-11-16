@@ -64,26 +64,26 @@ begin
           <self>.returns(::Integer)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params(:"v1", ::Integer).returns(::Integer)
+          <self>.params(:v1, ::Integer).returns(::Integer)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::String)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
-          <self>.params(:"v2", ::String).returns(::String)
+          <self>.params(:v2, ::String).returns(::String)
         end
         ::Sorbet::Private::Static.sig(<self>) do ||
           <self>.returns(::String)
         end
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
-        ::Sorbet::Private::Static.keep_def(<self>, :"v1")
-        ::Sorbet::Private::Static.keep_def(<self>, :"v1=")
-        ::Sorbet::Private::Static.keep_def(<self>, :"v2")
-        ::Sorbet::Private::Static.keep_def(<self>, :"v2=")
-        ::Sorbet::Private::Static.keep_def(<self>, :"v3")
-        ::Sorbet::Private::Static.keep_def(<self>, :"v4=")
-        ::Sorbet::Private::Static.keep_def(<self>, :"v5=")
+        ::Sorbet::Private::Static.keep_def(<self>, :initialize)
+        ::Sorbet::Private::Static.keep_def(<self>, :v1)
+        ::Sorbet::Private::Static.keep_def(<self>, :v1=)
+        ::Sorbet::Private::Static.keep_def(<self>, :v2)
+        ::Sorbet::Private::Static.keep_def(<self>, :v2=)
+        ::Sorbet::Private::Static.keep_def(<self>, :v3)
+        ::Sorbet::Private::Static.keep_def(<self>, :v4=)
+        ::Sorbet::Private::Static.keep_def(<self>, :v5=)
         <emptyTree>
       end
     end

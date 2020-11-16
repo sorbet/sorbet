@@ -118,7 +118,7 @@ def main
   fl = 1.0
 # ^ hover: Float(1.000000)
   sym = :test
-# ^ hover: Symbol(:"test")
+# ^ hover: Symbol(:test)
   Mod
 # ^ hover: T.class_of(Mod)
   rational = Rational(2, 3)

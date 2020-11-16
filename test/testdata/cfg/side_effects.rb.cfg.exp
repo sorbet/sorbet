@@ -59,7 +59,7 @@ subgraph "cluster_::<Class:Side>#<static-init>" {
     "bb::<Class:Side>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Side>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Side) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Side>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Side>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:\"foo\") = :\"foo\"\l<returnMethodTemp>$2: Symbol(:\"foo\") = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Side), <statTemp>$6: Symbol(:\"foo\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"foo\")\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Side) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Side>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Side>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:foo) = :foo\l<returnMethodTemp>$2: Symbol(:foo) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Side), <statTemp>$6: Symbol(:foo))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)\l<unconditional>\l"
     ];
 
     "bb::<Class:Side>#<static-init>_0" -> "bb::<Class:Side>#<static-init>_1" [style="bold"];

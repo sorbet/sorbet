@@ -82,7 +82,7 @@ ClassDef{
           block = nullptr
           pos_args = 1
           args = [
-            Literal{ value = :"value" }
+            Literal{ value = :value }
           ]
         }
       ]

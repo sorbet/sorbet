@@ -8,10 +8,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.super(ZSuperArgs)
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize)
   end
 
   <emptyTree>::<C None>.new()
 
-  <emptyTree>::<C None>.new(:"foo", 3)
+  <emptyTree>::<C None>.new(:foo, 3)
 end
