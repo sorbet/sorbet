@@ -288,16 +288,22 @@ SymbolRef Symbol::findMemberNoDealias(const GlobalState &gs, NameRef name) const
     return fnd->second;
 }
 
+// TODO(jez) I'm not sure which one we want to be the default.
 SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name) const {
-    return findMemberTransitiveInternal(gs, name, Flags::NONE, Flags::NONE, 100);
+    return findMemberTransitiveInternal(gs, name, Flags::METHOD | Flags::METHOD_ZSUPER, 100);
+}
+
+SymbolRef Symbol::findMemberTransitiveIncludingZSuperMethods(const GlobalState &gs, NameRef name) const {
+    return findMemberTransitiveInternal(gs, name, Flags::NONE, 100);
 }
 
 SymbolRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const {
-    return findMemberTransitiveInternal(gs, name, Flags::METHOD | Flags::METHOD_ABSTRACT, Flags::METHOD, 100);
+    // TODO(jez) Want to exclude all abstract methods and all zsuper methods, not methods that are
+    // both abstract and zsuper at the same time.
+    return findMemberTransitiveInternal(gs, name, Flags::METHOD | Flags::METHOD_ABSTRACT, 100);
 }
 
-SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
-                                               int maxDepth) const {
+SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 exclude, int maxDepth) const {
     ENFORCE(this->isClassOrModule());
     if (maxDepth == 0) {
         if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
@@ -324,7 +330,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
 
     SymbolRef result = findMember(gs, name);
     if (result.exists()) {
-        if (mask == 0 || (result.data(gs)->flags & mask) == flags) {
+        if (exclude == 0 || (result.data(gs)->flags & exclude) != exclude) {
             return result;
         }
     }
@@ -334,7 +340,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
             if (isClassOrModuleLinearizationComputed()) {
                 result = it->data(gs)->findMember(gs, name);
                 if (result.exists()) {
-                    if (mask == 0 || (result.data(gs)->flags & mask) == flags) {
+                    if (exclude == 0 || (result.data(gs)->flags & exclude) != exclude) {
                         return result;
                     }
                 }
@@ -344,14 +350,14 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
     } else {
         for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
             ENFORCE(it->exists());
-            result = it->data(gs)->findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
+            result = it->data(gs)->findMemberTransitiveInternal(gs, name, exclude, maxDepth - 1);
             if (result.exists()) {
                 return result;
             }
         }
     }
     if (this->superClass().exists()) {
-        return this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
+        return this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, exclude, maxDepth - 1);
     }
     return Symbols::noSymbol();
 }

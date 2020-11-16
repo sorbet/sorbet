@@ -67,6 +67,7 @@ constexpr ErrorClass AttachedClassAsParam{5058, StrictLevel::False};
 constexpr ErrorClass LazyResolve{5059, StrictLevel::False};
 constexpr ErrorClass GenericTypeParamBoundMismatch{5060, StrictLevel::False};
 constexpr ErrorClass PrivateConstantReferenced{5061, StrictLevel::True};
+constexpr ErrorClass ZSuperNoParentMethod{5062, StrictLevel::False};
 } // namespace sorbet::core::errors::Resolver
 
 #endif

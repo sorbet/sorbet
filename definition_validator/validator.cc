@@ -282,6 +282,9 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
         }
     }
 
+    // TODO(jez) This is more or less the behavior we want ZSuper to implement.
+    // Actually is it? Because we don't want to just skip the current method, but keep searching
+    // through all ZSuper methods transitively.
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(ctx)->findMemberTransitive(ctx, name);
         if (superMethod.exists()) {
@@ -307,6 +310,8 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(ctx)->isAbstract(); });
     for (const auto &overridenMethod : overridenMethods) {
         if (overridenMethod.data(ctx)->isFinalMethod()) {
+            // TODO(jez) Might want better error message here to say that you can't mark a final
+            // parent method private in a child.
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
                 e.setHeader("`{}` was declared as final and cannot be overridden by `{}`",
                             overridenMethod.data(ctx)->show(ctx), method.data(ctx)->show(ctx));
@@ -408,6 +413,35 @@ void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::Cl
     const auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
     validateFinalAncestorHelper(ctx, singleton, classDef, klass, "extended");
     validateFinalMethodHelper(ctx, singleton, klass);
+}
+
+void validateZSuper(const core::GlobalState &gs, const core::SymbolRef klass) {
+    for (const auto [name, sym] : klass.data(gs)->members()) {
+        if (!(sym.exists() && sym.data(gs)->isMethod() && sym.data(gs)->isMethodZSuper())) {
+            continue;
+        }
+
+        auto parentMethod = klass.data(gs)->findMemberTransitive(gs, name);
+        if (!parentMethod.exists()) {
+            if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::ZSuperNoParentMethod)) {
+                string visi;
+                if (sym.data(gs)->isMethodPrivate()) {
+                    visi = "private";
+                } else if (sym.data(gs)->isMethodPublic()) {
+                    visi = "public";
+                } else if (sym.data(gs)->isMethodProtected()) {
+                    visi = "protected";
+                } else {
+                    Exception::raise("Expected ZSuper method to have visibility `{}`", sym.data(gs)->show(gs));
+                }
+                e.setHeader("No method called `{}` exists to be made `{}` in `{}`", name.data(gs)->show(gs), visi,
+                            klass.data(gs)->show(gs));
+            }
+        } else {
+            ENFORCE(parentMethod.data(gs)->isMethod());
+            ENFORCE(!parentMethod.data(gs)->isMethodZSuper());
+        }
+    }
 }
 
 // Ignore RBI files for the purpose of checking sealed (unless there are no other files).
@@ -582,6 +616,7 @@ public:
         validateAbstract(ctx, singleton);
         validateFinal(ctx, sym, classDef);
         validateSealed(ctx, sym, classDef);
+        validateZSuper(ctx, sym);
         return tree;
     }
 

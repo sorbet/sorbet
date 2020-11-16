@@ -516,7 +516,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
     }
 
-    SymbolRef mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
+    // TODO(jez) findMemberTransitive resolves through method aliases and skips over ZSuper methods
+    auto mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
 
     if (!mayBeOverloaded.exists()) {
         if (args.name == Names::initialize()) {
@@ -646,10 +647,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
-    SymbolRef method = mayBeOverloaded.data(gs)->isOverloaded()
-                           ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, args.fullType,
-                                           targs, args.block != nullptr)
-                           : mayBeOverloaded;
+    auto method = mayBeOverloaded.data(gs)->isOverloaded()
+                      ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, args.fullType, targs,
+                                      args.block != nullptr)
+                      : mayBeOverloaded;
 
     DispatchResult result;
     auto &component = result.main;

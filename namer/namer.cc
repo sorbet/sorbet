@@ -1022,21 +1022,54 @@ class SymbolDefiner {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
         auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
-        if (method.exists()) {
-            switch (mod.name._id) {
-                case core::Names::private_()._id:
-                case core::Names::privateClassMethod()._id:
-                    method.data(ctx)->setMethodPrivate();
-                    break;
-                case core::Names::protected_()._id:
-                    method.data(ctx)->setMethodProtected();
-                    break;
-                case core::Names::public_()._id:
-                    method.data(ctx)->setMethodPublic();
-                    break;
-                default:
-                    break;
-            }
+        if (!method.exists()) {
+            auto declLoc = mod.loc;
+
+            auto methodDefFlags = ast::MethodDef::Flags{};
+            methodDefFlags.isSelfMethod = mod.name == core::Names::privateClassMethod();
+
+            // Create a fake ARGS_store so we can reuse parseArgs. More robust in case the
+            // underlying abstractions change in the future (versus creating the resulting
+            // structures directly).
+            auto argsStore = ast::MethodDef::ARGS_store{};
+            // TODO(jez) For positional args, the loc of the arg matters, because it will be used by
+            // argumentName to attempt to reconstruct a name from the source code.
+            // Be sure to record a symbol table snapshot.
+            // TODO(jez) Update symbol table snapshot to show isMethodZSuper
+            // TODO(jez) Should we skip this RestArg stuff, and just assume that if you're ever
+            // trying to dispatch to a ZSuper method it's wrong? We're not taking the intrinsic
+            // approach anymore--maybe we should be more like method aliases which have an empty
+            // params list.
+            argsStore.emplace_back(ast::MK::RestArg(
+                mod.loc, ast::make_tree<ast::Local>(mod.loc, core::LocalVariable(core::Names::arg0(), 0))));
+            auto blkLoc = core::LocOffsets::none();
+            argsStore.emplace_back(ast::MK::BlockArg(
+                blkLoc, ast::make_tree<ast::Local>(blkLoc, core::LocalVariable(core::Names::blkArg(), 0))));
+            auto parsedArgs = ast::ArgParsing::parseArgs(argsStore);
+
+            auto argsHash = ast::ArgParsing::hashArgs(ctx, parsedArgs);
+
+            auto tmpFoundMethod = FoundMethod{
+                mod.owner, mod.target, mod.loc, declLoc, methodDefFlags, parsedArgs, argsHash,
+            };
+            method = defineMethod(ctx, tmpFoundMethod);
+
+            method.data(ctx)->setMethodZSuper();
+        }
+
+        switch (mod.name._id) {
+            case core::Names::private_()._id:
+            case core::Names::privateClassMethod()._id:
+                method.data(ctx)->setMethodPrivate();
+                break;
+            case core::Names::protected_()._id:
+                method.data(ctx)->setMethodProtected();
+                break;
+            case core::Names::public_()._id:
+                method.data(ctx)->setMethodPublic();
+                break;
+            default:
+                break;
         }
     }
 
