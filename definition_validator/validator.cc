@@ -12,6 +12,7 @@ using namespace std;
 
 namespace sorbet::definition_validator {
 
+namespace {
 struct Signature {
     struct {
         absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> required;
@@ -611,6 +612,7 @@ public:
         return tree;
     }
 };
+} // namespace
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols");
