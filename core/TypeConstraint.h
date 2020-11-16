@@ -17,6 +17,8 @@ class TypeConstraint {
     TypePtr &findLowerBound(SymbolRef forWhat);
     TypePtr &findSolution(SymbolRef forWhat);
 
+    UnorderedMap<SymbolRef, std::pair<TypePtr, TypePtr>> collateBounds(const GlobalState &gs) const;
+
 public:
     TypeConstraint() = default;
     TypeConstraint(const TypeConstraint &) = delete;

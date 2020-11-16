@@ -244,24 +244,30 @@ InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
     return ret;
 }
 
-string TypeConstraint::toString(const core::GlobalState &gs) const {
-    auto bounds = UnorderedMap<SymbolRef, pair<TypePtr, TypePtr>>{};
+UnorderedMap<SymbolRef, std::pair<TypePtr, TypePtr>> TypeConstraint::collateBounds(const GlobalState &gs) const {
+    auto collated = UnorderedMap<SymbolRef, pair<TypePtr, TypePtr>>{};
 
     for (const auto &[sym, lowerBound] : this->lowerBounds) {
-        auto &[lowerRef, _upperRef] = bounds[sym];
+        auto &[lowerRef, _upperRef] = collated[sym];
         ENFORCE(lowerRef == nullptr, "{} in lowerBounds twice?", sym.show(gs));
         lowerRef = lowerBound;
     }
     for (const auto &[sym, upperBound] : this->upperBounds) {
-        auto &[_lowerRef, upperRef] = bounds[sym];
+        auto &[_lowerRef, upperRef] = collated[sym];
         ENFORCE(upperRef == nullptr, "{} in upperBounds twice?", sym.show(gs));
         upperRef = upperBound;
     }
 
+    return collated;
+}
+
+string TypeConstraint::toString(const core::GlobalState &gs) const {
+    auto collated = this->collateBounds(gs);
+
     fmt::memory_buffer buf;
     fmt::format_to(buf, "bounds: [{}]\n",
                    fmt::map_join(
-                       bounds.begin(), bounds.end(), ", ", [&gs](auto entry) -> auto {
+                       collated.begin(), collated.end(), ", ", [&gs](auto entry) -> auto {
                            const auto &[sym, bounds] = entry;
                            const auto &[lowerBound, upperBound] = bounds;
                            auto lower = lowerBound != nullptr ? lowerBound.show(gs) : "_";
@@ -277,22 +283,10 @@ string TypeConstraint::toString(const core::GlobalState &gs) const {
 }
 
 vector<ErrorLine> TypeConstraint::toExplanation(const core::GlobalState &gs) const {
-    auto boundsFor = UnorderedMap<SymbolRef, pair<TypePtr, TypePtr>>{};
-
-    for (const auto &[sym, lowerBound] : this->lowerBounds) {
-        auto &[lowerRef, _upperRef] = boundsFor[sym];
-        ENFORCE(lowerRef == nullptr, "{} in lowerBounds twice?", sym.show(gs));
-        lowerRef = lowerBound;
-    }
-    for (const auto &[sym, upperBound] : this->upperBounds) {
-        auto &[_lowerRef, upperRef] = boundsFor[sym];
-        ENFORCE(upperRef == nullptr, "{} in upperBounds twice?", sym.show(gs));
-        upperRef = upperBound;
-    }
-
+    auto collated = this->collateBounds(gs);
     auto result = vector<ErrorLine>{};
 
-    for (const auto &[sym, bounds] : boundsFor) {
+    for (const auto &[sym, bounds] : collated) {
         const auto &[lowerBound, upperBound] = bounds;
         auto typeVar = make_type<TypeVar>(sym).show(gs);
         if (lowerBound == nullptr && upperBound == nullptr) {
