@@ -13,7 +13,14 @@ cd "$(dirname "$0")/../.."
 nobindcall_files=()
 bindcall_files=()
 
-for f in $(find gems/sorbet-runtime/lib -name \*.rb); do
+# shellcheck disable=SC2207
+sorbet_runtime_files=(
+    $(git ls-files -c -m -o --exclude-standard -- '*.rb' | \
+             grep ^gems/sorbet-runtime/lib/
+    )
+)
+
+for f in "${sorbet_runtime_files[@]}"; do
     if grep -E -q '^.*bind\([a-z]+).call' "$f"; then
         bindcall_files=("${bindcall_files[@]}" "$f")
         continue
