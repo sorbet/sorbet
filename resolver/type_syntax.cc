@@ -357,7 +357,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     break;
                 case core::Names::overridable()._id:
-                    if (sig.seen.overridable) {
+                    if (sig.seen.final) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final",
                                         "overridable");
