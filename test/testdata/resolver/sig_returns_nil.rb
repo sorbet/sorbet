@@ -1,12 +1,29 @@
 # typed: true
-class Main
-    extend T::Sig
+class A
+  extend T::Sig
 
-    sig {returns(nil)} # error: You probably meant `.returns(NilClass)`
-    def returns_nil; end
+  sig do
+    params(x: nil) # error: Unsupported type syntax
+      .returns(nil) # error: You probably meant `.returns(NilClass)`
+  end
+  def foo(x)
+    0 # error: Returning value that does not conform to method result type
+  end
 
-    sig {returns(nil)} # error: You probably meant `.returns(NilClass)`
-    def returns_nil_bad
-        3 # error: Returning value that does not conform to method result type
-    end
+  sig do
+    params(
+      blk: T.proc.params(
+        x: nil # error: Unsupported type syntax
+      ).returns(nil) # error: You probably meant `.returns(NilClass)`
+    )
+    .void
+  end
+  def bar(&blk)
+    yield 0
+    0
+  end
 end
+
+T.let(nil, nil) # error: Unsupported type syntax
+
+A.new.foo(0)

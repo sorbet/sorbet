@@ -1,0 +1,40 @@
+literal-type-syntax.rb:3: Unsupported type syntax https://srb.help/5004
+     3 |T.let(0, 0)
+                 ^
+
+literal-type-syntax.rb:4: Unsupported type syntax https://srb.help/5004
+     4 |T.let(0.0, 0.0)
+                   ^^^
+
+literal-type-syntax.rb:5: Unsupported type syntax https://srb.help/5004
+     5 |T.let('', '')
+                  ^^
+
+literal-type-syntax.rb:6: Unsupported type syntax https://srb.help/5004
+     6 |T.let(:'', :'')
+                   ^^^
+
+literal-type-syntax.rb:7: Unsupported type syntax https://srb.help/5004
+     7 |T.let(true, true)
+                    ^^^^
+
+literal-type-syntax.rb:8: Unsupported type syntax https://srb.help/5004
+     8 |T.let(false, false)
+                     ^^^^^
+
+literal-type-syntax.rb:9: Unsupported type syntax https://srb.help/5004
+     9 |T.let(nil, nil)
+                   ^^^
+Errors: 7
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+T.let(0, 0)
+T.let(0.0, 0.0)
+T.let('', '')
+T.let(:'', :'')
+T.let(true, true)
+T.let(false, false)
+T.let(nil, nil)
