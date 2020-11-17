@@ -1241,8 +1241,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         }
     }
     if (this->isMethod()) {
-        if (isa_type<AliasType>(this->resultType)) {
-            // If we have an alias method, we should never look at it's arguments;
+        if (isa_type<AliasType>(this->resultType) || this->isZSuperMethod()) {
+            // If we have an alias or zsuper method, we should never look at it's arguments;
             // we should instead look at the arguments of whatever we're aliasing.
             ENFORCE_NO_TIMER(this->arguments().empty(), this->show(gs));
         } else {

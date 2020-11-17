@@ -1028,28 +1028,9 @@ class SymbolDefiner {
             auto methodDefFlags = ast::MethodDef::Flags{};
             methodDefFlags.isSelfMethod = mod.name == core::Names::privateClassMethod();
 
-            // Create a fake ARGS_store so we can reuse parseArgs. More robust in case the
-            // underlying abstractions change in the future (versus creating the resulting
-            // structures directly).
-            auto argsStore = ast::MethodDef::ARGS_store{};
-            // TODO(jez) For positional args, the loc of the arg matters, because it will be used by
-            // argumentName to attempt to reconstruct a name from the source code.
-            // TODO(jez) Should we skip this RestArg stuff, and just assume that if you're ever
-            // trying to dispatch to a ZSuper method it's wrong? We're not taking the intrinsic
-            // approach anymore--maybe we should be more like method aliases which have an empty
-            // params list.
-            argsStore.emplace_back(ast::MK::RestArg(
-                mod.loc, ast::make_tree<ast::Local>(mod.loc, core::LocalVariable(core::Names::arg0(), 0))));
-            auto blkLoc = core::LocOffsets::none();
-            argsStore.emplace_back(ast::MK::BlockArg(
-                blkLoc, ast::make_tree<ast::Local>(blkLoc, core::LocalVariable(core::Names::blkArg(), 0))));
-            auto parsedArgs = ast::ArgParsing::parseArgs(argsStore);
-
-            auto argsHash = ast::ArgParsing::hashArgs(ctx, parsedArgs);
-
-            auto tmpFoundMethod = FoundMethod{
-                mod.owner, mod.target, mod.loc, declLoc, methodDefFlags, parsedArgs, argsHash,
-            };
+            // TODO(jez) Only thing left to do is get your tests to pass and get it to pass on pay-server
+            // TODO(jez) Try running Sorbet in debug mode on pay-server to test no args.
+            auto tmpFoundMethod = FoundMethod{mod.owner, mod.target, mod.loc, declLoc, methodDefFlags, {}, {}};
             method = defineMethod(ctx, tmpFoundMethod);
 
             method.data(ctx)->setZSuperMethod();

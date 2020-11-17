@@ -7,9 +7,7 @@ class ::<root> < ::Object ()
     type-member(+) ::<Class:Child>::<AttachedClass> -> T.attached_class (of Child) @ test/testdata/infer/private_method_zsuper.rb:12
     method ::<Class:Child>#<static-init> (<blk>) @ test/testdata/infer/private_method_zsuper.rb:12
       argument <blk><block> @ Loc {file=test/testdata/infer/private_method_zsuper.rb start=??? end=???}
-    method ::<Class:Child>#foo : private|zsuper (private_class_method :foo, <blk>) @ test/testdata/infer/private_method_zsuper.rb:13
-      argument private_class_method :foo<repeated> @ Loc {file=test/testdata/infer/private_method_zsuper.rb start=13:3 end=13:28}
-      argument <blk><block> @ Loc {file=test/testdata/infer/private_method_zsuper.rb start=??? end=???}
+    method ::<Class:Child>#foo : private|zsuper () @ test/testdata/infer/private_method_zsuper.rb:13
   class ::Parent < ::Object () @ test/testdata/infer/private_method_zsuper.rb:3
   class ::<Class:Parent>[<AttachedClass>] < ::<Class:Object> (Sig) @ test/testdata/infer/private_method_zsuper.rb:3
     type-member(+) ::<Class:Parent>::<AttachedClass> -> T.attached_class (of Parent) @ test/testdata/infer/private_method_zsuper.rb:3

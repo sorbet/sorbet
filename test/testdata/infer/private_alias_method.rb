@@ -3,8 +3,8 @@
 class A
   def public_foo; puts 'in public_foo'; end
 
-  alias_method :private_foo, :public_foo
   private :private_foo
+  alias_method :private_foo, :public_foo
 
   def private_ok_here
     public_foo

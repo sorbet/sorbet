@@ -10,26 +10,16 @@ class ::<root> < ::Object ()
     method ::<Class:AbstractFooable>#<static-init> (<blk>) @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:37
       argument <blk><block> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=??? end=???}
   class ::Child < ::Parent () @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:21
-    method ::Child#method_no_sig : private|zsuper (private :method_no_sig, <blk>) @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:26
-      argument private :method_no_sig<repeated> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=26:3 end=26:25}
-      argument <blk><block> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=??? end=???}
-    method ::Child#method_with_abstract_sig : private|zsuper (private :method_with_abstract_sig, <blk>) @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:32
-      argument private :method_with_abstract_sig<repeated> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=32:3 end=32:36}
-      argument <blk><block> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=??? end=???}
-    method ::Child#method_with_overridable_sig : private|zsuper (private :method_with_overridable_sig, <blk>) @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:34
-      argument private :method_with_overridable_sig<repeated> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=34:3 end=34:39}
-      argument <blk><block> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=??? end=???}
-    method ::Child#method_with_sig : private|zsuper (private :method_with_sig, <blk>) @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:30
-      argument private :method_with_sig<repeated> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=30:3 end=30:27}
-      argument <blk><block> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=??? end=???}
+    method ::Child#method_no_sig : private|zsuper () @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:26
+    method ::Child#method_with_abstract_sig : private|zsuper () @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:32
+    method ::Child#method_with_overridable_sig : private|zsuper () @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:34
+    method ::Child#method_with_sig : private|zsuper () @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:30
   class ::<Class:Child>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:21
     type-member(+) ::<Class:Child>::<AttachedClass> -> T.attached_class (of Child) @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:21
     method ::<Class:Child>#<static-init> (<blk>) @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:21
       argument <blk><block> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=??? end=???}
   class ::FooImpl < ::AbstractFooable () @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:46
-    method ::FooImpl#foo : private|zsuper (private :foo, <blk>) @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:47
-      argument private :foo<repeated> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=47:3 end=47:15}
-      argument <blk><block> @ Loc {file=test/testdata/resolver/zsuper_method_abstract_overridable.rb start=??? end=???}
+    method ::FooImpl#foo : private|zsuper () @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:47
   class ::<Class:FooImpl>[<AttachedClass>] < ::<Class:AbstractFooable> () @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:46
     type-member(+) ::<Class:FooImpl>::<AttachedClass> -> T.attached_class (of FooImpl) @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:46
     method ::<Class:FooImpl>#<static-init> (<blk>) @ test/testdata/resolver/zsuper_method_abstract_overridable.rb:46
