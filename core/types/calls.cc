@@ -695,10 +695,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (spec.flags.isKeyword) {
             break;
         }
-        if (ait + 1 == aend && hasKwargs && (spec.flags.isDefault || spec.flags.isRepeated) &&
-            Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
-            break;
-        }
 
         auto offset = ait - args.args.begin();
         if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
