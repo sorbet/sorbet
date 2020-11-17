@@ -537,6 +537,10 @@ public:
         return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, 88);
     }
 
+    static SymbolRef Class_new() {
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 8);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
         return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
@@ -560,7 +564,7 @@ public:
     }
 
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 200;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 31;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 32;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 1;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 2;
     static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 99;
