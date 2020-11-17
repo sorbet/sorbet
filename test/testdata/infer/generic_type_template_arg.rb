@@ -1,6 +1,6 @@
 # typed: true
 
-class ReferencesClassWithTypeMembers
+module ModuleTypeMemberTypeHasTypeParam
   extend T::Generic
   extend T::Sig
 
