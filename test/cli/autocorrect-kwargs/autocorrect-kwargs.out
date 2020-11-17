@@ -1,16 +1,106 @@
-6c6
-< sig {returns(foo: Integer, bar: String)}
----
-> sig {returns({foo: Integer, bar: String})}
-13c13
-< sig {returns(T::Array[foo: Integer])}
----
-> sig {returns(T::Array[{foo: Integer}])}
-18c18
-< foo = T::Array[foo: Integer, bar: String].new
----
-> foo = T::Array[{foo: Integer, bar: String}].new
-21c21
-< sig {params({a: Integer, b: String}).void}
----
-> sig {params(a: Integer, b: String).void}
+autocorrect-kwargs.rb:6: `returns` does not accept keyword arguments https://srb.help/5003
+     6 |sig {returns(foo: Integer, bar: String)}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-kwargs.rb:6: Replaced with `{foo: Integer, bar: String}`
+     6 |sig {returns(foo: Integer, bar: String)}
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-kwargs.rb:13: Unsupported type syntax https://srb.help/5004
+    13 |sig {returns(T::Array[foo: Integer])}
+                              ^^^
+
+autocorrect-kwargs.rb:13: Keyword arguments given to `Array` https://srb.help/7032
+    13 |sig {returns(T::Array[foo: Integer])}
+                              ^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-kwargs.rb:13: Replaced with `{foo: Integer}`
+    13 |sig {returns(T::Array[foo: Integer])}
+                              ^^^^^^^^^^^^
+
+autocorrect-kwargs.rb:13: Wrong number of type parameters for `Array`. Expected: `1`, got: `0` https://srb.help/7010
+    13 |sig {returns(T::Array[foo: Integer])}
+                     ^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-kwargs.rb:21: `params` expects keyword arguments https://srb.help/5003
+    21 |sig {params({a: Integer, b: String}).void}
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    All parameters must be given names in `params` even if they are positional
+  Autocorrect: Done
+    autocorrect-kwargs.rb:21: Replaced with `a: Integer, b: String`
+    21 |sig {params({a: Integer, b: String}).void}
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-kwargs.rb:22: Malformed `sig`. Type not specified for argument `a` https://srb.help/5003
+    22 |def test3(a, b)
+                  ^
+    autocorrect-kwargs.rb:21: Signature
+    21 |sig {params({a: Integer, b: String}).void}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-kwargs.rb:22: Malformed `sig`. Type not specified for argument `b` https://srb.help/5003
+    22 |def test3(a, b)
+                     ^
+    autocorrect-kwargs.rb:21: Signature
+    21 |sig {params({a: Integer, b: String}).void}
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-kwargs.rb:13: Keyword arguments given to `Array` https://srb.help/7032
+    13 |sig {returns(T::Array[foo: Integer])}
+                              ^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-kwargs.rb:13: Replaced with `{foo: Integer}`
+    13 |sig {returns(T::Array[foo: Integer])}
+                              ^^^^^^^^^^^^
+
+autocorrect-kwargs.rb:13: Wrong number of type parameters for `Array`. Expected: `1`, got: `0` https://srb.help/7010
+    13 |sig {returns(T::Array[foo: Integer])}
+                     ^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-kwargs.rb:13: Unsupported usage of literal type https://srb.help/7009
+    13 |sig {returns(T::Array[foo: Integer])}
+                              ^^^
+
+autocorrect-kwargs.rb:18: Keyword arguments given to `Array` https://srb.help/7032
+    18 |foo = T::Array[foo: Integer, bar: String].new
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    autocorrect-kwargs.rb:18: Replaced with `{foo: Integer, bar: String}`
+    18 |foo = T::Array[foo: Integer, bar: String].new
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-kwargs.rb:18: Wrong number of type parameters for `Array`. Expected: `1`, got: `0` https://srb.help/7010
+    18 |foo = T::Array[foo: Integer, bar: String].new
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-kwargs.rb:18: Unsupported usage of literal type https://srb.help/7009
+    18 |foo = T::Array[foo: Integer, bar: String].new
+                       ^^^
+Errors: 13
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+extend T::Sig
+
+# Wrap curly braces around the keyword args in returns to make them into a shape
+sig {returns({foo: Integer, bar: String})}
+def test1
+  {foo: 10, bar: "hi"}
+end
+
+# Wrap curly braces around the keyword args to [] to make the elemnt of the
+# array into a shape
+sig {returns(T::Array[{foo: Integer}])}
+def test2
+  []
+end
+
+foo = T::Array[{foo: Integer, bar: String}].new
+
+# Remove the curly braces from the params list
+sig {params(a: Integer, b: String).void}
+def test3(a, b)
+end
