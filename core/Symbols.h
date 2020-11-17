@@ -272,7 +272,7 @@ public:
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
     }
 
-    inline bool isMethodZSuper() const {
+    inline bool isZSuperMethod() const {
         ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_ZSUPER) != 0;
     }
@@ -450,7 +450,7 @@ public:
         flags |= Symbol::Flags::METHOD_PRIVATE;
     }
 
-    inline void setMethodZSuper() {
+    inline void setZSuperMethod() {
         ENFORCE_NO_TIMER(isMethod());
         flags |= Symbol::Flags::METHOD_ZSUPER;
     }

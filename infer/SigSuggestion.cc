@@ -253,7 +253,7 @@ core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclos
 
     for (const auto &mixin : enclosingClass->mixins()) {
         auto mixinMethod = mixin.data(ctx)->findMember(ctx, name);
-        if (mixinMethod.exists() && !mixinMethod.data(ctx)->isMethodZSuper()) {
+        if (mixinMethod.exists() && !mixinMethod.data(ctx)->isZSuperMethod()) {
             // Skipping ZSuper methods because they won't have a meaningful signature for the sake
             // of sig suggestion.
             return mixinMethod;
@@ -267,7 +267,7 @@ core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclos
     }
 
     auto superMethod = superClass.data(ctx)->findMember(ctx, name);
-    if (superMethod.exists() && !superMethod.data(ctx)->isMethodZSuper()) {
+    if (superMethod.exists() && !superMethod.data(ctx)->isZSuperMethod()) {
         return superMethod;
     } else {
         return closestOverridenMethod(ctx, superClass, name);

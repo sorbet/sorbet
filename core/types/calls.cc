@@ -648,7 +648,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     SymbolRef mayBeOverloaded = mayBeZSuper;
-    if (mayBeZSuper.data(gs)->isMethodZSuper()) {
+    if (mayBeZSuper.data(gs)->isZSuperMethod()) {
         mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
         if (!mayBeOverloaded.exists()) {
             // This happens when using `private :foo` in a class where there is no `foo` in that
@@ -657,7 +657,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         }
 
-        ENFORCE(!mayBeOverloaded.data(gs)->isMethodZSuper());
+        ENFORCE(!mayBeOverloaded.data(gs)->isZSuperMethod());
     }
 
     auto method = mayBeOverloaded.data(gs)->isOverloaded()
