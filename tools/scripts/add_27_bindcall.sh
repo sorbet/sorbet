@@ -31,7 +31,7 @@ done
 
 mismatched=()
 for f in "${bindcall_files[@]}"; do
-    file_27="${f#.rb}_27.rb"
+    file_27="${f%.rb}_27.rb"
     origfile_27="${file_27}.orig"
     if [ -e "$file_27" ]; then
         mv "$file_27" "$origfile_27"
@@ -50,7 +50,7 @@ for f in "${bindcall_files[@]}"; do
 done
 
 for f in "${nobindcall_files[@]}"; do
-    file_27="${f#.rb}_27.rb"
+    file_27="${f%.rb}_27.rb"
     if [ ! -e "$file_27" ]; then
         continue
     fi
