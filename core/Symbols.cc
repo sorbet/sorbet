@@ -673,10 +673,32 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
 
     if (this->isClassOrModule() || this->isMethod()) {
         if (this->isMethod()) {
+            auto methodFlags = InlinedVector<string, 3>{};
+
             if (this->isMethodPrivate()) {
-                fmt::format_to(buf, " : private");
+                methodFlags.emplace_back("private");
             } else if (this->isMethodProtected()) {
-                fmt::format_to(buf, " : protected");
+                methodFlags.emplace_back("protected");
+            }
+
+            if (this->isAbstract()) {
+                methodFlags.emplace_back("abstract");
+            }
+            if (this->isOverridable()) {
+                methodFlags.emplace_back("overridable");
+            }
+            if (this->isOverride()) {
+                methodFlags.emplace_back("override");
+            }
+            if (this->isIncompatibleOverride()) {
+                methodFlags.emplace_back("allow_incompatible");
+            }
+            if (this->isFinalMethod()) {
+                methodFlags.emplace_back("final");
+            }
+
+            if (!methodFlags.empty()) {
+                fmt::format_to(buf, " : {}", fmt::map_join(methodFlags, "|", [](const auto &flag) { return flag; }));
             }
         }
 
