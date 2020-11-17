@@ -379,17 +379,6 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                         break;
                     }
 
-                    auto nil = ast::cast_tree<ast::Literal>(send->args[0]);
-                    if (nil && nil->isNil(ctx)) {
-                        const auto loc = core::Loc(ctx.file, send->args[0].loc());
-                        if (auto e = ctx.state.beginError(loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("You probably meant `.returns(NilClass)`");
-                            e.replaceWith("Replace with `NilClass`", loc, "NilClass");
-                        }
-                        sig.returns = core::Types::nilClass();
-                        break;
-                    }
-
                     sig.returns = getResultTypeWithSelfTypeParams(ctx, send->args.front(), *parent, args);
 
                     break;
@@ -980,6 +969,14 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 }
                 result.type = core::Types::untypedUntracked();
             }
+        },
+        [&](const ast::Literal &lit) {
+            auto underlying = core::isa_type<core::LiteralType>(lit.value) ? lit.value.underlying() : lit.value;
+            if (auto e = ctx.beginError(lit.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Unsupported literal in type syntax", lit.value.show(ctx));
+                e.replaceWith("Replace with underlying type", core::Loc(ctx.file, lit.loc), "{}", underlying.show(ctx));
+            }
+            result.type = underlying;
         },
         [&](const ast::TreePtr &e) {
             if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {

@@ -1,28 +1,56 @@
-literal-type-syntax.rb:3: Unsupported type syntax https://srb.help/5004
+literal-type-syntax.rb:3: Unsupported literal in type syntax https://srb.help/5003
+     3 |T.let(0, 0)
+                 ^
+  Autocorrect: Done
+    literal-type-syntax.rb:3: Replaced with `Integer`
      3 |T.let(0, 0)
                  ^
 
-literal-type-syntax.rb:4: Unsupported type syntax https://srb.help/5004
+literal-type-syntax.rb:4: Unsupported literal in type syntax https://srb.help/5003
+     4 |T.let(0.0, 0.0)
+                   ^^^
+  Autocorrect: Done
+    literal-type-syntax.rb:4: Replaced with `Float`
      4 |T.let(0.0, 0.0)
                    ^^^
 
-literal-type-syntax.rb:5: Unsupported type syntax https://srb.help/5004
+literal-type-syntax.rb:5: Unsupported literal in type syntax https://srb.help/5003
+     5 |T.let('', '')
+                  ^^
+  Autocorrect: Done
+    literal-type-syntax.rb:5: Replaced with `String`
      5 |T.let('', '')
                   ^^
 
-literal-type-syntax.rb:6: Unsupported type syntax https://srb.help/5004
+literal-type-syntax.rb:6: Unsupported literal in type syntax https://srb.help/5003
+     6 |T.let(:'', :'')
+                   ^^^
+  Autocorrect: Done
+    literal-type-syntax.rb:6: Replaced with `Symbol`
      6 |T.let(:'', :'')
                    ^^^
 
-literal-type-syntax.rb:7: Unsupported type syntax https://srb.help/5004
+literal-type-syntax.rb:7: Unsupported literal in type syntax https://srb.help/5003
+     7 |T.let(true, true)
+                    ^^^^
+  Autocorrect: Done
+    literal-type-syntax.rb:7: Replaced with `TrueClass`
      7 |T.let(true, true)
                     ^^^^
 
-literal-type-syntax.rb:8: Unsupported type syntax https://srb.help/5004
+literal-type-syntax.rb:8: Unsupported literal in type syntax https://srb.help/5003
+     8 |T.let(false, false)
+                     ^^^^^
+  Autocorrect: Done
+    literal-type-syntax.rb:8: Replaced with `FalseClass`
      8 |T.let(false, false)
                      ^^^^^
 
-literal-type-syntax.rb:9: Unsupported type syntax https://srb.help/5004
+literal-type-syntax.rb:9: Unsupported literal in type syntax https://srb.help/5003
+     9 |T.let(nil, nil)
+                   ^^^
+  Autocorrect: Done
+    literal-type-syntax.rb:9: Replaced with `NilClass`
      9 |T.let(nil, nil)
                    ^^^
 Errors: 7
@@ -31,10 +59,10 @@ Errors: 7
 
 # typed: true
 
-T.let(0, 0)
-T.let(0.0, 0.0)
-T.let('', '')
-T.let(:'', :'')
-T.let(true, true)
-T.let(false, false)
-T.let(nil, nil)
+T.let(0, Integer)
+T.let(0.0, Float)
+T.let('', String)
+T.let(:'', Symbol)
+T.let(true, TrueClass)
+T.let(false, FalseClass)
+T.let(nil, NilClass)
