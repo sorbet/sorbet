@@ -53,7 +53,31 @@ literal-type-syntax.rb:9: Unsupported literal in type syntax https://srb.help/50
     literal-type-syntax.rb:9: Replaced with `NilClass`
      9 |T.let(nil, nil)
                    ^^^
-Errors: 7
+
+literal-type-syntax.rb:11: Unsupported literal in type syntax https://srb.help/5003
+    11 |T.let(true, T.any(true, false))
+                          ^^^^
+  Autocorrect: Done
+    literal-type-syntax.rb:11: Replaced with `TrueClass`
+    11 |T.let(true, T.any(true, false))
+                          ^^^^
+
+literal-type-syntax.rb:11: Unsupported literal in type syntax https://srb.help/5003
+    11 |T.let(true, T.any(true, false))
+                                ^^^^^
+  Autocorrect: Done
+    literal-type-syntax.rb:11: Replaced with `FalseClass`
+    11 |T.let(true, T.any(true, false))
+                                ^^^^^
+
+literal-type-syntax.rb:11: Unsupported usage of bare type https://srb.help/7009
+    11 |T.let(true, T.any(true, false))
+                          ^^^^
+
+literal-type-syntax.rb:11: Unsupported usage of bare type https://srb.help/7009
+    11 |T.let(true, T.any(true, false))
+                                ^^^^^
+Errors: 11
 
 --------------------------------------------------------------------------
 
@@ -66,3 +90,5 @@ T.let(:'', Symbol)
 T.let(true, TrueClass)
 T.let(false, FalseClass)
 T.let(nil, NilClass)
+
+T.let(true, T.any(TrueClass, FalseClass))
