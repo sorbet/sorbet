@@ -32,6 +32,12 @@ public:
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
 
+enum class Visibility : u1 {
+    Public = 1,
+    Protected,
+    Private,
+};
+
 class Symbol final {
 public:
     Symbol(const Symbol &) = delete;
@@ -270,6 +276,18 @@ public:
     inline bool isMethodPrivate() const {
         ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
+    }
+
+    Visibility methodVisibility() const {
+        if (isMethodPublic()) {
+            return Visibility::Public;
+        } else if (isMethodProtected()) {
+            return Visibility::Protected;
+        } else if (isMethodPrivate()) {
+            return Visibility::Private;
+        } else {
+            Exception::raise("Expected method to have visibility");
+        }
     }
 
     // This is analogous to the Ruby VM's VM_METHOD_TYPE_ZSUPER in method.h

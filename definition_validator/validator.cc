@@ -282,9 +282,6 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
         }
     }
 
-    // TODO(jez) This is more or less the behavior we want ZSuper to implement.
-    // Actually is it? Because we don't want to just skip the current method, but keep searching
-    // through all ZSuper methods transitively.
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(ctx)->findMemberTransitive(ctx, name);
         if (superMethod.exists()) {
@@ -310,11 +307,27 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     auto anyIsInterface = absl::c_any_of(overridenMethods, [&](auto &m) { return m.data(ctx)->isAbstract(); });
     for (const auto &overridenMethod : overridenMethods) {
         if (overridenMethod.data(ctx)->isFinalMethod()) {
-            // TODO(jez) Might want better error message here to say that you can't mark a final
-            // parent method private in a child.
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
-                e.setHeader("`{}` was declared as final and cannot be overridden by `{}`",
-                            overridenMethod.data(ctx)->show(ctx), method.data(ctx)->show(ctx));
+                if (method.data(ctx)->isZSuperMethod()) {
+                    string modifier;
+                    switch (method.data(ctx)->methodVisibility()) {
+                        case core::Visibility::Public:
+                            modifier = "public";
+                            break;
+                        case core::Visibility::Protected:
+                            modifier = "protected";
+                            break;
+                        case core::Visibility::Private:
+                            modifier = "private";
+                            break;
+                    }
+                    e.setHeader("`{}` was declared as final and cannot be marked `{}` in `{}`",
+                                overridenMethod.data(ctx)->show(ctx), modifier, klass.data(ctx)->show(ctx));
+
+                } else {
+                    e.setHeader("`{}` was declared as final and cannot be overridden by `{}`",
+                                overridenMethod.data(ctx)->show(ctx), method.data(ctx)->show(ctx));
+                }
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "original method defined here");
             }
         }
@@ -415,31 +428,33 @@ void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::Cl
     validateFinalMethodHelper(ctx, singleton, klass);
 }
 
-void validateZSuper(const core::GlobalState &gs, const core::SymbolRef klass) {
-    for (const auto [name, sym] : klass.data(gs)->members()) {
-        if (!(sym.exists() && sym.data(gs)->isMethod() && sym.data(gs)->isZSuperMethod())) {
+void validateZSuper(const core::Context ctx, const core::SymbolRef klass) {
+    for (const auto [name, sym] : klass.data(ctx)->members()) {
+        if (!(sym.exists() && sym.data(ctx)->isMethod() && sym.data(ctx)->isZSuperMethod())) {
             continue;
         }
 
-        auto parentMethod = klass.data(gs)->findMemberTransitive(gs, name);
+        auto parentMethod = klass.data(ctx)->findMemberTransitive(ctx, name);
         if (!parentMethod.exists()) {
-            if (auto e = gs.beginError(sym.data(gs)->loc(), core::errors::Resolver::ZSuperNoParentMethod)) {
+            if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Resolver::ZSuperNoParentMethod)) {
                 string visi;
-                if (sym.data(gs)->isMethodPrivate()) {
+                if (sym.data(ctx)->isMethodPrivate()) {
                     visi = "private";
-                } else if (sym.data(gs)->isMethodPublic()) {
+                } else if (sym.data(ctx)->isMethodPublic()) {
                     visi = "public";
-                } else if (sym.data(gs)->isMethodProtected()) {
+                } else if (sym.data(ctx)->isMethodProtected()) {
                     visi = "protected";
                 } else {
-                    Exception::raise("Expected ZSuper method to have visibility `{}`", sym.data(gs)->show(gs));
+                    Exception::raise("Expected ZSuper method to have visibility `{}`", sym.data(ctx)->show(ctx));
                 }
-                e.setHeader("No method called `{}` exists to be made `{}` in `{}`", name.data(gs)->show(gs), visi,
-                            klass.data(gs)->show(gs));
+                e.setHeader("No method called `{}` exists to be made `{}` in `{}`", name.data(ctx)->show(ctx), visi,
+                            klass.data(ctx)->show(ctx));
             }
         } else {
-            ENFORCE(parentMethod.data(gs)->isMethod());
-            ENFORCE(!parentMethod.data(gs)->isZSuperMethod());
+            ENFORCE(parentMethod.data(ctx)->isMethod());
+            ENFORCE(!parentMethod.data(ctx)->isZSuperMethod());
+
+            validateOverriding(ctx, sym);
         }
     }
 }
@@ -617,6 +632,7 @@ public:
         validateFinal(ctx, sym, classDef);
         validateSealed(ctx, sym, classDef);
         validateZSuper(ctx, sym);
+        validateZSuper(ctx, singleton);
         return tree;
     }
 
