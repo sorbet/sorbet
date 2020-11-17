@@ -9,6 +9,7 @@
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
+#include "main/autogen/packages.h"
 #include "main/autogen/subclasses.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPOutput.h"
@@ -203,11 +204,15 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
+    // all we're doing here is adding to a vector, rather than consuming packages as they're produced
+    auto packageMutex = make_shared<absl::Mutex>();
+    auto packageq = make_shared<vector<autogen::Package>>();
     for (int i = 0; i < indexed.size(); ++i) {
         fileq->push(move(i), 1);
     }
 
-    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, fileq, resultq]() {
+    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, fileq, resultq, packageq,
+                                        packageMutex]() {
         AutogenResult out;
         int n = 0;
         {
@@ -217,11 +222,20 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                 ++n;
                 auto &tree = indexed[idx];
-                if (tree.file.data(gs).isRBI() || tree.file.data(gs).isPackage()) {
+                if (tree.file.data(gs).isRBI()) {
                     continue;
                 }
 
                 core::Context ctx(gs, core::Symbols::root(), tree.file);
+                if (tree.file.data(gs).isPackage()) {
+                    auto pkg = autogen::Packages::extractPackage(ctx, move(tree));
+                    {
+                        absl::MutexLock lck(packageMutex.get());
+                        packageq->emplace_back(move(pkg));
+                    }
+                    continue;
+                }
+
                 auto pf = autogen::Autogen::generate(ctx, move(tree));
                 tree = move(pf.tree);
 
@@ -331,7 +345,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
 
     if (opts.autoloaderConfig.packagedAutoloader) {
-        autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath);
+        autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
+                                                       *packageq);
     }
 }
 #endif

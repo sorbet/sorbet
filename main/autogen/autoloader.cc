@@ -1,3 +1,4 @@
+
 #include "main/autogen/autoloader.h"
 #include "absl/strings/match.h"
 #include "common/FileOps.h"
@@ -419,20 +420,15 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
     }
 }
 
-string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const core::SymbolRef pkg,
+string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const Package &pkg,
                                 const string_view mangledName) {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
     fmt::format_to(buf, "{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule, mangledName);
-    for (auto [name, member] : pkg.data(gs)->members()) {
-        if (!member.data(gs)->isClassOrModule() || member.data(gs)->isSingletonClass(gs) ||
-            member.data(gs)->name == core::Names::Constants::PackageMethods()) {
-            // we'll get singleton classes redundantly elsewhere, and we should handle the exported names elsewhere as
-            // well
-            continue;
-        }
-
-        fmt::format_to(buf, "  {}: \"{}.rb\",\n", member.data(gs)->name.show(gs), member.data(gs)->name.show(gs));
+    for (auto expt : pkg.exports) {
+        auto name = fmt::format(
+            "{}", fmt::map_join(expt.nameParts, "::", [&](core::NameRef nr) -> string { return nr.show(gs); }));
+        fmt::format_to(buf, "  {}: \"{}.rb\",\n", name, name);
     }
     fmt::format_to(buf, "}})\n");
 
@@ -440,23 +436,19 @@ string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderCon
 }
 
 void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
-                                           const std::string &path) {
+                                           const std::string &path, const vector<Package> &packages) {
     // we're going to be building up the root package map as we walk all the other packages, so make that first
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
     fmt::format_to(buf, "{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
 
     // walk over all the packages
-    for (auto [_, pkg] : core::Symbols::PackageRegistry().data(gs)->members()) {
-        if (!pkg.data(gs)->isClassOrModule() || pkg.data(gs)->isSingletonClass(gs)) {
-            // this means it's either T.class_of(<PkgRegistry>) or a singleton class of a package, so skip it
-            continue;
-        }
-
-        auto mangledName = absl::StrJoin(absl::StrSplit(pkg.show(gs), "::"), "_");
+    for (auto &pkg : packages) {
+        auto pkgName = fmt::format(
+            "{}", fmt::map_join(pkg.package, "::", [&](core::NameRef nr) -> string { return nr.show(gs); }));
+        auto mangledName =
+            fmt::format("{}", fmt::map_join(pkg.package, "_", [&](core::NameRef nr) -> string { return nr.show(gs); }));
         auto source = renderPackageAutoloadSrc(gs, alCfg, pkg, mangledName);
-        // gs.tracer().error("For package {}, we got {}\n\n", pkg.show(gs), source);
-        auto pkgName = pkg.data(gs)->name.show(gs);
 
         FileOps::ensureDir(join(path, mangledName));
         auto targetPath = join(path, join(mangledName, "_root.rb"));
