@@ -39,15 +39,14 @@ for f in "${bindcall_files[@]}"; do
     perl -p -e 's/\.bind\(([a-z]+)\)\.call\(/.bind_call(\1, /g;' \
      -e 's/\.bind\(([a-z]+)\).call$/.bind_call(\1)/g' "$f" > "$file_27"
 
-    if ! $check; then
-        continue
-    fi
     if [ ! -e "$origfile_27" ]; then
         continue
     fi
 
-    if ! cmp -s "$file_27" "$origfile_27"; then
-        mismatched=("${mismatched[@]}" "$file_27")
+    if $check; then
+        if ! cmp -s "$file_27" "$origfile_27"; then
+            mismatched=("${mismatched[@]}" "$file_27")
+        fi
     fi
     rm "${origfile_27}"
 done
