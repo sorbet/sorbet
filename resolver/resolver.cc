@@ -1562,7 +1562,7 @@ public:
 
 class ResolveSignaturesWalk {
 private:
-    std::vector<int> nestedBlockCounts;
+    vector<int> nestedBlockCounts;
 
     ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef, int pos,
                                   bool isOverloaded) {
@@ -1720,7 +1720,7 @@ private:
 
     // Force errors from any signatures that didn't attach to methods.
     // `lastSigs` will always be empty after this function is called.
-    void processLeftoverSigs(core::MutableContext ctx, InlinedVector<ast::Send *, 1> &lastSigs) {
+    void processLeftoverSigs(core::MutableContext ctx, InlinedVector<const ast::Send *, 1> &lastSigs) {
         if (!lastSigs.empty()) {
             // These sigs won't have been parsed, as there was no methods to
             // attach them to -- parse them here manually to force any errors.
@@ -1742,7 +1742,7 @@ private:
     }
 
     void processClassBody(core::MutableContext ctx, ast::ClassDef &klass) {
-        InlinedVector<ast::Send *, 1> lastSigs;
+        InlinedVector<const ast::Send *, 1> lastSigs;
         for (auto &stat : klass.rhs) {
             processStatement(ctx, stat, lastSigs);
         }
@@ -1755,7 +1755,7 @@ private:
     }
 
     void processInSeq(core::MutableContext ctx, ast::InsSeq &seq) {
-        InlinedVector<ast::Send *, 1> lastSigs;
+        InlinedVector<const ast::Send *, 1> lastSigs;
 
         // Explicitly check in the contxt of the class, not <static-init>
         auto classCtx = ctx.withOwner(ctx.owner.data(ctx)->enclosingClass(ctx));
@@ -1774,7 +1774,7 @@ private:
         seq.stats.erase(toRemove, seq.stats.end());
     }
 
-    void processStatement(core::MutableContext ctx, ast::TreePtr &stat, InlinedVector<ast::Send *, 1> &lastSigs) {
+    void processStatement(core::MutableContext ctx, ast::TreePtr &stat, InlinedVector<const ast::Send *, 1> &lastSigs) {
         typecase(
             stat,
 
@@ -1982,7 +1982,7 @@ private:
         return result;
     }
 
-    bool handleDeclaration(core::MutableContext ctx, ast::Assign &asgn) {
+    bool handleDeclaration(core::MutableContext ctx, const ast::Assign &asgn) {
         auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
         if (uid == nullptr) {
             return false;
