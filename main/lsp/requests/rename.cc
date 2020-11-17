@@ -128,30 +128,51 @@ public:
         string newsrc;
         if (auto sendResp = response->isSend()) {
             auto receiverLoc = sendResp->receiverLoc;
-            cout << "source/recv: " << source << "/" << sendResp->receiverLoc.source(gs) << " // " << loc.beginPos()
-                 << "," << receiverLoc.beginPos() << "\n";
-            ENFORCE(loc.contains(receiverLoc));
-            ENFORCE(loc.beginPos() == receiverLoc.beginPos(), "send expression starts with receiver");
+            ENFORCE(loc.contains(receiverLoc), "receiver expression not within send expression");
+            ENFORCE(loc.beginPos() == receiverLoc.beginPos(), "send expression doesn't start with receiver");
             if (receiverLoc.endPos() == receiverLoc.beginPos()) {
                 // no receiver expression, method is start of loc
                 newsrc = newName + source.substr(oldName.length(), source.length() - oldName.length());
             } else {
                 string::size_type methodNameOffset =
                     receiverLoc.endPos() - receiverLoc.beginPos() + 1; // +1 for the dot
-                auto argsOffset = methodNameOffset + oldName.length();
-                newsrc = source.substr(0, methodNameOffset) + newName +
-                         source.substr(argsOffset, source.length() - argsOffset);
+                newsrc = replaceAt(source, methodNameOffset);
             }
+        } else if (auto defResp = response->isDefinition()) {
+            newsrc = replaceMethodNameInDef(source);
         } else {
-            newsrc = replaceMethodNameInStr(source);
+            ENFORCE(0, "unexpected query response type while renaming method");
+            return;
         }
         edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
     }
 
 private:
-    string replaceMethodNameInStr(string def) {
-        // TODO(soam): this breaks for `def foo(foobar)`
-        return absl::StrReplaceAll(def, {{oldName, newName}});
+    string replaceMethodNameInDef(string def) {
+        // We can't do a simple string replace-all because of cases like:
+        //   `def foo(foobar)`
+        //   `attr_reader :att`
+        // Since we don't have more precise info about where the name is, we do this:
+        //   1. if the definition starts with attr_{reader,writer,accessor} then skip over that
+        //   2. and then change the first instance of oldName to newName
+        string::size_type offset = 0;
+        vector<string> prefixes{"attr_reader", "attr_accessor", "attr_writer"};
+        for (auto prefix : prefixes) {
+            if (absl::StartsWith(def, prefix)) {
+                offset = prefix.length();
+                break;
+            }
+        }
+        auto pos = def.find(oldName, offset);
+        if (pos == string::npos) {
+            ENFORCE(0, "Method name should appear in definition");
+            return def;
+        }
+        return replaceAt(def, pos);
+    }
+    string replaceAt(string input, string::size_type pos) {
+        auto suffixOffset = pos + oldName.length();
+        return input.substr(0, pos) + newName + input.substr(suffixOffset, input.length() - suffixOffset);
     }
 };
 class ConstRenamer : public Renamer {
@@ -216,14 +237,10 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
             return JSONNullObject();
         }
 
-        // auto locations = extractLocations(gs, queryResult.responses);
-
         // We want location but also the type of the expression at that location; and for some expression types like
         // sends, we need more than just a location, for parsing purposes (the send location is too broad and makes us
-        // parse too much)
-
-        // we also need to dedup responses based on location (maybe there should be priority on which kind of symbol
-        // "wins" a dedup but for rename it maybe doesnt matter?).
+        // parse too much).
+        // TODO(soam): do we need to dedup locations?
         for (auto &response : queryResult.responses) {
             auto loc = response->getLoc();
             if (!loc.exists() || !loc.file().exists()) {
