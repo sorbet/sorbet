@@ -11,7 +11,7 @@ mkdir -p output
 main/sorbet --silence-dev-message --stop-after=namer \
   --stripe-packages \
   -p autogen-autoloader:output \
-  --autogen-autoloader-modules={Foo,Bar} \
+  --autogen-autoloader-modules={Foo,FooMethods,Bar,BarMethods} \
   --autogen-autoloader-ignore=scripts/ \
   --autogen-autoloader-preamble "$preamble" \
   --autogen-autoloader-packaged \
