@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: false
+# typed: strict
 
 module T::Props
   module Private
@@ -69,7 +69,7 @@ module T::Props
             case mode
             when Deserialize then "#{varname}.to_f"
             when Serialize then nil
-            else mode
+            else T.absurd(mode)
             end
           elsif raw <= Numeric
             nil
@@ -162,7 +162,7 @@ module T::Props
           type_name = T.must(module_name(type))
           "#{type_name}.from_hash(#{varname})"
         else
-          mode
+          T.absurd(mode)
         end
       end
 
@@ -175,7 +175,7 @@ module T::Props
           type_name = T.must(module_name(type))
           "#{type_name}.deserialize(#{varname})"
         else
-          mode
+          T.absurd(mode)
         end
       end
 

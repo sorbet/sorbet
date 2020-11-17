@@ -130,6 +130,9 @@ class UnboundMethod
   sig {params(obj: BasicObject).returns(Method)}
   def bind(obj); end
 
+  sig {params(obj: BasicObject, args: T.untyped).returns(T.untyped)}
+  def bind_call(obj, *args); end
+
   # Returns a clone of this method.
   #
   # ```ruby
