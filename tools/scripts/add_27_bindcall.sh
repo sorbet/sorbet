@@ -14,7 +14,7 @@ nobindcall_files=()
 bindcall_files=()
 
 for f in $(find gems/sorbet-runtime/lib -name \*.rb); do
-    if egrep -E -q '^.*bind\([a-z]+).call' $f; then
+    if grep -E -q '^.*bind\([a-z]+).call' "$f"; then
         bindcall_files=("${bindcall_files[@]}" "$f")
         continue
     fi
