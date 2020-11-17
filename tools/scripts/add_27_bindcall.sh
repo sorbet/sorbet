@@ -43,10 +43,8 @@ for f in "${bindcall_files[@]}"; do
         continue
     fi
 
-    if $check; then
-        if ! cmp -s "$file_27" "$origfile_27"; then
-            mismatched=("${mismatched[@]}" "$file_27")
-        fi
+    if ! cmp -s "$file_27" "$origfile_27"; then
+        mismatched=("${mismatched[@]}" "$file_27")
     fi
     rm "${origfile_27}"
 done
@@ -58,9 +56,7 @@ for f in "${nobindcall_files[@]}"; do
     fi
 
     rm "$file_27"
-    if $check; then
-        mismatched=("${mismatched[@]}" "$file_27")
-    fi
+    mismatched=("${mismatched[@]}" "$file_27")
 done
 
 runtime_file=gems/sorbet-runtime/lib/sorbet-runtime.rb
