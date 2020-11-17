@@ -13,6 +13,18 @@ using namespace std;
 namespace sorbet::definition_validator {
 
 namespace {
+
+string_view prettyVisibility(core::Visibility visibility) {
+    switch (visibility) {
+        case core::Visibility::Public:
+            return "public";
+        case core::Visibility::Protected:
+            return "protected";
+        case core::Visibility::Private:
+            return "private";
+    }
+}
+
 struct Signature {
     struct {
         absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> required;
@@ -309,20 +321,9 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
         if (overridenMethod.data(ctx)->isFinalMethod()) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
                 if (method.data(ctx)->isZSuperMethod()) {
-                    string modifier;
-                    switch (method.data(ctx)->methodVisibility()) {
-                        case core::Visibility::Public:
-                            modifier = "public";
-                            break;
-                        case core::Visibility::Protected:
-                            modifier = "protected";
-                            break;
-                        case core::Visibility::Private:
-                            modifier = "private";
-                            break;
-                    }
+                    auto visi = prettyVisibility(method.data(ctx)->methodVisibility());
                     e.setHeader("`{}` was declared as final and cannot be marked `{}` in `{}`",
-                                overridenMethod.data(ctx)->show(ctx), modifier, klass.data(ctx)->show(ctx));
+                                overridenMethod.data(ctx)->show(ctx), visi, klass.data(ctx)->show(ctx));
 
                 } else {
                     e.setHeader("`{}` was declared as final and cannot be overridden by `{}`",
@@ -437,16 +438,7 @@ void validateZSuper(const core::Context ctx, const core::SymbolRef klass) {
         auto parentMethod = klass.data(ctx)->findMemberTransitive(ctx, name);
         if (!parentMethod.exists()) {
             if (auto e = ctx.state.beginError(sym.data(ctx)->loc(), core::errors::Resolver::ZSuperNoParentMethod)) {
-                string visi;
-                if (sym.data(ctx)->isMethodPrivate()) {
-                    visi = "private";
-                } else if (sym.data(ctx)->isMethodPublic()) {
-                    visi = "public";
-                } else if (sym.data(ctx)->isMethodProtected()) {
-                    visi = "protected";
-                } else {
-                    Exception::raise("Expected ZSuper method to have visibility `{}`", sym.data(ctx)->show(ctx));
-                }
+                auto visi = prettyVisibility(sym.data(ctx)->methodVisibility());
                 e.setHeader("No method called `{}` exists to be made `{}` in `{}`", name.data(ctx)->show(ctx), visi,
                             klass.data(ctx)->show(ctx));
             }
