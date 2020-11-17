@@ -244,7 +244,7 @@ class Pathname < Object
   # [`Dir.glob`](https://docs.ruby-lang.org/en/2.6.0/Dir.html#method-c-glob).
   sig do
     params(
-        p1: String,
+        p1: T.any(String, Pathname),
         p2: String,
     )
     .returns(T::Array[Pathname])
