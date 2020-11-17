@@ -33,3 +33,16 @@ class Child < Parent
 
   private :method_with_overridable_sig # error: Can't narrow visibility of overridable method `method_with_overridable_sig`
 end
+
+class AbstractFooable
+  extend T::Sig
+  extend T::Helpers
+  abstract!
+
+  sig {abstract.void}
+  def foo; end
+end
+
+class FooImpl < AbstractFooable # error: Missing definition for abstract method `foo`
+  private :foo
+end
