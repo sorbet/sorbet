@@ -46,7 +46,13 @@ class <C <U <root>>> < <C <U Object>> ()
     type-member(+) <S <C <U Foo1>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo1>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo1) @ Loc {file=test/testdata/namer/visibility.rb start=29:7 end=29:11}
     method <S <C <U Foo1>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=29:1 end=33:4}
       argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
+    method <S <C <U Foo1>> $1><U foo> : private|zsuper (private_class_method :foo, <blk>) @ Loc {file=test/testdata/namer/visibility.rb start=32:3 end=32:28}
+      argument private_class_method :foo<repeated> @ Loc {file=test/testdata/namer/visibility.rb start=32:3 end=32:28}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
   class <C <U Foo2>> < <C <U Object>> () @ Loc {file=test/testdata/namer/visibility.rb start=35:1 end=35:11}
+    method <C <U Foo2>><U foo> : private|zsuper (private :foo, <blk>) @ Loc {file=test/testdata/namer/visibility.rb start=38:3 end=38:15}
+      argument private :foo<repeated> @ Loc {file=test/testdata/namer/visibility.rb start=38:3 end=38:15}
+      argument <blk><block> @ Loc {file=test/testdata/namer/visibility.rb start=??? end=???}
   class <S <C <U Foo2>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/namer/visibility.rb start=35:7 end=35:11}
     type-member(+) <S <C <U Foo2>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo2>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo2) @ Loc {file=test/testdata/namer/visibility.rb start=35:7 end=35:11}
     method <S <C <U Foo2>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/namer/visibility.rb start=35:1 end=39:4}

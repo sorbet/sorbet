@@ -1034,8 +1034,6 @@ class SymbolDefiner {
             auto argsStore = ast::MethodDef::ARGS_store{};
             // TODO(jez) For positional args, the loc of the arg matters, because it will be used by
             // argumentName to attempt to reconstruct a name from the source code.
-            // Be sure to record a symbol table snapshot.
-            // TODO(jez) Update symbol table snapshot to show isZSuperMethod
             // TODO(jez) Should we skip this RestArg stuff, and just assume that if you're ever
             // trying to dispatch to a ZSuper method it's wrong? We're not taking the intrinsic
             // approach anymore--maybe we should be more like method aliases which have an empty

@@ -977,9 +977,6 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     //  - When a method doesn't exist.
                     //
                     // In all of these cases, we bail out and skip the non-private checking.
-                    // TODO(jez) Need some way to record that even though we dispatched to something
-                    // like `Class#new`, that we went through a different method visibility to get
-                    // there.
                     if (it->main.visibilityMethod.exists() && it->main.visibilityMethod.data(ctx)->isMethodPrivate() &&
                         !send->isPrivateOk) {
                         ENFORCE(it->main.method.exists());

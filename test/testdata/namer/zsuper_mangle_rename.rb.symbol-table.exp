@@ -1,0 +1,27 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/namer/zsuper_mangle_rename.rb:5
+      argument <blk><block> @ Loc {file=test/testdata/namer/zsuper_mangle_rename.rb start=??? end=???}
+  class ::Child < ::Parent () @ test/testdata/namer/zsuper_mangle_rename.rb:15
+    method ::Child#foo : zsuper (private :foo, <blk>) @ test/testdata/namer/zsuper_mangle_rename.rb:16
+      argument private :foo<repeated> @ Loc {file=test/testdata/namer/zsuper_mangle_rename.rb start=16:3 end=16:15}
+      argument <blk><block> @ Loc {file=test/testdata/namer/zsuper_mangle_rename.rb start=??? end=???}
+  class ::<Class:Child>[<AttachedClass>] < ::<Class:Parent> () @ test/testdata/namer/zsuper_mangle_rename.rb:15
+    type-member(+) ::<Class:Child>::<AttachedClass> -> T.attached_class (of Child) @ test/testdata/namer/zsuper_mangle_rename.rb:15
+    method ::<Class:Child>#<static-init> (<blk>) @ test/testdata/namer/zsuper_mangle_rename.rb:15
+      argument <blk><block> @ Loc {file=test/testdata/namer/zsuper_mangle_rename.rb start=??? end=???}
+  class ::NoZSuperPrivatePublic < ::Object () @ test/testdata/namer/zsuper_mangle_rename.rb:5
+    method ::NoZSuperPrivatePublic#foo (<blk>) @ test/testdata/namer/zsuper_mangle_rename.rb:6
+      argument <blk><block> @ Loc {file=test/testdata/namer/zsuper_mangle_rename.rb start=??? end=???}
+  class ::<Class:NoZSuperPrivatePublic>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/namer/zsuper_mangle_rename.rb:5
+    type-member(+) ::<Class:NoZSuperPrivatePublic>::<AttachedClass> -> T.attached_class (of NoZSuperPrivatePublic) @ test/testdata/namer/zsuper_mangle_rename.rb:5
+    method ::<Class:NoZSuperPrivatePublic>#<static-init> (<blk>) @ test/testdata/namer/zsuper_mangle_rename.rb:5
+      argument <blk><block> @ Loc {file=test/testdata/namer/zsuper_mangle_rename.rb start=??? end=???}
+  class ::Parent < ::Object () @ test/testdata/namer/zsuper_mangle_rename.rb:12
+    method ::Parent#foo (<blk>) @ test/testdata/namer/zsuper_mangle_rename.rb:13
+      argument <blk><block> @ Loc {file=test/testdata/namer/zsuper_mangle_rename.rb start=??? end=???}
+  class ::<Class:Parent>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/namer/zsuper_mangle_rename.rb:12
+    type-member(+) ::<Class:Parent>::<AttachedClass> -> T.attached_class (of Parent) @ test/testdata/namer/zsuper_mangle_rename.rb:12
+    method ::<Class:Parent>#<static-init> (<blk>) @ test/testdata/namer/zsuper_mangle_rename.rb:12
+      argument <blk><block> @ Loc {file=test/testdata/namer/zsuper_mangle_rename.rb start=??? end=???}
+

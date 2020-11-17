@@ -694,10 +694,15 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         if (this->isMethod()) {
             auto methodFlags = InlinedVector<string, 3>{};
 
-            if (this->isMethodPrivate()) {
-                methodFlags.emplace_back("private");
-            } else if (this->isMethodProtected()) {
-                methodFlags.emplace_back("protected");
+            switch (this->methodVisibility()) {
+                case Visibility::Private:
+                    methodFlags.emplace_back("private");
+                    break;
+                case Visibility::Protected:
+                    methodFlags.emplace_back("protected");
+                    break;
+                case Visibility::Public:
+                    break;
             }
 
             if (this->isAbstract()) {
@@ -714,6 +719,9 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
             }
             if (this->isFinalMethod()) {
                 methodFlags.emplace_back("final");
+            }
+            if (this->isZSuperMethod()) {
+                methodFlags.emplace_back("zsuper");
             }
 
             if (!methodFlags.empty()) {

@@ -1,7 +1,6 @@
 # typed: true
 
 # Either both these cases should be mangle rename errors, or neither.
-# TODO(jez) symbol-table snapshot test for this
 
 class NoZSuperPrivatePublic
   def foo; end

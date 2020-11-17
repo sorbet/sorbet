@@ -13,6 +13,11 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=??? end=???}
   class <S <S <C <U A>> $1> $1>[<C <U <AttachedClass>>>] < <S <C <U Module>> $1> () @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=3:8 end=3:9}
     type-member(+) <S <S <C <U A>> $1> $1><C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U A>> $1> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U A>> $1>   targs = [     <C <U <AttachedClass>>> = A   ] }) @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=3:8 end=3:9}
+    method <S <S <C <U A>> $1> $1><U bar> : private|zsuper (private_class_method def self.bar
+    end, <blk>) @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=5:5 end=6:8}
+      argument private_class_method def self.bar
+    end<repeated> @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=5:5 end=6:8}
+      argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=??? end=???}
   class <C <U B>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=10:1 end=10:8}
   class <S <C <U B>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=10:7 end=10:8}
     type-member(+) <S <C <U B>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U B>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=B) @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=10:7 end=10:8}
@@ -24,4 +29,9 @@ class <C <U <root>>> < <C <U Object>> ()
       argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=??? end=???}
   class <S <S <C <U B>> $1> $1>[<C <U <AttachedClass>>>] < <S <S <C <U Object>> $1> $1> () @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=10:7 end=10:8}
     type-member(+) <S <S <C <U B>> $1> $1><C <U <AttachedClass>>> -> LambdaParam(<S <S <C <U B>> $1> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=AppliedType {   klass = <S <C <U B>> $1>   targs = [     <C <U <AttachedClass>>> = B   ] }) @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=10:7 end=10:8}
+    method <S <S <C <U B>> $1> $1><U bar> : private|zsuper (private_class_method def self.bar
+    end, <blk>) @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=12:5 end=13:8}
+      argument private_class_method def self.bar
+    end<repeated> @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=12:5 end=13:8}
+      argument <blk><block> @ Loc {file=test/testdata/rewriter/flatten_module_private_class_method.rb start=??? end=???}
 

@@ -22,20 +22,20 @@ end
 
 
 class C
-  private :foo
+  private :foo # TODO(jez) Should this error?
   def foo; end  # this does not end up being private
 end
 
 class Foo1
   def foo;  # this does not end up being private
   end
-  private_class_method :foo
+  private_class_method :foo # error: No method called `foo` exists to be made `private` in `T.class_of(Foo1)`
 end
 
 class Foo2
   def self.foo;  # this does not end up being private
   end
-  private :foo
+  private :foo # error: No method called `foo` exists to be made `private` in `Foo2`
 end
 
 class Foo3
