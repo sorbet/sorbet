@@ -477,7 +477,7 @@ class Pathname < Object
     )
     .returns(T::Array[Pathname])
   end
-  def children(with_directory); end
+  def children(with_directory=T.unsafe(nil)); end
 
   # Changes file permissions.
   #
