@@ -272,6 +272,11 @@ public:
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
     }
 
+    // This is analogous to the Ruby VM's VM_METHOD_TYPE_ZSUPER in method.h
+    // ZSuper methods are created by `private :foo` when `foo` is actually defined on an ancestor.
+    // They're called this because they behave like methods that just do
+    //   def foo(*args); super; end
+    // and zsuper is the node type for that super with no args that means "forward my args"
     inline bool isZSuperMethod() const {
         ENFORCE_NO_TIMER(isMethod());
         return (flags & Symbol::Flags::METHOD_ZSUPER) != 0;
@@ -673,7 +678,8 @@ private:
     InlinedVector<SymbolRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
 
-    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 exclude, int maxDepth = 100) const;
+    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, const std::vector<u4> &exclude,
+                                           int maxDepth = 100) const;
 
     inline void unsetClassOrModuleLinearizationComputed() {
         ENFORCE(isClassOrModule());

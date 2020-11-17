@@ -516,7 +516,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
     }
 
-    // TODO(jez) findMemberTransitive resolves through method aliases and skips over ZSuper methods
     auto mayBeZSuper = symbol.data(gs)->findMemberTransitiveIncludingZSuperMethods(gs, args.name);
 
     if (!mayBeZSuper.exists()) {
