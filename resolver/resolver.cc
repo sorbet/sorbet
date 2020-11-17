@@ -1260,8 +1260,8 @@ class ResolveTypeMembersWalk {
         auto it = std::remove_if(job.dependencies.begin(), job.dependencies.end(), [&](core::SymbolRef dep) {
             if (isGenericResolved(ctx, dep)) {
                 if (dep.data(ctx)->isClassOrModule()) {
-                    // `dep`'s dependencies are resolved. Compute its externalType here so that TypeSyntax can access
-                    // it.
+                    // `dep`'s dependencies are resolved. Compute its externalType here so that we can resolve this
+                    // type member or type alias's type.
                     dep.data(ctx)->unsafeComputeExternalType(ctx);
                 }
                 return true;

@@ -9,6 +9,13 @@ module ModuleTypeMemberTypeHasTypeParam
   Y = type_member(:in, upper: T.class_of(A))
 end
 
+module ModuleTypeAliasTypeHasTypeParams
+  extend T::Sig 
+
+  # Same as above.
+  Z = T.type_alias{T.class_of(A)}
+end
+
 class A
   extend T::Generic
   X = type_template
