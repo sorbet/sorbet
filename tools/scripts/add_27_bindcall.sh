@@ -38,7 +38,8 @@ for f in "${bindcall_files[@]}"; do
     fi
     perl -p -e 's/\.bind\(([a-z]+)\)\.call\(/.bind_call(\1, /g;' \
          -e 's/\.bind\(([a-z]+)\).call$/.bind_call(\1)/g;' \
-         -e 's/^# typed: (true|strict)$/# typed: false/' "$f" > "$file_27"
+         -e 's/^# typed: (true|strict)$/# typed: false/;' \
+         -e 's/T\.absurd\(([a-z]+)\)/\1/' "$f" > "$file_27"
 
     if [ ! -e "$origfile_27" ]; then
         continue

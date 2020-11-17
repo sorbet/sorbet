@@ -69,7 +69,7 @@ module T::Props
             case mode
             when Deserialize then "#{varname}.to_f"
             when Serialize then nil
-            else T.absurd(mode)
+            else mode
             end
           elsif raw <= Numeric
             nil
@@ -162,7 +162,7 @@ module T::Props
           type_name = T.must(module_name(type))
           "#{type_name}.from_hash(#{varname})"
         else
-          T.absurd(mode)
+          mode
         end
       end
 
@@ -175,7 +175,7 @@ module T::Props
           type_name = T.must(module_name(type))
           "#{type_name}.deserialize(#{varname})"
         else
-          T.absurd(mode)
+          mode
         end
       end
 
