@@ -20,6 +20,7 @@ end
 f = M::Foo.new
 f.baz(f.x)
 f.baz
+f  .  baz  (   )
 
 M::Foo.new.baz 3
 

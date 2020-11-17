@@ -130,14 +130,17 @@ public:
             auto receiverLoc = sendResp->receiverLoc;
             ENFORCE(loc.contains(receiverLoc), "receiver expression not within send expression");
             ENFORCE(loc.beginPos() == receiverLoc.beginPos(), "send expression doesn't start with receiver");
+            string::size_type methodNameOffset;
             if (receiverLoc.endPos() == receiverLoc.beginPos()) {
                 // no receiver expression, method is start of loc
-                newsrc = newName + source.substr(oldName.length(), source.length() - oldName.length());
+                methodNameOffset = 0;
             } else {
-                string::size_type methodNameOffset =
-                    receiverLoc.endPos() - receiverLoc.beginPos() + 1; // +1 for the dot
-                newsrc = replaceAt(source, methodNameOffset);
+                // find the method name: <receiver expression> <whitespace?> <dot> <whitespace?> <method name>
+                methodNameOffset = receiverLoc.endPos() - receiverLoc.beginPos();
+                methodNameOffset = 1 + source.find(".", methodNameOffset);
+                methodNameOffset = source.find_first_not_of(" \t", methodNameOffset);
             }
+            newsrc = replaceAt(source, methodNameOffset);
         } else if (auto defResp = response->isDefinition()) {
             newsrc = replaceMethodNameInDef(source);
         } else {

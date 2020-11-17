@@ -20,6 +20,7 @@ end
 f = M::Foo.new
 f.bar(f.x)
 f.bar
+f  .  bar  (   )
 
 M::Foo.new.bar 3
 
