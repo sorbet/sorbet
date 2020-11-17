@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 # typed: ignore
 
-require_relative 'private/methods/_methods'
-
 # Work around an interaction bug with sorbet-runtime and rspec-mocks,
 # which occurs when using message expectations (*_any_instance_of,
 # expect, allow) and and_call_original.
