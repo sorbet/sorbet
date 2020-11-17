@@ -309,6 +309,11 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     // was handled above
                     break;
                 case core::Names::abstract()._id:
+                    if (sig.seen.final) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final", "abstract");
+                        }
+                    }
                     sig.seen.abstract = true;
                     break;
                 case core::Names::override_()._id: {
@@ -316,7 +321,6 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
 
                     if (send->numPosArgs > 0) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            auto paramsStr = send->fun.show(ctx);
                             e.setHeader("`{}` expects keyword arguments", send->fun.show(ctx));
                         }
                         break;
@@ -353,6 +357,12 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     break;
                 case core::Names::overridable()._id:
+                    if (sig.seen.overridable) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final",
+                                        "overridable");
+                        }
+                    }
                     sig.seen.overridable = true;
                     break;
                 case core::Names::returns()._id: {
