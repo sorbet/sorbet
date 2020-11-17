@@ -870,11 +870,21 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             targs.reserve(s.args.size());
             argLocs.reserve(s.args.size());
             holders.reserve(s.args.size());
+            auto i = -1;
             for (auto &arg : s.args) {
+                i++;
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(core::Loc(ctx.file, arg.loc()));
-                ty.type = core::make_type<core::MetaType>(
-                    getResultTypeWithSelfTypeParams(ctx, arg, sigBeingParsed, args.withoutSelfType()));
+                if (i < s.numPosArgs) {
+                    ty.type = core::make_type<core::MetaType>(
+                        getResultTypeWithSelfTypeParams(ctx, arg, sigBeingParsed, args.withoutSelfType()));
+                } else {
+                    // Fill this in with a dummy type. We don't want to parse this as type syntax
+                    // because we already know it's garbage.
+                    // But we still want to record some sort of arg (for the loc specifically) so
+                    // that the calls.cc intrinsic can craft an autocorrect.
+                    ty.type = core::Types::untypedUntracked();
+                }
                 holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
                 targs.emplace_back(holders.back().get());
                 argLocs.emplace_back(arg.loc());

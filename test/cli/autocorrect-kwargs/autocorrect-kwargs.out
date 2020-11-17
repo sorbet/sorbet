@@ -6,10 +6,6 @@ autocorrect-kwargs.rb:6: `returns` does not accept keyword arguments https://srb
      6 |sig {returns(foo: Integer, bar: String)}
                      ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect-kwargs.rb:13: Unsupported type syntax https://srb.help/5004
-    13 |sig {returns(T::Array[foo: Integer])}
-                              ^^^
-
 autocorrect-kwargs.rb:13: Keyword arguments given to `Array` https://srb.help/7032
     13 |sig {returns(T::Array[foo: Integer])}
                               ^^^^^^^^^^^^
@@ -77,7 +73,7 @@ autocorrect-kwargs.rb:18: Wrong number of type parameters for `Array`. Expected:
 autocorrect-kwargs.rb:18: Unsupported usage of literal type https://srb.help/7009
     18 |foo = T::Array[foo: Integer, bar: String].new
                        ^^^
-Errors: 13
+Errors: 12
 
 --------------------------------------------------------------------------
 
