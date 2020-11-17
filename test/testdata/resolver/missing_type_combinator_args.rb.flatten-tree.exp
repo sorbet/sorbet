@@ -23,7 +23,7 @@ begin
         ::T.let(1)
         begin
           ::Sorbet::Private::Static.keep_for_typechecking(2)
-          T.let(1, T.untyped)
+          T.let(1, Integer)
         end
         ::T.reveal_type()
         ::T.reveal_type(1, 2)
