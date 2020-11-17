@@ -18,6 +18,20 @@ QualifiedName QualifiedName::fromFullName(vector<core::NameRef> name) {
     return {name, pkgName};
 }
 
+string QualifiedName::show(const core::GlobalState &gs) const {
+    if (auto pkg = package) {
+        return fmt::format("<package {}>::{}", pkg->show(gs),
+                           fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string { return nr.show(gs); }));
+    } else {
+        return fmt::format("::{}",
+                           fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string { return nr.show(gs); }));
+    }
+}
+
+string QualifiedName::join(const core::GlobalState &gs, string_view sep) const {
+    return fmt::format("{}", fmt::map_join(nameParts, sep, [&](core::NameRef nr) -> string { return nr.show(gs); }));
+}
+
 // Find the `Definition` associated with this `DefinitionRef`
 const Definition &DefinitionRef::data(const ParsedFile &pf) const {
     return pf.defs[_id];
@@ -40,6 +54,21 @@ vector<core::NameRef> ParsedFile::showFullName(const core::GlobalState &gs, Defi
     auto scope = showFullName(gs, ref.scope);
     scope.insert(scope.end(), ref.name.nameParts.begin(), ref.name.nameParts.end());
     return scope;
+}
+
+// Show the full qualified name of this `Definition`, if possible. (If for some reason there is no actual `defining_ref`
+// for this `DefinitionRef` (e.g. if this is called _during_ an `AutogenWalk` traversal and the defining ref has not yet
+// been set) then this will return an empty vector.
+QualifiedName ParsedFile::showQualifiedName(const core::GlobalState &gs, DefinitionRef id) const {
+    auto &def = id.data(*this);
+    if (!def.defining_ref.exists()) {
+        return {};
+    }
+    auto &ref = def.defining_ref.data(*this);
+    auto nameParts = showFullName(gs, ref.scope);
+    nameParts.insert(nameParts.end(), ref.name.nameParts.begin(), ref.name.nameParts.end());
+    auto package = ref.resolved.package;
+    return {nameParts, package};
 }
 
 // Pretty-print a `ParsedFile`, including all definitions and references and the pieces of metadata associated with them

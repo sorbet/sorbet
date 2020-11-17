@@ -31,6 +31,9 @@ struct QualifiedName {
     core::NameRef name() const {
         return nameParts.back();
     }
+
+    std::string show(const core::GlobalState &gs) const;
+    std::string join(const core::GlobalState &gs, std::string_view sep) const;
 };
 
 const u4 NONE_ID = (u4)-1;
@@ -167,6 +170,7 @@ struct ParsedFile {
     std::string toString(const core::GlobalState &gs) const;
     std::string toMsgpack(core::Context ctx, int version);
     std::vector<core::NameRef> showFullName(const core::GlobalState &gs, DefinitionRef id) const;
+    QualifiedName showQualifiedName(const core::GlobalState &gs, DefinitionRef id) const;
     std::vector<std::string> listAllClasses(core::Context ctx);
 };
 
