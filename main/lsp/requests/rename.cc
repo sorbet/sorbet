@@ -114,6 +114,7 @@ unique_ptr<WorkspaceEdit> Renamer::buildEdit() {
     we->documentChanges = move(textDocEdits);
     return we;
 }
+
 class MethodRenamer : public Renamer {
 public:
     MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
@@ -126,8 +127,21 @@ public:
         auto location = config.loc2Location(gs, loc);
         string newsrc;
         if (auto sendResp = response->isSend()) {
-            // sendResp->dispatchResult->main.receiver;
-            newsrc = replaceMethodNameInSend(source);
+            auto receiverLoc = sendResp->receiverLoc;
+            cout << "source/recv: " << source << "/" << sendResp->receiverLoc.source(gs) << " // " << loc.beginPos()
+                 << "," << receiverLoc.beginPos() << "\n";
+            ENFORCE(loc.contains(receiverLoc));
+            ENFORCE(loc.beginPos() == receiverLoc.beginPos(), "send expression starts with receiver");
+            if (receiverLoc.endPos() == receiverLoc.beginPos()) {
+                // no receiver expression, method is start of loc
+                newsrc = newName + source.substr(oldName.length(), source.length() - oldName.length());
+            } else {
+                string::size_type methodNameOffset =
+                    receiverLoc.endPos() - receiverLoc.beginPos() + 1; // +1 for the dot
+                auto argsOffset = methodNameOffset + oldName.length();
+                newsrc = source.substr(0, methodNameOffset) + newName +
+                         source.substr(argsOffset, source.length() - argsOffset);
+            }
         } else {
             newsrc = replaceMethodNameInStr(source);
         }
@@ -135,39 +149,8 @@ public:
     }
 
 private:
-    // Parse a method name from a send (call), replace it with the new name, and return the full send source with the
-    // new name
-    string replaceMethodNameInSend(string send) {
-        // Split into method and args
-        string methodExpr, args;
-        for (string::size_type i = 0; i < send.size(); i++) {
-            if (send[i] == ' ' || send[i] == '(') {
-                methodExpr = send.substr(0, i);
-                args = send.substr(i, send.size() - i);
-                break;
-            }
-        }
-        // no args passed
-        if (methodExpr.size() == 0) {
-            methodExpr = send;
-            args = "";
-        }
-        ENFORCE(send == (methodExpr + args));
-
-        // The method name must be at the end of the methodExpr; if so, replace it and reconstruct the send
-        auto prefixLen = methodExpr.size() - oldName.size();
-        if (oldName == methodExpr.substr(prefixLen, oldName.size())) {
-            auto newMethodExpr = methodExpr.substr(0, prefixLen) + newName;
-            return (newMethodExpr + args);
-        } else {
-            // If this happens we parsed the send incorrectly (or we parsed something that's not a send), so give up and
-            // return the unmodified source
-            ENFORCE(0);
-            return send;
-        }
-    }
-
     string replaceMethodNameInStr(string def) {
+        // TODO(soam): this breaks for `def foo(foobar)`
         return absl::StrReplaceAll(def, {{oldName, newName}});
     }
 };

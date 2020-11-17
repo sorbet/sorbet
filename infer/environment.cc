@@ -996,8 +996,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(core::Loc(ctx.file, bind.loc), retainedResult, send->fun,
-                                                     send->isPrivateOk, ctx.owner));
+                        ctx,
+                        core::lsp::SendResponse(core::Loc(ctx.file, bind.loc), retainedResult, send->fun,
+                                                send->isPrivateOk, ctx.owner, core::Loc(ctx.file, send->receiverLoc)));
                 }
                 if (send->link) {
                     // This should eventually become ENFORCEs but currently they are wrong
