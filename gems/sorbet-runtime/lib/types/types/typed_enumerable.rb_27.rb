@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: true
+# typed: false
 
 module T::Types
   # Note: All subclasses of Enumerable should add themselves to the
