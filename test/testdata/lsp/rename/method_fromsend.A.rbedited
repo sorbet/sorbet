@@ -1,0 +1,30 @@
+# typed: true
+# frozen_string_literal: true
+
+module M
+  class Foo
+    def baz(a=1)
+    end
+
+    def caller
+      baz(1)
+    end
+
+    def x
+      42
+    end
+  end
+end
+
+f = M::Foo.new
+f.baz(f.x)
+f.baz
+# ^ apply-rename: [A] newName: baz
+f  .  baz  (   )
+
+M::Foo.new.baz 3
+
+class Unrelated
+  # this should be left unchanged
+  def bar; end
+end
