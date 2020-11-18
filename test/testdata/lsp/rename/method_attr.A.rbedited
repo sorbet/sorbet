@@ -1,0 +1,10 @@
+# typed: true
+# frozen_string_literal: true
+
+class Foo
+  attr_reader :baz
+end
+
+f = Foo.new
+f.baz
+# ^ apply-rename: [A] newName: baz

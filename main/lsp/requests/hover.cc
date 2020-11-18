@@ -91,7 +91,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             }
             if (sendResp->dispatchResult->main.method.exists() && sendResp->dispatchResult->main.method.isSynthetic()) {
                 // For synthetic methods, just show the return type
-                typeString = retType->showWithMoreInfo(gs);
+                typeString = retType.showWithMoreInfo(gs);
             } else {
                 typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint);
             }
@@ -105,7 +105,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             if (!retType) {
                 retType = core::Types::untypedUntracked();
             }
-            typeString = retType->showWithMoreInfo(gs);
+            typeString = retType.showWithMoreInfo(gs);
         }
 
         // Sort so documentation order is deterministic.

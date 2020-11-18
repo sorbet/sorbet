@@ -53,6 +53,7 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     out.rootDir = cfg.rootDir;
     out.preamble = cfg.preamble;
     out.registryModule = cfg.registryModule;
+    out.rootObject = cfg.rootObject;
     for (auto &str : cfg.modules) {
         out.topLevelNamespaceRefs.emplace(gs.enterNameConstant(str));
     }
@@ -201,10 +202,10 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     string casgnArg;
     auto type = definitionType(gs);
     if (type == Definition::Type::Module || type == Definition::Type::Class) {
-        fullName =
-            root() ? "Object" : fmt::format("{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string {
-                                                return nr.show(gs);
-                                            }));
+        fullName = root() ? alCfg.rootObject
+                          : fmt::format("{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string {
+                                            return nr.show(gs);
+                                        }));
         if (!root()) {
             fmt::format_to(buf, "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
             predeclare(gs, fullName, buf);

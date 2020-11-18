@@ -27,7 +27,7 @@ class SerializerImpl;
 }
 class IntrinsicMethod {
 public:
-    virtual void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const = 0;
+    virtual void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const = 0;
 };
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
@@ -77,6 +77,7 @@ public:
         static constexpr u4 CLASS_OR_MODULE_LINEARIZATION_COMPUTED = 0x0000'0100;
         static constexpr u4 CLASS_OR_MODULE_FINAL = 0x0000'0200;
         static constexpr u4 CLASS_OR_MODULE_SEALED = 0x0000'0400;
+        static constexpr u4 CLASS_OR_MODULE_PRIVATE = 0x0000'0800;
 
         // Method flags
         static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
@@ -99,6 +100,7 @@ public:
 
         // Static Field flags
         static constexpr u4 STATIC_FIELD_TYPE_ALIAS = 0x0000'0010;
+        static constexpr u4 STATIC_FIELD_PRIVATE = 0x0000'0020;
     };
 
     Loc loc() const;
@@ -312,6 +314,16 @@ public:
         return (flags & Symbol::Flags::CLASS_OR_MODULE_SEALED) != 0;
     }
 
+    inline bool isClassOrModulePrivate() const {
+        ENFORCE_NO_TIMER(isClassOrModule());
+        return (flags & Symbol::Flags::CLASS_OR_MODULE_PRIVATE) != 0;
+    }
+
+    inline bool isStaticFieldPrivate() const {
+        ENFORCE_NO_TIMER(isStaticField());
+        return (flags & Symbol::Flags::STATIC_FIELD_PRIVATE) != 0;
+    }
+
     inline void setClassOrModule() {
         ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags |= Symbol::Flags::CLASS_OR_MODULE;
@@ -457,6 +469,11 @@ public:
         flags |= Symbol::Flags::CLASS_OR_MODULE_SEALED;
     }
 
+    inline void setClassOrModulePrivate() {
+        ENFORCE(isClassOrModule());
+        flags |= Symbol::Flags::CLASS_OR_MODULE_PRIVATE;
+    }
+
     inline void setTypeAlias() {
         ENFORCE(isStaticField());
         flags |= Symbol::Flags::STATIC_FIELD_TYPE_ALIAS;
@@ -467,6 +484,11 @@ public:
         // To make things nicer, we relax the ENFORCE here to also allow asking whether "some constant" is a type alias.
         ENFORCE(isClassOrModule() || isStaticField() || isTypeMember());
         return isStaticField() && (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
+    }
+
+    inline void setStaticFieldPrivate() {
+        ENFORCE(isStaticField());
+        flags |= Symbol::Flags::STATIC_FIELD_PRIVATE;
     }
 
     inline void setRewriterSynthesized() {
@@ -510,6 +532,8 @@ public:
     std::string toJSON(const GlobalState &gs, int tabs = 0, bool showFull = false) const;
     // Renders the full name of this Symbol in a form suitable for user display.
     std::string show(const GlobalState &gs) const;
+
+    std::string_view showKind(const GlobalState &gs) const;
 
     // Returns the singleton class for this class, lazily instantiating it if it
     // doesn't exist.

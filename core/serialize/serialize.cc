@@ -344,7 +344,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         case TypePtr::Tag::UnresolvedClassType:
         case TypePtr::Tag::BlamedUntyped:
         case TypePtr::Tag::ClassType: {
-            auto &c = cast_type_nonnull<ClassType>(what);
+            auto c = cast_type_nonnull<ClassType>(what);
             p.putU4(c.symbol.rawId());
             break;
         }
@@ -355,7 +355,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             break;
         }
         case TypePtr::Tag::LiteralType: {
-            auto &c = cast_type_nonnull<LiteralType>(what);
+            auto c = cast_type_nonnull<LiteralType>(what);
             p.putU1((u1)c.literalKind);
             p.putS8(c.value);
             break;
@@ -389,7 +389,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             break;
         }
         case TypePtr::Tag::AliasType: {
-            auto &alias = cast_type_nonnull<AliasType>(what);
+            auto alias = cast_type_nonnull<AliasType>(what);
             p.putU4(alias.symbol.rawId());
             break;
         }

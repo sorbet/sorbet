@@ -12,6 +12,7 @@ using namespace std;
 
 namespace sorbet::definition_validator {
 
+namespace {
 struct Signature {
     struct {
         absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> required;
@@ -83,11 +84,11 @@ void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrap
         if (!checkSubtype(ctx, superArgType, methodArgType)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                            methodArgs[idx].get().show(ctx), methodArgType->show(ctx),
-                            supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
+                            methodArgs[idx].get().show(ctx), methodArgType.show(ctx), supermethodKind(ctx, superMethod),
+                            superMethod.data(ctx)->show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter `{}` was declared here with type `{}`",
-                               superArgs[idx].get().show(ctx), superArgType->show(ctx));
+                               superArgs[idx].get().show(ctx), superArgType.show(ctx));
             }
         }
         idx++;
@@ -156,11 +157,11 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
                     if (auto e =
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                                    corresponding->get().show(ctx), corresponding->get().type->show(ctx),
+                                    corresponding->get().show(ctx), corresponding->get().type.show(ctx),
                                     supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
                         e.addErrorLine(superMethod.data(ctx)->loc(),
                                        "The corresponding parameter `{}` was declared here with type `{}`",
-                                       req.get().show(ctx), req.get().type->show(ctx));
+                                       req.get().show(ctx), req.get().type.show(ctx));
                     }
                 }
             } else {
@@ -184,11 +185,11 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
                     if (auto e =
                             ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                         e.setHeader("Keyword parameter `{}` of type `{}` not compatible with type of {} method `{}`",
-                                    corresponding->get().show(ctx), corresponding->get().type->show(ctx),
+                                    corresponding->get().show(ctx), corresponding->get().type.show(ctx),
                                     supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
                         e.addErrorLine(superMethod.data(ctx)->loc(),
                                        "The super method parameter `{}` was declared here with type `{}`",
-                                       opt.get().show(ctx), opt.get().type->show(ctx));
+                                       opt.get().show(ctx), opt.get().type.show(ctx));
                     }
                 }
             }
@@ -205,11 +206,11 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
         } else if (!checkSubtype(ctx, leftRest->get().type, right.kw.rest->get().type)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
                 e.setHeader("Parameter **`{}` of type `{}` not compatible with type of {} method `{}`",
-                            right.kw.rest->get().show(ctx), right.kw.rest->get().type->show(ctx),
+                            right.kw.rest->get().show(ctx), right.kw.rest->get().type.show(ctx),
                             supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(),
                                "The super method parameter **`{}` was declared here with type `{}`",
-                               left.kw.rest->get().show(ctx), left.kw.rest->get().type->show(ctx));
+                               left.kw.rest->get().show(ctx), left.kw.rest->get().type.show(ctx));
             }
         }
     }
@@ -241,10 +242,10 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
 
         if (!checkSubtype(ctx, methodReturn, superReturn)) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturn->show(ctx),
+                e.setHeader("Return type `{}` does not match return type of {} method `{}`", methodReturn.show(ctx),
                             supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Super method defined here with return type `{}`",
-                               superReturn->show(ctx));
+                               superReturn.show(ctx));
             }
         }
     }
@@ -346,25 +347,25 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     }
 }
 
-core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef *classDef,
+core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef &classDef,
                                 const core::SymbolRef ancestor) {
-    for (const auto &anc : classDef->ancestors) {
+    for (const auto &anc : classDef.ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
         if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
-    for (const auto &anc : classDef->singletonAncestors) {
+    for (const auto &anc : classDef.singletonAncestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
         if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
             return anc.loc();
         }
     }
     // give up
-    return classDef->loc;
+    return classDef.loc;
 }
 
-void validateFinalAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef,
+void validateFinalAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef,
                                  const core::SymbolRef errMsgClass, const string_view verb) {
     for (const auto &mixin : klass.data(ctx)->mixins()) {
         if (!mixin.data(ctx)->isClassOrModuleFinal()) {
@@ -402,7 +403,7 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
     }
 }
 
-void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef) {
+void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
     if (superClass.exists() && superClass.data(ctx)->isClassOrModuleFinal()) {
         if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
@@ -449,14 +450,14 @@ core::FileRef bestNonRBIFile(core::Context ctx, const core::SymbolRef klass) {
     return bestFile;
 }
 
-void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef,
+void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef,
                                   const core::SymbolRef errMsgClass, const string_view verb) {
-    auto klassFile = bestNonRBIFile(ctx, klass);
     for (const auto &mixin : klass.data(ctx)->mixins()) {
         if (!mixin.data(ctx)->isClassOrModuleSealed()) {
             continue;
         }
-        // TODO(jez) sealedLocs is actually always one loc. We should add an ENFORCE or error message for this.
+
+        auto klassFile = bestNonRBIFile(ctx, klass);
         if (absl::c_any_of(mixin.data(ctx)->sealedLocs(ctx),
                            [klassFile](auto loc) { return loc.file() == klassFile; })) {
             continue;
@@ -472,18 +473,19 @@ void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass
     }
 }
 
-void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef *classDef) {
+void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
-    auto file = bestNonRBIFile(ctx, klass);
-    if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed() &&
-        !absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx), [file](auto loc) { return loc.file() == file; })) {
-        if (auto e =
-                ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
-            e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.data(ctx)->show(ctx),
-                        klass.data(ctx)->show(ctx));
-            for (auto loc : superClass.data(ctx)->sealedLocs(ctx)) {
-                e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
-                               superClass.data(ctx)->show(ctx));
+    if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed()) {
+        auto file = bestNonRBIFile(ctx, klass);
+        if (!absl::c_any_of(superClass.data(ctx)->sealedLocs(ctx), [file](auto loc) { return loc.file() == file; })) {
+            if (auto e =
+                    ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::SealedAncestor)) {
+                e.setHeader("`{}` is sealed and cannot be inherited by `{}`", superClass.data(ctx)->show(ctx),
+                            klass.data(ctx)->show(ctx));
+                for (auto loc : superClass.data(ctx)->sealedLocs(ctx)) {
+                    e.addErrorLine(loc, "`{}` was marked sealed and can only be inherited in this file",
+                                   superClass.data(ctx)->show(ctx));
+                }
             }
         }
     }
@@ -581,8 +583,8 @@ private:
 
 public:
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
-        auto sym = classDef->symbol;
+        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+        auto sym = classDef.symbol;
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         validateTStructNotGrandparent(ctx, sym);
         validateAbstract(ctx, sym);
@@ -593,8 +595,8 @@ public:
     }
 
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        auto *methodDef = ast::cast_tree<ast::MethodDef>(tree);
-        auto methodData = methodDef->symbol.data(ctx);
+        auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
+        auto methodData = methodDef.symbol.data(ctx);
         auto ownerData = methodData->owner.data(ctx);
 
         // Only perform this check if this isn't a module from the stdlib, and
@@ -603,13 +605,14 @@ public:
         // Array and Hash are defined with their parameters as covariant, and as
         // a result most of their methods would fail this check.
         if (!methodData->loc().file().data(ctx).isStdlib() && !ownerData->typeMembers().empty()) {
-            variance::validateMethodVariance(ctx, methodDef->symbol);
+            variance::validateMethodVariance(ctx, methodDef.symbol);
         }
 
-        validateOverriding(ctx, methodDef->symbol);
+        validateOverriding(ctx, methodDef.symbol);
         return tree;
     }
 };
+} // namespace
 
 ast::ParsedFile runOne(core::Context ctx, ast::ParsedFile tree) {
     Timer timeit(ctx.state.tracer(), "validateSymbols");

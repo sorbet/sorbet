@@ -414,6 +414,9 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value("autoloader"));
     options.add_options("advanced")("autogen-registry-module", "Name of Ruby module used for autoloader registry",
                                     cxxopts::value<string>()->default_value("Opus::Require"));
+    options.add_options("advanced")("autogen-root-object",
+                                    "Name of Ruby object on which root autoloads should be installed",
+                                    cxxopts::value<string>()->default_value("Object"));
     options.add_options("advanced")("autogen-autoloader-samefile",
                                     "Modules that should never be collapsed into their parent. This helps break cycles "
                                     "in certain cases. (e.g. Foo::Bar::Baz)",
@@ -632,6 +635,7 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
     cfg.registryModule = raw["autogen-registry-module"].as<string>();
     cfg.rootDir = stripTrailingSlashes(raw["autogen-autoloader-root"].as<string>());
     cfg.packagedAutoloader = raw["autogen-autoloader-packaged"].as<bool>();
+    cfg.rootObject = raw["autogen-root-object"].as<string>();
     return true;
 }
 
@@ -955,8 +959,5 @@ void readOptions(Options &opts,
         throw EarlyReturnWithCode(1);
     }
 }
-
-EarlyReturnWithCode::EarlyReturnWithCode(int returnCode)
-    : SorbetException("early return with code " + to_string(returnCode)), returnCode(returnCode){};
 
 } // namespace sorbet::realmain::options

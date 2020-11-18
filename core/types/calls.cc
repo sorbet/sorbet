@@ -19,16 +19,33 @@ using namespace std;
 
 namespace sorbet::core {
 
-DispatchResult ProxyType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+namespace {
+DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "proxytype");
-    auto und = underlying();
-    return und->dispatchCall(gs, args.withThisRef(und));
+    return und.dispatchCall(gs, args.withThisRef(und));
+}
+} // namespace
+
+bool LiteralType::derivesFrom(const GlobalState &gs, core::SymbolRef klass) const {
+    return underlying().derivesFrom(gs, klass);
 }
 
-DispatchResult OrType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+bool ShapeType::derivesFrom(const GlobalState &gs, core::SymbolRef klass) const {
+    return underlying().derivesFrom(gs, klass);
+}
+
+bool TupleType::derivesFrom(const GlobalState &gs, core::SymbolRef klass) const {
+    return underlying().derivesFrom(gs, klass);
+}
+
+DispatchResult LiteralType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+    return dispatchCallProxyType(gs, underlying(), args);
+}
+
+DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "ortype");
-    auto leftRet = left->dispatchCall(gs, args.withSelfRef(left));
-    auto rightRet = right->dispatchCall(gs, args.withSelfRef(right));
+    auto leftRet = left.dispatchCall(gs, args.withSelfRef(left));
+    auto rightRet = right.dispatchCall(gs, args.withSelfRef(right));
     DispatchResult ret{Types::any(gs, leftRet.returnType, rightRet.returnType), move(leftRet.main),
                        make_unique<DispatchResult>(move(rightRet)), DispatchResult::Combinator::OR};
     return ret;
@@ -46,10 +63,6 @@ TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
     return Types::glb(gs, largs, rargs);
 }
 
-DispatchResult TypeVar::dispatchCall(const GlobalState &gs, DispatchArgs args) {
-    Exception::raise("should never happen");
-}
-
 bool allComponentsPresent(DispatchResult &res) {
     if (!res.main.method.exists()) {
         return false;
@@ -60,10 +73,11 @@ bool allComponentsPresent(DispatchResult &res) {
     return allComponentsPresent(*res.secondary);
 }
 
-DispatchResult AndType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "andtype");
-    auto leftRet = left->dispatchCall(gs, args.withThisRef(left));
-    auto rightRet = right->dispatchCall(gs, args.withThisRef(right));
+    // Tell dispatchCall to not produce any dispatch-related errors. They are very expensive to produce.
+    auto leftRet = left.dispatchCall(gs, args.withThisRef(left).withErrorsSuppressed());
+    auto rightRet = right.dispatchCall(gs, args.withThisRef(right).withErrorsSuppressed());
 
     // If either side is missing the method, dispatch to the other.
     auto leftOk = allComponentsPresent(leftRet);
@@ -73,6 +87,11 @@ DispatchResult AndType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
     }
     if (rightOk && !leftOk) {
         return rightRet;
+    }
+    if (!rightOk && !leftOk) {
+        // Expensive case. Re-dispatch the calls with errors enabled so we can give the user an error.
+        leftRet = left.dispatchCall(gs, args.withThisRef(left));
+        rightRet = right.dispatchCall(gs, args.withThisRef(right));
     }
     DispatchResult ret{Types::all(gs, leftRet.returnType, rightRet.returnType), move(leftRet.main),
                        make_unique<DispatchResult>(move(rightRet)),
@@ -94,7 +113,7 @@ TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name) const {
     return Types::any(gs, l, r);
 }
 
-DispatchResult ShapeType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
@@ -105,10 +124,10 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, DispatchArgs args)
             return res;
         }
     }
-    return ProxyType::dispatchCall(gs, args);
+    return dispatchCallProxyType(gs, underlying(), args);
 }
 
-DispatchResult TupleType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
@@ -119,7 +138,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, DispatchArgs args)
             return res;
         }
     }
-    return ProxyType::dispatchCall(gs, args);
+    return dispatchCallProxyType(gs, underlying(), args);
 }
 
 namespace {
@@ -156,8 +175,8 @@ core::Loc smallestLocWithin(core::Loc callLoc, const core::TypeAndOrigins &argTp
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
                                SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
-                               const TypePtr &selfType, vector<TypePtr> &targs, Loc loc, Loc originForUninitialized,
-                               bool mayBeSetter = false) {
+                               const TypePtr &selfType, const vector<TypePtr> &targs, Loc loc,
+                               Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(gs, method);
@@ -172,16 +191,16 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     if (auto e = gs.beginError(smallestLocWithin(callLoc, argTpe), errors::Infer::MethodArgumentMismatch)) {
         if (mayBeSetter && isSetter(gs, method.data(gs)->name)) {
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.argumentName(gs),
-                        expectedType->show(gs));
+                        expectedType.show(gs));
         } else {
-            e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType->show(gs), argTpe.type->show(gs),
+            e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs), argTpe.type.show(gs),
                         argSym.argumentName(gs));
             e.addErrorSection(ErrorSection({
                 ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`", method.data(gs)->show(gs),
-                                argSym.argumentName(gs), expectedType->show(gs)),
+                                argSym.argumentName(gs), expectedType.show(gs)),
             }));
         }
-        e.addErrorSection(ErrorSection("Got " + argTpe.type->show(gs) + " originating from:",
+        e.addErrorSection(ErrorSection("Got " + argTpe.type.show(gs) + " originating from:",
                                        argTpe.origins2Explanations(gs, originForUninitialized)));
         auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
         if (!withoutNil.isBottom() &&
@@ -217,8 +236,8 @@ int getArity(const GlobalState &gs, SymbolRef method) {
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
 SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef primary, u2 numPosArgs,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType, vector<TypePtr> &targs,
-                        bool hasBlock) {
+                        InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType,
+                        const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
             "overload not permitted here");
@@ -351,14 +370,15 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         return metaType->wrapped;
     }
 
-    if (auto *classType = cast_type<ClassType>(tp)) {
-        if (classType->symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
+    if (isa_type<ClassType>(tp)) {
+        auto classType = cast_type_nonnull<ClassType>(tp);
+        if (classType.symbol.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
             // T::Enum instances are allowed to stand for themselves in type syntax positions.
             // See the note in type_syntax.cc regarding T::Enum.
             return tp;
         }
 
-        SymbolRef attachedClass = classType->symbol.data(gs)->attachedClass(gs);
+        SymbolRef attachedClass = classType.symbol.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
@@ -395,7 +415,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
         return TupleType::build(gs, move(unwrappedElems));
-    } else if (auto *litType = cast_type<LiteralType>(tp)) {
+    } else if (isa_type<LiteralType>(tp)) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unsupported usage of literal type");
         }
@@ -482,14 +502,16 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalSta
 //  - We never allow a non-shaped Hash to satisfy keyword arguments;
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : untyped
 //    (with a subtype check on the key type, once we have generics)
-DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core::SymbolRef symbol,
-                                  vector<TypePtr> &targs) {
+DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::SymbolRef symbol,
+                                  const vector<TypePtr> &targs) {
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
                               Symbols::noSymbol());
     } else if (symbol == Symbols::void_()) {
-        if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
-            e.setHeader("Can not call method `{}` on void type", args.name.data(gs)->show(gs));
+        if (!args.suppressErrors) {
+            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
+                e.setHeader("Can not call method `{}` on void type", args.name.data(gs)->show(gs));
+            }
         }
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
     }
@@ -503,7 +525,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
             // putting it there will inadvertently shadow real definitions in
             // some cases, so we special-case it here as a last resort.
             auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
-            if (!args.args.empty()) {
+            if (!args.args.empty() && !args.suppressErrors) {
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0,
@@ -516,6 +538,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
             return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         }
         auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+        if (args.suppressErrors) {
+            // Short circuit here to avoid constructing an expensive error message.
+            return result;
+        }
         // This is a hack. We want to always be able to build the error object
         // so that it is not immediately sent to GlobalState::_error
         // and recorded.
@@ -523,10 +549,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
         // errors list of the result so that the caller can deal with the error.
         auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod);
         if (e) {
-            string thisStr = args.thisType->show(gs);
-            if (args.fullType.get() != args.thisType.get()) {
+            string thisStr = args.thisType.show(gs);
+            if (args.fullType != args.thisType) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(gs)->show(gs),
-                            thisStr, args.fullType->show(gs));
+                            thisStr, args.fullType.show(gs));
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", args.name.data(gs)->show(gs), thisStr);
 
@@ -549,9 +575,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 if (symbol.data(gs)->isClassOrModuleModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMemberTransitive(gs, args.name);
                     if (objMeth.exists() && objMeth.data(gs)->owner.data(gs)->isClassOrModuleModule()) {
-                        e.addErrorSection(
-                            ErrorSection(ErrorColors::format("Did you mean to `include {}` in this module?",
-                                                             objMeth.data(gs)->owner.data(gs)->name.show(gs))));
+                        e.addErrorNote("Did you mean to `{}` in this module?",
+                                       fmt::format("include {}", objMeth.data(gs)->owner.data(gs)->name.show(gs)));
                     }
                 }
                 auto alternatives = symbol.data(gs)->findMemberFuzzyMatch(gs, args.name);
@@ -599,20 +624,21 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                         }
 
                         if (!addedAutocorrect) {
-                            lines.emplace_back(ErrorLine::from(alternative.symbol.data(gs)->loc(),
-                                                               "Did you mean: `{}`?", suggestedName));
+                            lines.emplace_back(
+                                ErrorLine::from(alternative.symbol.data(gs)->loc(), "`{}`", suggestedName));
                         }
                     }
-                    e.addErrorSection(ErrorSection(lines));
+                    if (!lines.empty()) {
+                        e.addErrorSection(ErrorSection("Did you mean:", lines));
+                    }
                 }
 
                 auto attached = symbol.data(gs)->attachedClass(gs);
                 if (attached.exists() && symbol.data(gs)->derivesFrom(gs, Symbols::Chalk_Tools_Accessible())) {
-                    e.addErrorSection(ErrorSection(
-                        "If this method is generated by Chalk::Tools::Accessible, you "
-                        "may need to re-generate the .rbi. Try running:\n" +
-                        ErrorColors::format("  scripts/bin/remote-script sorbet/shim_generation/make_accessible.rb {}",
-                                            attached.data(gs)->showFullName(gs))));
+                    e.addErrorNote("If this method is generated by Chalk::Tools::Accessible, you "
+                                   "may need to re-generate the .rbi. Try running:\n"
+                                   "  scripts/bin/remote-script sorbet/shim_generation/make_accessible.rb {}",
+                                   attached.data(gs)->showFullName(gs));
                 }
             }
         }
@@ -670,7 +696,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
             break;
         }
         if (ait + 1 == aend && hasKwargs && (spec.flags.isDefault || spec.flags.isRepeated) &&
-            Types::approximate(gs, arg->type, *constr)->derivesFrom(gs, Symbols::Hash())) {
+            Types::approximate(gs, arg->type, *constr).derivesFrom(gs, Symbols::Hash())) {
             break;
         }
 
@@ -733,8 +759,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
             while (kwit != kwend) {
                 // if the key isn't a symbol literal, break out as this is not a valid keyword
                 auto &key = *kwit++;
-                auto *lit = cast_type<LiteralType>(key->type);
-                if (!lit || lit->literalKind != LiteralType::LiteralTypeKind::Symbol) {
+                if (!isa_type<LiteralType>(key->type) ||
+                    cast_type_nonnull<LiteralType>(key->type).literalKind != LiteralType::LiteralTypeKind::Symbol) {
                     // it's not possible to tell if this is hash will be used as kwargs yet, so we can't raise a useful
                     // error here.
 
@@ -765,14 +791,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                         // Allow an untyped arg to satisfy all kwargs
                         --aend;
                         kwargs = Types::untypedUntracked();
-                    } else if (kwSplatType->derivesFrom(gs, Symbols::Hash())) {
+                    } else if (kwSplatType.derivesFrom(gs, Symbols::Hash())) {
                         --aend;
                         if (auto e =
                                 gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
                             e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
                                         "arguments");
                             e.addErrorSection(
-                                ErrorSection("Got " + kwSplatType->show(gs) + " originating from:",
+                                ErrorSection("Got " + kwSplatType.show(gs) + " originating from:",
                                              kwSplatArg->origins2Explanations(gs, args.originForUninitialized)));
                             result.main.errors.emplace_back(e.build());
                         }
@@ -829,11 +855,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
         if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                        errors::Infer::MethodArgumentCountMismatch)) {
-                if (args.fullType.get() != args.thisType.get()) {
+                if (args.fullType != args.thisType) {
                     e.setHeader(
                         "Not enough arguments provided for method `{}` on `{}` component of `{}`. Expected: `{}`, got: "
                         "`{}`",
-                        data->show(gs), args.thisType->show(gs), args.fullType->show(gs), prettyArity(gs, method),
+                        data->show(gs), args.thisType.show(gs), args.fullType.show(gs), prettyArity(gs, method),
                         posArgs); // TODO: should use position and print the source tree, not the cfg one.
                 } else {
                     e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`",
@@ -843,8 +869,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", data->show(gs));
                 if (args.name == core::Names::any() &&
                     symbol == core::Symbols::T().data(gs)->lookupSingletonClass(gs)) {
-                    e.addErrorSection(
-                        core::ErrorSection("Hint: if you want to allow any type as an argument, use `T.untyped`"));
+                    e.addErrorNote("If you want to allow any type as an argument, use `{}`", "T.untyped");
                 }
 
                 result.main.errors.emplace_back(e.build());
@@ -873,14 +898,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                     break;
                 } else if (spec.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
-                        auto key = cast_type<LiteralType>(*it);
-                        SymbolRef klass = cast_type<ClassType>(key->underlying())->symbol;
+                        auto key = cast_type_nonnull<LiteralType>(*it);
+                        SymbolRef klass = cast_type_nonnull<ClassType>(key.underlying()).symbol;
                         if (klass != Symbols::Symbol()) {
                             continue;
                         }
 
-                        NameRef arg(gs, key->value);
-                        if (consumed.find(NameRef(gs, key->value)) != consumed.end()) {
+                        NameRef arg(gs, key.value);
+                        if (consumed.find(NameRef(gs, key.value)) != consumed.end()) {
                             continue;
                         }
                         consumed.insert(arg);
@@ -903,9 +928,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 ++kwit;
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
-                    auto lit = cast_type<LiteralType>(litType);
-                    return cast_type<ClassType>(lit->underlying())->symbol == Symbols::Symbol() &&
-                           lit->value == spec.name._id;
+                    auto lit = cast_type_nonnull<LiteralType>(litType);
+                    return cast_type_nonnull<ClassType>(lit.underlying()).symbol == Symbols::Symbol() &&
+                           lit.value == spec.name._id;
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
@@ -928,12 +953,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
                 }
             }
             for (auto &keyType : hash->keys) {
-                auto key = cast_type<LiteralType>(keyType);
-                SymbolRef klass = cast_type<ClassType>(key->underlying())->symbol;
-                if (klass == Symbols::Symbol() && consumed.find(NameRef(gs, key->value)) != consumed.end()) {
+                auto key = cast_type_nonnull<LiteralType>(keyType);
+                SymbolRef klass = cast_type_nonnull<ClassType>(key.underlying()).symbol;
+                if (klass == Symbols::Symbol() && consumed.find(NameRef(gs, key.value)) != consumed.end()) {
                     continue;
                 }
-                NameRef arg(gs, key->value);
+                NameRef arg(gs, key.value);
 
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
@@ -1036,7 +1061,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
         if (!constr->solve(gs)) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                        errors::Infer::GenericMethodConstaintUnsolved)) {
-                e.setHeader("Could not find valid instantiation of type parameters");
+                e.setHeader("Could not find valid instantiation of type parameters for `{}`",
+                            method.data(gs)->show(gs));
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.data(gs)->show(gs));
+                e.addErrorSection(ErrorSection("Found no solution for these constraints:", constr->toExplanation(gs)));
                 result.main.errors.emplace_back(e.build());
             }
         }
@@ -1065,13 +1093,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, DispatchArgs args, core
     return result;
 }
 
-DispatchResult ClassType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult ClassType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "classtype");
     vector<TypePtr> empty;
     return dispatchCallSymbol(gs, args, symbol, empty);
 }
 
-DispatchResult AppliedType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "appliedType");
     return dispatchCallSymbol(gs, args, this->klass, this->targs);
 }
@@ -1117,11 +1145,7 @@ TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const
     return getMethodArguments(gs, klass, name, targs);
 }
 
-DispatchResult AliasType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
-    Exception::raise("AliasType::dispatchCall");
-}
-
-DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) {
+DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     switch (args.name._id) {
         case Names::new_()._id: {
             auto innerArgs = DispatchArgs{Names::initialize(),
@@ -1133,7 +1157,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
                                           wrapped,
                                           args.block,
                                           args.originForUninitialized};
-            auto original = wrapped->dispatchCall(gs, innerArgs);
+            auto original = wrapped.dispatchCall(gs, innerArgs);
             original.returnType = wrapped;
             original.main.sendTp = wrapped;
             return original;
@@ -1142,16 +1166,16 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, DispatchArgs args) 
             auto loc = core::Loc(args.locs.file, args.locs.call);
             if (auto e = gs.beginError(loc, errors::Infer::MetaTypeDispatchCall)) {
                 e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.data(gs)->show(gs),
-                            this->wrapped->show(gs));
+                            this->wrapped.show(gs));
                 if (args.name == core::Names::tripleEq()) {
                     if (auto appliedType = cast_type<AppliedType>(this->wrapped)) {
-                        e.addErrorSection(
-                            ErrorSection("It looks like you're trying to pattern match on a generic", {}));
+                        e.addErrorNote("It looks like you're trying to pattern match on a generic, "
+                                       "which doesn't work at runtime");
                         e.replaceWith("Replace with class name", loc, "{}", appliedType->klass.data(gs)->show(gs));
                     }
                 }
             }
-            return ProxyType::dispatchCall(gs, args);
+            return dispatchCallProxyType(gs, underlying(), args);
     }
 }
 
@@ -1166,9 +1190,13 @@ SymbolRef unwrapSymbol(const TypePtr &type) {
 
             [&](const AppliedType &app) { result = app.klass; },
 
-            [&](const ProxyType &proxy) { typePtr = proxy.underlying(); },
-
-            [&](const TypePtr &ty) { ENFORCE(false, "Unexpected type: {}", ty.typeName()); });
+            [&](const TypePtr &ty) {
+                if (is_proxy_type(ty)) {
+                    typePtr = ty.underlying();
+                } else {
+                    ENFORCE(false, "Unexpected type: {}", ty.typeName());
+                }
+            });
     }
     return result;
 }
@@ -1176,35 +1204,35 @@ namespace {
 
 class T_untyped : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         res.returnType = make_type<MetaType>(Types::untypedUntracked());
     }
 } T_untyped;
 
 class T_noreturn : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         res.returnType = make_type<MetaType>(Types::bottom());
     }
 } T_noreturn;
 
 class T_must : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.empty()) {
             return;
         }
         const auto loc = core::Loc(args.locs.file, args.locs.call);
         if (!args.args[0]->type.isFullyDefined()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type->show(gs));
+                e.setHeader("T.must() applied to incomplete type `{}`", args.args[0]->type.show(gs));
             }
             return;
         }
         auto ret = Types::approximateSubtract(gs, args.args[0]->type, Types::nilClass());
         if (ret == args.args[0]->type) {
             if (auto e = gs.beginError(loc, errors::Infer::InvalidCast)) {
-                e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type->show(gs));
+                e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type.show(gs));
                 const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
                 e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs));
             }
@@ -1215,7 +1243,7 @@ public:
 
 class T_any : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.empty()) {
             return;
         }
@@ -1234,7 +1262,7 @@ public:
 
 class T_all : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.empty()) {
             return;
         }
@@ -1253,13 +1281,13 @@ public:
 
 class T_revealType : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() != 1) {
             return;
         }
 
         if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::RevealType)) {
-            e.setHeader("Revealed type: `{}`", args.args[0]->type->showWithMoreInfo(gs));
+            e.setHeader("Revealed type: `{}`", args.args[0]->type.showWithMoreInfo(gs));
             e.addErrorSection(
                 ErrorSection("From:", args.args[0]->origins2Explanations(gs, args.originForUninitialized)));
         }
@@ -1269,7 +1297,7 @@ public:
 
 class T_nilable : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() != 1) {
             return;
         }
@@ -1281,7 +1309,7 @@ public:
 
 class T_proc : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // NOTE: real validation done during infer
         res.returnType = Types::declBuilderForProcsSingletonClass();
     }
@@ -1289,7 +1317,7 @@ public:
 
 class Object_class : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         SymbolRef self = unwrapSymbol(args.thisType);
         auto singleton = self.data(gs)->lookupSingletonClass(gs);
         if (singleton.exists()) {
@@ -1302,7 +1330,7 @@ public:
 
 class Class_new : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         SymbolRef self = unwrapSymbol(args.thisType);
 
         auto attachedClass = self.data(gs)->attachedClass(gs);
@@ -1319,7 +1347,7 @@ public:
         DispatchArgs innerArgs{Names::initialize(), args.locs,  args.numPosArgs,
                                args.args,           instanceTy, instanceTy,
                                instanceTy,          args.block, args.originForUninitialized};
-        auto dispatched = instanceTy->dispatchCall(gs, innerArgs);
+        auto dispatched = instanceTy.dispatchCall(gs, innerArgs);
 
         for (auto &err : res.main.errors) {
             dispatched.main.errors.emplace_back(std::move(err));
@@ -1339,7 +1367,7 @@ public:
     //
     // Unfortunately, this means that some errors are double reported (once by resolver, and then
     // again by infer).
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         SymbolRef attachedClass;
 
         SymbolRef self = unwrapSymbol(args.thisType);
@@ -1420,11 +1448,11 @@ public:
                 if (!Types::isSubType(gs, argType, memType->upperBound)) {
                     validBounds = false;
                     if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
-                        auto argStr = argType->show(gs);
+                        auto argStr = argType.show(gs);
                         e.setHeader("`{}` is not a subtype of upper bound of type member `{}`", argStr,
                                     memData->showFullName(gs));
                         e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", memData->showFullName(gs),
-                                       "upper", memType->upperBound->show(gs));
+                                       "upper", memType->upperBound.show(gs));
                     }
                 }
 
@@ -1432,11 +1460,11 @@ public:
                     validBounds = false;
 
                     if (auto e = gs.beginError(loc, errors::Resolver::GenericTypeParamBoundMismatch)) {
-                        auto argStr = argType->show(gs);
+                        auto argStr = argType.show(gs);
                         e.setHeader("`{}` is not a supertype of lower bound of type member `{}`", argStr,
                                     memData->showFullName(gs));
                         e.addErrorLine(memData->loc(), "`{}` is `{}` bounded by `{}` here", memData->showFullName(gs),
-                                       "lower", memType->lowerBound->show(gs));
+                                       "lower", memType->lowerBound.show(gs));
                     }
                 }
 
@@ -1462,7 +1490,7 @@ public:
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
 public:
     // Forward Sorbet::Private::Static.sig(recv, ...) {...} to recv.sig(...) {...}
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() < 1) {
             return;
         }
@@ -1481,14 +1509,14 @@ public:
         }
 
         auto recv = args.args[0]->type;
-        res = recv->dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv, recv, recv,
-                                      args.block, args.originForUninitialized});
+        res = recv.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv, recv, recv,
+                                     args.block, args.originForUninitialized});
     }
 } SorbetPrivateStatic_sig;
 
 class Magic_buildHashOrKeywordArgs : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() % 2 == 0);
 
         vector<TypePtr> keys;
@@ -1496,8 +1524,7 @@ public:
         keys.reserve(args.args.size() / 2);
         values.reserve(args.args.size() / 2);
         for (int i = 0; i < args.args.size(); i += 2) {
-            auto *key = cast_type<LiteralType>(args.args[i]->type);
-            if (key == nullptr) {
+            if (!isa_type<LiteralType>(args.args[i]->type)) {
                 res.returnType = Types::hashOfUntyped();
                 return;
             }
@@ -1511,7 +1538,7 @@ public:
 
 class Magic_buildArray : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.empty()) {
             res.returnType = Types::arrayOfUntyped();
             return;
@@ -1539,7 +1566,7 @@ public:
 
 class Magic_buildRange : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 3, "Magic_buildRange called with missing arguments");
 
         auto rangeElemType = Types::dropLiteral(args.args[0]->type);
@@ -1570,7 +1597,7 @@ class Magic_expandSplat : public IntrinsicMethod {
 
         auto *tuple = cast_type<TupleType>(type);
         if (tuple == nullptr && core::Types::approximate(gs, type, core::TypeConstraint::EmptyFrozenConstraint)
-                                    ->derivesFrom(gs, Symbols::Array())) {
+                                    .derivesFrom(gs, Symbols::Array())) {
             // If this is an array and not a tuple, just pass it through. We
             // can't say anything about the elements.
             return type;
@@ -1589,21 +1616,21 @@ class Magic_expandSplat : public IntrinsicMethod {
     }
 
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() != 3) {
             res.returnType = Types::arrayOfUntyped();
             return;
         }
         auto val = args.args.front()->type;
-        auto *beforeLit = cast_type<LiteralType>(args.args[1]->type);
-        auto *afterLit = cast_type<LiteralType>(args.args[2]->type);
-        if (!(beforeLit->underlying()->derivesFrom(gs, Symbols::Integer()) &&
-              afterLit->underlying()->derivesFrom(gs, Symbols::Integer()))) {
+        auto beforeLit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        auto afterLit = cast_type_nonnull<LiteralType>(args.args[2]->type);
+        if (!(beforeLit.underlying().derivesFrom(gs, Symbols::Integer()) &&
+              afterLit.underlying().derivesFrom(gs, Symbols::Integer()))) {
             res.returnType = Types::untypedUntracked();
             return;
         }
-        int before = (int)beforeLit->value;
-        int after = (int)afterLit->value;
+        int before = (int)beforeLit.value;
+        int after = (int)afterLit.value;
         res.returnType = expandArray(gs, val, before + after);
     }
 } Magic_expandSplat;
@@ -1647,7 +1674,7 @@ private:
     }
 
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // args[0] is the receiver
         // args[1] is the method
         // args[2] are the splat arguments
@@ -1666,11 +1693,15 @@ public:
             return;
         }
 
-        auto *lit = cast_type<LiteralType>(args.args[1]->type);
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+        if (!isa_type<LiteralType>(args.args[1]->type)) {
             return;
         }
-        NameRef fn(gs, (u4)lit->value);
+        auto lit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        if (!lit.derivesFrom(gs, Symbols::Symbol())) {
+            return;
+        }
+
+        NameRef fn(gs, (u4)lit.value);
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
             return;
@@ -1711,7 +1742,7 @@ public:
                                receiver->type,
                                args.block,
                                args.originForUninitialized};
-        auto dispatched = receiver->type->dispatchCall(gs, innerArgs);
+        auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
@@ -1752,7 +1783,7 @@ private:
         DispatchArgs innerArgs{to_proc,         sendLocs,        0,
                                sendArgs,        nonNilBlockType, nonNilBlockType,
                                nonNilBlockType, nullptr,         originForUninitialized};
-        auto dispatched = nonNilBlockType->dispatchCall(gs, innerArgs);
+        auto dispatched = nonNilBlockType.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             gs._error(std::move(err));
         }
@@ -1800,14 +1831,14 @@ private:
         ENFORCE(bspec.flags.isBlock);
         e.addErrorSection(ErrorSection({
             ErrorLine::from(bspec.loc, "Method `{}` has specified `{}` as `{}`", dispatchComp.method.data(gs)->show(gs),
-                            bspec.argumentName(gs), blockType->show(gs)),
+                            bspec.argumentName(gs), blockType.show(gs)),
         }));
     }
 
-    static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, DispatchArgs innerArgs,
+    static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, const DispatchArgs &innerArgs,
                              shared_ptr<SendAndBlockLink> link, TypePtr passedInBlockType, Loc callLoc, Loc blockLoc,
                              DispatchResult &res) {
-        auto dispatched = receiver->type->dispatchCall(gs, innerArgs);
+        auto dispatched = receiver->type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
@@ -1818,15 +1849,15 @@ private:
         auto &blockPreType = dispatched.main.blockPreType;
         if (blockPreType && !Types::isSubTypeUnderConstraint(gs, *constr, passedInBlockType, blockPreType,
                                                              UntypedMode::AlwaysCompatible)) {
-            auto *passedInProcClass = cast_type<ClassType>(passedInBlockType);
             auto nonNilableBlockType = Types::dropNil(gs, blockPreType);
-            if (passedInProcClass && passedInProcClass->symbol == Symbols::Proc() &&
+            if (isa_type<ClassType>(passedInBlockType) &&
+                cast_type_nonnull<ClassType>(passedInBlockType).symbol == Symbols::Proc() &&
                 Types::isSubType(gs, nonNilableBlockType, passedInBlockType)) {
                 // If a block of unknown arity is passed in, but the function was declared with a known arity,
                 // raise an error in strict mode.
                 // This could occur, for example, when using Method#to_proc, since we type it as returning a `Proc`.
                 if (auto e = gs.beginError(blockLoc, errors::Infer::ProcArityUnknown)) {
-                    e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc", blockPreType->show(gs));
+                    e.setHeader("Cannot use a `{}` with unknown arity as a `{}`", "Proc", blockPreType.show(gs));
                     if (!dispatched.secondary) {
                         Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
                     }
@@ -1841,8 +1872,8 @@ private:
                     passedInBlockType = make_type<core::AppliedType>(procWithCorrectArity, move(targs));
                 }
             } else if (auto e = gs.beginError(blockLoc, errors::Infer::MethodArgumentMismatch)) {
-                e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType->show(gs),
-                            passedInBlockType->show(gs));
+                e.setHeader("Expected `{}` but found `{}` for block argument", blockPreType.show(gs),
+                            passedInBlockType.show(gs));
                 if (!dispatched.secondary) {
                     Magic_callWithBlock::showLocationOfArgDefn(gs, e, blockPreType, dispatched.main);
                 }
@@ -1884,7 +1915,7 @@ private:
     }
 
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // args[0] is the receiver
         // args[1] is the method
         // args[2] is the block
@@ -1912,11 +1943,15 @@ public:
             return;
         }
 
-        auto *lit = cast_type<LiteralType>(args.args[1]->type);
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+        if (!isa_type<LiteralType>(args.args[1]->type)) {
             return;
         }
-        NameRef fn(gs, (u4)lit->value);
+        auto lit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        if (!lit.derivesFrom(gs, Symbols::Symbol())) {
+            return;
+        }
+
+        NameRef fn(gs, (u4)lit.value);
 
         u2 numPosArgs = args.numPosArgs - 3;
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
@@ -1956,7 +1991,7 @@ public:
 
 class Magic_callWithSplatAndBlock : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // args[0] is the receiver
         // args[1] is the method
         // args[2] are the splat arguments
@@ -1976,11 +2011,15 @@ public:
             return;
         }
 
-        auto *lit = cast_type<LiteralType>(args.args[1]->type);
-        if (!lit || !lit->derivesFrom(gs, Symbols::Symbol())) {
+        if (!isa_type<LiteralType>(args.args[1]->type)) {
             return;
         }
-        NameRef fn(gs, (u4)lit->value);
+        auto lit = cast_type_nonnull<LiteralType>(args.args[1]->type);
+        if (!lit.derivesFrom(gs, Symbols::Symbol())) {
+            return;
+        }
+
+        NameRef fn(gs, (u4)lit.value);
 
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
@@ -2046,7 +2085,7 @@ public:
 
 class Magic_suggestUntypedConstantType : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 1);
         auto ty = core::Types::widen(gs, args.args.front()->type);
         auto loc = core::Loc(args.locs.file, args.locs.args[0]);
@@ -2054,8 +2093,8 @@ public:
             e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                         "# typed: strict");
             if (!ty.isUntyped() && loc.exists()) {
-                e.replaceWith(fmt::format("Initialize as `{}`", ty->show(gs)), loc, "T.let({}, {})", loc.source(gs),
-                              ty->show(gs));
+                e.replaceWith(fmt::format("Initialize as `{}`", ty.show(gs)), loc, "T.let({}, {})", loc.source(gs),
+                              ty.show(gs));
             }
         }
         res.returnType = move(ty);
@@ -2068,7 +2107,7 @@ public:
  */
 class Magic_selfNew : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // args[0] is the Class to create an instance of
         // args[1..] are the arguments to the constructor
 
@@ -2099,7 +2138,7 @@ public:
             DispatchArgs innerArgs{Names::new_(), sendLocs,   numPosArgs,
                                    sendArgStore,  selfTy,     selfTy,
                                    selfTy,        args.block, args.originForUninitialized};
-            dispatched = selfTy->dispatchCall(gs, innerArgs);
+            dispatched = selfTy.dispatchCall(gs, innerArgs);
             returnTy = dispatched.returnType;
         } else {
             // Otherwise, we know that this is the proper new intrinsic, and we
@@ -2113,7 +2152,7 @@ public:
             DispatchArgs innerArgs{Names::initialize(), sendLocs,   numPosArgs,
                                    sendArgStore,        instanceTy, instanceTy,
                                    instanceTy,          args.block, args.originForUninitialized};
-            dispatched = instanceTy->dispatchCall(gs, innerArgs);
+            dispatched = instanceTy.dispatchCall(gs, innerArgs);
 
             // The return type from dispatched is ignored, and we return
             // `T.attached_class` instead.
@@ -2132,7 +2171,7 @@ public:
 
 class DeclBuilderForProcs_void : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // NOTE: real validation done in infer
         res.returnType = Types::declBuilderForProcsSingletonClass();
     }
@@ -2140,7 +2179,7 @@ public:
 
 class DeclBuilderForProcs_returns : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // NOTE: real validation done in infer
         res.returnType = Types::declBuilderForProcsSingletonClass();
     }
@@ -2148,7 +2187,7 @@ public:
 
 class DeclBuilderForProcs_params : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // NOTE: real validation done in infer
         res.returnType = Types::declBuilderForProcsSingletonClass();
     }
@@ -2156,7 +2195,7 @@ public:
 
 class DeclBuilderForProcs_bind : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // NOTE: real validation done in infer
         res.returnType = Types::declBuilderForProcsSingletonClass();
     }
@@ -2164,18 +2203,23 @@ public:
 
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
-        const LiteralType *lit = nullptr;
+        TypePtr argType = nullptr;
         if (args.args.size() == 1) {
-            lit = cast_type<LiteralType>(args.args.front()->type);
+            argType = args.args.front()->type;
         }
-        if (!lit || !lit->underlying()->derivesFrom(gs, Symbols::Integer())) {
+        if (!isa_type<LiteralType>(argType)) {
             return;
         }
 
-        auto idx = lit->value;
+        auto lit = cast_type_nonnull<LiteralType>(argType);
+        if (!lit.underlying().derivesFrom(gs, Symbols::Integer())) {
+            return;
+        }
+
+        auto idx = lit.value;
         if (idx < 0) {
             idx = tuple->elems.size() + idx;
         }
@@ -2189,7 +2233,7 @@ public:
 
 class Tuple_last : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
@@ -2206,7 +2250,7 @@ public:
 
 class Tuple_first : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
@@ -2223,7 +2267,7 @@ public:
 
 class Tuple_minMax : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
 
@@ -2240,14 +2284,14 @@ public:
 
 class Tuple_to_a : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         res.returnType = args.selfType;
     }
 } Tuple_to_a;
 
 class Tuple_concat : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         vector<TypePtr> elems;
         auto *tuple = cast_type<TupleType>(args.thisType);
         ENFORCE(tuple);
@@ -2265,7 +2309,7 @@ public:
 
 class Shape_merge : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto *shape = cast_type<ShapeType>(args.thisType);
         ENFORCE(shape);
 
@@ -2287,8 +2331,9 @@ public:
 
         auto keys = shape->keys;
         auto values = shape->values;
-        auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType *key, const TypePtr &value) {
-            auto fnd = absl::c_find_if(keys, [&key](auto &lit) { return key->equals(*cast_type<LiteralType>(lit)); });
+        auto addShapeEntry = [&keys, &values](const TypePtr &keyType, const LiteralType &key, const TypePtr &value) {
+            auto fnd =
+                absl::c_find_if(keys, [&key](auto &lit) { return key.equals(cast_type_nonnull<LiteralType>(lit)); });
             if (fnd == keys.end()) {
                 keys.emplace_back(keyType);
                 values.emplace_back(value);
@@ -2300,8 +2345,12 @@ public:
         // inlined keyword arguments first
         for (auto i = 0; i < numKwargs; i += 2) {
             auto &keyType = args.args[i]->type;
-            auto *key = cast_type<LiteralType>(keyType);
-            if (!key || key->literalKind != LiteralType::LiteralTypeKind::Symbol) {
+            if (!isa_type<LiteralType>(keyType)) {
+                return;
+            }
+
+            auto key = cast_type_nonnull<LiteralType>(keyType);
+            if (key.literalKind != LiteralType::LiteralTypeKind::Symbol) {
                 return;
             }
 
@@ -2311,7 +2360,7 @@ public:
         // then kwsplat
         if (kwsplat != nullptr) {
             for (auto &keyType : kwsplat->keys) {
-                auto *key = cast_type<LiteralType>(keyType);
+                auto key = cast_type_nonnull<LiteralType>(keyType);
                 addShapeEntry(keyType, key, kwsplat->values[&keyType - &kwsplat->keys.front()]);
             }
         }
@@ -2321,7 +2370,7 @@ public:
 } Shape_merge;
 
 class Shape_to_hash : public IntrinsicMethod {
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         res.returnType = args.selfType;
     }
 } Shape_to_hash;
@@ -2363,7 +2412,7 @@ class Array_flatten : public IntrinsicMethod {
     }
 
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         TypePtr element;
         if (auto *ap = cast_type<AppliedType>(args.thisType)) {
@@ -2373,7 +2422,7 @@ public:
         } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
             element = tuple->elementType();
         } else {
-            ENFORCE(false, "Array#flatten on unexpected type: {}", args.selfType->show(gs));
+            ENFORCE(false, "Array#flatten on unexpected type: {}", args.selfType.show(gs));
         }
 
         int64_t depth;
@@ -2383,18 +2432,19 @@ public:
                     args.locs.args.size());
             auto argLoc = args.locs.args[0];
 
-            auto lt = cast_type<LiteralType>(argTyp);
-            if (!lt) {
+            if (!isa_type<LiteralType>(argTyp)) {
                 if (auto e =
                         gs.beginError(core::Loc(args.locs.file, argLoc), core::errors::Infer::ExpectedLiteralType)) {
                     e.setHeader("You must pass an Integer literal to specify a depth with Array#flatten");
                 }
                 return;
             }
-            ENFORCE(lt->literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
 
-            if (lt->value >= 0) {
-                depth = lt->value;
+            auto lt = cast_type_nonnull<LiteralType>(argTyp);
+            ENFORCE(lt.literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
+
+            if (lt.value >= 0) {
+                depth = lt.value;
             } else {
                 // Negative values behave like no depth was given
                 depth = INT64_MAX;
@@ -2413,7 +2463,7 @@ public:
 
 class Array_product : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
@@ -2426,7 +2476,7 @@ public:
         } else {
             // We will have only dispatched to this intrinsic when we knew the receiver.
             // Did we register this intrinsic on the wrong symbol?
-            ENFORCE(false, "Array#product on unexpected receiver type: {}", args.selfType->show(gs));
+            ENFORCE(false, "Array#product on unexpected receiver type: {}", args.selfType.show(gs));
             res.returnType = Types::untypedUntracked();
             return;
         }
@@ -2452,7 +2502,7 @@ public:
 
 class Array_compact : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         TypePtr element;
         if (auto *ap = cast_type<AppliedType>(args.thisType)) {
             ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
@@ -2461,7 +2511,7 @@ public:
         } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
             element = tuple->elementType();
         } else {
-            ENFORCE(false, "Array#compact on unexpected type: {}", args.selfType->show(gs));
+            ENFORCE(false, "Array#compact on unexpected type: {}", args.selfType.show(gs));
         }
         auto ret = Types::approximateSubtract(gs, element, Types::nilClass());
         res.returnType = Types::arrayOf(gs, ret);
@@ -2470,7 +2520,7 @@ public:
 
 class Kernel_proc : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.block == nullptr) {
             return;
         }
@@ -2489,7 +2539,7 @@ public:
 class Enumerable_toH : public IntrinsicMethod {
 public:
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         auto hash = make_type<ClassType>(core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs));
         InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
         CallLocs locs{
@@ -2503,7 +2553,7 @@ public:
 
         DispatchArgs dispatch{core::Names::enumerableToH(), locs, 1, innerArgs, hash, hash, hash, nullptr,
                               args.originForUninitialized};
-        auto dispatched = hash->dispatchCall(gs, dispatch);
+        auto dispatched = hash.dispatchCall(gs, dispatch);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));
         }
@@ -2515,7 +2565,7 @@ public:
 // statically determine things like `Integer === 3` to be true
 class Module_tripleEq : public IntrinsicMethod {
 public:
-    void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const override {
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         if (args.args.size() != 1) {
             return;
         }

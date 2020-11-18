@@ -3,7 +3,7 @@ ClassDef{
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
       orig = nullptr
-      symbol = ::<todo sym>
+      symbol = (class ::<todo sym>)
     }]
   rhs = [
     MethodDef{
@@ -85,7 +85,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -120,7 +120,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -155,7 +155,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -190,7 +190,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -225,7 +225,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -260,7 +260,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -295,7 +295,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -330,7 +330,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -365,7 +365,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -400,7 +400,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -435,7 +435,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -470,7 +470,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -505,7 +505,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -540,7 +540,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -578,7 +578,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -616,7 +616,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -657,7 +657,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -695,7 +695,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -733,7 +733,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -774,7 +774,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -809,7 +809,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -844,7 +844,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -882,7 +882,7 @@ ClassDef{
             rhs = Send{
               recv = ConstantLit{
                 orig = nullptr
-                symbol = ::<Magic>
+                symbol = (class ::<Magic>)
               }
               fun = <U <build-range>>
               block = nullptr
@@ -921,7 +921,7 @@ ClassDef{
               recv = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::<Magic>
+                  symbol = (class ::<Magic>)
                 }
                 fun = <U <build-range>>
                 block = nullptr
@@ -963,7 +963,7 @@ ClassDef{
               recv = Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::<Magic>
+                  symbol = (class ::<Magic>)
                 }
                 fun = <U <build-range>>
                 block = nullptr

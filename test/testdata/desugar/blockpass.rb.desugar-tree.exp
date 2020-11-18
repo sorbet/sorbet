@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   def calls_with_object<<C <todo sym>>>(&blk)
-    ::<Magic>.<call-with-block>(<self>, :"calls_arg_with_object", blk, <emptyTree>::<C HasMeth>.new())
+    ::<Magic>.<call-with-block>(<self>, :calls_arg_with_object, blk, <emptyTree>::<C HasMeth>.new())
   end
 
   class <emptyTree>::<C CallsWithObject><<C <todo sym>>> < (::<todo sym>)
@@ -33,7 +33,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   class <emptyTree>::<C CallsWithObjectChild><<C <todo sym>>> < (<emptyTree>::<C CallsWithObject>)
     def self.calls_with_object<<C <todo sym>>>(&blk)
-      ::<Magic>.<call-with-block>(<self>, :"super", blk)
+      ::<Magic>.<call-with-block>(<self>, :super, blk)
     end
   end
 
@@ -43,19 +43,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <block-pass>$2.meth()
       end
       <self>.calls_with_object() do |*args|
-        ::<Magic>.<call-with-splat>(:"meth".to_proc(), :"call", args.to_a(), nil)
+        ::<Magic>.<call-with-splat>(:meth.to_proc(), :call, args.to_a(), nil)
       end
       <self>.calls_with_object() do |x|
-        :"meth".to_proc().call(x)
+        :meth.to_proc().call(x)
       end
       <self>.calls_with_object() do |x|
         x.meth()
       end
-      ::<Magic>.<call-with-block>(<self>, :"calls_with_object", blk)
-      ::<Magic>.<call-with-block>(<self>, :"calls_with_object", <self>.returns_lambda())
-      ::<Magic>.<call-with-block>(<self>, :"calls_with_object", <emptyTree>::<C HasToProc>.new())
+      ::<Magic>.<call-with-block>(<self>, :calls_with_object, blk)
+      ::<Magic>.<call-with-block>(<self>, :calls_with_object, <self>.returns_lambda())
+      ::<Magic>.<call-with-block>(<self>, :calls_with_object, <emptyTree>::<C HasToProc>.new())
       <self>.calls_with_object() do |*args|
-        ::<Magic>.<call-with-splat>(<emptyTree>::<C HasToProc>.new().to_proc(), :"call", args.to_a(), nil)
+        ::<Magic>.<call-with-splat>(<emptyTree>::<C HasToProc>.new().to_proc(), :call, args.to_a(), nil)
       end
       <emptyTree>::<C CallsWithObject>.calls_with_object() do |<block-pass>$3|
         <block-pass>$3.meth()

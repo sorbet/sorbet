@@ -244,24 +244,67 @@ InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
     return ret;
 }
 
-std::string TypeConstraint::toString(const core::GlobalState &gs) const {
+UnorderedMap<SymbolRef, std::pair<TypePtr, TypePtr>> TypeConstraint::collateBounds(const GlobalState &gs) const {
+    auto collated = UnorderedMap<SymbolRef, pair<TypePtr, TypePtr>>{};
+
+    for (const auto &[sym, lowerBound] : this->lowerBounds) {
+        auto &[lowerRef, _upperRef] = collated[sym];
+        ENFORCE(lowerRef == nullptr, "{} in lowerBounds twice?", sym.show(gs));
+        lowerRef = lowerBound;
+    }
+    for (const auto &[sym, upperBound] : this->upperBounds) {
+        auto &[_lowerRef, upperRef] = collated[sym];
+        ENFORCE(upperRef == nullptr, "{} in upperBounds twice?", sym.show(gs));
+        upperRef = upperBound;
+    }
+
+    return collated;
+}
+
+string TypeConstraint::toString(const core::GlobalState &gs) const {
+    auto collated = this->collateBounds(gs);
+
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "upperBounds: [{}]\n",
+    fmt::format_to(buf, "bounds: [{}]\n",
                    fmt::map_join(
-                       this->upperBounds.begin(), this->upperBounds.end(), ", ", [&gs](auto pair) -> auto {
-                           return fmt::format("{}: {}", pair.first.toString(gs), pair.second->show(gs));
-                       }));
-    fmt::format_to(buf, "lowerBounds: [{}]\n",
-                   fmt::map_join(
-                       this->lowerBounds.begin(), this->lowerBounds.end(), ", ", [&gs](auto pair) -> auto {
-                           return fmt::format("{}: {}", pair.first.toString(gs), pair.second->show(gs));
+                       collated.begin(), collated.end(), ", ", [&gs](auto entry) -> auto {
+                           const auto &[sym, bounds] = entry;
+                           const auto &[lowerBound, upperBound] = bounds;
+                           auto lower = lowerBound != nullptr ? lowerBound.show(gs) : "_";
+                           auto upper = upperBound != nullptr ? upperBound.show(gs) : "_";
+                           return fmt::format("{} <: {} <: {}", lower, sym.data(gs)->show(gs), upper);
                        }));
     fmt::format_to(buf, "solution: [{}]\n",
                    fmt::map_join(
                        this->solution.begin(), this->solution.end(), ", ", [&gs](auto pair) -> auto {
-                           return fmt::format("{}: {}", pair.first.toString(gs), pair.second->show(gs));
+                           return fmt::format("{}: {}", pair.first.show(gs), pair.second.show(gs));
                        }));
     return to_string(buf);
+}
+
+vector<ErrorLine> TypeConstraint::toExplanation(const core::GlobalState &gs) const {
+    auto collated = this->collateBounds(gs);
+    auto result = vector<ErrorLine>{};
+
+    for (const auto &[sym, bounds] : collated) {
+        const auto &[lowerBound, upperBound] = bounds;
+        auto typeVar = make_type<TypeVar>(sym).show(gs);
+        if (lowerBound == nullptr && upperBound == nullptr) {
+            result.emplace_back(ErrorLine::fromWithoutLoc("`{}` is not constrained", typeVar));
+        } else if (lowerBound == nullptr) {
+            result.emplace_back(
+                ErrorLine::fromWithoutLoc("`{}` must be a subtype of `{}`", typeVar, upperBound.show(gs)));
+        } else if (upperBound == nullptr) {
+            result.emplace_back(
+                ErrorLine::fromWithoutLoc("`{}` must be a subtype of `{}`", lowerBound.show(gs), typeVar));
+        } else {
+            result.emplace_back(
+                ErrorLine::fromWithoutLoc("`{}` must be a subtype of `{}` which must be a subtype of `{}`",
+                                          lowerBound.show(gs), typeVar, upperBound.show(gs)));
+        }
+    }
+
+    return result;
 }
 
 } // namespace sorbet::core

@@ -222,7 +222,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                 ++n;
                 auto &tree = indexed[idx];
-                if (tree.file.data(gs).isRBI()) {
+                if (tree.file.data(gs).isRBI() || tree.file.data(gs).isPackage()) {
                     continue;
                 }
 

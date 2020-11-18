@@ -32,15 +32,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.some_method([0, 1, 2])
 
-    <self>.some_method({:"prop" => 10})
+    <self>.some_method({:prop => 10})
 
     <self>.some_method("Literal")
 
     <self>.some_method(1)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"package_method")
+    ::Sorbet::Private::Static.keep_def(<self>, :package_method)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"static_method")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :static_method)
 
     @hello = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
   end
@@ -61,9 +61,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :"some_method")
+      ::Sorbet::Private::Static.keep_self_def(<self>, :some_method)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :"method_call_arg")
+      ::Sorbet::Private::Static.keep_self_def(<self>, :method_call_arg)
 
       <emptyTree>::<C ConstantArg> = 10
     end

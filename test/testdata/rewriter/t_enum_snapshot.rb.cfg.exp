@@ -183,7 +183,7 @@ subgraph "cluster_::<Class:EnumsDoEnum>#<static-init>" {
     "bb::<Class:EnumsDoEnum>#<static-init>_2" -> "bb::<Class:EnumsDoEnum>#<static-init>_3" [style="tapered"];
 
     "bb::<Class:EnumsDoEnum>#<static-init>_3" [
-        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(EnumsDoEnum))\l<statTemp>$11: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$13, enums>\l<self>: T.class_of(EnumsDoEnum) = <selfRestore>$14\l<cfgAlias>$101: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$103: Symbol(:\"something_outside\") = :\"something_outside\"\l<statTemp>$99: Symbol(:\"something_outside\") = <cfgAlias>$101: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(EnumsDoEnum), <statTemp>$103: Symbol(:\"something_outside\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$13: Sorbet::Private::Static::Void, <selfRestore>$14: T.class_of(EnumsDoEnum))\l<statTemp>$11: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$13, enums>\l<self>: T.class_of(EnumsDoEnum) = <selfRestore>$14\l<cfgAlias>$101: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$103: Symbol(:something_outside) = :something_outside\l<statTemp>$99: Symbol(:something_outside) = <cfgAlias>$101: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(EnumsDoEnum), <statTemp>$103: Symbol(:something_outside))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:EnumsDoEnum>#<static-init>_3" -> "bb::<Class:EnumsDoEnum>#<static-init>_1" [style="bold"];

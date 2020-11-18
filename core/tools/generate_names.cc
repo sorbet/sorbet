@@ -149,6 +149,7 @@ NameDef names[] = {
     {"protected_", "protected"},
     {"public_", "public"},
     {"privateClassMethod", "private_class_method"},
+    {"privateConstant", "private_constant"},
     {"moduleFunction", "module_function"},
     {"aliasMethod", "alias_method"},
 
@@ -372,7 +373,7 @@ NameDef names[] = {
     {"PackageMethods", "<PackageMethods>", true},
 
     // GlobalState initEmpty()
-    {"Top", "<any>", true},
+    {"Top", "<top>", true},
     {"Bottom", "T.noreturn", true},
     {"Untyped", "T.untyped", true},
     {"Root", "<root>", true},

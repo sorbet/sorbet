@@ -136,7 +136,7 @@ LSPQueryResult LSPTask::queryByLoc(LSPTypecheckerDelegate &typechecker, string_v
     if (errorIfFileIsUntyped && fref.data(gs).strictLevel < core::StrictLevel::True) {
         config.logger->info("Ignoring request on untyped file `{}`", uri);
         // Act as if the query returned no results.
-        return LSPQueryResult{{}};
+        return LSPQueryResult{{}, nullptr};
     }
 
     auto loc = config.lspPos2Loc(fref, pos, gs);

@@ -621,11 +621,7 @@ bool Symbol::isPrintable(const GlobalState &gs) const {
     return false;
 }
 
-string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
-    fmt::memory_buffer buf;
-
-    printTabs(buf, tabs);
-
+string_view Symbol::showKind(const GlobalState &gs) const {
     string_view type = "unknown"sv;
     if (this->isClassOrModule()) {
         if (this->isClassOrModuleClass()) {
@@ -648,6 +644,16 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
     } else if (this->isTypeArgument()) {
         type = "type-argument"sv;
     }
+
+    return type;
+}
+
+string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    string_view type = this->showKind(gs);
 
     string_view variance = ""sv;
 
@@ -701,13 +707,19 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                                return symb.argumentName(gs);
                            }));
         }
+
+        if (this->isClassOrModule() && this->isClassOrModulePrivate()) {
+            fmt::format_to(buf, " : private");
+        }
+    } else if (this->isStaticField() && this->isStaticFieldPrivate()) {
+        fmt::format_to(buf, " : private");
     }
     if (this->resultType && !isClassOrModule()) {
         string resultType;
         if (showRaw) {
-            resultType = absl::StrReplaceAll(this->resultType->toStringWithTabs(gs, tabs), {{"\n", " "}});
+            resultType = absl::StrReplaceAll(this->resultType.toStringWithTabs(gs, tabs), {{"\n", " "}});
         } else {
-            resultType = this->resultType->show(gs);
+            resultType = this->resultType.show(gs);
         }
         fmt::format_to(buf, " -> {}", resultType);
     }
@@ -795,7 +807,7 @@ string ArgInfo::toString(const GlobalState &gs) const {
     }
     fmt::format_to(buf, "<{}>", fmt::join(flagTexts, ", "));
     if (this->type) {
-        fmt::format_to(buf, " -> {}", this->type->show(gs));
+        fmt::format_to(buf, " -> {}", this->type.show(gs));
     }
 
     fmt::format_to(buf, " @ {}", loc.showRaw(gs));
@@ -982,15 +994,14 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     const TypePtr *iter = &currentClasses;
     const OrType *orT = nullptr;
     while ((orT = cast_type<OrType>(*iter))) {
-        auto right = cast_type<ClassType>(orT->right);
+        auto right = cast_type_nonnull<ClassType>(orT->right);
         ENFORCE(left);
-        if (right->symbol == classOfSubclass) {
+        if (right.symbol == classOfSubclass) {
             return;
         }
         iter = &orT->left;
     }
-    ENFORCE(isa_type<ClassType>(*iter));
-    if (cast_type<ClassType>(*iter)->symbol == classOfSubclass) {
+    if (cast_type_nonnull<ClassType>(*iter).symbol == classOfSubclass) {
         return;
     }
     if (currentClasses != core::Types::bottom()) {
@@ -1027,16 +1038,17 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto result = Types::bottom();
     while (auto orType = cast_type<OrType>(currentClasses)) {
-        auto classType = cast_type<ClassType>(orType->right);
-        ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
-        auto subclass = classType->symbol.data(gs)->attachedClass(gs);
+        ENFORCE(isa_type<ClassType>(orType->right), "Something in sealedSubclasses that's not a ClassType");
+        auto classType = cast_type_nonnull<ClassType>(orType->right);
+        auto subclass = classType.symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
         result = Types::any(gs, make_type<ClassType>(subclass), result);
         currentClasses = orType->left;
     }
-    auto lastClassType = cast_type<ClassType>(currentClasses);
-    ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
-    auto subclass = lastClassType->symbol.data(gs)->attachedClass(gs);
+
+    ENFORCE(isa_type<ClassType>(currentClasses), "Last element of sealedSubclasses must be ClassType");
+    auto lastClassType = cast_type_nonnull<ClassType>(currentClasses);
+    auto subclass = lastClassType.symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
     result = Types::any(gs, make_type<ClassType>(subclass), result);
 
@@ -1044,16 +1056,17 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 }
 
 SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
-    if (auto alias = cast_type<AliasType>(resultType)) {
+    if (isa_type<AliasType>(resultType)) {
+        auto alias = cast_type_nonnull<AliasType>(resultType);
         if (depthLimit == 0) {
             if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
                 e.setHeader("Too many alias expansions for symbol {}, the alias is either too long or infinite. Next "
                             "expansion would have been to {}",
-                            showFullName(gs), alias->symbol.data(gs)->showFullName(gs));
+                            showFullName(gs), alias.symbol.data(gs)->showFullName(gs));
             }
             return def;
         }
-        return alias->symbol.data(gs)->dealiasWithDefault(gs, depthLimit - 1, def);
+        return alias.symbol.data(gs)->dealiasWithDefault(gs, depthLimit - 1, def);
     }
     return this->ref(gs);
 }
@@ -1212,7 +1225,7 @@ SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
 
 u4 Symbol::hash(const GlobalState &gs) const {
     u4 result = _hash(name.data(gs)->shortName(gs));
-    result = mix(result, !this->resultType ? 0 : this->resultType->hash(gs));
+    result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
@@ -1233,7 +1246,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
         if (!type) {
             type = Types::untypedUntracked();
         }
-        result = mix(result, type->hash(gs));
+        result = mix(result, type.hash(gs));
         result = mix(result, _hash(arg.name.data(gs)->shortName(gs)));
     }
     for (const auto &e : typeParams) {
@@ -1261,7 +1274,7 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
         // This is a synthetic method that encodes the superclasses of its owning class in its return type.
         // If the return type changes, we must take the slow path.
         ENFORCE(resultType);
-        result = mix(result, resultType->hash(gs));
+        result = mix(result, resultType.hash(gs));
     }
 
     return result;

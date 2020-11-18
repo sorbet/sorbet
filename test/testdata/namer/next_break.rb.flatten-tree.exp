@@ -28,7 +28,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :"test_next_break")
+      ::Sorbet::Private::Static.keep_def(<self>, :test_next_break)
     end
   end
   <emptyTree>

@@ -175,12 +175,12 @@ private:
                 if (aliasSym.data(ctx)->isMethod()) {
                     validateMethod(ctx, polarity, aliasSym);
                 } else {
-                    Exception::raise("Unexpected type alias: {}", alias.toString(ctx));
+                    Exception::raise("Unexpected type alias: {}", type.toString(ctx));
                 }
             },
 
             [&](const core::TypePtr &skipped) {
-                Exception::raise("Unexpected type in variance checking: {}", skipped->toString(ctx));
+                Exception::raise("Unexpected type in variance checking: {}", skipped.toString(ctx));
             });
     }
 

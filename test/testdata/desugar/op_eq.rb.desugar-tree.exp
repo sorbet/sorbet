@@ -19,7 +19,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def example<<C <todo sym>>>(a, &<blk>)
       begin
         if a
-          a = :"a"
+          a = :a
         else
           a
         end
@@ -27,7 +27,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           b$2 = <self>
           b$3 = b$2.b()
           if b$3
-            b$2.b=(:"b")
+            b$2.b=(:b)
           else
             b$3
           end
@@ -46,7 +46,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         if a
           a
         else
-          a = :"a"
+          a = :a
         end
         begin
           b$8 = <self>
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           if b$9
             b$9
           else
-            b$8.b=(:"b")
+            b$8.b=(:b)
           end
         end
         begin

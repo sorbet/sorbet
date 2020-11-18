@@ -1,4 +1,5 @@
 #include "common/kvstore/KeyValueStore.h"
+#include "common/EarlyReturnWithCode.h"
 #include "common/Timer.h"
 #include "lmdb.h"
 
@@ -95,7 +96,14 @@ KeyValueStore::KeyValueStore(string version, string path, string flavor)
     // manually maintaining a map from thread to transaction.
     // Avoids MDB_READERS_FULL issues with concurrent Sorbet processes.
     rc = mdb_env_open(dbState->env, this->path.c_str(), MDB_NOTLS, 0664);
-    if (rc != 0) {
+    if (rc == ENOENT) {
+        fmt::print(stderr, "'{}' does not exist. When using --cache-dir, create the directory before hand.\n",
+                   this->path);
+        throw EarlyReturnWithCode(1);
+    } else if (rc == EACCES) {
+        fmt::print(stderr, "No read permissions for '{}'", this->path);
+        throw EarlyReturnWithCode(1);
+    } else if (rc != 0) {
         goto fail;
     }
     return;

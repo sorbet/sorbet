@@ -6,7 +6,7 @@ InsSeq{
       name = EmptyTree<<C <U <root>>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
         MethodDef{
@@ -20,7 +20,7 @@ InsSeq{
               Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::<Magic>
+                  symbol = (class ::<Magic>)
                 }
                 fun = <U <define-top-class-or-module>>
                 block = nullptr
@@ -28,14 +28,14 @@ InsSeq{
                 args = [
                   ConstantLit{
                     orig = nullptr
-                    symbol = ::A
+                    symbol = (class ::A)
                   }
                 ]
               }
               Send{
                 recv = ConstantLit{
                   orig = nullptr
-                  symbol = ::Sorbet::Private::Static
+                  symbol = (module ::Sorbet::Private::Static)
                 }
                 fun = <U keep_for_ide>
                 block = nullptr
@@ -46,7 +46,7 @@ InsSeq{
                       scope = EmptyTree
                       cnst = <C <U A>>
                     }
-                    symbol = ::A
+                    symbol = (class ::A)
                   }
                 ]
               }
@@ -63,11 +63,11 @@ InsSeq{
           scope = EmptyTree
           cnst = <C <U A>>
         }
-        symbol = ::A
+        symbol = (class ::A)
       }<<C <U A>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
         MethodDef{
@@ -211,7 +211,7 @@ InsSeq{
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
-              symbol = ::Sorbet::Private::Static
+              symbol = (module ::Sorbet::Private::Static)
             }
             fun = <U keep_def>
             block = nullptr
@@ -220,7 +220,7 @@ InsSeq{
               Local{
                 localVariable = <U <self>>
               }
-              Literal{ value = :"take_arguments" }
+              Literal{ value = :take_arguments }
             ]
           }
         }

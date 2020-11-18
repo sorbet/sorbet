@@ -10,12 +10,11 @@ namespace sorbet::autogen {
 
 QualifiedName QualifiedName::fromFullName(vector<core::NameRef> name) {
     if (name.size() < 3 || name.front() != core::Names::Constants::PackageRegistry()) {
-        return {name, nullopt};
+        return {move(name), nullopt};
     }
     auto pkgName = std::optional<core::NameRef>{name[1]};
-    name.erase(name.begin());
-    name.erase(name.begin());
-    return {name, pkgName};
+    name.erase(name.begin(), name.begin() + 2);
+    return {move(name), pkgName};
 }
 
 string QualifiedName::show(const core::GlobalState &gs) const {

@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :"subpkg_class")
+      ::Sorbet::Private::Static.keep_self_def(<self>, :subpkg_class)
     end
   end
 end
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :"package_class")
+      ::Sorbet::Private::Static.keep_self_def(<self>, :package_class)
     end
   end
 end

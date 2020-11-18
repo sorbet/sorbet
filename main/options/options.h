@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_OPTIONS_H
 #define RUBY_TYPER_OPTIONS_H
 #include "common/ConstExprStr.h"
+#include "common/EarlyReturnWithCode.h"
 #include "common/FileSystem.h"
 #include "common/common.h"
 #include "core/StrictLevel.h"
@@ -8,13 +9,6 @@
 #include "spdlog/spdlog.h"
 
 namespace sorbet::realmain::options {
-
-// Terminate execution of sorbet with specific return code
-class EarlyReturnWithCode : public SorbetException {
-public:
-    EarlyReturnWithCode(int returnCode);
-    const int returnCode;
-};
 
 class PrinterConfig {
 public:
@@ -108,6 +102,7 @@ struct AutoloaderConfig {
     std::string rootDir;
     std::string preamble;
     std::string registryModule;
+    std::string rootObject;
     std::vector<std::string> requireExcludes;
     std::vector<std::vector<std::string>> sameFileModules;
     std::vector<std::string> stripPrefixes;

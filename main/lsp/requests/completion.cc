@@ -177,8 +177,11 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
             result = mergeSimilarMethods(similarMethodsForReceiver(gs, type.left, prefix),
                                          similarMethodsForReceiver(gs, type.right, prefix));
         },
-        [&](const core::ProxyType &type) { result = similarMethodsForReceiver(gs, type.underlying(), prefix); },
-        [&](const core::TypePtr &type) { return; });
+        [&](const core::TypePtr &type) {
+            if (is_proxy_type(receiver)) {
+                result = similarMethodsForReceiver(gs, receiver.underlying(), prefix);
+            }
+        });
 
     return result;
 }
@@ -260,7 +263,7 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const 
             fmt::format_to(argBuf, "{}: ", argSym.name.data(gs)->shortName(gs));
         }
         if (argSym.type) {
-            auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint)->show(gs);
+            auto resultType = getResultType(gs, argSym.type, method, receiverType, constraint).show(gs);
             fmt::format_to(argBuf, "${{{}:{}}}", nextTabstop++, resultType);
         } else {
             fmt::format_to(argBuf, "${{{}}}", nextTabstop++);
@@ -286,7 +289,7 @@ string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const 
                 targs_it++;
                 blkArgs = fmt::format(" |{}|", fmt::map_join(targs_it, appliedType->targs.end(), ", ", [&](auto targ) {
                                           auto resultType = getResultType(gs, targ, method, receiverType, constraint);
-                                          return fmt::format("${{{}:{}}}", nextTabstop++, resultType->show(gs));
+                                          return fmt::format("${{{}:{}}}", nextTabstop++, resultType.show(gs));
                                       }));
             }
         }
@@ -536,8 +539,9 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
     }
 
     core::SymbolRef receiverSym;
-    if (auto classType = core::cast_type<core::ClassType>(receiverType)) {
-        receiverSym = classType->symbol;
+    if (core::isa_type<core::ClassType>(receiverType)) {
+        auto classType = core::cast_type_nonnull<core::ClassType>(receiverType);
+        receiverSym = classType.symbol;
     } else if (auto appliedType = core::cast_type<core::AppliedType>(receiverType)) {
         receiverSym = appliedType->klass;
     } else {

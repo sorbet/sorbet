@@ -34,19 +34,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.p(blk)
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_positional")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_keyword")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_two_keyword")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_two_keyword)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_positional_then_keyword")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional_then_keyword)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_rest")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_rest)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_keyword_rest")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword_rest)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_block")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_block)
   end
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)
@@ -55,15 +55,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def takes_keyword<<C <todo sym>>>(arg0:, &<blk>)
-      <self>.super(:"arg0", arg0)
+      <self>.super(:arg0, arg0)
     end
 
     def takes_two_keyword<<C <todo sym>>>(arg0:, arg1:, &<blk>)
-      <self>.super(:"arg0", arg0, :"arg1", arg1)
+      <self>.super(:arg0, arg0, :arg1, arg1)
     end
 
     def takes_positional_then_keyword<<C <todo sym>>>(arg0, arg1:, &<blk>)
-      <self>.super(arg0, :"arg1", arg1)
+      <self>.super(arg0, :arg1, arg1)
     end
 
     def takes_rest<<C <todo sym>>>(*args, &<blk>)
@@ -78,18 +78,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.super()
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_positional")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_keyword")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_two_keyword")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_two_keyword)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_positional_then_keyword")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional_then_keyword)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_rest")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_rest)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_keyword_rest")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword_rest)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"takes_block")
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_block)
   end
 end

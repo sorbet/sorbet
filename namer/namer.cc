@@ -130,13 +130,19 @@ struct FoundMethod final {
 };
 
 struct Modifier {
-    DefinitionKind kind;
+    enum class Kind : u1 {
+        Class = 0,
+        Method = 1,
+        ClassOrStaticField = 2,
+    };
+    Kind kind;
     FoundDefinitionRef owner;
     core::LocOffsets loc;
     // The name of the modification.
     core::NameRef name;
     // For methods: The name of the method being modified.
-    core::NameRef methodName;
+    // For constants: The name of the constant being modified.
+    core::NameRef target;
 };
 
 class FoundDefinitions final {
@@ -351,7 +357,7 @@ class SymbolFinder {
             case core::Names::declareInterface()._id:
             case core::Names::declareAbstract()._id: {
                 Modifier mod;
-                mod.kind = DefinitionKind::Class;
+                mod.kind = Modifier::Kind::Class;
                 mod.owner = klass;
                 mod.loc = send->loc;
                 mod.name = send->fun;
@@ -470,22 +476,49 @@ public:
                 case core::Names::privateClassMethod()._id:
                 case core::Names::protected_()._id:
                 case core::Names::public_()._id:
+                    addMethodModifier(ctx, original);
+                    break;
+                case core::Names::privateConstant()._id:
+                    addConstantModifier(ctx, original);
                     break;
                 default:
                     return tree;
             }
-
-            Modifier methodModifier;
-            methodModifier.kind = DefinitionKind::Method;
-            methodModifier.owner = getOwner();
-            methodModifier.loc = original.loc;
-            methodModifier.name = original.fun;
-            methodModifier.methodName = unwrapLiteralToMethodName(ctx, original, original.args[0]);
-            if (methodModifier.methodName.exists()) {
-                foundDefs->addModifier(move(methodModifier));
-            }
         }
         return tree;
+    }
+
+    void addMethodModifier(core::Context ctx, ast::Send &original) {
+        Modifier methodModifier;
+        methodModifier.kind = Modifier::Kind::Method;
+        methodModifier.owner = getOwner();
+        methodModifier.loc = original.loc;
+        methodModifier.name = original.fun;
+        methodModifier.target = unwrapLiteralToMethodName(ctx, original, original.args[0]);
+
+        if (methodModifier.target.exists()) {
+            foundDefs->addModifier(move(methodModifier));
+        }
+    }
+
+    void addConstantModifier(core::Context ctx, ast::Send &original) {
+        Modifier constantModifier;
+        constantModifier.kind = Modifier::Kind::ClassOrStaticField;
+        constantModifier.owner = getOwner();
+        constantModifier.loc = original.loc;
+        constantModifier.name = original.fun;
+        if (auto sym = ast::cast_tree<ast::Literal>(original.args[0])) {
+            if (sym->isSymbol(ctx)) {
+                constantModifier.target = sym->asSymbol(ctx);
+            } else if (sym->isString(ctx)) {
+                constantModifier.target = sym->asString(ctx);
+            } else {
+                constantModifier.target = core::NameRef::noName();
+            }
+        }
+        if (constantModifier.target.exists()) {
+            foundDefs->addModifier(move(constantModifier));
+        }
     }
 
     core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::Send &original, ast::TreePtr &expr) {
@@ -982,13 +1015,13 @@ class SymbolDefiner {
     }
 
     void modifyMethod(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == DefinitionKind::Method);
+        ENFORCE(mod.kind == Modifier::Kind::Method);
 
         auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (mod.name._id == core::Names::privateClassMethod()._id) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
-        auto method = ctx.state.lookupMethodSymbol(owner, mod.methodName);
+        auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
         if (method.exists()) {
             switch (mod.name._id) {
                 case core::Names::private_()._id:
@@ -1003,6 +1036,24 @@ class SymbolDefiner {
                     break;
                 default:
                     break;
+            }
+        }
+    }
+
+    void modifyConstant(core::MutableContext ctx, const Modifier &mod) {
+        ENFORCE(mod.kind == Modifier::Kind::ClassOrStaticField);
+
+        auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+        auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
+        auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
+        if (constant.exists() && mod.name == core::Names::privateConstant()) {
+            if (constant.data(ctx)->isClassOrModule()) {
+                constant.data(ctx)->setClassOrModulePrivate();
+            } else if (constant.data(ctx)->isStaticField()) {
+                constant.data(ctx)->setStaticFieldPrivate();
+            } else if (constant.data(ctx)->isTypeMember()) {
+                // Visibility on type members is special (even more restrictive than private),
+                // so we ignore requests to mark type members private.
             }
         }
     }
@@ -1088,7 +1139,7 @@ class SymbolDefiner {
     }
 
     void modifyClass(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == DefinitionKind::Class);
+        ENFORCE(mod.kind == Modifier::Kind::Class);
         const auto fun = mod.name;
         auto symbolData = ctx.owner.data(ctx);
         if (fun == core::Names::declareFinal()) {
@@ -1302,14 +1353,15 @@ public:
         for (const auto &modifier : foundDefs->modifiers()) {
             const auto owner = getOwnerSymbol(modifier.owner);
             switch (modifier.kind) {
-                case DefinitionKind::Method:
+                case Modifier::Kind::Method:
                     modifyMethod(ctx.withOwner(owner), modifier);
                     break;
-                case DefinitionKind::Class:
+                case Modifier::Kind::Class:
                     modifyClass(ctx.withOwner(owner), modifier);
                     break;
-                default:
-                    Exception::raise("Found invalid modifier");
+                case Modifier::Kind::ClassOrStaticField:
+                    modifyConstant(ctx.withOwner(owner), modifier);
+                    break;
             }
         }
     }

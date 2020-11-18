@@ -71,17 +71,15 @@ struct TypeSyntaxArgs {
 class TypeSyntax {
 public:
     static bool isSig(core::Context ctx, const ast::Send &send);
-    static ParsedSig parseSig(core::MutableContext ctx, const ast::Send &send, const ParsedSig *parent,
-                              TypeSyntaxArgs args);
+    static ParsedSig parseSig(core::Context ctx, const ast::Send &send, const ParsedSig *parent, TypeSyntaxArgs args);
 
     struct ResultType {
         core::TypePtr type;
         core::SymbolRef rebind;
     };
-    static ResultType getResultTypeAndBind(core::MutableContext ctx, ast::TreePtr &expr, const ParsedSig &,
+    static ResultType getResultTypeAndBind(core::Context ctx, ast::TreePtr &expr, const ParsedSig &,
                                            TypeSyntaxArgs args);
-    static core::TypePtr getResultType(core::MutableContext ctx, ast::TreePtr &expr, const ParsedSig &,
-                                       TypeSyntaxArgs args);
+    static core::TypePtr getResultType(core::Context ctx, ast::TreePtr &expr, const ParsedSig &, TypeSyntaxArgs args);
 
     TypeSyntax() = delete;
 };

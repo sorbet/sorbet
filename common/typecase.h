@@ -3,6 +3,7 @@
 
 #include "common/Exception.h"
 #include "common/common.h"
+#include "common/has_member.h"
 #include <functional>
 #include <string>
 #include <typeinfo>
@@ -37,16 +38,6 @@ struct argtype_extractor<ReturnType (ClassType::*)(ArgType) const> {
     using arg_type = ArgType;
 };
 
-namespace Sfinae {
-// Check if .tag() exists (from https://stackoverflow.com/a/9154394)
-// Indicates that type is a tagged pointer.
-template <class> struct sfinae_true : std::true_type {};
-
-template <class T> static auto test_has_tag(int) -> sfinae_true<decltype(std::declval<T>().tag())>;
-template <class> static auto test_has_tag(long) -> std::false_type;
-template <class T> struct has_tag : decltype(test_has_tag<T>(0)) {};
-} // namespace Sfinae
-
 // fast_cast-based typecase
 
 template <typename Base, typename FUNC> bool typecaseHelper(Base *base, FUNC &&func) {
@@ -61,8 +52,10 @@ template <typename Base, typename FUNC> bool typecaseHelper(Base *base, FUNC &&f
     }
 }
 
+GENERATE_HAS_MEMBER(tag)
+
 template <typename Base, typename... Subclasses> void typecase(Base *base, Subclasses &&... funcs) {
-    static_assert(Sfinae::has_tag<Base>() != true,
+    static_assert(HAS_MEMBER_tag<Base>() != true,
                   "For tagged pointers, please call typecase on a reference to the object not a pointer.");
     bool done = false;
 
@@ -91,7 +84,7 @@ template <typename Base, typename FUNC> bool typecaseHelper(Base &base, FUNC &&f
 }
 
 template <typename Base, typename... Subclasses> void typecase(Base &base, Subclasses &&... funcs) {
-    static_assert(Sfinae::has_tag<Base>() == true,
+    static_assert(HAS_MEMBER_tag<Base>() == true,
                   "typecase used on reference type without .tag()! Did you mean to use it on a pointer type?");
     bool done = false;
 
@@ -101,7 +94,7 @@ template <typename Base, typename... Subclasses> void typecase(Base &base, Subcl
         if (!base) {
             sorbet::Exception::raise("nullptr passed to typecase");
         }
-        sorbet::Exception::raise("not handled typecase case: {}", demangle(typeid(*base).name()));
+        sorbet::Exception::raise("not handled typecase case: {}", base.tag());
     }
 }
 
