@@ -414,7 +414,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value("autoloader"));
     options.add_options("advanced")("autogen-registry-module", "Name of Ruby module used for autoloader registry",
                                     cxxopts::value<string>()->default_value("Opus::Require"));
-    options.add_options("advanced")("autogen-root-object", "Name of Ruby object on which root autoloads should be installed",
+    options.add_options("advanced")("autogen-root-object",
+                                    "Name of Ruby object on which root autoloads should be installed",
                                     cxxopts::value<string>()->default_value("Object"));
     options.add_options("advanced")("autogen-autoloader-samefile",
                                     "Modules that should never be collapsed into their parent. This helps break cycles "

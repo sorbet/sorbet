@@ -196,10 +196,10 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     string casgnArg;
     auto type = definitionType(gs);
     if (type == Definition::Type::Module || type == Definition::Type::Class) {
-        fullName =
-            root() ? alCfg.rootObject : fmt::format("{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string {
-                                                return nr.show(gs);
-                                            }));
+        fullName = root() ? alCfg.rootObject
+                          : fmt::format("{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string {
+                                            return nr.show(gs);
+                                        }));
         if (!root()) {
             fmt::format_to(buf, "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
             predeclare(gs, fullName, buf);
