@@ -1362,8 +1362,6 @@ public:
                 case Modifier::Kind::ClassOrStaticField:
                     modifyConstant(ctx.withOwner(owner), modifier);
                     break;
-                default:
-                    Exception::raise("Found invalid modifier");
             }
         }
     }
