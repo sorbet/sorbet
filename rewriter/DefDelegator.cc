@@ -9,47 +9,43 @@ using namespace std;
 namespace sorbet::rewriter {
 
 vector<ast::TreePtr> DefDelegator::run(core::MutableContext ctx, const ast::Send *send) {
-    vector<ast::TreePtr> empty;
+    vector<ast::TreePtr> methodStubs;
     auto loc = send->loc;
 
     if (send->fun != core::Names::defDelegator()) {
-        return empty;
+        return methodStubs;
     }
 
     // This method takes 2..3 positional arguments and no keyword args:
     // `def_delegator(accessor, method, ali = method)`
     if (!(send->numPosArgs == 2 || send->numPosArgs == 3)) {
-        return empty;
+        return methodStubs;
     }
 
     if (send->hasKwArgs()) {
-        return empty;
+        return methodStubs;
     }
 
     auto *accessor = ast::cast_tree<ast::Literal>(send->args[0]);
-    auto *method = ast::cast_tree<ast::Literal>(send->args[1]);
-
     if (!accessor || !(accessor->isSymbol(ctx) || accessor->isString(ctx))) {
-        return empty;
+        return methodStubs;
     }
 
+    auto *method = ast::cast_tree<ast::Literal>(send->args[1]);
     if (!method || !method->isSymbol(ctx)) {
-        return empty;
+        return methodStubs;
     }
 
     core::NameRef methodName = method->asSymbol(ctx);
 
     if (send->numPosArgs == 3) {
         auto *alias = ast::cast_tree<ast::Literal>(send->args[2]);
-
         if (!alias || !alias->isSymbol(ctx)) {
-            return empty;
+            return methodStubs;
         }
 
         methodName = alias->asSymbol(ctx);
     }
-
-    vector<ast::TreePtr> methodStubs;
 
     // sig {params(arg0: T.untyped, blk: Proc).returns(T.untyped)}
     ast::Send::ARGS_store sigArgs;
@@ -66,7 +62,12 @@ vector<ast::TreePtr> DefDelegator::run(core::MutableContext ctx, const ast::Send
     args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
     args.emplace_back(ast::make_tree<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
 
-    methodStubs.push_back(ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::EmptyTree()));
+    methodStubs.push_back(
+        ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::RaiseUnimplemented(loc)));
+
+    // Include the original call to def_delegator so sorbet will still type-check it
+    // and throw errors if the class (or its parent) didn't `extend Forwardable`
+    methodStubs.push_back(send->deepCopy());
 
     return methodStubs;
 }

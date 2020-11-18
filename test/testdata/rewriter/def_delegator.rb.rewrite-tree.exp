@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<C <todo sym>>>(*arg0, &<blk>)
-      <emptyTree>
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def aliased_bar<<C <todo sym>>>(*arg0, &<blk>)
-      <emptyTree>
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -62,7 +62,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foo)
 
+    <self>.def_delegator(:thing, :foo)
+
     ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar)
+
+    <self>.def_delegator(:thing, :bar, :aliased_bar)
 
     ::Sorbet::Private::Static.keep_def(<self>, :usages)
   end
@@ -73,7 +77,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<C <todo sym>>>(*arg0, &<blk>)
-      <emptyTree>
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -81,14 +85,44 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def aliased_bar<<C <todo sym>>>(*arg0, &<blk>)
-      <emptyTree>
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.extend(<emptyTree>::<C Forwardable>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foo)
 
+    <self>.def_delegator(:thing, :foo)
+
     ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar)
+
+    <self>.def_delegator(:thing, :bar, :aliased_bar)
+  end
+
+  class <emptyTree>::<C ErrorsWhenMissingForwardable><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.untyped(), :<blk>, ::T.nilable(::Proc)).returns(::T.untyped())
+    end
+
+    def foo<<C <todo sym>>>(*arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.untyped(), :<blk>, ::T.nilable(::Proc)).returns(::T.untyped())
+    end
+
+    def aliased_bar<<C <todo sym>>>(*arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo)
+
+    <self>.def_delegator(:thing, :foo)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar)
+
+    <self>.def_delegator(:thing, :bar, :aliased_bar)
   end
 
   class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
@@ -123,7 +157,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def each<<C <todo sym>>>(*arg0, &<blk>)
-      <emptyTree>
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
     <self>.extend(<emptyTree>::<C T>::<C Generic>)
@@ -135,5 +169,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>::<C Elem> = <self>.type_member()
 
     ::Sorbet::Private::Static.keep_def(<self>, :each)
+
+    <self>.def_delegator(:thing, :each)
   end
 end

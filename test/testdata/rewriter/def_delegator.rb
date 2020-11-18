@@ -36,6 +36,11 @@ class WorksWithoutExtendingTSig
   def_delegator :thing, :bar, :aliased_bar
 end
 
+class ErrorsWhenMissingForwardable
+  def_delegator :thing, :foo # error: Method `def_delegator` does not exist
+  def_delegator :thing, :bar, :aliased_bar # error: Method `def_delegator` does not exist
+end
+
 class IgnoredUsages
   extend Forwardable
 
