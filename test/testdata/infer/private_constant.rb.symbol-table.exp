@@ -1,46 +1,79 @@
 class ::<root> < ::Object ()
-  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> (Sig)
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:3
       argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
   module ::Foo < ::Sorbet::Private::Static::ImplicitModuleSuperclass () @ test/testdata/infer/private_constant.rb:3
-    static-field ::Foo::ANOTHER_PRIVATE_CONST : private -> TrueClass @ test/testdata/infer/private_constant.rb:8
-    static-field ::Foo::A_PRIVATE_CONST : private -> String("private") @ test/testdata/infer/private_constant.rb:5
-    static-field ::Foo::A_PUBLIC_CONST -> String("public") @ test/testdata/infer/private_constant.rb:4
-    class ::Foo::AnotherPrivateClass < ::Object () : private @ test/testdata/infer/private_constant.rb:14
-    class ::Foo::<Class:AnotherPrivateClass>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/infer/private_constant.rb:14
-      type-member(+) ::Foo::<Class:AnotherPrivateClass>::<AttachedClass> -> T.attached_class (of Foo::AnotherPrivateClass) @ test/testdata/infer/private_constant.rb:14
-      method ::Foo::<Class:AnotherPrivateClass>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:14
+    static-field ::Foo::ANOTHER_PRIVATE_CONST : private -> TrueClass @ test/testdata/infer/private_constant.rb:10
+    static-field ::Foo::A_PRIVATE_CONST : private -> String("private") @ test/testdata/infer/private_constant.rb:7
+    static-field ::Foo::A_PUBLIC_CONST -> String("public") @ test/testdata/infer/private_constant.rb:6
+    class ::Foo::AnotherPrivateClass < ::Object () : private @ test/testdata/infer/private_constant.rb:22
+    class ::Foo::<Class:AnotherPrivateClass>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/infer/private_constant.rb:22
+      type-member(+) ::Foo::<Class:AnotherPrivateClass>::<AttachedClass> -> T.attached_class (of Foo::AnotherPrivateClass) @ test/testdata/infer/private_constant.rb:22
+      method ::Foo::<Class:AnotherPrivateClass>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:22
         argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
-    module ::Foo::AnotherPrivateModule < ::Sorbet::Private::Static::ImplicitModuleSuperclass () : private @ test/testdata/infer/private_constant.rb:31
-    class ::Foo::<Class:AnotherPrivateModule>[<AttachedClass>] < ::Module () @ test/testdata/infer/private_constant.rb:31
-      type-member(+) ::Foo::<Class:AnotherPrivateModule>::<AttachedClass> -> T.attached_class (of Foo::AnotherPrivateModule) @ test/testdata/infer/private_constant.rb:31
-      method ::Foo::<Class:AnotherPrivateModule>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:31
+    module ::Foo::AnotherPrivateModule < ::Sorbet::Private::Static::ImplicitModuleSuperclass () : private @ test/testdata/infer/private_constant.rb:39
+    class ::Foo::<Class:AnotherPrivateModule>[<AttachedClass>] < ::Module () @ test/testdata/infer/private_constant.rb:39
+      type-member(+) ::Foo::<Class:AnotherPrivateModule>::<AttachedClass> -> T.attached_class (of Foo::AnotherPrivateModule) @ test/testdata/infer/private_constant.rb:39
+      method ::Foo::<Class:AnotherPrivateModule>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:39
         argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
-    class ::Foo::PrivateClass < ::Object () : private @ test/testdata/infer/private_constant.rb:11
-    class ::Foo::<Class:PrivateClass>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/infer/private_constant.rb:11
-      type-member(+) ::Foo::<Class:PrivateClass>::<AttachedClass> -> T.attached_class (of Foo::PrivateClass) @ test/testdata/infer/private_constant.rb:11
-      method ::Foo::<Class:PrivateClass>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:11
+    class ::Foo::PrivateClass < ::Object () : private @ test/testdata/infer/private_constant.rb:19
+    class ::Foo::<Class:PrivateClass>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/infer/private_constant.rb:19
+      type-member(+) ::Foo::<Class:PrivateClass>::<AttachedClass> -> T.attached_class (of Foo::PrivateClass) @ test/testdata/infer/private_constant.rb:19
+      method ::Foo::<Class:PrivateClass>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:19
         argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
-    module ::Foo::PrivateModule < ::Sorbet::Private::Static::ImplicitModuleSuperclass () : private @ test/testdata/infer/private_constant.rb:17
-      class ::Foo::PrivateModule::ClassInsidePrivateModule < ::Object () @ test/testdata/infer/private_constant.rb:25
-      class ::Foo::PrivateModule::<Class:ClassInsidePrivateModule>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/infer/private_constant.rb:25
-        type-member(+) ::Foo::PrivateModule::<Class:ClassInsidePrivateModule>::<AttachedClass> -> T.attached_class (of Foo::PrivateModule::ClassInsidePrivateModule) @ test/testdata/infer/private_constant.rb:25
-        method ::Foo::PrivateModule::<Class:ClassInsidePrivateModule>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:25
+    static-field ::Foo::PrivateInt : private -> <Alias: ::Integer > @ test/testdata/infer/private_constant.rb:16
+    static-field-type-alias ::Foo::PrivateIntTypeAlias : private -> Integer @ test/testdata/infer/private_constant.rb:13
+    module ::Foo::PrivateModule < ::Sorbet::Private::Static::ImplicitModuleSuperclass () : private @ test/testdata/infer/private_constant.rb:25
+      class ::Foo::PrivateModule::ClassInsidePrivateModule < ::Object () @ test/testdata/infer/private_constant.rb:33
+      class ::Foo::PrivateModule::<Class:ClassInsidePrivateModule>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/infer/private_constant.rb:33
+        type-member(+) ::Foo::PrivateModule::<Class:ClassInsidePrivateModule>::<AttachedClass> -> T.attached_class (of Foo::PrivateModule::ClassInsidePrivateModule) @ test/testdata/infer/private_constant.rb:33
+        method ::Foo::PrivateModule::<Class:ClassInsidePrivateModule>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:33
           argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
-        method ::Foo::PrivateModule::<Class:ClassInsidePrivateModule>#also_ok_private_usage (<blk>) @ test/testdata/infer/private_constant.rb:26
+        method ::Foo::PrivateModule::<Class:ClassInsidePrivateModule>#also_ok_private_usage (<blk>) @ test/testdata/infer/private_constant.rb:34
           argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
-    class ::Foo::<Class:PrivateModule>[<AttachedClass>] < ::Module () @ test/testdata/infer/private_constant.rb:17
-      type-member(+) ::Foo::<Class:PrivateModule>::<AttachedClass> -> T.attached_class (of Foo::PrivateModule) @ test/testdata/infer/private_constant.rb:17
-      method ::Foo::<Class:PrivateModule>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:17
+    class ::Foo::<Class:PrivateModule>[<AttachedClass>] < ::Module () @ test/testdata/infer/private_constant.rb:25
+      type-member(+) ::Foo::<Class:PrivateModule>::<AttachedClass> -> T.attached_class (of Foo::PrivateModule) @ test/testdata/infer/private_constant.rb:25
+      method ::Foo::<Class:PrivateModule>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:25
         argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
-      method ::Foo::<Class:PrivateModule>#ok_private_usage (<blk>) @ test/testdata/infer/private_constant.rb:18
+      method ::Foo::<Class:PrivateModule>#ok_private_usage (<blk>) @ test/testdata/infer/private_constant.rb:26
         argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
-  class ::<Class:Foo>[<AttachedClass>] < ::Module () @ test/testdata/infer/private_constant.rb:3
+  class ::<Class:Foo>[<AttachedClass>] < ::Module (Sig) @ test/testdata/infer/private_constant.rb:3
     type-member(+) ::<Class:Foo>::<AttachedClass> -> T.attached_class (of Foo) @ test/testdata/infer/private_constant.rb:3
     method ::<Class:Foo>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:3
       argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
-    method ::<Class:Foo>#not_ok_private_usage (<blk>) @ test/testdata/infer/private_constant.rb:42
+    method ::<Class:Foo>#not_ok_private_usage (<blk>) @ test/testdata/infer/private_constant.rb:50
       argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
-    method ::<Class:Foo>#ok_private_usage (<blk>) @ test/testdata/infer/private_constant.rb:34
+    method ::<Class:Foo>#ok_private_usage (<blk>) @ test/testdata/infer/private_constant.rb:42
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
+    method ::<Class:Foo>#using_private_class (x, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant.rb:61
+      argument x<> -> Foo::PrivateClass @ Loc {file=test/testdata/infer/private_constant.rb start=60:16 end=60:17}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
+    method ::<Class:Foo>#using_private_ints (x, y, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant.rb:58
+      argument x<> -> Integer @ Loc {file=test/testdata/infer/private_constant.rb start=57:16 end=57:17}
+      argument y<> -> Integer @ Loc {file=test/testdata/infer/private_constant.rb start=57:40 end=57:41}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
+    method ::<Class:Foo>#using_private_module (x, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant.rb:64
+      argument x<> -> T.class_of(Foo::PrivateModule) @ Loc {file=test/testdata/infer/private_constant.rb start=63:16 end=63:17}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
+  class ::Object < ::BasicObject (Kernel) @ https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#L27
+    method ::Object#foo : private (x, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant.rb:100
+      argument x<> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=98:13 end=98:14}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
+  class ::PrivateTypeMember[Elem] < ::Object () @ test/testdata/infer/private_constant.rb:80
+    class ::PrivateTypeMember::B < ::Object () @ test/testdata/infer/private_constant.rb:90
+      method ::PrivateTypeMember::B#bar (x, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant.rb:94
+        argument x<> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=92:17 end=92:18}
+        argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
+    class ::PrivateTypeMember::<Class:B>[<AttachedClass>] < ::<Class:Object> (Sig) @ test/testdata/infer/private_constant.rb:90
+      type-member(+) ::PrivateTypeMember::<Class:B>::<AttachedClass> -> T.attached_class (of PrivateTypeMember::B) @ test/testdata/infer/private_constant.rb:90
+      method ::PrivateTypeMember::<Class:B>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:90
+        argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
+    type-member(=) ::PrivateTypeMember::Elem -> PrivateTypeMember::Elem @ test/testdata/infer/private_constant.rb:84
+    method ::PrivateTypeMember#foo (x, <blk>) -> Sorbet::Private::Static::Void @ test/testdata/infer/private_constant.rb:88
+      argument x<> -> PrivateTypeMember::Elem @ Loc {file=test/testdata/infer/private_constant.rb start=87:15 end=87:16}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
+  class ::<Class:PrivateTypeMember>[<AttachedClass>] < ::<Class:Object> (Sig, Generic, Helpers) @ test/testdata/infer/private_constant.rb:80
+    type-member(+) ::<Class:PrivateTypeMember>::<AttachedClass> -> T.attached_class (of PrivateTypeMember) @ test/testdata/infer/private_constant.rb:80
+    method ::<Class:PrivateTypeMember>#<static-init> (<blk>) @ test/testdata/infer/private_constant.rb:80
       argument <blk><block> @ Loc {file=test/testdata/infer/private_constant.rb start=??? end=???}
 
