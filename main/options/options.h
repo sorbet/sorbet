@@ -102,6 +102,7 @@ struct AutoloaderConfig {
     std::string rootDir;
     std::string preamble;
     std::string registryModule;
+    std::string rootObject;
     std::vector<std::string> requireExcludes;
     std::vector<std::vector<std::string>> sameFileModules;
     std::vector<std::string> stripPrefixes;

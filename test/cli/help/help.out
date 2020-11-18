@@ -147,6 +147,9 @@ Usage:
       --autogen-registry-module arg
                                 Name of Ruby module used for autoloader
                                 registry (default: Opus::Require)
+      --autogen-root-object arg
+                                Name of Ruby object on which root autoloads
+                                should be installed (default: Object)
       --autogen-autoloader-samefile arg
                                 Modules that should never be collapsed into
                                 their parent. This helps break cycles in
