@@ -18,10 +18,12 @@ using namespace std;
 
 namespace sorbet::core {
 
-SymbolRef MutableContext::selfClass() {
+SymbolRef Context::selfClass() {
     SymbolData data = this->owner.data(this->state);
     if (data->isClassOrModule()) {
-        return data->singletonClass(this->state);
+        auto klass = data->lookupSingletonClass(this->state);
+        ENFORCE_NO_TIMER(klass.exists());
+        return klass;
     }
     return data->enclosingClass(this->state);
 }
@@ -40,6 +42,10 @@ bool Context::permitOverloadDefinitions(const core::GlobalState &gs, FileRef sig
 
     constexpr string_view whitelistedTest = "overloads_test.rb"sv;
     return FileOps::getFileName(sigLoc.data(gs).path()) == whitelistedTest;
+}
+
+bool Context::permitOverloadDefinitions(FileRef sigLoc) const {
+    return Context::permitOverloadDefinitions(state, sigLoc, owner);
 }
 
 bool MutableContext::permitOverloadDefinitions(FileRef sigLoc) const {

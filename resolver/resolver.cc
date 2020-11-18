@@ -1561,11 +1561,45 @@ public:
 };
 
 class ResolveSignaturesWalk {
+public:
+    struct ResolveSignatureJob {
+        core::FileRef file;
+        core::SymbolRef owner;
+        ast::MethodDef *mdef;
+        InlinedVector<const ast::Send *, 1> sigs;
+    };
+    vector<ResolveSignatureJob> sigJobs;
+
+    struct ResolveFieldJob {
+        core::FileRef file;
+        core::SymbolRef owner;
+        core::SymbolRef scope;
+        const ast::Cast *cast;
+        const ast::UnresolvedIdent *uid;
+    };
+    vector<ResolveFieldJob> fieldJobs;
+
+    struct ResolveMethodAliasJob {
+        core::FileRef file;
+        core::SymbolRef owner;
+        core::LocOffsets loc;
+        core::NameRef toName;
+        core::NameRef fromName;
+    };
+    vector<ResolveMethodAliasJob> methodAliasJobs;
+
+    struct ResolveSignaturesWalkResult {
+        vector<ResolveSignatureJob> sigJobs;
+        vector<ResolveFieldJob> fieldJobs;
+        vector<ResolveMethodAliasJob> methodAliasJobs;
+        vector<ast::ParsedFile> trees;
+    };
+
 private:
     vector<int> nestedBlockCounts;
 
-    ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef, int pos,
-                                  bool isOverloaded) {
+    static ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef,
+                                         int pos, bool isOverloaded) {
         if (!isOverloaded) {
             return ast::MK::arg2Local(mdef.args[pos]);
         } else {
@@ -1580,8 +1614,8 @@ private:
         }
     }
 
-    void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, core::LocOffsets exprLoc, ParsedSig sig,
-                           bool isOverloaded, const ast::MethodDef &mdef) {
+    static void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, core::LocOffsets exprLoc,
+                                  ParsedSig sig, bool isOverloaded, const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
 
@@ -1718,9 +1752,219 @@ private:
         }
     }
 
+    static void handleAbstractOrInterfaceMethods(core::Context ctx, ast::MethodDef &mdef) {
+        if (mdef.symbol.data(ctx)->isAbstract()) {
+            if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
+                if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
+                    e.setHeader("Abstract methods must not contain any code in their body");
+                    e.replaceWith("Delete the body", core::Loc(ctx.file, mdef.rhs.loc()), "");
+                }
+
+                mdef.rhs = ast::MK::EmptyTree();
+            }
+            if (!mdef.symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
+                if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
+                    e.setHeader("Before declaring an abstract method, you must mark your class/module "
+                                "as abstract using `abstract!` or `interface!`");
+                }
+            }
+
+            // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
+            // behavior of the runtime.
+            ast::Send::ARGS_store args;
+
+            auto argIdx = -1;
+            auto numPosArgs = 0;
+            for (auto &arg : mdef.args) {
+                ++argIdx;
+
+                const ast::Local *local = nullptr;
+                if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
+                    local = ast::cast_tree<ast::Local>(opt->expr);
+                } else {
+                    local = ast::cast_tree<ast::Local>(arg);
+                }
+
+                auto &info = mdef.symbol.data(ctx)->arguments()[argIdx];
+                if (info.flags.isKeyword) {
+                    args.emplace_back(ast::MK::Symbol(local->loc, info.name));
+                    args.emplace_back(local->deepCopy());
+                } else if (info.flags.isRepeated || info.flags.isBlock) {
+                    // Explicitly skip for now.
+                    // Involves synthesizing a call to callWithSplat, callWithBlock, or
+                    // callWithSplatAndBlock
+                } else {
+                    args.emplace_back(local->deepCopy());
+                    ++numPosArgs;
+                }
+            }
+
+            auto self = ast::MK::Self(mdef.loc);
+            mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), numPosArgs, std::move(args));
+        } else if (mdef.symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
+            if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
+                e.setHeader("All methods in an interface must be declared abstract");
+            }
+        }
+    }
+
+public:
+    static void processResolveSignatureJob(core::MutableContext ctx, const ResolveSignatureJob &job) {
+        auto &sigs = job.sigs;
+        auto &mdef = job.mdef;
+        ENFORCE_NO_TIMER(!sigs.empty());
+
+        prodCounterInc("types.sig.count");
+        auto loc = sigs[0]->loc;
+        if (ctx.file.data(ctx).originalSigil == core::StrictLevel::None && !sigs.front()->flags.isRewriterSynthesized) {
+            if (auto e = ctx.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
+                e.setHeader("To use `{}`, this file must declare an explicit `{}` sigil (found: "
+                            "none). If you're not sure which one to use, start with `{}`",
+                            "sig", "# typed:", "# typed: false");
+            }
+        }
+
+        bool isOverloaded = sigs.size() > 1 && ctx.permitOverloadDefinitions(ctx.file);
+        auto originalName = mdef->symbol.data(ctx)->name;
+        if (isOverloaded) {
+            ctx.state.mangleRenameSymbol(mdef->symbol, originalName);
+        }
+        int i = 0;
+
+        // process signatures in the context of either the current
+        // class, or the current singleton class, depending on if
+        // the current method is a self method.
+        core::SymbolRef sigOwner;
+        if (mdef->flags.isSelfMethod) {
+            sigOwner = ctx.owner.data(ctx)->singletonClass(ctx);
+        } else {
+            sigOwner = ctx.owner;
+        }
+
+        while (i < sigs.size()) {
+            auto allowSelfType = true;
+            auto allowRebind = false;
+            auto allowTypeMember = true;
+            auto sig = TypeSyntax::parseSig(ctx.withOwner(sigOwner), *sigs[i], nullptr,
+                                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef->symbol});
+            core::SymbolRef overloadSym;
+            if (isOverloaded) {
+                vector<int> argsToKeep;
+                int argId = -1;
+                for (auto &argTree : mdef->args) {
+                    argId++;
+                    const auto local = ast::MK::arg2Local(argTree);
+                    auto treeArgName = local->localVariable._name;
+                    ENFORCE(local != nullptr);
+                    auto spec = absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == treeArgName; });
+                    if (spec != sig.argTypes.end()) {
+                        argsToKeep.emplace_back(argId);
+                    }
+                }
+                overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, sigs[i]->loc), mdef->symbol,
+                                                               originalName, i, argsToKeep);
+                if (i != sigs.size() - 1) {
+                    overloadSym.data(ctx)->setOverloaded();
+                }
+            } else {
+                overloadSym = mdef->symbol;
+            }
+            fillInInfoFromSig(ctx, overloadSym, sigs[i]->loc, move(sig), isOverloaded, *mdef);
+            i++;
+        }
+        handleAbstractOrInterfaceMethods(ctx, *mdef);
+    }
+
+    static void processResolveFieldJob(core::MutableContext ctx, const ResolveFieldJob &job) {
+        auto &uid = job.uid;
+        auto &cast = job.cast;
+        auto scope = job.scope;
+
+        auto prior = scope.data(ctx)->findMember(ctx, uid->name);
+        if (prior.exists()) {
+            if (core::Types::equiv(ctx, prior.data(ctx)->resultType, cast->type)) {
+                // We already have a symbol for this field, and it matches what we already saw, so we can short
+                // circuit.
+                return;
+            } else {
+                // We do some normalization here to ensure that the file / line we report the error on doesn't
+                // depend on the order that we traverse files nor the order we traverse within a file.
+                auto priorLoc = prior.data(ctx)->loc();
+                core::Loc reportOn;
+                core::Loc errorLine;
+                core::Loc thisLoc = core::Loc(ctx.file, uid->loc);
+                if (thisLoc.file() == priorLoc.file()) {
+                    reportOn = thisLoc.beginPos() < priorLoc.beginPos() ? thisLoc : priorLoc;
+                    errorLine = thisLoc.beginPos() < priorLoc.beginPos() ? priorLoc : thisLoc;
+                } else {
+                    reportOn = thisLoc.file() < priorLoc.file() ? thisLoc : priorLoc;
+                    errorLine = thisLoc.file() < priorLoc.file() ? priorLoc : thisLoc;
+                }
+
+                if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
+                    e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.data(ctx)->show(ctx));
+                    e.addErrorLine(errorLine, "Previous declaration is here:");
+                }
+                return;
+            }
+        }
+
+        core::SymbolRef var;
+        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
+            var = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, uid->loc), scope, uid->name);
+        } else {
+            var = ctx.state.enterFieldSymbol(core::Loc(ctx.file, uid->loc), scope, uid->name);
+        }
+        var.data(ctx)->resultType = cast->type;
+    }
+
+    static void processResolveMethodAliasJob(core::MutableContext ctx, const ResolveMethodAliasJob &job) {
+        auto owner = ctx.owner;
+        core::SymbolRef toMethod = owner.data(ctx)->findMemberNoDealias(ctx, job.toName);
+        if (toMethod.exists()) {
+            toMethod = toMethod.data(ctx)->dealiasMethod(ctx);
+        }
+
+        if (!toMethod.exists()) {
+            if (auto e = ctx.beginError(job.loc, core::errors::Resolver::BadAliasMethod)) {
+                e.setHeader("Can't make method alias from `{}` to non existing method `{}`", job.fromName.show(ctx),
+                            job.toName.show(ctx));
+            }
+            toMethod = core::Symbols::Sorbet_Private_Static_badAliasMethodStub();
+        }
+
+        core::SymbolRef fromMethod = owner.data(ctx)->findMemberNoDealias(ctx, job.fromName);
+        if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
+            if (auto e = ctx.beginError(job.loc, core::errors::Resolver::BadAliasMethod)) {
+                auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
+                if (fromMethod == dealiased) {
+                    e.setHeader("Redefining the existing method `{}` as a method alias",
+                                fromMethod.data(ctx)->show(ctx));
+                    e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous definition");
+                } else {
+                    e.setHeader("Redefining method alias `{}` from `{}` to `{}`", fromMethod.data(ctx)->show(ctx),
+                                dealiased.data(ctx)->show(ctx), toMethod.data(ctx)->show(ctx));
+                    e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous alias definition");
+                    e.addErrorLine(dealiased.data(ctx)->loc(), "Previous alias pointed to");
+                    e.addErrorLine(toMethod.data(ctx)->loc(), "Redefining alias to");
+                }
+            }
+            return;
+        }
+
+        // No need to make an alias when they're already the same symbol.
+        if (fromMethod == toMethod) {
+            return;
+        }
+
+        core::SymbolRef alias = ctx.state.enterMethodSymbol(core::Loc(job.file, job.loc), job.owner, job.fromName);
+        alias.data(ctx.state)->resultType = core::make_type<core::AliasType>(toMethod);
+    }
+
+private:
     // Force errors from any signatures that didn't attach to methods.
     // `lastSigs` will always be empty after this function is called.
-    void processLeftoverSigs(core::MutableContext ctx, InlinedVector<const ast::Send *, 1> &lastSigs) {
+    void processLeftoverSigs(core::Context ctx, InlinedVector<const ast::Send *, 1> &lastSigs) {
         if (!lastSigs.empty()) {
             // These sigs won't have been parsed, as there was no methods to
             // attach them to -- parse them here manually to force any errors.
@@ -1741,7 +1985,7 @@ private:
         }
     }
 
-    void processClassBody(core::MutableContext ctx, ast::ClassDef &klass) {
+    void processClassBody(core::Context ctx, ast::ClassDef &klass) {
         InlinedVector<const ast::Send *, 1> lastSigs;
         for (auto &stat : klass.rhs) {
             processStatement(ctx, stat, lastSigs);
@@ -1754,7 +1998,7 @@ private:
         klass.rhs.erase(toRemove, klass.rhs.end());
     }
 
-    void processInSeq(core::MutableContext ctx, ast::InsSeq &seq) {
+    void processInSeq(core::Context ctx, ast::InsSeq &seq) {
         InlinedVector<const ast::Send *, 1> lastSigs;
 
         // Explicitly check in the contxt of the class, not <static-init>
@@ -1774,7 +2018,7 @@ private:
         seq.stats.erase(toRemove, seq.stats.end());
     }
 
-    void processStatement(core::MutableContext ctx, ast::TreePtr &stat, InlinedVector<const ast::Send *, 1> &lastSigs) {
+    void processStatement(core::Context ctx, ast::TreePtr &stat, InlinedVector<const ast::Send *, 1> &lastSigs) {
         typecase(
             stat,
 
@@ -1828,127 +2072,10 @@ private:
                 }
 
                 if (!lastSigs.empty()) {
-                    prodCounterInc("types.sig.count");
-
-                    auto loc = lastSigs[0]->loc;
-                    if (ctx.file.data(ctx).originalSigil == core::StrictLevel::None &&
-                        !lastSigs.front()->flags.isRewriterSynthesized) {
-                        if (auto e = ctx.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
-                            e.setHeader("To use `{}`, this file must declare an explicit `{}` sigil (found: "
-                                        "none). If you're not sure which one to use, start with `{}`",
-                                        "sig", "# typed:", "# typed: false");
-                        }
-                    }
-
-                    bool isOverloaded = lastSigs.size() > 1 && ctx.permitOverloadDefinitions(ctx.file);
-                    auto originalName = mdef.symbol.data(ctx)->name;
-                    if (isOverloaded) {
-                        ctx.state.mangleRenameSymbol(mdef.symbol, originalName);
-                    }
-                    int i = 0;
-
-                    // process signatures in the context of either the current
-                    // class, or the current singleton class, depending on if
-                    // the current method is a self method.
-                    core::SymbolRef sigOwner;
-                    if (mdef.flags.isSelfMethod) {
-                        sigOwner = ctx.owner.data(ctx)->singletonClass(ctx);
-                    } else {
-                        sigOwner = ctx.owner;
-                    }
-
-                    while (i < lastSigs.size()) {
-                        auto allowSelfType = true;
-                        auto allowRebind = false;
-                        auto allowTypeMember = true;
-                        auto sig = TypeSyntax::parseSig(
-                            ctx.withOwner(sigOwner), *lastSigs[i], nullptr,
-                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
-                        core::SymbolRef overloadSym;
-                        if (isOverloaded) {
-                            vector<int> argsToKeep;
-                            int argId = -1;
-                            for (auto &argTree : mdef.args) {
-                                argId++;
-                                const auto local = ast::MK::arg2Local(argTree);
-                                auto treeArgName = local->localVariable._name;
-                                ENFORCE(local != nullptr);
-                                auto spec =
-                                    absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == treeArgName; });
-                                if (spec != sig.argTypes.end()) {
-                                    argsToKeep.emplace_back(argId);
-                                }
-                            }
-                            overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, lastSigs[i]->loc),
-                                                                           mdef.symbol, originalName, i, argsToKeep);
-                            overloadSym.data(ctx)->setMethodVisibility(mdef.symbol.data(ctx)->methodVisibility());
-                            if (i != lastSigs.size() - 1) {
-                                overloadSym.data(ctx)->setOverloaded();
-                            }
-                        } else {
-                            overloadSym = mdef.symbol;
-                        }
-                        fillInInfoFromSig(ctx, overloadSym, lastSigs[i]->loc, move(sig), isOverloaded, mdef);
-                        i++;
-                    }
-
-                    // OVERLOAD
+                    sigJobs.emplace_back(ResolveSignatureJob{ctx.file, ctx.owner, &mdef, std::move(lastSigs)});
                     lastSigs.clear();
-                }
-
-                if (mdef.symbol.data(ctx)->isAbstract()) {
-                    if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
-                        if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
-                            e.setHeader("Abstract methods must not contain any code in their body");
-                            e.replaceWith("Delete the body", core::Loc(ctx.file, mdef.rhs.loc()), "");
-                        }
-
-                        mdef.rhs = ast::MK::EmptyTree();
-                    }
-                    if (!mdef.symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
-                        if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
-                            e.setHeader("Before declaring an abstract method, you must mark your class/module "
-                                        "as abstract using `abstract!` or `interface!`");
-                        }
-                    }
-
-                    // Rewrite the empty body of the abstract method to forward all arguments to `super`, mirroring the
-                    // behavior of the runtime.
-                    ast::Send::ARGS_store args;
-
-                    auto argIdx = -1;
-                    auto numPosArgs = 0;
-                    for (auto &arg : mdef.args) {
-                        ++argIdx;
-
-                        const ast::Local *local = nullptr;
-                        if (auto *opt = ast::cast_tree<ast::OptionalArg>(arg)) {
-                            local = ast::cast_tree<ast::Local>(opt->expr);
-                        } else {
-                            local = ast::cast_tree<ast::Local>(arg);
-                        }
-
-                        auto &info = mdef.symbol.data(ctx)->arguments()[argIdx];
-                        if (info.flags.isKeyword) {
-                            args.emplace_back(ast::MK::Symbol(local->loc, info.name));
-                            args.emplace_back(local->deepCopy());
-                        } else if (info.flags.isRepeated || info.flags.isBlock) {
-                            // Explicitly skip for now.
-                            // Involves synthesizing a call to callWithSplat, callWithBlock, or
-                            // callWithSplatAndBlock
-                        } else {
-                            args.emplace_back(local->deepCopy());
-                            ++numPosArgs;
-                        }
-                    }
-
-                    auto self = ast::MK::Self(mdef.loc);
-                    mdef.rhs =
-                        ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), numPosArgs, std::move(args));
-                } else if (mdef.symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
-                    if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
-                        e.setHeader("All methods in an interface must be declared abstract");
-                    }
+                } else {
+                    handleAbstractOrInterfaceMethods(ctx, mdef);
                 }
             },
             [&](const ast::ClassDef &cdef) {
@@ -1982,7 +2109,7 @@ private:
         return result;
     }
 
-    bool handleDeclaration(core::MutableContext ctx, const ast::Assign &asgn) {
+    bool handleDeclaration(core::Context ctx, const ast::Assign &asgn) {
         auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
         if (uid == nullptr) {
             return false;
@@ -2040,43 +2167,7 @@ private:
             scope = ctx.selfClass();
         }
 
-        auto prior = scope.data(ctx)->findMember(ctx, uid->name);
-        if (prior.exists()) {
-            if (core::Types::equiv(ctx, prior.data(ctx)->resultType, cast->type)) {
-                // We already have a symbol for this field, and it matches what we already saw, so we can short
-                // circuit.
-                return true;
-            } else {
-                // We do some normalization here to ensure that the file / line we report the error on doesn't
-                // depend on the order that we traverse files nor the order we traverse within a file.
-                auto priorLoc = prior.data(ctx)->loc();
-                core::Loc reportOn;
-                core::Loc errorLine;
-                core::Loc thisLoc = core::Loc(ctx.file, uid->loc);
-                if (thisLoc.file() == priorLoc.file()) {
-                    reportOn = thisLoc.beginPos() < priorLoc.beginPos() ? thisLoc : priorLoc;
-                    errorLine = thisLoc.beginPos() < priorLoc.beginPos() ? priorLoc : thisLoc;
-                } else {
-                    reportOn = thisLoc.file() < priorLoc.file() ? thisLoc : priorLoc;
-                    errorLine = thisLoc.file() < priorLoc.file() ? priorLoc : thisLoc;
-                }
-
-                if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
-                    e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.data(ctx)->show(ctx));
-                    e.addErrorLine(errorLine, "Previous declaration is here:");
-                }
-                return false;
-            }
-        }
-        core::SymbolRef var;
-
-        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
-            var = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, uid->loc), scope, uid->name);
-        } else {
-            var = ctx.state.enterFieldSymbol(core::Loc(ctx.file, uid->loc), scope, uid->name);
-        }
-
-        var.data(ctx)->resultType = cast->type;
+        fieldJobs.emplace_back(ResolveFieldJob{ctx.file, ctx.owner, scope, cast, uid});
         return true;
     }
 
@@ -2251,7 +2342,7 @@ public:
         nestedBlockCounts.emplace_back(0);
     }
 
-    ast::TreePtr postTransformAssign(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         if (handleDeclaration(ctx, asgn)) {
@@ -2303,7 +2394,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
         nestedBlockCounts.pop_back();
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         processClassBody(ctx.withOwner(klass.symbol), klass);
@@ -2330,12 +2421,12 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformInsSeq(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr postTransformInsSeq(core::Context ctx, ast::TreePtr tree) {
         processInSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         if (auto *id = ast::cast_tree<ast::ConstantLit>(send.recv)) {
@@ -2421,46 +2512,8 @@ public:
             auto toName = args[1];
 
             auto owner = methodOwner(ctx);
-            core::SymbolRef toMethod = owner.data(ctx)->findMemberNoDealias(ctx, toName);
-            if (toMethod.exists()) {
-                toMethod = toMethod.data(ctx)->dealiasMethod(ctx);
-            }
 
-            if (!toMethod.exists()) {
-                if (auto e = ctx.beginError(send.args[1].loc(), core::errors::Resolver::BadAliasMethod)) {
-                    e.setHeader("Can't make method alias from `{}` to non existing method `{}`", fromName.show(ctx),
-                                toName.show(ctx));
-                }
-                toMethod = core::Symbols::Sorbet_Private_Static_badAliasMethodStub();
-            }
-
-            core::SymbolRef fromMethod = owner.data(ctx)->findMemberNoDealias(ctx, fromName);
-            if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::BadAliasMethod)) {
-                    auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
-                    if (fromMethod == dealiased) {
-                        e.setHeader("Redefining the existing method `{}` as a method alias",
-                                    fromMethod.data(ctx)->show(ctx));
-                        e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous definition");
-                    } else {
-                        e.setHeader("Redefining method alias `{}` from `{}` to `{}`", fromMethod.data(ctx)->show(ctx),
-                                    dealiased.data(ctx)->show(ctx), toMethod.data(ctx)->show(ctx));
-                        e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous alias definition");
-                        e.addErrorLine(dealiased.data(ctx)->loc(), "Previous alias pointed to");
-                        e.addErrorLine(toMethod.data(ctx)->loc(), "Redefining alias to");
-                    }
-                }
-                return tree;
-            }
-
-            // No need to make an alias when they're already the same symbol.
-            if (fromMethod == toMethod) {
-                return tree;
-            }
-
-            core::SymbolRef alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, send.loc), owner, fromName);
-            alias.data(ctx)->resultType = core::make_type<core::AliasType>(toMethod);
-
+            methodAliasJobs.emplace_back(ResolveMethodAliasJob{ctx.file, owner, send.loc, toName, fromName});
             return tree;
         } else {
             return tree;
@@ -2534,7 +2587,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
 
     computeExternalTypes(gs);
 
-    auto result = resolveSigs(gs, std::move(trees));
+    auto result = resolveSigs(gs, workers, std::move(trees));
     if (!result.hasResult()) {
         return result;
     }
@@ -2543,22 +2596,88 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     return result;
 }
 
-ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
-    ResolveSignaturesWalk sigs;
-    const auto &epochManager = gs.epochManager;
+ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerPool &workers,
+                                                  vector<ast::ParsedFile> trees) {
     Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
-    u4 count = 0;
+
+    auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+    auto outputq = make_shared<BlockingBoundedQueue<ResolveSignaturesWalk::ResolveSignaturesWalkResult>>(trees.size());
     for (auto &tree : trees) {
-        count++;
-        // Don't check every turn of the loop. We want to be responsive to cancelation without harming throughput.
-        if (count % 250 == 0 && epochManager->wasTypecheckingCanceled()) {
-            return ast::ParsedFilesOrCancelled();
+        inputq->push(move(tree), 1);
+    }
+    trees.clear();
+
+    workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
+        Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
+        ResolveSignaturesWalk walk;
+        ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
+        ast::ParsedFile job;
+        for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
+            if (result.gotItem()) {
+                core::Context ctx(gs, core::Symbols::root(), job.file);
+                job.tree = ast::TreeMap::apply(ctx, walk, std::move(job.tree));
+                output.trees.emplace_back(move(job));
+            }
         }
-        core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
-        tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
+        if (!output.trees.empty()) {
+            output.fieldJobs = move(walk.fieldJobs);
+            output.sigJobs = move(walk.sigJobs);
+            output.methodAliasJobs = move(walk.methodAliasJobs);
+            auto count = output.trees.size();
+            outputq->push(move(output), count);
+        }
+    });
+
+    ResolveSignaturesWalk::ResolveSignaturesWalkResult combined;
+    {
+        ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
+        for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (result.gotItem()) {
+                if (combined.trees.empty()) {
+                    combined = move(threadResult);
+                } else {
+                    combined.trees.insert(combined.trees.end(), make_move_iterator(threadResult.trees.begin()),
+                                          make_move_iterator(threadResult.trees.end()));
+                    combined.fieldJobs.insert(combined.fieldJobs.end(),
+                                              make_move_iterator(threadResult.fieldJobs.begin()),
+                                              make_move_iterator(threadResult.fieldJobs.end()));
+                    combined.sigJobs.insert(combined.sigJobs.end(), make_move_iterator(threadResult.sigJobs.begin()),
+                                            make_move_iterator(threadResult.sigJobs.end()));
+                    combined.methodAliasJobs.insert(combined.methodAliasJobs.end(),
+                                                    make_move_iterator(threadResult.methodAliasJobs.begin()),
+                                                    make_move_iterator(threadResult.methodAliasJobs.end()));
+                }
+            }
+        }
     }
 
-    return trees;
+    {
+        Timer timeit(gs.tracer(), "resolver.resolve_fields");
+        for (auto &job : combined.fieldJobs) {
+            core::MutableContext ctx(gs, job.owner, job.file);
+            ResolveSignaturesWalk::processResolveFieldJob(ctx, job);
+        }
+    }
+
+    {
+        Timer timeit(gs.tracer(), "resolver.resolve_sigs");
+        for (auto &job : combined.sigJobs) {
+            core::MutableContext ctx(gs, job.owner, job.file);
+            ResolveSignaturesWalk::processResolveSignatureJob(ctx, job);
+        }
+    }
+
+    {
+        Timer timeit(gs.tracer(), "resolver.resolve_method_aliases");
+        for (auto &job : combined.methodAliasJobs) {
+            core::MutableContext ctx(gs, job.owner, job.file);
+            ResolveSignaturesWalk::processResolveMethodAliasJob(ctx, job);
+        }
+    }
+
+    return move(combined.trees);
 }
 
 void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
@@ -2583,7 +2702,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     })
     trees = ResolveTypeMembersWalk::run(gs, std::move(trees), *workers);
     computeExternalTypes(gs);
-    auto result = resolveSigs(gs, std::move(trees));
+    auto result = resolveSigs(gs, *workers, std::move(trees));
     if (!result.hasResult()) {
         return result;
     }
