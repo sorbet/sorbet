@@ -130,11 +130,12 @@ struct FoundMethod final {
 };
 
 struct Modifier {
-    enum : u1 {
+    enum class Kind : u1 {
         Class = 0,
         Method = 1,
         ClassOrStaticField = 2,
-    } kind;
+    };
+    Kind kind;
     FoundDefinitionRef owner;
     core::LocOffsets loc;
     // The name of the modification.
@@ -356,7 +357,7 @@ class SymbolFinder {
             case core::Names::declareInterface()._id:
             case core::Names::declareAbstract()._id: {
                 Modifier mod;
-                mod.kind = Modifier::Class;
+                mod.kind = Modifier::Kind::Class;
                 mod.owner = klass;
                 mod.loc = send->loc;
                 mod.name = send->fun;
@@ -489,7 +490,7 @@ public:
 
     void addMethodModifier(core::Context ctx, ast::Send &original) {
         Modifier methodModifier;
-        methodModifier.kind = Modifier::Method;
+        methodModifier.kind = Modifier::Kind::Method;
         methodModifier.owner = getOwner();
         methodModifier.loc = original.loc;
         methodModifier.name = original.fun;
@@ -502,7 +503,7 @@ public:
 
     void addConstantModifier(core::Context ctx, ast::Send &original) {
         Modifier constantModifier;
-        constantModifier.kind = Modifier::ClassOrStaticField;
+        constantModifier.kind = Modifier::Kind::ClassOrStaticField;
         constantModifier.owner = getOwner();
         constantModifier.loc = original.loc;
         constantModifier.name = original.fun;
@@ -1014,7 +1015,7 @@ class SymbolDefiner {
     }
 
     void modifyMethod(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == Modifier::Method);
+        ENFORCE(mod.kind == Modifier::Kind::Method);
 
         auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (mod.name._id == core::Names::privateClassMethod()._id) {
@@ -1040,7 +1041,7 @@ class SymbolDefiner {
     }
 
     void modifyConstant(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == Modifier::ClassOrStaticField);
+        ENFORCE(mod.kind == Modifier::Kind::ClassOrStaticField);
 
         auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
@@ -1138,7 +1139,7 @@ class SymbolDefiner {
     }
 
     void modifyClass(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == Modifier::Class);
+        ENFORCE(mod.kind == Modifier::Kind::Class);
         const auto fun = mod.name;
         auto symbolData = ctx.owner.data(ctx);
         if (fun == core::Names::declareFinal()) {
@@ -1352,13 +1353,13 @@ public:
         for (const auto &modifier : foundDefs->modifiers()) {
             const auto owner = getOwnerSymbol(modifier.owner);
             switch (modifier.kind) {
-                case Modifier::Method:
+                case Modifier::Kind::Method:
                     modifyMethod(ctx.withOwner(owner), modifier);
                     break;
-                case Modifier::Class:
+                case Modifier::Kind::Class:
                     modifyClass(ctx.withOwner(owner), modifier);
                     break;
-                case Modifier::ClassOrStaticField:
+                case Modifier::Kind::ClassOrStaticField:
                     modifyConstant(ctx.withOwner(owner), modifier);
                     break;
                 default:
