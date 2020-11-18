@@ -89,8 +89,10 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
             if (constraint) {
                 retType = core::Types::instantiate(gs, retType, *constraint);
             }
-            if (sendResp->dispatchResult->main.method.exists() && sendResp->dispatchResult->main.method.isSynthetic()) {
-                // For synthetic methods, just show the return type
+            if (sendResp->dispatchResult->main.method.exists() &&
+                sendResp->dispatchResult->main.method.data(gs)->owner == core::Symbols::MagicSingleton()) {
+                // Most <Magic>.<foo> are not meant to be exposed to the user. Instead, just show
+                // the result type.
                 typeString = retType.showWithMoreInfo(gs);
             } else {
                 typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint);
