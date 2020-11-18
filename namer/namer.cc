@@ -1045,11 +1045,14 @@ class SymbolDefiner {
         auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
         auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
-        if (constant.exists() && mod.name._id == core::Names::privateConstant()._id) {
+        if (constant.exists() && mod.name == core::Names::privateConstant()) {
             if (constant.data(ctx)->isClassOrModule()) {
                 constant.data(ctx)->setClassOrModulePrivate();
             } else if (constant.data(ctx)->isStaticField()) {
                 constant.data(ctx)->setStaticFieldPrivate();
+            } else if (constant.data(ctx)->isTypeMember()) {
+                // Visibility on type members is special (even more restrictive than private),
+                // so we ignore requests to mark type members private.
             }
         }
     }
