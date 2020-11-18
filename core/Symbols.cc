@@ -707,6 +707,12 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                                return symb.argumentName(gs);
                            }));
         }
+
+        if (this->isClassOrModule() && this->isClassOrModulePrivate()) {
+            fmt::format_to(buf, " : private");
+        }
+    } else if (this->isStaticField() && this->isStaticFieldPrivate()) {
+        fmt::format_to(buf, " : private");
     }
     if (this->resultType && !isClassOrModule()) {
         string resultType;

@@ -1266,7 +1266,7 @@ class Module < Object
   # Makes a list of existing constants private.
   sig do
     params(
-        arg0: Symbol,
+        arg0: T.any(Symbol, String),
     )
     .returns(T.self_type)
   end

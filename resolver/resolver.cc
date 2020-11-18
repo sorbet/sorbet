@@ -239,6 +239,17 @@ private:
             }
             core::SymbolRef resolved = id->symbol.data(ctx)->dealias(ctx);
             core::SymbolRef result = resolved.data(ctx)->findMember(ctx, c.cnst);
+
+            // Private constants are allowed to be resolved, when there is no scope set (the scope is checked above),
+            // otherwise we should error out:
+            if (result.exists() &&
+                ((result.data(ctx)->isClassOrModule() && result.data(ctx)->isClassOrModulePrivate()) ||
+                 (result.data(ctx)->isStaticField() && result.data(ctx)->isStaticFieldPrivate()))) {
+                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
+                    e.setHeader("Non-private reference to private constant `{}` referenced",
+                                result.data(ctx)->show(ctx));
+                }
+            }
             return result;
         } else {
             if (!resolutionFailed) {
