@@ -20,6 +20,41 @@ variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(
     result->placeholder = name;
     return result;
 }
+
+variant<JSONNullObject, unique_ptr<PrepareRenameResult>>
+getPrepareRenameResultForSend(const core::GlobalState &gs, const core::lsp::SendResponse *sendResp) {
+    // The send expression is of the form <receiver>.<method><args>
+    // We want to return the range and placeholder for the method part of the expression, because this is what the
+    // editor will highlight in the rename UI.
+
+    // TODO(soam): handle dispatchResult->secondary
+    auto method = sendResp->dispatchResult->main.method;
+    if (!method.exists()) {
+        return JSONNullObject();
+    }
+    auto methodName = sendResp->dispatchResult->main.method.data(gs)->name.show(gs);
+    auto expr = sendResp->termLoc.source(gs);
+    // find the end of the receiver, find the dot, and then the next non-whitespace char
+    string::size_type receiverOffset = sendResp->receiverLoc.endPos() - sendResp->termLoc.beginPos();
+    if (receiverOffset != 0) {
+        receiverOffset = expr.find_first_of(".", receiverOffset) + 1;
+        receiverOffset = expr.find_first_not_of(" \t", receiverOffset);
+    }
+    auto offsets = sendResp->termLoc.offsets();
+    offsets.beginLoc += receiverOffset;
+    offsets.endLoc = offsets.beginLoc + methodName.length();
+    auto methodNameLoc = core::Loc(sendResp->termLoc.file(), offsets);
+
+    auto range = Range::fromLoc(gs, methodNameLoc);
+    if (range == nullptr) {
+        return JSONNullObject();
+    }
+
+    auto result = make_unique<PrepareRenameResult>(move(range));
+    result->placeholder = methodName;
+    return result;
+}
+
 } // namespace
 
 PrepareRenameTask::PrepareRenameTask(const LSPConfiguration &config, MessageId id,
@@ -60,8 +95,7 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerDelegate
                     response->result = getPrepareRenameResult(gs, defResp->symbol);
                 }
             } else if (auto sendResp = resp->isSend()) {
-                auto method = sendResp->dispatchResult->main.method;
-                response->result = getPrepareRenameResult(gs, method);
+                response->result = getPrepareRenameResultForSend(gs, sendResp);
             }
         }
     }
