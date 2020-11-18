@@ -246,7 +246,8 @@ private:
                 ((result.data(ctx)->isClassOrModule() && result.data(ctx)->isClassOrModulePrivate()) ||
                  (result.data(ctx)->isStaticField() && result.data(ctx)->isStaticFieldPrivate()))) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
-                    e.setHeader("Non-private reference to private constant `{}` referenced", result.data(ctx)->show(ctx));
+                    e.setHeader("Non-private reference to private constant `{}` referenced",
+                                result.data(ctx)->show(ctx));
                 }
             }
             return result;
