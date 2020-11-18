@@ -511,6 +511,8 @@ public:
     // Renders the full name of this Symbol in a form suitable for user display.
     std::string show(const GlobalState &gs) const;
 
+    std::string_view showKind(const GlobalState &gs) const;
+
     // Returns the singleton class for this class, lazily instantiating it if it
     // doesn't exist.
     SymbolRef singletonClass(GlobalState &gs);

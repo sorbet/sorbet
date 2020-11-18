@@ -621,11 +621,7 @@ bool Symbol::isPrintable(const GlobalState &gs) const {
     return false;
 }
 
-string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
-    fmt::memory_buffer buf;
-
-    printTabs(buf, tabs);
-
+string_view Symbol::showKind(const GlobalState &gs) const {
     string_view type = "unknown"sv;
     if (this->isClassOrModule()) {
         if (this->isClassOrModuleClass()) {
@@ -648,6 +644,16 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
     } else if (this->isTypeArgument()) {
         type = "type-argument"sv;
     }
+
+    return type;
+}
+
+string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    string_view type = this->showKind(gs);
 
     string_view variance = ""sv;
 
