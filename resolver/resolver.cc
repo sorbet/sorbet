@@ -1566,7 +1566,8 @@ public:
         core::FileRef file;
         core::SymbolRef owner;
         ast::MethodDef *mdef;
-        InlinedVector<const ast::Send *, 1> sigs;
+        InlinedVector<ParsedSig, 1> sigs;
+        InlinedVector<core::LocOffsets, 1> sigLocs;
     };
     vector<ResolveSignatureJob> sigJobs;
 
@@ -1815,38 +1816,16 @@ public:
         ENFORCE_NO_TIMER(!sigs.empty());
 
         prodCounterInc("types.sig.count");
-        auto loc = sigs[0]->loc;
-        if (ctx.file.data(ctx).originalSigil == core::StrictLevel::None && !sigs.front()->flags.isRewriterSynthesized) {
-            if (auto e = ctx.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
-                e.setHeader("To use `{}`, this file must declare an explicit `{}` sigil (found: "
-                            "none). If you're not sure which one to use, start with `{}`",
-                            "sig", "# typed:", "# typed: false");
-            }
-        }
 
         bool isOverloaded = sigs.size() > 1 && ctx.permitOverloadDefinitions(ctx.file);
         auto originalName = mdef->symbol.data(ctx)->name;
         if (isOverloaded) {
             ctx.state.mangleRenameSymbol(mdef->symbol, originalName);
         }
+
         int i = 0;
-
-        // process signatures in the context of either the current
-        // class, or the current singleton class, depending on if
-        // the current method is a self method.
-        core::SymbolRef sigOwner;
-        if (mdef->flags.isSelfMethod) {
-            sigOwner = ctx.owner.data(ctx)->singletonClass(ctx);
-        } else {
-            sigOwner = ctx.owner;
-        }
-
         while (i < sigs.size()) {
-            auto allowSelfType = true;
-            auto allowRebind = false;
-            auto allowTypeMember = true;
-            auto sig = TypeSyntax::parseSig(ctx.withOwner(sigOwner), *sigs[i], nullptr,
-                                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef->symbol});
+            auto &sig = sigs[i];
             core::SymbolRef overloadSym;
             if (isOverloaded) {
                 vector<int> argsToKeep;
@@ -1861,7 +1840,7 @@ public:
                         argsToKeep.emplace_back(argId);
                     }
                 }
-                overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, sigs[i]->loc), mdef->symbol,
+                overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, job.sigLocs[i]), mdef->symbol,
                                                                originalName, i, argsToKeep);
                 if (i != sigs.size() - 1) {
                     overloadSym.data(ctx)->setOverloaded();
@@ -1869,7 +1848,7 @@ public:
             } else {
                 overloadSym = mdef->symbol;
             }
-            fillInInfoFromSig(ctx, overloadSym, sigs[i]->loc, move(sig), isOverloaded, *mdef);
+            fillInInfoFromSig(ctx, overloadSym, job.sigLocs[i], move(sig), isOverloaded, *mdef);
             i++;
         }
         handleAbstractOrInterfaceMethods(ctx, *mdef);
@@ -2072,7 +2051,41 @@ private:
                 }
 
                 if (!lastSigs.empty()) {
-                    sigJobs.emplace_back(ResolveSignatureJob{ctx.file, ctx.owner, &mdef, std::move(lastSigs)});
+                    prodCounterInc("types.sig.count");
+                    auto loc = lastSigs[0]->loc;
+                    if (ctx.file.data(ctx).originalSigil == core::StrictLevel::None &&
+                        !lastSigs.front()->flags.isRewriterSynthesized) {
+                        if (auto e = ctx.beginError(loc, core::errors::Resolver::SigInFileWithoutSigil)) {
+                            e.setHeader("To use `{}`, this file must declare an explicit `{}` sigil (found: "
+                                        "none). If you're not sure which one to use, start with `{}`",
+                                        "sig", "# typed:", "# typed: false");
+                        }
+                    }
+
+                    // process signatures in the context of either the current
+                    // class, or the current singleton class, depending on if
+                    // the current method is a self method.
+                    core::SymbolRef sigOwner;
+                    if (mdef.flags.isSelfMethod) {
+                        sigOwner = ctx.owner.data(ctx)->lookupSingletonClass(ctx);
+                    } else {
+                        sigOwner = ctx.owner;
+                    }
+
+                    ResolveSignatureJob job{ctx.file, ctx.owner, &mdef, {}, {}};
+                    int i = 0;
+                    while (i < lastSigs.size()) {
+                        auto allowSelfType = true;
+                        auto allowRebind = false;
+                        auto allowTypeMember = true;
+                        auto sig = TypeSyntax::parseSig(
+                            ctx.withOwner(sigOwner), *lastSigs[i], nullptr,
+                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
+                        job.sigs.emplace_back(move(sig));
+                        job.sigLocs.emplace_back(lastSigs[i]->loc);
+                        i++;
+                    }
+                    sigJobs.emplace_back(move(job));
                     lastSigs.clear();
                 } else {
                     handleAbstractOrInterfaceMethods(ctx, mdef);
