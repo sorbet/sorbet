@@ -78,7 +78,7 @@ public:
     }
 
 private:
-    static constexpr tagged_storage TAG_MASK = 0xffff000000000007;
+    static constexpr tagged_storage TAG_MASK = 0xffff000000000000;
 
     static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
 
@@ -87,12 +87,8 @@ private:
     template <typename E, typename... Args> friend TreePtr make_tree(Args &&...);
 
     static tagged_storage tagPtr(Tag tag, void *expr) {
-        auto val = static_cast<tagged_storage>(tag);
-        if (val >= 8) {
-            // Store the tag in the upper 16 bits of the pointer, as it won't fit in the lower three bits.
-            val <<= 48;
-        }
-
+        // Store the tag in the upper 16 bits of the pointer, regardless of size.
+        auto val = static_cast<tagged_storage>(tag) << 48;
         auto maskedPtr = reinterpret_cast<tagged_storage>(expr) & PTR_MASK;
 
         return maskedPtr | val;
@@ -179,11 +175,7 @@ public:
         ENFORCE(ptr != 0);
 
         auto value = reinterpret_cast<tagged_storage>(ptr) & TAG_MASK;
-        if (value <= 7) {
-            return static_cast<Tag>(value);
-        } else {
-            return static_cast<Tag>(value >> 48);
-        }
+        return static_cast<Tag>(value >> 48);
     }
 
     Expression *get() const noexcept {
