@@ -60,11 +60,25 @@ bool checkSubtype(const core::Context ctx, const core::TypePtr &sub, const core:
 
 string supermethodKind(const core::Context ctx, core::SymbolRef method) {
     auto methodData = method.data(ctx);
-    ENFORCE(methodData->isAbstract() || methodData->isOverridable());
+    ENFORCE(methodData->isAbstract() || methodData->isOverridable() || methodData->hasSig());
     if (methodData->isAbstract()) {
         return "abstract";
-    } else {
+    } else if (methodData->isOverridable()) {
         return "overridable";
+    } else {
+        return "overridden";
+    }
+}
+
+string implementationOf(const core::Context ctx, core::SymbolRef method) {
+    auto methodData = method.data(ctx);
+    ENFORCE(methodData->isAbstract() || methodData->isOverridable() || methodData->hasSig());
+    if (methodData->isAbstract()) {
+        return "Implementation of abstract";
+    } else if (methodData->isOverridable()) {
+        return "Implementation of overridable";
+    } else {
+        return "Override of";
     }
 }
 
@@ -112,8 +126,8 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
         auto rightPos = right.pos.required.size() + right.pos.optional.size();
         if (leftPos > rightPos) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Implementation of {} method `{}` must accept at least `{}` positional arguments",
-                            supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx), leftPos);
+                e.setHeader("{} method `{}` must accept at least `{}` positional arguments",
+                            implementationOf(ctx, superMethod), superMethod.data(ctx)->show(ctx), leftPos);
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
         }
@@ -122,7 +136,7 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
     if (auto leftRest = left.pos.rest) {
         if (!right.pos.rest) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Implementation of {} method `{}` must accept *`{}`", supermethodKind(ctx, superMethod),
+                e.setHeader("{} method `{}` must accept *`{}`", implementationOf(ctx, superMethod),
                             superMethod.data(ctx)->show(ctx), leftRest->get().show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
@@ -131,8 +145,8 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
 
     if (right.pos.required.size() > left.pos.required.size()) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Implementation of {} method `{}` must accept no more than `{}` required argument(s)",
-                        supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx), left.pos.required.size());
+            e.setHeader("{} method `{}` must accept no more than `{}` required argument(s)",
+                        implementationOf(ctx, superMethod), superMethod.data(ctx)->show(ctx), left.pos.required.size());
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
         }
     }
@@ -166,8 +180,8 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
                 }
             } else {
                 if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                    e.setHeader("Implementation of {} method `{}` is missing required keyword argument `{}`",
-                                supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx),
+                    e.setHeader("{} method `{}` is missing required keyword argument `{}`",
+                                implementationOf(ctx, superMethod), superMethod.data(ctx)->show(ctx),
                                 req.get().name.show(ctx));
                     e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
                 }
@@ -199,7 +213,7 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
     if (auto leftRest = left.kw.rest) {
         if (!right.kw.rest) {
             if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-                e.setHeader("Implementation of {} method `{}` must accept **`{}`", supermethodKind(ctx, superMethod),
+                e.setHeader("{} method `{}` must accept **`{}`", implementationOf(ctx, superMethod),
                             superMethod.data(ctx)->show(ctx), leftRest->get().show(ctx));
                 e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
             }
@@ -220,8 +234,8 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
             continue;
         }
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Implementation of {} method `{}` contains extra required keyword argument `{}`",
-                        supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx),
+            e.setHeader("{} method `{}` contains extra required keyword argument `{}`",
+                        implementationOf(ctx, superMethod), superMethod.data(ctx)->show(ctx),
                         extra.get().name.toString(ctx));
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
         }
@@ -229,8 +243,8 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
 
     if (!left.syntheticBlk && right.syntheticBlk) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
-            e.setHeader("Implementation of {} method `{}` must explicitly name a block argument",
-                        supermethodKind(ctx, superMethod), superMethod.data(ctx)->show(ctx));
+            e.setHeader("{} method `{}` must explicitly name a block argument", implementationOf(ctx, superMethod),
+                        superMethod.data(ctx)->show(ctx));
             e.addErrorLine(superMethod.data(ctx)->loc(), "Base method defined here");
         }
     }
@@ -331,7 +345,8 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
                 e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
             }
         }
-        if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable()) &&
+        if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable() ||
+             (overridenMethod.data(ctx)->hasSig() && method.data(ctx)->isOverride())) &&
             !method.data(ctx)->isIncompatibleOverride() && !isRBI && !method.data(ctx)->isRewriterSynthesized()) {
             validateCompatibleOverride(ctx, overridenMethod, method);
         }
