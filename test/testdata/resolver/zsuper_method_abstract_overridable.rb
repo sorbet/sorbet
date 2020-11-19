@@ -46,3 +46,4 @@ end
 class FooImpl < AbstractFooable # error: Missing definition for abstract method `foo`
   private :foo
 end
+# TODO(jez) This is just not implemented yet

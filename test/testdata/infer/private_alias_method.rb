@@ -3,6 +3,8 @@
 class A
   def public_foo; puts 'in public_foo'; end
 
+  # TODO(jez) Test both ways
+  # TODO(jez) We enter alias methods in resolver but ZSuper methods in namer, which means that the alias_method always looks like the one redefining something.
   private :private_foo
   alias_method :private_foo, :public_foo
 

@@ -16,7 +16,7 @@ class A
   include MakesFooPrivate
 end
 
-A.new.foo # error: Non-private call to private method `DefinesFo#foo`
+A.new.foo # error: Non-private call to private method `foo`
 
 class B
   include MakesFooPrivate

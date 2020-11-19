@@ -26,7 +26,7 @@ class Test
     using_symbol
     self.using_symbol
     assigned_self = self
-    assigned_self.using_symbol # error: Non-private call to private method `Test#using_symbol`
+    assigned_self.using_symbol # error: Non-private call to private method `using_symbol`
   end
 
   private
@@ -40,21 +40,21 @@ class TestChild < Test
     using_symbol
     self.using_symbol
     assigned_self = self
-    assigned_self.using_symbol # error: Non-private call to private method `Test#using_symbol`
+    assigned_self.using_symbol # error: Non-private call to private method `using_symbol`
   end
 end
 
-Object.new.foo # error: Non-private call to private method `Object#foo`
+Object.new.foo # error: Non-private call to private method `foo`
 
-Test.new.using_symbol # error: Non-private call to private method `Test#using_symbol`
-Test.new.using_symbol_returned_by_def # error: Non-private call to private method `Test#using_symbol_returned_by_def`
+Test.new.using_symbol # error: Non-private call to private method `using_symbol`
+Test.new.using_symbol_returned_by_def # error: Non-private call to private method `using_symbol_returned_by_def`
 Test.new.calling_private
-Test.new.using_symbol { 123 } # error: Non-private call to private method `Test#using_symbol`
-Test.new.block_call # error: Non-private call to private method `Test#block_call`
-Test.new.block_call { 123 } # error: Non-private call to private method `Test#block_call`
-Test.new.block_call(&:foo) # error: Non-private call to private method `Test#block_call`
+Test.new.using_symbol { 123 } # error: Non-private call to private method `using_symbol`
+Test.new.block_call # error: Non-private call to private method `block_call`
+Test.new.block_call { 123 } # error: Non-private call to private method `block_call`
+Test.new.block_call(&:foo) # error: Non-private call to private method `block_call`
 
-TestChild.new.using_symbol # error: Non-private call to private method `Test#using_symbol`
+TestChild.new.using_symbol # error: Non-private call to private method `using_symbol`
 
 T.unsafe(Test.new).using_symbol
 

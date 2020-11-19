@@ -23,6 +23,7 @@ end
 class Child < Parent
   abstract!
 
+  # TODO(jez) This is just unimplemented
   private :becomes_private # error: Can't narrow visibility of abstract method `Parent#becomes_private`
 
   # Ok, because Liskov substitution principle still holds

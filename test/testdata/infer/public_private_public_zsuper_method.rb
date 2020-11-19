@@ -16,7 +16,7 @@ end
 GrandParent.new.grand_parent_method
 
 begin
-  Parent.new.grand_parent_method # error: Non-private call to private method `Parent#grand_parent_method`
+  Parent.new.grand_parent_method # error: Non-private call to private method `grand_parent_method`
 rescue NoMethodError => exn
   p exn
 end

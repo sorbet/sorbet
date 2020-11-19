@@ -22,6 +22,7 @@ class Parent < GrandParent
 end
 
 class Child < Parent
+  # TODO(jez) This is just unimplemented
   private :abstract_in_grandparent # error: Can't narrow visibility of abstract method `abstract_in_grandparent`
 
   private :overridable_in_grandparent # error: Can't narrow visibility of overridable method `overridable_in_grandparent`

@@ -7,7 +7,7 @@
 class Child < Parent
   private_class_method :foo
 
-  T.reveal_type(foo) # error: Revealed type `Integer`
+  T.reveal_type(foo) # error: Revealed type: `Integer`
 end
 
 class Parent
@@ -19,4 +19,4 @@ class Parent
   end
 end
 
-Child.foo # error: Non-private call to private method `Child.foo`
+Child.foo # error: Non-private call to private method `foo`
