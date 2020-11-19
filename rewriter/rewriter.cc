@@ -45,6 +45,7 @@ public:
         Flatfiles::run(ctx, classDef);
         Prop::run(ctx, classDef);
         TypeMembers::run(ctx, classDef);
+        Singleton::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);
@@ -119,12 +120,6 @@ public:
 
                     // This one is also a little different: it gets the ClassDef kind
                     nodes = Mattr::run(ctx, &send, classDef->kind);
-                    if (!nodes.empty()) {
-                        replaceNodes[stat.get()] = std::move(nodes);
-                        return;
-                    }
-
-                    nodes = Singleton::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

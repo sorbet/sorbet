@@ -1,6 +1,9 @@
-#include "rewriter/Singleton.h"
+#include "absl/algorithm/container.h"
+#include <algorithm> // for std::move
+
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
+#include "rewriter/Singleton.h"
 
 using namespace std;
 
@@ -8,51 +11,88 @@ namespace sorbet::rewriter {
 
 namespace {
 
-bool isSingleton(const ast::TreePtr &expr) {
-    if (auto *sym = ast::cast_tree<ast::UnresolvedConstantLit>(expr)) {
-        return sym->cnst == core::Names::Constants::Singleton();
+bool isFinal(const ast::TreePtr &stmt) {
+    auto *send = ast::cast_tree<ast::Send>(stmt);
+    if (send == nullptr) {
+        return false;
     }
-    return false;
+
+    if (!send->recv.isSelfReference()) {
+        return false;
+    }
+
+    if (!send->args.empty()) {
+        return false;
+    }
+
+    if (send->fun != core::Names::declareFinal()) {
+        return false;
+    }
+
+    return true;
+}
+
+bool isIncludeSingleton(const ast::TreePtr &stmt) {
+    const auto *send = ast::cast_tree<ast::Send>(stmt);
+    if (send == nullptr) {
+        return false;
+    }
+
+    if (!send->recv.isSelfReference()) {
+        return false;
+    }
+
+    if (send->fun != core::Names::include()) {
+        return false;
+    }
+
+    if (send->args.size() != 1 || send->hasKwArgs()) {
+        return false;
+    }
+
+    auto *sym = ast::cast_tree<ast::UnresolvedConstantLit>(send->args.front());
+    if (sym == nullptr || sym->cnst != core::Names::Constants::Singleton()) {
+        return false;
+    }
+
+    return true;
 }
 
 } // namespace
 
-std::vector<ast::TreePtr> Singleton::run(core::MutableContext ctx, const ast::Send *send) {
-    vector<ast::TreePtr> stmts{};
-
-    if (!send->recv.isSelfReference()) {
-        return stmts;
+void Singleton::run(core::MutableContext ctx, ast::ClassDef *cdef) {
+    auto *it = absl::c_find_if(cdef->rhs, isIncludeSingleton);
+    if (it == cdef->rhs.end()) {
+        return;
     }
 
-    if (send->fun != core::Names::include()) {
-        return stmts;
-    }
+    auto finalKlass = absl::c_any_of(cdef->rhs, isFinal);
+    auto loc = it->loc();
 
-    if (send->args.size() != 1) {
-        return stmts;
-    }
+    ast::ClassDef::RHS_store newRHS;
+    newRHS.reserve(cdef->rhs.size() + 2);
 
-    if (!isSingleton(send->args.front())) {
-        return stmts;
-    }
-
-    auto loc = send->loc;
+    std::move(cdef->rhs.begin(), it, std::back_inserter(newRHS));
 
     {
         auto sig = ast::MK::Sig0(loc, ast::MK::Send0(loc, ast::MK::T(loc), core::Names::attachedClass()));
-        ast::cast_tree_nonnull<ast::Send>(sig).args.emplace_back(ast::MK::Symbol(loc, core::Names::final_()));
-        stmts.emplace_back(std::move(sig));
+        if (finalKlass) {
+            ast::cast_tree_nonnull<ast::Send>(sig).args.emplace_back(ast::MK::Symbol(loc, core::Names::final_()));
+        }
+        newRHS.emplace_back(std::move(sig));
     }
 
     {
         auto method = ast::MK::SyntheticMethod0(loc, loc, core::Names::instance(), ast::MK::RaiseUnimplemented(loc));
         ast::cast_tree_nonnull<ast::MethodDef>(method).flags.isSelfMethod = true;
-        stmts.emplace_back(std::move(method));
+        newRHS.emplace_back(std::move(method));
     }
 
-    stmts.emplace_back(send->deepCopy());
+    std::move(it, cdef->rhs.end(), std::back_inserter(newRHS));
 
-    return stmts;
+    cdef->rhs = std::move(newRHS);
+
+    return;
 }
 
 } // namespace sorbet::rewriter

@@ -20,7 +20,7 @@ namespace sorbet::rewriter {
  * ```
  * class Foo
  *
- *   sig(:final) {returns(T.attached_class)}
+ *   sig {returns(T.attached_class)}
  *   def self.instance
  *     raise "Not implemented"
  *   end
@@ -31,7 +31,7 @@ namespace sorbet::rewriter {
  */
 class Singleton final {
 public:
-    static std::vector<ast::TreePtr> run(core::MutableContext ctx, const ast::Send *send);
+    static void run(core::MutableContext ctx, ast::ClassDef *cdef);
 
     Singleton() = delete;
 };
