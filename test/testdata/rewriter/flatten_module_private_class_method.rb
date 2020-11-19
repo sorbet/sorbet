@@ -15,4 +15,3 @@ class B
 end
 
 # TODO(jez) I don't know why we are seeing zsuper methods added to the symbol table in this file.
-# TODO(jez) The symbol table has some multi-line outputs on this file.

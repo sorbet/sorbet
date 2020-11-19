@@ -1028,7 +1028,6 @@ class SymbolDefiner {
             auto methodDefFlags = ast::MethodDef::Flags{};
             methodDefFlags.isSelfMethod = mod.name == core::Names::privateClassMethod();
 
-            // TODO(jez) Only thing left to do is get your tests to pass and get it to pass on pay-server
             // TODO(jez) Try running Sorbet in debug mode on pay-server to test no args.
             auto tmpFoundMethod = FoundMethod{mod.owner, mod.target, mod.loc, declLoc, methodDefFlags, {}, {}};
             method = defineMethod(ctx, tmpFoundMethod);
