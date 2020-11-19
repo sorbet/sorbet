@@ -1375,16 +1375,17 @@ public:
         }
         res.main.errors.clear();
         res.returnType = instanceTy;
-        res.main = move(dispatched.main);
-        if (!res.main.method.exists()) {
+        if (!dispatched.main.method.exists()) {
             // If we actually dispatched to some `initialize` method, use that method as the result,
             // because it will be more interesting to people downstream who want to look at the
             // result.
             //
             // But if this class hasn't defined a custom `initialize` method, still record that we
             // dispatched to *something*, namely `Class#new`.
-            res.main.method = core::Symbols::Class_new();
+            dispatched.main.method = res.main.method;
         }
+        dispatched.main.visibilityMethod = res.main.visibilityMethod;
+        res.main = move(dispatched.main);
         res.main.sendTp = instanceTy;
     }
 } Class_new;
