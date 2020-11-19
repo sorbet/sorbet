@@ -1289,7 +1289,7 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
 }
 }; // namespace
 
-void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logger &logger, WorkerPool &workers) {
+void computeFileHashes(const vector<shared_ptr<core::File>> &files, spdlog::logger &logger, WorkerPool &workers) {
     Timer timeit(logger, "computeFileHashes");
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
     for (int i = 0; i < files.size(); i++) {
@@ -1301,7 +1301,7 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
 
     shared_ptr<BlockingBoundedQueue<vector<pair<int, unique_ptr<const core::FileHash>>>>> resultq =
         make_shared<BlockingBoundedQueue<vector<pair<int, unique_ptr<const core::FileHash>>>>>(files.size());
-    workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
+    workers.multiplexJob("lspStateHash", [fileq, resultq, &files, &logger]() {
         vector<pair<int, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
         int job;
