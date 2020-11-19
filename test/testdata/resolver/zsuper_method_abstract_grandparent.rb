@@ -21,9 +21,10 @@ class Parent < GrandParent
   def overridable_in_grandparent; end
 end
 
+# Would like to emit errors here, but we don't do this for normal `abstract/override/override`
+# chains either, so I didn't bother to implement it for ZSuper methods.
 class Child < Parent
-  # TODO(jez) This is just unimplemented
-  private :abstract_in_grandparent # error: Can't narrow visibility of abstract method `abstract_in_grandparent`
+  private :abstract_in_grandparent # would like to be error: Can't narrow visibility
 
-  private :overridable_in_grandparent # error: Can't narrow visibility of overridable method `overridable_in_grandparent`
+  private :overridable_in_grandparent # would like to be error: Can't narrow visibility
 end

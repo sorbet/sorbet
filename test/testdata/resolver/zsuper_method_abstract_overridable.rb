@@ -29,9 +29,9 @@ class Child < Parent
   # (even though by Liskov substitution we would want one)
   private :method_with_sig
 
-  private :method_with_abstract_sig # error: Can't narrow visibility of abstract method `method_with_abstract_sig`
+  private :method_with_abstract_sig # error: Can't narrow visibility of `abstract` method `Parent#method_with_abstract_sig`
 
-  private :method_with_overridable_sig # error: Can't narrow visibility of overridable method `method_with_overridable_sig`
+  private :method_with_overridable_sig # error: Can't narrow visibility of `overridable` method `Parent#method_with_overridable_sig`
 end
 
 class AbstractFooable
@@ -43,7 +43,6 @@ class AbstractFooable
   def foo; end
 end
 
-class FooImpl < AbstractFooable # error: Missing definition for abstract method `foo`
-  private :foo
+class FooImpl < AbstractFooable # error: Missing definition for abstract method `AbstractFooable#foo`
+  private :foo # error: Can't narrow visibility of `abstract` method `AbstractFooable#foo`
 end
-# TODO(jez) This is just not implemented yet

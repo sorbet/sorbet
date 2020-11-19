@@ -352,7 +352,18 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
         }
         if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable()) &&
             !method.data(ctx)->isIncompatibleOverride() && !isRBI && !method.data(ctx)->isRewriterSynthesized()) {
-            validateCompatibleOverride(ctx, overridenMethod, method);
+            if (method.data(ctx)->isZSuperMethod() && overridenMethod.data(ctx)->isMethodPublic() &&
+                method.data(ctx)->isMethodPrivate()) {
+                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::BadMethodOverride)) {
+                    auto parentKind = overridenMethod.data(ctx)->isAbstract() ? "abstract" : "overridable";
+                    e.setHeader("Can't narrow visibility of `{}` method `{}` from public to private", parentKind,
+                                overridenMethod.data(ctx)->show(ctx));
+                    e.addErrorLine(overridenMethod.data(ctx)->loc(), "Parent method efined here");
+                }
+            } else {
+                // ZSupper methods don't have args or return type, so doesn't make sense to validateCompatibleOverride
+                validateCompatibleOverride(ctx, overridenMethod, method);
+            }
         }
     }
 }
