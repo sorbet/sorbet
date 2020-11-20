@@ -1,5 +1,7 @@
 # typed: true
 
+# TODO(jez) Refactor alias_method support from resolver into namer.
+
 # This case matches what people actually tend to write
 class A
   def foo(x); puts 'A#foo'; end
