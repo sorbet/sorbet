@@ -1,17 +1,15 @@
 # typed: true
 
+# This case matches what people actually tend to write
 class A
-  def public_foo; puts 'in public_foo'; end
+  def foo(x); puts 'A#foo'; end
 
-  # TODO(jez) Test both ways
-  # TODO(jez) We enter alias methods in resolver but ZSuper methods in namer, which means that the alias_method always looks like the one redefining something.
-  # TODO(jez) I think we should move aliasMethod handling out of resolver and into namer.
-  private :private_foo
-  alias_method :private_foo, :public_foo
+  alias_method :private_original_foo, :foo
+  private :private_original_foo
 
-  def private_ok_here
-    public_foo
-    private_foo
+  def foo(x)
+    return "custom validation failed" unless x.even?
+    private_original_foo
   end
 
   def inspect
@@ -19,14 +17,19 @@ class A
   end
 end
 
-a2 = A.new
-puts '-- private ok here --'
-a2.private_ok_here
-puts '-- public ok --'
-a2.public_foo
-puts '-- private not ok --'
-begin
-  a2.private_foo # error: Non-private call to private method `A#private_foo`
-rescue NoMethodError => exn
-  puts exn.message
+# This test doesn't, but I figure we may as well test what happens.
+class A
+  def foo(x); puts 'A#foo'; end
+
+  private :private_original_foo
+  alias_method :private_original_foo, :foo
+
+  def foo(x)
+    return "custom validation failed" unless x.even?
+    private_original_foo
+  end
+
+  def inspect
+    '#<A:...>'
+  end
 end
