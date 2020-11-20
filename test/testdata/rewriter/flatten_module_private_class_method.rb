@@ -14,4 +14,4 @@ class B
   end
 end
 
-# TODO(jez) I don't know why we are seeing zsuper methods added to the symbol table in this file.
+# TODO(jez) I don't know why we are seeing zsuper methods added to the symbol table in this file. But also, I kind of don't care enough to fix them.
