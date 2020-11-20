@@ -40,8 +40,6 @@
 #include <csignal>
 #include <poll.h>
 
-#include "absl/strings/str_replace.h"
-
 namespace spd = spdlog;
 
 using namespace std;
