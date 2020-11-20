@@ -22,9 +22,11 @@ end
 
 
 class C
-  private :foo # TODO(jez) Should this error?
+  private :foo
   def foo; end  # this does not end up being private
 end
+
+C.new.foo # error: Non-private call to private method `foo`
 
 class Foo1
   def foo;  # this does not end up being private
