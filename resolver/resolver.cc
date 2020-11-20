@@ -1858,6 +1858,17 @@ private:
                             }
                             overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, lastSigs[i]->loc),
                                                                            mdef.symbol, originalName, i, argsToKeep);
+                            switch (mdef.symbol.data(ctx)->methodVisibility()) {
+                                case core::Visibility::Public:
+                                    overloadSym.data(ctx)->setMethodPublic();
+                                    break;
+                                case core::Visibility::Protected:
+                                    overloadSym.data(ctx)->setMethodProtected();
+                                    break;
+                                case core::Visibility::Private:
+                                    overloadSym.data(ctx)->setMethodPrivate();
+                                    break;
+                            }
                             if (i != lastSigs.size() - 1) {
                                 overloadSym.data(ctx)->setOverloaded();
                             }

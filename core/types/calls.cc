@@ -669,7 +669,6 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto &component = result.main;
     component.receiver = args.selfType;
     component.method = method;
-    // TODO(jez) All overloads should be entered with the original method's visibility I hope.
     component.visibilityMethod = visibilityMethod;
 
     const SymbolData data = method.data(gs);
