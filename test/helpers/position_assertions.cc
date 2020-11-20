@@ -1364,8 +1364,8 @@ void ApplyRenameAssertion::check(const UnorderedMap<std::string, std::shared_ptr
         {
             CHECK_EQ_DIFF(
                 expectedEditedFileContents, actualEditedFileContents,
-                fmt::format("The expected (rbedited) file contents for {} did not match the actual post-edit contents",
-                            filePath));
+                fmt::format("The expected (rbedited) file contents in {} did not match the actual post-edit contents.",
+                            expectedEditedFilePath));
         }
     }
 }
