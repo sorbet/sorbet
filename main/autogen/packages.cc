@@ -29,11 +29,11 @@ class PackageWalk {
 public:
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-        if (classDef->symbol == core::Symbols::root() || classDef->ancestors.size() != 1 ||
-            classDef->kind != ast::ClassDef::Kind::Class) {
+        if (classDef.symbol == core::Symbols::root() || classDef.ancestors.size() != 1 ||
+            classDef.kind != ast::ClassDef::Kind::Class) {
             return tree;
         }
-        auto cnst = ast::cast_tree<ast::ConstantLit>(classDef->name);
+        auto cnst = ast::cast_tree<ast::ConstantLit>(classDef.name);
         if (!cnst) {
             return tree;
         }
@@ -46,25 +46,25 @@ public:
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         // we're not going to report errors about ill-formed things here: those errors should get reported elsewhere,
         // and instead we'll bail if things don't look like we expect
-        if (send->args.size() != 1) {
+        if (send.args.size() != 1) {
             return tree;
         }
-        if (send->fun != core::Names::export_() && send->fun != core::Names::import() &&
-            send->fun != core::Names::exportMethods()) {
+        if (send.fun != core::Names::export_() && send.fun != core::Names::import() &&
+            send.fun != core::Names::exportMethods()) {
             return tree;
         }
 
-        auto cnst = ast::cast_tree<ast::ConstantLit>(send->args.front());
+        auto cnst = ast::cast_tree<ast::ConstantLit>(send.args.front());
         if (!cnst) {
             return tree;
         }
 
         auto name = QualifiedName::fromFullName(constantName(ctx, cnst));
-        if (send->fun == core::Names::export_()) {
+        if (send.fun == core::Names::export_()) {
             exports.emplace_back(move(name));
-        } else if (send->fun == core::Names::import()) {
+        } else if (send.fun == core::Names::import()) {
             imports.emplace_back(move(name));
-        } else if (send->fun == core::Names::exportMethods()) {
+        } else if (send.fun == core::Names::exportMethods()) {
             exportMethods = optional<QualifiedName>{move(name)};
         }
 
