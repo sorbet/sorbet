@@ -149,6 +149,43 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be overridden in #<Class:#<Class:0x[0-9a-f]+>>$/, err.message)
   end
 
+  it "allows toggling a final method's visbility in the same class" do
+    Class.new do
+      extend T::Sig
+      sig(:final) {void}
+      private def foo; end
+
+      sig(:final) {void}
+      def bar; end
+      private :bar
+      public :bar
+    end
+  end
+
+  it "forbids toggling a final method's visibility in a child class" do
+    c = Class.new do
+      extend T::Sig
+
+      sig(:final) {void}
+      private def becomes_public; end
+
+      sig(:final) {void}
+      def becomes_private; end
+    end
+    err = assert_raises(RuntimeError) do
+      Class.new(c) do
+        public :becomes_public
+      end
+    end
+    assert_match(/^The method `becomes_public` on #<Class:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    err = assert_raises(RuntimeError) do
+      Class.new(c) do
+        private :becomes_private
+      end
+    end
+    assert_match(/^The method `becomes_private` on #<Class:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+  end
+
   it "forbids overriding a final method from an included module" do
     m = Module.new do
       extend T::Sig
