@@ -203,14 +203,6 @@ public:
         return ptr;
     }
 
-    Expression *operator->() const noexcept {
-        return get();
-    }
-
-    Expression *operator*() const noexcept {
-        return get();
-    }
-
     explicit operator bool() const noexcept {
         return get() != nullptr;
     }
@@ -247,10 +239,14 @@ template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
 }
 
 class Expression {
-public:
-    virtual ~Expression() = default;
+protected:
+    // We should only ever be creating subclasses of Expression, never Expression directly.
+    Expression() = default;
+    ~Expression() = default;
 };
-CheckSize(Expression, 8, 8);
+// Expression itself has a size, but when inheriting from Expression, the base class will
+// be considered a zero-sized class.
+CheckSize(Expression, 1, 1);
 
 struct ParsedFile {
     TreePtr tree;
@@ -364,7 +360,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(ClassDef, 128, 8);
+CheckSize(ClassDef, 120, 8);
 
 TREE(MethodDef) : public Expression {
 public:
@@ -401,7 +397,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(MethodDef, 72, 8);
+CheckSize(MethodDef, 64, 8);
 
 TREE(If) : public Expression {
 public:
@@ -421,7 +417,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(If, 40, 8);
+CheckSize(If, 32, 8);
 
 TREE(While) : public Expression {
 public:
@@ -440,7 +436,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(While, 32, 8);
+CheckSize(While, 24, 8);
 
 TREE(Break) : public Expression {
 public:
@@ -458,7 +454,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Break, 24, 8);
+CheckSize(Break, 16, 8);
 
 TREE(Retry) : public Expression {
 public:
@@ -474,7 +470,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Retry, 16, 8);
+CheckSize(Retry, 8, 8);
 
 TREE(Next) : public Expression {
 public:
@@ -492,7 +488,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Next, 24, 8);
+CheckSize(Next, 16, 8);
 
 TREE(Return) : public Expression {
 public:
@@ -510,7 +506,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Return, 24, 8);
+CheckSize(Return, 16, 8);
 
 TREE(RescueCase) : public Expression {
 public:
@@ -536,7 +532,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(RescueCase, 56, 8);
+CheckSize(RescueCase, 48, 8);
 
 TREE(Rescue) : public Expression {
 public:
@@ -560,7 +556,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Rescue, 64, 8);
+CheckSize(Rescue, 56, 8);
 
 TREE(Local) : public Expression {
 public:
@@ -578,7 +574,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Local, 24, 8);
+CheckSize(Local, 16, 8);
 
 TREE(UnresolvedIdent) : public Expression {
 public:
@@ -603,7 +599,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(UnresolvedIdent, 24, 8);
+CheckSize(UnresolvedIdent, 16, 8);
 
 TREE(RestArg) : public Expression {
 public:
@@ -621,7 +617,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(RestArg, 24, 8);
+CheckSize(RestArg, 16, 8);
 
 TREE(KeywordArg) : public Expression {
 public:
@@ -639,7 +635,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(KeywordArg, 24, 8);
+CheckSize(KeywordArg, 16, 8);
 
 TREE(OptionalArg) : public Expression {
 public:
@@ -658,7 +654,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(OptionalArg, 32, 8);
+CheckSize(OptionalArg, 24, 8);
 
 TREE(BlockArg) : public Expression {
 public:
@@ -676,7 +672,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(BlockArg, 24, 8);
+CheckSize(BlockArg, 16, 8);
 
 TREE(ShadowArg) : public Expression {
 public:
@@ -694,7 +690,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(ShadowArg, 24, 8);
+CheckSize(ShadowArg, 16, 8);
 
 TREE(Assign) : public Expression {
 public:
@@ -713,7 +709,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Assign, 32, 8);
+CheckSize(Assign, 24, 8);
 
 TREE(Send) : public Expression {
 public:
@@ -790,7 +786,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Send, 64, 8);
+CheckSize(Send, 56, 8);
 
 TREE(Cast) : public Expression {
 public:
@@ -812,7 +808,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Cast, 48, 8);
+CheckSize(Cast, 40, 8);
 
 TREE(Hash) : public Expression {
 public:
@@ -834,7 +830,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Hash, 64, 8);
+CheckSize(Hash, 56, 8);
 
 TREE(Array) : public Expression {
 public:
@@ -855,7 +851,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Array, 56, 8);
+CheckSize(Array, 48, 8);
 
 TREE(Literal) : public Expression {
 public:
@@ -880,7 +876,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Literal, 32, 8);
+CheckSize(Literal, 24, 8);
 
 TREE(UnresolvedConstantLit) : public Expression {
 public:
@@ -899,7 +895,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(UnresolvedConstantLit, 32, 8);
+CheckSize(UnresolvedConstantLit, 24, 8);
 
 TREE(ConstantLit) : public Expression {
 public:
@@ -924,7 +920,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(ConstantLit, 56, 8);
+CheckSize(ConstantLit, 48, 8);
 
 TREE(ZSuperArgs) : public Expression {
 public:
@@ -941,7 +937,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(ZSuperArgs, 16, 8);
+CheckSize(ZSuperArgs, 8, 8);
 
 TREE(Block) : public Expression {
 public:
@@ -959,7 +955,7 @@ public:
     std::string nodeName();
     void _sanityCheck();
 };
-CheckSize(Block, 48, 8);
+CheckSize(Block, 40, 8);
 
 TREE(InsSeq) : public Expression {
 public:
@@ -983,7 +979,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(InsSeq, 64, 8);
+CheckSize(InsSeq, 56, 8);
 
 TREE(EmptyTree) : public Expression {
 public:
@@ -999,7 +995,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(EmptyTree, 16, 8);
+CheckSize(EmptyTree, 8, 8);
 
 // This specialization of make_tree exists to ensure that we only ever create one empty tree.
 template <> TreePtr make_tree<EmptyTree>();
