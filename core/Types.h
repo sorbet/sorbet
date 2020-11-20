@@ -433,7 +433,7 @@ public:
     SelfType();
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    virtual std::string showValue(const GlobalState &gs) const final;
+    std::string showValue(const GlobalState &gs) const;
 
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
@@ -470,12 +470,12 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    virtual std::string showValue(const GlobalState &gs) const final;
+    std::string showValue(const GlobalState &gs) const;
 
     bool equals(const LiteralType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
-CheckSize(LiteralType, 24, 8);
+CheckSize(LiteralType, 16, 8);
 
 template <> inline TypePtr make_type<LiteralType, double &>(double &val) {
     return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(LiteralType::LiteralTypeKind::Float),
