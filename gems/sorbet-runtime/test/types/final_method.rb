@@ -171,6 +171,9 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
 
       sig(:final) {void}
       def becomes_private; end
+
+      sig(:final) {void}
+      protected def protected_becomes_private; end
     end
     err = assert_raises(RuntimeError) do
       Class.new(c) do
@@ -184,6 +187,12 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       end
     end
     assert_match(/^The method `becomes_private` on #<Class:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    err = assert_raises(RuntimeError) do
+      Class.new(c) do
+        private :protected_becomes_private
+      end
+    end
+    assert_match(/^The method `protected_becomes_private` on #<Class:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
   end
 
   it "forbids overriding a final method from an included module" do
