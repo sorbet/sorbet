@@ -417,7 +417,7 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
             FileOps::createDir(subdir);
         }
         for (auto &[_, child] : node.children) {
-            if (node.root() && alCfg.packagedAutoloader) {
+            if (alCfg.packagedAutoloader && node.root()) {
                 // in a packaged context, we want to make sure that these constants are also put in their packages
                 ENFORCE(child->qname.package);
                 auto namespaceName = child->qname.package->show(gs);
