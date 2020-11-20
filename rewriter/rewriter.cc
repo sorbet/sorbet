@@ -23,6 +23,7 @@
 #include "rewriter/Regexp.h"
 #include "rewriter/SelfNew.h"
 #include "rewriter/SigRewriter.h"
+#include "rewriter/Singleton.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
@@ -44,6 +45,7 @@ public:
         Flatfiles::run(ctx, classDef);
         Prop::run(ctx, classDef);
         TypeMembers::run(ctx, classDef);
+        Singleton::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);

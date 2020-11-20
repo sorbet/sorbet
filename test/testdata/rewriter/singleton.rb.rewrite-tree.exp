@@ -1,0 +1,45 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(::T.attached_class())
+    end
+
+    def self.instance<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :instance)
+
+    <self>.include(<emptyTree>::<C Singleton>)
+  end
+
+  class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C A>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C A>.instance())
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C B>.instance())
+
+  class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime, :final) do ||
+      <self>.returns(::T.attached_class())
+    end
+
+    def self.instance<<C <todo sym>>>(&<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :instance)
+
+    <self>.include(<emptyTree>::<C Singleton>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.final!()
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C C>.instance())
+
+  class <emptyTree>::<C D><<C <todo sym>>> < (<emptyTree>::<C C>)
+  end
+end
