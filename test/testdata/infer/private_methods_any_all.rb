@@ -44,4 +44,4 @@ sig {params(qux_and_bar: T.all(PublicQux, PrivateBar)).void}
 def test_qux_and_bar(qux_and_bar)
   qux_and_bar.bar # error: Non-private call to private method `bar`
 end
-
+# TODO(jez) We should say "on `Foo` component of ..."

@@ -5,6 +5,7 @@ class A
 
   # TODO(jez) Test both ways
   # TODO(jez) We enter alias methods in resolver but ZSuper methods in namer, which means that the alias_method always looks like the one redefining something.
+  # TODO(jez) I think we should move aliasMethod handling out of resolver and into namer.
   private :private_foo
   alias_method :private_foo, :public_foo
 
