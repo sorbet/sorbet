@@ -26,8 +26,6 @@ class C
   def foo; end  # this does not end up being private
 end
 
-C.new.foo # error: Non-private call to private method `foo`
-
 class Foo1
   def foo;  # this does not end up being private
   end
@@ -55,3 +53,5 @@ class Foo4
     private :foo
   end
 end
+
+C.new.foo # error: Non-private call to private method `foo`

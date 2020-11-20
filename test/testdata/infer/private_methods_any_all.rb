@@ -42,5 +42,5 @@ end
 
 sig {params(qux_and_bar: T.all(PublicQux, PrivateBar)).void}
 def test_qux_and_bar(qux_and_bar)
-  qux_and_bar.bar # error: Non-private call to private method `bar` on `T.all(PrivateBar, PublicQux)`
+  qux_and_bar.bar # error: Non-private call to private method `bar` on `T.all(PublicQux, PrivateBar)`
 end
