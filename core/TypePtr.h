@@ -73,29 +73,30 @@ private:
     };
     tagged_storage store;
 
-    // We use a 0 to indicate not inlined so that nullptr (which has counter value 0) is naturally viewed as
+    // Top bit indicates if value is inlined into pointer.
+    // We use a 0 in top bit to indicate not inlined so that nullptr (which has counter value 0) is naturally viewed as
     // 'inlined'.
-    static constexpr tagged_storage NOT_INLINED_MASK = 0x0100;
-    // We use a 8-bit tag mask so that tags can be efficiently extracted via
-    // movzx on x86.
-    static constexpr tagged_storage TAG_MASK = 0x00FF;
+    static constexpr tagged_storage NOT_INLINED_MASK = 0x8000000000000000;
+    static constexpr tagged_storage TAG_MASK = 0x7FFF000000000007;
 
     static constexpr tagged_storage PTR_MASK = ~(NOT_INLINED_MASK | TAG_MASK);
 
     static tagged_storage tagToMask(Tag tag) {
-        // Store the tag in the lower bits of the pointer, regardless of size.
-        return static_cast<tagged_storage>(tag);
+        auto val = static_cast<tagged_storage>(tag);
+        if (val >= 8) {
+            // Store the tag in the upper 16 bits of the pointer, as it won't fit in the lower three bits.
+            val <<= 48;
+        }
+        return val;
     }
 
     static tagged_storage tagValue(Tag tag, u4 inlinedValue) {
         auto val = tagToMask(tag);
 
-        // Store value into val.  It doesn't much matter where we put it in
-        // the upper 48 bits, but we put it in the uppermost 32 bits to
-        // ensure that retrieve it requires only a shift and no masking.
-        val |= static_cast<tagged_storage>(inlinedValue) << 32;
+        // Store value into val.
+        val |= static_cast<tagged_storage>(inlinedValue) << 3;
 
-        // Asserts that tag isn't using the bit which we use to indicate that value is _not_ inlined.
+        // Asserts that tag isn't using top bit which we use to indicate that value is _not_ inlined.
         ENFORCE((val & NOT_INLINED_MASK) == 0);
 
         return val;
@@ -104,7 +105,7 @@ private:
     static tagged_storage tagPtr(Tag tag, void *expr) {
         auto val = tagToMask(tag);
 
-        auto maskedPtr = reinterpret_cast<tagged_storage>(expr) << 16;
+        auto maskedPtr = reinterpret_cast<tagged_storage>(expr) & PTR_MASK;
 
         return maskedPtr | val | NOT_INLINED_MASK;
     }
@@ -159,7 +160,7 @@ private:
 
     u4 inlinedValue() const {
         ENFORCE_NO_TIMER(!containsPtr());
-        auto val = store >> 32;
+        auto val = (store & PTR_MASK) >> 3;
         return static_cast<u4>(val);
     }
 
@@ -169,7 +170,7 @@ private:
             return reinterpret_cast<void *>(val);
         } else {
             // sign extension for the upper 16 bits
-            return reinterpret_cast<void *>(val >> 16);
+            return reinterpret_cast<void *>((val << 16) >> 16);
         }
     }
 
@@ -247,7 +248,11 @@ public:
         ENFORCE_NO_TIMER(store != 0);
 
         auto value = reinterpret_cast<tagged_storage>(store) & TAG_MASK;
-        return static_cast<Tag>(value);
+        if (value <= 7) {
+            return static_cast<Tag>(value);
+        } else {
+            return static_cast<Tag>(value >> 48);
+        }
     }
 
     bool operator!=(const TypePtr &other) const {
