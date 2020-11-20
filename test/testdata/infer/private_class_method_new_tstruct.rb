@@ -5,5 +5,3 @@ class A < T::Struct
 end
 
 A.new
-
-# TODO(jez) This shows the whole ClassDef tree's loc in the error message...?

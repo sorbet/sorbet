@@ -465,7 +465,7 @@ ast::TreePtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send)
 }
 
 vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
-                                       const vector<PropInfo> &props) {
+                                       core::LocOffsets klassDeclLoc, const vector<PropInfo> &props) {
     ast::MethodDef::ARGS_store args;
     ast::Send::ARGS_store sigArgs;
     args.reserve(props.size());
@@ -501,12 +501,12 @@ vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffset
         stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, ivarName),
                                            ast::MK::Local(prop.nameLoc, prop.name)));
     }
-    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassLoc));
+    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassDeclLoc));
 
     vector<ast::TreePtr> result;
-    result.emplace_back(ast::MK::SigVoid(klassLoc, std::move(sigArgs)));
+    result.emplace_back(ast::MK::SigVoid(klassDeclLoc, std::move(sigArgs)));
     result.emplace_back(
-        ast::MK::SyntheticMethod(klassLoc, klassLoc, core::Names::initialize(), std::move(args), std::move(body)));
+        ast::MK::SyntheticMethod(klassLoc, klassDeclLoc, core::Names::initialize(), std::move(args), std::move(body)));
     return result;
 }
 
@@ -555,7 +555,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
     if (wantTypedInitialize(syntacticSuperClass)) {
         // For direct T::Struct subclasses, we know that seeing no props means the constructor should be zero-arity.
-        for (auto &stat : mkTypedInitialize(ctx, klass->loc, props)) {
+        for (auto &stat : mkTypedInitialize(ctx, klass->loc, klass->declLoc, props)) {
             klass->rhs.emplace_back(std::move(stat));
         }
     }
