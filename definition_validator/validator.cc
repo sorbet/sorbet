@@ -333,16 +333,7 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
         }
         if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable()) &&
             !method.data(ctx)->isIncompatibleOverride() && !isRBI && !method.data(ctx)->isRewriterSynthesized()) {
-            if (overridenMethod.data(ctx)->isFinalMethod()) {
-                if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::OverridesFinal)) {
-                    e.setHeader("Method overrides a final method `{}`", overridenMethod.data(ctx)->show(ctx));
-                    e.addErrorLine(overridenMethod.data(ctx)->loc(), "defined here");
-                }
-            }
-            if ((overridenMethod.data(ctx)->isAbstract() || overridenMethod.data(ctx)->isOverridable()) &&
-                !method.data(ctx)->isIncompatibleOverride()) {
-                validateCompatibleOverride(ctx, overridenMethod, method);
-            }
+            validateCompatibleOverride(ctx, overridenMethod, method);
         }
     }
 }
