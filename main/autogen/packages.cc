@@ -28,7 +28,7 @@ class PackageWalk {
 
 public:
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
+        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef->symbol == core::Symbols::root() || classDef->ancestors.size() != 1 ||
             classDef->kind != ast::ClassDef::Kind::Class) {
             return tree;
