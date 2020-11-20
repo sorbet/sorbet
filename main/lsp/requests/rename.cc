@@ -127,24 +127,17 @@ public:
         auto location = config.loc2Location(gs, loc);
         string newsrc;
         if (auto sendResp = response->isSend()) {
-            auto receiverLoc = sendResp->receiverLoc;
-            ENFORCE(loc.contains(receiverLoc), "receiver expression not within send expression");
-            ENFORCE(loc.beginPos() == receiverLoc.beginPos(), "send expression doesn't start with receiver");
-            string::size_type methodNameOffset;
-            if (receiverLoc.endPos() == receiverLoc.beginPos()) {
-                // no receiver expression, method is start of loc
-                methodNameOffset = 0;
-            } else {
-                // find the method name: <receiver expression> <whitespace?> <dot> <whitespace?> <method name>
-                methodNameOffset = receiverLoc.endPos() - receiverLoc.beginPos();
-                methodNameOffset = 1 + source.find(".", methodNameOffset);
-                methodNameOffset = source.find_first_not_of(" \t", methodNameOffset);
+            auto methodNameLoc = sendResp->getMethodNameLoc(gs);
+            if (!methodNameLoc) {
+                ENFORCE(0, "Method name not found in send expression")
+                return;
             }
+            string::size_type methodNameOffset = methodNameLoc->beginPos() - sendResp->termLoc.beginPos();
             newsrc = replaceAt(source, methodNameOffset);
         } else if (auto defResp = response->isDefinition()) {
             newsrc = replaceMethodNameInDef(source);
         } else {
-            ENFORCE(0, "unexpected query response type while renaming method");
+            ENFORCE(0, "Unexpected query response type while renaming method");
             return;
         }
         edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));

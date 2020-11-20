@@ -27,31 +27,18 @@ getPrepareRenameResultForSend(const core::GlobalState &gs, const core::lsp::Send
     // We want to return the range and placeholder for the method part of the expression, because this is what the
     // editor will highlight in the rename UI.
 
-    // TODO(soam): handle dispatchResult->secondary
-    auto method = sendResp->dispatchResult->main.method;
-    if (!method.exists()) {
+    auto methodNameLoc = sendResp->getMethodNameLoc(gs);
+    if (!methodNameLoc) {
         return JSONNullObject();
     }
-    auto methodName = sendResp->dispatchResult->main.method.data(gs)->name.show(gs);
-    auto expr = sendResp->termLoc.source(gs);
-    // find the end of the receiver, find the dot, and then the next non-whitespace char
-    string::size_type receiverOffset = sendResp->receiverLoc.endPos() - sendResp->termLoc.beginPos();
-    if (receiverOffset != 0) {
-        receiverOffset = expr.find_first_of(".", receiverOffset) + 1;
-        receiverOffset = expr.find_first_not_of(" \t", receiverOffset);
-    }
-    auto offsets = sendResp->termLoc.offsets();
-    offsets.beginLoc += receiverOffset;
-    offsets.endLoc = offsets.beginLoc + methodName.length();
-    auto methodNameLoc = core::Loc(sendResp->termLoc.file(), offsets);
 
-    auto range = Range::fromLoc(gs, methodNameLoc);
+    auto range = Range::fromLoc(gs, methodNameLoc.value());
     if (range == nullptr) {
         return JSONNullObject();
     }
 
     auto result = make_unique<PrepareRenameResult>(move(range));
-    result->placeholder = methodName;
+    result->placeholder = methodNameLoc->source(gs);
     return result;
 }
 
