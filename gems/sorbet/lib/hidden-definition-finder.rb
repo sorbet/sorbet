@@ -265,7 +265,11 @@ class Sorbet::Private::HiddenMethodFinder
       fqn = real_name(my_klass)
       if fqn
         klass_str = String.new
-        klass_str << (Sorbet::Private::RealStdlib.real_is_a?(my_klass, Class) ? "class #{fqn}\n" : "module #{fqn}\n")
+        klass_str << (Sorbet::Private::RealStdlib.real_is_a?(my_klass, Class) ? "class #{name}\n" : "module #{name}\n")
+        children = serialize_constants(source_children, rbi_children, my_klass, my_klass_is_singleton, source_symbols, rbi_symbols)
+        if children != ""
+          klass_str << indent!(children)
+        end
         klass_str << includes.join("\n")
         klass_str << "\n" unless klass_str.end_with?("\n")
         klass_str << methods.join("\n")
@@ -277,12 +281,11 @@ class Sorbet::Private::HiddenMethodFinder
       end
     end
 
-    children = serialize_constants(source_children, rbi_children, my_klass, my_klass_is_singleton, source_symbols, rbi_symbols)
-    if children != ""
-      ret << children
-    end
-
     ret.empty? ? nil : ret.join("\n")
+  end
+
+  private def indent!(str)
+    str.gsub!(/^(?!$)/, ' ' * 2)
   end
 
   private def without_errors(lines)
@@ -391,11 +394,26 @@ class Sorbet::Private::HiddenMethodFinder
     rbi_mixins = rbi.map {|id| rbi_symbols[id]}
     rbi_mixins.each do |rbi_mixin|
       if !source_mixins.include?(rbi_mixin)
+        shortest_rbi_mixin = shortest_constant_lookup(klass.to_s, rbi_mixin)
         keyword = is_singleton ? "extend" : "include"
-        ret << "  #{keyword} ::#{rbi_mixin}"
+        shortest_rbi_mixin = "::#{shortest_rbi_mixin}" if shortest_rbi_mixin == rbi_mixin
+        ret << "  #{keyword} #{shortest_rbi_mixin}"
       end
     end
     ret
+  end
+
+  private def shortest_constant_lookup(from, to)
+    from_path = from.split('::')
+    to_path = to.split('::')
+    shortest_path = to_path.each_with_index.each_with_object([]) do |(v, idx), memo|
+      memo << v if !memo.empty? || v != from_path[idx]
+    end
+    if shortest_path.empty?
+      to_path.last
+    else
+      shortest_path.join('::')
+    end
   end
 
   def capture_stderr
