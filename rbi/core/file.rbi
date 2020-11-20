@@ -759,7 +759,7 @@ class File < IO
   # id of this process. See eaccess(3).
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -769,7 +769,7 @@ class File < IO
   # of this process. See access(3).
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -855,7 +855,7 @@ class File < IO
   # object.
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
@@ -1057,7 +1057,7 @@ class File < IO
   # id of this process. See eaccess(3).
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T.nilable(Integer))
   end
@@ -1067,7 +1067,7 @@ class File < IO
   # of this process. See access(3)
   sig do
     params(
-        file: String,
+        file: T.any(String, Pathname),
     )
     .returns(T.nilable(Integer))
   end
@@ -1201,8 +1201,8 @@ class File < IO
 
   sig do
     params(
-        file: String,
-        mode: String,
+        file: T.any(String, Pathname),
+        mode: T.any(String, Integer),
         perm: String,
         opt: Integer,
     )
