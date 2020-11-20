@@ -292,11 +292,13 @@ SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name) cons
     // We skip over ZSuper methods by default because at the time this was implemented, it was more
     // common for call sites to findMemberTransitive to want pretend they didn't exist than they
     // did. In a sense, this is just like how findMemberTransitive always resolves method aliases.
-    return findMemberTransitiveInternal(gs, name, {Flags::METHOD | Flags::METHOD_ZSUPER}, 100);
+    auto dealias = true;
+    return findMemberTransitiveInternal(gs, name, {Flags::METHOD | Flags::METHOD_ZSUPER}, dealias, 100);
 }
 
 SymbolRef Symbol::findMemberTransitiveIncludingZSuperMethods(const GlobalState &gs, NameRef name) const {
-    return findMemberTransitiveInternal(gs, name, {}, 100);
+    auto dealias = false;
+    return findMemberTransitiveInternal(gs, name, {}, dealias, 100);
 }
 
 SymbolRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const {
@@ -304,11 +306,12 @@ SymbolRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef na
         Flags::METHOD | Flags::METHOD_ABSTRACT,
         Flags::METHOD | Flags::METHOD_ZSUPER,
     };
-    return findMemberTransitiveInternal(gs, name, exclude, 100);
+    auto dealias = true;
+    return findMemberTransitiveInternal(gs, name, exclude, dealias, 100);
 }
 
 SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, const vector<u4> &exclude,
-                                               int maxDepth) const {
+                                               bool dealias, int maxDepth) const {
     ENFORCE(this->isClassOrModule());
     if (maxDepth == 0) {
         if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
@@ -333,7 +336,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
         Exception::raise("findMemberTransitive hit a loop while resolving");
     }
 
-    SymbolRef result = findMember(gs, name);
+    SymbolRef result = dealias ? findMember(gs, name) : findMemberNoDealias(gs, name);
     if (result.exists()) {
         if (exclude.empty()) {
             return result;
@@ -347,7 +350,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
         for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
             ENFORCE(it->exists());
             if (isClassOrModuleLinearizationComputed()) {
-                result = it->data(gs)->findMember(gs, name);
+                result = dealias ? it->data(gs)->findMember(gs, name) : it->data(gs)->findMemberNoDealias(gs, name);
                 if (result.exists()) {
                     if (exclude.empty()) {
                         return result;
@@ -363,14 +366,14 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
     } else {
         for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
             ENFORCE(it->exists());
-            result = it->data(gs)->findMemberTransitiveInternal(gs, name, exclude, maxDepth - 1);
+            result = it->data(gs)->findMemberTransitiveInternal(gs, name, exclude, dealias, maxDepth - 1);
             if (result.exists()) {
                 return result;
             }
         }
     }
     if (this->superClass().exists()) {
-        return this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, exclude, maxDepth - 1);
+        return this->superClass().data(gs)->findMemberTransitiveInternal(gs, name, exclude, dealias, maxDepth - 1);
     }
     return Symbols::noSymbol();
 }

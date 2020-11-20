@@ -516,9 +516,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
     }
 
-    auto mayBeZSuper = symbol.data(gs)->findMemberTransitiveIncludingZSuperMethods(gs, args.name);
+    auto visibilityMethod = symbol.data(gs)->findMemberTransitiveIncludingZSuperMethods(gs, args.name);
 
-    if (!mayBeZSuper.exists()) {
+    if (!visibilityMethod.exists()) {
         if (args.name == Names::initialize()) {
             // Special-case initialize(). We should define this on
             // `BasicObject`, but our method-resolution order is wrong, and
@@ -646,6 +646,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
+    auto mayBeZSuper = visibilityMethod.data(gs)->dealias(gs);
     SymbolRef mayBeOverloaded = mayBeZSuper;
     if (mayBeZSuper.data(gs)->isZSuperMethod()) {
         mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
@@ -668,14 +669,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     auto &component = result.main;
     component.receiver = args.selfType;
     component.method = method;
-    if (mayBeOverloaded == mayBeZSuper) {
-        // Upgrade mayBeZSuper to method post-overload checking.
-        component.visibilityMethod = method;
-    } else {
-        // Keep the one before overload checking, because it's important that we use this method's
-        // visibility checks.
-        component.visibilityMethod = mayBeZSuper;
-    }
+    // TODO(jez) All overloads should be entered with the original method's visibility I hope.
+    component.visibilityMethod = visibilityMethod;
 
     const SymbolData data = method.data(gs);
     unique_ptr<TypeConstraint> &maybeConstraint = result.main.constr;

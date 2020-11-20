@@ -88,3 +88,17 @@ class Foo
     T.assert_type!(g.overloaded(4), Integer)
   end
 end
+
+class PrivateOverloads
+  extend T::Sig
+
+  sig {returns(NilClass)}
+  sig {params(x: Integer).returns(Integer)}
+  private def foo(x=nil); end
+end
+
+po1 = PrivateOverloads.new.foo # error: Non-private call to private method `foo` on `PrivateOverloads`
+T.reveal_type(po1) # error: Revealed type: `NilClass`
+
+po2 = PrivateOverloads.new.foo(0) # error: Non-private call to private method `foo` on `PrivateOverloads`
+T.reveal_type(po2) # error: Revealed type: `Integer`

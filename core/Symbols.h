@@ -702,7 +702,7 @@ private:
     InlinedVector<Loc, 2> locs_;
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, const std::vector<u4> &exclude,
-                                           int maxDepth = 100) const;
+                                           bool dealias, int maxDepth = 100) const;
 
     inline void unsetClassOrModuleLinearizationComputed() {
         ENFORCE(isClassOrModule());
