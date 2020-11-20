@@ -469,59 +469,59 @@ public:
     ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
 
-        if (original.args.size() == 1) {
-            // Common case: Send is not to a modifier.
-            switch (original.fun._id) {
-                case core::Names::private_()._id:
-                case core::Names::privateClassMethod()._id:
-                case core::Names::protected_()._id:
-                case core::Names::public_()._id:
-                    addMethodModifier(ctx, original);
-                    break;
-                case core::Names::privateConstant()._id:
-                    addConstantModifier(ctx, original);
-                    break;
-                default:
-                    return tree;
-            }
+        switch (original.fun._id) {
+            case core::Names::private_()._id:
+            case core::Names::privateClassMethod()._id:
+            case core::Names::protected_()._id:
+            case core::Names::public_()._id:
+                for (const auto &arg : original.args) {
+                    addMethodModifier(ctx, original.fun, arg);
+                }
+                break;
+            case core::Names::privateConstant()._id:
+                for (const auto &arg : original.args) {
+                    addConstantModifier(ctx, original.fun, arg);
+                }
+                break;
         }
         return tree;
     }
 
-    void addMethodModifier(core::Context ctx, ast::Send &original) {
-        Modifier methodModifier;
-        methodModifier.kind = Modifier::Kind::Method;
-        methodModifier.owner = getOwner();
-        methodModifier.loc = original.loc;
-        methodModifier.name = original.fun;
-        methodModifier.target = unwrapLiteralToMethodName(ctx, original, original.args[0]);
-
-        if (methodModifier.target.exists()) {
-            foundDefs->addModifier(move(methodModifier));
+    void addMethodModifier(core::Context ctx, core::NameRef modifierName, const ast::TreePtr &arg) {
+        auto target = unwrapLiteralToMethodName(ctx, arg);
+        if (target.exists()) {
+            foundDefs->addModifier(Modifier{
+                Modifier::Kind::Method,
+                getOwner(),
+                arg.loc(),
+                /*name*/ modifierName,
+                target,
+            });
         }
     }
 
-    void addConstantModifier(core::Context ctx, ast::Send &original) {
-        Modifier constantModifier;
-        constantModifier.kind = Modifier::Kind::ClassOrStaticField;
-        constantModifier.owner = getOwner();
-        constantModifier.loc = original.loc;
-        constantModifier.name = original.fun;
-        if (auto sym = ast::cast_tree<ast::Literal>(original.args[0])) {
+    void addConstantModifier(core::Context ctx, core::NameRef modifierName, const ast::TreePtr &arg) {
+        auto target = core::NameRef::noName();
+        if (auto sym = ast::cast_tree<ast::Literal>(arg)) {
             if (sym->isSymbol(ctx)) {
-                constantModifier.target = sym->asSymbol(ctx);
+                target = sym->asSymbol(ctx);
             } else if (sym->isString(ctx)) {
-                constantModifier.target = sym->asString(ctx);
-            } else {
-                constantModifier.target = core::NameRef::noName();
+                target = sym->asString(ctx);
             }
         }
-        if (constantModifier.target.exists()) {
-            foundDefs->addModifier(move(constantModifier));
+
+        if (target.exists()) {
+            foundDefs->addModifier(Modifier{
+                Modifier::Kind::ClassOrStaticField,
+                getOwner(),
+                arg.loc(),
+                /*name*/ modifierName,
+                target,
+            });
         }
     }
 
-    core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::Send &original, ast::TreePtr &expr) {
+    core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::TreePtr &expr) {
         if (auto sym = ast::cast_tree<ast::Literal>(expr)) {
             // this handles the `private :foo` case
             if (!sym->isSymbol(ctx)) {
@@ -546,7 +546,7 @@ public:
                 return core::NameRef::noName();
             }
 
-            return unwrapLiteralToMethodName(ctx, original, send->args[1]);
+            return unwrapLiteralToMethodName(ctx, send->args[1]);
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
             return core::NameRef::noName();
