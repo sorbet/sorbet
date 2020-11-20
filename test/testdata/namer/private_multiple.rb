@@ -18,6 +18,6 @@ A.new.foo # Non-private call to private method `A#foo`
 A.new.bar # Non-private call to private method `A#bar`
 A.new.qux # Non-private call to private method `A#qux`
 
-p A::X # Non-private reference to private constant `X`
-p A::Y # Non-private reference to private constant `Y`
-p A::Z # Non-private reference to private constant `Z`
+p A::X # Non-private reference to private constant `A::X`
+p A::Y # Non-private reference to private constant `A::Y`
+p A::Z # Non-private reference to private constant `A::Z`
