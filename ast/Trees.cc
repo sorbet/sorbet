@@ -6,7 +6,6 @@
 #include <utility>
 
 // makes lldb work. Don't remove please
-template class std::unique_ptr<sorbet::ast::Expression>;
 template class std::unique_ptr<sorbet::ast::ClassDef>;
 template class std::unique_ptr<sorbet::ast::MethodDef>;
 template class std::unique_ptr<sorbet::ast::If>;
