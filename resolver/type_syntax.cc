@@ -379,17 +379,6 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                         break;
                     }
 
-                    auto nil = ast::cast_tree<ast::Literal>(send->args[0]);
-                    if (nil && nil->isNil(ctx)) {
-                        const auto loc = core::Loc(ctx.file, send->args[0].loc());
-                        if (auto e = ctx.state.beginError(loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("You probably meant `.returns(NilClass)`");
-                            e.replaceWith("Replace with `NilClass`", loc, "NilClass");
-                        }
-                        sig.returns = core::Types::nilClass();
-                        break;
-                    }
-
                     sig.returns = getResultTypeWithSelfTypeParams(ctx, send->args.front(), *parent, args);
 
                     break;
@@ -881,11 +870,21 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             targs.reserve(s.args.size());
             argLocs.reserve(s.args.size());
             holders.reserve(s.args.size());
+            auto i = -1;
             for (auto &arg : s.args) {
+                i++;
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(core::Loc(ctx.file, arg.loc()));
-                ty.type = core::make_type<core::MetaType>(
-                    getResultTypeWithSelfTypeParams(ctx, arg, sigBeingParsed, args.withoutSelfType()));
+                if (i < s.numPosArgs) {
+                    ty.type = core::make_type<core::MetaType>(
+                        getResultTypeWithSelfTypeParams(ctx, arg, sigBeingParsed, args.withoutSelfType()));
+                } else {
+                    // Fill this in with a dummy type. We don't want to parse this as type syntax
+                    // because we already know it's garbage.
+                    // But we still want to record some sort of arg (for the loc specifically) so
+                    // that the calls.cc intrinsic can craft an autocorrect.
+                    ty.type = core::Types::untypedUntracked();
+                }
                 holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
                 targs.emplace_back(holders.back().get());
                 argLocs.emplace_back(arg.loc());
@@ -980,6 +979,14 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 }
                 result.type = core::Types::untypedUntracked();
             }
+        },
+        [&](const ast::Literal &lit) {
+            auto underlying = core::isa_type<core::LiteralType>(lit.value) ? lit.value.underlying() : lit.value;
+            if (auto e = ctx.beginError(lit.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Unsupported literal in type syntax", lit.value.show(ctx));
+                e.replaceWith("Replace with underlying type", core::Loc(ctx.file, lit.loc), "{}", underlying.show(ctx));
+            }
+            result.type = underlying;
         },
         [&](const ast::TreePtr &e) {
             if (auto e = ctx.beginError(expr.loc(), core::errors::Resolver::InvalidTypeDeclaration)) {

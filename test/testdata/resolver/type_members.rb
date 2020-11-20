@@ -15,7 +15,7 @@ class Invalids
   BadArg = type_member(junk: 1)
          # ^^^^^^^^^^^^^^^^^^^^ error: Missing required param `fixed`
          # ^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `junk` passed for method
-                           # ^ error: Unsupported type syntax
+                           # ^ error: Unsupported literal in type syntax
 end
 
 module TypeParamDependsOnTypeParam

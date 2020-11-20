@@ -19,7 +19,7 @@ class A
       c: T.enum(1),
       d: T.enum([]), # error: enum([]) is invalid
       e: T.enum([unsupported]), # error: Unsupported type literal
-      f: 0, # error: Unsupported type syntax
+      f: 0, # error: Unsupported literal in type syntax
       g: T.any(*[Integer, String]), # error: splats cannot be used in types
       h: T.junk, # error: Method `junk` does not exist on `T.class_of(T)`
        # ^^^^^^ error: Unsupported method `T.junk`
@@ -27,7 +27,7 @@ class A
       j: T.class_of(T.nilable(Integer)), # error: T.class_of needs a Class as its argument
       k: T.class_of(1), # error: T.class_of needs a Class as its argument
       l: {[] => String}, # error: Shape keys must be literals
-      m: {foo: 0}, # error: Unsupported type syntax
+      m: {foo: 0}, # error: Unsupported literal in type syntax
       n: T.all, # error: Not enough arguments provided for method
       o: T.any, # error: Not enough arguments provided for method
     )
