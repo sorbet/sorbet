@@ -94,3 +94,28 @@ class InstNewBlock
     T.reveal_type(self.new {|x| x + 1}) # error: Revealed type: `String`
   end
 end
+
+# typed: true
+class OverridesNewBad
+  extend T::Sig
+
+  sig {params(arg0: Integer).returns(Integer)}
+  def self.new(arg0); 0; end
+
+  def initialize; end
+
+  x = new # error: Not enough arguments provided for method `OverridesNewBad.new`
+  T.reveal_type(x) # error: Revealed type: `Integer`
+end
+
+class OverridesNewNotGreatButWellTakeIt
+  extend T::Sig
+
+  sig {params(arg0: Integer).returns(T.attached_class)}
+  def self.new(arg0); super; end
+
+  def initialize(arg0); end
+
+  x = new # error: Not enough arguments provided for method `OverridesNewNotGreatButWellTakeIt.new`
+  T.reveal_type(x) # error: `T.attached_class (of OverridesNewNotGreatButWellTakeIt)`
+end

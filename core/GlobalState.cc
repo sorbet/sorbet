@@ -397,6 +397,18 @@ void GlobalState::initEmpty() {
     id = synthesizeClass(core::Names::Constants::Encoding());
     ENFORCE(id == Symbols::Encoding());
 
+    // Class#new
+    id = enterMethodSymbol(Loc::none(), Symbols::Class(), Names::new_());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::args());
+        arg.flags.isRepeated = true;
+    }
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+    ENFORCE(id == Symbols::Class_new());
+
     // Root members
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();

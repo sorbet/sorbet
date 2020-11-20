@@ -1355,6 +1355,15 @@ public:
         res.main.errors.clear();
         res.returnType = instanceTy;
         res.main = move(dispatched.main);
+        if (!res.main.method.exists()) {
+            // If we actually dispatched to some `initialize` method, use that method as the result,
+            // because it will be more interesting to people downstream who want to look at the
+            // result.
+            //
+            // But if this class hasn't defined a custom `initialize` method, still record that we
+            // dispatched to *something*, namely `Class#new`.
+            res.main.method = core::Symbols::Class_new();
+        }
         res.main.sendTp = instanceTy;
     }
 } Class_new;
@@ -2129,33 +2138,20 @@ public:
         }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
 
-        TypePtr returnTy;
-        DispatchResult dispatched;
-        if (!self.data(gs)->isSingletonClass(gs)) {
-            // In the case that `self` is not a singleton class, we know that
-            // this was a call to `new` outside of a self context. Dispatch to
-            // an instance method named new, and see what happens.
-            DispatchArgs innerArgs{Names::new_(), sendLocs,   numPosArgs,
-                                   sendArgStore,  selfTy,     selfTy,
-                                   selfTy,        args.block, args.originForUninitialized};
-            dispatched = selfTy.dispatchCall(gs, innerArgs);
-            returnTy = dispatched.returnType;
-        } else {
-            // Otherwise, we know that this is the proper new intrinsic, and we
-            // should be returning something of type `T.attached_class`
-            auto attachedClass = self.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
+        DispatchArgs innerArgs{Names::new_(), sendLocs,   numPosArgs,
+                               sendArgStore,  selfTy,     selfTy,
+                               selfTy,        args.block, args.originForUninitialized};
+        auto dispatched = selfTy.dispatchCall(gs, innerArgs);
+        auto returnTy = dispatched.returnType;
 
-            // AttachedClass will only be missing on `T.untyped`
+        // If we actually dispatch to something that looks like a construtor, replace return with `T.attached_class`
+        if (self.data(gs)->isSingletonClass(gs) && dispatched.main.method.exists() &&
+            (dispatched.main.method == core::Symbols::Class_new() ||
+             dispatched.main.method.data(gs)->name == core::Names::initialize())) {
+            // AttachedClass will only be missing on `T.untyped`, which will have a dispatch component of noSymbol
+            auto attachedClass = self.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
             ENFORCE(attachedClass.exists());
 
-            auto instanceTy = self.data(gs)->attachedClass(gs).data(gs)->externalType();
-            DispatchArgs innerArgs{Names::initialize(), sendLocs,   numPosArgs,
-                                   sendArgStore,        instanceTy, instanceTy,
-                                   instanceTy,          args.block, args.originForUninitialized};
-            dispatched = instanceTy.dispatchCall(gs, innerArgs);
-
-            // The return type from dispatched is ignored, and we return
-            // `T.attached_class` instead.
             returnTy = make_type<SelfTypeParam>(attachedClass);
         }
 

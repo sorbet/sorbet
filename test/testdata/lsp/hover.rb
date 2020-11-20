@@ -138,9 +138,9 @@ def main
       # ^^^^^^ hover: T.class_of(BigFoo)
       # ^^^^^^ hover: The docs for BigFoo
 
-  # .new only works if we definte `initialize`
   foo = BigFoo.new
-             # ^^^ hover: (nothing)
+  #            ^^^ hover: sig {params(args: T.untyped).returns(BigFoo)}
+  #            ^^^ hover: def new(*args); end
   hoo = BigFoo::LittleFoo1.new
                          # ^^^ hover: sig {returns(BigFoo::LittleFoo1)}
   raise "error message"

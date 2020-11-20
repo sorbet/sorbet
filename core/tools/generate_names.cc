@@ -318,6 +318,7 @@ NameDef names[] = {
     {"arg1"},
     {"arg2"},
     {"opts"},
+    {"args"},
     {"Elem", "Elem", true},
     {"keepForIde", "keep_for_ide"},
     {"keepForTypechecking", "keep_for_typechecking"},
