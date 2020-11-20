@@ -971,10 +971,16 @@ class SymbolDefiner {
                 // we don't have a method definition with the right argument structure, so we need to mangle the
                 // existing one and create a new one
                 if (!isIntrinsic(sym.data(ctx))) {
-                    paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedArgs);
-                    ctx.state.mangleRenameSymbol(sym, method.name);
-                    // Re-enter a new symbol.
-                    sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
+                    if (sym.data(ctx)->isZSuperMethod()) {
+                        // private :foo before def foo; end, or class reopened in separate files (like .rb + .rbi)
+                        // This means we found the method's arity now, and can re-use the existing symbol.
+                        sym.data(ctx)->unsetZSuperMethod();
+                    } else {
+                        paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedArgs);
+                        ctx.state.mangleRenameSymbol(sym, method.name);
+                        // Re-enter a new symbol.
+                        sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
+                    }
                 } else {
                     // ...unless it's an intrinsic, because we allow multiple incompatible definitions of those in code
                     // TODO(jvilk): Wouldn't this always fail since `!sym.exists()`?

@@ -478,6 +478,11 @@ public:
         flags |= Symbol::Flags::METHOD_ZSUPER;
     }
 
+    inline void unsetZSuperMethod() {
+        ENFORCE_NO_TIMER(isMethod());
+        flags &= ~Symbol::Flags::METHOD_ZSUPER;
+    }
+
     inline void setClassOrModuleAbstract() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_ABSTRACT;
