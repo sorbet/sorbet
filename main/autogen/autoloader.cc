@@ -422,7 +422,7 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
                 ENFORCE(child->qname.package);
                 auto namespaceName = child->qname.package->show(gs);
                 // this package name will include the suffix _Package on the end, and we want to remove that
-                constexpr int suffixLen = 8; // strlen("_Package")
+                constexpr int suffixLen = "_Package"sv.length();
                 string packageName = namespaceName.substr(0, namespaceName.size() - suffixLen);
                 auto pkgSubdir = join(subdir, packageName);
                 FileOps::ensureDir(pkgSubdir);
