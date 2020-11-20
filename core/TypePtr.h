@@ -75,10 +75,10 @@ private:
 
     // We use a 0 to indicate not inlined so that nullptr (which has counter value 0) is naturally viewed as
     // 'inlined'.
-    static constexpr tagged_storage NOT_INLINED_MASK = 0x100;
+    static constexpr tagged_storage NOT_INLINED_MASK = 0x0100;
     // We use a 8-bit tag mask so that tags can be efficiently extracted via
     // movzx on x86.
-    static constexpr tagged_storage TAG_MASK = 0xFF;
+    static constexpr tagged_storage TAG_MASK = 0x00FF;
 
     static constexpr tagged_storage PTR_MASK = ~(NOT_INLINED_MASK | TAG_MASK);
 
