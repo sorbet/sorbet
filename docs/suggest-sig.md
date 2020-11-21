@@ -140,7 +140,7 @@ To opt all files into this strictness level and insert as many sigs as Sorbet
 can guess, run this:
 
 ```
-srb tc --typed=strict --error-white-list=7017 --autocorrect
+srb tc --typed=strict --isolate-error-code=7017 --autocorrect
 ```
 
 This
@@ -163,4 +163,3 @@ Some tips:
 
 - Run your test suite. This is one area where having `sig`s checked at runtime
   helps: if Sorbet's guess was wrong, it's likely that the tests will catch it.
-
