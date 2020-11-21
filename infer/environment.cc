@@ -962,6 +962,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
+                auto multipleComponents = it->secondary != nullptr;
                 while (it != nullptr) {
                     for (auto &err : it->main.errors) {
                         ctx.state._error(std::move(err));
@@ -980,8 +981,17 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (it->main.method.exists() && it->main.method.data(ctx)->isMethodPrivate() &&
                         !send->isPrivateOk) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
-                            e.setHeader("Non-private call to private method `{}`", it->main.method.show(ctx));
-                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined as");
+                            if (multipleComponents) {
+                                e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
+                                            it->main.method.data(ctx)->name.data(ctx)->show(ctx),
+                                            it->main.receiver.show(ctx), recvType.type.show(ctx));
+                            } else {
+                                e.setHeader("Non-private call to private method `{}` on `{}`",
+                                            it->main.method.data(ctx)->name.data(ctx)->show(ctx),
+                                            it->main.receiver.show(ctx));
+                            }
+                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
+                                           it->main.method.data(ctx)->owner.data(ctx)->show(ctx));
                         }
                     }
 

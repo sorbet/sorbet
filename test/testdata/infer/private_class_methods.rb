@@ -34,15 +34,15 @@ class Test
   extend ClassMethods
 end
 
-Object.bar # error: Non-private call to private method `Object.bar`
+Object.bar # error: Non-private call to private method `bar` on `T.class_of(Object)`
 
 Test.method_a
-Test.method_b # error: Non-private call to private method `Test.method_b`
-Test.method_c # error: Non-private call to private method `Test.method_c`
-Test.method_d # error: Non-private call to private method `Test.method_d`
-Test.method_e # error: Non-private call to private method `Test.method_e`
-Test.method_g # error: Non-private call to private method `Test::ClassMethods#method_g`
-Test.method_h # error: Non-private call to private method `Test::ClassMethods#method_h`
+Test.method_b # error: Non-private call to private method `method_b` on `T.class_of(Test)`
+Test.method_c # error: Non-private call to private method `method_c` on `T.class_of(Test)`
+Test.method_d # error: Non-private call to private method `method_d` on `T.class_of(Test)`
+Test.method_e # error: Non-private call to private method `method_e` on `T.class_of(Test)`
+Test.method_g # error: Non-private call to private method `method_g` on `T.class_of(Test)`
+Test.method_h # error: Non-private call to private method `method_h` on `T.class_of(Test)`
 
 # TODO: The following methods should contain errors. Sorbet currently does not support setting method
 # visibility using the private/protected keywords that affect the visibility of subsequent methods.
