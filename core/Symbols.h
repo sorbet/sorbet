@@ -32,6 +32,12 @@ public:
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
 
+enum class Visibility : u1 {
+    Public = 1,
+    Protected,
+    Private,
+};
+
 class Symbol final {
 public:
     Symbol(const Symbol &) = delete;
@@ -271,6 +277,18 @@ public:
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
     }
 
+    Visibility methodVisibility() const {
+        if (this->isMethodPublic()) {
+            return Visibility::Public;
+        } else if (this->isMethodProtected()) {
+            return Visibility::Protected;
+        } else if (this->isMethodPrivate()) {
+            return Visibility::Private;
+        } else {
+            Exception::raise("Expected method to have visibility");
+        }
+    }
+
     inline bool isClassOrModuleModule() const {
         ENFORCE_NO_TIMER(isClassOrModule());
         if (flags & Symbol::Flags::CLASS_OR_MODULE_MODULE)
@@ -442,6 +460,21 @@ public:
     inline void setMethodPrivate() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_PRIVATE;
+    }
+
+    void setMethodVisibility(Visibility visibility) {
+        ENFORCE(isMethod());
+        switch (visibility) {
+            case Visibility::Public:
+                this->setMethodPublic();
+                break;
+            case Visibility::Protected:
+                this->setMethodProtected();
+                break;
+            case Visibility::Private:
+                this->setMethodPrivate();
+                break;
+        }
     }
 
     inline void setClassOrModuleAbstract() {
