@@ -455,6 +455,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("censor-for-snapshot-tests",
                                "When printing raw location information, don't show line numbers");
     options.add_options("dev")("error-white-list",
+                               "Deprecated, renamed to --isolate-error-code. "
                                "Error code to whitelist into reporting. "
                                "Errors not mentioned will be silenced. "
                                "This option can be passed multiple times.",
@@ -462,10 +463,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("isolate-error-code",
                                "Error code to report. "
                                "Errors not mentioned will be silenced. "
-                               "This option can be passed multiple times. "
-                               "An alternative to --error-white-list.",
+                               "This option can be passed multiple times.",
                                cxxopts::value<vector<int>>(), "errorCode");
     options.add_options("dev")("error-black-list",
+                               "Deprecated, renamed to --suppress-error-code. "
                                "Error code to blacklist from reporting. "
                                "Errors mentioned will be silenced. "
                                "This option can be passed multiple times.",
@@ -473,8 +474,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("suppress-error-code",
                                "Error code to not report. "
                                "Errors not mentioned will be silenced. "
-                               "This option can be passed multiple times. "
-                               "An alternative to --error-black-list.",
+                               "This option can be passed multiple times.",
                                cxxopts::value<vector<int>>(), "errorCode");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{false,true,strict,strong,[auto]}");

@@ -206,22 +206,23 @@ Usage:
                                 When printing raw location information, don't
                                 show line numbers
       --error-white-list errorCode
-                                Error code to whitelist into reporting.
-                                Errors not mentioned will be silenced. This option
+                                Deprecated, renamed to --isolate-error-code.
+                                Error code to whitelist into reporting. Errors
+                                not mentioned will be silenced. This option
                                 can be passed multiple times.
       --isolate-error-code errorCode
-                                Error code to report. Errors not mentioned will
-                                be silenced. This option can be passed multiple
-                                times. An alternative to --error-white-list.
+                                Error code to report. Errors not mentioned
+                                will be silenced. This option can be passed
+                                multiple times.
       --error-black-list errorCode
+                                Deprecated, renamed to --suppress-error-code.
                                 Error code to blacklist from reporting.
                                 Errors mentioned will be silenced. This option can
                                 be passed multiple times.
       --suppress-error-code errorCode
-                                Error code to not report. Errors not mentioned
-                                will be silenced. This option can be passed
-                                multiple times. An alternative to
-                                --error-black-list.
+                                Error code to not report. Errors not
+                                mentioned will be silenced. This option can be passed
+                                multiple times.
       --typed {false,true,strict,strong,[auto]}
                                 Force all code to specified strictness level
                                 (default: auto)
