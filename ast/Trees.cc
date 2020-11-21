@@ -534,7 +534,7 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
         fmt::format_to(buf, "def ");
     }
     fmt::format_to(buf, "{}", name.data(gs)->toString(gs));
-    auto &data = this->symbol.dataAllowingNone(gs);
+    const auto data = this->symbol.dataAllowingNone(gs);
     if (name != data->name) {
         fmt::format_to(buf, "<{}>", data->name.data(gs)->toString(gs));
     }

@@ -47,7 +47,7 @@ LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
     // Note: this will add an empty local to aliases if 'what' is not there
     LocalRef &alias = cctx.aliases[what];
     if (!alias.exists()) {
-        const core::SymbolData data = what.data(cctx.ctx);
+        auto data = what.data(cctx.ctx);
         alias = cctx.newTemporary(data->name);
     }
     return alias;

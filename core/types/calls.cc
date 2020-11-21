@@ -656,7 +656,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     component.receiver = args.selfType;
     component.method = method;
 
-    const SymbolData data = method.data(gs);
+    auto data = method.data(gs);
     unique_ptr<TypeConstraint> &maybeConstraint = result.main.constr;
     TypeConstraint *constr;
     if (args.block || data->isGenericMethod()) {
@@ -1110,7 +1110,7 @@ TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name,
     if (!method.exists()) {
         return nullptr;
     }
-    const SymbolData data = method.data(gs);
+    auto data = method.data(gs);
 
     vector<TypePtr> args;
     args.reserve(data->arguments().size());

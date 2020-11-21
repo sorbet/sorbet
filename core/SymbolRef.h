@@ -15,7 +15,7 @@ struct SymbolDataDebugCheck {
     void check() const;
 };
 
-/** This class is indended to be a safe way to pass `Symbol &` around.
+/** This class is intended to be a safe way to pass `Symbol &` around.
  *  Entering new symbols can invalidate `Symbol &`s and thus they are generally unsafe.
  *  This class ensures that all accesses are safe in debug builds and effectively is a `Symbol &` in optimized builds.
  */
@@ -23,11 +23,22 @@ class SymbolData : private DebugOnlyCheck<SymbolDataDebugCheck> {
     Symbol &symbol;
 
 public:
-    SymbolData(Symbol &ref, const GlobalState &gs);
+    SymbolData(Symbol &ref, GlobalState &gs);
+
     Symbol *operator->();
     const Symbol *operator->() const;
 };
 CheckSize(SymbolData, 8, 8);
+
+class ConstSymbolData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    const Symbol &symbol;
+
+public:
+    ConstSymbolData(const Symbol &ref, const GlobalState &gs);
+
+    const Symbol *operator->() const;
+};
+CheckSize(ConstSymbolData, 8, 8);
 
 class Symbol;
 
@@ -111,9 +122,9 @@ public:
     bool isSynthetic() const;
 
     SymbolData data(GlobalState &gs) const;
-    const SymbolData data(const GlobalState &gs) const;
+    ConstSymbolData data(const GlobalState &gs) const;
     SymbolData dataAllowingNone(GlobalState &gs) const;
-    const SymbolData dataAllowingNone(const GlobalState &gs) const;
+    ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
 
     bool operator==(const SymbolRef &rhs) const;
 

@@ -1406,6 +1406,7 @@ public:
 
         auto sym = id->symbol;
         auto data = sym.data(ctx);
+
         if (data->isTypeAlias() || data->isTypeMember()) {
             ENFORCE(!data->isTypeMember() || send->recv.isSelfReference());
 
@@ -1418,7 +1419,8 @@ public:
             // >   Boolean = T.let(nil, T.untyped)
             // > end
             if (data->isTypeAlias() && send->fun == core::Names::let()) {
-                data->resultType = core::Types::untypedUntracked();
+                // TODO(jvilk): Fix this.
+                const_cast<core::TypePtr &>(data->resultType) = core::Types::untypedUntracked();
                 return tree;
             }
 
