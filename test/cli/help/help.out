@@ -209,10 +209,19 @@ Usage:
                                 Error code to whitelist into reporting.
                                 Errors not mentioned will be silenced. This option
                                 can be passed multiple times.
+      --isolate-error-code errorCode
+                                Error code to report. Errors not mentioned will
+                                be silenced. This option can be passed multiple
+                                times. An alternative to --error-white-list.
       --error-black-list errorCode
                                 Error code to blacklist from reporting.
                                 Errors mentioned will be silenced. This option can
                                 be passed multiple times.
+      --suppress-error-code errorCode
+                                Error code to not report. Errors not mentioned
+                                will be silenced. This option can be passed
+                                multiple times. An alternative to
+                                --error-black-list.
       --typed {false,true,strict,strong,[auto]}
                                 Force all code to specified strictness level
                                 (default: auto)

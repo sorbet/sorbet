@@ -459,10 +459,22 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                "Errors not mentioned will be silenced. "
                                "This option can be passed multiple times.",
                                cxxopts::value<vector<int>>(), "errorCode");
+    options.add_options("dev")("isolate-error-code",
+                               "Error code to report. "
+                               "Errors not mentioned will be silenced. "
+                               "This option can be passed multiple times. "
+                               "An alternative to --error-white-list.",
+                               cxxopts::value<vector<int>>(), "errorCode");
     options.add_options("dev")("error-black-list",
                                "Error code to blacklist from reporting. "
                                "Errors mentioned will be silenced. "
                                "This option can be passed multiple times.",
+                               cxxopts::value<vector<int>>(), "errorCode");
+    options.add_options("dev")("suppress-error-code",
+                               "Error code to not report. "
+                               "Errors not mentioned will be silenced. "
+                               "This option can be passed multiple times. "
+                               "An alternative to --error-black-list.",
                                cxxopts::value<vector<int>>(), "errorCode");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{false,true,strict,strong,[auto]}");
@@ -877,12 +889,34 @@ void readOptions(Options &opts,
             auto rawList = raw["error-white-list"].as<vector<int>>();
             opts.errorCodeWhiteList = set<int>(rawList.begin(), rawList.end());
         }
+        if (raw.count("isolate-error-code") > 0) {
+            if (raw.count("error-white-list") > 0) {
+                logger->error("You can't pass both `{}` and `{}`", "--isolate-error-code", "--error-white-list");
+                throw EarlyReturnWithCode(1);
+            }
+            auto rawList = raw["isolate-error-code"].as<vector<int>>();
+            opts.errorCodeWhiteList = set<int>(rawList.begin(), rawList.end());
+        }
         if (raw.count("error-black-list") > 0) {
             if (raw.count("error-white-list") > 0) {
                 logger->error("You can't pass both `{}` and `{}`", "--error-black-list", "--error-white-list");
                 throw EarlyReturnWithCode(1);
+            } else if (raw.count("isolate-error-code") > 0) {
+                logger->error("You can't pass both `{}` and `{}`", "--error-black-list", "--isolate-error-code");
+                throw EarlyReturnWithCode(1);
+            } else if (raw.count("suppress-error-code") > 0) {
+                logger->error("You can't pass both `{}` and `{}`", "--error-black-list", "--suppress-error-code");
+                throw EarlyReturnWithCode(1);
             }
             auto rawList = raw["error-black-list"].as<vector<int>>();
+            opts.errorCodeBlackList = set<int>(rawList.begin(), rawList.end());
+        }
+        if (raw.count("suppress-error-code") > 0) {
+            if (raw.count("error-white-list") > 0) {
+                logger->error("You can't pass both `{}` and `{}`", "--suppress-error-code", "--error-white-list");
+                throw EarlyReturnWithCode(1);
+            }
+            auto rawList = raw["suppress-error-code"].as<vector<int>>();
             opts.errorCodeBlackList = set<int>(rawList.begin(), rawList.end());
         }
         if (sorbet::debug_mode) {
