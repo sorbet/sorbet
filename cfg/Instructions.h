@@ -74,23 +74,23 @@ CheckSize(Alias, 24, 8);
 
 class SolveConstraint final : public Instruction {
 public:
-    std::shared_ptr<core::SendAndBlockLink> link;
     LocalRef send;
-    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : link(link), send(send){};
+    std::shared_ptr<core::SendAndBlockLink> link;
+    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : send(send), link(link){};
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(SolveConstraint, 40, 8);
+CheckSize(SolveConstraint, 32, 8);
 
 class Send final : public Instruction {
 public:
-    VariableUseSite recv;
-    core::NameRef fun;
-    core::LocOffsets receiverLoc;
+    bool isPrivateOk;
     u2 numPosArgs;
+    core::NameRef fun;
+    VariableUseSite recv;
+    core::LocOffsets receiverLoc;
     InlinedVector<VariableUseSite, 2> args;
     InlinedVector<core::LocOffsets, 2> argLocs;
-    bool isPrivateOk;
     std::shared_ptr<core::SendAndBlockLink> link;
 
     Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, u2 numPosArgs,
@@ -100,7 +100,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Send, 160, 8);
+CheckSize(Send, 144, 8);
 
 class Return final : public Instruction {
 public:
@@ -125,13 +125,13 @@ CheckSize(BlockReturn, 56, 8);
 
 class LoadSelf final : public Instruction {
 public:
-    std::shared_ptr<core::SendAndBlockLink> link;
     LocalRef fallback;
+    std::shared_ptr<core::SendAndBlockLink> link;
     LoadSelf(std::shared_ptr<core::SendAndBlockLink> link, LocalRef fallback);
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(LoadSelf, 40, 8);
+CheckSize(LoadSelf, 32, 8);
 
 class Literal final : public Instruction {
 public:
@@ -155,10 +155,10 @@ CheckSize(GetCurrentException, 16, 8);
 
 class LoadArg final : public Instruction {
 public:
-    core::SymbolRef method;
     u2 argId;
+    core::SymbolRef method;
 
-    LoadArg(core::SymbolRef method, u2 argId) : method(method), argId{argId} {
+    LoadArg(core::SymbolRef method, u2 argId) : argId(argId), method(method) {
         categoryCounterInc("cfg", "loadarg");
     };
 
@@ -166,14 +166,14 @@ public:
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(LoadArg, 24, 8);
+CheckSize(LoadArg, 16, 8);
 
 class ArgPresent final : public Instruction {
 public:
-    core::SymbolRef method;
     u2 argId;
+    core::SymbolRef method;
 
-    ArgPresent(core::SymbolRef method, u2 argId) : method(method), argId{argId} {
+    ArgPresent(core::SymbolRef method, u2 argId) : argId(argId), method(method) {
         categoryCounterInc("cfg", "argpresent");
     }
 
@@ -181,7 +181,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(ArgPresent, 24, 8);
+CheckSize(ArgPresent, 16, 8);
 
 class LoadYieldParams final : public Instruction {
 public:
@@ -197,16 +197,16 @@ CheckSize(LoadYieldParams, 32, 8);
 
 class Cast final : public Instruction {
 public:
+    core::NameRef cast;
     VariableUseSite value;
     core::TypePtr type;
-    core::NameRef cast;
 
-    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : value(value), type(type), cast(cast) {}
+    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), value(value), type(type) {}
 
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Cast, 64, 8);
+CheckSize(Cast, 56, 8);
 
 class TAbsurd final : public Instruction {
 public:

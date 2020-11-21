@@ -57,7 +57,7 @@ string BlockReturn::showRaw(const core::GlobalState &gs, const CFG &cfg, int tab
 }
 
 LoadSelf::LoadSelf(shared_ptr<core::SendAndBlockLink> link, LocalRef fallback)
-    : link(std::move(link)), fallback(fallback) {
+    : fallback(fallback), link(std::move(link)) {
     categoryCounterInc("cfg", "loadself");
 }
 
@@ -72,8 +72,8 @@ string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) 
 Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, u2 numPosArgs,
            const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk,
            const shared_ptr<core::SendAndBlockLink> &link)
-    : recv(recv), fun(fun), receiverLoc(receiverLoc), numPosArgs{numPosArgs}, argLocs(std::move(argLocs)),
-      isPrivateOk(isPrivateOk), link(move(link)) {
+    : isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), fun(fun), recv(recv), receiverLoc(receiverLoc), argLocs(std::move(argLocs)),
+      link(move(link)) {
     ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
             args.size());
 
