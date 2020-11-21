@@ -127,6 +127,8 @@ struct FoundMethod final {
     ast::MethodDef::Flags flags;
     vector<ast::ParsedArg> parsedArgs;
     vector<u4> argsHash;
+    // If set, enters the found method as a method alias
+    core::NameRef aliasTo;
 };
 
 struct Modifier {
@@ -483,6 +485,9 @@ public:
                     addConstantModifier(ctx, original.fun, arg);
                 }
                 break;
+            case core::Names::aliasMethod()._id:
+                addMethodAlias(ctx, original);
+                break;
         }
         return tree;
     }
@@ -519,6 +524,43 @@ public:
                 target,
             });
         }
+    }
+
+    void addMethodAlias(core::Context ctx, const ast::Send &original) {
+        // TODO(jez) Add test for keyword args
+        if (!(original.args.size() == 2 && original.numPosArgs == 2)) {
+            return;
+        }
+
+        auto parsedArgs = InlinedVector<core::NameRef, 2>{};
+
+        for (auto &arg : original.args) {
+            auto lit = ast::cast_tree<ast::Literal>(arg);
+            if (lit == nullptr || !lit->isSymbol(ctx)) {
+                continue;
+            }
+            core::NameRef name = lit->asSymbol(ctx);
+
+            parsedArgs.emplace_back(name);
+        }
+
+        if (parsedArgs.size() != 2) {
+            return;
+        }
+
+        auto fromName = parsedArgs[0];
+        auto toName = parsedArgs[1];
+
+        foundDefs->addMethod(FoundMethod{
+            getOwner(),
+            fromName,
+            original.loc,
+            original.loc,
+            ast::MethodDef::Flags{},
+            vector<ast::ParsedArg>{},
+            vector<u4>{},
+            toName,
+        });
     }
 
     core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::TreePtr &expr) {

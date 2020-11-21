@@ -2376,23 +2376,6 @@ public:
                 return tree;
             }
 
-            vector<core::NameRef> args;
-            for (auto &arg : send.args) {
-                auto lit = ast::cast_tree<ast::Literal>(arg);
-                if (lit == nullptr || !lit->isSymbol(ctx)) {
-                    continue;
-                }
-                core::NameRef name = lit->asSymbol(ctx);
-
-                args.emplace_back(name);
-            }
-            if (send.args.size() != 2) {
-                return tree;
-            }
-            if (args.size() != 2) {
-                return tree;
-            }
-
             auto fromName = args[0];
             auto toName = args[1];
 
