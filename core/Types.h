@@ -812,6 +812,8 @@ struct DispatchArgs {
 struct DispatchComponent {
     TypePtr receiver;
     SymbolRef method;
+    // The method whose Symbol should be used for computing visibility-related behaviors
+    SymbolRef visibilityMethod;
     std::vector<std::unique_ptr<Error>> errors;
     TypePtr sendTp;
     TypePtr blockReturnType;
@@ -829,9 +831,15 @@ struct DispatchResult {
 
     DispatchResult() = default;
     DispatchResult(TypePtr returnType, TypePtr receiverType, core::SymbolRef method)
-        : returnType(returnType),
-          main(DispatchComponent{
-              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, ArgInfo{}, nullptr}){};
+        : returnType(returnType), main(DispatchComponent{std::move(receiverType),
+                                                         method,
+                                                         method,
+                                                         {},
+                                                         std::move(returnType),
+                                                         nullptr,
+                                                         nullptr,
+                                                         ArgInfo{},
+                                                         nullptr}){};
     DispatchResult(TypePtr returnType, DispatchComponent comp)
         : returnType(std::move(returnType)), main(std::move(comp)){};
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,

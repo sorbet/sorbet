@@ -292,11 +292,16 @@ SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name) cons
     return findMemberTransitiveInternal(gs, name, Flags::NONE, Flags::NONE, 100);
 }
 
+SymbolRef Symbol::findMemberTransitiveNoDealias(const GlobalState &gs, NameRef name) const {
+    auto dealias = false;
+    return findMemberTransitiveInternal(gs, name, Flags::NONE, Flags::NONE, dealias, 100);
+}
+
 SymbolRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const {
     return findMemberTransitiveInternal(gs, name, Flags::METHOD | Flags::METHOD_ABSTRACT, Flags::METHOD, 100);
 }
 
-SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
+SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags, bool dealias,
                                                int maxDepth) const {
     ENFORCE(this->isClassOrModule());
     if (maxDepth == 0) {
@@ -322,7 +327,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
         Exception::raise("findMemberTransitive hit a loop while resolving");
     }
 
-    SymbolRef result = findMember(gs, name);
+    auto result = dealias ? findMember(gs, name) : findMemberNoDealias(gs, name);
     if (result.exists()) {
         if (mask == 0 || (result.data(gs)->flags & mask) == flags) {
             return result;
@@ -332,7 +337,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
         for (auto it = this->mixins().begin(); it != this->mixins().end(); ++it) {
             ENFORCE(it->exists());
             if (isClassOrModuleLinearizationComputed()) {
-                result = it->data(gs)->findMember(gs, name);
+                result = dealias ? it->data(gs)->findMember(gs, name) : it->data(gs)->findMemberNoDealias(gs, name);
                 if (result.exists()) {
                     if (mask == 0 || (result.data(gs)->flags & mask) == flags) {
                         return result;

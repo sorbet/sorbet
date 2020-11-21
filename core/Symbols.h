@@ -501,6 +501,7 @@ public:
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberNoDealias(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
+    SymbolRef findMemberTransitiveNoDealias(const GlobalState &gs, NameRef name) const;
     SymbolRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
 
     /* transitively finds a member with the most similar name */
@@ -661,7 +662,7 @@ private:
     InlinedVector<SymbolRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
 
-    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
+    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags, bool dealias,
                                            int maxDepth = 100) const;
 
     inline void unsetClassOrModuleLinearizationComputed() {

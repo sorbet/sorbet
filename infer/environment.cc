@@ -977,11 +977,17 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     //  - When a method doesn't exist.
                     //
                     // In all of these cases, we bail out and skip the non-private checking.
-                    if (it->main.method.exists() && it->main.method.data(ctx)->isMethodPrivate() &&
+                    if (it->main.visibilityMethod.exists() && it->main.visibilityMethod.data(ctx)->isMethodPrivate() &&
                         !send->isPrivateOk) {
+                        ENFORCE(it->main.method.exists());
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
-                            e.setHeader("Non-private call to private method `{}`", it->main.method.show(ctx));
-                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined as");
+                            e.setHeader("Non-private call to private method `{}`", it->main.visibilityMethod.show(ctx));
+                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
+                                           it->main.method.data(ctx)->owner.data(ctx)->show(ctx));
+                            if (it->main.method != it->main.visibilityMethod) {
+                                e.addErrorLine(it->main.visibilityMethod.data(ctx)->loc(), "Made private in `{}` here",
+                                               it->main.visibilityMethod.data(ctx)->owner.data(ctx)->show(ctx));
+                            }
                         }
                     }
 

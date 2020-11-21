@@ -117,7 +117,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -131,7 +131,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -516,9 +516,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
     }
 
-    SymbolRef mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
+    auto visibilityMethod = symbol.data(gs)->findMemberTransitiveNoDealias(gs, args.name);
 
-    if (!mayBeOverloaded.exists()) {
+    if (!visibilityMethod.exists()) {
         if (args.name == Names::initialize()) {
             // Special-case initialize(). We should define this on
             // `BasicObject`, but our method-resolution order is wrong, and
@@ -646,15 +646,18 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
-    SymbolRef method = mayBeOverloaded.data(gs)->isOverloaded()
-                           ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, args.fullType,
-                                           targs, args.block != nullptr)
-                           : mayBeOverloaded;
+    auto mayBeOverloaded = visibilityMethod.data(gs)->dealias(gs);
+
+    auto method = mayBeOverloaded.data(gs)->isOverloaded()
+                      ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, args.fullType, targs,
+                                      args.block != nullptr)
+                      : mayBeOverloaded;
 
     DispatchResult result;
     auto &component = result.main;
     component.receiver = args.selfType;
     component.method = method;
+    component.visibilityMethod = visibilityMethod;
 
     const SymbolData data = method.data(gs);
     unique_ptr<TypeConstraint> &maybeConstraint = result.main.constr;
@@ -1353,17 +1356,21 @@ public:
             dispatched.main.errors.emplace_back(std::move(err));
         }
         res.main.errors.clear();
+
         res.returnType = instanceTy;
-        res.main = move(dispatched.main);
-        if (!res.main.method.exists()) {
+
+        dispatched.main.visibilityMethod = res.main.visibilityMethod;
+        if (!dispatched.main.method.exists()) {
             // If we actually dispatched to some `initialize` method, use that method as the result,
             // because it will be more interesting to people downstream who want to look at the
             // result.
             //
             // But if this class hasn't defined a custom `initialize` method, still record that we
-            // dispatched to *something*, namely `Class#new`.
-            res.main.method = core::Symbols::Class_new();
+            // dispatched to *something*, namely whatever it started with.
+            dispatched.main.method = res.main.method;
         }
+        res.main = move(dispatched.main);
+
         res.main.sendTp = instanceTy;
     }
 } Class_new;
