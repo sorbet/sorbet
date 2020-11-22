@@ -893,7 +893,7 @@ module Opus::Types::Test
         msg = check_error_message_for_obj(@type, 'foo')
         assert_equal('Expected type T.enum([:foo, :bar]), got "foo"', msg)
 
-        type = T.enum(['foo', 'bar'])
+        type = T.enum(%w[foo bar])
         msg = check_error_message_for_obj(type, :foo)
         assert_equal('Expected type T.enum(["foo", "bar"]), got :foo', msg)
       end
