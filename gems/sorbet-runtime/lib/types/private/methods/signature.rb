@@ -28,7 +28,7 @@ class T::Private::Methods::Signature
     )
   end
 
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, parameters: method.parameters, on_failure:, override_allow_incompatible: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false)
     @method = method
     @method_name = method_name
     @arg_types = []
