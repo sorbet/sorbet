@@ -464,11 +464,6 @@ Style/FrozenStringLiteralComment:
 Style/GuardClause:
   Enabled: false
 
-# Offense count: 2
-Style/IdenticalConditionalBranches:
-  Exclude:
-    - 'lib/types/props/private/setter_factory.rb'
-
 # Offense count: 140
 # Cop supports --auto-correct.
 Style/IfUnlessModifier:
