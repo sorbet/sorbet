@@ -497,10 +497,9 @@ module Opus::Types::Test
         assert_match(/\AParameter 'c': Expected type Integer, got type String with value "bye"/, err.message)
       end
 
-
       it 'raises an error when two parameters have the same name' do
 
-        @mod.sig { params(_: Integer, _: Integer).returns(String) }
+        @mod.sig { params(_: Integer, _: Integer).returns(String) } # rubocop:disable Lint/DuplicateHashKey
         def @mod.bar(_, _)
           ""
         end
