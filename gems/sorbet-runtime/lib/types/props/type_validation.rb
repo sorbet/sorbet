@@ -13,7 +13,7 @@ module T::Props::TypeValidation
 
     sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
     def valid_rule_key?(key)
-      super || :DEPRECATED_underspecified_type == key
+      super || key == :DEPRECATED_underspecified_type
     end
 
     sig do

@@ -390,6 +390,8 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   end
 
   describe 'string value comparison assertions' do
+    # rubocop:disable Style/YodaCondition
+
     it 'returns false if the types mismatch for ==' do
       assert_equal(false, 'spade' == CardSuit::SPADE)
       assert_equal(false, 'diamond' == CardSuit::SPADE)
@@ -403,6 +405,8 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
       assert_equal(false, CardSuit::SPADE === 'spade')
       assert_equal(false, CardSuit::CLUB === 'spade')
     end
+
+    # rubocop:enable Style/YodaCondition
 
     it 'returns false for a string in a `when` compared to an enum value' do
       val = CardSuit::SPADE
@@ -439,6 +443,8 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
       T::Configuration.disable_legacy_t_enum_migration_mode
     end
 
+    # rubocop:disable Style/YodaCondition
+
     it 'raises an assertion if string is lhs of comparison' do
       assert_equal(true, 'spade' == CardSuit::SPADE)
 
@@ -462,6 +468,8 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
 
       assert_equal(false, CardSuit::CLUB === 'spade')
     end
+
+    # rubocop:enable Style/YodaCondition
 
     it 'raises an assertion for a string in a `when` compared to an enum value' do
       val = CardSuit::SPADE
