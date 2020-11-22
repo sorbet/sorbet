@@ -7,7 +7,7 @@ module T::Types
   class TypeVariable < Base
     attr_reader :variance
 
-    VALID_VARIANCES = [:in, :out, :invariant]
+    VALID_VARIANCES = %i[in out invariant]
 
     def initialize(variance)
       if !VALID_VARIANCES.include?(variance)

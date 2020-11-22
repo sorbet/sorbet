@@ -45,12 +45,12 @@ module Chalk::Tools::RedactionUtils
 end
 Chalk::Tools::RedactionUtils::RedactionDirectiveSpec = T.type_alias do
   T.any(
-    T.enum([
-      :redact_digits,
-      :redact_digits_except_last4,
-      :redact_card,
-      :redact_all,
-      :truncate,
+    T.enum(%i[
+      redact_digits
+      redact_digits_except_last4
+      redact_card
+      redact_all
+      truncate
     ]),
     [T.enum([:truncate]), Integer],
     [T.enum([:truncate_middle]), Integer, Integer],

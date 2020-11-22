@@ -876,7 +876,7 @@ module Opus::Types::Test
 
     describe "Enum" do
       before do
-        @type = T.enum([:foo, :bar])
+        @type = T.enum(%i[foo bar])
       end
 
       it 'passes validation with a value from the enum' do

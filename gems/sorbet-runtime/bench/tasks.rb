@@ -33,5 +33,5 @@ namespace :bench do
     SorbetBenchmarks::Typecheck.run
   end
 
-  task all: [:getters, :setters, :constructor, :deserialize, :prop_definition, :typecheck]
+  task all: %i[getters setters constructor deserialize prop_definition typecheck]
 end

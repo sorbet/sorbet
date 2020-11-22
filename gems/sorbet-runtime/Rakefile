@@ -6,7 +6,7 @@
 require "./lib/sorbet-runtime"
 T::Configuration.default_checked_level = :always
 
-task default: [:test, :rubocop]
+task default: %i[test rubocop]
 
 task :test do
   Dir.glob('./test/**/*.rb').reject {|path| path.match(%r{^./test/types/fixtures/})}.each(&method(:require))

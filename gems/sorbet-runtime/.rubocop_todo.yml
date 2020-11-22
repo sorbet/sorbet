@@ -609,14 +609,6 @@ Style/SingleLineMethods:
 Style/StringLiterals:
   Enabled: false
 
-# Offense count: 14
-# Cop supports --auto-correct.
-# Configuration parameters: .
-# SupportedStyles: percent, brackets
-Style/SymbolArray:
-  EnforcedStyle: percent
-  MinSize: 7
-
 # Offense count: 50
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyleForMultiline.
