@@ -614,13 +614,6 @@ Style/SlicingWithRange:
     - 'lib/types/utils.rb'
     - 'test/types/method_validation.rb'
 
-# Offense count: 4
-# Configuration parameters: AllowModifier.
-Style/SoleNestedConditional:
-  Exclude:
-    - 'lib/types/private/methods/signature_validation.rb'
-    - 'lib/types/props/decorator.rb'
-
 # Offense count: 651
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, ConsistentQuotesInMultiline.
