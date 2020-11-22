@@ -54,7 +54,7 @@ class T::Props::Decorator
     @props = @props.merge(prop => rules.freeze).freeze
   end
 
-  VALID_RULE_KEYS = T.let(%i{
+  VALID_RULE_KEYS = T.let(%i[
     enum
     foreign
     foreign_hint_only
@@ -68,7 +68,7 @@ class T::Props::Decorator
     extra
     setter_validate
     _tnilable
-  }.map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
+  ].map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
   private_constant :VALID_RULE_KEYS
 
   sig {params(key: Symbol).returns(T::Boolean).checked(:never)}

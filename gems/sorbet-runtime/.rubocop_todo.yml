@@ -514,15 +514,6 @@ Style/NumericPredicate:
     - 'lib/types/props/generated_code_validation.rb'
     - 'lib/types/utils.rb'
 
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: PreferredDelimiters.
-Style/PercentLiteralDelimiters:
-  Exclude:
-    - 'lib/types/configuration.rb'
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/generated_code_validation.rb'
-
 # Offense count: 8
 # Cop supports --auto-correct.
 Style/RedundantBegin:

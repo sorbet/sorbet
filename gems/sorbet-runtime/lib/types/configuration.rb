@@ -347,7 +347,7 @@ module T::Configuration
     end
   end
 
-  @default_scalar_types = Set.new(%w{
+  @default_scalar_types = Set.new(%w[
     NilClass
     TrueClass
     FalseClass
@@ -357,7 +357,7 @@ module T::Configuration
     Symbol
     Time
     T::Enum
-  }).freeze
+  ]).freeze
 
   def self.scalar_types
     @scalar_types || @default_scalar_types
