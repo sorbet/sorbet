@@ -198,10 +198,10 @@ class T::Private::Methods::Signature
   end
 
   def method_desc
-    if @method.source_location
-      loc = @method.source_location.join(':')
+    loc = if @method.source_location
+      @method.source_location.join(':')
     else
-      loc = "<unknown location>"
+      "<unknown location>"
     end
     "#{@method} at #{loc}"
   end

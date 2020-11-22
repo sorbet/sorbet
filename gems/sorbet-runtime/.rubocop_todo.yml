@@ -436,18 +436,6 @@ Style/CommentAnnotation:
     - 'lib/types/types/enum.rb'
     - 'test/types/types.rb'
 
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SingleLineConditionsOnly, IncludeTernaryExpressions.
-# SupportedStyles: assign_to_condition, assign_inside_condition
-Style/ConditionalAssignment:
-  Exclude:
-    - 'lib/types/private/abstract/validate.rb'
-    - 'lib/types/private/methods/signature.rb'
-    - 'lib/types/private/methods/signature_validation.rb'
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/private/deserializer_generator.rb'
-
 # Offense count: 107
 Style/Documentation:
   Enabled: false

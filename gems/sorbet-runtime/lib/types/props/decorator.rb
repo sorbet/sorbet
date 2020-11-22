@@ -541,10 +541,10 @@ class T::Props::Decorator
         # of the method, optimizing it so this only runs on the first invocation.
         foreign = resolved_foreign
       end
-      if allow_direct_mutation.nil?
-        opts = {}
+      opts = if allow_direct_mutation.nil?
+        {}
       else
-        opts = {allow_direct_mutation: allow_direct_mutation}
+        {allow_direct_mutation: allow_direct_mutation}
       end
 
       T.unsafe(self.class).decorator.foreign_prop_get(self, prop_name, foreign, rules, opts)

@@ -216,10 +216,10 @@ module T::Private::Methods::SignatureValidation
   end
 
   private_class_method def self.method_loc_str(method)
-    if method.source_location
-      loc = method.source_location.join(':')
+    loc = if method.source_location
+      method.source_location.join(':')
     else
-      loc = "<unknown location>"
+      "<unknown location>"
     end
     "#{method.owner} at #{loc}"
   end

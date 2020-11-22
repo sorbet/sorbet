@@ -48,12 +48,12 @@ module T::Props
             SerdeTransform::Mode::DESERIALIZE,
             'val'
           )
-          if transformation
+          transformed_val = if transformation
             # Rescuing exactly NoMethodError is intended as a temporary hack
             # to preserve the semantics from before codegen. More generally
             # we are inconsistent about typechecking on deser and need to decide
             # our strategy here.
-            transformed_val = <<~RUBY
+            <<~RUBY
               begin
                 #{transformation}
               rescue NoMethodError => e
@@ -71,7 +71,7 @@ module T::Props
               end
             RUBY
           else
-            transformed_val = 'val'
+            'val'
           end
 
           nil_handler = generate_nil_handler(
