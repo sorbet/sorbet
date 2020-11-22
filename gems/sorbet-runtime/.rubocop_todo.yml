@@ -452,20 +452,6 @@ Style/ConditionalAssignment:
 Style/Documentation:
   Enabled: false
 
-# Offense count: 9
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: empty, nil, both
-Style/EmptyElse:
-  Exclude:
-    - 'lib/types/enum.rb'
-    - 'lib/types/interface_wrapper.rb'
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/private/apply_default.rb'
-    - 'lib/types/props/serializable.rb'
-    - 'lib/types/props/type_validation.rb'
-    - 'lib/types/utils.rb'
-
 # Offense count: 17
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.

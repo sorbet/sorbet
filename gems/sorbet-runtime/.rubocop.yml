@@ -26,6 +26,8 @@ Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrivialAccessors:
   IgnoreClassMethods: true
+Style/EmptyElse:
+  EnforcedStyle: empty
 
 # This doesn't play very well with implementations of Sorbet abstract methods
 Lint/UnusedMethodArgument:
