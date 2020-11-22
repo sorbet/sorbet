@@ -514,11 +514,6 @@ Style/NumericPredicate:
     - 'lib/types/props/generated_code_validation.rb'
     - 'lib/types/utils.rb'
 
-# Offense count: 4
-Style/OptionalBooleanParameter:
-  Exclude:
-    - 'lib/types/props/serializable.rb'
-
 # Offense count: 5
 # Cop supports --auto-correct.
 # Configuration parameters: PreferredDelimiters.
