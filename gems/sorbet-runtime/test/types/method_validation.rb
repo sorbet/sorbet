@@ -140,10 +140,10 @@ module Opus::Types::Test
         end
         TEST_DATA = {
           x: "foo",
-          y: 50.times.map do |i|
+          y: Array.new(50) do |i|
             "foo_#{i}".to_sym
           end,
-          z: 50.times.map do |i|
+          z: Array.new(50) do |i|
             ["bar_#{i}".to_sym, i.to_s]
           end.to_h,
         }

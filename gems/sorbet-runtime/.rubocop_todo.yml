@@ -361,13 +361,6 @@ Naming/PredicateName:
     - 'lib/types/props/optional.rb'
     - 'lib/types/utils.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect.
-Performance/TimesMap:
-  Exclude:
-    - 'test/types/method_validation.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 # Configuration parameters: AutoCorrect.
