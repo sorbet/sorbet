@@ -4,7 +4,7 @@
 module T::Props::TypeValidation
   include T::Props::Plugin
 
-  BANNED_TYPES = [Object, BasicObject, Kernel]
+  BANNED_TYPES = [Object, BasicObject, Kernel].freeze
 
   class UnderspecifiedType < ArgumentError; end
 

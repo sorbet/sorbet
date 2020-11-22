@@ -126,7 +126,7 @@ module Opus::Types::Test
 
         %i[overridable abstract],
         %i[overridable overridable],
-      ]
+      ].freeze
       INVALID_MODE_TESTS.each do |seq|
         name = (["sig"] + seq).join(".")
         it name do

@@ -146,7 +146,7 @@ module Opus::Types::Test
           z: Array.new(50) do |i|
             ["bar_#{i}".to_sym, i.to_s]
           end.to_h,
-        }
+        }.freeze
 
         Critic::Extensions::TypeExt.unpatch_types
         @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way

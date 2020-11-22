@@ -469,19 +469,6 @@ Style/GuardClause:
 Style/IfUnlessModifier:
   Enabled: false
 
-# Offense count: 8
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: literals, strict
-Style/MutableConstant:
-  Exclude:
-    - 'lib/types/private/methods/modes.rb'
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/type_validation.rb'
-    - 'lib/types/types/type_variable.rb'
-    - 'test/types/builder_syntax.rb'
-    - 'test/types/method_validation.rb'
-
 # Offense count: 53
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
