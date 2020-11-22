@@ -602,18 +602,6 @@ Style/SingleLineMethods:
     - 'test/types/types.rb'
     - 'test/types/validate_override_types.rb'
 
-# Offense count: 11
-# Cop supports --auto-correct.
-Style/SlicingWithRange:
-  Exclude:
-    - 'lib/types/private/methods/_methods.rb'
-    - 'lib/types/props/pretty_printable.rb'
-    - 'lib/types/props/private/deserializer_generator.rb'
-    - 'lib/types/props/private/serializer_generator.rb'
-    - 'lib/types/props/serializable.rb'
-    - 'lib/types/utils.rb'
-    - 'test/types/method_validation.rb'
-
 # Offense count: 651
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, ConsistentQuotesInMultiline.

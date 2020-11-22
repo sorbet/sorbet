@@ -60,3 +60,7 @@ Performance/CollectionLiteralInLoop:
 # We frequently care about the exact type of values, not just truthiness
 Style/DoubleNegation:
   Enabled: false
+
+# We don't want to needlessly break older Rubies
+Style/SlicingWithRange:
+  Enabled: false
