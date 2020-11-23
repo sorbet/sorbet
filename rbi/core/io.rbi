@@ -980,7 +980,7 @@ class IO < Object
       fd: T.any(String, Integer),
       mode: T.any(Integer, String),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
-      blk: T.proc.params(io: IO).returns(T.type_parameter(:U))
+      blk: T.proc.params(io: T.attached_class).returns(T.type_parameter(:U))
     ).returns(T.type_parameter(:U))
   end
   def self.open(fd, mode='r', opt=nil, &blk); end
