@@ -845,7 +845,7 @@ constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZ
 SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const vector<u4> &methodHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    auto ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_lookup_by_name", ownerScope->members().size());
 
     NameRef lookupName = name;
@@ -874,7 +874,7 @@ SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name,
 SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    auto ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_lookup_by_name", ownerScope->members().size());
 
     NameRef lookupName = name;
@@ -902,7 +902,7 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     ENFORCE(sym.exists(), "lookup up previous name of non-existing symbol");
     NameRef name = sym.data(*this)->name;
     NameData nameData = name.data(*this);
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    auto ownerScope = owner.dataAllowingNone(*this);
 
     if (nameData->kind == NameKind::UNIQUE) {
         if (nameData->unique.uniqueNameKind != UniqueNameKind::MangleRename) {
@@ -917,9 +917,9 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
             if (!nm.exists()) {
                 return Symbols::noSymbol();
             }
-            auto res = ownerScope->members()[nm];
-            ENFORCE(res.exists());
-            return res;
+            auto res = ownerScope->members().find(nm);
+            ENFORCE(res != ownerScope->members().end());
+            return res->second;
         }
     } else {
         u4 unique = 1;
@@ -2032,7 +2032,7 @@ SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
 }
 
 SymbolRef GlobalState::lookupStaticInitForClass(SymbolRef klass) const {
-    auto &classData = klass.data(*this);
+    auto classData = klass.data(*this);
     ENFORCE(classData->isClassOrModule());
     auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));

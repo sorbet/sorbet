@@ -180,28 +180,28 @@ SymbolData SymbolRef::dataAllowingNone(GlobalState &gs) const {
     }
 }
 
-const SymbolData SymbolRef::data(const GlobalState &gs) const {
+ConstSymbolData SymbolRef::data(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     return dataAllowingNone(gs);
 }
 
-const SymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
+ConstSymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
     switch (kind()) {
         case SymbolRef::Kind::ClassOrModule:
             ENFORCE_NO_TIMER(classOrModuleIndex() < gs.classAndModules.size());
-            return SymbolData(const_cast<Symbol &>(gs.classAndModules[classOrModuleIndex()]), gs);
+            return ConstSymbolData(gs.classAndModules[classOrModuleIndex()], gs);
         case SymbolRef::Kind::Method:
             ENFORCE_NO_TIMER(methodIndex() < gs.methods.size());
-            return SymbolData(const_cast<Symbol &>(gs.methods[methodIndex()]), gs);
+            return ConstSymbolData(gs.methods[methodIndex()], gs);
         case SymbolRef::Kind::Field:
             ENFORCE_NO_TIMER(fieldIndex() < gs.fields.size());
-            return SymbolData(const_cast<Symbol &>(gs.fields[fieldIndex()]), gs);
+            return ConstSymbolData(gs.fields[fieldIndex()], gs);
         case SymbolRef::Kind::TypeArgument:
             ENFORCE_NO_TIMER(typeArgumentIndex() < gs.typeArguments.size());
-            return SymbolData(const_cast<Symbol &>(gs.typeArguments[typeArgumentIndex()]), gs);
+            return ConstSymbolData(gs.typeArguments[typeArgumentIndex()], gs);
         case SymbolRef::Kind::TypeMember:
             ENFORCE_NO_TIMER(typeMemberIndex() < gs.typeMembers.size());
-            return SymbolData(const_cast<Symbol &>(gs.typeMembers[typeMemberIndex()]), gs);
+            return ConstSymbolData(gs.typeMembers[typeMemberIndex()], gs);
     }
 }
 
@@ -1400,7 +1400,9 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
     return result;
 }
 
-SymbolData::SymbolData(Symbol &ref, const GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
+SymbolData::SymbolData(Symbol &ref, GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
+
+ConstSymbolData::ConstSymbolData(const Symbol &ref, const GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
 
 SymbolDataDebugCheck::SymbolDataDebugCheck(const GlobalState &gs)
     : gs(gs), symbolCountAtCreation(gs.symbolsUsedTotal()) {}
@@ -1415,6 +1417,11 @@ Symbol *SymbolData::operator->() {
 };
 
 const Symbol *SymbolData::operator->() const {
+    runDebugOnlyCheck();
+    return &symbol;
+};
+
+const Symbol *ConstSymbolData::operator->() const {
     runDebugOnlyCheck();
     return &symbol;
 };

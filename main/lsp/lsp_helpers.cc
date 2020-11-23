@@ -85,7 +85,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
     vector<string> typeAndArgNames;
 
     vector<string> flags;
-    const core::SymbolData &sym = method.data(gs);
+    auto sym = method.data(gs);
     string sigCall = "sig";
     if (sym->isMethod()) {
         if (sym->isFinalMethod()) {
