@@ -8,6 +8,7 @@
 #include "rewriter/Cleanup.h"
 #include "rewriter/Command.h"
 #include "rewriter/DSLBuilder.h"
+#include "rewriter/DefDelegator.h"
 #include "rewriter/Delegate.h"
 #include "rewriter/Flatfiles.h"
 #include "rewriter/Flatten.h"
@@ -100,6 +101,12 @@ public:
                     }
 
                     nodes = Private::run(ctx, &send);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = DefDelegator::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;

@@ -1,15 +1,16 @@
-#ifndef SORBET_REWRITER_DELEGATE_H
-#define SORBET_REWRITER_DELEGATE_H
+#ifndef SORBET_REWRITER_DEF_DELEGATOR_H
+#define SORBET_REWRITER_DEF_DELEGATOR_H
 #include "ast/ast.h"
 
 namespace sorbet::rewriter {
 
 /**
- * This class implements Module#delegate from ActiveSupport
+ * This class implements Forwardable#def_delegator
  * by desugaring things of the form
  *
  *    class MyClass
- *      delegate :foo, :bar, to: 'thing'
+ *      def_delegator :thing, :foo
+ *      def_delegator :thing, :bar, :aliased_bar
  *    end
  *
  * into
@@ -19,14 +20,14 @@ namespace sorbet::rewriter {
  *      def foo(*arg0, &blk); end
  *
  *      sig {params(arg0: T.untyped, blk: T.nilable(Proc)).returns(T.untyped)}
- *      def bar(*arg0, &blk); end
+ *      def aliased_bar(*arg0, &blk); end
  *    end
  */
-class Delegate final {
+class DefDelegator final {
 public:
     static std::vector<ast::TreePtr> run(core::MutableContext ctx, const ast::Send *send);
 
-    Delegate() = delete;
+    DefDelegator() = delete;
 };
 
 } // namespace sorbet::rewriter
