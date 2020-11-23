@@ -2,7 +2,6 @@
 #define SORBET_LSP_QUERYRESPONSE
 #include "core/Loc.h"
 #include "core/LocalVariable.h"
-#include "core/Symbols.h"
 #include "core/Types.h"
 #include <variant>
 
@@ -22,27 +21,7 @@ public:
     const core::SymbolRef enclosingMethod;
     const core::Loc receiverLoc;
 
-    const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const {
-        // TODO: handle dispatchResult->secondary
-        auto methodName = dispatchResult->main.method.data(gs)->name.show(gs);
-        auto expr = termLoc.source(gs);
-        // There are two possible forms of a send expression:
-        //   <receiver expr><whitespace?>.<whitespace?><method>
-        //   <method>
-        std::string::size_type methodNameOffset = receiverLoc.endPos() - termLoc.beginPos();
-        if (methodNameOffset != 0) {
-            methodNameOffset = expr.find_first_of(".", methodNameOffset) + 1;
-            methodNameOffset = expr.find_first_not_of(" \t", methodNameOffset);
-        }
-        auto offsets = termLoc.offsets();
-        offsets.beginLoc += methodNameOffset;
-        offsets.endLoc = offsets.beginLoc + methodName.length();
-        auto methodNameLoc = core::Loc(termLoc.file(), offsets);
-        if (offsets.endPos() > termLoc.endPos() || methodName != methodNameLoc.source(gs)) {
-            return std::nullopt;
-        }
-        return std::optional<core::Loc>(methodNameLoc);
-    }
+    const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
 
 class IdentResponse final {

@@ -125,6 +125,9 @@ public:
         auto loc = response->getLoc();
         auto source = loc.source(gs);
         auto location = config.loc2Location(gs, loc);
+        if (location == nullptr) {
+            return;
+        }
         string newsrc;
         if (auto sendResp = response->isSend()) {
             auto methodNameLoc = sendResp->getMethodNameLoc(gs);
@@ -181,6 +184,9 @@ public:
         auto loc = response->getLoc();
         auto source = loc.source(gs);
         auto location = config.loc2Location(gs, loc);
+        if (location == nullptr) {
+            return;
+        }
         vector<string> strs = absl::StrSplit(source, "::");
         strs[strs.size() - 1] = string(newName);
         auto newsrc = absl::StrJoin(strs, "::");
@@ -226,8 +232,6 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
     }
 
     for (auto sym : symbolsToRename) {
-        // vector<unique_ptr<Location>> references = getReferencesToSymbol(typechecker, sym);
-
         auto queryResult = queryBySymbol(typechecker, sym);
         if (queryResult.error) {
             return JSONNullObject();

@@ -17,6 +17,28 @@ const SendResponse *QueryResponse::isSend() const {
     return get_if<SendResponse>(&response);
 }
 
+const optional<core::Loc> SendResponse::getMethodNameLoc(const core::GlobalState &gs) const {
+    // TODO: handle dispatchResult->secondary
+    auto methodName = dispatchResult->main.method.data(gs)->name.show(gs);
+    auto expr = termLoc.source(gs);
+    // There are two possible forms of a send expression:
+    //   <receiver expr><whitespace?>.<whitespace?><method>
+    //   <method>
+    string::size_type methodNameOffset = receiverLoc.endPos() - termLoc.beginPos();
+    if (methodNameOffset != 0) {
+        methodNameOffset = expr.find_first_of(".", methodNameOffset) + 1;
+        methodNameOffset = expr.find_first_not_of(" \t", methodNameOffset);
+    }
+    auto offsets = termLoc.offsets();
+    offsets.beginLoc += methodNameOffset;
+    offsets.endLoc = offsets.beginLoc + methodName.length();
+    auto methodNameLoc = core::Loc(termLoc.file(), offsets);
+    if (offsets.endPos() > termLoc.endPos() || methodName != methodNameLoc.source(gs)) {
+        return nullopt;
+    }
+    return optional<core::Loc>(methodNameLoc);
+}
+
 const IdentResponse *QueryResponse::isIdent() const {
     return get_if<IdentResponse>(&response);
 }
