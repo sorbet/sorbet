@@ -166,9 +166,9 @@ private:
         }
         return replaceAt(def, pos);
     }
-    string replaceAt(string input, string::size_type pos) {
+    string replaceAt(string_view input, string::size_type pos) {
         auto suffixOffset = pos + oldName.length();
-        return input.substr(0, pos) + newName + input.substr(suffixOffset, input.length() - suffixOffset);
+        return absl::StrCat(input.substr(0, pos), newName, input.substr(suffixOffset, input.length() - suffixOffset));
     }
 };
 class ConstRenamer : public Renamer {
