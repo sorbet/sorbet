@@ -180,13 +180,7 @@ public:
 
     Expression *get() const noexcept {
         auto val = ptr & PTR_MASK;
-
-        if constexpr (sizeof(void *) == 4) {
-            return reinterpret_cast<Expression *>(val);
-        } else {
-            // sign extension for the upper 16 bits
-            return reinterpret_cast<Expression *>(val >> 16);
-        }
+        return reinterpret_cast<Expression *>(val >> 16);
     }
 
     // Fetch the tagged pointer. This is needed for:

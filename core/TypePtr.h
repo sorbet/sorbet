@@ -165,12 +165,7 @@ private:
 
     void *get() const {
         auto val = store & PTR_MASK;
-        if constexpr (sizeof(void *) == 4) {
-            return reinterpret_cast<void *>(val);
-        } else {
-            // sign extension for the upper 16 bits
-            return reinterpret_cast<void *>(val >> 16);
-        }
+        return reinterpret_cast<void *>(val >> 16);
     }
 
 public:
