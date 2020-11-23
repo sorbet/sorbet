@@ -1419,7 +1419,7 @@ public:
             // >   Boolean = T.let(nil, T.untyped)
             // > end
             if (data->isTypeAlias() && send->fun == core::Names::let()) {
-                // TODO(jvilk): Fix this.
+                // TODO(jvilk): This mutates the symbol table from an immutable context due to a const bug in Symbols.cc. DO NOT COPY THIS
                 const_cast<core::TypePtr &>(data->resultType) = core::Types::untypedUntracked();
                 return tree;
             }
