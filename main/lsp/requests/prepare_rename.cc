@@ -20,6 +20,28 @@ variant<JSONNullObject, unique_ptr<PrepareRenameResult>> getPrepareRenameResult(
     result->placeholder = name;
     return result;
 }
+
+variant<JSONNullObject, unique_ptr<PrepareRenameResult>>
+getPrepareRenameResultForSend(const core::GlobalState &gs, const core::lsp::SendResponse *sendResp) {
+    // The send expression is of the form <receiver>.<method><args>
+    // We want to return the range and placeholder for the method part of the expression, because this is what the
+    // editor will highlight in the rename UI.
+
+    auto methodNameLoc = sendResp->getMethodNameLoc(gs);
+    if (!methodNameLoc) {
+        return JSONNullObject();
+    }
+
+    auto range = Range::fromLoc(gs, methodNameLoc.value());
+    if (range == nullptr) {
+        return JSONNullObject();
+    }
+
+    auto result = make_unique<PrepareRenameResult>(move(range));
+    result->placeholder = methodNameLoc->source(gs);
+    return result;
+}
+
 } // namespace
 
 PrepareRenameTask::PrepareRenameTask(const LSPConfiguration &config, MessageId id,
@@ -60,8 +82,7 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerDelegate
                     response->result = getPrepareRenameResult(gs, defResp->symbol);
                 }
             } else if (auto sendResp = resp->isSend()) {
-                auto method = sendResp->dispatchResult->main.method;
-                response->result = getPrepareRenameResult(gs, method);
+                response->result = getPrepareRenameResultForSend(gs, sendResp);
             }
         }
     }

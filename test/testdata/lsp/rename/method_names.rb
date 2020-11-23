@@ -29,6 +29,8 @@ end
 c2 = C2.new
 # only the second m1 should change
 puts c2.m1.m1.x
+puts c2.m1().m1.x
+puts c2.m1().m1().x
 
 c1 = C1.new
 # both first and second m1 should change

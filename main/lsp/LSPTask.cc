@@ -199,29 +199,58 @@ bool LSPTask::canPreempt(const LSPIndexer &indexer) const {
     return !needsMultithreading(indexer);
 }
 
-vector<unique_ptr<Location>>
-LSPTask::extractLocations(const core::GlobalState &gs,
-                          const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
-                          vector<unique_ptr<Location>> locations) const {
+// Filter for untyped locations, and dedup responses that are at the same location
+vector<unique_ptr<core::lsp::QueryResponse>>
+LSPTask::filterAndDedup(const core::GlobalState &gs,
+                        const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) const {
+    vector<unique_ptr<core::lsp::QueryResponse>> responses;
+    // Filter for responses with a loc that exists and points to a typed file, unless it's a const, field or
+    // definition in which case we're ok with untyped files (because we know where those things are even in untyped
+    // files.)
     for (auto &q : queryResponses) {
         core::Loc loc = q->getLoc();
         if (loc.exists() && loc.file().exists()) {
             auto fileIsTyped = loc.file().data(gs).strictLevel >= core::StrictLevel::True;
             // If file is untyped, only support responses involving constants and definitions.
             if (fileIsTyped || q->isConstant() || q->isField() || q->isDefinition()) {
-                addLocIfExists(gs, locations, loc);
+                responses.push_back(make_unique<core::lsp::QueryResponse>(*q));
             }
         }
     }
-    // Dedupe locations
-    fast_sort(locations,
-              [](const unique_ptr<Location> &a, const unique_ptr<Location> &b) -> bool { return a->cmp(*b) < 0; });
-    locations.resize(std::distance(locations.begin(),
-                                   std::unique(locations.begin(), locations.end(),
-                                               [](const unique_ptr<Location> &a,
-                                                  const unique_ptr<Location> &b) -> bool { return a->cmp(*b) == 0; })));
-    return locations;
+
+    // sort by location and deduplicate
+    fast_sort(responses,
+              [](const unique_ptr<core::lsp::QueryResponse> &a, const unique_ptr<core::lsp::QueryResponse> &b) -> bool {
+                  auto aLoc = a->getLoc();
+                  auto bLoc = b->getLoc();
+                  auto cmp = (aLoc.beginPos() - bLoc.beginPos());
+                  if (cmp == 0) {
+                      cmp = aLoc.endPos() - bLoc.endPos();
+                  }
+                  // TODO: precedence based on response type, in case of same location?
+                  return cmp < 0;
+              });
+    responses.resize(
+        std::distance(responses.begin(), std::unique(responses.begin(), responses.end(),
+                                                     [](const unique_ptr<core::lsp::QueryResponse> &a,
+                                                        const unique_ptr<core::lsp::QueryResponse> &b) -> bool {
+                                                         auto aLoc = a->getLoc();
+                                                         auto bLoc = b->getLoc();
+                                                         return aLoc == bLoc;
+                                                     })));
+    return responses;
 }
+
+vector<unique_ptr<Location>>
+LSPTask::extractLocations(const core::GlobalState &gs,
+                          const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
+                          vector<unique_ptr<Location>> locations) const {
+    auto queryResponsesFiltered = filterAndDedup(gs, queryResponses);
+    for (auto &q : queryResponsesFiltered) {
+        addLocIfExists(gs, locations, q->getLoc());
+    }
+    return locations;
+} // namespace sorbet::realmain::lsp
 
 vector<unique_ptr<Location>> LSPTask::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
                                                             vector<unique_ptr<Location>> locations) const {

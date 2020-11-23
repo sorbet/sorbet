@@ -4,7 +4,6 @@
 module M
   class Foo
     def bar(a=1)
-#     ^ apply-rename: [A] newName: baz
     end
 
     def caller
@@ -20,6 +19,7 @@ end
 f = M::Foo.new
 f.bar(f.x)
 f.bar
+# ^ apply-rename: [A] newName: baz
 f  .  bar  (   )
 
 M::Foo.new.bar 3

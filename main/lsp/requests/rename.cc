@@ -89,12 +89,15 @@ core::SymbolRef findRootClassWithMethod(const core::GlobalState &gs, core::Symbo
 
 class Renamer {
 public:
-    Renamer(const string oldName, const string newName) : oldName(oldName), newName(newName) {}
+    Renamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName, const string newName)
+        : gs(gs), config(config), oldName(oldName), newName(newName) {}
     virtual ~Renamer() = default;
-    virtual void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) = 0;
+    virtual void rename(unique_ptr<core::lsp::QueryResponse> &response) = 0;
     unique_ptr<WorkspaceEdit> buildEdit();
 
 protected:
+    const core::GlobalState &gs;
+    const LSPConfiguration &config;
     string oldName;
     string newName;
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
@@ -111,67 +114,79 @@ unique_ptr<WorkspaceEdit> Renamer::buildEdit() {
     we->documentChanges = move(textDocEdits);
     return we;
 }
+
 class MethodRenamer : public Renamer {
 public:
-    MethodRenamer(const string oldName, const string newName) : Renamer(oldName, newName) {}
+    MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
+                  const string newName)
+        : Renamer(gs, config, oldName, newName) {}
     ~MethodRenamer() {}
-    void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) override {
-        auto loc = location->range->toLoc(gs, fref);
+    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
+        auto loc = response->getLoc();
         auto source = loc.source(gs);
+        auto location = config.loc2Location(gs, loc);
+        if (location == nullptr) {
+            return;
+        }
         string newsrc;
-        if (absl::StartsWith(source, "def ") || absl::StartsWith(source, "attr_reader") ||
-            absl::StartsWith(source, "attr_writer") || absl::StartsWith(source, "attr_accessor")) {
+        if (auto sendResp = response->isSend()) {
+            auto methodNameLoc = sendResp->getMethodNameLoc(gs);
+            if (!methodNameLoc) {
+                ENFORCE(0, "Method name not found in send expression")
+                return;
+            }
+            string::size_type methodNameOffset = methodNameLoc->beginPos() - sendResp->termLoc.beginPos();
+            newsrc = replaceAt(source, methodNameOffset);
+        } else if (auto defResp = response->isDefinition()) {
             newsrc = replaceMethodNameInDef(source);
-        } else { // send
-            newsrc = replaceMethodNameInSend(source);
+        } else {
+            ENFORCE(0, "Unexpected query response type while renaming method");
+            return;
         }
         edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
     }
 
 private:
-    // Parse a method name from a send (call), replace it with the new name, and return the full send source with the
-    // new name
-    string replaceMethodNameInSend(string send) {
-        // Split into method and args
-        string methodExpr, args;
-        for (string::size_type i = 0; i < send.size(); i++) {
-            if (send[i] == ' ' || send[i] == '(') {
-                methodExpr = send.substr(0, i);
-                args = send.substr(i, send.size() - i);
+    string replaceMethodNameInDef(string def) {
+        // We can't do a simple string replace-all because of cases like:
+        //   `def foo(foobar)`
+        //   `attr_reader :att`
+        // Since we don't have more precise info about where the name is, we do this:
+        //   1. if the definition starts with attr_{reader,writer,accessor} then skip over that
+        //   2. and then change the first instance of oldName to newName
+        string::size_type offset = 0;
+        vector<string> prefixes{"attr_reader", "attr_accessor", "attr_writer"};
+        for (auto prefix : prefixes) {
+            if (absl::StartsWith(def, prefix)) {
+                offset = prefix.length();
                 break;
             }
         }
-        // no args passed
-        if (methodExpr.size() == 0) {
-            methodExpr = send;
-            args = "";
+        auto pos = def.find(oldName, offset);
+        if (pos == string::npos) {
+            ENFORCE(0, "Method name should appear in definition");
+            return def;
         }
-        ENFORCE(send == (methodExpr + args));
-
-        // The method name must be at the end of the methodExpr; if so, replace it and reconstruct the send
-        auto prefixLen = methodExpr.size() - oldName.size();
-        if (oldName == methodExpr.substr(prefixLen, oldName.size())) {
-            auto newMethodExpr = methodExpr.substr(0, prefixLen) + newName;
-            return (newMethodExpr + args);
-        } else {
-            // If this happens we parsed the send incorrectly (or we parsed something that's not a send), so give up and
-            // return the unmodified source
-            ENFORCE(0);
-            return send;
-        }
+        return replaceAt(def, pos);
     }
-
-    string replaceMethodNameInDef(string def) {
-        return absl::StrReplaceAll(def, {{oldName, newName}});
+    string replaceAt(string_view input, string::size_type pos) {
+        auto suffixOffset = pos + oldName.length();
+        return absl::StrCat(input.substr(0, pos), newName, input.substr(suffixOffset, input.length() - suffixOffset));
     }
 };
 class ConstRenamer : public Renamer {
 public:
-    ConstRenamer(const string oldName, const string newName) : Renamer(oldName, newName) {}
+    ConstRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
+                 const string newName)
+        : Renamer(gs, config, oldName, newName) {}
     ~ConstRenamer() {}
-    void rename(const core::GlobalState &gs, unique_ptr<Location> &location, core::FileRef fref) override {
-        auto loc = location->range->toLoc(gs, fref);
+    void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
+        auto loc = response->getLoc();
         auto source = loc.source(gs);
+        auto location = config.loc2Location(gs, loc);
+        if (location == nullptr) {
+            return;
+        }
         vector<string> strs = absl::StrSplit(source, "::");
         strs[strs.size() - 1] = string(newName);
         auto newsrc = absl::StrJoin(strs, "::");
@@ -190,7 +205,7 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
 
     vector<core::SymbolRef> symbolsToRename;
     if (symbolData->isMethod()) {
-        renamer = make_unique<MethodRenamer>(originalName, newName);
+        renamer = make_unique<MethodRenamer>(gs, config, originalName, newName);
         // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
         // then find the full tree; then look for methods with the same name as ours; then find all references to all
         // those methods and rename them.
@@ -212,22 +227,26 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
             }
         }
     } else {
-        renamer = make_unique<ConstRenamer>(originalName, newName);
+        renamer = make_unique<ConstRenamer>(gs, config, originalName, newName);
         symbolsToRename.push_back(symbol);
     }
 
     for (auto sym : symbolsToRename) {
-        vector<unique_ptr<Location>> references = getReferencesToSymbol(typechecker, sym);
+        auto queryResult = queryBySymbol(typechecker, sym);
+        if (queryResult.error) {
+            return JSONNullObject();
+        }
 
-        for (auto &location : references) {
-            // Get text at location.
-            auto fref = config.uri2FileRef(gs, location->uri);
-            if (fref.data(gs).isPayload()) {
+        // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
+        // in some cases like sends, we need the SendResponse to be able to accurately find the method name in the
+        // expression.
+        for (auto &response : filterAndDedup(gs, queryResult.responses)) {
+            auto loc = response->getLoc();
+            if (loc.file().data(gs).isPayload()) {
                 // We don't support renaming things in payload files.
                 return JSONNullObject();
             }
-
-            renamer->rename(gs, location, fref);
+            renamer->rename(response);
         }
     }
     return renamer->buildEdit();

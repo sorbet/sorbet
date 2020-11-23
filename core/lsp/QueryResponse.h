@@ -11,14 +11,17 @@ class TypeConstraint;
 class SendResponse final {
 public:
     SendResponse(core::Loc termLoc, std::shared_ptr<core::DispatchResult> dispatchResult, core::NameRef callerSideName,
-                 bool isPrivateOk, core::SymbolRef enclosingMethod)
+                 bool isPrivateOk, core::SymbolRef enclosingMethod, core::Loc receiverLoc)
         : dispatchResult(std::move(dispatchResult)), callerSideName(callerSideName), termLoc(termLoc),
-          isPrivateOk(isPrivateOk), enclosingMethod(enclosingMethod){};
+          isPrivateOk(isPrivateOk), enclosingMethod(enclosingMethod), receiverLoc(receiverLoc){};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
     const core::NameRef callerSideName;
     const core::Loc termLoc;
     const bool isPrivateOk;
     const core::SymbolRef enclosingMethod;
+    const core::Loc receiverLoc;
+
+    const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
 
 class IdentResponse final {
