@@ -236,13 +236,9 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
         // We want location but also the type of the expression at that location; and for some expression types like
         // sends, we need more than just a location, for parsing purposes (the send location is too broad and makes us
         // parse too much).
-        // TODO(soam): do we need to dedup locations?
-        for (auto &response : queryResult.responses) {
+        for (auto &response : filterAndDedup(gs, queryResult.responses)) {
             auto loc = response->getLoc();
-            if (!loc.exists() || !loc.file().exists()) {
-                continue;
-            }
-            if (response->getLoc().file().data(gs).isPayload()) {
+            if (loc.file().data(gs).isPayload()) {
                 // We don't support renaming things in payload files.
                 return JSONNullObject();
             }
