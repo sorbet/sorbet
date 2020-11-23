@@ -233,9 +233,9 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
             return JSONNullObject();
         }
 
-        // We want location but also the type of the expression at that location; and for some expression types like
-        // sends, we need more than just a location, for parsing purposes (the send location is too broad and makes us
-        // parse too much).
+        // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
+        // in some cases like sends, we need the SendResponse to be able to accurately find the method name in the
+        // expression.
         for (auto &response : filterAndDedup(gs, queryResult.responses)) {
             auto loc = response->getLoc();
             if (loc.file().data(gs).isPayload()) {
