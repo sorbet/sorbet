@@ -92,7 +92,7 @@ private:
 
         // Store value into val.  It doesn't much matter where we put it in
         // the upper 48 bits, but we put it in the uppermost 32 bits to
-        // ensure that retrieve it requires only a shift and no masking.
+        // ensure that retrieving it requires only a shift and no masking.
         val |= static_cast<tagged_storage>(inlinedValue) << 32;
 
         // Asserts that tag isn't using the bit which we use to indicate that value is _not_ inlined.
