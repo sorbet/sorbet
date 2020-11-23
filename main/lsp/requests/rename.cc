@@ -90,10 +90,11 @@ core::SymbolRef findRootClassWithMethod(const core::GlobalState &gs, core::Symbo
 class Renamer {
 public:
     Renamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName, const string newName)
-        : gs(gs), config(config), oldName(oldName), newName(newName) {}
+        : gs(gs), config(config), oldName(oldName), newName(newName), invalid(false) {}
     virtual ~Renamer() = default;
     virtual void rename(unique_ptr<core::lsp::QueryResponse> &response) = 0;
-    unique_ptr<WorkspaceEdit> buildEdit();
+    // unique_ptr<WorkspaceEdit> buildEdit();
+    variant<JSONNullObject, unique_ptr<WorkspaceEdit>> buildEdit();
 
 protected:
     const core::GlobalState &gs;
@@ -101,9 +102,14 @@ protected:
     string oldName;
     string newName;
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
+    bool invalid;
 };
 
-unique_ptr<WorkspaceEdit> Renamer::buildEdit() {
+variant<JSONNullObject, unique_ptr<WorkspaceEdit>> Renamer::buildEdit() {
+    if (invalid) {
+        return JSONNullObject();
+    }
+
     auto we = make_unique<WorkspaceEdit>();
     vector<unique_ptr<TextDocumentEdit>> textDocEdits;
     for (auto &item : edits) {
@@ -119,9 +125,16 @@ class MethodRenamer : public Renamer {
 public:
     MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
                   const string newName)
-        : Renamer(gs, config, oldName, newName) {}
+        : Renamer(gs, config, oldName, newName) {
+        if (oldName == "initialize") {
+            invalid = true;
+        }
+    }
     ~MethodRenamer() {}
     void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
+        if (invalid) {
+            return;
+        }
         auto loc = response->getLoc();
         auto source = loc.source(gs);
         auto location = config.loc2Location(gs, loc);
@@ -148,14 +161,24 @@ public:
 
 private:
     string replaceMethodNameInDef(string def) {
-        // We can't do a simple string replace-all because of cases like:
+        // block attr_ methods rename
+        const vector<string> unsupported_def_keywords{"attr_reader", "attr_accessor", "attr_writer"};
+        for (auto u : unsupported_def_keywords) {
+            if (absl::StartsWith(def, u)) {
+                invalid = true; // ensures the entire rename operation is blocked, not just this particular location
+                return def;
+            }
+        }
+
+        // We can't do a simple string search because of cases like:
         //   `def foo(foobar)`
+        //   `def de`
         //   `attr_reader :att`
         // Since we don't have more precise info about where the name is, we do this:
-        //   1. if the definition starts with attr_{reader,writer,accessor} then skip over that
+        //   1. if the definition starts with "def" (or another supported prefix) then skip over that
         //   2. and then change the first instance of oldName to newName
         string::size_type offset = 0;
-        vector<string> prefixes{"attr_reader", "attr_accessor", "attr_writer"};
+        const vector<string> prefixes{"def"};
         for (auto prefix : prefixes) {
             if (absl::StartsWith(def, prefix)) {
                 offset = prefix.length();
