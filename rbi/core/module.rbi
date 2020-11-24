@@ -730,7 +730,7 @@ class Module < Object
   sig do
     params(
         arg0: T.any(Symbol, String),
-        blk: BasicObject,
+        blk: T.proc.bind(T.untyped).returns(T.untyped),
     )
     .returns(Symbol)
   end
