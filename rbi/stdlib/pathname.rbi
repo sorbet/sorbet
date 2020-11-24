@@ -497,8 +497,8 @@ class Pathname < Object
   # [`File.chown`](https://docs.ruby-lang.org/en/2.6.0/File.html#method-c-chown).
   sig do
     params(
-        owner: Integer,
-        group: Integer,
+        owner: T.nilable(Integer),
+        group: T.nilable(Integer),
     )
     .returns(Integer)
   end
@@ -889,8 +889,8 @@ class Pathname < Object
   # [`File.lchown`](https://docs.ruby-lang.org/en/2.6.0/File.html#method-c-lchown).
   sig do
     params(
-        owner: Integer,
-        group: Integer,
+        owner: T.nilable(Integer),
+        group: T.nilable(Integer),
     )
     .returns(Integer)
   end
