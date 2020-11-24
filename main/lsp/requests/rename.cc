@@ -94,7 +94,6 @@ public:
         : gs(gs), config(config), oldName(oldName), newName(newName), invalid(false) {}
     virtual ~Renamer() = default;
     virtual void rename(unique_ptr<core::lsp::QueryResponse> &response) = 0;
-    // unique_ptr<WorkspaceEdit> buildEdit();
     variant<JSONNullObject, unique_ptr<WorkspaceEdit>> buildEdit();
 
 protected:
