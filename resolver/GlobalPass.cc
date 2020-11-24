@@ -390,7 +390,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             if (!singleton.exists()) {
                 singleton = sym.data(gs)->singletonClass(gs);
             }
-            singleton.data(gs)->addMixin(classMethods);
+            singleton.data(gs)->addMixin(gs, classMethods);
         }
     }
 
