@@ -45,21 +45,34 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     core::NameRef name = parentTypeMember.data(gs)->name;
     core::SymbolRef my = sym.data(gs)->findMember(gs, name);
     if (!my.exists()) {
-        auto code =
-            parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())
-                ? core::errors::Resolver::EnumerableParentTypeNotDeclared
-                : core::errors::Resolver::ParentTypeNotDeclared;
+        // The type member for `my` is not manually defined in the module/class pointed by `sym`
+        if (parentTypeMember.data(gs)->isFixed()) {
+            // If the type member was fixed in the `parent`, we can safely copy it over in `sym`
+            // and make it invariant.
+            my = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
+            my.data(gs)->setFixed();
+            auto parentType = parentTypeMember.data(gs)->resultType;
+            my.data(gs)->resultType = parentType;
+            typeAliases[sym.classOrModuleIndex()].emplace_back(parentTypeMember, my);
+            return true;
+        } else {
+            // If the type member was not fixed, this is an error, the type should be redefined manually.
+            // We insert a dummy invariant definition fixed on `T.untyped` so errors don't propagate.
+            auto code =
+                parent == core::Symbols::Enumerable() || parent.data(gs)->derivesFrom(gs, core::Symbols::Enumerable())
+                    ? core::errors::Resolver::EnumerableParentTypeNotDeclared
+                    : core::errors::Resolver::ParentTypeNotDeclared;
 
-        if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
-            e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs),
-                        parent.data(gs)->show(gs), sym.data(gs)->show(gs));
-            e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
+            if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
+                e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs),
+                            parent.data(gs)->show(gs), sym.data(gs)->show(gs));
+                e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
+            }
+            my = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
+            auto untyped = core::Types::untyped(gs, sym);
+            my.data(gs)->resultType = core::make_type<core::LambdaParam>(my, untyped, untyped);
+            return false;
         }
-        my = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
-        my.data(gs)->setFixed();
-        auto untyped = core::Types::untyped(gs, sym);
-        my.data(gs)->resultType = core::make_type<core::LambdaParam>(my, untyped, untyped);
-        return false;
     }
     const auto &data = my.data(gs);
     if (!data->isTypeMember() && !data->isTypeArgument()) {
