@@ -227,8 +227,8 @@ class File < IO
   # ```
   sig do
     params(
-        owner: Integer,
-        group: Integer,
+        owner: T.nilable(Integer),
+        group: T.nilable(Integer),
         files: String,
     )
     .returns(Integer)
@@ -612,8 +612,8 @@ class File < IO
   # link). Often not available. Returns number of files in the argument list.
   sig do
     params(
-        owner: Integer,
-        group: Integer,
+        owner: T.nilable(Integer),
+        group: T.nilable(Integer),
         files: String,
     )
     .returns(Integer)
@@ -1132,8 +1132,8 @@ class File < IO
   # ```
   sig do
     params(
-        owner: Integer,
-        group: Integer,
+        owner: T.nilable(Integer),
+        group: T.nilable(Integer),
     )
     .returns(Integer)
   end
