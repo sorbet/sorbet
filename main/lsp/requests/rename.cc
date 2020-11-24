@@ -7,6 +7,7 @@
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
+#include "main/lsp/requests/prepare_rename.h"
 #include <stdio.h>
 using namespace std;
 
@@ -162,12 +163,9 @@ public:
 private:
     string replaceMethodNameInDef(string def) {
         // block attr_ methods rename
-        const vector<string> unsupported_def_keywords{"attr_reader", "attr_accessor", "attr_writer"};
-        for (auto u : unsupported_def_keywords) {
-            if (absl::StartsWith(def, u)) {
-                invalid = true; // ensures the entire rename operation is blocked, not just this particular location
-                return def;
-            }
+        if (!PrepareRenameTask::validateDef(def)) {
+            invalid = true; // ensures the entire rename operation is blocked, not just this particular location
+            return def;
         }
 
         // We can't do a simple string search because of cases like:
