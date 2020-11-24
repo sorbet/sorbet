@@ -271,6 +271,34 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
+void Symbol::addMixin(const GlobalState &gs, SymbolRef sym) {
+    ENFORCE(isClassOrModule());
+    if (!isClassOrModuleLinearizationComputed()) {
+        // Symbol hasn't been linearized yet, so add symbol unconditionally (order matters, so dupes are OK and
+        // semantically important!)
+        // This is the 99% common case.
+        mixins_.emplace_back(sym);
+    } else {
+        // Symbol has been linearized, but we are trying to add another mixin. This is bad behavior and we shouldn't
+        // allow it, but we currently allow it for the following circumstances:
+        // * To support mixing in items to classes defined in payload, which have already been linearized.
+        // * To support no-op addMixin during incrementalResolver, which shouldn't be introducing new mixins.
+        //   * In other words, we expect the mixin to already be present.
+        //   * incrementalResolver contains an ENFORCE that verifies that symbols haven't received new mixins via
+        //   checking the linearization bit.
+
+        // Ignore superclass (as in GlobalPass.cc's `computeClassLinearization`)
+        if (sym != superClass() && absl::c_find(mixins_, sym) == mixins_.end()) {
+            auto parent = superClass();
+            // Don't include as mixin if it derives from the parent class (as in GlobalPass.cc's `maybeAddMixin`)
+            if (!parent.exists() || !parent.data(gs)->derivesFrom(gs, sym)) {
+                mixins_.emplace_back(sym);
+                unsetClassOrModuleLinearizationComputed();
+            }
+        }
+    }
+}
+
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
     auto ret = findMemberNoDealias(gs, name);
     if (ret.exists()) {

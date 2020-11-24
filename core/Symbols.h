@@ -134,11 +134,7 @@ public:
         return mixins_;
     }
 
-    void addMixin(SymbolRef sym) {
-        ENFORCE(isClassOrModule());
-        mixins_.emplace_back(sym);
-        unsetClassOrModuleLinearizationComputed();
-    }
+    void addMixin(const GlobalState &gs, SymbolRef sym);
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
         ENFORCE(isClassOrModule());

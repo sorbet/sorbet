@@ -465,8 +465,7 @@ private:
         }
     }
 
-    static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun,
-                                   bool isIncrementalResolver) {
+    static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
         auto ancestorSym = job.ancestor->symbol;
         if (!ancestorSym.exists()) {
             return false;
@@ -528,10 +527,7 @@ private:
             }
         } else {
             ENFORCE(resolved.data(ctx)->isClassOrModule());
-            // Don't mutate mixins during incremental resolver.
-            if (!isIncrementalResolver) {
-                job.klass.data(ctx)->addMixin(resolved);
-            }
+            job.klass.data(ctx)->addMixin(ctx, resolved);
         }
 
         if (ancestorPresent) {
@@ -812,7 +808,7 @@ public:
     }
 
     static vector<ast::ParsedFile> resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                                    WorkerPool &workers, bool isIncrementalResolver) {
+                                                    WorkerPool &workers) {
         Timer timeit(gs.tracer(), "resolver.resolve_constants");
         const core::GlobalState &igs = gs;
         auto resultq = make_shared<BlockingBoundedQueue<ResolveWalkResult>>(trees.size());
@@ -909,15 +905,15 @@ public:
                 // We try to resolve most ancestors second because this makes us much more likely to resolve everything
                 // else.
                 int origSize = todoAncestors.size();
-                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(),
-                                    [&gs, isIncrementalResolver](AncestorResolutionItem &job) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                                        auto resolved = resolveAncestorJob(ctx, job, false, isIncrementalResolver);
-                                        if (resolved) {
-                                            tryRegisterSealedSubclass(ctx, job);
-                                        }
-                                        return resolved;
-                                    });
+                auto it =
+                    remove_if(todoAncestors.begin(), todoAncestors.end(), [&gs](AncestorResolutionItem &job) -> bool {
+                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                        auto resolved = resolveAncestorJob(ctx, job, false);
+                        if (resolved) {
+                            tryRegisterSealedSubclass(ctx, job);
+                        }
+                        return resolved;
+                    });
                 todoAncestors.erase(it, todoAncestors.end());
                 progress = (origSize != todoAncestors.size());
                 categoryCounterAdd("resolve.constants.ancestor", "retry", origSize - todoAncestors.size());
@@ -1020,9 +1016,9 @@ public:
 
             for (auto &job : todoAncestors) {
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                auto resolved = resolveAncestorJob(ctx, job, true, isIncrementalResolver);
+                auto resolved = resolveAncestorJob(ctx, job, true);
                 if (!resolved) {
-                    resolved = resolveAncestorJob(ctx, job, true, isIncrementalResolver);
+                    resolved = resolveAncestorJob(ctx, job, true);
                     ENFORCE(resolved);
                 }
             }
@@ -2498,7 +2494,7 @@ void computeExternalTypes(core::GlobalState &gs) {
 
 ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
     const auto &epochManager = *gs.epochManager;
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers, false);
+    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
@@ -2557,8 +2553,15 @@ void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees
 
 ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vector<ast::ParsedFile> trees) {
     auto workers = WorkerPool::create(0, gs.tracer());
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers, true);
+    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
+    if (debug_mode) {
+        for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
+            core::SymbolRef sym(gs, core::SymbolRef::Kind::ClassOrModule, i);
+            // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
+            ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), sym.toString(gs));
+        }
+    }
     trees = ResolveTypeMembersWalk::run(gs, std::move(trees), *workers);
     computeExternalTypes(gs);
     auto result = resolveSigs(gs, std::move(trees));
@@ -2575,7 +2578,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
 
 vector<ast::ParsedFile> Resolver::runConstantResolution(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                         WorkerPool &workers) {
-    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers, false);
+    trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), workers);
     sanityCheck(gs, trees);
 
     return trees;
