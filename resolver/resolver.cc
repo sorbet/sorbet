@@ -1058,10 +1058,12 @@ class ResolveTypeMembersWalk {
         vector<ast::ParsedFile> files;
         vector<ResolveAssignItem> todoAssigns;
         vector<ResolveAttachedClassItem> todoAttachedClassItems;
+        vector<core::SymbolRef> todoUntypedResultTypes;
     };
 
     vector<ResolveAssignItem> todoAssigns_;
     vector<ResolveAttachedClassItem> todoAttachedClassItems_;
+    vector<core::SymbolRef> todoUntypedResultTypes_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
@@ -1419,9 +1421,7 @@ public:
             // >   Boolean = T.let(nil, T.untyped)
             // > end
             if (data->isTypeAlias() && send->fun == core::Names::let()) {
-                // TODO(jvilk): This mutates the symbol table from an immutable context due to a const bug in
-                // Symbols.cc. DO NOT COPY THIS
-                const_cast<core::TypePtr &>(data->resultType) = core::Types::untypedUntracked();
+                todoUntypedResultTypes_.emplace_back(sym);
                 return tree;
             }
 
@@ -1463,6 +1463,7 @@ public:
             if (!output.files.empty()) {
                 output.todoAssigns = move(walk.todoAssigns_);
                 output.todoAttachedClassItems = move(walk.todoAttachedClassItems_);
+                output.todoUntypedResultTypes = move(walk.todoUntypedResultTypes_);
                 auto count = output.files.size();
                 outputq->push(move(output), count);
             }
@@ -1487,6 +1488,10 @@ public:
                             combined.todoAttachedClassItems.end(),
                             make_move_iterator(threadResult.todoAttachedClassItems.begin()),
                             make_move_iterator(threadResult.todoAttachedClassItems.end()));
+                        combined.todoUntypedResultTypes.insert(
+                            combined.todoUntypedResultTypes.end(),
+                            make_move_iterator(threadResult.todoUntypedResultTypes.begin()),
+                            make_move_iterator(threadResult.todoUntypedResultTypes.end()));
                     }
                 }
             }
@@ -1494,6 +1499,10 @@ public:
 
         // Put files into a consistent order for subsequent passes.
         fast_sort(combined.files, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
+
+        for (auto sym : combined.todoUntypedResultTypes) {
+            sym.data(gs)->resultType = core::Types::untypedUntracked();
+        }
 
         vector<bool> resolvedAttachedClasses(gs.classAndModulesUsed());
         for (auto &job : combined.todoAttachedClassItems) {
