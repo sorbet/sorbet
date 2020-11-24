@@ -2555,13 +2555,11 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     auto workers = WorkerPool::create(0, gs.tracer());
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
-    if (debug_mode) {
-        for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
-            core::SymbolRef sym(gs, core::SymbolRef::Kind::ClassOrModule, i);
-            // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
-            ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), sym.toString(gs));
-        }
-    }
+    DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
+        core::SymbolRef sym(gs, core::SymbolRef::Kind::ClassOrModule, i);
+        // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
+        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), sym.toString(gs));
+    })
     trees = ResolveTypeMembersWalk::run(gs, std::move(trees), *workers);
     computeExternalTypes(gs);
     auto result = resolveSigs(gs, std::move(trees));
