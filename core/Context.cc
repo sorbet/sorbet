@@ -83,7 +83,7 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
     ENFORCE(from.typeArguments.size() == to.typeArguments.size(), "Can't substitute symbols yet");
     ENFORCE(from.typeMembers.size() == to.typeMembers.size(), "Can't substitute symbols yet");
 
-    const_cast<GlobalState &>(from).sanityCheck();
+    from.sanityCheck();
     {
         UnfreezeFileTable unfreezeFiles(to);
         int fileIdx = 0; // Skip file 0
