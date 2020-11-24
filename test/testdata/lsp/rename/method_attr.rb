@@ -8,4 +8,4 @@ end
 
 f = Foo.new
 f.foo
-
+#  ^ apply-rename: [B] newName: bar invalid: true
