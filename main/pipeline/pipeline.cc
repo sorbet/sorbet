@@ -312,6 +312,9 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
             // Cancellation cannot occur during incremental namer.
             ENFORCE(result.hasResult());
             what = move(result.result());
+            if (opts.stopAfterPhase == options::Phase::NAMER) {
+                return what;
+            }
         }
 
         {
@@ -324,6 +327,9 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
             // incrementalResolve is not cancelable.
             ENFORCE(result.hasResult());
             what = move(result.result());
+            if (opts.stopAfterPhase == options::Phase::RESOLVER) {
+                return what;
+            }
         }
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
