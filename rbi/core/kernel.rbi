@@ -2783,6 +2783,13 @@ module Kernel
   # ```
   #
   # See `Kernel.exec` for the standard shell.
-  sig { params(args: String).returns(T.any(NilClass, FalseClass, TrueClass)) }
-  def system(*args); end
+  sig do
+    params(
+      env: T.any(String, [String, String], T::Hash[String, T.nilable(String)]),
+      argv0: T.any(String, [String, String]),
+      args: String,
+      options: T.untyped,
+    ).returns(T.nilable(T::Boolean))
+  end
+  def system(env, argv0 = T.unsafe(nil), *args, **options); end
 end
