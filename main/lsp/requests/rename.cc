@@ -7,7 +7,6 @@
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
-#include "main/lsp/requests/prepare_rename.h"
 #include <stdio.h>
 using namespace std;
 

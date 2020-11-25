@@ -12,9 +12,6 @@ public:
     PrepareRenameTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<TextDocumentPositionParams> params);
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
-
-    // returns false if the source can't be renamed
-    static bool validateDef(std::string defSource);
 };
 
 } // namespace sorbet::realmain::lsp
