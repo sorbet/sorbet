@@ -87,3 +87,10 @@ initial_hash.transform_values!.with_index do |v, i|
   T.assert_type!(v, Float)
   T.assert_type!(i, Integer)
 end
+
+T.assert_type!({}.any?, T::Boolean)
+T.assert_type!({ a: 'ant', b: 'bear', c: 'cat' }.any?(/d/), T::Boolean)
+T.assert_type!(
+  { a: 'ant', b: 'bear', c: 'cat' }.any? { |key, value| key == value },
+  T::Boolean
+)
