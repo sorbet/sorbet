@@ -2,9 +2,14 @@
 # frozen_string_literal: true
 
 class Foo
-  attr_reader :bar
+  attr_reader :foo
+#              ^ apply-rename: [A] invalid: true
+  attr_writer :bar
+#              ^ apply-rename: [C] invalid: true
+  attr_accessor :baz
+#                ^ apply-rename: [D] invalid: true
 end
 
 f = Foo.new
-f.bar
-# ^ apply-rename: [A] newName: baz
+f.foo
+#  ^ apply-rename: [B] newName: bar invalid: true expectedErrorMessage: Sorbet does not support renaming `attr_reader`s

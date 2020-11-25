@@ -8,8 +8,9 @@ namespace sorbet::realmain::lsp {
 class RenameParams;
 class RenameTask final : public LSPRequestTask {
     std::unique_ptr<RenameParams> params;
-    absl::variant<JSONNullObject, std::unique_ptr<WorkspaceEdit>>
-    getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string newName);
+
+    void getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, std::string newName,
+                        std::unique_ptr<ResponseMessage> &response);
 
 public:
     RenameTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<RenameParams> params);

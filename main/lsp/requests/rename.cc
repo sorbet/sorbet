@@ -90,10 +90,17 @@ core::SymbolRef findRootClassWithMethod(const core::GlobalState &gs, core::Symbo
 class Renamer {
 public:
     Renamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName, const string newName)
-        : gs(gs), config(config), oldName(oldName), newName(newName) {}
+        : gs(gs), config(config), oldName(oldName), newName(newName), invalid(false) {}
     virtual ~Renamer() = default;
     virtual void rename(unique_ptr<core::lsp::QueryResponse> &response) = 0;
-    unique_ptr<WorkspaceEdit> buildEdit();
+    variant<JSONNullObject, unique_ptr<WorkspaceEdit>> buildEdit();
+
+    bool getInvalid() {
+        return invalid;
+    }
+    string getError() {
+        return error;
+    }
 
 protected:
     const core::GlobalState &gs;
@@ -101,9 +108,15 @@ protected:
     string oldName;
     string newName;
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
+    bool invalid;
+    string error;
 };
 
-unique_ptr<WorkspaceEdit> Renamer::buildEdit() {
+variant<JSONNullObject, unique_ptr<WorkspaceEdit>> Renamer::buildEdit() {
+    if (invalid) {
+        return JSONNullObject();
+    }
+
     auto we = make_unique<WorkspaceEdit>();
     vector<unique_ptr<TextDocumentEdit>> textDocEdits;
     for (auto &item : edits) {
@@ -119,9 +132,16 @@ class MethodRenamer : public Renamer {
 public:
     MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
                   const string newName)
-        : Renamer(gs, config, oldName, newName) {}
+        : Renamer(gs, config, oldName, newName) {
+        if (oldName == "initialize") {
+            invalid = true;
+        }
+    }
     ~MethodRenamer() {}
     void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
+        if (invalid) {
+            return;
+        }
         auto loc = response->getLoc();
         auto source = loc.source(gs);
         auto location = config.loc2Location(gs, loc);
@@ -148,14 +168,24 @@ public:
 
 private:
     string replaceMethodNameInDef(string def) {
-        // We can't do a simple string replace-all because of cases like:
+        const vector<string> unsupportedDefPrefixes{"attr_reader", "attr_accessor", "attr_writer"};
+        for (auto u : unsupportedDefPrefixes) {
+            if (absl::StartsWith(def, u)) {
+                invalid = true; // ensures the entire rename operation is blocked, not just this particular location
+                error = fmt::format("Sorbet does not support renaming `{}`s", u);
+                return def;
+            }
+        }
+
+        // We can't do a simple string search because of cases like:
         //   `def foo(foobar)`
+        //   `def de`
         //   `attr_reader :att`
         // Since we don't have more precise info about where the name is, we do this:
-        //   1. if the definition starts with attr_{reader,writer,accessor} then skip over that
+        //   1. if the definition starts with "def" (or another supported prefix) then skip over that
         //   2. and then change the first instance of oldName to newName
         string::size_type offset = 0;
-        vector<string> prefixes{"attr_reader", "attr_accessor", "attr_writer"};
+        const vector<string> prefixes{"def"};
         for (auto prefix : prefixes) {
             if (absl::StartsWith(def, prefix)) {
                 offset = prefix.length();
@@ -196,8 +226,8 @@ public:
 
 } // namespace
 
-variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker,
-                                                                              core::SymbolRef symbol, string newName) {
+void RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, string newName,
+                                unique_ptr<ResponseMessage> &responseMsg) {
     const core::GlobalState &gs = typechecker.state();
     auto symbolData = symbol.data(gs);
     auto originalName = symbolData->name.show(gs);
@@ -234,7 +264,8 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
     for (auto sym : symbolsToRename) {
         auto queryResult = queryBySymbol(typechecker, sym);
         if (queryResult.error) {
-            return JSONNullObject();
+            responseMsg->result = JSONNullObject();
+            return;
         }
 
         // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
@@ -244,12 +275,16 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
             auto loc = response->getLoc();
             if (loc.file().data(gs).isPayload()) {
                 // We don't support renaming things in payload files.
-                return JSONNullObject();
+                responseMsg->result = JSONNullObject();
+                return;
             }
             renamer->rename(response);
         }
     }
-    return renamer->buildEdit();
+    responseMsg->result = renamer->buildEdit();
+    if (renamer->getInvalid()) {
+        responseMsg->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, renamer->getError());
+    }
 }
 
 RenameTask::RenameTask(const LSPConfiguration &config, MessageId id, unique_ptr<RenameParams> params)
@@ -279,48 +314,49 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-    } else {
-        // An explicit null indicates that we don't support this request (or that nothing was at the location).
-        // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
-        response->result = variant<JSONNullObject, unique_ptr<WorkspaceEdit>>(JSONNullObject());
-        auto &queryResponses = result.responses;
-        if (!queryResponses.empty()) {
-            auto resp = move(queryResponses[0]);
-            // Only supports rename requests from constants and class definitions.
-            if (auto constResp = resp->isConstant()) {
-                // Sanity check the text.
-                if (islower(params->newName[0])) {
-                    response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                                 "Constant names must begin with an uppercase letter.");
-                    return response;
-                }
-                if (isValidRenameLocation(constResp->symbol, gs, response)) {
-                    response->result = getRenameEdits(typechecker, constResp->symbol, params->newName);
-                }
-            } else if (auto defResp = resp->isDefinition()) {
-                if (defResp->symbol.data(gs)->isClassOrModule() && islower(params->newName[0])) {
-                    response->error =
-                        make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                   "Class and Module names must begin with an uppercase letter.");
-                    return response;
-                }
+        return response;
+    }
 
-                if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
-                    response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                                 "Method names must begin with an lowercase letter.");
-                    return response;
-                }
+    // An explicit null indicates that we don't support this request (or that nothing was at the location).
+    // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
+    response->result = variant<JSONNullObject, unique_ptr<WorkspaceEdit>>(JSONNullObject());
+    auto &queryResponses = result.responses;
+    if (queryResponses.empty()) {
+        return response;
+    }
 
-                if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
-                    if (isValidRenameLocation(defResp->symbol, gs, response)) {
-                        response->result = getRenameEdits(typechecker, defResp->symbol, params->newName);
-                    }
-                }
-            } else if (auto sendResp = resp->isSend()) {
-                auto method = sendResp->dispatchResult->main.method;
-                response->result = getRenameEdits(typechecker, method, params->newName);
+    auto resp = move(queryResponses[0]);
+    if (auto constResp = resp->isConstant()) {
+        // Sanity check the text.
+        if (islower(params->newName[0])) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Constant names must begin with an uppercase letter.");
+            return response;
+        }
+        if (isValidRenameLocation(constResp->symbol, gs, response)) {
+            getRenameEdits(typechecker, constResp->symbol, params->newName, response);
+        }
+    } else if (auto defResp = resp->isDefinition()) {
+        if (defResp->symbol.data(gs)->isClassOrModule() && islower(params->newName[0])) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Class and Module names must begin with an uppercase letter.");
+            return response;
+        }
+
+        if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Method names must begin with an lowercase letter.");
+            return response;
+        }
+
+        if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
+            if (isValidRenameLocation(defResp->symbol, gs, response)) {
+                getRenameEdits(typechecker, defResp->symbol, params->newName, response);
             }
         }
+    } else if (auto sendResp = resp->isSend()) {
+        auto method = sendResp->dispatchResult->main.method;
+        getRenameEdits(typechecker, method, params->newName, response);
     }
 
     return response;
