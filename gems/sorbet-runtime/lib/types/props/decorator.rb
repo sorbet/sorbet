@@ -234,7 +234,7 @@ class T::Props::Decorator
     nil
   end
 
-  SAFE_NAME = /\A[A-Za-z_][A-Za-z0-9_-]*\z/.freeze
+  SAFE_NAME = T.let(/\A[A-Za-z_][A-Za-z0-9_-]*\z/.freeze, Regexp)
 
   # Used to validate both prop names and serialized forms
   sig {params(name: T.any(Symbol, String)).void}
@@ -656,14 +656,14 @@ class T::Props::Decorator
 
   sig {params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never)}
   private def clobber_getter?(child, prop)
-    child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
-      child.instance_method(prop).source_location&.first == __FILE__
+    !!(child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
+       child.instance_method(prop).source_location&.first == __FILE__)
   end
 
   sig {params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never)}
   private def clobber_setter?(child, prop)
-    child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
-      child.instance_method("#{prop}=").source_location&.first == __FILE__
+    !!(child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
+       child.instance_method("#{prop}=").source_location&.first == __FILE__)
   end
 
   sig {params(mod: Module).void.checked(:never)}
