@@ -96,6 +96,13 @@ public:
     virtual void rename(unique_ptr<core::lsp::QueryResponse> &response) = 0;
     variant<JSONNullObject, unique_ptr<WorkspaceEdit>> buildEdit();
 
+    bool getInvalid() {
+        return invalid;
+    }
+    string getError() {
+        return error;
+    }
+
 protected:
     const core::GlobalState &gs;
     const LSPConfiguration &config;
@@ -103,6 +110,7 @@ protected:
     string newName;
     UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
     bool invalid;
+    string error;
 };
 
 variant<JSONNullObject, unique_ptr<WorkspaceEdit>> Renamer::buildEdit() {
@@ -163,7 +171,9 @@ private:
     string replaceMethodNameInDef(string def) {
         // block attr_ methods rename
         if (!PrepareRenameTask::validateDef(def)) {
+            // TODO: can we increment a counter here?
             invalid = true; // ensures the entire rename operation is blocked, not just this particular location
+            error = "Attribute method renames are unsupported.";
             return def;
         }
 
@@ -216,8 +226,8 @@ public:
 
 } // namespace
 
-variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker,
-                                                                              core::SymbolRef symbol, string newName) {
+void RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, string newName,
+                                unique_ptr<ResponseMessage> &responseMsg) {
     const core::GlobalState &gs = typechecker.state();
     auto symbolData = symbol.data(gs);
     auto originalName = symbolData->name.show(gs);
@@ -254,7 +264,8 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
     for (auto sym : symbolsToRename) {
         auto queryResult = queryBySymbol(typechecker, sym);
         if (queryResult.error) {
-            return JSONNullObject();
+            responseMsg->result = JSONNullObject();
+            return;
         }
 
         // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
@@ -264,12 +275,16 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
             auto loc = response->getLoc();
             if (loc.file().data(gs).isPayload()) {
                 // We don't support renaming things in payload files.
-                return JSONNullObject();
+                responseMsg->result = JSONNullObject();
+                return;
             }
             renamer->rename(response);
         }
     }
-    return renamer->buildEdit();
+    responseMsg->result = renamer->buildEdit();
+    if (renamer->getInvalid()) {
+        responseMsg->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest, renamer->getError());
+    }
 }
 
 RenameTask::RenameTask(const LSPConfiguration &config, MessageId id, unique_ptr<RenameParams> params)
@@ -299,51 +314,53 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-    } else {
-        // An explicit null indicates that we don't support this request (or that nothing was at the location).
-        // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
-        response->result = variant<JSONNullObject, unique_ptr<WorkspaceEdit>>(JSONNullObject());
-        auto &queryResponses = result.responses;
-        if (!queryResponses.empty()) {
-            auto resp = move(queryResponses[0]);
-            // Only supports rename requests from constants and class definitions.
-            if (auto constResp = resp->isConstant()) {
-                // Sanity check the text.
-                if (islower(params->newName[0])) {
-                    response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                                 "Constant names must begin with an uppercase letter.");
-                    return response;
-                }
-                if (isValidRenameLocation(constResp->symbol, gs, response)) {
-                    response->result = getRenameEdits(typechecker, constResp->symbol, params->newName);
-                }
-            } else if (auto defResp = resp->isDefinition()) {
-                if (defResp->symbol.data(gs)->isClassOrModule() && islower(params->newName[0])) {
-                    response->error =
-                        make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                   "Class and Module names must begin with an uppercase letter.");
-                    return response;
-                }
+        return response;
+    }
 
-                if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
-                    response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                                 "Method names must begin with an lowercase letter.");
-                    return response;
-                }
+    // An explicit null indicates that we don't support this request (or that nothing was at the location).
+    // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
+    response->result = variant<JSONNullObject, unique_ptr<WorkspaceEdit>>(JSONNullObject());
+    auto &queryResponses = result.responses;
+    if (queryResponses.empty()) {
+        return response;
+    }
 
-                if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
-                    if (isValidRenameLocation(defResp->symbol, gs, response)) {
-                        response->result = getRenameEdits(typechecker, defResp->symbol, params->newName);
-                    }
-                }
-            } else if (auto sendResp = resp->isSend()) {
-                auto method = sendResp->dispatchResult->main.method;
-                response->result = getRenameEdits(typechecker, method, params->newName);
+    auto resp = move(queryResponses[0]);
+    // Only supports rename requests from constants and class definitions.
+    if (auto constResp = resp->isConstant()) {
+        // Sanity check the text.
+        if (islower(params->newName[0])) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Constant names must begin with an uppercase letter.");
+            return response;
+        }
+        if (isValidRenameLocation(constResp->symbol, gs, response)) {
+            getRenameEdits(typechecker, constResp->symbol, params->newName, response);
+        }
+    } else if (auto defResp = resp->isDefinition()) {
+        if (defResp->symbol.data(gs)->isClassOrModule() && islower(params->newName[0])) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Class and Module names must begin with an uppercase letter.");
+            return response;
+        }
+
+        if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Method names must begin with an lowercase letter.");
+            return response;
+        }
+
+        if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
+            if (isValidRenameLocation(defResp->symbol, gs, response)) {
+                getRenameEdits(typechecker, defResp->symbol, params->newName, response);
             }
         }
+    } else if (auto sendResp = resp->isSend()) {
+        auto method = sendResp->dispatchResult->main.method;
+        getRenameEdits(typechecker, method, params->newName, response);
     }
 
     return response;
-}
+} // namespace sorbet::realmain::lsp
 
 } // namespace sorbet::realmain::lsp
