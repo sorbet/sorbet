@@ -155,6 +155,13 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     this->autocorrects.emplace_back(move(autocorrect));
 }
 
+ErrorBuilder::ErrorBuilder(ErrorBuilder &&other)
+    : gs(other.gs), state(other.state), loc(other.loc), what(other.what), header(move(other.header)),
+      sections(move(other.sections)), autocorrects(move(other.autocorrects)) {
+    // Do not report the moved ErrorBuilder.
+    other.state = ErrorBuilder::State::DidBuild;
+}
+
 // This will sometimes be bypassed in lieu of just calling build() so put your
 // logic in build() instead.
 ErrorBuilder::~ErrorBuilder() {

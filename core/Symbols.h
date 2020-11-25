@@ -134,7 +134,9 @@ public:
         return mixins_;
     }
 
-    void addMixin(const GlobalState &gs, SymbolRef sym);
+    // Attempts to add the given mixin to the symbol. If the mixin is invalid, it returns an error message that should
+    // be reported to the user. Otherwise, returns nullptr.
+    [[nodiscard]] std::unique_ptr<ErrorBuilder> addMixin(const GlobalState &gs, SymbolRef sym);
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
         ENFORCE(isClassOrModule());

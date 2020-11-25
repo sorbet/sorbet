@@ -1,4 +1,5 @@
 # typed: true
+
 class Sup
 end
 class A < Sup

@@ -527,7 +527,9 @@ private:
             }
         } else {
             ENFORCE(resolved.data(ctx)->isClassOrModule());
-            job.klass.data(ctx)->addMixin(ctx, resolved);
+            if (auto e = job.klass.data(ctx)->addMixin(ctx, resolved)) {
+                e->addErrorLine(core::Loc(ctx.file, job.ancestor->loc), "`{}` included here", resolved.show(ctx));
+            }
         }
 
         if (ancestorPresent) {

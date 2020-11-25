@@ -384,7 +384,9 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             if (!singleton.exists()) {
                 singleton = sym.data(gs)->singletonClass(gs);
             }
-            singleton.data(gs)->addMixin(gs, classMethods);
+            if (auto e = singleton.data(gs)->addMixin(gs, classMethods)) {
+                // Report error as-is; no further details to add.
+            }
         }
     }
 
