@@ -325,39 +325,45 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
         return response;
     }
 
-    auto resp = move(queryResponses[0]);
-    // Only supports rename requests from constants and class definitions.
-    if (auto constResp = resp->isConstant()) {
-        // Sanity check the text.
-        if (islower(params->newName[0])) {
-            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                         "Constant names must begin with an uppercase letter.");
-            return response;
-        }
-        if (isValidRenameLocation(constResp->symbol, gs, response)) {
-            getRenameEdits(typechecker, constResp->symbol, params->newName, response);
-        }
-    } else if (auto defResp = resp->isDefinition()) {
-        if (defResp->symbol.data(gs)->isClassOrModule() && islower(params->newName[0])) {
-            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                         "Class and Module names must begin with an uppercase letter.");
-            return response;
-        }
-
-        if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
-            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                         "Method names must begin with an lowercase letter.");
-            return response;
-        }
-
-        if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
-            if (isValidRenameLocation(defResp->symbol, gs, response)) {
-                getRenameEdits(typechecker, defResp->symbol, params->newName, response);
+    for (auto const &resp : queryResponses) {
+        if (auto constResp = resp->isConstant()) {
+            // Sanity check the text.
+            if (islower(params->newName[0])) {
+                response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                             "Constant names must begin with an uppercase letter.");
+                return response;
             }
+            if (isValidRenameLocation(constResp->symbol, gs, response)) {
+                getRenameEdits(typechecker, constResp->symbol, params->newName, response);
+            }
+            return response;
+        } else if (auto defResp = resp->isDefinition()) {
+            if (defResp->symbol.data(gs)->isClassOrModule() && islower(params->newName[0])) {
+                response->error = make_unique<ResponseError>(
+                    (int)LSPErrorCodes::InvalidRequest, "Class and Module names must begin with an uppercase letter.");
+                return response;
+            }
+
+            if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
+                response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                             "Method names must begin with an lowercase letter.");
+                return response;
+            }
+
+            if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
+                if (isValidRenameLocation(defResp->symbol, gs, response)) {
+                    getRenameEdits(typechecker, defResp->symbol, params->newName, response);
+                }
+            }
+            return response;
+        } else if (auto sendResp = resp->isSend()) {
+            auto method = sendResp->dispatchResult->main.method;
+            getRenameEdits(typechecker, method, params->newName, response);
+            return response;
+        } else if (resp->isField()) {
+            // we get duplicate responses, ignore field rename requests
+            continue;
         }
-    } else if (auto sendResp = resp->isSend()) {
-        auto method = sendResp->dispatchResult->main.method;
-        getRenameEdits(typechecker, method, params->newName, response);
     }
 
     return response;
