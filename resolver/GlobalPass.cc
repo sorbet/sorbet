@@ -303,12 +303,6 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
             ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
 
             if (!mixin.data(gs)->isClassOrModuleModule()) {
-                if (mixin != core::Symbols::BasicObject()) {
-                    if (auto e = gs.beginError(data->loc(), core::errors::Resolver::IncludesNonModule)) {
-                        e.setHeader("Only modules can be `{}`d. This module or class includes `{}`", "include",
-                                    mixin.data(gs)->show(gs));
-                    }
-                }
                 // insert all transitive parents of class to bring methods back.
                 auto allMixins = mixinLinearization.fullLinearizationSlow(gs);
                 newMixins.insert(newMixins.begin(), allMixins.begin(), allMixins.end());
@@ -390,7 +384,11 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             if (!singleton.exists()) {
                 singleton = sym.data(gs)->singletonClass(gs);
             }
-            singleton.data(gs)->addMixin(gs, classMethods);
+            if (!singleton.data(gs)->addMixin(gs, classMethods)) {
+                // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before adding it
+                // as a member.
+                ENFORCE(false);
+            }
         }
     }
 

@@ -1,8 +1,5 @@
 # typed: strict
 # enable-packager: true
-# disable-fast-path: true
-# ^ The "Only modules can be `include`d." error, unfortunately, doesn't surface the same errors on the fast path.
-# This is a restriction in other tests.
 
 class A < PackageSpec
   import 123
@@ -35,6 +32,6 @@ class A < PackageSpec
                     # ^^^^^^^ error: Argument to `export_methods` must be a constant
                              # ^^^^^^ error: Argument to `export_methods` must be a constant
                              # ^^^^^^ error: Not enough arguments
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only modules can be `include`d. This module or class includes `A::AClass`
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Only modules can be `include`d. This module or class includes `A::ASecondClass`
+#                                      ^^^^^^^^^ error: Only modules can be `include`d, but `A::ASecondClass` is a class
+#                                                          ^^^^^^ error: Only modules can be `include`d, but `A::AClass` is a class
 end

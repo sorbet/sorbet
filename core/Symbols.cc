@@ -271,8 +271,13 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
-void Symbol::addMixin(const GlobalState &gs, SymbolRef sym) {
+bool Symbol::addMixin(const GlobalState &gs, SymbolRef sym) {
     ENFORCE(isClassOrModule());
+    // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
+    // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
+    bool isValidMixin = !sym.data(gs)->isClassModuleSet() || sym.data(gs)->isClassOrModuleModule() ||
+                        sym == core::Symbols::BasicObject();
+
     if (!isClassOrModuleLinearizationComputed()) {
         // Symbol hasn't been linearized yet, so add symbol unconditionally (order matters, so dupes are OK and
         // semantically important!)
@@ -297,6 +302,7 @@ void Symbol::addMixin(const GlobalState &gs, SymbolRef sym) {
             }
         }
     }
+    return isValidMixin;
 }
 
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {

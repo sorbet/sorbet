@@ -122,6 +122,7 @@ private:
         core::FileRef file;
 
         bool isSuperclass; // true if superclass, false for mixin
+        bool isInclude;    // true if include, false if extend
 
         AncestorResolutionItem() = default;
         AncestorResolutionItem(AncestorResolutionItem &&rhs) noexcept = default;
@@ -527,7 +528,14 @@ private:
             }
         } else {
             ENFORCE(resolved.data(ctx)->isClassOrModule());
-            job.klass.data(ctx)->addMixin(ctx, resolved);
+            if (!job.klass.data(ctx)->addMixin(ctx, resolved)) {
+                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
+                    e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
+                                resolved.data(ctx)->show(ctx));
+                    e.addErrorLine(resolved.data(ctx)->loc(), "`{}` defined as a class here",
+                                   resolved.data(ctx)->show(ctx));
+                }
+            }
         }
 
         if (ancestorPresent) {
@@ -598,7 +606,7 @@ private:
         ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
     }
 
-    void transformAncestor(core::Context ctx, core::SymbolRef klass, ast::TreePtr &ancestor,
+    void transformAncestor(core::Context ctx, core::SymbolRef klass, ast::TreePtr &ancestor, bool isInclude,
                            bool isSuperclass = false) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
             auto scopeTmp = nesting_;
@@ -612,6 +620,7 @@ private:
         job.klass = klass;
         job.isSuperclass = isSuperclass;
         job.file = ctx.file;
+        job.isInclude = isInclude;
 
         if (auto *cnst = ast::cast_tree<ast::ConstantLit>(ancestor)) {
             auto sym = cnst->symbol;
@@ -675,16 +684,18 @@ public:
 
         core::SymbolRef klass = original.symbol;
 
+        bool isInclude = true;
         for (auto &ancst : original.ancestors) {
             bool isSuperclass = (original.kind == ast::ClassDef::Kind::Class && &ancst == &original.ancestors.front() &&
                                  !klass.data(ctx)->isSingletonClass(ctx));
-            transformAncestor(isSuperclass ? ctx : ctx.withOwner(klass), klass, ancst, isSuperclass);
+            transformAncestor(isSuperclass ? ctx : ctx.withOwner(klass), klass, ancst, isInclude, isSuperclass);
         }
 
         auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
+        isInclude = false;
         for (auto &ancst : original.singletonAncestors) {
             ENFORCE(singleton.exists());
-            transformAncestor(ctx.withOwner(klass), singleton, ancst);
+            transformAncestor(ctx.withOwner(klass), singleton, ancst, isInclude);
         }
 
         nesting_ = nesting_->parent;
