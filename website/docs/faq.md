@@ -81,9 +81,9 @@ class A
 
   sig {void}
   def initialize
-    reader = T.let(0, Integer)
-    writer = T.let(0, Integer)
-    accessor = T.let(0, Integer)
+    @reader = T.let(0, Integer)
+    @writer = T.let(0, Integer)
+    @accessor = T.let(0, Integer)
   end
 end
 ```
