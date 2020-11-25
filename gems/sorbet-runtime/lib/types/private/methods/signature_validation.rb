@@ -100,19 +100,16 @@ module T::Private::Methods::SignatureValidation
       raise "Unexpected mode: #{signature.mode}. Please report to #dev-productivity."
     end
 
+    # Given a singleton class, we can check if it belongs to a
+    # module by looking at its superclass; given `module M`,
+    # `M.singleton_class.superclass == Module`, which is not true
+    # for any class.
     owner = signature.method.owner
     if (signature.mode == Modes.abstract || Modes::OVERRIDABLE_MODES.include?(signature.mode)) &&
-        owner.singleton_class?
-      # Given a singleton class, we can check if it belongs to a
-      # module by looking at its superclass; given `module M`,
-      # `M.singleton_class.superclass == Module`, which is not true
-      # for any class.
-      if owner.superclass == Module
-        raise "Defining an overridable class method (via #{pretty_mode(signature)}) " \
-              "on a module is not allowed. Class methods on " \
-              "modules do not get inherited and thus cannot be overridden. For help, ask in " \
-              "#dev-productivity."
-      end
+        owner.singleton_class? && owner.superclass == Module
+      raise "Defining an overridable class method (via #{pretty_mode(signature)}) " \
+            "on a module is not allowed. Class methods on " \
+            "modules do not get inherited and thus cannot be overridden."
     end
   end
 
@@ -219,10 +216,10 @@ module T::Private::Methods::SignatureValidation
   end
 
   private_class_method def self.method_loc_str(method)
-    if method.source_location
-      loc = method.source_location.join(':')
+    loc = if method.source_location
+      method.source_location.join(':')
     else
-      loc = "<unknown location>"
+      "<unknown location>"
     end
     "#{method.owner} at #{loc}"
   end

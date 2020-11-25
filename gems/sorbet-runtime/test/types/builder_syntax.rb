@@ -117,16 +117,16 @@ module Opus::Types::Test
       end
 
       INVALID_MODE_TESTS = [
-        [:abstract, :abstract],
-        [:abstract, :override],
-        [:abstract, :overridable],
+        %i[abstract abstract],
+        %i[abstract override],
+        %i[abstract overridable],
 
-        [:override, :abstract],
-        [:override, :override],
+        %i[override abstract],
+        %i[override override],
 
-        [:overridable, :abstract],
-        [:overridable, :overridable],
-      ]
+        %i[overridable abstract],
+        %i[overridable overridable],
+      ].freeze
       INVALID_MODE_TESTS.each do |seq|
         name = (["sig"] + seq).join(".")
         it name do

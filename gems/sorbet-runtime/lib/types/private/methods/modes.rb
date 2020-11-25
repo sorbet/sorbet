@@ -8,9 +8,9 @@ module T::Private::Methods::Modes
   def self.override; 'override'; end
   def self.overridable_override; 'overridable_override'; end
   def self.untyped; 'untyped'; end
-  MODES = [self.standard, self.abstract, self.overridable, self.override, self.overridable_override, self.untyped]
+  MODES = [self.standard, self.abstract, self.overridable, self.override, self.overridable_override, self.untyped].freeze
 
-  OVERRIDABLE_MODES = [self.override, self.overridable, self.overridable_override, self.untyped, self.abstract]
-  OVERRIDE_MODES = [self.override, self.overridable_override]
+  OVERRIDABLE_MODES = [self.override, self.overridable, self.overridable_override, self.untyped, self.abstract].freeze
+  OVERRIDE_MODES = [self.override, self.overridable_override].freeze
   NON_OVERRIDE_MODES = MODES - OVERRIDE_MODES
 end

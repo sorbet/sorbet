@@ -338,7 +338,7 @@ module T::Configuration
     if values.nil?
       @scalar_types = values
     else
-      bad_values = values.select {|v| v.class != String}
+      bad_values = values.reject {|v| v.class == String}
       unless bad_values.empty?
         raise ArgumentError.new("Provided values must all be class name strings.")
       end
@@ -347,7 +347,7 @@ module T::Configuration
     end
   end
 
-  @default_scalar_types = Set.new(%w{
+  @default_scalar_types = Set.new(%w[
     NilClass
     TrueClass
     FalseClass
@@ -357,7 +357,7 @@ module T::Configuration
     Symbol
     Time
     T::Enum
-  }).freeze
+  ]).freeze
 
   def self.scalar_types
     @scalar_types || @default_scalar_types
@@ -398,7 +398,7 @@ module T::Configuration
   #   should be allowed. Useful to whitelist benign violations, like shim files
   #   generated for an autoloader.
   def self.sealed_violation_whitelist=(sealed_violation_whitelist)
-    if @sealed_violation_whitelist != nil
+    if !@sealed_violation_whitelist.nil?
       raise ArgumentError.new("Cannot overwrite sealed_violation_whitelist after setting it")
     end
 

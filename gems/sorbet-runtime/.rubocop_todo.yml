@@ -361,13 +361,6 @@ Naming/PredicateName:
     - 'lib/types/props/optional.rb'
     - 'lib/types/utils.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: AutoCorrect.
-Performance/TimesMap:
-  Exclude:
-    - 'test/types/method_validation.rb'
-
 # Offense count: 1
 # Cop supports --auto-correct.
 # Configuration parameters: AutoCorrect.
@@ -402,12 +395,6 @@ Style/Alias:
     - 'lib/types/types/base.rb'
     - 'test/types/edge_cases.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/ArrayCoercion:
-  Exclude:
-    - 'test/test_helper.rb'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 Style/BisectedAttrAccessor:
@@ -438,11 +425,6 @@ Style/CaseLikeIf:
 Style/ClassAndModuleChildren:
   Enabled: false
 
-# Offense count: 1
-Style/ClassVars:
-  Exclude:
-    - 'test/types/props/optional.rb'
-
 # Offense count: 4
 # Cop supports --auto-correct.
 # Configuration parameters: Keywords.
@@ -454,56 +436,9 @@ Style/CommentAnnotation:
     - 'lib/types/types/enum.rb'
     - 'test/types/types.rb'
 
-# Offense count: 6
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SingleLineConditionsOnly, IncludeTernaryExpressions.
-# SupportedStyles: assign_to_condition, assign_inside_condition
-Style/ConditionalAssignment:
-  Exclude:
-    - 'lib/types/private/abstract/validate.rb'
-    - 'lib/types/private/methods/signature.rb'
-    - 'lib/types/private/methods/signature_validation.rb'
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/private/deserializer_generator.rb'
-
 # Offense count: 107
 Style/Documentation:
   Enabled: false
-
-# Offense count: 1
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: allowed_in_returns, forbidden
-Style/DoubleNegation:
-  Exclude:
-    - 'lib/types/props/private/deserializer_generator.rb'
-
-# Offense count: 9
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: empty, nil, both
-Style/EmptyElse:
-  Exclude:
-    - 'lib/types/enum.rb'
-    - 'lib/types/interface_wrapper.rb'
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/private/apply_default.rb'
-    - 'lib/types/props/serializable.rb'
-    - 'lib/types/props/type_validation.rb'
-    - 'lib/types/utils.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: compact, expanded
-Style/EmptyMethod:
-  Exclude:
-    - 'test/test_helper.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/EvenOdd:
-  Exclude:
-    - 'lib/types/props/generated_code_validation.rb'
 
 # Offense count: 17
 # Cop supports --auto-correct.
@@ -517,88 +452,10 @@ Style/FrozenStringLiteralComment:
 Style/GuardClause:
   Enabled: false
 
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/HashEachMethods:
-  Exclude:
-    - 'lib/types/props/has_lazily_specialized_methods.rb'
-
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, UseHashRocketsWithSymbolValues, PreferHashRocketsForNonAlnumEndingSymbols.
-# SupportedStyles: ruby19, hash_rockets, no_mixed_keys, ruby19_no_mixed_keys
-Style/HashSyntax:
-  Exclude:
-    - 'lib/types/props/generated_code_validation.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/HashTransformValues:
-  Exclude:
-    - 'lib/types/types/fixed_hash.rb'
-
-# Offense count: 2
-Style/IdenticalConditionalBranches:
-  Exclude:
-    - 'lib/types/props/private/setter_factory.rb'
-
-# Offense count: 2
-# Configuration parameters: AllowIfModifier.
-Style/IfInsideElse:
-  Exclude:
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/private/serde_transform.rb'
-
 # Offense count: 140
 # Cop supports --auto-correct.
 Style/IfUnlessModifier:
   Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: InverseMethods, InverseBlocks.
-Style/InverseMethods:
-  Exclude:
-    - 'lib/types/configuration.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/KeywordParametersOrder:
-  Exclude:
-    - 'lib/types/private/methods/signature.rb'
-    - 'test/types/method_validation.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/LineEndConcatenation:
-  Exclude:
-    - 'lib/types/private/methods/_methods.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: IgnoredMethods.
-Style/MethodCallWithoutArgsParentheses:
-  Exclude:
-    - 'bench/setters.rb'
-
-# Offense count: 2
-Style/MultipleComparison:
-  Exclude:
-    - 'lib/types/private/methods/_methods.rb'
-    - 'lib/types/private/methods/signature_validation.rb'
-
-# Offense count: 8
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: literals, strict
-Style/MutableConstant:
-  Exclude:
-    - 'lib/types/private/methods/modes.rb'
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/type_validation.rb'
-    - 'lib/types/types/type_variable.rb'
-    - 'test/types/builder_syntax.rb'
-    - 'test/types/method_validation.rb'
 
 # Offense count: 53
 # Cop supports --auto-correct.
@@ -620,15 +477,6 @@ Style/Next:
     - 'lib/types/private/methods/signature_validation.rb'
     - 'lib/types/props/decorator.rb'
 
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: IncludeSemanticChanges.
-Style/NonNilCheck:
-  Exclude:
-    - 'lib/types/configuration.rb'
-    - 'lib/types/private/methods/_methods.rb'
-    - 'lib/types/private/sealed.rb'
-
 # Offense count: 18
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, IgnoredMethods.
@@ -641,26 +489,6 @@ Style/NumericPredicate:
     - 'lib/types/props/generated_code_validation.rb'
     - 'lib/types/utils.rb'
 
-# Offense count: 4
-Style/OptionalBooleanParameter:
-  Exclude:
-    - 'lib/types/props/serializable.rb'
-
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: PreferredDelimiters.
-Style/PercentLiteralDelimiters:
-  Exclude:
-    - 'lib/types/configuration.rb'
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/generated_code_validation.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/Proc:
-  Exclude:
-    - 'test/types/props/struct.rb'
-
 # Offense count: 8
 # Cop supports --auto-correct.
 Style/RedundantBegin:
@@ -672,28 +500,6 @@ Style/RedundantBegin:
     - 'test/types/absurd.rb'
     - 'test/types/edge_cases.rb'
     - 'test/types/method_validation.rb'
-
-# Offense count: 15
-# Cop supports --auto-correct.
-Style/RedundantFileExtensionInRequire:
-  Exclude:
-    - 'Rakefile'
-    - 'test/types/sealed_module.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/RedundantParentheses:
-  Exclude:
-    - 'lib/types/props/decorator.rb'
-    - 'lib/types/props/serializable.rb'
-
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Exclude:
-    - 'lib/types/non_forcing_constants.rb'
-    - 'lib/types/types/typed_enumerable.rb'
 
 # Offense count: 44
 # Cop supports --auto-correct.
@@ -715,14 +521,6 @@ Style/RedundantSelf:
     - 'test/types/attached_class.rb'
     - 'test/types/props/decorator.rb'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, AllowInnerSlashes.
-# SupportedStyles: slashes, percent_r, mixed
-Style/RegexpLiteral:
-  Exclude:
-    - 'Rakefile'
-
 # Offense count: 5
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
@@ -732,14 +530,6 @@ Style/RescueStandardError:
     - 'lib/types/private/methods/_methods.rb'
     - 'lib/types/props/serializable.rb'
     - 'lib/types/types/typed_enumerable.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: ConvertCodeThatCanStartToReturnNil, AllowedMethods.
-# AllowedMethods: present?, blank?, presence, try, try!
-Style/SafeNavigation:
-  Exclude:
-    - 'lib/types/utils.rb'
 
 # Offense count: 17
 # Cop supports --auto-correct.
@@ -768,33 +558,6 @@ Style/SingleLineMethods:
     - 'test/types/types.rb'
     - 'test/types/validate_override_types.rb'
 
-# Offense count: 11
-# Cop supports --auto-correct.
-Style/SlicingWithRange:
-  Exclude:
-    - 'lib/types/private/methods/_methods.rb'
-    - 'lib/types/props/pretty_printable.rb'
-    - 'lib/types/props/private/deserializer_generator.rb'
-    - 'lib/types/props/private/serializer_generator.rb'
-    - 'lib/types/props/serializable.rb'
-    - 'lib/types/utils.rb'
-    - 'test/types/method_validation.rb'
-
-# Offense count: 4
-# Configuration parameters: AllowModifier.
-Style/SoleNestedConditional:
-  Exclude:
-    - 'lib/types/private/methods/signature_validation.rb'
-    - 'lib/types/props/decorator.rb'
-
-# Offense count: 4
-# Cop supports --auto-correct.
-Style/StringConcatenation:
-  Exclude:
-    - 'lib/types/private/methods/_methods.rb'
-    - 'lib/types/props/serializable.rb'
-    - 'test/types/enum.rb'
-
 # Offense count: 651
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, ConsistentQuotesInMultiline.
@@ -802,58 +565,12 @@ Style/StringConcatenation:
 Style/StringLiterals:
   Enabled: false
 
-# Offense count: 14
-# Cop supports --auto-correct.
-# Configuration parameters: .
-# SupportedStyles: percent, brackets
-Style/SymbolArray:
-  EnforcedStyle: percent
-  MinSize: 7
-
 # Offense count: 50
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyleForMultiline.
 # SupportedStylesForMultiline: comma, consistent_comma, no_comma
 Style/TrailingCommaInArguments:
   Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyleForMultiline.
-# SupportedStylesForMultiline: comma, consistent_comma, no_comma
-Style/TrailingCommaInHashLiteral:
-  Exclude:
-    - 'sorbet-runtime.gemspec'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AllowNamedUnderscoreVariables.
-Style/TrailingUnderscoreVariable:
-  Exclude:
-    - 'lib/types/private/methods/_methods.rb'
-
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: WordRegex.
-# SupportedStyles: percent, brackets
-Style/WordArray:
-  EnforcedStyle: percent
-  MinSize: 4
-
-# Offense count: 5
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: forbid_for_all_comparison_operators, forbid_for_equality_operators_only, require_for_all_comparison_operators, require_for_equality_operators_only
-Style/YodaCondition:
-  Exclude:
-    - 'lib/types/props/type_validation.rb'
-    - 'test/types/enum.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/ZeroLengthPredicate:
-  Exclude:
-    - 'lib/types/private/methods/call_validation.rb'
 
 # Offense count: 82
 # Cop supports --auto-correct.

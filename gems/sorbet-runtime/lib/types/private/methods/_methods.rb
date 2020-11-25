@@ -145,7 +145,7 @@ module T::Private::Methods
         if (ancestor.method_defined?(method_name) ||
             ancestor.private_method_defined?(method_name) ||
             ancestor.protected_method_defined?(method_name)) &&
-              final_method?(method_owner_and_name_to_key(ancestor, method_name))
+           final_method?(method_owner_and_name_to_key(ancestor, method_name))
           raise(
             "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
             (target == ancestor ? "redefined" : "overridden in #{target}")
@@ -193,7 +193,7 @@ module T::Private::Methods
 
     if method_name == :method_added || method_name == :singleton_method_added
       raise(
-        "Putting a `sig` on `#{method_name}` is not supported" +
+        "Putting a `sig` on `#{method_name}` is not supported" \
         " (sorbet-runtime uses this method internally to perform `sig` validation logic)"
       )
     end
@@ -316,10 +316,10 @@ module T::Private::Methods
     begin
       # We allow `sig` in the current module's context (normal case) and
       if hook_mod != current_declaration.mod &&
-          # inside `class << self`, and
-          hook_mod.singleton_class != current_declaration.mod &&
-          # on `self` at the top level of a file
-          current_declaration.mod != TOP_SELF
+         # inside `class << self`, and
+         hook_mod.singleton_class != current_declaration.mod &&
+         # on `self` at the top level of a file
+         current_declaration.mod != TOP_SELF
         raise "A method (#{method_name}) is being added on a different class/module (#{hook_mod}) than the " \
               "last call to `sig` (#{current_declaration.mod}). Make sure each call " \
               "to `sig` is immediately followed by a method definition on the same " \
@@ -410,7 +410,7 @@ module T::Private::Methods
   def self.run_all_sig_blocks
     loop do
       break if @sig_wrappers.empty?
-      key, _ = @sig_wrappers.first
+      key, = @sig_wrappers.first
       run_sig_block_for_key(key)
     end
   end
@@ -427,7 +427,7 @@ module T::Private::Methods
   end
 
   def self.set_final_checks_on_hooks(enable)
-    is_enabled = @old_hooks != nil
+    is_enabled = !@old_hooks.nil?
     if enable == is_enabled
       return
     end

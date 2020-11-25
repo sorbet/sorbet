@@ -116,7 +116,7 @@ module Opus::Types::Test
           mod = Module.new do
             extend T::Sig
             sig {params(a: Integer, b: Integer).returns(Integer)}
-            def self.foo(a: 1, b:)
+            def self.foo(a: 1, b:) # rubocop:disable Style/KeywordParametersOrder
               a + b
             end
           end
@@ -140,13 +140,13 @@ module Opus::Types::Test
         end
         TEST_DATA = {
           x: "foo",
-          y: 50.times.map do |i|
+          y: Array.new(50) do |i|
             "foo_#{i}".to_sym
           end,
-          z: 50.times.map do |i|
+          z: Array.new(50) do |i|
             ["bar_#{i}".to_sym, i.to_s]
           end.to_h,
-        }
+        }.freeze
 
         Critic::Extensions::TypeExt.unpatch_types
         @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
@@ -497,10 +497,9 @@ module Opus::Types::Test
         assert_match(/\AParameter 'c': Expected type Integer, got type String with value "bye"/, err.message)
       end
 
-
       it 'raises an error when two parameters have the same name' do
 
-        @mod.sig { params(_: Integer, _: Integer).returns(String) }
+        @mod.sig { params(_: Integer, _: Integer).returns(String) } # rubocop:disable Lint/DuplicateHashKey
         def @mod.bar(_, _)
           ""
         end

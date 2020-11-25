@@ -8,7 +8,7 @@ module T::Types
     attr_reader :types
 
     def initialize(types)
-      @types = types.each_with_object({}) {|(k, v), h| h[k] = T::Utils.coerce(v)}
+      @types = types.transform_values {|v| T::Utils.coerce(v)}
     end
 
     # @override Base

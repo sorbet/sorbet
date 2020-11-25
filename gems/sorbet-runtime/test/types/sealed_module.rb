@@ -38,15 +38,15 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
   end
 
   it "forbids inheriting a sealed class in another file" do
-    require_relative './fixtures/sealed_module/forbid_sealed_class__1.rb'
+    require_relative './fixtures/sealed_module/forbid_sealed_class__1'
 
     err = assert_raises(RuntimeError) do
-      require_relative './fixtures/sealed_module/forbid_sealed_class__2.rb'
+      require_relative './fixtures/sealed_module/forbid_sealed_class__2'
     end
     assert_match(/was declared sealed and can only be inherited in/, err.message)
 
     err = assert_raises(RuntimeError) do
-      require_relative './fixtures/sealed_module/forbid_sealed_class__3.rb'
+      require_relative './fixtures/sealed_module/forbid_sealed_class__3'
     end
     assert_match(/was declared sealed and can only be inherited in/, err.message)
   end
@@ -62,15 +62,15 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
   end
 
   it "forbids including a sealed module in another file" do
-    require_relative './fixtures/sealed_module/forbid_sealed_module_include__1.rb'
+    require_relative './fixtures/sealed_module/forbid_sealed_module_include__1'
 
     err = assert_raises(RuntimeError) do
-      require_relative './fixtures/sealed_module/forbid_sealed_module_include__2.rb'
+      require_relative './fixtures/sealed_module/forbid_sealed_module_include__2'
     end
     assert_match(/was declared sealed and can only be included in/, err.message)
 
     err = assert_raises(RuntimeError) do
-      require_relative './fixtures/sealed_module/forbid_sealed_module_include__3.rb'
+      require_relative './fixtures/sealed_module/forbid_sealed_module_include__3'
     end
     assert_match(/was declared sealed and can only be included in/, err.message)
   end
@@ -86,15 +86,15 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
   end
 
   it "forbids extending a sealed module in another file" do
-    require_relative './fixtures/sealed_module/forbid_sealed_module_extend__1.rb'
+    require_relative './fixtures/sealed_module/forbid_sealed_module_extend__1'
 
     err = assert_raises(RuntimeError) do
-      require_relative './fixtures/sealed_module/forbid_sealed_module_extend__2.rb'
+      require_relative './fixtures/sealed_module/forbid_sealed_module_extend__2'
     end
     assert_match(/was declared sealed and can only be extended in/, err.message)
 
     err = assert_raises(RuntimeError) do
-      require_relative './fixtures/sealed_module/forbid_sealed_module_extend__3.rb'
+      require_relative './fixtures/sealed_module/forbid_sealed_module_extend__3'
     end
     assert_match(/was declared sealed and can only be extended in/, err.message)
   end
@@ -145,22 +145,22 @@ class Opus::Types::Test::SealedModuleTest < Critic::Unit::UnitTest
   it "finds the right file names with classes that are abstract! & sealed!" do
     # This test used to not work because both abstract! and sealed! change the inherited hook,
     # which adds extra lines to the backtrace (via super).
-    require_relative './fixtures/sealed_module/sealed_abstract__1.rb'
+    require_relative './fixtures/sealed_module/sealed_abstract__1'
 
     err = assert_raises(RuntimeError) do
-      require_relative './fixtures/sealed_module/sealed_abstract__2.rb'
+      require_relative './fixtures/sealed_module/sealed_abstract__2'
     end
     assert_match(/was declared sealed and can only be inherited in/, err.message)
 
     err = assert_raises(RuntimeError) do
-      require_relative './fixtures/sealed_module/sealed_abstract__3.rb'
+      require_relative './fixtures/sealed_module/sealed_abstract__3'
     end
     assert_match(/was declared sealed and can only be inherited in/, err.message)
   end
 
   it "allows whitelisting certain sealed violations" do
-    require_relative './fixtures/sealed_module/whitelist_violation__1.rb'
-    require_relative './fixtures/sealed_module/whitelist_violation__2.rb'
+    require_relative './fixtures/sealed_module/whitelist_violation__1'
+    require_relative './fixtures/sealed_module/whitelist_violation__2'
   end
 
   it "returns an empty set if we try to get the subclasses of a sealed-but-never-inherited parent" do

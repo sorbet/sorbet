@@ -37,7 +37,7 @@ module T::Types
             return false unless @type.recursively_valid?(obj[it])
             it += 1
           end
-          return true
+          true
         end
       when Hash
         return false unless @type.is_a?(FixedArray)
@@ -50,10 +50,10 @@ module T::Types
           # iterate over a [key, value] array, so we can't juse use the @type.recursively_valid?(v)
           return false if !key_type.recursively_valid?(key) || !value_type.recursively_valid?(val)
         end
-        return true
+        true
       when Enumerator
         # Enumerators can be unbounded: see `[:foo, :bar].cycle`
-        return true
+        true
       when Range
         # A nil beginning or a nil end does not provide any type information. That is, nil in a range represents
         # boundlessness, it does not express a type. For example `(nil...nil)` is not a T::Range[NilClass], its a range
@@ -65,7 +65,7 @@ module T::Types
           return false unless @type.recursively_valid?(item)
         end
 
-        return true
+        true
       else
         # We don't check the enumerable since it isn't guaranteed to be
         # rewindable (e.g. STDIN) and it may be expensive to enumerate

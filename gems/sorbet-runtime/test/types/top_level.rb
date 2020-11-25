@@ -6,11 +6,11 @@ class Opus::Types::Test::TopLevel < Critic::Unit::UnitTest
 
   it 'works with top level sigs' do
     result = Subprocess.check_output(["ruby", TOP_LEVEL_FIXTURE])
-    assert_equal(<<~EOF, result)
-    called main#foo
-    Expected type Integer, got type String with value "nope"
-    called main.bar
-    Expected type Symbol, got type Float with value 0.0
-    EOF
+    assert_equal(<<~EXPECTED, result)
+      called main#foo
+      Expected type Integer, got type String with value "nope"
+      called main.bar
+      Expected type Symbol, got type Float with value 0.0
+    EXPECTED
   end
 end

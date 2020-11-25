@@ -26,6 +26,8 @@ Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrivialAccessors:
   IgnoreClassMethods: true
+Style/EmptyElse:
+  EnforcedStyle: empty
 
 # This doesn't play very well with implementations of Sorbet abstract methods
 Lint/UnusedMethodArgument:
@@ -33,6 +35,10 @@ Lint/UnusedMethodArgument:
 
 # Prone to false positives when we care about which class owns a method
 Lint/UselessMethodDefinition:
+  Enabled: false
+
+# This can be bad for performance
+Style/MultipleComparison:
   Enabled: false
 
 Naming/FileName:
@@ -50,3 +56,11 @@ Performance/CollectionLiteralInLoop:
   Exclude:
     # Ok to prioritize brevity over perf in tests
     - 'test/**/*'
+
+# We frequently care about the exact type of values, not just truthiness
+Style/DoubleNegation:
+  Enabled: false
+
+# We don't want to needlessly break older Rubies
+Style/SlicingWithRange:
+  Enabled: false

@@ -28,7 +28,7 @@ class T::Private::Methods::Signature
     )
   end
 
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, parameters: method.parameters, on_failure:, override_allow_incompatible: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false)
     @method = method
     @method_name = method_name
     @arg_types = []
@@ -67,7 +67,7 @@ class T::Private::Methods::Signature
     if !extra_names.empty?
       raise "The declaration for `#{method.name}` has extra parameter(s): #{extra_names.join(', ')}"
     end
-    
+
     if parameters.size != raw_arg_types.size
       raise "The declaration for `#{method.name}` has arguments with duplicate names"
     end
@@ -198,10 +198,10 @@ class T::Private::Methods::Signature
   end
 
   def method_desc
-    if @method.source_location
-      loc = @method.source_location.join(':')
+    loc = if @method.source_location
+      @method.source_location.join(':')
     else
-      loc = "<unknown location>"
+      "<unknown location>"
     end
     "#{@method} at #{loc}"
   end
