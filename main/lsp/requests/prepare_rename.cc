@@ -64,35 +64,28 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerDelegate
     if (result.error) {
         // An error happened while setting up the query.
         response->error = move(result.error);
-    } else {
-        // An explicit null indicates that we don't support this request (or that nothing was at the location).
-        // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
-        response->result = variant<JSONNullObject, unique_ptr<PrepareRenameResult>>(JSONNullObject());
-        auto &queryResponses = result.responses;
-
-        for (auto const &resp : queryResponses) {
-            // We support rename requests from constants, class definitions, and methods.
-            if (auto constResp = resp->isConstant()) {
-                response->result = getPrepareRenameResult(gs, constResp->symbol);
-                break;
-            } else if (auto defResp = resp->isDefinition()) {
-                if (defResp->symbol.data(gs)->isClassOrModule()) {
-                    response->result = getPrepareRenameResult(gs, defResp->symbol);
-                    break;
-                } else if (defResp->symbol.data(gs)->isMethod()) {
-                    response->result = getPrepareRenameResult(gs, defResp->symbol);
-                    break;
-                }
-            } else if (auto sendResp = resp->isSend()) {
-                response->result = getPrepareRenameResultForSend(gs, sendResp);
-                break;
-            } else if (resp->isField()) {
-                // for attr methods we get multiple responses; ignore the field response
-                continue;
-            }
-        }
+        return response;
     }
+
+    // An explicit null indicates that we don't support this request (or that nothing was at the location).
+    // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
+    response->result = variant<JSONNullObject, unique_ptr<PrepareRenameResult>>(JSONNullObject());
+    auto &queryResponses = result.responses;
+    auto resp = move(queryResponses[0]);
+    // We support rename requests from constants, class definitions, and methods.
+    if (auto constResp = resp->isConstant()) {
+        response->result = getPrepareRenameResult(gs, constResp->symbol);
+    } else if (auto defResp = resp->isDefinition()) {
+        if (defResp->symbol.data(gs)->isClassOrModule()) {
+            response->result = getPrepareRenameResult(gs, defResp->symbol);
+        } else if (defResp->symbol.data(gs)->isMethod()) {
+            response->result = getPrepareRenameResult(gs, defResp->symbol);
+        }
+    } else if (auto sendResp = resp->isSend()) {
+        response->result = getPrepareRenameResultForSend(gs, sendResp);
+    }
+
     return response;
-} // namespace sorbet::realmain::lsp
+}
 
 } // namespace sorbet::realmain::lsp

@@ -172,7 +172,7 @@ private:
         for (auto u : unsupportedDefPrefixes) {
             if (absl::StartsWith(def, u)) {
                 invalid = true; // ensures the entire rename operation is blocked, not just this particular location
-                error = "Attribute method renames are unsupported.";
+                error = fmt::format("Sorbet does not support renaming `{}`s", u);
                 return def;
             }
         }
@@ -325,48 +325,41 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
         return response;
     }
 
-    for (auto const &resp : queryResponses) {
-        if (auto constResp = resp->isConstant()) {
-            // Sanity check the text.
-            if (islower(params->newName[0])) {
-                response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                             "Constant names must begin with an uppercase letter.");
-                return response;
-            }
-            if (isValidRenameLocation(constResp->symbol, gs, response)) {
-                getRenameEdits(typechecker, constResp->symbol, params->newName, response);
-            }
+    auto resp = move(queryResponses[0]);
+    if (auto constResp = resp->isConstant()) {
+        // Sanity check the text.
+        if (islower(params->newName[0])) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Constant names must begin with an uppercase letter.");
             return response;
-        } else if (auto defResp = resp->isDefinition()) {
-            if (defResp->symbol.data(gs)->isClassOrModule() && islower(params->newName[0])) {
-                response->error = make_unique<ResponseError>(
-                    (int)LSPErrorCodes::InvalidRequest, "Class and Module names must begin with an uppercase letter.");
-                return response;
-            }
-
-            if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
-                response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                             "Method names must begin with an lowercase letter.");
-                return response;
-            }
-
-            if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
-                if (isValidRenameLocation(defResp->symbol, gs, response)) {
-                    getRenameEdits(typechecker, defResp->symbol, params->newName, response);
-                }
-            }
-            return response;
-        } else if (auto sendResp = resp->isSend()) {
-            auto method = sendResp->dispatchResult->main.method;
-            getRenameEdits(typechecker, method, params->newName, response);
-            return response;
-        } else if (resp->isField()) {
-            // we get duplicate responses, ignore field rename requests
-            continue;
         }
+        if (isValidRenameLocation(constResp->symbol, gs, response)) {
+            getRenameEdits(typechecker, constResp->symbol, params->newName, response);
+        }
+    } else if (auto defResp = resp->isDefinition()) {
+        if (defResp->symbol.data(gs)->isClassOrModule() && islower(params->newName[0])) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Class and Module names must begin with an uppercase letter.");
+            return response;
+        }
+
+        if (defResp->symbol.data(gs)->isMethod() && isupper(params->newName[0])) {
+            response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
+                                                         "Method names must begin with an lowercase letter.");
+            return response;
+        }
+
+        if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
+            if (isValidRenameLocation(defResp->symbol, gs, response)) {
+                getRenameEdits(typechecker, defResp->symbol, params->newName, response);
+            }
+        }
+    } else if (auto sendResp = resp->isSend()) {
+        auto method = sendResp->dispatchResult->main.method;
+        getRenameEdits(typechecker, method, params->newName, response);
     }
 
     return response;
-} // namespace sorbet::realmain::lsp
+}
 
 } // namespace sorbet::realmain::lsp
