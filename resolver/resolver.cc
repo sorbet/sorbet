@@ -532,6 +532,8 @@ private:
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
                                 resolved.data(ctx)->show(ctx));
+                    e.addErrorLine(resolved.data(ctx)->loc(), "`{}` defined as a class here",
+                                   resolved.data(ctx)->show(ctx));
                 }
             }
         }
