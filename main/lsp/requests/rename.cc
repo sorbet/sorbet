@@ -169,12 +169,13 @@ public:
 
 private:
     string replaceMethodNameInDef(string def) {
-        // block attr_ methods rename
-        if (!PrepareRenameTask::validateDef(def)) {
-            // TODO: can we increment a counter here?
-            invalid = true; // ensures the entire rename operation is blocked, not just this particular location
-            error = "Attribute method renames are unsupported.";
-            return def;
+        const vector<string> unsupportedDefPrefixes{"attr_reader", "attr_accessor", "attr_writer"};
+        for (auto u : unsupportedDefPrefixes) {
+            if (absl::StartsWith(def, u)) {
+                invalid = true; // ensures the entire rename operation is blocked, not just this particular location
+                error = "Attribute method renames are unsupported.";
+                return def;
+            }
         }
 
         // We can't do a simple string search because of cases like:

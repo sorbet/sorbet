@@ -44,17 +44,6 @@ getPrepareRenameResultForSend(const core::GlobalState &gs, const core::lsp::Send
 
 } // namespace
 
-bool PrepareRenameTask::validateDef(string defSource) {
-    // attr_* methods can't be renamed, because we don't do field renames yet
-    const vector<string> unsupportedDefPrefixes{"attr_reader", "attr_accessor", "attr_writer"};
-    for (auto u : unsupportedDefPrefixes) {
-        if (absl::StartsWith(defSource, u)) {
-            return false;
-        }
-    }
-    return true;
-}
-
 PrepareRenameTask::PrepareRenameTask(const LSPConfiguration &config, MessageId id,
                                      unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentPrepareRename), params(move(params)) {}
@@ -89,12 +78,7 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerDelegate
                 if (defResp->symbol.data(gs)->isClassOrModule()) {
                     response->result = getPrepareRenameResult(gs, defResp->symbol);
                 } else if (defResp->symbol.data(gs)->isMethod()) {
-                    if (PrepareRenameTask::validateDef(defResp->termLoc.source(gs))) {
-                        response->result = getPrepareRenameResult(gs, defResp->symbol);
-                    } else {
-                        response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
-                                                                     "Unsupported method rename operation");
-                    }
+                    response->result = getPrepareRenameResult(gs, defResp->symbol);
                 }
             } else if (auto sendResp = resp->isSend()) {
                 response->result = getPrepareRenameResultForSend(gs, sendResp);
