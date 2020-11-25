@@ -303,12 +303,6 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
             ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
 
             if (!mixin.data(gs)->isClassOrModuleModule()) {
-                if (mixin != core::Symbols::BasicObject()) {
-                    if (auto e = gs.beginError(data->loc(), core::errors::Resolver::IncludesNonModule)) {
-                        e.setHeader("Only modules can be `{}`d. This module or class includes `{}`", "include",
-                                    mixin.data(gs)->show(gs));
-                    }
-                }
                 // insert all transitive parents of class to bring methods back.
                 auto allMixins = mixinLinearization.fullLinearizationSlow(gs);
                 newMixins.insert(newMixins.begin(), allMixins.begin(), allMixins.end());

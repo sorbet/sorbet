@@ -11,6 +11,7 @@
 #include "core/Names.h"
 #include "core/Types.h"
 #include "core/errors/internal.h"
+#include "core/errors/resolver.h"
 #include <string>
 
 template class std::vector<sorbet::core::TypeAndOrigins>;
@@ -273,6 +274,18 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
 
 void Symbol::addMixin(const GlobalState &gs, SymbolRef sym) {
     ENFORCE(isClassOrModule());
+    // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
+    // GlobalPass.cc.
+    if (sym.data(gs)->isClassModuleSet() && !sym.data(gs)->isClassOrModuleModule()) {
+        if (sym != core::Symbols::BasicObject()) {
+            if (auto e = gs.beginError(loc(), core::errors::Resolver::IncludesNonModule)) {
+                e.setHeader("Only modules can be `{}`d. This module or class includes `{}`", "include",
+                            sym.data(gs)->show(gs));
+            }
+            // Add mixin anyway; linearization still processes it.
+        }
+    }
+
     if (!isClassOrModuleLinearizationComputed()) {
         // Symbol hasn't been linearized yet, so add symbol unconditionally (order matters, so dupes are OK and
         // semantically important!)

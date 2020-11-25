@@ -1,8 +1,5 @@
 # typed: strict
 # enable-packager: true
-# disable-fast-path: true
-# ^ The "Only modules can be `include`d." error, unfortunately, doesn't surface the same errors on the fast path.
-# This is a restriction in other tests.
 
 class A < PackageSpec
   import 123
