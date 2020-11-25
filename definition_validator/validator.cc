@@ -579,6 +579,8 @@ public:
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         validateTStructNotGrandparent(ctx, sym);
         if (!sym.data(ctx)->isSingletonClass(ctx)) {
+            // Only validateAbstract for this class if we haven't already (we already have if this
+            // is a `class << self` ClassDef)
             validateAbstract(ctx, sym);
         }
         validateAbstract(ctx, singleton);
