@@ -4294,8 +4294,6 @@ end
 # :   nil indicates [RFC-822] group syntax. Otherwise, returns [RFC-822] domain
 #     name.
 class Net::IMAP::Address < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def host(); end
 
   def host=(_); end
@@ -4725,8 +4723,6 @@ end
 # :   Returns a hash that represents parameters of the Content-Disposition
 #     field.
 class Net::IMAP::ContentDisposition < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def dsp_type(); end
 
   def dsp_type=(_); end
@@ -4762,8 +4758,6 @@ end
 # raw\_data
 # :   Returns the raw data string.
 class Net::IMAP::ContinuationRequest < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def data(); end
 
   def data=(_); end
@@ -4847,8 +4841,6 @@ end
 # message\_id
 # :   Returns a string that represents the message-id.
 class Net::IMAP::Envelope < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def bcc(); end
 
   def bcc=(_); end
@@ -4947,8 +4939,6 @@ end
 #     UID
 # :       A number expressing the unique identifier of the message.
 class Net::IMAP::FetchData < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def attr(); end
 
   def attr=(_); end
@@ -5006,8 +4996,6 @@ end
 # rights
 # :   The access rights the indicated user has to the mailbox.
 class Net::IMAP::MailboxACLItem < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def mailbox(); end
 
   def mailbox=(_); end
@@ -5050,8 +5038,6 @@ end
 # name
 # :   Returns the mailbox name.
 class Net::IMAP::MailboxList < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def attr(); end
 
   def attr=(_); end
@@ -5095,8 +5081,6 @@ end
 # quota
 # :   Quota limit imposed on the mailbox.
 class Net::IMAP::MailboxQuota < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def mailbox(); end
 
   def mailbox=(_); end
@@ -5132,8 +5116,6 @@ end
 # quotaroots
 # :   Zero or more quotaroots that affect the quota on the specified mailbox.
 class Net::IMAP::MailboxQuotaRoot < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def mailbox(); end
 
   def mailbox=(_); end
@@ -5220,8 +5202,6 @@ end
 # data
 # :   Returns the data, if it exists.
 class Net::IMAP::ResponseCode < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def data(); end
 
   def data=(_); end
@@ -5291,8 +5271,6 @@ class Net::IMAP::ResponseParser
 end
 
 class Net::IMAP::ResponseParser::Token < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def symbol(); end
 
   def symbol=(_); end
@@ -5324,8 +5302,6 @@ end
 # text
 # :   Returns the text.
 class Net::IMAP::ResponseText < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def code(); end
 
   def code=(_); end
@@ -5353,8 +5329,6 @@ end
 # :   Returns a hash. Each key is one of "MESSAGES", "RECENT", "UIDNEXT",
 #     "UIDVALIDITY", "UNSEEN". Each value is a number.
 class Net::IMAP::StatusData < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def attr(); end
 
   def attr=(_); end
@@ -5399,8 +5373,6 @@ end
 # raw\_data
 # :   Returns the raw data string.
 class Net::IMAP::TaggedResponse < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def data(); end
 
   def data=(_); end
@@ -5438,8 +5410,6 @@ end
 #     [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#ThreadMember)
 #     objects for mail items that are children of this in the thread.
 class Net::IMAP::ThreadMember < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def children(); end
 
   def children=(_); end
@@ -5480,8 +5450,6 @@ end
 # raw\_data
 # :   Returns the raw data string.
 class Net::IMAP::UntaggedResponse < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def data(); end
 
   def data=(_); end
@@ -6229,8 +6197,6 @@ class Net::SFTP::Operations::Download
 end
 
 class Net::SFTP::Operations::Download::Entry < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def directory(); end
 
   def directory=(_); end
@@ -6338,8 +6304,6 @@ class Net::SFTP::Operations::Upload
 end
 
 class Net::SFTP::Operations::Upload::LiveFile < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def handle(); end
 
   def handle=(_); end
@@ -6610,8 +6574,6 @@ class Net::SFTP::Protocol::V04::Attributes < Net::SFTP::Protocol::V01::Attribute
 end
 
 class Net::SFTP::Protocol::V04::Attributes::ACL < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def flag(); end
 
   def flag=(_); end
@@ -8579,8 +8541,6 @@ class Net::SSH::Service::Forward
 end
 
 class Net::SSH::Service::Forward::Remote < Struct
-  Elem = type_member(fixed: T.untyped)
-
   def host(); end
 
   def host=(_); end

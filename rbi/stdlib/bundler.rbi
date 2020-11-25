@@ -4034,9 +4034,6 @@ module Bundler::GemHelpers
 end
 
 class Bundler::GemHelpers::PlatformMatch < Struct
-  extend T::Generic
-  Elem = type_member(fixed: T.untyped)
-
   EXACT_MATCH = ::T.let(nil, T.untyped)
   WORST_MATCH = ::T.let(nil, T.untyped)
 
@@ -4508,9 +4505,6 @@ end
 
 class Bundler::LazySpecification::Identifier < Struct
   include ::Comparable
-  extend ::T::Generic
-
-  Elem = type_member(fixed: T.untyped)
 
   sig do
     params(
@@ -5322,9 +5316,6 @@ end
 # directed edge @attr [Vertex] destination The destination of the directed edge
 # @attr [Object] requirement The requirement the directed edge represents
 class Bundler::Molinillo::DependencyGraph::Edge < Struct
-  extend T::Generic
-  Elem = type_member(fixed: T.untyped)
-
   sig {returns(T.untyped)}
   def destination(); end
 
@@ -5822,9 +5813,6 @@ end
 # A state that encapsulates a set of {#requirements} with an {Array} of
 # possibilities
 class Bundler::Molinillo::DependencyState < Bundler::Molinillo::ResolutionState
-  extend T::Generic
-  Elem = type_member(fixed: T.untyped)
-
   # Removes a possibility from `self` @return [PossibilityState] a state with a
   # single possibility,
   #
@@ -5882,14 +5870,9 @@ end
 # A state that encapsulates a single possibility to fulfill the given
 # {#requirement}
 class Bundler::Molinillo::PossibilityState < Bundler::Molinillo::ResolutionState
-  extend T::Generic
-  Elem = type_member(fixed: T.untyped)
 end
 
 class Bundler::Molinillo::ResolutionState < Struct
-  extend T::Generic
-  Elem = type_member(fixed: T.untyped)
-
   sig {returns(T.untyped)}
   def activated(); end
 
@@ -6145,9 +6128,6 @@ class Bundler::Molinillo::Resolver::Resolution
 end
 
 class Bundler::Molinillo::Resolver::Resolution::Conflict < Struct
-  extend T::Generic
-  Elem = type_member(fixed: T.untyped)
-
   sig {returns(T.untyped)}
   def activated_by_name(); end
 
@@ -6261,9 +6241,6 @@ class Bundler::Molinillo::Resolver::Resolution::Conflict < Struct
 end
 
 class Bundler::Molinillo::Resolver::Resolution::PossibilitySet < Struct
-  extend T::Generic
-  Elem = type_member(fixed: T.untyped)
-
   sig {returns(T.untyped)}
   def dependencies(); end
 
@@ -6317,8 +6294,6 @@ end
 
 class Bundler::Molinillo::Resolver::Resolution::UnwindDetails < Struct
   include ::Comparable
-  extend T::Generic
-  Elem = type_member(fixed: T.untyped)
 
   # We compare
   # [`UnwindDetails`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/Resolver/Resolution/UnwindDetails.html)
@@ -8521,9 +8496,6 @@ class Bundler::Settings
 end
 
 class Bundler::Settings::Path < Struct
-  extend T::Generic
-  Elem = type_member(fixed: T.untyped)
-
   sig {returns(T.untyped)}
   def append_ruby_scope(); end
 

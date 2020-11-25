@@ -643,8 +643,6 @@ end
 class REXML::DocType < ::REXML::Parent
   include(::REXML::XMLTokens)
 
-  Elem = type_member(fixed: REXML::Child)
-
   DEFAULT_ENTITIES = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
   PUBLIC = T.let(T.unsafe(nil), String)
@@ -755,9 +753,6 @@ end
 # [`REXML`](https://docs.ruby-lang.org/en/2.6.0/REXML.html) documents do not
 # write a default declaration for you. See |DECLARATION| and |write|.
 class REXML::Document < ::REXML::Element
-
-  Elem = type_member(fixed: REXML::Child)
-
   # A convenient default [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html)
   # declaration. If you want an
   # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) declaration, the

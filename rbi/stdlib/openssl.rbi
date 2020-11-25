@@ -1607,11 +1607,9 @@ class OpenSSL::ASN1::PrintableString < OpenSSL::ASN1::Primitive
 end
 
 class OpenSSL::ASN1::Sequence < OpenSSL::ASN1::Constructive
-  Elem = type_member(fixed: T.untyped)
 end
 
 class OpenSSL::ASN1::Set < OpenSSL::ASN1::Constructive
-  Elem = type_member(fixed: T.untyped)
 end
 
 class OpenSSL::ASN1::T61String < OpenSSL::ASN1::Primitive
