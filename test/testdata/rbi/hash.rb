@@ -89,8 +89,11 @@ initial_hash.transform_values!.with_index do |v, i|
 end
 
 T.assert_type!({}.any?, T::Boolean)
-T.assert_type!({ a: 'ant', b: 'bear', c: 'cat' }.any?(/d/), T::Boolean)
-T.assert_type!(
-  { a: 'ant', b: 'bear', c: 'cat' }.any? { |key, value| key == value },
-  T::Boolean
-)
+T.reveal_type(T::Hash[Symbol, Integer].new.any? do |key, value| # error: Revealed type: `T::Boolean`
+  T.reveal_type(key) # error: Revealed type: `Symbol`
+  T.reveal_type(value) # error: Revealed type: `Integer`
+end)
+T.reveal_type(T::Hash[Symbol, Integer].new.any? do |(key, value)| # error: Revealed type: `T::Boolean`
+  T.reveal_type(key) # error: Revealed type: `Symbol`
+  T.reveal_type(value) # error: Revealed type: `Integer`
+end)

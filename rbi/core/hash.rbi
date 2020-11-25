@@ -308,7 +308,7 @@ class Hash < Object
   sig {returns(T::Boolean)}
   sig do
     params(
-        blk: T.proc.params(arg0: K, arg1: V).returns(BasicObject),
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
     .returns(T::Boolean)
   end
