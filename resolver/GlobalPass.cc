@@ -384,8 +384,10 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             if (!singleton.exists()) {
                 singleton = sym.data(gs)->singletonClass(gs);
             }
-            if (auto e = singleton.data(gs)->addMixin(gs, classMethods)) {
-                // Report error as-is; no further details to add.
+            if (!singleton.data(gs)->addMixin(gs, classMethods)) {
+                // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before adding it
+                // as a member.
+                ENFORCE(false);
             }
         }
     }

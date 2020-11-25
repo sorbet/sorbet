@@ -11,7 +11,6 @@
 #include "core/Names.h"
 #include "core/Types.h"
 #include "core/errors/internal.h"
-#include "core/errors/resolver.h"
 #include <string>
 
 template class std::vector<sorbet::core::TypeAndOrigins>;
@@ -272,21 +271,12 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
-unique_ptr<ErrorBuilder> Symbol::addMixin(const GlobalState &gs, SymbolRef sym) {
+bool Symbol::addMixin(const GlobalState &gs, SymbolRef sym) {
     ENFORCE(isClassOrModule());
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
-    // GlobalPass.cc.
-    unique_ptr<ErrorBuilder> rv = nullptr;
-    if (sym.data(gs)->isClassModuleSet() && !sym.data(gs)->isClassOrModuleModule()) {
-        if (sym != core::Symbols::BasicObject()) {
-            if (auto e = gs.beginError(loc(), core::errors::Resolver::IncludesNonModule)) {
-                e.setHeader("Only modules can be `{}`d. This module or class includes `{}`", "include",
-                            sym.data(gs)->show(gs));
-                rv = make_unique<ErrorBuilder>(move(e));
-            }
-            // Add mixin anyway; linearization still processes it.
-        }
-    }
+    // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
+    bool isValidMixin = !sym.data(gs)->isClassModuleSet() || sym.data(gs)->isClassOrModuleModule() ||
+                        sym == core::Symbols::BasicObject();
 
     if (!isClassOrModuleLinearizationComputed()) {
         // Symbol hasn't been linearized yet, so add symbol unconditionally (order matters, so dupes are OK and
@@ -312,7 +302,7 @@ unique_ptr<ErrorBuilder> Symbol::addMixin(const GlobalState &gs, SymbolRef sym) 
             }
         }
     }
-    return rv;
+    return isValidMixin;
 }
 
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {

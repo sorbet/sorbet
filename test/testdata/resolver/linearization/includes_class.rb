@@ -5,12 +5,14 @@ end
 class A < Sup
 end
 
-class B # error: Only modules can be `include`d
-  include A
+class B
+  include A # error: Only modules can be `include`d, but `A` is a class
+  extend A # error: Only modules can be `extend`d, but `A` is a class
 end
 
-module C # error: Only modules can be `include`d
-  include A
+module C
+  include A # error: Only modules can be `include`d, but `A` is a class
+  extend A # error: Only modules can be `extend`d, but `A` is a class
   def bla
     raise "s"
   end

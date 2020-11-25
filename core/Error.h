@@ -137,7 +137,9 @@ class ErrorBuilder {
 
 public:
     ErrorBuilder(const ErrorBuilder &) = delete;
-    ErrorBuilder(ErrorBuilder &&);
+    // If you undelete this, you will need to make sure the moved ErrorBuilder is marked as 'DidBuild' so Sorbet does
+    // not report an empty error.
+    ErrorBuilder(ErrorBuilder &&) = delete;
     ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what);
     ~ErrorBuilder();
 
