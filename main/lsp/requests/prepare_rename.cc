@@ -71,6 +71,9 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerDelegate
     // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
     response->result = variant<JSONNullObject, unique_ptr<PrepareRenameResult>>(JSONNullObject());
     auto &queryResponses = result.responses;
+    if (queryResponses.empty()) {
+        return response;
+    }
     auto resp = move(queryResponses[0]);
     // We support rename requests from constants, class definitions, and methods.
     if (auto constResp = resp->isConstant()) {
