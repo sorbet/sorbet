@@ -28,4 +28,5 @@ class Bar < Foo # error: Type `V` declared by parent `Foo` must be re-declared i
   K = Bar[String,String].new.foo('a', 2)
 # ^ error: Type variable `K` needs to be declared as `= type_member(SOMETHING)`
     # ^^^^^^^^^^^^^^^^^^ error: Wrong number of type parameters
+                                    # ^ error: Expected `String` but found `Integer(2)` for argument `v`
 end
