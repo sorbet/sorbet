@@ -224,7 +224,10 @@ LSPTask::filterAndDedup(const core::GlobalState &gs,
               [](const unique_ptr<core::lsp::QueryResponse> &a, const unique_ptr<core::lsp::QueryResponse> &b) -> bool {
                   auto aLoc = a->getLoc();
                   auto bLoc = b->getLoc();
-                  auto cmp = (aLoc.beginPos() - bLoc.beginPos());
+                  auto cmp = aLoc.file().id() - bLoc.file().id();
+                  if (cmp == 0) {
+                      cmp = (aLoc.beginPos() - bLoc.beginPos());
+                  }
                   if (cmp == 0) {
                       cmp = aLoc.endPos() - bLoc.endPos();
                   }
@@ -264,23 +267,29 @@ LSPTask::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::Symbol
     return move(priorRefs);
 }
 
-vector<unique_ptr<DocumentHighlight>>
-LSPTask::getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, string_view const uri, core::SymbolRef symbol,
-                                     vector<unique_ptr<DocumentHighlight>> highlights) const {
-    if (symbol.exists()) {
-        auto fref = config.uri2FileRef(typechecker.state(), uri);
-        if (fref.exists()) {
-            auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
-            auto locations = extractLocations(typechecker.state(), run2.responses);
-            for (auto const &location : locations) {
-                // 'queryBySymbolInFiles' may pick up secondary files required for accurate querying (e.g., package
-                // files)
-                if (location->uri == uri) {
-                    auto highlight = make_unique<DocumentHighlight>(move(location->range));
-                    highlights.push_back(move(highlight));
-                }
+vector<unique_ptr<core::lsp::QueryResponse>>
+LSPTask::getReferencesToSymbolInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, core::SymbolRef symbol,
+                                     vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+    if (symbol.exists() && fref.exists()) {
+        auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
+        for (auto &resp : run2.responses) {
+            // Ignore results in other files (which may have been picked up for typechecking purposes)
+            if (resp->getLoc().file() == fref) {
+                priorRefs.emplace_back(move(resp));
             }
         }
+    }
+    return move(priorRefs);
+}
+
+vector<unique_ptr<DocumentHighlight>>
+LSPTask::getHighlights(LSPTypecheckerDelegate &typechecker,
+                       const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) const {
+    vector<unique_ptr<DocumentHighlight>> highlights;
+    auto locations = extractLocations(typechecker.state(), queryResponses);
+    for (auto const &location : locations) {
+        auto highlight = make_unique<DocumentHighlight>(move(location->range));
+        highlights.push_back(move(highlight));
     }
     return highlights;
 }
@@ -335,9 +344,8 @@ void populateFieldAccessorType(const core::GlobalState &gs, AccessorInfo &info) 
 } // namespace
 
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::getReferencesForAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info,
-                                  core::SymbolRef fallback,
-                                  vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+LSPTask::getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
+                                 vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     switch (info.accessorType) {
         case FieldAccessorType::None:
             // Common case: Not an accessor.
@@ -428,28 +436,28 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
     return info;
 }
 
-vector<unique_ptr<DocumentHighlight>>
-LSPTask::getHighlightsForAccessorInFile(LSPTypecheckerDelegate &typechecker, string_view uri, const AccessorInfo info,
-                                        core::SymbolRef fallback,
-                                        vector<unique_ptr<DocumentHighlight>> &&highlights) const {
+vector<unique_ptr<core::lsp::QueryResponse>>
+LSPTask::getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
+                                       core::SymbolRef fallback,
+                                       vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     switch (info.accessorType) {
         case FieldAccessorType::None:
             // Common case: Not an accessor.
-            return getHighlightsToSymbolInFile(typechecker, uri, fallback, move(highlights));
+            return getReferencesToSymbolInFile(typechecker, fref, fallback, move(priorRefs));
         case FieldAccessorType::Reader:
-            return getHighlightsToSymbolInFile(
-                typechecker, uri, info.fieldSymbol,
-                getHighlightsToSymbolInFile(typechecker, uri, info.readerSymbol, move(highlights)));
+            return getReferencesToSymbolInFile(
+                typechecker, fref, info.fieldSymbol,
+                getReferencesToSymbolInFile(typechecker, fref, info.readerSymbol, move(priorRefs)));
         case FieldAccessorType::Writer:
-            return getHighlightsToSymbolInFile(
-                typechecker, uri, info.fieldSymbol,
-                getHighlightsToSymbolInFile(typechecker, uri, info.writerSymbol, move(highlights)));
+            return getReferencesToSymbolInFile(
+                typechecker, fref, info.fieldSymbol,
+                getReferencesToSymbolInFile(typechecker, fref, info.writerSymbol, move(priorRefs)));
         case FieldAccessorType::Accessor:
-            return getHighlightsToSymbolInFile(
-                typechecker, uri, info.fieldSymbol,
-                getHighlightsToSymbolInFile(
-                    typechecker, uri, info.writerSymbol,
-                    getHighlightsToSymbolInFile(typechecker, uri, info.readerSymbol, move(highlights))));
+            return getReferencesToSymbolInFile(
+                typechecker, fref, info.fieldSymbol,
+                getReferencesToSymbolInFile(
+                    typechecker, fref, info.writerSymbol,
+                    getReferencesToSymbolInFile(typechecker, fref, info.readerSymbol, move(priorRefs))));
     }
 }
 

@@ -45,6 +45,10 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
         // An explicit null indicates that we don't support this request (or that nothing was at the location).
         // Note: Need to correctly type variant here so it goes into right 'slot' of result variant.
         response->result = variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>(JSONNullObject());
+        auto fref = config.uri2FileRef(typechecker.state(), uri);
+        if (!fref.exists()) {
+            return response;
+        }
         auto &queryResponses = result.responses;
         if (!queryResponses.empty()) {
             auto file = config.uri2FileRef(gs, uri);
@@ -56,16 +60,21 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
             // N.B.: Ignores literals.
             // If file is untyped, only supports find reference requests from constants and class definitions.
             if (auto constResp = resp->isConstant()) {
-                response->result = getHighlightsToSymbolInFile(typechecker, uri, constResp->symbol);
+                response->result =
+                    getHighlights(typechecker, getReferencesToSymbolInFile(typechecker, fref, constResp->symbol));
             } else if (auto fieldResp = resp->isField()) {
                 // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-                response->result = getHighlightsForAccessorInFile(
-                    typechecker, uri, getAccessorInfo(typechecker.state(), fieldResp->symbol), fieldResp->symbol);
+                response->result = getHighlights(
+                    typechecker, getReferencesToAccessorInFile(typechecker, fref,
+                                                               getAccessorInfo(typechecker.state(), fieldResp->symbol),
+                                                               fieldResp->symbol));
             } else if (auto defResp = resp->isDefinition()) {
                 if (fileIsTyped || defResp->symbol.data(gs)->isClassOrModule()) {
                     // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-                    response->result = getHighlightsForAccessorInFile(
-                        typechecker, uri, getAccessorInfo(typechecker.state(), defResp->symbol), defResp->symbol);
+                    response->result = getHighlights(
+                        typechecker,
+                        getReferencesToAccessorInFile(
+                            typechecker, fref, getAccessorInfo(typechecker.state(), defResp->symbol), defResp->symbol));
                 }
             } else if (fileIsTyped && resp->isIdent()) {
                 auto identResp = resp->isIdent();
@@ -80,17 +89,17 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
             } else if (fileIsTyped && resp->isSend()) {
                 auto sendResp = resp->isSend();
                 auto start = sendResp->dispatchResult.get();
-                vector<unique_ptr<DocumentHighlight>> highlights;
+                vector<unique_ptr<core::lsp::QueryResponse>> references;
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                         // This could be a `prop` or `attr_*`, which have multiple associated symbols.
-                        highlights = getHighlightsForAccessorInFile(
-                            typechecker, uri, getAccessorInfo(typechecker.state(), start->main.method),
-                            start->main.method);
+                        references = getReferencesToAccessorInFile(
+                            typechecker, fref, getAccessorInfo(typechecker.state(), start->main.method),
+                            start->main.method, move(references));
                     }
                     start = start->secondary.get();
                 }
-                response->result = move(highlights);
+                response->result = getHighlights(typechecker, references);
             }
         }
     }

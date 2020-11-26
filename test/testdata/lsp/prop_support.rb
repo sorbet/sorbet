@@ -42,26 +42,26 @@ class ItemMetadata
   sig {returns(String)}
   attr_reader :serial
 # ^^^^^^^^^^^^^^^^^^^ def: serial 1
-  #            ^^^^^^ def: serial 2
+  #            ^^^^^^ usage: serial 2
 
   sig {params(owner: String).returns(String)}
   attr_writer :owner
 # ^^^^^^^^^^^^^^^^^^ def: owner 1
-  #            ^^^^^ def: owner 2
+  #            ^^^^^ usage: owner 2
 
   sig {returns(String)}
   attr_accessor :region
 # ^^^^^^^^^^^^^^^^^^^^^ def: region 1
-  #              ^^^^^^ def: region 2
+  #              ^^^^^^ usage: region 2
 
   sig {void}
   def initialize
     @serial = T.let("", String)
-    #^^^^^^ usage: serial 2
+    #^^^^^^ def: serial 2
     @owner = T.let("", String)
-    #^^^^^ usage: owner 2
+    #^^^^^ def: owner 2
     @region = T.let("", String)
-    #^^^^^^ usage: region 2
+    #^^^^^^ def: region 2
   end
 
   sig {void}

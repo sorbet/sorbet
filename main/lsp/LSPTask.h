@@ -38,9 +38,13 @@ protected:
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
     getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
                           std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+    std::vector<std::unique_ptr<core::lsp::QueryResponse>>
+    getReferencesToSymbolInFile(LSPTypecheckerDelegate &typechecker, core::FileRef file, core::SymbolRef symbol,
+                                std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+
     std::vector<std::unique_ptr<DocumentHighlight>>
-    getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, std::string_view uri, core::SymbolRef symbol,
-                                std::vector<std::unique_ptr<DocumentHighlight>> highlights = {}) const;
+    getHighlights(LSPTypecheckerDelegate &typechecker,
+                  const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &responses) const;
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc) const;
     std::vector<std::unique_ptr<Location>>
     extractLocations(const core::GlobalState &gs,
@@ -62,14 +66,15 @@ protected:
 
     // Get references to the given accessor. If `info.accessorType` is `None`, it returns references to `fallback` only.
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
-    getReferencesForAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
-                             std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+    getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
+                            std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
-    // Get highlights to the given accessor. If `info.accessorType` is `None`, it returns highlights to `fallback` only.
-    std::vector<std::unique_ptr<DocumentHighlight>>
-    getHighlightsForAccessorInFile(LSPTypecheckerDelegate &typechecker, std::string_view uri, const AccessorInfo info,
-                                   core::SymbolRef fallback,
-                                   std::vector<std::unique_ptr<DocumentHighlight>> &&highlights = {}) const;
+    // Get references to the given accessor in the given file. If `info.accessorType` is `None`, it returns highlights
+    // to `fallback` only.
+    std::vector<std::unique_ptr<core::lsp::QueryResponse>>
+    getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
+                                  core::SymbolRef fallback,
+                                  std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
 
     LSPTask(const LSPConfiguration &config, LSPMethod method);
 

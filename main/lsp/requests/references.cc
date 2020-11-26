@@ -42,15 +42,15 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 // This could be a `prop` or `attr_*`, which have multiple associated symbols.
                 response->result = extractLocations(
                     typechecker.state(),
-                    getReferencesForAccessor(typechecker, getAccessorInfo(typechecker.state(), fieldResp->symbol),
-                                             fieldResp->symbol));
+                    getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), fieldResp->symbol),
+                                            fieldResp->symbol));
             } else if (auto defResp = resp->isDefinition()) {
                 if (fileIsTyped || defResp->symbol.data(gs)->isClassOrModule()) {
                     // This could be a `prop` or `attr_*`, which have multiple associated symbols.
                     response->result = extractLocations(
                         typechecker.state(),
-                        getReferencesForAccessor(typechecker, getAccessorInfo(typechecker.state(), defResp->symbol),
-                                                 defResp->symbol));
+                        getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), defResp->symbol),
+                                                defResp->symbol));
                 }
             } else if (fileIsTyped && resp->isIdent()) {
                 auto identResp = resp->isIdent();
@@ -68,9 +68,9 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
                         // This could be a `prop` or `attr_*`, which has multiple associated symbols.
-                        responses = getReferencesForAccessor(typechecker,
-                                                             getAccessorInfo(typechecker.state(), start->main.method),
-                                                             start->main.method, move(responses));
+                        responses = getReferencesToAccessor(typechecker,
+                                                            getAccessorInfo(typechecker.state(), start->main.method),
+                                                            start->main.method, move(responses));
                     }
                     start = start->secondary.get();
                 }
