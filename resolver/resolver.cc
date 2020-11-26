@@ -556,46 +556,57 @@ private:
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.show(gs));
             }
-            // Keep processing it anyways
+            return;
         }
 
-        if (send->args.size() != 1) {
+        if (send->args.size() < 1) {
             // The arity mismatch error will be emitted later by infer.
             return;
         }
-        auto &front = send->args.front();
-        auto *id = ast::cast_tree<ast::ConstantLit>(front);
-        if (id == nullptr || !id->symbol.exists() || !id->symbol.isClassOrModule()) {
-            if (auto e =
-                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
+
+        auto argumentNumber = 0;
+        for (auto &arg : send->args) {
+            auto *id = ast::cast_tree<ast::ConstantLit>(arg);
+
+            if (id == nullptr || !id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
+                if (auto e = gs.beginError(core::Loc(todo.file, send->loc),
+                                           core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("Argument to `{}` must be statically resolvable to a module",
+                                send->fun.data(gs)->show(gs));
+                }
+                return;
             }
-            return;
-        }
-        if (id->symbol.data(gs)->isClassOrModuleClass()) {
-            if (auto e =
-                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` is a class, not a module; Only modules may be mixins", id->symbol.data(gs)->show(gs));
+            if (id->symbol.data(gs)->isClassOrModuleClass()) {
+                if (auto e = gs.beginError(core::Loc(todo.file, send->loc),
+                                           core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
+                                id->symbol.data(gs)->show(gs));
+                }
+                return;
             }
-            return;
-        }
-        if (id->symbol == owner) {
-            if (auto e =
-                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Must not pass your self to `{}`", send->fun.show(gs));
+            if (id->symbol == owner) {
+                if (auto e = gs.beginError(core::Loc(todo.file, send->loc),
+                                           core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("Must not pass your self to `{}`", send->fun.data(gs)->show(gs));
+                }
+                return;
             }
-            return;
-        }
-        auto existing = owner.data(gs)->findMember(gs, core::Names::classMethods());
-        if (existing.exists() && existing != id->symbol) {
-            if (auto e =
-                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send->fun.show(gs),
-                            existing.data(gs)->show(gs), id->symbol.data(gs)->show(gs));
+
+            // Get the fake property holding the mixes
+            auto mixData = id->symbol.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
+            auto loc = core::Loc(owner.data(gs)->loc().file(), send->loc);
+            if (!mixData.exists()) {
+                // We never stored a mixin in this symbol
+                // Create a the fake property that will hold the mixed in modules
+                mixData = gs.enterMethodSymbol(loc, owner, core::Names::mixedInClassMethods());
             }
-            return;
+
+            // Add an argument to the fake property to store the referenced module
+            auto argName = gs.enterNameUTF8(fmt::format("arg{}", argumentNumber)); // name has to be distinct
+            auto &argInfo = gs.enterMethodArgumentSymbol(loc, mixData, argName);
+            argInfo.rebind = id->symbol; // Store the mixin module ref in the `rebind` value of the fake argument
+            argumentNumber++;
         }
-        owner.data(gs)->members()[core::Names::classMethods()] = id->symbol;
     }
 
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
@@ -2754,72 +2765,6 @@ public:
 
     ast::TreePtr postTransformInsSeq(core::Context ctx, ast::TreePtr tree) {
         processInSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
-        return tree;
-    }
-};
-
-class ResolveMixesInClassMethodsWalk {
-    void processMixesInClassMethods(core::MutableContext ctx, ast::Send &send) {
-        if (!ctx.owner.data(ctx)->isClassOrModule() || !ctx.owner.data(ctx)->isClassOrModuleModule()) {
-            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` can only be declared inside a module, not a class", send.fun.data(ctx)->show(ctx));
-            }
-            return;
-        }
-
-        if (send.args.size() < 1) {
-            // The arity mismatch error will be emitted later by infer.
-            return;
-        }
-
-        auto argumentNumber = 0;
-        for (auto &arg : send.args) {
-            auto *id = ast::cast_tree<ast::ConstantLit>(arg);
-
-            if (id == nullptr || !id->symbol.exists() || !id->symbol.data(ctx)->isClassOrModule()) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                    e.setHeader("Argument to `{}` must be statically resolvable to a module",
-                                send.fun.data(ctx)->show(ctx));
-                }
-                return;
-            }
-            if (id->symbol.data(ctx)->isClassOrModuleClass()) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                    e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
-                                id->symbol.data(ctx)->show(ctx));
-                }
-                return;
-            }
-            if (id->symbol == ctx.owner) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                    e.setHeader("Must not pass your self to `{}`", send.fun.data(ctx)->show(ctx));
-                }
-                return;
-            }
-
-            // Get the fake property holding the mixes
-            auto mixData = id->symbol.data(ctx)->findMember(ctx.state, core::Names::mixedInClassMethods());
-            auto loc = core::Loc(ctx.owner.data(ctx)->loc().file(), send.loc);
-            if (!mixData.exists()) {
-                // We never stored a mixin in this symbol
-                // Create the fake property that will hold the mixed in modules
-                mixData = ctx.state.enterMethodSymbol(loc, ctx.owner, core::Names::mixedInClassMethods());
-            }
-
-            // Add an argument to the fake property to store the referenced module
-            auto argName = ctx.state.enterNameUTF8(fmt::format("arg{}", argumentNumber)); // name has to be distinct
-            auto &argInfo = ctx.state.enterMethodArgumentSymbol(loc, mixData, argName);
-            argInfo.rebind = id->symbol; // Store the mixin module ref in the `rebind` value of the fake argument
-            argumentNumber++;
-        }
-    }
-
-public:
-    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.recv->isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
-            processMixesInClassMethods(ctx, send);
-        }
         return tree;
     }
 };

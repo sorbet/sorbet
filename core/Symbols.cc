@@ -701,7 +701,7 @@ bool Symbol::isPrintable(const GlobalState &gs) const {
 
     for (auto childPair : this->members()) {
         if (childPair.first == Names::singleton() || childPair.first == Names::attached() ||
-            childPair.first == Names::classMethods()) {
+            childPair.first == Names::mixedInClassMethods()) {
             continue;
         }
 
