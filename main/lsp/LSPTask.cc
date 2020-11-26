@@ -224,9 +224,9 @@ LSPTask::filterAndDedup(const core::GlobalState &gs,
               [](const unique_ptr<core::lsp::QueryResponse> &a, const unique_ptr<core::lsp::QueryResponse> &b) -> bool {
                   auto aLoc = a->getLoc();
                   auto bLoc = b->getLoc();
-                  auto cmp = aLoc.file().id() - bLoc.file().id();
+                  int cmp = aLoc.file().id() - bLoc.file().id();
                   if (cmp == 0) {
-                      cmp = (aLoc.beginPos() - bLoc.beginPos());
+                      cmp = aLoc.beginPos() - bLoc.beginPos();
                   }
                   if (cmp == 0) {
                       cmp = aLoc.endPos() - bLoc.endPos();
