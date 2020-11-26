@@ -12,6 +12,17 @@ namespace sorbet::realmain::lsp {
 class LSPIndexer;
 class LSPPreprocessor;
 class DocumentHighlight;
+
+enum class FieldAccessorType { None, Reader, Writer, Accessor };
+
+struct AccessorInfo {
+    core::NameRef type;
+    FieldAccessorType accessorType = FieldAccessorType::None;
+    core::SymbolRef fieldSymbol;
+    core::SymbolRef readerSymbol;
+    core::SymbolRef writerSymbol;
+};
+
 /**
  * A work unit that needs to execute on the typechecker thread. Subclasses implement `run`.
  * Contains miscellaneous helper methods that are useful in multiple tasks.
@@ -24,9 +35,9 @@ protected:
 
     // Task helper methods.
 
-    std::vector<std::unique_ptr<Location>>
+    std::vector<std::unique_ptr<core::lsp::QueryResponse>>
     getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                          std::vector<std::unique_ptr<Location>> locations = {}) const;
+                          std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
     std::vector<std::unique_ptr<DocumentHighlight>>
     getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, std::string_view uri, core::SymbolRef symbol,
                                 std::vector<std::unique_ptr<DocumentHighlight>> highlights = {}) const;
@@ -44,6 +55,21 @@ protected:
     LSPQueryResult queryBySymbolInFiles(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
                                         std::vector<core::FileRef> frefs) const;
     LSPQueryResult queryBySymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol) const;
+
+    // Given a method or field symbol, checks if the symbol belongs to a `prop`, `const`, `attr_reader`, `attr_writer`,
+    // etc, and populates an AccessorInfo object.
+    AccessorInfo getAccessorInfo(const core::GlobalState &gs, core::SymbolRef symbol) const;
+
+    // Get references to the given accessor. If `info.accessorType` is `None`, it returns references to `fallback` only.
+    std::vector<std::unique_ptr<core::lsp::QueryResponse>>
+    getReferencesForAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
+                             std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&priorRefs = {}) const;
+
+    // Get highlights to the given accessor. If `info.accessorType` is `None`, it returns highlights to `fallback` only.
+    std::vector<std::unique_ptr<DocumentHighlight>>
+    getHighlightsForAccessorInFile(LSPTypecheckerDelegate &typechecker, std::string_view uri, const AccessorInfo info,
+                                   core::SymbolRef fallback,
+                                   std::vector<std::unique_ptr<DocumentHighlight>> &&highlights = {}) const;
 
     LSPTask(const LSPConfiguration &config, LSPMethod method);
 

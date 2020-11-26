@@ -58,10 +58,14 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
             if (auto constResp = resp->isConstant()) {
                 response->result = getHighlightsToSymbolInFile(typechecker, uri, constResp->symbol);
             } else if (auto fieldResp = resp->isField()) {
-                response->result = getHighlightsToSymbolInFile(typechecker, uri, fieldResp->symbol);
+                // This could be a `prop` or `attr_*`, which have multiple associated symbols.
+                response->result = getHighlightsForAccessorInFile(
+                    typechecker, uri, getAccessorInfo(typechecker.state(), fieldResp->symbol), fieldResp->symbol);
             } else if (auto defResp = resp->isDefinition()) {
                 if (fileIsTyped || defResp->symbol.data(gs)->isClassOrModule()) {
-                    response->result = getHighlightsToSymbolInFile(typechecker, uri, defResp->symbol);
+                    // This could be a `prop` or `attr_*`, which have multiple associated symbols.
+                    response->result = getHighlightsForAccessorInFile(
+                        typechecker, uri, getAccessorInfo(typechecker.state(), defResp->symbol), defResp->symbol);
                 }
             } else if (fileIsTyped && resp->isIdent()) {
                 auto identResp = resp->isIdent();
@@ -79,8 +83,10 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
                 vector<unique_ptr<DocumentHighlight>> highlights;
                 while (start != nullptr) {
                     if (start->main.method.exists() && !start->main.receiver.isUntyped()) {
-                        highlights =
-                            getHighlightsToSymbolInFile(typechecker, uri, start->main.method, move(highlights));
+                        // This could be a `prop` or `attr_*`, which have multiple associated symbols.
+                        highlights = getHighlightsForAccessorInFile(
+                            typechecker, uri, getAccessorInfo(typechecker.state(), start->main.method),
+                            start->main.method);
                     }
                     start = start->secondary.get();
                 }
