@@ -45,10 +45,14 @@ module Opus::Types::Test
       mixin = Module.new do
         extend T::Helpers
         mixes_in_class_methods(Module.new do
-                                 def mixin_class_method; 1; end
+                                 def mixin_class_method
+                                   1
+                                 end
                                end,
                                Module.new do
-                                 def mixin_class_method; 2; end
+                                 def mixin_class_method
+                                   2
+                                 end
                                end)
       end
 
@@ -61,16 +65,24 @@ module Opus::Types::Test
       mixin = Module.new do
         extend T::Helpers
         mixes_in_class_methods(Module.new do
-                                 def mixin_class_method; 1; end
+                                 def mixin_class_method
+                                   1
+                                 end
                                end,
                                Module.new do
-                                 def mixin_class_method; 2; end
+                                 def mixin_class_method
+                                   2
+                                 end
                                end)
         mixes_in_class_methods(Module.new do
-                                def mixin_class_method; 3; end
+                                 def mixin_class_method
+                                   3
+                                 end
                                end,
                                Module.new do
-                                def mixin_class_method; 4; end
+                                 def mixin_class_method
+                                   4
+                                 end
                                end)
       end
 

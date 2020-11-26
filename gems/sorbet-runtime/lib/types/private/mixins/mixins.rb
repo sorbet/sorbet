@@ -5,7 +5,7 @@ module T::Private
   module MixesInClassMethods
     def included(other)
       mods = Abstract::Data.get(self, :class_methods_mixins)
-      mods.each { |mod| other.extend(mod) }
+      mods.each {|mod| other.extend(mod)}
       super
     end
   end
