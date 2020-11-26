@@ -51,7 +51,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                     auto run2 = typechecker.query(
                         core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable),
                         {loc.file()});
-                    response->result = extractLocations(gs, run2.responses);
+                    response->result = extractLocations(gs, move(run2.responses));
                 }
             } else if (fileIsTyped && resp->isSend()) {
                 auto sendResp = resp->isSend();

@@ -199,24 +199,25 @@ bool LSPTask::canPreempt(const LSPIndexer &indexer) const {
     return !needsMultithreading(indexer);
 }
 
-// Filter for untyped locations, and dedup responses that are at the same location
+// Filter for untyped locations and dedup responses that are at the same location (inplace)
 vector<unique_ptr<core::lsp::QueryResponse>>
-LSPTask::filterAndDedup(const core::GlobalState &gs,
-                        const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) const {
-    vector<unique_ptr<core::lsp::QueryResponse>> responses;
+LSPTask::filterAndDedup(const core::GlobalState &gs, vector<unique_ptr<core::lsp::QueryResponse>> &&responses) const {
     // Filter for responses with a loc that exists and points to a typed file, unless it's a const, field or
     // definition in which case we're ok with untyped files (because we know where those things are even in untyped
     // files.)
-    for (auto &q : queryResponses) {
-        core::Loc loc = q->getLoc();
-        if (loc.exists() && loc.file().exists()) {
-            auto fileIsTyped = loc.file().data(gs).strictLevel >= core::StrictLevel::True;
-            // If file is untyped, only support responses involving constants and definitions.
-            if (fileIsTyped || q->isConstant() || q->isField() || q->isDefinition()) {
-                responses.push_back(make_unique<core::lsp::QueryResponse>(*q));
-            }
-        }
-    }
+    responses.erase(remove_if(responses.begin(), responses.end(),
+                              [&gs](auto &q) -> bool {
+                                  core::Loc loc = q->getLoc();
+                                  if (loc.exists() && loc.file().exists()) {
+                                      auto fileIsTyped = loc.file().data(gs).strictLevel >= core::StrictLevel::True;
+                                      // If file is untyped, only support responses involving constants and definitions.
+                                      if (fileIsTyped || q->isConstant() || q->isField() || q->isDefinition()) {
+                                          return false;
+                                      }
+                                  }
+                                  return true;
+                              }),
+                    responses.end());
 
     // sort by location and deduplicate
     fast_sort(responses,
@@ -238,15 +239,14 @@ LSPTask::filterAndDedup(const core::GlobalState &gs,
                                                          auto bLoc = b->getLoc();
                                                          return aLoc == bLoc;
                                                      })));
-    return responses;
+    return move(responses);
 }
 
-vector<unique_ptr<Location>>
-LSPTask::extractLocations(const core::GlobalState &gs,
-                          const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses,
-                          vector<unique_ptr<Location>> locations) const {
-    auto queryResponsesFiltered = filterAndDedup(gs, queryResponses);
-    for (auto &q : queryResponsesFiltered) {
+vector<unique_ptr<Location>> LSPTask::extractLocations(const core::GlobalState &gs,
+                                                       vector<unique_ptr<core::lsp::QueryResponse>> &&queryResponses,
+                                                       vector<unique_ptr<Location>> locations) const {
+    queryResponses = filterAndDedup(gs, move(queryResponses));
+    for (auto &q : queryResponses) {
         addLocIfExists(gs, locations, q->getLoc());
     }
     return locations;
@@ -256,7 +256,7 @@ vector<unique_ptr<Location>> LSPTask::getReferencesToSymbol(LSPTypecheckerDelega
                                                             vector<unique_ptr<Location>> locations) const {
     if (symbol.exists()) {
         auto run2 = queryBySymbol(typechecker, symbol);
-        locations = extractLocations(typechecker.state(), run2.responses, move(locations));
+        locations = extractLocations(typechecker.state(), move(run2.responses), move(locations));
     }
     return locations;
 }
@@ -268,7 +268,7 @@ LSPTask::getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, string
         auto fref = config.uri2FileRef(typechecker.state(), uri);
         if (fref.exists()) {
             auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
-            auto locations = extractLocations(typechecker.state(), run2.responses);
+            auto locations = extractLocations(typechecker.state(), move(run2.responses));
             for (auto const &location : locations) {
                 // 'queryBySymbolInFiles' may pick up secondary files required for accurate querying (e.g., package
                 // files)

@@ -70,7 +70,7 @@ unique_ptr<ResponseMessage> DocumentHighlightTask::runRequest(LSPTypecheckerDele
                     auto run2 = typechecker.query(
                         core::lsp::Query::createVarQuery(identResp->enclosingMethod, identResp->variable),
                         {loc.file()});
-                    auto locations = extractLocations(gs, run2.responses);
+                    auto locations = extractLocations(gs, move(run2.responses));
                     response->result = locationsToDocumentHighlights(uri, move(locations));
                 }
             } else if (fileIsTyped && resp->isSend()) {

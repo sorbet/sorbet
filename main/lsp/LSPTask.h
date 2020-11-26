@@ -33,11 +33,11 @@ protected:
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<Location>> &locs, core::Loc loc) const;
     std::vector<std::unique_ptr<Location>>
     extractLocations(const core::GlobalState &gs,
-                     const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses,
+                     std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&queryResponses,
                      std::vector<std::unique_ptr<Location>> locations = {}) const;
     std::vector<std::unique_ptr<core::lsp::QueryResponse>>
     filterAndDedup(const core::GlobalState &gs,
-                   const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &queryResponses) const;
+                   std::vector<std::unique_ptr<core::lsp::QueryResponse>> &&queryResponses) const;
 
     LSPQueryResult queryByLoc(LSPTypecheckerDelegate &typechecker, std::string_view uri, const Position &pos,
                               LSPMethod forMethod, bool errorIfFileIsUntyped = true) const;

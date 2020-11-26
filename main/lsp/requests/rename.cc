@@ -240,7 +240,7 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> RenameTask::getRenameEdits(LS
         // Filter for untyped files, and deduplicate responses by location.  We don't use extractLocations here because
         // in some cases like sends, we need the SendResponse to be able to accurately find the method name in the
         // expression.
-        for (auto &response : filterAndDedup(gs, queryResult.responses)) {
+        for (auto &response : filterAndDedup(gs, move(queryResult.responses))) {
             auto loc = response->getLoc();
             if (loc.file().data(gs).isPayload()) {
                 // We don't support renaming things in payload files.
