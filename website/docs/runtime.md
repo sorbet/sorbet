@@ -291,8 +291,19 @@ If you want to minimize runtime overhead but still statically check the sig when
 running srb tc, you can use `T::Sig::WithoutRuntime.sig` instead of `sig`.
 
 ```ruby
-# Never runs runtime checks and does not evaluate the sig at runtime
-T::Sig::WithoutRuntime.sig {params(xs: T::Array[String]).void}
+# typed: true
+require "sorbet-runtime"
+
+class Foo
+  extend T::Sig
+  # This signature will raise both statically and at runtime because `NotFound` doesn't exist
+  sig { params(x: NotFound).void.checked(:never) }
+  def foo(x); end
+
+  # This signature will only raise statically, the sig block isn't evaluated at runtime
+  T::Sig::WithoutRuntime.sig { params(x: NotFound).void }
+  def bar(x); end
+end
 ```
 
 ## What's next?
