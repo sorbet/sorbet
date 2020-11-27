@@ -1,4 +1,5 @@
 #include "rewriter/TestCase.h"
+#include "absl/strings/str_replace.h"
 #include "ast/Helpers.h"
 #include "core/GlobalState.h"
 
@@ -36,7 +37,13 @@ std::vector<ast::TreePtr> TestCase::run(core::MutableContext ctx, ast::Send *sen
         return stats;
     }
 
-    auto name = arg0->asString(ctx);
+    // auto formatted_name = fmt::format("test_{0}", arg0->asString(ctx).toString(ctx));
+    // auto name = arg0->asString(ctx).data(ctx);
+    // std::cout << "name: " << name->toString(ctx) << std::endl;
+
+    auto snake_case_name = absl::StrReplaceAll(arg0->asString(ctx).toString(ctx), {{" ", "_"}});
+    auto name = ctx.state.enterNameUTF8("test_" + snake_case_name);
+
     // Generate sigs?
     //
     std::cout << "Generate method" << std::endl;
