@@ -1,0 +1,24 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  a = nil
+
+  b = 1
+
+  c = ""
+
+  begin
+    <assignTemp>$1 = nil
+    if ::<Magic>.<pattern-match>(<assignTemp>$1)
+      <emptyTree>
+    else
+      if ::<Magic>.<pattern-match>(<assignTemp>$1)
+        <emptyTree>
+      else
+        if ::<Magic>.<pattern-match>(<assignTemp>$1)
+          <emptyTree>
+        else
+          <emptyTree>
+        end
+      end
+    end
+  end
+end

@@ -1,0 +1,47 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <emptyTree>::<C A> = nil
+
+  <emptyTree>::<C B> = nil
+
+  begin
+    <assignTemp>$1 = nil
+    if ::<Magic>.<pattern-match>(<assignTemp>$1)
+      <emptyTree>
+    else
+      if ::<Magic>.<pattern-match>(<assignTemp>$1)
+        <emptyTree>
+      else
+        if ::<Magic>.<pattern-match>(<assignTemp>$1)
+          <emptyTree>
+        else
+          if ::<Magic>.<pattern-match>(<assignTemp>$1)
+            begin
+              x = ::<Magic>.<pattern-match-as>()
+              <emptyTree>::<C T>.reveal_type(x)
+            end
+          else
+            if ::<Magic>.<pattern-match>(<assignTemp>$1)
+              begin
+                x = ::<Magic>.<pattern-match-as>()
+                <emptyTree>::<C T>.reveal_type(x)
+              end
+            else
+              if ::<Magic>.<pattern-match>(<assignTemp>$1)
+                begin
+                  x = ::<Magic>.<pattern-match-as>()
+                  y = ::<Magic>.<pattern-match-as>()
+                  begin
+                    <emptyTree>::<C T>.reveal_type(x)
+                    <emptyTree>::<C T>.reveal_type(y)
+                  end
+                end
+              else
+                <emptyTree>
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end

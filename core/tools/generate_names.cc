@@ -355,6 +355,11 @@ NameDef names[] = {
     {"product"},
     {"compact"},
 
+    // Pattern matching
+    {"patternMatch", "<pattern-match>"},
+    {"patternMatchAs", "<pattern-match-as>"},
+    {"patternMatchVar", "<pattern-match-var>"},
+
     {"staticInit", "<static-init>"},
 
     {"require"},

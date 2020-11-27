@@ -1,0 +1,50 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  expr = "x"
+
+  <emptyTree>::<C T>.reveal_type(expr)
+
+  x = begin
+    <assignTemp>$1 = expr
+    if ::<Magic>.<pattern-match>(<assignTemp>$1)
+      begin
+        s = ::<Magic>.<pattern-match-as>()
+        begin
+          <emptyTree>::<C T>.reveal_type(s)
+          1
+        end
+      end
+    else
+      if ::<Magic>.<pattern-match>(<assignTemp>$1)
+        begin
+          x = ::<Magic>.<pattern-match-as>()
+          begin
+            <emptyTree>::<C T>.reveal_type(x)
+            1
+          end
+        end
+      else
+        if ::<Magic>.<pattern-match>(<assignTemp>$1)
+          begin
+            expr = ::<Magic>.<pattern-match-as>()
+            begin
+              <emptyTree>::<C T>.reveal_type(expr)
+              1
+            end
+          end
+        else
+          if ::<Magic>.<pattern-match>(<assignTemp>$1)
+            begin
+              <emptyTree>::<C T>.reveal_type(x)
+              <emptyTree>::<C T>.reveal_type(expr)
+              1
+            end
+          else
+            1
+          end
+        end
+      end
+    end
+  end
+
+  <emptyTree>::<C T>.reveal_type(x)
+end

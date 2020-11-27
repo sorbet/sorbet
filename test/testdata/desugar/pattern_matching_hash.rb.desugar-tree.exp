@@ -1,0 +1,87 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  expr = {}
+
+  begin
+    <assignTemp>$1 = expr
+    if ::<Magic>.<pattern-match>(<assignTemp>$1)
+      begin
+        a = ::<Magic>.<pattern-match-var>()
+        <emptyTree>::<C T>.reveal_type(a)
+      end
+    else
+      if ::<Magic>.<pattern-match>(<assignTemp>$1)
+        begin
+          b = ::<Magic>.<pattern-match-var>()
+          <emptyTree>::<C T>.reveal_type(b)
+        end
+      else
+        if ::<Magic>.<pattern-match>(<assignTemp>$1)
+          begin
+            c = ::<Magic>.<pattern-match-var>()
+            d = ::<Magic>.<pattern-match-var>()
+            begin
+              <emptyTree>::<C T>.reveal_type(c)
+              <emptyTree>::<C T>.reveal_type(d)
+            end
+          end
+        else
+          if ::<Magic>.<pattern-match>(<assignTemp>$1)
+            begin
+              i = ::<Magic>.<pattern-match-as>()
+              e = ::<Magic>.<pattern-match-var>()
+              g = ::<Magic>.<pattern-match-var>()
+              h = ::<Magic>.<pattern-match-var>()
+              begin
+                <emptyTree>::<C T>.reveal_type(e)
+                <emptyTree>::<C T>.reveal_type(g)
+                <emptyTree>::<C T>.reveal_type(h)
+                <emptyTree>::<C T>.reveal_type(i)
+              end
+            end
+          else
+            if ::<Magic>.<pattern-match>(<assignTemp>$1)
+              begin
+                m = ::<Magic>.<pattern-match-as>()
+                j = ::<Magic>.<pattern-match-var>()
+                l = ::<Magic>.<pattern-match-var>()
+                begin
+                  <emptyTree>::<C T>.reveal_type(j)
+                  <emptyTree>::<C T>.reveal_type(l)
+                  <emptyTree>::<C T>.reveal_type(m)
+                end
+              end
+            else
+              if ::<Magic>.<pattern-match>(<assignTemp>$1)
+                begin
+                  n4 = ::<Magic>.<pattern-match-as>()
+                  n1 = ::<Magic>.<pattern-match-var>()
+                  n2 = ::<Magic>.<pattern-match-var>()
+                  n3 = ::<Magic>.<pattern-match-var>()
+                  begin
+                    <emptyTree>::<C T>.reveal_type(n1)
+                    <emptyTree>::<C T>.reveal_type(n2)
+                    <emptyTree>::<C T>.reveal_type(n3)
+                    <emptyTree>::<C T>.reveal_type(n4)
+                  end
+                end
+              else
+                if ::<Magic>.<pattern-match>(<assignTemp>$1)
+                  begin
+                    o = ::<Magic>.<pattern-match-var>()
+                    <emptyTree>::<C T>.reveal_type(o)
+                  end
+                else
+                  if ::<Magic>.<pattern-match>(<assignTemp>$1)
+                    <emptyTree>
+                  else
+                    <emptyTree>
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end

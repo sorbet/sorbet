@@ -650,6 +650,35 @@ void GlobalState::initEmpty() {
     }
     method.data(*this)->resultType = core::make_type<core::ClassType>(core::Symbols::Encoding());
 
+    // Synthesize <Magic>#<pattern-match>(*args : T.untyped) => T::Boolean
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::patternMatch());
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.flags.isRepeated = true;
+        arg.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::Boolean();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
+    // Synthesize <Magic>#<pattern-match-as>() => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::patternMatchAs());
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
+    // Synthesize <Magic>#<pattern-match-var>() => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::patternMatchVar());
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
     // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {
