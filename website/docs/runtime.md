@@ -287,8 +287,8 @@ absent, `.checked(:tests)` sigs behave as if they had been `.checked(:never)`.
 ## T::Sig::WithoutRuntime.sig
 
 Even with `.checked(:never)` you are opting into evaluating the sig at runtime.
-If you want to minimize runtime overhead but keep utilizing the static
-checks you can use `T::Sig::WithoutRuntime.sig` instead of `sig`.
+If you want to minimize runtime overhead but still statically check the sig when
+running srb tc, you can use `T::Sig::WithoutRuntime.sig` instead of `sig`.
 
 ```ruby
 # Never runs runtime checks and does not evaluate the sig at runtime
