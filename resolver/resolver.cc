@@ -1483,14 +1483,10 @@ public:
                     } else {
                         absl::c_move(threadResult.files, back_inserter(combined.files));
                         absl::c_move(threadResult.todoAssigns, back_inserter(combined.todoAssigns));
-                        combined.todoAttachedClassItems.insert(
-                            combined.todoAttachedClassItems.end(),
-                            make_move_iterator(threadResult.todoAttachedClassItems.begin()),
-                            make_move_iterator(threadResult.todoAttachedClassItems.end()));
-                        combined.todoUntypedResultTypes.insert(
-                            combined.todoUntypedResultTypes.end(),
-                            make_move_iterator(threadResult.todoUntypedResultTypes.begin()),
-                            make_move_iterator(threadResult.todoUntypedResultTypes.end()));
+                        absl::c_move(threadResult.todoAttachedClassItems,
+                                     back_inserter(combined.todoAttachedClassItems));
+                        absl::c_move(threadResult.todoUntypedResultTypes,
+                                     back_inserter(combined.todoUntypedResultTypes));
                     }
                 }
             }
