@@ -272,8 +272,7 @@ class FlattenWalk {
             if (targetLevel == 1) {
                 ENFORCE(expressionsToBePutInTargets[targetLevel].empty());
             } else {
-                target->insert(target->begin(), make_move_iterator(expressionsToBePutInTargets[targetLevel].begin()),
-                               make_move_iterator(expressionsToBePutInTargets[targetLevel].end()));
+                absl::c_move(expressionsToBePutInTargets[targetLevel], inserter(*target, target->begin()));
             }
         }
 

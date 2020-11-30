@@ -652,8 +652,7 @@ void addFilesFromDir(Options &opts, string_view dir, shared_ptr<spdlog::logger> 
         throw EarlyReturnWithCode(1);
     }
     opts.inputFileNames.reserve(opts.inputFileNames.size() + containedFiles.size());
-    opts.inputFileNames.insert(opts.inputFileNames.end(), std::make_move_iterator(containedFiles.begin()),
-                               std::make_move_iterator(containedFiles.end()));
+    absl::c_move(containedFiles, back_inserter(opts.inputFileNames));
 }
 
 void readOptions(Options &opts,
