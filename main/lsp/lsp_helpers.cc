@@ -375,7 +375,7 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
             // Account for yarddoc lines by inserting an extra newline right before
             // the yarddoc line (note that we are reverse iterating)
             if (absl::StartsWith(comment, "@")) {
-                documentation_lines.emplace_back();
+                documentation_lines.emplace_back("");
             }
         }
 
