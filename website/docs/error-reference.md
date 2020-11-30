@@ -866,7 +866,9 @@ result of any method call. This effectively means that Sorbet knew the type
 statically for 100% of calls within a file. This sigil is rarely used—usually
 the only files that are `# typed: strong` are RBI files and files with empty
 class definitions. Most Ruby files that actually do interesting things will have
-errors in `# typed: strong`.
+errors in `# typed: strong`. Support for `typed: strong` files is minimal, as
+Sorbet changes regularly and new features often bring new `T.untyped`
+intermediate values.
 
 ## 7019
 
