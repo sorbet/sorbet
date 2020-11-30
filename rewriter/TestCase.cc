@@ -12,11 +12,11 @@ std::vector<ast::TreePtr> TestCase::run(core::MutableContext ctx, ast::Send *sen
     }
 
     std::cout << "Checking method name" << std::endl;
-    if (send->fun != core::Names::test1()) {
+    if (send->fun != core::Names::test()) {
         return stats;
     }
 
-    std::cout << "Checking nunmber of args" << std::endl;
+    std::cout << "Checking number of args" << std::endl;
     if (send->args.size() != 1) {
         return stats;
     }
