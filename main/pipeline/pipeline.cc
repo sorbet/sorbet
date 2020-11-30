@@ -520,6 +520,12 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                 ENFORCE(ret.trees.empty());
                 ret.trees = move(threadResult.res.trees);
                 ret.pluginGeneratedFiles = move(threadResult.res.pluginGeneratedFiles);
+                // Preallocate name and symbol tables. We do so now so that we don't have to pay the memory overhead
+                // across all cores, which can get quite expensive.
+                ret.gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
+                                          opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
+                                          opts.reserveTypeMemberTableCapacity, opts.reserveNameTableCapacity);
+
             } else {
                 core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
                 {
