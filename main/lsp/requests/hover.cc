@@ -117,7 +117,7 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
         vector<string> documentation;
         for (auto loc : documentationLocations) {
             auto doc = findDocumentation(loc.file().data(gs).source(), loc.beginPos());
-            if (doc.has_value() && !(*doc).empty()) {
+            if (doc.has_value() && !doc->empty()) {
                 documentation.emplace_back(*doc);
             }
         }
