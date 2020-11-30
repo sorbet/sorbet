@@ -159,7 +159,7 @@ public:
     void drainErrors(const core::GlobalState &gs) {
         errorQueue->flushAllErrors(gs);
         auto newErrors = errorCollector->drainErrors();
-        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        absl::c_move(newErrors, back_inserter(errors));
     }
 
     void clear(const core::GlobalState &gs) {

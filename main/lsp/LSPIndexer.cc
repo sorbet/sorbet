@@ -286,9 +286,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
 
     if (update.canceledSlowPath) {
         // Merge diagnostic latency timers; this edit contains the previous slow path.
-        edit.diagnosticLatencyTimers.insert(edit.diagnosticLatencyTimers.end(),
-                                            make_move_iterator(pendingTypecheckDiagnosticLatencyTimers.begin()),
-                                            make_move_iterator(pendingTypecheckDiagnosticLatencyTimers.end()));
+        absl::c_move(pendingTypecheckDiagnosticLatencyTimers, back_inserter(edit.diagnosticLatencyTimers));
         clearAndReplaceTimers(pendingTypecheckDiagnosticLatencyTimers, edit.diagnosticLatencyTimers);
     } else if (!update.canTakeFastPath) {
         // Replace diagnostic latency timers; this is a new slow path that did not cancel the previous slow path.

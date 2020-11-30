@@ -52,8 +52,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
             if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb &&
                 bb->rubyBlockId == thenb->rubyBlockId) { // can be squashed togather
                 if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
-                    bb->exprs.insert(bb->exprs.end(), make_move_iterator(thenb->exprs.begin()),
-                                     make_move_iterator(thenb->exprs.end()));
+                    absl::c_move(thenb->exprs, back_inserter(bb->exprs));
                     thenb->backEdges.clear();
                     bb->bexit.cond.variable = thenb->bexit.cond.variable;
                     bb->bexit.thenb = thenb->bexit.thenb;

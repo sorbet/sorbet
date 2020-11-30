@@ -332,8 +332,7 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
 
 DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs) {
     ENFORCE(lhs.qname == rhs.qname, "Name mismatch for DefTreeBuilder::merge");
-    lhs.namedDefs.insert(lhs.namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
-                         make_move_iterator(rhs.namedDefs.end()));
+    absl::c_move(rhs.namedDefs, back_inserter(lhs.namedDefs));
     if (rhs.nonBehaviorDef) {
         updateNonBehaviorDef(gs, lhs, move(*rhs.nonBehaviorDef.get()));
     }

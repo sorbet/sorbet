@@ -545,7 +545,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
         vector<ast::TreePtr> nodes;
         nodes.emplace_back(ensureWithoutAccessors(propInfo.value(), send));
-        nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
+        absl::c_move(processed, back_inserter(nodes));
         replaceNodes[stat.get()] = std::move(nodes);
         props.emplace_back(std::move(propInfo.value()));
     }

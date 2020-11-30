@@ -132,7 +132,7 @@ TEST_CASE("WhitequarkParserTest") {
         {
             errorQueue->flushAllErrors(gs);
             auto newErrors = errorCollector->drainErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            absl::c_move(newErrors, back_inserter(errors));
         }
 
         auto expectation = test.expectations.find("parse-tree-whitequark");
@@ -140,7 +140,7 @@ TEST_CASE("WhitequarkParserTest") {
             got["parse-tree-whitequark"].append(nodes->toWhitequark(gs)).append("\n");
             errorQueue->flushAllErrors(gs);
             auto newErrors = errorCollector->drainErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            absl::c_move(newErrors, back_inserter(errors));
         }
     }
 

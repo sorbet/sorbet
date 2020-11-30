@@ -864,21 +864,12 @@ public:
                  !result.done();
                  result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
-                    todo.insert(todo.end(), make_move_iterator(threadResult.todo_.begin()),
-                                make_move_iterator(threadResult.todo_.end()));
-                    todoAncestors.insert(todoAncestors.end(), make_move_iterator(threadResult.todoAncestors_.begin()),
-                                         make_move_iterator(threadResult.todoAncestors_.end()));
-                    todoClassAliases.insert(todoClassAliases.end(),
-                                            make_move_iterator(threadResult.todoClassAliases_.begin()),
-                                            make_move_iterator(threadResult.todoClassAliases_.end()));
-                    todoTypeAliases.insert(todoTypeAliases.end(),
-                                           make_move_iterator(threadResult.todoTypeAliases_.begin()),
-                                           make_move_iterator(threadResult.todoTypeAliases_.end()));
-                    todoClassMethods.insert(todoClassMethods.end(),
-                                            make_move_iterator(threadResult.todoClassMethods_.begin()),
-                                            make_move_iterator(threadResult.todoClassMethods_.end()));
-                    trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
-                                 make_move_iterator(threadResult.trees.end()));
+                    absl::c_move(threadResult.todo_, back_inserter(todo));
+                    absl::c_move(threadResult.todoAncestors_, back_inserter(todoAncestors));
+                    absl::c_move(threadResult.todoClassAliases_, back_inserter(todoClassAliases));
+                    absl::c_move(threadResult.todoTypeAliases_, back_inserter(todoTypeAliases));
+                    absl::c_move(threadResult.todoClassMethods_, back_inserter(todoClassMethods));
+                    absl::c_move(threadResult.trees, back_inserter(trees));
                 }
             }
         }
@@ -1490,11 +1481,8 @@ public:
                     if (combined.files.empty()) {
                         combined = move(threadResult);
                     } else {
-                        combined.files.insert(combined.files.end(), make_move_iterator(threadResult.files.begin()),
-                                              make_move_iterator(threadResult.files.end()));
-                        combined.todoAssigns.insert(combined.todoAssigns.end(),
-                                                    make_move_iterator(threadResult.todoAssigns.begin()),
-                                                    make_move_iterator(threadResult.todoAssigns.end()));
+                        absl::c_move(threadResult.files, back_inserter(combined.files));
+                        absl::c_move(threadResult.todoAssigns, back_inserter(combined.todoAssigns));
                         combined.todoAttachedClassItems.insert(
                             combined.todoAttachedClassItems.end(),
                             make_move_iterator(threadResult.todoAttachedClassItems.begin()),

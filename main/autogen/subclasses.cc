@@ -124,8 +124,7 @@ vector<string> Subclasses::serializeSubclassMap(const Subclasses::Map &descendan
         }
 
         fast_sort(serializedChildren);
-        descendantsMapSerialized.insert(descendantsMapSerialized.end(), make_move_iterator(serializedChildren.begin()),
-                                        make_move_iterator(serializedChildren.end()));
+        absl::c_move(serializedChildren, back_inserter(descendantsMapSerialized));
     }
 
     return descendantsMapSerialized;

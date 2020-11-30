@@ -532,12 +532,9 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
                         }
                     }
                 }
-                ret.trees.insert(ret.trees.end(), make_move_iterator(threadResult.res.trees.begin()),
-                                 make_move_iterator(threadResult.res.trees.end()));
+                absl::c_move(threadResult.res.trees, back_inserter(ret.trees));
 
-                ret.pluginGeneratedFiles.insert(ret.pluginGeneratedFiles.end(),
-                                                make_move_iterator(threadResult.res.pluginGeneratedFiles.begin()),
-                                                make_move_iterator(threadResult.res.pluginGeneratedFiles.end()));
+                absl::c_move(threadResult.res.pluginGeneratedFiles, back_inserter(ret.pluginGeneratedFiles));
             }
             progress.reportProgress(input->doneEstimate());
         }
@@ -567,9 +564,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
                     core::FileRef file = job;
                     auto cachedTree = readFileWithStrictnessOverrides(localGs, file, opts, kvstore);
                     auto [parsedFile, pluginFiles] = indexOneWithPlugins(opts, *localGs, file, move(cachedTree));
-                    threadResult.res.pluginGeneratedFiles.insert(threadResult.res.pluginGeneratedFiles.end(),
-                                                                 make_move_iterator(pluginFiles.begin()),
-                                                                 make_move_iterator(pluginFiles.end()));
+                    absl::c_move(pluginFiles, back_inserter(threadResult.res.pluginGeneratedFiles));
                     threadResult.res.trees.emplace_back(move(parsedFile));
                 }
             }
@@ -641,9 +636,7 @@ IndexResult indexPluginFiles(IndexResult firstPass, const options::Options &opts
         }
     }
     suppliedFilesAndPluginFiles.trees = move(firstPass.trees);
-    suppliedFilesAndPluginFiles.trees.insert(suppliedFilesAndPluginFiles.trees.end(),
-                                             make_move_iterator(indexedPluginFiles.trees.begin()),
-                                             make_move_iterator(indexedPluginFiles.trees.end()));
+    absl::c_move(indexedPluginFiles.trees, back_inserter(suppliedFilesAndPluginFiles.trees));
     return suppliedFilesAndPluginFiles;
 }
 
@@ -1041,8 +1034,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                         for (auto &tree : trees) {
                             gs->errorQueue->flushErrorsForFile(*gs, tree.file);
                         }
-                        typecheck_result.insert(typecheck_result.end(), make_move_iterator(trees.begin()),
-                                                make_move_iterator(trees.end()));
+                        absl::c_move(trees, back_inserter(typecheck_result));
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
 

@@ -382,8 +382,7 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
     vector<shared_ptr<RangeAssertion>> assertions;
     for (auto &fileAndContents : filesAndContents) {
         auto fileAssertions = parseAssertionsForFile(fileAndContents.second);
-        assertions.insert(assertions.end(), make_move_iterator(fileAssertions.begin()),
-                          make_move_iterator(fileAssertions.end()));
+        absl::c_move(fileAssertions, back_inserter(assertions));
     }
 
     // Sort assertions in (filename, range, message) order

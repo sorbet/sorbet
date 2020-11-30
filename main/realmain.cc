@@ -264,7 +264,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             continue;
         }
         counterConsume(move(out.counters));
-        merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
+        absl::c_move(out.prints, back_inserter(merged));
         if (opts.print.AutogenAutoloader.enabled) {
             Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
             root = autogen::DefTreeBuilder::merge(gs, move(root), move(*out.defTree));
@@ -296,7 +296,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         vector<string> mergedClasslist;
         for (auto &el : merged) {
             auto &v = el.second.classlist;
-            mergedClasslist.insert(mergedClasslist.end(), make_move_iterator(v.begin()), make_move_iterator(v.end()));
+            absl::c_move(v, back_inserter(mergedClasslist));
         }
         fast_sort(mergedClasslist);
         auto last = unique(mergedClasslist.begin(), mergedClasslist.end());

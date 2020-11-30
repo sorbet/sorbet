@@ -64,7 +64,7 @@ void LSPOutputToVector::rawWrite(unique_ptr<LSPMessage> msg) {
 vector<unique_ptr<LSPMessage>> LSPOutputToVector::getOutput() {
     absl::MutexLock lock(&mtx);
     vector<unique_ptr<LSPMessage>> messages;
-    messages.insert(messages.end(), make_move_iterator(output.begin()), make_move_iterator(output.end()));
+    absl::c_move(output, back_inserter(messages));
     output.clear();
     return messages;
 }

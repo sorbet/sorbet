@@ -1810,8 +1810,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                allFoundDefinitions.insert(allFoundDefinitions.end(), make_move_iterator(threadResult.begin()),
-                                           make_move_iterator(threadResult.end()));
+                absl::c_move(threadResult, back_inserter(allFoundDefinitions));
             }
         }
     }
@@ -1875,8 +1874,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                trees.insert(trees.end(), make_move_iterator(threadResult.begin()),
-                             make_move_iterator(threadResult.end()));
+                absl::c_move(threadResult, back_inserter(trees));
             }
         }
     }

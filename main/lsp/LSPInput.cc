@@ -99,7 +99,7 @@ void LSPProgrammaticInput::write(vector<unique_ptr<LSPMessage>> messages) {
     if (closed) {
         Exception::raise("Cannot write to a closed input.");
     }
-    available.insert(available.end(), make_move_iterator(messages.begin()), make_move_iterator(messages.end()));
+    absl::c_move(messages, back_inserter(available));
 }
 
 void LSPProgrammaticInput::close() {

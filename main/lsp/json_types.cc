@@ -224,9 +224,7 @@ void SorbetWorkspaceEditParams::merge(SorbetWorkspaceEditParams &newerParams) {
     sorbetCancellationExpected = sorbetCancellationExpected || newerParams.sorbetCancellationExpected;
     sorbetPreemptionsExpected += newerParams.sorbetPreemptionsExpected;
     // Consume newerParams' diagnostic latency timers.
-    diagnosticLatencyTimers.insert(diagnosticLatencyTimers.end(),
-                                   make_move_iterator(newerParams.diagnosticLatencyTimers.begin()),
-                                   make_move_iterator(newerParams.diagnosticLatencyTimers.end()));
+    absl::c_move(newerParams.diagnosticLatencyTimers, back_inserter(diagnosticLatencyTimers));
 }
 
 } // namespace sorbet::realmain::lsp

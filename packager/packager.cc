@@ -715,8 +715,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                  !result.done();
                  result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
-                    files.insert(files.end(), make_move_iterator(threadResult.begin()),
-                                 make_move_iterator(threadResult.end()));
+                    absl::c_move(threadResult, back_inserter(files));
                 }
             }
         }
