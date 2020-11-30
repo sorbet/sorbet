@@ -288,7 +288,7 @@ LSPTask::getHighlights(LSPTypecheckerDelegate &typechecker,
     auto locations = extractLocations(typechecker.state(), queryResponses);
     for (auto const &location : locations) {
         auto highlight = make_unique<DocumentHighlight>(move(location->range));
-        highlights.push_back(move(highlight));
+        highlights.emplace_back(move(highlight));
     }
     return highlights;
 }
