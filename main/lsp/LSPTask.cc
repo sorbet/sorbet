@@ -261,8 +261,7 @@ LSPTask::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::Symbol
                                vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists()) {
         auto run2 = queryBySymbol(typechecker, symbol);
-        priorRefs.insert(priorRefs.end(), make_move_iterator(run2.responses.begin()),
-                         make_move_iterator(run2.responses.end()));
+        absl::c_move(run2.responses, back_inserter(priorRefs));
     }
     return move(priorRefs);
 }
