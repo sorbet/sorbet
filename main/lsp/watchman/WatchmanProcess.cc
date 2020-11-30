@@ -43,9 +43,8 @@ void WatchmanProcess::start() {
             "  \"expression\": [\"allof\", "
             "    [\"type\", \"f\"],\n"
             "    [\"anyof\", {}],\n"
-            "    [\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]\n" // Exclude
-                                                                                                           // rsync
-                                                                                                           // tmpfiles
+            // Exclude rsync tmpfiles
+            "    [\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]\n"
             "  ],\n"
             "  \"defer_vcs\": false,\n"
             "  \"fields\": [\"name\"],\n"
