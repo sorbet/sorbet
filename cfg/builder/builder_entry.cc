@@ -117,8 +117,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     fast_sort(aliasesPrefix,
               [](const Binding &l, const Binding &r) -> bool { return l.bind.variable.id() < r.bind.variable.id(); });
 
-    entry->exprs.insert(entry->exprs.begin(), make_move_iterator(aliasesPrefix.begin()),
-                        make_move_iterator(aliasesPrefix.end()));
+    absl::c_move(aliasesPrefix, inserter(entry->exprs, entry->exprs.begin()));
     res->sanityCheck(ctx);
     sanityCheck(ctx, *res);
     fillInTopoSorts(ctx, *res);

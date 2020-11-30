@@ -136,7 +136,7 @@ public:
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
             auto sorted = sortedClasses();
-            stats.insert(stats.begin(), make_move_iterator(sorted.begin()), make_move_iterator(sorted.end()));
+            absl::c_move(sorted, inserter(stats, stats.begin()));
             return ast::MK::InsSeq(tree.loc(), std::move(stats), std::move(tree));
         }
 
