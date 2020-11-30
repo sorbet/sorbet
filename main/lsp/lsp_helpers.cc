@@ -370,12 +370,12 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
             string_view comment = line.substr(line.find('#') + skip_after_hash);
 
-            documentation_lines.push_back(comment);
+            documentation_lines.emplace_back(comment);
 
             // Account for yarddoc lines by inserting an extra newline right before
             // the yarddoc line (note that we are reverse iterating)
             if (absl::StartsWith(comment, "@")) {
-                documentation_lines.push_back(string_view(""));
+                documentation_lines.emplace_back();
             }
         }
 
@@ -386,11 +386,11 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     }
 
     string documentation = absl::StrJoin(documentation_lines.rbegin(), documentation_lines.rend(), "\n");
-    documentation = absl::StripTrailingAsciiWhitespace(documentation);
+    documentation = string(absl::StripTrailingAsciiWhitespace(documentation));
 
-    if (documentation.empty())
+    if (documentation.empty()) {
         return nullopt;
-    else {
+    } else {
         return documentation;
     }
 }
