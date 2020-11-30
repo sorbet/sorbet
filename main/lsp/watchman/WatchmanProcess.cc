@@ -38,19 +38,21 @@ void WatchmanProcess::start() {
         // laptops have 4.9.0. Thus, we use [ "anyof", [ "suffix", "suffix1" ], [ "suffix", "suffix2" ], ... ].
         // Note 2: `empty_on_fresh_instance` prevents Watchman from sending entire contents of folder if this
         // subscription starts the daemon / causes the daemon to watch this folder for the first time.
-        string subscribeCommand = fmt::format("[\"subscribe\", \"{}\", \"{}\", {{\n"
-                                              "  \"expression\": [\"allof\", "
-                                              "    [\"type\", \"f\"],\n"
-                                              "    [\"anyof\", {}]"
-                                              "  ],\n"
-                                              "  \"defer_vcs\": false,\n"
-                                              "  \"fields\": [\"name\"],\n"
-                                              "  \"empty_on_fresh_instance\": true\n"
-                                              "}}]\n",
-                                              workSpace, subscriptionName,
-                                              fmt::map_join(extensions, ",", [](const std::string &ext) -> string {
-                                                  return fmt::format("[\"suffix\", \"{}\"]", ext);
-                                              }));
+        string subscribeCommand = fmt::format(
+            "[\"subscribe\", \"{}\", \"{}\", {{\n"
+            "  \"expression\": [\"allof\", "
+            "    [\"type\", \"f\"],\n"
+            "    [\"anyof\", {}],\n"
+            // Exclude rsync tmpfiles
+            "    [\"not\", [\"match\", \"**/.~tmp~/**\", \"wholename\", {{\"includedotfiles\": true}}]]\n"
+            "  ],\n"
+            "  \"defer_vcs\": false,\n"
+            "  \"fields\": [\"name\"],\n"
+            "  \"empty_on_fresh_instance\": true\n"
+            "}}]\n",
+            workSpace, subscriptionName, fmt::map_join(extensions, ",", [](const std::string &ext) -> string {
+                return fmt::format("[\"suffix\", \"{}\"]", ext);
+            }));
         p.send(subscribeCommand.c_str(), subscribeCommand.size());
         logger->debug(subscribeCommand);
 
