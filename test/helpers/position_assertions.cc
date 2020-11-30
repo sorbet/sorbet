@@ -160,8 +160,8 @@ LocationDiff diffLocations(vector<unique_ptr<Location>> &expectedLocs, vector<un
 void assertLocationsMatch(const LSPConfiguration &config,
                           const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, string_view symbol,
                           const vector<shared_ptr<RangeAssertion>> &assertions, int line, int character,
-                          string_view locSourceLine, string_view locFilename,
-                          vector<unique_ptr<Location>> &actualLocs) {
+                          string_view locSourceLine, string_view locFilename, vector<unique_ptr<Location>> &actualLocs,
+                          string request) {
     vector<unique_ptr<Location>> expectedLocs;
     for (auto &assertion : assertions) {
         expectedLocs.emplace_back(assertion->getLocation(config));
@@ -179,10 +179,11 @@ void assertLocationsMatch(const LSPConfiguration &config,
         ADD_FAIL_CHECK_AT(
             expectedFilePath.c_str(), expectedLocation->range->start->line + 1,
             fmt::format(
-                "Sorbet did not report a reference to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
-                "did not report reference at:\n{}",
-                symbol,
+                "Sorbet did not report a {} to symbol `{}`.\nGiven symbol at:\n{}\nSorbet "
+                "did not report {} at:\n{}",
+                request, symbol,
                 prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
+                request,
                 prettyPrintRangeComment(getLine(config, sourceFileContents, *expectedLocation),
                                         *expectedLocation->range, "")));
     }
@@ -192,10 +193,11 @@ void assertLocationsMatch(const LSPConfiguration &config,
         ADD_FAIL_CHECK_AT(
             unexpectedFilePath.c_str(), unexpected->range->start->line + 1,
             fmt::format(
-                "Sorbet reported unexpected reference to symbol `{}`.\nGiven symbol "
-                "at:\n{}\nSorbet reported an unexpected (additional?) reference at:\n{}",
-                symbol,
+                "Sorbet reported unexpected {} to symbol `{}`.\nGiven symbol "
+                "at:\n{}\nSorbet reported an unexpected (additional?) {} at:\n{}",
+                request, symbol,
                 prettyPrintRangeComment(locSourceLine, *RangeAssertion::makeRange(line, character, character + 1), ""),
+                request,
                 prettyPrintRangeComment(getLine(config, sourceFileContents, *unexpected), *unexpected->range, "")));
     }
 }
@@ -588,7 +590,7 @@ void UsageAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &s
     }
 
     assertLocationsMatch(config, sourceFileContents, symbol, allLocs, line, character, locSourceLine, locFilename,
-                         locations);
+                         locations, "reference");
 }
 
 void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
@@ -645,7 +647,7 @@ void UsageAssertion::checkHighlights(const UnorderedMap<string, shared_ptr<core:
     }
 
     assertLocationsMatch(config, sourceFileContents, symbol, allLocs, line, character, locSourceLine, locFilename,
-                         locations);
+                         locations, "highlight");
 }
 
 string DefAssertion::toString() const {
@@ -737,7 +739,7 @@ void TypeDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> 
     }
 
     assertLocationsMatch(config, sourceFileContents, symbol, typeDefs, line, character, locSourceLine, locFilename,
-                         locations);
+                         locations, "type definition");
 }
 
 string TypeDefAssertion::toString() const {

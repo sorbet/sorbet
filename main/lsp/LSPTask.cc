@@ -1,4 +1,5 @@
 #include "main/lsp/LSPTask.h"
+#include "absl/strings/match.h"
 #include "absl/synchronization/notification.h"
 #include "common/sort.h"
 #include "core/NameHash.h"
@@ -223,7 +224,10 @@ LSPTask::filterAndDedup(const core::GlobalState &gs,
               [](const unique_ptr<core::lsp::QueryResponse> &a, const unique_ptr<core::lsp::QueryResponse> &b) -> bool {
                   auto aLoc = a->getLoc();
                   auto bLoc = b->getLoc();
-                  auto cmp = (aLoc.beginPos() - bLoc.beginPos());
+                  int cmp = aLoc.file().id() - bLoc.file().id();
+                  if (cmp == 0) {
+                      cmp = aLoc.beginPos() - bLoc.beginPos();
+                  }
                   if (cmp == 0) {
                       cmp = aLoc.endPos() - bLoc.endPos();
                   }
@@ -250,36 +254,210 @@ LSPTask::extractLocations(const core::GlobalState &gs,
         addLocIfExists(gs, locations, q->getLoc());
     }
     return locations;
-} // namespace sorbet::realmain::lsp
-
-vector<unique_ptr<Location>> LSPTask::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                                                            vector<unique_ptr<Location>> locations) const {
-    if (symbol.exists()) {
-        auto run2 = queryBySymbol(typechecker, symbol);
-        locations = extractLocations(typechecker.state(), run2.responses, move(locations));
-    }
-    return locations;
 }
 
-vector<unique_ptr<DocumentHighlight>>
-LSPTask::getHighlightsToSymbolInFile(LSPTypecheckerDelegate &typechecker, string_view const uri, core::SymbolRef symbol,
-                                     vector<unique_ptr<DocumentHighlight>> highlights) const {
+vector<unique_ptr<core::lsp::QueryResponse>>
+LSPTask::getReferencesToSymbol(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
+                               vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
     if (symbol.exists()) {
-        auto fref = config.uri2FileRef(typechecker.state(), uri);
-        if (fref.exists()) {
-            auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
-            auto locations = extractLocations(typechecker.state(), run2.responses);
-            for (auto const &location : locations) {
-                // 'queryBySymbolInFiles' may pick up secondary files required for accurate querying (e.g., package
-                // files)
-                if (location->uri == uri) {
-                    auto highlight = make_unique<DocumentHighlight>(move(location->range));
-                    highlights.push_back(move(highlight));
-                }
+        auto run2 = queryBySymbol(typechecker, symbol);
+        absl::c_move(run2.responses, back_inserter(priorRefs));
+    }
+    return move(priorRefs);
+}
+
+vector<unique_ptr<core::lsp::QueryResponse>>
+LSPTask::getReferencesToSymbolInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, core::SymbolRef symbol,
+                                     vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+    if (symbol.exists() && fref.exists()) {
+        auto run2 = queryBySymbolInFiles(typechecker, symbol, {fref});
+        for (auto &resp : run2.responses) {
+            // Ignore results in other files (which may have been picked up for typechecking purposes)
+            if (resp->getLoc().file() == fref) {
+                priorRefs.emplace_back(move(resp));
             }
         }
     }
+    return move(priorRefs);
+}
+
+vector<unique_ptr<DocumentHighlight>>
+LSPTask::getHighlights(LSPTypecheckerDelegate &typechecker,
+                       const vector<unique_ptr<core::lsp::QueryResponse>> &queryResponses) const {
+    vector<unique_ptr<DocumentHighlight>> highlights;
+    auto locations = extractLocations(typechecker.state(), queryResponses);
+    for (auto const &location : locations) {
+        auto highlight = make_unique<DocumentHighlight>(move(location->range));
+        highlights.emplace_back(move(highlight));
+    }
     return highlights;
+}
+
+namespace {
+
+static const vector<core::NameRef> accessorNames = {
+    core::Names::prop(),        core::Names::tokenProp(),    core::Names::timestampedTokenProp(),
+    core::Names::createdProp(), core::Names::attrAccessor(),
+};
+
+static const vector<core::NameRef> writerNames = {
+    core::Names::attrWriter(),
+};
+
+static const vector<core::NameRef> readerNames = {
+    core::Names::const_(),
+    core::Names::merchantProp(),
+    core::Names::attrReader(),
+};
+
+void populateFieldAccessorType(const core::GlobalState &gs, AccessorInfo &info) {
+    auto method = info.readerSymbol.exists() ? info.readerSymbol : info.writerSymbol;
+    ENFORCE(method.exists());
+    ENFORCE(method.data(gs)->isMethod());
+    // Check definition site of method for `prop`, `const`, etc. The loc for the method should begin with
+    // `def|prop|const|...`.
+    auto methodSource = method.data(gs)->loc().source(gs);
+    // Common case: ordinary `def`. Fast reject.
+    if (absl::StartsWith(methodSource, "def")) {
+        info.accessorType = FieldAccessorType::None;
+        return;
+    }
+
+    if (absl::c_any_of(accessorNames, [&methodSource, &gs](auto name) -> bool {
+            return absl::StartsWith(methodSource, name.toString(gs));
+        })) {
+        info.accessorType = FieldAccessorType::Accessor;
+    } else if (absl::c_any_of(writerNames, [&methodSource, &gs](auto name) -> bool {
+                   return absl::StartsWith(methodSource, name.toString(gs));
+               })) {
+        info.accessorType = FieldAccessorType::Writer;
+    } else if (absl::c_any_of(readerNames, [&methodSource, &gs](auto name) -> bool {
+                   return absl::StartsWith(methodSource, name.toString(gs));
+               })) {
+        info.accessorType = FieldAccessorType::Reader;
+    } else {
+        info.accessorType = FieldAccessorType::None;
+    }
+}
+
+} // namespace
+
+vector<unique_ptr<core::lsp::QueryResponse>>
+LSPTask::getReferencesToAccessor(LSPTypecheckerDelegate &typechecker, const AccessorInfo info, core::SymbolRef fallback,
+                                 vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+    switch (info.accessorType) {
+        case FieldAccessorType::None:
+            // Common case: Not an accessor.
+            return getReferencesToSymbol(typechecker, fallback, move(priorRefs));
+        case FieldAccessorType::Reader:
+            return getReferencesToSymbol(typechecker, info.fieldSymbol,
+                                         getReferencesToSymbol(typechecker, info.readerSymbol, move(priorRefs)));
+        case FieldAccessorType::Writer:
+            return getReferencesToSymbol(typechecker, info.fieldSymbol,
+                                         getReferencesToSymbol(typechecker, info.writerSymbol, move(priorRefs)));
+        case FieldAccessorType::Accessor:
+            return getReferencesToSymbol(
+                typechecker, info.fieldSymbol,
+                getReferencesToSymbol(typechecker, info.writerSymbol,
+                                      getReferencesToSymbol(typechecker, info.readerSymbol, move(priorRefs))));
+    }
+}
+
+AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolRef symbol) const {
+    AccessorInfo info;
+
+    core::SymbolRef owner = symbol.data(gs)->owner;
+    if (!owner.exists()) {
+        return info;
+    }
+
+    string_view baseName;
+
+    string symbolName = symbol.data(gs)->name.toString(gs);
+    // Extract the base name from `symbol`.
+    if (absl::StartsWith(symbolName, "@")) {
+        if (!symbol.data(gs)->isField()) {
+            return info;
+        }
+        info.fieldSymbol = symbol;
+        baseName = string_view(symbolName).substr(1);
+    } else if (absl::EndsWith(symbolName, "=")) {
+        if (!symbol.data(gs)->isMethod()) {
+            return info;
+        }
+        info.writerSymbol = symbol;
+        baseName = string_view(symbolName).substr(0, symbolName.length() - 1);
+    } else {
+        if (!symbol.data(gs)->isMethod()) {
+            return info;
+        }
+        info.readerSymbol = symbol;
+        baseName = symbolName;
+    }
+
+    // Find the other associated symbols.
+    if (!info.fieldSymbol.exists()) {
+        auto fieldNameStr = absl::StrCat("@", baseName);
+        auto fieldName = gs.lookupNameUTF8(fieldNameStr);
+        if (!fieldName.exists()) {
+            // Field is not optional.
+            return info;
+        }
+        info.fieldSymbol = gs.lookupFieldSymbol(owner, fieldName);
+        if (!info.fieldSymbol.exists()) {
+            // field symbol does not exist, so `symbol` must not be an accessor.
+            return info;
+        }
+    }
+
+    if (!info.readerSymbol.exists()) {
+        auto readerName = gs.lookupNameUTF8(baseName);
+        if (readerName.exists()) {
+            info.readerSymbol = gs.lookupMethodSymbol(owner, readerName);
+        }
+    }
+
+    if (!info.writerSymbol.exists()) {
+        auto writerNameStr = absl::StrCat(baseName, "=");
+        auto writerName = gs.lookupNameUTF8(writerNameStr);
+        if (writerName.exists()) {
+            info.writerSymbol = gs.lookupMethodSymbol(owner, writerName);
+        }
+    }
+
+    // If this is an accessor, we should have a field and _at least_ one of reader or writer.
+    if (!info.writerSymbol.exists() && !info.readerSymbol.exists()) {
+        return info;
+    }
+
+    // Use reader or writer to determine what type of field accessor we are dealing with (if any).
+    populateFieldAccessorType(gs, info);
+    return info;
+}
+
+vector<unique_ptr<core::lsp::QueryResponse>>
+LSPTask::getReferencesToAccessorInFile(LSPTypecheckerDelegate &typechecker, core::FileRef fref, const AccessorInfo info,
+                                       core::SymbolRef fallback,
+                                       vector<unique_ptr<core::lsp::QueryResponse>> &&priorRefs) const {
+    switch (info.accessorType) {
+        case FieldAccessorType::None:
+            // Common case: Not an accessor.
+            return getReferencesToSymbolInFile(typechecker, fref, fallback, move(priorRefs));
+        case FieldAccessorType::Reader:
+            return getReferencesToSymbolInFile(
+                typechecker, fref, info.fieldSymbol,
+                getReferencesToSymbolInFile(typechecker, fref, info.readerSymbol, move(priorRefs)));
+        case FieldAccessorType::Writer:
+            return getReferencesToSymbolInFile(
+                typechecker, fref, info.fieldSymbol,
+                getReferencesToSymbolInFile(typechecker, fref, info.writerSymbol, move(priorRefs)));
+        case FieldAccessorType::Accessor:
+            return getReferencesToSymbolInFile(
+                typechecker, fref, info.fieldSymbol,
+                getReferencesToSymbolInFile(
+                    typechecker, fref, info.writerSymbol,
+                    getReferencesToSymbolInFile(typechecker, fref, info.readerSymbol, move(priorRefs))));
+    }
 }
 
 void LSPTask::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<Location>> &locs, core::Loc loc) const {
