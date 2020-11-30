@@ -305,7 +305,15 @@ class Hash < Object
 
   # See also
   # [`Enumerable#any?`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-any-3F)
-  def any?(*_); end
+  sig {returns(T::Boolean)}
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T::Boolean)
+  end
+  sig { params(pattern: T.untyped).returns(T::Boolean) }
+  def any?(pattern = nil, &blk); end
 
   # Removes all key-value pairs from *hsh*.
   #

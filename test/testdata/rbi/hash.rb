@@ -87,3 +87,13 @@ initial_hash.transform_values!.with_index do |v, i|
   T.assert_type!(v, Float)
   T.assert_type!(i, Integer)
 end
+
+T.assert_type!({}.any?, T::Boolean)
+T.reveal_type(T::Hash[Symbol, Integer].new.any? do |key, value| # error: Revealed type: `T::Boolean`
+  T.reveal_type(key) # error: Revealed type: `Symbol`
+  T.reveal_type(value) # error: Revealed type: `Integer`
+end)
+T.reveal_type(T::Hash[Symbol, Integer].new.any? do |(key, value)| # error: Revealed type: `T::Boolean`
+  T.reveal_type(key) # error: Revealed type: `Symbol`
+  T.reveal_type(value) # error: Revealed type: `Integer`
+end)
