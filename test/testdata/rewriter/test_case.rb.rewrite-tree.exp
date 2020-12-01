@@ -1,0 +1,52 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C ActiveSupport>::<C TestCase><<C <todo sym>>> < ()
+  end
+
+  class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
+    def assert<<C <todo sym>>>(test, &<blk>)
+      if test
+        true
+      else
+        false
+      end
+    end
+
+    def self.test<<C <todo sym>>>(*args, &<blk>)
+      <emptyTree>
+    end
+
+    def test_valid_method_call<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    def test_block_is_evaluated_in_the_context_of_an_instance<<C <todo sym>>>(&<blk>)
+      <self>.assert(true)
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :assert)
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :test)
+
+    <self>.tesst("invalid", "method name") do ||
+      <emptyTree>
+    end
+
+    <self>.test("invalid", "parameter count") do ||
+      <emptyTree>
+    end
+
+    <self>.test("no block argument")
+
+    <self>.test(:not_a_string) do ||
+      <emptyTree>
+    end
+
+    <self>.test(:not_a_string) do ||
+      <self>.assert(true)
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :test_valid_method_call)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :test_block_is_evaluated_in_the_context_of_an_instance)
+  end
+end
