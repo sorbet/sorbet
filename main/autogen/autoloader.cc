@@ -435,6 +435,7 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
     }
 }
 
+namespace {
 string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const Package &pkg,
                                 const string_view mangledName) {
     fmt::memory_buffer buf;
@@ -456,6 +457,7 @@ string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderCon
 
     return to_string(buf);
 }
+} // namespace
 
 void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
                                            const std::string &path, const vector<Package> &packages) {
