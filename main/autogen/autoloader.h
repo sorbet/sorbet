@@ -36,6 +36,7 @@ struct AutoloaderConfig {
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
     std::vector<std::string> stripPrefixes;
+    bool packagedAutoloader = false;
 
     AutoloaderConfig() = default;
     AutoloaderConfig(const AutoloaderConfig &) = delete;
@@ -123,6 +124,9 @@ class AutoloadWriter {
 public:
     static void writeAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
                                const DefTree &root);
+
+    static void writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,
+                                      const std::vector<Package> &packages);
 
 private:
     static void write(const core::GlobalState &gs, const AutoloaderConfig &, const std::string &path,

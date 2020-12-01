@@ -1,0 +1,78 @@
+No errors! Great job.
+
+--- output/Project_Bar/Bar.rb
+# frozen_string_literal: true
+# typed: true
+
+Opus::Require.on_autoload('Bar')
+
+class Bar
+end
+
+Opus::Require.for_autoload(Bar, "test/cli/autogen-multipkg-autoloader/bar/bar.rb")
+
+--- output/Project_Bar/BarMethods.rb
+# frozen_string_literal: true
+# typed: true
+
+Opus::Require.on_autoload('BarMethods')
+
+module BarMethods
+end
+
+Opus::Require.for_autoload(BarMethods, "test/cli/autogen-multipkg-autoloader/bar/bar_methods.rb")
+
+--- output/Project_Bar/_root.rb
+# frozen_string_literal: true
+# typed: true
+
+require_relative "Project_Bar/BarMethods.rb"
+module ::PackageRoot::Project_Bar
+  extend ::PackageRoot::Project_Bar::BarMethods
+end
+Opus::Require.autoload_map(::PackageRoot::Project_Bar, {
+  Bar: "Project_Bar/Bar.rb",
+})
+
+--- output/Project_Foo/Foo.rb
+# frozen_string_literal: true
+# typed: true
+
+Opus::Require.on_autoload('Foo')
+
+class Foo
+end
+
+Opus::Require.for_autoload(Foo, "test/cli/autogen-multipkg-autoloader/foo/foo.rb")
+
+--- output/Project_Foo/FooMethods.rb
+# frozen_string_literal: true
+# typed: true
+
+Opus::Require.on_autoload('FooMethods')
+
+module FooMethods
+end
+
+Opus::Require.for_autoload(FooMethods, "test/cli/autogen-multipkg-autoloader/foo/foo_methods.rb")
+
+--- output/Project_Foo/_root.rb
+# frozen_string_literal: true
+# typed: true
+
+require_relative "Project_Foo/FooMethods.rb"
+module ::PackageRoot::Project_Foo
+  extend ::PackageRoot::Project_Foo::FooMethods
+end
+Opus::Require.autoload_map(::PackageRoot::Project_Foo, {
+  Foo: "Project_Foo/Foo.rb",
+})
+
+--- output/_root.rb
+# frozen_string_literal: true
+# typed: true
+
+Opus::Require.autoload_map(::PackageRoot, {
+  Project::Bar: "Project_Bar/_root.rb",
+  Project::Foo: "Project_Foo/_root.rb",
+})

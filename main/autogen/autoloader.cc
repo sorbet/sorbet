@@ -7,6 +7,10 @@
 #include "core/GlobalState.h"
 #include "core/Names.h"
 
+#include "absl/strings/str_join.h"
+#include "absl/strings/str_replace.h"
+#include "absl/strings/str_split.h"
+
 using namespace std;
 namespace sorbet::autogen {
 
@@ -65,6 +69,7 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
     out.stripPrefixes = cfg.stripPrefixes;
+    out.packagedAutoloader = cfg.packagedAutoloader;
     return out;
 }
 
@@ -81,7 +86,7 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
     const auto &pathStr = parsedFile.tree.file.data(gs).path();
     u4 pathDepth = count(pathStr.begin(), pathStr.end(), '/'); // Pre-compute for comparison
 
-    auto fullName = QualifiedName::fromFullName(parsedFile.showFullName(gs, def));
+    auto fullName = parsedFile.showQualifiedName(gs, def);
 
     return {def.data(parsedFile), fullName, parentName, parsedFile.requires, parsedFile.tree.file, pathDepth};
 }
@@ -318,6 +323,7 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
         auto &child = node->children[part];
         if (!child) {
             child = make_unique<DefTree>();
+            child->qname.package = ndef.qname.package;
             child->qname.nameParts = node->qname.nameParts;
             child->qname.nameParts.emplace_back(part);
         }
@@ -400,7 +406,9 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
                            UnorderedSet<std::string> &toDelete, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
     string filePath = join(path, fmt::format("{}.rb", name));
-    FileOps::writeIfDifferent(filePath, node.renderAutoloadSrc(gs, alCfg));
+    if (!alCfg.packagedAutoloader || !node.root()) {
+        FileOps::writeIfDifferent(filePath, node.renderAutoloadSrc(gs, alCfg));
+    }
     toDelete.erase(filePath);
     if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
@@ -408,9 +416,76 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
             FileOps::createDir(subdir);
         }
         for (auto &[_, child] : node.children) {
-            write(gs, alCfg, subdir, toDelete, *child);
+            if (alCfg.packagedAutoloader && node.root()) {
+                // in a packaged context, we want to make sure that these constants are also put in their packages
+                ENFORCE(child->qname.package);
+                auto namespaceName = child->qname.package->show(gs);
+                // this package name will include the suffix _Package on the end, and we want to remove that
+                constexpr int suffixLen = "_Package"sv.length();
+                ENFORCE(namespaceName.size() > suffixLen);
+                string packageName = namespaceName.substr(0, namespaceName.size() - suffixLen);
+                auto pkgSubdir = join(subdir, packageName);
+                FileOps::ensureDir(pkgSubdir);
+                write(gs, alCfg, pkgSubdir, toDelete, *child);
+            } else {
+                write(gs, alCfg, subdir, toDelete, *child);
+            }
         }
     }
+}
+
+namespace {
+string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const Package &pkg,
+                                const string_view mangledName) {
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "{}\n", alCfg.preamble);
+
+    // TODO: what will the export_methods autoload actually look like? no idea, but this shows that the data is there
+    if (pkg.exportMethods) {
+        fmt::format_to(buf, "require_relative \"{}/{}.rb\"\n", mangledName, pkg.exportMethods->join(gs, "/"));
+        fmt::format_to(buf, "module ::PackageRoot::{}\n", mangledName);
+        fmt::format_to(buf, "  extend ::PackageRoot::{}::{}\n", mangledName, pkg.exportMethods->join(gs, "::"));
+        fmt::format_to(buf, "end\n");
+    }
+    fmt::format_to(buf, "{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule, mangledName);
+    for (auto expt : pkg.exports) {
+        auto name = expt.join(gs, "::");
+        fmt::format_to(buf, "  {}: \"{}/{}.rb\",\n", name, mangledName, name);
+    }
+    fmt::format_to(buf, "}})\n");
+
+    return to_string(buf);
+}
+} // namespace
+
+void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
+                                           const std::string &path, const vector<Package> &packages) {
+    // we're going to be building up the root package map as we walk all the other packages, so make that first
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "{}\n", alCfg.preamble);
+    fmt::format_to(buf, "{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
+
+    // walk over all the packages
+    for (auto &pkg : packages) {
+        auto pkgName = fmt::format(
+            "{}", fmt::map_join(pkg.package, "::", [&](core::NameRef nr) -> string { return nr.show(gs); }));
+        auto mangledName =
+            fmt::format("{}", fmt::map_join(pkg.package, "_", [&](core::NameRef nr) -> string { return nr.show(gs); }));
+        auto source = renderPackageAutoloadSrc(gs, alCfg, pkg, mangledName);
+
+        FileOps::ensureDir(join(path, mangledName));
+        auto targetPath = join(path, join(mangledName, "_root.rb"));
+
+        // write the package autoload into the appropriate file
+        FileOps::writeIfDifferent(targetPath, source);
+
+        // and add the entry for this file to the root autoload
+        fmt::format_to(buf, "  {}: \"{}\",\n", pkgName, join(mangledName, "_root.rb"));
+    }
+
+    fmt::format_to(buf, "}})\n");
+    auto rootSrc = to_string(buf);
+    FileOps::writeIfDifferent(join(path, "_root.rb"), rootSrc);
 }
 
 } // namespace sorbet::autogen
