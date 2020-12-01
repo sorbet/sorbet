@@ -224,6 +224,55 @@ public:
     }
 };
 
+// Add subclass-related methods (methods overriding and overridden by `symbol`) to the `methods` vector.
+void addSubclassRelatedMethods(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
+                               vector<core::SymbolRef> &methods) {
+    const core::GlobalState &gs = typechecker.state();
+    auto symbolData = symbol.data(gs);
+
+    // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
+    // then find the full tree; then look for methods with the same name as ours; then find all references to all
+    // those methods and rename them.
+    auto symbolClass = symbolData->enclosingClass(gs);
+
+    // We have to be careful to follow superclass links only as long as we find a method that `symbol` overrides.
+    // Otherwise we will find unrelated methods and rename them even though they don't need to be (see the
+    // method_class_hierarchy test case for an example).
+    auto root = findRootClassWithMethod(gs, symbolClass, symbolData->name);
+
+    auto subclasses = getSubclasses(typechecker, root);
+
+    // find the target method definition in each subclass
+    for (auto c : subclasses) {
+        auto classSymbol = c.data(gs);
+        auto member = classSymbol->findMember(gs, symbolData->name);
+        if (!member.exists()) {
+            continue;
+        }
+        methods.push_back(member);
+    }
+}
+
+// Add methods that are related because of dispatching via secondary components in sends (union types).
+void addDispatchRelatedMethods(LSPTypecheckerDelegate &typechecker, const core::DispatchResult *dispatchResult,
+                               vector<core::SymbolRef> &methods) {
+    for (const core::DispatchResult *dr = dispatchResult; dr; dr = dr->secondary.get()) {
+        auto method = dr->main.method;
+        ENFORCE(method.exists());
+        auto included = false;
+        for (auto m : methods) {
+            if (m == method) {
+                included = true;
+                break;
+            }
+        }
+        if (!included) {
+            // this also adds `method` itself
+            addSubclassRelatedMethods(typechecker, method, methods);
+        }
+    }
+}
+
 } // namespace
 
 void RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol, string newName,
@@ -236,32 +285,17 @@ void RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
     vector<core::SymbolRef> symbolsToRename;
     if (symbolData->isMethod()) {
         renamer = make_unique<MethodRenamer>(gs, config, originalName, newName);
-        // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
-        // then find the full tree; then look for methods with the same name as ours; then find all references to all
-        // those methods and rename them.
-        auto symbolClass = symbolData->enclosingClass(gs);
-
-        // We have to be careful to follow superclass links only as long as we find a method that `symbol` overrides.
-        // Otherwise we will find unrelated methods and rename them even though they don't need to be (see the
-        // method_class_hierarchy test case for an example).
-        auto root = findRootClassWithMethod(gs, symbolClass, symbolData->name);
-
-        auto subclasses = getSubclasses(typechecker, root);
-
-        // find the target method definition in each subclass
-        for (auto c : subclasses) {
-            auto classSymbol = c.data(gs);
-            auto member = classSymbol->findMember(gs, symbolData->name);
-            if (member.exists()) {
-                symbolsToRename.push_back(member);
-            }
-        }
+        addSubclassRelatedMethods(typechecker, symbol, symbolsToRename);
     } else {
         renamer = make_unique<ConstRenamer>(gs, config, originalName, newName);
         symbolsToRename.push_back(symbol);
     }
 
-    for (auto sym : symbolsToRename) {
+    // We use symbolsToRename as a queue -- the loop body may add more symbols that need to be renamed, which is why we
+    // don't use an iterator here.
+    for (int i = 0; i < symbolsToRename.size(); i++) {
+        auto sym = symbolsToRename[i];
+
         auto queryResult = queryBySymbol(typechecker, sym);
         if (queryResult.error) {
             responseMsg->result = JSONNullObject();
@@ -278,7 +312,17 @@ void RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
                 responseMsg->result = JSONNullObject();
                 return;
             }
+
+            // The renamer de-duplicates edits at the same location
             renamer->rename(response);
+
+            // Handle secondary dispatch results (union types)
+            // TODO: move this into method renamer?
+            if (auto sendResp = response->isSend()) {
+                if (sendResp->dispatchResult->secondary) {
+                    addDispatchRelatedMethods(typechecker, sendResp->dispatchResult.get(), symbolsToRename);
+                }
+            }
         }
     }
     responseMsg->result = renamer->buildEdit();
@@ -355,6 +399,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             }
         }
     } else if (auto sendResp = resp->isSend()) {
+        // We don't need to handle dispatchResult->secondary here, because it will be checked in getRenameEdits.
         auto method = sendResp->dispatchResult->main.method;
         getRenameEdits(typechecker, method, params->newName, response);
     }

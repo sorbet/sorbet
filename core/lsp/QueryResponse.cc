@@ -18,7 +18,8 @@ const SendResponse *QueryResponse::isSend() const {
 }
 
 const optional<core::Loc> SendResponse::getMethodNameLoc(const core::GlobalState &gs) const {
-    // TODO: handle dispatchResult->secondary
+    // We don't handle dispatchResult->secondary because we only need the method name; we assume here that the method
+    // name is the same for all dispatch components
     auto methodName = dispatchResult->main.method.data(gs)->name.show(gs);
     auto expr = termLoc.source(gs);
     // There are two possible forms of a send expression:
