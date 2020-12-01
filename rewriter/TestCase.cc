@@ -23,12 +23,12 @@ std::vector<ast::TreePtr> TestCase::run(core::MutableContext ctx, ast::Send *sen
         return stats;
     }
 
-    if (!send->block) {
+    if (send->block == nullptr) {
         return stats;
     }
 
     auto *arg0 = ast::cast_tree<ast::Literal>(send->args[0]);
-    if (!arg0 || !arg0->isString(ctx)) {
+    if (arg0 == nullptr || !arg0->isString(ctx)) {
         return stats;
     }
 
