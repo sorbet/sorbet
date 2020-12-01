@@ -15,8 +15,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
+    end
+
     def test_valid_method_call<<C <todo sym>>>(&<blk>)
       <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.void()
     end
 
     def test_block_is_evaluated_in_the_context_of_an_instance<<C <todo sym>>>(&<blk>)

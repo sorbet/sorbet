@@ -32,19 +32,14 @@ std::vector<ast::TreePtr> TestCase::run(core::MutableContext ctx, ast::Send *sen
         return stats;
     }
 
-    // auto formatted_name = fmt::format("test_{0}", arg0->asString(ctx).toString(ctx));
-    // auto name = arg0->asString(ctx).data(ctx);
-    // std::cout << "name: " << name->toString(ctx) << std::endl;
-
-    auto snake_case_name = absl::StrReplaceAll(arg0->asString(ctx).toString(ctx), {{" ", "_"}});
-    auto name = ctx.state.enterNameUTF8("test_" + snake_case_name);
-
-    // Generate sigs?
-    //
     auto loc = send->loc;
     auto block = ast::cast_tree<ast::Block>(send->block);
+    auto snake_case_name = absl::StrReplaceAll(arg0->asString(ctx).toString(ctx), {{" ", "_"}});
+    auto name = ctx.state.enterNameUTF8("test_" + snake_case_name);
     auto method = ast::MK::SyntheticMethod0(loc, loc, name, std::move(block->body));
-    stats.emplace_back(std::move(method));
+    auto method_with_sig = ast::MK::InsSeq1(method.loc(), ast::MK::SigVoid(method.loc(), {}), std::move(method));
+
+    stats.emplace_back(std::move(method_with_sig));
 
     return stats;
 }
