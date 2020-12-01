@@ -760,35 +760,35 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
 
         int classAndModuleSize = p.getU4();
         ENFORCE(classAndModuleSize > 0);
-        classAndModules.reserve(nearestPowerOf2(classAndModuleSize));
+        classAndModules.reserve(classAndModuleSize);
         for (int i = 0; i < classAndModuleSize; i++) {
             classAndModules.emplace_back(unpickleSymbol(p, &result));
         }
 
         int methodSize = p.getU4();
         ENFORCE(methodSize > 0);
-        methods.reserve(nearestPowerOf2(methodSize));
+        methods.reserve(methodSize);
         for (int i = 0; i < methodSize; i++) {
             methods.emplace_back(unpickleSymbol(p, &result));
         }
 
         int fieldSize = p.getU4();
         ENFORCE(fieldSize > 0);
-        fields.reserve(nearestPowerOf2(fieldSize));
+        fields.reserve(fieldSize);
         for (int i = 0; i < fieldSize; i++) {
             fields.emplace_back(unpickleSymbol(p, &result));
         }
 
         int typeArgumentSize = p.getU4();
         ENFORCE(typeArgumentSize > 0);
-        typeArguments.reserve(nearestPowerOf2(typeArgumentSize));
+        typeArguments.reserve(typeArgumentSize);
         for (int i = 0; i < typeArgumentSize; i++) {
             typeArguments.emplace_back(unpickleSymbol(p, &result));
         }
 
         int typeMemberSize = p.getU4();
         ENFORCE(typeMemberSize > 0);
-        typeMembers.reserve(nearestPowerOf2(typeMemberSize));
+        typeMembers.reserve(typeMemberSize);
         for (int i = 0; i < typeMemberSize; i++) {
             typeMembers.emplace_back(unpickleSymbol(p, &result));
         }
