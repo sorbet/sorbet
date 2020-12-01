@@ -560,7 +560,7 @@ public:
         bool showRaw = false;
         return toStringWithOptions(gs, 0, showFull, showRaw);
     }
-    std::string toJSON(const GlobalState &gs, int tabs = 0, bool showFull = false) const;
+    std::string toJSON(const GlobalState &gs, int tabs = 0) const;
     // Renders the full name of this Symbol in a form suitable for user display.
     std::string show(const GlobalState &gs) const;
 

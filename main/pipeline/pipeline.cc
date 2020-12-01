@@ -131,6 +131,9 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     if (print.ParseTreeJson.enabled) {
         print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
     }
+    if (print.ParseTreeJsonWithLocs.enabled) {
+        print.ParseTreeJson.fmt("{}\n", nodes->toJSONWithLocs(gs, file, 0));
+    }
     if (print.ParseTreeWhitequark.enabled) {
         print.ParseTreeWhitequark.fmt("{}\n", nodes->toWhitequark(gs, 0));
     }

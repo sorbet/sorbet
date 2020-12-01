@@ -31,6 +31,7 @@ struct PrintOptions {
 const vector<PrintOptions> print_options({
     {"parse-tree", &Printers::ParseTree},
     {"parse-tree-json", &Printers::ParseTreeJson},
+    {"parse-tree-json-with-locs", &Printers::ParseTreeJsonWithLocs},
     {"parse-tree-whitequark", &Printers::ParseTreeWhitequark},
     {"desugar-tree", &Printers::DesugarTree},
     {"desugar-tree-raw", &Printers::DesugarTreeRaw},
@@ -95,6 +96,7 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
     return vector<reference_wrapper<PrinterConfig>>({
         ParseTree,
         ParseTreeJson,
+        ParseTreeJsonWithLocs,
         ParseTreeWhitequark,
         DesugarTree,
         DesugarTreeRaw,

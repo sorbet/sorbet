@@ -16,6 +16,7 @@ public:
         return toStringWithTabs(gs);
     }
     virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) = 0;
+    virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0) = 0;
     virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
     core::LocOffsets loc;
@@ -26,6 +27,8 @@ protected:
                    int tabs) const;
     void printNodeJSON(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
                        int tabs) const;
+    void printNodeJSONWithLocs(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
+                               core::FileRef file, int tabs) const;
     void printNodeWhitequark(fmt::memory_buffer &to, const std::unique_ptr<Node> &node, const core::GlobalState &gs,
                              int tabs) const;
 };
