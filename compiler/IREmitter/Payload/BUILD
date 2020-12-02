@@ -41,7 +41,7 @@ filegroup(
     name = "vm_payload_srcs",
     srcs = [
         "PayloadIntrinsics.c",
-        "payload.c",
+        "vm-payload.c",
     ],
     visibility = ["//visibility:public"],
 )
