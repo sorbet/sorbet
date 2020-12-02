@@ -51,8 +51,7 @@ public:
         state.builder.restoreIP(ip);
 
         // Store the last exception state
-        state.previousException =
-            state.builder.CreateCall(cs.module->getFunction("rb_errinfo"), {}, "previousException");
+        state.previousException = state.builder.CreateCall(cs.getFunction("rb_errinfo"), {}, "previousException");
 
         // Setup the exception handling entry block
         state.exceptionEntry = llvm::BasicBlock::Create(cs, "exception-entry", state.currentFunc);
@@ -66,7 +65,7 @@ public:
     }
 
     llvm::Function *getDoNothing() const {
-        return cs.module->getFunction("sorbet_blockReturnUndef");
+        return cs.getFunction("sorbet_blockReturnUndef");
     }
 
     llvm::Function *getEnsure() const {
@@ -95,7 +94,7 @@ public:
     tuple<llvm::Value *, llvm::Value *> sorbetTry(llvm::Function *fun, llvm::Value *exceptionContext) {
         auto [pc, iseq_encoded, closure] = getExceptionArgs();
         auto *result =
-            builder.CreateCall(cs.module->getFunction("sorbet_try"),
+            builder.CreateCall(cs.getFunction("sorbet_try"),
                                {fun, pc, iseq_encoded, closure, exceptionContext, exceptionResultPtr}, "result");
 
         return {result, exceptionResultPtr};
@@ -110,7 +109,7 @@ public:
     }
 
     void raiseIfNotNil(llvm::Value *exceptionValue) {
-        builder.CreateCall(cs.module->getFunction("sorbet_raiseIfNotNil"), {exceptionValue});
+        builder.CreateCall(cs.getFunction("sorbet_raiseIfNotNil"), {exceptionValue});
     }
 
     // Returns the exception value that was raised.
@@ -129,7 +128,7 @@ public:
         // If a non-undef value was returned from the body, there's no possibility that an exception was raised. Run
         // ensure and return the body result.
         builder.SetInsertPoint(earlyReturnBlock);
-        builder.CreateCall(cs.module->getFunction("rb_set_errinfo"), {previousException});
+        builder.CreateCall(cs.getFunction("rb_set_errinfo"), {previousException});
         auto ensureResult = sorbetEnsure(bodyResult);
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, ensureResult);
 
@@ -169,7 +168,7 @@ public:
         // Setup the exception state for the ensure handler
         auto *handlerException = builder.CreateLoad(handlerExceptionPtr);
         auto *exceptionContext = determinePostRescueExceptionContext(handlerException);
-        builder.CreateCall(cs.module->getFunction("rb_set_errinfo"), {exceptionContext});
+        builder.CreateCall(cs.getFunction("rb_set_errinfo"), {exceptionContext});
 
         // Check the handlerResult for a retry, and branch back to the beginning of exception handling if it's present
         // and we ran the rescue block.

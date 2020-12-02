@@ -95,18 +95,17 @@ public:
         if (sym.data(cs)->owner != core::Symbols::root()) {
             auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
             if (isModule) {
-                builder.CreateCall(cs.module->getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
+                builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
             } else {
                 auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
-                builder.CreateCall(cs.module->getFunction("sorbet_defineNestedClass"),
-                                   {getOwner, classNameCStr, rawCall});
+                builder.CreateCall(cs.getFunction("sorbet_defineNestedClass"), {getOwner, classNameCStr, rawCall});
             }
         } else {
             if (isModule) {
-                builder.CreateCall(cs.module->getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
+                builder.CreateCall(cs.getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
             } else {
                 auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
-                builder.CreateCall(cs.module->getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
+                builder.CreateCall(cs.getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
             }
         }
         builder.CreateCall(IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc),
@@ -166,7 +165,7 @@ public:
         auto slowFunctionName = "callWithProc" + (string)name;
         auto *cache = IREmitterHelpers::makeInlineCache(cs, slowFunctionName);
 
-        return builder.CreateCall(cs.module->getFunction("sorbet_callFuncProcWithCache"),
+        return builder.CreateCall(cs.getFunction("sorbet_callFuncProcWithCache"),
                                   {recv, rawId, argc, argv, kw_splat, blockAsProc, cache}, slowFunctionName);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -227,8 +226,8 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
     }
 
     auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
-    return builder.CreateCall(cs.module->getFunction(cMethod),
-                              {recv, fun, argc, argv, blkPtr, irctx.localsOffset[rubyBlockId]}, "rawSendResult");
+    return builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, irctx.localsOffset[rubyBlockId]},
+                              "rawSendResult");
 }
 
 class CallCMethod : public NameBasedIntrinsicMethod {
@@ -314,7 +313,7 @@ public:
                 llvm::Value *argIndices[] = {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, 0, true)),
                                              llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, 0, true))};
                 auto hashValue = globalInitBuilder.CreateCall(
-                    mcctx.cs.module->getFunction("sorbet_hashBuild"),
+                    mcctx.cs.getFunction("sorbet_hashBuild"),
                     {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(32, mcctx.send->args.size(), true)),
                      globalInitBuilder.CreateGEP(argArray, argIndices)},
                     "builtHash");
@@ -332,7 +331,7 @@ public:
         auto global = builder.CreateLoad(
             llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
             "hashLiteral");
-        auto copy = builder.CreateCall(mcctx.cs.module->getFunction("sorbet_hashDup"), {global}, "duplicatedHash");
+        auto copy = builder.CreateCall(mcctx.cs.getFunction("sorbet_hashDup"), {global}, "duplicatedHash");
         return copy;
     }
 

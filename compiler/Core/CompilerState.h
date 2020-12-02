@@ -60,6 +60,10 @@ public:
     // Forwards to `GlobalState::trace`
     void trace(std::string_view) const;
 
+    // A wrapper around `llvm::Module::getFunction` that displays useful errors when
+    // the function is not found
+    llvm::Function *getFunction(llvm::StringRef) const;
+
     // Add an error to GlobalState, and then throw to abort compilation.
     // Use only when compilation CANNOT continue.
     // (Emitting any old GlobalState error will still cause Sorbet to exit non-zero.)

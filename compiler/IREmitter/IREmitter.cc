@@ -227,10 +227,10 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
                     builder.CreateCondBr(isArray, argExpandBlock, afterArgArrayExpandBlock);
                     builder.SetInsertPoint(argExpandBlock);
-                    auto newArgArray = builder.CreateCall(cs.module->getFunction("sorbet_rubyArrayInnerPtr"),
-                                                          {rawArg1Value}, "expandedArgArray");
-                    auto newArgc = builder.CreateCall(cs.module->getFunction("sorbet_rubyArrayLen"), {rawArg1Value},
-                                                      "expandedArgc");
+                    auto newArgArray = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {rawArg1Value},
+                                                          "expandedArgArray");
+                    auto newArgc =
+                        builder.CreateCall(cs.getFunction("sorbet_rubyArrayLen"), {rawArg1Value}, "expandedArgc");
                     auto expansionEnd = builder.GetInsertBlock();
                     builder.CreateBr(afterArgArrayExpandBlock);
                     builder.SetInsertPoint(afterArgArrayExpandBlock);
@@ -345,9 +345,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                 //
                 if (blkArgName.exists() && irctx.usesBlockArgs) {
                     // TODO: I don't think this correctly handles blocks with block args
-                    Payload::varSet(cs, blkArgName,
-                                    builder.CreateCall(cs.module->getFunction("sorbet_getMethodBlockAsProc")), builder,
-                                    irctx, 0);
+                    Payload::varSet(cs, blkArgName, builder.CreateCall(cs.getFunction("sorbet_getMethodBlockAsProc")),
+                                    builder, irctx, 0);
                 }
                 builder.CreateBr(checkBlocks[0]);
             }
@@ -401,8 +400,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                         if (argsFlags[argId].isKeyword && !argsFlags[argId].isRepeated) {
                             auto name = irctx.rubyBlockArgs[rubyBlockId][argId];
                             auto rawId = Payload::idIntern(cs, builder, name.data(cfg)._name.data(cs)->shortName(cs));
-                            auto rawRubySym =
-                                builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
+                            auto rawRubySym = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
 
                             auto argPresent = irctx.argPresentVariables[argId];
                             auto passedValue = Payload::getKWArg(cs, builder, hashArgs, rawRubySym);
@@ -634,7 +632,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     },
                     [&](cfg::TAbsurd *i) {
                         auto val = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
-                        builder.CreateCall(cs.module->getFunction("sorbet_t_absurd"), {val});
+                        builder.CreateCall(cs.getFunction("sorbet_t_absurd"), {val});
                     });
                 if (isTerminated) {
                     break;
@@ -805,22 +803,22 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
         // The actual version will be linked into libruby.so and compared against at runtime.
         auto compileTimeBuildSCMRevision = sorbet_getBuildSCMRevision();
         auto compileTimeIsReleaseBuild = sorbet_getIsReleaseBuild();
-        builder.CreateCall(cs.module->getFunction("sorbet_ensureSorbetRuby"),
+        builder.CreateCall(cs.getFunction("sorbet_ensureSorbetRuby"),
                            {
                                llvm::ConstantInt::get(cs, llvm::APInt(32, compileTimeIsReleaseBuild, true)),
                                Payload::toCString(cs, compileTimeBuildSCMRevision, builder),
                            });
 
-        auto realpath = builder.CreateCall(cs.module->getFunction("sorbet_readRealpath"), {});
+        auto realpath = builder.CreateCall(cs.getFunction("sorbet_readRealpath"), {});
         realpath->setName("realpath");
 
-        builder.CreateCall(cs.module->getFunction("sorbet_globalConstructors"), {realpath});
+        builder.CreateCall(cs.getFunction("sorbet_globalConstructors"), {realpath});
 
         core::SymbolRef staticInit = cs.gs.lookupStaticInitForFile(sym.data(cs)->loc());
 
         // Call the LLVM method that was made by run() from this Init_ method
         auto staticInitName = IREmitterHelpers::getFunctionName(cs, staticInit);
-        auto staticInitFunc = cs.module->getFunction(staticInitName);
+        auto staticInitFunc = cs.getFunction(staticInitName);
         ENFORCE(staticInitFunc, staticInitName + " does not exist");
         builder.CreateCall(staticInitFunc,
                            {

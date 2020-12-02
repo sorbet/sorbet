@@ -78,7 +78,7 @@ public:
         }
 
         auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
-        return builder.CreateCall(cs.module->getFunction(cMethod),
+        return builder.CreateCall(cs.getFunction(cMethod),
                                   {recv, fun, argc, argv, blkPtr, mcctx.irctx.localsOffset[rubyBlockId]},
                                   "rawSendResult");
     };
@@ -123,7 +123,7 @@ public:
                 llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
             auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
 
-            auto rubyFunc = cs.module->getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
+            auto rubyFunc = cs.getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
             ENFORCE(rubyFunc);
             builder.CreateCall(rubyFunc, {Payload::getRubyConstant(cs, ownerSym, builder),
                                           Payload::toCString(cs, funcNameRef.show(cs), builder), ptr,

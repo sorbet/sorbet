@@ -792,7 +792,7 @@ getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionT
 
 llvm::Function *IREmitterHelpers::lookupFunction(CompilerState &cs, core::SymbolRef sym) {
     ENFORCE(sym.data(cs)->name != core::Names::staticInit(), "use special helper instead");
-    auto func = cs.module->getFunction(IREmitterHelpers::getFunctionName(cs, sym));
+    auto func = cs.getFunction(IREmitterHelpers::getFunctionName(cs, sym));
     return func;
 }
 llvm::Function *IREmitterHelpers::getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym) {
@@ -852,7 +852,7 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build,
     auto &builder = static_cast<llvm::IRBuilder<> &>(build);
 
     if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
-        builder.CreateCall(cs.module->getFunction("sorbet_popRubyStack"), {});
+        builder.CreateCall(cs.getFunction("sorbet_popRubyStack"), {});
     }
 
     builder.CreateRet(retVal);
@@ -870,9 +870,8 @@ void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &buil
     builder.CreateCondBr(expected, successBlock, failBlock);
     builder.SetInsertPoint(failBlock);
     // this will throw exception
-    builder.CreateCall(
-        cs.module->getFunction("sorbet_cast_failure"),
-        {value, Payload::toCString(cs, description, builder), Payload::toCString(cs, expectedType.show(cs), builder)});
+    builder.CreateCall(cs.getFunction("sorbet_cast_failure"), {value, Payload::toCString(cs, description, builder),
+                                                               Payload::toCString(cs, expectedType.show(cs), builder)});
     builder.CreateUnreachable();
     builder.SetInsertPoint(successBlock);
 }
@@ -898,7 +897,7 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
         case core::LiteralType::LiteralTypeKind::Symbol: {
             auto str = core::NameRef(cs, litType.value).data(cs)->shortName(cs);
             auto rawId = Payload::idIntern(cs, builder, str);
-            return builder.CreateCall(cs.module->getFunction("rb_id2sym"), {rawId}, "rawSym");
+            return builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
         }
         case core::LiteralType::LiteralTypeKind::String: {
             auto str = core::NameRef(cs, litType.value).data(cs)->shortName(cs);

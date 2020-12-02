@@ -82,6 +82,12 @@ llvm::FunctionType *CompilerState::getSorbetIntrinsicFFIType() {
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
+llvm::Function *CompilerState::getFunction(llvm::StringRef name) const {
+    llvm::Function *f = module->getFunction(name);
+    ENFORCE(f, "could not find {} in the payload", name.str());
+    return f;
+}
+
 CompilerState CompilerState::withFunctionEntry(llvm::BasicBlock *entry) {
     auto res = CompilerState(*this);
     res.functionEntryInitializers = entry;

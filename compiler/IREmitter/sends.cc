@@ -195,7 +195,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
         if (numKwArgs == 0) {
             // no inlined keyword args, lookup the hash to be splatted
             auto *splat = Payload::varGet(cs, args.back().variable, builder, irctx, rubyBlockId);
-            kwHash = builder.CreateCall(cs.module->getFunction("sorbet_hashDup"), {splat});
+            kwHash = builder.CreateCall(cs.getFunction("sorbet_hashDup"), {splat});
         } else {
             // fill in inlined args (posEnd .. kwEnd)
             auto it = args.begin() + posEnd;
@@ -204,7 +204,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
                 setSendArgsEntry(cs, builder, sendArgs, argId, var);
             }
 
-            kwHash = builder.CreateCall(cs.module->getFunction("sorbet_hashBuild"),
+            kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"),
                                         {llvm::ConstantInt::get(cs, llvm::APInt(32, numKwArgs, true)),
                                          getSendArgsPointer(cs, builder, sendArgs)},
                                         "kwargsHash");
@@ -212,7 +212,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
             // merge in the splat if it's present (mcctx.send->args.back())
             if (hasKwSplat) {
                 auto *splat = Payload::varGet(cs, args.back().variable, builder, irctx, rubyBlockId);
-                builder.CreateCall(cs.module->getFunction("sorbet_hashUpdate"), {kwHash, splat});
+                builder.CreateCall(cs.getFunction("sorbet_hashUpdate"), {kwHash, splat});
             }
         }
 
@@ -253,7 +253,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     // before this, perf will not be good
     auto *self = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
     if (send->fun == core::Names::super()) {
-        return builder.CreateCall(cs.module->getFunction("sorbet_callSuper"), {argc, argv, kw_splat}, "rawSendResult");
+        return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {argc, argv, kw_splat}, "rawSendResult");
     } else {
         return callViaRubyVMSimple(cs, mcctx.build, irctx, self, argv, argc, kw_splat, str, mcctx.blk,
                                    irctx.localsOffset[rubyBlockId]);
@@ -261,7 +261,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
 };
 
 llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, string slowFunName) {
-    auto icValidatorFunc = cs.module->getFunction("sorbet_inlineCacheInvalidated");
+    auto icValidatorFunc = cs.getFunction("sorbet_inlineCacheInvalidated");
     auto inlineCacheType =
         (llvm::StructType *)(((llvm::PointerType *)((icValidatorFunc->arg_begin() + 1)->getType()))->getElementType());
     ENFORCE(inlineCacheType != nullptr);
@@ -292,12 +292,12 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBu
 
         auto slowFunctionName = "callFuncWithBlock_" + (string)name;
         auto *cache = makeInlineCache(cs, slowFunctionName);
-        return builder.CreateCall(cs.module->getFunction("sorbet_callFuncBlockWithCache"),
+        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"),
                                   {self, rawId, argc, argv, kw_splat, blkFun, localsOffset, cache}, slowFunctionName);
     } else {
         auto slowFunctionName = "callFunc_" + (string)name;
         auto *cache = makeInlineCache(cs, slowFunctionName);
-        return builder.CreateCall(cs.module->getFunction("sorbet_callFuncWithCache"),
+        return builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"),
                                   {self, rawId, argc, argv, kw_splat, cache}, slowFunctionName);
     }
 }
