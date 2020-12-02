@@ -35,7 +35,7 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
     return true;
 }
 
-// Checks if s is a subclass or mixin of root, and updates visited and memoized vectors.
+// Checks if s is a subclass of root or contains root as a mixin, and updates visited and memoized vectors.
 bool isSubclassOrMixin(const core::GlobalState &gs, core::SymbolRef root, core::SymbolRef s, vector<bool> &memoized,
                        vector<bool> &visited) {
     // don't visit the same class twice
