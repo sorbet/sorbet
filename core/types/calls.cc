@@ -143,10 +143,10 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
 
 namespace {
 bool isSetter(const GlobalState &gs, NameRef fun) {
-    if (fun.data(gs)->kind != NameKind::UTF8) {
+    if (fun.kind() != NameRef::Kind::UTF8) {
         return false;
     }
-    const string_view rawName = fun.data(gs)->raw.utf8;
+    const string_view rawName = fun.utf8NameData(gs)->utf8;
     if (rawName.size() < 2) {
         return false;
     }
@@ -510,7 +510,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (symbol == Symbols::void_()) {
         if (!args.suppressErrors) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
-                e.setHeader("Can not call method `{}` on void type", args.name.data(gs)->show(gs));
+                e.setHeader("Can not call method `{}` on void type", args.name.show(gs));
             }
         }
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
@@ -551,10 +551,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (e) {
             string thisStr = args.thisType.show(gs);
             if (args.fullType != args.thisType) {
-                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(gs)->show(gs),
-                            thisStr, args.fullType.show(gs));
+                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
+                            args.fullType.show(gs));
             } else {
-                e.setHeader("Method `{}` does not exist on `{}`", args.name.data(gs)->show(gs), thisStr);
+                e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
 
                 // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
                 // suggest adding `extend T::Helpers`.
@@ -904,8 +904,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             continue;
                         }
 
-                        NameRef arg(gs, key.value);
-                        if (consumed.find(NameRef(gs, key.value)) != consumed.end()) {
+                        NameRef arg = key.asName();
+                        if (consumed.find(arg) != consumed.end()) {
                             continue;
                         }
                         consumed.insert(arg);
@@ -930,7 +930,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
                     auto lit = cast_type_nonnull<LiteralType>(litType);
                     return cast_type_nonnull<ClassType>(lit.underlying()).symbol == Symbols::Symbol() &&
-                           lit.value == spec.name._id;
+                           lit.value == spec.name.rawId();
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
@@ -955,10 +955,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             for (auto &keyType : hash->keys) {
                 auto key = cast_type_nonnull<LiteralType>(keyType);
                 SymbolRef klass = cast_type_nonnull<ClassType>(key.underlying()).symbol;
-                if (klass == Symbols::Symbol() && consumed.find(NameRef(gs, key.value)) != consumed.end()) {
+                NameRef arg = key.asName();
+                if (klass == Symbols::Symbol() && consumed.find(arg) != consumed.end()) {
                     continue;
                 }
-                NameRef arg(gs, key.value);
 
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
@@ -1146,8 +1146,8 @@ TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const
 }
 
 DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
-    switch (args.name._id) {
-        case Names::new_()._id: {
+    switch (args.name.rawId()) {
+        case Names::new_().rawId(): {
             auto innerArgs = DispatchArgs{Names::initialize(),
                                           args.locs,
                                           args.numPosArgs,
@@ -1165,13 +1165,13 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
         default:
             auto loc = core::Loc(args.locs.file, args.locs.call);
             if (auto e = gs.beginError(loc, errors::Infer::MetaTypeDispatchCall)) {
-                e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.data(gs)->show(gs),
+                e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs),
                             this->wrapped.show(gs));
                 if (args.name == core::Names::tripleEq()) {
                     if (auto appliedType = cast_type<AppliedType>(this->wrapped)) {
                         e.addErrorNote("It looks like you're trying to pattern match on a generic, "
                                        "which doesn't work at runtime");
-                        e.replaceWith("Replace with class name", loc, "{}", appliedType->klass.data(gs)->show(gs));
+                        e.replaceWith("Replace with class name", loc, "{}", appliedType->klass.show(gs));
                     }
                 }
             }
@@ -1710,7 +1710,7 @@ public:
             return;
         }
 
-        NameRef fn(gs, (u4)lit.value);
+        NameRef fn = lit.asName();
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
             return;
@@ -1960,7 +1960,7 @@ public:
             return;
         }
 
-        NameRef fn(gs, (u4)lit.value);
+        NameRef fn = lit.asName();
 
         u2 numPosArgs = args.numPosArgs - 3;
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
@@ -2028,7 +2028,7 @@ public:
             return;
         }
 
-        NameRef fn(gs, (u4)lit.value);
+        NameRef fn = lit.asName();
 
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;

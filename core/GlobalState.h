@@ -12,8 +12,6 @@
 #include <memory>
 
 namespace sorbet::core {
-
-class Name;
 class NameRef;
 class Symbol;
 class SymbolRef;
@@ -32,7 +30,6 @@ class SerializerImpl;
 } // namespace serialize
 
 class GlobalState final {
-    friend Name;
     friend NameRef;
     friend Symbol;
     friend SymbolRef;
@@ -53,7 +50,9 @@ public:
 
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload. Enforced in payload.cc.
-    static constexpr unsigned int PAYLOAD_MAX_NAME_COUNT = 32768;
+    static constexpr unsigned int PAYLOAD_MAX_UTF8_NAME_COUNT = 4;
+    static constexpr unsigned int PAYLOAD_MAX_UNIQUE_NAME_COUNT = 4;
+    static constexpr unsigned int PAYLOAD_MAX_CONSTANT_NAME_COUNT = 2;
     static constexpr unsigned int PAYLOAD_MAX_CLASS_AND_MODULE_COUNT = 8192;
     static constexpr unsigned int PAYLOAD_MAX_METHOD_COUNT = 32768;
     static constexpr unsigned int PAYLOAD_MAX_FIELD_COUNT = 4096;
@@ -65,7 +64,7 @@ public:
 
     // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
     void preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 fieldsSize, u4 typeArgumentsSize,
-                           u4 typeMembersSize, u4 nameSize);
+                           u4 typeMembersSize, u4 uniqueNameSize, u4 constantNameSize, u4 utf8NameSize);
 
     GlobalState(const GlobalState &) = delete;
     GlobalState(GlobalState &&) = delete;
@@ -131,7 +130,10 @@ public:
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
     spdlog::logger &tracer() const;
-    unsigned int namesUsed() const;
+    unsigned int uniqueNamesUsed() const;
+    unsigned int utf8NamesUsed() const;
+    unsigned int constantNamesUsed() const;
+    unsigned int namesUsedTotal() const;
 
     unsigned int classAndModulesUsed() const;
     unsigned int methodsUsed() const;
@@ -245,7 +247,9 @@ private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
     struct DeepCloneHistoryEntry {
         int globalStateId;
-        unsigned int lastNameKnownByParentGlobalState;
+        unsigned int lastUniqueNameKnownByParentGlobalState;
+        unsigned int lastConstantNameKnownByParentGlobalState;
+        unsigned int lastUTF8NameKnownByParentGlobalState;
     };
     std::vector<DeepCloneHistoryEntry> deepCloneHistory;
 
@@ -253,7 +257,9 @@ private:
     std::vector<std::shared_ptr<std::vector<char>>> strings;
     std::string_view enterString(std::string_view nm);
     u2 stringsLastPageUsed = STRINGS_PAGE_SIZE + 1;
-    std::vector<Name> names;
+    std::vector<UTF8Name> utf8Names;
+    std::vector<ConstantName> constantNames;
+    std::vector<UniqueName> uniqueNames;
     UnorderedMap<std::string, FileRef> fileRefByPath;
     std::vector<Symbol> classAndModules;
     std::vector<Symbol> methods;
@@ -278,7 +284,7 @@ private:
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
 
-    void expandNames(u4 newSize);
+    void expandNames(u4 uniqueNameSize, u4 constantNameSize, u4 utf8NameSize);
 
     SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().classOrModuleIndex(),
                               bool isModule = false);

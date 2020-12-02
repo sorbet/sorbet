@@ -142,7 +142,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
     // requires
     mpack_start_array(&writer, pf.requires.size());
     for (auto nm : pf.requires) {
-        packString(nm.data(ctx)->show(ctx));
+        packString(nm.show(ctx));
     }
     mpack_finish_array(&writer);
 
@@ -188,7 +188,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
                 str = "alias";
                 break;
             default:
-                str = sym.data(ctx)->show(ctx);
+                str = sym.show(ctx);
         }
         packString(str);
     }

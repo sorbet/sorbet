@@ -329,9 +329,14 @@ LiteralType::LiteralType(double val) : floatval(val), literalKind(LiteralTypeKin
 }
 
 LiteralType::LiteralType(SymbolRef klass, NameRef val)
-    : value(val._id), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
+    : nameId(val.rawId()), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
     categoryCounterInc("types.allocated", "literaltype");
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
+}
+
+NameRef LiteralType::asName() const {
+    ENFORCE(literalKind == LiteralTypeKind::String || literalKind == LiteralTypeKind::Symbol);
+    return NameRef::fromRaw(nameId);
 }
 
 TypePtr LiteralType::underlying() const {

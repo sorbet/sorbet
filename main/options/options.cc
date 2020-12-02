@@ -346,8 +346,15 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "reserve-type-member-table-capacity", "Preallocate the specified number of entries in the type member table",
         cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveTypeMemberTableCapacity)));
     options.add_options("advanced")(
-        "reserve-name-table-capacity", "Preallocate the specified number of entries in the name table",
-        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveNameTableCapacity)));
+        "reserve-unique-name-table-capacity", "Preallocate the specified number of entries in the unique name table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveUniqueNameTableCapacity)));
+    options.add_options("advanced")(
+        "reserve-utf8-name-table-capacity", "Preallocate the specified number of entries in the utf8 name table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveUTF8NameTableCapacity)));
+    options.add_options("advanced")(
+        "reserve-constant-name-table-capacity",
+        "Preallocate the specified number of entries in the constant name table",
+        cxxopts::value<u4>()->default_value(fmt::format("{}", empty.reserveConstantNameTableCapacity)));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
     options.add_options("advanced")("remove-path-prefix",
                                     "Remove the provided path prefix from all printed paths. Defaults to the input "
@@ -855,7 +862,9 @@ void readOptions(Options &opts,
                 }
             }
         }
-        opts.reserveNameTableCapacity = raw["reserve-name-table-capacity"].as<u4>();
+        opts.reserveUniqueNameTableCapacity = raw["reserve-unique-name-table-capacity"].as<u4>();
+        opts.reserveUTF8NameTableCapacity = raw["reserve-utf8-name-table-capacity"].as<u4>();
+        opts.reserveConstantNameTableCapacity = raw["reserve-constant-name-table-capacity"].as<u4>();
         opts.reserveClassTableCapacity = raw["reserve-class-table-capacity"].as<u4>();
         opts.reserveMethodTableCapacity = raw["reserve-method-table-capacity"].as<u4>();
         opts.reserveFieldTableCapacity = raw["reserve-field-table-capacity"].as<u4>();

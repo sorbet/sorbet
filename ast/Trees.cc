@@ -436,7 +436,7 @@ string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
         fmt::format_to(buf, "class ");
     }
     fmt::format_to(buf, "{}<{}> < ", name.toStringWithTabs(gs, tabs),
-                   this->symbol.dataAllowingNone(gs)->name.data(gs)->toString(gs));
+                   this->symbol.dataAllowingNone(gs)->name.toString(gs));
     printArgs(gs, buf, this->ancestors, tabs);
 
     if (this->rhs.empty()) {
@@ -461,7 +461,7 @@ string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::format_to(buf, "kind = {}\n", kind == ClassDef::Kind::Module ? "module" : "class");
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "name = {}<{}>\n", name.showRaw(gs, tabs + 1),
-                   this->symbol.dataAllowingNone(gs)->name.data(gs)->showRaw(gs));
+                   this->symbol.dataAllowingNone(gs)->name.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "ancestors = [");
     bool first = true;
@@ -533,10 +533,10 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
     } else {
         fmt::format_to(buf, "def ");
     }
-    fmt::format_to(buf, "{}", name.data(gs)->toString(gs));
+    fmt::format_to(buf, "{}", name.toString(gs));
     const auto data = this->symbol.dataAllowingNone(gs);
     if (name != data->name) {
-        fmt::format_to(buf, "<{}>", data->name.data(gs)->toString(gs));
+        fmt::format_to(buf, "<{}>", data->name.toString(gs));
     }
     fmt::format_to(buf, "(");
     bool first = true;
@@ -580,8 +580,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::format_to(buf, "flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
 
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "name = {}<{}>\n", name.data(gs)->showRaw(gs),
-                   this->symbol.dataAllowingNone(gs)->name.data(gs)->showRaw(gs));
+    fmt::format_to(buf, "name = {}<{}>\n", name.showRaw(gs), this->symbol.dataAllowingNone(gs)->name.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "args = [");
     bool first = true;
@@ -682,7 +681,7 @@ string EmptyTree::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
 }
 
 string UnresolvedConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("{}::{}", this->scope.toStringWithTabs(gs, tabs), this->cnst.data(gs)->toString(gs));
+    return fmt::format("{}::{}", this->scope.toStringWithTabs(gs, tabs), this->cnst.toString(gs));
 }
 
 string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
@@ -692,7 +691,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "scope = {}\n", this->scope.showRaw(gs, tabs + 1));
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "cnst = {}\n", this->cnst.data(gs)->showRaw(gs));
+    fmt::format_to(buf, "cnst = {}\n", this->cnst.showRaw(gs));
     printTabs(buf, tabs);
     fmt::format_to(buf, "}}");
     return fmt::to_string(buf);
@@ -923,7 +922,7 @@ string Rescue::showRaw(const core::GlobalState &gs, int tabs) {
 
 string Send::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}.{}", this->recv.toStringWithTabs(gs, tabs), this->fun.data(gs)->toString(gs));
+    fmt::format_to(buf, "{}.{}", this->recv.toStringWithTabs(gs, tabs), this->fun.toString(gs));
     printArgs(gs, buf, this->args, tabs);
     if (this->block != nullptr) {
         fmt::format_to(buf, "{}", this->block.toStringWithTabs(gs, tabs));
@@ -938,7 +937,7 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "recv = {}\n", this->recv.showRaw(gs, tabs + 1));
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "fun = {}\n", this->fun.data(gs)->showRaw(gs));
+    fmt::format_to(buf, "fun = {}\n", this->fun.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "block = ");
     if (this->block) {
@@ -1186,15 +1185,13 @@ string Literal::nodeName() {
 core::NameRef Literal::asString(const core::GlobalState &gs) const {
     ENFORCE(isString(gs));
     auto t = core::cast_type_nonnull<core::LiteralType>(value);
-    core::NameRef res(gs, t.value);
-    return res;
+    return t.asName();
 }
 
 core::NameRef Literal::asSymbol(const core::GlobalState &gs) const {
     ENFORCE(isSymbol(gs));
     auto t = core::cast_type_nonnull<core::LiteralType>(value);
-    core::NameRef res(gs, t.value);
-    return res;
+    return t.asName();
 }
 
 bool Literal::isSymbol(const core::GlobalState &gs) const {

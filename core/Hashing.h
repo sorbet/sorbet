@@ -11,12 +11,12 @@ inline unsigned int mix(unsigned int acc, unsigned int nw) {
     return nw + (acc << 6) + (acc << 16) - acc; // HASH_MULT in faster version
 }
 
-inline unsigned int _hash_mix_unique(unsigned int hash1, NameKind nk, unsigned int hash2, unsigned int hash3) {
-    return mix(mix(hash2, hash1), hash3) * HASH_MULT2 + _NameKind2Id_UNIQUE(nk);
+inline unsigned int _hash_mix_unique(unsigned int hash1, NameRef::Kind nk, unsigned int hash2, unsigned int hash3) {
+    return mix(mix(hash2, hash1), hash3) * HASH_MULT2 + static_cast<unsigned int>(nk);
 }
 
-inline unsigned int _hash_mix_constant(NameKind nk, unsigned int id) {
-    return id * HASH_MULT2 + _NameKind2Id_CONSTANT(nk);
+inline unsigned int _hash_mix_constant(NameRef::Kind nk, unsigned int id) {
+    return id * HASH_MULT2 + static_cast<unsigned int>(nk);
 }
 
 inline unsigned int _hash(std::string_view utf8) {
@@ -32,7 +32,7 @@ inline unsigned int _hash(std::string_view utf8) {
         res = mix(res, *it - '!'); // "!" is the first printable letter in ASCII.
         // This will help Latin1 but may harm utf8 multibyte
     }
-    return res * HASH_MULT2 + _NameKind2Id_UTF8(NameKind::UTF8);
+    return res * HASH_MULT2 + static_cast<unsigned int>(NameRef::Kind::UTF8);
 }
 } // namespace sorbet::core
 #endif // SORBET_HASHING_H

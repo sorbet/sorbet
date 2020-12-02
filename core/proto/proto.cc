@@ -17,13 +17,13 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
     com::stripe::rubytyper::Name protoName;
     protoName.set_name(name.show(gs));
     protoName.set_unique(com::stripe::rubytyper::Name::NOT_UNIQUE);
-    switch (name.data(gs)->kind) {
-        case NameKind::UTF8:
+    switch (name.kind()) {
+        case NameRef::Kind::UTF8:
             protoName.set_kind(com::stripe::rubytyper::Name::UTF8);
             break;
-        case NameKind::UNIQUE:
+        case NameRef::Kind::UNIQUE:
             protoName.set_kind(com::stripe::rubytyper::Name::UNIQUE);
-            switch (name.data(gs)->unique.uniqueNameKind) {
+            switch (name.uniqueNameData(gs)->uniqueNameKind) {
                 case UniqueNameKind::Parser:
                     protoName.set_unique(com::stripe::rubytyper::Name::PARSER);
                     break;
@@ -59,7 +59,7 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
                     break;
             }
             break;
-        case NameKind::CONSTANT:
+        case NameRef::Kind::CONSTANT:
             protoName.set_kind(com::stripe::rubytyper::Name::CONSTANT);
             break;
     }
@@ -151,11 +151,11 @@ com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, cons
             break;
         case LiteralType::LiteralTypeKind::String:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::STRING);
-            proto.set_string(NameRef(gs, lit.value).show(gs));
+            proto.set_string(lit.asName().show(gs));
             break;
         case LiteralType::LiteralTypeKind::Symbol:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::SYMBOL);
-            proto.set_symbol(NameRef(gs, lit.value).show(gs));
+            proto.set_symbol(lit.asName().show(gs));
             break;
         case LiteralType::LiteralTypeKind::Float:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::FLOAT);

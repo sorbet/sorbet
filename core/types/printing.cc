@@ -35,9 +35,8 @@ string UnresolvedClassType::toStringWithTabs(const GlobalState &gs, int tabs) co
 }
 
 string UnresolvedClassType::show(const GlobalState &gs) const {
-    return fmt::format(
-        "{}::{} (unresolved)", this->scope.data(gs)->show(gs),
-        fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.data(gs)->show(gs); }));
+    return fmt::format("{}::{} (unresolved)", this->scope.data(gs)->show(gs),
+                       fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.show(gs); }));
 }
 
 string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -60,9 +59,9 @@ string LiteralType::show(const GlobalState &gs) const {
 string LiteralType::showValue(const GlobalState &gs) const {
     SymbolRef undSymbol = cast_type_nonnull<ClassType>(this->underlying()).symbol;
     if (undSymbol == Symbols::String()) {
-        return fmt::format("\"{}\"", absl::CEscape(NameRef(gs, this->value).show(gs)));
+        return fmt::format("\"{}\"", absl::CEscape(asName().show(gs)));
     } else if (undSymbol == Symbols::Symbol()) {
-        auto shown = NameRef(gs, this->value).show(gs);
+        auto shown = asName().show(gs);
         if (absl::StrContains(shown, " ")) {
             return fmt::format(":\"{}\"", absl::CEscape(shown));
         } else {
@@ -131,7 +130,7 @@ string ShapeType::show(const GlobalState &gs) const {
         }
         SymbolRef undSymbol = cast_type_nonnull<ClassType>(cast_type_nonnull<LiteralType>(key).underlying()).symbol;
         if (undSymbol == Symbols::Symbol()) {
-            fmt::format_to(buf, "{}: {}", NameRef(gs, cast_type_nonnull<LiteralType>(key).value).show(gs),
+            fmt::format_to(buf, "{}: {}", cast_type_nonnull<LiteralType>(key).asName().show(gs),
                            (*valueIterator).show(gs));
         } else {
             fmt::format_to(buf, "{} => {}", key.show(gs), (*valueIterator).show(gs));

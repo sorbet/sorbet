@@ -6,11 +6,13 @@
 
 using namespace std;
 namespace sorbet::core {
+namespace {
 u4 incZero(u4 a) {
     return a == 0 ? 1 : a;
 };
-NameHash::NameHash(const GlobalState &gs, const NameData &nm) : _hashValue(incZero(_hash(nm->shortName(gs)))){};
-NameHash::NameHash(const GlobalState &gs, const Name &nm) : _hashValue(incZero(_hash(nm.shortName(gs)))){};
+} // namespace
+
+NameHash::NameHash(const GlobalState &gs, NameRef ref) : _hashValue(incZero(_hash(ref.shortName(gs)))){};
 
 void NameHash::sortAndDedupe(std::vector<core::NameHash> &hashes) {
     fast_sort(hashes);

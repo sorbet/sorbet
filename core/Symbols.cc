@@ -400,7 +400,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
         return res;
     }
 
-    if (name.data(gs)->kind == NameKind::UTF8) {
+    if (name.kind() == NameRef::Kind::UTF8) {
         auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
         if (sym.symbol.exists()) {
             res.emplace_back(sym);
@@ -423,12 +423,12 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
                 }
             }
         }
-        auto shortName = name.data(gs)->shortName(gs);
+        auto shortName = name.shortName(gs);
         if (!shortName.empty() && std::isupper(shortName.front())) {
             vector<Symbol::FuzzySearchResult> constant_matches = findMemberFuzzyMatchConstant(gs, name, betterThan);
             res.insert(res.end(), constant_matches.begin(), constant_matches.end());
         }
-    } else if (name.data(gs)->kind == NameKind::CONSTANT) {
+    } else if (name.kind() == NameRef::Kind::CONSTANT) {
         res = findMemberFuzzyMatchConstant(gs, name, betterThan);
     }
     return res;
@@ -447,7 +447,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
     best.symbol = Symbols::noSymbol();
     best.name = NameRef::noName();
     best.distance = betterThan;
-    auto currentName = name.data(gs)->shortName(gs);
+    auto currentName = name.shortName(gs);
     if (best.distance < 0) {
         best.distance = 1 + (currentName.size() / 2);
     }
@@ -479,11 +479,12 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             }
             for (const auto scope : candidateScopes) {
                 for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
-                    if (member.first.data(gs)->kind == NameKind::CONSTANT &&
-                        member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8 &&
+                    if (member.first.kind() == NameRef::Kind::CONSTANT &&
+                        member.first.constantNameData(gs)->original.kind() == NameRef::Kind::UTF8 &&
                         member.second.exists()) {
                         auto thisDistance = Levenstein::distance(
-                            currentName, member.first.data(gs)->cnst.original.data(gs)->raw.utf8, best.distance);
+                            currentName, member.first.constantNameData(gs)->original.utf8NameData(gs)->utf8,
+                            best.distance);
                         if (thisDistance <= best.distance) {
                             best.distance = thisDistance;
                             best.symbol = member.second;
@@ -514,15 +515,14 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             yetToGoDeeper.pop_back();
             ENFORCE(thisIter.data(gs)->isClassOrModule());
             for (auto member : thisIter.data(gs)->membersStableOrderSlow(gs)) {
-                if (member.second.exists() && member.first.exists() &&
-                    member.first.data(gs)->kind == NameKind::CONSTANT &&
-                    member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8) {
+                if (member.second.exists() && member.first.exists() && member.first.kind() == NameRef::Kind::CONSTANT &&
+                    member.first.constantNameData(gs)->original.kind() == NameRef::Kind::UTF8) {
                     if (member.second.data(gs)->isClassOrModule() &&
                         member.second.data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
                     auto thisDistance = Levenstein::distance(
-                        currentName, member.first.data(gs)->cnst.original.data(gs)->raw.utf8, best.distance);
+                        currentName, member.first.constantNameData(gs)->original.utf8NameData(gs)->utf8, best.distance);
                     if (thisDistance <= globalBestDistance) {
                         if (thisDistance < globalBestDistance) {
                             globalBest.clear();
@@ -552,19 +552,19 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
     result.symbol = Symbols::noSymbol();
     result.name = NameRef::noName();
     result.distance = betterThan;
-    ENFORCE(name.data(gs)->kind == NameKind::UTF8);
+    ENFORCE(name.kind() == NameRef::Kind::UTF8);
 
-    auto currentName = name.data(gs)->raw.utf8;
+    auto currentName = name.utf8NameData(gs)->utf8;
     if (result.distance < 0) {
         result.distance = 1 + (currentName.size() / 2);
     }
 
     for (auto pair : members()) {
         auto thisName = pair.first;
-        if (thisName.data(gs)->kind != NameKind::UTF8) {
+        if (thisName.kind() != NameRef::Kind::UTF8) {
             continue;
         }
-        auto utf8 = thisName.data(gs)->raw.utf8;
+        auto utf8 = thisName.utf8NameData(gs)->utf8;
         int thisDistance = Levenstein::distance(currentName, utf8, result.distance);
         if (thisDistance < result.distance ||
             (thisDistance == result.distance && result.symbol._id > pair.second._id)) {
@@ -580,7 +580,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
         auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
-            ENFORCE(subResult.name.data(gs)->kind == NameKind::UTF8);
+            ENFORCE(subResult.name.kind() == NameRef::Kind::UTF8);
             result = subResult;
         }
     }
@@ -588,7 +588,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
         auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
-            ENFORCE(subResult.name.data(gs)->kind == NameKind::UTF8);
+            ENFORCE(subResult.name.kind() == NameRef::Kind::UTF8);
             result = subResult;
         }
     }
@@ -889,7 +889,7 @@ string Symbol::show(const GlobalState &gs) const {
     }
 
     if (!this->owner.exists() || this->owner == Symbols::root()) {
-        return this->name.data(gs)->show(gs);
+        return this->name.show(gs);
     }
 
     if (this->owner == core::Symbols::PackageRegistry()) {
@@ -909,38 +909,36 @@ string Symbol::show(const GlobalState &gs) const {
     }
 
     if (this->isMethod() && this->owner.data(gs)->isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
-        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs),
-                           this->name.data(gs)->show(gs));
+        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs), this->name.show(gs));
     }
 
     auto needsColonColon = this->isClassOrModule() || this->isStaticField() || this->isTypeMember();
 
-    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#",
-                       this->name.data(gs)->show(gs));
+    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#", this->name.show(gs));
 }
 
 string ArgInfo::argumentName(const GlobalState &gs) const {
     if (flags.isKeyword) {
-        return (string)name.data(gs)->shortName(gs);
+        return (string)name.shortName(gs);
     } else {
         // positional arg
         if (loc.exists()) {
             return loc.source(gs);
         } else {
-            return (string)name.data(gs)->shortName(gs);
+            return (string)name.shortName(gs);
         }
     }
 }
 
 namespace {
 bool isSingletonName(const GlobalState &gs, core::NameRef name) {
-    return name.data(gs)->kind == NameKind::UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
+    return name.kind() == NameRef::Kind::UNIQUE && name.uniqueNameData(gs)->uniqueNameKind == UniqueNameKind::Singleton;
 }
 
 bool isMangledSingletonName(const GlobalState &gs, core::NameRef name) {
-    return name.data(gs)->kind == NameKind::UNIQUE &&
-           name.data(gs)->unique.uniqueNameKind == UniqueNameKind::MangleRename &&
-           isSingletonName(gs, name.data(gs)->unique.original);
+    return name.kind() == NameRef::Kind::UNIQUE &&
+           name.uniqueNameData(gs)->uniqueNameKind == UniqueNameKind::MangleRename &&
+           isSingletonName(gs, name.uniqueNameData(gs)->original);
 }
 } // namespace
 
@@ -989,7 +987,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 
 SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModule());
-    ENFORCE(this->name.data(gs)->isClassName(gs));
+    ENFORCE(this->name.isClassName(gs));
 
     SymbolRef selfRef = this->ref(gs);
     if (selfRef == Symbols::untyped()) {
@@ -1176,7 +1174,7 @@ Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
     result.flags = this->flags;
     result.mixins_ = this->mixins_;
     result.resultType = this->resultType;
-    result.name = NameRef(to, this->name.id());
+    result.name = NameRef(to, this->name.kind(), this->name.unsafeTableIndex());
     result.locs_ = this->locs_;
     result.typeParams = this->typeParams;
     if (keepGsId) {
@@ -1184,13 +1182,13 @@ Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
     } else {
         result.members_.reserve(this->members().size());
         for (auto &mem : this->members_) {
-            result.members_[NameRef(to, mem.first.id())] = mem.second;
+            result.members_[NameRef(to, mem.first.kind(), mem.first.unsafeTableIndex())] = mem.second;
         }
     }
     result.arguments_.reserve(this->arguments_.size());
     for (auto &mem : this->arguments_) {
         auto &store = result.arguments_.emplace_back(mem.deepCopy());
-        store.name = NameRef(to, mem.name.id());
+        store.name = NameRef(to, mem.name.kind(), mem.name.unsafeTableIndex());
     }
     result.superClassOrRebind = this->superClassOrRebind;
     result.intrinsic = this->intrinsic;
@@ -1280,7 +1278,7 @@ SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
 }
 
 u4 Symbol::hash(const GlobalState &gs) const {
-    u4 result = _hash(name.data(gs)->shortName(gs));
+    u4 result = _hash(name.shortName(gs));
     result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
@@ -1288,12 +1286,12 @@ u4 Symbol::hash(const GlobalState &gs) const {
     // argumentsOrMixins, typeParams, typeAliases
     for (auto e : membersStableOrderSlow(gs)) {
         if (e.second.exists() && !e.second.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.second.data(gs)->name.data(gs)->shortName(gs)));
+            result = mix(result, _hash(e.second.data(gs)->name.shortName(gs)));
         }
     }
     for (const auto &e : mixins_) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
     for (const auto &arg : arguments_) {
@@ -1303,11 +1301,11 @@ u4 Symbol::hash(const GlobalState &gs) const {
             type = Types::untypedUntracked();
         }
         result = mix(result, type.hash(gs));
-        result = mix(result, _hash(arg.name.data(gs)->shortName(gs)));
+        result = mix(result, _hash(arg.name.shortName(gs)));
     }
     for (const auto &e : typeParams) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
 
@@ -1317,7 +1315,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
 u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     ENFORCE(isMethod());
 
-    u4 result = _hash(name.data(gs)->shortName(gs));
+    u4 result = _hash(name.shortName(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
@@ -1343,7 +1341,7 @@ vector<u4> Symbol::methodArgumentHash(const GlobalState &gs) const {
         u4 arg = 0;
         // Changing name of keyword arg is a shape change.
         if (e.flags.isKeyword) {
-            arg = mix(arg, _hash(e.name.data(gs)->shortName(gs)));
+            arg = mix(arg, _hash(e.name.shortName(gs)));
         }
         // Changing an argument from e.g. keyword to position-based is a shape change.
         result.push_back(mix(arg, e.flags.toU1()));
@@ -1355,7 +1353,7 @@ bool Symbol::ignoreInHashing(const GlobalState &gs) const {
     if (isClassOrModule()) {
         return superClass() == core::Symbols::StubModule();
     } else if (isMethod()) {
-        return name.data(gs)->kind == NameKind::UNIQUE && name.data(gs)->unique.original == core::Names::staticInit();
+        return name.kind() == NameRef::Kind::UNIQUE && name.uniqueNameData(gs)->original == core::Names::staticInit();
     }
     return false;
 }
@@ -1410,20 +1408,20 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
         result.emplace_back(e);
     }
     fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
-        auto lhsShort = lhs.first.data(gs)->shortName(gs);
-        auto rhsShort = rhs.first.data(gs)->shortName(gs);
+        auto lhsShort = lhs.first.shortName(gs);
+        auto rhsShort = rhs.first.shortName(gs);
         auto compareShort = lhsShort.compare(rhsShort);
         if (compareShort != 0) {
             return compareShort < 0;
         }
-        auto lhsRaw = lhs.first.data(gs)->showRaw(gs);
-        auto rhsRaw = rhs.first.data(gs)->showRaw(gs);
+        auto lhsRaw = lhs.first.showRaw(gs);
+        auto rhsRaw = rhs.first.showRaw(gs);
         auto compareRaw = lhsRaw.compare(rhsRaw);
         if (compareRaw != 0) {
             return compareRaw < 0;
         }
-        auto lhsSym = lhs.second.data(gs)->showRaw(gs);
-        auto rhsSym = rhs.second.data(gs)->showRaw(gs);
+        auto lhsSym = lhs.second.showRaw(gs);
+        auto rhsSym = rhs.second.showRaw(gs);
         auto compareSym = lhsSym.compare(rhsSym);
         if (compareSym != 0) {
             return compareSym < 0;

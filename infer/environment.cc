@@ -373,8 +373,8 @@ string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) c
         sorted.emplace_back(pair);
     }
     fast_sort(sorted, [&cfg](const auto &lhs, const auto &rhs) -> bool {
-        return lhs.first.data(cfg)._name.id() < rhs.first.data(cfg)._name.id() ||
-               (lhs.first.data(cfg)._name.id() == rhs.first.data(cfg)._name.id() &&
+        return lhs.first.data(cfg)._name.rawId() < rhs.first.data(cfg)._name.rawId() ||
+               (lhs.first.data(cfg)._name.rawId() == rhs.first.data(cfg)._name.rawId() &&
                 lhs.first.data(cfg).unique < rhs.first.data(cfg).unique);
     });
     for (const auto &pair : sorted) {
@@ -486,7 +486,7 @@ bool isSingleton(core::Context ctx, core::SymbolRef sym) {
     }
 
     // T::Enum values are modeled as singletons of their own fake class.
-    if (sym.data(ctx)->name.data(ctx)->isTEnumName(ctx)) {
+    if (sym.data(ctx)->name.isTEnumName(ctx)) {
         return true;
     }
 

@@ -44,7 +44,7 @@ vector<core::NameRef> ParsedFile::showFullName(const core::GlobalState &gs, Defi
 // Pretty-print a `ParsedFile`, including all definitions and references and the pieces of metadata associated with them
 string ParsedFile::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer out;
-    auto nameToString = [&](const auto &nm) -> string { return nm.data(gs)->show(gs); };
+    auto nameToString = [&](const auto &nm) -> string { return nm.show(gs); };
 
     fmt::format_to(out,
                    "# ParsedFile: {}\n"
@@ -133,7 +133,7 @@ vector<string> ParsedFile::listAllClasses(core::Context ctx) {
         }
         vector<core::NameRef> names = showFullName(ctx, def.id);
         out.emplace_back(fmt::format("{}", fmt::map_join(names, "::", [&ctx](const core::NameRef &nm) -> string_view {
-                                         return nm.data(ctx)->shortName(ctx);
+                                         return nm.shortName(ctx);
                                      })));
     }
 

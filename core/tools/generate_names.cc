@@ -460,7 +460,8 @@ void emit_name_header(ostream &out, NameDef &name) {
     out << "#define NAME_" << name.srcName << '\n';
     out << "    // \"" << name.val << "\"" << '\n';
     out << "    static inline constexpr NameRef " << name.srcName << "() {" << '\n';
-    out << "        return NameRef(NameRef::WellKnown{}, " << name.id << ");" << '\n';
+    out << "        return NameRef(NameRef::WellKnown{}, NameRef::Kind::" << (name.isConstant ? "CONSTANT" : "UTF8")
+        << ", " << name.id << ");" << '\n';
     out << "    }" << '\n';
     out << "#endif" << '\n';
     out << '\n';
@@ -483,22 +484,26 @@ void emit_register(ostream &out) {
     }
     out << '\n';
     for (auto &name : names) {
-        out << "    ENFORCE(" << name.srcName << "_id._id == " << name.id << "); /* " << name.srcName << "() */"
-            << '\n';
+        out << "    ENFORCE(" << name.srcName << "_id." << (name.isConstant ? "constantIndex()" : "utf8Index()")
+            << " == " << name.id << "); /* " << name.srcName << "() */" << '\n';
     }
     out << '\n';
     out << "}" << '\n';
 }
 
 int main(int argc, char **argv) {
-    int i = 1;
+    int lastConstantId = 0;
+    int lastUTF8Id = 0;
     for (auto &name : names) {
         if (name.isConstant) {
-            i++;
+            name.id = lastConstantId;
+            lastConstantId++;
+        } else {
+            name.id = lastUTF8Id;
         }
-        name.id = i++;
+        // Constants enter UTF8 and Constant names.
+        lastUTF8Id++;
     }
-    int lastId = i;
 
     // emit header file
     {
@@ -527,9 +532,14 @@ int main(int argc, char **argv) {
         }
         header << "}" << '\n';
 
-        header << "#ifndef NAME_LAST_WELL_KNOWN_NAME" << '\n';
-        header << "#define NAME_LAST_WELL_KNOWN_NAME" << '\n';
-        header << "constexpr int LAST_WELL_KNOWN_NAME = " << lastId << ";" << '\n';
+        header << "#ifndef NAME_LAST_WELL_KNOWN_CONSTANT_NAME" << '\n';
+        header << "#define NAME_LAST_WELL_KNOWN_CONSTANT_NAME" << '\n';
+        header << "constexpr int LAST_WELL_KNOWN_CONSTANT_NAME = " << lastConstantId << ";" << '\n';
+        header << "#endif" << '\n';
+
+        header << "#ifndef NAME_LAST_WELL_KNOWN_UTF8_NAME" << '\n';
+        header << "#define NAME_LAST_WELL_KNOWN_UTF8_NAME" << '\n';
+        header << "constexpr int LAST_WELL_KNOWN_UTF8_NAME = " << lastUTF8Id << ";" << '\n';
         header << "#endif" << '\n';
 
         header << "    void registerNames(GlobalState &gs);" << '\n';

@@ -351,11 +351,11 @@ class SymbolFinder {
             return;
         }
 
-        switch (send->fun._id) {
-            case core::Names::declareFinal()._id:
-            case core::Names::declareSealed()._id:
-            case core::Names::declareInterface()._id:
-            case core::Names::declareAbstract()._id: {
+        switch (send->fun.rawId()) {
+            case core::Names::declareFinal().rawId():
+            case core::Names::declareSealed().rawId():
+            case core::Names::declareInterface().rawId():
+            case core::Names::declareAbstract().rawId(): {
                 Modifier mod;
                 mod.kind = Modifier::Kind::Class;
                 mod.owner = klass;
@@ -471,14 +471,14 @@ public:
 
         if (original.args.size() == 1) {
             // Common case: Send is not to a modifier.
-            switch (original.fun._id) {
-                case core::Names::private_()._id:
-                case core::Names::privateClassMethod()._id:
-                case core::Names::protected_()._id:
-                case core::Names::public_()._id:
+            switch (original.fun.rawId()) {
+                case core::Names::private_().rawId():
+                case core::Names::privateClassMethod().rawId():
+                case core::Names::protected_().rawId():
+                case core::Names::public_().rawId():
                     addMethodModifier(ctx, original);
                     break;
-                case core::Names::privateConstant()._id:
+                case core::Names::privateConstant().rawId():
                     addConstantModifier(ctx, original);
                     break;
                 default:
@@ -611,8 +611,8 @@ public:
                 auto *key = ast::cast_tree<ast::Literal>(send->args[i]);
                 core::NameRef name;
                 if (key != nullptr && key->isSymbol(ctx)) {
-                    switch (key->asSymbol(ctx)._id) {
-                        case core::Names::fixed()._id:
+                    switch (key->asSymbol(ctx).rawId()) {
+                        case core::Names::fixed().rawId():
                             found.isFixed = true;
                             break;
                     }
@@ -645,11 +645,11 @@ public:
         } else if (!send->recv.isSelfReference()) {
             handleAssignment(ctx, asgn);
         } else {
-            switch (send->fun._id) {
-                case core::Names::typeTemplate()._id:
+            switch (send->fun.rawId()) {
+                case core::Names::typeTemplate().rawId():
                     handleTypeMemberDefinition(ctx, send, asgn, lhs);
                     break;
-                case core::Names::typeMember()._id:
+                case core::Names::typeMember().rawId():
                     handleTypeMemberDefinition(ctx, send, asgn, lhs);
                     break;
                 default:
@@ -732,7 +732,7 @@ class SymbolDefiner {
             auto renamedSymbol = ctx.state.findRenamedSymbol(scope.data(ctx)->owner, scope);
             if (renamedSymbol.exists()) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
-                    auto constLitName = name.data(ctx)->show(ctx);
+                    auto constLitName = name.show(ctx);
                     auto scopeName = scope.data(ctx)->show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
                                 scopeName, scopeName);
@@ -749,7 +749,7 @@ class SymbolDefiner {
         }
 
         if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
-            auto constLitName = name.data(ctx)->show(ctx);
+            auto constLitName = name.show(ctx);
             auto newOwnerName = scope.data(ctx)->show(ctx);
             e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, newOwnerName,
                         newOwnerName);
@@ -1018,20 +1018,20 @@ class SymbolDefiner {
         ENFORCE(mod.kind == Modifier::Kind::Method);
 
         auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
-        if (mod.name._id == core::Names::privateClassMethod()._id) {
+        if (mod.name == core::Names::privateClassMethod()) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
         auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
         if (method.exists()) {
-            switch (mod.name._id) {
-                case core::Names::private_()._id:
-                case core::Names::privateClassMethod()._id:
+            switch (mod.name.rawId()) {
+                case core::Names::private_().rawId():
+                case core::Names::privateClassMethod().rawId():
                     method.data(ctx)->setMethodPrivate();
                     break;
-                case core::Names::protected_()._id:
+                case core::Names::protected_().rawId():
                     method.data(ctx)->setMethodProtected();
                     break;
-                case core::Names::public_()._id:
+                case core::Names::public_().rawId():
                     method.data(ctx)->setMethodPublic();
                     break;
                 default:
@@ -1193,8 +1193,8 @@ class SymbolDefiner {
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         if (!sym.exists() && currSym.exists()) {
-            emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc),
-                                       staticField.name.data(ctx)->show(ctx), currSym.data(ctx)->loc());
+            emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc), staticField.name.show(ctx),
+                                       currSym.data(ctx)->loc());
             ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
         }
         if (sym.exists()) {
@@ -1254,12 +1254,12 @@ class SymbolDefiner {
             if (existingTypeMember.data(ctx)->loc().file() != ctx.file) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.asgnLoc),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Duplicate type member `{}`", typeMember.name.data(ctx)->show(ctx));
+                    e.setHeader("Duplicate type member `{}`", typeMember.name.show(ctx));
                     e.addErrorLine(existingTypeMember.data(ctx)->loc(), "Also defined here");
                 }
                 if (auto e = ctx.state.beginError(existingTypeMember.data(ctx)->loc(),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Duplicate type member `{}`", typeMember.name.data(ctx)->show(ctx));
+                    e.setHeader("Duplicate type member `{}`", typeMember.name.show(ctx));
                     e.addErrorLine(core::Loc(ctx.file, typeMember.asgnLoc), "Also defined here");
                 }
             }
@@ -1295,8 +1295,8 @@ class SymbolDefiner {
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
                 if (oldSym.exists() && !(oldSym.data(ctx)->loc() == core::Loc(ctx.file, typeMember.asgnLoc) ||
                                          oldSym.data(ctx)->loc().isTombStoned(ctx))) {
-                    emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc),
-                                               typeMember.name.data(ctx)->show(ctx), oldSym.data(ctx)->loc());
+                    emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), typeMember.name.show(ctx),
+                                               oldSym.data(ctx)->loc());
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
                 auto alias =
@@ -1451,14 +1451,14 @@ class TreeSymbolizer {
 
         if (send->args.empty()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
-                e.setHeader("`{}` requires at least one argument", send->fun.data(ctx)->show(ctx));
+                e.setHeader("`{}` requires at least one argument", send->fun.show(ctx));
             }
             return;
         }
 
         if (send->block != nullptr) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
-                e.setHeader("`{}` can not be passed a block", send->fun.data(ctx)->show(ctx));
+                e.setHeader("`{}` can not be passed a block", send->fun.show(ctx));
             }
             return;
         }
@@ -1477,7 +1477,7 @@ class TreeSymbolizer {
                 dest->emplace_back(arg.deepCopy());
             } else {
                 if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
-                    e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
+                    e.setHeader("`{}` must only contain constant literals", send->fun.show(ctx));
                 }
                 arg = ast::MK::EmptyTree();
             }
@@ -1698,13 +1698,13 @@ public:
                 for (auto i = start; i < end; i += 2) {
                     auto key = ast::cast_tree<ast::Literal>(send->args[i]);
                     if (key != nullptr && key->isSymbol(ctx)) {
-                        switch (key->asSymbol(ctx)._id) {
-                            case core::Names::fixed()._id:
+                        switch (key->asSymbol(ctx).rawId()) {
+                            case core::Names::fixed().rawId():
                                 fixed = true;
                                 break;
 
-                            case core::Names::lower()._id:
-                            case core::Names::upper()._id:
+                            case core::Names::lower().rawId():
+                            case core::Names::upper().rawId():
                                 bounded = true;
                                 break;
                         }
@@ -1759,10 +1759,10 @@ public:
             return handleAssignment(ctx, std::move(tree));
         }
 
-        switch (send->fun._id) {
-            case core::Names::typeTemplate()._id:
+        switch (send->fun.rawId()) {
+            case core::Names::typeTemplate().rawId():
                 return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
-            case core::Names::typeMember()._id:
+            case core::Names::typeMember().rawId():
                 return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
             default:
                 return handleAssignment(ctx, std::move(tree));

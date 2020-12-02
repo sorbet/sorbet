@@ -457,6 +457,7 @@ public:
     union {
         const int64_t value;
         const double floatval;
+        const u4 nameId;
     };
 
     enum class LiteralTypeKind : u1 { Integer, String, Symbol, Float };
@@ -471,6 +472,9 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     std::string showValue(const GlobalState &gs) const;
+
+    // If this is a String or Symbol type, retrieves the Name contained within the type.
+    NameRef asName() const;
 
     bool equals(const LiteralType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -523,9 +527,9 @@ template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &wha
         case LiteralType::LiteralTypeKind::Integer:
             return LiteralType(absl::bit_cast<int64_t>(what.value));
         case LiteralType::LiteralTypeKind::String:
-            return LiteralType(Symbols::String(), NameRef(NameRef::WellKnown{}, static_cast<u4>(what.value)));
+            return LiteralType(Symbols::String(), NameRef::fromRaw(static_cast<u4>(what.value)));
         case LiteralType::LiteralTypeKind::Symbol:
-            return LiteralType(Symbols::Symbol(), NameRef(NameRef::WellKnown{}, static_cast<u4>(what.value)));
+            return LiteralType(Symbols::Symbol(), NameRef::fromRaw(static_cast<u4>(what.value)));
     }
 }
 

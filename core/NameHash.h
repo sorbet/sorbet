@@ -2,16 +2,14 @@
 #define RUBY_TYPER_NAME_HASH_H
 #include "common/common.h"
 namespace sorbet::core {
-class Name;
-class NameData;
 class GlobalState;
+class NameRef;
 class NameHash {
 public:
     /** Sorts an array of NameHashes and removes duplicates. */
     static void sortAndDedupe(std::vector<core::NameHash> &hashes);
 
-    NameHash(const GlobalState &gs, const NameData &nm);
-    NameHash(const GlobalState &gs, const Name &nm);
+    NameHash(const GlobalState &gs, NameRef ref);
     inline bool isDefined() const {
         return _hashValue != 0;
     }

@@ -550,7 +550,7 @@ private:
         if (!owner.data(gs)->isClassOrModule() || !owner.data(gs)->isClassOrModuleModule()) {
             if (auto e =
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.data(gs)->show(gs));
+                e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.show(gs));
             }
             // Keep processing it anyways
         }
@@ -564,21 +564,21 @@ private:
         if (id == nullptr || !id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
             if (auto e =
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.data(gs)->show(gs));
+                e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
             }
             return;
         }
         if (id->symbol.data(gs)->isClassOrModuleClass()) {
             if (auto e =
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` is a class, not a module; Only modules may be mixins", id->symbol.data(gs)->show(gs));
+                e.setHeader("`{}` is a class, not a module; Only modules may be mixins", id->symbol.show(gs));
             }
             return;
         }
         if (id->symbol == owner) {
             if (auto e =
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Must not pass your self to `{}`", send->fun.data(gs)->show(gs));
+                e.setHeader("Must not pass your self to `{}`", send->fun.show(gs));
             }
             return;
         }
@@ -586,8 +586,8 @@ private:
         if (existing.exists() && existing != id->symbol) {
             if (auto e =
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send->fun.data(gs)->show(gs),
-                            existing.data(gs)->show(gs), id->symbol.data(gs)->show(gs));
+                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send->fun.show(gs),
+                            existing.data(gs)->show(gs), id->symbol.show(gs));
             }
             return;
         }
@@ -1161,17 +1161,17 @@ class ResolveTypeMembersWalk {
                     core::TypePtr resTy = TypeSyntax::getResultType(
                         ctx, value, emptySig, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
 
-                    switch (lit->asSymbol(ctx)._id) {
-                        case core::Names::fixed()._id:
+                    switch (lit->asSymbol(ctx).rawId()) {
+                        case core::Names::fixed().rawId():
                             memberType->lowerBound = resTy;
                             memberType->upperBound = resTy;
                             break;
 
-                        case core::Names::lower()._id:
+                        case core::Names::lower().rawId():
                             memberType->lowerBound = resTy;
                             break;
 
-                        case core::Names::upper()._id:
+                        case core::Names::upper().rawId():
                             memberType->upperBound = resTy;
                             break;
                     }
@@ -1326,10 +1326,10 @@ public:
 
     ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        switch (send.fun._id) {
-            case core::Names::typeAlias()._id:
-            case core::Names::typeMember()._id:
-            case core::Names::typeTemplate()._id:
+        switch (send.fun.rawId()) {
+            case core::Names::typeAlias().rawId():
+            case core::Names::typeMember().rawId():
+            case core::Names::typeTemplate().rawId():
                 break;
 
             default:
@@ -1387,10 +1387,10 @@ public:
     ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
-        switch (send.fun._id) {
-            case core::Names::typeMember()._id:
-            case core::Names::typeTemplate()._id:
-            case core::Names::typeAlias()._id:
+        switch (send.fun.rawId()) {
+            case core::Names::typeMember().rawId():
+            case core::Names::typeTemplate().rawId():
+            case core::Names::typeAlias().rawId():
                 trackDependencies_ = false;
                 break;
 
@@ -2062,7 +2062,7 @@ private:
                 }
 
                 if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
-                    e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.data(ctx)->show(ctx));
+                    e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
                     e.addErrorLine(errorLine, "Previous declaration is here:");
                 }
                 return false;
@@ -2146,8 +2146,8 @@ private:
         // non-null
         ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
 
-        auto name = core::NameRef(ctx.state, literal.value);
-        auto shortName = name.data(ctx)->shortName(ctx);
+        auto name = literal.asName();
+        auto shortName = name.shortName(ctx);
         if (shortName.empty()) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("The string given to `{}` must not be empty", method);
@@ -2185,7 +2185,7 @@ private:
                     }
 
                     auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
-                    auto packageName = core::NameRef(ctx.state, package.value);
+                    auto packageName = package.asName();
                     auto mangledName = packageName.lookupMangledPackageName(ctx.state);
                     // if the mangled name doesn't exist, then this means probably there's no package named this
                     if (!mangledName.exists()) {
@@ -2342,11 +2342,11 @@ public:
             if (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_NonForcingConstants()) {
                 return tree;
             }
-            switch (send.fun._id) {
-                case core::Names::let()._id:
-                case core::Names::uncheckedLet()._id:
-                case core::Names::assertType()._id:
-                case core::Names::cast()._id: {
+            switch (send.fun.rawId()) {
+                case core::Names::let().rawId():
+                case core::Names::uncheckedLet().rawId():
+                case core::Names::assertType().rawId():
+                case core::Names::cast().rawId(): {
                     if (send.args.size() < 2) {
                         return tree;
                     }
@@ -2367,8 +2367,8 @@ public:
                     return ast::MK::InsSeq1(send.loc, ast::MK::KeepForTypechecking(std::move(send.args[1])),
                                             ast::make_tree<ast::Cast>(send.loc, type, std::move(expr), send.fun));
                 }
-                case core::Names::revealType()._id:
-                case core::Names::absurd()._id: {
+                case core::Names::revealType().rawId():
+                case core::Names::absurd().rawId(): {
                     // These errors do not match up with our "upper error levels are super sets
                     // of errors from lower levels" claim. This is ONLY an error in lower levels.
 
@@ -2381,7 +2381,7 @@ public:
                         doWhat = "resolve strings to constants";
                     }
 
-                    auto fun = fmt::format("T.{}", send.fun.data(ctx)->show(ctx));
+                    auto fun = fmt::format("T.{}", send.fun.show(ctx));
                     if (ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
                         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::RevealTypeInUntypedFile)) {
                             e.setHeader("`{}` can only {} in `{}` files (or higher)", fun, doWhat, "# typed: true");
@@ -2389,7 +2389,7 @@ public:
                     }
                     return tree;
                 }
-                case core::Names::nonForcingIsA_p()._id:
+                case core::Names::nonForcingIsA_p().rawId():
                     validateNonForcingIsA(ctx, send);
                     return tree;
                 default:

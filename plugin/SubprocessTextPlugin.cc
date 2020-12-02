@@ -68,7 +68,7 @@ struct SpawningWalker {
             optional<string> output;
             {
                 string className = core::Loc(ctx.file, klass->name.loc()).source(ctx);
-                string_view shortName = send->fun.data(ctx)->shortName(ctx);
+                string_view shortName = send->fun.shortName(ctx);
                 string sendSource = core::Loc(ctx.file, send->loc).source(ctx);
 
                 vector<string> args(ctx.state.dslRubyExtraArgs);
@@ -97,7 +97,7 @@ struct SpawningWalker {
                             }
                             first = false;
                             if (auto &name = *it; name != core::Names::Constants::Root()) {
-                                format_to(generatedSource, "{}", name.data(ctx)->shortName(ctx));
+                                format_to(generatedSource, "{}", name.shortName(ctx));
                             }
                         }
                         format_to(generatedSource, "{}", ';');

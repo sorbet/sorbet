@@ -102,43 +102,44 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
 
     fastPath = false;
     if (optionalCommonParent != nullptr) {
-        if (from.namesUsed() == optionalCommonParent->namesUsed() &&
+        if (from.namesUsedTotal() == optionalCommonParent->namesUsedTotal() &&
             from.symbolsUsedTotal() == optionalCommonParent->symbolsUsedTotal()) {
-            ENFORCE(to.namesUsed() >= from.namesUsed());
+            ENFORCE(to.namesUsedTotal() >= from.namesUsedTotal());
             ENFORCE(to.symbolsUsedTotal() >= from.symbolsUsedTotal());
             fastPath = true;
         }
     }
 
     if (!fastPath || debug_mode) {
-        bool seenEmpty = false;
         {
             UnfreezeNameTable unfreezeNames(to);
-            nameSubstitution.reserve(from.names.size());
+            uniqueNameSubstitution.reserve(from.uniqueNames.size());
+            utf8NameSubstitution.reserve(from.utf8Names.size());
+            constantNameSubstitution.reserve(from.constantNames.size());
+
             int i = -1;
-            for (const Name &nm : from.names) {
+            for (const auto &nm : from.utf8Names) {
                 i++;
-                ENFORCE(nameSubstitution.size() == i, "Name substitution has wrong size");
-                if (seenEmpty) {
-                    switch (nm.kind) {
-                        case NameKind::UNIQUE:
-                            nameSubstitution.emplace_back(to.freshNameUnique(
-                                nm.unique.uniqueNameKind, substitute(nm.unique.original), nm.unique.num));
-                            break;
-                        case NameKind::UTF8:
-                            nameSubstitution.emplace_back(to.enterNameUTF8(nm.raw.utf8));
-                            break;
-                        case NameKind::CONSTANT:
-                            nameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.cnst.original)));
-                            break;
-                        default:
-                            ENFORCE(false, "NameKind missing");
-                    }
-                } else {
-                    nameSubstitution.emplace_back(to, 0);
-                    seenEmpty = true;
-                }
-                ENFORCE(!fastPath || nameSubstitution.back()._id == i);
+                ENFORCE(utf8NameSubstitution.size() == i, "Name substitution has wrong size");
+                utf8NameSubstitution.emplace_back(to.enterNameUTF8(nm.utf8));
+                ENFORCE(!fastPath || utf8NameSubstitution.back().utf8Index() == i);
+            }
+
+            i = -1;
+            for (const auto &nm : from.constantNames) {
+                i++;
+                ENFORCE(constantNameSubstitution.size() == i, "Name substitution has wrong size");
+                constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.original)));
+                ENFORCE(!fastPath || constantNameSubstitution.back().constantIndex() == i);
+            }
+
+            i = -1;
+            for (const auto &nm : from.uniqueNames) {
+                i++;
+                ENFORCE(uniqueNameSubstitution.size() == i, "Name substitution has wrong size");
+                uniqueNameSubstitution.emplace_back(
+                    to.freshNameUnique(nm.uniqueNameKind, substitute(nm.original), nm.num));
+                ENFORCE(!fastPath || uniqueNameSubstitution.back().uniqueIndex() == i);
             }
         }
 

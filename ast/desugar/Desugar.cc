@@ -178,7 +178,7 @@ TreePtr mergeStrings(DesugarContext dctx, core::LocOffsets loc, InlinedVector<Tr
                     if (isa_tree<EmptyTree>(expr))
                         return ""sv;
                     else
-                        return cast_tree<Literal>(expr)->asString(dctx.ctx).data(dctx.ctx)->shortName(dctx.ctx);
+                        return cast_tree<Literal>(expr)->asString(dctx.ctx).shortName(dctx.ctx);
                 }))));
     }
 }
@@ -318,7 +318,7 @@ TreePtr symbol2Proc(DesugarContext dctx, TreePtr expr) {
     ENFORCE(lit && lit->isSymbol(dctx.ctx));
 
     // &:foo => {|temp| temp.foo() }
-    core::NameRef name(dctx.ctx, core::cast_type_nonnull<core::LiteralType>(lit->value).value);
+    core::NameRef name = core::cast_type_nonnull<core::LiteralType>(lit->value).asName();
     // `temp` does not refer to any specific source text, so give it a 0-length Loc so LSP ignores it.
     auto zeroLengthLoc = loc.copyWithZeroLength();
     TreePtr recv = MK::Local(zeroLengthLoc, temp);
@@ -1367,14 +1367,14 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
             },
             [&](parser::Complex *complex) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Names::Constants::Complex().data(dctx.ctx)->cnst.original;
+                core::NameRef complex_name = core::Names::Constants::Complex().constantNameData(dctx.ctx)->original;
                 core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->value);
                 auto send = MK::Send2(loc, std::move(kernel), complex_name, MK::Int(loc, 0), MK::String(loc, value));
                 result = std::move(send);
             },
             [&](parser::Rational *complex) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Names::Constants::Rational().data(dctx.ctx)->cnst.original;
+                core::NameRef complex_name = core::Names::Constants::Rational().constantNameData(dctx.ctx)->original;
                 core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->val);
                 auto send = MK::Send1(loc, std::move(kernel), complex_name, MK::String(loc, value));
                 result = std::move(send);
@@ -1668,7 +1668,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                         if (auto e = dctx.ctx.state.beginError(core::Loc(dctx.ctx.file, dctx.enclosingMethodLoc),
                                                                core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
-                                        dctx.enclosingMethodName.data(dctx.ctx)->show(dctx.ctx), "yield");
+                                        dctx.enclosingMethodName.show(dctx.ctx), "yield");
                             e.addErrorLine(core::Loc(dctx.ctx.file, loc), "Arising from use of `{}` in method body",
                                            "yield");
                         }

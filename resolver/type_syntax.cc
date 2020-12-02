@@ -193,11 +193,11 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
         while (send != nullptr) {
             // so we don't report multiple "method does not exist" errors arising from the same expression
             bool reportedInvalidMethod = false;
-            switch (send->fun._id) {
-                case core::Names::proc()._id:
+            switch (send->fun.rawId()) {
+                case core::Names::proc().rawId():
                     sig.seen.proc = true;
                     break;
-                case core::Names::bind()._id: {
+                case core::Names::bind().rawId(): {
                     if (sig.seen.bind) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed `{}`: Multiple calls to `.bind`", send->fun.show(ctx));
@@ -239,7 +239,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
 
                     break;
                 }
-                case core::Names::params()._id: {
+                case core::Names::params().rawId(): {
                     if (sig.seen.params) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Malformed `{}`: Multiple calls to `.params`", send->fun.show(ctx));
@@ -305,10 +305,10 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     break;
                 }
-                case core::Names::typeParameters()._id:
+                case core::Names::typeParameters().rawId():
                     // was handled above
                     break;
-                case core::Names::abstract()._id:
+                case core::Names::abstract().rawId():
                     if (sig.seen.final) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final", "abstract");
@@ -316,7 +316,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     sig.seen.abstract = true;
                     break;
-                case core::Names::override_()._id: {
+                case core::Names::override_().rawId(): {
                     sig.seen.override_ = true;
 
                     if (send->numPosArgs > 0) {
@@ -345,7 +345,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
 
                     break;
                 }
-                case core::Names::implementation()._id:
+                case core::Names::implementation().rawId():
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
                         e.setHeader("Use of `{}` has been replaced by `{}`", "implementation", "override");
                         if (send->recv.isSelfReference()) {
@@ -356,7 +356,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                         }
                     }
                     break;
-                case core::Names::overridable()._id:
+                case core::Names::overridable().rawId():
                     if (sig.seen.final) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                             e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final",
@@ -365,7 +365,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     sig.seen.overridable = true;
                     break;
-                case core::Names::returns()._id: {
+                case core::Names::returns().rawId(): {
                     sig.seen.returns = true;
                     if (send->numPosArgs != send->args.size()) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -393,16 +393,16 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
 
                     break;
                 }
-                case core::Names::void_()._id:
+                case core::Names::void_().rawId():
                     sig.seen.void_ = true;
                     sig.returns = core::Types::void_();
                     break;
-                case core::Names::checked()._id:
+                case core::Names::checked().rawId():
                     sig.seen.checked = true;
                     break;
-                case core::Names::onFailure()._id:
+                case core::Names::onFailure().rawId():
                     break;
-                case core::Names::final_()._id:
+                case core::Names::final_().rawId():
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         reportedInvalidMethod = true;
                         e.setHeader("The syntax for declaring a method final is `sig(:final) {{...}}`, not `sig "
@@ -442,14 +442,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
 
 core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                    TypeSyntaxArgs args) {
-    switch (send.fun._id) {
-        case core::Names::nilable()._id:
+    switch (send.fun.rawId()) {
+        case core::Names::nilable().rawId():
             if (send.numPosArgs != 1 || send.hasKwArgs()) {
                 return core::Types::untypedUntracked(); // error will be reported in infer.
             }
             return core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, send.args[0], sig, args),
                                     core::Types::nilClass());
-        case core::Names::all()._id: {
+        case core::Names::all().rawId(): {
             if (send.args.empty()) {
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
@@ -462,7 +462,7 @@ core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, con
             }
             return result;
         }
-        case core::Names::any()._id: {
+        case core::Names::any().rawId(): {
             if (send.args.empty()) {
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
@@ -475,7 +475,7 @@ core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, con
             }
             return result;
         }
-        case core::Names::typeParameter()._id: {
+        case core::Names::typeParameter().rawId(): {
             if (send.args.size() != 1) {
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
@@ -496,7 +496,7 @@ core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, con
             }
             return fnd.type;
         }
-        case core::Names::enum_()._id: {
+        case core::Names::enum_().rawId(): {
             if (send.args.size() != 1) {
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
@@ -524,7 +524,7 @@ core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, con
             }
             return result;
         }
-        case core::Names::classOf()._id: {
+        case core::Names::classOf().rawId(): {
             if (send.args.size() != 1) {
                 // Error will be reported in infer
                 return core::Types::untypedUntracked();
@@ -567,9 +567,9 @@ core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, con
             }
             return singleton.data(ctx)->externalType();
         }
-        case core::Names::untyped()._id:
+        case core::Names::untyped().rawId():
             return core::Types::untyped(ctx, args.untypedBlame);
-        case core::Names::selfType()._id:
+        case core::Names::selfType().rawId():
             if (args.allowSelfType) {
                 return core::make_type<core::SelfType>();
             }
@@ -577,8 +577,8 @@ core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, con
                 e.setHeader("Only top-level T.self_type is supported");
             }
             return core::Types::untypedUntracked();
-        case core::Names::experimentalAttachedClass()._id:
-        case core::Names::attachedClass()._id:
+        case core::Names::experimentalAttachedClass().rawId():
+        case core::Names::attachedClass().rawId():
             if (send.fun == core::Names::experimentalAttachedClass()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::ExperimentalAttachedClass)) {
                     e.setHeader("`{}` has been stabilized and is no longer experimental",
@@ -599,7 +599,7 @@ core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, con
                 auto attachedClass = ctx.owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
                 return attachedClass.data(ctx)->resultType;
             }
-        case core::Names::noreturn()._id:
+        case core::Names::noreturn().rawId():
             return core::Types::bottom();
 
         default:
