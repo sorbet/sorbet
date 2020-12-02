@@ -1809,14 +1809,14 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
         ::memcpy(result->constantNames.data(), this->constantNames.data(),
                  this->constantNames.size() * sizeof(ConstantName));*/
     } else {
-        for (auto &nm : this->uniqueNames) {
-            result->uniqueNames.emplace_back(nm.deepCopy(*result));
-        }
         for (auto &nm : this->utf8Names) {
             result->utf8Names.emplace_back(nm.deepCopy(*result));
         }
         for (auto &nm : this->uniqueNames) {
             result->uniqueNames.emplace_back(nm.deepCopy(*result));
+        }
+        for (auto &nm : this->constantNames) {
+            result->constantNames.emplace_back(nm.deepCopy(*result));
         }
     }
 

@@ -50,9 +50,9 @@ public:
 
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload. Enforced in payload.cc.
-    static constexpr unsigned int PAYLOAD_MAX_UTF8_NAME_COUNT = 4;
-    static constexpr unsigned int PAYLOAD_MAX_UNIQUE_NAME_COUNT = 4;
-    static constexpr unsigned int PAYLOAD_MAX_CONSTANT_NAME_COUNT = 2;
+    static constexpr unsigned int PAYLOAD_MAX_UTF8_NAME_COUNT = 16384;
+    static constexpr unsigned int PAYLOAD_MAX_UNIQUE_NAME_COUNT = 4096;
+    static constexpr unsigned int PAYLOAD_MAX_CONSTANT_NAME_COUNT = 4096;
     static constexpr unsigned int PAYLOAD_MAX_CLASS_AND_MODULE_COUNT = 8192;
     static constexpr unsigned int PAYLOAD_MAX_METHOD_COUNT = 32768;
     static constexpr unsigned int PAYLOAD_MAX_FIELD_COUNT = 4096;
