@@ -132,7 +132,7 @@ TEST_CASE("Substitute") { // NOLINT
 
     auto other2 = subst.substitute(other1);
     REQUIRE(other2.exists());
-    REQUIRE(other2.data(gs2)->kind == NameRef::Kind::UTF8);
+    REQUIRE(other2.kind() == NameRef::Kind::UTF8);
     REQUIRE_EQ("<U other>", other2.showRaw(gs2));
 }
 
