@@ -35,21 +35,25 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
     return true;
 }
 
-// Checks if s is a subclass of root, and updates isSubclass, visited, and subclasses vectors.
-bool isSubclass(const core::GlobalState &gs, core::SymbolRef root, core::SymbolRef s, vector<bool> &memoized,
-                vector<bool> &visited) {
+// Checks if s is a subclass of root or contains root as a mixin, and updates visited and memoized vectors.
+bool isSubclassOrMixin(const core::GlobalState &gs, core::SymbolRef root, core::SymbolRef s, vector<bool> &memoized,
+                       vector<bool> &visited) {
     // don't visit the same class twice
     if (visited[s.classOrModuleIndex()] == true) {
         return memoized[s.classOrModuleIndex()];
     }
     visited[s.classOrModuleIndex()] = true;
 
-    auto super = s.data(gs)->superClass();
-    if (super.exists()) {
-        memoized[s.classOrModuleIndex()] = isSubclass(gs, root, super, memoized, visited);
-    } else {
-        memoized[s.classOrModuleIndex()] = false;
+    for (core::SymbolRef a : s.data(gs)->mixins()) {
+        if (a == root) {
+            memoized[s.classOrModuleIndex()] = true;
+            return true;
+        }
     }
+    if (s.data(gs)->superClass().exists()) {
+        memoized[s.classOrModuleIndex()] = isSubclassOrMixin(gs, root, s.data(gs)->superClass(), memoized, visited);
+    }
+
     return memoized[s.classOrModuleIndex()];
 }
 
@@ -64,7 +68,7 @@ vector<core::SymbolRef> getSubclasses(LSPTypecheckerDelegate &typechecker, core:
     vector<core::SymbolRef> subclasses;
     for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
         auto s = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
-        if (isSubclass(gs, root, s, memoized, visited)) {
+        if (isSubclassOrMixin(gs, root, s, memoized, visited)) {
             subclasses.emplace_back(s);
         }
     }
