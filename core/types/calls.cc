@@ -930,7 +930,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
                     auto lit = cast_type_nonnull<LiteralType>(litType);
                     return cast_type_nonnull<ClassType>(lit.underlying()).symbol == Symbols::Symbol() &&
-                           lit.value == spec.name.rawId();
+                           lit.asName() == spec.name;
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
@@ -1638,8 +1638,8 @@ public:
             res.returnType = Types::untypedUntracked();
             return;
         }
-        int before = (int)beforeLit.value;
-        int after = (int)afterLit.value;
+        int before = (int)beforeLit.asInteger();
+        int after = (int)afterLit.asInteger();
         res.returnType = expandArray(gs, val, before + after);
     }
 } Magic_expandSplat;
@@ -2215,7 +2215,7 @@ public:
             return;
         }
 
-        auto idx = lit.value;
+        auto idx = lit.asInteger();
         if (idx < 0) {
             idx = tuple->elems.size() + idx;
         }
@@ -2439,8 +2439,8 @@ public:
             auto lt = cast_type_nonnull<LiteralType>(argTyp);
             ENFORCE(lt.literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
 
-            if (lt.value >= 0) {
-                depth = lt.value;
+            if (lt.asInteger() >= 0) {
+                depth = lt.asInteger();
             } else {
                 // Negative values behave like no depth was given
                 depth = INT64_MAX;

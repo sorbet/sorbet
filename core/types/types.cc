@@ -334,6 +334,16 @@ LiteralType::LiteralType(SymbolRef klass, NameRef val)
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
+int64_t LiteralType::asInteger() const {
+    ENFORCE(literalKind == LiteralTypeKind::Integer);
+    return value;
+}
+
+double LiteralType::asFloat() const {
+    ENFORCE(literalKind == LiteralTypeKind::Float);
+    return floatval;
+}
+
 NameRef LiteralType::asName() const {
     ENFORCE(literalKind == LiteralTypeKind::String || literalKind == LiteralTypeKind::Symbol);
     return NameRef::fromRaw(nameId);

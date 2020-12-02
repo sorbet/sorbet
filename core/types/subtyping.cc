@@ -348,7 +348,9 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                                 auto fnd = absl::c_find_if(h1.keys, [&](auto &candidate) -> bool {
                                     auto el1l = cast_type_nonnull<LiteralType>(candidate);
                                     auto u1 = cast_type_nonnull<ClassType>(el1l.underlying());
-                                    return el1l.value == el2l.value && u1.symbol == u2.symbol; // from lambda
+                                    // NOTE: candidate and el2 are LiteralTypes and their TypePtrs can be compared by
+                                    // value.
+                                    return candidate == el2 && u1.symbol == u2.symbol; // from lambda
                                 });
                                 if (fnd != h1.keys.end()) {
                                     auto &inserted = valueLubs.emplace_back(
@@ -380,7 +382,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                         auto u1 = cast_type_nonnull<ClassType>(l1.underlying());
                         auto u2 = cast_type_nonnull<ClassType>(l2.underlying());
                         if (u1.symbol == u2.symbol) {
-                            if (l1.value == l2.value) {
+                            // NOTE: t1 and t2 are LiteralTypes and their TypePtrs can be compared by value.
+                            if (t1 == t2) {
                                 result = t1;
                             } else {
                                 result = l1.underlying();
@@ -695,7 +698,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             auto fnd = absl::c_find_if(h1.keys, [&](auto &candidate) -> bool {
                                 auto el1l = cast_type_nonnull<LiteralType>(candidate);
                                 auto u1 = cast_type_nonnull<ClassType>(el1l.underlying());
-                                return el1l.value == el2l.value && u1.symbol == u2.symbol; // from lambda
+                                // NOTE: candidate and el2 are LiteralTypes and can be compared by value.
+                                return candidate == el2 && u1.symbol == u2.symbol; // from lambda
                             });
                             if (fnd != h1.keys.end()) {
                                 auto left = h1.values[fnd - h1.keys.begin()];
@@ -730,7 +734,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                     auto u1 = cast_type_nonnull<ClassType>(l1.underlying());
                     auto u2 = cast_type_nonnull<ClassType>(l2.underlying());
                     if (u1.symbol == u2.symbol) {
-                        if (l1.value == l2.value) {
+                        // NOTE: t1 and t2 are LiteralTypes and can be compared by value.
+                        if (t1 == t2) {
                             result = t1;
                         } else {
                             result = Types::bottom();
@@ -1181,7 +1186,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                         auto fnd = absl::c_find_if(h1.keys, [&](auto &candidate) -> bool {
                             auto el1l = cast_type_nonnull<LiteralType>(candidate);
                             auto u1 = cast_type_nonnull<ClassType>(el1l.underlying());
-                            return el1l.value == el2l.value && u1.symbol == u2.symbol; // from lambda
+                            // NOTE: candidate and el2 are LiteralTypes and can be compared by value.
+                            return candidate == el2 && u1.symbol == u2.symbol; // from lambda
                         });
                         result = fnd != h1.keys.end() &&
                                  Types::isSubTypeUnderConstraint(gs, constr, h1.values[fnd - h1.keys.begin()],
@@ -1201,7 +1207,8 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
                     auto l2 = cast_type_nonnull<LiteralType>(t2);
                     auto u1 = cast_type_nonnull<ClassType>(l1.underlying());
                     auto u2 = cast_type_nonnull<ClassType>(l2.underlying());
-                    result = u1.symbol == u2.symbol && l1.value == l2.value;
+                    // NOTE: t1 and t2 are LiteralTypes and can be compared by value.
+                    result = u1.symbol == u2.symbol && t1 == t2;
                 },
                 [&](const MetaType &m1) {
                     auto *m2 = cast_type<MetaType>(t2);

@@ -354,10 +354,10 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             p.putU1((u1)c.literalKind);
             switch (c.literalKind) {
                 case LiteralType::LiteralTypeKind::Integer:
-                    p.putS8(c.value);
+                    p.putS8(c.asInteger());
                     break;
                 case LiteralType::LiteralTypeKind::Float:
-                    p.putS8(absl::bit_cast<int64_t>(c.floatval));
+                    p.putS8(absl::bit_cast<int64_t>(c.asFloat()));
                     break;
                 case LiteralType::LiteralTypeKind::String:
                 case LiteralType::LiteralTypeKind::Symbol:

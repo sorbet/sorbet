@@ -453,13 +453,13 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
 }
 
 TYPE_INLINED(LiteralType) final {
-public:
     union {
         const int64_t value;
         const double floatval;
         const u4 nameId;
     };
 
+public:
     enum class LiteralTypeKind : u1 { Integer, String, Symbol, Float };
     const LiteralTypeKind literalKind;
     LiteralType(int64_t val);
@@ -475,6 +475,10 @@ public:
 
     // If this is a String or Symbol type, retrieves the Name contained within the type.
     NameRef asName() const;
+    // If this is a Float type, retrieves the float contained within the type.
+    double asFloat() const;
+    // If this is an Integer type, retrieves the integer contained within the type.
+    int64_t asInteger() const;
 
     bool equals(const LiteralType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -510,12 +514,38 @@ template <> inline TypePtr make_type<LiteralType, float>(float &&val) {
 
 template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef &>(SymbolRef &&klass, NameRef &val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), absl::bit_cast<u8>(type.value));
+    u8 value = 0;
+    switch (type.literalKind) {
+        case LiteralType::LiteralTypeKind::Float:
+            value = absl::bit_cast<u8>(type.asFloat());
+            break;
+        case LiteralType::LiteralTypeKind::Integer:
+            value = absl::bit_cast<u8>(type.asInteger());
+            break;
+        case LiteralType::LiteralTypeKind::String:
+        case LiteralType::LiteralTypeKind::Symbol:
+            value = type.asName().rawId();
+            break;
+    }
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), value);
 }
 
 template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef>(SymbolRef &&klass, NameRef &&val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), absl::bit_cast<u8>(type.value));
+    u8 value = 0;
+    switch (type.literalKind) {
+        case LiteralType::LiteralTypeKind::Float:
+            value = absl::bit_cast<u8>(type.asFloat());
+            break;
+        case LiteralType::LiteralTypeKind::Integer:
+            value = absl::bit_cast<u8>(type.asInteger());
+            break;
+        case LiteralType::LiteralTypeKind::String:
+        case LiteralType::LiteralTypeKind::Symbol:
+            value = type.asName().rawId();
+            break;
+    }
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), value);
 }
 
 template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &what) {

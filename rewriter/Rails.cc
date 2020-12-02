@@ -48,7 +48,7 @@ void Rails::run(core::MutableContext ctx, ast::ClassDef *cdef) {
         return;
     }
     char version[5];
-    snprintf(version, sizeof(version), "V%.1f", value.floatval);
+    snprintf(version, sizeof(version), "V%.1f", value.asFloat());
     absl::c_replace(version, '.', '_');
 
     cdef->ancestors.emplace_back(ast::MK::UnresolvedConstant(

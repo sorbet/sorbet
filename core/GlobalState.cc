@@ -1395,7 +1395,7 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
                   original.uniqueNameData(*this)->uniqueNameKind == UniqueNameKind::TEnum)),
             "looking up a constant name over wrong name kind");
 
-    const auto hs = _hash_mix_constant(NameRef::Kind::CONSTANT, original.constantIndex());
+    const auto hs = _hash_mix_constant(NameRef::Kind::CONSTANT, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
