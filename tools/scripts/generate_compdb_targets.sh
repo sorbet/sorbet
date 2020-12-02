@@ -12,7 +12,7 @@ cleanup() {
 }
 trap cleanup exit
 
-bazel run --script_path "$buildifier" @com_github_bazelbuild_buildtools//buildifier
+./bazel run --script_path "$buildifier" @com_github_bazelbuild_buildtools//buildifier
 
 (
     sed -n '1,/BEGIN compile_commands/p' tools/BUILD

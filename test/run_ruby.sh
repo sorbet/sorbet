@@ -27,10 +27,10 @@ echo
 info "Building Ruby..."
 
 if [ -n "$debug" ]; then
-  bazel build @sorbet_ruby//:ruby --config dbg
+  ./bazel build @sorbet_ruby//:ruby --config dbg
   command=("lldb" "--" "${ruby}")
 else
-  bazel build @sorbet_ruby//:ruby -c opt
+  ./bazel build @sorbet_ruby//:ruby -c opt
   command=( "${ruby}" )
 fi
 

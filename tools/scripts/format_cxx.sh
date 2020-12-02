@@ -10,7 +10,7 @@ fi
 
 cd "$(dirname "$0")/../.."
 
-bazel build @com_stripe_ruby_typer//tools:clang-format &> /dev/null
+./bazel build @com_stripe_ruby_typer//tools:clang-format &> /dev/null
 
 # shellcheck disable=SC2207
 cxx_src=(
