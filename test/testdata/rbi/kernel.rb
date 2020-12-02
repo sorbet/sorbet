@@ -24,6 +24,25 @@ end
 define_singleton_method(:foo) { puts '' }
 define_singleton_method('foo') { puts '' }
 
+# make sure we don't regress and mark these as errors
+env = {'VAR' => 'VAL'}
+system('echo')
+system('echo', err: File::NULL)
+system('echo', out: :err)
+system('echo', 'hello')
+system('echo', 'hello', err: File::NULL)
+system('echo', 'hello', out: :err)
+system(['echo', 'echo'])
+system(['echo', 'echo'], 'hello')
+system(['echo', 'echo'], out: :err)
+system(['echo', 'echo'], 'hello', out: :err)
+system(env, 'echo')
+system(env, 'echo', out: :err)
+system(env, ['echo', 'echo'])
+system(env, ['echo', 'echo'], out: :err)
+system(env, ['echo', 'echo'], 'hello')
+system(env, ['echo', 'echo'], 'hello', out: :err)
+
 y = loop do
 end
 puts y # error: This code is unreachable
