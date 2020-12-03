@@ -65,4 +65,5 @@ Test.new.block_call(&nil) # Currently no Error, since the nil block makes Magic_
 
 # TODO: The following method should contain an error. Sorbet currently does not support setting method
 # visibility using the private/protected keywords that affect the visibility of subsequent methods.
-Test.new.subsequent_visibility
+Test.new.subsequent_visibility # error: Non-private call to private method `Test#subsequent_visibility`
+

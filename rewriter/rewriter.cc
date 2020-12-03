@@ -1,4 +1,7 @@
 #include "rewriter/rewriter.h"
+#include "ast/Helpers.h"
+#include "ast/ast.h"
+
 #include "ast/treemap/treemap.h"
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"
@@ -28,6 +31,7 @@
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
+#include "rewriter/Visibility.h"
 
 using namespace std;
 
@@ -47,6 +51,7 @@ public:
         Prop::run(ctx, classDef);
         TypeMembers::run(ctx, classDef);
         Singleton::run(ctx, classDef);
+        Visibility::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);
