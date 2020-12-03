@@ -1580,6 +1580,14 @@ public:
     };
     vector<ResolveFieldJob> fieldJobs;
 
+    struct ResolveStaticFieldJob {
+        core::FileRef file;
+        core::SymbolRef owner;
+        core::SymbolRef sym;
+        ast::Assign *assign;
+    };
+    vector<ResolveStaticFieldJob> staticFieldJobs;
+
     struct ResolveMethodAliasJob {
         core::FileRef file;
         core::SymbolRef owner;
@@ -1592,6 +1600,7 @@ public:
     struct ResolveSignaturesWalkResult {
         vector<ResolveSignatureJob> sigJobs;
         vector<ResolveFieldJob> fieldJobs;
+        vector<ResolveStaticFieldJob> staticFieldJobs;
         vector<ResolveMethodAliasJob> methodAliasJobs;
         vector<ast::ParsedFile> trees;
     };
@@ -1897,6 +1906,33 @@ public:
         var.data(ctx)->resultType = cast->type;
     }
 
+    static void processResolveStaticFieldJob(core::MutableContext ctx, const ResolveStaticFieldJob &job) {
+        auto data = job.sym.data(ctx);
+        if (data->resultType == nullptr) {
+            data->resultType = resolveConstantType(ctx, job.assign->rhs, job.sym);
+            if (data->resultType == nullptr) {
+                // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
+                auto rhs = move(job.assign->rhs);
+                auto loc = rhs.loc();
+                job.assign->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                                                 core::Names::suggestType(), move(rhs));
+            }
+        } else if (!core::isa_type<core::AliasType>(data->resultType)) {
+            // If we've already resolved a temporary constant, we still want to run resolveConstantType to
+            // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
+            // typechecking runs) but we only want to run this on constants that are value-level and not class
+            // or type aliases. The check for isa_type<AliasType> makes sure that we skip aliases of the form `X
+            // = Integer` and only run this over constant value assignments like `X = 5` or `Y = 5; X = Y`.
+            if (resolveConstantType(ctx, job.assign->rhs, job.sym) == nullptr) {
+                if (auto e =
+                        ctx.beginError(job.assign->rhs.loc(), core::errors::Resolver::ConstantMissingTypeAnnotation)) {
+                    e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
+                                "# typed: strict");
+                }
+            }
+        }
+    }
+
     static void processResolveMethodAliasJob(core::MutableContext ctx, const ResolveMethodAliasJob &job) {
         auto owner = ctx.owner;
         core::SymbolRef toMethod = owner.data(ctx)->findMemberNoDealias(ctx, job.toName);
@@ -2105,7 +2141,7 @@ private:
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    core::TypePtr resolveConstantType(core::Context ctx, const ast::TreePtr &expr, core::SymbolRef ofSym) {
+    static core::TypePtr resolveConstantType(core::Context ctx, const ast::TreePtr &expr, core::SymbolRef ofSym) {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = a.value; },
@@ -2374,29 +2410,7 @@ public:
         }
 
         if (data->isStaticField()) {
-            if (data->resultType == nullptr) {
-                data->resultType = resolveConstantType(ctx, asgn.rhs, sym);
-                if (data->resultType == nullptr) {
-                    // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
-                    auto rhs = move(asgn.rhs);
-                    auto loc = rhs.loc();
-                    asgn.rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
-                                              core::Names::suggestType(), move(rhs));
-                }
-            } else if (!core::isa_type<core::AliasType>(data->resultType)) {
-                // If we've already resolved a temporary constant, we still want to run resolveConstantType to
-                // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
-                // typechecking runs) but we only want to run this on constants that are value-level and not class
-                // or type aliases. The check for isa_type<AliasType> makes sure that we skip aliases of the form `X
-                // = Integer` and only run this over constant value assignments like `X = 5` or `Y = 5; X = Y`.
-                if (resolveConstantType(ctx, asgn.rhs, sym) == nullptr) {
-                    if (auto e =
-                            ctx.beginError(asgn.rhs.loc(), core::errors::Resolver::ConstantMissingTypeAnnotation)) {
-                        e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
-                                    "# typed: strict");
-                    }
-                }
-            }
+            staticFieldJobs.emplace_back(ResolveStaticFieldJob{ctx.file, ctx.owner, sym, &asgn});
         }
 
         return tree;
@@ -2634,6 +2648,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
         }
         if (!output.trees.empty()) {
             output.fieldJobs = move(walk.fieldJobs);
+            output.staticFieldJobs = move(walk.staticFieldJobs);
             output.sigJobs = move(walk.sigJobs);
             output.methodAliasJobs = move(walk.methodAliasJobs);
             auto count = output.trees.size();
@@ -2656,6 +2671,9 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
                     combined.fieldJobs.insert(combined.fieldJobs.end(),
                                               make_move_iterator(threadResult.fieldJobs.begin()),
                                               make_move_iterator(threadResult.fieldJobs.end()));
+                    combined.staticFieldJobs.insert(combined.staticFieldJobs.end(),
+                                                    make_move_iterator(threadResult.staticFieldJobs.begin()),
+                                                    make_move_iterator(threadResult.staticFieldJobs.end()));
                     combined.sigJobs.insert(combined.sigJobs.end(), make_move_iterator(threadResult.sigJobs.begin()),
                                             make_move_iterator(threadResult.sigJobs.end()));
                     combined.methodAliasJobs.insert(combined.methodAliasJobs.end(),
@@ -2671,6 +2689,14 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
         for (auto &job : combined.fieldJobs) {
             core::MutableContext ctx(gs, job.owner, job.file);
             ResolveSignaturesWalk::processResolveFieldJob(ctx, job);
+        }
+    }
+
+    {
+        Timer timeit(gs.tracer(), "resolver.resolve_static_fields");
+        for (auto &job : combined.staticFieldJobs) {
+            core::MutableContext ctx(gs, job.owner, job.file);
+            ResolveSignaturesWalk::processResolveStaticFieldJob(ctx, job);
         }
     }
 

@@ -19,7 +19,7 @@ using namespace std;
 namespace sorbet::core {
 
 SymbolRef Context::selfClass() {
-    SymbolData data = this->owner.data(this->state);
+    auto data = this->owner.data(this->state);
     if (data->isClassOrModule()) {
         auto klass = data->lookupSingletonClass(this->state);
         ENFORCE_NO_TIMER(klass.exists());
