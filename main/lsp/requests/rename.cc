@@ -249,23 +249,17 @@ void addSubclassRelatedMethods(LSPTypecheckerDelegate &typechecker, core::Symbol
         if (!member.exists()) {
             continue;
         }
-        methods.push_back(member);
+        methods.emplace_back(member);
     }
 }
 
 // Add methods that are related because of dispatching via secondary components in sends (union types).
 void addDispatchRelatedMethods(LSPTypecheckerDelegate &typechecker, const core::DispatchResult *dispatchResult,
                                vector<core::SymbolRef> &methods) {
-    for (const core::DispatchResult *dr = dispatchResult; dr; dr = dr->secondary.get()) {
+    for (const core::DispatchResult *dr = dispatchResult; dr != nullptr; dr = dr->secondary.get()) {
         auto method = dr->main.method;
         ENFORCE(method.exists());
-        auto included = false;
-        for (auto m : methods) {
-            if (m == method) {
-                included = true;
-                break;
-            }
-        }
+        auto included = absl::c_find(methods, m) != methods.end();
         if (!included) {
             // this also adds `method` itself
             addSubclassRelatedMethods(typechecker, method, methods);
