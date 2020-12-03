@@ -2136,6 +2136,8 @@ private:
                         }
                     }
 
+                    // We cannot parse the signature right now; it depends on the `resultType` of symbols (e.g.,
+                    // static fields for enums!) to determine e.g. the result type. Enqueue it to parse later.
                     parseSigJobs.emplace_back(ParseSignatureJob{ctx.file, ctx.owner, &mdef, lastSigs});
                     lastSigs.clear();
                 } else {
@@ -2533,7 +2535,7 @@ public:
                 return tree;
             }
 
-            vector<core::NameRef> args;
+            InlinedVector<core::NameRef, 2> args;
             for (auto &arg : send.args) {
                 auto lit = ast::cast_tree<ast::Literal>(arg);
                 if (lit == nullptr || !lit->isSymbol(ctx)) {
@@ -2727,6 +2729,8 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
         combined.methodAliasJobs.clear();
     }
 
+    // We've determined the resultType of everything now, so we can parse sigs!
+    // Parsing is expensive, as it visits the AST subtree of every single sig node. Let's parse sigs in parallel.
     auto resolveSigInputq =
         make_shared<ConcurrentBoundedQueue<ResolveSignaturesWalk::ParseSignatureJob>>(combined.parseSigJobs.size());
     auto resolveSigOutputq = make_shared<BlockingBoundedQueue<vector<ResolveSignaturesWalk::ResolveSignatureJob>>>(
