@@ -60,18 +60,18 @@ string LiteralType::show(const GlobalState &gs) const {
 string LiteralType::showValue(const GlobalState &gs) const {
     SymbolRef undSymbol = cast_type_nonnull<ClassType>(this->underlying()).symbol;
     if (undSymbol == Symbols::String()) {
-        return fmt::format("\"{}\"", absl::CEscape(NameRef(gs, this->value).show(gs)));
+        return fmt::format("\"{}\"", absl::CEscape(asName(gs).show(gs)));
     } else if (undSymbol == Symbols::Symbol()) {
-        auto shown = NameRef(gs, this->value).show(gs);
+        auto shown = asName(gs).show(gs);
         if (absl::StrContains(shown, " ")) {
             return fmt::format(":\"{}\"", absl::CEscape(shown));
         } else {
             return fmt::format(":{}", shown);
         }
     } else if (undSymbol == Symbols::Integer()) {
-        return to_string(this->value);
+        return to_string(asInteger());
     } else if (undSymbol == Symbols::Float()) {
-        return to_string(absl::bit_cast<double>(this->value));
+        return to_string(asFloat());
     } else if (undSymbol == Symbols::TrueClass()) {
         return "true";
     } else if (undSymbol == Symbols::FalseClass()) {
