@@ -904,8 +904,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             continue;
                         }
 
-                        NameRef arg(gs, key.value);
-                        if (consumed.find(NameRef(gs, key.value)) != consumed.end()) {
+                        NameRef arg = key.asName();
+                        if (consumed.find(arg) != consumed.end()) {
                             continue;
                         }
                         consumed.insert(arg);
@@ -930,7 +930,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
                     auto lit = cast_type_nonnull<LiteralType>(litType);
                     return cast_type_nonnull<ClassType>(lit.underlying()).symbol == Symbols::Symbol() &&
-                           lit.value == spec.name._id;
+                           lit.asName() == spec.name;
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
@@ -955,10 +955,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             for (auto &keyType : hash->keys) {
                 auto key = cast_type_nonnull<LiteralType>(keyType);
                 SymbolRef klass = cast_type_nonnull<ClassType>(key.underlying()).symbol;
-                if (klass == Symbols::Symbol() && consumed.find(NameRef(gs, key.value)) != consumed.end()) {
+                if (klass == Symbols::Symbol() && consumed.find(key.asName()) != consumed.end()) {
                     continue;
                 }
-                NameRef arg(gs, key.value);
+                NameRef arg = key.asName();
 
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
@@ -1638,8 +1638,8 @@ public:
             res.returnType = Types::untypedUntracked();
             return;
         }
-        int before = (int)beforeLit.value;
-        int after = (int)afterLit.value;
+        int before = (int)beforeLit.asInteger();
+        int after = (int)afterLit.asInteger();
         res.returnType = expandArray(gs, val, before + after);
     }
 } Magic_expandSplat;
@@ -1710,7 +1710,7 @@ public:
             return;
         }
 
-        NameRef fn(gs, (u4)lit.value);
+        NameRef fn = lit.asName();
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
             return;
@@ -1960,7 +1960,7 @@ public:
             return;
         }
 
-        NameRef fn(gs, (u4)lit.value);
+        NameRef fn = lit.asName();
 
         u2 numPosArgs = args.numPosArgs - 3;
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
@@ -2028,7 +2028,7 @@ public:
             return;
         }
 
-        NameRef fn(gs, (u4)lit.value);
+        NameRef fn = lit.asName();
 
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
@@ -2215,7 +2215,7 @@ public:
             return;
         }
 
-        auto idx = lit.value;
+        auto idx = lit.asInteger();
         if (idx < 0) {
             idx = tuple->elems.size() + idx;
         }
@@ -2439,8 +2439,8 @@ public:
             auto lt = cast_type_nonnull<LiteralType>(argTyp);
             ENFORCE(lt.literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
 
-            if (lt.value >= 0) {
-                depth = lt.value;
+            if (lt.asInteger() >= 0) {
+                depth = lt.asInteger();
             } else {
                 // Negative values behave like no depth was given
                 depth = INT64_MAX;

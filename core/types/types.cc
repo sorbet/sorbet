@@ -334,6 +334,21 @@ LiteralType::LiteralType(SymbolRef klass, NameRef val)
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
+int64_t LiteralType::asInteger() const {
+    ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Integer);
+    return value;
+}
+
+double LiteralType::asFloat() const {
+    ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Float);
+    return floatval;
+}
+
+core::NameRef LiteralType::asName() const {
+    ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Symbol || literalKind == LiteralTypeKind::String);
+    return NameRef(NameRef::WellKnown{}, value);
+}
+
 TypePtr LiteralType::underlying() const {
     switch (literalKind) {
         case LiteralTypeKind::Integer:
@@ -367,15 +382,17 @@ void LiteralType::_sanityCheck(const GlobalState &gs) const {
 }
 
 bool LiteralType::equals(const LiteralType &rhs) const {
-    if (this->value != rhs.value) {
+    if (this->literalKind != rhs.literalKind) {
         return false;
     }
-    if (!isa_type<ClassType>(this->underlying()) || !isa_type<ClassType>(rhs.underlying())) {
-        return false;
+    switch (this->literalKind) {
+        case LiteralTypeKind::Float:
+            return this->floatval == rhs.floatval;
+        case LiteralTypeKind::Integer:
+        case LiteralTypeKind::Symbol:
+        case LiteralTypeKind::String:
+            return this->value == rhs.value;
     }
-    auto lklass = cast_type_nonnull<ClassType>(this->underlying());
-    auto rklass = cast_type_nonnull<ClassType>(rhs.underlying());
-    return lklass.symbol == rklass.symbol;
 }
 
 OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
