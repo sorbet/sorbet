@@ -18,7 +18,7 @@ const SendResponse *QueryResponse::isSend() const {
 }
 
 const optional<core::Loc> SendResponse::getMethodNameLoc(const core::GlobalState &gs) const {
-    auto methodName = this->callerSideName.data(gs)->show(gs);
+    auto methodName = this->callerSideName.show(gs);
     auto expr = termLoc.source(gs);
     // We parse two forms of send expressions:
     //   <receiver expr><whitespace?>.<whitespace?><method>
