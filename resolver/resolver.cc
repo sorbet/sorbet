@@ -2706,6 +2706,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
             core::MutableContext ctx(gs, job.owner, job.file);
             ResolveSignaturesWalk::processResolveFieldJob(ctx, job);
         }
+        combined.fieldJobs.clear();
     }
 
     {
@@ -2714,6 +2715,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
             core::MutableContext ctx(gs, job.owner, job.file);
             ResolveSignaturesWalk::processResolveStaticFieldJob(ctx, job);
         }
+        combined.staticFieldJobs.clear();
     }
 
     {
@@ -2722,6 +2724,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
             core::MutableContext ctx(gs, job.owner, job.file);
             ResolveSignaturesWalk::processResolveMethodAliasJob(ctx, job);
         }
+        combined.methodAliasJobs.clear();
     }
 
     auto resolveSigInputq =
