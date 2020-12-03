@@ -14,7 +14,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-NameRef::NameRef(const GlobalState &gs, u4 id) : DebugOnlyCheck(gs, id), _id(id) {}
+NameRef::NameRef(const GlobalState &gs, u4 id) : DebugOnlyCheck(gs, id), _id{id} {}
 
 Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE) {
