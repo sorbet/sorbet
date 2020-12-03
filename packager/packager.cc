@@ -31,7 +31,7 @@ public:
     NameFormatter(const core::GlobalState &gs) : gs(gs) {}
 
     void operator()(std::string *out, core::NameRef name) const {
-        out->append(name.data(gs)->shortName(gs));
+        out->append(name.shortName(gs));
     }
 };
 
@@ -152,18 +152,18 @@ public:
 
 void checkPackageName(core::Context ctx, ast::UnresolvedConstantLit *constLit) {
     while (constLit != nullptr) {
-        if (absl::StrContains(constLit->cnst.data(ctx)->shortName(ctx), "_")) {
+        if (absl::StrContains(constLit->cnst.shortName(ctx), "_")) {
             // By forbidding package names to have an underscore, we can trivially convert between mangled names and
             // unmangled names by replacing `_` with `::`.
             if (auto e = ctx.beginError(constLit->loc, core::errors::Packager::InvalidPackageName)) {
                 e.setHeader("Package names cannot contain an underscore");
-                auto replacement = absl::StrReplaceAll(constLit->cnst.data(ctx)->shortName(ctx), {{"_", ""}});
+                auto replacement = absl::StrReplaceAll(constLit->cnst.shortName(ctx), {{"_", ""}});
                 auto nameLoc = constLit->loc;
                 // cnst is the last characters in the constant literal
-                nameLoc.beginLoc = nameLoc.endLoc - constLit->cnst.data(ctx)->shortName(ctx).size();
+                nameLoc.beginLoc = nameLoc.endLoc - constLit->cnst.shortName(ctx).size();
 
                 e.addAutocorrect(core::AutocorrectSuggestion{
-                    fmt::format("Replace `{}` with `{}`", constLit->cnst.data(ctx)->shortName(ctx), replacement),
+                    fmt::format("Replace `{}` with `{}`", constLit->cnst.shortName(ctx), replacement),
                     {core::AutocorrectSuggestion::Edit{core::Loc(ctx.file, nameLoc), replacement}}});
             }
         }
@@ -246,7 +246,7 @@ struct PackageInfoFinder {
         // Blacklisted methods
         if (send.fun == core::Names::extend() || send.fun == core::Names::include()) {
             if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
-                e.setHeader("Invalid expression in package: `{}` is not allowed", send.fun.data(ctx)->shortName(ctx));
+                e.setHeader("Invalid expression in package: `{}` is not allowed", send.fun.shortName(ctx));
             }
             return tree;
         }

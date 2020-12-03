@@ -793,8 +793,7 @@ public:
             unresolvedConstants.emplace_back(fmt::format(
                 "{}::{}",
                 unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.data(ctx)->show(ctx) : "",
-                fmt::map_join(unresolvedPath->second,
-                              "::", [&](const auto &el) -> string { return el.data(ctx)->show(ctx); })));
+                fmt::map_join(unresolvedPath->second, "::", [&](const auto &el) -> string { return el.show(ctx); })));
         }
         return tree;
     }
@@ -1223,19 +1222,19 @@ class AllNamesCollector {
 public:
     core::UsageHash acc;
     ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
-        acc.sends.emplace_back(ctx, ast::cast_tree_nonnull<ast::Send>(tree).fun.data(ctx));
+        acc.sends.emplace_back(ctx, ast::cast_tree_nonnull<ast::Send>(tree).fun);
         return tree;
     }
 
     ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        acc.constants.emplace_back(ctx, original.name.data(ctx));
+        acc.constants.emplace_back(ctx, original.name);
         return tree;
     }
 
     void handleUnresolvedConstantLit(core::Context ctx, ast::UnresolvedConstantLit *expr) {
         while (expr) {
-            acc.constants.emplace_back(ctx, expr->cnst.data(ctx));
+            acc.constants.emplace_back(ctx, expr->cnst);
             // Handle references to 'Foo' in 'Foo::Bar'.
             expr = ast::cast_tree<ast::UnresolvedConstantLit>(expr->scope);
         }
@@ -1243,7 +1242,7 @@ public:
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-        acc.constants.emplace_back(ctx, original.symbol.data(ctx)->name.data(ctx));
+        acc.constants.emplace_back(ctx, original.symbol.data(ctx)->name);
 
         handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(original.name));
 
@@ -1264,7 +1263,7 @@ public:
     ast::TreePtr postTransformUnresolvedIdent(core::Context ctx, ast::TreePtr tree) {
         auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         if (id.kind != ast::UnresolvedIdent::Kind::Local) {
-            acc.constants.emplace_back(ctx, id.name.data(ctx));
+            acc.constants.emplace_back(ctx, id.name);
         }
         return tree;
     }

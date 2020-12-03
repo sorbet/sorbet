@@ -486,7 +486,7 @@ bool isSingleton(core::Context ctx, core::SymbolRef sym) {
     }
 
     // T::Enum values are modeled as singletons of their own fake class.
-    if (sym.data(ctx)->name.data(ctx)->isTEnumName(ctx)) {
+    if (sym.data(ctx)->name.isTEnumName(ctx)) {
         return true;
     }
 

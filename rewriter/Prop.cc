@@ -403,7 +403,7 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
         //  T.unsafe(nil)
         // end
 
-        auto fkMethod = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_");
+        auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
 
         ast::TreePtr arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
@@ -418,7 +418,7 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
         //  T.unsafe(nil)
         // end
 
-        auto fkMethodBang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
+        auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
         ast::TreePtr arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         nodes.emplace_back(

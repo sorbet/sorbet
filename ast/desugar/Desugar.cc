@@ -178,7 +178,7 @@ TreePtr mergeStrings(DesugarContext dctx, core::LocOffsets loc, InlinedVector<Tr
                     if (isa_tree<EmptyTree>(expr))
                         return ""sv;
                     else
-                        return cast_tree<Literal>(expr)->asString(dctx.ctx).data(dctx.ctx)->shortName(dctx.ctx);
+                        return cast_tree<Literal>(expr)->asString(dctx.ctx).shortName(dctx.ctx);
                 }))));
     }
 }
@@ -1668,7 +1668,7 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                         if (auto e = dctx.ctx.state.beginError(core::Loc(dctx.ctx.file, dctx.enclosingMethodLoc),
                                                                core::errors::Desugar::UnnamedBlockParameter)) {
                             e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
-                                        dctx.enclosingMethodName.data(dctx.ctx)->show(dctx.ctx), "yield");
+                                        dctx.enclosingMethodName.show(dctx.ctx), "yield");
                             e.addErrorLine(core::Loc(dctx.ctx.file, loc), "Arising from use of `{}` in method body",
                                            "yield");
                         }

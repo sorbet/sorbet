@@ -138,9 +138,9 @@ string Ident::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 
 string Alias::toString(const core::GlobalState &gs, const CFG &cfg) const {
     if (name.exists()) {
-        return fmt::format("alias {} ({})", this->what.data(gs)->name.data(gs)->toString(gs), name.toString(gs));
+        return fmt::format("alias {} ({})", this->what.data(gs)->name.toString(gs), name.toString(gs));
     } else {
-        return fmt::format("alias {}", this->what.data(gs)->name.data(gs)->toString(gs));
+        return fmt::format("alias {}", this->what.data(gs)->name.toString(gs));
     }
 }
 
@@ -150,14 +150,14 @@ string Alias::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 
 string Send::toString(const core::GlobalState &gs, const CFG &cfg) const {
     return fmt::format(
-        "{}.{}({})", this->recv.toString(gs, cfg), this->fun.data(gs)->toString(gs),
+        "{}.{}({})", this->recv.toString(gs, cfg), this->fun.toString(gs),
         fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(gs, cfg); }));
 }
 
 string Send::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format(
         "Send {{\n{0}&nbsp;recv = {1},\n{0}&nbsp;fun = {2},\n{0}&nbsp;args = ({3}),\n{0}}}", spacesForTabLevel(tabs),
-        this->recv.toString(gs, cfg), this->fun.data(gs)->showRaw(gs),
+        this->recv.toString(gs, cfg), this->fun.showRaw(gs),
         fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.showRaw(gs, cfg, tabs + 1); }));
 }
 
@@ -207,7 +207,7 @@ string Cast::toString(const core::GlobalState &gs, const CFG &cfg) const {
 
 string Cast::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("Cast {{\n{0}&nbsp;cast = T.{1},\n{0}&nbsp;value = {2},\n{0}&nbsp;type = {3},\n{0}}}",
-                       spacesForTabLevel(tabs), this->cast.data(gs)->show(gs), this->value.showRaw(gs, cfg, tabs + 1),
+                       spacesForTabLevel(tabs), this->cast.show(gs), this->value.showRaw(gs, cfg, tabs + 1),
                        this->type.show(gs));
 }
 

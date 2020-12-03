@@ -83,10 +83,10 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
     bool useToAsPrefix = false;
     if (prefixNode) {
         if (isLiteralTrue(ctx, *prefixNode)) {
-            beforeUnderscore = toName.data(ctx)->shortName(ctx);
+            beforeUnderscore = toName.shortName(ctx);
             useToAsPrefix = true;
         } else if (auto result = stringOrSymbolNameRef(ctx, *prefixNode)) {
-            beforeUnderscore = result->data(ctx)->shortName(ctx);
+            beforeUnderscore = result->shortName(ctx);
         } else {
             return empty;
         }
@@ -104,8 +104,8 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
                 // Active Support raises at runtime for these cases
                 return empty;
             }
-            methodName = ctx.state.enterNameUTF8(
-                fmt::format("{}_{}", beforeUnderscore, lit->asSymbol(ctx).data(ctx)->shortName(ctx)));
+            methodName =
+                ctx.state.enterNameUTF8(fmt::format("{}_{}", beforeUnderscore, lit->asSymbol(ctx).shortName(ctx)));
         } else {
             methodName = lit->asSymbol(ctx);
         }

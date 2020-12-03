@@ -154,7 +154,7 @@ private:
                             auto flavor =
                                 paramData->owner.data(ctx)->isSingletonClass(ctx) ? "type_template" : "type_member";
 
-                            auto paramName = paramData->name.data(ctx)->show(ctx);
+                            auto paramName = paramData->name.show(ctx);
 
                             e.setHeader("`{}` `{}` was defined as `{}` but is used in an `{}` context", flavor,
                                         paramName, showVariance(paramVariance), showPolarity(polarity));

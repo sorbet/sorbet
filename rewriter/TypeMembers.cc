@@ -31,7 +31,7 @@ void TypeMembers::run(core::MutableContext ctx, ast::ClassDef *cdef) {
 
         if (typeMembers.contains(lhs->cnst)) {
             if (auto e = ctx.beginError(lhs->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                e.setHeader("Duplicate type member `{}`", lhs->cnst.data(ctx)->show(ctx));
+                e.setHeader("Duplicate type member `{}`", lhs->cnst.show(ctx));
             }
             expr = ast::MK::EmptyTree();
             return;

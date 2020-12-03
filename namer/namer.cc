@@ -732,7 +732,7 @@ class SymbolDefiner {
             auto renamedSymbol = ctx.state.findRenamedSymbol(scope.data(ctx)->owner, scope);
             if (renamedSymbol.exists()) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
-                    auto constLitName = name.data(ctx)->show(ctx);
+                    auto constLitName = name.show(ctx);
                     auto scopeName = scope.data(ctx)->show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
                                 scopeName, scopeName);
@@ -749,7 +749,7 @@ class SymbolDefiner {
         }
 
         if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
-            auto constLitName = name.data(ctx)->show(ctx);
+            auto constLitName = name.show(ctx);
             auto newOwnerName = scope.data(ctx)->show(ctx);
             e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, newOwnerName,
                         newOwnerName);
@@ -1193,8 +1193,8 @@ class SymbolDefiner {
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         if (!sym.exists() && currSym.exists()) {
-            emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc),
-                                       staticField.name.data(ctx)->show(ctx), currSym.data(ctx)->loc());
+            emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc), staticField.name.show(ctx),
+                                       currSym.data(ctx)->loc());
             ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
         }
         if (sym.exists()) {
@@ -1254,12 +1254,12 @@ class SymbolDefiner {
             if (existingTypeMember.data(ctx)->loc().file() != ctx.file) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.asgnLoc),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Duplicate type member `{}`", typeMember.name.data(ctx)->show(ctx));
+                    e.setHeader("Duplicate type member `{}`", typeMember.name.show(ctx));
                     e.addErrorLine(existingTypeMember.data(ctx)->loc(), "Also defined here");
                 }
                 if (auto e = ctx.state.beginError(existingTypeMember.data(ctx)->loc(),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Duplicate type member `{}`", typeMember.name.data(ctx)->show(ctx));
+                    e.setHeader("Duplicate type member `{}`", typeMember.name.show(ctx));
                     e.addErrorLine(core::Loc(ctx.file, typeMember.asgnLoc), "Also defined here");
                 }
             }
@@ -1295,8 +1295,8 @@ class SymbolDefiner {
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
                 if (oldSym.exists() && !(oldSym.data(ctx)->loc() == core::Loc(ctx.file, typeMember.asgnLoc) ||
                                          oldSym.data(ctx)->loc().isTombStoned(ctx))) {
-                    emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc),
-                                               typeMember.name.data(ctx)->show(ctx), oldSym.data(ctx)->loc());
+                    emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), typeMember.name.show(ctx),
+                                               oldSym.data(ctx)->loc());
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
                 auto alias =
@@ -1451,14 +1451,14 @@ class TreeSymbolizer {
 
         if (send->args.empty()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
-                e.setHeader("`{}` requires at least one argument", send->fun.data(ctx)->show(ctx));
+                e.setHeader("`{}` requires at least one argument", send->fun.show(ctx));
             }
             return;
         }
 
         if (send->block != nullptr) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
-                e.setHeader("`{}` can not be passed a block", send->fun.data(ctx)->show(ctx));
+                e.setHeader("`{}` can not be passed a block", send->fun.show(ctx));
             }
             return;
         }
@@ -1477,7 +1477,7 @@ class TreeSymbolizer {
                 dest->emplace_back(arg.deepCopy());
             } else {
                 if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
-                    e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
+                    e.setHeader("`{}` must only contain constant literals", send->fun.show(ctx));
                 }
                 arg = ast::MK::EmptyTree();
             }

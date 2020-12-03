@@ -96,7 +96,7 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
             type = ast::MK::Nilable(tyloc, move(type));
         }
         // def self.get_<prop>
-        core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx)->show(ctx));
+        core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.show(ctx));
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type)));
         auto defSelfGetProp = ast::MK::SyntheticMethod(loc, loc, getName, {}, ast::MK::RaiseUnimplemented(loc));
         ast::cast_tree<ast::MethodDef>(defSelfGetProp)->flags.isSelfMethod = true;

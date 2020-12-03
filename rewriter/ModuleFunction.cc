@@ -119,7 +119,7 @@ vector<ast::TreePtr> ModuleFunction::run(core::MutableContext ctx, ast::Send *se
                 methodName = lit->asSymbol(ctx);
             } else if (lit->isString(ctx)) {
                 core::NameRef nameRef = lit->asString(ctx);
-                auto shortName = nameRef.data(ctx)->shortName(ctx);
+                auto shortName = nameRef.shortName(ctx);
                 bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
                                  absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
                 if (validAttr) {
