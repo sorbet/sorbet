@@ -92,7 +92,7 @@ core::SymbolRef findRootClassWithMethod(const core::GlobalState &gs, core::Symbo
 
 class UniqueSymbolQueue {
 public:
-    UniqueSymbolQueue() : iter(0) {}
+    UniqueSymbolQueue() {}
 
     bool tryEnqueue(core::SymbolRef s) {
         auto insertResult = set.insert(s);
@@ -104,17 +104,16 @@ public:
     }
 
     core::SymbolRef pop() {
-        if (iter < symbols.size()) {
-            auto result = symbols[iter];
-            iter++;
-            return result;
+        if (!symbols.empty()) {
+            auto s = symbols.front();
+            symbols.pop_front();
+            return s;
         }
         return core::SymbolRef();
     }
 
 private:
-    int iter;
-    vector<core::SymbolRef> symbols;
+    deque<core::SymbolRef> symbols;
     UnorderedSet<core::SymbolRef> set;
 };
 
