@@ -456,6 +456,7 @@ TYPE_INLINED(LiteralType) final {
     union {
         const int64_t value;
         const double floatval;
+        const u4 nameId;
     };
 
 public:

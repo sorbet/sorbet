@@ -14,7 +14,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-NameRef::NameRef(const GlobalState &gs, unsigned int id) : DebugOnlyCheck(gs, id), _id(id) {}
+NameRef::NameRef(const GlobalState &gs, u4 id) : DebugOnlyCheck(gs, id), _id(id) {}
 
 Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE) {
@@ -200,7 +200,7 @@ bool Name::isTEnumName(const GlobalState &gs) const {
            original.data(gs)->unique.uniqueNameKind == UniqueNameKind::TEnum;
 }
 
-NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, int _id) {
+NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, u4 _id) {
     // store the globalStateId of the creating global state to allow sharing refs between siblings
     // when the ref refers to a name in the common ancestor
     globalStateId = gs.globalStateId;
@@ -212,7 +212,7 @@ NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, int _id) {
     }
 }
 
-void NameRefDebugCheck::check(const GlobalState &gs, int _id) const {
+void NameRefDebugCheck::check(const GlobalState &gs, u4 _id) const {
     if (globalStateId == -1) {
         return;
     }
