@@ -151,7 +151,7 @@ public:
         auto recv = Payload::varGet(cs, send->args[0].variable, builder, irctx, rubyBlockId);
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        core::NameRef funName(cs, lit.value);
+        core::NameRef funName = lit.asName(cs);
         auto name = funName.data(cs)->shortName(cs);
         auto rawId = Payload::idIntern(cs, builder, name);
         auto block = Payload::varGet(cs, send->args[2].variable, builder, irctx, rubyBlockId);

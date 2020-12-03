@@ -105,7 +105,7 @@ public:
 
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        core::NameRef funcNameRef(cs, lit.value);
+        core::NameRef funcNameRef = lit.asName(cs);
 
         auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
         if (ownerSym == core::Symbols::Object() && !isSelf) {
@@ -238,7 +238,7 @@ public:
             if (literalOptions.literalKind != core::LiteralType::LiteralTypeKind::Integer) {
                 return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
             }
-            options = literalOptions.value;
+            options = literalOptions.asInteger();
         }
 
         auto &arg0 = send->args[0];
@@ -251,7 +251,7 @@ public:
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
         auto &builder = builderCast(mcctx.build);
-        auto str = core::NameRef(cs, literal.value).data(cs)->shortName(cs);
+        auto str = literal.asName(cs).data(cs)->shortName(cs);
         return Payload::cPtrToRubyRegexp(cs, builder, str, options);
     };
 

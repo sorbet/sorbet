@@ -615,7 +615,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                     continue;
                 }
                 auto litType = core::cast_type_nonnull<core::LiteralType>(maybeCast->args[0].type);
-                rubyBlockArgs[b->rubyBlockId][litType.value] = maybeCallOnLoadYieldArg.bind.variable;
+                rubyBlockArgs[b->rubyBlockId][litType.asInteger()] = maybeCallOnLoadYieldArg.bind.variable;
             }
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
             if (exceptionHandlingBlockHeaders[b->id] == 0) {
@@ -891,16 +891,16 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
     auto litType = core::cast_type_nonnull<core::LiteralType>(lit);
     switch (litType.literalKind) {
         case core::LiteralType::LiteralTypeKind::Integer:
-            return Payload::longToRubyValue(cs, builder, litType.value);
+            return Payload::longToRubyValue(cs, builder, litType.asInteger());
         case core::LiteralType::LiteralTypeKind::Float:
-            return Payload::doubleToRubyValue(cs, builder, absl::bit_cast<double>(litType.value));
+            return Payload::doubleToRubyValue(cs, builder, litType.asFloat());
         case core::LiteralType::LiteralTypeKind::Symbol: {
-            auto str = core::NameRef(cs, litType.value).data(cs)->shortName(cs);
+            auto str = litType.asName(cs).data(cs)->shortName(cs);
             auto rawId = Payload::idIntern(cs, builder, str);
             return builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
         }
         case core::LiteralType::LiteralTypeKind::String: {
-            auto str = core::NameRef(cs, litType.value).data(cs)->shortName(cs);
+            auto str = litType.asName(cs).data(cs)->shortName(cs);
             return Payload::cPtrToRubyString(cs, builder, str, true);
         }
     }
