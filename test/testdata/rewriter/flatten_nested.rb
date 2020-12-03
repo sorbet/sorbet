@@ -1,29 +1,11 @@
 # typed: true
 
 class A
-  private def outer_method
-    private def inner_method
+  def outer_method
+    def inner_method
       puts self
     end
   end
-
-  private
-
-  def below_method
-  end
-
-  def also_below_method
-  end
-end
-
-class A
-  def below_method
-  end
-  private :below_method
-
-  def also_below_method
-  end
-  private :also_below_method
 end
 
 A.new.outer_method

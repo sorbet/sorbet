@@ -34,14 +34,8 @@ void Visibility::run(core::MutableContext ctx, ast::ClassDef *classDef) {
                 if (currentVisibility == core::Names::private_()) {
                     ast::MethodDef::ARGS_store newArgs;
                     newArgs.reserve(0);
-                    // monday: look at printout of rewritten tree, find extra method if it exists
-                    // Might need to chane this into a symbol
-                    // newArgs.emplace_back(ast::MK::Symbol(mdef->loc, mdef->name));
                     auto privateCall = ast::MK::Send1(mdef->loc, ast::MK::Self(mdef->loc), core::Names::private_(),
                                                       ast::MK::Symbol(mdef->loc, mdef->name));
-                    // new node(/* private mdef.to_symbol*/)
-                    cout << "testing postTransformClassDef " << classDef->rhs.size() << "\n";
-
                     classDef->rhs.insert(classDef->rhs.end(), std::move(privateCall));
                 }
             },

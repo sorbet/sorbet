@@ -44,7 +44,5 @@ Test.method_e # error: Non-private call to private method `Test.method_e`
 Test.method_g # error: Non-private call to private method `Test::ClassMethods#method_g`
 Test.method_h # error: Non-private call to private method `Test::ClassMethods#method_h`
 
-# TODO: The following methods should contain errors. Sorbet currently does not support setting method
-# visibility using the private/protected keywords that affect the visibility of subsequent methods.
-Test.method_f
-Test.method_i
+Test.method_f # error: Non-private call to private method `Test.method_f`
+Test.method_i # error: Non-private call to private method `Test::ClassMethods#method_i`

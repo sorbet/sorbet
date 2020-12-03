@@ -1,7 +1,4 @@
 #include "rewriter/rewriter.h"
-#include "ast/Helpers.h"
-#include "ast/ast.h"
-
 #include "ast/treemap/treemap.h"
 #include "ast/verifier/verifier.h"
 #include "common/typecase.h"
