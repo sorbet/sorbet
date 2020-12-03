@@ -469,7 +469,8 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
     int64_t asInteger() const;
     double asFloat() const;
-    core::NameRef asName() const;
+    core::NameRef asName(const core::GlobalState &gs) const;
+    core::NameRef unsafeAsName() const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;

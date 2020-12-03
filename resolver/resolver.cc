@@ -2146,7 +2146,7 @@ private:
         // non-null
         ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
 
-        auto name = literal.asName();
+        auto name = literal.asName(ctx);
         auto shortName = name.data(ctx)->shortName(ctx);
         if (shortName.empty()) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
@@ -2185,7 +2185,7 @@ private:
                     }
 
                     auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
-                    auto packageName = package.asName();
+                    auto packageName = package.asName(ctx);
                     auto mangledName = packageName.lookupMangledPackageName(ctx.state);
                     // if the mangled name doesn't exist, then this means probably there's no package named this
                     if (!mangledName.exists()) {

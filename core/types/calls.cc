@@ -904,7 +904,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             continue;
                         }
 
-                        NameRef arg = key.asName();
+                        NameRef arg = key.asName(gs);
                         if (consumed.find(arg) != consumed.end()) {
                             continue;
                         }
@@ -930,7 +930,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
                     auto lit = cast_type_nonnull<LiteralType>(litType);
                     return cast_type_nonnull<ClassType>(lit.underlying()).symbol == Symbols::Symbol() &&
-                           lit.asName() == spec.name;
+                           lit.asName(gs) == spec.name;
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.flags.isDefault) {
@@ -955,10 +955,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             for (auto &keyType : hash->keys) {
                 auto key = cast_type_nonnull<LiteralType>(keyType);
                 SymbolRef klass = cast_type_nonnull<ClassType>(key.underlying()).symbol;
-                if (klass == Symbols::Symbol() && consumed.find(key.asName()) != consumed.end()) {
+                if (klass == Symbols::Symbol() && consumed.find(key.asName(gs)) != consumed.end()) {
                     continue;
                 }
-                NameRef arg = key.asName();
+                NameRef arg = key.asName(gs);
 
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
@@ -1710,7 +1710,7 @@ public:
             return;
         }
 
-        NameRef fn = lit.asName();
+        NameRef fn = lit.asName(gs);
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;
             return;
@@ -1960,7 +1960,7 @@ public:
             return;
         }
 
-        NameRef fn = lit.asName();
+        NameRef fn = lit.asName(gs);
 
         u2 numPosArgs = args.numPosArgs - 3;
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
@@ -2028,7 +2028,7 @@ public:
             return;
         }
 
-        NameRef fn = lit.asName();
+        NameRef fn = lit.asName(gs);
 
         if (args.args[2]->type.isUntyped()) {
             res.returnType = args.args[2]->type;

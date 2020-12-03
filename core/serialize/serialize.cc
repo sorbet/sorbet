@@ -366,7 +366,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
                     break;
                 case LiteralType::LiteralTypeKind::Symbol:
                 case LiteralType::LiteralTypeKind::String:
-                    p.putS8(c.asName()._id);
+                    p.putS8(c.unsafeAsName()._id);
                     break;
             }
             break;

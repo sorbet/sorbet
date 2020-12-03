@@ -344,7 +344,12 @@ double LiteralType::asFloat() const {
     return floatval;
 }
 
-core::NameRef LiteralType::asName() const {
+core::NameRef LiteralType::asName(const core::GlobalState &gs) const {
+    ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Symbol || literalKind == LiteralTypeKind::String);
+    return NameRef(gs, value);
+}
+
+core::NameRef LiteralType::unsafeAsName() const {
     ENFORCE_NO_TIMER(literalKind == LiteralTypeKind::Symbol || literalKind == LiteralTypeKind::String);
     return NameRef(NameRef::WellKnown{}, value);
 }
