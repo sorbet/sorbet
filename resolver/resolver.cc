@@ -1566,10 +1566,18 @@ public:
         core::FileRef file;
         core::SymbolRef owner;
         ast::MethodDef *mdef;
-        InlinedVector<ParsedSig, 1> sigs;
         InlinedVector<core::LocOffsets, 1> sigLocs;
+        InlinedVector<ParsedSig, 1> sigs;
+        InlinedVector<vector<bool>, 1> sigArgsToKeep;
     };
-    vector<ResolveSignatureJob> sigJobs;
+
+    struct ParseSignatureJob {
+        core::FileRef file;
+        core::SymbolRef owner;
+        ast::MethodDef *mdef;
+        InlinedVector<const ast::Send *, 1> sends;
+    };
+    vector<ParseSignatureJob> parseSigJobs;
 
     struct ResolveFieldJob {
         core::FileRef file;
@@ -1598,7 +1606,7 @@ public:
     vector<ResolveMethodAliasJob> methodAliasJobs;
 
     struct ResolveSignaturesWalkResult {
-        vector<ResolveSignatureJob> sigJobs;
+        vector<ParseSignatureJob> parseSigJobs;
         vector<ResolveFieldJob> fieldJobs;
         vector<ResolveStaticFieldJob> staticFieldJobs;
         vector<ResolveMethodAliasJob> methodAliasJobs;
@@ -1819,6 +1827,46 @@ private:
     }
 
 public:
+    static ResolveSignatureJob processParseSignatureJob(core::Context ctx, const ParseSignatureJob &job) {
+        auto &mdef = *job.mdef;
+        // process signatures in the context of either the current
+        // class, or the current singleton class, depending on if
+        // the current method is a self method.
+        core::SymbolRef sigOwner;
+        if (mdef.flags.isSelfMethod) {
+            sigOwner = ctx.owner.data(ctx)->lookupSingletonClass(ctx);
+        } else {
+            sigOwner = ctx.owner;
+        }
+
+        ResolveSignatureJob resolveJob{ctx.file, ctx.owner, job.mdef, {}, {}, {}};
+        bool isOverloaded = job.sends.size() > 1 && ctx.permitOverloadDefinitions(ctx.file);
+
+        for (auto send : job.sends) {
+            auto allowSelfType = true;
+            auto allowRebind = false;
+            auto allowTypeMember = true;
+            auto sig = TypeSyntax::parseSig(ctx.withOwner(sigOwner), *send, nullptr,
+                                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
+            if (isOverloaded) {
+                vector<bool> argsToKeep(mdef.args.size());
+                int argId = -1;
+                for (auto &argTree : mdef.args) {
+                    argId++;
+                    const auto local = ast::MK::arg2Local(argTree);
+                    auto treeArgName = local->localVariable._name;
+                    ENFORCE(local != nullptr);
+                    auto spec = absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == treeArgName; });
+                    argsToKeep[argId] = spec != sig.argTypes.end();
+                }
+                resolveJob.sigArgsToKeep.emplace_back(move(argsToKeep));
+            }
+            resolveJob.sigs.emplace_back(move(sig));
+            resolveJob.sigLocs.emplace_back(send->loc);
+        }
+        return resolveJob;
+    }
+
     static void processResolveSignatureJob(core::MutableContext ctx, const ResolveSignatureJob &job) {
         auto &sigs = job.sigs;
         auto &mdef = job.mdef;
@@ -1829,6 +1877,7 @@ public:
         bool isOverloaded = sigs.size() > 1 && ctx.permitOverloadDefinitions(ctx.file);
         auto originalName = mdef->symbol.data(ctx)->name;
         if (isOverloaded) {
+            ENFORCE(job.sigs.size() == job.sigArgsToKeep.size());
             ctx.state.mangleRenameSymbol(mdef->symbol, originalName);
         }
 
@@ -1837,20 +1886,8 @@ public:
             auto &sig = sigs[i];
             core::SymbolRef overloadSym;
             if (isOverloaded) {
-                vector<int> argsToKeep;
-                int argId = -1;
-                for (auto &argTree : mdef->args) {
-                    argId++;
-                    const auto local = ast::MK::arg2Local(argTree);
-                    auto treeArgName = local->localVariable._name;
-                    ENFORCE(local != nullptr);
-                    auto spec = absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == treeArgName; });
-                    if (spec != sig.argTypes.end()) {
-                        argsToKeep.emplace_back(argId);
-                    }
-                }
                 overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, job.sigLocs[i]), mdef->symbol,
-                                                               originalName, i, argsToKeep);
+                                                               originalName, i, job.sigArgsToKeep[i]);
                 if (i != sigs.size() - 1) {
                     overloadSym.data(ctx)->setOverloaded();
                 }
@@ -1983,6 +2020,7 @@ private:
         if (!lastSigs.empty()) {
             // These sigs won't have been parsed, as there was no methods to
             // attach them to -- parse them here manually to force any errors.
+            // TODO(jvilk): MOVE OUT
             for (auto sig : lastSigs) {
                 auto allowSelfType = true;
                 auto allowRebind = false;
@@ -2098,30 +2136,7 @@ private:
                         }
                     }
 
-                    // process signatures in the context of either the current
-                    // class, or the current singleton class, depending on if
-                    // the current method is a self method.
-                    core::SymbolRef sigOwner;
-                    if (mdef.flags.isSelfMethod) {
-                        sigOwner = ctx.owner.data(ctx)->lookupSingletonClass(ctx);
-                    } else {
-                        sigOwner = ctx.owner;
-                    }
-
-                    ResolveSignatureJob job{ctx.file, ctx.owner, &mdef, {}, {}};
-                    int i = 0;
-                    while (i < lastSigs.size()) {
-                        auto allowSelfType = true;
-                        auto allowRebind = false;
-                        auto allowTypeMember = true;
-                        auto sig = TypeSyntax::parseSig(
-                            ctx.withOwner(sigOwner), *lastSigs[i], nullptr,
-                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
-                        job.sigs.emplace_back(move(sig));
-                        job.sigLocs.emplace_back(lastSigs[i]->loc);
-                        i++;
-                    }
-                    sigJobs.emplace_back(move(job));
+                    parseSigJobs.emplace_back(ParseSignatureJob{ctx.file, ctx.owner, &mdef, lastSigs});
                     lastSigs.clear();
                 } else {
                     handleAbstractOrInterfaceMethods(ctx, mdef);
@@ -2634,8 +2649,8 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
     }
     trees.clear();
 
-    workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
-        Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
+    workers.multiplexJob("resolveSignaturesWalk", [&gs, inputq, outputq]() -> void {
+        Timer timeit(gs.tracer(), "resolveSignaturesWalkWorker");
         ResolveSignaturesWalk walk;
         ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
         ast::ParsedFile job;
@@ -2649,7 +2664,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
         if (!output.trees.empty()) {
             output.fieldJobs = move(walk.fieldJobs);
             output.staticFieldJobs = move(walk.staticFieldJobs);
-            output.sigJobs = move(walk.sigJobs);
+            output.parseSigJobs = move(walk.parseSigJobs);
             output.methodAliasJobs = move(walk.methodAliasJobs);
             auto count = output.trees.size();
             outputq->push(move(output), count);
@@ -2674,8 +2689,9 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
                     combined.staticFieldJobs.insert(combined.staticFieldJobs.end(),
                                                     make_move_iterator(threadResult.staticFieldJobs.begin()),
                                                     make_move_iterator(threadResult.staticFieldJobs.end()));
-                    combined.sigJobs.insert(combined.sigJobs.end(), make_move_iterator(threadResult.sigJobs.begin()),
-                                            make_move_iterator(threadResult.sigJobs.end()));
+                    combined.parseSigJobs.insert(combined.parseSigJobs.end(),
+                                                 make_move_iterator(threadResult.parseSigJobs.begin()),
+                                                 make_move_iterator(threadResult.parseSigJobs.end()));
                     combined.methodAliasJobs.insert(combined.methodAliasJobs.end(),
                                                     make_move_iterator(threadResult.methodAliasJobs.begin()),
                                                     make_move_iterator(threadResult.methodAliasJobs.end()));
@@ -2701,18 +2717,62 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
     }
 
     {
-        Timer timeit(gs.tracer(), "resolver.resolve_sigs");
-        for (auto &job : combined.sigJobs) {
-            core::MutableContext ctx(gs, job.owner, job.file);
-            ResolveSignaturesWalk::processResolveSignatureJob(ctx, job);
-        }
-    }
-
-    {
         Timer timeit(gs.tracer(), "resolver.resolve_method_aliases");
         for (auto &job : combined.methodAliasJobs) {
             core::MutableContext ctx(gs, job.owner, job.file);
             ResolveSignaturesWalk::processResolveMethodAliasJob(ctx, job);
+        }
+    }
+
+    auto resolveSigInputq =
+        make_shared<ConcurrentBoundedQueue<ResolveSignaturesWalk::ParseSignatureJob>>(combined.parseSigJobs.size());
+    auto resolveSigOutputq = make_shared<BlockingBoundedQueue<vector<ResolveSignaturesWalk::ResolveSignatureJob>>>(
+        combined.parseSigJobs.size());
+
+    for (auto &parseSigJob : combined.parseSigJobs) {
+        resolveSigInputq->push(move(parseSigJob), 1);
+    }
+
+    workers.multiplexJob("resolver.parse_sigs", [&gs, resolveSigInputq, resolveSigOutputq]() -> void {
+        Timer timeit(gs.tracer(), "resolver.parse_sigs.worker");
+        vector<ResolveSignaturesWalk::ResolveSignatureJob> output;
+        ResolveSignaturesWalk::ParseSignatureJob job;
+        for (auto result = resolveSigInputq->try_pop(job); !result.done(); result = resolveSigInputq->try_pop(job)) {
+            if (result.gotItem()) {
+                core::Context ctx(gs, core::Symbols::root(), job.file);
+                output.emplace_back(ResolveSignaturesWalk::processParseSignatureJob(ctx, job));
+            }
+        }
+        if (!output.empty()) {
+            auto count = output.size();
+            resolveSigOutputq->push(move(output), count);
+        }
+    });
+
+    vector<ResolveSignaturesWalk::ResolveSignatureJob> combinedSigs;
+    combinedSigs.reserve(combined.parseSigJobs.size());
+    combined.parseSigJobs.clear();
+    {
+        vector<ResolveSignaturesWalk::ResolveSignatureJob> threadResult;
+        for (auto result = resolveSigOutputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
+             !result.done();
+             result = resolveSigOutputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
+            if (result.gotItem()) {
+                if (combinedSigs.empty()) {
+                    combinedSigs = move(threadResult);
+                } else {
+                    combinedSigs.insert(combinedSigs.end(), make_move_iterator(threadResult.begin()),
+                                        make_move_iterator(threadResult.end()));
+                }
+            }
+        }
+    }
+
+    {
+        Timer timeit(gs.tracer(), "resolver.resolve_sigs");
+        for (auto &job : combinedSigs) {
+            core::MutableContext ctx(gs, job.owner, job.file);
+            ResolveSignaturesWalk::processResolveSignatureJob(ctx, job);
         }
     }
 

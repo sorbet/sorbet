@@ -1,6 +1,7 @@
 #include "GlobalState.h"
 
 #include "common/Timer.h"
+#include "common/UIntSet.h"
 #include "common/sort.h"
 #include "core/Error.h"
 #include "core/Hashing.h"
@@ -1092,7 +1093,7 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
 }
 
 SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, core::NameRef originalName, u4 num,
-                                              const vector<int> &argsToKeep) {
+                                              const std::vector<bool> &argsToKeep) {
     NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
     core::Loc loc = num == 0 ? original.data(*this)->loc()
                              : sigLoc; // use original Loc for main overload so that we get right jump-to-def for it.
@@ -1103,11 +1104,12 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, co
         ENFORCE(res.data(*this)->arguments().empty());
         res.data(*this)->arguments().reserve(original.data(*this)->arguments().size());
         const auto &originalArguments = original.data(*this)->arguments();
+        ENFORCE(argsToKeep.size() == originalArguments.size());
         int i = -1;
         for (auto &arg : originalArguments) {
             i += 1;
             Loc loc = arg.loc;
-            if (!absl::c_linear_search(argsToKeep, i)) {
+            if (!argsToKeep[i]) {
                 if (arg.flags.isBlock) {
                     loc = Loc::none();
                 } else {
