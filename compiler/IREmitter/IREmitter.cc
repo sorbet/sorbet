@@ -330,7 +330,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     }
 
                     llvm::Value *indices[] = {llvm::ConstantInt::get(cs, llvm::APInt(32, i, true))};
-                    auto name = a.data(cfg)._name.data(cs)->shortName(cs);
+                    auto name = a.data(cfg)._name.shortName(cs);
                     llvm::StringRef nameRef(name.data(), name.length());
                     auto rawValue = builder.CreateLoad(builder.CreateGEP(argArrayRaw, indices), {"rawArg_", nameRef});
                     Payload::varSet(cs, a, rawValue, builder, irctx, rubyBlockId);
@@ -399,7 +399,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     for (int argId = maxPositionalArgCount; argId < argsFlags.size(); argId++) {
                         if (argsFlags[argId].isKeyword && !argsFlags[argId].isRepeated) {
                             auto name = irctx.rubyBlockArgs[rubyBlockId][argId];
-                            auto rawId = Payload::idIntern(cs, builder, name.data(cfg)._name.data(cs)->shortName(cs));
+                            auto rawId = Payload::idIntern(cs, builder, name.data(cfg)._name.shortName(cs));
                             auto rawRubySym = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
 
                             auto argPresent = irctx.argPresentVariables[argId];
@@ -619,8 +619,7 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         auto skipTypeTest = bind.bind.variable.data(cfg) == core::LocalVariable::selfVariable();
 
                         if (!skipTypeTest) {
-                            IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type,
-                                                           i->cast.data(cs)->shortName(cs));
+                            IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type, i->cast.shortName(cs));
                         }
 
                         if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {

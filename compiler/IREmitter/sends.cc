@@ -52,7 +52,7 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
     auto afterSend = llvm::BasicBlock::Create(cs, "afterSend", builder.GetInsertBlock()->getParent());
     auto rememberStart = builder.GetInsertBlock();
     builder.SetInsertPoint(afterSend);
-    auto methodName = send->fun.data(cs)->shortName(cs);
+    auto methodName = send->fun.shortName(cs);
     llvm::StringRef methodNameRef(methodName.data(), methodName.size());
     auto phi = builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("symIntrinsicRawPhi_") + methodNameRef);
     builder.SetInsertPoint(rememberStart);
@@ -76,7 +76,7 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
 
                 remainingType = leftType;
 
-                auto clazName = c.data(cs)->name.data(cs)->shortName(cs);
+                auto clazName = c.data(cs)->name.shortName(cs);
                 llvm::StringRef clazNameRef(clazName.data(), clazName.size());
 
                 auto alternative = llvm::BasicBlock::Create(
@@ -242,7 +242,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     auto *send = mcctx.send;
     auto &irctx = mcctx.irctx;
     auto rubyBlockId = mcctx.rubyBlockId;
-    auto str = send->fun.data(cs)->shortName(cs);
+    auto str = send->fun.shortName(cs);
 
     // fill in args
     auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx);

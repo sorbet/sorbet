@@ -65,9 +65,9 @@ public:
 std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
     auto name = sym.data(gs)->name;
     if (name.data(gs)->kind == core::NameKind::UNIQUE) {
-        return name.data(gs)->unique.original.data(gs)->show(gs);
+        return name.data(gs)->unique.original.show(gs);
     }
-    return name.data(gs)->show(gs);
+    return name.show(gs);
 }
 
 class DefineClassIntrinsic : public NameBasedIntrinsicMethod {
@@ -80,7 +80,7 @@ public:
         auto sym = typeToSym(cs, send->args[0].type);
         auto attachedClass = sym.data(cs)->attachedClass(cs);
 
-        if (attachedClass.data(cs)->name.data(cs)->isTEnumName(cs)) {
+        if (attachedClass.data(cs)->name.isTEnumName(cs)) {
             // T::Enum classes like `class X$1 < MyEnum; end` are fake and for the type system only
             // (We don't define them at runtime, because classes are expensive compared to how many
             // individual enum values there are.)
@@ -152,7 +152,7 @@ public:
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         core::NameRef funName = lit.asName(cs);
-        auto name = funName.data(cs)->shortName(cs);
+        auto name = funName.shortName(cs);
         auto rawId = Payload::idIntern(cs, builder, name);
         auto block = Payload::varGet(cs, send->args[2].variable, builder, irctx, rubyBlockId);
         auto blockAsProc = IREmitterHelpers::callViaRubyVMSimple(
@@ -225,7 +225,7 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
         blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
     }
 
-    auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
+    auto fun = Payload::idIntern(cs, builder, send->fun.shortName(cs));
     return builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, irctx.localsOffset[rubyBlockId]},
                               "rawSendResult");
 }

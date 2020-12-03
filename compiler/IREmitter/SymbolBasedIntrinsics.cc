@@ -77,7 +77,7 @@ public:
             blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
         }
 
-        auto fun = Payload::idIntern(cs, builder, send->fun.data(cs)->shortName(cs));
+        auto fun = Payload::idIntern(cs, builder, send->fun.shortName(cs));
         return builder.CreateCall(cs.getFunction(cMethod),
                                   {recv, fun, argc, argv, blkPtr, mcctx.irctx.localsOffset[rubyBlockId]},
                                   "rawSendResult");
@@ -251,7 +251,7 @@ public:
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
         auto &builder = builderCast(mcctx.build);
-        auto str = literal.asName(cs).data(cs)->shortName(cs);
+        auto str = literal.asName(cs).shortName(cs);
         return Payload::cPtrToRubyRegexp(cs, builder, str, options);
     };
 
@@ -278,7 +278,7 @@ public:
 
         auto attachedClass = appliedType->klass.data(cs)->attachedClass(cs);
         ENFORCE(attachedClass.exists());
-        if (!attachedClass.data(cs)->name.data(cs)->isTEnumName(cs)) {
+        if (!attachedClass.data(cs)->name.isTEnumName(cs)) {
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 

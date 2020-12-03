@@ -236,9 +236,9 @@ core::SymbolRef removeRoot(core::SymbolRef sym) {
 std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
     auto name = sym.data(gs)->name;
     if (name.data(gs)->kind == core::NameKind::UNIQUE) {
-        return name.data(gs)->unique.original.data(gs)->show(gs);
+        return name.data(gs)->unique.original.show(gs);
     }
-    return name.data(gs)->show(gs);
+    return name.show(gs);
 }
 
 std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
@@ -324,7 +324,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
                 }
             }
 
-            if (ct.symbol.data(cs)->name.data(cs)->isTEnumName(cs)) {
+            if (ct.symbol.data(cs)->name.isTEnumName(cs)) {
                 // T.let(..., MyEnum::X$1) is special. These are singleton values, so we can do a type
                 // test with an object (reference) equality check.
                 ret = builder.CreateCall(cs.getFunction("sorbet_testObjectEqual_p"),
@@ -437,7 +437,7 @@ std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBu
             if (IREmitterHelpers::isFileOrClassStaticInit(cs, md.symbol)) {
                 funcName = "<top (required)>";
             } else {
-                funcName = md.symbol.data(cs)->name.data(cs)->shortName(cs);
+                funcName = md.symbol.data(cs)->name.shortName(cs);
             }
 
             parent = llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(cs));
@@ -504,7 +504,7 @@ void fillLocals(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterCo
     fast_sort(escapedVariables, [](const auto &left, const auto &right) -> bool { return left.second < right.second; });
 
     for (auto &entry : escapedVariables) {
-        auto *id = Payload::idIntern(cs, builder, entry.first.data(irctx.cfg)._name.data(cs)->shortName(cs));
+        auto *id = Payload::idIntern(cs, builder, entry.first.data(irctx.cfg)._name.shortName(cs));
         auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, baseOffset + entry.second, false));
         llvm::Value *indices[] = {offset};
         builder.CreateStore(id, builder.CreateGEP(locals, indices));
@@ -851,16 +851,15 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
                 return Payload::getRubyConstant(cs, alias.constantSym, builder);
             case Alias::AliasKind::GlobalField:
                 return builder.CreateCall(cs.getFunction("sorbet_globalVariableGet"),
-                                          {Payload::idIntern(cs, builder, alias.globalField.data(cs)->shortName(cs))});
+                                          {Payload::idIntern(cs, builder, alias.globalField.shortName(cs))});
             case Alias::AliasKind::ClassField:
                 return builder.CreateCall(cs.getFunction("sorbet_classVariableGet"),
                                           {getClassVariableStoreClass(cs, builder, irctx),
-                                           Payload::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs))});
+                                           Payload::idIntern(cs, builder, alias.classField.shortName(cs))});
             case Alias::AliasKind::InstanceField:
-                return builder.CreateCall(
-                    cs.getFunction("sorbet_instanceVariableGet"),
-                    {varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId),
-                     Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs))});
+                return builder.CreateCall(cs.getFunction("sorbet_instanceVariableGet"),
+                                          {varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId),
+                                           Payload::idIntern(cs, builder, alias.instanceField.shortName(cs))});
         }
     }
     if (irctx.escapedVariableIndices.contains(local)) {
@@ -889,15 +888,15 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
                                 llvm::ConstantInt::get(cs, llvm::APInt(64, name.length())), var});
         } else if (alias.kind == Alias::AliasKind::GlobalField) {
             builder.CreateCall(cs.getFunction("sorbet_globalVariableSet"),
-                               {Payload::idIntern(cs, builder, alias.globalField.data(cs)->shortName(cs)), var});
+                               {Payload::idIntern(cs, builder, alias.globalField.shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::ClassField) {
             builder.CreateCall(cs.getFunction("sorbet_classVariableSet"),
                                {getClassVariableStoreClass(cs, builder, irctx),
-                                Payload::idIntern(cs, builder, alias.classField.data(cs)->shortName(cs)), var});
+                                Payload::idIntern(cs, builder, alias.classField.shortName(cs)), var});
         } else if (alias.kind == Alias::AliasKind::InstanceField) {
             builder.CreateCall(cs.getFunction("sorbet_instanceVariableSet"),
                                {Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId),
-                                Payload::idIntern(cs, builder, alias.instanceField.data(cs)->shortName(cs)), var});
+                                Payload::idIntern(cs, builder, alias.instanceField.shortName(cs)), var});
         }
         return;
     }

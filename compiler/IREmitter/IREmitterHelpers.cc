@@ -29,7 +29,7 @@ UnorderedMap<cfg::LocalRef, Alias> setupAliases(CompilerState &cs, const cfg::CF
 
                 if (i->what == core::Symbols::Magic_undeclaredFieldStub()) {
                     // When `i->what` is undeclaredFieldStub, `i->name` is populated
-                    auto name = i->name.data(cs)->shortName(cs);
+                    auto name = i->name.shortName(cs);
                     if (name.size() > 2 && name[0] == '@' && name[1] == '@') {
                         aliases[bind.bind.variable] = Alias::forClassField(i->name);
                     } else if (name.size() > 1 && name[0] == '@') {
@@ -44,7 +44,7 @@ UnorderedMap<cfg::LocalRef, Alias> setupAliases(CompilerState &cs, const cfg::CF
                     // It's currently impossible in Sorbet to declare a global field with a T.let
                     // (they will all be Magic_undeclaredFieldStub)
                     auto name = i->what.data(cs)->name;
-                    auto shortName = name.data(cs)->shortName(cs);
+                    auto shortName = name.shortName(cs);
                     ENFORCE(!(shortName.size() > 0 && shortName[0] == '$'));
 
                     if (i->what.data(cs)->isField()) {
@@ -87,7 +87,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
             if (entry.second == std::nullopt) {
                 continue;
             }
-            auto svName = var.data(cfg)._name.data(cs)->shortName(cs);
+            auto svName = var.data(cfg)._name.shortName(cs);
             builder.SetInsertPoint(irctx.functionInitializersByFunction[entry.second.value()]);
             auto alloca = llvmVariables[var] =
                 builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
@@ -101,7 +101,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
         builder.SetInsertPoint(irctx.functionInitializersByFunction[0]);
         auto name = Names::returnValue(cs);
         auto var = cfg.enterLocal(core::LocalVariable{name, 1});
-        auto nameStr = name.data(cs)->toString(cs);
+        auto nameStr = name.toString(cs);
         llvmVariables[var] =
             builder.CreateAlloca(cs.getValueType(), nullptr, llvm::StringRef(nameStr.data(), nameStr.length()));
     }
@@ -254,7 +254,7 @@ llvm::DISubprogram *getDebugScope(CompilerState &cs, cfg::CFG &cfg, llvm::DIScop
     auto loc = cfg.symbol.data(cs)->loc();
 
     auto owner = cfg.symbol.data(cs)->owner;
-    std::string diName(owner.data(cs)->name.data(cs)->shortName(cs));
+    std::string diName(owner.data(cs)->name.shortName(cs));
 
     if (owner.data(cs)->isSingletonClass(cs)) {
         diName += ".";
@@ -262,7 +262,7 @@ llvm::DISubprogram *getDebugScope(CompilerState &cs, cfg::CFG &cfg, llvm::DIScop
         diName += "#";
     }
 
-    diName += cfg.symbol.data(cs)->name.data(cs)->shortName(cs);
+    diName += cfg.symbol.data(cs)->name.shortName(cs);
 
     auto lineNo = loc.position(cs).first.line;
 
@@ -708,7 +708,7 @@ string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
     auto name = sym.data(cs)->name;
     if (name.data(cs)->kind == core::NameKind::CONSTANT &&
         name.data(cs)->cnst.original.data(cs)->kind == core::NameKind::UTF8) {
-        suffix = (string)name.data(cs)->shortName(cs);
+        suffix = (string)name.shortName(cs);
     } else {
         suffix = name.toString(cs);
     }
@@ -731,7 +731,7 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
     auto name = sym.data(cs)->name;
     string suffix;
     if (name.data(cs)->kind == core::NameKind::UTF8) {
-        suffix = (string)name.data(cs)->shortName(cs);
+        suffix = (string)name.shortName(cs);
     } else {
         suffix = name.toString(cs);
     }
@@ -895,12 +895,12 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
         case core::LiteralType::LiteralTypeKind::Float:
             return Payload::doubleToRubyValue(cs, builder, litType.asFloat());
         case core::LiteralType::LiteralTypeKind::Symbol: {
-            auto str = litType.asName(cs).data(cs)->shortName(cs);
+            auto str = litType.asName(cs).shortName(cs);
             auto rawId = Payload::idIntern(cs, builder, str);
             return builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
         }
         case core::LiteralType::LiteralTypeKind::String: {
-            auto str = litType.asName(cs).data(cs)->shortName(cs);
+            auto str = litType.asName(cs).shortName(cs);
             return Payload::cPtrToRubyString(cs, builder, str, true);
         }
     }
