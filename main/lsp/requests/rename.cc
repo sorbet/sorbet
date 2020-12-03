@@ -137,7 +137,17 @@ public:
     MethodRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
                   const string newName)
         : Renamer(gs, config, oldName, newName) {
-        if (oldName == "initialize") {
+        const vector<string> invalidNames = {"initialize", "call"};
+        for (auto name : invalidNames) {
+            if (oldName == name) {
+                invalid = true;
+                error = fmt::format("The `{}` method cannot be renamed.", oldName);
+                return;
+            }
+        }
+        // block any method not starting with /[a-zA-Z0-9_]+/. This blocks operator overloads.
+        if (!isalnum(oldName[0]) && oldName[0] != '_') {
+            error = fmt::format("The `{}` method cannot be renamed.", oldName);
             invalid = true;
         }
     }
@@ -156,7 +166,13 @@ public:
         if (auto sendResp = response->isSend()) {
             auto methodNameLoc = sendResp->getMethodNameLoc(gs);
             if (!methodNameLoc) {
-                ENFORCE(0, "Method name not found in send expression")
+                // If there are locations we don't know how to rename, fail the entire rename operation
+                invalid = true;
+                if (methodNameLoc->file().exists()) {
+                    auto path = methodNameLoc->file().data(gs).path();
+                    error = fmt::format("Failed to rename `{}` method call at {}:{}", oldName, path,
+                                        methodNameLoc->position(gs).first.line);
+                }
                 return;
             }
             string::size_type methodNameOffset = methodNameLoc->beginPos() - sendResp->termLoc.beginPos();
