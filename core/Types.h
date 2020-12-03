@@ -453,12 +453,12 @@ template <> inline SelfType cast_type_nonnull<SelfType>(const TypePtr &what) {
 }
 
 TYPE_INLINED(LiteralType) final {
-public:
     union {
         const int64_t value;
         const double floatval;
     };
 
+public:
     enum class LiteralTypeKind : u1 { Integer, String, Symbol, Float };
     const LiteralTypeKind literalKind;
     LiteralType(int64_t val);
@@ -467,6 +467,10 @@ public:
     TypePtr underlying() const;
     bool derivesFrom(const GlobalState &gs, core::SymbolRef klass) const;
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
+    int64_t asInteger() const;
+    double asFloat() const;
+    core::NameRef asName(const core::GlobalState &gs) const;
+    core::NameRef unsafeAsName() const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
@@ -506,12 +510,12 @@ template <> inline TypePtr make_type<LiteralType, float>(float &&val) {
 
 template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef &>(SymbolRef &&klass, NameRef &val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), absl::bit_cast<u8>(type.value));
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val._id);
 }
 
 template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef>(SymbolRef &&klass, NameRef &&val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), absl::bit_cast<u8>(type.value));
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val._id);
 }
 
 template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &what) {
