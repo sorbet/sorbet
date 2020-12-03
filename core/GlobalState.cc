@@ -1428,8 +1428,7 @@ NameRef GlobalState::lookupNameConstant(string_view original) const {
     return lookupNameConstant(utf8);
 }
 
-void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsigned int> *to, unsigned int szFrom,
-               unsigned int szTo) {
+void moveNames(pair<unsigned int, u4> *from, pair<unsigned int, u4> *to, unsigned int szFrom, unsigned int szTo) {
     // printf("\nResizing name hash table from %u to %u\n", szFrom, szTo);
     ENFORCE((szTo & (szTo - 1)) == 0, "name hash table size corruption");
     ENFORCE((szFrom & (szFrom - 1)) == 0, "name hash table size corruption");

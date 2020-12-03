@@ -394,9 +394,10 @@ bool LiteralType::equals(const LiteralType &rhs) const {
         case LiteralTypeKind::Float:
             return this->floatval == rhs.floatval;
         case LiteralTypeKind::Integer:
+            return this->value == rhs.value;
         case LiteralTypeKind::Symbol:
         case LiteralTypeKind::String:
-            return this->value == rhs.value;
+            return this->nameId == rhs.nameId;
     }
 }
 
