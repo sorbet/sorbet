@@ -12,7 +12,17 @@
   "files.associations": {
     "*.rbi": "ruby",
     "*.rbupdated": "ruby",
-    "*.rbedited": "ruby"
+    "*.rbedited": "ruby",
+    "*.def": "cpp",
+    "complex": "cpp",
+    "ios": "cpp",
+    "istream": "cpp",
+    "locale": "cpp",
+    "ostream": "cpp",
+    "random": "cpp",
+    "regex": "cpp",
+    "*.inc": "cpp",
+    "vector": "cpp"
   },
   "[cpp]": {
     // Runs clang-format when you save (provided by vscode-clangd).

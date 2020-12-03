@@ -23,6 +23,7 @@ namespace sorbet::namer {
 namespace {
 class FoundDefinitions;
 
+// Some structs the namer needs
 struct FoundClassRef;
 struct FoundClass;
 struct FoundStaticField;
@@ -44,12 +45,15 @@ class FoundDefinitionRef final {
     u4 _id;
 
 public:
+    // What are these doing?
+    // Establishing different ways to initialize a found definition ref?
     FoundDefinitionRef(DefinitionKind kind, u4 idx) : _kind(kind), _id(idx) {}
     FoundDefinitionRef() : FoundDefinitionRef(DefinitionKind::Empty, 0) {}
     FoundDefinitionRef(const FoundDefinitionRef &nm) = default;
     FoundDefinitionRef(FoundDefinitionRef &&nm) = default;
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
+    // What is an example of a root of a definition?
     static FoundDefinitionRef root() {
         return FoundDefinitionRef(DefinitionKind::Symbol, core::Symbols::root().rawId());
     }
@@ -66,11 +70,14 @@ public:
         return _id;
     }
 
+    // What's this?
     FoundClassRef &klassRef(FoundDefinitions &foundDefs);
     const FoundClassRef &klassRef(const FoundDefinitions &foundDefs) const;
 
     FoundClass &klass(FoundDefinitions &foundDefs);
     const FoundClass &klass(const FoundDefinitions &foundDefs) const;
+
+    // void setKlassIsCurrentlyPrivate(FoundDefinitions &foundDefs, bool isCurrentlyPrivate);
 
     FoundMethod &method(FoundDefinitions &foundDefs);
     const FoundMethod &method(const FoundDefinitions &foundDefs) const;
@@ -97,6 +104,7 @@ struct FoundClass final {
     core::LocOffsets loc;
     core::LocOffsets declLoc;
     ast::ClassDef::Kind classKind;
+    bool isCurrentlyPrivate;
 };
 
 struct FoundStaticField final {
@@ -176,6 +184,7 @@ public:
 
     FoundDefinitionRef addClass(FoundClass &&klass) {
         const u4 idx = _klasses.size();
+        // cout << "addClass (" << idx << ")\n";
         _klasses.emplace_back(move(klass));
         return addDefinition(FoundDefinitionRef(DefinitionKind::Class, idx));
     }
@@ -245,13 +254,21 @@ const FoundClassRef &FoundDefinitionRef::klassRef(const FoundDefinitions &foundD
 FoundClass &FoundDefinitionRef::klass(FoundDefinitions &foundDefs) {
     ENFORCE(kind() == DefinitionKind::Class);
     ENFORCE(foundDefs._klasses.size() > idx());
+    // cout << "klass (non-const) (" << idx() << "): " << foundDefs._klasses[idx()].isCurrentlyPrivate << "\n";
     return foundDefs._klasses[idx()];
 }
 const FoundClass &FoundDefinitionRef::klass(const FoundDefinitions &foundDefs) const {
     ENFORCE(kind() == DefinitionKind::Class);
     ENFORCE(foundDefs._klasses.size() > idx());
+    // cout << "klass (const) (" << idx() << "): " << foundDefs._klasses[idx()].isCurrentlyPrivate << "\n";
     return foundDefs._klasses[idx()];
 }
+// void FoundDefinitionRef::setKlassIsCurrentlyPrivate(FoundDefinitions &foundDefs, bool isCurrentlyPrivate) {
+//     ENFORCE(kind() == DefinitionKind::Class);
+//     ENFORCE(foundDefs._klasses.size() > idx());
+//     auto klass = foundDefs._klasses[idx()];
+//     klass.isCurrentlyPrivate = isCurrentlyPrivate;
+// }
 
 FoundMethod &FoundDefinitionRef::method(FoundDefinitions &foundDefs) {
     ENFORCE(kind() == DefinitionKind::Method);
@@ -412,6 +429,7 @@ public:
         found.classKind = klass.kind;
         found.loc = klass.loc;
         found.declLoc = klass.declLoc;
+        found.isCurrentlyPrivate = false;
 
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
@@ -430,6 +448,7 @@ public:
             }
         }
 
+        // cout << "preTransformClassDef: " << ownerStack.size() << "\n";
         ownerStack.emplace_back(foundDefs->addClass(move(found)));
         return tree;
     }
@@ -455,6 +474,13 @@ public:
         foundMethod.loc = method.loc;
         foundMethod.declLoc = method.declLoc;
         foundMethod.flags = method.flags;
+
+        ENFORCE(foundMethod.owner.kind() == DefinitionKind::Class); // TODO: Move up and remove if statement below.
+        if (foundMethod.owner.kind() == DefinitionKind::Class) {
+            // cout << "preTransformMethodDef method: " << foundMethod.name.show(ctx.state)
+            //     << " || flag: " << foundMethod.owner.klass(*foundDefs).isCurrentlyPrivate << "\n";
+            foundMethod.flags.isPrivate = foundMethod.owner.klass(*foundDefs).isCurrentlyPrivate;
+        }
         foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
         foundMethod.argsHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
         ownerStack.emplace_back(foundDefs->addMethod(move(foundMethod)));
@@ -463,6 +489,10 @@ public:
 
     ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
         ownerStack.pop_back();
+        return tree;
+    }
+
+    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
         return tree;
     }
 
@@ -1004,7 +1034,9 @@ class SymbolDefiner {
     core::SymbolRef insertMethod(core::MutableContext ctx, const FoundMethod &method) {
         auto symbol = defineMethod(ctx, method);
         auto implicitlyPrivate = ctx.owner.data(ctx)->enclosingClass(ctx) == core::Symbols::root();
-        if (implicitlyPrivate) {
+        // cout << "insertMethod: Defining (insert) method: " << symbol.show(ctx.state)
+        //      << " || flag: " << method.flags.isPrivate << "\n";
+        if (implicitlyPrivate || method.flags.isPrivate) {
             // Methods defined at the top level default to private (on Object)
             symbol.data(ctx)->setMethodPrivate();
         } else {
@@ -1349,6 +1381,8 @@ public:
             }
         }
 
+        // Maybe subsequent privacy should be considered a modifier? We go in and modify methods that show up after the
+        // modifier?
         // TODO: Split up?
         for (const auto &modifier : foundDefs->modifiers()) {
             const auto owner = getOwnerSymbol(modifier.owner);
