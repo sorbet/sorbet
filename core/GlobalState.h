@@ -260,7 +260,7 @@ private:
     std::vector<Symbol> fields;
     std::vector<Symbol> typeMembers;
     std::vector<Symbol> typeArguments;
-    std::vector<std::pair<unsigned int, unsigned int>> namesByHash;
+    std::vector<std::pair<unsigned int, u4>> namesByHash;
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
