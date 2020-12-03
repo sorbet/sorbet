@@ -191,7 +191,7 @@ void SymbolMatcher::updatePartialMatch(core::SymbolRef symbolRef, string_view::c
     if (!isEligibleSymbol(nameData)) {
         return;
     }
-    auto shortName = nameData->shortName(gs);
+    auto shortName = symbolData->name.shortName(gs);
     auto &partialMatch = getPartialMatch(symbolRef);
     partialMatch = partialMatchSymbol(shortName, queryBegin, queryEnd, true, ceilingScore);
     for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
@@ -270,7 +270,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
                 if (!isEligibleSymbol(nameData)) {
                     continue;
                 }
-                auto shortName = nameData->shortName(gs);
+                auto shortName = symbolData->name.shortName(gs);
                 uint bestScore = ceilingScore;
                 auto [partialScore, partialMatchEnd] =
                     partialMatchSymbol(shortName, queryBegin, queryEnd, false, ceilingScore);

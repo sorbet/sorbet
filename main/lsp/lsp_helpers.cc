@@ -42,7 +42,7 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
 }
 
 bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view pattern) {
-    string_view view = name.data(gs)->shortName(gs);
+    string_view view = name.shortName(gs);
     auto fnd = view.find(pattern);
     return fnd != string_view::npos;
 }
@@ -152,7 +152,7 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
     ENFORCE(methodNameRef.exists());
     string methodName = "???";
     if (methodNameRef.exists()) {
-        methodName = methodNameRef.data(gs)->toString(gs);
+        methodName = methodNameRef.toString(gs);
     }
     string methodNamePrefix = "";
     if (methodData->owner.exists() && methodData->owner.data(gs)->isClassOrModule() &&

@@ -550,7 +550,7 @@ private:
         if (!owner.data(gs)->isClassOrModule() || !owner.data(gs)->isClassOrModuleModule()) {
             if (auto e =
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.data(gs)->show(gs));
+                e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.show(gs));
             }
             // Keep processing it anyways
         }
@@ -564,7 +564,7 @@ private:
         if (id == nullptr || !id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
             if (auto e =
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.data(gs)->show(gs));
+                e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
             }
             return;
         }
@@ -578,7 +578,7 @@ private:
         if (id->symbol == owner) {
             if (auto e =
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Must not pass your self to `{}`", send->fun.data(gs)->show(gs));
+                e.setHeader("Must not pass your self to `{}`", send->fun.show(gs));
             }
             return;
         }
@@ -586,7 +586,7 @@ private:
         if (existing.exists() && existing != id->symbol) {
             if (auto e =
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send->fun.data(gs)->show(gs),
+                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send->fun.show(gs),
                             existing.data(gs)->show(gs), id->symbol.data(gs)->show(gs));
             }
             return;
@@ -2062,7 +2062,7 @@ private:
                 }
 
                 if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
-                    e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.data(ctx)->show(ctx));
+                    e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
                     e.addErrorLine(errorLine, "Previous declaration is here:");
                 }
                 return false;
@@ -2147,7 +2147,7 @@ private:
         ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
 
         auto name = literal.asName(ctx);
-        auto shortName = name.data(ctx)->shortName(ctx);
+        auto shortName = name.shortName(ctx);
         if (shortName.empty()) {
             if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
                 e.setHeader("The string given to `{}` must not be empty", method);
@@ -2381,7 +2381,7 @@ public:
                         doWhat = "resolve strings to constants";
                     }
 
-                    auto fun = fmt::format("T.{}", send.fun.data(ctx)->show(ctx));
+                    auto fun = fmt::format("T.{}", send.fun.show(ctx));
                     if (ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
                         if (auto e = ctx.beginError(send.loc, core::errors::Resolver::RevealTypeInUntypedFile)) {
                             e.setHeader("`{}` can only {} in `{}` files (or higher)", fun, doWhat, "# typed: true");

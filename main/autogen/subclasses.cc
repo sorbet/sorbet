@@ -54,14 +54,13 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
 
         // Get fully-qualified parent name as string
         string parentName =
-            fmt::format("{}", fmt::map_join(ref.resolved.nameParts, "::", [&ctx](const core::NameRef &nm) -> string {
-                            return nm.data(ctx)->show(ctx);
-                        }));
+            fmt::format("{}", fmt::map_join(ref.resolved.nameParts,
+                                            "::", [&ctx](const core::NameRef &nm) -> string { return nm.show(ctx); }));
 
         // Add child class to the set identified by its parent
-        string childName = fmt::format(
-            "{}", fmt::map_join(pf.showFullName(ctx, defn),
-                                "::", [&ctx](const core::NameRef &nm) -> string { return nm.data(ctx)->show(ctx); }));
+        string childName =
+            fmt::format("{}", fmt::map_join(pf.showFullName(ctx, defn),
+                                            "::", [&ctx](const core::NameRef &nm) -> string { return nm.show(ctx); }));
 
         out[parentName].entries.insert(make_pair(childName, defn.data(pf).type));
         out[parentName].classKind = ref.parentKind;

@@ -82,8 +82,8 @@ TEST_CASE("Infer") {
 
         auto barSymbol = rootScope->findMember(gs, gs.enterNameConstant("Bar"));
         auto fooSymbol = rootScope->findMember(gs, gs.enterNameConstant("Foo"));
-        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.data(gs)->showRaw(gs));
-        REQUIRE_EQ("<C <U Foo>>", fooSymbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.showRaw(gs));
+        REQUIRE_EQ("<C <U Foo>>", fooSymbol.data(gs)->name.showRaw(gs));
 
         auto barType = core::make_type<core::ClassType>(barSymbol);
         auto fooType = core::make_type<core::ClassType>(fooSymbol);
@@ -101,9 +101,9 @@ TEST_CASE("Infer") {
         auto barSymbol = rootScope->findMember(gs, gs.enterNameConstant("Bar"));
         auto foo1Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo1"));
         auto foo2Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo2"));
-        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.data(gs)->showRaw(gs));
-        REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.data(gs)->showRaw(gs));
-        REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.showRaw(gs));
+        REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.showRaw(gs));
+        REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.showRaw(gs));
 
         auto barType = core::make_type<core::ClassType>(barSymbol);
         auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
@@ -150,9 +150,9 @@ TEST_CASE("Infer") {
         auto barSymbol = rootScope->findMember(gs, gs.enterNameConstant("Bar"));
         auto foo1Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo1"));
         auto foo2Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo2"));
-        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.data(gs)->showRaw(gs));
-        REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.data(gs)->showRaw(gs));
-        REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.showRaw(gs));
+        REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.showRaw(gs));
+        REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.showRaw(gs));
 
         auto barType = core::make_type<core::ClassType>(barSymbol);
         auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);

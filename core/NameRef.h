@@ -96,12 +96,23 @@ public:
 
     NameRef lookupMangledPackageName(const GlobalState &gs) const;
 
+    bool isClassName(const GlobalState &gs) const;
+
+    // Convenience method, because enums need to be special cased in more places than other kinds of
+    // unique names, and everyone always forget to unwrap the first layer (NameKind::CONSTANT)
+    // before checking for UniqueNameKind::TEnum.
+    bool isTEnumName(const GlobalState &gs) const;
+
+    unsigned int hash(const GlobalState &gs) const;
+
+    std::string_view shortName(const GlobalState &gs) const;
     std::string showRaw(const GlobalState &gs) const;
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
 
     void enforceCorrectGlobalState(const GlobalState &gs) const;
     void sanityCheckSubstitution(const GlobalSubstitution &subst) const;
+    void sanityCheck(const GlobalState &gs) const;
 
 public:
     u4 _id;

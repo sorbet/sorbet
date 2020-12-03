@@ -510,7 +510,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     } else if (symbol == Symbols::void_()) {
         if (!args.suppressErrors) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
-                e.setHeader("Can not call method `{}` on void type", args.name.data(gs)->show(gs));
+                e.setHeader("Can not call method `{}` on void type", args.name.show(gs));
             }
         }
         return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
@@ -551,10 +551,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (e) {
             string thisStr = args.thisType.show(gs);
             if (args.fullType != args.thisType) {
-                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(gs)->show(gs),
-                            thisStr, args.fullType.show(gs));
+                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
+                            args.fullType.show(gs));
             } else {
-                e.setHeader("Method `{}` does not exist on `{}`", args.name.data(gs)->show(gs), thisStr);
+                e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
 
                 // catch the special case of `interface!`, `abstract!`, `final!`, or `sealed!` and
                 // suggest adding `extend T::Helpers`.
@@ -1165,7 +1165,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
         default:
             auto loc = core::Loc(args.locs.file, args.locs.call);
             if (auto e = gs.beginError(loc, errors::Infer::MetaTypeDispatchCall)) {
-                e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.data(gs)->show(gs),
+                e.setHeader("Call to method `{}` on `{}` mistakes a type for a value", args.name.show(gs),
                             this->wrapped.show(gs));
                 if (args.name == core::Names::tripleEq()) {
                     if (auto appliedType = cast_type<AppliedType>(this->wrapped)) {

@@ -1457,7 +1457,7 @@ ast::TreePtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalS
 
 NameRef SerializerImpl::unpickleNameRef(UnPickler &p, const GlobalState &gs) {
     NameRef name(NameRef::WellKnown{}, p.getU4());
-    ENFORCE(name.data(gs)->ref(gs) == name);
+    name.sanityCheck(gs);
     return name;
 }
 

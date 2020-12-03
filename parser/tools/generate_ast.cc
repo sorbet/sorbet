@@ -706,8 +706,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case FieldType::Name:
-                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name
-                    << ".data(gs)->showRaw(gs));" << '\n';
+                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name << ".showRaw(gs));"
+                    << '\n';
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(buf, \"" << arg.name << " = \");\n";
@@ -773,7 +773,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         switch (arg.type) {
             case FieldType::Name:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma
-                    << "\\n\", JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                    << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \");\n";
@@ -840,7 +840,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         switch (arg.type) {
             case FieldType::Name:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma
-                    << "\\n\", JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                    << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \");\n";
@@ -898,7 +898,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 if (node.whitequarkName == "str") {
                     out << "    fmt::format_to(buf, \", \\\"{}\\\"\", " << arg.name << ".toString(gs));\n";
                 } else {
-                    out << "    fmt::format_to(buf, \", :\" + JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                    out << "    fmt::format_to(buf, \", :\" + JSON::escape(" << arg.name << ".show(gs)));\n";
                 }
                 break;
             case FieldType::Node:

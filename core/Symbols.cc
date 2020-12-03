@@ -423,7 +423,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
                 }
             }
         }
-        auto shortName = name.data(gs)->shortName(gs);
+        auto shortName = name.shortName(gs);
         if (!shortName.empty() && std::isupper(shortName.front())) {
             vector<Symbol::FuzzySearchResult> constant_matches = findMemberFuzzyMatchConstant(gs, name, betterThan);
             res.insert(res.end(), constant_matches.begin(), constant_matches.end());
@@ -447,7 +447,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
     best.symbol = Symbols::noSymbol();
     best.name = NameRef::noName();
     best.distance = betterThan;
-    auto currentName = name.data(gs)->shortName(gs);
+    auto currentName = name.shortName(gs);
     if (best.distance < 0) {
         best.distance = 1 + (currentName.size() / 2);
     }
@@ -889,7 +889,7 @@ string Symbol::show(const GlobalState &gs) const {
     }
 
     if (!this->owner.exists() || this->owner == Symbols::root()) {
-        return this->name.data(gs)->show(gs);
+        return this->name.show(gs);
     }
 
     if (this->owner == core::Symbols::PackageRegistry()) {
@@ -909,25 +909,23 @@ string Symbol::show(const GlobalState &gs) const {
     }
 
     if (this->isMethod() && this->owner.data(gs)->isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
-        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs),
-                           this->name.data(gs)->show(gs));
+        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs), this->name.show(gs));
     }
 
     auto needsColonColon = this->isClassOrModule() || this->isStaticField() || this->isTypeMember();
 
-    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#",
-                       this->name.data(gs)->show(gs));
+    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#", this->name.show(gs));
 }
 
 string ArgInfo::argumentName(const GlobalState &gs) const {
     if (flags.isKeyword) {
-        return (string)name.data(gs)->shortName(gs);
+        return (string)name.shortName(gs);
     } else {
         // positional arg
         if (loc.exists()) {
             return loc.source(gs);
         } else {
-            return (string)name.data(gs)->shortName(gs);
+            return (string)name.shortName(gs);
         }
     }
 }
@@ -989,7 +987,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 
 SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModule());
-    ENFORCE(this->name.data(gs)->isClassName(gs));
+    ENFORCE(this->name.isClassName(gs));
 
     SymbolRef selfRef = this->ref(gs);
     if (selfRef == Symbols::untyped()) {
@@ -1280,7 +1278,7 @@ SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
 }
 
 u4 Symbol::hash(const GlobalState &gs) const {
-    u4 result = _hash(name.data(gs)->shortName(gs));
+    u4 result = _hash(name.shortName(gs));
     result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
@@ -1288,12 +1286,12 @@ u4 Symbol::hash(const GlobalState &gs) const {
     // argumentsOrMixins, typeParams, typeAliases
     for (auto e : membersStableOrderSlow(gs)) {
         if (e.second.exists() && !e.second.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.second.data(gs)->name.data(gs)->shortName(gs)));
+            result = mix(result, _hash(e.second.data(gs)->name.shortName(gs)));
         }
     }
     for (const auto &e : mixins_) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
     for (const auto &arg : arguments_) {
@@ -1303,11 +1301,11 @@ u4 Symbol::hash(const GlobalState &gs) const {
             type = Types::untypedUntracked();
         }
         result = mix(result, type.hash(gs));
-        result = mix(result, _hash(arg.name.data(gs)->shortName(gs)));
+        result = mix(result, _hash(arg.name.shortName(gs)));
     }
     for (const auto &e : typeParams) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
 
@@ -1317,7 +1315,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
 u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     ENFORCE(isMethod());
 
-    u4 result = _hash(name.data(gs)->shortName(gs));
+    u4 result = _hash(name.shortName(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
@@ -1343,7 +1341,7 @@ vector<u4> Symbol::methodArgumentHash(const GlobalState &gs) const {
         u4 arg = 0;
         // Changing name of keyword arg is a shape change.
         if (e.flags.isKeyword) {
-            arg = mix(arg, _hash(e.name.data(gs)->shortName(gs)));
+            arg = mix(arg, _hash(e.name.shortName(gs)));
         }
         // Changing an argument from e.g. keyword to position-based is a shape change.
         result.push_back(mix(arg, e.flags.toU1()));
@@ -1410,20 +1408,20 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
         result.emplace_back(e);
     }
     fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
-        auto lhsShort = lhs.first.data(gs)->shortName(gs);
-        auto rhsShort = rhs.first.data(gs)->shortName(gs);
+        auto lhsShort = lhs.first.shortName(gs);
+        auto rhsShort = rhs.first.shortName(gs);
         auto compareShort = lhsShort.compare(rhsShort);
         if (compareShort != 0) {
             return compareShort < 0;
         }
-        auto lhsRaw = lhs.first.data(gs)->showRaw(gs);
-        auto rhsRaw = rhs.first.data(gs)->showRaw(gs);
+        auto lhsRaw = lhs.first.showRaw(gs);
+        auto rhsRaw = rhs.first.showRaw(gs);
         auto compareRaw = lhsRaw.compare(rhsRaw);
         if (compareRaw != 0) {
             return compareRaw < 0;
         }
-        auto lhsSym = lhs.second.data(gs)->showRaw(gs);
-        auto rhsSym = rhs.second.data(gs)->showRaw(gs);
+        auto lhsSym = lhs.second.showRaw(gs);
+        auto rhsSym = rhs.second.showRaw(gs);
         auto compareSym = lhsSym.compare(rhsSym);
         if (compareSym != 0) {
             return compareSym < 0;

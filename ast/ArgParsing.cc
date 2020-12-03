@@ -77,7 +77,7 @@ std::vector<u4> ArgParsing::hashArgs(core::Context ctx, const std::vector<Parsed
         u4 arg = 0;
         u1 flags = 0;
         if (e.flags.isKeyword) {
-            arg = core::mix(arg, core::_hash(e.local._name.data(ctx)->shortName(ctx)));
+            arg = core::mix(arg, core::_hash(e.local._name.shortName(ctx)));
             flags += 1;
         }
         if (e.flags.isRepeated) {

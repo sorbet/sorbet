@@ -26,7 +26,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Tre
             loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos()};
         } else if (lit->isString(ctx)) {
             core::NameRef nameRef = lit->asString(ctx);
-            auto shortName = nameRef.data(ctx)->shortName(ctx);
+            auto shortName = nameRef.shortName(ctx);
             bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
                              absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
             if (validAttr) {
