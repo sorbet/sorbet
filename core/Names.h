@@ -91,10 +91,6 @@ public:
 
     ~Name() noexcept;
 
-    bool operator==(const Name &rhs) const;
-
-    bool operator!=(const Name &rhs) const;
-
     Name deepCopy(const GlobalState &to) const;
 };
 
