@@ -141,12 +141,10 @@ public:
                 return;
             }
         }
-        // block any method not in /[a-zA-Z0-9_]+/. This blocks operator overloads.
-        for (auto c : oldName) {
-            if (!isalnum(c) && c != '_') {
-                error = fmt::format("The `{}` method cannot be renamed.", oldName);
-                invalid = true;
-            }
+        // block any method not starting with /[a-zA-Z0-9_]+/. This blocks operator overloads.
+        if (!isalnum(oldName[0]) && oldName[0] != '_') {
+            error = fmt::format("The `{}` method cannot be renamed.", oldName);
+            invalid = true;
         }
     }
     ~MethodRenamer() {}
