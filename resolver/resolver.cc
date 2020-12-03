@@ -1888,6 +1888,7 @@ public:
             if (isOverloaded) {
                 overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, job.sigLocs[i]), mdef->symbol,
                                                                originalName, i, job.sigArgsToKeep[i]);
+                overloadSym.data(ctx)->setMethodVisibility(mdef->symbol.data(ctx)->methodVisibility());
                 if (i != sigs.size() - 1) {
                     overloadSym.data(ctx)->setOverloaded();
                 }
@@ -2020,7 +2021,6 @@ private:
         if (!lastSigs.empty()) {
             // These sigs won't have been parsed, as there was no methods to
             // attach them to -- parse them here manually to force any errors.
-            // TODO(jvilk): MOVE OUT
             for (auto sig : lastSigs) {
                 auto allowSelfType = true;
                 auto allowRebind = false;
@@ -2739,7 +2739,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, WorkerP
         ResolveSignaturesWalk::ParseSignatureJob job;
         for (auto result = resolveSigInputq->try_pop(job); !result.done(); result = resolveSigInputq->try_pop(job)) {
             if (result.gotItem()) {
-                core::Context ctx(gs, core::Symbols::root(), job.file);
+                core::Context ctx(gs, job.owner, job.file);
                 output.emplace_back(ResolveSignaturesWalk::processParseSignatureJob(ctx, job));
             }
         }
