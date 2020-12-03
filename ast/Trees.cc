@@ -1186,14 +1186,14 @@ string Literal::nodeName() {
 core::NameRef Literal::asString(const core::GlobalState &gs) const {
     ENFORCE(isString(gs));
     auto t = core::cast_type_nonnull<core::LiteralType>(value);
-    core::NameRef res(gs, t.value);
+    core::NameRef res = t.asName(gs);
     return res;
 }
 
 core::NameRef Literal::asSymbol(const core::GlobalState &gs) const {
     ENFORCE(isSymbol(gs));
     auto t = core::cast_type_nonnull<core::LiteralType>(value);
-    core::NameRef res(gs, t.value);
+    core::NameRef res = t.asName(gs);
     return res;
 }
 

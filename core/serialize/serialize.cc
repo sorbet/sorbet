@@ -357,7 +357,18 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         case TypePtr::Tag::LiteralType: {
             auto c = cast_type_nonnull<LiteralType>(what);
             p.putU1((u1)c.literalKind);
-            p.putS8(c.value);
+            switch (c.literalKind) {
+                case LiteralType::LiteralTypeKind::Float:
+                    p.putS8(absl::bit_cast<int64_t>(c.asFloat()));
+                    break;
+                case LiteralType::LiteralTypeKind::Integer:
+                    p.putS8(c.asInteger());
+                    break;
+                case LiteralType::LiteralTypeKind::Symbol:
+                case LiteralType::LiteralTypeKind::String:
+                    p.putS8(c.unsafeAsName()._id);
+                    break;
+            }
             break;
         }
         case TypePtr::Tag::AndType: {
