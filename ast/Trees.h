@@ -364,10 +364,9 @@ public:
     struct Flags {
         bool isSelfMethod : 1;
         bool isRewriterSynthesized : 1;
-        bool isPrivate : 1;
 
         // In C++20 we can replace this with bit field initialzers
-        Flags() : isSelfMethod(false), isRewriterSynthesized(false), isPrivate(false) {}
+        Flags() : isSelfMethod(false), isRewriterSynthesized(false) {}
     };
     CheckSize(Flags, 1, 1);
 

@@ -6,7 +6,7 @@
 
 #include <utility>
 
-    using namespace std;
+using namespace std;
 
 // This DSL pass flattens nested methods, so that once we've reached a non-definition AST node (i.e. not a ClassDef or a
 // MethodDef) then we know that there are no MethodDefs lurking deeper in the tree. In order to work correctly, this
@@ -20,7 +20,6 @@
 //   sig{void}
 //   private def foo
 //     sig{void}
-//     private
 //     def self.bar; end
 //   end
 // end
