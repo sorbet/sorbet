@@ -18,12 +18,12 @@ const SendResponse *QueryResponse::isSend() const {
 }
 
 const optional<core::Loc> SendResponse::getMethodNameLoc(const core::GlobalState &gs) const {
-    // TODO: handle dispatchResult->secondary
-    auto methodName = dispatchResult->main.method.data(gs)->name.show(gs);
+    auto methodName = this->callerSideName.data(gs)->show(gs);
     auto expr = termLoc.source(gs);
-    // There are two possible forms of a send expression:
+    // We parse two forms of send expressions:
     //   <receiver expr><whitespace?>.<whitespace?><method>
     //   <method>
+    // All other forms (operator overloads etc) cause nullopt to be returned.
     string::size_type methodNameOffset = receiverLoc.endPos() - termLoc.beginPos();
     if (methodNameOffset != 0) {
         methodNameOffset = expr.find_first_of(".", methodNameOffset) + 1;
