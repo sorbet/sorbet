@@ -244,9 +244,37 @@ public:
     }
 };
 
+class UniqueSymbolQueue {
+public:
+    UniqueSymbolQueue() : iter(0) {}
+
+    bool tryEnqueue(core::SymbolRef s) {
+        auto insertResult = set.insert(s);
+        bool isNew = insertResult.second;
+        if (isNew) {
+            symbols.emplace_back(s);
+        }
+        return isNew;
+    }
+
+    core::SymbolRef pop() {
+        if (iter < symbols.size()) {
+            auto result = symbols[iter];
+            iter++;
+            return result;
+        }
+        return core::SymbolRef();
+    }
+
+private:
+    int iter;
+    vector<core::SymbolRef> symbols;
+    UnorderedSet<core::SymbolRef> set;
+};
+
 // Add subclass-related methods (methods overriding and overridden by `symbol`) to the `methods` vector.
 void addSubclassRelatedMethods(LSPTypecheckerDelegate &typechecker, core::SymbolRef symbol,
-                               vector<core::SymbolRef> &methods) {
+                               UniqueSymbolQueue &methods) {
     const core::GlobalState &gs = typechecker.state();
     auto symbolData = symbol.data(gs);
 
@@ -269,19 +297,18 @@ void addSubclassRelatedMethods(LSPTypecheckerDelegate &typechecker, core::Symbol
         if (!member.exists()) {
             continue;
         }
-        methods.emplace_back(member);
+        methods.tryEnqueue(member);
     }
 }
 
 // Add methods that are related because of dispatching via secondary components in sends (union types).
 void addDispatchRelatedMethods(LSPTypecheckerDelegate &typechecker, const core::DispatchResult *dispatchResult,
-                               vector<core::SymbolRef> &methods) {
+                               UniqueSymbolQueue &methods) {
     for (const core::DispatchResult *dr = dispatchResult; dr != nullptr; dr = dr->secondary.get()) {
         auto method = dr->main.method;
         ENFORCE(method.exists());
-        auto included = absl::c_find(methods, m) != methods.end();
-        if (!included) {
-            // this also adds `method` itself
+        auto isNew = methods.tryEnqueue(method);
+        if (isNew) {
             addSubclassRelatedMethods(typechecker, method, methods);
         }
     }
@@ -296,20 +323,19 @@ void RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
     auto originalName = symbolData->name.show(gs);
     unique_ptr<Renamer> renamer;
 
-    vector<core::SymbolRef> symbolsToRename;
+    // vector<core::SymbolRef> symbolsToRename;
+    UniqueSymbolQueue symbolQueue;
     if (symbolData->isMethod()) {
         renamer = make_unique<MethodRenamer>(gs, config, originalName, newName);
-        addSubclassRelatedMethods(typechecker, symbol, symbolsToRename);
+        addSubclassRelatedMethods(typechecker, symbol, symbolQueue);
     } else {
         renamer = make_unique<ConstRenamer>(gs, config, originalName, newName);
-        symbolsToRename.push_back(symbol);
+        symbolQueue.tryEnqueue(symbol);
     }
 
     // We use symbolsToRename as a queue -- the loop body may add more symbols that need to be renamed, which is why we
     // don't use an iterator here.
-    for (int i = 0; i < symbolsToRename.size(); i++) {
-        auto sym = symbolsToRename[i];
-
+    for (auto sym = symbolQueue.pop(); sym.exists(); sym = symbolQueue.pop()) {
         auto queryResult = queryBySymbol(typechecker, sym);
         if (queryResult.error) {
             responseMsg->result = JSONNullObject();
@@ -334,7 +360,7 @@ void RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
             // TODO: move this into method renamer?
             if (auto sendResp = response->isSend()) {
                 if (sendResp->dispatchResult->secondary) {
-                    addDispatchRelatedMethods(typechecker, sendResp->dispatchResult.get(), symbolsToRename);
+                    addDispatchRelatedMethods(typechecker, sendResp->dispatchResult.get(), symbolQueue);
                 }
             }
         }
