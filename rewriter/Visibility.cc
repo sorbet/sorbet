@@ -16,7 +16,7 @@ void Visibility::run(core::MutableContext ctx, ast::ClassDef *classDef) {
 
     for (auto &stat : classDef->rhs) {
         typecase(
-            stat.get(), [&](ast::Assign *assign) {},
+            stat.get(),
             [&](ast::Send *send) {
                 if (send->args.size() != 0 && send->recv != nullptr) {
                     return;
@@ -32,8 +32,6 @@ void Visibility::run(core::MutableContext ctx, ast::ClassDef *classDef) {
             },
             [&](ast::MethodDef *mdef) {
                 if (currentVisibility == core::Names::private_()) {
-                    ast::MethodDef::ARGS_store newArgs;
-                    newArgs.reserve(0);
                     auto privateCall = ast::MK::Send1(mdef->loc, ast::MK::Self(mdef->loc), core::Names::private_(),
                                                       ast::MK::Symbol(mdef->loc, mdef->name));
                     classDef->rhs.insert(classDef->rhs.end(), std::move(privateCall));
