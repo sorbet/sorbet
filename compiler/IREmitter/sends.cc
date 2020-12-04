@@ -253,6 +253,14 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     // before this, perf will not be good
     auto *self = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
     if (send->fun == core::Names::super()) {
+        if (mcctx.blk != nullptr) {
+            // blocks require a locals offset parameter
+            llvm::Value *localsOffset = irctx.localsOffset[rubyBlockId];
+            ENFORCE(localsOffset != nullptr);
+            return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
+                                      {argc, argv, kw_splat, mcctx.blk, localsOffset}, "rawSendResult");
+        }
+
         return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {argc, argv, kw_splat}, "rawSendResult");
     } else {
         return callViaRubyVMSimple(cs, mcctx.build, irctx, self, argv, argc, kw_splat, str, mcctx.blk,

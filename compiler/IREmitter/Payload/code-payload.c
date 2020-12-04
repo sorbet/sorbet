@@ -1064,6 +1064,52 @@ VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const r
     }
 }
 
+struct sorbet_iterSuperArg {
+    VALUE recv;
+    ID func;
+    int argc;
+    const VALUE *argv;
+    const rb_callable_method_entry_t *me;
+};
+
+static VALUE sorbet_iterSuper(VALUE obj) {
+    struct sorbet_iterSuperArg *arg = (struct sorbet_iterSuperArg *)obj;
+    return rb_vm_call(GET_EC(), arg->recv, arg->func, arg->argc, arg->argv, arg->me);
+}
+
+SORBET_INLINE
+VALUE sorbet_callSuperBlock(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
+                            BlockFFIType blockImpl, VALUE closure) {
+    // Mostly an implementation of return rb_call_super(argc, argv);
+    rb_execution_context_t *ec = GET_EC();
+    VALUE recv = ec->cfp->self;
+    VALUE klass;
+    ID id;
+    rb_control_frame_t *cfp = ec->cfp;
+    const rb_callable_method_entry_t *me = rb_vm_frame_method_entry(cfp);
+
+    klass = RCLASS_ORIGIN(me->defined_class);
+    klass = RCLASS_SUPER(klass);
+    id = me->def->original_id;
+    me = rb_callable_method_entry(klass, id);
+
+    if (!me) {
+        // TODO do something here
+        // return rb_method_missing(recv, id, argc, argv, MISSING_SUPER);
+        rb_raise(rb_eRuntimeError, "unimplemented super with a missing method");
+        return Qnil;
+    }
+
+    struct sorbet_iterSuperArg arg;
+    arg.recv = recv;
+    arg.func = id;
+    arg.argc = argc;
+    arg.argv = argv;
+    arg.me = me;
+
+    return rb_iterate(sorbet_iterSuper, (VALUE)&arg, blockImpl, closure);
+}
+
 // ****
 // ****                       Exceptions
 // ****
