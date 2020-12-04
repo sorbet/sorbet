@@ -733,7 +733,7 @@ void readOptions(Options &opts,
         opts.lspSignatureHelpEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-signature-help"].as<bool>();
         opts.lspDocumentFormatRubyfmtEnabled =
             enableAllLSPFeatures || raw["enable-experimental-lsp-document-formatting-rubyfmt"].as<bool>();
-        opts.lspRenameEnabled = enableAllLSPFeatures || raw["enable-experimental-lsp-rename"].as<bool>();
+        opts.lspRenameEnabled = opts.lspAllBetaFeaturesEnabled || raw["enable-experimental-lsp-rename"].as<bool>();
 
         if (raw.count("lsp-directories-missing-from-client") > 0) {
             auto lspDirsMissingFromClient = raw["lsp-directories-missing-from-client"].as<vector<string>>();
