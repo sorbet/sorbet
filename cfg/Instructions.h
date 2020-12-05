@@ -304,6 +304,13 @@ struct InsnDeleter {
 
 class InsnPtr final : public std::unique_ptr<Instruction, InsnDeleter> {
 public:
+    // Required for typecase
+    template <class To> static bool isa(const InsnPtr &insn);
+    template <class To> static const To &cast(const InsnPtr &insn);
+    template <class To> static To &cast(InsnPtr &insn) {
+        return const_cast<To &>(cast<To>(static_cast<const InsnPtr &>(insn)));
+    }
+
     InsnPtr() : InsnPtr(nullptr) {}
     InsnPtr(Instruction *i) : std::unique_ptr<Instruction, InsnDeleter>(i) {}
 
@@ -311,6 +318,20 @@ public:
         return get()->tag;
     }
 };
+
+template <class To> inline bool InsnPtr::isa(const InsnPtr &what) {
+    return isa_instruction<To>(what.get());
+}
+template <> inline bool InsnPtr::isa<InsnPtr>(const InsnPtr &what) {
+    return true;
+}
+
+template <class To> inline const To &InsnPtr::cast(const InsnPtr &what) {
+    return *cast_instruction<To>(what.get());
+}
+template <> inline const InsnPtr &InsnPtr::cast(const InsnPtr &what) {
+    return what;
+}
 
 template <typename T, class... Args>
 InsnPtr make_insn(Args&& ...arg) {
