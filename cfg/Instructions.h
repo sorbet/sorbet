@@ -35,8 +35,10 @@ public:
     virtual ~Instruction() = default;
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const = 0;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const = 0;
-    Instruction() = default;
     bool isSynthetic = false;
+
+protected:
+    Instruction() = default;
 };
 
 template <class To> To *cast_instruction(Instruction *what) {
