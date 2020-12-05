@@ -58,6 +58,12 @@ std::string Instruction::showRaw(const core::GlobalState &gs, const CFG &cfg, in
 #undef SHOW_RAW
 }
 
+void Instruction::deleteTagged() {
+#define DELETE_INSN(name) delete static_cast<name *>(this);
+    GENERATE_TAG_SWITCH(tag, DELETE_INSN)
+#undef DELETE_INSN
+}
+
 Return::Return(LocalRef what, core::LocOffsets whatLoc) : Instruction(Tag::Return), what(what), whatLoc(whatLoc) {
     categoryCounterInc("cfg", "return");
 }
