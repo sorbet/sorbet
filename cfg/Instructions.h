@@ -269,7 +269,18 @@ public:
 };
 CheckSize(TAbsurd, 40, 8);
 
-using InsnPtr = std::unique_ptr<Instruction>;
+struct InsnDeleter {
+    void operator()(Instruction *insn) {
+        delete insn;
+    }
+};
+
+using InsnPtr = std::unique_ptr<Instruction, InsnDeleter>;
+
+template <typename T, class... Args>
+InsnPtr make_insn(Args&& ...arg) {
+    return InsnPtr(new T(std::forward<Args>(arg)...));
+}
 
 } // namespace sorbet::cfg
 
