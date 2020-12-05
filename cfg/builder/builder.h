@@ -25,7 +25,7 @@ private:
                                 core::LocOffsets loc);
     static void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc);
     static void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
-    static void synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets loc, std::unique_ptr<Instruction> inst);
+    static void synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets loc, InsnPtr inst);
     static BasicBlock *walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method);
     static std::tuple<LocalRef, BasicBlock *, BasicBlock *>
     walkDefault(CFGContext cctx, int argIndex, const core::ArgInfo &argInfo, LocalRef argLocal, core::LocOffsets argLoc,

@@ -40,9 +40,9 @@ public:
     VariableUseSite bind;
     core::LocOffsets loc;
 
-    std::unique_ptr<Instruction> value;
+    InsnPtr value;
 
-    Binding(LocalRef bind, core::LocOffsets loc, std::unique_ptr<Instruction> value);
+    Binding(LocalRef bind, core::LocOffsets loc, InsnPtr value);
     Binding(Binding &&other) = default;
     Binding() = default;
 
