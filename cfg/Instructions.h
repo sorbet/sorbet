@@ -53,9 +53,10 @@ public:
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const = 0;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const = 0;
     bool isSynthetic = false;
+    const Tag tag;
 
 protected:
-    Instruction() = default;
+    Instruction(Tag tag) : tag(tag) {}
 };
 
 template <class To> To *cast_instruction(Instruction *what) {
@@ -95,7 +96,7 @@ class SolveConstraint final : public Instruction {
 public:
     LocalRef send;
     std::shared_ptr<core::SendAndBlockLink> link;
-    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : send(send), link(link){};
+    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : Instruction(Tag::SolveConstraint), send(send), link(link){};
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
@@ -119,7 +120,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Send, 144, 8);
+CheckSize(Send, 152, 8);
 
 class Return final : public Instruction {
 public:
@@ -165,7 +166,7 @@ CheckSize(Literal, 32, 8);
 
 class GetCurrentException : public Instruction {
 public:
-    GetCurrentException() {
+    GetCurrentException() : Instruction(Tag::GetCurrentException) {
         categoryCounterInc("cfg", "GetCurrentException");
     };
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
@@ -178,7 +179,7 @@ public:
     u2 argId;
     core::MethodRef method;
 
-    LoadArg(core::MethodRef method, u2 argId) : argId(argId), method(method) {
+    LoadArg(core::MethodRef method, u2 argId) : Instruction(Tag::LoadArg), argId(argId), method(method) {
         categoryCounterInc("cfg", "loadarg");
     };
 
@@ -193,7 +194,7 @@ public:
     u2 argId;
     core::MethodRef method;
 
-    ArgPresent(core::MethodRef method, u2 argId) : argId(argId), method(method) {
+    ArgPresent(core::MethodRef method, u2 argId) : Instruction(Tag::ArgPresent), argId(argId), method(method) {
         categoryCounterInc("cfg", "argpresent");
     }
 
@@ -207,7 +208,7 @@ class LoadYieldParams final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link) {
+    LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link) : Instruction(Tag::LoadYieldParams), link(link) {
         categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
@@ -248,7 +249,7 @@ public:
     VariableUseSite value;
     core::TypePtr type;
 
-    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), value(value), type(type) {}
+    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : Instruction(Tag::Cast), cast(cast), value(value), type(type) {}
 
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
@@ -259,7 +260,7 @@ class TAbsurd final : public Instruction {
 public:
     VariableUseSite what;
 
-    TAbsurd(LocalRef what) : what(what) {
+    TAbsurd(LocalRef what) : Instruction(Tag::TAbsurd), what(what) {
         categoryCounterInc("cfg", "tabsurd");
     }
 
