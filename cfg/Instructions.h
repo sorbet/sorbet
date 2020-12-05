@@ -29,6 +29,23 @@ public:
 // implicitly numbered: result of every instruction can be uniquely referenced
 // by its position in a linear array.
 
+enum class Tag : u1 {
+    Ident = 1,
+    Alias,
+    SolveConstraint,
+    Send,
+    Return,
+    BlockReturn,
+    LoadSelf,
+    Literal,
+    GetCurrentException,
+    LoadArg,
+    ArgPresent,
+    LoadYieldParams,
+    Cast,
+    TAbsurd,
+};
+
 // When adding a new subtype, see if you need to add it to fillInBlockArguments
 class Instruction {
 public:
