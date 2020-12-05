@@ -1066,11 +1066,6 @@ class ResolveTypeMembersAndFieldsWalk {
         core::FileRef file;
     };
 
-    struct ResolveSimpleFieldItem {
-        core::SymbolRef field;
-        core::SymbolRef resultType;
-    };
-
     struct ResolveCastItem {
         core::FileRef file;
         core::SymbolRef owner;
