@@ -1274,7 +1274,8 @@ class ResolveTypeMembersWalk {
         typecase(
             expr, [&](const ast::Literal &a) { result = a.value; },
             [&](const ast::Cast &cast) {
-                if (cast.cast != core::Names::let() && cast.cast != core::Names::uncheckedLet()) {
+                if (cast.type != nullptr && cast.cast != core::Names::let() &&
+                    cast.cast != core::Names::uncheckedLet()) {
                     if (auto e = ctx.beginError(cast.loc, core::errors::Resolver::ConstantAssertType)) {
                         e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
@@ -1286,18 +1287,12 @@ class ResolveTypeMembersWalk {
         return result;
     }
 
-    static void resolveStaticField(core::MutableContext ctx, ResolveStaticFieldItem &job) {
+    static bool tryResolveStaticField(core::MutableContext ctx, ResolveStaticFieldItem &job) {
+        ENFORCE(job.sym.data(ctx)->isStaticField());
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
             data->resultType = resolveConstantType(ctx, asgn->rhs);
-            if (data->resultType == nullptr) {
-                // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
-                auto rhs = move(asgn->rhs);
-                auto loc = rhs.loc();
-                asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
-                                           core::Names::suggestType(), move(rhs));
-            }
         } else if (!core::isa_type<core::AliasType>(data->resultType)) {
             // If we've already resolved a temporary constant, we still want to run resolveConstantType to
             // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
@@ -1311,6 +1306,7 @@ class ResolveTypeMembersWalk {
                 }
             }
         }
+        return data->resultType != nullptr;
     }
 
     static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs,
@@ -1864,6 +1860,14 @@ public:
                                 });
             combined.todoResolveFieldItems.erase(it, combined.todoResolveFieldItems.end());
         }
+        {
+            auto it = remove_if(combined.todoResolveStaticFieldItems.begin(),
+                                combined.todoResolveStaticFieldItems.end(), [&](ResolveStaticFieldItem &job) {
+                                    core::MutableContext ctx(gs, job.sym, job.file);
+                                    return tryResolveStaticField(ctx, job);
+                                });
+            combined.todoResolveStaticFieldItems.erase(it, combined.todoResolveStaticFieldItems.end());
+        }
 
         // loop over any out-of-order type_member/type_alias references
         bool progress = true;
@@ -1915,7 +1919,13 @@ public:
         }
         for (auto &job : combined.todoResolveStaticFieldItems) {
             core::MutableContext ctx(gs, job.sym, job.file);
-            resolveStaticField(ctx, job);
+            if (!tryResolveStaticField(ctx, job)) {
+                // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
+                auto rhs = move(job.asgn->rhs);
+                auto loc = rhs.loc();
+                job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                                               core::Names::suggestType(), move(rhs));
+            }
         }
 
         return move(combined.files);

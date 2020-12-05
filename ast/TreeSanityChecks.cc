@@ -76,6 +76,7 @@ void Break::_sanityCheck() {
 
 void Cast::_sanityCheck() {
     ENFORCE(arg);
+    // Note; We initially set `type` to `nullptr` in resolver before filling it in.
     // ENFORCE(type);
     ENFORCE(cast == core::Names::cast() || cast == core::Names::assertType() || cast == core::Names::let() ||
             cast == core::Names::uncheckedLet());
