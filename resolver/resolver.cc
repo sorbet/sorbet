@@ -1081,6 +1081,11 @@ class ResolveTypeMembersAndFieldsWalk {
         bool atTopLevel = false;
     };
 
+    struct ResolveSimpleStaticFieldItem {
+        core::SymbolRef sym;
+        core::TypePtr resultType;
+    };
+
     struct ResolveStaticFieldItem {
         core::FileRef file;
         core::SymbolRef sym;
@@ -1095,6 +1100,7 @@ class ResolveTypeMembersAndFieldsWalk {
         vector<ResolveCastItem> todoResolveCastItems;
         vector<ResolveFieldItem> todoResolveFieldItems;
         vector<ResolveStaticFieldItem> todoResolveStaticFieldItems;
+        vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
     };
 
     vector<ResolveAssignItem> todoAssigns_;
@@ -1103,6 +1109,7 @@ class ResolveTypeMembersAndFieldsWalk {
     vector<ResolveCastItem> todoResolveCastItems_;
     vector<ResolveFieldItem> todoResolveFieldItems_;
     vector<ResolveStaticFieldItem> todoResolveStaticFieldItems_;
+    vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
@@ -1287,32 +1294,33 @@ class ResolveTypeMembersAndFieldsWalk {
         return result;
     }
 
-    static bool tryResolveStaticField(core::MutableContext ctx, ResolveStaticFieldItem &job) {
+    [[nodiscard]] static core::TypePtr tryResolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
         ENFORCE(job.sym.data(ctx)->isStaticField());
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
-            data->resultType = resolveConstantType(ctx, asgn->rhs);
-            return data->resultType != nullptr;
+            auto resultType = resolveConstantType(ctx, asgn->rhs);
+            return resultType;
         }
         // resultType was already set. We may be running on the incremental path. Force this field to be resolved in
         // `resolveStaticField`, which may produce an error message.
-        return false;
+        return nullptr;
     }
 
-    static void resolveStaticField(core::MutableContext ctx, ResolveStaticFieldItem &job) {
+    [[nodiscard]] static core::TypePtr resolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
         ENFORCE(job.sym.data(ctx)->isStaticField());
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
-            data->resultType = resolveConstantType(ctx, asgn->rhs);
-            if (data->resultType == nullptr) {
+            auto resultType = resolveConstantType(ctx, asgn->rhs);
+            if (resultType == nullptr) {
                 // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
                 auto rhs = move(job.asgn->rhs);
                 auto loc = rhs.loc();
                 job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
                                                core::Names::suggestType(), move(rhs));
             }
+            return resultType;
         } else if (!core::isa_type<core::AliasType>(data->resultType)) {
             // If we've already resolved a temporary constant, we still want to run resolveConstantType to
             // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
@@ -1326,6 +1334,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
             }
         }
+        return data->resultType;
     }
 
     static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs,
@@ -1762,10 +1771,15 @@ public:
 
             todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, dependencies_, ctx.file});
         } else if (data->isStaticField()) {
-            ResolveStaticFieldItem &job = todoResolveStaticFieldItems_.emplace_back();
+            ResolveStaticFieldItem job;
             job.file = ctx.file;
             job.sym = sym;
             job.asgn = &asgn;
+            if (auto resultType = tryResolveStaticField(ctx, job)) {
+                todoResolveSimpleStaticFieldItems_.emplace_back(ResolveSimpleStaticFieldItem{sym, resultType});
+            } else {
+                todoResolveStaticFieldItems_.emplace_back(move(job));
+            }
         }
 
         if (send == nullptr) {
@@ -1808,6 +1822,7 @@ public:
                 output.todoResolveCastItems = move(walk.todoResolveCastItems_);
                 output.todoResolveFieldItems = move(walk.todoResolveFieldItems_);
                 output.todoResolveStaticFieldItems = move(walk.todoResolveStaticFieldItems_);
+                output.todoResolveSimpleStaticFieldItems = move(walk.todoResolveSimpleStaticFieldItems_);
                 auto count = output.files.size();
                 outputq->push(move(output), count);
             }
@@ -1848,6 +1863,10 @@ public:
                             combined.todoResolveStaticFieldItems.end(),
                             make_move_iterator(threadResult.todoResolveStaticFieldItems.begin()),
                             make_move_iterator(threadResult.todoResolveStaticFieldItems.end()));
+                        combined.todoResolveSimpleStaticFieldItems.insert(
+                            combined.todoResolveSimpleStaticFieldItems.end(),
+                            make_move_iterator(threadResult.todoResolveSimpleStaticFieldItems.begin()),
+                            make_move_iterator(threadResult.todoResolveSimpleStaticFieldItems.end()));
                     }
                 }
             }
@@ -1877,12 +1896,10 @@ public:
             combined.todoResolveFieldItems.erase(it, combined.todoResolveFieldItems.end());
         }
         {
-            auto it = remove_if(combined.todoResolveStaticFieldItems.begin(),
-                                combined.todoResolveStaticFieldItems.end(), [&](ResolveStaticFieldItem &job) {
-                                    core::MutableContext ctx(gs, job.sym, job.file);
-                                    return tryResolveStaticField(ctx, job);
-                                });
-            combined.todoResolveStaticFieldItems.erase(it, combined.todoResolveStaticFieldItems.end());
+            for (auto &job : combined.todoResolveSimpleStaticFieldItems) {
+                job.sym.data(gs)->resultType = job.resultType;
+            }
+            combined.todoResolveSimpleStaticFieldItems.clear();
         }
 
         // loop over any out-of-order type_member/type_alias references
@@ -1925,7 +1942,7 @@ public:
 
         // Resolve the remaining casts and fields.
         for (auto &job : combined.todoResolveCastItems) {
-            core::MutableContext ctx(gs, job.owner, job.file);
+            core::Context ctx(gs, job.owner, job.file);
             resolveCastItem(ctx, job);
         }
         for (auto &job : combined.todoResolveFieldItems) {
@@ -1934,8 +1951,10 @@ public:
             ENFORCE_NO_TIMER(success);
         }
         for (auto &job : combined.todoResolveStaticFieldItems) {
-            core::MutableContext ctx(gs, job.sym, job.file);
-            resolveStaticField(ctx, job);
+            core::Context ctx(gs, job.sym, job.file);
+            if (auto resultType = resolveStaticField(ctx, job)) {
+                job.sym.data(gs)->resultType = resultType;
+            }
         }
 
         return move(combined.files);
