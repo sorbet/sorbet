@@ -1293,6 +1293,26 @@ class ResolveTypeMembersAndFieldsWalk {
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
             data->resultType = resolveConstantType(ctx, asgn->rhs);
+            return data->resultType != nullptr;
+        }
+        // resultType was already set. We may be running on the incremental path. Force this field to be resolved in
+        // `resolveStaticField`, which may produce an error message.
+        return false;
+    }
+
+    static void resolveStaticField(core::MutableContext ctx, ResolveStaticFieldItem &job) {
+        ENFORCE(job.sym.data(ctx)->isStaticField());
+        auto &asgn = job.asgn;
+        auto data = job.sym.data(ctx);
+        if (data->resultType == nullptr) {
+            data->resultType = resolveConstantType(ctx, asgn->rhs);
+            if (data->resultType == nullptr) {
+                // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
+                auto rhs = move(job.asgn->rhs);
+                auto loc = rhs.loc();
+                job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                                               core::Names::suggestType(), move(rhs));
+            }
         } else if (!core::isa_type<core::AliasType>(data->resultType)) {
             // If we've already resolved a temporary constant, we still want to run resolveConstantType to
             // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
@@ -1306,7 +1326,6 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
             }
         }
-        return data->resultType != nullptr;
     }
 
     static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs,
@@ -1919,13 +1938,7 @@ public:
         }
         for (auto &job : combined.todoResolveStaticFieldItems) {
             core::MutableContext ctx(gs, job.sym, job.file);
-            if (!tryResolveStaticField(ctx, job)) {
-                // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
-                auto rhs = move(job.asgn->rhs);
-                auto loc = rhs.loc();
-                job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
-                                               core::Names::suggestType(), move(rhs));
-            }
+            resolveStaticField(ctx, job);
         }
 
         return move(combined.files);
