@@ -1190,11 +1190,9 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     // Attempts to resolve the type of the given field. Returns `false` if the cast is not yet resolved.
-    static bool tryResolveField(core::MutableContext ctx, ResolveFieldItem &job) {
+    static void resolveField(core::MutableContext ctx, ResolveFieldItem &job) {
         auto cast = job.cast;
-        if (cast->type == nullptr) {
-            return false;
-        }
+        ENFORCE_NO_TIMER(cast->type != nullptr);
 
         core::SymbolRef scope;
         auto uid = job.ident;
@@ -1236,7 +1234,7 @@ class ResolveTypeMembersAndFieldsWalk {
             if (core::Types::equiv(ctx, prior.data(ctx)->resultType, cast->type)) {
                 // We already have a symbol for this field, and it matches what we already saw, so we can short
                 // circuit.
-                return true;
+                return;
             } else {
                 // We do some normalization here to ensure that the file / line we report the error on doesn't
                 // depend on the order that we traverse files nor the order we traverse within a file.
@@ -1256,7 +1254,7 @@ class ResolveTypeMembersAndFieldsWalk {
                     e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
                     e.addErrorLine(errorLine, "Previous declaration is here:");
                 }
-                return true;
+                return;
             }
         }
         core::SymbolRef var;
@@ -1268,7 +1266,7 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         var.data(ctx)->resultType = cast->type;
-        return true;
+        return;
     }
 
     // Resolve the type of the rhs of a constant declaration. This logic is
@@ -1888,14 +1886,6 @@ public:
         // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
         // (which is a static field).
         {
-            auto it = remove_if(combined.todoResolveFieldItems.begin(), combined.todoResolveFieldItems.end(),
-                                [&](ResolveFieldItem &job) {
-                                    core::MutableContext ctx(gs, job.owner, job.file);
-                                    return tryResolveField(ctx, job);
-                                });
-            combined.todoResolveFieldItems.erase(it, combined.todoResolveFieldItems.end());
-        }
-        {
             for (auto &job : combined.todoResolveSimpleStaticFieldItems) {
                 job.sym.data(gs)->resultType = job.resultType;
             }
@@ -1947,8 +1937,7 @@ public:
         }
         for (auto &job : combined.todoResolveFieldItems) {
             core::MutableContext ctx(gs, job.owner, job.file);
-            auto success = tryResolveField(ctx, job);
-            ENFORCE_NO_TIMER(success);
+            resolveField(ctx, job);
         }
         for (auto &job : combined.todoResolveStaticFieldItems) {
             core::Context ctx(gs, job.sym, job.file);
