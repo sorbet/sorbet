@@ -49,7 +49,10 @@ enum class Tag : u1 {
 // A mapping from instruction type to its corresponding tag.
 template <typename T> struct InsnToTag;
 
+class InsnPtr;
 struct InsnDeleter;
+class Instruction;
+template <class To> To *cast_instruction(Instruction *what);
 
 // When adding a new subtype, see if you need to add it to fillInBlockArguments
 class Instruction {
@@ -57,7 +60,6 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
     bool isSynthetic = false;
-    const Tag tag;
 
 protected:
     Instruction(Tag tag) : tag(tag) {}
@@ -66,6 +68,11 @@ protected:
 private:
     friend InsnDeleter;
     void deleteTagged();
+
+    friend InsnPtr;
+    template <class To>
+    friend To *cast_instruction(Instruction *);
+    const Tag tag;
 };
 
 template <class To> To *cast_instruction(Instruction *what) {
@@ -295,7 +302,15 @@ struct InsnDeleter {
     }
 };
 
-using InsnPtr = std::unique_ptr<Instruction, InsnDeleter>;
+class InsnPtr final : public std::unique_ptr<Instruction, InsnDeleter> {
+public:
+    InsnPtr() : InsnPtr(nullptr) {}
+    InsnPtr(Instruction *i) : std::unique_ptr<Instruction, InsnDeleter>(i) {}
+
+    Tag tag() const noexcept {
+        return get()->tag;
+    }
+};
 
 template <typename T, class... Args>
 InsnPtr make_insn(Args&& ...arg) {
