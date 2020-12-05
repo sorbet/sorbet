@@ -397,7 +397,7 @@ private:
             return true;
         }
         if (isFullyResolved(ctx, rhs)) {
-            // this todo will be resolved during ResolveTypeMembersWalk below
+            // this todo will be resolved during ResolveTypeMembersAndFieldsWalk below
             job.lhs.data(ctx)->resultType = core::make_type<core::ClassType>(core::Symbols::todo());
             return true;
         }
@@ -1040,7 +1040,7 @@ public:
     }
 };
 
-class ResolveTypeMembersWalk {
+class ResolveTypeMembersAndFieldsWalk {
     // A type_member, type_template, or T.type_alias that needs to have types
     // resolved.
     struct ResolveAssignItem {
@@ -1087,7 +1087,7 @@ class ResolveTypeMembersWalk {
         ast::Assign *asgn;
     };
 
-    struct ResolveTypeMembersResult {
+    struct ResolveTypeMembersAndFieldsResult {
         vector<ast::ParsedFile> files;
         vector<ResolveAssignItem> todoAssigns;
         vector<ResolveAttachedClassItem> todoAttachedClassItems;
@@ -1543,7 +1543,7 @@ class ResolveTypeMembersWalk {
     }
 
 public:
-    ResolveTypeMembersWalk() {
+    ResolveTypeMembersAndFieldsWalk() {
         nestedBlockCounts.emplace_back(0);
     }
 
@@ -1759,7 +1759,7 @@ public:
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-        auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersResult>>(trees.size());
+        auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersAndFieldsResult>>(trees.size());
         for (auto &tree : trees) {
             inputq->push(move(tree), 1);
         }
@@ -1767,8 +1767,8 @@ public:
 
         workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
             Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
-            ResolveTypeMembersWalk walk;
-            ResolveTypeMembersResult output;
+            ResolveTypeMembersAndFieldsWalk walk;
+            ResolveTypeMembersAndFieldsResult output;
             ast::ParsedFile job;
             for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
                 if (result.gotItem()) {
@@ -1789,9 +1789,9 @@ public:
             }
         });
 
-        ResolveTypeMembersResult combined;
+        ResolveTypeMembersAndFieldsResult combined;
         {
-            ResolveTypeMembersResult threadResult;
+            ResolveTypeMembersAndFieldsResult threadResult;
             for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
@@ -2791,7 +2791,7 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-    trees = ResolveTypeMembersWalk::run(gs, std::move(trees), workers);
+    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
@@ -2843,7 +2843,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
         // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
         ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), sym.toString(gs));
     })
-    trees = ResolveTypeMembersWalk::run(gs, std::move(trees), *workers);
+    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(trees));
     if (!result.hasResult()) {
         return result;
