@@ -76,7 +76,7 @@ void Break::_sanityCheck() {
 
 void Cast::_sanityCheck() {
     ENFORCE(arg);
-    ENFORCE(type);
+    // ENFORCE(type);
     ENFORCE(cast == core::Names::cast() || cast == core::Names::assertType() || cast == core::Names::let() ||
             cast == core::Names::uncheckedLet());
 }
