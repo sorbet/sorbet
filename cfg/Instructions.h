@@ -254,6 +254,8 @@ public:
 };
 CheckSize(TAbsurd, 40, 8);
 
+using InsnPtr = std::unique_ptr<Instruction>;
+
 } // namespace sorbet::cfg
 
 #endif // SORBET_CFG_H
