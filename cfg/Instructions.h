@@ -46,6 +46,9 @@ enum class Tag : u1 {
     TAbsurd,
 };
 
+// A mapping from instruction type to its corresponding tag.
+template <typename T> struct InsnToTag;
+
 struct InsnDeleter;
 
 // When adding a new subtype, see if you need to add it to fillInBlockArguments
@@ -69,14 +72,25 @@ template <class To> To *cast_instruction(Instruction *what) {
     static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
     static_assert(std::is_assignable<Instruction *&, To *>::value,
                   "Ill Formed To, has to be a subclass of Instruction");
-    return fast_cast<Instruction, To>(what);
+    if (what == nullptr) {
+        return nullptr;
+    }
+    if (what->tag != InsnToTag<To>::value) {
+        return nullptr;
+    }
+    return static_cast<To*>(what);
 }
 
 template <class To> bool isa_instruction(Instruction *what) {
     return cast_instruction<To>(what) != nullptr;
 }
 
-class Ident final : public Instruction {
+#define INSN(name)                              \
+    class name;                                 \
+    template <> struct InsnToTag<name> { static constexpr Tag value = Tag::name; }; \
+    class __attribute__((aligned(8))) name final
+
+INSN(Ident) : public Instruction {
 public:
     LocalRef what;
 
@@ -86,7 +100,7 @@ public:
 };
 CheckSize(Ident, 16, 8);
 
-class Alias final : public Instruction {
+INSN(Alias) : public Instruction {
 public:
     core::SymbolRef what;
     core::NameRef name;
@@ -98,7 +112,7 @@ public:
 };
 CheckSize(Alias, 24, 8);
 
-class SolveConstraint final : public Instruction {
+INSN(SolveConstraint) : public Instruction {
 public:
     LocalRef send;
     std::shared_ptr<core::SendAndBlockLink> link;
@@ -108,7 +122,7 @@ public:
 };
 CheckSize(SolveConstraint, 32, 8);
 
-class Send final : public Instruction {
+INSN(Send) : public Instruction {
 public:
     bool isPrivateOk;
     u2 numPosArgs;
@@ -128,7 +142,7 @@ public:
 };
 CheckSize(Send, 152, 8);
 
-class Return final : public Instruction {
+INSN(Return) : public Instruction {
 public:
     VariableUseSite what;
     core::LocOffsets whatLoc;
@@ -139,7 +153,7 @@ public:
 };
 CheckSize(Return, 48, 8);
 
-class BlockReturn final : public Instruction {
+INSN(BlockReturn) : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
     VariableUseSite what;
@@ -150,7 +164,7 @@ public:
 };
 CheckSize(BlockReturn, 56, 8);
 
-class LoadSelf final : public Instruction {
+INSN(LoadSelf) : public Instruction {
 public:
     LocalRef fallback;
     std::shared_ptr<core::SendAndBlockLink> link;
@@ -160,7 +174,7 @@ public:
 };
 CheckSize(LoadSelf, 32, 8);
 
-class Literal final : public Instruction {
+INSN(Literal) : public Instruction {
 public:
     core::TypePtr value;
 
@@ -170,7 +184,7 @@ public:
 };
 CheckSize(Literal, 32, 8);
 
-class GetCurrentException : public Instruction {
+INSN(GetCurrentException) : public Instruction {
 public:
     GetCurrentException() : Instruction(Tag::GetCurrentException) {
         categoryCounterInc("cfg", "GetCurrentException");
@@ -180,7 +194,7 @@ public:
 };
 CheckSize(GetCurrentException, 16, 8);
 
-class LoadArg final : public Instruction {
+INSN(LoadArg) : public Instruction {
 public:
     u2 argId;
     core::MethodRef method;
@@ -195,7 +209,7 @@ public:
 };
 CheckSize(LoadArg, 16, 8);
 
-class ArgPresent final : public Instruction {
+INSN(ArgPresent) : public Instruction {
 public:
     u2 argId;
     core::MethodRef method;
@@ -210,7 +224,7 @@ public:
 };
 CheckSize(ArgPresent, 16, 8);
 
-class LoadYieldParams final : public Instruction {
+INSN(LoadYieldParams) : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
 
@@ -222,7 +236,7 @@ public:
 };
 CheckSize(LoadYieldParams, 32, 8);
 
-class YieldParamPresent final : public Instruction {
+INSN(YieldParamPresent) : public Instruction {
 public:
     u2 argId;
 
@@ -234,7 +248,7 @@ public:
 };
 CheckSize(YieldParamPresent, 16, 8);
 
-class YieldLoadArg final : public Instruction {
+INSN(YieldLoadArg) : public Instruction {
 public:
     core::ArgInfo::ArgFlags flags;
     u2 argId;
@@ -249,7 +263,7 @@ public:
 };
 CheckSize(YieldLoadArg, 40, 8);
 
-class Cast final : public Instruction {
+INSN(Cast) : public Instruction {
 public:
     core::NameRef cast;
     VariableUseSite value;
@@ -262,7 +276,7 @@ public:
 };
 CheckSize(Cast, 56, 8);
 
-class TAbsurd final : public Instruction {
+INSN(TAbsurd) : public Instruction {
 public:
     VariableUseSite what;
 
