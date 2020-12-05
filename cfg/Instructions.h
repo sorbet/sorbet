@@ -50,8 +50,8 @@ enum class Tag : u1 {
 class Instruction {
 public:
     virtual ~Instruction() = default;
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const = 0;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const = 0;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
     bool isSynthetic = false;
     const Tag tag;
 
@@ -75,8 +75,8 @@ public:
     LocalRef what;
 
     Ident(LocalRef what);
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Ident, 16, 8);
 
@@ -87,8 +87,8 @@ public:
 
     Alias(core::SymbolRef what, core::NameRef name = core::NameRef::noName());
 
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Alias, 24, 8);
 
@@ -97,8 +97,8 @@ public:
     LocalRef send;
     std::shared_ptr<core::SendAndBlockLink> link;
     SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : Instruction(Tag::SolveConstraint), send(send), link(link){};
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(SolveConstraint, 32, 8);
 
@@ -117,8 +117,8 @@ public:
          const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk = false,
          const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Send, 152, 8);
 
@@ -128,8 +128,8 @@ public:
     core::LocOffsets whatLoc;
 
     Return(LocalRef what, core::LocOffsets whatLoc);
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Return, 48, 8);
 
@@ -139,8 +139,8 @@ public:
     VariableUseSite what;
 
     BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, LocalRef what);
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(BlockReturn, 56, 8);
 
@@ -149,8 +149,8 @@ public:
     LocalRef fallback;
     std::shared_ptr<core::SendAndBlockLink> link;
     LoadSelf(std::shared_ptr<core::SendAndBlockLink> link, LocalRef fallback);
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(LoadSelf, 32, 8);
 
@@ -159,8 +159,8 @@ public:
     core::TypePtr value;
 
     Literal(const core::TypePtr &value);
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Literal, 32, 8);
 
@@ -169,8 +169,8 @@ public:
     GetCurrentException() : Instruction(Tag::GetCurrentException) {
         categoryCounterInc("cfg", "GetCurrentException");
     };
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(GetCurrentException, 16, 8);
 
@@ -184,8 +184,8 @@ public:
     };
 
     const core::ArgInfo &argument(const core::GlobalState &gs) const;
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(LoadArg, 16, 8);
 
@@ -199,8 +199,8 @@ public:
     }
 
     const core::ArgInfo &argument(const core::GlobalState &gs) const;
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(ArgPresent, 16, 8);
 
@@ -211,8 +211,8 @@ public:
     LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link) : Instruction(Tag::LoadYieldParams), link(link) {
         categoryCounterInc("cfg", "loadarg");
     };
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(LoadYieldParams, 32, 8);
 
@@ -251,8 +251,8 @@ public:
 
     Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : Instruction(Tag::Cast), cast(cast), value(value), type(type) {}
 
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(Cast, 56, 8);
 
@@ -264,8 +264,8 @@ public:
         categoryCounterInc("cfg", "tabsurd");
     }
 
-    virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 CheckSize(TAbsurd, 40, 8);
 
