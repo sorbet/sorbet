@@ -6,6 +6,17 @@ namespace sorbet::core {
 class GlobalState;
 class GlobalSubstitution;
 class Name;
+struct UniqueName;
+struct ConstantName;
+struct RawName;
+
+enum class NameKind : u1 {
+    UTF8 = 1,
+    UNIQUE = 2,
+    CONSTANT = 3,
+};
+
+CheckSize(NameKind, 1, 1);
 
 struct NameDataDebugCheck {
     const GlobalState &gs;
@@ -16,17 +27,33 @@ struct NameDataDebugCheck {
 };
 
 /** This is to `NameRef &` what SymbolData is to `SymbolRef &`. Read docs on SymbolData */
-class NameData : private DebugOnlyCheck<NameDataDebugCheck> {
-    Name &name;
+class UniqueNameData : private DebugOnlyCheck<NameDataDebugCheck> {
+    const UniqueName &name;
 
 public:
-    NameData(Name &ref, const GlobalState &gs);
-    Name *operator->();
-    const Name *operator->() const;
+    UniqueNameData(const UniqueName &ref, const GlobalState &gs);
+    const UniqueName *operator->() const;
 };
-constexpr size_t sizeof__Name = sizeof(Name *);
-constexpr size_t alignof__Name = alignof(Name *);
-CheckSize(NameData, sizeof__Name, alignof__Name);
+
+class ConstantNameData : private DebugOnlyCheck<NameDataDebugCheck> {
+    const ConstantName &name;
+
+public:
+    ConstantNameData(const ConstantName &ref, const GlobalState &gs);
+    const ConstantName *operator->() const;
+};
+
+class RawNameData : private DebugOnlyCheck<NameDataDebugCheck> {
+    const RawName &name;
+
+public:
+    RawNameData(const RawName &ref, const GlobalState &gs);
+    const RawName *operator->() const;
+};
+
+constexpr size_t sizeof__UniqueName = sizeof(UniqueName *);
+constexpr size_t alignof__UniqueName = alignof(UniqueName *);
+CheckSize(UniqueNameData, sizeof__UniqueName, alignof__UniqueName);
 
 struct NameRefDebugCheck {
     int globalStateId;
@@ -40,6 +67,9 @@ struct NameRefDebugCheck {
 };
 
 class NameRef final : private DebugOnlyCheck<NameRefDebugCheck> {
+private:
+    const Name &data(const GlobalState &gs) const;
+
 public:
     friend GlobalState;
     friend Name;
@@ -74,9 +104,11 @@ public:
         return _id;
     }
 
-    NameData data(GlobalState &gs) const;
+    NameKind kind(const GlobalState &gs) const;
 
-    const NameData data(const GlobalState &gs) const;
+    const UniqueNameData unique(const GlobalState &gs) const;
+    const RawNameData raw(const GlobalState &gs) const;
+    const ConstantNameData cnst(const GlobalState &gs) const;
 
     // Returns the `0` NameRef, used to indicate non-existence of a name
     static NameRef noName() {

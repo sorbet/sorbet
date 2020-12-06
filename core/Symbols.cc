@@ -400,7 +400,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
         return res;
     }
 
-    if (name.data(gs)->kind == NameKind::UTF8) {
+    if (name.kind(gs) == NameKind::UTF8) {
         auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
         if (sym.symbol.exists()) {
             res.emplace_back(sym);
@@ -428,7 +428,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
             vector<Symbol::FuzzySearchResult> constant_matches = findMemberFuzzyMatchConstant(gs, name, betterThan);
             res.insert(res.end(), constant_matches.begin(), constant_matches.end());
         }
-    } else if (name.data(gs)->kind == NameKind::CONSTANT) {
+    } else if (name.kind(gs) == NameKind::CONSTANT) {
         res = findMemberFuzzyMatchConstant(gs, name, betterThan);
     }
     return res;
@@ -479,11 +479,10 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             }
             for (const auto scope : candidateScopes) {
                 for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
-                    if (member.first.data(gs)->kind == NameKind::CONSTANT &&
-                        member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8 &&
-                        member.second.exists()) {
+                    if (member.first.kind(gs) == NameKind::CONSTANT &&
+                        member.first.cnst(gs)->original.kind(gs) == NameKind::UTF8 && member.second.exists()) {
                         auto thisDistance = Levenstein::distance(
-                            currentName, member.first.data(gs)->cnst.original.data(gs)->raw.utf8, best.distance);
+                            currentName, member.first.cnst(gs)->original.raw(gs)->utf8, best.distance);
                         if (thisDistance <= best.distance) {
                             best.distance = thisDistance;
                             best.symbol = member.second;
@@ -514,15 +513,14 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             yetToGoDeeper.pop_back();
             ENFORCE(thisIter.data(gs)->isClassOrModule());
             for (auto member : thisIter.data(gs)->membersStableOrderSlow(gs)) {
-                if (member.second.exists() && member.first.exists() &&
-                    member.first.data(gs)->kind == NameKind::CONSTANT &&
-                    member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8) {
+                if (member.second.exists() && member.first.exists() && member.first.kind(gs) == NameKind::CONSTANT &&
+                    member.first.cnst(gs)->original.kind(gs) == NameKind::UTF8) {
                     if (member.second.data(gs)->isClassOrModule() &&
                         member.second.data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
-                    auto thisDistance = Levenstein::distance(
-                        currentName, member.first.data(gs)->cnst.original.data(gs)->raw.utf8, best.distance);
+                    auto thisDistance =
+                        Levenstein::distance(currentName, member.first.cnst(gs)->original.raw(gs)->utf8, best.distance);
                     if (thisDistance <= globalBestDistance) {
                         if (thisDistance < globalBestDistance) {
                             globalBest.clear();
@@ -552,19 +550,18 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
     result.symbol = Symbols::noSymbol();
     result.name = NameRef::noName();
     result.distance = betterThan;
-    ENFORCE(name.data(gs)->kind == NameKind::UTF8);
 
-    auto currentName = name.data(gs)->raw.utf8;
+    auto currentName = name.raw(gs)->utf8;
     if (result.distance < 0) {
         result.distance = 1 + (currentName.size() / 2);
     }
 
     for (auto pair : members()) {
         auto thisName = pair.first;
-        if (thisName.data(gs)->kind != NameKind::UTF8) {
+        if (thisName.kind(gs) != NameKind::UTF8) {
             continue;
         }
-        auto utf8 = thisName.data(gs)->raw.utf8;
+        auto utf8 = thisName.raw(gs)->utf8;
         int thisDistance = Levenstein::distance(currentName, utf8, result.distance);
         if (thisDistance < result.distance ||
             (thisDistance == result.distance && result.symbol._id > pair.second._id)) {
@@ -580,7 +577,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
         auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
-            ENFORCE(subResult.name.data(gs)->kind == NameKind::UTF8);
+            ENFORCE(subResult.name.kind(gs) == NameKind::UTF8);
             result = subResult;
         }
     }
@@ -588,7 +585,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
         auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
-            ENFORCE(subResult.name.data(gs)->kind == NameKind::UTF8);
+            ENFORCE(subResult.name.kind(gs) == NameKind::UTF8);
             result = subResult;
         }
     }
@@ -932,13 +929,12 @@ string ArgInfo::argumentName(const GlobalState &gs) const {
 
 namespace {
 bool isSingletonName(const GlobalState &gs, core::NameRef name) {
-    return name.data(gs)->kind == NameKind::UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
+    return name.kind(gs) == NameKind::UNIQUE && name.unique(gs)->uniqueNameKind == UniqueNameKind::Singleton;
 }
 
 bool isMangledSingletonName(const GlobalState &gs, core::NameRef name) {
-    return name.data(gs)->kind == NameKind::UNIQUE &&
-           name.data(gs)->unique.uniqueNameKind == UniqueNameKind::MangleRename &&
-           isSingletonName(gs, name.data(gs)->unique.original);
+    return name.kind(gs) == NameKind::UNIQUE && name.unique(gs)->uniqueNameKind == UniqueNameKind::MangleRename &&
+           isSingletonName(gs, name.unique(gs)->original);
 }
 } // namespace
 
@@ -1353,7 +1349,7 @@ bool Symbol::ignoreInHashing(const GlobalState &gs) const {
     if (isClassOrModule()) {
         return superClass() == core::Symbols::StubModule();
     } else if (isMethod()) {
-        return name.data(gs)->kind == NameKind::UNIQUE && name.data(gs)->unique.original == core::Names::staticInit();
+        return name.kind(gs) == NameKind::UNIQUE && name.unique(gs)->original == core::Names::staticInit();
     }
     return false;
 }

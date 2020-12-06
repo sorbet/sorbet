@@ -11,13 +11,6 @@
 namespace sorbet::core {
 class GlobalState;
 class Name;
-enum class NameKind : u1 {
-    UTF8 = 1,
-    UNIQUE = 2,
-    CONSTANT = 3,
-};
-
-CheckSize(NameKind, 1, 1);
 
 inline int _NameKind2Id_UTF8(NameKind nm) {
     ENFORCE(nm == NameKind::UTF8);
