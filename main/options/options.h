@@ -211,7 +211,7 @@ struct Options {
     bool lspDocumentSymbolEnabled = false;
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
-    bool lspGoToImplementationEnabled = true;
+    bool lspGoToImplementationEnabled = false;
     bool lspRenameEnabled = false;
 
     std::string inlineInput; // passed via -e

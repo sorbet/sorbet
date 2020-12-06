@@ -208,7 +208,7 @@ void checkServerCapabilities(const ServerCapabilities &capabilities) {
     // We don't support all possible features. Make sure we don't make any false claims.
     CHECK(capabilities.definitionProvider.value_or(false));
     CHECK(capabilities.typeDefinitionProvider.value_or(false));
-    CHECK_FALSE(capabilities.implementationProvider.has_value());
+    CHECK(capabilities.implementationProvider.has_value());
     CHECK(capabilities.referencesProvider.value_or(false));
     CHECK(capabilities.documentHighlightProvider.has_value());
     CHECK(capabilities.documentSymbolProvider.value_or(false));
