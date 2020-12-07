@@ -256,7 +256,7 @@ string SymbolRef::show(const GlobalState &gs) const {
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner;
     auto klass = owner.data(ctx)->enclosingClass(ctx);
-    ENFORCE(klass.data(ctx)->isClassOrModule());
+    ENFORCE(klass.isClassOrModule());
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(ctx, owner);
@@ -518,11 +518,11 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         while (!yetToGoDeeper.empty()) {
             const SymbolRef thisIter = yetToGoDeeper.back();
             yetToGoDeeper.pop_back();
-            ENFORCE(thisIter.data(gs)->isClassOrModule());
+            ENFORCE(thisIter.isClassOrModule());
             for (auto member : thisIter.data(gs)->membersStableOrderSlow(gs)) {
                 if (member.second.exists() && member.first.exists() && member.first.kind(gs) == NameKind::CONSTANT &&
                     member.first.dataCnst(gs)->original.kind(gs) == NameKind::UTF8) {
-                    if (member.second.data(gs)->isClassOrModule() &&
+                    if (member.second.isClassOrModule() &&
                         member.second.data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
@@ -538,7 +538,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                         best.name = member.first;
                         globalBest.emplace_back(best);
                     }
-                    if (member.second.data(gs)->isClassOrModule()) {
+                    if (member.second.isClassOrModule()) {
                         yetToGoDeeper.emplace_back(member.second);
                     }
                 }
@@ -912,7 +912,7 @@ string Symbol::show(const GlobalState &gs) const {
         return fmt::format("T.attached_class (of {})", attached.data(gs)->show(gs));
     }
 
-    if (this->isMethod() && this->owner.data(gs)->isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
+    if (this->isMethod() && this->owner.isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
         return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs), this->name.show(gs));
     }
 
@@ -1027,7 +1027,7 @@ SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
 void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(ctx));
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
-    ENFORCE(subclass.data(ctx)->isClassOrModule(), "Sealed subclass {} must be class", subclass.show(ctx));
+    ENFORCE(subclass.isClassOrModule(), "Sealed subclass {} must be class", subclass.show(ctx));
 
     // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
     auto selfRef = this->ref(ctx);
@@ -1273,7 +1273,7 @@ SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
 
 SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
     SymbolRef owner = ref(gs);
-    while (!owner.data(gs)->isClassOrModule()) {
+    while (!owner.isClassOrModule()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
         owner = owner.data(gs)->owner;
     }

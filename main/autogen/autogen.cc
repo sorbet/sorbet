@@ -223,7 +223,7 @@ public:
         ref.definitionLoc = core::Loc(ctx.file, original->loc);
         ref.name = QualifiedName::fromFullName(constantName(ctx, original));
         auto sym = original->symbol;
-        if (!sym.data(ctx)->isClassOrModule() || sym != core::Symbols::StubModule()) {
+        if (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) {
             ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
         }
         ref.is_resolved_statically = true;

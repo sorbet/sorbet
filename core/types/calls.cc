@@ -1830,7 +1830,7 @@ private:
             return;
         }
 
-        if (dispatchComp.method.data(gs)->isClassOrModule()) {
+        if (dispatchComp.method.isClassOrModule()) {
             return;
         }
 
@@ -1892,7 +1892,7 @@ private:
         {
             auto it = &dispatched;
             while (it != nullptr) {
-                if (it->main.method.exists() && !it->main.method.data(gs)->isClassOrModule()) {
+                if (it->main.method.exists() && !it->main.method.isClassOrModule()) {
                     const auto &methodArgs = it->main.method.data(gs)->arguments();
                     ENFORCE(!methodArgs.empty());
                     const auto &bspec = methodArgs.back();

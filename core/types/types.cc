@@ -492,8 +492,8 @@ void ClassType::_sanityCheck(const GlobalState &gs) const {
  * */
 InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, SymbolRef what,
                                                      const vector<TypePtr> &targs, SymbolRef asIf) {
-    ENFORCE(asIf.data(gs)->isClassOrModule());
-    ENFORCE(what.data(gs)->isClassOrModule());
+    ENFORCE(asIf.isClassOrModule());
+    ENFORCE(what.isClassOrModule());
     ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf) || asIf.data(gs)->derivesFrom(gs, what),
             what.data(gs)->name.showRaw(gs), asIf.data(gs)->name.showRaw(gs));
     InlinedVector<SymbolRef, 4> currentAlignment;
@@ -533,8 +533,8 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, Symb
 TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, SymbolRef fromWhat, SymbolRef inWhat,
                                     const vector<TypePtr> &targs) {
     SymbolRef originalOwner = fromWhat;
-    ENFORCE(fromWhat.data(gs)->isClassOrModule());
-    ENFORCE(inWhat.data(gs)->isClassOrModule());
+    ENFORCE(fromWhat.isClassOrModule());
+    ENFORCE(inWhat.isClassOrModule());
 
     // TODO: the ENFORCE below should be above this conditional, but there is
     // currently a problem with the handling of `module_function` that causes it
@@ -585,7 +585,7 @@ void TypeVar::_sanityCheck(const GlobalState &gs) const {
 }
 
 void AppliedType::_sanityCheck(const GlobalState &gs) const {
-    ENFORCE(this->klass.data(gs)->isClassOrModule());
+    ENFORCE(this->klass.isClassOrModule());
     ENFORCE(this->klass != Symbols::untyped());
 
     ENFORCE(this->klass.data(gs)->typeMembers().size() == this->targs.size() ||

@@ -678,7 +678,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
 
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
-            if (sym.data(ctx)->isClassOrModule()) {
+            if (sym.isClassOrModule()) {
                 // the T::Type generics internally have a typeArity of 0, so this allows us to check against them in the
                 // same way that we check against types like `Array`
                 bool isBuiltinGeneric = sym == core::Symbols::T_Hash() || sym == core::Symbols::T_Array() ||
@@ -932,7 +932,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
             corrected = corrected.data(ctx)->dealias(ctx);
 
-            if (!corrected.data(ctx)->isClassOrModule()) {
+            if (!corrected.isClassOrModule()) {
                 if (auto e = ctx.beginError(s.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Expected a class or module");
                 }

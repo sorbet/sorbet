@@ -304,12 +304,12 @@ core::SymbolRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flag
     }
 
     if (flags.isSelfMethod) {
-        if (owner.data(ctx)->isClassOrModule()) {
+        if (owner.isClassOrModule()) {
             owner = owner.data(ctx)->lookupSingletonClass(ctx);
         }
     }
     ENFORCE(owner.exists());
-    ENFORCE(owner.data(ctx)->isClassOrModule());
+    ENFORCE(owner.isClassOrModule());
     return owner;
 }
 
@@ -672,7 +672,7 @@ class SymbolDefiner {
     // Returns a symbol to the referenced name. Name must be a class or module.
     core::SymbolRef squashNames(core::MutableContext ctx, FoundDefinitionRef ref, core::SymbolRef owner) {
         // Prerequisite: Owner is a class or module.
-        ENFORCE(owner.data(ctx)->isClassOrModule());
+        ENFORCE(owner.isClassOrModule());
         switch (ref.kind()) {
             case DefinitionKind::Empty:
                 return owner;
@@ -727,7 +727,7 @@ class SymbolDefiner {
     core::SymbolRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
                                   core::LocOffsets loc) {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
-        if (scope.data(ctx)->isClassOrModule()) {
+        if (scope.isClassOrModule()) {
             // Check if original symbol was mangled away. If so, complain.
             auto renamedSymbol = ctx.state.findRenamedSymbol(scope.data(ctx)->owner, scope);
             if (renamedSymbol.exists()) {
@@ -1047,7 +1047,7 @@ class SymbolDefiner {
         auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
         auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
         if (constant.exists() && mod.name == core::Names::privateConstant()) {
-            if (constant.data(ctx)->isClassOrModule()) {
+            if (constant.isClassOrModule()) {
                 constant.data(ctx)->setClassOrModulePrivate();
             } else if (constant.data(ctx)->isStaticField()) {
                 constant.data(ctx)->setStaticFieldPrivate();
@@ -1064,7 +1064,7 @@ class SymbolDefiner {
 
         const bool isModule = klass.classKind == ast::ClassDef::Kind::Module;
         auto declLoc = core::Loc(ctx.file, klass.declLoc);
-        if (!symbol.data(ctx)->isClassOrModule()) {
+        if (!symbol.isClassOrModule()) {
             // we might have already mangled the class symbol, so see if we have a symbol that is a class already
             auto klassSymbol = ctx.state.lookupClassSymbol(symbol.data(ctx)->owner, symbol.data(ctx)->name);
             if (klassSymbol.exists()) {
@@ -1512,7 +1512,7 @@ public:
                 // Nothing else should have been typeAlias by now.
                 ENFORCE(klass.symbol == core::Symbols::root());
             }
-            if (!klass.symbol.data(ctx)->isClassOrModule()) {
+            if (!klass.symbol.isClassOrModule()) {
                 auto klassSymbol =
                     ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner, klass.symbol.data(ctx)->name);
                 ENFORCE(klassSymbol.exists());
@@ -1637,7 +1637,7 @@ public:
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
-        if (!scope.data(ctx)->isClassOrModule()) {
+        if (!scope.isClassOrModule()) {
             auto scopeName = scope.data(ctx)->name;
             scope = ctx.state.lookupClassSymbol(scope.data(ctx)->owner, scopeName);
         }
@@ -1656,7 +1656,7 @@ public:
 
         ENFORCE(asgn.lhs.get() == typeName &&
                 asgn.rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
-        if (!ctx.owner.data(ctx)->isClassOrModule()) {
+        if (!ctx.owner.isClassOrModule()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Types must be defined in class or module scopes");
             }
