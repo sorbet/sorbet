@@ -155,6 +155,13 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
     return SymbolRef(gs, type, distance);
 }
 
+bool SymbolRef::isField(const GlobalState &gs) const {
+    return isFieldOrStaticField() && data(gs)->isField();
+}
+bool SymbolRef::isStaticField(const GlobalState &gs) const {
+    return isFieldOrStaticField() && data(gs)->isStaticField();
+}
+
 SymbolData SymbolRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     return dataAllowingNone(gs);

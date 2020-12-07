@@ -75,6 +75,29 @@ public:
         return _id;
     }
 
+    inline bool isClassOrModule() const {
+        return kind() == Kind::ClassOrModule;
+    }
+
+    inline bool isMethod() const {
+        return kind() == Kind::Method;
+    }
+
+    inline bool isFieldOrStaticField() const {
+        return kind() == Kind::Field;
+    }
+
+    inline bool isTypeArgument() const {
+        return kind() == Kind::TypeArgument;
+    }
+
+    inline bool isTypeMember() const {
+        return kind() == Kind::TypeMember;
+    }
+
+    bool isField(const GlobalState &gs) const;
+    bool isStaticField(const GlobalState &gs) const;
+
     u4 classOrModuleIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
         return unsafeTableIndex();
