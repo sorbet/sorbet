@@ -50,7 +50,6 @@ enum class Tag : u1 {
 template <typename T> struct InsnToTag;
 
 class InsnPtr;
-struct InsnDeleter;
 class Instruction;
 template <class To> To *cast_instruction(Instruction *what);
 
@@ -66,7 +65,6 @@ protected:
     ~Instruction() = default;
 
 private:
-    friend InsnDeleter;
     void deleteTagged();
 
     friend InsnPtr;
@@ -296,13 +294,21 @@ public:
 };
 CheckSize(TAbsurd, 32, 8);
 
-struct InsnDeleter {
-    void operator()(Instruction *insn) {
-        insn->deleteTagged();
-    }
-};
+class InsnPtr final {
+    Instruction *ptr;
 
-class InsnPtr final : public std::unique_ptr<Instruction, InsnDeleter> {
+    void reset(Instruction *i) noexcept {
+        if (ptr) {
+            ptr->deleteTagged();
+        }
+        ptr = i;
+    }
+    Instruction *release() noexcept {
+        auto *i = ptr;
+        ptr = nullptr;
+        return i;
+    }
+
 public:
     // Required for typecase
     template <class To> static bool isa(const InsnPtr &insn);
@@ -312,7 +318,45 @@ public:
     }
 
     InsnPtr() : InsnPtr(nullptr) {}
-    InsnPtr(Instruction *i) : std::unique_ptr<Instruction, InsnDeleter>(i) {}
+    InsnPtr(Instruction *i) : ptr(i) {}
+    ~InsnPtr() {
+        if (ptr != nullptr) {
+            ptr->deleteTagged();
+        }
+    }
+
+    InsnPtr(const InsnPtr &) = delete;
+    InsnPtr &operator=(const InsnPtr &) = delete;
+
+    InsnPtr(InsnPtr &&other) noexcept {
+        ptr = other.release();
+    }
+    InsnPtr &operator=(InsnPtr &&other) noexcept {
+        if (*this == other) {
+            return *this;
+        }
+
+        reset(other.release());
+        return *this;
+    }
+
+    Instruction *operator->() const noexcept {
+        return get();
+    }
+    Instruction *get() const noexcept {
+        return ptr;
+    }
+
+    explicit operator bool() const noexcept {
+        return get() != nullptr;
+    }
+
+    bool operator==(const InsnPtr &other) const noexcept {
+        return get() == other.get();
+    }
+    bool operator!=(const InsnPtr &other) const noexcept {
+        return get() != other.get();
+    }
 
     Tag tag() const noexcept {
         return get()->tag;
