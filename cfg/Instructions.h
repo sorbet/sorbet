@@ -65,8 +65,6 @@ protected:
     ~Instruction() = default;
 
 private:
-    void deleteTagged();
-
     friend InsnPtr;
     template <class To>
     friend To *cast_instruction(Instruction *);
@@ -280,17 +278,45 @@ public:
 CheckSize(TAbsurd, 32, 8);
 
 class InsnPtr final {
-    Instruction *ptr;
+    using tagged_storage = u8;
 
-    void reset(Instruction *i) noexcept {
-        if (ptr) {
-            ptr->deleteTagged();
-        }
-        ptr = i;
+    static constexpr tagged_storage TAG_MASK = 0xffff;
+
+    static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
+
+    tagged_storage ptr;
+
+    template <typename T, typename... Args> friend InsnPtr make_insn(Args &&...);
+
+    static tagged_storage tagPtr(Tag tag, void *i) {
+        auto val = static_cast<tagged_storage>(tag);
+        auto maskedPtr = reinterpret_cast<tagged_storage>(i) << 16;
+
+        return maskedPtr | val;
     }
-    Instruction *release() noexcept {
-        auto *i = ptr;
-        ptr = nullptr;
+
+    static void deleteTagged(Tag tag, void *ptr) noexcept;
+
+    InsnPtr(Tag tag, Instruction *i) : ptr(tagPtr(tag, i)) {}
+
+    void resetTagged(tagged_storage i) noexcept {
+        Tag tagVal;
+        void *saved = nullptr;
+
+        if (ptr != 0) {
+            tagVal = tag();
+            saved = get();
+        }
+
+        ptr = i;
+
+        if (saved != nullptr) {
+            deleteTagged(tagVal, saved);
+        }
+    }
+    tagged_storage releaseTagged() noexcept {
+        auto i = ptr;
+        ptr = 0;
         return i;
     }
 
@@ -302,11 +328,10 @@ public:
         return const_cast<To &>(cast<To>(static_cast<const InsnPtr &>(insn)));
     }
 
-    InsnPtr() : InsnPtr(nullptr) {}
-    InsnPtr(Instruction *i) : ptr(i) {}
+    constexpr InsnPtr() noexcept : ptr(0) {}
     ~InsnPtr() {
-        if (ptr != nullptr) {
-            ptr->deleteTagged();
+        if (ptr != 0) {
+            deleteTagged(tag(), get());
         }
     }
 
@@ -314,14 +339,14 @@ public:
     InsnPtr &operator=(const InsnPtr &) = delete;
 
     InsnPtr(InsnPtr &&other) noexcept {
-        ptr = other.release();
+        ptr = other.releaseTagged();
     }
     InsnPtr &operator=(InsnPtr &&other) noexcept {
         if (*this == other) {
             return *this;
         }
 
-        reset(other.release());
+        resetTagged(other.releaseTagged());
         return *this;
     }
 
@@ -329,7 +354,8 @@ public:
         return get();
     }
     Instruction *get() const noexcept {
-        return ptr;
+        auto val = ptr & PTR_MASK;
+        return reinterpret_cast<Instruction *>(val >> 16);
     }
 
     explicit operator bool() const noexcept {
@@ -344,7 +370,9 @@ public:
     }
 
     Tag tag() const noexcept {
-        return get()->tag;
+        ENFORCE(ptr != 0);
+
+        return static_cast<Tag>(ptr & TAG_MASK);
     }
 };
 
@@ -364,7 +392,7 @@ template <> inline const InsnPtr &InsnPtr::cast(const InsnPtr &what) {
 
 template <typename T, class... Args>
 InsnPtr make_insn(Args&& ...arg) {
-    return InsnPtr(new T(std::forward<Args>(arg)...));
+    return InsnPtr(InsnToTag<T>::value, new T(std::forward<Args>(arg)...));
 }
 
 } // namespace sorbet::cfg
