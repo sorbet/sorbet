@@ -565,6 +565,7 @@ private:
         }
 
         auto argumentNumber = 0;
+        auto encounteredError = false;
         for (auto &arg : send->args) {
             auto *id = ast::cast_tree<ast::ConstantLit>(arg);
 
@@ -577,19 +578,22 @@ private:
                 return;
             }
             if (id->symbol.data(gs)->isClassOrModuleClass()) {
-                if (auto e = gs.beginError(core::Loc(todo.file, send->loc),
-                                           core::errors::Resolver::InvalidMixinDeclaration)) {
+                if (auto e =
+                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
                                 id->symbol.data(gs)->show(gs));
                 }
-                return;
+                encounteredError = true;
             }
             if (id->symbol == owner) {
-                if (auto e = gs.beginError(core::Loc(todo.file, send->loc),
-                                           core::errors::Resolver::InvalidMixinDeclaration)) {
+                if (auto e =
+                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("Must not pass your self to `{}`", send->fun.data(gs)->show(gs));
                 }
-                return;
+                encounteredError = true;
+            }
+            if (encounteredError) {
+                continue;
             }
 
             // Get the fake property holding the mixes

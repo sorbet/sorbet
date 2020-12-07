@@ -67,3 +67,20 @@ class Test2
 end
 
 Test2.foo # error: Not enough arguments provided for method `Mixin2::ClassMethods4#foo`. Expected: `4`, got: `0`
+
+module Bad1
+  extend T::Sig
+  extend T::Helpers
+
+  module ClassMethods; end
+  class ClassMethods2; end
+  mixes_in_class_methods(ClassMethods, ClassMethods2) # error: is a class, not a module
+end
+
+module Bad2
+  extend T::Sig
+  extend T::Helpers
+
+  module ClassMethods; end
+  mixes_in_class_methods(ClassMethods, Bad2) # error: Must not pass your self
+end

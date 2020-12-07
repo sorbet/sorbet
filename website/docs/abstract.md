@@ -172,7 +172,7 @@ end
 A.foo
 ```
 
-We can also call `mixes_in_class_methods` with multiple modules or classes to
+We can also call `mixes_in_class_methods` with multiple modules to
 mix in more methods. Some Ruby modules mixin more than one module as class
 methods when they are included, and some modules mixin class methods but also
 include other modules that mixin in their own class modules. In these cases, you
