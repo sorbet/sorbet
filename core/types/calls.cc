@@ -584,17 +584,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     vector<ErrorLine> lines;
                     lines.reserve(alternatives.size());
                     for (auto alternative : alternatives) {
-                        auto possibleSymbol = alternative.symbol.data(gs);
-                        if (!possibleSymbol->isClassOrModule() && !possibleSymbol->isMethod()) {
+                        auto possibleSymbol = alternative.symbol;
+                        if (!possibleSymbol.isClassOrModule() && !possibleSymbol.isMethod()) {
                             continue;
                         }
 
-                        auto suggestedName = possibleSymbol->isClassOrModule() ? alternative.symbol.show(gs) + ".new"
-                                                                               : alternative.symbol.show(gs);
+                        auto suggestedName = possibleSymbol.isClassOrModule() ? alternative.symbol.show(gs) + ".new"
+                                                                              : alternative.symbol.show(gs);
 
                         bool addedAutocorrect = false;
-                        if (possibleSymbol->isClassOrModule()) {
-                            const auto replacement = possibleSymbol->name.show(gs);
+                        if (possibleSymbol.isClassOrModule()) {
+                            const auto replacement = possibleSymbol.data(gs)->name.show(gs);
                             const auto loc = core::Loc(args.locs.file, args.locs.call);
                             const auto toReplace = args.name.toString(gs);
                             // This is a bit hacky but the loc corresponding to the send isn't available here and until
@@ -607,7 +607,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 addedAutocorrect = true;
                             }
                         } else {
-                            const auto replacement = possibleSymbol->name.toString(gs);
+                            const auto replacement = possibleSymbol.data(gs)->name.toString(gs);
                             const auto toReplace = args.name.toString(gs);
                             if (replacement != toReplace) {
                                 const auto loc = core::Loc(args.locs.file, args.locs.receiver);

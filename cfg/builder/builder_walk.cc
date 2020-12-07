@@ -74,7 +74,7 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
             // These should have been removed in the namer
             Exception::notImplemented();
     }
-    ENFORCE(klass.data(cctx.ctx)->isClassOrModule());
+    ENFORCE(klass.isClassOrModule());
 
     auto sym = klass.data(cctx.ctx)->findMemberTransitive(cctx.ctx, id.name);
     if (!sym.exists()) {
