@@ -233,12 +233,12 @@ string Cast::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) cons
 }
 
 string TAbsurd::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("T.absurd({})", this->what.toString(gs, cfg));
+    return fmt::format("T.absurd({})", varUseSiteToString(gs, cfg, this->variable, this->type));
 }
 
 string TAbsurd::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("TAbsurd {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs),
-                       this->what.showRaw(gs, cfg, tabs + 1));
+                       varUseSiteShowRaw(gs, cfg, tabs + 1, this->variable, this->type));
 }
 
 string VariableUseSite::toString(const core::GlobalState &gs, const CFG &cfg) const {

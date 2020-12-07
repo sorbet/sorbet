@@ -1213,7 +1213,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
             },
             [&](cfg::TAbsurd *i) {
-                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->what.variable);
+                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->variable);
 
                 if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
                     if (typeAndOrigin.type.isUntyped()) {

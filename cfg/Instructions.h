@@ -212,16 +212,17 @@ CheckSize(Cast, 56, 8);
 
 class TAbsurd final : public Instruction {
 public:
-    VariableUseSite what;
+    LocalRef variable;
+    core::TypePtr type;
 
-    TAbsurd(LocalRef what) : what(what) {
+    TAbsurd(LocalRef what) : variable(what) {
         categoryCounterInc("cfg", "tabsurd");
     }
 
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(TAbsurd, 40, 8);
+CheckSize(TAbsurd, 32, 8);
 
 } // namespace sorbet::cfg
 
