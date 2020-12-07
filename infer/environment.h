@@ -214,7 +214,7 @@ public:
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
-    const core::TypeAndOrigins &getAndFillTypeAndOrigin(core::Context ctx, cfg::VariableUseSite &symbol) const;
+    const core::TypeAndOrigins &getAndFillTypeAndOrigin(core::Context ctx, cfg::LocalRef var, core::TypePtr &varTYpe) const;
 
     /*
      * Create an Environment out of this one that holds if final condition in

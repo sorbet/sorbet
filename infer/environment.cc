@@ -408,9 +408,10 @@ const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg
 }
 
 const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(core::Context ctx,
-                                                                 cfg::VariableUseSite &symbol) const {
-    const auto &ret = getTypeAndOrigin(ctx, symbol.variable);
-    symbol.type = ret.type;
+                                                                 cfg::LocalRef variable,
+                                                                 core::TypePtr &varType) const {
+    const auto &ret = getTypeAndOrigin(ctx, variable);
+    varType = ret.type;
     return ret;
 }
 
@@ -943,10 +944,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                 args.reserve(send->args.size());
                 for (cfg::VariableUseSite &arg : send->args) {
-                    args.emplace_back(&getAndFillTypeAndOrigin(ctx, arg));
+                    args.emplace_back(&getAndFillTypeAndOrigin(ctx, arg.variable, arg.type));
                 }
 
-                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, send->recv);
+                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, send->recv.variable, send->recv.type);
                 if (send->link) {
                     checkFullyDefined = false;
                 }
@@ -1147,7 +1148,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
 
-                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->what);
+                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->what.variable, i->what.type);
                 if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
                     methodReturnType = core::Types::untypedUntracked();
                 }
@@ -1172,7 +1173,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 ENFORCE(i->link);
                 ENFORCE(i->link->result->main.blockReturnType != nullptr);
 
-                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->what);
+                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->what.variable, i->what.type);
                 auto expectedType = i->link->result->main.blockReturnType;
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
                     expectedType = core::Types::untypedUntracked();
@@ -1254,7 +1255,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     noLoopChecking = true;
                 }
 
-                const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c->value);
+                const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c->value.variable, c->value.type);
                 ENFORCE(c->cast != core::Names::uncheckedLet());
                 if (c->cast != core::Names::cast()) {
                     if (c->cast == core::Names::assertType() && ty.type.isUntyped()) {

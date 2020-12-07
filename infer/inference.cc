@@ -120,7 +120,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         current.setUninitializedVarsToNil(ctx, cfg->symbol.data(ctx)->loc());
 
         for (auto &blockArg : bb->args) {
-            current.getAndFillTypeAndOrigin(ctx, blockArg);
+            current.getAndFillTypeAndOrigin(ctx, blockArg.variable, blockArg.type);
         }
 
         visited[bb->id] = true;
@@ -173,7 +173,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
                             // Just a failsafe check; args.size() should always be 1.
                             if (send->args.size() > 0) {
-                                auto ty = current.getAndFillTypeAndOrigin(ctx, send->args[0]);
+                                auto ty = current.getAndFillTypeAndOrigin(ctx, send->args[0].variable, send->args[0].type);
                                 e.addErrorSection(core::ErrorSection(
                                     core::ErrorColors::format("Type of receiver is `{}`, from:", ty.type.show(ctx)),
                                     ty.origins2Explanations(ctx, current.locForUninitialized())));
@@ -229,7 +229,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
         if (!current.isDead) {
             ENFORCE(bb->firstDeadInstructionIdx == -1);
-            current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
+            current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond.variable, bb->bexit.cond.type);
             current.ensureGoodCondition(ctx, bb->bexit.cond.variable);
         } else {
             ENFORCE(bb->firstDeadInstructionIdx != -1);
