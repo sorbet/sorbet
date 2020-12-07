@@ -70,7 +70,7 @@ void InsnPtr::deleteTagged(Tag tag, void *expr) noexcept {
 #undef DELETE_INSN
 }
 
-Return::Return(LocalRef what, core::LocOffsets whatLoc) : Instruction(Tag::Return), what(what), whatLoc(whatLoc) {
+Return::Return(LocalRef what, core::LocOffsets whatLoc) : what(what), whatLoc(whatLoc) {
     categoryCounterInc("cfg", "return");
 }
 
@@ -91,7 +91,7 @@ string Return::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) co
                        this->what.showRaw(gs, cfg, tabs + 1));
 }
 
-BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, LocalRef what) : Instruction(Tag::BlockReturn), link(std::move(link)), what(what) {
+BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, LocalRef what) : link(std::move(link)), what(what) {
     categoryCounterInc("cfg", "blockreturn");
 }
 
@@ -105,7 +105,7 @@ string BlockReturn::showRaw(const core::GlobalState &gs, const CFG &cfg, int tab
 }
 
 LoadSelf::LoadSelf(shared_ptr<core::SendAndBlockLink> link, LocalRef fallback)
-    : Instruction(Tag::LoadSelf), fallback(fallback), link(std::move(link)) {
+    : fallback(fallback), link(std::move(link)) {
     categoryCounterInc("cfg", "loadself");
 }
 
@@ -120,7 +120,7 @@ string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) 
 Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, u2 numPosArgs,
            const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk,
            const shared_ptr<core::SendAndBlockLink> &link)
-    : Instruction(Tag::Send), isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), fun(fun), recv(recv), receiverLoc(receiverLoc),
+    : isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), fun(fun), recv(recv), receiverLoc(receiverLoc),
       argLocs(std::move(argLocs)), link(move(link)) {
     ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
             args.size());
@@ -135,7 +135,7 @@ Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, u2 nu
     histogramInc("cfg.send.args", this->args.size());
 }
 
-Literal::Literal(const core::TypePtr &value) : Instruction(Tag::Literal), value(move(value)) {
+Literal::Literal(const core::TypePtr &value) : value(move(value)) {
     categoryCounterInc("cfg", "literal");
 }
 
@@ -162,11 +162,11 @@ string Literal::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) c
     return fmt::format("Literal {{ value = {} }}", this->value.show(gs));
 }
 
-Ident::Ident(LocalRef what) : Instruction(Tag::Ident), what(what) {
+Ident::Ident(LocalRef what) : what(what) {
     categoryCounterInc("cfg", "ident");
 }
 
-Alias::Alias(core::SymbolRef what, core::NameRef name) : Instruction(Tag::Alias), what(what), name(name) {
+Alias::Alias(core::SymbolRef what, core::NameRef name) : what(what), name(name) {
     // what == undeclaredFieldStub -> name.exists()
     ENFORCE(what != core::Symbols::Magic_undeclaredFieldStub() || name.exists(),
             "Missing name for undeclared field alias!");
