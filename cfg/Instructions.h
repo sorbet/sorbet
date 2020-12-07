@@ -115,14 +115,15 @@ CheckSize(Return, 32, 8);
 
 class BlockReturn final : public Instruction {
 public:
+    LocalRef variable;
+    core::TypePtr type;
     std::shared_ptr<core::SendAndBlockLink> link;
-    VariableUseSite what;
 
     BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, LocalRef what);
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(BlockReturn, 56, 8);
+CheckSize(BlockReturn, 48, 8);
 
 class LoadSelf final : public Instruction {
 public:

@@ -62,17 +62,19 @@ string Return::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) co
                        varUseSiteShowRaw(gs, cfg, tabs + 1, variable, type));
 }
 
-BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, LocalRef what) : link(std::move(link)), what(what) {
+BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, LocalRef what) : variable(what), link(std::move(link)) {
     categoryCounterInc("cfg", "blockreturn");
 }
 
 string BlockReturn::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("blockreturn<{}> {}", this->link->fun.toString(gs), this->what.toString(gs, cfg));
+    return fmt::format("blockreturn<{}> {}", this->link->fun.toString(gs),
+                       varUseSiteToString(gs, cfg, this->variable, this->type));
 }
 
 string BlockReturn::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("BlockReturn {{\n{0}&nbsp;link = {1},\n{0}&nbsp;what = {2},\n{0}}}", spacesForTabLevel(tabs),
-                       this->link->fun.showRaw(gs), this->what.showRaw(gs, cfg, tabs + 1));
+                       this->link->fun.showRaw(gs),
+                       varUseSiteShowRaw(gs, cfg, tabs + 1, this->variable, this->type));
 }
 
 LoadSelf::LoadSelf(shared_ptr<core::SendAndBlockLink> link, LocalRef fallback)

@@ -122,7 +122,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
                 blockReads.add(v->variable.id());
             } else if (auto *v = cast_instruction<BlockReturn>(bind.value.get())) {
-                blockReads.add(v->what.variable.id());
+                blockReads.add(v->variable.id());
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
                 blockReads.add(v->value.variable.id());
             } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {

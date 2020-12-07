@@ -1173,7 +1173,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 ENFORCE(i->link);
                 ENFORCE(i->link->result->main.blockReturnType != nullptr);
 
-                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->what.variable, i->what.type);
+                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->variable, i->type);
                 auto expectedType = i->link->result->main.blockReturnType;
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
                     expectedType = core::Types::untypedUntracked();
