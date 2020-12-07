@@ -20,6 +20,25 @@ string spacesForTabLevel(int tabs) {
     }
     return to_string(ss);
 }
+string varUseSiteToString(const core::GlobalState &gs, const CFG &cfg,
+                          LocalRef variable, const core::TypePtr &type) {
+    if (variable == LocalRef::unconditional() || type == nullptr) {
+        return variable.toString(gs, cfg);
+    } else {
+        return fmt::format("{}: {}", variable.toString(gs, cfg), type.show(gs));
+    }
+}
+
+string varUseSiteShowRaw(const core::GlobalState &gs, const CFG &cfg, int tabs,
+                         LocalRef variable, const core::TypePtr &type) {
+    if (variable == LocalRef::unconditional() || type == nullptr) {
+        return fmt::format("VariableUseSite {{ variable = {} }}", variable.showRaw(gs, cfg));
+    } else {
+        return fmt::format("VariableUseSite {{\n{0}&nbsp;variable = {1},\n{0}&nbsp;type = {2},\n{0}}}",
+                           spacesForTabLevel(tabs), variable.showRaw(gs, cfg), type.show(gs));
+    }
+}
+
 } // namespace
 
 Return::Return(LocalRef what) : what(what) {
@@ -221,20 +240,11 @@ string TAbsurd::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) c
 }
 
 string VariableUseSite::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    if (this->variable == LocalRef::unconditional() || this->type == nullptr) {
-        return this->variable.toString(gs, cfg);
-    } else {
-        return fmt::format("{}: {}", this->variable.toString(gs, cfg), this->type.show(gs));
-    }
+    return varUseSiteToString(gs, cfg, this->variable, this->type);
 }
 
 string VariableUseSite::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    if (this->variable == LocalRef::unconditional() || this->type == nullptr) {
-        return fmt::format("VariableUseSite {{ variable = {} }}", this->variable.showRaw(gs, cfg));
-    } else {
-        return fmt::format("VariableUseSite {{\n{0}&nbsp;variable = {1},\n{0}&nbsp;type = {2},\n{0}}}",
-                           spacesForTabLevel(tabs), this->variable.showRaw(gs, cfg), this->type.show(gs));
-    }
+    return varUseSiteShowRaw(gs, cfg, tabs, this->variable, this->type);
 }
 
 } // namespace sorbet::cfg
