@@ -1148,7 +1148,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 tp.type = core::Types::bottom();
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
 
-                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->what.variable, i->what.type);
+                const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->variable, i->type);
                 if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
                     methodReturnType = core::Types::untypedUntracked();
                 }

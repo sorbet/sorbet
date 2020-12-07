@@ -104,13 +104,14 @@ CheckSize(Send, 144, 8);
 
 class Return final : public Instruction {
 public:
-    VariableUseSite what;
+    LocalRef variable;
+    core::TypePtr type;
 
     Return(LocalRef what);
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Return, 40, 8);
+CheckSize(Return, 32, 8);
 
 class BlockReturn final : public Instruction {
 public:

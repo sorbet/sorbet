@@ -215,7 +215,8 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 } else if (auto *v = cast_instruction<TAbsurd>(bind.value.get())) {
                     v->what = maybeDealias(ctx, cfg, v->what.variable, current);
                 } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
-                    v->what = maybeDealias(ctx, cfg, v->what.variable, current);
+                    v->variable = maybeDealias(ctx, cfg, v->variable, current);
+                    // XXX clear v->type?
                 }
             }
 

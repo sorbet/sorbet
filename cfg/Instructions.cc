@@ -41,7 +41,7 @@ string varUseSiteShowRaw(const core::GlobalState &gs, const CFG &cfg, int tabs,
 
 } // namespace
 
-Return::Return(LocalRef what) : what(what) {
+Return::Return(LocalRef what) : variable(what) {
     categoryCounterInc("cfg", "return");
 }
 
@@ -54,12 +54,12 @@ string SolveConstraint::showRaw(const core::GlobalState &gs, const CFG &cfg, int
 }
 
 string Return::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("return {}", this->what.toString(gs, cfg));
+    return fmt::format("return {}", varUseSiteToString(gs, cfg, variable, type));
 }
 
 string Return::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("Return {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs),
-                       this->what.showRaw(gs, cfg, tabs + 1));
+                       varUseSiteShowRaw(gs, cfg, tabs + 1, variable, type));
 }
 
 BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, LocalRef what) : link(std::move(link)), what(what) {
