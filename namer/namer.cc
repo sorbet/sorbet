@@ -1051,7 +1051,7 @@ class SymbolDefiner {
                 constant.data(ctx)->setClassOrModulePrivate();
             } else if (constant.data(ctx)->isStaticField()) {
                 constant.data(ctx)->setStaticFieldPrivate();
-            } else if (constant.data(ctx)->isTypeMember()) {
+            } else if (constant.isTypeMember()) {
                 // Visibility on type members is special (even more restrictive than private),
                 // so we ignore requests to mark type members private.
             }

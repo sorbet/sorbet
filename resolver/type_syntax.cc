@@ -544,7 +544,7 @@ core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, con
                 }
                 return core::Types::untypedUntracked();
             }
-            if (maybeAliased.data(ctx)->isTypeMember()) {
+            if (maybeAliased.isTypeMember()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a T.type_member");
                 }
@@ -729,7 +729,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 } else {
                     result.type = sym.data(ctx)->externalType();
                 }
-            } else if (sym.data(ctx)->isTypeMember()) {
+            } else if (sym.isTypeMember()) {
                 auto symData = sym.data(ctx);
                 auto symOwner = symData->owner.data(ctx);
 

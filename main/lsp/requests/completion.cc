@@ -391,7 +391,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
                 item->kind = CompletionItemKind::Module;
             }
         }
-    } else if (what.data(gs)->isTypeMember() || what.data(gs)->isStaticField()) {
+    } else if (what.isTypeMember() || what.data(gs)->isStaticField()) {
         item->kind = CompletionItemKind::Field;
     } else {
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
@@ -615,7 +615,7 @@ bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::Sy
         return false;
     }
 
-    if (!(sym.isClassOrModule() || sym.data(gs)->isStaticField() || sym.data(gs)->isTypeMember())) {
+    if (!(sym.isClassOrModule() || sym.data(gs)->isStaticField() || sym.isTypeMember())) {
         return false;
     }
 

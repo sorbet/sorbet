@@ -16,7 +16,7 @@ namespace sorbet::resolver {
 namespace {
 core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, core::SymbolRef klass,
                           const vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
-    ENFORCE(tparam.data(gs)->isTypeMember());
+    ENFORCE(tparam.isTypeMember());
     if (tparam.data(gs)->owner == klass) {
         return tparam;
     } else {

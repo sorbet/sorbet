@@ -1100,7 +1100,7 @@ class ResolveTypeMembersWalk {
     }
 
     static bool isLHSResolved(core::Context ctx, core::SymbolRef sym) {
-        if (sym.data(ctx)->isTypeMember()) {
+        if (sym.isTypeMember()) {
             auto *lambdaParam = core::cast_type<core::LambdaParam>(sym.data(ctx)->resultType);
             ENFORCE(lambdaParam != nullptr);
 
@@ -1129,7 +1129,7 @@ class ResolveTypeMembersWalk {
         core::LambdaParam *parentType = nullptr;
         auto parentMember = owner.data(ctx)->superClass().data(ctx)->findMember(ctx, data->name);
         if (parentMember.exists()) {
-            if (parentMember.data(ctx)->isTypeMember()) {
+            if (parentMember.isTypeMember()) {
                 parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType);
                 ENFORCE(parentType != nullptr);
             } else if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
@@ -1276,7 +1276,7 @@ class ResolveTypeMembersWalk {
     }
 
     static bool resolveJob(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
-        ENFORCE(job.lhs.data(ctx)->isTypeAlias() || job.lhs.data(ctx)->isTypeMember());
+        ENFORCE(job.lhs.data(ctx)->isTypeAlias() || job.lhs.isTypeMember());
 
         if (isLHSResolved(ctx, job.lhs)) {
             return true;
@@ -1297,7 +1297,7 @@ class ResolveTypeMembersWalk {
         if (!job.dependencies.empty()) {
             return false;
         }
-        if (job.lhs.data(ctx)->isTypeMember()) {
+        if (job.lhs.isTypeMember()) {
             auto superclass = job.lhs.data(ctx)->owner.data(ctx)->superClass();
             if (!isGenericResolved(ctx, superclass)) {
                 return false;
