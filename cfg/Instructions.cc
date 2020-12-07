@@ -5,8 +5,6 @@
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
 #include <utility>
-// helps debugging
-template class std::unique_ptr<sorbet::cfg::Instruction>;
 
 using namespace std;
 
