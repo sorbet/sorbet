@@ -106,28 +106,28 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
              * variable serves to represent this.
              */
             if (bind.bind.variable.isAliasForGlobal(ctx, *this) &&
-                cast_instruction<Alias>(bind.value.get()) == nullptr) {
+                cast_instruction<Alias>(bind.value) == nullptr) {
                 blockReads.add(bind.bind.variable.id());
             }
 
-            if (auto *v = cast_instruction<Ident>(bind.value.get())) {
+            if (auto *v = cast_instruction<Ident>(bind.value)) {
                 blockReads.add(v->what.id());
-            } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Send>(bind.value)) {
                 blockReads.add(v->recv.variable.id());
                 for (auto &arg : v->args) {
                     blockReads.add(arg.variable.id());
                 }
-            } else if (auto *v = cast_instruction<TAbsurd>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<TAbsurd>(bind.value)) {
                 blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Return>(bind.value)) {
                 blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<BlockReturn>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<BlockReturn>(bind.value)) {
                 blockReads.add(v->what.variable.id());
-            } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Cast>(bind.value)) {
                 blockReads.add(v->value.variable.id());
-            } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<LoadSelf>(bind.value)) {
                 blockReads.add(v->fallback.id());
-            } else if (auto *v = cast_instruction<SolveConstraint>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<SolveConstraint>(bind.value)) {
                 blockReads.add(v->send.id());
             } else if (auto *v = cast_instruction<YieldLoadArg>(bind.value.get())) {
                 blockReads.add(v->yieldParam.variable.id());

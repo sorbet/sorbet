@@ -51,7 +51,6 @@ template <typename T> struct InsnToTag;
 
 class InsnPtr;
 class Instruction;
-template <class To> To *cast_instruction(Instruction *what);
 
 // When adding a new subtype, see if you need to add it to fillInBlockArguments
 class Instruction {
@@ -59,32 +58,12 @@ public:
     bool isSynthetic = false;
 
 protected:
-    Instruction(Tag tag) : tag(tag) {}
+    Instruction() = default;
     ~Instruction() = default;
 
 private:
     friend InsnPtr;
-    template <class To>
-    friend To *cast_instruction(Instruction *);
-    const Tag tag;
 };
-
-template <class To> To *cast_instruction(Instruction *what) {
-    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Instruction *&, To *>::value,
-                  "Ill Formed To, has to be a subclass of Instruction");
-    if (what == nullptr) {
-        return nullptr;
-    }
-    if (what->tag != InsnToTag<To>::value) {
-        return nullptr;
-    }
-    return static_cast<To*>(what);
-}
-
-template <class To> bool isa_instruction(Instruction *what) {
-    return cast_instruction<To>(what) != nullptr;
-}
 
 #define INSN(name)                              \
     class name;                                 \
@@ -117,7 +96,7 @@ INSN(SolveConstraint) : public Instruction {
 public:
     LocalRef send;
     std::shared_ptr<core::SendAndBlockLink> link;
-    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : Instruction(Tag::SolveConstraint), send(send), link(link){};
+    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link, LocalRef send) : send(send), link(link){};
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
@@ -141,7 +120,7 @@ public:
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Send, 144, 8);
+CheckSize(Send, 136, 8);
 
 INSN(Return) : public Instruction {
 public:
@@ -187,7 +166,7 @@ CheckSize(Literal, 24, 8);
 
 INSN(GetCurrentException) : public Instruction {
 public:
-    GetCurrentException() : Instruction(Tag::GetCurrentException) {
+    GetCurrentException() {
         categoryCounterInc("cfg", "GetCurrentException");
     };
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
@@ -200,7 +179,7 @@ public:
     u2 argId;
     core::MethodRef method;
 
-    LoadArg(core::MethodRef method, u2 argId) : Instruction(Tag::LoadArg), argId(argId), method(method) {
+    LoadArg(core::MethodRef method, u2 argId) : argId(argId), method(method) {
         categoryCounterInc("cfg", "loadarg");
     };
 
@@ -215,7 +194,7 @@ public:
     u2 argId;
     core::MethodRef method;
 
-    ArgPresent(core::MethodRef method, u2 argId) : Instruction(Tag::ArgPresent), argId(argId), method(method) {
+    ArgPresent(core::MethodRef method, u2 argId) : argId(argId), method(method) {
         categoryCounterInc("cfg", "argpresent");
     }
 
@@ -229,7 +208,7 @@ INSN(LoadYieldParams) : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link) : Instruction(Tag::LoadYieldParams), link(link) {
+    LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link) {
         categoryCounterInc("cfg", "loadarg");
     };
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
@@ -270,7 +249,7 @@ public:
     VariableUseSite value;
     core::TypePtr type;
 
-    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : Instruction(Tag::Cast), cast(cast), value(value), type(type) {}
+    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), value(value), type(type) {}
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
@@ -281,7 +260,7 @@ INSN(TAbsurd) : public Instruction {
 public:
     VariableUseSite what;
 
-    TAbsurd(LocalRef what) : Instruction(Tag::TAbsurd), what(what) {
+    TAbsurd(LocalRef what) : what(what) {
         categoryCounterInc("cfg", "tabsurd");
     }
 
@@ -342,6 +321,7 @@ public:
     }
 
     constexpr InsnPtr() noexcept : ptr(0) {}
+    constexpr InsnPtr(std::nullptr_t) : ptr(0) {}
     ~InsnPtr() {
         if (ptr != 0) {
             deleteTagged(tag(), get());
@@ -392,15 +372,39 @@ public:
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 
+template <class To> bool isa_instruction(const InsnPtr &what) {
+    return what != nullptr && what.tag() == InsnToTag<To>::value;
+}
+
+template <class To> To *cast_instruction(InsnPtr &what) {
+    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
+    static_assert(std::is_assignable<Instruction *&, To *>::value,
+                  "Ill Formed To, has to be a subclass of Instruction");
+    if (isa_instruction<To>(what)) {
+        return reinterpret_cast<To *>(what.get());
+    }
+    return nullptr;
+}
+
+template <class To> const To *cast_instruction(const InsnPtr &what) {
+    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
+    static_assert(std::is_assignable<Instruction *&, To *>::value,
+                  "Ill Formed To, has to be a subclass of Instruction");
+    if (isa_instruction<To>(what)) {
+        return reinterpret_cast<const To *>(what.get());
+    }
+    return nullptr;
+}
+
 template <class To> inline bool InsnPtr::isa(const InsnPtr &what) {
-    return isa_instruction<To>(what.get());
+    return isa_instruction<To>(what);
 }
 template <> inline bool InsnPtr::isa<InsnPtr>(const InsnPtr &what) {
     return true;
 }
 
 template <class To> inline const To &InsnPtr::cast(const InsnPtr &what) {
-    return *cast_instruction<To>(what.get());
+    return *cast_instruction<To>(what);
 }
 template <> inline const InsnPtr &InsnPtr::cast(const InsnPtr &what) {
     return what;
