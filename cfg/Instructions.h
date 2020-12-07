@@ -56,8 +56,6 @@ template <class To> To *cast_instruction(Instruction *what);
 // When adding a new subtype, see if you need to add it to fillInBlockArguments
 class Instruction {
 public:
-    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
-    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
     bool isSynthetic = false;
 
 protected:
@@ -389,6 +387,9 @@ public:
 
         return static_cast<Tag>(ptr & TAG_MASK);
     }
+
+    std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
 
 template <class To> inline bool InsnPtr::isa(const InsnPtr &what) {

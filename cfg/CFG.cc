@@ -330,7 +330,7 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);
     }
     for (const Binding &exp : this->exprs) {
-        fmt::format_to(std::back_inserter(buf), "{} = {}\n", exp.bind.toString(gs, cfg), exp.value->toString(gs, cfg));
+        fmt::format_to(std::back_inserter(buf), "{} = {}\n", exp.bind.toString(gs, cfg), exp.value.toString(gs, cfg));
     }
     fmt::format_to(std::back_inserter(buf), "{}", this->bexit.cond.toString(gs, cfg));
     return to_string(buf);
@@ -348,7 +348,7 @@ string BasicBlock::showRaw(const core::GlobalState &gs, const CFG &cfg) const {
     }
     for (const Binding &exp : this->exprs) {
         fmt::format_to(std::back_inserter(buf), "Binding {{\n&nbsp;bind = {},\n&nbsp;value = {},\n}}\n",
-                       exp.bind.showRaw(gs, cfg, 1), exp.value->showRaw(gs, cfg, 1));
+                       exp.bind.showRaw(gs, cfg, 1), exp.value.showRaw(gs, cfg, 1));
     }
     fmt::format_to(std::back_inserter(buf), "{}", this->bexit.cond.showRaw(gs, cfg));
     return to_string(buf);

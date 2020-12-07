@@ -1391,7 +1391,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
             });
 
-        ENFORCE(tp.type != nullptr, "Inferencer did not assign type: {}", bind.value->toString(ctx, inWhat));
+        ENFORCE(tp.type != nullptr, "Inferencer did not assign type: {}", bind.value.toString(ctx, inWhat));
         tp.type.sanityCheck(ctx);
 
         if (checkFullyDefined && !tp.type.isFullyDefined()) {

@@ -46,15 +46,19 @@ string spacesForTabLevel(int tabs) {
             CASE_STATEMENT(body, TAbsurd)                               \
             }
 
-std::string Instruction::toString(const core::GlobalState &gs, const CFG &cfg) const {
-#define TO_STRING(name) return static_cast<const name *>(this)->toString(gs, cfg);
-    GENERATE_TAG_SWITCH(tag, TO_STRING)
+std::string InsnPtr::toString(const core::GlobalState &gs, const CFG &cfg) const {
+    auto *ptr = get();
+
+#define TO_STRING(name) return static_cast<const name *>(ptr)->toString(gs, cfg);
+    GENERATE_TAG_SWITCH(tag(), TO_STRING)
 #undef TO_STRING
 }
 
-std::string Instruction::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-#define SHOW_RAW(name) return static_cast<const name *>(this)->showRaw(gs, cfg, tabs);
-    GENERATE_TAG_SWITCH(tag, SHOW_RAW)
+std::string InsnPtr::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
+    auto *ptr = get();
+
+#define SHOW_RAW(name) return static_cast<const name *>(ptr)->showRaw(gs, cfg, tabs);
+    GENERATE_TAG_SWITCH(tag(), SHOW_RAW)
 #undef SHOW_RAW
 }
 
