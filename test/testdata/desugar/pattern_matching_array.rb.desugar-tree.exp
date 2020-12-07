@@ -3,34 +3,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   begin
     <assignTemp>$1 = expr
-    if ::<Magic>.<pattern-match>(<assignTemp>$1)
+    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       begin
-        a = ::<Magic>.<pattern-match-as>()
+        a = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
         <emptyTree>::<C T>.reveal_type(a)
       end
     else
-      if ::<Magic>.<pattern-match>(<assignTemp>$1)
+      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
         begin
-          b = ::<Magic>.<pattern-match-var>()
+          b = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
           <emptyTree>::<C T>.reveal_type(b)
         end
       else
-        if ::<Magic>.<pattern-match>(<assignTemp>$1)
+        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
           begin
-            c = ::<Magic>.<pattern-match-var>()
-            d = ::<Magic>.<pattern-match-var>()
+            c = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            d = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
             begin
               <emptyTree>::<C T>.reveal_type(c)
               <emptyTree>::<C T>.reveal_type(d)
             end
           end
         else
-          if ::<Magic>.<pattern-match>(<assignTemp>$1)
+          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
             begin
-              e = ::<Magic>.<pattern-match-var>()
-              f = ::<Magic>.<pattern-match-var>()
-              h = ::<Magic>.<pattern-match-as>()
-              g = ::<Magic>.<pattern-match-var>()
+              e = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              f = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              h = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              g = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
               begin
                 <emptyTree>::<C T>.reveal_type(e)
                 <emptyTree>::<C T>.reveal_type(f)
@@ -39,26 +39,26 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
               end
             end
           else
-            if ::<Magic>.<pattern-match>(<assignTemp>$1)
+            if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
               begin
-                i = ::<Magic>.<pattern-match-var>()
+                i = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
                 <emptyTree>::<C T>.reveal_type(i)
               end
             else
-              if ::<Magic>.<pattern-match>(<assignTemp>$1)
+              if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
                 begin
-                  k = ::<Magic>.<pattern-match-var>()
-                  l = ::<Magic>.<pattern-match-var>()
+                  k = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                  l = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
                   begin
                     <emptyTree>::<C T>.reveal_type(k)
                     <emptyTree>::<C T>.reveal_type(l)
                   end
                 end
               else
-                if ::<Magic>.<pattern-match>(<assignTemp>$1)
+                if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
                   begin
-                    m = ::<Magic>.<pattern-match-var>()
-                    n = ::<Magic>.<pattern-match-var>()
+                    m = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                    n = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
                     begin
                       <emptyTree>::<C T>.reveal_type(m)
                       <emptyTree>::<C T>.reveal_type(n)

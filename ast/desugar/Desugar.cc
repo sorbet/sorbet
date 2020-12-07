@@ -409,17 +409,18 @@ void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, 
     if (auto var = parser::cast_node<parser::MatchVar>(node.get())) {
         auto loc = var->loc;
         auto recv = MK::Constant(loc, core::Symbols::Magic());
-        auto val = MK::Send0(loc, std::move(recv), core::Names::patternMatchVar());
+        auto val = MK::RaiseUnimplemented(loc);
         vars.emplace_back(MK::Assign(loc, var->name, std::move(val)));
     } else if (auto rest = parser::cast_node<parser::MatchRest>(node.get())) {
         desugarPatternMatchingVars(vars, dctx, rest->var);
     } else if (auto pair = parser::cast_node<parser::Pair>(node.get())) {
         desugarPatternMatchingVars(vars, dctx, pair->value);
     } else if (auto as_pattern = parser::cast_node<parser::MatchAs>(node.get())) {
+        auto loc = as_pattern->as->loc;
         auto name = parser::cast_node<parser::MatchVar>(as_pattern->as.get())->name;
-        auto recv = MK::Constant(as_pattern->as->loc, core::Symbols::Magic());
-        auto val = MK::Send0(as_pattern->as->loc, std::move(recv), core::Names::patternMatchAs());
-        vars.emplace_back(MK::Assign(as_pattern->as->loc, name, std::move(val)));
+        auto recv = MK::Constant(loc, core::Symbols::Magic());
+        auto val = MK::RaiseUnimplemented(loc);
+        vars.emplace_back(MK::Assign(loc, name, std::move(val)));
         desugarPatternMatchingVars(vars, dctx, as_pattern->value);
     } else if (auto array_pattern = parser::cast_node<parser::ArrayPattern>(node.get())) {
         for (auto &elt : array_pattern->elts) {
@@ -1946,13 +1947,9 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                         body = MK::InsSeq(pattern->loc, std::move(vars), std::move(body));
                     }
 
-                    // Call `Magic.<pattern-match>(expr, TODO pattern, TODO guard)`
-                    auto recv = MK::Constant(pattern->loc, core::Symbols::Magic());
-                    auto var = MK::Local(pattern->loc, exprName);
-                    auto match = MK::Send1(pattern->loc, std::move(recv), core::Names::patternMatch(), std::move(var));
-
                     // Create a new `if` for the branch:
-                    // `in A` => `if (Magic.<pattern-match>(expr, TODO pattern, TODO guard))`
+                    // `in A` => `if (TODO)`
+                    auto match = MK::RaiseUnimplemented(pattern->loc);
                     res = MK::If(inPattern->loc, std::move(match), std::move(body), std::move(res));
                 }
                 res = MK::InsSeq1(loc, std::move(exprVar), std::move(res));
