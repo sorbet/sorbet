@@ -223,12 +223,13 @@ string GetCurrentException::showRaw(const core::GlobalState &gs, const CFG &cfg,
 }
 
 string Cast::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("cast({}, {});", this->value.toString(gs, cfg), this->type.toString(gs));
+    return fmt::format("cast({}, {});", varUseSiteToString(gs, cfg, this->variable, this->resultType), this->type.toString(gs));
 }
 
 string Cast::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("Cast {{\n{0}&nbsp;cast = T.{1},\n{0}&nbsp;value = {2},\n{0}&nbsp;type = {3},\n{0}}}",
-                       spacesForTabLevel(tabs), this->cast.show(gs), this->value.showRaw(gs, cfg, tabs + 1),
+                       spacesForTabLevel(tabs), this->cast.show(gs),
+                       varUseSiteShowRaw(gs, cfg, tabs + 1, this->variable, this->resultType),
                        this->type.show(gs));
 }
 

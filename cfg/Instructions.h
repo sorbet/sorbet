@@ -200,10 +200,11 @@ CheckSize(LoadYieldParams, 32, 8);
 class Cast final : public Instruction {
 public:
     core::NameRef cast;
-    VariableUseSite value;
+    LocalRef variable;
+    core::TypePtr resultType; // TODO(froydnj) is this is the result type or the cast type?
     core::TypePtr type;
 
-    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), value(value), type(type) {}
+    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), variable(value), type(type) {}
 
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;

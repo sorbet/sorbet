@@ -124,7 +124,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             } else if (auto *v = cast_instruction<BlockReturn>(bind.value.get())) {
                 blockReads.add(v->variable.id());
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
-                blockReads.add(v->value.variable.id());
+                blockReads.add(v->variable.id());
             } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
                 blockReads.add(v->fallback.id());
             } else if (auto *v = cast_instruction<SolveConstraint>(bind.value.get())) {

@@ -1255,7 +1255,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     noLoopChecking = true;
                 }
 
-                const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c->value.variable, c->value.type);
+                const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c->variable, c->resultType);
                 ENFORCE(c->cast != core::Names::uncheckedLet());
                 if (c->cast != core::Names::cast()) {
                     if (c->cast == core::Names::assertType() && ty.type.isUntyped()) {
