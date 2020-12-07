@@ -58,8 +58,10 @@ std::string Instruction::showRaw(const core::GlobalState &gs, const CFG &cfg, in
 #undef SHOW_RAW
 }
 
-void Instruction::deleteTagged() {
-#define DELETE_INSN(name) delete static_cast<name *>(this);
+void InsnPtr::deleteTagged(Tag tag, void *expr) noexcept {
+    ENFORCE(expr != nullptr);
+
+#define DELETE_INSN(name) delete static_cast<name *>(expr);
     GENERATE_TAG_SWITCH(tag, DELETE_INSN)
 #undef DELETE_INSN
 }
