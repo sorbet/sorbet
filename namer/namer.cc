@@ -1049,7 +1049,7 @@ class SymbolDefiner {
         if (constant.exists() && mod.name == core::Names::privateConstant()) {
             if (constant.isClassOrModule()) {
                 constant.data(ctx)->setClassOrModulePrivate();
-            } else if (constant.data(ctx)->isStaticField()) {
+            } else if (constant.isStaticField(ctx)) {
                 constant.data(ctx)->setStaticFieldPrivate();
             } else if (constant.isTypeMember()) {
                 // Visibility on type members is special (even more restrictive than private),
@@ -1207,7 +1207,7 @@ class SymbolDefiner {
         }
         sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope, name);
 
-        if (staticField.isTypeAlias && sym.data(ctx)->isStaticField()) {
+        if (staticField.isTypeAlias && sym.isStaticField(ctx)) {
             sym.data(ctx)->setTypeAlias();
         }
 

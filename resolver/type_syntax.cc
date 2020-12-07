@@ -551,7 +551,7 @@ core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, con
                 return core::Types::untypedUntracked();
             }
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
-            if (sym.data(ctx)->isStaticField()) {
+            if (sym.isStaticField(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a constant field");
                 }
@@ -787,7 +787,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                     }
                     result.type = core::Types::untypedUntracked();
                 }
-            } else if (sym.data(ctx)->isStaticField()) {
+            } else if (sym.isStaticField(ctx)) {
                 if (auto e = ctx.beginError(i.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Constant `{}` is not a class or type alias", maybeAliased.show(ctx));
                     e.addErrorLine(sym.data(ctx)->loc(),
