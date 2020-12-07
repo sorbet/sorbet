@@ -87,7 +87,8 @@ public:
     bool isPrivateOk;
     u2 numPosArgs;
     core::NameRef fun;
-    VariableUseSite recv;
+    LocalRef recv;
+    core::TypePtr recvType;
     core::LocOffsets receiverLoc;
     InlinedVector<VariableUseSite, 2> args;
     InlinedVector<core::LocOffsets, 2> argLocs;

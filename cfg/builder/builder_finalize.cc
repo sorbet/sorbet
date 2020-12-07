@@ -208,7 +208,8 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 if (auto *v = cast_instruction<Ident>(bind.value.get())) {
                     v->what = maybeDealias(ctx, cfg, v->what, current);
                 } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
-                    v->recv = maybeDealias(ctx, cfg, v->recv.variable, current);
+                    v->recv = maybeDealias(ctx, cfg, v->recv, current);
+                    // XXX clear v->type?
                     for (auto &arg : v->args) {
                         arg = maybeDealias(ctx, cfg, arg.variable, current);
                     }

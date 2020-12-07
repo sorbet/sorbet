@@ -99,17 +99,17 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
                 } else if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
                     if (send->fun == core::Names::bang()) {
                         if (send->args.empty()) {
-                            if (isNeeded(bind.bind.variable) && !isNeeded(send->recv.variable)) {
-                                used_vars[send->recv.variable.id()] = true;
+                            if (isNeeded(bind.bind.variable) && !isNeeded(send->recv)) {
+                                used_vars[send->recv.id()] = true;
                                 changed = true;
                             }
                         }
                     } else if (send->fun == core::Names::eqeq()) {
                         if (send->args.size() == 1) {
-                            if (isNeeded(send->args[0].variable) && !isNeeded(send->recv.variable)) {
-                                used_vars[send->recv.variable.id()] = true;
+                            if (isNeeded(send->args[0].variable) && !isNeeded(send->recv)) {
+                                used_vars[send->recv.id()] = true;
                                 changed = true;
-                            } else if (isNeeded(send->recv.variable) && !isNeeded(send->args[0].variable)) {
+                            } else if (isNeeded(send->recv) && !isNeeded(send->args[0].variable)) {
                                 used_vars[send->args[0].variable.id()] = true;
                                 changed = true;
                             }
@@ -504,7 +504,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        auto fnd = _vars.find(send->recv.variable);
+        auto fnd = _vars.find(send->recv);
         if (fnd != _vars.end()) {
             whoKnows.replaceTruthy(local, typeTestsWithVar, fnd->second.knowledge.falsy());
             whoKnows.replaceFalsy(local, typeTestsWithVar, fnd->second.knowledge.truthy());
@@ -512,8 +512,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
                                                           core::Types::falsyTypes());
             fnd->second.knowledge.falsy().addNoTypeTest(fnd->first, typeTestsWithVar, local, core::Types::falsyTypes());
         }
-        whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
-        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
+        whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv, core::Types::falsyTypes());
+        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv, core::Types::falsyTypes());
 
         whoKnows.sanityCheck();
     } else if (send->fun == core::Names::nil_p()) {
@@ -521,8 +521,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
-        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
+        whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv, core::Types::nilClass());
+        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv, core::Types::nilClass());
         whoKnows.sanityCheck();
     } else if (send->fun == core::Names::blank_p()) {
         if (!knowledgeFilter.isNeeded(local)) {
@@ -530,12 +530,12 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
-        auto &originalType = send->recv.type;
+        auto &originalType = send->recvType;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
         if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
             auto &whoKnows = getKnowledge(local);
-            whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
+            whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
     } else if (send->fun == core::Names::present_p()) {
@@ -544,12 +544,12 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
         // Note that this assumes that .present? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
-        auto &originalType = send->recv.type;
+        auto &originalType = send->recvType;
         auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
 
         if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
             auto &whoKnows = getKnowledge(local);
-            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
+            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv, knowledgeTypeWithoutFalsy);
             whoKnows.sanityCheck();
         }
     }
@@ -568,8 +568,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         if (klass.exists()) {
             auto ty = klass.data(ctx)->externalType();
             if (!ty.isUntyped()) {
-                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
-                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, ty);
+                whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv, ty);
+                whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv, ty);
             }
             whoKnows.sanityCheck();
         }
@@ -580,7 +580,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
         auto &whoKnows = getKnowledge(local);
         const auto &argType = send->args[0].type;
-        const auto &recvType = send->recv.type;
+        const auto &recvType = send->recvType;
 
         auto funIsEq = send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p();
         auto &truthy = funIsEq ? whoKnows.truthy() : whoKnows.falsy();
@@ -589,7 +589,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         ENFORCE(argType != nullptr);
         ENFORCE(recvType != nullptr);
         if (!argType.isUntyped()) {
-            truthy.addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
+            truthy.addYesTypeTest(local, typeTestsWithVar, send->recv, argType);
         }
         if (!recvType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
@@ -599,7 +599,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
             if (isSingleton(ctx, s.symbol)) {
-                falsy.addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
+                falsy.addNoTypeTest(local, typeTestsWithVar, send->recv, argType);
             }
         }
         if (core::isa_type<core::ClassType>(recvType)) {
@@ -616,7 +616,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        const auto &recvType = send->recv.type;
+        const auto &recvType = send->recvType;
 
         // `when` against class literal
         core::SymbolRef representedClass = core::Types::getRepresentedClass(ctx, recvType);
@@ -641,7 +641,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         whoKnows.sanityCheck();
 
     } else if (send->fun == core::Names::lessThan()) {
-        const auto &recvKlass = send->recv.type;
+        const auto &recvKlass = send->recvType;
         const auto &argType = send->args[0].type;
 
         if (core::isa_type<core::ClassType>(argType)) {
@@ -660,8 +660,8 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         auto &whoKnows = getKnowledge(local);
-        whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
-        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
+        whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv, argType);
+        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv, argType);
         whoKnows.sanityCheck();
     }
 }
@@ -947,7 +947,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     args.emplace_back(&getAndFillTypeAndOrigin(ctx, arg.variable, arg.type));
                 }
 
-                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, send->recv.variable, send->recv.type);
+                const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(ctx, send->recv, send->recvType);
                 if (send->link) {
                     checkFullyDefined = false;
                 }

@@ -171,14 +171,14 @@ string Alias::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 
 string Send::toString(const core::GlobalState &gs, const CFG &cfg) const {
     return fmt::format(
-        "{}.{}({})", this->recv.toString(gs, cfg), this->fun.toString(gs),
+        "{}.{}({})", varUseSiteToString(gs, cfg, this->recv, this->recvType), this->fun.toString(gs),
         fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(gs, cfg); }));
 }
 
 string Send::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format(
         "Send {{\n{0}&nbsp;recv = {1},\n{0}&nbsp;fun = {2},\n{0}&nbsp;args = ({3}),\n{0}}}", spacesForTabLevel(tabs),
-        this->recv.toString(gs, cfg), this->fun.showRaw(gs),
+        varUseSiteToString(gs, cfg, this->recv, this->recvType), this->fun.showRaw(gs),
         fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.showRaw(gs, cfg, tabs + 1); }));
 }
 
