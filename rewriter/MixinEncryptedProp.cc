@@ -38,7 +38,7 @@ vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send
     core::NameRef name;
     core::NameRef enc_name;
 
-    if (send->fun._id != core::Names::encryptedProp()._id) {
+    if (send->fun != core::Names::encryptedProp()) {
         return empty;
     }
     if (send->args.empty()) {

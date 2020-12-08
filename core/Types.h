@@ -512,12 +512,12 @@ template <> inline TypePtr make_type<LiteralType, float>(float &&val) {
 
 template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef &>(SymbolRef &&klass, NameRef &val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val._id);
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val.rawId());
 }
 
 template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef>(SymbolRef &&klass, NameRef &&val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val._id);
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val.rawId());
 }
 
 template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &what) {
@@ -529,9 +529,9 @@ template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &wha
         case LiteralType::LiteralTypeKind::Integer:
             return LiteralType(absl::bit_cast<int64_t>(what.value));
         case LiteralType::LiteralTypeKind::String:
-            return LiteralType(Symbols::String(), NameRef(NameRef::WellKnown{}, static_cast<u4>(what.value)));
+            return LiteralType(Symbols::String(), NameRef::fromRawUnchecked(static_cast<u4>(what.value)));
         case LiteralType::LiteralTypeKind::Symbol:
-            return LiteralType(Symbols::Symbol(), NameRef(NameRef::WellKnown{}, static_cast<u4>(what.value)));
+            return LiteralType(Symbols::Symbol(), NameRef::fromRawUnchecked(static_cast<u4>(what.value)));
     }
 }
 

@@ -118,29 +118,29 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     ret.loc = send->loc;
 
     // ----- Is this a send we care about? -----
-    switch (send->fun._id) {
-        case core::Names::prop()._id:
+    switch (send->fun.rawId()) {
+        case core::Names::prop().rawId():
             // Nothing special
             break;
-        case core::Names::const_()._id:
+        case core::Names::const_().rawId():
             ret.isImmutable = true;
             break;
-        case core::Names::tokenProp()._id:
-        case core::Names::timestampedTokenProp()._id:
+        case core::Names::tokenProp().rawId():
+        case core::Names::timestampedTokenProp().rawId():
             ret.name = core::Names::token();
-            ret.nameLoc = core::LocOffsets{send->loc.beginPos() +
-                                               (send->fun._id == core::Names::timestampedTokenProp()._id ? 12 : 0),
-                                           send->loc.endPos() - 5}; // get the 'token' part of it
+            ret.nameLoc =
+                core::LocOffsets{send->loc.beginPos() + (send->fun == core::Names::timestampedTokenProp() ? 12 : 0),
+                                 send->loc.endPos() - 5}; // get the 'token' part of it
             ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
-        case core::Names::createdProp()._id:
+        case core::Names::createdProp().rawId():
             ret.name = core::Names::created();
             ret.nameLoc =
                 core::LocOffsets{send->loc.beginPos(),
                                  send->loc.endPos() - 5}; // 5 is the difference between `created_prop` and `created`
             ret.type = ast::MK::Constant(send->loc, core::Symbols::Float());
             break;
-        case core::Names::merchantProp()._id:
+        case core::Names::merchantProp().rawId():
             ret.isImmutable = true;
             ret.name = core::Names::merchant();
             ret.nameLoc =

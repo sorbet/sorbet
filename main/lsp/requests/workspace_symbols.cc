@@ -110,7 +110,7 @@ inline bool canMatchWordBoundary(char ch) {
 }
 
 inline bool isEligibleSymbol(core::NameRef name, const core::GlobalState &gs) {
-    if (name.kind(gs) == core::NameKind::UNIQUE) {
+    if (name.kind() == core::NameKind::UNIQUE) {
         return false;
     }
     return true;

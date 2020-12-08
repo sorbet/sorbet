@@ -17,10 +17,10 @@ public:
         if (!allowSameFromTo) {
             from.sanityCheckSubstitution(*this);
         }
-        ENFORCE(from._id < nameSubstitution.size(),
-                "name substitution index out of bounds, got {} where subsitution size is {}", std::to_string(from._id),
-                std::to_string(nameSubstitution.size()));
-        return nameSubstitution[from._id];
+        ENFORCE(from.unsafeTableIndex() < nameSubstitution.size(),
+                "name substitution index out of bounds, got {} where subsitution size is {}",
+                std::to_string(from.rawId()), std::to_string(nameSubstitution.size()));
+        return nameSubstitution[from.unsafeTableIndex()];
     }
 
     bool useFastPath() const;

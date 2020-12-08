@@ -146,7 +146,7 @@ public:
 
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
-            ENFORCE(id->name.kind(gs_) == core::NameKind::UTF8);
+            ENFORCE(id->name.kind() == core::NameKind::UTF8);
             auto name_str = id->name.show(gs_);
             if (isNumberedParameterName(name_str) && driver_->lex.context.inDynamicBlock()) {
                 if (driver_->numparam_stack.seen_ordinary_params()) {

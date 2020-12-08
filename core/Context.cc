@@ -139,10 +139,10 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
                             ENFORCE(false, "NameKind missing");
                     }
                 } else {
-                    nameSubstitution.emplace_back(to, 0);
+                    nameSubstitution.emplace_back(NameRef::noName());
                     seenEmpty = true;
                 }
-                ENFORCE(!fastPath || nameSubstitution.back()._id == i);
+                ENFORCE(!fastPath || nameSubstitution.back().unsafeTableIndex() == i);
             }
         }
 
