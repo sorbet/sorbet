@@ -404,6 +404,42 @@ TreePtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlhs *lhs
     return MK::InsSeq(loc, std::move(stats), MK::Local(loc, tempRhs));
 }
 
+// Map all MatchVars used in `pattern` to local variables initialized from magic calls
+void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, unique_ptr<parser::Node> &node) {
+    if (auto var = parser::cast_node<parser::MatchVar>(node.get())) {
+        auto loc = var->loc;
+        auto recv = MK::Constant(loc, core::Symbols::Magic());
+        auto val = MK::RaiseUnimplemented(loc);
+        vars.emplace_back(MK::Assign(loc, var->name, std::move(val)));
+    } else if (auto rest = parser::cast_node<parser::MatchRest>(node.get())) {
+        desugarPatternMatchingVars(vars, dctx, rest->var);
+    } else if (auto pair = parser::cast_node<parser::Pair>(node.get())) {
+        desugarPatternMatchingVars(vars, dctx, pair->value);
+    } else if (auto as_pattern = parser::cast_node<parser::MatchAs>(node.get())) {
+        auto loc = as_pattern->as->loc;
+        auto name = parser::cast_node<parser::MatchVar>(as_pattern->as.get())->name;
+        auto recv = MK::Constant(loc, core::Symbols::Magic());
+        auto val = MK::RaiseUnimplemented(loc);
+        vars.emplace_back(MK::Assign(loc, name, std::move(val)));
+        desugarPatternMatchingVars(vars, dctx, as_pattern->value);
+    } else if (auto array_pattern = parser::cast_node<parser::ArrayPattern>(node.get())) {
+        for (auto &elt : array_pattern->elts) {
+            desugarPatternMatchingVars(vars, dctx, elt);
+        }
+    } else if (auto array_pattern = parser::cast_node<parser::ArrayPatternWithTail>(node.get())) {
+        for (auto &elt : array_pattern->elts) {
+            desugarPatternMatchingVars(vars, dctx, elt);
+        }
+    } else if (auto hash_pattern = parser::cast_node<parser::HashPattern>(node.get())) {
+        for (auto &elt : hash_pattern->pairs) {
+            desugarPatternMatchingVars(vars, dctx, elt);
+        }
+    } else if (auto alt_pattern = parser::cast_node<parser::MatchAlt>(node.get())) {
+        desugarPatternMatchingVars(vars, dctx, alt_pattern->left);
+        desugarPatternMatchingVars(vars, dctx, alt_pattern->right);
+    }
+}
+
 bool locReported = false;
 
 ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node> node) {
@@ -1883,6 +1919,40 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 // It wasn't a Send to begin with--there's no way this could result in a private
                 // method call error.
                 ast::cast_tree_nonnull<ast::Send>(res).flags.isPrivateOk = true;
+                result = std::move(res);
+            },
+            [&](parser::CaseMatch *caseMatch) {
+                // Create a local var to store the expression used in each match clause
+                auto exprLoc = caseMatch->expr->loc;
+                auto exprName = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp(),
+                                                               dctx.uniqueCounter++);
+                auto exprVar = MK::Assign(exprLoc, exprName, node2TreeImpl(dctx, std::move(caseMatch->expr)));
+
+                // Desugar the `else` block
+                TreePtr res = node2TreeImpl(dctx, std::move(caseMatch->elseBody));
+
+                // Desugar each `in` as an `if` branch calling `Magic.<pattern-match>()`
+                for (auto it = caseMatch->inBodies.rbegin(); it != caseMatch->inBodies.rend(); ++it) {
+                    auto inPattern = parser::cast_node<parser::InPattern>(it->get());
+                    ENFORCE(inPattern != nullptr, "case pattern without a in?");
+
+                    // Keep the `in` body for the `then` body of the new `if`
+                    auto pattern = std::move(inPattern->pattern);
+                    auto body = node2TreeImpl(dctx, std::move(inPattern->body));
+
+                    // Desugar match variables found inside the pattern
+                    InsSeq::STATS_store vars;
+                    desugarPatternMatchingVars(vars, dctx, pattern);
+                    if (!vars.empty()) {
+                        body = MK::InsSeq(pattern->loc, std::move(vars), std::move(body));
+                    }
+
+                    // Create a new `if` for the branch:
+                    // `in A` => `if (TODO)`
+                    auto match = MK::RaiseUnimplemented(pattern->loc);
+                    res = MK::If(inPattern->loc, std::move(match), std::move(body), std::move(res));
+                }
+                res = MK::InsSeq1(loc, std::move(exprVar), std::move(res));
                 result = std::move(res);
             },
             [&](parser::Backref *backref) {

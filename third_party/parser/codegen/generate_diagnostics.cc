@@ -61,6 +61,11 @@ tuple<string, string> MESSAGES[] = {
     {"OrdinaryParamDefined", "can't use numbered params when ordinary params were also defined"},
     {"NumparamUsedInOuterScope", "numbered parameter is already used in an outer scope"},
     {"CircularArgumentReference", "circular argument reference {}"},
+    {"PatternInterpInVarName", "symbol literal with interpolation is not allowed"},
+    {"PatternLVarName", "{} is not allowed as a local variable name"},
+    {"PatternLVarUndefined", "no such local variable: {}"},
+    {"PatternDuplicateVariable", "duplicate variable name {}"},
+    {"PatternDuplicateKey", "duplicate hash pattern key {}"},
 
     // Parser warnings
     {"UselessElse", "else without rescue is useless"},

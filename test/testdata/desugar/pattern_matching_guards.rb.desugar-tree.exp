@@ -1,0 +1,26 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  x = nil
+
+  y = begin
+    <assignTemp>$1 = nil
+    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      1
+    else
+      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        2
+      else
+        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          3
+        else
+          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            45
+          else
+            6
+          end
+        end
+      end
+    end
+  end
+
+  <emptyTree>::<C T>.reveal_type(y)
+end

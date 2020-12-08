@@ -151,6 +151,10 @@ public:
     void set_state_expr_fname();
     void set_state_expr_value();
 
+    void unset_command_start() {
+        command_start = false;
+    }
+
     void extend_static();
     void extend_dynamic();
     void unextend();

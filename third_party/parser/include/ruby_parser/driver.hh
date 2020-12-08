@@ -226,6 +226,36 @@ public:
     }
 };
 
+class pattern_variables_stack {
+    std::vector<std::set<std::string>> stack;
+    friend class base_driver;
+
+public:
+    pattern_variables_stack() {
+        push();
+    };
+
+    void push() {
+        std::set<std::string> s;
+        stack.emplace_back(s);
+    }
+
+    void pop() {
+        stack.pop_back();
+    }
+
+    void declare(std::string name) {
+        stack.back().insert(name);
+    }
+
+    bool declared(std::string name) {
+        if(stack.empty()) {
+            return false;
+        }
+        return stack.back().find(name) != stack.back().end();
+    }
+};
+
 class base_driver {
 public:
     diagnostics_t diagnostics;
@@ -234,6 +264,8 @@ public:
     mempool alloc;
     current_arg_stack current_arg_stack;
     max_numparam_stack numparam_stack;
+    pattern_variables_stack pattern_variables;
+    pattern_variables_stack pattern_hash_keys;
 
     bool pending_error;
     size_t def_level;
