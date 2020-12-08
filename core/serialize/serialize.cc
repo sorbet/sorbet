@@ -654,12 +654,8 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     }
 
     result.putU4(gs.names.size());
-    i = -1;
     for (const Name &n : gs.names) {
-        ++i;
-        if (i != 0) {
-            pickle(result, n);
-        }
+        pickle(result, n);
     }
 
     result.putU4(gs.classAndModules.size());
@@ -756,13 +752,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         ENFORCE(namesSize > 0);
         names.reserve(nearestPowerOf2(namesSize));
         for (int i = 0; i < namesSize; i++) {
-            if (i == 0) {
-                auto &inserted = names.emplace_back();
-                inserted.kind = NameKind::UTF8;
-                inserted.raw.utf8 = string_view();
-            } else {
-                names.emplace_back(unpickleName(p, result));
-            }
+            names.emplace_back(unpickleName(p, result));
         }
     }
 

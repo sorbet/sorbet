@@ -20,6 +20,11 @@ NameRef::NameRef(const GlobalState &gs, NameKind kind, u4 id)
     ENFORCE_NO_TIMER(id <= ID_MASK);
 }
 
+NameRef::NameRef(const GlobalState &gs, NameRef ref) : DebugOnlyCheck(gs, ref.unsafeTableIndex()), _id(ref.rawId()) {
+    // If this fails, the symbol table is too big :(
+    ENFORCE_NO_TIMER(this->unsafeTableIndex() <= ID_MASK);
+}
+
 Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE) {
         unique.~UniqueName();

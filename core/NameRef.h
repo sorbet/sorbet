@@ -103,7 +103,7 @@ public:
 
     NameRef(const GlobalState &gs, NameKind kind, u4 id);
 
-    NameRef(const GlobalState &gs, NameRef ref) : NameRef(gs, ref.kind(), ref.unsafeTableIndex()) {}
+    NameRef(const GlobalState &gs, NameRef ref);
 
     NameRef(const NameRef &nm) = default;
 

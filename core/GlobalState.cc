@@ -73,9 +73,6 @@ void GlobalState::initEmpty() {
     UnfreezeFileTable fileTableAccess(*this);
     UnfreezeNameTable nameTableAccess(*this);
     UnfreezeSymbolTable symTableAccess(*this);
-    names.emplace_back(); // first name is used in hashes to indicate empty cell
-    names[0].kind = NameKind::UTF8;
-    names[0].raw.utf8 = string_view();
     Names::registerNames(*this);
 
     SymbolRef id;
@@ -1660,7 +1657,7 @@ void GlobalState::sanityCheck() const {
             names.capacity(), namesByHash.capacity());
     ENFORCE(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
     int i = -1;
-    for (i = 1; i < names.size(); i++) {
+    for (i = 0; i < names.size(); i++) {
         NameRef(*this, names[i].kind, i).sanityCheck(*this);
     }
 

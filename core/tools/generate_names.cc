@@ -495,7 +495,7 @@ void emit_register(ostream &out) {
 }
 
 int main(int argc, char **argv) {
-    int i = 1;
+    int i = 0;
     for (auto &name : names) {
         if (name.isConstant) {
             i++;
