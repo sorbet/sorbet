@@ -146,7 +146,7 @@ bool isSetter(const GlobalState &gs, NameRef fun) {
     if (fun.kind(gs) != NameKind::UTF8) {
         return false;
     }
-    const string_view rawName = fun.raw(gs)->utf8;
+    const string_view rawName = fun.dataUtf8(gs)->utf8;
     if (rawName.size() < 2) {
         return false;
     }

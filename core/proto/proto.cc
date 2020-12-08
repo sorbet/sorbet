@@ -23,7 +23,7 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
             break;
         case NameKind::UNIQUE:
             protoName.set_kind(com::stripe::rubytyper::Name::UNIQUE);
-            switch (name.unique(gs)->uniqueNameKind) {
+            switch (name.dataUnique(gs)->uniqueNameKind) {
                 case UniqueNameKind::Parser:
                     protoName.set_unique(com::stripe::rubytyper::Name::PARSER);
                     break;

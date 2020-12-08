@@ -275,31 +275,31 @@ const ConstantNameData NameRef::dataCnst(const GlobalState &gs) const {
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {
-    auto name = this->raw(gs);
+    auto name = this->dataUtf8(gs);
     string nameEq = absl::StrCat(name->utf8, "=");
     return gs.enterNameUTF8(nameEq);
 }
 
 NameRef NameRef::addQuestion(GlobalState &gs) const {
-    auto name = this->raw(gs);
+    auto name = this->dataUtf8(gs);
     string nameEq = absl::StrCat(name->utf8, "?");
     return gs.enterNameUTF8(nameEq);
 }
 
 NameRef NameRef::addAt(GlobalState &gs) const {
-    auto name = this->raw(gs);
+    auto name = this->dataUtf8(gs);
     string nameEq = absl::StrCat("@", name->utf8);
     return gs.enterNameUTF8(nameEq);
 }
 
 NameRef NameRef::prepend(GlobalState &gs, string_view s) const {
-    auto name = this->raw(gs);
+    auto name = this->dataUtf8(gs);
     string nameEq = absl::StrCat(s, name->utf8);
     return gs.enterNameUTF8(nameEq);
 }
 
 NameRef NameRef::lookupMangledPackageName(const GlobalState &gs) const {
-    auto name = this->raw(gs);
+    auto name = this->dataUtf8(gs);
     auto parts = absl::StrSplit(name->utf8, "::");
     string nameEq = absl::StrCat(absl::StrJoin(parts, "_"), "_Package");
     return gs.lookupNameConstant(nameEq);

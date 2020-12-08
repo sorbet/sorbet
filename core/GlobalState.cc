@@ -904,7 +904,7 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     auto ownerScope = owner.dataAllowingNone(*this);
 
     if (name.kind(*this) == NameKind::UNIQUE) {
-        auto uniqueData = name.unique(*this);
+        auto uniqueData = name.dataUnique(*this);
         if (uniqueData->uniqueNameKind != UniqueNameKind::MangleRename) {
             return Symbols::noSymbol();
         }
@@ -1057,7 +1057,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
 }
 
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    bool isBlock = name.kind(*this) == NameKind::UNIQUE && name.unique(*this)->original == Names::blockTemp();
+    bool isBlock = name.kind(*this) == NameKind::UNIQUE && name.dataUnique(*this)->original == Names::blockTemp();
     ENFORCE(isBlock || owner.data(*this)->isClassOrModule(), "entering method symbol into not-a-class");
 
     auto flags = Symbol::Flags::METHOD;
@@ -1323,8 +1323,8 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
     ENFORCE(original.kind(*this) == NameKind::UTF8 ||
                 (original.kind(*this) == NameKind::UNIQUE &&
-                 (original.unique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                  original.unique(*this)->uniqueNameKind == UniqueNameKind::TEnum)),
+                 (original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                  original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum)),
             "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());
@@ -1390,8 +1390,8 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
     }
     ENFORCE(original.kind(*this) == NameKind::UTF8 ||
                 (original.kind(*this) == NameKind::UNIQUE &&
-                 (original.unique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                  original.unique(*this)->uniqueNameKind == UniqueNameKind::TEnum)),
+                 (original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                  original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum)),
             "looking up a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());

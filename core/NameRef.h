@@ -106,6 +106,8 @@ public:
 
     NameKind kind(const GlobalState &gs) const;
 
+    /* Names are one of three different kinds: unique, utf8, or constant. */
+
     const UniqueNameData dataUnique(const GlobalState &gs) const;
     const UTF8NameData dataUtf8(const GlobalState &gs) const;
     const ConstantNameData dataCnst(const GlobalState &gs) const;

@@ -812,7 +812,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
         auto deduped = vector<SimilarMethod>{};
         for (auto &[methodName, similarMethods] : similarMethodsByName) {
             if (methodName.kind(gs) == core::NameKind::UNIQUE &&
-                methodName.unique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
+                methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
                 // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
                 // unique names, because we want each overload to show up but those use unique names.
                 continue;
