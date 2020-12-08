@@ -8,7 +8,7 @@ class GlobalSubstitution;
 class Name;
 struct UniqueName;
 struct ConstantName;
-struct RawName;
+struct UTF8Name;
 
 enum class NameKind : u1 {
     UTF8 = 1,
@@ -43,12 +43,12 @@ public:
     const ConstantName *operator->() const;
 };
 
-class RawNameData : private DebugOnlyCheck<NameDataDebugCheck> {
-    const RawName &name;
+class UTF8NameData : private DebugOnlyCheck<NameDataDebugCheck> {
+    const UTF8Name &name;
 
 public:
-    RawNameData(const RawName &ref, const GlobalState &gs);
-    const RawName *operator->() const;
+    UTF8NameData(const UTF8Name &ref, const GlobalState &gs);
+    const UTF8Name *operator->() const;
 };
 
 constexpr size_t sizeof__UniqueName = sizeof(UniqueName *);
@@ -106,9 +106,9 @@ public:
 
     NameKind kind(const GlobalState &gs) const;
 
-    const UniqueNameData unique(const GlobalState &gs) const;
-    const RawNameData raw(const GlobalState &gs) const;
-    const ConstantNameData cnst(const GlobalState &gs) const;
+    const UniqueNameData dataUnique(const GlobalState &gs) const;
+    const UTF8NameData dataUtf8(const GlobalState &gs) const;
+    const ConstantNameData dataCnst(const GlobalState &gs) const;
 
     // Returns the `0` NameRef, used to indicate non-existence of a name
     static NameRef noName() {

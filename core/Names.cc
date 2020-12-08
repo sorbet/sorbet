@@ -256,19 +256,19 @@ const Name &NameRef::data(const GlobalState &gs) const {
     return gs.names[_id];
 }
 
-const UniqueNameData NameRef::unique(const GlobalState &gs) const {
+const UniqueNameData NameRef::dataUnique(const GlobalState &gs) const {
     auto &name = data(gs);
     ENFORCE(name.kind == NameKind::UNIQUE);
     return UniqueNameData(name.unique, gs);
 }
 
-const RawNameData NameRef::raw(const GlobalState &gs) const {
+const UTF8NameData NameRef::dataUtf8(const GlobalState &gs) const {
     auto &name = data(gs);
     ENFORCE(name.kind == NameKind::UTF8);
-    return RawNameData(name.raw, gs);
+    return UTF8NameData(name.raw, gs);
 }
 
-const ConstantNameData NameRef::cnst(const GlobalState &gs) const {
+const ConstantNameData NameRef::dataCnst(const GlobalState &gs) const {
     auto &name = data(gs);
     ENFORCE(name.kind == NameKind::CONSTANT);
     return ConstantNameData(name.cnst, gs);
@@ -330,7 +330,7 @@ Name Name::deepCopy(const GlobalState &to) const {
 
 UniqueNameData::UniqueNameData(const UniqueName &ref, const GlobalState &gs) : DebugOnlyCheck(gs), name(ref) {}
 ConstantNameData::ConstantNameData(const ConstantName &ref, const GlobalState &gs) : DebugOnlyCheck(gs), name(ref) {}
-RawNameData::RawNameData(const RawName &ref, const GlobalState &gs) : DebugOnlyCheck(gs), name(ref) {}
+UTF8NameData::UTF8NameData(const UTF8Name &ref, const GlobalState &gs) : DebugOnlyCheck(gs), name(ref) {}
 
 NameDataDebugCheck::NameDataDebugCheck(const GlobalState &gs) : gs(gs), nameCountAtCreation(gs.namesUsed()) {}
 
@@ -348,7 +348,7 @@ const ConstantName *ConstantNameData::operator->() const {
     return &name;
 };
 
-const RawName *RawNameData::operator->() const {
+const UTF8Name *UTF8NameData::operator->() const {
     runDebugOnlyCheck();
     return &name;
 };

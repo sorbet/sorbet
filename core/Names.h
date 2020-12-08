@@ -27,10 +27,10 @@ inline int _NameKind2Id_CONSTANT(NameKind nm) {
     return 3;
 }
 
-struct RawName final {
+struct UTF8Name final {
     std::string_view utf8;
 };
-CheckSize(RawName, 16, 8);
+CheckSize(UTF8Name, 16, 8);
 
 enum class UniqueNameKind : u1 {
     Parser,
@@ -71,7 +71,7 @@ private:
 public:
     union { // todo: can discriminate this union through the pointer to Name
         // itself using lower bits
-        RawName raw;
+        UTF8Name raw;
         UniqueName unique;
         ConstantName cnst;
     };
