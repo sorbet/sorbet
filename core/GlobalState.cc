@@ -901,19 +901,18 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     // it'll be whatever the largest `x$n` that exists is, if any; otherwise, there will be none.
     ENFORCE(sym.exists(), "lookup up previous name of non-existing symbol");
     NameRef name = sym.data(*this)->name;
-    NameData nameData = name.data(*this);
     auto ownerScope = owner.dataAllowingNone(*this);
 
-    if (nameData->kind == NameKind::UNIQUE) {
-        if (nameData->unique.uniqueNameKind != UniqueNameKind::MangleRename) {
+    if (name.kind(*this) == NameKind::UNIQUE) {
+        auto uniqueData = name.dataUnique(*this);
+        if (uniqueData->uniqueNameKind != UniqueNameKind::MangleRename) {
             return Symbols::noSymbol();
         }
-        if (nameData->unique.num == 1) {
+        if (uniqueData->num == 1) {
             return Symbols::noSymbol();
         } else {
-            ENFORCE(nameData->unique.num > 1);
-            auto nm =
-                lookupNameUnique(UniqueNameKind::MangleRename, nameData->unique.original, nameData->unique.num - 1);
+            ENFORCE(uniqueData->num > 1);
+            auto nm = lookupNameUnique(UniqueNameKind::MangleRename, uniqueData->original, uniqueData->num - 1);
             if (!nm.exists()) {
                 return Symbols::noSymbol();
             }
@@ -1058,8 +1057,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
 }
 
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    bool isBlock =
-        name.data(*this)->kind == NameKind::UNIQUE && name.data(*this)->unique.original == Names::blockTemp();
+    bool isBlock = name.kind(*this) == NameKind::UNIQUE && name.dataUnique(*this)->original == Names::blockTemp();
     ENFORCE(isBlock || owner.data(*this)->isClassOrModule(), "entering method symbol into not-a-class");
 
     auto flags = Symbol::Flags::METHOD;
@@ -1323,10 +1321,9 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
-    ENFORCE(original.data(*this)->kind == NameKind::UTF8 ||
-                (original.data(*this)->kind == NameKind::UNIQUE &&
-                 (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::TEnum)),
+    ENFORCE(original.kind(*this) == NameKind::UTF8 ||
+                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum,
             "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());
@@ -1390,10 +1387,9 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
     if (!original.exists()) {
         return core::NameRef::noName();
     }
-    ENFORCE(original.data(*this)->kind == NameKind::UTF8 ||
-                (original.data(*this)->kind == NameKind::UNIQUE &&
-                 (original.data(*this)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                  original.data(*this)->unique.uniqueNameKind == UniqueNameKind::TEnum)),
+    ENFORCE(original.kind(*this) == NameKind::UTF8 ||
+                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum,
             "looking up a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());

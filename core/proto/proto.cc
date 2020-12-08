@@ -17,13 +17,13 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
     com::stripe::rubytyper::Name protoName;
     protoName.set_name(name.show(gs));
     protoName.set_unique(com::stripe::rubytyper::Name::NOT_UNIQUE);
-    switch (name.data(gs)->kind) {
+    switch (name.kind(gs)) {
         case NameKind::UTF8:
             protoName.set_kind(com::stripe::rubytyper::Name::UTF8);
             break;
         case NameKind::UNIQUE:
             protoName.set_kind(com::stripe::rubytyper::Name::UNIQUE);
-            switch (name.data(gs)->unique.uniqueNameKind) {
+            switch (name.dataUnique(gs)->uniqueNameKind) {
                 case UniqueNameKind::Parser:
                     protoName.set_unique(com::stripe::rubytyper::Name::PARSER);
                     break;

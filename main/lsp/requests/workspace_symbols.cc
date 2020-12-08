@@ -109,8 +109,8 @@ inline bool canMatchWordBoundary(char ch) {
     return isspace(ch);
 }
 
-inline bool isEligibleSymbol(const core::NameData &nameData) {
-    if (nameData->kind == core::NameKind::UNIQUE) {
+inline bool isEligibleSymbol(core::NameRef name, const core::GlobalState &gs) {
+    if (name.kind(gs) == core::NameKind::UNIQUE) {
         return false;
     }
     return true;
@@ -187,8 +187,7 @@ PartialMatch partialMatchSymbol(string_view symbol, string_view::const_iterator 
 void SymbolMatcher::updatePartialMatch(core::SymbolRef symbolRef, string_view::const_iterator queryBegin,
                                        string_view::const_iterator queryEnd, size_t &ceilingScore) {
     auto symbolData = symbolRef.data(gs);
-    auto nameData = symbolData->name.data(gs);
-    if (!isEligibleSymbol(nameData)) {
+    if (!isEligibleSymbol(symbolData->name, gs)) {
         return;
     }
     auto shortName = symbolData->name.shortName(gs);
@@ -266,8 +265,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
                     continue;
                 }
                 auto symbolData = symbolRef.data(gs);
-                auto nameData = symbolData->name.data(gs);
-                if (!isEligibleSymbol(nameData)) {
+                if (!isEligibleSymbol(symbolData->name, gs)) {
                     continue;
                 }
                 auto shortName = symbolData->name.shortName(gs);

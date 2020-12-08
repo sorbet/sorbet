@@ -29,13 +29,13 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     // static-init for a file
-    if (data->name.data(gs)->kind == core::NameKind::UNIQUE &&
-        data->name.data(gs)->unique.original == core::Names::staticInit()) {
+    if (data->name.kind(gs) == core::NameKind::UNIQUE &&
+        data->name.dataUnique(gs)->original == core::Names::staticInit()) {
         return true;
     }
     // <block>
-    if (data->name.data(gs)->kind == core::NameKind::UNIQUE &&
-        data->name.data(gs)->unique.original == core::Names::blockTemp()) {
+    if (data->name.kind(gs) == core::NameKind::UNIQUE &&
+        data->name.dataUnique(gs)->original == core::Names::blockTemp()) {
         return true;
     }
     return false;

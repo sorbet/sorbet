@@ -143,10 +143,10 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
 
 namespace {
 bool isSetter(const GlobalState &gs, NameRef fun) {
-    if (fun.data(gs)->kind != NameKind::UTF8) {
+    if (fun.kind(gs) != NameKind::UTF8) {
         return false;
     }
-    const string_view rawName = fun.data(gs)->raw.utf8;
+    const string_view rawName = fun.dataUtf8(gs)->utf8;
     if (rawName.size() < 2) {
         return false;
     }

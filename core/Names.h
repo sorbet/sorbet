@@ -11,13 +11,6 @@
 namespace sorbet::core {
 class GlobalState;
 class Name;
-enum class NameKind : u1 {
-    UTF8 = 1,
-    UNIQUE = 2,
-    CONSTANT = 3,
-};
-
-CheckSize(NameKind, 1, 1);
 
 inline int _NameKind2Id_UTF8(NameKind nm) {
     ENFORCE(nm == NameKind::UTF8);
@@ -34,10 +27,10 @@ inline int _NameKind2Id_CONSTANT(NameKind nm) {
     return 3;
 }
 
-struct RawName final {
+struct UTF8Name final {
     std::string_view utf8;
 };
-CheckSize(RawName, 16, 8);
+CheckSize(UTF8Name, 16, 8);
 
 enum class UniqueNameKind : u1 {
     Parser,
@@ -78,7 +71,7 @@ private:
 public:
     union { // todo: can discriminate this union through the pointer to Name
         // itself using lower bits
-        RawName raw;
+        UTF8Name raw;
         UniqueName unique;
         ConstantName cnst;
     };

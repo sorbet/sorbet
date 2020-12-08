@@ -39,7 +39,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     core::TypePtr methodReturnType = cfg->symbol.data(ctx)->resultType;
     auto missingReturnType = methodReturnType == nullptr;
 
-    if (cfg->symbol.data(ctx)->name.data(ctx)->kind != core::NameKind::UTF8 ||
+    if (cfg->symbol.data(ctx)->name.kind(ctx) != core::NameKind::UTF8 ||
         cfg->symbol.data(ctx)->name == core::Names::staticInit() || !cfg->symbol.data(ctx)->loc().exists()) {
         guessTypes = false;
     }
