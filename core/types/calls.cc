@@ -559,7 +559,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // suggest adding `extend T::Helpers`.
                 if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
                     args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
-                    args.name == core::Names::mixesInClassMethods()) {
+                    args.name == core::Names::mixesInClassMethods() || args.name == core::Names::requiresAncestor()) {
                     auto attachedClass = symbol.data(gs)->attachedClass(gs);
                     if (auto suggestion =
                             maybeSuggestExtendTHelpers(gs, attachedClass, core::Loc(args.locs.file, args.locs.call))) {
