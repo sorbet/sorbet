@@ -16,7 +16,7 @@ void Visibility::run(core::MutableContext ctx, ast::ClassDef *classDef) {
     vector<ast::TreePtr> inlinePrivateCalls;
     for (auto &stat : classDef->rhs) {
         typecase(
-            stat.get(), [&](ast::Assign *assign) {},
+            stat.get(),
             [&](ast::Send *send) {
                 if (send->args.size() != 0 && send->recv != nullptr) {
                     return;

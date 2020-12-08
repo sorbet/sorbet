@@ -48,7 +48,6 @@ public:
         Prop::run(ctx, classDef);
         TypeMembers::run(ctx, classDef);
         Singleton::run(ctx, classDef);
-        Visibility::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);
@@ -161,6 +160,9 @@ public:
             }
         }
         ModuleFunction::run(ctx, classDef);
+
+        // This rewriter runs last to catch any methods added by any other rewriter
+        Visibility::run(ctx, classDef);
 
         return tree;
     }

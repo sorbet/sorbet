@@ -11,10 +11,14 @@ namespace sorbet::rewriter {
  *
  *   private
  *   def foo; end
+ *   def bar; end
  *
  * into
  *
+ *   def foo; end
+ *   def bar; end
  *   private :foo
+ *   private :bar
  *
  */
 class Visibility final {

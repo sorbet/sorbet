@@ -33,6 +33,8 @@ class Test
   def subsequent_visibility
     3
   end
+
+  attr_reader :subsequent_visibility_attr_reader
 end
 
 class TestChild < Test
@@ -70,6 +72,7 @@ Test.new.splat_and_block_call(*[1, 'a'], &nil) # Currently no Error, since the n
 Test.new.block_call(&nil) # Currently no Error, since the nil block makes Magic_callWithBlock return prematurely.
 
 Test.new.subsequent_visibility # error: Non-private call to private method `Test#subsequent_visibility`
+Test.new.subsequent_visibility_attr_reader # error: Non-private call to private method `Test#subsequent_visibility`
 
 # Currently we do not handle when private is called against self
 UnhandledTestCase.new.foo
