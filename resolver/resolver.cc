@@ -652,6 +652,7 @@ private:
         auto owner = todo.owner;
         auto send = todo.send;
         auto loc = core::Loc(todo.file, send->loc);
+
         if (!owner.data(gs)->isClassOrModuleModule() && !owner.data(gs)->isClassOrModuleAbstract()) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidRequiredAncestor)) {
                 e.setHeader("`{}` can only be declared inside a module or an abstract class", send->fun.show(gs));
@@ -681,6 +682,8 @@ private:
                 }
                 return;
             }
+
+            owner.data(gs)->recordRequiredAncestor(gs, id->symbol, argLoc);
         }
     }
 

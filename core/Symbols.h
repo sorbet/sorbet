@@ -587,6 +587,20 @@ public:
     const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
+    // Record a required ancestor for this class of module
+    void recordRequiredAncestor(GlobalState &gs, SymbolRef ancestor, Loc loc);
+
+    // Associate a required ancestor with the loc it's required at
+    struct RequiredAncestor {
+        SymbolRef symbol;
+        Loc loc;
+
+        RequiredAncestor(SymbolRef symbol, Loc loc) : symbol(symbol), loc(loc) {}
+    };
+
+    // Locally required ancestors by this class or module
+    std::vector<RequiredAncestor> requiredAncestors(const GlobalState &gs) const;
+
     // if dealiasing fails here, then we return Untyped instead
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const {
         return dealiasWithDefault(gs, depthLimit, Symbols::untyped());

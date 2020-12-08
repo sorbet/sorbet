@@ -1175,6 +1175,62 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
     return result;
 }
 
+// Record a required ancestor for this class of module
+void Symbol::recordRequiredAncestor(GlobalState &gs, SymbolRef ancestor, Loc loc) {
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
+
+    // We store the required ancestors into a fake property called `<required-ancestors>`
+    auto ancestors = this->findMember(gs, Names::requiredAncestors());
+    if (!ancestors.exists()) {
+        ancestors = gs.enterMethodSymbol(loc, this->ref(gs), Names::requiredAncestors());
+        ancestors.data(gs)->locs_.clear(); // Remove the original location
+    }
+
+    if (ancestors.data(gs)->resultType == nullptr) {
+        vector<TypePtr> targs;
+        ancestors.data(gs)->resultType = TupleType::build(gs, move(targs));
+    } else {
+        // Do not require the same ancestor twice
+        auto &elems = (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems;
+        bool alreadyRecorded = absl::c_any_of(elems, [ancestor](auto elem) {
+            ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
+            return cast_type_nonnull<ClassType>(elem).symbol == ancestor;
+        });
+        if (alreadyRecorded) {
+            return;
+        }
+    }
+
+    auto type = core::make_type<ClassType>(ancestor);
+    (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems.emplace_back(type);
+    ancestors.data(gs)->locs_.emplace_back(loc);
+}
+
+// Locally required ancestors by this class or module
+vector<Symbol::RequiredAncestor> Symbol::requiredAncestors(const GlobalState &gs) const {
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
+
+    vector<RequiredAncestor> res;
+
+    auto ancestors = this->findMember(gs, Names::requiredAncestors());
+    if (!ancestors.exists()) {
+        // No ancestor was recorded for this class or module
+        return res;
+    }
+
+    auto data = ancestors.data(gs);
+    auto types = cast_type<TupleType>(data->resultType);
+    auto index = 0;
+    for (auto elem : types->elems) {
+        ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
+        ENFORCE(index < data->locs().size(), "Missing loc in requiredAncestors");
+        res.emplace_back(cast_type_nonnull<ClassType>(elem).symbol, data->locs().at(index));
+        index++;
+    }
+
+    return res;
+}
+
 SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
     if (isa_type<AliasType>(resultType)) {
         auto alias = cast_type_nonnull<AliasType>(resultType);
