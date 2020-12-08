@@ -44,6 +44,12 @@ class TestChild < Test
   end
 end
 
+class UnhandledTestCase
+  self.private
+  def foo; end
+end
+
+A.new.foo # error: Non-private call to private method
 Object.new.foo # error: Non-private call to private method `Object#foo`
 
 Test.new.using_symbol # error: Non-private call to private method `Test#using_symbol`
@@ -63,7 +69,8 @@ Test.new.splat_call(*T.unsafe(nil)) # Currently no Error, since T.unsafe makes M
 Test.new.splat_and_block_call(*[1, 'a'], &nil) # Currently no Error, since the nil block makes Magic_callWithSplatAndBlock return prematurely.
 Test.new.block_call(&nil) # Currently no Error, since the nil block makes Magic_callWithBlock return prematurely.
 
-# TODO: The following method should contain an error. Sorbet currently does not support setting method
-# visibility using the private/protected keywords that affect the visibility of subsequent methods.
 Test.new.subsequent_visibility # error: Non-private call to private method `Test#subsequent_visibility`
+
+# Currently we do not handle when private is called against self
+UnhandledTestCase.new.foo
 

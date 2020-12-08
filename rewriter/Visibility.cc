@@ -13,10 +13,10 @@ namespace sorbet::rewriter {
 
 void Visibility::run(core::MutableContext ctx, ast::ClassDef *classDef) {
     core::NameRef currentVisibility = core::Names::public_();
-
+    vector<ast::TreePtr> inlinePrivateCalls;
     for (auto &stat : classDef->rhs) {
         typecase(
-            stat.get(),
+            stat.get(), [&](ast::Assign *assign) {},
             [&](ast::Send *send) {
                 if (send->args.size() != 0 && send->recv != nullptr) {
                     return;
@@ -32,12 +32,17 @@ void Visibility::run(core::MutableContext ctx, ast::ClassDef *classDef) {
             },
             [&](ast::MethodDef *mdef) {
                 if (currentVisibility == core::Names::private_()) {
-                    auto privateCall = ast::MK::Send1(mdef->loc, ast::MK::Self(mdef->loc), core::Names::private_(),
-                                                      ast::MK::Symbol(mdef->loc, mdef->name));
-                    classDef->rhs.insert(classDef->rhs.end(), std::move(privateCall));
+                    auto privateCall =
+                        ast::MK::Send1(mdef->declLoc, ast::MK::Self(mdef->declLoc), core::Names::private_(),
+                                       ast::MK::Symbol(mdef->declLoc, mdef->name));
+                    inlinePrivateCalls.emplace_back(std::move(privateCall));
                 }
             },
             [&](ast::Expression *e) {});
+    }
+
+    for (auto &newPrivateCall : inlinePrivateCalls) {
+        classDef->rhs.emplace_back(std::move(newPrivateCall));
     }
 }
 
