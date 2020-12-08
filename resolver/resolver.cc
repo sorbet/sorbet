@@ -649,6 +649,39 @@ private:
     }
 
     static void resolveRequiredAncestorsJob(core::GlobalState &gs, const RequireAncestorResolutionItem &todo) {
+        auto owner = todo.owner;
+        auto send = todo.send;
+        auto loc = core::Loc(todo.file, send->loc);
+        if (!owner.data(gs)->isClassOrModuleModule() && !owner.data(gs)->isClassOrModuleAbstract()) {
+            if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                e.setHeader("`{}` can only be declared inside a module or an abstract class", send->fun.show(gs));
+            }
+            return;
+        }
+
+        if (send->args.empty()) {
+            return; // The arity mismatch error will be emitted later by infer.
+        }
+
+        for (auto &arg : send->args) {
+            auto argLoc = core::Loc(todo.file, arg.loc());
+            auto *id = ast::cast_tree<ast::ConstantLit>(arg);
+
+            if (id == nullptr || !id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
+                if (auto e = gs.beginError(argLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                    e.setHeader("Argument to `{}` must be statically resolvable to a class or a module",
+                                send->fun.show(gs));
+                }
+                return;
+            }
+
+            if (id->symbol == owner) {
+                if (auto e = gs.beginError(argLoc, core::errors::Resolver::InvalidRequiredAncestor)) {
+                    e.setHeader("Must not pass yourself to `{}`", send->fun.show(gs));
+                }
+                return;
+            }
+        }
     }
 
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
