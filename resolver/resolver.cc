@@ -170,11 +170,24 @@ private:
         const ClassMethodsResolutionItem &operator=(const ClassMethodsResolutionItem &) = delete;
     };
 
+    struct RequireAncestorResolutionItem {
+        core::FileRef file;
+        core::SymbolRef owner;
+        ast::Send *send;
+
+        RequireAncestorResolutionItem(RequireAncestorResolutionItem &&) noexcept = default;
+        RequireAncestorResolutionItem &operator=(RequireAncestorResolutionItem &&rhs) noexcept = default;
+
+        RequireAncestorResolutionItem(const RequireAncestorResolutionItem &) = delete;
+        const RequireAncestorResolutionItem &operator=(const RequireAncestorResolutionItem &) = delete;
+    };
+
     vector<ResolutionItem> todo_;
     vector<AncestorResolutionItem> todoAncestors_;
     vector<ClassAliasResolutionItem> todoClassAliases_;
     vector<TypeAliasResolutionItem> todoTypeAliases_;
     vector<ClassMethodsResolutionItem> todoClassMethods_;
+    vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
 
     static core::SymbolRef resolveLhs(core::Context ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
@@ -635,6 +648,9 @@ private:
         }
     }
 
+    static void resolveRequiredAncestorsJob(core::GlobalState &gs, const RequireAncestorResolutionItem &todo) {
+    }
+
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {
         ENFORCE(job.ancestor->symbol.exists(), "Ancestor must exist, or we can't check whether it's sealed.");
         auto ancestorSym = job.ancestor->symbol.data(ctx)->dealias(ctx);
@@ -794,9 +810,14 @@ public:
 
     ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        if (send.recv.isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
-            auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
-            this->todoClassMethods_.emplace_back(move(item));
+        if (send.recv.isSelfReference()) {
+            if (send.fun == core::Names::mixesInClassMethods()) {
+                auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
+                this->todoClassMethods_.emplace_back(move(item));
+            } else if (send.fun == core::Names::requiresAncestor()) {
+                auto item = RequireAncestorResolutionItem{ctx.file, ctx.owner, &send};
+                this->todoRequiredAncestors_.emplace_back(move(item));
+            }
         } else {
             auto recvAsConstantLit = ast::cast_tree<ast::ConstantLit>(send.recv);
             if (recvAsConstantLit != nullptr && recvAsConstantLit->symbol == core::Symbols::Magic() &&
@@ -847,6 +868,7 @@ public:
         vector<ClassAliasResolutionItem> todoClassAliases_;
         vector<TypeAliasResolutionItem> todoTypeAliases_;
         vector<ClassMethodsResolutionItem> todoClassMethods_;
+        vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
         vector<ast::ParsedFile> trees;
     };
 
@@ -894,6 +916,7 @@ public:
                                          move(constants.todoClassAliases_),
                                          move(constants.todoTypeAliases_),
                                          move(constants.todoClassMethods_),
+                                         move(constants.todoRequiredAncestors_),
                                          move(partiallyResolvedTrees)};
                 auto computedTreesCount = result.trees.size();
                 resultq->push(move(result), computedTreesCount);
@@ -905,6 +928,7 @@ public:
         vector<ClassAliasResolutionItem> todoClassAliases;
         vector<TypeAliasResolutionItem> todoTypeAliases;
         vector<ClassMethodsResolutionItem> todoClassMethods;
+        vector<RequireAncestorResolutionItem> todoRequiredAncestors;
 
         {
             ResolveWalkResult threadResult;
@@ -925,6 +949,9 @@ public:
                     todoClassMethods.insert(todoClassMethods.end(),
                                             make_move_iterator(threadResult.todoClassMethods_.begin()),
                                             make_move_iterator(threadResult.todoClassMethods_.end()));
+                    todoRequiredAncestors.insert(todoRequiredAncestors.end(),
+                                                 make_move_iterator(threadResult.todoRequiredAncestors_.begin()),
+                                                 make_move_iterator(threadResult.todoRequiredAncestors_.end()));
                     trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
                                  make_move_iterator(threadResult.trees.end()));
                 }
@@ -944,6 +971,9 @@ public:
             return locCompare(core::Loc(lhs.file, (*lhs.rhs).loc()), core::Loc(rhs.file, (*rhs.rhs).loc()));
         });
         fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool {
+            return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
+        });
+        fast_sort(todoRequiredAncestors, [](const auto &lhs, const auto &rhs) -> bool {
             return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
         });
         fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool {
@@ -1025,6 +1055,14 @@ public:
                 resolveClassMethodsJob(gs, todo);
             }
             todoClassMethods.clear();
+        }
+
+        {
+            Timer timeit(gs.tracer(), "resolver.requires_ancestor");
+            for (auto &todo : todoRequiredAncestors) {
+                resolveRequiredAncestorsJob(gs, todo);
+            }
+            todoRequiredAncestors.clear();
         }
 
         // We can no longer resolve new constants. All the code below reports errors
