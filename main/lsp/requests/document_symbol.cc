@@ -93,7 +93,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
     vector<pair<core::SymbolRef::Kind, u4>> symbolTypes = {
         {core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()},
         {core::SymbolRef::Kind::Method, gs.methodsUsed()},
-        {core::SymbolRef::Kind::Field, gs.fieldsUsed()},
+        {core::SymbolRef::Kind::FieldOrStaticField, gs.fieldsUsed()},
         {core::SymbolRef::Kind::TypeArgument, gs.typeArgumentsUsed()},
         {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
     };

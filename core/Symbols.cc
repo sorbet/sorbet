@@ -140,7 +140,7 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
         type = SymbolRef::Kind::Method;
         distance = this - gs.methods.data();
     } else if (isField() || isStaticField()) {
-        type = SymbolRef::Kind::Field;
+        type = SymbolRef::Kind::FieldOrStaticField;
         distance = this - gs.fields.data();
     } else if (isTypeMember()) {
         type = SymbolRef::Kind::TypeMember;
@@ -175,7 +175,7 @@ SymbolData SymbolRef::dataAllowingNone(GlobalState &gs) const {
         case SymbolRef::Kind::Method:
             ENFORCE_NO_TIMER(methodIndex() < gs.methods.size());
             return SymbolData(gs.methods[methodIndex()], gs);
-        case SymbolRef::Kind::Field:
+        case SymbolRef::Kind::FieldOrStaticField:
             ENFORCE_NO_TIMER(fieldIndex() < gs.fields.size());
             return SymbolData(gs.fields[fieldIndex()], gs);
         case SymbolRef::Kind::TypeArgument:
@@ -200,7 +200,7 @@ ConstSymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
         case SymbolRef::Kind::Method:
             ENFORCE_NO_TIMER(methodIndex() < gs.methods.size());
             return ConstSymbolData(gs.methods[methodIndex()], gs);
-        case SymbolRef::Kind::Field:
+        case SymbolRef::Kind::FieldOrStaticField:
             ENFORCE_NO_TIMER(fieldIndex() < gs.fields.size());
             return ConstSymbolData(gs.fields[fieldIndex()], gs);
         case SymbolRef::Kind::TypeArgument:
@@ -218,7 +218,7 @@ bool SymbolRef::isSynthetic() const {
             return classOrModuleIndex() < Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS;
         case Kind::Method:
             return methodIndex() < Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS;
-        case Kind::Field:
+        case Kind::FieldOrStaticField:
             return fieldIndex() < Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS;
         case Kind::TypeArgument:
             return typeArgumentIndex() < Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS;
@@ -1223,7 +1223,7 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
             case SymbolRef::Kind::Method:
                 current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(this->loc(), this->owner, this->name);
                 break;
-            case SymbolRef::Kind::Field:
+            case SymbolRef::Kind::FieldOrStaticField:
                 if (isField()) {
                     current2 = const_cast<GlobalState &>(gs).enterFieldSymbol(this->loc(), this->owner, this->name);
                 } else {

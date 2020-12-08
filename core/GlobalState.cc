@@ -1138,7 +1138,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) 
 
     ENFORCE(!symbolTableFrozen);
 
-    auto result = SymbolRef(this, SymbolRef::Kind::Field, fields.size());
+    auto result = SymbolRef(this, SymbolRef::Kind::FieldOrStaticField, fields.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
     fields.emplace_back();
 
@@ -1171,7 +1171,7 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef 
 
     ENFORCE(!symbolTableFrozen);
 
-    auto ret = SymbolRef(this, SymbolRef::Kind::Field, fields.size());
+    auto ret = SymbolRef(this, SymbolRef::Kind::FieldOrStaticField, fields.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
     fields.emplace_back();
 
