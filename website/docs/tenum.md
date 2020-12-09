@@ -63,6 +63,48 @@ handled, Sorbet would report an error statically that one of the cases was
 missing. For more information on how exhaustiveness checking works, see
 [Exhaustiveness Checking](exhaustiveness.md).
 
+## Enum values in types
+
+We might want a type for "only red suits" or "only black suits." `T::Enum`
+allows using individual enum values like `Suit::Hearts` or `Suit::Diamonds` as
+types (in addition to the name of the enum itself, like `Suit`):
+
+```ruby
+# (1) Hearts and Diamonds are enum values and also types
+sig {params(red_suit: T.any(Suit::Hearts, Suit::Diamonds)).void}
+def handle_red_suit(red_suit)
+  case red_suit
+  when Suit::Hearts then "..."
+  when Suit::Diamonds then "..."
+  # (2) exhaustive, even with only two cases handled
+  else T.absurd(red_suit)
+  end
+end
+
+handle_red_suit(Suit::Hearts) # ok
+handle_red_suit(Suit::Spades) # type error
+```
+
+We can also define [type aliases](type-aliases.md) of various groups of enum
+values:
+
+```ruby
+# Two type aliases for two different enum subsets
+RedSuit = T.type_alias {T.any(Suit::Hearts, Suit::Diamonds)}
+BlackSuit = T.type_alias {T.any(Suit::Spades, Suit::Clubs)}
+
+sig {params(black_suit: BlackSuit).void}
+def handle_black_suit(black_suit)
+  # ...
+end
+```
+
+Using enum values in types is useful for modeling enums where there is a
+frequently-used subset of enum values.
+
+<a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0A%23%20(1)%20New%20enumerations%20are%20defined%20by%20creating%20a%20subclass%20of%20T%3A%3AEnum%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20%23%20(2)%20Enum%20values%20are%20declared%20within%20an%20%60enums%20do%60%20block%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new%0A%20%20%20%20Hearts%20%3D%20new%0A%20%20%20%20Clubs%20%3D%20new%0A%20%20%20%20Diamonds%20%3D%20new%0A%20%20end%0Aend%0A%0Asig%20%7Bparams(red_suit%3A%20T.any(Suit%3A%3AHearts%2C%20Suit%3A%3ADiamonds)).void%7D%0Adef%20handle_red_suit(red_suit)%0A%20%20case%20red_suit%0A%20%20when%20Suit%3A%3AHearts%20then%20%22...%22%0A%20%20when%20Suit%3A%3ADiamonds%20then%20%22...%22%0A%20%20%23%20exhaustive%2C%20even%20with%20only%20two%20cases%20handled%0A%20%20else%20T.absurd(red_suit)%0A%20%20end%0Aend%0A%0Ahandle_red_suit(Suit%3A%3AHearts)%20%23%20ok%0Ahandle_red_suit(Suit%3A%3ASpades)%20%23%20type%20error%0A%0ARedSuit%20%3D%20T.type_alias%20%7BT.any(Suit%3A%3AHearts%2C%20Suit%3A%3ADiamonds)%7D%0ABlackSuit%20%3D%20T.type_alias%20%7BT.any(Suit%3A%3ASpades%2C%20Suit%3A%3AClubs)%7D%0A%0Asig%20%7Bparams(black_suit%3A%20BlackSuit).void%7D%0Adef%20handle_black_suit(black_suit)%0A%20%20case%20black_suit%0A%20%20when%20Suit%3A%3ASpades%20then%20%22...%22%0A%20%20when%20Suit%3A%3AClubs%20then%20%22...%22%0A%20%20%23%20exhaustive%2C%20even%20with%20only%20two%20cases%20handled%0A%20%20else%20T.absurd(black_suit)%0A%20%20end%0Aend%0A">→
+View full example on sorbet.run</a>
+
 ## Converting enums to other types
 
 Enumerations do not implicitly convert to any other type. Instead, all
@@ -92,8 +134,8 @@ class Suit < T::Enum
 end
 ```
 
-A particularly common case to convert an enum to a String. Because this is so
-common, this conversion has been built in (it still must be explicitly called):
+A particularly common case is to convert an enum to a String. Because this is so
+common, this conversion method is built in:
 
 ```ruby
 Suit::Spades.serialize # => 'spades'
@@ -101,9 +143,9 @@ Suit::Hearts.serialize # => 'hearts'
 # ...
 ```
 
-Again: this conversion must be done explicitly. When attempting to implicitly
-convert an enum value to a string, you'll get a non-human-friendly
-representation of the enum:
+Again: this conversion to a string must still be done explicitly. When
+attempting to implicitly convert an enum value to a string, you'll get a
+non-human-friendly representation of the enum:
 
 ```ruby
 suit = Suit::Spades
@@ -169,9 +211,6 @@ Suit.has_serialized?(Suit::Spades.serialize)
 Suit.has_serialized?('bad value')
 # => false
 ```
-
-<!-- TODO(jez) Using enum *values* as type annotations / in unions -->
-<!-- TODO(jez) ^ Limitation: can't be used in type aliases... -->
 
 ## Listing the values of an enum
 
@@ -246,9 +285,15 @@ into `T::Enum`, and without mutating state.
 
 ## Defining one enum as a subset of another enum
 
-One thing that comes up from time to time is having one large enum, but knowing
-that in certain places only a subset of those enums are valid. With `T::Enum`,
-there are a number of ways to encode this:
+> This section has been superseded by the
+> [Enum values in types](#enum-values-in-types) section above. This section is
+> older, and describes workarounds relevant before that section above existed.
+> We include this section here mostly for inspiration (the ideas in this section
+> are not discouraged, just verbose).
+
+In addition to using [enum values in types](#enum-values-in-types) and type
+aliases of enum values, there are two other ways to define one enum as a subset
+of another:
 
 1.  By using a [sealed module](sealed.md)
 2.  By explicitly converting between multiple enums
