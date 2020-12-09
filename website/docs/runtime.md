@@ -284,6 +284,28 @@ For example, this should probably be placed as the first line of any `rake test`
 target, as well as any other entry point to a project's tests. If this line is
 absent, `.checked(:tests)` sigs behave as if they had been `.checked(:never)`.
 
+## T::Sig::WithoutRuntime.sig
+
+Even with `.checked(:never)` you are opting into evaluating the sig at runtime.
+If you want to minimize runtime overhead but still statically check the sig when
+running srb tc, you can use `T::Sig::WithoutRuntime.sig` instead of `sig`.
+
+```ruby
+# typed: true
+require "sorbet-runtime"
+
+class Foo
+  extend T::Sig
+  # This signature will raise both statically and at runtime because `NotFound` doesn't exist
+  sig { params(x: NotFound).void.checked(:never) }
+  def foo(x); end
+
+  # This signature will only raise statically, the sig block isn't evaluated at runtime
+  T::Sig::WithoutRuntime.sig { params(x: NotFound).void }
+  def bar(x); end
+end
+```
+
 ## What's next?
 
 - [Signatures](sigs.md)
