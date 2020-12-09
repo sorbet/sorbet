@@ -1885,12 +1885,10 @@ public:
 
         // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
         // (which is a static field).
-        {
-            for (auto &job : combined.todoResolveSimpleStaticFieldItems) {
-                job.sym.data(gs)->resultType = job.resultType;
-            }
-            combined.todoResolveSimpleStaticFieldItems.clear();
+        for (auto &job : combined.todoResolveSimpleStaticFieldItems) {
+            job.sym.data(gs)->resultType = job.resultType;
         }
+        combined.todoResolveSimpleStaticFieldItems.clear();
 
         // loop over any out-of-order type_member/type_alias references
         bool progress = true;
