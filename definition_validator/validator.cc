@@ -501,6 +501,23 @@ void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::C
     validateSealedAncestorHelper(ctx, singleton, classDef, klass, "extended");
 }
 
+void validateUselessRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+    auto data = sym.data(ctx);
+
+    for (auto req : data->requiredAncestors(ctx)) {
+        if (data->derivesFrom(ctx, req.symbol)) {
+            if (auto e = ctx.state.beginError(req.loc, core::errors::Resolver::UselessRequiredAncestor)) {
+                e.setHeader("`{}` is already {} by `{}`", req.symbol.data(ctx)->show(ctx),
+                            req.symbol.data(ctx)->isClassOrModuleModule() ? "included" : "inherited", data->show(ctx));
+            }
+        }
+    }
+}
+
+void validateRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+    validateUselessRequiredAncestors(ctx, sym);
+}
+
 class ValidateWalk {
 private:
     UnorderedMap<core::ClassOrModuleRef, vector<core::MethodRef>> abstractCache;
@@ -598,10 +615,12 @@ public:
             // Only validateAbstract for this class if we haven't already (we already have if this
             // is a `class << self` ClassDef)
             validateAbstract(ctx, sym);
+            validateRequiredAncestors(ctx, sym);
         }
         validateAbstract(ctx, singleton);
         validateFinal(ctx, sym, classDef);
         validateSealed(ctx, sym, classDef);
+        validateRequiredAncestors(ctx, singleton);
         return tree;
     }
 

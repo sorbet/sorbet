@@ -45,3 +45,29 @@ module Helper6
   requires_ancestor Helper6
   #                 ^^^^^^^ error: Must not pass yourself to `requires_ancestor`
 end
+
+module Helper7
+  extend T::Helpers
+  include Kernel
+
+  requires_ancestor Kernel
+  #                 ^^^^^^ error: `Kernel` is already included by `Helper7`
+end
+
+class Helper8
+  extend T::Helpers
+
+  abstract!
+
+  requires_ancestor Object
+  #                 ^^^^^^ error: `Object` is already inherited by `Helper8`
+end
+
+class Helper9 < String
+  extend T::Helpers
+
+  abstract!
+
+  requires_ancestor String
+  #                 ^^^^^^ error: `String` is already inherited by `Helper9`
+end
