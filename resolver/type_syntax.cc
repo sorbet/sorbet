@@ -316,7 +316,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                     }
                     if (sig.seen.override_) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("`{}` cannot be combined with `{}`", "override", "abstract");
+                            e.setHeader("`{}` cannot be combined with `{}`", "abstract", "override");
                         }
                     }
                     sig.seen.abstract = true;
@@ -324,7 +324,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 case core::Names::override_()._id: {
                     if (sig.seen.abstract) {
                         if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("`{}` cannot be combined with `{}`", "abstract", "override");
+                            e.setHeader("`{}` cannot be combined with `{}`", "override", "abstract");
                         }
                     }
                     sig.seen.override_ = true;
