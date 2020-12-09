@@ -155,7 +155,7 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
         methodName = methodNameRef.toString(gs);
     }
     string methodNamePrefix = "";
-    if (methodData->owner.exists() && methodData->owner.data(gs)->isClassOrModule() &&
+    if (methodData->owner.exists() && methodData->owner.isClassOrModule() &&
         methodData->owner.data(gs)->attachedClass(gs).exists()) {
         methodNamePrefix = "self.";
     }
@@ -222,7 +222,7 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     ENFORCE(constant == constant.data(gs)->dealias(gs));
 
     core::TypePtr result;
-    if (constant.data(gs)->isClassOrModule()) {
+    if (constant.isClassOrModule()) {
         auto targetClass = constant;
         if (!targetClass.data(gs)->attachedClass(gs).exists()) {
             targetClass = targetClass.data(gs)->lookupSingletonClass(gs);

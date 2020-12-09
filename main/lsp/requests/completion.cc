@@ -377,7 +377,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
     // If we ever have 100,000+ items in the completion list, we'll need to bump the padding here.
     item->sortText = fmt::format("{:06d}", sortIdx);
 
-    if (what.data(gs)->isClassOrModule()) {
+    if (what.isClassOrModule()) {
         if (what.data(gs)->isClassOrModuleClass()) {
             if (what.data(gs)->derivesFrom(gs, core::Symbols::T_Enum())) {
                 item->kind = CompletionItemKind::Enum;
@@ -391,7 +391,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
                 item->kind = CompletionItemKind::Module;
             }
         }
-    } else if (what.data(gs)->isTypeMember() || what.data(gs)->isStaticField()) {
+    } else if (what.isTypeMember() || what.isStaticField(gs)) {
         item->kind = CompletionItemKind::Field;
     } else {
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
@@ -615,7 +615,7 @@ bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::Sy
         return false;
     }
 
-    if (!(sym.data(gs)->isClassOrModule() || sym.data(gs)->isStaticField() || sym.data(gs)->isTypeMember())) {
+    if (!(sym.isClassOrModule() || sym.isStaticField(gs) || sym.isTypeMember())) {
         return false;
     }
 

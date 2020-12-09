@@ -78,7 +78,7 @@ vector<core::SymbolRef> getSubclasses(const core::GlobalState &gs, core::SymbolR
 // "root" of the tree of classes that define a method.
 core::SymbolRef findRootClassWithMethod(const core::GlobalState &gs, core::SymbolRef klass, core::NameRef methodName) {
     auto root = klass;
-    ENFORCE(klass.data(gs)->isClassOrModule());
+    ENFORCE(klass.isClassOrModule());
     while (true) {
         auto tmp = root.data(gs)->superClass();
         ENFORCE(tmp.exists()); // everything derives from Kernel::Object so we can't ever reach the actual top type
@@ -421,7 +421,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             getRenameEdits(typechecker, constResp->symbol, params->newName, response);
         }
     } else if (auto defResp = resp->isDefinition()) {
-        if (defResp->symbol.data(gs)->isClassOrModule() && islower(params->newName[0])) {
+        if (defResp->symbol.isClassOrModule() && islower(params->newName[0])) {
             response->error = make_unique<ResponseError>((int)LSPErrorCodes::InvalidRequest,
                                                          "Class and Module names must begin with an uppercase letter.");
             return response;
@@ -433,7 +433,7 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
             return response;
         }
 
-        if (defResp->symbol.data(gs)->isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
+        if (defResp->symbol.isClassOrModule() || defResp->symbol.data(gs)->isMethod()) {
             if (isValidRenameLocation(defResp->symbol, gs, response)) {
                 getRenameEdits(typechecker, defResp->symbol, params->newName, response);
             }

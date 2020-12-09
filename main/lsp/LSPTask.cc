@@ -376,7 +376,7 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
     string symbolName = symbol.data(gs)->name.toString(gs);
     // Extract the base name from `symbol`.
     if (absl::StartsWith(symbolName, "@")) {
-        if (!symbol.data(gs)->isField()) {
+        if (!symbol.isField(gs)) {
             return info;
         }
         info.fieldSymbol = symbol;

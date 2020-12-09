@@ -45,7 +45,7 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                     getReferencesToAccessor(typechecker, getAccessorInfo(typechecker.state(), fieldResp->symbol),
                                             fieldResp->symbol));
             } else if (auto defResp = resp->isDefinition()) {
-                if (fileIsTyped || defResp->symbol.data(gs)->isClassOrModule()) {
+                if (fileIsTyped || defResp->symbol.isClassOrModule()) {
                     // This could be a `prop` or `attr_*`, which have multiple associated symbols.
                     response->result = extractLocations(
                         typechecker.state(),

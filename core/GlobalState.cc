@@ -939,7 +939,7 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
 
 SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
     ENFORCE_NO_TIMER(!owner.exists() || // used when entering entirely syntehtic classes
-                     owner.data(*this)->isClassOrModule());
+                     owner.isClassOrModule());
     ENFORCE_NO_TIMER(name.isClassName(*this));
     SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
@@ -969,7 +969,7 @@ SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) 
 
 SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
     u4 flags;
-    ENFORCE(owner.data(*this)->isClassOrModule());
+    ENFORCE(owner.isClassOrModule());
     ENFORCE(name.exists());
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;
@@ -1058,7 +1058,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
 
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
     bool isBlock = name.kind(*this) == NameKind::UNIQUE && name.dataUnique(*this)->original == Names::blockTemp();
-    ENFORCE(isBlock || owner.data(*this)->isClassOrModule(), "entering method symbol into not-a-class");
+    ENFORCE(isBlock || owner.isClassOrModule(), "entering method symbol into not-a-class");
 
     auto flags = Symbol::Flags::METHOD;
 
@@ -1122,7 +1122,7 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, co
 }
 
 SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.data(*this)->isClassOrModule(), "entering field symbol into not-a-class");
+    ENFORCE(owner.isClassOrModule(), "entering field symbol into not-a-class");
     ENFORCE(name.exists());
 
     auto flags = Symbol::Flags::FIELD;
@@ -1138,7 +1138,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) 
 
     ENFORCE(!symbolTableFrozen);
 
-    auto result = SymbolRef(this, SymbolRef::Kind::Field, fields.size());
+    auto result = SymbolRef(this, SymbolRef::Kind::FieldOrStaticField, fields.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
     fields.emplace_back();
 
@@ -1155,7 +1155,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) 
 }
 
 SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.data(*this)->isClassOrModule());
+    ENFORCE(owner.isClassOrModule());
     ENFORCE(name.exists());
 
     SymbolData ownerScope = owner.dataAllowingNone(*this);
@@ -1171,7 +1171,7 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef 
 
     ENFORCE(!symbolTableFrozen);
 
-    auto ret = SymbolRef(this, SymbolRef::Kind::Field, fields.size());
+    auto ret = SymbolRef(this, SymbolRef::Kind::FieldOrStaticField, fields.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
     fields.emplace_back();
 

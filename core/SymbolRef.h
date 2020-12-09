@@ -57,7 +57,7 @@ public:
     enum class Kind : u1 {
         ClassOrModule = 0,
         Method = 1,
-        Field = 2,
+        FieldOrStaticField = 2,
         TypeArgument = 3,
         TypeMember = 4,
     };
@@ -75,6 +75,29 @@ public:
         return _id;
     }
 
+    inline bool isClassOrModule() const {
+        return kind() == Kind::ClassOrModule;
+    }
+
+    inline bool isMethod() const {
+        return kind() == Kind::Method;
+    }
+
+    inline bool isFieldOrStaticField() const {
+        return kind() == Kind::FieldOrStaticField;
+    }
+
+    inline bool isTypeArgument() const {
+        return kind() == Kind::TypeArgument;
+    }
+
+    inline bool isTypeMember() const {
+        return kind() == Kind::TypeMember;
+    }
+
+    bool isField(const GlobalState &gs) const;
+    bool isStaticField(const GlobalState &gs) const;
+
     u4 classOrModuleIndex() const {
         ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
         return unsafeTableIndex();
@@ -86,7 +109,7 @@ public:
     }
 
     u4 fieldIndex() const {
-        ENFORCE_NO_TIMER(kind() == Kind::Field);
+        ENFORCE_NO_TIMER(kind() == Kind::FieldOrStaticField);
         return unsafeTableIndex();
     }
 
@@ -413,7 +436,7 @@ public:
     }
 
     static SymbolRef Magic_undeclaredFieldStub() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Field, 0);
+        return SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, 0);
     }
 
     static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {

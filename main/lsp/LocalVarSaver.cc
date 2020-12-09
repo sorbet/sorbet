@@ -14,7 +14,7 @@ ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr t
     } else if (ctx.owner == core::Symbols::root()) {
         owner = ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local.loc));
     } else {
-        ENFORCE(ctx.owner.data(ctx)->isClassOrModule());
+        ENFORCE(ctx.owner.isClassOrModule());
         owner = ctx.state.lookupStaticInitForClass(ctx.owner);
     }
 
@@ -25,7 +25,7 @@ ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr t
         core::TypeAndOrigins tp;
 
         auto enclosingMethod = ctx.owner;
-        if (enclosingMethod.data(ctx)->isClassOrModule()) {
+        if (enclosingMethod.isClassOrModule()) {
             enclosingMethod = ctx.owner == core::Symbols::root()
                                   ? ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local.loc))
                                   : ctx.state.lookupStaticInitForClass(ctx.owner);

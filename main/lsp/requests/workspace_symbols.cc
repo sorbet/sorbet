@@ -50,7 +50,7 @@ private:
                 return classOrModuleMatches[ref.classOrModuleIndex()];
             case core::SymbolRef::Kind::Method:
                 return methodMatches[ref.methodIndex()];
-            case core::SymbolRef::Kind::Field:
+            case core::SymbolRef::Kind::FieldOrStaticField:
                 return fieldMatches[ref.fieldIndex()];
             case core::SymbolRef::Kind::TypeArgument:
                 return typeArgumentMatches[ref.typeArgumentIndex()];
@@ -234,7 +234,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
 
     const vector<pair<core::SymbolRef::Kind, uint>> symbolKinds = {
         {core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()},
-        {core::SymbolRef::Kind::Field, gs.fieldsUsed()},
+        {core::SymbolRef::Kind::FieldOrStaticField, gs.fieldsUsed()},
         {core::SymbolRef::Kind::Method, gs.methodsUsed()},
     };
 

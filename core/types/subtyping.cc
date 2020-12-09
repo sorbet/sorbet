@@ -937,8 +937,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 }
 
 bool classSymbolIsAsGoodAs(const GlobalState &gs, SymbolRef c1, SymbolRef c2) {
-    ENFORCE(c1.data(gs)->isClassOrModule());
-    ENFORCE(c2.data(gs)->isClassOrModule());
+    ENFORCE(c1.isClassOrModule());
+    ENFORCE(c2.isClassOrModule());
     return c1 == c2 || c1.data(gs)->derivesFrom(gs, c2);
 }
 

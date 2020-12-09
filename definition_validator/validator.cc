@@ -268,7 +268,7 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
 void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     auto klass = method.data(ctx)->owner;
     auto name = method.data(ctx)->name;
-    ENFORCE(klass.data(ctx)->isClassOrModule());
+    ENFORCE(klass.isClassOrModule());
     auto klassData = klass.data(ctx);
     InlinedVector<core::SymbolRef, 4> overridenMethods;
 

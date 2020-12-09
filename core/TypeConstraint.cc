@@ -15,7 +15,7 @@ void TypeConstraint::defineDomain(const GlobalState &gs, const InlinedVector<Sym
     // ENFORCE(isEmpty()); // unfortunately this is false. See
     // test/testdata/infer/generic_methods/countraints_crosstalk.rb
     for (const auto &tp : typeParams) {
-        ENFORCE(tp.data(gs)->isTypeArgument());
+        ENFORCE(tp.isTypeArgument());
         auto typ = cast_type<TypeVar>(tp.data(gs)->resultType);
         ENFORCE(typ != nullptr);
 
