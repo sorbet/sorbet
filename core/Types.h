@@ -120,6 +120,7 @@ public:
     static TypePtr classClass();
     static TypePtr declBuilderForProcsSingletonClass();
     static TypePtr falsyTypes();
+    static TypePtr todo();
 
     static TypePtr dropSubtypesOf(const GlobalState &gs, const TypePtr &from, SymbolRef klass);
     static TypePtr approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what);

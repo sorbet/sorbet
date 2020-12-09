@@ -1041,10 +1041,6 @@ public:
 };
 
 class ResolveTypeMembersAndFieldsWalk {
-    static core::TypePtr todoType() {
-        return core::make_type<core::ClassType>(core::Symbols::todo());
-    }
-
     // A type_member, type_template, or T.type_alias that needs to have types
     // resolved.
     struct ResolveAssignItem {
@@ -1282,7 +1278,7 @@ class ResolveTypeMembersAndFieldsWalk {
         typecase(
             expr, [&](const ast::Literal &a) { result = a.value; },
             [&](const ast::Cast &cast) {
-                if (cast.type != todoType() && cast.cast != core::Names::let() &&
+                if (cast.type != core::Types::todo() && cast.cast != core::Names::let() &&
                     cast.cast != core::Names::uncheckedLet()) {
                     if (auto e = ctx.beginError(cast.loc, core::errors::Resolver::ConstantAssertType)) {
                         e.setHeader("Use `{}` to specify the type of constants", "T.let");
@@ -1295,7 +1291,7 @@ class ResolveTypeMembersAndFieldsWalk {
         return result;
     }
 
-    // Tries to resolve the given static field. Returns todoType() if it is unable to resolve the field.
+    // Tries to resolve the given static field. Returns Types::todo() if it is unable to resolve the field.
     [[nodiscard]] static core::TypePtr tryResolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
         ENFORCE(job.sym.data(ctx)->isStaticField());
         auto &asgn = job.asgn;
@@ -1303,14 +1299,14 @@ class ResolveTypeMembersAndFieldsWalk {
         if (data->resultType == nullptr) {
             auto resultType = resolveConstantType(ctx, asgn->rhs);
             if (!resultType) {
-                return todoType();
+                return core::Types::todo();
             } else {
                 return resultType;
             }
         }
         // resultType was already set. We may be running on the incremental path. Force this field to be resolved in
         // `resolveStaticField`, which may produce an error message.
-        return todoType();
+        return core::Types::todo();
     }
 
     [[nodiscard]] static core::TypePtr resolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
@@ -1719,7 +1715,7 @@ public:
 
                 auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
                 auto expr = std::move(send.args[0]);
-                auto cast = ast::make_tree<ast::Cast>(send.loc, todoType(), std::move(expr), send.fun);
+                auto cast = ast::make_tree<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
                 item.cast = ast::cast_tree<ast::Cast>(cast);
                 item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
 
@@ -1783,7 +1779,7 @@ public:
             job.asgn = &asgn;
 
             auto resultType = tryResolveStaticField(ctx, job);
-            if (resultType != todoType()) {
+            if (resultType != core::Types::todo()) {
                 todoResolveSimpleStaticFieldItems_.emplace_back(ResolveSimpleStaticFieldItem{sym, resultType});
             } else {
                 todoResolveStaticFieldItems_.emplace_back(move(job));
