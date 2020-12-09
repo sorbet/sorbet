@@ -196,7 +196,7 @@ class DateTime < Date
   # ```ruby
   # DateTime.new(2001,2,3,4,5,6).min          #=> 5
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def min(); end
 
   # Returns a string in an ISO 8601 format. (This method doesn't use the
@@ -206,7 +206,7 @@ class DateTime < Date
   # DateTime.new(2001,2,3,4,5,6,'-7').to_s
   #                          #=> "2001-02-03T04:05:06-07:00"
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(string)}
   def to_s(); end
 
   # Returns the offset.
@@ -214,7 +214,7 @@ class DateTime < Date
   # ```ruby
   # DateTime.parse('04pm+0730').offset        #=> (5/16)
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(Rational)}
   def offset(); end
 
   # Returns the timezone.
@@ -222,7 +222,7 @@ class DateTime < Date
   # ```ruby
   # DateTime.parse('04pm+0730').zone          #=> "+07:30"
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(string)}
   def zone(); end
 
   # Returns the second (0-59).
@@ -230,7 +230,7 @@ class DateTime < Date
   # ```ruby
   # DateTime.new(2001,2,3,4,5,6).sec          #=> 6
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def sec(); end
 
   # Returns the hour (0-23).
@@ -238,7 +238,7 @@ class DateTime < Date
   # ```ruby
   # DateTime.new(2001,2,3,4,5,6).hour         #=> 4
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def hour(); end
 
   # Formats date according to the directives in the given format string. The
@@ -421,7 +421,7 @@ class DateTime < Date
   #
   # See also strftime(3) and
   # [`::strptime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-c-strptime).
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: string).returns(DateTime)}
   def strftime(*arg0); end
 
   # Returns the second (0-59).
@@ -429,7 +429,7 @@ class DateTime < Date
   # ```ruby
   # DateTime.new(2001,2,3,4,5,6).sec          #=> 6
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def second(); end
 
   # This method is equivalent to strftime('%FT%T%:z'). The optional argument `n`
@@ -439,7 +439,7 @@ class DateTime < Date
   # DateTime.parse('2001-02-03T04:05:06.123456789+07:00').iso8601(9)
   #                           #=> "2001-02-03T04:05:06.123456789+07:00"
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: Integer).returns(string)}
   def iso8601(*arg0); end
 
   # This method is equivalent to strftime('%FT%T%:z'). The optional argument `n`
@@ -449,17 +449,17 @@ class DateTime < Date
   # DateTime.parse('2001-02-03T04:05:06.123456789+07:00').rfc3339(9)
   #                           #=> "2001-02-03T04:05:06.123456789+07:00"
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: Integer).returns(string)}
   def rfc3339(*arg0); end
 
   # This method is equivalent to strftime('%FT%T%:z'). The optional argument `n`
   # is the number of digits for fractional seconds.
   #
   # ```ruby
-  # DateTime.parse('2001-02-03T04:05:06.123456789+07:00').iso8601(9)
+  # DateTime.parse('2001-02-03T04:05:06.123456789+07:00').xmlschema(9)
   #                           #=> "2001-02-03T04:05:06.123456789+07:00"
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: Integer).returns(string)}
   def xmlschema(*arg0); end
 
   # Returns a string in a JIS X 0301 format. The optional argument `n` is the
@@ -469,7 +469,7 @@ class DateTime < Date
   # DateTime.parse('2001-02-03T04:05:06.123456789+07:00').jisx0301(9)
   #                           #=> "H13.02.03T04:05:06.123456789+07:00"
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: Integer).returns(string)}
   def jisx0301(*arg0); end
 
   # Returns the minute (0-59).
@@ -477,7 +477,7 @@ class DateTime < Date
   # ```ruby
   # DateTime.new(2001,2,3,4,5,6).min          #=> 5
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(Integer)}
   def minute(); end
 
   # Returns the fractional part of the second.
@@ -485,7 +485,7 @@ class DateTime < Date
   # ```ruby
   # DateTime.new(2001,2,3,4,5,6.5).sec_fraction       #=> (1/2)
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(Rational)}
   def sec_fraction(); end
 
   # Returns the fractional part of the second.
@@ -493,7 +493,7 @@ class DateTime < Date
   # ```ruby
   # DateTime.new(2001,2,3,4,5,6.5).sec_fraction       #=> (1/2)
   # ```
-  sig {returns(T.untyped)}
+  sig {returns(Rational)}
   def second_fraction(); end
 
   # Duplicates self and resets its offset.
@@ -503,7 +503,7 @@ class DateTime < Date
   #                           #=> #<DateTime: 2001-02-03T04:05:06-02:00 ...>
   # d.new_offset('+09:00')    #=> #<DateTime: 2001-02-03T15:05:06+09:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: string).returns(DateTime)}
   def new_offset(*arg0); end
 
   # Returns a [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object
@@ -520,9 +520,11 @@ class DateTime < Date
   sig {returns(DateTime)}
   def to_datetime(); end
 
+  # Probably from rails
   sig {returns(T.untyped)}
   def blank?(); end
 
+  #
   sig {returns(T.untyped)}
   def to_utc_time(); end
 
@@ -541,7 +543,7 @@ class DateTime < Date
   # ```ruby
   # DateTime.now              #=> #<DateTime: 2011-06-11T21:20:44+09:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(DateTime)}
+  sig {params(arg0: Numeric).returns(DateTime)}
   def self.now(*arg0); end
 
   # Parses the given representation of date and time, and creates a
@@ -559,7 +561,7 @@ class DateTime < Date
   # DateTime.parse('3rd Feb 2001 04:05:06 PM')
   #                           #=> #<DateTime: 2001-02-03T16:05:06+00:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: string).returns(DateTime)}
   def self.parse(*arg0); end
 
   # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
@@ -571,7 +573,7 @@ class DateTime < Date
   # DateTime.jd(Rational('0.5'))
   #                           #=> #<DateTime: -4712-01-01T12:00:00+00:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: Numeric).returns(DateTime)}
   def self.jd(*arg0); end
 
   # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
@@ -584,7 +586,7 @@ class DateTime < Date
   # DateTime.ordinal(2001,-332,-20,-55,-54,'+7')
   #                           #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(DateTime)}
   def self.ordinal(*arg0); end
 
   # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
@@ -597,7 +599,7 @@ class DateTime < Date
   # DateTime.new(2001,-11,-26,-20,-55,-54,'+7')
   #                           #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(DateTime)}
   def self.civil(*arg0); end
 
   # Creates a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
@@ -609,7 +611,7 @@ class DateTime < Date
   # DateTime.commercial(2001,5,6,4,5,6,'+7')
   #                           #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(DateTime)}
   def self.commercial(*arg0); end
 
   # Parses the given representation of date and time with the given template,
@@ -653,7 +655,7 @@ class DateTime < Date
   #
   # See also strptime(3) and
   # [`strftime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html#method-i-strftime).
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: T.untyped).returns(DateTime)}
   def self.strptime(*arg0); end
 
   # Creates a new
@@ -668,7 +670,7 @@ class DateTime < Date
   # DateTime.iso8601('2001-W05-6T04:05:06+07:00')
   #                           #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: string).returns(DateTime)}
   def self.iso8601(*arg0); end
 
   # Creates a new
@@ -679,7 +681,7 @@ class DateTime < Date
   # DateTime.rfc3339('2001-02-03T04:05:06+07:00')
   #                           #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: string).returns(DateTime)}
   def self.rfc3339(*arg0); end
 
   # Creates a new
@@ -691,7 +693,7 @@ class DateTime < Date
   # DateTime.xmlschema('2001-02-03T04:05:06+07:00')
   #                           #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: string).returns(DateTime)}
   def self.xmlschema(*arg0); end
 
   # Creates a new
@@ -702,7 +704,7 @@ class DateTime < Date
   # DateTime.rfc2822('Sat, 3 Feb 2001 04:05:06 +0700')
   #                          #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: string).returns(DateTime)}
   def self.rfc2822(*arg0); end
 
   # Creates a new
@@ -713,7 +715,7 @@ class DateTime < Date
   # DateTime.rfc2822('Sat, 3 Feb 2001 04:05:06 +0700')
   #                          #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: string).returns(DateTime)}
   def self.rfc822(*arg0); end
 
   # Creates a new
@@ -724,7 +726,7 @@ class DateTime < Date
   # DateTime.httpdate('Sat, 03 Feb 2001 04:05:06 GMT')
   #                           #=> #<DateTime: 2001-02-03T04:05:06+00:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: string).returns(DateTime)}
   def self.httpdate(*arg0); end
 
   # Creates a new
@@ -742,6 +744,8 @@ class DateTime < Date
   # DateTime.jisx0301('13.02.03T04:05:06+07:00')
   #                           #=> #<DateTime: 2001-02-03T04:05:06+07:00 ...>
   # ```
-  sig {params(arg0: T.untyped).returns(T.untyped)}
+  sig {params(arg0: string).returns(DateTime)}
   def self.jisx0301(*arg0); end
+
+
 end
