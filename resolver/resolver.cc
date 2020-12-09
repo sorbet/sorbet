@@ -1158,7 +1158,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     // Resolve a cast to a simple, non-generic class type (e.g., T.let(x, ClassOrModule)). Returns `false` if
     // `ResolveCastItem` is not simple.
-    static bool tryResolveSimpleClassCastItem(core::Context ctx, ResolveCastItem &job) {
+    [[nodiscard]] static bool tryResolveSimpleClassCastItem(core::Context ctx, ResolveCastItem &job) {
         if (!ast::isa_tree<ast::ConstantLit>(*job.typeArg)) {
             return false;
         }
@@ -1274,7 +1274,7 @@ class ResolveTypeMembersAndFieldsWalk {
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    static core::TypePtr resolveConstantType(core::Context ctx, const ast::TreePtr &expr) {
+    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::TreePtr &expr) {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = a.value; },
