@@ -598,8 +598,17 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
                 };
             }
             ENFORCE(backId >= 0);
-            auto &expectedSendBind = b->backEdges[backId]->exprs[b->backEdges[backId]->exprs.size() - 2];
-            auto expectedSend = cfg::cast_instruction<cfg::Send>(expectedSendBind.value.get());
+
+            cfg::Instruction *expected = nullptr;
+            for (auto i = b->backEdges[backId]->exprs.rbegin(); i != b->backEdges[backId]->exprs.rend(); ++i) {
+                if (i->bind.variable.data(cfg)._name == core::Names::blockPreCallTemp()) {
+                    expected = i->value.get();
+                    break;
+                }
+            }
+            ENFORCE(expected);
+
+            auto expectedSend = cfg::cast_instruction<cfg::Send>(expected);
             ENFORCE(expectedSend);
             ENFORCE(expectedSend->link);
             blockLinks[b->rubyBlockId] = expectedSend->link;
