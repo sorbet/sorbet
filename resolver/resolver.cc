@@ -1092,6 +1092,15 @@ class ResolveTypeMembersAndFieldsWalk {
         ast::Assign *asgn;
     };
 
+    struct ResolveMethodAliasItem {
+        core::FileRef file;
+        core::SymbolRef owner;
+        core::LocOffsets loc;
+        core::LocOffsets toNameLoc;
+        core::NameRef toName;
+        core::NameRef fromName;
+    };
+
     struct ResolveTypeMembersAndFieldsResult {
         vector<ast::ParsedFile> files;
         vector<ResolveAssignItem> todoAssigns;
@@ -1101,6 +1110,7 @@ class ResolveTypeMembersAndFieldsWalk {
         vector<ResolveFieldItem> todoResolveFieldItems;
         vector<ResolveStaticFieldItem> todoResolveStaticFieldItems;
         vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
+        vector<ResolveMethodAliasItem> todoMethodAliasItems;
     };
 
     vector<ResolveAssignItem> todoAssigns_;
@@ -1110,6 +1120,7 @@ class ResolveTypeMembersAndFieldsWalk {
     vector<ResolveFieldItem> todoResolveFieldItems_;
     vector<ResolveStaticFieldItem> todoResolveStaticFieldItems_;
     vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems_;
+    vector<ResolveMethodAliasItem> todoMethodAliasItems_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
@@ -1531,6 +1542,48 @@ class ResolveTypeMembersAndFieldsWalk {
         return true;
     }
 
+    static void resolveMethodAlias(core::MutableContext ctx, const ResolveMethodAliasItem &job) {
+        core::SymbolRef toMethod = ctx.owner.data(ctx)->findMemberNoDealias(ctx, job.toName);
+        if (toMethod.exists()) {
+            toMethod = toMethod.data(ctx)->dealiasMethod(ctx);
+        }
+
+        if (!toMethod.exists()) {
+            if (auto e = ctx.beginError(job.toNameLoc, core::errors::Resolver::BadAliasMethod)) {
+                e.setHeader("Can't make method alias from `{}` to non existing method `{}`", job.fromName.show(ctx),
+                            job.toName.show(ctx));
+            }
+            toMethod = core::Symbols::Sorbet_Private_Static_badAliasMethodStub();
+        }
+
+        core::SymbolRef fromMethod = ctx.owner.data(ctx)->findMemberNoDealias(ctx, job.fromName);
+        if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
+            if (auto e = ctx.beginError(job.loc, core::errors::Resolver::BadAliasMethod)) {
+                auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
+                if (fromMethod == dealiased) {
+                    e.setHeader("Redefining the existing method `{}` as a method alias",
+                                fromMethod.data(ctx)->show(ctx));
+                    e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous definition");
+                } else {
+                    e.setHeader("Redefining method alias `{}` from `{}` to `{}`", fromMethod.data(ctx)->show(ctx),
+                                dealiased.data(ctx)->show(ctx), toMethod.data(ctx)->show(ctx));
+                    e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous alias definition");
+                    e.addErrorLine(dealiased.data(ctx)->loc(), "Previous alias pointed to");
+                    e.addErrorLine(toMethod.data(ctx)->loc(), "Redefining alias to");
+                }
+            }
+            return;
+        }
+
+        // No need to make an alias when they're already the same symbol.
+        if (fromMethod == toMethod) {
+            return;
+        }
+
+        core::SymbolRef alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, job.loc), job.owner, job.fromName);
+        alias.data(ctx)->resultType = core::make_type<core::AliasType>(toMethod);
+    }
+
     // Returns `true` if `asgn` is a field declaration.
     bool handleFieldDeclaration(core::Context ctx, ast::Assign &asgn) {
         auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
@@ -1569,6 +1622,172 @@ class ResolveTypeMembersAndFieldsWalk {
         for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
             core::SymbolRef(gs, core::SymbolRef::Kind::ClassOrModule, i).data(gs)->unsafeComputeExternalType(gs);
         }
+    }
+
+    void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
+        constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
+
+        if (send.numPosArgs != 2) {
+            return;
+        }
+
+        auto [posEnd, kwEnd] = send.kwArgsRange();
+        auto numKwArgs = (kwEnd - posEnd) >> 1;
+        if (numKwArgs > 1) {
+            return;
+        }
+
+        auto stringLoc = send.args[1].loc();
+
+        auto *literalNode = ast::cast_tree<ast::Literal>(send.args[1]);
+        if (literalNode == nullptr) {
+            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                e.setHeader("`{}` only accepts string literals", method);
+            }
+            return;
+        }
+
+        if (!core::isa_type<core::LiteralType>(literalNode->value)) {
+            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                e.setHeader("`{}` only accepts string literals", method);
+            }
+            return;
+        }
+
+        auto literal = core::cast_type_nonnull<core::LiteralType>(literalNode->value);
+        if (literal.literalKind != core::LiteralType::LiteralTypeKind::String) {
+            // Infer will report a type error
+            return;
+        }
+
+        core::TypePtr packageType = nullptr;
+        optional<core::LocOffsets> packageLoc;
+        if (send.hasKwArgs()) {
+            // this means we got the third package arg
+            auto *key = ast::cast_tree<ast::Literal>(send.args[posEnd]);
+            if (!key || !key->isSymbol(ctx) || key->asSymbol(ctx) != ctx.state.lookupNameUTF8("package")) {
+                return;
+            }
+
+            auto *packageNode = ast::cast_tree<ast::Literal>(send.args[posEnd + 1]);
+            packageLoc = std::optional<core::LocOffsets>{send.args[posEnd + 1].loc()};
+            if (packageNode == nullptr) {
+                if (auto e = ctx.beginError(send.args[posEnd + 1].loc(), core::errors::Resolver::LazyResolve)) {
+                    e.setHeader("`{}` only accepts string literals", method);
+                }
+                return;
+            }
+
+            if (!core::isa_type<core::LiteralType>(packageNode->value) ||
+                core::cast_type_nonnull<core::LiteralType>(packageNode->value).literalKind !=
+                    core::LiteralType::LiteralTypeKind::String) {
+                // Infer will report a type error
+                return;
+            }
+            packageType = packageNode->value;
+        }
+        // if we got no keyword args, then package should be null, and if we keyword args, then package should be
+        // non-null
+        ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
+
+        auto name = literal.asName(ctx);
+        auto shortName = name.shortName(ctx);
+        if (shortName.empty()) {
+            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                e.setHeader("The string given to `{}` must not be empty", method);
+            }
+            return;
+        }
+
+        // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places below,
+        // we'll check to find out whether the first part is `""` or not, which means we're testing whether the string
+        // did or did not begin with `::`.
+        auto parts = absl::StrSplit(shortName, "::");
+        core::SymbolRef current;
+        for (auto part : parts) {
+            if (!current.exists()) {
+                // First iteration
+                if (!packageType) {
+                    if (part != "") {
+                        if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader(
+                                "The string given to `{}` must be an absolute constant reference that starts with `{}`",
+                                method, "::");
+                        }
+                        return;
+                    }
+                    current = core::Symbols::root();
+                    continue;
+                } else {
+                    if (part == "") {
+                        if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("The string given to `{}` should not be an absolute constant reference if a "
+                                        "package name is also provided",
+                                        method);
+                        }
+                        return;
+                    }
+
+                    auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
+                    auto packageName = package.asName(ctx);
+                    auto mangledName = packageName.lookupMangledPackageName(ctx.state);
+                    // if the mangled name doesn't exist, then this means probably there's no package named this
+                    if (!mangledName.exists()) {
+                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
+                        }
+                        return;
+                    }
+                    current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, mangledName);
+                    if (!current.exists()) {
+                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                            e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
+                        }
+                        return;
+                    }
+                }
+            }
+
+            auto member = ctx.state.lookupNameConstant(part);
+            if (!member.exists()) {
+                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                    auto pretty = fmt::format("{}::{}", prettyCurrent, part);
+                    e.setHeader("Unable to resolve constant `{}`", pretty);
+                }
+                return;
+            }
+
+            auto newCurrent = current.data(ctx)->findMember(ctx, member);
+            if (!newCurrent.exists()) {
+                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                    auto pretty = fmt::format("{}::{}", prettyCurrent, part);
+                    e.setHeader("Unable to resolve constant `{}`", pretty);
+                }
+                return;
+            }
+            current = newCurrent;
+        }
+
+        ENFORCE(current.exists(), "Loop invariant violated");
+
+        if (!current.isClassOrModule()) {
+            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
+                e.setHeader("The string given to `{}` must resolve to a class or module", method);
+                e.addErrorLine(current.data(ctx)->loc(), "Resolved to this constant");
+            }
+            return;
+        }
+    }
+
+    core::SymbolRef methodOwner(core::Context ctx) {
+        core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+        if (owner == core::Symbols::root()) {
+            // Root methods end up going on object
+            owner = core::Symbols::Object();
+        }
+        return owner;
     }
 
 public:
@@ -1688,51 +1907,111 @@ public:
                 trackDependencies_ = false;
                 break;
 
-            case core::Names::let()._id:
-            case core::Names::uncheckedLet()._id:
-            case core::Names::assertType()._id:
-            case core::Names::cast()._id: {
-                if (trackDependencies_) {
-                    classOfDepth_.pop_back();
-                }
-
-                auto *id = ast::cast_tree<ast::ConstantLit>(send.recv);
-                // Must be T::let/uncheckedLet/etc.
-                if (!id || (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_NonForcingConstants())) {
-                    return tree;
-                }
-
-                if (send.args.size() < 2) {
-                    return tree;
-                }
-
-                ResolveCastItem item;
-                item.file = ctx.file;
-
-                // Compute the containing class when translating the type,
-                // as there's a very good chance this has been called from a
-                // method context.
-                item.owner = ctx.owner.data(ctx)->enclosingClass(ctx);
-
-                auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
-                auto expr = std::move(send.args[0]);
-                auto cast = ast::make_tree<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
-                item.cast = ast::cast_tree<ast::Cast>(cast);
-                item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
-
-                // We should be able to resolve simple casts immediately.
-                if (!tryResolveSimpleClassCastItem(ctx.withOwner(item.owner), item)) {
-                    todoResolveCastItems_.emplace_back(move(item));
-                }
-
-                return ast::MK::InsSeq1(send.loc, move(typeExpr), move(cast));
-            }
-
             default:
                 if (trackDependencies_) {
                     classOfDepth_.pop_back();
                 }
                 break;
+        }
+
+        if (auto *id = ast::cast_tree<ast::ConstantLit>(send.recv)) {
+            if (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_NonForcingConstants()) {
+                return tree;
+            }
+
+            switch (send.fun._id) {
+                case core::Names::let()._id:
+                case core::Names::uncheckedLet()._id:
+                case core::Names::assertType()._id:
+                case core::Names::cast()._id: {
+                    if (send.args.size() < 2) {
+                        return tree;
+                    }
+
+                    ResolveCastItem item;
+                    item.file = ctx.file;
+
+                    // Compute the containing class when translating the type,
+                    // as there's a very good chance this has been called from a
+                    // method context.
+                    item.owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+
+                    auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
+                    auto expr = std::move(send.args[0]);
+                    auto cast = ast::make_tree<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
+                    item.cast = ast::cast_tree<ast::Cast>(cast);
+                    item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
+
+                    // We should be able to resolve simple casts immediately.
+                    if (!tryResolveSimpleClassCastItem(ctx.withOwner(item.owner), item)) {
+                        todoResolveCastItems_.emplace_back(move(item));
+                    }
+
+                    return ast::MK::InsSeq1(send.loc, move(typeExpr), move(cast));
+                }
+                case core::Names::revealType()._id:
+                case core::Names::absurd()._id: {
+                    // These errors do not match up with our "upper error levels are super sets
+                    // of errors from lower levels" claim. This is ONLY an error in lower levels.
+
+                    string_view doWhat;
+                    if (send.fun == core::Names::revealType()) {
+                        doWhat = "reveal types";
+                    } else if (send.fun == core::Names::absurd()) {
+                        doWhat = "check exhaustiveness";
+                    } else {
+                        doWhat = "resolve strings to constants";
+                    }
+
+                    auto fun = fmt::format("T.{}", send.fun.show(ctx));
+                    if (ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
+                        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::RevealTypeInUntypedFile)) {
+                            e.setHeader("`{}` can only {} in `{}` files (or higher)", fun, doWhat, "# typed: true");
+                        }
+                    }
+                    return tree;
+                }
+                case core::Names::nonForcingIsA_p()._id:
+                    validateNonForcingIsA(ctx, send);
+                    return tree;
+                default:
+                    return tree;
+            }
+        } else if (send.recv.isSelfReference()) {
+            if (send.fun != core::Names::aliasMethod()) {
+                return tree;
+            }
+
+            if (send.args.size() != 2) {
+                return tree;
+            }
+
+            InlinedVector<core::NameRef, 2> args;
+            for (auto &arg : send.args) {
+                auto lit = ast::cast_tree<ast::Literal>(arg);
+                if (lit == nullptr || !lit->isSymbol(ctx)) {
+                    continue;
+                }
+                core::NameRef name = lit->asSymbol(ctx);
+
+                args.emplace_back(name);
+            }
+            if (args.size() != 2) {
+                return tree;
+            }
+
+            auto fromName = args[0];
+            auto toName = args[1];
+            auto owner = methodOwner(ctx);
+
+            todoMethodAliasItems_.emplace_back(ResolveMethodAliasItem{
+                ctx.file,
+                owner,
+                send.loc,
+                send.args[1].loc(),
+                toName,
+                fromName,
+            });
         }
 
         return tree;
@@ -1824,6 +2103,7 @@ public:
                 output.todoResolveFieldItems = move(walk.todoResolveFieldItems_);
                 output.todoResolveStaticFieldItems = move(walk.todoResolveStaticFieldItems_);
                 output.todoResolveSimpleStaticFieldItems = move(walk.todoResolveSimpleStaticFieldItems_);
+                output.todoMethodAliasItems = move(walk.todoMethodAliasItems_);
                 auto count = output.files.size();
                 outputq->push(move(output), count);
             }
@@ -1868,6 +2148,10 @@ public:
                             combined.todoResolveSimpleStaticFieldItems.end(),
                             make_move_iterator(threadResult.todoResolveSimpleStaticFieldItems.begin()),
                             make_move_iterator(threadResult.todoResolveSimpleStaticFieldItems.end()));
+                        combined.todoMethodAliasItems.insert(
+                            combined.todoMethodAliasItems.end(),
+                            make_move_iterator(threadResult.todoMethodAliasItems.begin()),
+                            make_move_iterator(threadResult.todoMethodAliasItems.end()));
                     }
                 }
             }
@@ -1946,6 +2230,10 @@ public:
             if (auto resultType = resolveStaticField(ctx, job)) {
                 job.sym.data(gs)->resultType = resultType;
             }
+        }
+        for (auto &job : combined.todoMethodAliasItems) {
+            core::MutableContext ctx(gs, job.owner, job.file);
+            resolveMethodAlias(ctx, job);
         }
 
         return move(combined.files);
@@ -2350,178 +2638,6 @@ private:
             [&](const ast::TreePtr &e) {});
     }
 
-    void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
-        constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
-
-        if (send.numPosArgs != 2) {
-            return;
-        }
-
-        auto [posEnd, kwEnd] = send.kwArgsRange();
-        auto numKwArgs = (kwEnd - posEnd) >> 1;
-        if (numKwArgs > 1) {
-            return;
-        }
-
-        auto stringLoc = send.args[1].loc();
-
-        auto *literalNode = ast::cast_tree<ast::Literal>(send.args[1]);
-        if (literalNode == nullptr) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                e.setHeader("`{}` only accepts string literals", method);
-            }
-            return;
-        }
-
-        if (!core::isa_type<core::LiteralType>(literalNode->value)) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                e.setHeader("`{}` only accepts string literals", method);
-            }
-            return;
-        }
-
-        auto literal = core::cast_type_nonnull<core::LiteralType>(literalNode->value);
-        if (literal.literalKind != core::LiteralType::LiteralTypeKind::String) {
-            // Infer will report a type error
-            return;
-        }
-
-        core::TypePtr packageType = nullptr;
-        optional<core::LocOffsets> packageLoc;
-        if (send.hasKwArgs()) {
-            // this means we got the third package arg
-            auto *key = ast::cast_tree<ast::Literal>(send.args[posEnd]);
-            if (!key || !key->isSymbol(ctx) || key->asSymbol(ctx) != ctx.state.lookupNameUTF8("package")) {
-                return;
-            }
-
-            auto *packageNode = ast::cast_tree<ast::Literal>(send.args[posEnd + 1]);
-            packageLoc = std::optional<core::LocOffsets>{send.args[posEnd + 1].loc()};
-            if (packageNode == nullptr) {
-                if (auto e = ctx.beginError(send.args[posEnd + 1].loc(), core::errors::Resolver::LazyResolve)) {
-                    e.setHeader("`{}` only accepts string literals", method);
-                }
-                return;
-            }
-
-            if (!core::isa_type<core::LiteralType>(packageNode->value) ||
-                core::cast_type_nonnull<core::LiteralType>(packageNode->value).literalKind !=
-                    core::LiteralType::LiteralTypeKind::String) {
-                // Infer will report a type error
-                return;
-            }
-            packageType = packageNode->value;
-        }
-        // if we got no keyword args, then package should be null, and if we keyword args, then package should be
-        // non-null
-        ENFORCE((!send.hasKwArgs() && !packageType) || (send.hasKwArgs() && packageType));
-
-        auto name = literal.asName(ctx);
-        auto shortName = name.shortName(ctx);
-        if (shortName.empty()) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                e.setHeader("The string given to `{}` must not be empty", method);
-            }
-            return;
-        }
-
-        // If this string _begins_ with `::`, then the first fragment will be an empty string; in multiple places below,
-        // we'll check to find out whether the first part is `""` or not, which means we're testing whether the string
-        // did or did not begin with `::`.
-        auto parts = absl::StrSplit(shortName, "::");
-        core::SymbolRef current;
-        for (auto part : parts) {
-            if (!current.exists()) {
-                // First iteration
-                if (!packageType) {
-                    if (part != "") {
-                        if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader(
-                                "The string given to `{}` must be an absolute constant reference that starts with `{}`",
-                                method, "::");
-                        }
-                        return;
-                    }
-                    current = core::Symbols::root();
-                    continue;
-                } else {
-                    if (part == "") {
-                        if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("The string given to `{}` should not be an absolute constant reference if a "
-                                        "package name is also provided",
-                                        method);
-                        }
-                        return;
-                    }
-
-                    auto package = core::cast_type_nonnull<core::LiteralType>(packageType);
-                    auto packageName = package.asName(ctx);
-                    auto mangledName = packageName.lookupMangledPackageName(ctx.state);
-                    // if the mangled name doesn't exist, then this means probably there's no package named this
-                    if (!mangledName.exists()) {
-                        // TODO(gdritter): re-enable this once we implement runtime package support
-                        // if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                        //     e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
-                        // }
-                        // return;
-                        current = core::Symbols::root();
-                        continue;
-                    }
-                    current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, mangledName);
-                    if (!current.exists()) {
-                        // TODO(gdritter): re-enable this once we implement runtime package support
-                        // if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                        //     e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
-                        // }
-                        // return;
-                        current = core::Symbols::root();
-                        continue;
-                    }
-                }
-            }
-
-            auto member = ctx.state.lookupNameConstant(part);
-            if (!member.exists()) {
-                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
-                    auto pretty = fmt::format("{}::{}", prettyCurrent, part);
-                    e.setHeader("Unable to resolve constant `{}`", pretty);
-                }
-                return;
-            }
-
-            auto newCurrent = current.data(ctx)->findMember(ctx, member);
-            if (!newCurrent.exists()) {
-                if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
-                    auto pretty = fmt::format("{}::{}", prettyCurrent, part);
-                    e.setHeader("Unable to resolve constant `{}`", pretty);
-                }
-                return;
-            }
-            current = newCurrent;
-        }
-
-        ENFORCE(current.exists(), "Loop invariant violated");
-
-        if (!current.isClassOrModule()) {
-            if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                e.setHeader("The string given to `{}` must resolve to a class or module", method);
-                e.addErrorLine(current.data(ctx)->loc(), "Resolved to this constant");
-            }
-            return;
-        }
-    }
-
-    core::SymbolRef methodOwner(core::Context ctx) {
-        core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
-        if (owner == core::Symbols::root()) {
-            // Root methods end up going on object
-            owner = core::Symbols::Object();
-        }
-        return owner;
-    }
-
 public:
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
@@ -2532,114 +2648,6 @@ public:
     ast::TreePtr postTransformInsSeq(core::MutableContext ctx, ast::TreePtr tree) {
         processInSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
         return tree;
-    }
-
-    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-
-        if (auto *id = ast::cast_tree<ast::ConstantLit>(send.recv)) {
-            if (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_NonForcingConstants()) {
-                return tree;
-            }
-            switch (send.fun._id) {
-                case core::Names::revealType()._id:
-                case core::Names::absurd()._id: {
-                    // These errors do not match up with our "upper error levels are super sets
-                    // of errors from lower levels" claim. This is ONLY an error in lower levels.
-
-                    string_view doWhat;
-                    if (send.fun == core::Names::revealType()) {
-                        doWhat = "reveal types";
-                    } else if (send.fun == core::Names::absurd()) {
-                        doWhat = "check exhaustiveness";
-                    } else {
-                        doWhat = "resolve strings to constants";
-                    }
-
-                    auto fun = fmt::format("T.{}", send.fun.show(ctx));
-                    if (ctx.file.data(ctx).strictLevel <= core::StrictLevel::False) {
-                        if (auto e = ctx.beginError(send.loc, core::errors::Resolver::RevealTypeInUntypedFile)) {
-                            e.setHeader("`{}` can only {} in `{}` files (or higher)", fun, doWhat, "# typed: true");
-                        }
-                    }
-                    return tree;
-                }
-                case core::Names::nonForcingIsA_p()._id:
-                    validateNonForcingIsA(ctx, send);
-                    return tree;
-                default:
-                    return tree;
-            }
-        } else if (send.recv.isSelfReference()) {
-            if (send.fun != core::Names::aliasMethod()) {
-                return tree;
-            }
-
-            vector<core::NameRef> args;
-            for (auto &arg : send.args) {
-                auto lit = ast::cast_tree<ast::Literal>(arg);
-                if (lit == nullptr || !lit->isSymbol(ctx)) {
-                    continue;
-                }
-                core::NameRef name = lit->asSymbol(ctx);
-
-                args.emplace_back(name);
-            }
-            if (send.args.size() != 2) {
-                return tree;
-            }
-            if (args.size() != 2) {
-                return tree;
-            }
-
-            auto fromName = args[0];
-            auto toName = args[1];
-
-            auto owner = methodOwner(ctx);
-            core::SymbolRef toMethod = owner.data(ctx)->findMemberNoDealias(ctx, toName);
-            if (toMethod.exists()) {
-                toMethod = toMethod.data(ctx)->dealiasMethod(ctx);
-            }
-
-            if (!toMethod.exists()) {
-                if (auto e = ctx.beginError(send.args[1].loc(), core::errors::Resolver::BadAliasMethod)) {
-                    e.setHeader("Can't make method alias from `{}` to non existing method `{}`", fromName.show(ctx),
-                                toName.show(ctx));
-                }
-                toMethod = core::Symbols::Sorbet_Private_Static_badAliasMethodStub();
-            }
-
-            core::SymbolRef fromMethod = owner.data(ctx)->findMemberNoDealias(ctx, fromName);
-            if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Resolver::BadAliasMethod)) {
-                    auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
-                    if (fromMethod == dealiased) {
-                        e.setHeader("Redefining the existing method `{}` as a method alias",
-                                    fromMethod.data(ctx)->show(ctx));
-                        e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous definition");
-                    } else {
-                        e.setHeader("Redefining method alias `{}` from `{}` to `{}`", fromMethod.data(ctx)->show(ctx),
-                                    dealiased.data(ctx)->show(ctx), toMethod.data(ctx)->show(ctx));
-                        e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous alias definition");
-                        e.addErrorLine(dealiased.data(ctx)->loc(), "Previous alias pointed to");
-                        e.addErrorLine(toMethod.data(ctx)->loc(), "Redefining alias to");
-                    }
-                }
-                return tree;
-            }
-
-            // No need to make an alias when they're already the same symbol.
-            if (fromMethod == toMethod) {
-                return tree;
-            }
-
-            core::SymbolRef alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, send.loc), owner, fromName);
-            alias.data(ctx)->resultType = core::make_type<core::AliasType>(toMethod);
-
-            return tree;
-        } else {
-            return tree;
-        }
     }
 };
 
@@ -2720,7 +2728,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
             return ast::ParsedFilesOrCancelled();
         }
         core::MutableContext ctx(gs, core::Symbols::root(), tree.file);
-        tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
+        tree.tree = ast::ShallowMap::apply(ctx, sigs, std::move(tree.tree));
     }
 
     return trees;
