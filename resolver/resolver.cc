@@ -397,7 +397,7 @@ private:
             return true;
         }
         if (isFullyResolved(ctx, rhs)) {
-            // this todo will be resolved during ResolveTypeMembersWalk below
+            // this todo will be resolved during ResolveTypeMembersAndFieldsWalk below
             job.lhs.data(ctx)->resultType = core::make_type<core::ClassType>(core::Symbols::todo());
             return true;
         }
@@ -1040,7 +1040,11 @@ public:
     }
 };
 
-class ResolveTypeMembersWalk {
+class ResolveTypeMembersAndFieldsWalk {
+    static core::TypePtr todoType() {
+        return core::make_type<core::ClassType>(core::Symbols::todo());
+    }
+
     // A type_member, type_template, or T.type_alias that needs to have types
     // resolved.
     struct ResolveAssignItem {
@@ -1066,22 +1070,57 @@ class ResolveTypeMembersWalk {
         core::FileRef file;
     };
 
-    struct ResolveTypeMembersResult {
+    struct ResolveCastItem {
+        core::FileRef file;
+        core::SymbolRef owner;
+        ast::TreePtr *typeArg;
+        ast::Cast *cast;
+    };
+
+    struct ResolveFieldItem {
+        core::FileRef file;
+        core::SymbolRef owner;
+        ast::UnresolvedIdent *ident;
+        ast::Cast *cast;
+        bool atTopLevel = false;
+    };
+
+    struct ResolveSimpleStaticFieldItem {
+        core::SymbolRef sym;
+        core::TypePtr resultType;
+    };
+
+    struct ResolveStaticFieldItem {
+        core::FileRef file;
+        core::SymbolRef sym;
+        ast::Assign *asgn;
+    };
+
+    struct ResolveTypeMembersAndFieldsResult {
         vector<ast::ParsedFile> files;
         vector<ResolveAssignItem> todoAssigns;
         vector<ResolveAttachedClassItem> todoAttachedClassItems;
         vector<core::SymbolRef> todoUntypedResultTypes;
+        vector<ResolveCastItem> todoResolveCastItems;
+        vector<ResolveFieldItem> todoResolveFieldItems;
+        vector<ResolveStaticFieldItem> todoResolveStaticFieldItems;
+        vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
     };
 
     vector<ResolveAssignItem> todoAssigns_;
     vector<ResolveAttachedClassItem> todoAttachedClassItems_;
     vector<core::SymbolRef> todoUntypedResultTypes_;
+    vector<ResolveCastItem> todoResolveCastItems_;
+    vector<ResolveFieldItem> todoResolveFieldItems_;
+    vector<ResolveStaticFieldItem> todoResolveStaticFieldItems_;
+    vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems_;
 
     // State for tracking type usage inside of a type alias or type member
     // definition
     bool trackDependencies_ = false;
     vector<bool> classOfDepth_;
     vector<core::SymbolRef> dependencies_;
+    std::vector<int> nestedBlockCounts;
 
     void extendClassOfDepth(ast::Send &send) {
         if (trackDependencies_) {
@@ -1119,6 +1158,189 @@ class ResolveTypeMembersWalk {
         } else {
             return isLHSResolved(ctx, sym);
         }
+    }
+
+    // Resolve a cast to a simple, non-generic class type (e.g., T.let(x, ClassOrModule)). Returns `false` if
+    // `ResolveCastItem` is not simple.
+    [[nodiscard]] static bool tryResolveSimpleClassCastItem(core::Context ctx, ResolveCastItem &job) {
+        if (!ast::isa_tree<ast::ConstantLit>(*job.typeArg)) {
+            return false;
+        }
+
+        auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(*job.typeArg);
+        auto data = lit.symbol.data(ctx);
+        if (!data->isClassOrModule()) {
+            return false;
+        }
+
+        // A class with type members is not simple.
+        if (!data->typeMembers().empty()) {
+            return false;
+        }
+
+        resolveCastItem(ctx, job);
+        return true;
+    }
+
+    // Resolve a potentially more complex cast (e.g., may reference type member or alias).
+    static void resolveCastItem(core::Context ctx, ResolveCastItem &job) {
+        ParsedSig emptySig;
+        auto allowSelfType = true;
+        auto allowRebind = false;
+        auto allowTypeMember = true;
+        job.cast->type = TypeSyntax::getResultType(
+            ctx, *job.typeArg, emptySig,
+            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::noSymbol()});
+    }
+
+    // Attempts to resolve the type of the given field. Returns `false` if the cast is not yet resolved.
+    static void resolveField(core::MutableContext ctx, ResolveFieldItem &job) {
+        auto cast = job.cast;
+
+        core::SymbolRef scope;
+        auto uid = job.ident;
+        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
+            if (!ctx.owner.data(ctx)->isClassOrModule()) {
+                if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                    e.setHeader("The class variable `{}` must be declared at class scope", uid->name.show(ctx));
+                }
+            }
+
+            scope = ctx.owner.data(ctx)->enclosingClass(ctx);
+        } else {
+            // we need to check nested block counts because we want all fields to be declared on top level of either
+            // class or body, rather then nested in some block
+            if (job.atTopLevel && ctx.owner.data(ctx)->isClassOrModule()) {
+                // Declaring a class instance variable
+            } else if (job.atTopLevel && ctx.owner.data(ctx)->name == core::Names::initialize()) {
+                // Declaring a instance variable
+            } else if (ctx.owner.data(ctx)->isMethod() && ctx.owner.data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
+                       !core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
+                // Declaring a class instance variable in a static method
+                if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                    e.setHeader("The singleton instance variable `{}` must be declared inside the class body or "
+                                "declared nilable",
+                                uid->name.show(ctx));
+                }
+            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
+                // Inside a method; declaring a normal instance variable
+                if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                    e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
+                                uid->name.show(ctx), "initialize");
+                }
+            }
+            scope = ctx.selfClass();
+        }
+
+        auto prior = scope.data(ctx)->findMember(ctx, uid->name);
+        if (prior.exists()) {
+            if (core::Types::equiv(ctx, prior.data(ctx)->resultType, cast->type)) {
+                // We already have a symbol for this field, and it matches what we already saw, so we can short
+                // circuit.
+                return;
+            } else {
+                // We do some normalization here to ensure that the file / line we report the error on doesn't
+                // depend on the order that we traverse files nor the order we traverse within a file.
+                auto priorLoc = prior.data(ctx)->loc();
+                core::Loc reportOn;
+                core::Loc errorLine;
+                core::Loc thisLoc = core::Loc(job.file, uid->loc);
+                if (thisLoc.file() == priorLoc.file()) {
+                    reportOn = thisLoc.beginPos() < priorLoc.beginPos() ? thisLoc : priorLoc;
+                    errorLine = thisLoc.beginPos() < priorLoc.beginPos() ? priorLoc : thisLoc;
+                } else {
+                    reportOn = thisLoc.file() < priorLoc.file() ? thisLoc : priorLoc;
+                    errorLine = thisLoc.file() < priorLoc.file() ? priorLoc : thisLoc;
+                }
+
+                if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
+                    e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
+                    e.addErrorLine(errorLine, "Previous declaration is here:");
+                }
+                return;
+            }
+        }
+        core::SymbolRef var;
+
+        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
+            var = ctx.state.enterStaticFieldSymbol(core::Loc(job.file, uid->loc), scope, uid->name);
+        } else {
+            var = ctx.state.enterFieldSymbol(core::Loc(job.file, uid->loc), scope, uid->name);
+        }
+
+        var.data(ctx)->resultType = cast->type;
+        return;
+    }
+
+    // Resolve the type of the rhs of a constant declaration. This logic is
+    // extremely simplistic; We only handle simple literals, and explicit casts.
+    //
+    // We don't handle array or hash literals, because intuiting the element
+    // type (once we have generics) will be nontrivial.
+    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::TreePtr &expr) {
+        core::TypePtr result;
+        typecase(
+            expr, [&](const ast::Literal &a) { result = a.value; },
+            [&](const ast::Cast &cast) {
+                if (cast.type != todoType() && cast.cast != core::Names::let() &&
+                    cast.cast != core::Names::uncheckedLet()) {
+                    if (auto e = ctx.beginError(cast.loc, core::errors::Resolver::ConstantAssertType)) {
+                        e.setHeader("Use `{}` to specify the type of constants", "T.let");
+                    }
+                }
+                result = cast.type;
+            },
+            [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr); },
+            [&](const ast::TreePtr &expr) {});
+        return result;
+    }
+
+    // Tries to resolve the given static field. Returns todoType() if it is unable to resolve the field.
+    [[nodiscard]] static core::TypePtr tryResolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
+        ENFORCE(job.sym.data(ctx)->isStaticField());
+        auto &asgn = job.asgn;
+        auto data = job.sym.data(ctx);
+        if (data->resultType == nullptr) {
+            auto resultType = resolveConstantType(ctx, asgn->rhs);
+            if (!resultType) {
+                return todoType();
+            } else {
+                return resultType;
+            }
+        }
+        // resultType was already set. We may be running on the incremental path. Force this field to be resolved in
+        // `resolveStaticField`, which may produce an error message.
+        return todoType();
+    }
+
+    [[nodiscard]] static core::TypePtr resolveStaticField(core::Context ctx, ResolveStaticFieldItem &job) {
+        ENFORCE(job.sym.data(ctx)->isStaticField());
+        auto &asgn = job.asgn;
+        auto data = job.sym.data(ctx);
+        if (data->resultType == nullptr) {
+            auto resultType = resolveConstantType(ctx, asgn->rhs);
+            if (resultType == nullptr) {
+                // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
+                auto rhs = move(job.asgn->rhs);
+                auto loc = rhs.loc();
+                job.asgn->rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
+                                               core::Names::suggestType(), move(rhs));
+            }
+            return resultType;
+        } else if (!core::isa_type<core::AliasType>(data->resultType)) {
+            // If we've already resolved a temporary constant, we still want to run resolveConstantType to
+            // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
+            // typechecking runs) but we only want to run this on constants that are value-level and not class
+            // or type aliases. The check for isa_type<AliasType> makes sure that we skip aliases of the form `X
+            // = Integer` and only run this over constant value assignments like `X = 5` or `Y = 5; X = Y`.
+            if (resolveConstantType(ctx, asgn->rhs) == nullptr) {
+                if (auto e = ctx.beginError(asgn->rhs.loc(), core::errors::Resolver::ConstantMissingTypeAnnotation)) {
+                    e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
+                                "# typed: strict");
+                }
+            }
+        }
+        return data->resultType;
     }
 
     static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs,
@@ -1311,8 +1533,57 @@ class ResolveTypeMembersWalk {
         return true;
     }
 
+    // Returns `true` if `asgn` is a field declaration.
+    bool handleFieldDeclaration(core::Context ctx, ast::Assign &asgn) {
+        auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
+        if (uid == nullptr) {
+            return false;
+        }
+
+        if (uid->kind != ast::UnresolvedIdent::Kind::Instance && uid->kind != ast::UnresolvedIdent::Kind::Class) {
+            return false;
+        }
+
+        auto *recur = &asgn.rhs;
+        while (auto *outer = ast::cast_tree<ast::InsSeq>(*recur)) {
+            recur = &outer->expr;
+        }
+
+        auto *cast = ast::cast_tree<ast::Cast>(*recur);
+        if (cast == nullptr) {
+            return false;
+        } else if (cast->cast != core::Names::let()) {
+            if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
+                e.setHeader("Use `{}` to specify the type of constants", "T.let");
+            }
+        }
+
+        ResolveFieldItem &job = todoResolveFieldItems_.emplace_back();
+        job.file = ctx.file;
+        job.owner = ctx.owner;
+        job.cast = cast;
+        job.ident = uid;
+        job.atTopLevel = nestedBlockCounts.back() == 0;
+
+        return true;
+    }
+
+    static void computeExternalTypes(core::GlobalState &gs) {
+        Timer timeit(gs.tracer(), "resolver.computeExternalType");
+        // Ensure all symbols have `externalType` computed.
+        for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
+            core::SymbolRef(gs, core::SymbolRef::Kind::ClassOrModule, i).data(gs)->unsafeComputeExternalType(gs);
+        }
+    }
+
 public:
+    ResolveTypeMembersAndFieldsWalk() {
+        nestedBlockCounts.emplace_back(0);
+    }
+
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        nestedBlockCounts.emplace_back(0);
+
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         // If this is a class with no type members defined, resolve attached
@@ -1322,6 +1593,31 @@ public:
             todoAttachedClassItems_.emplace_back(ResolveAttachedClassItem{ctx.owner, klass.symbol, ctx.file});
         }
 
+        return tree;
+    }
+
+    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+        nestedBlockCounts.pop_back();
+        return tree;
+    }
+
+    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        nestedBlockCounts.emplace_back(0);
+        return tree;
+    }
+
+    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+        nestedBlockCounts.pop_back();
+        return tree;
+    }
+
+    ast::TreePtr preTransformBlock(core::Context ctx, ast::TreePtr tree) {
+        nestedBlockCounts.back() += 1;
+        return tree;
+    }
+
+    ast::TreePtr postTransformBlock(core::Context ctx, ast::TreePtr tree) {
+        nestedBlockCounts.back() -= 1;
         return tree;
     }
 
@@ -1395,6 +1691,46 @@ public:
                 trackDependencies_ = false;
                 break;
 
+            case core::Names::let()._id:
+            case core::Names::uncheckedLet()._id:
+            case core::Names::assertType()._id:
+            case core::Names::cast()._id: {
+                if (trackDependencies_) {
+                    classOfDepth_.pop_back();
+                }
+
+                auto *id = ast::cast_tree<ast::ConstantLit>(send.recv);
+                // Must be T::let/uncheckedLet/etc.
+                if (!id || (id->symbol != core::Symbols::T() && id->symbol != core::Symbols::T_NonForcingConstants())) {
+                    return tree;
+                }
+
+                if (send.args.size() < 2) {
+                    return tree;
+                }
+
+                ResolveCastItem item;
+                item.file = ctx.file;
+
+                // Compute the containing class when translating the type,
+                // as there's a very good chance this has been called from a
+                // method context.
+                item.owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+
+                auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
+                auto expr = std::move(send.args[0]);
+                auto cast = ast::make_tree<ast::Cast>(send.loc, todoType(), std::move(expr), send.fun);
+                item.cast = ast::cast_tree<ast::Cast>(cast);
+                item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
+
+                // We should be able to resolve simple casts immediately.
+                if (!tryResolveSimpleClassCastItem(ctx.withOwner(item.owner), item)) {
+                    todoResolveCastItems_.emplace_back(move(item));
+                }
+
+                return ast::MK::InsSeq1(send.loc, move(typeExpr), move(cast));
+            }
+
             default:
                 if (trackDependencies_) {
                     classOfDepth_.pop_back();
@@ -1407,21 +1743,20 @@ public:
 
     ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+        if (handleFieldDeclaration(ctx, asgn)) {
+            return tree;
+        }
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
         if (id == nullptr || !id->symbol.exists()) {
             return tree;
         }
 
-        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
-        if (send == nullptr) {
-            return tree;
-        }
-
         auto sym = id->symbol;
         auto data = sym.data(ctx);
 
-        if (data->isTypeAlias() || data->isTypeMember()) {
+        auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
+        if (send && (data->isTypeAlias() || data->isTypeMember())) {
             ENFORCE(!data->isTypeMember() || send->recv.isSelfReference());
 
             // This is for a special case that happens with the generation of
@@ -1441,6 +1776,22 @@ public:
                     send->fun == core::Names::typeTemplate());
 
             todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, dependencies_, ctx.file});
+        } else if (data->isStaticField()) {
+            ResolveStaticFieldItem job;
+            job.file = ctx.file;
+            job.sym = sym;
+            job.asgn = &asgn;
+
+            auto resultType = tryResolveStaticField(ctx, job);
+            if (resultType != todoType()) {
+                todoResolveSimpleStaticFieldItems_.emplace_back(ResolveSimpleStaticFieldItem{sym, resultType});
+            } else {
+                todoResolveStaticFieldItems_.emplace_back(move(job));
+            }
+        }
+
+        if (send == nullptr) {
+            return tree;
         }
 
         trackDependencies_ = false;
@@ -1454,7 +1805,7 @@ public:
         Timer timeit(gs.tracer(), "resolver.type_params");
 
         auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-        auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersResult>>(trees.size());
+        auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersAndFieldsResult>>(trees.size());
         for (auto &tree : trees) {
             inputq->push(move(tree), 1);
         }
@@ -1462,13 +1813,13 @@ public:
 
         workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
             Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
-            ResolveTypeMembersWalk walk;
-            ResolveTypeMembersResult output;
+            ResolveTypeMembersAndFieldsWalk walk;
+            ResolveTypeMembersAndFieldsResult output;
             ast::ParsedFile job;
             for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
                 if (result.gotItem()) {
                     core::Context ctx(gs, core::Symbols::root(), job.file);
-                    job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));
+                    job.tree = ast::TreeMap::apply(ctx, walk, std::move(job.tree));
                     output.files.emplace_back(move(job));
                 }
             }
@@ -1476,14 +1827,18 @@ public:
                 output.todoAssigns = move(walk.todoAssigns_);
                 output.todoAttachedClassItems = move(walk.todoAttachedClassItems_);
                 output.todoUntypedResultTypes = move(walk.todoUntypedResultTypes_);
+                output.todoResolveCastItems = move(walk.todoResolveCastItems_);
+                output.todoResolveFieldItems = move(walk.todoResolveFieldItems_);
+                output.todoResolveStaticFieldItems = move(walk.todoResolveStaticFieldItems_);
+                output.todoResolveSimpleStaticFieldItems = move(walk.todoResolveSimpleStaticFieldItems_);
                 auto count = output.files.size();
                 outputq->push(move(output), count);
             }
         });
 
-        ResolveTypeMembersResult combined;
+        ResolveTypeMembersAndFieldsResult combined;
         {
-            ResolveTypeMembersResult threadResult;
+            ResolveTypeMembersAndFieldsResult threadResult;
             for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
@@ -1504,6 +1859,22 @@ public:
                             combined.todoUntypedResultTypes.end(),
                             make_move_iterator(threadResult.todoUntypedResultTypes.begin()),
                             make_move_iterator(threadResult.todoUntypedResultTypes.end()));
+                        combined.todoResolveCastItems.insert(
+                            combined.todoResolveCastItems.end(),
+                            make_move_iterator(threadResult.todoResolveCastItems.begin()),
+                            make_move_iterator(threadResult.todoResolveCastItems.end()));
+                        combined.todoResolveFieldItems.insert(
+                            combined.todoResolveFieldItems.end(),
+                            make_move_iterator(threadResult.todoResolveFieldItems.begin()),
+                            make_move_iterator(threadResult.todoResolveFieldItems.end()));
+                        combined.todoResolveStaticFieldItems.insert(
+                            combined.todoResolveStaticFieldItems.end(),
+                            make_move_iterator(threadResult.todoResolveStaticFieldItems.begin()),
+                            make_move_iterator(threadResult.todoResolveStaticFieldItems.end()));
+                        combined.todoResolveSimpleStaticFieldItems.insert(
+                            combined.todoResolveSimpleStaticFieldItems.end(),
+                            make_move_iterator(threadResult.todoResolveSimpleStaticFieldItems.begin()),
+                            make_move_iterator(threadResult.todoResolveSimpleStaticFieldItems.end()));
                     }
                 }
             }
@@ -1521,6 +1892,13 @@ public:
             core::MutableContext ctx(gs, core::Symbols::root(), job.file);
             resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
         }
+
+        // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
+        // (which is a static field).
+        for (auto &job : combined.todoResolveSimpleStaticFieldItems) {
+            job.sym.data(gs)->resultType = job.resultType;
+        }
+        combined.todoResolveSimpleStaticFieldItems.clear();
 
         // loop over any out-of-order type_member/type_alias references
         bool progress = true;
@@ -1557,14 +1935,31 @@ public:
             }
         }
 
+        // Compute the resultType of all classes.
+        computeExternalTypes(gs);
+
+        // Resolve the remaining casts and fields.
+        for (auto &job : combined.todoResolveCastItems) {
+            core::Context ctx(gs, job.owner, job.file);
+            resolveCastItem(ctx, job);
+        }
+        for (auto &job : combined.todoResolveFieldItems) {
+            core::MutableContext ctx(gs, job.owner, job.file);
+            resolveField(ctx, job);
+        }
+        for (auto &job : combined.todoResolveStaticFieldItems) {
+            core::Context ctx(gs, job.sym, job.file);
+            if (auto resultType = resolveStaticField(ctx, job)) {
+                job.sym.data(gs)->resultType = resultType;
+            }
+        }
+
         return move(combined.files);
     }
 };
 
 class ResolveSignaturesWalk {
 private:
-    std::vector<int> nestedBlockCounts;
-
     ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef, int pos,
                                   bool isOverloaded) {
         if (!isOverloaded) {
@@ -1961,126 +2356,6 @@ private:
             [&](const ast::TreePtr &e) {});
     }
 
-    // Resolve the type of the rhs of a constant declaration. This logic is
-    // extremely simplistic; We only handle simple literals, and explicit casts.
-    //
-    // We don't handle array or hash literals, because intuiting the element
-    // type (once we have generics) will be nontrivial.
-    core::TypePtr resolveConstantType(core::Context ctx, const ast::TreePtr &expr, core::SymbolRef ofSym) {
-        core::TypePtr result;
-        typecase(
-            expr, [&](const ast::Literal &a) { result = a.value; },
-            [&](const ast::Cast &cast) {
-                if (cast.cast != core::Names::let() && cast.cast != core::Names::uncheckedLet()) {
-                    if (auto e = ctx.beginError(cast.loc, core::errors::Resolver::ConstantAssertType)) {
-                        e.setHeader("Use `{}` to specify the type of constants", "T.let");
-                    }
-                }
-                result = cast.type;
-            },
-            [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr, ofSym); },
-            [&](const ast::TreePtr &expr) {});
-        return result;
-    }
-
-    bool handleDeclaration(core::MutableContext ctx, ast::Assign &asgn) {
-        auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn.lhs);
-        if (uid == nullptr) {
-            return false;
-        }
-
-        if (uid->kind != ast::UnresolvedIdent::Kind::Instance && uid->kind != ast::UnresolvedIdent::Kind::Class) {
-            return false;
-        }
-
-        auto *recur = &asgn.rhs;
-        while (auto *outer = ast::cast_tree<ast::InsSeq>(*recur)) {
-            recur = &outer->expr;
-        }
-
-        auto *cast = ast::cast_tree<ast::Cast>(*recur);
-        if (cast == nullptr) {
-            return false;
-        } else if (cast->cast != core::Names::let()) {
-            if (auto e = ctx.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                e.setHeader("Use `{}` to specify the type of constants", "T.let");
-            }
-        }
-
-        core::SymbolRef scope;
-        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
-            if (!ctx.owner.isClassOrModule()) {
-                if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("The class variable `{}` must be declared at class scope", uid->name.show(ctx));
-                }
-            }
-
-            scope = ctx.owner.data(ctx)->enclosingClass(ctx);
-        } else {
-            // we need to check nested block counts because we want all fields to be declared on top level of either
-            // class or body, rather then nested in some block
-            if (nestedBlockCounts.back() == 0 && ctx.owner.isClassOrModule()) {
-                // Declaring a class instance variable
-            } else if (nestedBlockCounts.back() == 0 && ctx.owner.data(ctx)->name == core::Names::initialize()) {
-                // Declaring a instance variable
-            } else if (ctx.owner.data(ctx)->isMethod() && ctx.owner.data(ctx)->owner.data(ctx)->isSingletonClass(ctx) &&
-                       !core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
-                // Declaring a class instance variable in a static method
-                if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("The singleton instance variable `{}` must be declared inside the class body or "
-                                "declared nilable",
-                                uid->name.show(ctx));
-                }
-            } else if (!core::Types::isSubType(ctx, core::Types::nilClass(), cast->type)) {
-                // Inside a method; declaring a normal instance variable
-                if (auto e = ctx.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("The instance variable `{}` must be declared inside `{}` or declared nilable",
-                                uid->name.show(ctx), "initialize");
-                }
-            }
-            scope = ctx.selfClass();
-        }
-
-        auto prior = scope.data(ctx)->findMember(ctx, uid->name);
-        if (prior.exists()) {
-            if (core::Types::equiv(ctx, prior.data(ctx)->resultType, cast->type)) {
-                // We already have a symbol for this field, and it matches what we already saw, so we can short
-                // circuit.
-                return true;
-            } else {
-                // We do some normalization here to ensure that the file / line we report the error on doesn't
-                // depend on the order that we traverse files nor the order we traverse within a file.
-                auto priorLoc = prior.data(ctx)->loc();
-                core::Loc reportOn;
-                core::Loc errorLine;
-                core::Loc thisLoc = core::Loc(ctx.file, uid->loc);
-                if (thisLoc.file() == priorLoc.file()) {
-                    reportOn = thisLoc.beginPos() < priorLoc.beginPos() ? thisLoc : priorLoc;
-                    errorLine = thisLoc.beginPos() < priorLoc.beginPos() ? priorLoc : thisLoc;
-                } else {
-                    reportOn = thisLoc.file() < priorLoc.file() ? thisLoc : priorLoc;
-                    errorLine = thisLoc.file() < priorLoc.file() ? priorLoc : thisLoc;
-                }
-
-                if (auto e = ctx.state.beginError(reportOn, core::errors::Resolver::DuplicateVariableDeclaration)) {
-                    e.setHeader("Redeclaring variable `{}` with mismatching type", uid->name.show(ctx));
-                    e.addErrorLine(errorLine, "Previous declaration is here:");
-                }
-                return false;
-            }
-        }
-        core::SymbolRef var;
-
-        if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
-            var = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, uid->loc), scope, uid->name);
-        } else {
-            var = ctx.state.enterFieldSymbol(core::Loc(ctx.file, uid->loc), scope, uid->name);
-        }
-
-        var.data(ctx)->resultType = cast->type;
-        return true;
-    }
-
     void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
         constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
 
@@ -2248,86 +2523,9 @@ private:
     }
 
 public:
-    ResolveSignaturesWalk() {
-        nestedBlockCounts.emplace_back(0);
-    }
-
-    ast::TreePtr postTransformAssign(core::MutableContext ctx, ast::TreePtr tree) {
-        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
-
-        if (handleDeclaration(ctx, asgn)) {
-            return tree;
-        }
-
-        auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
-        if (id == nullptr || !id->symbol.exists()) {
-            return tree;
-        }
-
-        auto sym = id->symbol;
-        auto data = sym.data(ctx);
-        if (data->isTypeAlias() || data->isTypeMember()) {
-            return tree;
-        }
-
-        if (data->isStaticField()) {
-            if (data->resultType == nullptr) {
-                data->resultType = resolveConstantType(ctx, asgn.rhs, sym);
-                if (data->resultType == nullptr) {
-                    // Instead of emitting an error now, emit an error in infer that has a proper type suggestion
-                    auto rhs = move(asgn.rhs);
-                    auto loc = rhs.loc();
-                    asgn.rhs = ast::MK::Send1(loc, ast::MK::Constant(loc, core::Symbols::Magic()),
-                                              core::Names::suggestType(), move(rhs));
-                }
-            } else if (!core::isa_type<core::AliasType>(data->resultType)) {
-                // If we've already resolved a temporary constant, we still want to run resolveConstantType to
-                // report errors (e.g. so that a stand-in untyped value won't suppress errors in subsequent
-                // typechecking runs) but we only want to run this on constants that are value-level and not class
-                // or type aliases. The check for isa_type<AliasType> makes sure that we skip aliases of the form `X
-                // = Integer` and only run this over constant value assignments like `X = 5` or `Y = 5; X = Y`.
-                if (resolveConstantType(ctx, asgn.rhs, sym) == nullptr) {
-                    if (auto e =
-                            ctx.beginError(asgn.rhs.loc(), core::errors::Resolver::ConstantMissingTypeAnnotation)) {
-                        e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
-                                    "# typed: strict");
-                    }
-                }
-            }
-        }
-
-        return tree;
-    }
-
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        nestedBlockCounts.emplace_back(0);
-        return tree;
-    }
-
     ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
-        nestedBlockCounts.pop_back();
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         processClassBody(ctx.withOwner(klass.symbol), klass);
-        return tree;
-    }
-
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        nestedBlockCounts.emplace_back(0);
-        return tree;
-    }
-
-    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
-        nestedBlockCounts.pop_back();
-        return tree;
-    }
-
-    ast::TreePtr preTransformBlock(core::Context ctx, ast::TreePtr tree) {
-        nestedBlockCounts.back() += 1;
-        return tree;
-    }
-
-    ast::TreePtr postTransformBlock(core::Context ctx, ast::TreePtr tree) {
-        nestedBlockCounts.back() -= 1;
         return tree;
     }
 
@@ -2344,30 +2542,6 @@ public:
                 return tree;
             }
             switch (send.fun._id) {
-                case core::Names::let()._id:
-                case core::Names::uncheckedLet()._id:
-                case core::Names::assertType()._id:
-                case core::Names::cast()._id: {
-                    if (send.args.size() < 2) {
-                        return tree;
-                    }
-
-                    // Compute the containing class when translating the type,
-                    // as there's a very good chance this has been called from a
-                    // method context.
-                    core::SymbolRef ownerClass = ctx.owner.data(ctx)->enclosingClass(ctx);
-
-                    auto expr = std::move(send.args[0]);
-                    ParsedSig emptySig;
-                    auto allowSelfType = true;
-                    auto allowRebind = false;
-                    auto allowTypeMember = true;
-                    auto type = TypeSyntax::getResultType(
-                        ctx.withOwner(ownerClass), send.args[1], emptySig,
-                        TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, core::Symbols::noSymbol()});
-                    return ast::MK::InsSeq1(send.loc, ast::MK::KeepForTypechecking(std::move(send.args[1])),
-                                            ast::make_tree<ast::Cast>(send.loc, type, std::move(expr), send.fun));
-                }
                 case core::Names::revealType()._id:
                 case core::Names::absurd()._id: {
                     // These errors do not match up with our "upper error levels are super sets
@@ -2504,14 +2678,6 @@ public:
         return tree;
     }
 };
-
-void computeExternalTypes(core::GlobalState &gs) {
-    Timer timeit(gs.tracer(), "resolver.computeExternalType");
-    // Ensure all symbols have `externalType` computed.
-    for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
-        core::SymbolRef(gs, core::SymbolRef::Kind::ClassOrModule, i).data(gs)->unsafeComputeExternalType(gs);
-    }
-}
 }; // namespace
 
 ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
@@ -2528,12 +2694,10 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-    trees = ResolveTypeMembersWalk::run(gs, std::move(trees), workers);
+    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled();
     }
-
-    computeExternalTypes(gs);
 
     auto result = resolveSigs(gs, std::move(trees));
     if (!result.hasResult()) {
@@ -2582,8 +2746,7 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
         // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
         ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), sym.toString(gs));
     })
-    trees = ResolveTypeMembersWalk::run(gs, std::move(trees), *workers);
-    computeExternalTypes(gs);
+    trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(trees));
     if (!result.hasResult()) {
         return result;
