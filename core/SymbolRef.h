@@ -138,8 +138,8 @@ public:
     }
 
     bool inline exists() const {
-        //  ClassOrModule and id are both 0, for SymbolRef::noSymbol.
-        return _id != 0;
+        // 0th index is reserved on all symbol vectors for the non existant symbol.
+        return unsafeTableIndex() != 0;
     }
 
     bool isSynthetic() const;
@@ -418,17 +418,33 @@ public:
         return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, 61);
     }
 
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
+    static SymbolRef noMethod() {
         return SymbolRef(nullptr, SymbolRef::Kind::Method, 0);
+    }
+
+    static SymbolRef noField() {
+        return SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, 0);
+    }
+
+    static SymbolRef noTypeArgument() {
+        return SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, 0);
+    }
+
+    static SymbolRef noTypeMember() {
+        return SymbolRef(nullptr, SymbolRef::Kind::TypeMember, 0);
+    }
+
+    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 1);
     }
 
     static SymbolRef
     Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
-        return SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, 0);
+        return SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, 1);
     }
 
     static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
-        return SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, 1);
+        return SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, 2);
     }
 
     static SymbolRef T_Sig() {
@@ -436,11 +452,11 @@ public:
     }
 
     static SymbolRef Magic_undeclaredFieldStub() {
-        return SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, 0);
+        return SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, 1);
     }
 
     static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 1);
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 2);
     }
 
     static SymbolRef T_Helpers() {
@@ -492,7 +508,7 @@ public:
     }
 
     static SymbolRef sig() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 2);
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 3);
     }
 
     static SymbolRef Enumerator_Lazy() {
@@ -524,7 +540,7 @@ public:
     }
 
     static SymbolRef sigWithoutRuntime() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 3);
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 4);
     }
 
     static SymbolRef T_NonForcingConstants() {
@@ -540,7 +556,7 @@ public:
     }
 
     static SymbolRef SorbetPrivateStaticSingleton_sig() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 4);
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 5);
     }
 
     static SymbolRef PackageRegistry() {
@@ -556,15 +572,15 @@ public:
     }
 
     static SymbolRef PackageSpec_import() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 5);
-    }
-
-    static SymbolRef PackageSpec_export() {
         return SymbolRef(nullptr, SymbolRef::Kind::Method, 6);
     }
 
-    static SymbolRef PackageSpec_export_methods() {
+    static SymbolRef PackageSpec_export() {
         return SymbolRef(nullptr, SymbolRef::Kind::Method, 7);
+    }
+
+    static SymbolRef PackageSpec_export_methods() {
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 8);
     }
 
     static SymbolRef Encoding() {
@@ -572,7 +588,7 @@ public:
     }
 
     static SymbolRef Class_new() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 8);
+        return SymbolRef(nullptr, SymbolRef::Kind::Method, 9);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
@@ -598,10 +614,10 @@ public:
     }
 
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 200;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 32;
-    static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 2;
-    static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 2;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 99;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 33;
+    static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
+    static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 3;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 100;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {

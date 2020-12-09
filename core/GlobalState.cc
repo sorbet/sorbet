@@ -81,12 +81,22 @@ void GlobalState::initEmpty() {
     SymbolRef id;
     id = synthesizeClass(core::Names::Constants::NoSymbol(), 0);
     ENFORCE(id == Symbols::noSymbol());
+    id = enterMethodSymbol(Loc::none(), Symbols::noSymbol(), Names::noMethod());
+    ENFORCE(id == Symbols::noMethod());
+    id = enterFieldSymbol(Loc::none(), Symbols::noSymbol(), Names::noFieldOrStaticField());
+    ENFORCE(id == Symbols::noField());
+    id = enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeArgument(), Variance::CoVariant);
+    ENFORCE(id == Symbols::noTypeArgument());
+    id = enterTypeMember(Loc::none(), Symbols::noSymbol(), Names::Constants::NoTypeMember(), Variance::CoVariant);
+    ENFORCE(id == Symbols::noTypeMember());
+
     id = synthesizeClass(core::Names::Constants::Top(), 0);
     ENFORCE(id == Symbols::top());
     id = synthesizeClass(core::Names::Constants::Bottom(), 0);
     ENFORCE(id == Symbols::bottom());
     id = synthesizeClass(core::Names::Constants::Root(), 0);
     ENFORCE(id == Symbols::root());
+
     id = core::Symbols::root().data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::rootSingleton());
     id = synthesizeClass(core::Names::Constants::Todo(), 0);
@@ -959,6 +969,7 @@ SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) 
 
 SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
     u4 flags;
+    ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember());
     ENFORCE(owner.isClassOrModule());
     ENFORCE(name.exists());
     if (variance == Variance::Invariant) {
@@ -996,7 +1007,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
     DEBUG_ONLY(categoryCounterInc("symbols", "type_member"));
     wasModified_ = true;
 
-    auto &members = owner.data(*this)->typeMembers();
+    auto &members = owner.dataAllowingNone(*this)->typeMembers();
     if (!absl::c_linear_search(members, result)) {
         members.emplace_back(result);
     }
@@ -1004,7 +1015,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
 }
 
 SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
-    ENFORCE(owner.exists());
+    ENFORCE(owner.exists() || name == Names::Constants::NoTypeArgument());
     ENFORCE(name.exists());
     u4 flags;
     if (variance == Variance::Invariant) {
@@ -1042,7 +1053,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
     wasModified_ = true;
 
-    owner.data(*this)->typeArguments().emplace_back(result);
+    owner.dataAllowingNone(*this)->typeArguments().emplace_back(result);
     return result;
 }
 
@@ -1671,17 +1682,37 @@ void GlobalState::sanityCheck() const {
             sym.sanityCheck(*this);
         }
     }
+
+    i = -1;
     for (auto &sym : methods) {
-        sym.sanityCheck(*this);
+        i++;
+        if (i != 0) {
+            sym.sanityCheck(*this);
+        }
     }
+
+    i = -1;
     for (auto &sym : fields) {
-        sym.sanityCheck(*this);
+        i++;
+        if (i != 0) {
+            sym.sanityCheck(*this);
+        }
     }
+
+    i = -1;
     for (auto &sym : typeArguments) {
-        sym.sanityCheck(*this);
+        i++;
+        if (i != 0) {
+            sym.sanityCheck(*this);
+        }
     }
+
+    i = -1;
     for (auto &sym : typeMembers) {
-        sym.sanityCheck(*this);
+        i++;
+        if (i != 0) {
+            sym.sanityCheck(*this);
+        }
     }
     for (auto &ent : namesByHash) {
         if (ent.second == 0) {

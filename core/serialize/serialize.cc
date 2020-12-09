@@ -610,7 +610,8 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     for (int i = 0; i < membersSize; i++) {
         auto name = NameRef::fromRaw(*gs, p.getU4());
         auto sym = SymbolRef::fromRaw(p.getU4());
-        if (result.name != core::Names::Constants::Root()) {
+        if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
+            result.name != core::Names::noMethod()) {
             ENFORCE(name.exists());
             ENFORCE(sym.exists());
         }
