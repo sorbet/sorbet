@@ -1278,8 +1278,11 @@ class ResolveTypeMembersAndFieldsWalk {
         typecase(
             expr, [&](const ast::Literal &a) { result = a.value; },
             [&](const ast::Cast &cast) {
-                if (cast.type != core::Types::todo() && cast.cast != core::Names::let() &&
-                    cast.cast != core::Names::uncheckedLet()) {
+                if (cast.type == core::Types::todo()) {
+                    return;
+                }
+
+                if (cast.cast != core::Names::let() && cast.cast != core::Names::uncheckedLet()) {
                     if (auto e = ctx.beginError(cast.loc, core::errors::Resolver::ConstantAssertType)) {
                         e.setHeader("Use `{}` to specify the type of constants", "T.let");
                     }
@@ -1297,11 +1300,10 @@ class ResolveTypeMembersAndFieldsWalk {
         auto &asgn = job.asgn;
         auto data = job.sym.data(ctx);
         if (data->resultType == nullptr) {
-            auto resultType = resolveConstantType(ctx, asgn->rhs);
-            if (!resultType) {
-                return core::Types::todo();
-            } else {
+            if (auto resultType = resolveConstantType(ctx, asgn->rhs)) {
                 return resultType;
+            } else {
+                return core::Types::todo();
             }
         }
         // resultType was already set. We may be running on the incremental path. Force this field to be resolved in
@@ -1554,12 +1556,9 @@ class ResolveTypeMembersAndFieldsWalk {
             }
         }
 
-        ResolveFieldItem &job = todoResolveFieldItems_.emplace_back();
-        job.file = ctx.file;
-        job.owner = ctx.owner;
-        job.cast = cast;
-        job.ident = uid;
-        job.atTopLevel = nestedBlockCounts.back() == 0;
+        ENFORCE_NO_TIMER(!nestedBlockCounts.empty());
+        todoResolveFieldItems_.emplace_back(
+            ResolveFieldItem{ctx.file, ctx.owner, uid, cast, nestedBlockCounts.back() == 0});
 
         return true;
     }
@@ -1608,11 +1607,13 @@ public:
     }
 
     ast::TreePtr preTransformBlock(core::Context ctx, ast::TreePtr tree) {
+        ENFORCE_NO_TIMER(!nestedBlockCounts.empty());
         nestedBlockCounts.back() += 1;
         return tree;
     }
 
     ast::TreePtr postTransformBlock(core::Context ctx, ast::TreePtr tree) {
+        ENFORCE_NO_TIMER(!nestedBlockCounts.empty());
         nestedBlockCounts.back() -= 1;
         return tree;
     }
@@ -1773,11 +1774,7 @@ public:
 
             todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, dependencies_, ctx.file});
         } else if (data->isStaticField()) {
-            ResolveStaticFieldItem job;
-            job.file = ctx.file;
-            job.sym = sym;
-            job.asgn = &asgn;
-
+            ResolveStaticFieldItem job{ctx.file, sym, &asgn};
             auto resultType = tryResolveStaticField(ctx, job);
             if (resultType != core::Types::todo()) {
                 todoResolveSimpleStaticFieldItems_.emplace_back(ResolveSimpleStaticFieldItem{sym, resultType});
@@ -1890,7 +1887,8 @@ public:
         }
 
         // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
-        // (which is a static field).
+        // (which is a static field). This is stronger than we need (we really only need the enum types)
+        // but there's no particular reason to delay here.
         for (auto &job : combined.todoResolveSimpleStaticFieldItems) {
             job.sym.data(gs)->resultType = job.resultType;
         }
