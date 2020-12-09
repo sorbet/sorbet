@@ -314,9 +314,19 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                             e.setHeader("Method that is both `{}` and `{}` cannot be implemented", "final", "abstract");
                         }
                     }
+                    if (sig.seen.override_) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("`{}` cannot be combined with `{}`", "override", "abstract");
+                        }
+                    }
                     sig.seen.abstract = true;
                     break;
                 case core::Names::override_()._id: {
+                    if (sig.seen.abstract) {
+                        if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("`{}` cannot be combined with `{}`", "abstract", "override");
+                        }
+                    }
                     sig.seen.override_ = true;
 
                     if (send->numPosArgs > 0) {
