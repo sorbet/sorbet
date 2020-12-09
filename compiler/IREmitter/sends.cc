@@ -236,6 +236,32 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
     return fillSendArgArray(mcctx, 0);
 }
 
+namespace {
+bool canCallBlockViaRubyVM(MethodCallContext &mcctx) {
+    auto &cs = mcctx.cs;
+    auto *send = mcctx.send;
+    auto &irctx = mcctx.irctx;
+    auto rubyBlockId = mcctx.rubyBlockId;
+
+    ENFORCE(IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx))
+
+    // If the receiver is not the distinguished block argument then we have to be
+    // more general in our send.
+    auto recv = send->recv.variable;
+    if (recv != irctx.rubyBlockArgs[rubyBlockId].back()) {
+        return false;
+    }
+
+    // Can't handle invoking blocks that take blocks.
+    if (mcctx.blk != nullptr) {
+        return false;
+    }
+
+    return true;
+}
+
+} // namespace
+
 llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;
     auto &builder = builderCast(mcctx.build);
@@ -262,11 +288,19 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
         }
 
         return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {argc, argv, kw_splat}, "rawSendResult");
-    } else {
-        return callViaRubyVMSimple(cs, mcctx.build, irctx, self, argv, argc, kw_splat, str, mcctx.blk,
-                                   irctx.localsOffset[rubyBlockId]);
     }
-};
+
+    // Try to call blocks directly without reifying the block into a proc.
+    if (send->fun == core::Names::call() &&
+        IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx)) {
+        if (canCallBlockViaRubyVM(mcctx)) {
+            return builder.CreateCall(cs.getFunction("sorbet_callBlock"), {argc, argv, kw_splat}, "rawBlockSendResult");
+        }
+    }
+
+    return callViaRubyVMSimple(cs, mcctx.build, irctx, self, argv, argc, kw_splat, str, mcctx.blk,
+                               irctx.localsOffset[rubyBlockId]);
+}
 
 llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, string slowFunName) {
     auto icValidatorFunc = cs.getFunction("sorbet_inlineCacheInvalidated");

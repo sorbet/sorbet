@@ -707,6 +707,26 @@ VALUE sorbet_callFuncWithCache(VALUE recv, ID func, int argc,
     return rb_vm_call(GET_EC(), recv, func, argc, argv, cache->me);
 }
 
+SORBET_ATTRIBUTE(noinline)
+VALUE sorbet_callFuncPassingBlockWithCache(VALUE recv, ID func, int argc,
+                                           SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
+                                           struct FunctionInlineCache *cache) {
+    if (rb_block_given_p()) {
+        // this is an inlined version of PASS_PASSED_BLOCK_HANDLER()
+        rb_execution_context_t *ec = GET_EC();
+        const VALUE *ep = ec->cfp->ep;
+        while (!VM_ENV_LOCAL_P(ep)) {
+            ep = (void *)(ep[VM_ENV_DATA_INDEX_SPECVAL] & ~0x03);
+        }
+        VALUE block_handler = VM_ENV_BLOCK_HANDLER(ep);
+        vm_block_handler_verify(block_handler);
+        ec->passed_block_handler = block_handler;
+        VM_ENV_FLAGS_SET(ep, VM_FRAME_FLAG_PASSED);
+    }
+
+    return sorbet_callFuncWithCache(recv, func, argc, argv, kw_splat, cache);
+}
+
 // ****
 // ****                       Exceptions
 // ****

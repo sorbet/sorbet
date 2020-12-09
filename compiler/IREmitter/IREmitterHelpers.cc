@@ -906,4 +906,28 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
     }
 }
 
+bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::SymbolRef method,
+                                        const IREmitterContext &irctx) {
+    auto ty = irctx.rubyBlockType[blockId];
+    if (!(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInit)) {
+        return false;
+    }
+
+    if (ty == FunctionType::Block) {
+        auto blockLink = irctx.blockLinks[blockId];
+        if (blockLink->argFlags.empty()) {
+            return false;
+        }
+
+        return blockLink->argFlags.back().isBlock;
+    }
+
+    auto &args = method.data(cs)->arguments();
+    if (args.empty()) {
+        return false;
+    }
+
+    return args.back().flags.isBlock;
+}
+
 } // namespace sorbet::compiler

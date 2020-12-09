@@ -125,6 +125,9 @@ public:
     // or a type representing nil, false, or true.
     static llvm::Value *emitLiteralish(CompilerState &gs, llvm::IRBuilderBase &builder,
                                        const core::TypePtr &literalish);
+
+    // Return true if the given blockId has a block argument.
+    static bool hasBlockArgument(CompilerState &gs, int blockId, core::SymbolRef method, const IREmitterContext &irctx);
 };
 } // namespace sorbet::compiler
 #endif

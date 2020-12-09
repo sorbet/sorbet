@@ -74,6 +74,9 @@ SORBET_ALIVE(void, sorbet_inlineCacheInvalidated, (VALUE recv, struct FunctionIn
 SORBET_ALIVE(VALUE, sorbet_callFuncWithCache,
              (VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
               struct FunctionInlineCache *cache));
+SORBET_ALIVE(VALUE, sorbet_callFuncPassingBlockWithCache,
+             (VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
+              struct FunctionInlineCache *cache));
 
 SORBET_ALIVE(void, sorbet_setMethodStackFrame,
              (rb_execution_context_t * ec, rb_control_frame_t *cfp, const rb_iseq_t *iseq));
@@ -917,10 +920,9 @@ void sorbet_setLineNumber(int offset, VALUE *iseq_encoded, VALUE **storeLocation
 }
 
 SORBET_INLINE
-VALUE sorbet_callBlock(VALUE array) {
-    // TODO: one day we should use rb_yield_values, as it saves an allocation, but
-    // for now, do the easy thing
-    return rb_yield_splat(array);
+VALUE sorbet_callBlock(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat) {
+    // TODO(froydnj) use rb_yield_values_kw in 2.7
+    return rb_yield_values2(argc, argv);
 }
 
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.h#L123
@@ -985,12 +987,19 @@ VALUE sorbet_callFuncProcWithCache(VALUE recv, ID func, int argc,
                                    SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
                                    VALUE proc, struct FunctionInlineCache *cache) {
     if (!NIL_P(proc)) {
-        // this is an inlined version of vm_passed_block_handler_set(GET_EC(), proc);
+        // this is an inlined version of vm_passed_block_handler_set(GET_EC(), proc)
         vm_block_handler_verify(proc);
         GET_EC()->passed_block_handler = proc;
     }
 
     return sorbet_callFuncWithCache(recv, func, argc, argv, kw_splat, cache);
+}
+
+SORBET_INLINE
+VALUE sorbet_callFuncWithBlockWithCache(VALUE recv, ID func, int argc,
+                                        SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
+                                        struct FunctionInlineCache *cache) {
+    return sorbet_callFuncPassingBlockWithCache(recv, func, argc, argv, kw_splat, cache);
 }
 
 // This function doesn't benefit from inlining, as it's always indirectly used through rb_iterate. In the future, if we

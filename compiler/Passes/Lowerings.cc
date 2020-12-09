@@ -221,9 +221,76 @@ static llvm::RegisterPass<LowerIntrinsicsPass> X("lowerSorbetIntrinsics", "Lower
                                                  false  // Analysis Pass
 );
 
-}; // namespace
+// This pass is kind of a hack.  There are certain calls that we eagerly generate
+// because it makes code generation simpler.  But after code generation, those
+// calls may not actually be used and we know -- but LLVM doesn't -- that the
+// calls are safe to delete.  There's not an LLVM attribute to describe this sort
+// of behavior, so we have to write our own pass.
+class DeleteUnusedSorbetIntrinsicsPass : public llvm::ModulePass {
+public:
+    static char ID;
+
+    DeleteUnusedSorbetIntrinsicsPass() : llvm::ModulePass(ID) {}
+
+    struct CallInstVisitor : public llvm::InstVisitor<CallInstVisitor> {
+        vector<llvm::CallInst *> callsToDelete;
+        UnorderedSet<llvm::Function *> functionsToDelete;
+
+        CallInstVisitor(llvm::Module &m) {
+            auto f = m.getFunction("sorbet_getMethodBlockAsProc");
+            ENFORCE(f);
+            functionsToDelete.insert(f);
+        }
+
+        void visitCallInst(llvm::CallInst &ci) {
+            auto maybeFunc = ci.getCalledFunction();
+            if (!maybeFunc) {
+                return;
+            }
+
+            if (!functionsToDelete.contains(maybeFunc)) {
+                return;
+            }
+
+            if (!ci.use_empty()) {
+                return;
+            }
+
+            callsToDelete.emplace_back(&ci);
+        }
+    };
+
+    virtual bool runOnModule(llvm::Module &mod) override {
+        CallInstVisitor visitor(mod);
+        ENFORCE(!visitor.functionsToDelete.empty());
+
+        visitor.visit(mod);
+
+        if (visitor.callsToDelete.empty()) {
+            return false;
+        }
+
+        for (auto inst : visitor.callsToDelete) {
+            inst->eraseFromParent();
+        }
+
+        return true;
+    }
+};
+char DeleteUnusedSorbetIntrinsicsPass::ID = 0;
+
+static llvm::RegisterPass<DeleteUnusedSorbetIntrinsicsPass> Y("deleteUnusuedSorbetIntrinsics",
+                                                              "Delete Unused Sorbet Intrinsics",
+                                                              false, // Only looks at CFG
+                                                              false  // Analysis Pass
+);
+} // namespace
 const std::vector<llvm::ModulePass *> Passes::standardLowerings() {
     // LLVM pass manager is going to destuct them, so we need to allocate them every time
     return {new LowerIntrinsicsPass()};
 };
+
+llvm::ModulePass *Passes::createDeleteUnusedSorbetIntrinsticsPass() {
+    return new DeleteUnusedSorbetIntrinsicsPass();
+}
 } // namespace sorbet::compiler

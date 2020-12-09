@@ -9,6 +9,7 @@ class ModulePass;
 namespace sorbet::compiler {
 class Passes {
 public:
+    static llvm::ModulePass *createDeleteUnusedSorbetIntrinsticsPass();
     static const std::vector<llvm::ModulePass *> standardLowerings();
 };
 } // namespace sorbet::compiler
