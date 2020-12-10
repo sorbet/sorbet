@@ -843,7 +843,7 @@ void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 f
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const vector<u4> &methodHash) const {
+MethodRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const vector<u4> &methodHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
@@ -858,7 +858,7 @@ SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name,
         if ((resData->flags & Symbol::Flags::METHOD) == Symbol::Flags::METHOD &&
             (resData->methodArgumentHash(*this) == methodHash ||
              (resData->intrinsic != nullptr && !resData->hasSig()))) {
-            return res->second;
+            return res->second.asMethodRef();
         }
         lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
         if (!lookupName.exists()) {
@@ -867,7 +867,7 @@ SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name,
         res = ownerScope->members().find(lookupName);
         unique++;
     }
-    return Symbols::noSymbol();
+    return Symbols::noMethod();
 }
 
 // look up a symbol whose flags match the desired flags. This might look through mangled names to discover one whose
@@ -1056,7 +1056,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
     return result;
 }
 
-SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
+MethodRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
     bool isBlock = name.kind() == NameKind::UNIQUE && name.dataUnique(*this)->original == Names::blockTemp();
     ENFORCE(isBlock || owner.isClassOrModule(), "entering method symbol into not-a-class");
 
@@ -1069,16 +1069,16 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
     if (store.exists()) {
         ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asMethodRef();
     }
 
     ENFORCE(!symbolTableFrozen);
 
-    auto result = SymbolRef(this, SymbolRef::Kind::Method, methods.size());
+    auto result = MethodRef(*this, methods.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on methods invalidates `store`
     methods.emplace_back();
 
-    SymbolData data = result.dataAllowingNone(*this);
+    SymbolData data = SymbolRef(result).dataAllowingNone(*this);
     data->name = name;
     data->flags = flags;
     data->owner = owner;

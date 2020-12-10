@@ -79,7 +79,7 @@ public:
     ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     SymbolRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
     SymbolRef enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance);
-    SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
+    MethodRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterNewMethodOverload(Loc loc, SymbolRef original, core::NameRef originalName, u4 num,
                                      const std::vector<bool> &argsToKeep);
     SymbolRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
@@ -95,10 +95,10 @@ public:
     ClassOrModuleRef lookupClassSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE).asClassOrModuleRef();
     }
-    SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
+    MethodRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD).asMethodRef();
     }
-    SymbolRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const std::vector<u4> &methodHash) const;
+    MethodRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const std::vector<u4> &methodHash) const;
     SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
     }
