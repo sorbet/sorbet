@@ -122,7 +122,7 @@ public:
     static TypePtr falsyTypes();
     static TypePtr todo();
 
-    static TypePtr dropSubtypesOf(const GlobalState &gs, const TypePtr &from, SymbolRef klass);
+    static TypePtr dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassOrModuleRef klass);
     static TypePtr approximateSubtract(const GlobalState &gs, const TypePtr &from, const TypePtr &what);
     static bool canBeTruthy(const GlobalState &gs, const TypePtr &what);
     static bool canBeFalsy(const GlobalState &gs, const TypePtr &what);
@@ -595,7 +595,7 @@ private:
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<TypePtr, 4> &typeFilter);
-    friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, SymbolRef klass);
+    friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassOrModuleRef klass);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
     friend class Symbol; // the actual method is `recordSealedSubclass(Mutableconst GlobalState &gs, SymbolRef
                          // subclass)`, but refering to it introduces a cycle
