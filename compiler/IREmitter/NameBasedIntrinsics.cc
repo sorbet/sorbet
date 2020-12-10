@@ -64,8 +64,8 @@ public:
 
 std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
     auto name = sym.data(gs)->name;
-    if (name.data(gs)->kind == core::NameKind::UNIQUE) {
-        return name.data(gs)->unique.original.show(gs);
+    if (name.kind(gs) == core::NameKind::UNIQUE) {
+        return name.dataUnique(gs)->original.show(gs);
     }
     return name.show(gs);
 }

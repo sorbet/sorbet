@@ -715,8 +715,7 @@ string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
     }
     string suffix;
     auto name = sym.data(cs)->name;
-    if (name.data(cs)->kind == core::NameKind::CONSTANT &&
-        name.data(cs)->cnst.original.data(cs)->kind == core::NameKind::UTF8) {
+    if (name.kind(cs) == core::NameKind::CONSTANT && name.dataCnst(cs)->original.kind(cs) == core::NameKind::UTF8) {
         suffix = (string)name.shortName(cs);
     } else {
         suffix = name.toString(cs);
@@ -739,7 +738,7 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
 
     auto name = sym.data(cs)->name;
     string suffix;
-    if (name.data(cs)->kind == core::NameKind::UTF8) {
+    if (name.kind(cs) == core::NameKind::UTF8) {
         suffix = (string)name.shortName(cs);
     } else {
         suffix = name.toString(cs);
@@ -750,8 +749,7 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
 
 bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &cs, core::SymbolRef sym) {
     auto name = sym.data(cs)->name;
-    return (name.data(cs)->kind == core::NameKind::UTF8 ? name : name.data(cs)->unique.original) ==
-           core::Names::staticInit();
+    return (name.kind(cs) == core::NameKind::UTF8 ? name : name.dataUnique(cs)->original) == core::Names::staticInit();
 }
 
 core::Loc IREmitterHelpers::getMethodLineBounds(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef file,
