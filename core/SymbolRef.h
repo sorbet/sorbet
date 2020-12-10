@@ -159,6 +159,26 @@ public:
 };
 CheckSize(SymbolRef, 4, 4);
 
+class ClassOrModuleRef final {
+    u4 _id;
+
+public:
+    ClassOrModuleRef() : _id(0){};
+    ClassOrModuleRef(const GlobalState &from, u4 id);
+
+    u4 id() {
+        return _id;
+    }
+
+    SymbolData data(GlobalState &gs) const;
+    ConstSymbolData data(const GlobalState &gs) const;
+
+    bool operator==(const ClassOrModuleRef &rhs) const;
+
+    bool operator!=(const ClassOrModuleRef &rhs) const;
+};
+CheckSize(ClassOrModuleRef, 4, 4);
+
 class Symbols {
     Symbols() = delete;
 

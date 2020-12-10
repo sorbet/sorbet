@@ -16,6 +16,7 @@ namespace sorbet::core {
 class NameRef;
 class Symbol;
 class SymbolRef;
+class ClassOrModuleRef;
 class GlobalSubstitution;
 class ErrorQueue;
 struct GlobalStateHash;
@@ -34,6 +35,7 @@ class GlobalState final {
     friend NameRef;
     friend Symbol;
     friend SymbolRef;
+    friend ClassOrModuleRef;
     friend File;
     friend FileRef;
     friend GlobalSubstitution;

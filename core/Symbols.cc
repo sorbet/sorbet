@@ -29,6 +29,14 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
     return !(rhs == *this);
 }
 
+bool ClassOrModuleRef::operator==(const ClassOrModuleRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool ClassOrModuleRef::operator!=(const ClassOrModuleRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
 vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
@@ -212,6 +220,16 @@ ConstSymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
     }
 }
 
+SymbolData ClassOrModuleRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
+    return SymbolData(gs.classAndModules[_id], gs);
+}
+
+ConstSymbolData ClassOrModuleRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
+    return ConstSymbolData(gs.classAndModules[_id], gs);
+}
+
 bool SymbolRef::isSynthetic() const {
     switch (this->kind()) {
         case Kind::ClassOrModule:
@@ -242,6 +260,8 @@ SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
     // If this fails, the symbol table is too big :(
     ENFORCE_NO_TIMER(id <= ID_MASK);
 }
+
+ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, u4 id) : _id(id) {}
 
 string SymbolRef::showRaw(const GlobalState &gs) const {
     return dataAllowingNone(gs)->showRaw(gs);
