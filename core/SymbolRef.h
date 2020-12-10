@@ -175,7 +175,7 @@ public:
 
     bool isSynthetic() const;
 
-    // If Kind is ClassOrModule, returns a ClassOrModuleRef. Otherwise, returns a non-existant ClassOrModuleRef.
+    // If Kind is ClassOrModule, returns a ClassOrModuleRef.
     ClassOrModuleRef asClassOrModuleRef() const;
 
     SymbolData data(GlobalState &gs) const;
