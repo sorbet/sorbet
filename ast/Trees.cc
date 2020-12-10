@@ -175,7 +175,7 @@ bool isa_declaration(const TreePtr &what) {
  * Desugar string concatenation into series of .to_s calls and string concatenations
  */
 
-ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::SymbolRef symbol, TreePtr name,
+ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOrModuleRef symbol, TreePtr name,
                    ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind)
     : loc(loc), declLoc(declLoc), symbol(symbol), kind(kind), rhs(std::move(rhs)), name(std::move(name)),
       ancestors(std::move(ancestors)) {
@@ -436,7 +436,7 @@ string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
         fmt::format_to(buf, "class ");
     }
     fmt::format_to(buf, "{}<{}> < ", name.toStringWithTabs(gs, tabs),
-                   this->symbol.dataAllowingNone(gs)->name.toString(gs));
+                   core::SymbolRef(this->symbol).dataAllowingNone(gs)->name.toString(gs));
     printArgs(gs, buf, this->ancestors, tabs);
 
     if (this->rhs.empty()) {
@@ -461,7 +461,7 @@ string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::format_to(buf, "kind = {}\n", kind == ClassDef::Kind::Module ? "module" : "class");
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "name = {}<{}>\n", name.showRaw(gs, tabs + 1),
-                   this->symbol.dataAllowingNone(gs)->name.showRaw(gs));
+                   core::SymbolRef(this->symbol).dataAllowingNone(gs)->name.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "ancestors = [");
     bool first = true;

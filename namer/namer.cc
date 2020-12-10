@@ -1501,21 +1501,23 @@ public:
 
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Kind::Class);
-            klass.symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
+            klass.symbol =
+                ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx).asClassOrModuleRef();
             ENFORCE(klass.symbol.exists());
         } else {
-            if (klass.symbol == core::Symbols::todo()) {
-                klass.symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass.name);
+            core::SymbolRef symbol = klass.symbol;
+            if (symbol == core::Symbols::todo()) {
+                symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass.name);
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
-                ENFORCE(klass.symbol == core::Symbols::root());
+                ENFORCE(symbol == core::Symbols::root());
             }
-            if (!klass.symbol.isClassOrModule()) {
-                auto klassSymbol =
-                    ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner, klass.symbol.data(ctx)->name);
-                ENFORCE(klassSymbol.exists());
-                klass.symbol = klassSymbol;
+            if (!symbol.isClassOrModule()) {
+                klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner, klass.symbol.data(ctx)->name);
+                ENFORCE(klass.symbol.exists());
+            } else {
+                klass.symbol = symbol.asClassOrModuleRef();
             }
         }
         return tree;

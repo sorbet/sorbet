@@ -1073,7 +1073,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
             pickle(p, c.loc);
             pickle(p, c.declLoc);
             p.putU1(static_cast<u2>(c.kind));
-            p.putU4(c.symbol.rawId());
+            p.putU4(c.symbol.id());
             p.putU4(c.ancestors.size());
             p.putU4(c.singletonAncestors.size());
             p.putU4(c.rhs.size());
@@ -1338,7 +1338,7 @@ ast::TreePtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalS
             auto loc = unpickleLocOffsets(p);
             auto declLoc = unpickleLocOffsets(p);
             auto kind = p.getU1();
-            auto symbol = SymbolRef::fromRaw(p.getU4());
+            auto symbol = ClassOrModuleRef::fromRaw(p.getU4());
             auto ancestorsSize = p.getU4();
             auto singletonAncestorsSize = p.getU4();
             auto rhsSize = p.getU4();
