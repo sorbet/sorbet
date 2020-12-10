@@ -334,7 +334,7 @@ std::string TypePtr::showWithMoreInfo(const GlobalState &gs) const {
 #undef SHOW_WITH_MORE_INFO
 }
 
-bool TypePtr::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool TypePtr::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
 #define DERIVES_FROM(T) return cast_type_nonnull<T>(*this).derivesFrom(gs, klass);
     GENERATE_TAG_SWITCH(tag(), DERIVES_FROM)
 #undef DERIVES_FROM

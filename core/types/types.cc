@@ -184,7 +184,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
             auto cdata = c.symbol.data(gs);
             if (c.symbol == core::Symbols::untyped()) {
                 result = from;
-            } else if (SymbolRef(c.symbol) == klass || c.derivesFrom(gs, klass)) {
+            } else if (SymbolRef(c.symbol) == klass || c.derivesFrom(gs, klass.asClassOrModuleRef())) {
                 result = Types::bottom();
             } else if (c.symbol.data(gs)->isClassOrModuleClass() && klass.data(gs)->isClassOrModuleClass() &&
                        !klass.data(gs)->derivesFrom(gs, c.symbol)) {
@@ -202,7 +202,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
             }
         },
         [&](const AppliedType &c) {
-            if (c.klass == klass || c.derivesFrom(gs, klass)) {
+            if (c.klass == klass || c.derivesFrom(gs, klass.asClassOrModuleRef())) {
                 result = Types::bottom();
             } else {
                 result = from;
@@ -333,7 +333,7 @@ LiteralType::LiteralType(double val) : floatval(val), literalKind(LiteralTypeKin
     categoryCounterInc("types.allocated", "literaltype");
 }
 
-LiteralType::LiteralType(SymbolRef klass, NameRef val)
+LiteralType::LiteralType(ClassOrModuleRef klass, NameRef val)
     : nameId(val.rawId()), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
     categoryCounterInc("types.allocated", "literaltype");
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
@@ -578,7 +578,7 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
-bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool TypeVar::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
 }
 
@@ -605,8 +605,7 @@ void AppliedType::_sanityCheck(const GlobalState &gs) const {
     }
 }
 
-bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    ENFORCE_NO_TIMER(klass.isClassOrModule());
+bool AppliedType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     ClassType und(this->klass.asClassOrModuleRef());
     return und.derivesFrom(gs, klass);
 }
@@ -620,12 +619,12 @@ SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition
     categoryCounterInc("types.allocated", "selftypeparam");
 }
 
-bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool LambdaParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise(
         "LambdaParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool SelfTypeParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     return false;
 }
 
@@ -682,7 +681,7 @@ AppliedType::AppliedType(SymbolRef klass, vector<TypePtr> targs) : klass(klass),
     categoryCounterInc("types.allocated", "appliedtype");
 }
 
-bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool SelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise("should never happen");
 }
 

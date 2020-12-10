@@ -26,15 +26,15 @@ DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, Dispatc
 }
 } // namespace
 
-bool LiteralType::derivesFrom(const GlobalState &gs, core::SymbolRef klass) const {
+bool LiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
     return underlying().derivesFrom(gs, klass);
 }
 
-bool ShapeType::derivesFrom(const GlobalState &gs, core::SymbolRef klass) const {
+bool ShapeType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
     return underlying().derivesFrom(gs, klass);
 }
 
-bool TupleType::derivesFrom(const GlobalState &gs, core::SymbolRef klass) const {
+bool TupleType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
     return underlying().derivesFrom(gs, klass);
 }
 

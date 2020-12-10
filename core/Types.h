@@ -327,7 +327,7 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
 };
 CheckSize(ClassType, 8, 8);
@@ -367,7 +367,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
 
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
     void _sanityCheck(const GlobalState &gs) const;
 
@@ -384,7 +384,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
 
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -405,7 +405,7 @@ public:
     AliasType(SymbolRef other);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
     const SymbolRef symbol;
     void _sanityCheck(const GlobalState &gs) const;
@@ -439,7 +439,7 @@ public:
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
     void _sanityCheck(const GlobalState &gs) const;
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 };
 CheckSize(SelfType, 8, 8);
 
@@ -465,9 +465,9 @@ public:
     const LiteralTypeKind literalKind;
     LiteralType(int64_t val);
     LiteralType(double val);
-    LiteralType(SymbolRef klass, NameRef val);
+    LiteralType(ClassOrModuleRef klass, NameRef val);
     TypePtr underlying() const;
-    bool derivesFrom(const GlobalState &gs, core::SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
     int64_t asInteger() const;
     double asFloat() const;
@@ -510,24 +510,14 @@ template <> inline TypePtr make_type<LiteralType, float>(float &&val) {
     return make_type<LiteralType>(static_cast<double>(val));
 }
 
-template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef &>(SymbolRef &&klass, NameRef &val) {
-    LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val.rawId());
-}
-
-template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef>(SymbolRef &&klass, NameRef &&val) {
-    LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val.rawId());
-}
-
 template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef &>(ClassOrModuleRef &&klass, NameRef &val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val._id);
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val.rawId());
 }
 
 template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef>(ClassOrModuleRef &&klass, NameRef &&val) {
     LiteralType type(klass, val);
-    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val._id);
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val.rawId());
 }
 
 template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &what) {
@@ -557,7 +547,7 @@ public:
     std::string show(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
 
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
@@ -573,7 +563,7 @@ public:
     std::string show(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
@@ -624,7 +614,7 @@ public:
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
@@ -672,7 +662,7 @@ public:
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr underlying() const;
-    bool derivesFrom(const GlobalState &gs, core::SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 };
 CheckSize(ShapeType, 64, 8);
 
@@ -700,7 +690,7 @@ public:
     // Return the type of the underlying array that this tuple decays into
     TypePtr elementType() const;
     TypePtr underlying() const;
-    bool derivesFrom(const GlobalState &gs, core::SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 };
 CheckSize(TupleType, 40, 8);
 
@@ -719,7 +709,7 @@ public:
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
 
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 };
@@ -742,7 +732,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
 
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;

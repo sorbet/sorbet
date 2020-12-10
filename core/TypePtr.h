@@ -311,7 +311,7 @@ public:
     // Like show, but can include extra info. Does not necessarily match what the user can type.
     std::string showWithMoreInfo(const GlobalState &gs) const;
 
-    bool derivesFrom(const GlobalState &gs, SymbolRef klass) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
     unsigned int hash(const GlobalState &gs) const;
 

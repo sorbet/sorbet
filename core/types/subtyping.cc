@@ -1317,22 +1317,22 @@ bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypeP
     return isAsSpecificAs(gs, t1, t2) && isAsSpecificAs(gs, t2, t1);
 }
 
-bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    if (symbol == Symbols::untyped() || symbol == klass.asClassOrModuleRef()) {
+bool ClassType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+    if (symbol == Symbols::untyped() || symbol == klass) {
         return true;
     }
-    return symbol.data(gs)->derivesFrom(gs, klass.asClassOrModuleRef());
+    return symbol.data(gs)->derivesFrom(gs, klass);
 }
 
-bool OrType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool OrType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     return left.derivesFrom(gs, klass) && right.derivesFrom(gs, klass);
 }
 
-bool AndType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool AndType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     return left.derivesFrom(gs, klass) || right.derivesFrom(gs, klass);
 }
 
-bool AliasType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool AliasType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise("AliasType.derivesfrom");
 }
 
@@ -1353,7 +1353,7 @@ void MetaType::_sanityCheck(const GlobalState &gs) const {
     this->wrapped.sanityCheck(gs);
 }
 
-bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     return false;
 }
 
