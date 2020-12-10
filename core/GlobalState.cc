@@ -1154,11 +1154,10 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) 
     return result;
 }
 
-SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.isClassOrModule());
+SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    SymbolData ownerScope = SymbolRef(owner).dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto flags = Symbol::Flags::STATIC_FIELD;

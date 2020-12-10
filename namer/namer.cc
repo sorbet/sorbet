@@ -1187,8 +1187,8 @@ class SymbolDefiner {
             }
         }
 
-        auto scope = squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner));
-        scope = ensureIsClass(ctx, scope, staticField.name, staticField.asgnLoc);
+        auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner)),
+                                   staticField.name, staticField.asgnLoc);
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;

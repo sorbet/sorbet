@@ -1204,7 +1204,7 @@ class ResolveTypeMembersAndFieldsWalk {
     static void resolveField(core::MutableContext ctx, ResolveFieldItem &job) {
         auto cast = job.cast;
 
-        core::SymbolRef scope;
+        core::ClassOrModuleRef scope;
         auto uid = job.ident;
         if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             if (!ctx.owner.data(ctx)->isClassOrModule()) {

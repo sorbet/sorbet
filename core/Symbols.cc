@@ -1255,8 +1255,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
                 if (isField()) {
                     current2 = const_cast<GlobalState &>(gs).enterFieldSymbol(this->loc(), this->owner, this->name);
                 } else {
-                    current2 =
-                        const_cast<GlobalState &>(gs).enterStaticFieldSymbol(this->loc(), this->owner, this->name);
+                    current2 = const_cast<GlobalState &>(gs).enterStaticFieldSymbol(
+                        this->loc(), this->owner.asClassOrModuleRef(), this->name);
                 }
                 break;
             case SymbolRef::Kind::TypeArgument:
