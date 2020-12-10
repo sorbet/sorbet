@@ -2057,7 +2057,7 @@ const vector<shared_ptr<File>> &GlobalState::getFiles() const {
     return files;
 }
 
-SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
+SymbolRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
     auto prevCount = methodsUsed();
     auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this), core::Names::staticInit());
     if (prevCount != methodsUsed()) {
@@ -2068,11 +2068,10 @@ SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
     return sym;
 }
 
-SymbolRef GlobalState::lookupStaticInitForClass(SymbolRef klass) const {
+SymbolRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
     auto classData = klass.data(*this);
-    ENFORCE(classData->isClassOrModule());
     auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
-    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
+    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.data(*this)->toString(*this));
     return ref;
 }
 

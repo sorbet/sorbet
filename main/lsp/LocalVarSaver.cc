@@ -14,8 +14,7 @@ ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr t
     } else if (ctx.owner == core::Symbols::root()) {
         owner = ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local.loc));
     } else {
-        ENFORCE(ctx.owner.isClassOrModule());
-        owner = ctx.state.lookupStaticInitForClass(ctx.owner);
+        owner = ctx.state.lookupStaticInitForClass(ctx.owner.asClassOrModuleRef());
     }
 
     bool lspQueryMatch = ctx.state.lspQuery.matchesVar(owner, local.localVariable);
@@ -28,7 +27,7 @@ ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr t
         if (enclosingMethod.isClassOrModule()) {
             enclosingMethod = ctx.owner == core::Symbols::root()
                                   ? ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local.loc))
-                                  : ctx.state.lookupStaticInitForClass(ctx.owner);
+                                  : ctx.state.lookupStaticInitForClass(ctx.owner.asClassOrModuleRef());
         }
 
         core::lsp::QueryResponse::pushQueryResponse(

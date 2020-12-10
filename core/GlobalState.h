@@ -106,10 +106,10 @@ public:
     SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
 
     SymbolRef staticInitForFile(Loc loc);
-    SymbolRef staticInitForClass(SymbolRef klass, Loc loc);
+    SymbolRef staticInitForClass(ClassOrModuleRef klass, Loc loc);
 
     SymbolRef lookupStaticInitForFile(Loc loc) const;
-    SymbolRef lookupStaticInitForClass(SymbolRef klass) const;
+    SymbolRef lookupStaticInitForClass(ClassOrModuleRef klass) const;
 
     NameRef enterNameUTF8(std::string_view nm);
     NameRef lookupNameUTF8(std::string_view nm) const;

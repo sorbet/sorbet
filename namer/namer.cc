@@ -1058,7 +1058,7 @@ class SymbolDefiner {
         }
     }
 
-    core::SymbolRef getClassSymbol(core::MutableContext ctx, const FoundClass &klass) {
+    core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const FoundClass &klass) {
         core::SymbolRef symbol = squashNames(ctx, klass.klass, ctx.owner.data(ctx)->enclosingClass(ctx));
         ENFORCE(symbol.exists());
 
@@ -1076,14 +1076,14 @@ class SymbolDefiner {
 
             auto origName = symbol.data(ctx)->name;
             ctx.state.mangleRenameSymbol(symbol, symbol.data(ctx)->name);
-            symbol = ctx.state.enterClassSymbol(declLoc, symbol.data(ctx)->owner.asClassOrModuleRef(), origName);
-            symbol.data(ctx)->setIsModule(isModule);
+            klassSymbol = ctx.state.enterClassSymbol(declLoc, symbol.data(ctx)->owner.asClassOrModuleRef(), origName);
+            klassSymbol.data(ctx)->setIsModule(isModule);
 
             auto oldSymCount = ctx.state.classAndModulesUsed();
-            auto newSingleton = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+            auto newSingleton = klassSymbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
             ENFORCE(newSingleton.id() >= oldSymCount,
                     "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
-            return symbol;
+            return klassSymbol;
         } else if (symbol.data(ctx)->isClassModuleSet() && isModule != symbol.data(ctx)->isClassOrModuleModule()) {
             if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.data(ctx)->show(ctx),
@@ -1102,7 +1102,7 @@ class SymbolDefiner {
                 emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol, renamed);
             }
         }
-        return symbol;
+        return symbol.asClassOrModuleRef();
     }
 
     core::SymbolRef insertClass(core::MutableContext ctx, const FoundClass &klass) {
