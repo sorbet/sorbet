@@ -49,7 +49,7 @@ public:
     ClassOrModuleRef() : _id(0){};
     ClassOrModuleRef(const GlobalState &from, u4 id);
 
-    u4 id() {
+    u4 id() const {
         return _id;
     }
 

@@ -171,7 +171,7 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
         typ,
         [&](const ClassType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::CLASS);
-            proto.set_class_full_name(t.symbol.show(gs));
+            proto.set_class_full_name(t.symbol.data(gs)->show(gs));
         },
         [&](const AndType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::AND);

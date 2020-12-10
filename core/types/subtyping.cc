@@ -1318,7 +1318,7 @@ bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypeP
 }
 
 bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    if (symbol == Symbols::untyped() || symbol == klass) {
+    if (symbol == Symbols::untyped() || symbol == klass.asClassOrModuleRef()) {
         return true;
     }
     return symbol.data(gs)->derivesFrom(gs, klass);

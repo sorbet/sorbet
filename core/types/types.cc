@@ -184,7 +184,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
             auto cdata = c.symbol.data(gs);
             if (c.symbol == core::Symbols::untyped()) {
                 result = from;
-            } else if (c.symbol == klass || c.derivesFrom(gs, klass)) {
+            } else if (SymbolRef(c.symbol) == klass || c.derivesFrom(gs, klass)) {
                 result = Types::bottom();
             } else if (c.symbol.data(gs)->isClassOrModuleClass() && klass.data(gs)->isClassOrModuleClass() &&
                        !klass.data(gs)->derivesFrom(gs, c.symbol)) {
@@ -313,7 +313,7 @@ std::optional<int> Types::getProcArity(const AppliedType &type) {
     return std::nullopt;
 }
 
-ClassType::ClassType(SymbolRef symbol) : symbol(symbol) {
+ClassType::ClassType(ClassOrModuleRef symbol) : symbol(symbol) {
     categoryCounterInc("types.allocated", "classtype");
     ENFORCE(symbol.exists());
 }
@@ -605,7 +605,8 @@ void AppliedType::_sanityCheck(const GlobalState &gs) const {
 }
 
 bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
-    ClassType und(this->klass);
+    ENFORCE_NO_TIMER(klass.isClassOrModule());
+    ClassType und(this->klass.asClassOrModuleRef());
     return und.derivesFrom(gs, klass);
 }
 

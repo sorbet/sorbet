@@ -2540,7 +2540,8 @@ class Enumerable_toH : public IntrinsicMethod {
 public:
     // Forward Enumerable.to_h to RubyType.enumerable_to_h[self]
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        auto hash = make_type<ClassType>(core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs));
+        auto hash = make_type<ClassType>(
+            core::Symbols::Sorbet_Private_Static().data(gs)->lookupSingletonClass(gs).asClassOrModuleRef());
         InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
         CallLocs locs{
             args.locs.file,

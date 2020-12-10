@@ -319,8 +319,8 @@ TYPE_INLINED(ClassType) {
 public:
     // `const` because this is an inlined type; the symbol is inlined into the TypePtr. The TypePtr must be modified
     // to update the type.
-    const SymbolRef symbol;
-    ClassType(SymbolRef symbol);
+    const ClassOrModuleRef symbol;
+    ClassType(ClassOrModuleRef symbol);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
@@ -332,22 +332,14 @@ public:
 };
 CheckSize(ClassType, 8, 8);
 
-template <> inline TypePtr make_type<ClassType, core::SymbolRef &>(core::SymbolRef &ref) {
-    return TypePtr(TypePtr::Tag::ClassType, ref.rawId(), 0);
-}
-
-template <> inline TypePtr make_type<ClassType, core::SymbolRef>(core::SymbolRef &&ref) {
-    return TypePtr(TypePtr::Tag::ClassType, ref.rawId(), 0);
-}
-
 template <> inline TypePtr make_type<ClassType, core::ClassOrModuleRef>(core::ClassOrModuleRef &&ref) {
-    return TypePtr(TypePtr::Tag::ClassType, SymbolRef(ref).rawId(), 0);
+    return TypePtr(TypePtr::Tag::ClassType, ref.id(), 0);
 }
 
 template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
     ENFORCE_NO_TIMER(isa_type<ClassType>(what));
     if (what.tag() == TypePtr::Tag::ClassType) {
-        return ClassType(core::SymbolRef::fromRaw(what.inlinedValue()));
+        return ClassType(core::ClassOrModuleRef::fromRaw(what.inlinedValue()));
     } else {
         // Subclasses of ClassType contain untyped with metadata.
         return ClassType(core::Symbols::untyped());

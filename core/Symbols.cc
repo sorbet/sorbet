@@ -77,7 +77,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
     // this happens e.g. in case this is a stub class
     auto ref = this->ref(gs);
     if (typeMembers().empty()) {
-        resultType = make_type<ClassType>(ref);
+        resultType = make_type<ClassType>(ref.asClassOrModuleRef());
     } else {
         vector<TypePtr> targs;
         targs.reserve(typeMembers().size());
@@ -1084,18 +1084,19 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     while ((orT = cast_type<OrType>(*iter))) {
         auto right = cast_type_nonnull<ClassType>(orT->right);
         ENFORCE(left);
-        if (right.symbol == classOfSubclass) {
+        if (right.symbol == classOfSubclass.asClassOrModuleRef()) {
             return;
         }
         iter = &orT->left;
     }
-    if (cast_type_nonnull<ClassType>(*iter).symbol == classOfSubclass) {
+    if (cast_type_nonnull<ClassType>(*iter).symbol == classOfSubclass.asClassOrModuleRef()) {
         return;
     }
     if (currentClasses != core::Types::bottom()) {
-        appliedType->targs[0] = OrType::make_shared(currentClasses, make_type<ClassType>(classOfSubclass));
+        appliedType->targs[0] =
+            OrType::make_shared(currentClasses, make_type<ClassType>(classOfSubclass.asClassOrModuleRef()));
     } else {
-        appliedType->targs[0] = make_type<ClassType>(classOfSubclass);
+        appliedType->targs[0] = make_type<ClassType>(classOfSubclass.asClassOrModuleRef());
     }
 }
 
@@ -1130,7 +1131,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
         auto classType = cast_type_nonnull<ClassType>(orType->right);
         auto subclass = classType.symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
-        result = Types::any(gs, make_type<ClassType>(subclass), result);
+        result = Types::any(gs, make_type<ClassType>(subclass.asClassOrModuleRef()), result);
         currentClasses = orType->left;
     }
 
@@ -1138,7 +1139,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
     auto lastClassType = cast_type_nonnull<ClassType>(currentClasses);
     auto subclass = lastClassType.symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
-    result = Types::any(gs, make_type<ClassType>(subclass), result);
+    result = Types::any(gs, make_type<ClassType>(subclass.asClassOrModuleRef()), result);
 
     return result;
 }
