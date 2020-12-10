@@ -118,7 +118,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
     return resultType;
 }
 
-bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
+bool Symbol::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
     if (isClassOrModuleLinearizationComputed()) {
         for (SymbolRef a : mixins()) {
             if (a == sym) {
@@ -133,7 +133,7 @@ bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
         }
     }
     if (this->superClass().exists()) {
-        return sym == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
+        return SymbolRef(sym) == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
     }
     return false;
 }
@@ -332,7 +332,7 @@ bool Symbol::addMixin(const GlobalState &gs, SymbolRef sym) {
         if (sym != superClass() && absl::c_find(mixins_, sym) == mixins_.end()) {
             auto parent = superClass();
             // Don't include as mixin if it derives from the parent class (as in GlobalPass.cc's `maybeAddMixin`)
-            if (!parent.exists() || !parent.data(gs)->derivesFrom(gs, sym)) {
+            if (!parent.exists() || !parent.data(gs)->derivesFrom(gs, sym.asClassOrModuleRef())) {
                 mixins_.emplace_back(sym);
                 unsetClassOrModuleLinearizationComputed();
             }

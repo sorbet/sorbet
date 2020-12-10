@@ -169,7 +169,7 @@ public:
         return typeParams;
     }
 
-    bool derivesFrom(const GlobalState &gs, SymbolRef sym) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const;
 
     // TODO(dmitry) perf: most calls to this method could be eliminated as part of perf work.
     SymbolRef ref(const GlobalState &gs) const;

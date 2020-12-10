@@ -243,8 +243,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return OrType::make_shared(t1, t2);
         }
 
-        bool ltr = a1->klass == a2->klass || a2->klass.data(gs)->derivesFrom(gs, a1->klass);
-        bool rtl = !ltr && a1->klass.data(gs)->derivesFrom(gs, a2->klass);
+        bool ltr = a1->klass == a2->klass || a2->klass.data(gs)->derivesFrom(gs, a1->klass.asClassOrModuleRef());
+        bool rtl = !ltr && a1->klass.data(gs)->derivesFrom(gs, a2->klass.asClassOrModuleRef());
         if (!rtl && !ltr) {
             return OrType::make_shared(t1, t2);
         }
@@ -498,8 +498,8 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto c2 = cast_type_nonnull<ClassType>(t2);
     categoryCounterInc("lub", "<class>");
 
-    SymbolRef sym1 = c1.symbol;
-    SymbolRef sym2 = c2.symbol;
+    auto sym1 = c1.symbol;
+    auto sym2 = c2.symbol;
     if (sym1 == sym2 || sym2.data(gs)->derivesFrom(gs, sym1)) {
         categoryCounterInc("lub.<class>.collapsed", "yes");
         return t1;
@@ -541,8 +541,8 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto c2 = cast_type_nonnull<ClassType>(t2);
     categoryCounterInc("glb", "<class>");
 
-    SymbolRef sym1 = c1.symbol;
-    SymbolRef sym2 = c2.symbol;
+    auto sym1 = c1.symbol;
+    auto sym2 = c2.symbol;
     if (sym1 == sym2 || sym1.data(gs)->derivesFrom(gs, sym2)) {
         categoryCounterInc("glb.<class>.collapsed", "yes");
         return t1;
@@ -844,8 +844,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             }
             return Types::bottom();
         }
-        bool rtl = a1->klass == a2->klass || a1->klass.data(gs)->derivesFrom(gs, a2->klass);
-        bool ltr = !rtl && a2->klass.data(gs)->derivesFrom(gs, a1->klass);
+        bool rtl = a1->klass == a2->klass || a1->klass.data(gs)->derivesFrom(gs, a2->klass.asClassOrModuleRef());
+        bool ltr = !rtl && a2->klass.data(gs)->derivesFrom(gs, a1->klass.asClassOrModuleRef());
         if (!rtl && !ltr) {
             if (a1->klass.data(gs)->isClassOrModuleClass() && a2->klass.data(gs)->isClassOrModuleClass()) {
                 // At this point, the two types are both classes, and unrelated
@@ -939,7 +939,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 bool classSymbolIsAsGoodAs(const GlobalState &gs, SymbolRef c1, SymbolRef c2) {
     ENFORCE(c1.isClassOrModule());
     ENFORCE(c2.isClassOrModule());
-    return c1 == c2 || c1.data(gs)->derivesFrom(gs, c2);
+    return c1 == c2 || c1.data(gs)->derivesFrom(gs, c2.asClassOrModuleRef());
 }
 
 void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypePtr &ty, const TypePtr &blame) {
@@ -1321,7 +1321,7 @@ bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
     if (symbol == Symbols::untyped() || symbol == klass.asClassOrModuleRef()) {
         return true;
     }
-    return symbol.data(gs)->derivesFrom(gs, klass);
+    return symbol.data(gs)->derivesFrom(gs, klass.asClassOrModuleRef());
 }
 
 bool OrType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {

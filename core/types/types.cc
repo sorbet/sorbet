@@ -499,7 +499,8 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, Symb
                                                      const vector<TypePtr> &targs, SymbolRef asIf) {
     ENFORCE(asIf.isClassOrModule());
     ENFORCE(what.isClassOrModule());
-    ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf) || asIf.data(gs)->derivesFrom(gs, what),
+    ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf.asClassOrModuleRef()) ||
+                asIf.data(gs)->derivesFrom(gs, what.asClassOrModuleRef()),
             what.data(gs)->name.showRaw(gs), asIf.data(gs)->name.showRaw(gs));
     InlinedVector<SymbolRef, 4> currentAlignment;
     if (targs.empty()) {
@@ -548,8 +549,8 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
         return what;
     }
 
-    ENFORCE(inWhat == fromWhat || inWhat.data(gs)->derivesFrom(gs, fromWhat) ||
-                fromWhat.data(gs)->derivesFrom(gs, inWhat),
+    ENFORCE(inWhat == fromWhat || inWhat.data(gs)->derivesFrom(gs, fromWhat.asClassOrModuleRef()) ||
+                fromWhat.data(gs)->derivesFrom(gs, inWhat.asClassOrModuleRef()),
             "\n{}\nis unrelated to\n\n{}", fromWhat.data(gs)->toString(gs), inWhat.data(gs)->toString(gs));
 
     auto currentAlignment = alignBaseTypeArgs(gs, originalOwner, targs, inWhat);

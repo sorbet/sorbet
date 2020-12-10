@@ -502,7 +502,7 @@ private:
                 e.addErrorLine(resolved.data(ctx)->loc(), "Class definition");
             }
             resolved = stubSymbolForAncestor(job);
-        } else if (resolved.data(ctx)->derivesFrom(ctx, job.klass)) {
+        } else if (resolved.data(ctx)->derivesFrom(ctx, job.klass.asClassOrModuleRef())) {
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
                             job.klass.data(ctx)->show(ctx), resolved.data(ctx)->show(ctx));

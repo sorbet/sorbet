@@ -21,9 +21,9 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, c
         return tparam;
     } else {
         core::SymbolRef cursor;
-        if (tparam.data(gs)->owner.data(gs)->derivesFrom(gs, klass)) {
+        if (tparam.data(gs)->owner.data(gs)->derivesFrom(gs, klass.asClassOrModuleRef())) {
             cursor = tparam.data(gs)->owner;
-        } else if (klass.data(gs)->derivesFrom(gs, tparam.data(gs)->owner)) {
+        } else if (klass.data(gs)->derivesFrom(gs, tparam.data(gs)->owner.asClassOrModuleRef())) {
             cursor = klass;
         }
         while (true) {
@@ -259,7 +259,7 @@ int maybeAddMixin(core::GlobalState &gs, core::SymbolRef forSym, InlinedVector<c
     if (forSym == mixin) {
         Exception::raise("Loop in mixins");
     }
-    if (parent.data(gs)->derivesFrom(gs, mixin)) {
+    if (parent.data(gs)->derivesFrom(gs, mixin.asClassOrModuleRef())) {
         return pos;
     }
     auto fnd = find(mixinList.begin(), mixinList.end(), mixin);
@@ -317,8 +317,9 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         data->setClassOrModuleLinearizationComputed();
         if (debug_mode) {
             for (auto oldMixin : currentMixins) {
-                ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), "{} no longer derives from {}",
-                        ofClass.data(gs)->showFullName(gs), oldMixin.data(gs)->showFullName(gs));
+                ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin.asClassOrModuleRef()),
+                        "{} no longer derives from {}", ofClass.data(gs)->showFullName(gs),
+                        oldMixin.data(gs)->showFullName(gs));
             }
         }
     }
