@@ -17,6 +17,7 @@ class NameRef;
 class Symbol;
 class SymbolRef;
 class ClassOrModuleRef;
+class MethodRef;
 class GlobalSubstitution;
 class ErrorQueue;
 struct GlobalStateHash;
@@ -36,6 +37,7 @@ class GlobalState final {
     friend Symbol;
     friend SymbolRef;
     friend ClassOrModuleRef;
+    friend MethodRef;
     friend File;
     friend FileRef;
     friend GlobalSubstitution;

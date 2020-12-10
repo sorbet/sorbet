@@ -459,7 +459,7 @@ private:
         }
     }
 
-    static core::SymbolRef stubSymbolForAncestor(const AncestorResolutionItem &item) {
+    static core::ClassOrModuleRef stubSymbolForAncestor(const AncestorResolutionItem &item) {
         if (item.isSuperclass) {
             return core::Symbols::StubSuperClass();
         } else {
@@ -473,68 +473,72 @@ private:
             return false;
         }
 
-        core::SymbolRef resolved;
-        if (ancestorSym.data(ctx)->isTypeAlias()) {
-            if (!lastRun) {
-                return false;
+        core::ClassOrModuleRef resolvedClass;
+        {
+            core::SymbolRef resolved;
+            if (ancestorSym.data(ctx)->isTypeAlias()) {
+                if (!lastRun) {
+                    return false;
+                }
+                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
+                    e.setHeader("Superclasses and mixins may not be type aliases");
+                }
+                resolved = stubSymbolForAncestor(job);
+            } else {
+                resolved = ancestorSym.data(ctx)->dealias(ctx);
             }
-            if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins may not be type aliases");
+
+            if (!resolved.isClassOrModule()) {
+                if (!lastRun) {
+                    return false;
+                }
+                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
+                    e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
+                }
+                resolved = stubSymbolForAncestor(job);
             }
-            resolved = stubSymbolForAncestor(job);
-        } else {
-            resolved = ancestorSym.data(ctx)->dealias(ctx);
+            resolvedClass = resolved.asClassOrModuleRef();
         }
 
-        if (!resolved.isClassOrModule()) {
-            if (!lastRun) {
-                return false;
-            }
-            if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
-            }
-            resolved = stubSymbolForAncestor(job);
-        }
-
-        if (resolved == job.klass) {
+        if (resolvedClass == job.klass) {
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.data(ctx)->show(ctx));
-                e.addErrorLine(resolved.data(ctx)->loc(), "Class definition");
+                e.addErrorLine(resolvedClass.data(ctx)->loc(), "Class definition");
             }
-            resolved = stubSymbolForAncestor(job);
-        } else if (resolved.data(ctx)->derivesFrom(ctx, job.klass)) {
+            resolvedClass = stubSymbolForAncestor(job);
+        } else if (resolvedClass.data(ctx)->derivesFrom(ctx, job.klass)) {
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
-                            job.klass.data(ctx)->show(ctx), resolved.data(ctx)->show(ctx));
+                            job.klass.data(ctx)->show(ctx), resolvedClass.data(ctx)->show(ctx));
                 e.addErrorLine(job.klass.data(ctx)->loc(), "One definition");
-                e.addErrorLine(resolved.data(ctx)->loc(), "Other definition");
+                e.addErrorLine(resolvedClass.data(ctx)->loc(), "Other definition");
             }
-            resolved = stubSymbolForAncestor(job);
+            resolvedClass = stubSymbolForAncestor(job);
         }
 
         bool ancestorPresent = true;
         if (job.isSuperclass) {
-            if (resolved == core::Symbols::todo()) {
+            if (resolvedClass == core::Symbols::todo()) {
                 // No superclass specified
                 ancestorPresent = false;
             } else if (!job.klass.data(ctx)->superClass().exists() ||
                        job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
-                       job.klass.data(ctx)->superClass() == resolved.asClassOrModuleRef()) {
-                job.klass.data(ctx)->setSuperClass(resolved.asClassOrModuleRef());
+                       job.klass.data(ctx)->superClass() == resolvedClass) {
+                job.klass.data(ctx)->setSuperClass(resolvedClass);
             } else {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
                     e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.data(ctx)->show(ctx),
-                                job.klass.data(ctx)->superClass().data(ctx)->show(ctx), resolved.show(ctx));
+                                job.klass.data(ctx)->superClass().data(ctx)->show(ctx),
+                                resolvedClass.data(ctx)->show(ctx));
                 }
             }
         } else {
-            ENFORCE(resolved.isClassOrModule());
-            if (!job.klass.data(ctx)->addMixin(ctx, resolved.asClassOrModuleRef())) {
+            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass)) {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
-                                resolved.data(ctx)->show(ctx));
-                    e.addErrorLine(resolved.data(ctx)->loc(), "`{}` defined as a class here",
-                                   resolved.data(ctx)->show(ctx));
+                                resolvedClass.data(ctx)->show(ctx));
+                    e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
+                                   resolvedClass.data(ctx)->show(ctx));
                 }
             }
         }
@@ -1062,7 +1066,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     struct ResolveAttachedClassItem {
         core::SymbolRef owner;
-        core::SymbolRef klass;
+        core::ClassOrModuleRef klass;
         core::FileRef file;
     };
 
@@ -1441,20 +1445,19 @@ class ResolveTypeMembersAndFieldsWalk {
         // Once the owner has had all of its type members resolved, resolve the
         // AttachedClass on its singleton.
         if (isGenericResolved(ctx, owner)) {
-            resolveAttachedClass(ctx, owner, resolvedAttachedClasses);
+            resolveAttachedClass(ctx, owner.asClassOrModuleRef(), resolvedAttachedClasses);
         }
     }
 
-    static void resolveAttachedClass(core::MutableContext ctx, core::SymbolRef sym,
+    static void resolveAttachedClass(core::MutableContext ctx, core::ClassOrModuleRef sym,
                                      vector<bool> &resolvedAttachedClasses) {
-        ENFORCE(sym.isClassOrModule());
         // Avoid trying to re-resolve symbols that are already resolved.
         // This avoids (relatively) expensive findMember operations.
-        if (resolvedAttachedClasses[sym.classOrModuleIndex()] == true) {
+        if (resolvedAttachedClasses[sym.id()] == true) {
             return;
         }
 
-        resolvedAttachedClasses[sym.classOrModuleIndex()] = true;
+        resolvedAttachedClasses[sym.id()] = true;
 
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         if (!singleton.exists()) {

@@ -174,10 +174,11 @@ core::Loc smallestLocWithin(core::Loc callLoc, const core::TypeAndOrigins &argTp
 }
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
-                               SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
-                               const TypePtr &selfType, const vector<TypePtr> &targs, Loc loc,
+                               ClassOrModuleRef inClass, SymbolRef method, const TypeAndOrigins &argTpe,
+                               const ArgInfo &argSym, const TypePtr &selfType, const vector<TypePtr> &targs, Loc loc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
-    TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
+    TypePtr expectedType =
+        Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner.asClassOrModuleRef(), inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(gs, method);
     }
@@ -235,7 +236,7 @@ int getArity(const GlobalState &gs, SymbolRef method) {
 
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
-SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef primary, u2 numPosArgs,
+SymbolRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, SymbolRef primary, u2 numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType,
                         const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
@@ -282,8 +283,9 @@ SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef prim
                     continue;
                 }
 
-                auto argType = Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments()[i].type,
-                                                           candidate.data(gs)->owner, inClass, targs);
+                auto argType =
+                    Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments()[i].type,
+                                                candidate.data(gs)->owner.asClassOrModuleRef(), inClass, targs);
                 if (argType.isFullyDefined() && !Types::isSubType(gs, arg, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -502,7 +504,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalSta
 //  - We never allow a non-shaped Hash to satisfy keyword arguments;
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : untyped
 //    (with a subtype check on the key type, once we have generics)
-DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::SymbolRef symbol,
+DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
                                   const vector<TypePtr> &targs) {
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
@@ -1019,7 +1021,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         const auto &bspec = data->arguments().back();
         ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg: {}", data->show(gs));
 
-        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner, symbol, targs);
+        TypePtr blockType =
+            Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner.asClassOrModuleRef(), symbol, targs);
         if (!blockType) {
             blockType = Types::untyped(gs, method);
         }
@@ -1051,8 +1054,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         } else if (args.args.size() == 2 && method.data(gs)->name == Names::squareBracketsEq()) {
             resultType = args.args[1]->type;
         } else {
-            resultType =
-                Types::resultTypeAsSeenFrom(gs, method.data(gs)->resultType, method.data(gs)->owner, symbol, targs);
+            resultType = Types::resultTypeAsSeenFrom(gs, method.data(gs)->resultType,
+                                                     method.data(gs)->owner.asClassOrModuleRef(), symbol, targs);
         }
     }
     if (args.block == nullptr) {
@@ -1104,7 +1107,7 @@ DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchAr
     return dispatchCallSymbol(gs, args, this->klass, this->targs);
 }
 
-TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name, const vector<TypePtr> &targs) {
+TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name, const vector<TypePtr> &targs) {
     SymbolRef method = klass.data(gs)->findMemberTransitive(gs, name);
 
     if (!method.exists()) {
@@ -1118,13 +1121,14 @@ TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name,
         if (arg.flags.isRepeated) {
             ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     data->toString(gs));
-            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
+            return Types::arrayOf(
+                gs, Types::resultTypeAsSeenFrom(gs, arg.type, data->owner.asClassOrModuleRef(), klass, targs));
         }
         ENFORCE(!arg.flags.isKeyword, "getCallArguments does not support kwargs: {}", data->toString(gs));
         if (arg.flags.isBlock) {
             continue;
         }
-        args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
+        args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner.asClassOrModuleRef(), klass, targs));
     }
     return TupleType::build(gs, move(args));
 }

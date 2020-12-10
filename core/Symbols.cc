@@ -37,6 +37,14 @@ bool ClassOrModuleRef::operator!=(const ClassOrModuleRef &rhs) const {
     return rhs._id != this->_id;
 }
 
+bool MethodRef::operator==(const MethodRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool MethodRef::operator!=(const MethodRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
 vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
@@ -225,6 +233,11 @@ SymbolData ClassOrModuleRef::dataAllowingNone(GlobalState &gs) const {
     return SymbolData(gs.classAndModules[_id], gs);
 }
 
+MethodRef SymbolRef::asMethodRef() const {
+    ENFORCE_NO_TIMER(kind() == Kind::Method);
+    return MethodRef::fromRaw(unsafeTableIndex());
+}
+
 SymbolData ClassOrModuleRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     return dataAllowingNone(gs);
@@ -238,6 +251,18 @@ ConstSymbolData ClassOrModuleRef::data(const GlobalState &gs) const {
 ConstSymbolData ClassOrModuleRef::dataAllowingNone(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
     return ConstSymbolData(gs.classAndModules[_id], gs);
+}
+
+SymbolData MethodRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.methodsUsed());
+    return SymbolData(gs.methods[_id], gs);
+}
+
+ConstSymbolData MethodRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.methodsUsed());
+    return ConstSymbolData(gs.methods[_id], gs);
 }
 
 bool SymbolRef::isSynthetic() const {
@@ -273,7 +298,11 @@ SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
 
 SymbolRef::SymbolRef(ClassOrModuleRef kls) : SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, kls.id()) {}
 
+SymbolRef::SymbolRef(MethodRef kls) : SymbolRef(nullptr, SymbolRef::Kind::Method, kls.id()) {}
+
 ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, u4 id) : _id(id) {}
+
+MethodRef::MethodRef(const GlobalState &from, u4 id) : _id(id) {}
 
 string SymbolRef::showRaw(const GlobalState &gs) const {
     return dataAllowingNone(gs)->showRaw(gs);
@@ -544,12 +573,11 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         // find the closest by global dfs.
         auto globalBestDistance = best.distance - 1;
         vector<Symbol::FuzzySearchResult> globalBest;
-        vector<SymbolRef> yetToGoDeeper;
+        vector<ClassOrModuleRef> yetToGoDeeper;
         yetToGoDeeper.emplace_back(Symbols::root());
         while (!yetToGoDeeper.empty()) {
-            const SymbolRef thisIter = yetToGoDeeper.back();
+            const ClassOrModuleRef thisIter = yetToGoDeeper.back();
             yetToGoDeeper.pop_back();
-            ENFORCE(thisIter.isClassOrModule());
             for (auto member : thisIter.data(gs)->membersStableOrderSlow(gs)) {
                 if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
                     member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
@@ -570,7 +598,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                         globalBest.emplace_back(best);
                     }
                     if (member.second.isClassOrModule()) {
-                        yetToGoDeeper.emplace_back(member.second);
+                        yetToGoDeeper.emplace_back(member.second.asClassOrModuleRef());
                     }
                 }
             }

@@ -76,9 +76,9 @@ vector<core::SymbolRef> getSubclasses(const core::GlobalState &gs, core::SymbolR
 
 // Follow superClass links until we find the highest class that contains the given method. In other words we find the
 // "root" of the tree of classes that define a method.
-core::SymbolRef findRootClassWithMethod(const core::GlobalState &gs, core::SymbolRef klass, core::NameRef methodName) {
+core::SymbolRef findRootClassWithMethod(const core::GlobalState &gs, core::ClassOrModuleRef klass,
+                                        core::NameRef methodName) {
     auto root = klass;
-    ENFORCE(klass.isClassOrModule());
     while (true) {
         auto tmp = root.data(gs)->superClass();
         ENFORCE(tmp.exists()); // everything derives from Kernel::Object so we can't ever reach the actual top type

@@ -128,11 +128,11 @@ public:
     static bool canBeFalsy(const GlobalState &gs, const TypePtr &what);
     enum class Combinator { OR, AND };
 
-    static TypePtr resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, SymbolRef fromWhat,
-                                        SymbolRef inWhat, const std::vector<TypePtr> &targs);
+    static TypePtr resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
+                                        ClassOrModuleRef inWhat, const std::vector<TypePtr> &targs);
 
-    static InlinedVector<SymbolRef, 4> alignBaseTypeArgs(const GlobalState &gs, SymbolRef what,
-                                                         const std::vector<TypePtr> &targs, SymbolRef asIf);
+    static InlinedVector<SymbolRef, 4> alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
+                                                         const std::vector<TypePtr> &targs, ClassOrModuleRef asIf);
     // Extract the return value type from a proc.
     static TypePtr getProcReturnType(const GlobalState &gs, const TypePtr &procType);
     static TypePtr instantiate(const GlobalState &gs, const TypePtr &what, const InlinedVector<SymbolRef, 4> &params,

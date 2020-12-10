@@ -300,33 +300,30 @@ struct SymbolFinderResult {
     unique_ptr<FoundDefinitions> names;
 };
 
-core::SymbolRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flags) {
-    core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+core::ClassOrModuleRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flags) {
+    auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
     if (owner == core::Symbols::root()) {
         // Root methods end up going on object
         owner = core::Symbols::Object();
     }
 
     if (flags.isSelfMethod) {
-        if (owner.isClassOrModule()) {
-            owner = owner.data(ctx)->lookupSingletonClass(ctx);
-        }
+        owner = owner.data(ctx)->lookupSingletonClass(ctx);
     }
     ENFORCE(owner.exists());
-    ENFORCE(owner.isClassOrModule());
     return owner;
 }
 
 // Returns the SymbolRef corresponding to the class `self.class`, unless the
 // context is a class, in which case return it.
-core::SymbolRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat) {
+core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat) {
     core::SymbolRef owner = ofWhat;
     while (true) {
         ENFORCE(owner.exists(), "non-existing owner in contextClass");
         const auto &data = owner.data(gs);
 
         if (data->isClassOrModule()) {
-            break;
+            return owner.asClassOrModuleRef();
         }
         if (data->name == core::Names::staticInit()) {
             owner = data->owner.data(gs)->attachedClass(gs);
@@ -334,7 +331,6 @@ core::SymbolRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat
             owner = data->owner;
         }
     }
-    return owner;
 }
 
 /**
@@ -719,9 +715,8 @@ class SymbolDefiner {
     vector<core::SymbolRef> definedMethods;
 
     // Returns a symbol to the referenced name. Name must be a class or module.
-    core::SymbolRef squashNames(core::MutableContext ctx, FoundDefinitionRef ref, core::SymbolRef owner) {
-        // Prerequisite: Owner is a class or module.
-        ENFORCE(owner.isClassOrModule());
+    // Prerequisite: Owner is a class or module.
+    core::SymbolRef squashNames(core::MutableContext ctx, FoundDefinitionRef ref, core::ClassOrModuleRef owner) {
         switch (ref.kind()) {
             case DefinitionKind::Empty:
                 return owner;

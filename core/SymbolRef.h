@@ -74,6 +74,36 @@ public:
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
+class MethodRef final {
+    u4 _id;
+
+public:
+    MethodRef() : _id(0){};
+    MethodRef(const GlobalState &from, u4 id);
+
+    u4 id() const {
+        return _id;
+    }
+
+    bool exists() const {
+        return _id != 0;
+    }
+
+    static MethodRef fromRaw(u4 id) {
+        MethodRef ref;
+        ref._id = id;
+        return ref;
+    }
+
+    SymbolData data(GlobalState &gs) const;
+    ConstSymbolData data(const GlobalState &gs) const;
+
+    bool operator==(const MethodRef &rhs) const;
+
+    bool operator!=(const MethodRef &rhs) const;
+};
+CheckSize(MethodRef, 4, 4);
+
 class SymbolRef final {
     friend class GlobalState;
     friend class Symbol;
@@ -160,6 +190,7 @@ public:
     // This constructor is not marked explicit so that we can implicitly convert ClassOrModuleRef to SymbolRefs as
     // method arguments. This conversion is always safe and never throws.
     SymbolRef(ClassOrModuleRef kls);
+    SymbolRef(MethodRef kls);
     SymbolRef() : _id(0){};
 
     // From experimentation, in the common case, methods typically have 2 or fewer arguments.
@@ -184,6 +215,9 @@ public:
         ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
         return ClassOrModuleRef::fromRaw(unsafeTableIndex());
     }
+
+    // If Kind is Method, returns a MethodRef.
+    MethodRef asMethodRef() const;
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
