@@ -1,0 +1,20 @@
+# typed: true
+# assert-slow-path: true
+
+module A
+  def foo_a; end
+end
+
+module B
+  extend T::Helpers
+
+  requires_ancestor A
+
+  def foo_b
+    foo_a
+  end
+end
+
+class C # error: `C` must include `A` (required by `B`)
+  include B
+end

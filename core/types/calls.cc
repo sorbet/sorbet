@@ -518,6 +518,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     SymbolRef mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
 
     if (!mayBeOverloaded.exists()) {
+        // Before raising any error, we look if the method exists in all required ancestors by this symbol
+        auto ancestors = symbol.data(gs)->requiredAncestorsTransitive(gs);
+        for (auto ancst : ancestors) {
+            mayBeOverloaded = ancst.symbol.data(gs)->findMemberTransitive(gs, args.name);
+            if (mayBeOverloaded.exists()) {
+                break;
+            }
+        }
+    }
+
+    if (!mayBeOverloaded.exists()) {
         if (args.name == Names::initialize()) {
             // Special-case initialize(). We should define this on
             // `BasicObject`, but our method-resolution order is wrong, and
