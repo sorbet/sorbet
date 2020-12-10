@@ -90,8 +90,8 @@ public:
     SymbolRef lookupTypeMemberSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER);
     }
-    SymbolRef lookupClassSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE);
+    ClassOrModuleRef lookupClassSymbol(SymbolRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE).asClassOrModuleRef();
     }
     SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
@@ -289,7 +289,7 @@ private:
 
     void expandNames(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize);
 
-    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().id(), bool isModule = false);
+    ClassOrModuleRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().id(), bool isModule = false);
 
     SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
     SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;

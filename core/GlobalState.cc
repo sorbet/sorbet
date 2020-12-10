@@ -28,7 +28,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
+ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to Symbols::root().members later.
     SymbolRef symRef = SymbolRef(this, SymbolRef::Kind::ClassOrModule, classAndModules.size());
@@ -44,7 +44,7 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
     if (symRef.classOrModuleIndex() > Symbols::root().id()) {
         Symbols::root().data(*this)->members()[nameId] = symRef;
     }
-    return symRef;
+    return symRef.asClassOrModuleRef();
 }
 
 atomic<int> globalStateIdCounter(1);
@@ -748,8 +748,8 @@ void GlobalState::initEmpty() {
     for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
         string name = absl::StrCat("Proc", arity);
         auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc().id());
-        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: {} got: {} expected: {}", arity,
-                id.classOrModuleIndex(), Symbols::Proc(arity).id());
+        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: {} got: {} expected: {}", arity, id.id(),
+                Symbols::Proc(arity).id());
         id.data(*this)->singletonClass(*this);
     }
 
