@@ -592,6 +592,7 @@ public:
 
     // Associate a required ancestor with the loc it's required at
     struct RequiredAncestor {
+        SymbolRef origin; // Only used during transitive lookups
         SymbolRef symbol;
         Loc loc;
 
@@ -600,6 +601,9 @@ public:
 
     // Locally required ancestors by this class or module
     std::vector<RequiredAncestor> requiredAncestors(const GlobalState &gs) const;
+
+    // All required ancestors by this class or module
+    std::vector<RequiredAncestor> requiredAncestorsTransitive(const GlobalState &gs) const;
 
     // if dealiasing fails here, then we return Untyped instead
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const {

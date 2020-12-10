@@ -1231,6 +1231,57 @@ vector<Symbol::RequiredAncestor> Symbol::requiredAncestors(const GlobalState &gs
     return res;
 }
 
+// All required ancestors by this class or module
+vector<Symbol::RequiredAncestor> requiredAncestorsTransitiveInternal(const GlobalState &gs, SymbolRef sym,
+                                                                     std::vector<SymbolRef> &seen) {
+    std::vector<Symbol::RequiredAncestor> res;
+
+    if (absl::c_find(seen, sym) != seen.end()) {
+        return res; // Break recursive loops if we already visited this ancestor
+    }
+    seen.emplace_back(sym);
+
+    for (auto ancst : sym.data(gs)->requiredAncestors(gs)) {
+        ancst.origin = sym;
+        res.emplace_back(ancst);
+        for (auto sancst : requiredAncestorsTransitiveInternal(gs, ancst.symbol, seen)) {
+            if (sancst.symbol == sym) {
+                continue;
+            }
+            res.emplace_back(sancst);
+        }
+    }
+
+    auto parent = sym.data(gs)->superClass();
+    if (parent.exists()) {
+        for (auto ancst : requiredAncestorsTransitiveInternal(gs, parent, seen)) {
+            if (ancst.symbol == sym) {
+                continue;
+            }
+            res.emplace_back(ancst);
+        }
+    }
+
+    for (auto mixin : sym.data(gs)->mixins()) {
+        for (auto ancst : mixin.data(gs)->requiredAncestors(gs)) {
+            if (ancst.symbol == sym) {
+                continue;
+            }
+            ancst.origin = mixin;
+            res.emplace_back(ancst);
+        }
+    }
+
+    return res;
+}
+
+// All required ancestors by this class or module
+vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitive(const GlobalState &gs) const {
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
+    std::vector<SymbolRef> seen;
+    return requiredAncestorsTransitiveInternal(gs, this->ref(gs), seen);
+}
+
 SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
     if (isa_type<AliasType>(resultType)) {
         auto alias = cast_type_nonnull<AliasType>(resultType);
