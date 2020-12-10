@@ -118,7 +118,7 @@ private:
     };
     struct AncestorResolutionItem {
         ast::ConstantLit *ancestor;
-        core::SymbolRef klass;
+        core::ClassOrModuleRef klass;
         core::FileRef file;
 
         bool isSuperclass; // true if superclass, false for mixin
@@ -502,7 +502,7 @@ private:
                 e.addErrorLine(resolved.data(ctx)->loc(), "Class definition");
             }
             resolved = stubSymbolForAncestor(job);
-        } else if (resolved.data(ctx)->derivesFrom(ctx, job.klass.asClassOrModuleRef())) {
+        } else if (resolved.data(ctx)->derivesFrom(ctx, job.klass)) {
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
                             job.klass.data(ctx)->show(ctx), resolved.data(ctx)->show(ctx));
@@ -607,7 +607,7 @@ private:
         ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
     }
 
-    void transformAncestor(core::Context ctx, core::SymbolRef klass, ast::TreePtr &ancestor, bool isInclude,
+    void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::TreePtr &ancestor, bool isInclude,
                            bool isSuperclass = false) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
             auto scopeTmp = nesting_;
@@ -689,14 +689,15 @@ public:
         for (auto &ancst : original.ancestors) {
             bool isSuperclass = (original.kind == ast::ClassDef::Kind::Class && &ancst == &original.ancestors.front() &&
                                  !klass.data(ctx)->isSingletonClass(ctx));
-            transformAncestor(isSuperclass ? ctx : ctx.withOwner(klass), klass, ancst, isInclude, isSuperclass);
+            transformAncestor(isSuperclass ? ctx : ctx.withOwner(klass), klass.asClassOrModuleRef(), ancst, isInclude,
+                              isSuperclass);
         }
 
         auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
         isInclude = false;
         for (auto &ancst : original.singletonAncestors) {
             ENFORCE(singleton.exists());
-            transformAncestor(ctx.withOwner(klass), singleton, ancst, isInclude);
+            transformAncestor(ctx.withOwner(klass), singleton.asClassOrModuleRef(), ancst, isInclude);
         }
 
         nesting_ = nesting_->parent;
