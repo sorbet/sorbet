@@ -87,7 +87,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::noField());
     id = enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeArgument(), Variance::CoVariant);
     ENFORCE(id == Symbols::noTypeArgument());
-    id = enterTypeMember(Loc::none(), Symbols::noSymbol(), Names::Constants::NoTypeMember(), Variance::CoVariant);
+    id =
+        enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::NoTypeMember(), Variance::CoVariant);
     ENFORCE(id == Symbols::noTypeMember());
 
     id = synthesizeClass(core::Names::Constants::Top(), 0);
@@ -966,10 +967,9 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     return ret;
 }
 
-SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
+SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
     u4 flags;
     ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember());
-    ENFORCE(owner.isClassOrModule());
     ENFORCE(name.exists());
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;
@@ -983,7 +983,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
 
     flags = flags | Symbol::Flags::TYPE_MEMBER;
 
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    SymbolData ownerScope = SymbolRef(owner).dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
@@ -1006,7 +1006,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
     DEBUG_ONLY(categoryCounterInc("symbols", "type_member"));
     wasModified_ = true;
 
-    auto &members = owner.dataAllowingNone(*this)->typeMembers();
+    auto &members = SymbolRef(owner).dataAllowingNone(*this)->typeMembers();
     if (!absl::c_linear_search(members, result)) {
         members.emplace_back(result);
     }

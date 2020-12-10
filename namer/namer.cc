@@ -1228,7 +1228,7 @@ class SymbolDefiner {
         core::Variance variance = core::Variance::Invariant;
         const bool isTypeTemplate = typeMember.isTypeTemplete;
 
-        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
+        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner.asClassOrModuleRef();
 
         core::NameRef foundVariance = typeMember.varianceName;
         if (foundVariance.exists()) {

@@ -201,6 +201,10 @@ public:
         return SymbolRef();
     }
 
+    static ClassOrModuleRef noClassOrModule() {
+        return ClassOrModuleRef();
+    }
+
     static ClassOrModuleRef top() {
         return ClassOrModuleRef::fromRaw(1);
     }

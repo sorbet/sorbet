@@ -1264,8 +1264,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
                                                                            this->variance());
                 break;
             case SymbolRef::Kind::TypeMember:
-                current2 = const_cast<GlobalState &>(gs).enterTypeMember(this->loc(), this->owner, this->name,
-                                                                         this->variance());
+                current2 = const_cast<GlobalState &>(gs).enterTypeMember(this->loc(), this->owner.asClassOrModuleRef(),
+                                                                         this->name, this->variance());
                 break;
         }
 

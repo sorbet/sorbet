@@ -41,7 +41,8 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, c
 }
 
 bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::SymbolRef parentTypeMember,
-                       core::SymbolRef sym, vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
+                       core::ClassOrModuleRef sym,
+                       vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
     core::NameRef name = parentTypeMember.data(gs)->name;
     core::SymbolRef my = sym.data(gs)->findMember(gs, name);
     if (!my.exists()) {
@@ -82,17 +83,16 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         }
         return true;
     }
-    typeAliases[sym.classOrModuleIndex()].emplace_back(parentTypeMember, my);
+    typeAliases[sym.id()].emplace_back(parentTypeMember, my);
     return true;
 } // namespace
 
-void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
+void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
                         vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases, vector<bool> &resolved) {
-    ENFORCE(sym.isClassOrModule());
-    if (resolved[sym.classOrModuleIndex()]) {
+    if (resolved[sym.id()]) {
         return;
     }
-    resolved[sym.classOrModuleIndex()] = true;
+    resolved[sym.id()] = true;
 
     if (sym.data(gs)->superClass().exists()) {
         auto parent = sym.data(gs)->superClass();
@@ -128,7 +128,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
         }
     }
     auto mixins = sym.data(gs)->mixins();
-    for (core::SymbolRef mixin : mixins) {
+    for (auto mixin : mixins) {
         resolveTypeMembers(gs, mixin, typeAliases, resolved);
         auto typeMembers = mixin.data(gs)->typeMembers();
         for (core::SymbolRef tp : typeMembers) {
@@ -396,8 +396,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     vector<bool> resolved;
     resolved.resize(gs.classAndModulesUsed());
     for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto sym = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
-        ENFORCE(sym.isClassOrModule());
+        auto sym = core::ClassOrModuleRef(gs, i);
         resolveTypeMembers(gs, sym, typeAliases, resolved);
     }
 }
