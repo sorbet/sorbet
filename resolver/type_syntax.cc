@@ -952,7 +952,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
 
             auto correctedSingleton = corrected.data(ctx)->lookupSingletonClass(ctx);
             ENFORCE_NO_TIMER(correctedSingleton.exists());
-            auto ctype = core::make_type<core::ClassType>(correctedSingleton.asClassOrModuleRef());
+            auto ctype = core::make_type<core::ClassType>(correctedSingleton);
             // In `dispatchArgs` this is ordinarily used to specify the origin tag for
             // uninitialized variables. Inside of a signature we shouldn't need this:
             auto originForUninitialized = core::Loc::none();

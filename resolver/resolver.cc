@@ -683,21 +683,20 @@ public:
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
-        core::SymbolRef klass = original.symbol;
+        auto klass = original.symbol;
 
         bool isInclude = true;
         for (auto &ancst : original.ancestors) {
             bool isSuperclass = (original.kind == ast::ClassDef::Kind::Class && &ancst == &original.ancestors.front() &&
                                  !klass.data(ctx)->isSingletonClass(ctx));
-            transformAncestor(isSuperclass ? ctx : ctx.withOwner(klass), klass.asClassOrModuleRef(), ancst, isInclude,
-                              isSuperclass);
+            transformAncestor(isSuperclass ? ctx : ctx.withOwner(klass), klass, ancst, isInclude, isSuperclass);
         }
 
         auto singleton = klass.data(ctx)->lookupSingletonClass(ctx);
         isInclude = false;
         for (auto &ancst : original.singletonAncestors) {
             ENFORCE(singleton.exists());
-            transformAncestor(ctx.withOwner(klass), singleton.asClassOrModuleRef(), ancst, isInclude);
+            transformAncestor(ctx.withOwner(klass), singleton, ancst, isInclude);
         }
 
         nesting_ = nesting_->parent;

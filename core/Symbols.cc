@@ -986,7 +986,7 @@ bool Symbol::isSingletonClass(const GlobalState &gs) const {
     return isSingleton;
 }
 
-SymbolRef Symbol::singletonClass(GlobalState &gs) {
+ClassOrModuleRef Symbol::singletonClass(GlobalState &gs) {
     auto singleton = lookupSingletonClass(gs);
     if (singleton.exists()) {
         return singleton;
@@ -1017,7 +1017,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     return singleton;
 }
 
-SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
+ClassOrModuleRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModule());
     ENFORCE(this->name.isClassName(gs));
 
@@ -1026,21 +1026,21 @@ SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
         return Symbols::untyped();
     }
 
-    return findMember(gs, Names::singleton());
+    return findMember(gs, Names::singleton()).asClassOrModuleRef();
 }
 
-SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
+ClassOrModuleRef Symbol::attachedClass(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModule());
     if (this->ref(gs) == Symbols::untyped()) {
         return Symbols::untyped();
     }
 
     SymbolRef singleton = findMember(gs, Names::attached());
-    return singleton;
+    return singleton.asClassOrModuleRef();
 }
 
-SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
-    auto classSymbol = this->ref(gs);
+ClassOrModuleRef Symbol::topAttachedClass(const GlobalState &gs) const {
+    ClassOrModuleRef classSymbol = this->ref(gs).asClassOrModuleRef();
 
     while (true) {
         auto attachedClass = classSymbol.data(gs)->attachedClass(gs);
@@ -1082,19 +1082,18 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     while ((orT = cast_type<OrType>(*iter))) {
         auto right = cast_type_nonnull<ClassType>(orT->right);
         ENFORCE(left);
-        if (right.symbol == classOfSubclass.asClassOrModuleRef()) {
+        if (right.symbol == classOfSubclass) {
             return;
         }
         iter = &orT->left;
     }
-    if (cast_type_nonnull<ClassType>(*iter).symbol == classOfSubclass.asClassOrModuleRef()) {
+    if (cast_type_nonnull<ClassType>(*iter).symbol == classOfSubclass) {
         return;
     }
     if (currentClasses != core::Types::bottom()) {
-        appliedType->targs[0] =
-            OrType::make_shared(currentClasses, make_type<ClassType>(classOfSubclass.asClassOrModuleRef()));
+        appliedType->targs[0] = OrType::make_shared(currentClasses, make_type<ClassType>(classOfSubclass));
     } else {
-        appliedType->targs[0] = make_type<ClassType>(classOfSubclass.asClassOrModuleRef());
+        appliedType->targs[0] = make_type<ClassType>(classOfSubclass);
     }
 }
 
@@ -1129,7 +1128,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
         auto classType = cast_type_nonnull<ClassType>(orType->right);
         auto subclass = classType.symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
-        result = Types::any(gs, make_type<ClassType>(subclass.asClassOrModuleRef()), result);
+        result = Types::any(gs, make_type<ClassType>(subclass), result);
         currentClasses = orType->left;
     }
 
@@ -1137,7 +1136,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
     auto lastClassType = cast_type_nonnull<ClassType>(currentClasses);
     auto subclass = lastClassType.symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
-    result = Types::any(gs, make_type<ClassType>(subclass.asClassOrModuleRef()), result);
+    result = Types::any(gs, make_type<ClassType>(subclass), result);
 
     return result;
 }
