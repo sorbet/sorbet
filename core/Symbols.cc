@@ -329,7 +329,7 @@ bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym) {
         //   checking the linearization bit.
 
         // Ignore superclass (as in GlobalPass.cc's `computeClassLinearization`)
-        if (sym != superClass().asClassOrModuleRef() && absl::c_find(mixins_, sym) == mixins_.end()) {
+        if (sym != superClass() && absl::c_find(mixins_, sym) == mixins_.end()) {
             auto parent = superClass();
             // Don't include as mixin if it derives from the parent class (as in GlobalPass.cc's `maybeAddMixin`)
             if (!parent.exists() || !parent.data(gs)->derivesFrom(gs, sym)) {

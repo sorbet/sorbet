@@ -39,7 +39,7 @@ ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, boo
     data->flags = 0;
     data->setClassOrModule();
     data->setIsModule(isModule);
-    data->setSuperClass(SymbolRef(this, SymbolRef::Kind::ClassOrModule, superclass));
+    data->setSuperClass(ClassOrModuleRef(*this, superclass));
 
     if (symRef.classOrModuleIndex() > Symbols::root().id()) {
         Symbols::root().data(*this)->members()[nameId] = symRef;

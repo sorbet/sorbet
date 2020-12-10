@@ -596,14 +596,14 @@ public:
     bool ignoreInHashing(const GlobalState &gs) const;
 
     SymbolRef owner;
-    SymbolRef superClassOrRebind; // method arugments store rebind here
+    SymbolRef superClassOrRebind; // method arguments store rebind here
 
-    inline SymbolRef superClass() const {
+    inline ClassOrModuleRef superClass() const {
         ENFORCE_NO_TIMER(isClassOrModule());
-        return superClassOrRebind;
+        return superClassOrRebind.asClassOrModuleRef();
     }
 
-    inline void setSuperClass(SymbolRef claz) {
+    inline void setSuperClass(ClassOrModuleRef claz) {
         ENFORCE(isClassOrModule());
         superClassOrRebind = claz;
     }

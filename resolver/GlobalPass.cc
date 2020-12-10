@@ -226,7 +226,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
             } else {
                 ENFORCE(attached.data(gs)->superClass() != core::Symbols::todo());
                 auto singleton = attached.data(gs)->superClass().data(gs)->singletonClass(gs);
-                ref.data(gs)->setSuperClass(singleton);
+                ref.data(gs)->setSuperClass(singleton.asClassOrModuleRef());
             }
         } else {
             if (ref.data(gs)->isClassOrModuleClass()) {
@@ -285,12 +285,12 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
     auto data = ofClass.data(gs);
     if (!data->isClassOrModuleLinearizationComputed()) {
         if (data->superClass().exists()) {
-            computeClassLinearization(gs, data->superClass().asClassOrModuleRef());
+            computeClassLinearization(gs, data->superClass());
         }
         InlinedVector<core::ClassOrModuleRef, 4> currentMixins = data->mixins();
         InlinedVector<core::ClassOrModuleRef, 4> newMixins;
         for (auto mixin : currentMixins) {
-            if (mixin == data->superClass().asClassOrModuleRef()) {
+            if (mixin == data->superClass()) {
                 continue;
             }
             if (mixin.data(gs)->superClass() == core::Symbols::StubSuperClass() ||
@@ -306,10 +306,9 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
                 newMixins.insert(newMixins.begin(), allMixins.begin(), allMixins.end());
             } else {
                 int pos = 0;
-                pos = maybeAddMixin(gs, ofClass, newMixins, mixin, data->superClass().asClassOrModuleRef(), pos);
+                pos = maybeAddMixin(gs, ofClass, newMixins, mixin, data->superClass(), pos);
                 for (auto &mixinLinearizationComponent : mixinLinearization.mixins) {
-                    pos = maybeAddMixin(gs, ofClass, newMixins, mixinLinearizationComponent,
-                                        data->superClass().asClassOrModuleRef(), pos);
+                    pos = maybeAddMixin(gs, ofClass, newMixins, mixinLinearizationComponent, data->superClass(), pos);
                 }
             }
         }
@@ -323,7 +322,7 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         }
     }
     ENFORCE_NO_TIMER(data->isClassOrModuleLinearizationComputed());
-    return ParentLinearizationInformation{data->mixins(), data->superClass().asClassOrModuleRef(), ofClass};
+    return ParentLinearizationInformation{data->mixins(), data->superClass(), ofClass};
 }
 
 void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationInformation &info,

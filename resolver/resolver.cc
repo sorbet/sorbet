@@ -519,12 +519,12 @@ private:
                 ancestorPresent = false;
             } else if (!job.klass.data(ctx)->superClass().exists() ||
                        job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
-                       job.klass.data(ctx)->superClass() == resolved) {
-                job.klass.data(ctx)->setSuperClass(resolved);
+                       job.klass.data(ctx)->superClass() == resolved.asClassOrModuleRef()) {
+                job.klass.data(ctx)->setSuperClass(resolved.asClassOrModuleRef());
             } else {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
                     e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.data(ctx)->show(ctx),
-                                job.klass.data(ctx)->superClass().show(ctx), resolved.show(ctx));
+                                job.klass.data(ctx)->superClass().data(ctx)->show(ctx), resolved.show(ctx));
                 }
             }
         } else {

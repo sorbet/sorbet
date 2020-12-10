@@ -110,7 +110,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         }
 
         if (data->isClassOrModule() && data->superClass().exists()) {
-            symbolProto.set_superclass(data->superClass().rawId());
+            symbolProto.set_superclass(SymbolRef(data->superClass()).rawId());
         }
     }
 
