@@ -410,7 +410,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         }
         case TypePtr::Tag::AppliedType: {
             auto &at = cast_type_nonnull<AppliedType>(what);
-            p.putU4(at.klass.rawId());
+            p.putU4(at.klass.id());
             p.putU4(at.targs.size());
             for (auto &t : at.targs) {
                 pickle(p, t);
@@ -496,7 +496,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             return make_type<LambdaParam>(SymbolRef::fromRaw(p.getU4()), lower, upper);
         }
         case TypePtr::Tag::AppliedType: {
-            auto klass = SymbolRef::fromRaw(p.getU4());
+            auto klass = ClassOrModuleRef::fromRaw(p.getU4());
             int sz = p.getU4();
             vector<TypePtr> targs(sz);
             for (auto &t : targs) {

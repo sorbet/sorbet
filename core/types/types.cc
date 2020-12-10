@@ -202,7 +202,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
             }
         },
         [&](const AppliedType &c) {
-            if (c.klass == klass || c.derivesFrom(gs, klass.asClassOrModuleRef())) {
+            if (c.klass == klass.asClassOrModuleRef() || c.derivesFrom(gs, klass.asClassOrModuleRef())) {
                 result = Types::bottom();
             } else {
                 result = from;
@@ -591,14 +591,12 @@ void TypeVar::_sanityCheck(const GlobalState &gs) const {
 }
 
 void AppliedType::_sanityCheck(const GlobalState &gs) const {
-    ENFORCE(this->klass.isClassOrModule());
     ENFORCE(this->klass != Symbols::untyped());
 
     ENFORCE(this->klass.data(gs)->typeMembers().size() == this->targs.size() ||
                 (this->klass == Symbols::Array() && (this->targs.size() == 1)) ||
                 (this->klass == Symbols::Hash() && (this->targs.size() == 3)) ||
-                this->klass.classOrModuleIndex() >= Symbols::Proc0().classOrModuleIndex() &&
-                    this->klass.classOrModuleIndex() <= Symbols::last_proc().id(),
+                this->klass.id() >= Symbols::Proc0().id() && this->klass.id() <= Symbols::last_proc().id(),
             this->klass.data(gs)->name.showRaw(gs));
     for (auto &targ : this->targs) {
         targ.sanityCheck(gs);
@@ -606,7 +604,7 @@ void AppliedType::_sanityCheck(const GlobalState &gs) const {
 }
 
 bool AppliedType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
-    ClassType und(this->klass.asClassOrModuleRef());
+    ClassType und(this->klass);
     return und.derivesFrom(gs, klass);
 }
 
@@ -677,7 +675,7 @@ TypePtr TupleType::elementType() const {
 SelfType::SelfType() {
     categoryCounterInc("types.allocated", "selftype");
 };
-AppliedType::AppliedType(SymbolRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
+AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     categoryCounterInc("types.allocated", "appliedtype");
 }
 

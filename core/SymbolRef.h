@@ -626,15 +626,15 @@ public:
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
-    static SymbolRef Proc0() {
-        return SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
+    static ClassOrModuleRef Proc0() {
+        return ClassOrModuleRef::fromRaw(MAX_SYNTHETIC_CLASS_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
     }
 
     static ClassOrModuleRef Proc(int argc) {
         if (argc > MAX_PROC_ARITY) {
             return ClassOrModuleRef();
         }
-        return ClassOrModuleRef::fromRaw(Proc0().classOrModuleIndex() + argc * 2);
+        return ClassOrModuleRef::fromRaw(Proc0().id() + argc * 2);
     }
 
     static ClassOrModuleRef last_proc() {

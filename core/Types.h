@@ -696,9 +696,9 @@ CheckSize(TupleType, 40, 8);
 
 TYPE(AppliedType) final {
 public:
-    SymbolRef klass;
+    ClassOrModuleRef klass;
     std::vector<TypePtr> targs;
-    AppliedType(SymbolRef klass, std::vector<TypePtr> targs);
+    AppliedType(ClassOrModuleRef klass, std::vector<TypePtr> targs);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;

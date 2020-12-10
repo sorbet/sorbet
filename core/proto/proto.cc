@@ -185,7 +185,7 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
         },
         [&](const AppliedType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::APPLIED);
-            proto.mutable_applied()->set_symbol_full_name(t.klass.show(gs));
+            proto.mutable_applied()->set_symbol_full_name(t.klass.data(gs)->show(gs));
             for (auto &a : t.targs) {
                 *proto.mutable_applied()->add_type_args() = toProto(gs, a);
             }

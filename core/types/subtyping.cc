@@ -243,8 +243,8 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             return OrType::make_shared(t1, t2);
         }
 
-        bool ltr = a1->klass == a2->klass || a2->klass.data(gs)->derivesFrom(gs, a1->klass.asClassOrModuleRef());
-        bool rtl = !ltr && a1->klass.data(gs)->derivesFrom(gs, a2->klass.asClassOrModuleRef());
+        bool ltr = a1->klass == a2->klass || a2->klass.data(gs)->derivesFrom(gs, a1->klass);
+        bool rtl = !ltr && a1->klass.data(gs)->derivesFrom(gs, a2->klass);
         if (!rtl && !ltr) {
             return OrType::make_shared(t1, t2);
         }
@@ -844,8 +844,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
             }
             return Types::bottom();
         }
-        bool rtl = a1->klass == a2->klass || a1->klass.data(gs)->derivesFrom(gs, a2->klass.asClassOrModuleRef());
-        bool ltr = !rtl && a2->klass.data(gs)->derivesFrom(gs, a1->klass.asClassOrModuleRef());
+        bool rtl = a1->klass == a2->klass || a1->klass.data(gs)->derivesFrom(gs, a2->klass);
+        bool ltr = !rtl && a2->klass.data(gs)->derivesFrom(gs, a1->klass);
         if (!rtl && !ltr) {
             if (a1->klass.data(gs)->isClassOrModuleClass() && a2->klass.data(gs)->isClassOrModuleClass()) {
                 // At this point, the two types are both classes, and unrelated

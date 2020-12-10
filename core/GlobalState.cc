@@ -738,8 +738,8 @@ void GlobalState::initEmpty() {
     }
 
     // This fills in all the way up to MAX_SYNTHETIC_CLASS_SYMBOLS
-    ENFORCE(classAndModules.size() < Symbols::Proc0().classOrModuleIndex());
-    while (classAndModules.size() < Symbols::Proc0().classOrModuleIndex()) {
+    ENFORCE(classAndModules.size() < Symbols::Proc0().id());
+    while (classAndModules.size() < Symbols::Proc0().id()) {
         string name = absl::StrCat("<RESERVED_", reservedCount, ">");
         synthesizeClass(enterNameConstant(name));
         reservedCount++;

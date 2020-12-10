@@ -378,7 +378,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
             return tp;
         }
 
-        SymbolRef attachedClass = classType.symbol.data(gs)->attachedClass(gs);
+        auto attachedClass = classType.symbol.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
@@ -1378,10 +1378,8 @@ public:
     // Unfortunately, this means that some errors are double reported (once by resolver, and then
     // again by infer).
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        SymbolRef attachedClass;
-
         SymbolRef self = unwrapSymbol(args.thisType);
-        attachedClass = self.data(gs)->attachedClass(gs);
+        auto attachedClass = self.data(gs)->attachedClass(gs);
 
         if (!attachedClass.exists()) {
             return;

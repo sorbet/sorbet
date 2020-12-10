@@ -58,7 +58,7 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
     if (typeMembers().empty()) {
         return externalType();
     } else {
-        return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
+        return make_type<AppliedType>(ref(gs).asClassOrModuleRef(), selfTypeArgs(gs));
     }
 }
 
@@ -75,9 +75,9 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
 
     // note that sometimes resultType is set externally to not be a result of this computation
     // this happens e.g. in case this is a stub class
-    auto ref = this->ref(gs);
+    auto ref = this->ref(gs).asClassOrModuleRef();
     if (typeMembers().empty()) {
-        resultType = make_type<ClassType>(ref.asClassOrModuleRef());
+        resultType = make_type<ClassType>(ref);
     } else {
         vector<TypePtr> targs;
         targs.reserve(typeMembers().size());
