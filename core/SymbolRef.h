@@ -497,8 +497,8 @@ public:
         return ClassOrModuleRef::fromRaw(61);
     }
 
-    static SymbolRef noMethod() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 0);
+    static MethodRef noMethod() {
+        return MethodRef();
     }
 
     static SymbolRef noField() {
@@ -513,8 +513,8 @@ public:
         return SymbolRef(nullptr, SymbolRef::Kind::TypeMember, 0);
     }
 
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 1);
+    static MethodRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
+        return MethodRef::fromRaw(1);
     }
 
     static SymbolRef
@@ -534,8 +534,8 @@ public:
         return SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, 1);
     }
 
-    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 2);
+    static MethodRef Sorbet_Private_Static_badAliasMethodStub() {
+        return MethodRef::fromRaw(2);
     }
 
     static ClassOrModuleRef T_Helpers() {
@@ -586,8 +586,8 @@ public:
         return ClassOrModuleRef::fromRaw(74);
     }
 
-    static SymbolRef sig() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 3);
+    static MethodRef sig() {
+        return MethodRef::fromRaw(3);
     }
 
     static ClassOrModuleRef Enumerator_Lazy() {
@@ -618,8 +618,8 @@ public:
         return ClassOrModuleRef::fromRaw(81);
     }
 
-    static SymbolRef sigWithoutRuntime() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 4);
+    static MethodRef sigWithoutRuntime() {
+        return MethodRef::fromRaw(4);
     }
 
     static ClassOrModuleRef T_NonForcingConstants() {
@@ -634,8 +634,8 @@ public:
         return ClassOrModuleRef::fromRaw(84);
     }
 
-    static SymbolRef SorbetPrivateStaticSingleton_sig() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 5);
+    static MethodRef SorbetPrivateStaticSingleton_sig() {
+        return MethodRef::fromRaw(5);
     }
 
     static ClassOrModuleRef PackageRegistry() {
@@ -650,24 +650,24 @@ public:
         return ClassOrModuleRef::fromRaw(87);
     }
 
-    static SymbolRef PackageSpec_import() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 6);
+    static MethodRef PackageSpec_import() {
+        return MethodRef::fromRaw(6);
     }
 
-    static SymbolRef PackageSpec_export() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 7);
+    static MethodRef PackageSpec_export() {
+        return MethodRef::fromRaw(7);
     }
 
-    static SymbolRef PackageSpec_export_methods() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 8);
+    static MethodRef PackageSpec_export_methods() {
+        return MethodRef::fromRaw(8);
     }
 
     static ClassOrModuleRef Encoding() {
         return ClassOrModuleRef::fromRaw(88);
     }
 
-    static SymbolRef Class_new() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 9);
+    static MethodRef Class_new() {
+        return MethodRef::fromRaw(9);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
