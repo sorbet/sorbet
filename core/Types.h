@@ -336,6 +336,10 @@ template <> inline TypePtr make_type<ClassType, core::ClassOrModuleRef>(core::Cl
     return TypePtr(TypePtr::Tag::ClassType, ref.id(), 0);
 }
 
+template <> inline TypePtr make_type<ClassType, core::ClassOrModuleRef &>(core::ClassOrModuleRef &ref) {
+    return TypePtr(TypePtr::Tag::ClassType, ref.id(), 0);
+}
+
 template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
     ENFORCE_NO_TIMER(isa_type<ClassType>(what));
     if (what.tag() == TypePtr::Tag::ClassType) {

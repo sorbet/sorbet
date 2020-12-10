@@ -937,7 +937,7 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     }
 }
 
-SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
+ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
     ENFORCE_NO_TIMER(!owner.exists() || // used when entering entirely syntehtic classes
                      owner.isClassOrModule());
     ENFORCE_NO_TIMER(name.isClassName(*this));
@@ -949,14 +949,14 @@ SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) 
     if (store.exists()) {
         ENFORCE_NO_TIMER((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asClassOrModuleRef();
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
-    auto ret = SymbolRef(this, SymbolRef::Kind::ClassOrModule, classAndModules.size());
+    auto ret = ClassOrModuleRef(*this, classAndModules.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `store`
     classAndModules.emplace_back();
-    SymbolData data = ret.dataAllowingNone(*this);
+    SymbolData data = ret.data(*this);
     data->name = name;
     data->flags = flags;
     data->owner = owner;
