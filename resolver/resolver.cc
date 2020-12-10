@@ -2465,17 +2465,23 @@ private:
                     auto mangledName = packageName.lookupMangledPackageName(ctx.state);
                     // if the mangled name doesn't exist, then this means probably there's no package named this
                     if (!mangledName.exists()) {
-                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
-                        }
-                        return;
+                        // TODO(gdritter): re-enable this once we implement runtime package support
+                        // if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                        //     e.setHeader("Unable to find package: `{}`", packageName.toString(ctx));
+                        // }
+                        // return;
+                        current = core::Symbols::root();
+                        continue;
                     }
                     current = core::Symbols::PackageRegistry().data(ctx)->findMember(ctx, mangledName);
                     if (!current.exists()) {
-                        if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
-                            e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
-                        }
-                        return;
+                        // TODO(gdritter): re-enable this once we implement runtime package support
+                        // if (auto e = ctx.beginError(*packageLoc, core::errors::Resolver::LazyResolve)) {
+                        //     e.setHeader("Unable to find package `{}`", packageName.toString(ctx));
+                        // }
+                        // return;
+                        current = core::Symbols::root();
+                        continue;
                     }
                 }
             }
