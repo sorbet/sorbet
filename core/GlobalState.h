@@ -74,7 +74,7 @@ public:
 
     ~GlobalState() = default;
 
-    ClassOrModuleRef enterClassSymbol(Loc loc, SymbolRef owner, NameRef name);
+    ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     SymbolRef enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance);
     SymbolRef enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance);
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);

@@ -937,11 +937,10 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     }
 }
 
-ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE_NO_TIMER(!owner.exists() || // used when entering entirely syntehtic classes
-                     owner.isClassOrModule());
+ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
+    // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    SymbolData ownerScope = SymbolRef(owner).dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto flags = Symbol::Flags::CLASS_OR_MODULE;

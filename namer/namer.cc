@@ -723,8 +723,8 @@ class SymbolDefiner {
         emitRedefinedConstantError(ctx, errorLoc, symbol.data(ctx)->show(ctx), renamedSymbol.data(ctx)->loc());
     }
 
-    core::SymbolRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
-                                  core::LocOffsets loc) {
+    core::ClassOrModuleRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
+                                         core::LocOffsets loc) {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
         if (scope.isClassOrModule()) {
             // Check if original symbol was mangled away. If so, complain.
@@ -738,7 +738,7 @@ class SymbolDefiner {
                     e.addErrorLine(renamedSymbol.data(ctx)->loc(), "`{}` defined here", scopeName);
                 }
             }
-            return scope;
+            return scope.asClassOrModuleRef();
         }
 
         // Check if class was already mangled.
@@ -757,9 +757,10 @@ class SymbolDefiner {
         // Mangle this one out of the way, and re-enter a symbol with this name as a class.
         auto scopeName = scope.data(ctx)->name;
         ctx.state.mangleRenameSymbol(scope, scopeName);
-        scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope.data(ctx)->owner, scopeName);
-        scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
-        return scope;
+        auto scopeKlass = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc),
+                                                     scope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
+        scopeKlass.data(ctx)->singletonClass(ctx); // force singleton class into existance
+        return scopeKlass;
     }
 
     // Gets the symbol with the given name, or defines it as a class if it does not exist.
@@ -1075,7 +1076,7 @@ class SymbolDefiner {
 
             auto origName = symbol.data(ctx)->name;
             ctx.state.mangleRenameSymbol(symbol, symbol.data(ctx)->name);
-            symbol = ctx.state.enterClassSymbol(declLoc, symbol.data(ctx)->owner, origName);
+            symbol = ctx.state.enterClassSymbol(declLoc, symbol.data(ctx)->owner.asClassOrModuleRef(), origName);
             symbol.data(ctx)->setIsModule(isModule);
 
             auto oldSymCount = ctx.state.classAndModulesUsed();

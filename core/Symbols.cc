@@ -996,7 +996,7 @@ ClassOrModuleRef Symbol::singletonClass(GlobalState &gs) {
     auto selfLoc = this->loc();
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
-    singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
+    singleton = gs.enterClassSymbol(this->loc(), this->owner.asClassOrModuleRef(), singletonName);
     SymbolData singletonInfo = singleton.data(gs);
 
     prodCounterInc("types.input.singleton_classes.total");
@@ -1245,7 +1245,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         SymbolRef current2;
         switch (current.kind()) {
             case SymbolRef::Kind::ClassOrModule:
-                current2 = const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner, this->name);
+                current2 = const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner.asClassOrModuleRef(),
+                                                                          this->name);
                 break;
             case SymbolRef::Kind::Method:
                 current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(this->loc(), this->owner, this->name);
