@@ -101,7 +101,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     if (data->isClassOrModule() || data->isMethod()) {
         if (data->isClassOrModule()) {
             for (auto thing : data->mixins()) {
-                symbolProto.add_mixins(thing.rawId());
+                symbolProto.add_mixins(SymbolRef(thing).rawId());
             }
         } else {
             for (auto &thing : data->arguments()) {

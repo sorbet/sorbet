@@ -248,18 +248,19 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
 }
 
 struct ParentLinearizationInformation {
-    const InlinedVector<core::SymbolRef, 4> &mixins;
-    core::SymbolRef superClass;
-    core::SymbolRef klass;
-    InlinedVector<core::SymbolRef, 4> fullLinearizationSlow(core::GlobalState &gs);
+    const InlinedVector<core::ClassOrModuleRef, 4> &mixins;
+    core::ClassOrModuleRef superClass;
+    core::ClassOrModuleRef klass;
+    InlinedVector<core::ClassOrModuleRef, 4> fullLinearizationSlow(core::GlobalState &gs);
 };
 
-int maybeAddMixin(core::GlobalState &gs, core::SymbolRef forSym, InlinedVector<core::SymbolRef, 4> &mixinList,
-                  core::SymbolRef mixin, core::SymbolRef parent, int pos) {
+int maybeAddMixin(core::GlobalState &gs, core::ClassOrModuleRef forSym,
+                  InlinedVector<core::ClassOrModuleRef, 4> &mixinList, core::ClassOrModuleRef mixin,
+                  core::ClassOrModuleRef parent, int pos) {
     if (forSym == mixin) {
         Exception::raise("Loop in mixins");
     }
-    if (parent.data(gs)->derivesFrom(gs, mixin.asClassOrModuleRef())) {
+    if (parent.data(gs)->derivesFrom(gs, mixin)) {
         return pos;
     }
     auto fnd = find(mixinList.begin(), mixinList.end(), mixin);
@@ -279,18 +280,17 @@ int maybeAddMixin(core::GlobalState &gs, core::SymbolRef forSym, InlinedVector<c
 // tails of class linearization aren't copied around.
 // In order to obtain Ruby-side ancestors, one would need to walk superclass chain and concatenate `mixins`.
 // The algorithm is harder to explain than to code, so just follow code & tests if `testdata/resolver/linearization`
-ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, core::SymbolRef ofClass) {
+ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, core::ClassOrModuleRef ofClass) {
     ENFORCE_NO_TIMER(ofClass.exists());
     auto data = ofClass.data(gs);
-    ENFORCE_NO_TIMER(data->isClassOrModule());
     if (!data->isClassOrModuleLinearizationComputed()) {
         if (data->superClass().exists()) {
-            computeClassLinearization(gs, data->superClass());
+            computeClassLinearization(gs, data->superClass().asClassOrModuleRef());
         }
-        InlinedVector<core::SymbolRef, 4> currentMixins = data->mixins();
-        InlinedVector<core::SymbolRef, 4> newMixins;
+        InlinedVector<core::ClassOrModuleRef, 4> currentMixins = data->mixins();
+        InlinedVector<core::ClassOrModuleRef, 4> newMixins;
         for (auto mixin : currentMixins) {
-            if (mixin == data->superClass()) {
+            if (mixin == data->superClass().asClassOrModuleRef()) {
                 continue;
             }
             if (mixin.data(gs)->superClass() == core::Symbols::StubSuperClass() ||
@@ -298,7 +298,6 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
                 newMixins.emplace_back(mixin);
                 continue;
             }
-            ENFORCE_NO_TIMER(mixin.isClassOrModule());
             ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
 
             if (!mixin.data(gs)->isClassOrModuleModule()) {
@@ -307,9 +306,10 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
                 newMixins.insert(newMixins.begin(), allMixins.begin(), allMixins.end());
             } else {
                 int pos = 0;
-                pos = maybeAddMixin(gs, ofClass, newMixins, mixin, data->superClass(), pos);
+                pos = maybeAddMixin(gs, ofClass, newMixins, mixin, data->superClass().asClassOrModuleRef(), pos);
                 for (auto &mixinLinearizationComponent : mixinLinearization.mixins) {
-                    pos = maybeAddMixin(gs, ofClass, newMixins, mixinLinearizationComponent, data->superClass(), pos);
+                    pos = maybeAddMixin(gs, ofClass, newMixins, mixinLinearizationComponent,
+                                        data->superClass().asClassOrModuleRef(), pos);
                 }
             }
         }
@@ -317,18 +317,17 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         data->setClassOrModuleLinearizationComputed();
         if (debug_mode) {
             for (auto oldMixin : currentMixins) {
-                ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin.asClassOrModuleRef()),
-                        "{} no longer derives from {}", ofClass.data(gs)->showFullName(gs),
-                        oldMixin.data(gs)->showFullName(gs));
+                ENFORCE(ofClass.data(gs)->derivesFrom(gs, oldMixin), "{} no longer derives from {}",
+                        ofClass.data(gs)->showFullName(gs), oldMixin.data(gs)->showFullName(gs));
             }
         }
     }
     ENFORCE_NO_TIMER(data->isClassOrModuleLinearizationComputed());
-    return ParentLinearizationInformation{data->mixins(), data->superClass(), ofClass};
+    return ParentLinearizationInformation{data->mixins(), data->superClass().asClassOrModuleRef(), ofClass};
 }
 
 void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationInformation &info,
-                               InlinedVector<core::SymbolRef, 4> &acc) {
+                               InlinedVector<core::ClassOrModuleRef, 4> &acc) {
     ENFORCE(!absl::c_linear_search(acc, info.klass));
     acc.emplace_back(info.klass);
 
@@ -347,8 +346,8 @@ void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationI
         }
     }
 };
-InlinedVector<core::SymbolRef, 4> ParentLinearizationInformation::fullLinearizationSlow(core::GlobalState &gs) {
-    InlinedVector<core::SymbolRef, 4> res;
+InlinedVector<core::ClassOrModuleRef, 4> ParentLinearizationInformation::fullLinearizationSlow(core::GlobalState &gs) {
+    InlinedVector<core::ClassOrModuleRef, 4> res;
     fullLinearizationSlowImpl(gs, *this, res);
     return res;
 }
@@ -358,8 +357,7 @@ void Resolver::computeLinearization(core::GlobalState &gs) {
 
     // TODO: this does not support `prepend`
     for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-        const auto &ref = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
-        ENFORCE(ref.isClassOrModule());
+        const auto &ref = core::ClassOrModuleRef(gs, i);
         computeClassLinearization(gs, ref);
     }
 }
@@ -384,7 +382,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             if (!singleton.exists()) {
                 singleton = sym.data(gs)->singletonClass(gs);
             }
-            if (!singleton.data(gs)->addMixin(gs, classMethods)) {
+            if (!singleton.data(gs)->addMixin(gs, classMethods.asClassOrModuleRef())) {
                 // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before adding it
                 // as a member.
                 ENFORCE(false);

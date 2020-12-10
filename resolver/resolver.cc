@@ -529,7 +529,7 @@ private:
             }
         } else {
             ENFORCE(resolved.isClassOrModule());
-            if (!job.klass.data(ctx)->addMixin(ctx, resolved)) {
+            if (!job.klass.data(ctx)->addMixin(ctx, resolved.asClassOrModuleRef())) {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
                                 resolved.data(ctx)->show(ctx));

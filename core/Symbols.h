@@ -130,19 +130,19 @@ public:
     // have access to a mutable GlobalState and thus shouldn't be able to call it).
     TypePtr unsafeComputeExternalType(GlobalState &gs);
 
-    inline InlinedVector<SymbolRef, 4> &mixins() {
+    inline InlinedVector<ClassOrModuleRef, 4> &mixins() {
         ENFORCE_NO_TIMER(isClassOrModule());
         return mixins_;
     }
 
-    inline const InlinedVector<SymbolRef, 4> &mixins() const {
+    inline const InlinedVector<ClassOrModuleRef, 4> &mixins() const {
         ENFORCE_NO_TIMER(isClassOrModule());
         return mixins_;
     }
 
     // Attempts to add the given mixin to the symbol. If the mixin is invalid because it is not a module, it returns
     // `false` (but still adds the mixin for processing during linearization) and the caller should report an error.
-    [[nodiscard]] bool addMixin(const GlobalState &gs, SymbolRef sym);
+    [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym);
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
         ENFORCE(isClassOrModule());
@@ -684,7 +684,7 @@ private:
      *   implicit superclass (`class Foo` with no `< Parent`); Once we hit
      *   Resolver::finalize(), these will be rewritten to `Object()`.
      */
-    InlinedVector<SymbolRef, 4> mixins_;
+    InlinedVector<ClassOrModuleRef, 4> mixins_;
 
     /** For Class or module - ordered type members of the class,
      * for method - ordered type generic type arguments of the class
