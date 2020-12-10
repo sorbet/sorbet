@@ -420,6 +420,10 @@ void GlobalState::initEmpty() {
     }
     ENFORCE(id == Symbols::Class_new());
 
+    id = enterMethodSymbol(Loc::none(), Symbols::noClassOrModule(), Names::TodoMethod());
+    enterMethodArgumentSymbol(Loc::none(), id, Names::args());
+    ENFORCE(id == Symbols::todoMethod());
+
     // Root members
     Symbols::root().data(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().data(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
@@ -430,7 +434,7 @@ void GlobalState::initEmpty() {
     id.data(*this)->resultType = make_type<LiteralType>(Symbols::String(), enterNameUTF8(sorbet_full_version_string));
 
     // Synthesize <Magic>.<build-hash>(*vs : T.untyped) => Hash
-    SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
+    auto method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.flags.isRepeated = true;

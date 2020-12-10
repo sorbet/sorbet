@@ -2365,7 +2365,7 @@ private:
 
     static void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, core::LocOffsets exprLoc,
                                   ParsedSig sig, bool isOverloaded, const ast::MethodDef &mdef) {
-        ENFORCE(isOverloaded || mdef.symbol == method);
+        ENFORCE(isOverloaded || mdef.symbol == method.asMethodRef());
         ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
 
         if (!sig.seen.returns && !sig.seen.void_) {
@@ -2771,7 +2771,7 @@ public:
     }
     ast::TreePtr postTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
+        ENFORCE(original.symbol != core::Symbols::todoMethod(), "These should have all been resolved: {}",
                 tree.toString(ctx));
         return tree;
     }

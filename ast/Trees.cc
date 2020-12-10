@@ -185,7 +185,7 @@ ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOr
     _sanityCheck();
 }
 
-MethodDef::MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::SymbolRef symbol, core::NameRef name,
+MethodDef::MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,
                      ARGS_store args, TreePtr rhs, Flags flags)
     : loc(loc), declLoc(declLoc), symbol(symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), flags(flags) {
     categoryCounterInc("trees", "methoddef");
@@ -534,13 +534,13 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
         fmt::format_to(buf, "def ");
     }
     fmt::format_to(buf, "{}", name.toString(gs));
-    const auto data = this->symbol.dataAllowingNone(gs);
+    const auto data = this->symbol.data(gs);
     if (name != data->name) {
         fmt::format_to(buf, "<{}>", data->name.toString(gs));
     }
     fmt::format_to(buf, "(");
     bool first = true;
-    if (this->symbol == core::Symbols::todo()) {
+    if (this->symbol == core::Symbols::todoMethod()) {
         for (auto &a : this->args) {
             if (!first) {
                 fmt::format_to(buf, ", ");
@@ -580,11 +580,11 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::format_to(buf, "flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
 
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "name = {}<{}>\n", name.showRaw(gs), this->symbol.dataAllowingNone(gs)->name.showRaw(gs));
+    fmt::format_to(buf, "name = {}<{}>\n", name.showRaw(gs), this->symbol.data(gs)->name.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "args = [");
     bool first = true;
-    if (this->symbol == core::Symbols::todo()) {
+    if (this->symbol == core::Symbols::todoMethod()) {
         for (auto &a : this->args) {
             if (!first) {
                 fmt::format_to(buf, ", ");

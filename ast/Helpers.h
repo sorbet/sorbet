@@ -226,7 +226,8 @@ public:
             args.emplace_back(make_tree<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
         MethodDef::Flags flags;
-        return make_tree<MethodDef>(loc, declLoc, core::Symbols::todo(), name, std::move(args), std::move(rhs), flags);
+        return make_tree<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(args), std::move(rhs),
+                                    flags);
     }
 
     static TreePtr SyntheticMethod(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,

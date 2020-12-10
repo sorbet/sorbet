@@ -27,11 +27,11 @@ ast::TreePtr LocalVarFinder::preTransformMethodDef(core::Context ctx, ast::TreeP
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     ENFORCE(methodDef.symbol.exists());
-    ENFORCE(methodDef.symbol != core::Symbols::todo());
+    ENFORCE(methodDef.symbol != core::Symbols::todoMethod());
 
     auto currentMethod = methodDef.symbol;
 
-    if (currentMethod == this->targetMethod) {
+    if (currentMethod == this->targetMethod.asMethodRef()) {
         auto parsedArgs = ast::ArgParsing::parseArgs(methodDef.args);
         for (const auto &parsedArg : parsedArgs) {
             this->result_.emplace_back(parsedArg.local);

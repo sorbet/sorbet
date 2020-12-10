@@ -1100,7 +1100,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
             memcpy(&flags, &c.flags, sizeof(flags));
             p.putU1(flags);
             p.putU4(c.name.rawId());
-            p.putU4(c.symbol.rawId());
+            p.putU4(c.symbol.id());
             p.putU4(c.args.size());
             pickle(p, c.rhs);
             for (auto &a : c.args) {
@@ -1373,7 +1373,7 @@ ast::TreePtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalS
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &flagsU1, sizeof(flags));
             NameRef name = unpickleNameRef(p, gs);
-            auto symbol = SymbolRef::fromRaw(p.getU4());
+            auto symbol = MethodRef::fromRaw(p.getU4());
             auto argsSize = p.getU4();
             auto rhs = unpickleExpr(p, gs, file);
             ast::MethodDef::ARGS_store args(argsSize);
