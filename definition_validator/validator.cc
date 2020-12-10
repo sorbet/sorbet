@@ -514,8 +514,26 @@ void validateUselessRequiredAncestors(core::Context ctx, const core::SymbolRef s
     }
 }
 
+void validateUnsatisfiedRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+    auto data = sym.data(ctx);
+    if (data->isClassOrModuleModule() || data->isClassOrModuleAbstract()) {
+        return;
+    }
+    for (auto req : data->requiredAncestorsTransitive(ctx)) {
+        if (sym != req.symbol && !data->derivesFrom(ctx, req.symbol)) {
+            if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiedRequiredAncestor)) {
+                e.setHeader("`{}` must {} `{}` (required by `{}`)", data->show(ctx),
+                            req.symbol.data(ctx)->isClassOrModuleModule() ? "include" : "inherit",
+                            req.symbol.data(ctx)->show(ctx), req.origin.data(ctx)->show(ctx));
+                e.addErrorLine(req.loc, "required by `{}` here", req.origin.data(ctx)->show(ctx));
+            }
+        }
+    }
+}
+
 void validateRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
     validateUselessRequiredAncestors(ctx, sym);
+    validateUnsatisfiedRequiredAncestors(ctx, sym);
 }
 
 class ValidateWalk {

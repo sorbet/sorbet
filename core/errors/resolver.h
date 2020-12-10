@@ -69,6 +69,7 @@ constexpr ErrorClass GenericTypeParamBoundMismatch{5060, StrictLevel::False};
 constexpr ErrorClass PrivateConstantReferenced{5061, StrictLevel::True};
 constexpr ErrorClass InvalidRequiredAncestor{5062, StrictLevel::True};
 constexpr ErrorClass UselessRequiredAncestor{5063, StrictLevel::True};
+constexpr ErrorClass UnsatisfiedRequiredAncestor{5064, StrictLevel::True};
 } // namespace sorbet::core::errors::Resolver
 
 #endif
