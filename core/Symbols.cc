@@ -1053,10 +1053,9 @@ ClassOrModuleRef Symbol::topAttachedClass(const GlobalState &gs) const {
     return classSymbol;
 }
 
-void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
+void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass) {
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(ctx));
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
-    ENFORCE(subclass.isClassOrModule(), "Sealed subclass {} must be class", subclass.show(ctx));
 
     // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
     auto selfRef = this->ref(ctx);

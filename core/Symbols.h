@@ -578,7 +578,7 @@ public:
 
     ClassOrModuleRef topAttachedClass(const GlobalState &gs) const;
 
-    void recordSealedSubclass(MutableContext ctx, SymbolRef subclass);
+    void recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass);
     const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
