@@ -80,7 +80,7 @@ public:
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterNewMethodOverload(Loc loc, SymbolRef original, core::NameRef originalName, u4 num,
                                      const std::vector<bool> &argsToKeep);
-    SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
+    SymbolRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
 

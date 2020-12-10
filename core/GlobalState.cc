@@ -83,7 +83,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::noSymbol());
     id = enterMethodSymbol(Loc::none(), Symbols::noSymbol(), Names::noMethod());
     ENFORCE(id == Symbols::noMethod());
-    id = enterFieldSymbol(Loc::none(), Symbols::noSymbol(), Names::noFieldOrStaticField());
+    id = enterFieldSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noFieldOrStaticField());
     ENFORCE(id == Symbols::noField());
     id = enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeArgument(), Variance::CoVariant);
     ENFORCE(id == Symbols::noTypeArgument());
@@ -1121,12 +1121,11 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, co
     return res;
 }
 
-SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.isClassOrModule(), "entering field symbol into not-a-class");
+SymbolRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
     auto flags = Symbol::Flags::FIELD;
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    SymbolData ownerScope = SymbolRef(owner).dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
