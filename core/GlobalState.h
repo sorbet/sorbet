@@ -289,8 +289,7 @@ private:
 
     void expandNames(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize);
 
-    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().classOrModuleIndex(),
-                              bool isModule = false);
+    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().id(), bool isModule = false);
 
     SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
     SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;

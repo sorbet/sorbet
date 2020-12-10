@@ -41,8 +41,8 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
     data->setIsModule(isModule);
     data->setSuperClass(SymbolRef(this, SymbolRef::Kind::ClassOrModule, superclass));
 
-    if (symRef.classOrModuleIndex() > Symbols::root().classOrModuleIndex()) {
-        Symbols::root().dataAllowingNone(*this)->members()[nameId] = symRef;
+    if (symRef.classOrModuleIndex() > Symbols::root().id()) {
+        Symbols::root().data(*this)->members()[nameId] = symRef;
     }
     return symRef;
 }
@@ -101,7 +101,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::rootSingleton());
     id = synthesizeClass(core::Names::Constants::Todo(), 0);
     ENFORCE(id == Symbols::todo());
-    id = synthesizeClass(core::Names::Constants::Object(), Symbols::BasicObject().classOrModuleIndex());
+    id = synthesizeClass(core::Names::Constants::Object(), Symbols::BasicObject().id());
     ENFORCE(id == Symbols::Object());
     id = synthesizeClass(core::Names::Constants::Integer());
     ENFORCE(id == Symbols::Integer());
@@ -125,7 +125,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::untyped());
     id = synthesizeClass(core::Names::Constants::Opus(), 0, true);
     ENFORCE(id == Symbols::Opus());
-    id = synthesizeClass(core::Names::Constants::T(), Symbols::todo().classOrModuleIndex(), true);
+    id = synthesizeClass(core::Names::Constants::T(), Symbols::todo().id(), true);
     ENFORCE(id == Symbols::T());
     id = synthesizeClass(core::Names::Constants::Class(), 0);
     ENFORCE(id == Symbols::Class());
@@ -420,9 +420,9 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Class_new());
 
     // Root members
-    Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
-    Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
-    Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Bottom()] = Symbols::bottom();
+    Symbols::root().data(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
+    Symbols::root().data(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
+    Symbols::root().data(*this)->members()[core::Names::Constants::Bottom()] = Symbols::bottom();
 
     // Sorbet::Private::Static::VERSION
     id = enterStaticFieldSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::VERSION());
@@ -747,15 +747,15 @@ void GlobalState::initEmpty() {
 
     for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
         string name = absl::StrCat("Proc", arity);
-        auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc().classOrModuleIndex());
+        auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc().id());
         ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: {} got: {} expected: {}", arity,
-                id.classOrModuleIndex(), Symbols::Proc(arity).classOrModuleIndex());
+                id.classOrModuleIndex(), Symbols::Proc(arity).id());
         id.data(*this)->singletonClass(*this);
     }
 
-    ENFORCE(classAndModules.size() == Symbols::last_synthetic_class_sym().classOrModuleIndex() + 1,
+    ENFORCE(classAndModules.size() == Symbols::last_synthetic_class_sym().id() + 1,
             "Too many synthetic class symbols? have: {} expected: {}", classAndModules.size(),
-            Symbols::last_synthetic_class_sym().classOrModuleIndex() + 1);
+            Symbols::last_synthetic_class_sym().id() + 1);
 
     ENFORCE(methods.size() == Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS,
             "Too many synthetic method symbols? have: {} expected: {}", methods.size(),

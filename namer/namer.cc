@@ -51,7 +51,7 @@ public:
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
     static FoundDefinitionRef root() {
-        return FoundDefinitionRef(DefinitionKind::Symbol, core::Symbols::root().rawId());
+        return FoundDefinitionRef(DefinitionKind::Symbol, core::SymbolRef(core::Symbols::root()).rawId());
     }
 
     DefinitionKind kind() const {

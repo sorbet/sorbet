@@ -597,7 +597,7 @@ void AppliedType::_sanityCheck(const GlobalState &gs) const {
                 (this->klass == Symbols::Array() && (this->targs.size() == 1)) ||
                 (this->klass == Symbols::Hash() && (this->targs.size() == 3)) ||
                 this->klass.classOrModuleIndex() >= Symbols::Proc0().classOrModuleIndex() &&
-                    this->klass.classOrModuleIndex() <= Symbols::last_proc().classOrModuleIndex(),
+                    this->klass.classOrModuleIndex() <= Symbols::last_proc().id(),
             this->klass.data(gs)->name.showRaw(gs));
     for (auto &targ : this->targs) {
         targ.sanityCheck(gs);

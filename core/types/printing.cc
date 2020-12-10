@@ -294,7 +294,7 @@ string OrType::show(const GlobalState &gs) const {
     // If str is empty at this point, all of the types present in the flattened
     // OrType are NilClass.
     if (!str.has_value()) {
-        return Symbols::NilClass().show(gs);
+        return Symbols::NilClass().data(gs)->show(gs);
     }
 
     string res;

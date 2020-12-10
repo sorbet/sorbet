@@ -191,8 +191,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         }
     }
     for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto ref = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
-        ENFORCE(ref.isClassOrModule());
+        auto ref = core::ClassOrModuleRef(gs, i);
         if (!ref.data(gs)->isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             ref.data(gs)->setIsModule(true);

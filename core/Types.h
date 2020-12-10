@@ -340,6 +340,10 @@ template <> inline TypePtr make_type<ClassType, core::SymbolRef>(core::SymbolRef
     return TypePtr(TypePtr::Tag::ClassType, ref.rawId(), 0);
 }
 
+template <> inline TypePtr make_type<ClassType, core::ClassOrModuleRef>(core::ClassOrModuleRef &&ref) {
+    return TypePtr(TypePtr::Tag::ClassType, SymbolRef(ref).rawId(), 0);
+}
+
 template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
     ENFORCE_NO_TIMER(isa_type<ClassType>(what));
     if (what.tag() == TypePtr::Tag::ClassType) {
@@ -518,6 +522,16 @@ template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef &>(SymbolRe
 template <> inline TypePtr make_type<LiteralType, SymbolRef, NameRef>(SymbolRef &&klass, NameRef &&val) {
     LiteralType type(klass, val);
     return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val.rawId());
+}
+
+template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef &>(ClassOrModuleRef &&klass, NameRef &val) {
+    LiteralType type(klass, val);
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val._id);
+}
+
+template <> inline TypePtr make_type<LiteralType, ClassOrModuleRef, NameRef>(ClassOrModuleRef &&klass, NameRef &&val) {
+    LiteralType type(klass, val);
+    return TypePtr(TypePtr::Tag::LiteralType, static_cast<u4>(type.literalKind), val._id);
 }
 
 template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &what) {

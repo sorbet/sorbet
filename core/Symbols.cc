@@ -220,12 +220,21 @@ ConstSymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
     }
 }
 
+ClassOrModuleRef SymbolRef::asClassOrModuleRef() const {
+    if (kind() == Kind::ClassOrModule) {
+        return ClassOrModuleRef::fromRaw(unsafeTableIndex());
+    }
+    return ClassOrModuleRef();
+}
+
 SymbolData ClassOrModuleRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
     return SymbolData(gs.classAndModules[_id], gs);
 }
 
 ConstSymbolData ClassOrModuleRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
     return ConstSymbolData(gs.classAndModules[_id], gs);
 }
@@ -260,6 +269,8 @@ SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
     // If this fails, the symbol table is too big :(
     ENFORCE_NO_TIMER(id <= ID_MASK);
 }
+
+SymbolRef::SymbolRef(ClassOrModuleRef kls) : SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, kls.id()) {}
 
 ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, u4 id) : _id(id) {}
 
