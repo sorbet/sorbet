@@ -285,7 +285,6 @@ string SymbolRef::show(const GlobalState &gs) const {
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner;
     auto klass = owner.data(ctx)->enclosingClass(ctx);
-    ENFORCE(klass.isClassOrModule());
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(ctx, owner);
@@ -1299,13 +1298,13 @@ SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
     return owner;
 }
 
-SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
+ClassOrModuleRef Symbol::enclosingClass(const GlobalState &gs) const {
     SymbolRef owner = ref(gs);
     while (!owner.isClassOrModule()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
         owner = owner.data(gs)->owner;
     }
-    return owner;
+    return owner.asClassOrModuleRef();
 }
 
 u4 Symbol::hash(const GlobalState &gs) const {

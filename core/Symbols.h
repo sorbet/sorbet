@@ -655,7 +655,7 @@ public:
     void sanityCheck(const GlobalState &gs) const;
     SymbolRef enclosingMethod(const GlobalState &gs) const;
 
-    SymbolRef enclosingClass(const GlobalState &gs) const;
+    ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
 
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
     // why raw pointers are safe.
