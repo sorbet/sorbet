@@ -294,8 +294,6 @@ private:
     SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
     SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;
 
-    SymbolRef getTopLevelClassSymbol(NameRef name);
-
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };
 // CheckSize(GlobalState, 152, 8);
