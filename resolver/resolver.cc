@@ -2774,7 +2774,6 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     }
 
     workers.multiplexJob("resolveSignaturesWalk", [&gs, inputq, outputq]() -> void {
-        Timer timeit(gs.tracer(), "resolveSignaturesWalkWorker");
         ResolveSignaturesWalk walk;
         ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
         ast::ParsedFile job;
