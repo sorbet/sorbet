@@ -564,18 +564,25 @@ private:
             return;
         }
 
-        auto argumentNumber = 0;
         auto encounteredError = false;
         for (auto &arg : send->args) {
             auto *id = ast::cast_tree<ast::ConstantLit>(arg);
 
-            if (id == nullptr || !id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
+            if (id == nullptr) {
                 if (auto e = gs.beginError(core::Loc(todo.file, send->loc),
                                            core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("Argument to `{}` must be statically resolvable to a module",
                                 send->fun.data(gs)->show(gs));
                 }
                 return;
+            }
+            if (!id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
+                if (auto e =
+                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("Argument to `{}` must be statically resolvable to a module",
+                                send->fun.data(gs)->show(gs));
+                }
+                encounteredError = true;
             }
             if (id->symbol.data(gs)->isClassOrModuleClass()) {
                 if (auto e =
@@ -597,7 +604,7 @@ private:
             }
 
             // Get the fake property holding the mixes
-            auto mixData = id->symbol.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
+            auto mixData = owner.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
             auto loc = core::Loc(owner.data(gs)->loc().file(), send->loc);
             if (!mixData.exists()) {
                 // We never stored a mixin in this symbol
@@ -606,10 +613,10 @@ private:
             }
 
             // Add an argument to the fake property to store the referenced module
-            auto argName = gs.enterNameUTF8(fmt::format("arg{}", argumentNumber)); // name has to be distinct
+            auto currentArgSize = mixData.dataAllowingNone(gs)->arguments().size();
+            auto argName = gs.enterNameUTF8(fmt::format("arg{}", currentArgSize - 1)); // name has to be distinct
             auto &argInfo = gs.enterMethodArgumentSymbol(loc, mixData, argName);
             argInfo.rebind = id->symbol; // Store the mixin module ref in the `rebind` value of the fake argument
-            argumentNumber++;
         }
     }
 

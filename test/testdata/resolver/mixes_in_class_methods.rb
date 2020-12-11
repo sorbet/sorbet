@@ -21,10 +21,6 @@ end
 Test.mixin_class_method
 Test.new.mixin_method
 
-module Timesout
-  extend T::Helpers
-  mixes_in_class_methods(Mixin)
-end
 
 module Bad1
   extend T::Sig

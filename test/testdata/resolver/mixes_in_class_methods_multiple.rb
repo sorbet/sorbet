@@ -84,3 +84,11 @@ module Bad2
   module ClassMethods; end
   mixes_in_class_methods(ClassMethods, Bad2) # error: Must not pass your self
 end
+
+module Bad3
+  extend T::Sig
+  extend T::Helpers
+
+  module ClassMethods; end
+  mixes_in_class_methods(ClassMethods, 0) # error: must be statically resolvable to a module
+end
