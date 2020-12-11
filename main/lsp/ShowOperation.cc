@@ -40,7 +40,7 @@ string_view kindToDescription(ShowOperation::Kind kind) {
         case ShowOperation::Kind::SlowPathBlocking:
             return "Typechecking...";
         case ShowOperation::Kind::SlowPathNonBlocking:
-            return "Typchecking in background";
+            return "Typechecking in background";
         case ShowOperation::Kind::References:
             return "Finding all references...";
         case ShowOperation::Kind::SymbolSearch:
