@@ -144,6 +144,11 @@ TypePtr Types::falsyTypes() {
     return res;
 }
 
+TypePtr Types::todo() {
+    static auto res = make_type<ClassType>(Symbols::todo());
+    return res;
+}
+
 TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, SymbolRef klass) {
     TypePtr result;
 
