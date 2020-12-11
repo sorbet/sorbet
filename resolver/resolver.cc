@@ -2602,6 +2602,8 @@ private:
                     core::SymbolRef sigOwner;
                     if (mdef.flags.isSelfMethod) {
                         sigOwner = ctx.owner.data(ctx)->lookupSingletonClass(ctx);
+                        // namer ensures that all method owners are defined.
+                        ENFORCE_NO_TIMER(sigOwner.exists());
                     } else {
                         sigOwner = ctx.owner;
                     }
