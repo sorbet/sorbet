@@ -1179,6 +1179,8 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
     }
 }
 
+namespace {
+
 SymbolRef unwrapSymbol(const TypePtr &type) {
     SymbolRef result;
     TypePtr typePtr = type;
@@ -1200,7 +1202,6 @@ SymbolRef unwrapSymbol(const TypePtr &type) {
     }
     return result;
 }
-namespace {
 
 class T_untyped : public IntrinsicMethod {
 public:
@@ -1400,12 +1401,15 @@ public:
             attachedClass = Symbols::Set();
         }
 
-        auto arity = attachedClass.data(gs)->typeArity(gs);
-        if (attachedClass == Symbols::Hash()) {
-            arity = 2;
-        }
         if (attachedClass.data(gs)->typeMembers().empty()) {
             return;
+        }
+
+        int arity;
+        if (attachedClass == Symbols::Hash()) {
+            arity = 2;
+        } else {
+            arity = attachedClass.data(gs)->typeArity(gs);
         }
 
         // This is something like Generic[T1,...,foo: bar...]
