@@ -2113,106 +2113,107 @@ public:
             }
         });
 
-        ResolveTypeMembersAndFieldsResult combined;
+        vector<ast::ParsedFile> combinedFiles;
+        // The following items are not flattened; it'd be expensive to do so on large projects (they contain every
+        // field/method alias/etc for the entire workspace!)
+        vector<vector<ResolveAssignItem>> combinedTodoAssigns;
+        vector<vector<ResolveAttachedClassItem>> combinedTodoAttachedClassItems;
+        vector<vector<core::SymbolRef>> combinedTodoUntypedResultTypes;
+        vector<vector<ResolveCastItem>> combinedTodoResolveCastItems;
+        vector<vector<ResolveFieldItem>> combinedTodoResolveFieldItems;
+        vector<vector<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
+        vector<vector<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
+        vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
+
         {
             ResolveTypeMembersAndFieldsResult threadResult;
             for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
-                    if (combined.files.empty()) {
-                        combined = move(threadResult);
-                    } else {
-                        combined.files.insert(combined.files.end(), make_move_iterator(threadResult.files.begin()),
-                                              make_move_iterator(threadResult.files.end()));
-                        combined.todoAssigns.insert(combined.todoAssigns.end(),
-                                                    make_move_iterator(threadResult.todoAssigns.begin()),
-                                                    make_move_iterator(threadResult.todoAssigns.end()));
-                        combined.todoAttachedClassItems.insert(
-                            combined.todoAttachedClassItems.end(),
-                            make_move_iterator(threadResult.todoAttachedClassItems.begin()),
-                            make_move_iterator(threadResult.todoAttachedClassItems.end()));
-                        combined.todoUntypedResultTypes.insert(
-                            combined.todoUntypedResultTypes.end(),
-                            make_move_iterator(threadResult.todoUntypedResultTypes.begin()),
-                            make_move_iterator(threadResult.todoUntypedResultTypes.end()));
-                        combined.todoResolveCastItems.insert(
-                            combined.todoResolveCastItems.end(),
-                            make_move_iterator(threadResult.todoResolveCastItems.begin()),
-                            make_move_iterator(threadResult.todoResolveCastItems.end()));
-                        combined.todoResolveFieldItems.insert(
-                            combined.todoResolveFieldItems.end(),
-                            make_move_iterator(threadResult.todoResolveFieldItems.begin()),
-                            make_move_iterator(threadResult.todoResolveFieldItems.end()));
-                        combined.todoResolveStaticFieldItems.insert(
-                            combined.todoResolveStaticFieldItems.end(),
-                            make_move_iterator(threadResult.todoResolveStaticFieldItems.begin()),
-                            make_move_iterator(threadResult.todoResolveStaticFieldItems.end()));
-                        combined.todoResolveSimpleStaticFieldItems.insert(
-                            combined.todoResolveSimpleStaticFieldItems.end(),
-                            make_move_iterator(threadResult.todoResolveSimpleStaticFieldItems.begin()),
-                            make_move_iterator(threadResult.todoResolveSimpleStaticFieldItems.end()));
-                        combined.todoMethodAliasItems.insert(
-                            combined.todoMethodAliasItems.end(),
-                            make_move_iterator(threadResult.todoMethodAliasItems.begin()),
-                            make_move_iterator(threadResult.todoMethodAliasItems.end()));
-                    }
+                    combinedFiles.insert(combinedFiles.end(), make_move_iterator(threadResult.files.begin()),
+                                         make_move_iterator(threadResult.files.end()));
+                    combinedTodoAssigns.emplace_back(move(threadResult.todoAssigns));
+                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
+                    combinedTodoUntypedResultTypes.emplace_back(move(threadResult.todoUntypedResultTypes));
+                    combinedTodoResolveCastItems.emplace_back(move(threadResult.todoResolveCastItems));
+                    combinedTodoResolveFieldItems.emplace_back(move(threadResult.todoResolveFieldItems));
+                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
+                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
+                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
+                    combinedTodoResolveStaticFieldItems.emplace_back(move(threadResult.todoResolveStaticFieldItems));
+                    combinedTodoResolveSimpleStaticFieldItems.emplace_back(
+                        move(threadResult.todoResolveSimpleStaticFieldItems));
+                    combinedTodoMethodAliasItems.emplace_back(move(threadResult.todoMethodAliasItems));
                 }
             }
         }
 
         // Put files into a consistent order for subsequent passes.
-        fast_sort(combined.files, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
+        fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
 
-        for (auto sym : combined.todoUntypedResultTypes) {
-            sym.data(gs)->resultType = core::Types::untypedUntracked();
+        for (auto &threadTodo : combinedTodoUntypedResultTypes) {
+            for (auto sym : threadTodo) {
+                sym.data(gs)->resultType = core::Types::untypedUntracked();
+            }
         }
 
         vector<bool> resolvedAttachedClasses(gs.classAndModulesUsed());
-        for (auto &job : combined.todoAttachedClassItems) {
-            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-            resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
+        for (auto &threadTodo : combinedTodoAttachedClassItems) {
+            for (auto &job : threadTodo) {
+                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
+            }
         }
 
         // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
         // (which is a static field). This is stronger than we need (we really only need the enum types)
         // but there's no particular reason to delay here.
-        for (auto &job : combined.todoResolveSimpleStaticFieldItems) {
-            job.sym.data(gs)->resultType = job.resultType;
+        for (auto &threadTodo : combinedTodoResolveSimpleStaticFieldItems) {
+            for (auto &job : threadTodo) {
+                job.sym.data(gs)->resultType = job.resultType;
+            }
         }
-        combined.todoResolveSimpleStaticFieldItems.clear();
 
         // loop over any out-of-order type_member/type_alias references
         bool progress = true;
-        while (progress && !combined.todoAssigns.empty()) {
-            auto origSize = combined.todoAssigns.size();
-            auto it =
-                std::remove_if(combined.todoAssigns.begin(), combined.todoAssigns.end(), [&](ResolveAssignItem &job) {
-                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                    return resolveJob(ctx, job, resolvedAttachedClasses);
+        while (progress && !combinedTodoAssigns.empty()) {
+            progress = false;
+            auto it = std::remove_if(
+                combinedTodoAssigns.begin(), combinedTodoAssigns.end(), [&](vector<ResolveAssignItem> &threadTodos) {
+                    auto origSize = threadTodos.size();
+                    auto threadTodoIt =
+                        std::remove_if(threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
+                            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                            return resolveJob(ctx, job, resolvedAttachedClasses);
+                        });
+                    threadTodos.erase(threadTodoIt, threadTodos.end());
+                    progress = progress || threadTodos.size() != origSize;
+                    return threadTodos.empty();
                 });
-            combined.todoAssigns.erase(it, combined.todoAssigns.end());
-            progress = combined.todoAssigns.size() != origSize;
+            combinedTodoAssigns.erase(it, combinedTodoAssigns.end());
         }
 
         // If there was a step with no progress, there's a cycle in the
         // type member/alias declarations. This is handled by reporting an error
         // at `typed: false`, and marking all of the involved type
         // members/aliases as T.untyped.
-        if (!combined.todoAssigns.empty()) {
-            for (auto &job : combined.todoAssigns) {
-                auto data = job.lhs.data(gs);
+        if (!combinedTodoAssigns.empty()) {
+            for (auto &threadTodos : combinedTodoAssigns) {
+                for (auto &job : threadTodos) {
+                    auto data = job.lhs.data(gs);
 
-                if (data->isTypeMember()) {
-                    data->resultType = core::make_type<core::LambdaParam>(job.lhs, core::Types::untypedUntracked(),
-                                                                          core::Types::untypedUntracked());
-                } else {
-                    data->resultType = core::Types::untypedUntracked();
-                }
+                    if (data->isTypeMember()) {
+                        data->resultType = core::make_type<core::LambdaParam>(job.lhs, core::Types::untypedUntracked(),
+                                                                              core::Types::untypedUntracked());
+                    } else {
+                        data->resultType = core::Types::untypedUntracked();
+                    }
 
-                if (auto e = gs.beginError(data->loc(), core::errors::Resolver::TypeMemberCycle)) {
-                    auto flavor = data->isTypeAlias() ? "alias" : "member";
-                    e.setHeader("Type {} `{}` is involved in a cycle", flavor, data->show(gs));
+                    if (auto e = gs.beginError(data->loc(), core::errors::Resolver::TypeMemberCycle)) {
+                        auto flavor = data->isTypeAlias() ? "alias" : "member";
+                        e.setHeader("Type {} `{}` is involved in a cycle", flavor, data->show(gs));
+                    }
                 }
             }
         }
@@ -2221,49 +2222,70 @@ public:
         computeExternalTypes(gs);
 
         // Resolve the remaining casts and fields.
-        for (auto &job : combined.todoResolveCastItems) {
-            core::Context ctx(gs, job.owner, job.file);
-            resolveCastItem(ctx, job);
-        }
-        for (auto &job : combined.todoResolveFieldItems) {
-            core::MutableContext ctx(gs, job.owner, job.file);
-            resolveField(ctx, job);
-        }
-        for (auto &job : combined.todoResolveStaticFieldItems) {
-            core::Context ctx(gs, job.sym, job.file);
-            if (auto resultType = resolveStaticField(ctx, job)) {
-                job.sym.data(gs)->resultType = resultType;
+        for (auto &threadTodos : combinedTodoResolveCastItems) {
+            for (auto &job : threadTodos) {
+                core::Context ctx(gs, job.owner, job.file);
+                resolveCastItem(ctx, job);
             }
         }
-        for (auto &job : combined.todoMethodAliasItems) {
-            core::MutableContext ctx(gs, job.owner, job.file);
-            resolveMethodAlias(ctx, job);
+        for (auto &threadTodos : combinedTodoResolveFieldItems) {
+            for (auto &job : threadTodos) {
+                core::MutableContext ctx(gs, job.owner, job.file);
+                resolveField(ctx, job);
+            }
+        }
+        for (auto &threadTodos : combinedTodoResolveStaticFieldItems) {
+            for (auto &job : threadTodos) {
+                core::Context ctx(gs, job.sym, job.file);
+                if (auto resultType = resolveStaticField(ctx, job)) {
+                    job.sym.data(gs)->resultType = resultType;
+                }
+            }
+        }
+        for (auto &threadTodos : combinedTodoMethodAliasItems) {
+            for (auto &job : threadTodos) {
+                core::MutableContext ctx(gs, job.owner, job.file);
+                resolveMethodAlias(ctx, job);
+            }
         }
 
-        return move(combined.files);
+        return combinedFiles;
     }
 };
 
 class ResolveSignaturesWalk {
 public:
-    struct MethodSignature {
-        core::LocOffsets loc;
-        ParsedSig sig;
-        vector<bool> argsToKeep;
-    };
-    struct ResolveMethodSignaturesJob {
+    struct ResolveSignatureJob {
         core::FileRef file;
         core::SymbolRef owner;
         ast::MethodDef *mdef;
-        InlinedVector<MethodSignature, 1> sigs;
+        core::LocOffsets loc;
+        ParsedSig sig;
+    };
+
+    struct OverloadedMethodSignature {
+        core::LocOffsets loc;
+        ParsedSig sig;
+        // N.B.: Unused if method has multiple signatures but is not overloaded.
+        vector<bool> argsToKeep;
+    };
+
+    struct ResolveMultiSignatureJob {
+        core::FileRef file;
+        core::SymbolRef owner;
+        ast::MethodDef *mdef;
+        bool isOverloaded;
+        InlinedVector<OverloadedMethodSignature, 2> sigs;
     };
 
     struct ResolveSignaturesWalkResult {
-        vector<ResolveMethodSignaturesJob> methodSignatureJobs;
+        vector<ResolveSignatureJob> signatureJobs;
+        vector<ResolveMultiSignatureJob> multiSignatureJobs;
         vector<ast::ParsedFile> trees;
     };
 
-    vector<ResolveMethodSignaturesJob> methodSignatureJobs;
+    vector<ResolveSignatureJob> signatureJobs;
+    vector<ResolveMultiSignatureJob> multiSignatureJobs;
 
 private:
     static ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef,
@@ -2532,6 +2554,14 @@ private:
         seq.stats.erase(toRemove, seq.stats.end());
     }
 
+    ParsedSig parseSig(core::Context ctx, core::SymbolRef sigOwner, ast::Send &send, ast::MethodDef &mdef) {
+        auto allowSelfType = true;
+        auto allowRebind = false;
+        auto allowTypeMember = true;
+        return TypeSyntax::parseSig(ctx.withOwner(sigOwner), send, nullptr,
+                                    TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
+    }
+
     void processStatement(core::Context ctx, ast::TreePtr &stat, InlinedVector<ast::Send *, 1> &lastSigs) {
         typecase(
             stat,
@@ -2608,37 +2638,33 @@ private:
                         sigOwner = ctx.owner;
                     }
 
-                    bool isOverloaded = lastSigs.size() > 1 && ctx.permitOverloadDefinitions(ctx.file);
-
-                    InlinedVector<MethodSignature, 1> sigs;
-                    sigs.reserve(lastSigs.size());
-
-                    for (auto &lastSig : lastSigs) {
-                        auto allowSelfType = true;
-                        auto allowRebind = false;
-                        auto allowTypeMember = true;
-                        auto sig = TypeSyntax::parseSig(
-                            ctx.withOwner(sigOwner), *lastSig, nullptr,
-                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
-
-                        vector<bool> argsToKeep;
-                        if (isOverloaded) {
-                            for (auto &argTree : mdef.args) {
-                                const auto local = ast::MK::arg2Local(argTree);
-                                auto treeArgName = local->localVariable._name;
-                                ENFORCE(local != nullptr);
-                                argsToKeep.emplace_back(absl::c_find_if(sig.argTypes, [&](auto &spec) {
-                                                            return spec.name == treeArgName;
-                                                        }) != sig.argTypes.end());
+                    if (lastSigs.size() == 1) {
+                        auto &lastSig = lastSigs.front();
+                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.file, ctx.owner, &mdef, lastSig->loc,
+                                                                       parseSig(ctx, sigOwner, *lastSig, mdef)});
+                    } else {
+                        bool isOverloaded = ctx.permitOverloadDefinitions(ctx.file);
+                        InlinedVector<OverloadedMethodSignature, 2> sigs;
+                        for (auto &lastSig : lastSigs) {
+                            auto sig = parseSig(ctx, sigOwner, *lastSig, mdef);
+                            vector<bool> argsToKeep;
+                            if (isOverloaded) {
+                                for (auto &argTree : mdef.args) {
+                                    const auto local = ast::MK::arg2Local(argTree);
+                                    auto treeArgName = local->localVariable._name;
+                                    ENFORCE(local != nullptr);
+                                    argsToKeep.emplace_back(absl::c_find_if(sig.argTypes, [&](auto &spec) {
+                                                                return spec.name == treeArgName;
+                                                            }) != sig.argTypes.end());
+                                }
                             }
+                            sigs.emplace_back(OverloadedMethodSignature{lastSig->loc, move(sig), move(argsToKeep)});
                         }
-                        sigs.emplace_back(MethodSignature{lastSig->loc, move(sig), move(argsToKeep)});
+
+                        multiSignatureJobs.emplace_back(
+                            ResolveMultiSignatureJob{ctx.file, ctx.owner, &mdef, isOverloaded, std::move(sigs)});
                     }
 
-                    methodSignatureJobs.emplace_back(
-                        ResolveMethodSignaturesJob{ctx.file, ctx.owner, &mdef, std::move(sigs)});
-
-                    // OVERLOAD
                     lastSigs.clear();
                 } else {
                     handleAbstractMethod(ctx, mdef);
@@ -2654,14 +2680,14 @@ private:
     }
 
 public:
-    static void resolveMethodSignaturesJob(core::MutableContext ctx, const ResolveMethodSignaturesJob &job) {
+    static void resolveMultiSignatureJob(core::MutableContext ctx, const ResolveMultiSignatureJob &job) {
         auto &sigs = job.sigs;
         auto &mdef = *job.mdef;
-        ENFORCE_NO_TIMER(!sigs.empty());
+        ENFORCE_NO_TIMER(sigs.size() > 1);
 
         prodCounterInc("types.sig.count");
 
-        bool isOverloaded = sigs.size() > 1 && ctx.permitOverloadDefinitions(ctx.file);
+        bool isOverloaded = job.isOverloaded;
         auto originalName = mdef.symbol.data(ctx)->name;
         if (isOverloaded) {
             ctx.state.mangleRenameSymbol(mdef.symbol, originalName);
@@ -2683,6 +2709,13 @@ public:
             }
             fillInInfoFromSig(ctx, overloadSym, sig.loc, move(sig.sig), isOverloaded, mdef);
         }
+        handleAbstractMethod(ctx, mdef);
+    }
+    static void resolveSignatureJob(core::MutableContext ctx, const ResolveSignatureJob &job) {
+        prodCounterInc("types.sig.count");
+        auto &mdef = *job.mdef;
+        bool isOverloaded = false;
+        fillInInfoFromSig(ctx, mdef.symbol, job.loc, move(job.sig), isOverloaded, mdef);
         handleAbstractMethod(ctx, mdef);
     }
 
@@ -2785,41 +2818,49 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
             }
         }
         if (!output.trees.empty()) {
-            output.methodSignatureJobs = move(walk.methodSignatureJobs);
+            output.signatureJobs = move(walk.signatureJobs);
+            output.multiSignatureJobs = move(walk.multiSignatureJobs);
             auto count = output.trees.size();
             outputq->push(move(output), count);
         }
     });
 
-    ResolveSignaturesWalk::ResolveSignaturesWalkResult combined;
+    // Note: We don't flatten these into one array because it's an expensive operation (a flat array has # of sigs
+    // elements in it!)
+    vector<vector<ResolveSignaturesWalk::ResolveSignatureJob>> combinedSignatures;
+    vector<vector<ResolveSignaturesWalk::ResolveMultiSignatureJob>> combinedMultiSignatures;
+    vector<ast::ParsedFile> combinedTrees;
     {
         ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                if (combined.trees.empty()) {
-                    combined = move(threadResult);
-                } else {
-                    combined.trees.insert(combined.trees.end(), make_move_iterator(threadResult.trees.begin()),
-                                          make_move_iterator(threadResult.trees.end()));
-                    combined.methodSignatureJobs.insert(combined.methodSignatureJobs.end(),
-                                                        make_move_iterator(threadResult.methodSignatureJobs.begin()),
-                                                        make_move_iterator(threadResult.methodSignatureJobs.end()));
-                }
+                combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadResult.trees.begin()),
+                                     make_move_iterator(threadResult.trees.end()));
+                combinedSignatures.emplace_back(move(threadResult.signatureJobs));
+                combinedMultiSignatures.emplace_back(move(threadResult.multiSignatureJobs));
             }
         }
     }
 
     {
         Timer timeit(gs.tracer(), "resolver.resolve_sigs");
-        for (auto &job : combined.methodSignatureJobs) {
-            core::MutableContext ctx(gs, job.owner, job.file);
-            ResolveSignaturesWalk::resolveMethodSignaturesJob(ctx, job);
+        for (auto &threadSignatures : combinedSignatures) {
+            for (auto &job : threadSignatures) {
+                core::MutableContext ctx(gs, job.owner, job.file);
+                ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+            }
+        }
+        for (auto &threadMultiSignatures : combinedMultiSignatures) {
+            for (auto &job : threadMultiSignatures) {
+                core::MutableContext ctx(gs, job.owner, job.file);
+                ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
+            }
         }
     }
 
-    return move(combined.trees);
+    return move(combinedTrees);
 }
 
 void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
