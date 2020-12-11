@@ -109,6 +109,39 @@ have been considered. The easiest way is to use a <code>case</code> statement:</
 handled, Sorbet would report an error statically that one of the cases was
 missing. For more information on how exhaustiveness checking works, see
 <a href="/docs/exhaustiveness">Exhaustiveness Checking</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="enum-values-in-types"></a><a href="#enum-values-in-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Enum values in types</h2>
+<p>We might want a type for “only red suits” or “only black suits.” <code>T::Enum</code>
+allows using individual enum values like <code>Suit::Hearts</code> or <code>Suit::Diamonds</code> as
+types (in addition to the name of the enum itself, like <code>Suit</code>):</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># (1) Hearts and Diamonds are enum values and also types</span>
+sig {params(<span class="hljs-symbol">red_suit:</span> T.any(Suit::Hearts, Suit::Diamonds)).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handle_red_suit</span><span class="hljs-params">(red_suit)</span></span>
+  <span class="hljs-keyword">case</span> red_suit
+  <span class="hljs-keyword">when</span> Suit::Hearts <span class="hljs-keyword">then</span> <span class="hljs-string">"..."</span>
+  <span class="hljs-keyword">when</span> Suit::Diamonds <span class="hljs-keyword">then</span> <span class="hljs-string">"..."</span>
+  <span class="hljs-comment"># (2) exhaustive, even with only two cases handled</span>
+  <span class="hljs-keyword">else</span> T.absurd(red_suit)
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+
+handle_red_suit(Suit::Hearts) <span class="hljs-comment"># ok</span>
+handle_red_suit(Suit::Spades) <span class="hljs-comment"># type error</span>
+</code></pre>
+<p>We can also define <a href="/docs/type-aliases">type aliases</a> of various groups of enum
+values:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-comment"># Two type aliases for two different enum subsets</span>
+RedSuit = T.type_alias {T.any(Suit::Hearts, Suit::Diamonds)}
+BlackSuit = T.type_alias {T.any(Suit::Spades, Suit::Clubs)}
+
+sig {params(<span class="hljs-symbol">black_suit:</span> BlackSuit).void}
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">handle_black_suit</span><span class="hljs-params">(black_suit)</span></span>
+  <span class="hljs-comment"># ...</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>Using enum values in types is useful for modeling enums where there is a
+frequently-used subset of enum values.</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20strict%0Aextend%20T%3A%3ASig%0A%0A%23%20(1)%20New%20enumerations%20are%20defined%20by%20creating%20a%20subclass%20of%20T%3A%3AEnum%0Aclass%20Suit%20%3C%20T%3A%3AEnum%0A%20%20%23%20(2)%20Enum%20values%20are%20declared%20within%20an%20%60enums%20do%60%20block%0A%20%20enums%20do%0A%20%20%20%20Spades%20%3D%20new%0A%20%20%20%20Hearts%20%3D%20new%0A%20%20%20%20Clubs%20%3D%20new%0A%20%20%20%20Diamonds%20%3D%20new%0A%20%20end%0Aend%0A%0Asig%20%7Bparams(red_suit%3A%20T.any(Suit%3A%3AHearts%2C%20Suit%3A%3ADiamonds)).void%7D%0Adef%20handle_red_suit(red_suit)%0A%20%20case%20red_suit%0A%20%20when%20Suit%3A%3AHearts%20then%20%22...%22%0A%20%20when%20Suit%3A%3ADiamonds%20then%20%22...%22%0A%20%20%23%20exhaustive%2C%20even%20with%20only%20two%20cases%20handled%0A%20%20else%20T.absurd(red_suit)%0A%20%20end%0Aend%0A%0Ahandle_red_suit(Suit%3A%3AHearts)%20%23%20ok%0Ahandle_red_suit(Suit%3A%3ASpades)%20%23%20type%20error%0A%0ARedSuit%20%3D%20T.type_alias%20%7BT.any(Suit%3A%3AHearts%2C%20Suit%3A%3ADiamonds)%7D%0ABlackSuit%20%3D%20T.type_alias%20%7BT.any(Suit%3A%3ASpades%2C%20Suit%3A%3AClubs)%7D%0A%0Asig%20%7Bparams(black_suit%3A%20BlackSuit).void%7D%0Adef%20handle_black_suit(black_suit)%0A%20%20case%20black_suit%0A%20%20when%20Suit%3A%3ASpades%20then%20%22...%22%0A%20%20when%20Suit%3A%3AClubs%20then%20%22...%22%0A%20%20%23%20exhaustive%2C%20even%20with%20only%20two%20cases%20handled%0A%20%20else%20T.absurd(black_suit)%0A%20%20end%0Aend%0A">→
+View full example on sorbet.run</a></p>
 <h2><a class="anchor" aria-hidden="true" id="converting-enums-to-other-types"></a><a href="#converting-enums-to-other-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Converting enums to other types</h2>
 <p>Enumerations do not implicitly convert to any other type. Instead, all
 conversion must be done explicitly. One particularly convenient way to implement
@@ -134,15 +167,15 @@ itself:</p>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 </code></pre>
-<p>A particularly common case to convert an enum to a String. Because this is so
-common, this conversion has been built in (it still must be explicitly called):</p>
+<p>A particularly common case is to convert an enum to a String. Because this is so
+common, this conversion method is built in:</p>
 <pre><code class="hljs css language-ruby">Suit::Spades.serialize <span class="hljs-comment"># =&gt; 'spades'</span>
 Suit::Hearts.serialize <span class="hljs-comment"># =&gt; 'hearts'</span>
 <span class="hljs-comment"># ...</span>
 </code></pre>
-<p>Again: this conversion must be done explicitly. When attempting to implicitly
-convert an enum value to a string, you’ll get a non-human-friendly
-representation of the enum:</p>
+<p>Again: this conversion to a string must still be done explicitly. When
+attempting to implicitly convert an enum value to a string, you’ll get a
+non-human-friendly representation of the enum:</p>
 <pre><code class="hljs css language-ruby">suit = Suit::Spades
 puts <span class="hljs-string">"Got suit: <span class="hljs-subst">#{suit}</span>"</span>
 <span class="hljs-comment"># =&gt;  Got suit: #&lt;Suit::Spades&gt;</span>
@@ -189,8 +222,6 @@ returns <code>nil</code> when the value doesn’t deserialize to anything:</p>
 Suit.has_serialized?(<span class="hljs-string">'bad value'</span>)
 <span class="hljs-comment"># =&gt; false</span>
 </code></pre>
-<!-- TODO(jez) Using enum *values* as type annotations / in unions -->
-<!-- TODO(jez) ^ Limitation: can't be used in type aliases... -->
 <h2><a class="anchor" aria-hidden="true" id="listing-the-values-of-an-enum"></a><a href="#listing-the-values-of-an-enum" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Listing the values of an enum</h2>
 <p>Sometimes it is useful to enumerate all the values of an enum:</p>
 <pre><code class="hljs css language-ruby">Suit.values
@@ -250,9 +281,16 @@ into <code>T::Enum</code>, and without mutating state.</p>
 <a href="/docs/sealed#approximating-algebraic-data-types">Approximating algebraic data types</a>.</p>
 </blockquote>
 <h2><a class="anchor" aria-hidden="true" id="defining-one-enum-as-a-subset-of-another-enum"></a><a href="#defining-one-enum-as-a-subset-of-another-enum" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defining one enum as a subset of another enum</h2>
-<p>One thing that comes up from time to time is having one large enum, but knowing
-that in certain places only a subset of those enums are valid. With <code>T::Enum</code>,
-there are a number of ways to encode this:</p>
+<blockquote>
+<p>This section has been superseded by the
+<a href="#enum-values-in-types">Enum values in types</a> section above. This section is
+older, and describes workarounds relevant before that section above existed.
+We include this section here mostly for inspiration (the ideas in this section
+are not discouraged, just verbose).</p>
+</blockquote>
+<p>In addition to using <a href="#enum-values-in-types">enum values in types</a> and type
+aliases of enum values, there are two other ways to define one enum as a subset
+of another:</p>
 <ol>
 <li>By using a <a href="/docs/sealed">sealed module</a></li>
 <li>By explicitly converting between multiple enums</li>
@@ -336,7 +374,7 @@ definitions.</p></li>
 <p>For union types, sealed classes, and enums, Sorbet has powerful exhaustiveness
 checking that can statically catch when certain cases have not been handled.</p></li>
 </ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tstruct"><span class="arrow-prev">← </span><span>T::Struct</span></a><a class="docs-next button" href="/docs/untyped"><span>T.untyped</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#exhaustiveness">Exhaustiveness</a></li><li><a href="#converting-enums-to-other-types">Converting enums to other types</a></li><li><a href="#converting-from-other-types-to-enums">Converting from other types to enums</a></li><li><a href="#listing-the-values-of-an-enum">Listing the values of an enum</a></li><li><a href="#attaching-metadata-to-an-enum">Attaching metadata to an enum</a></li><li><a href="#defining-one-enum-as-a-subset-of-another-enum">Defining one enum as a subset of another enum</a><ul class="toc-headings"><li><a href="#by-using-a-sealed-module">By using a sealed module</a></li><li><a href="#by-explicitly-converting-between-multiple-enums">By explicitly converting between multiple enums</a></li></ul></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2020 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/tstruct"><span class="arrow-prev">← </span><span>T::Struct</span></a><a class="docs-next button" href="/docs/untyped"><span>T.untyped</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#exhaustiveness">Exhaustiveness</a></li><li><a href="#enum-values-in-types">Enum values in types</a></li><li><a href="#converting-enums-to-other-types">Converting enums to other types</a></li><li><a href="#converting-from-other-types-to-enums">Converting from other types to enums</a></li><li><a href="#listing-the-values-of-an-enum">Listing the values of an enum</a></li><li><a href="#attaching-metadata-to-an-enum">Attaching metadata to an enum</a></li><li><a href="#defining-one-enum-as-a-subset-of-another-enum">Defining one enum as a subset of another enum</a><ul class="toc-headings"><li><a href="#by-using-a-sealed-module">By using a sealed module</a></li><li><a href="#by-explicitly-converting-between-multiple-enums">By explicitly converting between multiple enums</a></li></ul></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2020 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
