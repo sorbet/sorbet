@@ -292,20 +292,30 @@ point is a test, run:</p>
 <p>For example, this should probably be placed as the first line of any <code>rake test</code>
 target, as well as any other entry point to a project’s tests. If this line is
 absent, <code>.checked(:tests)</code> sigs behave as if they had been <code>.checked(:never)</code>.</p>
-<h2><a class="anchor" aria-hidden="true" id="tsigwithoutruntimesig"></a><a href="#tsigwithoutruntimesig" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>T::Sig::WithoutRuntime.sig</h2>
-<p>Even with <code>.checked(:never)</code> you are opting into evaluating the sig at runtime.
-If you want to minimize runtime overhead but still statically check the sig when
-running srb tc, you can use <code>T::Sig::WithoutRuntime.sig</code> instead of <code>sig</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="tsigwithoutruntimesig"></a><a href="#tsigwithoutruntimesig" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>T::Sig::WithoutRuntime.sig</code></h2>
+<p>Even with <code>.checked(:never)</code>, there is some slight runtime overhead. The block
+for a <code>sig {...}</code> above a method is not evaluated until the first time that
+method is called. But Sorbet can only know whether a sig is <code>.checked(:never)</code>
+or not until the block is evaluated. So even if a sig is marked
+<code>.checked(:never)</code>, Sorbet will still wrap the method. The first time the method
+is called, Sorbet will discover the <code>.checked(:never)</code> and put back the original
+method.</p>
+<p>Sometimes even this tiny amount of runtime metaprogramming is unnacceptable at
+runtime. To completely eliminate all runtime side effects when defining a
+signature, replace <code>sig</code> with <code>T::Sig::WithoutRuntime.sig</code> when annotating
+methods:</p>
 <pre><code class="hljs css language-ruby"><span class="hljs-comment"># typed: true</span>
 <span class="hljs-keyword">require</span> <span class="hljs-string">"sorbet-runtime"</span>
 
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span></span>
   extend T::Sig
-  <span class="hljs-comment"># This signature will raise both statically and at runtime because `NotFound` doesn't exist</span>
+  <span class="hljs-comment"># This signature will raise both statically and at runtime</span>
+  <span class="hljs-comment"># (because `NotFound` doesn't exist, and causes a NameError)</span>
   sig { params(<span class="hljs-symbol">x:</span> NotFound).void.checked(<span class="hljs-symbol">:never</span>) }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 
-  <span class="hljs-comment"># This signature will only raise statically, the sig block isn't evaluated at runtime</span>
+  <span class="hljs-comment"># This signature will only raise statically</span>
+  <span class="hljs-comment"># (the sig block is ignored completely at runtime)</span>
   T::Sig::WithoutRuntime.sig { params(<span class="hljs-symbol">x:</span> NotFound).void }
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">bar</span><span class="hljs-params">(x)</span></span>; <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
@@ -328,7 +338,7 @@ for void</a>. <a href="#fnref1" class="footnote-backref">↩</a></p>
 </li>
 </ol>
 </section>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/static"><span class="arrow-prev">← </span><span>Enabling Static Checks</span></a><a class="docs-next button" href="/docs/rbi"><span>RBI Files</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#runtime-checked-sigs">Runtime-checked <code>sig</code>s</a></li><li><a href="#why-have-runtime-checks">Why have runtime checks?</a></li><li><a href="#changing-the-runtime-behavior">Changing the runtime behavior</a></li><li><a href="#on_failure-changing-what-happens-on-runtime-errors"><code>.on_failure</code>: Changing what happens on runtime errors</a></li><li><a href="#checked-whether-to-check-in-the-first-place"><code>.checked</code>: Whether to check in the first place</a></li><li><a href="#tsigwithoutruntimesig">T::Sig::WithoutRuntime.sig</a></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2020 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/static"><span class="arrow-prev">← </span><span>Enabling Static Checks</span></a><a class="docs-next button" href="/docs/rbi"><span>RBI Files</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#runtime-checked-sigs">Runtime-checked <code>sig</code>s</a></li><li><a href="#why-have-runtime-checks">Why have runtime checks?</a></li><li><a href="#changing-the-runtime-behavior">Changing the runtime behavior</a></li><li><a href="#on_failure-changing-what-happens-on-runtime-errors"><code>.on_failure</code>: Changing what happens on runtime errors</a></li><li><a href="#checked-whether-to-check-in-the-first-place"><code>.checked</code>: Whether to check in the first place</a></li><li><a href="#tsigwithoutruntimesig"><code>T::Sig::WithoutRuntime.sig</code></a></li><li><a href="#whats-next">What's next?</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2020 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
