@@ -1090,7 +1090,7 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
 }
 
 SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, core::NameRef originalName, u4 num,
-                                              const vector<int> &argsToKeep) {
+                                              const vector<bool> &argsToKeep) {
     NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
     core::Loc loc = num == 0 ? original.data(*this)->loc()
                              : sigLoc; // use original Loc for main overload so that we get right jump-to-def for it.
@@ -1105,7 +1105,7 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, co
         for (auto &arg : originalArguments) {
             i += 1;
             Loc loc = arg.loc;
-            if (!absl::c_linear_search(argsToKeep, i)) {
+            if (!argsToKeep[i]) {
                 if (arg.flags.isBlock) {
                     loc = Loc::none();
                 } else {

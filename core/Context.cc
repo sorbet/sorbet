@@ -42,6 +42,10 @@ bool Context::permitOverloadDefinitions(const core::GlobalState &gs, FileRef sig
     return FileOps::getFileName(sigLoc.data(gs).path()) == whitelistedTest;
 }
 
+bool Context::permitOverloadDefinitions(FileRef sigLoc) const {
+    return Context::permitOverloadDefinitions(state, sigLoc, owner);
+}
+
 bool MutableContext::permitOverloadDefinitions(FileRef sigLoc) const {
     return Context::permitOverloadDefinitions(state, sigLoc, owner);
 }

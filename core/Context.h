@@ -30,6 +30,7 @@ public:
     Context(const MutableContext &other) noexcept;
 
     ErrorBuilder beginError(LocOffsets loc, ErrorClass what) const;
+    bool permitOverloadDefinitions(FileRef sigLoc) const;
     static bool permitOverloadDefinitions(const core::GlobalState &gs, FileRef sigLoc, core::SymbolRef owner);
 
     Context withOwner(SymbolRef sym) const;
