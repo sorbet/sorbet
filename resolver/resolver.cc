@@ -2113,106 +2113,107 @@ public:
             }
         });
 
-        ResolveTypeMembersAndFieldsResult combined;
+        vector<ast::ParsedFile> combinedFiles;
+        // The following items are not flattened; it'd be expensive to do so on large projects (they contain every
+        // field/method alias/etc for the entire workspace!)
+        vector<vector<ResolveAssignItem>> combinedTodoAssigns;
+        vector<vector<ResolveAttachedClassItem>> combinedTodoAttachedClassItems;
+        vector<vector<core::SymbolRef>> combinedTodoUntypedResultTypes;
+        vector<vector<ResolveCastItem>> combinedTodoResolveCastItems;
+        vector<vector<ResolveFieldItem>> combinedTodoResolveFieldItems;
+        vector<vector<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
+        vector<vector<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
+        vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
+
         {
             ResolveTypeMembersAndFieldsResult threadResult;
             for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
                  result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
                 if (result.gotItem()) {
-                    if (combined.files.empty()) {
-                        combined = move(threadResult);
-                    } else {
-                        combined.files.insert(combined.files.end(), make_move_iterator(threadResult.files.begin()),
-                                              make_move_iterator(threadResult.files.end()));
-                        combined.todoAssigns.insert(combined.todoAssigns.end(),
-                                                    make_move_iterator(threadResult.todoAssigns.begin()),
-                                                    make_move_iterator(threadResult.todoAssigns.end()));
-                        combined.todoAttachedClassItems.insert(
-                            combined.todoAttachedClassItems.end(),
-                            make_move_iterator(threadResult.todoAttachedClassItems.begin()),
-                            make_move_iterator(threadResult.todoAttachedClassItems.end()));
-                        combined.todoUntypedResultTypes.insert(
-                            combined.todoUntypedResultTypes.end(),
-                            make_move_iterator(threadResult.todoUntypedResultTypes.begin()),
-                            make_move_iterator(threadResult.todoUntypedResultTypes.end()));
-                        combined.todoResolveCastItems.insert(
-                            combined.todoResolveCastItems.end(),
-                            make_move_iterator(threadResult.todoResolveCastItems.begin()),
-                            make_move_iterator(threadResult.todoResolveCastItems.end()));
-                        combined.todoResolveFieldItems.insert(
-                            combined.todoResolveFieldItems.end(),
-                            make_move_iterator(threadResult.todoResolveFieldItems.begin()),
-                            make_move_iterator(threadResult.todoResolveFieldItems.end()));
-                        combined.todoResolveStaticFieldItems.insert(
-                            combined.todoResolveStaticFieldItems.end(),
-                            make_move_iterator(threadResult.todoResolveStaticFieldItems.begin()),
-                            make_move_iterator(threadResult.todoResolveStaticFieldItems.end()));
-                        combined.todoResolveSimpleStaticFieldItems.insert(
-                            combined.todoResolveSimpleStaticFieldItems.end(),
-                            make_move_iterator(threadResult.todoResolveSimpleStaticFieldItems.begin()),
-                            make_move_iterator(threadResult.todoResolveSimpleStaticFieldItems.end()));
-                        combined.todoMethodAliasItems.insert(
-                            combined.todoMethodAliasItems.end(),
-                            make_move_iterator(threadResult.todoMethodAliasItems.begin()),
-                            make_move_iterator(threadResult.todoMethodAliasItems.end()));
-                    }
+                    combinedFiles.insert(combinedFiles.end(), make_move_iterator(threadResult.files.begin()),
+                                         make_move_iterator(threadResult.files.end()));
+                    combinedTodoAssigns.emplace_back(move(threadResult.todoAssigns));
+                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
+                    combinedTodoUntypedResultTypes.emplace_back(move(threadResult.todoUntypedResultTypes));
+                    combinedTodoResolveCastItems.emplace_back(move(threadResult.todoResolveCastItems));
+                    combinedTodoResolveFieldItems.emplace_back(move(threadResult.todoResolveFieldItems));
+                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
+                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
+                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
+                    combinedTodoResolveStaticFieldItems.emplace_back(move(threadResult.todoResolveStaticFieldItems));
+                    combinedTodoResolveSimpleStaticFieldItems.emplace_back(
+                        move(threadResult.todoResolveSimpleStaticFieldItems));
+                    combinedTodoMethodAliasItems.emplace_back(move(threadResult.todoMethodAliasItems));
                 }
             }
         }
 
         // Put files into a consistent order for subsequent passes.
-        fast_sort(combined.files, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
+        fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
 
-        for (auto sym : combined.todoUntypedResultTypes) {
-            sym.data(gs)->resultType = core::Types::untypedUntracked();
+        for (auto &threadTodo : combinedTodoUntypedResultTypes) {
+            for (auto sym : threadTodo) {
+                sym.data(gs)->resultType = core::Types::untypedUntracked();
+            }
         }
 
         vector<bool> resolvedAttachedClasses(gs.classAndModulesUsed());
-        for (auto &job : combined.todoAttachedClassItems) {
-            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-            resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
+        for (auto &threadTodo : combinedTodoAttachedClassItems) {
+            for (auto &job : threadTodo) {
+                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
+            }
         }
 
         // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
         // (which is a static field). This is stronger than we need (we really only need the enum types)
         // but there's no particular reason to delay here.
-        for (auto &job : combined.todoResolveSimpleStaticFieldItems) {
-            job.sym.data(gs)->resultType = job.resultType;
+        for (auto &threadTodo : combinedTodoResolveSimpleStaticFieldItems) {
+            for (auto &job : threadTodo) {
+                job.sym.data(gs)->resultType = job.resultType;
+            }
         }
-        combined.todoResolveSimpleStaticFieldItems.clear();
 
         // loop over any out-of-order type_member/type_alias references
         bool progress = true;
-        while (progress && !combined.todoAssigns.empty()) {
-            auto origSize = combined.todoAssigns.size();
-            auto it =
-                std::remove_if(combined.todoAssigns.begin(), combined.todoAssigns.end(), [&](ResolveAssignItem &job) {
-                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                    return resolveJob(ctx, job, resolvedAttachedClasses);
+        while (progress && !combinedTodoAssigns.empty()) {
+            progress = false;
+            auto it = std::remove_if(
+                combinedTodoAssigns.begin(), combinedTodoAssigns.end(), [&](vector<ResolveAssignItem> &threadTodos) {
+                    auto origSize = threadTodos.size();
+                    auto threadTodoIt =
+                        std::remove_if(threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
+                            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                            return resolveJob(ctx, job, resolvedAttachedClasses);
+                        });
+                    threadTodos.erase(threadTodoIt, threadTodos.end());
+                    progress = progress || threadTodos.size() != origSize;
+                    return threadTodos.empty();
                 });
-            combined.todoAssigns.erase(it, combined.todoAssigns.end());
-            progress = combined.todoAssigns.size() != origSize;
+            combinedTodoAssigns.erase(it, combinedTodoAssigns.end());
         }
 
         // If there was a step with no progress, there's a cycle in the
         // type member/alias declarations. This is handled by reporting an error
         // at `typed: false`, and marking all of the involved type
         // members/aliases as T.untyped.
-        if (!combined.todoAssigns.empty()) {
-            for (auto &job : combined.todoAssigns) {
-                auto data = job.lhs.data(gs);
+        if (!combinedTodoAssigns.empty()) {
+            for (auto &threadTodos : combinedTodoAssigns) {
+                for (auto &job : threadTodos) {
+                    auto data = job.lhs.data(gs);
 
-                if (data->isTypeMember()) {
-                    data->resultType = core::make_type<core::LambdaParam>(job.lhs, core::Types::untypedUntracked(),
-                                                                          core::Types::untypedUntracked());
-                } else {
-                    data->resultType = core::Types::untypedUntracked();
-                }
+                    if (data->isTypeMember()) {
+                        data->resultType = core::make_type<core::LambdaParam>(job.lhs, core::Types::untypedUntracked(),
+                                                                              core::Types::untypedUntracked());
+                    } else {
+                        data->resultType = core::Types::untypedUntracked();
+                    }
 
-                if (auto e = gs.beginError(data->loc(), core::errors::Resolver::TypeMemberCycle)) {
-                    auto flavor = data->isTypeAlias() ? "alias" : "member";
-                    e.setHeader("Type {} `{}` is involved in a cycle", flavor, data->show(gs));
+                    if (auto e = gs.beginError(data->loc(), core::errors::Resolver::TypeMemberCycle)) {
+                        auto flavor = data->isTypeAlias() ? "alias" : "member";
+                        e.setHeader("Type {} `{}` is involved in a cycle", flavor, data->show(gs));
+                    }
                 }
             }
         }
@@ -2221,26 +2222,34 @@ public:
         computeExternalTypes(gs);
 
         // Resolve the remaining casts and fields.
-        for (auto &job : combined.todoResolveCastItems) {
-            core::Context ctx(gs, job.owner, job.file);
-            resolveCastItem(ctx, job);
-        }
-        for (auto &job : combined.todoResolveFieldItems) {
-            core::MutableContext ctx(gs, job.owner, job.file);
-            resolveField(ctx, job);
-        }
-        for (auto &job : combined.todoResolveStaticFieldItems) {
-            core::Context ctx(gs, job.sym, job.file);
-            if (auto resultType = resolveStaticField(ctx, job)) {
-                job.sym.data(gs)->resultType = resultType;
+        for (auto &threadTodos : combinedTodoResolveCastItems) {
+            for (auto &job : threadTodos) {
+                core::Context ctx(gs, job.owner, job.file);
+                resolveCastItem(ctx, job);
             }
         }
-        for (auto &job : combined.todoMethodAliasItems) {
-            core::MutableContext ctx(gs, job.owner, job.file);
-            resolveMethodAlias(ctx, job);
+        for (auto &threadTodos : combinedTodoResolveFieldItems) {
+            for (auto &job : threadTodos) {
+                core::MutableContext ctx(gs, job.owner, job.file);
+                resolveField(ctx, job);
+            }
+        }
+        for (auto &threadTodos : combinedTodoResolveStaticFieldItems) {
+            for (auto &job : threadTodos) {
+                core::Context ctx(gs, job.sym, job.file);
+                if (auto resultType = resolveStaticField(ctx, job)) {
+                    job.sym.data(gs)->resultType = resultType;
+                }
+            }
+        }
+        for (auto &threadTodos : combinedTodoMethodAliasItems) {
+            for (auto &job : threadTodos) {
+                core::MutableContext ctx(gs, job.owner, job.file);
+                resolveMethodAlias(ctx, job);
+            }
         }
 
-        return move(combined.files);
+        return combinedFiles;
     }
 };
 
