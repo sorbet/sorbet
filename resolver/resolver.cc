@@ -582,7 +582,7 @@ private:
                     e.setHeader("Argument to `{}` must be statically resolvable to a module",
                                 send->fun.data(gs)->show(gs));
                 }
-                encounteredError = true;
+                return;
             }
             if (id->symbol.data(gs)->isClassOrModuleClass()) {
                 if (auto e =

@@ -53,5 +53,13 @@ end
 module Bad5
   extend T::Sig
   extend T::Helpers
-  mixes_in_class_methods(Bad5) # error: Must not pass your self
+
+  RUBY_CONSTANT = 0
+  mixes_in_class_methods(RUBY_CONSTANT) # error: must be statically resolvable to a module
+end
+
+module Bad6
+  extend T::Sig
+  extend T::Helpers
+  mixes_in_class_methods(Bad6) # error: Must not pass your self
 end
