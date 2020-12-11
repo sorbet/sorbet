@@ -2246,24 +2246,37 @@ public:
 
 class ResolveSignaturesWalk {
 public:
-    struct MethodSignature {
-        core::LocOffsets loc;
-        ParsedSig sig;
-        vector<bool> argsToKeep;
-    };
-    struct ResolveMethodSignaturesJob {
+    struct ResolveSignatureJob {
         core::FileRef file;
         core::SymbolRef owner;
         ast::MethodDef *mdef;
-        InlinedVector<MethodSignature, 1> sigs;
+        core::LocOffsets loc;
+        ParsedSig sig;
+    };
+
+    struct OverloadedMethodSignature {
+        core::LocOffsets loc;
+        ParsedSig sig;
+        // N.B.: Unused if method has multiple signatures but is not overloaded.
+        vector<bool> argsToKeep;
+    };
+
+    struct ResolveMultiSignatureJob {
+        core::FileRef file;
+        core::SymbolRef owner;
+        ast::MethodDef *mdef;
+        bool isOverloaded;
+        InlinedVector<OverloadedMethodSignature, 2> sigs;
     };
 
     struct ResolveSignaturesWalkResult {
-        vector<ResolveMethodSignaturesJob> methodSignatureJobs;
+        vector<ResolveSignatureJob> signatureJobs;
+        vector<ResolveMultiSignatureJob> multiSignatureJobs;
         vector<ast::ParsedFile> trees;
     };
 
-    vector<ResolveMethodSignaturesJob> methodSignatureJobs;
+    vector<ResolveSignatureJob> signatureJobs;
+    vector<ResolveMultiSignatureJob> multiSignatureJobs;
 
 private:
     static ast::Local const *getArgLocal(core::Context ctx, const core::ArgInfo &argSym, const ast::MethodDef &mdef,
@@ -2532,6 +2545,14 @@ private:
         seq.stats.erase(toRemove, seq.stats.end());
     }
 
+    ParsedSig parseSig(core::Context ctx, core::SymbolRef sigOwner, ast::Send &send, ast::MethodDef &mdef) {
+        auto allowSelfType = true;
+        auto allowRebind = false;
+        auto allowTypeMember = true;
+        return TypeSyntax::parseSig(ctx.withOwner(sigOwner), send, nullptr,
+                                    TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
+    }
+
     void processStatement(core::Context ctx, ast::TreePtr &stat, InlinedVector<ast::Send *, 1> &lastSigs) {
         typecase(
             stat,
@@ -2608,37 +2629,33 @@ private:
                         sigOwner = ctx.owner;
                     }
 
-                    bool isOverloaded = lastSigs.size() > 1 && ctx.permitOverloadDefinitions(ctx.file);
-
-                    InlinedVector<MethodSignature, 1> sigs;
-                    sigs.reserve(lastSigs.size());
-
-                    for (auto &lastSig : lastSigs) {
-                        auto allowSelfType = true;
-                        auto allowRebind = false;
-                        auto allowTypeMember = true;
-                        auto sig = TypeSyntax::parseSig(
-                            ctx.withOwner(sigOwner), *lastSig, nullptr,
-                            TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
-
-                        vector<bool> argsToKeep;
-                        if (isOverloaded) {
-                            for (auto &argTree : mdef.args) {
-                                const auto local = ast::MK::arg2Local(argTree);
-                                auto treeArgName = local->localVariable._name;
-                                ENFORCE(local != nullptr);
-                                argsToKeep.emplace_back(absl::c_find_if(sig.argTypes, [&](auto &spec) {
-                                                            return spec.name == treeArgName;
-                                                        }) != sig.argTypes.end());
+                    if (lastSigs.size() == 1) {
+                        auto &lastSig = lastSigs.front();
+                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.file, ctx.owner, &mdef, lastSig->loc,
+                                                                       parseSig(ctx, sigOwner, *lastSig, mdef)});
+                    } else {
+                        bool isOverloaded = ctx.permitOverloadDefinitions(ctx.file);
+                        InlinedVector<OverloadedMethodSignature, 2> sigs;
+                        for (auto &lastSig : lastSigs) {
+                            auto sig = parseSig(ctx, sigOwner, *lastSig, mdef);
+                            vector<bool> argsToKeep;
+                            if (isOverloaded) {
+                                for (auto &argTree : mdef.args) {
+                                    const auto local = ast::MK::arg2Local(argTree);
+                                    auto treeArgName = local->localVariable._name;
+                                    ENFORCE(local != nullptr);
+                                    argsToKeep.emplace_back(absl::c_find_if(sig.argTypes, [&](auto &spec) {
+                                                                return spec.name == treeArgName;
+                                                            }) != sig.argTypes.end());
+                                }
                             }
+                            sigs.emplace_back(OverloadedMethodSignature{lastSig->loc, move(sig), move(argsToKeep)});
                         }
-                        sigs.emplace_back(MethodSignature{lastSig->loc, move(sig), move(argsToKeep)});
+
+                        multiSignatureJobs.emplace_back(
+                            ResolveMultiSignatureJob{ctx.file, ctx.owner, &mdef, isOverloaded, std::move(sigs)});
                     }
 
-                    methodSignatureJobs.emplace_back(
-                        ResolveMethodSignaturesJob{ctx.file, ctx.owner, &mdef, std::move(sigs)});
-
-                    // OVERLOAD
                     lastSigs.clear();
                 } else {
                     handleAbstractMethod(ctx, mdef);
@@ -2654,14 +2671,14 @@ private:
     }
 
 public:
-    static void resolveMethodSignaturesJob(core::MutableContext ctx, const ResolveMethodSignaturesJob &job) {
+    static void resolveMultiSignatureJob(core::MutableContext ctx, const ResolveMultiSignatureJob &job) {
         auto &sigs = job.sigs;
         auto &mdef = *job.mdef;
-        ENFORCE_NO_TIMER(!sigs.empty());
+        ENFORCE_NO_TIMER(sigs.size() > 1);
 
         prodCounterInc("types.sig.count");
 
-        bool isOverloaded = sigs.size() > 1 && ctx.permitOverloadDefinitions(ctx.file);
+        bool isOverloaded = job.isOverloaded;
         auto originalName = mdef.symbol.data(ctx)->name;
         if (isOverloaded) {
             ctx.state.mangleRenameSymbol(mdef.symbol, originalName);
@@ -2683,6 +2700,13 @@ public:
             }
             fillInInfoFromSig(ctx, overloadSym, sig.loc, move(sig.sig), isOverloaded, mdef);
         }
+        handleAbstractMethod(ctx, mdef);
+    }
+    static void resolveSignatureJob(core::MutableContext ctx, const ResolveSignatureJob &job) {
+        prodCounterInc("types.sig.count");
+        auto &mdef = *job.mdef;
+        bool isOverloaded = false;
+        fillInInfoFromSig(ctx, mdef.symbol, job.loc, move(job.sig), isOverloaded, mdef);
         handleAbstractMethod(ctx, mdef);
     }
 
@@ -2785,7 +2809,8 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
             }
         }
         if (!output.trees.empty()) {
-            output.methodSignatureJobs = move(walk.methodSignatureJobs);
+            output.signatureJobs = move(walk.signatureJobs);
+            output.multiSignatureJobs = move(walk.multiSignatureJobs);
             auto count = output.trees.size();
             outputq->push(move(output), count);
         }
@@ -2803,9 +2828,12 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
                 } else {
                     combined.trees.insert(combined.trees.end(), make_move_iterator(threadResult.trees.begin()),
                                           make_move_iterator(threadResult.trees.end()));
-                    combined.methodSignatureJobs.insert(combined.methodSignatureJobs.end(),
-                                                        make_move_iterator(threadResult.methodSignatureJobs.begin()),
-                                                        make_move_iterator(threadResult.methodSignatureJobs.end()));
+                    combined.signatureJobs.insert(combined.signatureJobs.end(),
+                                                  make_move_iterator(threadResult.signatureJobs.begin()),
+                                                  make_move_iterator(threadResult.signatureJobs.end()));
+                    combined.multiSignatureJobs.insert(combined.multiSignatureJobs.end(),
+                                                       make_move_iterator(threadResult.multiSignatureJobs.begin()),
+                                                       make_move_iterator(threadResult.multiSignatureJobs.end()));
                 }
             }
         }
@@ -2813,9 +2841,13 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
 
     {
         Timer timeit(gs.tracer(), "resolver.resolve_sigs");
-        for (auto &job : combined.methodSignatureJobs) {
+        for (auto &job : combined.signatureJobs) {
             core::MutableContext ctx(gs, job.owner, job.file);
-            ResolveSignaturesWalk::resolveMethodSignaturesJob(ctx, job);
+            ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+        }
+        for (auto &job : combined.multiSignatureJobs) {
+            core::MutableContext ctx(gs, job.owner, job.file);
+            ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
         }
     }
 
