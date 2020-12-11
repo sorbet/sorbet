@@ -2282,7 +2282,7 @@ private:
         }
     }
 
-    static void handleAbstractOrInterfaceMethods(core::Context ctx, ast::MethodDef &mdef) {
+    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
         if (mdef.symbol.data(ctx)->isAbstract()) {
             if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
                 if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
@@ -2639,7 +2639,7 @@ private:
                     // OVERLOAD
                     lastSigs.clear();
                 } else {
-                    handleAbstractOrInterfaceMethods(ctx, mdef);
+                    handleAbstractMethod(ctx, mdef);
                 }
             },
             [&](const ast::ClassDef &cdef) {
@@ -2681,7 +2681,7 @@ public:
             }
             fillInInfoFromSig(ctx, overloadSym, sig.loc, move(sig.sig), isOverloaded, mdef);
         }
-        handleAbstractOrInterfaceMethods(ctx, mdef);
+        handleAbstractMethod(ctx, mdef);
     }
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
