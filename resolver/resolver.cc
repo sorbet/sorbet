@@ -571,16 +571,14 @@ private:
             if (id == nullptr) {
                 if (auto e = gs.beginError(core::Loc(todo.file, send->loc),
                                            core::errors::Resolver::InvalidMixinDeclaration)) {
-                    e.setHeader("Argument to `{}` must be statically resolvable to a module",
-                                send->fun.data(gs)->show(gs));
+                    e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
                 }
                 return;
             }
-            if (!id->symbol.exists() || !id->symbol.data(gs)->isClassOrModule()) {
+            if (!id->symbol.exists() || !id->symbol.isClassOrModule()) {
                 if (auto e =
                         gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                    e.setHeader("Argument to `{}` must be statically resolvable to a module",
-                                send->fun.data(gs)->show(gs));
+                    e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
                 }
                 return;
             }
@@ -595,7 +593,7 @@ private:
             if (id->symbol == owner) {
                 if (auto e =
                         gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                    e.setHeader("Must not pass your self to `{}`", send->fun.data(gs)->show(gs));
+                    e.setHeader("Must not pass your self to `{}`", send->fun.show(gs));
                 }
                 encounteredError = true;
             }
