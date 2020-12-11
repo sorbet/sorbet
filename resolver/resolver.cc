@@ -2485,11 +2485,14 @@ private:
             int j = 0;
             for (auto spec : sigParams) {
                 auto param = defParams[j];
-                auto sname = spec.name.show(ctx);
-                auto dname = param->localVariable._name.show(ctx);
-                if (sname != dname) {
+                auto sname = spec.name;
+                auto dname = param->localVariable._name;
+                // Common case: NameRefs match. Uncommon case: NameRefs don't match but their show strings are
+                // identical.
+                if (sname != dname && sname.show(ctx) != dname.show(ctx)) {
                     if (auto e = ctx.beginError(param->loc, core::errors::Resolver::BadParameterOrdering)) {
-                        e.setHeader("Bad parameter ordering for `{}`, expected `{}` instead", dname, sname);
+                        e.setHeader("Bad parameter ordering for `{}`, expected `{}` instead", dname.show(ctx),
+                                    sname.show(ctx));
                         e.addErrorLine(spec.loc, "Expected index in signature:");
                     }
                 }
