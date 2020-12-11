@@ -711,20 +711,21 @@ TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
     return ret;
 }
 
+namespace {
+vector<TypePtr> unwrapTypeVector(Context ctx, const vector<TypePtr> &elems) {
+    std::vector<TypePtr> unwrapped;
+    unwrapped.reserve(elems.size());
+    for (auto &e : elems) {
+        unwrapped.emplace_back(Types::unwrapSelfTypeParam(ctx, e));
+    }
+    return unwrapped;
+}
+} // namespace
+
 TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     ENFORCE(type != nullptr);
 
     TypePtr ret;
-
-    auto unwrapTypeVector = [&](const std::vector<TypePtr> &elems) -> std::vector<TypePtr> {
-        std::vector<TypePtr> unwrapped;
-        unwrapped.reserve(elems.size());
-        for (auto &e : elems) {
-            unwrapped.emplace_back(unwrapSelfTypeParam(ctx, e));
-        }
-        return unwrapped;
-    };
-
     typecase(
         type, [&](const ClassType &klass) { ret = type; }, [&](const TypeVar &tv) { ret = type; },
         [&](const LambdaParam &tv) { ret = type; }, [&](const SelfType &self) { ret = type; },
@@ -737,14 +738,14 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         },
         [&](const ShapeType &shape) {
             ret = make_type<ShapeType>(unwrapSelfTypeParam(ctx, shape.underlying_), shape.keys,
-                                       unwrapTypeVector(shape.values));
+                                       unwrapTypeVector(ctx, shape.values));
         },
         [&](const TupleType &tuple) {
-            ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple.underlying_), unwrapTypeVector(tuple.elems));
+            ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple.underlying_), unwrapTypeVector(ctx, tuple.elems));
         },
         [&](const MetaType &meta) { ret = make_type<MetaType>(unwrapSelfTypeParam(ctx, meta.wrapped)); },
         [&](const AppliedType &appliedType) {
-            ret = make_type<AppliedType>(appliedType.klass, unwrapTypeVector(appliedType.targs));
+            ret = make_type<AppliedType>(appliedType.klass, unwrapTypeVector(ctx, appliedType.targs));
         },
         [&](const SelfTypeParam &param) {
             auto sym = param.definition;
