@@ -2816,42 +2816,42 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
         }
     });
 
-    ResolveSignaturesWalk::ResolveSignaturesWalkResult combined;
+    // Note: We don't flatten these into one array because it's an expensive operation (a flat array has # of sigs
+    // elements in it!)
+    vector<vector<ResolveSignaturesWalk::ResolveSignatureJob>> combinedSignatures;
+    vector<vector<ResolveSignaturesWalk::ResolveMultiSignatureJob>> combinedMultiSignatures;
+    vector<ast::ParsedFile> combinedTrees;
     {
         ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                if (combined.trees.empty()) {
-                    combined = move(threadResult);
-                } else {
-                    combined.trees.insert(combined.trees.end(), make_move_iterator(threadResult.trees.begin()),
-                                          make_move_iterator(threadResult.trees.end()));
-                    combined.signatureJobs.insert(combined.signatureJobs.end(),
-                                                  make_move_iterator(threadResult.signatureJobs.begin()),
-                                                  make_move_iterator(threadResult.signatureJobs.end()));
-                    combined.multiSignatureJobs.insert(combined.multiSignatureJobs.end(),
-                                                       make_move_iterator(threadResult.multiSignatureJobs.begin()),
-                                                       make_move_iterator(threadResult.multiSignatureJobs.end()));
-                }
+                combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadResult.trees.begin()),
+                                     make_move_iterator(threadResult.trees.end()));
+                combinedSignatures.emplace_back(move(threadResult.signatureJobs));
+                combinedMultiSignatures.emplace_back(move(threadResult.multiSignatureJobs));
             }
         }
     }
 
     {
         Timer timeit(gs.tracer(), "resolver.resolve_sigs");
-        for (auto &job : combined.signatureJobs) {
-            core::MutableContext ctx(gs, job.owner, job.file);
-            ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+        for (auto &threadSignatures : combinedSignatures) {
+            for (auto &job : threadSignatures) {
+                core::MutableContext ctx(gs, job.owner, job.file);
+                ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
+            }
         }
-        for (auto &job : combined.multiSignatureJobs) {
-            core::MutableContext ctx(gs, job.owner, job.file);
-            ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
+        for (auto &threadMultiSignatures : combinedMultiSignatures) {
+            for (auto &job : threadMultiSignatures) {
+                core::MutableContext ctx(gs, job.owner, job.file);
+                ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
+            }
         }
     }
 
-    return move(combined.trees);
+    return move(combinedTrees);
 }
 
 void Resolver::sanityCheck(core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
