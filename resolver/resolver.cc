@@ -1313,8 +1313,6 @@ class ResolveTypeMembersAndFieldsWalk {
         if (data->resultType == nullptr) {
             if (auto resultType = resolveConstantType(ctx, asgn->rhs)) {
                 return resultType;
-            } else {
-                return core::Types::todo();
             }
         }
         // resultType was already set. We may be running on the incremental path. Force this field to be resolved in
