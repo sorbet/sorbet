@@ -77,7 +77,7 @@ public:
     SymbolRef enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance);
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterNewMethodOverload(Loc loc, SymbolRef original, core::NameRef originalName, u4 num,
-                                     const std::vector<int> &argsToKeep);
+                                     const std::vector<bool> &argsToKeep);
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
