@@ -461,7 +461,8 @@ int realmain(int argc, char *argv[]) {
     }
     gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
                           opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
-                          opts.reserveTypeMemberTableCapacity, opts.reserveNameTableCapacity);
+                          opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
+                          opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
     for (auto code : opts.errorCodeWhiteList) {
         gs->onlyShowErrorClass(code);
     }

@@ -10,7 +10,6 @@
 
 namespace sorbet::core {
 class GlobalState;
-class Name;
 
 inline int _NameKind2Id_UTF8(NameKind nm) {
     ENFORCE(nm == NameKind::UTF8);
@@ -29,6 +28,8 @@ inline int _NameKind2Id_CONSTANT(NameKind nm) {
 
 struct UTF8Name final {
     std::string_view utf8;
+
+    UTF8Name deepCopy(const core::GlobalState &gs) const;
 };
 CheckSize(UTF8Name, 16, 8);
 
@@ -51,43 +52,19 @@ struct UniqueName final {
     NameRef original;
     u4 num;
     UniqueNameKind uniqueNameKind;
+
+    UniqueName deepCopy(const core::GlobalState &gs) const;
 };
 
 CheckSize(UniqueName, 12, 4);
 
 struct ConstantName final {
     NameRef original;
+
+    ConstantName deepCopy(const core::GlobalState &gs) const;
 };
+CheckSize(ConstantName, 4, 4);
 
-class Name final {
-public:
-    friend GlobalState;
-
-    NameKind kind;
-
-private:
-    unsigned char UNUSED(_fill[3]);
-
-public:
-    union { // todo: can discriminate this union through the pointer to Name
-        // itself using lower bits
-        UTF8Name raw;
-        UniqueName unique;
-        ConstantName cnst;
-    };
-
-    Name() noexcept {};
-
-    Name(Name &&other) noexcept = default;
-
-    Name(const Name &other) = delete;
-
-    ~Name() noexcept;
-
-    Name deepCopy(const GlobalState &to) const;
-};
-
-CheckSize(Name, 24, 8);
 } // namespace sorbet::core
 
 #endif // SORBET_NAMES_H

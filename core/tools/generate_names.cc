@@ -495,14 +495,18 @@ void emit_register(ostream &out) {
 }
 
 int main(int argc, char **argv) {
-    int i = 0;
+    int constantI = 0;
+    int utf8I = 0;
     for (auto &name : names) {
         if (name.isConstant) {
-            i++;
+            utf8I++;
+            name.id = constantI++;
+        } else {
+            name.id = utf8I++;
         }
-        name.id = i++;
     }
-    int lastId = i;
+    int lastConstantId = constantI;
+    int lastUtf8Id = utf8I;
 
     // emit header file
     {
@@ -531,9 +535,14 @@ int main(int argc, char **argv) {
         }
         header << "}" << '\n';
 
-        header << "#ifndef NAME_LAST_WELL_KNOWN_NAME" << '\n';
-        header << "#define NAME_LAST_WELL_KNOWN_NAME" << '\n';
-        header << "constexpr int LAST_WELL_KNOWN_NAME = " << lastId << ";" << '\n';
+        header << "#ifndef NAME_LAST_WELL_KNOWN_CONSTANT_NAME" << '\n';
+        header << "#define NAME_LAST_WELL_KNOWN_CONSTANT_NAME" << '\n';
+        header << "constexpr int LAST_WELL_KNOWN_CONSTANT_NAME = " << lastConstantId << ";" << '\n';
+        header << "#endif" << '\n';
+
+        header << "#ifndef NAME_LAST_WELL_KNOWN_UTF8_NAME" << '\n';
+        header << "#define NAME_LAST_WELL_KNOWN_UTF8_NAME" << '\n';
+        header << "constexpr int LAST_WELL_KNOWN_UTF8_NAME = " << lastUtf8Id << ";" << '\n';
         header << "#endif" << '\n';
 
         header << "    void registerNames(GlobalState &gs);" << '\n';

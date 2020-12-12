@@ -5,7 +5,6 @@
 namespace sorbet::core {
 class GlobalState;
 class GlobalSubstitution;
-class Name;
 struct UniqueName;
 struct ConstantName;
 struct UTF8Name;
@@ -61,16 +60,14 @@ struct NameRefDebugCheck {
 
     constexpr NameRefDebugCheck() : globalStateId(-1) {}
 
-    NameRefDebugCheck(const GlobalState &gs, u4 id);
+    NameRefDebugCheck(const GlobalState &gs, NameKind kind, u4 id);
 
-    void check(const GlobalState &gs, u4 id) const;
+    void check(const GlobalState &gs, NameKind kind, u4 id) const;
     void check(const GlobalSubstitution &subst) const;
 };
 
 class NameRef final : private DebugOnlyCheck<NameRefDebugCheck> {
 private:
-    const Name &data(const GlobalState &gs) const;
-
     // NameKind takes up this many bits in _id.
     static constexpr u4 KIND_BITS = 2;
     static constexpr u4 ID_BITS = 32 - KIND_BITS;
@@ -84,7 +81,6 @@ private:
 
 public:
     friend GlobalState;
-    friend Name;
     // TODO(jvilk): Delurk this friend once name table is broken up.
     friend GlobalSubstitution;
 
