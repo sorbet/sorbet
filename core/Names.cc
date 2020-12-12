@@ -44,8 +44,10 @@ unsigned int NameRef::hash(const GlobalState &gs) const {
 
 string NameRef::showRaw(const GlobalState &gs) const {
     switch (kind()) {
-        case NameKind::UTF8:
-            return fmt::format("<U {}>", dataUtf8(gs)->utf8);
+        case NameKind::UTF8: {
+            auto raw = dataUtf8(gs);
+            return fmt::format("<U {}>", string(raw->utf8.begin(), raw->utf8.end()));
+        }
         case NameKind::UNIQUE: {
             auto unique = dataUnique(gs);
             string kind;
@@ -98,8 +100,10 @@ string NameRef::showRaw(const GlobalState &gs) const {
 
 string NameRef::toString(const GlobalState &gs) const {
     switch (kind()) {
-        case NameKind::UTF8:
-            return string(dataUtf8(gs)->utf8);
+        case NameKind::UTF8: {
+            auto raw = dataUtf8(gs);
+            return string(raw->utf8.begin(), raw->utf8.end());
+        }
         case NameKind::UNIQUE: {
             auto unique = dataUnique(gs);
             if (unique->uniqueNameKind == UniqueNameKind::Singleton) {
@@ -121,8 +125,10 @@ string NameRef::toString(const GlobalState &gs) const {
 
 string NameRef::show(const GlobalState &gs) const {
     switch (kind()) {
-        case NameKind::UTF8:
-            return string(dataUtf8(gs)->utf8);
+        case NameKind::UTF8: {
+            auto raw = dataUtf8(gs);
+            return string(raw->utf8.begin(), raw->utf8.end());
+        }
         case NameKind::UNIQUE: {
             auto unique = dataUnique(gs);
             if (unique->uniqueNameKind == UniqueNameKind::Singleton) {
@@ -144,8 +150,10 @@ string NameRef::show(const GlobalState &gs) const {
 }
 string_view NameRef::shortName(const GlobalState &gs) const {
     switch (kind()) {
-        case NameKind::UTF8:
-            return dataUtf8(gs)->utf8;
+        case NameKind::UTF8: {
+            auto raw = dataUtf8(gs);
+            return string_view(raw->utf8.begin(), raw->utf8.end() - raw->utf8.begin());
+        }
         case NameKind::UNIQUE:
             return dataUnique(gs)->original.shortName(gs);
         case NameKind::CONSTANT:
