@@ -88,6 +88,8 @@ public:
     // TODO(jvilk): Delurk this friend once name table is broken up.
     friend GlobalSubstitution;
 
+    // The value `0` implies that there is no NameKind tag present (NameKind begin at 1) and is a special-value used to
+    // indicate a non-existant NameRef.
     constexpr NameRef() : _id(0){};
 
     // WellKnown is a tag to statically indicate that the caller is deliberately
