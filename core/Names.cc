@@ -15,7 +15,7 @@ using namespace std;
 namespace sorbet::core {
 
 NameRef::NameRef(const GlobalState &gs, NameKind kind, u4 id)
-    : DebugOnlyCheck(gs, id), _id{id | (static_cast<u4>(kind) << ID_BITS)} {
+    : DebugOnlyCheck(gs, id), _id{(id & ID_MASK) | (static_cast<u4>(kind) << ID_BITS)} {
     // If this fails, the symbol table is too big :(
     ENFORCE_NO_TIMER(id <= ID_MASK);
 }
