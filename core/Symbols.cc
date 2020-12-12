@@ -520,8 +520,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             yetToGoDeeper.pop_back();
             ENFORCE(thisIter.isClassOrModule());
             for (auto member : thisIter.data(gs)->membersStableOrderSlow(gs)) {
-                if (member.second.exists() && member.first.exists() && member.first.kind(gs) == NameKind::CONSTANT &&
-                    member.first.dataCnst(gs)->original.kind(gs) == NameKind::UTF8) {
+                if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
+                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
                     if (member.second.isClassOrModule() &&
                         member.second.data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
