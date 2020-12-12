@@ -143,7 +143,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
 
 namespace {
 bool isSetter(const GlobalState &gs, NameRef fun) {
-    if (fun.kind(gs) != NameKind::UTF8) {
+    if (fun.kind() != NameKind::UTF8) {
         return false;
     }
     const string_view rawName = fun.dataUtf8(gs)->utf8;
@@ -1146,8 +1146,8 @@ TypePtr AppliedType::getCallArguments(const GlobalState &gs, NameRef name) const
 }
 
 DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
-    switch (args.name._id) {
-        case Names::new_()._id: {
+    switch (args.name.rawId()) {
+        case Names::new_().rawId(): {
             auto innerArgs = DispatchArgs{Names::initialize(),
                                           args.locs,
                                           args.numPosArgs,

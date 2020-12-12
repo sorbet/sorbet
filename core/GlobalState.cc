@@ -73,9 +73,6 @@ void GlobalState::initEmpty() {
     UnfreezeFileTable fileTableAccess(*this);
     UnfreezeNameTable nameTableAccess(*this);
     UnfreezeSymbolTable symTableAccess(*this);
-    names.emplace_back(); // first name is used in hashes to indicate empty cell
-    names[0].kind = NameKind::UTF8;
-    names[0].raw.utf8 = string_view();
     Names::registerNames(*this);
 
     SymbolRef id;
@@ -903,7 +900,7 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     NameRef name = sym.data(*this)->name;
     auto ownerScope = owner.dataAllowingNone(*this);
 
-    if (name.kind(*this) == NameKind::UNIQUE) {
+    if (name.kind() == NameKind::UNIQUE) {
         auto uniqueData = name.dataUnique(*this);
         if (uniqueData->uniqueNameKind != UniqueNameKind::MangleRename) {
             return Symbols::noSymbol();
@@ -1057,7 +1054,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
 }
 
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    bool isBlock = name.kind(*this) == NameKind::UNIQUE && name.dataUnique(*this)->original == Names::blockTemp();
+    bool isBlock = name.kind() == NameKind::UNIQUE && name.dataUnique(*this)->original == Names::blockTemp();
     ENFORCE(isBlock || owner.isClassOrModule(), "entering method symbol into not-a-class");
 
     auto flags = Symbol::Flags::METHOD;
@@ -1250,11 +1247,11 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
     while (namesByHash[bucketId].second != 0u) {
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
-            auto nameId = bucket.second;
-            auto &nm2 = names[nameId];
+            auto name = NameRef::fromRaw(*this, bucket.second);
+            auto &nm2 = name.data(*this);
             if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
                 counterInc("names.utf8.hit");
-                return NameRef(*this, nameId);
+                return name;
             } else {
                 counterInc("names.hash_collision.utf8");
             }
@@ -1276,11 +1273,11 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     while (namesByHash[bucketId].second != 0u) {
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
-            auto nameId = bucket.second;
-            auto &nm2 = names[nameId];
+            auto name = NameRef::fromRaw(*this, bucket.second);
+            auto &nm2 = name.data(*this);
             if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
                 counterInc("names.utf8.hit");
-                return NameRef(*this, nameId);
+                return name;
             } else {
                 counterInc("names.hash_collision.utf8");
             }
@@ -1304,29 +1301,29 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
         }
     }
 
-    auto idx = names.size();
+    auto name = NameRef(*this, NameKind::UTF8, names.size());
     auto &bucket = namesByHash[bucketId];
     bucket.first = hs;
-    bucket.second = idx;
-    names.emplace_back();
+    bucket.second = name.rawId();
+    auto &nameData = names.emplace_back();
 
-    names[idx].kind = NameKind::UTF8;
-    names[idx].raw.utf8 = enterString(nm);
-    ENFORCE(NameRef(*this, idx).hash(*this) == hs);
+    nameData.kind = NameKind::UTF8;
+    nameData.raw.utf8 = enterString(nm);
+    ENFORCE(name.hash(*this) == hs);
     categoryCounterInc("names", "utf8");
 
     wasModified_ = true;
-    return NameRef(*this, idx);
+    return name;
 }
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
-    ENFORCE(original.kind(*this) == NameKind::UTF8 ||
+    ENFORCE(original.kind() == NameKind::UTF8 ||
                 original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
                 original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum,
             "making a constant name over wrong name kind");
 
-    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());
+    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1335,10 +1332,11 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
-            auto &nm2 = names[bucket.second];
+            auto name = NameRef::fromRaw(*this, bucket.second);
+            auto &nm2 = name.data(*this);
             if (nm2.kind == NameKind::CONSTANT && nm2.cnst.original == original) {
                 counterInc("names.constant.hit");
-                return NameRef(*this, bucket.second);
+                return name;
             } else {
                 counterInc("names.hash_collision.constant");
             }
@@ -1364,19 +1362,19 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
         }
     }
 
+    auto name = NameRef(*this, NameKind::CONSTANT, names.size());
     auto &bucket = namesByHash[bucketId];
     bucket.first = hs;
-    bucket.second = names.size();
+    bucket.second = name.rawId();
 
-    auto idx = names.size();
-    names.emplace_back();
+    auto &nameData = names.emplace_back();
 
-    names[idx].kind = NameKind::CONSTANT;
-    names[idx].cnst.original = original;
-    ENFORCE(NameRef(*this, idx).hash(*this) == hs);
+    nameData.kind = NameKind::CONSTANT;
+    nameData.cnst.original = original;
+    ENFORCE(name.hash(*this) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "constant");
-    return NameRef(*this, idx);
+    return name;
 }
 
 NameRef GlobalState::enterNameConstant(string_view original) {
@@ -1387,12 +1385,12 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
     if (!original.exists()) {
         return core::NameRef::noName();
     }
-    ENFORCE(original.kind(*this) == NameKind::UTF8 ||
+    ENFORCE(original.kind() == NameKind::UTF8 ||
                 original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
                 original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum,
             "looking up a constant name over wrong name kind");
 
-    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.id());
+    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1401,10 +1399,11 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
     while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
-            auto &nm2 = names[bucket.second];
+            auto name = NameRef::fromRaw(*this, bucket.second);
+            auto &nm2 = name.data(*this);
             if (nm2.kind == NameKind::CONSTANT && nm2.cnst.original == original) {
                 counterInc("names.constant.hit");
-                return NameRef(*this, bucket.second);
+                return name;
             } else {
                 counterInc("names.hash_collision.constant");
             }
@@ -1455,7 +1454,7 @@ void GlobalState::expandNames(u4 newSize) {
 
 NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.id());
+    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1464,11 +1463,12 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
     while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
-            auto &nm2 = names[bucket.second];
+            auto name = NameRef::fromRaw(*this, bucket.second);
+            auto &nm2 = name.data(*this);
             if (nm2.kind == NameKind::UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
                 counterInc("names.unique.hit");
-                return NameRef(*this, bucket.second);
+                return name;
             } else {
                 counterInc("names.hash_collision.unique");
             }
@@ -1481,7 +1481,7 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.id());
+    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1490,11 +1490,12 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     while (namesByHash[bucketId].second != 0 && probeCount < hashTableSize) {
         auto &bucket = namesByHash[bucketId];
         if (bucket.first == hs) {
-            auto &nm2 = names[bucket.second];
+            auto name = NameRef::fromRaw(*this, bucket.second);
+            auto &nm2 = name.data(*this);
             if (nm2.kind == NameKind::UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
                 counterInc("names.unique.hit");
-                return NameRef(*this, bucket.second);
+                return name;
             } else {
                 counterInc("names.hash_collision.unique");
             }
@@ -1520,21 +1521,21 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
         }
     }
 
+    auto name = NameRef(*this, NameKind::UNIQUE, names.size());
     auto &bucket = namesByHash[bucketId];
     bucket.first = hs;
-    bucket.second = names.size();
+    bucket.second = name.rawId();
 
-    auto idx = names.size();
-    names.emplace_back();
+    auto &nameData = names.emplace_back();
 
-    names[idx].kind = NameKind::UNIQUE;
-    names[idx].unique.num = num;
-    names[idx].unique.uniqueNameKind = uniqueNameKind;
-    names[idx].unique.original = original;
-    ENFORCE(NameRef(*this, idx).hash(*this) == hs);
+    nameData.kind = NameKind::UNIQUE;
+    nameData.unique.num = num;
+    nameData.unique.uniqueNameKind = uniqueNameKind;
+    nameData.unique.original = original;
+    ENFORCE(name.hash(*this) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "unique");
-    return NameRef(*this, idx);
+    return name;
 }
 
 FileRef GlobalState::enterFile(const shared_ptr<File> &file) {
@@ -1656,8 +1657,8 @@ void GlobalState::sanityCheck() const {
             names.capacity(), namesByHash.capacity());
     ENFORCE(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
     int i = -1;
-    for (i = 1; i < names.size(); i++) {
-        NameRef(*this, i).sanityCheck(*this);
+    for (i = 0; i < names.size(); i++) {
+        NameRef(*this, names[i].kind, i).sanityCheck(*this);
     }
 
     i = -1;
@@ -1683,7 +1684,7 @@ void GlobalState::sanityCheck() const {
         if (ent.second == 0) {
             continue;
         }
-        ENFORCE_NO_TIMER(ent.first == NameRef(*this, ent.second).hash(*this), "name hash table corruption");
+        ENFORCE_NO_TIMER(ent.first == NameRef::fromRaw(*this, ent.second).hash(*this), "name hash table corruption");
     }
 }
 

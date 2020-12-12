@@ -463,7 +463,8 @@ void emit_name_header(ostream &out, NameDef &name) {
     out << "#define NAME_" << name.srcName << '\n';
     out << "    // \"" << name.val << "\"" << '\n';
     out << "    static inline constexpr NameRef " << name.srcName << "() {" << '\n';
-    out << "        return NameRef(NameRef::WellKnown{}, " << name.id << ");" << '\n';
+    out << "        return NameRef(NameRef::WellKnown{}, NameKind::" << (name.isConstant ? "CONSTANT" : "UTF8") << ", "
+        << name.id << ");" << '\n';
     out << "    }" << '\n';
     out << "#endif" << '\n';
     out << '\n';
@@ -486,15 +487,15 @@ void emit_register(ostream &out) {
     }
     out << '\n';
     for (auto &name : names) {
-        out << "    ENFORCE(" << name.srcName << "_id._id == " << name.id << "); /* " << name.srcName << "() */"
-            << '\n';
+        out << "    ENFORCE(" << name.srcName << "_id." << (name.isConstant ? "constantIndex" : "utf8Index")
+            << "() == " << name.id << "); /* " << name.srcName << "() */" << '\n';
     }
     out << '\n';
     out << "}" << '\n';
 }
 
 int main(int argc, char **argv) {
-    int i = 1;
+    int i = 0;
     for (auto &name : names) {
         if (name.isConstant) {
             i++;

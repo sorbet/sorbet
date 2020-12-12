@@ -351,11 +351,11 @@ class SymbolFinder {
             return;
         }
 
-        switch (send->fun._id) {
-            case core::Names::declareFinal()._id:
-            case core::Names::declareSealed()._id:
-            case core::Names::declareInterface()._id:
-            case core::Names::declareAbstract()._id: {
+        switch (send->fun.rawId()) {
+            case core::Names::declareFinal().rawId():
+            case core::Names::declareSealed().rawId():
+            case core::Names::declareInterface().rawId():
+            case core::Names::declareAbstract().rawId(): {
                 Modifier mod;
                 mod.kind = Modifier::Kind::Class;
                 mod.owner = klass;
@@ -471,14 +471,14 @@ public:
 
         if (original.args.size() == 1) {
             // Common case: Send is not to a modifier.
-            switch (original.fun._id) {
-                case core::Names::private_()._id:
-                case core::Names::privateClassMethod()._id:
-                case core::Names::protected_()._id:
-                case core::Names::public_()._id:
+            switch (original.fun.rawId()) {
+                case core::Names::private_().rawId():
+                case core::Names::privateClassMethod().rawId():
+                case core::Names::protected_().rawId():
+                case core::Names::public_().rawId():
                     addMethodModifier(ctx, original);
                     break;
-                case core::Names::privateConstant()._id:
+                case core::Names::privateConstant().rawId():
                     addConstantModifier(ctx, original);
                     break;
                 default:
@@ -609,10 +609,9 @@ public:
             // Walk over the keyword args to find bounds annotations
             for (auto i = send->numPosArgs; i < end; i += 2) {
                 auto *key = ast::cast_tree<ast::Literal>(send->args[i]);
-                core::NameRef name;
                 if (key != nullptr && key->isSymbol(ctx)) {
-                    switch (key->asSymbol(ctx)._id) {
-                        case core::Names::fixed()._id:
+                    switch (key->asSymbol(ctx).rawId()) {
+                        case core::Names::fixed().rawId():
                             found.isFixed = true;
                             break;
                     }
@@ -645,11 +644,11 @@ public:
         } else if (!send->recv.isSelfReference()) {
             handleAssignment(ctx, asgn);
         } else {
-            switch (send->fun._id) {
-                case core::Names::typeTemplate()._id:
+            switch (send->fun.rawId()) {
+                case core::Names::typeTemplate().rawId():
                     handleTypeMemberDefinition(ctx, send, asgn, lhs);
                     break;
-                case core::Names::typeMember()._id:
+                case core::Names::typeMember().rawId():
                     handleTypeMemberDefinition(ctx, send, asgn, lhs);
                     break;
                 default:
@@ -1018,20 +1017,20 @@ class SymbolDefiner {
         ENFORCE(mod.kind == Modifier::Kind::Method);
 
         auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
-        if (mod.name._id == core::Names::privateClassMethod()._id) {
+        if (mod.name == core::Names::privateClassMethod()) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
         auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
         if (method.exists()) {
-            switch (mod.name._id) {
-                case core::Names::private_()._id:
-                case core::Names::privateClassMethod()._id:
+            switch (mod.name.rawId()) {
+                case core::Names::private_().rawId():
+                case core::Names::privateClassMethod().rawId():
                     method.data(ctx)->setMethodPrivate();
                     break;
-                case core::Names::protected_()._id:
+                case core::Names::protected_().rawId():
                     method.data(ctx)->setMethodProtected();
                     break;
-                case core::Names::public_()._id:
+                case core::Names::public_().rawId():
                     method.data(ctx)->setMethodPublic();
                     break;
                 default:
@@ -1698,13 +1697,13 @@ public:
                 for (auto i = start; i < end; i += 2) {
                     auto key = ast::cast_tree<ast::Literal>(send->args[i]);
                     if (key != nullptr && key->isSymbol(ctx)) {
-                        switch (key->asSymbol(ctx)._id) {
-                            case core::Names::fixed()._id:
+                        switch (key->asSymbol(ctx).rawId()) {
+                            case core::Names::fixed().rawId():
                                 fixed = true;
                                 break;
 
-                            case core::Names::lower()._id:
-                            case core::Names::upper()._id:
+                            case core::Names::lower().rawId():
+                            case core::Names::upper().rawId():
                                 bounded = true;
                                 break;
                         }
@@ -1759,10 +1758,10 @@ public:
             return handleAssignment(ctx, std::move(tree));
         }
 
-        switch (send->fun._id) {
-            case core::Names::typeTemplate()._id:
+        switch (send->fun.rawId()) {
+            case core::Names::typeTemplate().rawId():
                 return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
-            case core::Names::typeMember()._id:
+            case core::Names::typeMember().rawId():
                 return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
             default:
                 return handleAssignment(ctx, std::move(tree));

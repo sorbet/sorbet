@@ -1391,17 +1391,17 @@ class ResolveTypeMembersAndFieldsWalk {
                     core::TypePtr resTy = TypeSyntax::getResultType(
                         ctx, value, emptySig, TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, lhs});
 
-                    switch (lit->asSymbol(ctx)._id) {
-                        case core::Names::fixed()._id:
+                    switch (lit->asSymbol(ctx).rawId()) {
+                        case core::Names::fixed().rawId():
                             memberType->lowerBound = resTy;
                             memberType->upperBound = resTy;
                             break;
 
-                        case core::Names::lower()._id:
+                        case core::Names::lower().rawId():
                             memberType->lowerBound = resTy;
                             break;
 
-                        case core::Names::upper()._id:
+                        case core::Names::upper().rawId():
                             memberType->upperBound = resTy;
                             break;
                     }
@@ -1843,10 +1843,10 @@ public:
 
     ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
-        switch (send.fun._id) {
-            case core::Names::typeAlias()._id:
-            case core::Names::typeMember()._id:
-            case core::Names::typeTemplate()._id:
+        switch (send.fun.rawId()) {
+            case core::Names::typeAlias().rawId():
+            case core::Names::typeMember().rawId():
+            case core::Names::typeTemplate().rawId():
                 break;
 
             default:
@@ -1904,10 +1904,10 @@ public:
     ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
-        switch (send.fun._id) {
-            case core::Names::typeMember()._id:
-            case core::Names::typeTemplate()._id:
-            case core::Names::typeAlias()._id:
+        switch (send.fun.rawId()) {
+            case core::Names::typeMember().rawId():
+            case core::Names::typeTemplate().rawId():
+            case core::Names::typeAlias().rawId():
                 trackDependencies_ = false;
                 break;
 
@@ -1923,11 +1923,11 @@ public:
                 return tree;
             }
 
-            switch (send.fun._id) {
-                case core::Names::let()._id:
-                case core::Names::uncheckedLet()._id:
-                case core::Names::assertType()._id:
-                case core::Names::cast()._id: {
+            switch (send.fun.rawId()) {
+                case core::Names::let().rawId():
+                case core::Names::uncheckedLet().rawId():
+                case core::Names::assertType().rawId():
+                case core::Names::cast().rawId(): {
                     if (send.args.size() < 2) {
                         return tree;
                     }
@@ -1953,8 +1953,8 @@ public:
 
                     return ast::MK::InsSeq1(send.loc, move(typeExpr), move(cast));
                 }
-                case core::Names::revealType()._id:
-                case core::Names::absurd()._id: {
+                case core::Names::revealType().rawId():
+                case core::Names::absurd().rawId(): {
                     // These errors do not match up with our "upper error levels are super sets
                     // of errors from lower levels" claim. This is ONLY an error in lower levels.
 
@@ -1975,7 +1975,7 @@ public:
                     }
                     return tree;
                 }
-                case core::Names::nonForcingIsA_p()._id:
+                case core::Names::nonForcingIsA_p().rawId():
                     validateNonForcingIsA(ctx, send);
                     return tree;
                 default:

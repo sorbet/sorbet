@@ -7,11 +7,11 @@ using namespace std;
 
 namespace sorbet::core {
 bool LocalVariable::exists() const {
-    return _name._id > 0;
+    return _name.exists();
 }
 
 bool LocalVariable::isSyntheticTemporary(const GlobalState &gs) const {
-    if (_name.kind(gs) == NameKind::UNIQUE) {
+    if (_name.kind() == NameKind::UNIQUE) {
         return true;
     }
     if (unique == 0) {

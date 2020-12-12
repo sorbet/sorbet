@@ -14,7 +14,16 @@ using namespace std;
 
 namespace sorbet::core {
 
-NameRef::NameRef(const GlobalState &gs, u4 id) : DebugOnlyCheck(gs, id), _id{id} {}
+NameRef::NameRef(const GlobalState &gs, NameKind kind, u4 id)
+    : DebugOnlyCheck(gs, id), _id{(id & ID_MASK) | (static_cast<u4>(kind) << ID_BITS)} {
+    // If this fails, the symbol table is too big :(
+    ENFORCE_NO_TIMER(id <= ID_MASK);
+}
+
+NameRef::NameRef(const GlobalState &gs, NameRef ref) : DebugOnlyCheck(gs, ref.unsafeTableIndex()), _id(ref.rawId()) {
+    // If this fails, the symbol table is too big :(
+    ENFORCE_NO_TIMER(this->unsafeTableIndex() <= ID_MASK);
+}
 
 Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE) {
@@ -31,9 +40,9 @@ unsigned int NameRef::hash(const GlobalState &gs) const {
             return _hash(name.raw.utf8);
         case NameKind::UNIQUE:
             return _hash_mix_unique((u2)name.unique.uniqueNameKind, NameKind::UNIQUE, name.unique.num,
-                                    name.unique.original.id());
+                                    name.unique.original.rawId());
         case NameKind::CONSTANT:
-            return _hash_mix_constant(NameKind::CONSTANT, name.cnst.original.id());
+            return _hash_mix_constant(NameKind::CONSTANT, name.cnst.original.rawId());
     }
 }
 
@@ -158,7 +167,8 @@ void NameRef::sanityCheck(const GlobalState &gs) const {
                              "Name table corrupted, re-entering UTF8 name gives different id");
             break;
         case NameKind::UNIQUE: {
-            ENFORCE_NO_TIMER(name.unique.original._id < this->_id, "unique name id not bigger than original");
+            ENFORCE_NO_TIMER(name.unique.original.unsafeTableIndex() < this->unsafeTableIndex(),
+                             "unique name id not bigger than original");
             ENFORCE_NO_TIMER(name.unique.num > 0, "unique num == 0");
             NameRef current2 = const_cast<GlobalState &>(gs).freshNameUnique(name.unique.uniqueNameKind,
                                                                              name.unique.original, name.unique.num);
@@ -166,7 +176,8 @@ void NameRef::sanityCheck(const GlobalState &gs) const {
             break;
         }
         case NameKind::CONSTANT:
-            ENFORCE_NO_TIMER(name.cnst.original._id < this->_id, "constant name id not bigger than original");
+            ENFORCE_NO_TIMER(name.cnst.original.unsafeTableIndex() < this->unsafeTableIndex(),
+                             "constant name id not bigger than original");
             ENFORCE_NO_TIMER(*this == const_cast<GlobalState &>(gs).enterNameConstant(name.cnst.original),
                              "Name table corrupted, re-entering CONSTANT name gives different id");
             break;
@@ -185,10 +196,9 @@ bool NameRef::isClassName(const GlobalState &gs) const {
                    name.unique.original.isClassName(gs);
         }
         case NameKind::CONSTANT:
-            ENFORCE(name.cnst.original.data(gs).kind == NameKind::UTF8 ||
-                    name.cnst.original.data(gs).kind == NameKind::UNIQUE &&
-                        (name.cnst.original.data(gs).unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                         name.cnst.original.data(gs).unique.uniqueNameKind == UniqueNameKind::TEnum));
+            ENFORCE(name.cnst.original.kind() == NameKind::UTF8 ||
+                    name.cnst.original.dataUnique(gs)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
+                    name.cnst.original.dataUnique(gs)->uniqueNameKind == UniqueNameKind::TEnum);
             return true;
     }
 }
@@ -238,39 +248,38 @@ void NameRefDebugCheck::check(const GlobalSubstitution &subst) const {
 }
 
 void NameRef::enforceCorrectGlobalState(const GlobalState &gs) const {
-    runDebugOnlyCheck(gs, id());
+    runDebugOnlyCheck(gs, unsafeTableIndex());
 }
 
 void NameRef::sanityCheckSubstitution(const GlobalSubstitution &subst) const {
     runDebugOnlyCheck(subst);
 }
 
-NameKind NameRef::kind(const GlobalState &gs) const {
-    return data(gs).kind;
-}
-
 const Name &NameRef::data(const GlobalState &gs) const {
-    ENFORCE(_id < gs.names.size(), "name {} id out of bounds {}", _id, gs.names.size());
+    ENFORCE(unsafeTableIndex() < gs.names.size(), "name {} id out of bounds {}", _id, gs.names.size());
     ENFORCE(exists(), "non existing name");
     enforceCorrectGlobalState(gs);
-    return gs.names[_id];
+    return gs.names[unsafeTableIndex()];
 }
 
 const UniqueNameData NameRef::dataUnique(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(kind() == NameKind::UNIQUE);
     auto &name = data(gs);
-    ENFORCE(name.kind == NameKind::UNIQUE);
+    ENFORCE_NO_TIMER(name.kind == NameKind::UNIQUE);
     return UniqueNameData(name.unique, gs);
 }
 
 const UTF8NameData NameRef::dataUtf8(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(kind() == NameKind::UTF8);
     auto &name = data(gs);
     ENFORCE(name.kind == NameKind::UTF8);
     return UTF8NameData(name.raw, gs);
 }
 
 const ConstantNameData NameRef::dataCnst(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(kind() == NameKind::CONSTANT);
     auto &name = data(gs);
-    ENFORCE(name.kind == NameKind::CONSTANT);
+    ENFORCE_NO_TIMER(name.kind == NameKind::CONSTANT);
     return ConstantNameData(name.cnst, gs);
 }
 
@@ -317,11 +326,11 @@ Name Name::deepCopy(const GlobalState &to) const {
         case NameKind::UNIQUE:
             out.unique.uniqueNameKind = this->unique.uniqueNameKind;
             out.unique.num = this->unique.num;
-            out.unique.original = NameRef(to, this->unique.original.id());
+            out.unique.original = NameRef(to, this->unique.original);
             break;
 
         case NameKind::CONSTANT:
-            out.cnst.original = NameRef(to, this->cnst.original.id());
+            out.cnst.original = NameRef(to, this->cnst.original);
             break;
     }
 

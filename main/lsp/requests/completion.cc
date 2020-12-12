@@ -620,7 +620,7 @@ bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::Sy
     }
 
     auto name = sym.data(gs)->name;
-    if (name.kind(gs) != core::NameKind::CONSTANT) {
+    if (name.kind() != core::NameKind::CONSTANT) {
         return false;
     }
 
@@ -811,7 +811,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
 
         auto deduped = vector<SimilarMethod>{};
         for (auto &[methodName, similarMethods] : similarMethodsByName) {
-            if (methodName.kind(gs) == core::NameKind::UNIQUE &&
+            if (methodName.kind() == core::NameKind::UNIQUE &&
                 methodName.dataUnique(gs)->uniqueNameKind == core::UniqueNameKind::MangleRename) {
                 // It's possible we want to ignore more things here. But note that we *don't* want to ignore all
                 // unique names, because we want each overload to show up but those use unique names.

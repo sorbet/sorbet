@@ -115,7 +115,6 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
     }
 
     if (!fastPath || debug_mode) {
-        bool seenEmpty = false;
         {
             UnfreezeNameTable unfreezeNames(to);
             nameSubstitution.reserve(from.names.size());
@@ -123,26 +122,21 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
             for (const Name &nm : from.names) {
                 i++;
                 ENFORCE(nameSubstitution.size() == i, "Name substitution has wrong size");
-                if (seenEmpty) {
-                    switch (nm.kind) {
-                        case NameKind::UNIQUE:
-                            nameSubstitution.emplace_back(to.freshNameUnique(
-                                nm.unique.uniqueNameKind, substitute(nm.unique.original), nm.unique.num));
-                            break;
-                        case NameKind::UTF8:
-                            nameSubstitution.emplace_back(to.enterNameUTF8(nm.raw.utf8));
-                            break;
-                        case NameKind::CONSTANT:
-                            nameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.cnst.original)));
-                            break;
-                        default:
-                            ENFORCE(false, "NameKind missing");
-                    }
-                } else {
-                    nameSubstitution.emplace_back(to, 0);
-                    seenEmpty = true;
+                switch (nm.kind) {
+                    case NameKind::UNIQUE:
+                        nameSubstitution.emplace_back(to.freshNameUnique(
+                            nm.unique.uniqueNameKind, substitute(nm.unique.original), nm.unique.num));
+                        break;
+                    case NameKind::UTF8:
+                        nameSubstitution.emplace_back(to.enterNameUTF8(nm.raw.utf8));
+                        break;
+                    case NameKind::CONSTANT:
+                        nameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.cnst.original)));
+                        break;
+                    default:
+                        ENFORCE(false, "NameKind missing");
                 }
-                ENFORCE(!fastPath || nameSubstitution.back()._id == i);
+                ENFORCE(!fastPath || nameSubstitution.back().unsafeTableIndex() == i);
             }
         }
 

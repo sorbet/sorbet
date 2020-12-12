@@ -17,7 +17,7 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
     com::stripe::rubytyper::Name protoName;
     protoName.set_name(name.show(gs));
     protoName.set_unique(com::stripe::rubytyper::Name::NOT_UNIQUE);
-    switch (name.kind(gs)) {
+    switch (name.kind()) {
         case NameKind::UTF8:
             protoName.set_kind(com::stripe::rubytyper::Name::UTF8);
             break;
