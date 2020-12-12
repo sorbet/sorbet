@@ -235,7 +235,7 @@ core::SymbolRef removeRoot(core::SymbolRef sym) {
 
 std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
     auto name = sym.data(gs)->name;
-    if (name.kind(gs) == core::NameKind::UNIQUE) {
+    if (name.kind() == core::NameKind::UNIQUE) {
         return name.dataUnique(gs)->original.show(gs);
     }
     return name.show(gs);
