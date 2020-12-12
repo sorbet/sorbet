@@ -161,7 +161,7 @@ public:
     const ConstantNameData dataCnst(const GlobalState &gs) const;
 
     // Returns the `0` NameRef, used to indicate non-existence of a name
-    static NameRef noName() {
+    static constexpr NameRef noName() {
         return NameRef();
     }
 
