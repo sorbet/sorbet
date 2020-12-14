@@ -67,9 +67,15 @@ Usage:
       --reserve-type-member-table-capacity arg
                                 Preallocate the specified number of entries
                                 in the type member table (default: 0)
-      --reserve-name-table-capacity arg
+      --reserve-utf8-name-table-capacity arg
                                 Preallocate the specified number of entries
-                                in the name table (default: 0)
+                                in the UTF8 name table (default: 0)
+      --reserve-constant-name-table-capacity arg
+                                Preallocate the specified number of entries
+                                in the constant name table (default: 0)
+      --reserve-unique-name-table-capacity arg
+                                Preallocate the specified number of entries
+                                in the unique name table (default: 0)
       --stdout-hup-hack         Monitor STDERR for HUP and exit on hangup
       --remove-path-prefix prefix
                                 Remove the provided path prefix from all
