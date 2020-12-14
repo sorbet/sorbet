@@ -150,10 +150,9 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
                     to.freshNameUnique(nm.uniqueNameKind, substitute(nm.original), nm.num));
                 ENFORCE(!fastPath || uniqueNameSubstitution.back().uniqueIndex() == i);
             }
-            i = constantNameSubstitution.size() - 1;
-            for (const ConstantName &nm : from.constantNames) {
-                i++;
+            for (i = constantNameSubstitution.size(); i < from.constantNames.size(); i++) {
                 ENFORCE_NO_TIMER(constantNameSubstitution.size() == i, "Constant name substitution has wrong size");
+                auto &nm = from.constantNames[i];
                 constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.original)));
                 ENFORCE(!fastPath || constantNameSubstitution.back().constantIndex() == i);
             }
