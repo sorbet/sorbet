@@ -19,20 +19,20 @@ public:
         }
         switch (from.kind()) {
             case NameKind::UTF8:
-                ENFORCE(from.unsafeTableIndex() < utf8NameSubstitution.size(),
+                ENFORCE(from.utf8Index() < utf8NameSubstitution.size(),
                         "utf8 name substitution index out of bounds, got {} where subsitution size is {}",
                         std::to_string(from.rawId()), std::to_string(utf8NameSubstitution.size()));
-                return utf8NameSubstitution[from.unsafeTableIndex()];
+                return utf8NameSubstitution[from.utf8Index()];
             case NameKind::CONSTANT:
-                ENFORCE(from.unsafeTableIndex() < constantNameSubstitution.size(),
+                ENFORCE(from.constantIndex() < constantNameSubstitution.size(),
                         "constant name substitution index out of bounds, got {} where subsitution size is {}",
                         std::to_string(from.rawId()), std::to_string(constantNameSubstitution.size()));
-                return constantNameSubstitution[from.unsafeTableIndex()];
+                return constantNameSubstitution[from.constantIndex()];
             case NameKind::UNIQUE:
-                ENFORCE(from.unsafeTableIndex() < uniqueNameSubstitution.size(),
+                ENFORCE(from.uniqueIndex() < uniqueNameSubstitution.size(),
                         "unique name substitution index out of bounds, got {} where subsitution size is {}",
                         std::to_string(from.rawId()), std::to_string(uniqueNameSubstitution.size()));
-                return uniqueNameSubstitution[from.unsafeTableIndex()];
+                return uniqueNameSubstitution[from.uniqueIndex()];
         }
     }
 
