@@ -1,0 +1,67 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C RootPackage><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.import(<emptyTree>::<C RootPackage>::<C Foo>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C RootPackage>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package>::<C Foo>
+
+      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package>::<C Foo>::<C Bar>
+
+      <emptyTree>::<C Baz> = <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package>::<C Foo>::<C Bar>::<C Baz>
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C Bar><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.params(:a, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+      end
+
+      def main<<C <todo sym>>>(a, &<blk>)
+        if a.>(10)
+          <emptyTree>::<C RootPackage>::<C Foo>::<C Foo>::<C Constant>
+        else
+          if a.<(4)
+            <emptyTree>::<C RootPackage>::<C Foo>::<C Bar>::<C Constant>
+          else
+            <emptyTree>::<C RootPackage>::<C Foo>::<C Baz>::<C Constant>
+          end
+        end
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :main)
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C RootPackage>::<C Foo><<C <todo sym>>> < (<emptyTree>::<C PackageSpec>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package>::<C Foo>)
+
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package>::<C Foo>::<C Bar>)
+
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package>::<C Foo>::<C Bar>::<C Baz>)
+  end
+
+  module <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package><<C <todo sym>>> < ()
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C RootPackage_Foo_Package><<C <todo sym>>> < ()
+    module <emptyTree>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C Constant> = "Foo"
+
+      module <emptyTree>::<C Bar><<C <todo sym>>> < ()
+        <emptyTree>::<C Constant> = "Bar"
+
+        module <emptyTree>::<C Baz><<C <todo sym>>> < ()
+          <emptyTree>::<C Constant> = "Baz"
+        end
+      end
+    end
+  end
+end
