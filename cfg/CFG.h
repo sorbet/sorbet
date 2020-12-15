@@ -111,6 +111,15 @@ public:
      * the entry point is going to be the last node in sorted array.
      */
     std::vector<BasicBlock *> forwardsTopoSort;
+
+    /**
+     * Tracks the set of methods called from typed callsites in this project. Used to generate a report of uncalled
+     * methods.
+     */
+    mutable std::unique_ptr<UIntSet> methodsCalled;
+
+    void reportMethodCalled(core::SymbolRef method) const;
+
     inline BasicBlock *entry() {
         return basicBlocks[0].get();
     }
@@ -156,7 +165,7 @@ public:
     LocalRef enterLocal(core::LocalVariable variable);
 
 private:
-    CFG();
+    CFG(std::unique_ptr<UIntSet> methodsCalled);
     BasicBlock *freshBlock(int outerLoops, int rubyBlockid);
     void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
     std::vector<int> minLoops;

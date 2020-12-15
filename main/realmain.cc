@@ -568,7 +568,7 @@ int realmain(int argc, char *argv[]) {
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
-            indexed = move(pipeline::typecheck(gs, move(indexed), opts, *workers).result());
+            indexed = move(pipeline::typecheck(gs, move(indexed), opts, *workers).trees.result());
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }

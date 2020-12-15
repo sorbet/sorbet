@@ -985,7 +985,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         }
                     }
 
-                    lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(it->main.method);
+                    if (it->main.method.exists()) {
+                        lspQueryMatch = lspQueryMatch || lspQuery.matchesSymbol(it->main.method);
+                        inWhat.reportMethodCalled(it->main.method);
+                    }
                     it = it->secondary.get();
                 }
                 shared_ptr<core::DispatchResult> retainedResult;
