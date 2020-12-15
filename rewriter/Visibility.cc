@@ -16,8 +16,13 @@ void Visibility::run(core::MutableContext ctx, ast::ClassDef *classDef) {
     vector<ast::TreePtr> inlinePrivateCalls;
 
     for (auto &stat : classDef->rhs) {
+        cout << "iterating over stat nodes\n";
         if (auto *send = ast::cast_tree<ast::Send>(stat)) {
+            cout << "START PRINT STATEMENT\n\n";
+            cout << "isSelfReference:" << send->recv.isSelfReference() << "\n";
+            cout << "\n================================\n\n";
             if ((send->recv == nullptr || send->recv.isSelfReference()) && send->args.size() == 0) {
+                cout << "in initial if statement";
                 // Technically this node can now be removed, but it doesn't really need to be removed now
                 if (send->fun == core::Names::private_()) {
                     currentVisibility = core::Names::private_();

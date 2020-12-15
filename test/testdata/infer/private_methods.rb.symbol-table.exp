@@ -1,4 +1,4 @@
-in second if statementin initial if statementin initial if statementin initial if statementin initial if statementin initial if statementin second if statementin initial if statementprivate callin second if statementadding inline private callin second if statementadding inline private callclass ::<root> < ::Object ()
+class ::<root> < ::Object ()
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/infer/private_methods.rb:3
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
