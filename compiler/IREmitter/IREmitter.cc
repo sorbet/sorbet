@@ -830,7 +830,11 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
 
     builder.CreateRetVoid();
 
-    ENFORCE(!llvm::verifyFunction(*entryFunc, &llvm::errs()), "see above");
+    if (debug_mode && llvm::verifyFunction(*entryFunc, &llvm::errs())) {
+        fmt::print("failed to verify:\n");
+        entryFunc->dump();
+        ENFORCE(false);
+    }
     cs.runCheapOptimizations(entryFunc);
 }
 

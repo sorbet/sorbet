@@ -264,7 +264,10 @@ llvm::DISubprogram *getDebugScope(CompilerState &cs, cfg::CFG &cfg, llvm::DIScop
 
     diName += cfg.symbol.data(cs)->name.shortName(cs);
 
-    auto lineNo = loc.position(cs).first.line;
+    // Line number 0 indicates that the compiler knows the entity came from this
+    // particular file, but doesn't have precise location tracking for it.  This
+    // can happen with e.g. synthesized packages.
+    auto lineNo = loc.exists() ? loc.position(cs).first.line : 0;
 
     return cs.debug->createFunction(parent, diName, func->getName(), debugFile, lineNo, getDebugFunctionType(cs, func),
                                     lineNo, llvm::DINode::FlagPrototyped, llvm::DISubprogram::SPFlagDefinition);
@@ -845,13 +848,23 @@ void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &buil
                                     int rubyBlockId, core::Loc loc) {
     auto &builder = static_cast<llvm::IRBuilder<> &>(build);
 
+    auto *scope = irctx.blockScopes[rubyBlockId];
+    unsigned line, column;
+
     if (!loc.exists()) {
-        builder.SetCurrentDebugLocation(llvm::DebugLoc());
+        // This location seems less useful than no debug location, but it ensures
+        // that we have a "real" debug location to set for LLVM.  LLVM verification
+        // will assert if we have calls in debug-info-laden functions that can be
+        // inlined and are not tagged with proper debug information.
+        line = 0;
+        column = 0;
     } else {
-        auto *scope = irctx.blockScopes[rubyBlockId];
         auto start = loc.position(cs).first;
-        builder.SetCurrentDebugLocation(llvm::DebugLoc::get(start.line, start.column, scope));
+        line = start.line;
+        column = start.column;
     }
+
+    builder.SetCurrentDebugLocation(llvm::DebugLoc::get(line, column, scope));
 }
 
 void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,

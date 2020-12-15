@@ -662,12 +662,21 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
     auto funcNameValue = Payload::cPtrToRubyString(cs1, builder, funcName, true);
     auto filename = loc.file().data(cs).path();
     auto filenameValue = Payload::cPtrToRubyString(cs1, builder, filename, true);
-    auto pos = loc.position(cs);
+    // The method might have been synthesized by Sorbet (e.g. in the case of packages).
+    // Give such methods line numbers of 0.
+    unsigned startLine, endLine;
+    if (loc.exists()) {
+        startLine = loc.position(cs).first.line;
+        endLine = loc.position(cs).second.line;
+    } else {
+        startLine = 0;
+        endLine = 0;
+    }
     auto [locals, numLocals] = getLocals(cs1, builder, irctx, md, rubyBlockId);
     auto ret = builder.CreateCall(cs.getFunction("sorbet_allocateRubyStackFrame"),
                                   {funcNameValue, funcNameId, filenameValue, realpath, parent, iseqType,
-                                   llvm::ConstantInt::get(cs, llvm::APInt(32, pos.first.line)),
-                                   llvm::ConstantInt::get(cs, llvm::APInt(32, pos.second.line)), locals, numLocals});
+                                   llvm::ConstantInt::get(cs, llvm::APInt(32, startLine)),
+                                   llvm::ConstantInt::get(cs, llvm::APInt(32, endLine)), locals, numLocals});
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     llvm::Constant *indices[] = {zero};
     builder.CreateStore(ret, llvm::ConstantExpr::getInBoundsGetElementPtr(store->getValueType(), store, indices));
@@ -780,6 +789,9 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, 
     auto &builder = builderCast(build);
     auto lineno = loc.position(cs).first.line;
     if (lastLoc.exists() && lastLoc.position(cs).first.line == lineno) {
+        return lastLoc;
+    }
+    if (!methodStart.exists()) {
         return lastLoc;
     }
     auto offset = lineno - methodStart.position(cs).first.line;

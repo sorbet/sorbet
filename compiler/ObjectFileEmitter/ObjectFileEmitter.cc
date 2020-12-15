@@ -403,7 +403,12 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
 
         fnPasses.doInitialization();
         for (llvm::Function &func : *module) {
-            ENFORCE(!llvm::verifyFunction(func, &llvm::dbgs()), (string)func.getName());
+            if (debug_mode && llvm::verifyFunction(func, &llvm::errs())) {
+                fmt::print("failed to verify:\n");
+                func.dump();
+                ENFORCE(false);
+            }
+
             fnPasses.run(func);
         }
         fnPasses.doFinalization();
