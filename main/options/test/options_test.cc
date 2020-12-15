@@ -81,4 +81,5 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.stripeMode, opts.stripeMode);
     CHECK_EQ(empty.stripePackages, opts.stripePackages);
     CHECK_EQ(empty.lspRenameEnabled, opts.lspRenameEnabled);
+    CHECK_EQ(empty.checkMethodsCalled.size(), opts.checkMethodsCalled.size());
 }

@@ -436,6 +436,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                     cxxopts::value<string>()->default_value(empty.errorUrlBase), "url-base");
     options.add_options("advanced")("ruby3-keyword-args", "Enforce use of new (Ruby 3.0-style) keyword arguments",
                                     cxxopts::value<bool>());
+    options.add_options("advanced")(
+        "check-methods-called",
+        "Checks that all methods defined in the input files are called at least once by typed code",
+        cxxopts::value<vector<string>>());
 
     // Developer options
     options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
@@ -878,6 +882,9 @@ void readOptions(Options &opts,
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         opts.ruby3KeywordArgs = raw["ruby3-keyword-args"].as<bool>();
+        if (raw.count("check-methods-called") > 0) {
+            opts.checkMethodsCalled = raw["check-methods-called"].as<vector<string>>();
+        }
         if (raw.count("error-white-list") > 0) {
             auto rawList = raw["error-white-list"].as<vector<int>>();
             opts.errorCodeWhiteList = set<int>(rawList.begin(), rawList.end());

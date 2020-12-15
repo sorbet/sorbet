@@ -7,6 +7,7 @@
 #include "absl/debugging/symbolize.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
+#include "core/errors/infer.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
 #include "main/autogen/packages.h"
@@ -345,6 +346,33 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                                                        packageq);
     }
 }
+
+void checkMethodsCalled(const core::GlobalState &gs, const options::Options &opts, const UIntSet &methodsCalled) {
+    vector<bool> filesToCheck(gs.filesUsed());
+    for (auto &file : opts.checkMethodsCalled) {
+        auto fref = gs.findFileByPath(file);
+        if (fref.exists()) {
+            filesToCheck[fref.id()] = true;
+        }
+    }
+
+    for (u4 i = 0; i < gs.methodsUsed(); i++) {
+        auto method = core::SymbolRef(gs, core::SymbolRef::Kind::Method, i);
+        auto methodData = method.data(gs);
+        if (methodData->name == core::Names::staticInit() || methodData->name.kind() != core::NameKind::UTF8) {
+            continue;
+        }
+        // TODO: Also check equivalent methods from parents / mixins.
+        if (filesToCheck[methodData->loc().file().id()] && !methodsCalled.contains(method.methodIndex())) {
+            // TODO: Probably move this error to infer. Need a story for incremental typecheck though.
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Infer::UncalledMethod)) {
+                e.setHeader("Method `{}` defined in `{}` must be called at least once from typed code", method.show(gs),
+                            method.data(gs)->loc().file().data(gs).path());
+            }
+        }
+    }
+}
+
 #endif
 
 int realmain(int argc, char *argv[]) {
@@ -568,7 +596,16 @@ int realmain(int argc, char *argv[]) {
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
-            indexed = move(pipeline::typecheck(gs, move(indexed), opts, *workers).trees.result());
+            auto tcResult = pipeline::typecheck(gs, move(indexed), opts, *workers);
+            if (!opts.checkMethodsCalled.empty()) {
+#ifdef SORBET_REALMAIN_MIN
+                logger->warn("--check-methods-called is disabled in sorbet-orig for faster builds");
+                return 1;
+#else
+                checkMethodsCalled(*gs, opts, *tcResult.methodsCalled);
+#endif
+            }
+            indexed = move(tcResult.trees.result());
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }

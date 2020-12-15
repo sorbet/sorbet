@@ -39,6 +39,7 @@ constexpr ErrorClass PrivateMethod{7031, StrictLevel::True};
 constexpr ErrorClass GenericArgumentKeywordArgs{7032, StrictLevel::True};
 constexpr ErrorClass KeywordArgHashWithoutSplat{7033, StrictLevel::True};
 constexpr ErrorClass UnnecessarySafeNavigation{7034, StrictLevel::True};
+constexpr ErrorClass UncalledMethod{7035, StrictLevel::True};
 // N.B infer does not run for untyped call at all. StrictLevel::False here would be meaningless
 } // namespace sorbet::core::errors::Infer
 #endif
