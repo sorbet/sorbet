@@ -24,6 +24,10 @@ end
 define_singleton_method(:foo) { puts '' }
 define_singleton_method('foo') { puts '' }
 
+def raise_test
+  raise ArgumentError, 'bad argument', nil
+end
+
 # make sure we don't regress and mark these as errors
 env = {'VAR' => 'VAL'}
 system('echo')
