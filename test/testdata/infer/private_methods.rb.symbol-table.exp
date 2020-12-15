@@ -1,9 +1,16 @@
-class ::<root> < ::Object ()
+in second if statementin initial if statementin initial if statementin initial if statementin initial if statementin initial if statementin second if statementin initial if statementprivate callin second if statementadding inline private callin second if statementadding inline private callclass ::<root> < ::Object ()
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/infer/private_methods.rb:3
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
   class ::Object < ::BasicObject (Kernel) @ https://github.com/sorbet/sorbet/tree/master/rbi/core/object.rbi#L27
     method ::Object#foo : private (<blk>) @ test/testdata/infer/private_methods.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+  class ::SelfReferentialPrivateMethodInvocationTest < ::Object () @ test/testdata/infer/private_methods.rb:49
+    method ::SelfReferentialPrivateMethodInvocationTest#subsequent_visibility (<blk>) @ test/testdata/infer/private_methods.rb:51
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+  class ::<Class:SelfReferentialPrivateMethodInvocationTest>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/infer/private_methods.rb:49
+    type-member(+) ::<Class:SelfReferentialPrivateMethodInvocationTest>::<AttachedClass> -> T.attached_class (of SelfReferentialPrivateMethodInvocationTest) @ test/testdata/infer/private_methods.rb:49
+    method ::<Class:SelfReferentialPrivateMethodInvocationTest>#<static-init> (<blk>) @ test/testdata/infer/private_methods.rb:49
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
   class ::Test < ::Object () @ test/testdata/infer/private_methods.rb:5
     method ::Test#block_call : private (blk) @ test/testdata/infer/private_methods.rb:22
@@ -19,6 +26,8 @@ class ::<root> < ::Object ()
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
     method ::Test#subsequent_visibility : private (<blk>) @ test/testdata/infer/private_methods.rb:33
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
+    method ::Test#subsequent_visibility_attr_reader : private (<blk>) @ test/testdata/infer/private_methods.rb:37
+      argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
     method ::Test#using_symbol : private (<blk>) @ test/testdata/infer/private_methods.rb:6
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
     method ::Test#using_symbol_returned_by_def : private (<blk>) @ test/testdata/infer/private_methods.rb:11
@@ -27,11 +36,11 @@ class ::<root> < ::Object ()
     type-member(+) ::<Class:Test>::<AttachedClass> -> T.attached_class (of Test) @ test/testdata/infer/private_methods.rb:5
     method ::<Class:Test>#<static-init> (<blk>) @ test/testdata/infer/private_methods.rb:5
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
-  class ::TestChild < ::Test () @ test/testdata/infer/private_methods.rb:38
-    method ::TestChild#calling_private_in_parent (<blk>) @ test/testdata/infer/private_methods.rb:39
+  class ::TestChild < ::Test () @ test/testdata/infer/private_methods.rb:40
+    method ::TestChild#calling_private_in_parent (<blk>) @ test/testdata/infer/private_methods.rb:41
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
-  class ::<Class:TestChild>[<AttachedClass>] < ::<Class:Test> () @ test/testdata/infer/private_methods.rb:38
-    type-member(+) ::<Class:TestChild>::<AttachedClass> -> T.attached_class (of TestChild) @ test/testdata/infer/private_methods.rb:38
-    method ::<Class:TestChild>#<static-init> (<blk>) @ test/testdata/infer/private_methods.rb:38
+  class ::<Class:TestChild>[<AttachedClass>] < ::<Class:Test> () @ test/testdata/infer/private_methods.rb:40
+    type-member(+) ::<Class:TestChild>::<AttachedClass> -> T.attached_class (of TestChild) @ test/testdata/infer/private_methods.rb:40
+    method ::<Class:TestChild>#<static-init> (<blk>) @ test/testdata/infer/private_methods.rb:40
       argument <blk><block> @ Loc {file=test/testdata/infer/private_methods.rb start=??? end=???}
 

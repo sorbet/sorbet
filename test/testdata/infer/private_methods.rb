@@ -46,12 +46,12 @@ class TestChild < Test
   end
 end
 
-class UnhandledTestCase
+class SelfReferentialPrivateMethodInvocationTest
   self.private
-  def foo; end
+  def subsequent_visibility
+  end
 end
 
-A.new.foo # error: Non-private call to private method
 Object.new.foo # error: Non-private call to private method `Object#foo`
 
 Test.new.using_symbol # error: Non-private call to private method `Test#using_symbol`
@@ -72,8 +72,7 @@ Test.new.splat_and_block_call(*[1, 'a'], &nil) # Currently no Error, since the n
 Test.new.block_call(&nil) # Currently no Error, since the nil block makes Magic_callWithBlock return prematurely.
 
 Test.new.subsequent_visibility # error: Non-private call to private method `Test#subsequent_visibility`
-Test.new.subsequent_visibility_attr_reader # error: Non-private call to private method `Test#subsequent_visibility`
+Test.new.subsequent_visibility_attr_reader # error: Non-private call to private method `Test#subsequent_visibility_attr_reader`
 
-# Currently we do not handle when private is called against self
-UnhandledTestCase.new.foo
+SelfReferentialPrivateMethodInvocationTest.new.subsequent_visibility # error: Non-private call to private method `SelfReferentialPrivateMethodInvocationTest#subsequent_visibility`
 

@@ -1,70 +1,32 @@
-begin
-  <emptyTree>
-  class <emptyTree><<C <root>>> < (::<todo sym>)
-    def foo(<blk>)
-      <emptyTree>
-    end
-
-    def self.<static-init><<static-init>$CENSORED>(<blk>)
-      begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"foo")
-        begin
-          ::<Magic>.<define-top-class-or-module>(::Test)
-          ::Sorbet::Private::Static.keep_for_ide(::Test)
-          <emptyTree>
-        end
-        begin
-          ::<Magic>.<define-top-class-or-module>(::TestChild)
-          ::Sorbet::Private::Static.keep_for_ide(::TestChild)
-          ::Sorbet::Private::Static.keep_for_ide(::Test)
-          <emptyTree>
-        end
-        ::Object.new().foo()
-        ::Test.new().using_symbol()
-        ::Test.new().using_symbol_returned_by_def()
-        ::Test.new().calling_private()
-        ::Test.new().using_symbol() do ||
-          123
-        end
-        ::Test.new().block_call()
-        ::Test.new().block_call() do ||
-          123
-        end
-        ::Test.new().block_call() do |<block-pass>$2$3|
-          <block-pass>$2$3.foo()
-        end
-        ::TestChild.new().using_symbol()
-        ::T.unsafe(::Test.new()).using_symbol()
-        ::<Magic>.<call-with-splat>(::Test.new(), :"splat_call", ::T.unsafe(nil).to_a())
-        ::<Magic>.<call-with-splat-and-block>(::Test.new(), :"splat_and_block_call", [1, "a"].to_a(), nil)
-        ::<Magic>.<call-with-block>(::Test.new(), :"block_call", nil)
-        ::Test.new().subsequent_visibility()
-        <emptyTree>
-      end
-    end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  def foo<<C <todo sym>>>(&<blk>)
+    <emptyTree>
   end
-  class ::Test<<C Test>> < (::<todo sym>)
-    def using_symbol(<blk>)
+
+  ::Sorbet::Private::Static.keep_def(<self>, :foo)
+
+  class <emptyTree>::<C Test><<C <todo sym>>> < (::<todo sym>)
+    def using_symbol<<C <todo sym>>>(&<blk>)
       1
     end
 
-    def using_symbol_returned_by_def(<blk>)
+    def using_symbol_returned_by_def<<C <todo sym>>>(&<blk>)
       2
     end
 
-    def splat_call(args, <blk>)
+    def splat_call<<C <todo sym>>>(*args, &<blk>)
       <self>.puts(args)
     end
 
-    def splat_and_block_call(foo, bar, blk)
+    def splat_and_block_call<<C <todo sym>>>(foo, bar, &blk)
       <emptyTree>
     end
 
-    def block_call(blk)
+    def block_call<<C <todo sym>>>(&blk)
       <emptyTree>
     end
 
-    def calling_private(<blk>)
+    def calling_private<<C <todo sym>>>(&<blk>)
       begin
         <self>.using_symbol()
         <self>.using_symbol()
@@ -73,28 +35,41 @@ begin
       end
     end
 
-    def subsequent_visibility(<blk>)
+    def subsequent_visibility<<C <todo sym>>>(&<blk>)
       3
     end
 
-    def self.<static-init>(<blk>)
-      begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"using_symbol")
-        <self>.private(:"using_symbol")
-        <self>.private(::Sorbet::Private::Static.keep_def(<self>, :"using_symbol_returned_by_def"))
-        <self>.private(::Sorbet::Private::Static.keep_def(<self>, :"splat_call"))
-        <self>.private(::Sorbet::Private::Static.keep_def(<self>, :"splat_and_block_call"))
-        <self>.private(::Sorbet::Private::Static.keep_def(<self>, :"block_call"))
-        ::Sorbet::Private::Static.keep_def(<self>, :"calling_private")
-        <self>.private()
-        ::Sorbet::Private::Static.keep_def(<self>, :"subsequent_visibility")
-        <self>.private(:"subsequent_visibility")
-        <emptyTree>
-      end
+    def subsequent_visibility_attr_reader<<C <todo sym>>>(&<blk>)
+      @subsequent_visibility_attr_reader
     end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :using_symbol)
+
+    <self>.private(:using_symbol)
+
+    <self>.private(::Sorbet::Private::Static.keep_def(<self>, :using_symbol_returned_by_def))
+
+    <self>.private(::Sorbet::Private::Static.keep_def(<self>, :splat_call))
+
+    <self>.private(::Sorbet::Private::Static.keep_def(<self>, :splat_and_block_call))
+
+    <self>.private(::Sorbet::Private::Static.keep_def(<self>, :block_call))
+
+    ::Sorbet::Private::Static.keep_def(<self>, :calling_private)
+
+    <self>.private()
+
+    ::Sorbet::Private::Static.keep_def(<self>, :subsequent_visibility)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :subsequent_visibility_attr_reader)
+
+    <self>.private(:subsequent_visibility)
+
+    <self>.private(:subsequent_visibility_attr_reader)
   end
-  class ::TestChild<<C TestChild>> < (::Test)
-    def calling_private_in_parent(<blk>)
+
+  class <emptyTree>::<C TestChild><<C <todo sym>>> < (<emptyTree>::<C Test>)
+    def calling_private_in_parent<<C <todo sym>>>(&<blk>)
       begin
         <self>.using_symbol()
         <self>.using_symbol()
@@ -103,9 +78,54 @@ begin
       end
     end
 
-    def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :"calling_private_in_parent")
-    end
+    ::Sorbet::Private::Static.keep_def(<self>, :calling_private_in_parent)
   end
-  <emptyTree>
+
+  class <emptyTree>::<C SelfReferentialPrivateMethodInvocationTest><<C <todo sym>>> < (::<todo sym>)
+    def subsequent_visibility<<C <todo sym>>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.private()
+
+    ::Sorbet::Private::Static.keep_def(<self>, :subsequent_visibility)
+  end
+
+  <emptyTree>::<C Object>.new().foo()
+
+  <emptyTree>::<C Test>.new().using_symbol()
+
+  <emptyTree>::<C Test>.new().using_symbol_returned_by_def()
+
+  <emptyTree>::<C Test>.new().calling_private()
+
+  <emptyTree>::<C Test>.new().using_symbol() do ||
+    123
+  end
+
+  <emptyTree>::<C Test>.new().block_call()
+
+  <emptyTree>::<C Test>.new().block_call() do ||
+    123
+  end
+
+  <emptyTree>::<C Test>.new().block_call() do |<block-pass>$2|
+    <block-pass>$2.foo()
+  end
+
+  <emptyTree>::<C TestChild>.new().using_symbol()
+
+  <emptyTree>::<C T>.unsafe(<emptyTree>::<C Test>.new()).using_symbol()
+
+  ::<Magic>.<call-with-splat>(<emptyTree>::<C Test>.new(), :splat_call, <emptyTree>::<C T>.unsafe(nil).to_a(), nil)
+
+  ::<Magic>.<call-with-splat-and-block>(<emptyTree>::<C Test>.new(), :splat_and_block_call, [1, "a"].to_a(), nil, nil)
+
+  ::<Magic>.<call-with-block>(<emptyTree>::<C Test>.new(), :block_call, nil)
+
+  <emptyTree>::<C Test>.new().subsequent_visibility()
+
+  <emptyTree>::<C Test>.new().subsequent_visibility_attr_reader()
+
+  <emptyTree>::<C SelfReferentialPrivateMethodInvocationTest>.new().subsequent_visibility()
 end

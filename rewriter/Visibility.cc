@@ -14,13 +14,10 @@ namespace sorbet::rewriter {
 void Visibility::run(core::MutableContext ctx, ast::ClassDef *classDef) {
     core::NameRef currentVisibility = core::Names::public_();
     vector<ast::TreePtr> inlinePrivateCalls;
+
     for (auto &stat : classDef->rhs) {
-        typecase(
-            stat.get(),
-            [&](ast::Send *send) {
-                if (send->args.size() != 0 && send->recv != nullptr) {
-                    return;
-                }
+        if (auto *send = ast::cast_tree<ast::Send>(stat)) {
+            if ((send->recv == nullptr || send->recv.isSelfReference()) && send->args.size() == 0) {
                 // Technically this node can now be removed, but it doesn't really need to be removed now
                 if (send->fun == core::Names::private_()) {
                     currentVisibility = core::Names::private_();
@@ -29,16 +26,15 @@ void Visibility::run(core::MutableContext ctx, ast::ClassDef *classDef) {
                 } else if (send->fun == core::Names::public_()) {
                     currentVisibility = core::Names::public_();
                 }
-            },
-            [&](ast::MethodDef *mdef) {
-                if (currentVisibility == core::Names::private_()) {
-                    auto privateCall =
-                        ast::MK::Send1(mdef->declLoc, ast::MK::Self(mdef->declLoc), core::Names::private_(),
-                                       ast::MK::Symbol(mdef->declLoc, mdef->name));
-                    inlinePrivateCalls.emplace_back(std::move(privateCall));
-                }
-            },
-            [&](ast::Expression *e) {});
+            }
+        } else if (auto *methodDef = ast::cast_tree<ast::MethodDef>(stat)) {
+            if (currentVisibility == core::Names::private_()) {
+                auto privateCall =
+                    ast::MK::Send1(methodDef->declLoc, ast::MK::Self(methodDef->declLoc), core::Names::private_(),
+                                   ast::MK::Symbol(methodDef->declLoc, methodDef->name));
+                inlinePrivateCalls.emplace_back(std::move(privateCall));
+            }
+        }
     }
 
     for (auto &newPrivateCall : inlinePrivateCalls) {
