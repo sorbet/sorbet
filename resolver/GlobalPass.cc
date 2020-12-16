@@ -236,6 +236,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
             } else {
                 if (!core::Symbols::BasicObject().data(gs)->derivesFrom(gs, ref) &&
                     core::Symbols::BasicObject() != ref) {
+                    // This is where we set the superclass for `Mixin`
                     ref.data(gs)->setSuperClass(core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
                 }
             }
@@ -375,6 +376,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
         core::SymbolRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
             ENFORCE(ancst.data(gs)->isClassOrModule());
+            // Reading the fake property created in resolver#resolveClassMethodsJob(){}
             auto mixedInClassMethods = ancst.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
             if (!mixedInClassMethods.exists()) {
                 continue;
@@ -382,14 +384,19 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
             if (!singleton.exists()) {
                 singleton = sym.data(gs)->singletonClass(gs);
             }
-            for (auto &mixedInClassMethod : mixedInClassMethods.data(gs)->arguments()) {
-                ENFORCE(mixedInClassMethod.rebind.data(gs)->isClassOrModule());
-                singleton.data(gs)->addMixin(mixedInClassMethod.rebind);
-            }
-            if (!singleton.data(gs)->addMixin(gs, classMethods.asClassOrModuleRef())) {
-                // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before adding it
-                // as a member.
-                ENFORCE(false);
+
+            auto resultType = mixedInClassMethods.data(gs)->resultType;
+            ENFORCE(resultType != nullptr && core::isa_type<core::TupleType>(resultType));
+            auto types = core::cast_type<core::TupleType>(resultType);
+
+            for (auto &type : types->elems) {
+                ENFORCE(core::isa_type<core::ClassType>(type));
+                auto classType = core::cast_type_nonnull<core::ClassType>(type);
+                if (!singleton.data(gs)->addMixin(gs, classType.symbol)) {
+                    // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before
+                    // adding it as a member.
+                    ENFORCE(false);
+                }
             }
         }
     }

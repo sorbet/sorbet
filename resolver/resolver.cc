@@ -602,19 +602,22 @@ private:
             }
 
             // Get the fake property holding the mixes
-            auto mixData = owner.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
+            auto mixMethod = owner.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
             auto loc = core::Loc(owner.data(gs)->loc().file(), send->loc);
-            if (!mixData.exists()) {
+            if (!mixMethod.exists()) {
                 // We never stored a mixin in this symbol
                 // Create a the fake property that will hold the mixed in modules
-                mixData = gs.enterMethodSymbol(loc, owner, core::Names::mixedInClassMethods());
+                mixMethod = gs.enterMethodSymbol(loc, owner, core::Names::mixedInClassMethods());
+                vector<core::TypePtr> targs;
+                mixMethod.data(gs)->resultType = core::TupleType::build(gs, move(targs));
+
+                // Create a dummy block argument to satisfy sanitycheck during GlobalState::expandNames
+                auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), mixMethod, core::Names::blkArg());
+                arg.flags.isBlock = true;
             }
 
-            // Add an argument to the fake property to store the referenced module
-            auto currentArgSize = mixData.dataAllowingNone(gs)->arguments().size();
-            auto argName = gs.enterNameUTF8(fmt::format("arg{}", currentArgSize - 1)); // name has to be distinct
-            auto &argInfo = gs.enterMethodArgumentSymbol(loc, mixData, argName);
-            argInfo.rebind = id->symbol; // Store the mixin module ref in the `rebind` value of the fake argument
+            auto type = core::make_type<core::ClassType>(id->symbol);
+            (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems.emplace_back(type);
         }
     }
 
