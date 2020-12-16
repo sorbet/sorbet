@@ -2420,10 +2420,11 @@ private:
             if (l1._name == core::Names::fwdArgs() && l2._name == core::Names::fwdKwargs() &&
                 l3._name == core::Names::fwdBlock()) {
                 if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Unsupported `{}` for argument forwarding syntax. "
-                                "Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
-                                "sig", method.data(ctx)->show(ctx));
+                    e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
                     e.addErrorLine(methodInfo->loc(), "Method declares argument forwarding here");
+                    e.addErrorNote("Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
+                                   method.data(ctx)->show(ctx));
+
                 }
                 return;
             }

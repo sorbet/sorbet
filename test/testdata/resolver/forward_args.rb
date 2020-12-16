@@ -41,7 +41,7 @@ class Foo
     params(
       args: T::Array[T.untyped]
     ).returns(String)
-  end # error: Unsupported `sig` for argument forwarding syntax. Rewrite the method as `def Foo#foo_fwd(*args, **kwargs, &blk)` to use a signature
+  end # error: Unsupported `sig` for argument forwarding syntax
   def foo_fwd(...)
     r1 = T.unsafe(self).bar(...)
     T.reveal_type(r1) # error: Revealed type: `T.untyped`
@@ -52,7 +52,7 @@ class Foo
       args: T.untyped,
       kargs: T::Hash[T.untyped, T.untyped]
     ).void
-  end # error: Unsupported `sig` for argument forwarding syntax. Rewrite the method as `def Foo#foo_fwd1(*args, **kwargs, &blk)` to use a signature
+  end # error: Unsupported `sig` for argument forwarding syntax
   def foo_fwd1(...)
   end
 
@@ -62,7 +62,7 @@ class Foo
       k: T::Hash[T.untyped, T.untyped],
       b: T.untyped
     ).void
-  end # error: Unsupported `sig` for argument forwarding syntax. Rewrite the method as `def Foo#foo_fwd2(*args, **kwargs, &blk)` to use a signature
+  end # error: Unsupported `sig` for argument forwarding syntax
   def foo_fwd2(...)
   end
 
