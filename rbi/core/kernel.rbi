@@ -2663,7 +2663,7 @@ module Kernel
     params(
         arg0: Class,
         arg1: T.untyped,
-        arg2: T::Array[String],
+        arg2: T.nilable(T::Array[String]),
     )
     .returns(T.noreturn)
   end
@@ -2671,7 +2671,7 @@ module Kernel
     params(
         arg0: Exception,
         arg1: T.untyped,
-        arg2: T::Array[String],
+        arg2: T.nilable(T::Array[String]),
     )
     .returns(T.noreturn)
   end
