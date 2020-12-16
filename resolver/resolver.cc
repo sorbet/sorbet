@@ -2424,7 +2424,6 @@ private:
                     e.addErrorLine(methodInfo->loc(), "Method declares argument forwarding here");
                     e.addErrorNote("Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
                                    method.data(ctx)->show(ctx));
-
                 }
                 return;
             }
