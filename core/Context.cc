@@ -136,6 +136,7 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
                 ENFORCE(uniqueNameSubstitution.size() == i, "Unique name substitution has wrong size");
                 if (nm.original.kind() == NameKind::CONSTANT &&
                     nm.original.constantIndex() >= constantNameSubstitution.size()) {
+                    // Note: Duplicate of loop body below. If you change one, change the other!
                     for (u4 i = constantNameSubstitution.size(); i <= nm.original.constantIndex(); i++) {
                         auto &cnst = from.constantNames[i];
                         ENFORCE_NO_TIMER(constantNameSubstitution.size() == i,
