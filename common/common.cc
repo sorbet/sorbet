@@ -297,6 +297,18 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, const Unordered
     return result;
 }
 
+// https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+sorbet::u4 sorbet::nextPowerOfTwo(sorbet::u4 v) {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+}
+
 class SetTerminateHandler {
 public:
     static void on_terminate() {

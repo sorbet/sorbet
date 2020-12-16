@@ -696,14 +696,6 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     return result;
 }
 
-int nearestPowerOf2(int from) {
-    int i = 1;
-    while (i < from) {
-        i = i * 2;
-    }
-    return i;
-}
-
 u4 SerializerImpl::unpickleGSUUID(UnPickler &p) {
     if (p.getU4() != Serializer::VERSION) {
         Exception::raise("Payload version mismatch");
@@ -759,19 +751,19 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
 
         int namesSize = p.getU4();
         ENFORCE(namesSize > 0);
-        utf8Names.reserve(nearestPowerOf2(namesSize));
+        utf8Names.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             utf8Names.emplace_back(unpickleUTF8Name(p, result));
         }
         namesSize = p.getU4();
         ENFORCE(namesSize > 0);
-        constantNames.reserve(nearestPowerOf2(namesSize));
+        constantNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             constantNames.emplace_back(unpickleConstantName(p, result));
         }
         namesSize = p.getU4();
         ENFORCE(namesSize > 0);
-        uniqueNames.reserve(nearestPowerOf2(namesSize));
+        uniqueNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             uniqueNames.emplace_back(unpickleUniqueName(p, result));
         }
@@ -782,35 +774,35 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
 
         int classAndModuleSize = p.getU4();
         ENFORCE(classAndModuleSize > 0);
-        classAndModules.reserve(nearestPowerOf2(classAndModuleSize));
+        classAndModules.reserve(nextPowerOfTwo(classAndModuleSize));
         for (int i = 0; i < classAndModuleSize; i++) {
             classAndModules.emplace_back(unpickleSymbol(p, &result));
         }
 
         int methodSize = p.getU4();
         ENFORCE(methodSize > 0);
-        methods.reserve(nearestPowerOf2(methodSize));
+        methods.reserve(nextPowerOfTwo(methodSize));
         for (int i = 0; i < methodSize; i++) {
             methods.emplace_back(unpickleSymbol(p, &result));
         }
 
         int fieldSize = p.getU4();
         ENFORCE(fieldSize > 0);
-        fields.reserve(nearestPowerOf2(fieldSize));
+        fields.reserve(nextPowerOfTwo(fieldSize));
         for (int i = 0; i < fieldSize; i++) {
             fields.emplace_back(unpickleSymbol(p, &result));
         }
 
         int typeArgumentSize = p.getU4();
         ENFORCE(typeArgumentSize > 0);
-        typeArguments.reserve(nearestPowerOf2(typeArgumentSize));
+        typeArguments.reserve(nextPowerOfTwo(typeArgumentSize));
         for (int i = 0; i < typeArgumentSize; i++) {
             typeArguments.emplace_back(unpickleSymbol(p, &result));
         }
 
         int typeMemberSize = p.getU4();
         ENFORCE(typeMemberSize > 0);
-        typeMembers.reserve(nearestPowerOf2(typeMemberSize));
+        typeMembers.reserve(nextPowerOfTwo(typeMemberSize));
         for (int i = 0; i < typeMemberSize; i++) {
             typeMembers.emplace_back(unpickleSymbol(p, &result));
         }

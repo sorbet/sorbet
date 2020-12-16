@@ -47,20 +47,6 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
     return symRef;
 }
 
-namespace {
-// https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
-u4 nextPowerOfTwo(u4 v) {
-    v--;
-    v |= v >> 1;
-    v |= v >> 2;
-    v |= v >> 4;
-    v |= v >> 8;
-    v |= v >> 16;
-    v++;
-    return v;
-}
-} // namespace
-
 atomic<int> globalStateIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
 
