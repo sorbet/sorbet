@@ -17,10 +17,23 @@ public:
         if (!allowSameFromTo) {
             from.sanityCheckSubstitution(*this);
         }
-        ENFORCE(from.unsafeTableIndex() < nameSubstitution.size(),
-                "name substitution index out of bounds, got {} where subsitution size is {}",
-                std::to_string(from.rawId()), std::to_string(nameSubstitution.size()));
-        return nameSubstitution[from.unsafeTableIndex()];
+        switch (from.kind()) {
+            case NameKind::UTF8:
+                ENFORCE(from.utf8Index() < utf8NameSubstitution.size(),
+                        "utf8 name substitution index out of bounds, got {} where subsitution size is {}",
+                        std::to_string(from.rawId()), std::to_string(utf8NameSubstitution.size()));
+                return utf8NameSubstitution[from.utf8Index()];
+            case NameKind::CONSTANT:
+                ENFORCE(from.constantIndex() < constantNameSubstitution.size(),
+                        "constant name substitution index out of bounds, got {} where subsitution size is {}",
+                        std::to_string(from.rawId()), std::to_string(constantNameSubstitution.size()));
+                return constantNameSubstitution[from.constantIndex()];
+            case NameKind::UNIQUE:
+                ENFORCE(from.uniqueIndex() < uniqueNameSubstitution.size(),
+                        "unique name substitution index out of bounds, got {} where subsitution size is {}",
+                        std::to_string(from.rawId()), std::to_string(uniqueNameSubstitution.size()));
+                return uniqueNameSubstitution[from.uniqueIndex()];
+        }
     }
 
     bool useFastPath() const;
@@ -28,7 +41,9 @@ public:
 private:
     friend NameRefDebugCheck;
 
-    std::vector<NameRef> nameSubstitution;
+    std::vector<NameRef> utf8NameSubstitution;
+    std::vector<NameRef> constantNameSubstitution;
+    std::vector<NameRef> uniqueNameSubstitution;
     // set if no substitution is actually necessary
     bool fastPath;
 

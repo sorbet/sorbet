@@ -732,10 +732,10 @@ vector<ast::ParsedFile> Packager::runIncremental(core::GlobalState &gs, vector<a
     // TODO(jvilk): This incremental pass reprocesses every package file in the project. It should instead only process
     // the packages needed to understand file changes.
     ENFORCE(checkContainsAllPackages(gs, files));
-    auto namesUsed = gs.namesUsed();
+    auto namesUsed = gs.namesUsedTotal();
     auto emptyWorkers = WorkerPool::create(0, gs.tracer());
     files = Packager::run(gs, *emptyWorkers, move(files));
-    ENFORCE(gs.namesUsed() == namesUsed);
+    ENFORCE(gs.namesUsedTotal() == namesUsed);
     return files;
 }
 

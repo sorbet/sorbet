@@ -169,7 +169,9 @@ struct Options {
     u4 reserveFieldTableCapacity = 0;
     u4 reserveTypeArgumentTableCapacity = 0;
     u4 reserveTypeMemberTableCapacity = 0;
-    u4 reserveNameTableCapacity = 0;
+    u4 reserveUtf8NameTableCapacity = 0;
+    u4 reserveConstantNameTableCapacity = 0;
+    u4 reserveUniqueNameTableCapacity = 0;
 
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";

@@ -110,8 +110,8 @@ TEST_CASE("Substitute") { // NOLINT
     GlobalState gs2(errorQueue);
     gs2.initEmpty();
 
-    NameRef foo1, bar1, other1;
-    NameRef foo2, bar2;
+    NameRef foo1, bar1, other1, cnstBaz1, uniqueBaz1, otherCnstBart1;
+    NameRef foo2, bar2, cnstBaz2, uniqueBaz2;
     {
         UnfreezeNameTable thaw1(gs1);
         UnfreezeNameTable thaw2(gs2);
@@ -119,16 +119,23 @@ TEST_CASE("Substitute") { // NOLINT
         foo1 = gs1.enterNameUTF8("foo");
         bar1 = gs1.enterNameUTF8("bar");
         other1 = gs1.enterNameUTF8("other");
+        cnstBaz1 = gs1.enterNameConstant("Baz");
+        uniqueBaz1 = gs1.freshNameUnique(UniqueNameKind::Namer, cnstBaz1, 1);
+        otherCnstBart1 = gs1.enterNameConstant("Bart");
 
         foo2 = gs2.enterNameUTF8("foo");
+        bar2 = gs2.enterNameUTF8("bar");
+        cnstBaz2 = gs2.enterNameConstant("Baz");
+        uniqueBaz2 = gs2.freshNameUnique(UniqueNameKind::Namer, cnstBaz1, 1);
         gs1.enterNameUTF8("name");
-        bar2 = gs1.enterNameUTF8("bar");
     }
 
     GlobalSubstitution subst(gs1, gs2);
 
     CHECK_EQ(subst.substitute(foo1), foo2);
     CHECK_EQ(subst.substitute(bar1), bar2);
+    CHECK_EQ(subst.substitute(uniqueBaz1), uniqueBaz2);
+    CHECK_EQ(subst.substitute(cnstBaz1), cnstBaz2);
 
     auto other2 = subst.substitute(other1);
     REQUIRE(other2.exists());
