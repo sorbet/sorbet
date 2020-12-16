@@ -106,6 +106,18 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
         for (int i = 1; i <= numparamMax(dctx, &numparams->decls); i++) {
             args.emplace_back(numparamTree(dctx, i, &numparams->decls));
         }
+    } else if (auto *fargs = parser::cast_node<parser::ForwardArgs>(argnode.get())) {
+        // we desugar (...) into (*<fwd-args>, **<fwd-kwargs>, &<fwd-block>)
+        args.reserve(3);
+        // add `*<fwd-args>`
+        unique_ptr<parser::Node> rest = make_unique<parser::Restarg>(fargs->loc, core::Names::fwdArgs(), fargs->loc);
+        args.emplace_back(node2TreeImpl(dctx, std::move(rest)));
+        // add `**<fwd-kwargs>`
+        unique_ptr<parser::Node> kwrest = make_unique<parser::Kwrestarg>(fargs->loc, core::Names::fwdKwargs());
+        args.emplace_back(node2TreeImpl(dctx, std::move(kwrest)));
+        // add `&<fwd-block>`
+        unique_ptr<parser::Node> block = make_unique<parser::Blockarg>(fargs->loc, core::Names::fwdBlock());
+        args.emplace_back(node2TreeImpl(dctx, std::move(block)));
     } else if (argnode.get() == nullptr) {
         // do nothing
     } else {
@@ -703,6 +715,42 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                         }
                     }
                     result = std::move(res);
+                } else if (send->args.size() == 1 && parser::isa_node<parser::ForwardedArgs>(send->args.back().get())) {
+                    // If the call is forwarding arguments like `foo(...)`
+                    // we desugar it as `foo(<fwd-args>, **<fwd-kwargs>, &<fwd-block>)`
+
+                    auto method =
+                        MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
+
+                    Send::ARGS_store sendArgs;
+                    sendArgs.emplace_back(std::move(rec));
+                    sendArgs.emplace_back(std::move(method));
+
+                    auto args = MK::Local(loc, core::Names::fwdArgs());
+                    auto argsSplat = MK::Send0(loc, std::move(args), core::Names::toA());
+
+                    auto kwargs = MK::Local(loc, core::Names::fwdKwargs());
+                    auto kwargsSplat = MK::Send0(loc, std::move(kwargs), core::Names::toHash());
+
+                    Array::ENTRY_store kwargsEntries;
+                    kwargsEntries.emplace_back(std::move(kwargsSplat));
+                    auto kwargsArray = MK::Array(loc, std::move(kwargsEntries));
+
+                    auto argsConcat =
+                        MK::Send1(loc, std::move(argsSplat), core::Names::concat(), std::move(kwargsArray));
+                    sendArgs.emplace_back(std::move(argsConcat));
+
+                    auto kwArray = make_unique<parser::Nil>(loc);
+                    auto kwArgs = node2TreeImpl(dctx, std::move(kwArray));
+                    sendArgs.emplace_back(std::move(kwArgs));
+
+                    auto blk = MK::Local(loc, core::Names::fwdBlock());
+                    sendArgs.emplace_back(std::move(blk));
+
+                    auto send = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
+                                         core::Names::callWithSplatAndBlock(), 4, std::move(sendArgs), {});
+
+                    result = std::move(send);
                 } else {
                     int numPosArgs = send->args.size();
                     if (numPosArgs > 0) {

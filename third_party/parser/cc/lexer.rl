@@ -2833,6 +2833,14 @@ bool lexer::is_declared(const std::string& identifier) const {
   return env.find(identifier) != env.end();
 }
 
+void lexer::declare_forward_args() {
+  declare(FORWARD_ARGS);
+}
+
+bool lexer::is_declared_forward_args() {
+  return is_declared(FORWARD_ARGS);
+}
+
 optional_size lexer::dedentLevel() {
   // We erase @dedentLevel as a precaution to avoid accidentally
   // using a stale value.

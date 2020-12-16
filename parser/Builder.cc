@@ -422,6 +422,8 @@ public:
         if (callargs != nullptr && !callargs->empty()) {
             if (auto *bp = parser::cast_node<BlockPass>(callargs->back().get())) {
                 error(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
+            } else if (auto *fa = parser::cast_node<ForwardedArgs>(callargs->back().get())) {
+                error(ruby_parser::dclass::BlockAndBlockarg, fa->loc);
             }
         }
 
@@ -735,6 +737,17 @@ public:
                           const token *do_, unique_ptr<Node> body, const token *end) {
         return make_unique<For>(tokLoc(for_).join(tokLoc(end)), std::move(iterator), std::move(iteratee),
                                 std::move(body));
+    }
+
+    unique_ptr<Node> forward_args(const token *begin, const token *dots, const token *end) {
+        return make_unique<ForwardArgs>(tokLoc(begin).join(tokLoc(dots)).join(tokLoc(end)));
+    }
+
+    unique_ptr<Node> forwarded_args(const token *dots) {
+        if (!driver_->lex.is_declared_forward_args()) {
+            error(ruby_parser::dclass::UnexpectedToken, tokLoc(dots), "\"...\"");
+        }
+        return make_unique<ForwardedArgs>(tokLoc(dots));
     }
 
     unique_ptr<Node> gvar(const token *tok) {
@@ -1769,6 +1782,16 @@ ForeignPtr for_(SelfPtr builder, const token *for_, ForeignPtr iterator, const t
                                         build->cast_node(body), end));
 }
 
+ForeignPtr forward_args(SelfPtr builder, const token *begin, const token *dots, const token *end) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->forward_args(begin, dots, end));
+}
+
+ForeignPtr forwarded_args(SelfPtr builder, const token *dots) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->forwarded_args(dots));
+}
+
 ForeignPtr gvar(SelfPtr builder, const token *tok) {
     auto build = cast_builder(builder);
     return build->toForeign(build->gvar(tok));
@@ -2274,6 +2297,8 @@ struct ruby_parser::builder Builder::interface = {
     float_,
     floatComplex,
     for_,
+    forward_args,
+    forwarded_args,
     gvar,
     hash_pattern,
     ident,
