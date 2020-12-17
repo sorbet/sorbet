@@ -1310,9 +1310,15 @@ vector<Symbol::RequiredAncestor> requiredAncestorsTransitiveInternal(const Globa
 
 // All required ancestors by this class or module
 vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitive(const GlobalState &gs) const {
+    return readRequiredAncestorsInternal(gs, Names::requiredAncestorsLin());
+}
+
+void Symbol::computeRequiredAncestorLinearization(GlobalState &gs) {
     ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
     std::vector<SymbolRef> seen;
-    return requiredAncestorsTransitiveInternal(gs, this->ref(gs), seen);
+    for (auto &req : requiredAncestorsTransitiveInternal(gs, this->ref(gs), seen)) {
+        recordRequiredAncestorInternal(gs, req, Names::requiredAncestorsLin());
+    }
 }
 
 SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {

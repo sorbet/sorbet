@@ -409,6 +409,9 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
         auto sym = core::ClassOrModuleRef(gs, i);
         resolveTypeMembers(gs, sym, typeAliases, resolved);
+
+        // Precompute the list of all required ancestors for this symbol
+        sym.data(gs)->computeRequiredAncestorLinearization(gs);
     }
 }
 

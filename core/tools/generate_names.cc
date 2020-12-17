@@ -283,6 +283,7 @@ NameDef names[] = {
 
     // Requires ancestor
     {"requiredAncestors", "<required-ancestor>"},
+    {"requiredAncestorsLin", "<required-ancestor-lin>"},
     {"requiresAncestor", "requires_ancestor"},
 
     // This behaves like the above two names, in the sense that we use a member

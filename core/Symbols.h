@@ -599,6 +599,8 @@ public:
         RequiredAncestor(SymbolRef origin, SymbolRef symbol, Loc loc) : origin(origin), symbol(symbol), loc(loc) {}
     };
 
+    void computeRequiredAncestorLinearization(GlobalState &gs);
+
     // Locally required ancestors by this class or module
     std::vector<RequiredAncestor> requiredAncestors(const GlobalState &gs) const;
 
