@@ -15,8 +15,9 @@ module B
   end
 end
 
-class C # error: `C` must include `E` (required by `D`)
+class C
   include D
+  include E
 end
 
 module D
