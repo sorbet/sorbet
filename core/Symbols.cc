@@ -1176,6 +1176,12 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 }
 
 // Record a required ancestor for this class of module
+//
+// Each RequiredAncestor is stored into a magic method referenced by `prop` where:
+// * RequiredAncestor.symbol goes into the return type tuple
+// * RequiredAncestor.origin goes into the first argument type tuple
+// * RequiredAncestor.loc goes into the symbol loc
+// All fields for the same RequiredAncestor are stored at the same index.
 void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAncestor &ancestor, NameRef prop) {
     ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
 
@@ -1184,25 +1190,36 @@ void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAnc
     if (!ancestors.exists()) {
         ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs), prop);
         ancestors.data(gs)->locs_.clear(); // Remove the original location
+
+        // Create the return type tuple to store RequiredAncestor.symbol
+        vector<TypePtr> tsymbols;
+        ancestors.data(gs)->resultType = TupleType::build(gs, move(tsymbols));
+
+        // Create the first argument typed as a tuple to store RequiredAncestor.origin
+        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors, core::Names::arg());
+        vector<TypePtr> torigins;
+        arg.type = TupleType::build(gs, move(torigins));
     }
 
-    if (ancestors.data(gs)->resultType == nullptr) {
-        vector<TypePtr> targs;
-        ancestors.data(gs)->resultType = TupleType::build(gs, move(targs));
-    } else {
-        // Do not require the same ancestor twice
-        auto &elems = (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems;
-        bool alreadyRecorded = absl::c_any_of(elems, [ancestor](auto elem) {
-            ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
-            return cast_type_nonnull<ClassType>(elem).symbol == ancestor.symbol;
-        });
-        if (alreadyRecorded) {
-            return;
-        }
+    // Do not require the same ancestor twice
+    auto &elems = (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems;
+    bool alreadyRecorded = absl::c_any_of(elems, [ancestor](auto elem) {
+        ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
+        return cast_type_nonnull<ClassType>(elem).symbol == ancestor.symbol;
+    });
+    if (alreadyRecorded) {
+        return;
     }
 
-    auto type = core::make_type<ClassType>(ancestor.symbol);
-    (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems.emplace_back(type);
+    // Store the RequiredAncestor.symbol
+    auto tSymbol = core::make_type<ClassType>(ancestor.symbol);
+    (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems.emplace_back(tSymbol);
+
+    // Store the RequiredAncestor.origin
+    auto tOrigin = core::make_type<ClassType>(ancestor.origin);
+    (cast_type<TupleType>(ancestors.data(gs)->arguments()[0].type))->elems.emplace_back(tOrigin);
+
+    // Store the RequiredAncestor.loc
     ancestors.data(gs)->locs_.emplace_back(ancestor.loc);
 }
 
@@ -1219,12 +1236,17 @@ vector<Symbol::RequiredAncestor> Symbol::readRequiredAncestorsInternal(const Glo
     }
 
     auto data = ancestors.data(gs);
-    auto types = cast_type<TupleType>(data->resultType);
+    auto tSymbols = cast_type<TupleType>(data->resultType);
+    auto tOrigins = cast_type<TupleType>(data->arguments()[0].type);
     auto index = 0;
-    for (auto elem : types->elems) {
+    for (auto elem : tSymbols->elems) {
         ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
+        ENFORCE(isa_type<ClassType>(tOrigins->elems[index]), "Bad origin in requiredAncestors");
         ENFORCE(index < data->locs().size(), "Missing loc in requiredAncestors");
-        res.emplace_back(this->ref(gs), cast_type_nonnull<ClassType>(elem).symbol, data->locs().at(index));
+        auto &origin = cast_type_nonnull<ClassType>(tOrigins->elems[index]).symbol;
+        auto &symbol = cast_type_nonnull<ClassType>(elem).symbol;
+        auto &loc = data->locs()[index];
+        res.emplace_back(origin, symbol, loc);
         index++;
     }
 
