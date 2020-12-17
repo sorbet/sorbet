@@ -1176,13 +1176,13 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 }
 
 // Record a required ancestor for this class of module
-void Symbol::recordRequiredAncestorInternal(GlobalState &gs, SymbolRef ancestor, Loc loc, NameRef prop) {
+void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAncestor &ancestor, NameRef prop) {
     ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
 
     // We store the required ancestors into a fake property called `<required-ancestors>`
     auto ancestors = this->findMember(gs, prop);
     if (!ancestors.exists()) {
-        ancestors = gs.enterMethodSymbol(loc, this->ref(gs), prop);
+        ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs), prop);
         ancestors.data(gs)->locs_.clear(); // Remove the original location
     }
 
@@ -1194,16 +1194,16 @@ void Symbol::recordRequiredAncestorInternal(GlobalState &gs, SymbolRef ancestor,
         auto &elems = (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems;
         bool alreadyRecorded = absl::c_any_of(elems, [ancestor](auto elem) {
             ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
-            return cast_type_nonnull<ClassType>(elem).symbol == ancestor;
+            return cast_type_nonnull<ClassType>(elem).symbol == ancestor.symbol;
         });
         if (alreadyRecorded) {
             return;
         }
     }
 
-    auto type = core::make_type<ClassType>(ancestor);
+    auto type = core::make_type<ClassType>(ancestor.symbol);
     (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems.emplace_back(type);
-    ancestors.data(gs)->locs_.emplace_back(loc);
+    ancestors.data(gs)->locs_.emplace_back(ancestor.loc);
 }
 
 // Locally required ancestors by this class or module
@@ -1224,7 +1224,7 @@ vector<Symbol::RequiredAncestor> Symbol::readRequiredAncestorsInternal(const Glo
     for (auto elem : types->elems) {
         ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
         ENFORCE(index < data->locs().size(), "Missing loc in requiredAncestors");
-        res.emplace_back(cast_type_nonnull<ClassType>(elem).symbol, data->locs().at(index));
+        res.emplace_back(this->ref(gs), cast_type_nonnull<ClassType>(elem).symbol, data->locs().at(index));
         index++;
     }
 
@@ -1233,7 +1233,8 @@ vector<Symbol::RequiredAncestor> Symbol::readRequiredAncestorsInternal(const Glo
 
 // Record a required ancestor for this class of module
 void Symbol::recordRequiredAncestor(GlobalState &gs, SymbolRef ancestor, Loc loc) {
-    recordRequiredAncestorInternal(gs, ancestor, loc, Names::requiredAncestors());
+    RequiredAncestor req = {this->ref(gs), ancestor, loc};
+    recordRequiredAncestorInternal(gs, req, Names::requiredAncestors());
 }
 
 // Locally required ancestors by this class or module

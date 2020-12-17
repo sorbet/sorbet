@@ -592,11 +592,11 @@ public:
 
     // Associate a required ancestor with the loc it's required at
     struct RequiredAncestor {
-        SymbolRef origin; // Only used during transitive lookups
-        SymbolRef symbol;
-        Loc loc;
+        SymbolRef origin; // The class or module that required `symbol`
+        SymbolRef symbol; // The symbol required
+        Loc loc;          // The location it was required at
 
-        RequiredAncestor(SymbolRef symbol, Loc loc) : symbol(symbol), loc(loc) {}
+        RequiredAncestor(SymbolRef origin, SymbolRef symbol, Loc loc) : origin(origin), symbol(symbol), loc(loc) {}
     };
 
     // Locally required ancestors by this class or module
@@ -717,7 +717,7 @@ private:
     InlinedVector<Loc, 2> locs_;
 
     // Record a required ancestor for this class of module in a magic property
-    void recordRequiredAncestorInternal(GlobalState &gs, SymbolRef ancestor, Loc loc, NameRef prop);
+    void recordRequiredAncestorInternal(GlobalState &gs, RequiredAncestor &ancestor, NameRef prop);
 
     // Read required ancestors for this class of module from a magic property
     std::vector<RequiredAncestor> readRequiredAncestorsInternal(const GlobalState &gs, NameRef prop) const;
