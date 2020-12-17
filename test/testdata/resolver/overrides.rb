@@ -56,6 +56,14 @@ class B5 < A5
   def foo; end
 end
 
+# however, not using override when overriding B5#foo should be an error
+class C5 < B5
+  extend T::Sig
+  sig {void}
+  def foo; end
+# ^^^^^^^ error: Method `C5#foo` overrides an overridable method
+end
+
 class A6
   extend T::Sig
   sig {void}
