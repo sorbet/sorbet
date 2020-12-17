@@ -2835,7 +2835,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
         for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
             if (result.gotItem()) {
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::TreeMap::apply(ctx, walk, std::move(job.tree));
+                job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));
                 output.trees.emplace_back(move(job));
             }
         }
