@@ -63,8 +63,6 @@ enum class Tag {
 // A mapping from tree type to its corresponding tag.
 template <typename T> struct TreeToTag;
 
-class Expression;
-
 class TreePtr {
 public:
     // We store tagged pointers as 64-bit values.
@@ -178,9 +176,9 @@ public:
         return static_cast<Tag>(value);
     }
 
-    Expression *get() const noexcept {
+    void *get() const noexcept {
         auto val = ptr & PTR_MASK;
-        return reinterpret_cast<Expression *>(val >> 16);
+        return reinterpret_cast<void *>(val >> 16);
     }
 
     // Fetch the tagged pointer. This is needed for:
@@ -223,16 +221,6 @@ public:
 template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
     return TreePtr(TreeToTag<E>::value, new E(std::forward<Args>(args)...));
 }
-
-class Expression {
-protected:
-    // We should only ever be creating subclasses of Expression, never Expression directly.
-    Expression() = default;
-    ~Expression() = default;
-};
-// Expression itself has a size, but when inheriting from Expression, the base class will
-// be considered a zero-sized class.
-CheckSize(Expression, 1, 1);
 
 struct ParsedFile {
     TreePtr tree;
@@ -311,7 +299,7 @@ template <> inline const TreePtr &TreePtr::cast<TreePtr>(const TreePtr &tree) {
     template <> struct TreeToTag<name> { static constexpr Tag value = Tag::name; }; \
     class __attribute__((aligned(8))) name final
 
-TREE(ClassDef) : public Expression {
+TREE(ClassDef) {
 public:
     const core::LocOffsets loc;
     core::LocOffsets declLoc;
@@ -348,7 +336,7 @@ public:
 };
 CheckSize(ClassDef, 120, 8);
 
-TREE(MethodDef) : public Expression {
+TREE(MethodDef) {
 public:
     const core::LocOffsets loc;
     core::LocOffsets declLoc;
@@ -385,7 +373,7 @@ public:
 };
 CheckSize(MethodDef, 64, 8);
 
-TREE(If) : public Expression {
+TREE(If) {
 public:
     const core::LocOffsets loc;
 
@@ -405,7 +393,7 @@ public:
 };
 CheckSize(If, 32, 8);
 
-TREE(While) : public Expression {
+TREE(While) {
 public:
     const core::LocOffsets loc;
 
@@ -424,7 +412,7 @@ public:
 };
 CheckSize(While, 24, 8);
 
-TREE(Break) : public Expression {
+TREE(Break) {
 public:
     const core::LocOffsets loc;
 
@@ -442,7 +430,7 @@ public:
 };
 CheckSize(Break, 16, 8);
 
-TREE(Retry) : public Expression {
+TREE(Retry) {
 public:
     const core::LocOffsets loc;
 
@@ -458,7 +446,7 @@ public:
 };
 CheckSize(Retry, 8, 8);
 
-TREE(Next) : public Expression {
+TREE(Next) {
 public:
     const core::LocOffsets loc;
 
@@ -476,7 +464,7 @@ public:
 };
 CheckSize(Next, 16, 8);
 
-TREE(Return) : public Expression {
+TREE(Return) {
 public:
     const core::LocOffsets loc;
 
@@ -494,7 +482,7 @@ public:
 };
 CheckSize(Return, 16, 8);
 
-TREE(RescueCase) : public Expression {
+TREE(RescueCase) {
 public:
     const core::LocOffsets loc;
 
@@ -520,7 +508,7 @@ public:
 };
 CheckSize(RescueCase, 48, 8);
 
-TREE(Rescue) : public Expression {
+TREE(Rescue) {
 public:
     const core::LocOffsets loc;
 
@@ -544,7 +532,7 @@ public:
 };
 CheckSize(Rescue, 56, 8);
 
-TREE(Local) : public Expression {
+TREE(Local) {
 public:
     const core::LocOffsets loc;
 
@@ -562,7 +550,7 @@ public:
 };
 CheckSize(Local, 16, 8);
 
-TREE(UnresolvedIdent) : public Expression {
+TREE(UnresolvedIdent) {
 public:
     const core::LocOffsets loc;
 
@@ -587,7 +575,7 @@ public:
 };
 CheckSize(UnresolvedIdent, 16, 8);
 
-TREE(RestArg) : public Expression {
+TREE(RestArg) {
 public:
     const core::LocOffsets loc;
 
@@ -605,7 +593,7 @@ public:
 };
 CheckSize(RestArg, 16, 8);
 
-TREE(KeywordArg) : public Expression {
+TREE(KeywordArg) {
 public:
     const core::LocOffsets loc;
 
@@ -623,7 +611,7 @@ public:
 };
 CheckSize(KeywordArg, 16, 8);
 
-TREE(OptionalArg) : public Expression {
+TREE(OptionalArg) {
 public:
     const core::LocOffsets loc;
 
@@ -642,7 +630,7 @@ public:
 };
 CheckSize(OptionalArg, 24, 8);
 
-TREE(BlockArg) : public Expression {
+TREE(BlockArg) {
 public:
     const core::LocOffsets loc;
 
@@ -660,7 +648,7 @@ public:
 };
 CheckSize(BlockArg, 16, 8);
 
-TREE(ShadowArg) : public Expression {
+TREE(ShadowArg) {
 public:
     const core::LocOffsets loc;
 
@@ -678,7 +666,7 @@ public:
 };
 CheckSize(ShadowArg, 16, 8);
 
-TREE(Assign) : public Expression {
+TREE(Assign) {
 public:
     const core::LocOffsets loc;
 
@@ -697,7 +685,7 @@ public:
 };
 CheckSize(Assign, 24, 8);
 
-TREE(Send) : public Expression {
+TREE(Send) {
 public:
     const core::LocOffsets loc;
 
@@ -774,7 +762,7 @@ public:
 };
 CheckSize(Send, 56, 8);
 
-TREE(Cast) : public Expression {
+TREE(Cast) {
 public:
     const core::LocOffsets loc;
 
@@ -796,7 +784,7 @@ public:
 };
 CheckSize(Cast, 40, 8);
 
-TREE(Hash) : public Expression {
+TREE(Hash) {
 public:
     const core::LocOffsets loc;
 
@@ -818,7 +806,7 @@ public:
 };
 CheckSize(Hash, 56, 8);
 
-TREE(Array) : public Expression {
+TREE(Array) {
 public:
     const core::LocOffsets loc;
 
@@ -839,7 +827,7 @@ public:
 };
 CheckSize(Array, 48, 8);
 
-TREE(Literal) : public Expression {
+TREE(Literal) {
 public:
     const core::LocOffsets loc;
 
@@ -864,7 +852,7 @@ public:
 };
 CheckSize(Literal, 24, 8);
 
-TREE(UnresolvedConstantLit) : public Expression {
+TREE(UnresolvedConstantLit) {
 public:
     const core::LocOffsets loc;
 
@@ -883,7 +871,7 @@ public:
 };
 CheckSize(UnresolvedConstantLit, 24, 8);
 
-TREE(ConstantLit) : public Expression {
+TREE(ConstantLit) {
 public:
     const core::LocOffsets loc;
 
@@ -908,7 +896,7 @@ public:
 };
 CheckSize(ConstantLit, 48, 8);
 
-TREE(ZSuperArgs) : public Expression {
+TREE(ZSuperArgs) {
 public:
     const core::LocOffsets loc;
 
@@ -925,7 +913,7 @@ public:
 };
 CheckSize(ZSuperArgs, 8, 8);
 
-TREE(Block) : public Expression {
+TREE(Block) {
 public:
     const core::LocOffsets loc;
 
@@ -943,7 +931,7 @@ public:
 };
 CheckSize(Block, 40, 8);
 
-TREE(InsSeq) : public Expression {
+TREE(InsSeq) {
 public:
     const core::LocOffsets loc;
 
@@ -967,7 +955,7 @@ public:
 };
 CheckSize(InsSeq, 56, 8);
 
-TREE(EmptyTree) : public Expression {
+TREE(EmptyTree) {
 public:
     const core::LocOffsets loc;
 
