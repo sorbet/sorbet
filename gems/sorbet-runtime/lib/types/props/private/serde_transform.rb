@@ -183,7 +183,12 @@ module T::Props
 
       sig {params(type: Module).returns(T.nilable(String)).checked(:never)}
       private_class_method def self.module_name(type)
-        MODULE_NAME.bind(type).call
+        mangler = T::Configuration.module_name_mangler
+        if mangler
+          mangler.call(type)
+        else
+          MODULE_NAME.bind(type).call
+        end
       end
     end
   end
