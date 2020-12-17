@@ -271,8 +271,18 @@ public:
 
     bool isLiteralish(CompilerState &cs, const core::TypePtr &t) const {
         // See IREmitterHelpers::emitLiteralish; we put the expected fast test first.
-        return core::isa_type<core::LiteralType>(t) || t.derivesFrom(cs, core::Symbols::FalseClass()) ||
-               t.derivesFrom(cs, core::Symbols::TrueClass()) || t.derivesFrom(cs, core::Symbols::NilClass());
+        if (core::isa_type<core::LiteralType>(t)) {
+            return true;
+        }
+
+        // IREmitterHelpers::emitLiteralish knows that its TypePtr argument is
+        // restricted.  We have no such guarantees, so we have to be more defensive.
+        if (t.hasUntyped()) {
+            return false;
+        }
+
+        return t.derivesFrom(cs, core::Symbols::FalseClass()) || t.derivesFrom(cs, core::Symbols::TrueClass()) ||
+               t.derivesFrom(cs, core::Symbols::NilClass());
     }
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
