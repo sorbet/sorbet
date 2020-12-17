@@ -724,6 +724,8 @@ private:
     // Read required ancestors for this class of module from a magic property
     std::vector<RequiredAncestor> readRequiredAncestorsInternal(const GlobalState &gs, NameRef prop) const;
 
+    std::vector<RequiredAncestor> requiredAncestorsTransitiveInternal(GlobalState &gs, std::vector<SymbolRef> &seen);
+
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                            int maxDepth = 100) const;
 
