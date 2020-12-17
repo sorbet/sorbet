@@ -1176,13 +1176,13 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 }
 
 // Record a required ancestor for this class of module
-void Symbol::recordRequiredAncestor(GlobalState &gs, SymbolRef ancestor, Loc loc) {
+void Symbol::recordRequiredAncestorInternal(GlobalState &gs, SymbolRef ancestor, Loc loc, NameRef prop) {
     ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
 
     // We store the required ancestors into a fake property called `<required-ancestors>`
-    auto ancestors = this->findMember(gs, Names::requiredAncestors());
+    auto ancestors = this->findMember(gs, prop);
     if (!ancestors.exists()) {
-        ancestors = gs.enterMethodSymbol(loc, this->ref(gs), Names::requiredAncestors());
+        ancestors = gs.enterMethodSymbol(loc, this->ref(gs), prop);
         ancestors.data(gs)->locs_.clear(); // Remove the original location
     }
 
@@ -1207,12 +1207,12 @@ void Symbol::recordRequiredAncestor(GlobalState &gs, SymbolRef ancestor, Loc loc
 }
 
 // Locally required ancestors by this class or module
-vector<Symbol::RequiredAncestor> Symbol::requiredAncestors(const GlobalState &gs) const {
+vector<Symbol::RequiredAncestor> Symbol::readRequiredAncestorsInternal(const GlobalState &gs, NameRef prop) const {
     ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
 
     vector<RequiredAncestor> res;
 
-    auto ancestors = this->findMember(gs, Names::requiredAncestors());
+    auto ancestors = this->findMember(gs, prop);
     if (!ancestors.exists()) {
         // No ancestor was recorded for this class or module
         return res;
@@ -1229,6 +1229,16 @@ vector<Symbol::RequiredAncestor> Symbol::requiredAncestors(const GlobalState &gs
     }
 
     return res;
+}
+
+// Record a required ancestor for this class of module
+void Symbol::recordRequiredAncestor(GlobalState &gs, SymbolRef ancestor, Loc loc) {
+    recordRequiredAncestorInternal(gs, ancestor, loc, Names::requiredAncestors());
+}
+
+// Locally required ancestors by this class or module
+vector<Symbol::RequiredAncestor> Symbol::requiredAncestors(const GlobalState &gs) const {
+    return readRequiredAncestorsInternal(gs, Names::requiredAncestors());
 }
 
 // All required ancestors by this class or module

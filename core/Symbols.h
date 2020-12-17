@@ -716,6 +716,12 @@ private:
     InlinedVector<SymbolRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
 
+    // Record a required ancestor for this class of module in a magic property
+    void recordRequiredAncestorInternal(GlobalState &gs, SymbolRef ancestor, Loc loc, NameRef prop);
+
+    // Read required ancestors for this class of module from a magic property
+    std::vector<RequiredAncestor> readRequiredAncestorsInternal(const GlobalState &gs, NameRef prop) const;
+
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                            int maxDepth = 100) const;
 
