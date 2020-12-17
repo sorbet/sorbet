@@ -297,6 +297,23 @@ vector<string> sorbet::FileOps::listFilesInDir(string_view path, const Unordered
     return result;
 }
 
+// https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+sorbet::u4 sorbet::nextPowerOfTwo(sorbet::u4 v) {
+    // Avoid underflow in subtraction on next line.
+    if (v == 0) {
+        // 1 is the nearest power of 2 to 0 (2^0)
+        return 1;
+    }
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+}
+
 class SetTerminateHandler {
 public:
     static void on_terminate() {
