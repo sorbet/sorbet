@@ -205,5 +205,50 @@ module Opus::Types::Test
         end
       end
     end
+
+    describe 'exclude_value_in_type_errors' do
+      describe 'when in default state' do
+        it 'raises an error with a message including the value' do
+          e = assert_raises(TypeError) do
+            T.let("foo", Integer)
+          end
+          assert_equal('T.let: Expected type Integer, got type String with value "foo"', e.message.split("\n").first)
+        end
+      end
+
+      describe 'when false' do
+        before do
+          T::Configuration.exclude_value_in_type_errors = false
+        end
+
+        after do
+          T::Configuration.exclude_value_in_type_errors = nil
+        end
+
+        it 'raises an error with a message including the value' do
+          e = assert_raises(TypeError) do
+            T.let("foo", Integer)
+          end
+          assert_equal('T.let: Expected type Integer, got type String with value "foo"', e.message.split("\n").first)
+        end
+      end
+
+      describe 'when true' do
+        before do
+          T::Configuration.exclude_value_in_type_errors = true
+        end
+
+        after do
+          T::Configuration.exclude_value_in_type_errors = nil
+        end
+
+        it 'raises an error with a message including the value' do
+          e = assert_raises(TypeError) do
+            T.let("foo", Integer)
+          end
+          assert_equal('T.let: Expected type Integer, got type String', e.message.split("\n").first)
+        end
+      end
+    end
   end
 end

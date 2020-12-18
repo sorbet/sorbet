@@ -425,4 +425,20 @@ module T::Configuration
       raise ArgumentError.new("Provided value must respond to :call")
     end
   end
+
+  # Configure if type errors excludes the value of the problematic type.
+  #
+  # When true, the value is left out
+  # Example: 'Expected type Integer, got String'
+  #
+  # When false (default), the value of the problematic type is excluded in exceptions:
+  # Example: 'Expected type Integer, got String with value "foo"'
+  #
+  # @param [Boolean] exclude_value
+  def self.exclude_value_in_type_errors=(exclude_value)
+    @exclude_value = exclude_value
+  end
+  def self.exclude_value_in_type_errors
+    !!@exclude_value
+  end
 end
