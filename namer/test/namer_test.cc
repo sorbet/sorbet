@@ -197,6 +197,8 @@ TEST_CASE("namer tests") {
         // The locs should update by three characters.
         REQUIRE_EQ(locs.first.beginPos() + 3, locs.second.beginPos());
         REQUIRE_EQ(locs.first.endPos() + 3, locs.second.endPos());
+        // The current behavior chooses the _last_ loc in the file if there are multiple implicit definitions.
+        REQUIRE_EQ(locs.first.beginPos(), 33);
     }
 
     SUBCASE("ExplicitModuleDefinitionsTakePrecedenceOverImplicit") {
