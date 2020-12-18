@@ -1792,7 +1792,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", (string)job.file.data(gs).path()}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::TreeMap::apply(ctx, finder, std::move(job.tree));
+                job.tree = ast::ShallowMap::apply(ctx, finder, std::move(job.tree));
                 SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
                 output.emplace_back(move(jobOutput));
             }
