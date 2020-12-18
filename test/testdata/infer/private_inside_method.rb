@@ -9,9 +9,9 @@ end
 # defined, that's it's visibility always.
 
 # no runtime error
-A.foo # error: Non-private call to private method `A.foo`
+A.foo
 
 A.bar
 
 # runtime error (private call)
-A.foo # error: Non-private call to private method `A.foo`
+A.foo
