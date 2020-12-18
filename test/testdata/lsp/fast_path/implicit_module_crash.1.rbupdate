@@ -1,0 +1,6 @@
+# typed: true
+# assert-fast-path: implicit_module_crash.rb
+
+Bundler::CRPC # error: Unable to resolve constant
+
+module ::DRPC::SomeSubmodule; end
