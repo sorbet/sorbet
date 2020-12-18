@@ -378,11 +378,6 @@ unique_ptr<ResponseMessage> RenameTask::runRequest(LSPTypecheckerDelegate &typec
     const core::GlobalState &gs = typechecker.state();
 
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentRename);
-    if (!config.opts.lspRenameEnabled) {
-        response->error = make_unique<ResponseError>(
-            (int)LSPErrorCodes::InvalidRequest, "The `Rename` LSP feature is experimental and disabled by default.");
-        return response;
-    }
 
     prodCategoryCounterInc("lsp.messages.processed", "textDocument.rename");
 
