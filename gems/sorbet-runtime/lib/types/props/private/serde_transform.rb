@@ -177,13 +177,9 @@ module T::Props
         end
       end
 
-      # Guard against overrides of `name` or `to_s`
-      MODULE_NAME = T.let(Module.instance_method(:name), UnboundMethod)
-      private_constant :MODULE_NAME
-
       sig {params(type: Module).returns(T.nilable(String)).checked(:never)}
       private_class_method def self.module_name(type)
-        MODULE_NAME.bind(type).call
+        T::Configuration.module_name_mangler.call(type)
       end
     end
   end
