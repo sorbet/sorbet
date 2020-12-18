@@ -464,10 +464,9 @@ public:
         foundMethod.argsHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
         ownerStack.emplace_back(foundDefs->addMethod(move(foundMethod)));
 
-        if (methodVisiStack.back().has_value()) {
-            auto &current = methodVisiStack.back();
-            foundDefs->addModifier(Modifier{current->kind, current->owner, current->loc, current->name, method.name});
-        }
+        // After flatten, method defs have been hoisted and reordered, so instead we look for the
+        // keep_def / keep_self_def calls, which will still be ordered correctly relative to
+        // visibility modifiers.
         return tree;
     }
 
@@ -514,6 +513,29 @@ public:
                 for (const auto &arg : original.args) {
                     addConstantModifier(ctx, original.fun, arg);
                 }
+                break;
+            case core::Names::keepDef().rawId():
+                // ^ visibility toggle doesn't look at `self.*` methods, only instance methods
+                // (need to use `class << self` to use nullary private with singleton class methods)
+
+                if (original.args.size() != 2) {
+                    break;
+                }
+
+                ENFORCE(!methodVisiStack.empty());
+                if (!methodVisiStack.back().has_value()) {
+                    break;
+                }
+
+                auto recv = ast::cast_tree<ast::ConstantLit>(original.recv);
+                if (recv == nullptr || recv->symbol != core::Symbols::Sorbet_Private_Static()) {
+                    break;
+                }
+
+                auto &current = methodVisiStack.back();
+                auto method = unwrapLiteralToMethodName(ctx, original.args[1]);
+                foundDefs->addModifier(Modifier{current->kind, current->owner, current->loc, current->name, method});
+
                 break;
         }
         return tree;
