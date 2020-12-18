@@ -143,6 +143,10 @@ struct Modifier {
     // For methods: The name of the method being modified.
     // For constants: The name of the constant being modified.
     core::NameRef target;
+
+    Modifier withTarget(core::NameRef target) {
+        return Modifier{this->kind, this->owner, this->loc, this->name, target};
+    }
 };
 
 class FoundDefinitions final {
@@ -495,14 +499,13 @@ public:
             case core::Names::public_().rawId():
                 if (original.args.empty()) {
                     ENFORCE(!methodVisiStack.empty());
-                    methodVisiStack.pop_back();
-                    methodVisiStack.emplace_back(optional<Modifier>{Modifier{
+                    methodVisiStack.back() = optional<Modifier>{Modifier{
                         Modifier::Kind::Method,
                         getOwner(),
                         original.loc,
                         original.fun,
                         core::NameRef::noName(),
-                    }});
+                    }};
                 } else {
                     for (const auto &arg : original.args) {
                         addMethodModifier(ctx, original.fun, arg);
@@ -532,9 +535,8 @@ public:
                     break;
                 }
 
-                auto &current = methodVisiStack.back();
-                auto method = unwrapLiteralToMethodName(ctx, original.args[1]);
-                foundDefs->addModifier(Modifier{current->kind, current->owner, current->loc, current->name, method});
+                auto methodName = unwrapLiteralToMethodName(ctx, original.args[1]);
+                foundDefs->addModifier(methodVisiStack.back()->withTarget(methodName));
 
                 break;
         }
