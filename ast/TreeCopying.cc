@@ -7,9 +7,9 @@ namespace sorbet::ast {
 
 namespace {
 
-TreePtr deepCopy(const Expression *avoid, const TreePtr &tree, bool root = false);
+TreePtr deepCopy(const void *avoid, const TreePtr &tree, bool root = false);
 
-template <class T> T deepCopyVec(const Expression *avoid, const T &origin) {
+template <class T> T deepCopyVec(const void *avoid, const T &origin) {
     T copy;
     copy.reserve(origin.size());
     for (const auto &memb : origin) {
@@ -20,7 +20,7 @@ template <class T> T deepCopyVec(const Expression *avoid, const T &origin) {
 
 class DeepCopyError {};
 
-TreePtr deepCopy(const Expression *avoid, const Tag tag, const Expression *tree, bool root) {
+TreePtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool root) {
     if (!root && tree == avoid) {
         throw DeepCopyError();
     }
@@ -183,7 +183,7 @@ TreePtr deepCopy(const Expression *avoid, const Tag tag, const Expression *tree,
     }
 }
 
-TreePtr deepCopy(const Expression *avoid, const TreePtr &tree, bool root) {
+TreePtr deepCopy(const void *avoid, const TreePtr &tree, bool root) {
     ENFORCE(tree != nullptr);
 
     return deepCopy(avoid, tree.tag(), tree.get(), root);
