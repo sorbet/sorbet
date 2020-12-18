@@ -159,7 +159,6 @@ void LSPWrapper::enableAllExperimentalFeatures() {
     enableExperimentalFeature(LSPExperimentalFeature::DocumentSymbol);
     enableExperimentalFeature(LSPExperimentalFeature::SignatureHelp);
     enableExperimentalFeature(LSPExperimentalFeature::DocumentFormat);
-    enableExperimentalFeature(LSPExperimentalFeature::Rename);
 }
 
 void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
@@ -175,9 +174,6 @@ void LSPWrapper::enableExperimentalFeature(LSPExperimentalFeature feature) {
             break;
         case LSPExperimentalFeature::DocumentFormat:
             opts->lspDocumentFormatRubyfmtEnabled = true;
-            break;
-        case LSPExperimentalFeature::Rename:
-            opts->lspRenameEnabled = true;
             break;
     }
 }

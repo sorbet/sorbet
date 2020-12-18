@@ -39,9 +39,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
         serverCap->signatureHelpProvider = move(sigHelpProvider);
     }
 
-    if (opts.lspRenameEnabled) {
-        serverCap->renameProvider = make_unique<RenameOptions>(true);
-    }
+    serverCap->renameProvider = make_unique<RenameOptions>(true);
 
     auto completionProvider = make_unique<CompletionOptions>();
     completionProvider->triggerCharacters = {"."};
