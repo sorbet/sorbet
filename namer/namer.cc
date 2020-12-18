@@ -798,8 +798,8 @@ class SymbolDefiner {
             // Symbol must be:
             // * Not <root> or <PackageRegistry> as those are not useful and would result in O(files in project) locs on
             // the symbol
-            // * Not explicitly defined already.
-            // * Already possess a `loc` from this specific file.
+            // * Not explicitly defined already
+            // * Already possess a `loc` from this specific file
             if (existing != core::Symbols::root() && existing != core::Symbols::PackageRegistry() &&
                 existing.data(ctx)->owner != core::Symbols::PackageRegistry() && !isClassExplicitlyDefined(existing)) {
                 auto &locs = existing.data(ctx)->locs();
