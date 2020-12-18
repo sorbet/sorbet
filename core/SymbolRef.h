@@ -176,7 +176,10 @@ public:
     bool isSynthetic() const;
 
     // If Kind is ClassOrModule, returns a ClassOrModuleRef.
-    ClassOrModuleRef asClassOrModuleRef() const;
+    ClassOrModuleRef asClassOrModuleRef() const {
+        ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
+        return ClassOrModuleRef::fromRaw(unsafeTableIndex());
+    }
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;

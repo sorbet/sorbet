@@ -220,11 +220,6 @@ ConstSymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
     }
 }
 
-ClassOrModuleRef SymbolRef::asClassOrModuleRef() const {
-    ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
-    return ClassOrModuleRef::fromRaw(unsafeTableIndex());
-}
-
 SymbolData ClassOrModuleRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
