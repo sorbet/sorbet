@@ -983,12 +983,11 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
                             if (multipleComponents) {
                                 e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
-                                            it->main.method.data(ctx)->name.data(ctx)->show(ctx),
-                                            it->main.receiver.show(ctx), recvType.type.show(ctx));
+                                            it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx),
+                                            recvType.type.show(ctx));
                             } else {
                                 e.setHeader("Non-private call to private method `{}` on `{}`",
-                                            it->main.method.data(ctx)->name.data(ctx)->show(ctx),
-                                            it->main.receiver.show(ctx));
+                                            it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx));
                             }
                             e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
                                            it->main.method.data(ctx)->owner.data(ctx)->show(ctx));
