@@ -467,6 +467,12 @@ public:
     }
 
     ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+        // Only consider sends at (or near) the top level of a class def, but **not** inside any
+        // other definition (like a method).
+        if (ownerStack.back().kind() != DefinitionKind::Class) {
+            return tree;
+        }
+
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (original.fun.rawId()) {
