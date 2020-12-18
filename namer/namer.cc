@@ -667,6 +667,25 @@ class SymbolDefiner {
     unique_ptr<const FoundDefinitions> foundDefs;
     vector<core::SymbolRef> definedClasses;
     vector<core::SymbolRef> definedMethods;
+    // Map from class symbol index to whether or not we have processed an explicit declaration for it.
+    // Used to ensure we update loc information for implicitly defined classes / modules on the incremental path, e.g.
+    // `class Foo::Bar` where no `module Foo` exists.
+    vector<bool> explicitlyDefinedClasses;
+
+    void markClassExplicitlyDefined(core::SymbolRef klass) {
+        ENFORCE_NO_TIMER(klass.isClassOrModule());
+        const auto idx = klass.classOrModuleIndex();
+        if (idx >= explicitlyDefinedClasses.size()) {
+            explicitlyDefinedClasses.resize(nextPowerOfTwo(idx + 1));
+        }
+        explicitlyDefinedClasses[idx] = true;
+    }
+
+    bool isClassExplicitlyDefined(core::SymbolRef klass) {
+        ENFORCE_NO_TIMER(klass.isClassOrModule());
+        const auto idx = klass.classOrModuleIndex();
+        return idx < explicitlyDefinedClasses.size() && explicitlyDefinedClasses[idx];
+    }
 
     // Returns a symbol to the referenced name. Name must be a class or module.
     core::SymbolRef squashNames(core::MutableContext ctx, FoundDefinitionRef ref, core::SymbolRef owner) {
@@ -773,6 +792,24 @@ class SymbolDefiner {
         if (!existing.exists()) {
             existing = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope, name);
             existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
+        } else if (existing.isClassOrModule()) {
+            // Ensure that we update the `loc` for this symbol. This branch is important for the incremental path,
+            // where all symbols are already defined but the locations of definitions may shift.
+            // Symbol must be:
+            // * Not <root> or <PackageRegistry> as those are not useful and would result in O(files in project) locs on
+            // the symbol
+            // * Not explicitly defined already.
+            // * Already possess a `loc` from this specific file.
+            if (existing != core::Symbols::root() && existing != core::Symbols::PackageRegistry() &&
+                existing.data(ctx)->owner != core::Symbols::PackageRegistry() && !isClassExplicitlyDefined(existing)) {
+                auto &locs = existing.data(ctx)->locs();
+                for (auto &symbolLoc : locs) {
+                    if (symbolLoc.file() == ctx.file) {
+                        existing.data(ctx)->addLoc(ctx, core::Loc(ctx.file, loc));
+                        break;
+                    }
+                }
+            }
         }
 
         return existing;
@@ -1106,6 +1143,7 @@ class SymbolDefiner {
 
     core::SymbolRef insertClass(core::MutableContext ctx, const FoundClass &klass) {
         auto symbol = getClassSymbol(ctx, klass);
+        markClassExplicitlyDefined(symbol);
 
         if (klass.classKind == ast::ClassDef::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
             symbol != core::Symbols::BasicObject()) {
@@ -1317,6 +1355,8 @@ public:
     void run(core::MutableContext ctx) {
         definedClasses.reserve(foundDefs->klasses().size());
         definedMethods.reserve(foundDefs->methods().size());
+        // Note: This is not a precise bound as we may define additional classes used in scopes.
+        explicitlyDefinedClasses.resize(nextPowerOfTwo(ctx.state.classAndModulesUsed() + definedClasses.size()));
 
         for (auto &ref : foundDefs->definitions()) {
             switch (ref.kind()) {
