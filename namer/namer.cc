@@ -467,12 +467,6 @@ public:
     }
 
     ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
-        // Only consider sends at (or near) the top level of a class def, but **not** inside any
-        // other definition (like a method).
-        if (ownerStack.back().kind() != DefinitionKind::Class) {
-            return tree;
-        }
-
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (original.fun.rawId()) {
@@ -1798,7 +1792,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", (string)job.file.data(gs).path()}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::TreeMap::apply(ctx, finder, std::move(job.tree));
+                job.tree = ast::ShallowMap::apply(ctx, finder, std::move(job.tree));
                 SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
                 output.emplace_back(move(jobOutput));
             }
