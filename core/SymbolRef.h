@@ -157,6 +157,8 @@ public:
 
     SymbolRef(GlobalState const *from, Kind type, u4 id);
     SymbolRef(const GlobalState &from, Kind type, u4 id);
+    // This constructor is not marked explicit so that we can implicitly convert ClassOrModuleRef to SymbolRefs as
+    // method arguments. This conversion is always safe and never throws.
     SymbolRef(ClassOrModuleRef kls);
     SymbolRef() : _id(0){};
 
