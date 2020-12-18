@@ -2,6 +2,7 @@
 #define RUBY_TYPER_PIPELINE_H
 #include "ProgressIndicator.h"
 #include "ast/ast.h"
+#include "common/UIntSet.h"
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
@@ -12,6 +13,11 @@ class PreemptionTaskManager;
 }
 
 namespace sorbet::realmain::pipeline {
+struct TypecheckResult {
+    ast::ParsedFilesOrCancelled trees;
+    std::unique_ptr<UIntSet> methodsCalled;
+};
+
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
                          ast::TreePtr cachedTree = nullptr);
 
@@ -38,13 +44,14 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, std::vector<ast::ParsedF
                                  WorkerPool &workers, bool skipConfigatron = false);
 
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
-ast::ParsedFilesOrCancelled
+TypecheckResult
 typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
           WorkerPool &workers, bool cancelable = false,
           std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
           bool presorted = false);
 
-ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts);
+ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
+                             std::unique_ptr<UIntSet> &methodsCalled);
 
 // Computes file hashes for the given files, and stores them in the files. If supplied, attempts to retrieve hashes from
 // the key-value store. Returns 'true' if it had to compute any file hashes.

@@ -54,7 +54,10 @@ class CFGCollectorAndTyper {
     const options::Options &opts;
 
 public:
-    CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
+    unique_ptr<UIntSet> methodsCalled;
+
+    CFGCollectorAndTyper(const options::Options &opts, unique_ptr<UIntSet> methodsCalled)
+        : opts(opts), methodsCalled(move(methodsCalled)){};
 
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
@@ -62,7 +65,7 @@ public:
             return tree;
         }
         auto &print = opts.print;
-        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m, move(methodsCalled));
 
         if (opts.stopAfterPhase == options::Phase::CFG) {
             return tree;
@@ -73,6 +76,7 @@ public:
                 extension->typecheck(ctx, *cfg, m);
             }
         }
+        this->methodsCalled = move(cfg->methodsCalled);
         if (print.CFG.enabled) {
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
@@ -694,7 +698,8 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
     return ret;
 }
 
-ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts) {
+ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
+                             unique_ptr<UIntSet> &methodsCalled) {
     ast::ParsedFile result{ast::MK::EmptyTree(), resolved.file};
     core::FileRef f = resolved.file;
 
@@ -727,13 +732,14 @@ ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const 
             opts.print.CFGRaw.fmt("  node [fontname = \"Courier\"];\n");
             opts.print.CFGRaw.fmt("  edge [fontname = \"Courier\"];\n");
         }
-        CFGCollectorAndTyper collector(opts);
+        CFGCollectorAndTyper collector(opts, move(methodsCalled));
         {
             result.tree = ast::TreeMap::apply(ctx, collector, move(resolved.tree));
             for (auto &extension : ctx.state.semanticExtensions) {
                 extension->finishTypecheckFile(ctx, f);
             }
         }
+        methodsCalled = move(collector.methodsCalled);
         if (opts.print.CFG.enabled) {
             opts.print.CFG.fmt("}}\n\n");
         }
@@ -946,15 +952,15 @@ ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<as
     return ast::ParsedFilesOrCancelled(move(what));
 }
 
-ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                      const options::Options &opts, WorkerPool &workers, bool cancelable,
-                                      optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager,
-                                      bool presorted) {
+TypecheckResult typecheck(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what, const options::Options &opts,
+                          WorkerPool &workers, bool cancelable,
+                          optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs->hadCriticalError() || gs->errorQueue->filesFlushedCount == 0);
 
     vector<ast::ParsedFile> typecheck_result;
+    unique_ptr<UIntSet> methodsCalled;
     const auto &epochManager = *gs->epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
     const u4 epoch = epochManager.getStatus().epoch;
@@ -968,10 +974,12 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
 
         shared_ptr<ConcurrentBoundedQueue<ast::ParsedFile>> fileq;
         shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> treesq;
+        shared_ptr<BlockingBoundedQueue<unique_ptr<UIntSet>>> methodsCalledQ;
 
         {
             fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
             treesq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(what.size());
+            methodsCalledQ = make_shared<BlockingBoundedQueue<unique_ptr<UIntSet>>>(max(1, workers.size()));
         }
 
         const core::GlobalState &igs = *gs;
@@ -989,50 +997,54 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob(
-                "typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, treesq, cancelable]() {
-                    vector<ast::ParsedFile> trees;
-                    ast::ParsedFile job;
-                    int processedByThread = 0;
+            // Lets us initialize UIntSet in lambda while avoiding race on igs in case thread has no work to do.
+            u4 numMethods = igs.methodsUsed();
+            workers.multiplexJob("typecheck", [&igs, &opts, epoch, &epochManager, &preemptionManager, fileq, treesq,
+                                               cancelable, numMethods, methodsCalledQ]() {
+                auto methodsCalled = make_unique<UIntSet>(numMethods);
+                vector<ast::ParsedFile> trees;
+                ast::ParsedFile job;
+                int processedByThread = 0;
 
-                    {
-                        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                            if (result.gotItem()) {
-                                unique_ptr<absl::ReaderMutexLock> lock;
-                                if (preemptionManager) {
-                                    // [IDE] While held, no preemption tasks can run. Auto-released after each turn of
-                                    // the loop.
-                                    lock = (*preemptionManager)->lockPreemption();
+                {
+                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                        if (result.gotItem()) {
+                            unique_ptr<absl::ReaderMutexLock> lock;
+                            if (preemptionManager) {
+                                // [IDE] While held, no preemption tasks can run. Auto-released after each turn of
+                                // the loop.
+                                lock = (*preemptionManager)->lockPreemption();
+                            }
+                            processedByThread++;
+                            // [IDE] Only do the work if typechecking hasn't been canceled.
+                            const bool isCanceled = cancelable && epochManager.wasTypecheckingCanceled();
+                            // [IDE] Also, don't do work if the file has changed under us since we began
+                            // typechecking!
+                            // TODO(jvilk): epoch is unlikely to overflow, but it is theoretically possible.
+                            const bool fileWasChanged = preemptionManager && job.file.data(igs).epoch > epoch;
+                            if (!isCanceled && !fileWasChanged) {
+                                core::FileRef file = job.file;
+                                try {
+                                    core::Context ctx(igs, core::Symbols::root(), file);
+                                    auto parsedFile = typecheckOne(ctx, move(job), opts, methodsCalled);
+                                    trees.emplace_back(move(parsedFile));
+                                } catch (SorbetException &) {
+                                    Exception::failInFuzzer();
+                                    igs.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                       file.data(igs).path());
                                 }
-                                processedByThread++;
-                                // [IDE] Only do the work if typechecking hasn't been canceled.
-                                const bool isCanceled = cancelable && epochManager.wasTypecheckingCanceled();
-                                // [IDE] Also, don't do work if the file has changed under us since we began
-                                // typechecking!
-                                // TODO(jvilk): epoch is unlikely to overflow, but it is theoretically possible.
-                                const bool fileWasChanged = preemptionManager && job.file.data(igs).epoch > epoch;
-                                if (!isCanceled && !fileWasChanged) {
-                                    core::FileRef file = job.file;
-                                    try {
-                                        core::Context ctx(igs, core::Symbols::root(), file);
-                                        auto parsedFile = typecheckOne(ctx, move(job), opts);
-                                        trees.emplace_back(move(parsedFile));
-                                    } catch (SorbetException &) {
-                                        Exception::failInFuzzer();
-                                        igs.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                           file.data(igs).path());
-                                    }
-                                    // Stream out errors
-                                    treesq->push(move(trees), processedByThread);
-                                    processedByThread = 0;
-                                }
+                                // Stream out errors
+                                treesq->push(move(trees), processedByThread);
+                                processedByThread = 0;
                             }
                         }
                     }
-                    if (processedByThread > 0) {
-                        treesq->push(move(trees), processedByThread);
-                    }
-                });
+                }
+                if (processedByThread > 0) {
+                    treesq->push(move(trees), processedByThread);
+                }
+                methodsCalledQ->push(move(methodsCalled), 1);
+            });
 
             vector<ast::ParsedFile> trees;
             {
@@ -1053,7 +1065,23 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
                     }
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
-                    return ast::ParsedFilesOrCancelled();
+                    return TypecheckResult{};
+                }
+            }
+
+            {
+                unique_ptr<UIntSet> threadResult;
+                for (auto result =
+                         methodsCalledQ->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs->tracer());
+                     !result.done(); result = methodsCalledQ->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(),
+                                                                             gs->tracer())) {
+                    if (result.gotItem()) {
+                        if (!methodsCalled) {
+                            methodsCalled = move(threadResult);
+                        } else {
+                            methodsCalled->add(*threadResult);
+                        }
+                    }
                 }
             }
 
@@ -1214,7 +1242,7 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
         // Error queue is re-used across runs, so reset the flush count to ignore files flushed during typecheck.
         gs->errorQueue->filesFlushedCount = 0;
 
-        return ast::ParsedFilesOrCancelled(move(typecheck_result));
+        return TypecheckResult{ast::ParsedFilesOrCancelled(move(typecheck_result)), move(methodsCalled)};
     }
 }
 

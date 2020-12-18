@@ -62,7 +62,8 @@ public:
         if (m.symbol.data(ctx)->isOverloaded()) {
             return tree;
         }
-        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m);
+        auto methodsCalled = make_unique<UIntSet>(ctx.state.methodsUsed());
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m.symbol), m, move(methodsCalled));
         auto symbol = cfg->symbol;
         cfg = infer::Inference::run(ctx.withOwner(symbol), move(cfg));
         if (cfg) {

@@ -63,7 +63,8 @@ LocalRef CFG::enterLocal(core::LocalVariable variable) {
     return ref;
 }
 
-CFG::CFG() {
+CFG::CFG(unique_ptr<UIntSet> methodsCalled) : methodsCalled(move(methodsCalled)) {
+    ENFORCE_NO_TIMER(this->methodsCalled != nullptr);
     freshBlock(0, 0); // entry;
     freshBlock(0, 0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
@@ -266,6 +267,10 @@ string CFG::showRaw(core::Context ctx) const {
     }
     fmt::format_to(buf, "}}");
     return to_string(buf);
+}
+
+void CFG::reportMethodCalled(core::SymbolRef method) const {
+    methodsCalled->add(method.methodIndex());
 }
 
 string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {

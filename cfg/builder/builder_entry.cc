@@ -7,11 +7,11 @@ using namespace std;
 
 namespace sorbet::cfg {
 
-unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
+unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md, unique_ptr<UIntSet> methodsCalled) {
     Timer timeit(ctx.state.tracer(), "cfg");
     ENFORCE(md.symbol.exists());
     ENFORCE(!md.symbol.data(ctx)->isOverloaded());
-    unique_ptr<CFG> res(new CFG); // private constructor
+    unique_ptr<CFG> res(new CFG(move(methodsCalled))); // private constructor
     res->file = ctx.file;
     res->symbol = md.symbol.data(ctx)->dealiasMethod(ctx);
     u4 temporaryCounter = 1;
