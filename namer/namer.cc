@@ -496,7 +496,7 @@ public:
                 if (original.args.empty()) {
                     ENFORCE(!methodVisiStack.empty());
                     methodVisiStack.pop_back();
-                    methodVisiStack.emplace_back(optional{Modifier{
+                    methodVisiStack.emplace_back(optional<Modifier>{Modifier{
                         Modifier::Kind::Method,
                         getOwner(),
                         original.loc,
