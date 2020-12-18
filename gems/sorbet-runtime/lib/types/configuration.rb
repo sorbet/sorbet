@@ -363,7 +363,16 @@ module T::Configuration
     @scalar_types || @default_scalar_types
   end
 
+  # Guard against overrides of `name` or `to_s`
+  MODULE_NAME = Module.instance_method(:name)
+  private_constant :MODULE_NAME
+
+  @default_module_name_mangler = ->(type) {MODULE_NAME.bind(type).call}
   @module_name_mangler = nil
+
+  def self.module_name_mangler
+    @module_name_mangler || @default_module_name_mangler
+  end
 
   # Set to override the default behavior for converting types
   #   to names in generated code. Used by the runtime implementation
@@ -373,10 +382,6 @@ module T::Configuration
   #   to a String (pass nil to reset to default behavior)
   def self.module_name_mangler=(handler)
     @module_name_mangler = handler
-  end
-
-  def self.module_name_mangler
-    @module_name_mangler
   end
 
   # Temporarily disable ruby warnings while executing the given block. This is
