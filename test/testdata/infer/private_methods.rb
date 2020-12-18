@@ -33,6 +33,8 @@ class Test
   def subsequent_visibility
     3
   end
+
+  attr_reader :subsequent_visibility_attr_reader
 end
 
 class TestChild < Test
@@ -63,6 +65,5 @@ Test.new.splat_call(*T.unsafe(nil)) # Currently no Error, since T.unsafe makes M
 Test.new.splat_and_block_call(*[1, 'a'], &nil) # Currently no Error, since the nil block makes Magic_callWithSplatAndBlock return prematurely.
 Test.new.block_call(&nil) # Currently no Error, since the nil block makes Magic_callWithBlock return prematurely.
 
-# TODO: The following method should contain an error. Sorbet currently does not support setting method
-# visibility using the private/protected keywords that affect the visibility of subsequent methods.
-Test.new.subsequent_visibility
+Test.new.subsequent_visibility # error: Non-private call to private method `subsequent_visibility`
+Test.new.subsequent_visibility_attr_reader # error: Non-private call to private method `subsequent_visibility_attr_reader`
