@@ -436,7 +436,7 @@ string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
         fmt::format_to(buf, "class ");
     }
     fmt::format_to(buf, "{}<{}> < ", name.toStringWithTabs(gs, tabs),
-                   core::SymbolRef(this->symbol).dataAllowingNone(gs)->name.toString(gs));
+                   this->symbol.dataAllowingNone(gs)->name.toString(gs));
     printArgs(gs, buf, this->ancestors, tabs);
 
     if (this->rhs.empty()) {
@@ -461,7 +461,7 @@ string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::format_to(buf, "kind = {}\n", kind == ClassDef::Kind::Module ? "module" : "class");
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "name = {}<{}>\n", name.showRaw(gs, tabs + 1),
-                   core::SymbolRef(this->symbol).dataAllowingNone(gs)->name.showRaw(gs));
+                   this->symbol.dataAllowingNone(gs)->name.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "ancestors = [");
     bool first = true;

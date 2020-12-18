@@ -220,14 +220,22 @@ ConstSymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
     }
 }
 
-SymbolData ClassOrModuleRef::data(GlobalState &gs) const {
-    ENFORCE_NO_TIMER(this->exists());
+SymbolData ClassOrModuleRef::dataAllowingNone(GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
     return SymbolData(gs.classAndModules[_id], gs);
 }
 
+SymbolData ClassOrModuleRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    return dataAllowingNone(gs);
+}
+
 ConstSymbolData ClassOrModuleRef::data(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
+    return dataAllowingNone(gs);
+}
+
+ConstSymbolData ClassOrModuleRef::dataAllowingNone(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
     return ConstSymbolData(gs.classAndModules[_id], gs);
 }

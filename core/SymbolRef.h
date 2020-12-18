@@ -64,7 +64,9 @@ public:
     }
 
     SymbolData data(GlobalState &gs) const;
+    SymbolData dataAllowingNone(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
 
     bool operator==(const ClassOrModuleRef &rhs) const;
 

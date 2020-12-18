@@ -31,7 +31,7 @@ namespace sorbet::core {
 ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to Symbols::root().members later.
-    SymbolRef symRef = SymbolRef(this, SymbolRef::Kind::ClassOrModule, classAndModules.size());
+    ClassOrModuleRef symRef = ClassOrModuleRef(*this, classAndModules.size());
     classAndModules.emplace_back();
     SymbolData data = symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
     data->name = nameId;
@@ -41,10 +41,10 @@ ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, boo
     data->setIsModule(isModule);
     data->setSuperClass(ClassOrModuleRef(*this, superclass));
 
-    if (symRef.classOrModuleIndex() > Symbols::root().id()) {
+    if (symRef.id() > Symbols::root().id()) {
         Symbols::root().data(*this)->members()[nameId] = symRef;
     }
-    return symRef.asClassOrModuleRef();
+    return symRef;
 }
 
 atomic<int> globalStateIdCounter(1);
@@ -941,7 +941,7 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
 ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
-    SymbolData ownerScope = SymbolRef(owner).dataAllowingNone(*this);
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto flags = Symbol::Flags::CLASS_OR_MODULE;
@@ -983,7 +983,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef 
 
     flags = flags | Symbol::Flags::TYPE_MEMBER;
 
-    SymbolData ownerScope = SymbolRef(owner).dataAllowingNone(*this);
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
@@ -1006,7 +1006,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef 
     DEBUG_ONLY(categoryCounterInc("symbols", "type_member"));
     wasModified_ = true;
 
-    auto &members = SymbolRef(owner).dataAllowingNone(*this)->typeMembers();
+    auto &members = owner.dataAllowingNone(*this)->typeMembers();
     if (!absl::c_linear_search(members, result)) {
         members.emplace_back(result);
     }
@@ -1125,7 +1125,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef
     ENFORCE(name.exists());
 
     auto flags = Symbol::Flags::FIELD;
-    SymbolData ownerScope = SymbolRef(owner).dataAllowingNone(*this);
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
@@ -1156,7 +1156,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef
 SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
-    SymbolData ownerScope = SymbolRef(owner).dataAllowingNone(*this);
+    SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto flags = Symbol::Flags::STATIC_FIELD;
