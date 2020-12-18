@@ -344,6 +344,9 @@ class SymbolFinder {
     // The tree doesn't have symbols yet, so `ctx.owner`, which is a SymbolRef, is meaningless.
     // Instead, we track the owner manually via FoundDefinitionRefs.
     vector<FoundDefinitionRef> ownerStack;
+    // `private` with no arguments toggles the visibility of all methods below in the class def.
+    // This tracks those as they appear.
+    vector<optional<Modifier>> methodVisiStack = {nullopt};
 
     void findClassModifiers(core::Context ctx, FoundDefinitionRef klass, ast::TreePtr &line) {
         auto *send = ast::cast_tree<ast::Send>(line);
@@ -431,6 +434,7 @@ public:
         }
 
         ownerStack.emplace_back(foundDefs->addClass(move(found)));
+        methodVisiStack.emplace_back(nullopt);
         return tree;
     }
 
@@ -439,6 +443,7 @@ public:
 
         FoundDefinitionRef klassName = ownerStack.back();
         ownerStack.pop_back();
+        methodVisiStack.pop_back();
 
         for (auto &exp : klass.rhs) {
             findClassModifiers(ctx, klassName, exp);
@@ -458,6 +463,11 @@ public:
         foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
         foundMethod.argsHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
         ownerStack.emplace_back(foundDefs->addMethod(move(foundMethod)));
+
+        if (methodVisiStack.back().has_value()) {
+            auto &current = methodVisiStack.back();
+            foundDefs->addModifier(Modifier{current->kind, current->owner, current->loc, current->name, method.name});
+        }
         return tree;
     }
 
@@ -470,12 +480,28 @@ public:
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (original.fun.rawId()) {
-            case core::Names::private_().rawId():
             case core::Names::privateClassMethod().rawId():
-            case core::Names::protected_().rawId():
-            case core::Names::public_().rawId():
                 for (const auto &arg : original.args) {
                     addMethodModifier(ctx, original.fun, arg);
+                }
+                break;
+            case core::Names::private_().rawId():
+            case core::Names::protected_().rawId():
+            case core::Names::public_().rawId():
+                if (original.args.empty()) {
+                    ENFORCE(!methodVisiStack.empty());
+                    methodVisiStack.pop_back();
+                    methodVisiStack.emplace_back(optional{Modifier{
+                        Modifier::Kind::Method,
+                        getOwner(),
+                        original.loc,
+                        original.fun,
+                        core::NameRef::noName(),
+                    }});
+                } else {
+                    for (const auto &arg : original.args) {
+                        addMethodModifier(ctx, original.fun, arg);
+                    }
                 }
                 break;
             case core::Names::privateConstant().rawId():
