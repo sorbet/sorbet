@@ -817,7 +817,7 @@ struct DispatchArgs {
 
 struct DispatchComponent {
     TypePtr receiver;
-    SymbolRef method;
+    MethodRef method;
     std::vector<std::unique_ptr<Error>> errors;
     TypePtr sendTp;
     TypePtr blockReturnType;
@@ -834,7 +834,7 @@ struct DispatchResult {
     Combinator secondaryKind;
 
     DispatchResult() = default;
-    DispatchResult(TypePtr returnType, TypePtr receiverType, core::SymbolRef method)
+    DispatchResult(TypePtr returnType, TypePtr receiverType, core::MethodRef method)
         : returnType(returnType),
           main(DispatchComponent{
               std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, ArgInfo{}, nullptr}){};

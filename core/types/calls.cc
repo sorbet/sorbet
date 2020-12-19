@@ -117,7 +117,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method.asMethodRef(), {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -131,7 +131,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method.asMethodRef(), {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -508,14 +508,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                   const vector<TypePtr> &targs) {
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
-                              Symbols::noSymbol());
+                              Symbols::noMethod());
     } else if (symbol == Symbols::void_()) {
         if (!args.suppressErrors) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
                 e.setHeader("Can not call method `{}` on void type", args.name.show(gs));
             }
         }
-        return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+        return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     }
 
     SymbolRef mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
@@ -526,7 +526,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // `BasicObject`, but our method-resolution order is wrong, and
             // putting it there will inadvertently shadow real definitions in
             // some cases, so we special-case it here as a last resort.
-            auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+            auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
             if (!args.args.empty() && !args.suppressErrors) {
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
@@ -537,9 +537,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
             return result;
         } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         }
-        auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+        auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
             // Short circuit here to avoid constructing an expensive error message.
             return result;
@@ -648,10 +648,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
-    SymbolRef method = mayBeOverloaded.data(gs)->isOverloaded()
-                           ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, args.fullType,
-                                           targs, args.block != nullptr)
-                           : mayBeOverloaded;
+    auto method = mayBeOverloaded.data(gs)->isOverloaded()
+                      ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, args.fullType, targs,
+                                      args.block != nullptr)
+                            .asMethodRef()
+                      : mayBeOverloaded.asMethodRef();
 
     DispatchResult result;
     auto &component = result.main;
@@ -1836,10 +1837,6 @@ private:
             return;
         }
 
-        if (dispatchComp.method.isClassOrModule()) {
-            return;
-        }
-
         const auto &methodArgs = dispatchComp.method.data(gs)->arguments();
         ENFORCE(!methodArgs.empty());
         const auto &bspec = methodArgs.back();
@@ -1898,7 +1895,7 @@ private:
         {
             auto it = &dispatched;
             while (it != nullptr) {
-                if (it->main.method.exists() && !it->main.method.isClassOrModule()) {
+                if (it->main.method.exists()) {
                     const auto &methodArgs = it->main.method.data(gs)->arguments();
                     ENFORCE(!methodArgs.empty());
                     const auto &bspec = methodArgs.back();
