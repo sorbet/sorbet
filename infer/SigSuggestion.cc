@@ -247,27 +247,26 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
     return argTypesForBBToPass[cfg->deadBlock()->id];
 }
 
-core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclosingClassSymbol, core::NameRef name) {
+core::MethodRef closestOverridenMethod(core::Context ctx, core::ClassOrModuleRef enclosingClassSymbol,
+                                       core::NameRef name) {
     auto enclosingClass = enclosingClassSymbol.data(ctx);
     ENFORCE(enclosingClass->isClassOrModuleLinearizationComputed(), "Should have been linearized by resolver");
 
     for (const auto &mixin : enclosingClass->mixins()) {
         auto mixinMethod = mixin.data(ctx)->findMember(ctx, name);
         if (mixinMethod.exists()) {
-            ENFORCE(mixinMethod.data(ctx)->isMethod());
-            return mixinMethod;
+            return mixinMethod.asMethodRef();
         }
     }
 
     auto superClass = enclosingClass->superClass();
     if (!superClass.exists()) {
-        core::SymbolRef none;
-        return none;
+        return core::Symbols::noMethod();
     }
 
     auto superMethod = superClass.data(ctx)->findMember(ctx, name);
     if (superMethod.exists()) {
-        return superMethod;
+        return superMethod.asMethodRef();
     } else {
         return closestOverridenMethod(ctx, superClass, name);
     }
