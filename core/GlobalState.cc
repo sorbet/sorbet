@@ -28,10 +28,10 @@ using namespace std;
 
 namespace sorbet::core {
 
-SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
+ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to Symbols::root().members later.
-    SymbolRef symRef = SymbolRef(this, SymbolRef::Kind::ClassOrModule, classAndModules.size());
+    ClassOrModuleRef symRef = ClassOrModuleRef(*this, classAndModules.size());
     classAndModules.emplace_back();
     SymbolData data = symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
     data->name = nameId;
@@ -39,10 +39,10 @@ SymbolRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isMod
     data->flags = 0;
     data->setClassOrModule();
     data->setIsModule(isModule);
-    data->setSuperClass(SymbolRef(this, SymbolRef::Kind::ClassOrModule, superclass));
+    data->setSuperClass(ClassOrModuleRef(*this, superclass));
 
-    if (symRef.classOrModuleIndex() > Symbols::root().classOrModuleIndex()) {
-        Symbols::root().dataAllowingNone(*this)->members()[nameId] = symRef;
+    if (symRef.id() > Symbols::root().id()) {
+        Symbols::root().data(*this)->members()[nameId] = symRef;
     }
     return symRef;
 }
@@ -81,17 +81,28 @@ void GlobalState::initEmpty() {
     SymbolRef id;
     id = synthesizeClass(core::Names::Constants::NoSymbol(), 0);
     ENFORCE(id == Symbols::noSymbol());
+    id = enterMethodSymbol(Loc::none(), Symbols::noSymbol(), Names::noMethod());
+    ENFORCE(id == Symbols::noMethod());
+    id = enterFieldSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noFieldOrStaticField());
+    ENFORCE(id == Symbols::noField());
+    id = enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::NoTypeArgument(), Variance::CoVariant);
+    ENFORCE(id == Symbols::noTypeArgument());
+    id =
+        enterTypeMember(Loc::none(), Symbols::noClassOrModule(), Names::Constants::NoTypeMember(), Variance::CoVariant);
+    ENFORCE(id == Symbols::noTypeMember());
+
     id = synthesizeClass(core::Names::Constants::Top(), 0);
     ENFORCE(id == Symbols::top());
     id = synthesizeClass(core::Names::Constants::Bottom(), 0);
     ENFORCE(id == Symbols::bottom());
     id = synthesizeClass(core::Names::Constants::Root(), 0);
     ENFORCE(id == Symbols::root());
+
     id = core::Symbols::root().data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::rootSingleton());
     id = synthesizeClass(core::Names::Constants::Todo(), 0);
     ENFORCE(id == Symbols::todo());
-    id = synthesizeClass(core::Names::Constants::Object(), Symbols::BasicObject().classOrModuleIndex());
+    id = synthesizeClass(core::Names::Constants::Object(), Symbols::BasicObject().id());
     ENFORCE(id == Symbols::Object());
     id = synthesizeClass(core::Names::Constants::Integer());
     ENFORCE(id == Symbols::Integer());
@@ -115,7 +126,7 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::untyped());
     id = synthesizeClass(core::Names::Constants::Opus(), 0, true);
     ENFORCE(id == Symbols::Opus());
-    id = synthesizeClass(core::Names::Constants::T(), Symbols::todo().classOrModuleIndex(), true);
+    id = synthesizeClass(core::Names::Constants::T(), Symbols::todo().id(), true);
     ENFORCE(id == Symbols::T());
     id = synthesizeClass(core::Names::Constants::Class(), 0);
     ENFORCE(id == Symbols::Class());
@@ -410,9 +421,9 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Class_new());
 
     // Root members
-    Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
-    Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
-    Symbols::root().dataAllowingNone(*this)->members()[core::Names::Constants::Bottom()] = Symbols::bottom();
+    Symbols::root().data(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
+    Symbols::root().data(*this)->members()[core::Names::Constants::Top()] = Symbols::top();
+    Symbols::root().data(*this)->members()[core::Names::Constants::Bottom()] = Symbols::bottom();
 
     // Sorbet::Private::Static::VERSION
     id = enterStaticFieldSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::VERSION());
@@ -728,8 +739,8 @@ void GlobalState::initEmpty() {
     }
 
     // This fills in all the way up to MAX_SYNTHETIC_CLASS_SYMBOLS
-    ENFORCE(classAndModules.size() < Symbols::Proc0().classOrModuleIndex());
-    while (classAndModules.size() < Symbols::Proc0().classOrModuleIndex()) {
+    ENFORCE(classAndModules.size() < Symbols::Proc0().id());
+    while (classAndModules.size() < Symbols::Proc0().id()) {
         string name = absl::StrCat("<RESERVED_", reservedCount, ">");
         synthesizeClass(enterNameConstant(name));
         reservedCount++;
@@ -737,15 +748,15 @@ void GlobalState::initEmpty() {
 
     for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
         string name = absl::StrCat("Proc", arity);
-        auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc().classOrModuleIndex());
-        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: {} got: {} expected: {}", arity,
-                id.classOrModuleIndex(), Symbols::Proc(arity).classOrModuleIndex());
+        auto id = synthesizeClass(enterNameConstant(name), Symbols::Proc().id());
+        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: {} got: {} expected: {}", arity, id.id(),
+                Symbols::Proc(arity).id());
         id.data(*this)->singletonClass(*this);
     }
 
-    ENFORCE(classAndModules.size() == Symbols::last_synthetic_class_sym().classOrModuleIndex() + 1,
+    ENFORCE(classAndModules.size() == Symbols::last_synthetic_class_sym().id() + 1,
             "Too many synthetic class symbols? have: {} expected: {}", classAndModules.size(),
-            Symbols::last_synthetic_class_sym().classOrModuleIndex() + 1);
+            Symbols::last_synthetic_class_sym().id() + 1);
 
     ENFORCE(methods.size() == Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS,
             "Too many synthetic method symbols? have: {} expected: {}", methods.size(),
@@ -927,9 +938,8 @@ SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
     }
 }
 
-SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE_NO_TIMER(!owner.exists() || // used when entering entirely syntehtic classes
-                     owner.isClassOrModule());
+ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
+    // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
     SymbolData ownerScope = owner.dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
@@ -939,14 +949,14 @@ SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) 
     if (store.exists()) {
         ENFORCE_NO_TIMER((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asClassOrModuleRef();
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
-    auto ret = SymbolRef(this, SymbolRef::Kind::ClassOrModule, classAndModules.size());
+    auto ret = ClassOrModuleRef(*this, classAndModules.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `store`
     classAndModules.emplace_back();
-    SymbolData data = ret.dataAllowingNone(*this);
+    SymbolData data = ret.data(*this);
     data->name = name;
     data->flags = flags;
     data->owner = owner;
@@ -957,9 +967,9 @@ SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) 
     return ret;
 }
 
-SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
+SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
     u4 flags;
-    ENFORCE(owner.isClassOrModule());
+    ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember());
     ENFORCE(name.exists());
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;
@@ -996,7 +1006,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
     DEBUG_ONLY(categoryCounterInc("symbols", "type_member"));
     wasModified_ = true;
 
-    auto &members = owner.data(*this)->typeMembers();
+    auto &members = owner.dataAllowingNone(*this)->typeMembers();
     if (!absl::c_linear_search(members, result)) {
         members.emplace_back(result);
     }
@@ -1004,7 +1014,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
 }
 
 SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
-    ENFORCE(owner.exists());
+    ENFORCE(owner.exists() || name == Names::Constants::NoTypeArgument());
     ENFORCE(name.exists());
     u4 flags;
     if (variance == Variance::Invariant) {
@@ -1042,7 +1052,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
     wasModified_ = true;
 
-    owner.data(*this)->typeArguments().emplace_back(result);
+    owner.dataAllowingNone(*this)->typeArguments().emplace_back(result);
     return result;
 }
 
@@ -1111,8 +1121,7 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, co
     return res;
 }
 
-SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.isClassOrModule(), "entering field symbol into not-a-class");
+SymbolRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
     auto flags = Symbol::Flags::FIELD;
@@ -1144,8 +1153,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) 
     return result;
 }
 
-SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.isClassOrModule());
+SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
     SymbolData ownerScope = owner.dataAllowingNone(*this);
@@ -1671,17 +1679,37 @@ void GlobalState::sanityCheck() const {
             sym.sanityCheck(*this);
         }
     }
+
+    i = -1;
     for (auto &sym : methods) {
-        sym.sanityCheck(*this);
+        i++;
+        if (i != 0) {
+            sym.sanityCheck(*this);
+        }
     }
+
+    i = -1;
     for (auto &sym : fields) {
-        sym.sanityCheck(*this);
+        i++;
+        if (i != 0) {
+            sym.sanityCheck(*this);
+        }
     }
+
+    i = -1;
     for (auto &sym : typeArguments) {
-        sym.sanityCheck(*this);
+        i++;
+        if (i != 0) {
+            sym.sanityCheck(*this);
+        }
     }
+
+    i = -1;
     for (auto &sym : typeMembers) {
-        sym.sanityCheck(*this);
+        i++;
+        if (i != 0) {
+            sym.sanityCheck(*this);
+        }
     }
     for (auto &ent : namesByHash) {
         if (ent.second == 0) {
@@ -2029,7 +2057,7 @@ const vector<shared_ptr<File>> &GlobalState::getFiles() const {
     return files;
 }
 
-SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
+SymbolRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
     auto prevCount = methodsUsed();
     auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this), core::Names::staticInit());
     if (prevCount != methodsUsed()) {
@@ -2040,11 +2068,10 @@ SymbolRef GlobalState::staticInitForClass(SymbolRef klass, Loc loc) {
     return sym;
 }
 
-SymbolRef GlobalState::lookupStaticInitForClass(SymbolRef klass) const {
+SymbolRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
     auto classData = klass.data(*this);
-    ENFORCE(classData->isClassOrModule());
     auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
-    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
+    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.data(*this)->toString(*this));
     return ref;
 }
 

@@ -118,7 +118,7 @@ private:
     };
     struct AncestorResolutionItem {
         ast::ConstantLit *ancestor;
-        core::SymbolRef klass;
+        core::ClassOrModuleRef klass;
         core::FileRef file;
 
         bool isSuperclass; // true if superclass, false for mixin
@@ -519,17 +519,17 @@ private:
                 ancestorPresent = false;
             } else if (!job.klass.data(ctx)->superClass().exists() ||
                        job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
-                       job.klass.data(ctx)->superClass() == resolved) {
-                job.klass.data(ctx)->setSuperClass(resolved);
+                       job.klass.data(ctx)->superClass() == resolved.asClassOrModuleRef()) {
+                job.klass.data(ctx)->setSuperClass(resolved.asClassOrModuleRef());
             } else {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
                     e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.data(ctx)->show(ctx),
-                                job.klass.data(ctx)->superClass().show(ctx), resolved.show(ctx));
+                                job.klass.data(ctx)->superClass().data(ctx)->show(ctx), resolved.show(ctx));
                 }
             }
         } else {
             ENFORCE(resolved.isClassOrModule());
-            if (!job.klass.data(ctx)->addMixin(ctx, resolved)) {
+            if (!job.klass.data(ctx)->addMixin(ctx, resolved.asClassOrModuleRef())) {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
                                 resolved.data(ctx)->show(ctx));
@@ -607,7 +607,7 @@ private:
         ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
     }
 
-    void transformAncestor(core::Context ctx, core::SymbolRef klass, ast::TreePtr &ancestor, bool isInclude,
+    void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::TreePtr &ancestor, bool isInclude,
                            bool isSuperclass = false) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
             auto scopeTmp = nesting_;
@@ -683,7 +683,7 @@ public:
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
-        core::SymbolRef klass = original.symbol;
+        auto klass = original.symbol;
 
         bool isInclude = true;
         for (auto &ancst : original.ancestors) {
@@ -1204,7 +1204,7 @@ class ResolveTypeMembersAndFieldsWalk {
     static void resolveField(core::MutableContext ctx, ResolveFieldItem &job) {
         auto cast = job.cast;
 
-        core::SymbolRef scope;
+        core::ClassOrModuleRef scope;
         auto uid = job.ident;
         if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             if (!ctx.owner.data(ctx)->isClassOrModule()) {

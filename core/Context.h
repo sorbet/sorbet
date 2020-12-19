@@ -58,11 +58,11 @@ public:
         : state(state), owner(owner), file(file) {}
     MutableContext(const MutableContext &other) noexcept : state(other.state), owner(other.owner), file(other.file) {}
 
-    // Returns a SymbolRef corresponding to the class `self.class` for code
+    // Returns a ClassOrModuleRef corresponding to the class `self.class` for code
     // executed in this MutableContext, or, if `self` is a class,
     // `self.singleton_class` (We model classes as being normal instances of
     // their singleton classes for most purposes)
-    SymbolRef selfClass();
+    ClassOrModuleRef selfClass();
 
     bool permitOverloadDefinitions(FileRef sigLoc) const;
 

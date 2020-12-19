@@ -130,19 +130,19 @@ public:
     // have access to a mutable GlobalState and thus shouldn't be able to call it).
     TypePtr unsafeComputeExternalType(GlobalState &gs);
 
-    inline InlinedVector<SymbolRef, 4> &mixins() {
+    inline InlinedVector<ClassOrModuleRef, 4> &mixins() {
         ENFORCE_NO_TIMER(isClassOrModule());
         return mixins_;
     }
 
-    inline const InlinedVector<SymbolRef, 4> &mixins() const {
+    inline const InlinedVector<ClassOrModuleRef, 4> &mixins() const {
         ENFORCE_NO_TIMER(isClassOrModule());
         return mixins_;
     }
 
     // Attempts to add the given mixin to the symbol. If the mixin is invalid because it is not a module, it returns
     // `false` (but still adds the mixin for processing during linearization) and the caller should report an error.
-    [[nodiscard]] bool addMixin(const GlobalState &gs, SymbolRef sym);
+    [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym);
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
         ENFORCE(isClassOrModule());
@@ -169,7 +169,7 @@ public:
         return typeParams;
     }
 
-    bool derivesFrom(const GlobalState &gs, SymbolRef sym) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const;
 
     // TODO(dmitry) perf: most calls to this method could be eliminated as part of perf work.
     SymbolRef ref(const GlobalState &gs) const;
@@ -568,17 +568,17 @@ public:
 
     // Returns the singleton class for this class, lazily instantiating it if it
     // doesn't exist.
-    SymbolRef singletonClass(GlobalState &gs);
+    ClassOrModuleRef singletonClass(GlobalState &gs);
 
     // Returns the singleton class or noSymbol
-    SymbolRef lookupSingletonClass(const GlobalState &gs) const;
+    ClassOrModuleRef lookupSingletonClass(const GlobalState &gs) const;
 
     // Returns attached class or noSymbol if it does not exist
-    SymbolRef attachedClass(const GlobalState &gs) const;
+    ClassOrModuleRef attachedClass(const GlobalState &gs) const;
 
-    SymbolRef topAttachedClass(const GlobalState &gs) const;
+    ClassOrModuleRef topAttachedClass(const GlobalState &gs) const;
 
-    void recordSealedSubclass(MutableContext ctx, SymbolRef subclass);
+    void recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass);
     const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
@@ -596,14 +596,14 @@ public:
     bool ignoreInHashing(const GlobalState &gs) const;
 
     SymbolRef owner;
-    SymbolRef superClassOrRebind; // method arugments store rebind here
+    SymbolRef superClassOrRebind; // method arguments store rebind here
 
-    inline SymbolRef superClass() const {
+    inline ClassOrModuleRef superClass() const {
         ENFORCE_NO_TIMER(isClassOrModule());
-        return superClassOrRebind;
+        return superClassOrRebind.asClassOrModuleRef();
     }
 
-    inline void setSuperClass(SymbolRef claz) {
+    inline void setSuperClass(ClassOrModuleRef claz) {
         ENFORCE(isClassOrModule());
         superClassOrRebind = claz;
     }
@@ -655,7 +655,7 @@ public:
     void sanityCheck(const GlobalState &gs) const;
     SymbolRef enclosingMethod(const GlobalState &gs) const;
 
-    SymbolRef enclosingClass(const GlobalState &gs) const;
+    ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
 
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
     // why raw pointers are safe.
@@ -684,7 +684,7 @@ private:
      *   implicit superclass (`class Foo` with no `< Parent`); Once we hit
      *   Resolver::finalize(), these will be rewritten to `Object()`.
      */
-    InlinedVector<SymbolRef, 4> mixins_;
+    InlinedVector<ClassOrModuleRef, 4> mixins_;
 
     /** For Class or module - ordered type members of the class,
      * for method - ordered type generic type arguments of the class

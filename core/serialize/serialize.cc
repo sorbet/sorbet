@@ -342,7 +342,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         case TypePtr::Tag::BlamedUntyped:
         case TypePtr::Tag::ClassType: {
             auto c = cast_type_nonnull<ClassType>(what);
-            p.putU4(c.symbol.rawId());
+            p.putU4(c.symbol.id());
             break;
         }
         case TypePtr::Tag::OrType: {
@@ -410,7 +410,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         }
         case TypePtr::Tag::AppliedType: {
             auto &at = cast_type_nonnull<AppliedType>(what);
-            p.putU4(at.klass.rawId());
+            p.putU4(at.klass.id());
             p.putU4(at.targs.size());
             for (auto &t : at.targs) {
                 pickle(p, t);
@@ -444,7 +444,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
         case TypePtr::Tag::UnresolvedClassType:
         case TypePtr::Tag::UnresolvedAppliedType:
         case TypePtr::Tag::ClassType:
-            return make_type<ClassType>(SymbolRef::fromRaw(p.getU4()));
+            return make_type<ClassType>(ClassOrModuleRef::fromRaw(p.getU4()));
         case TypePtr::Tag::OrType:
             return OrType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
         case TypePtr::Tag::LiteralType: {
@@ -496,7 +496,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             return make_type<LambdaParam>(SymbolRef::fromRaw(p.getU4()), lower, upper);
         }
         case TypePtr::Tag::AppliedType: {
-            auto klass = SymbolRef::fromRaw(p.getU4());
+            auto klass = ClassOrModuleRef::fromRaw(p.getU4());
             int sz = p.getU4();
             vector<TypePtr> targs(sz);
             for (auto &t : targs) {
@@ -545,8 +545,8 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     p.putU4(what.flags);
     if (!what.isMethod()) {
         p.putU4(what.mixins_.size());
-        for (SymbolRef s : what.mixins_) {
-            p.putU4(s.rawId());
+        for (ClassOrModuleRef s : what.mixins_) {
+            p.putU4(s.id());
         }
     }
     p.putU4(what.typeParams.size());
@@ -589,7 +589,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
         int mixinsSize = p.getU4();
         result.mixins_.reserve(mixinsSize);
         for (int i = 0; i < mixinsSize; i++) {
-            result.mixins_.emplace_back(SymbolRef::fromRaw(p.getU4()));
+            result.mixins_.emplace_back(ClassOrModuleRef::fromRaw(p.getU4()));
         }
     }
     int typeParamsSize = p.getU4();
@@ -610,7 +610,8 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     for (int i = 0; i < membersSize; i++) {
         auto name = NameRef::fromRaw(*gs, p.getU4());
         auto sym = SymbolRef::fromRaw(p.getU4());
-        if (result.name != core::Names::Constants::Root()) {
+        if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
+            result.name != core::Names::noMethod()) {
             ENFORCE(name.exists());
             ENFORCE(sym.exists());
         }
@@ -1072,7 +1073,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
             pickle(p, c.loc);
             pickle(p, c.declLoc);
             p.putU1(static_cast<u2>(c.kind));
-            p.putU4(c.symbol.rawId());
+            p.putU4(c.symbol.id());
             p.putU4(c.ancestors.size());
             p.putU4(c.singletonAncestors.size());
             p.putU4(c.rhs.size());
@@ -1337,7 +1338,7 @@ ast::TreePtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalS
             auto loc = unpickleLocOffsets(p);
             auto declLoc = unpickleLocOffsets(p);
             auto kind = p.getU1();
-            auto symbol = SymbolRef::fromRaw(p.getU4());
+            auto symbol = ClassOrModuleRef::fromRaw(p.getU4());
             auto ancestorsSize = p.getU4();
             auto singletonAncestorsSize = p.getU4();
             auto rhsSize = p.getU4();

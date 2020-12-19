@@ -54,7 +54,7 @@ LocalRef global2Local(CFGContext cctx, core::SymbolRef what) {
 }
 
 LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) {
-    core::SymbolRef klass;
+    core::ClassOrModuleRef klass;
 
     switch (id.kind) {
         case ast::UnresolvedIdent::Kind::Class:
@@ -65,7 +65,7 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
             break;
         case ast::UnresolvedIdent::Kind::Instance:
             ENFORCE(cctx.ctx.owner.data(cctx.ctx)->isMethod());
-            klass = cctx.ctx.owner.data(cctx.ctx)->owner;
+            klass = cctx.ctx.owner.data(cctx.ctx)->owner.asClassOrModuleRef();
             break;
         case ast::UnresolvedIdent::Kind::Global:
             klass = core::Symbols::root();
@@ -74,7 +74,6 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
             // These should have been removed in the namer
             Exception::notImplemented();
     }
-    ENFORCE(klass.isClassOrModule());
 
     auto sym = klass.data(cctx.ctx)->findMemberTransitive(cctx.ctx, id.name);
     if (!sym.exists()) {

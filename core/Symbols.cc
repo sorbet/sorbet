@@ -29,6 +29,14 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
     return !(rhs == *this);
 }
 
+bool ClassOrModuleRef::operator==(const ClassOrModuleRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool ClassOrModuleRef::operator!=(const ClassOrModuleRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
 vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
@@ -50,7 +58,7 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
     if (typeMembers().empty()) {
         return externalType();
     } else {
-        return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
+        return make_type<AppliedType>(ref(gs).asClassOrModuleRef(), selfTypeArgs(gs));
     }
 }
 
@@ -67,7 +75,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
 
     // note that sometimes resultType is set externally to not be a result of this computation
     // this happens e.g. in case this is a stub class
-    auto ref = this->ref(gs);
+    auto ref = this->ref(gs).asClassOrModuleRef();
     if (typeMembers().empty()) {
         resultType = make_type<ClassType>(ref);
     } else {
@@ -110,7 +118,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
     return resultType;
 }
 
-bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
+bool Symbol::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
     if (isClassOrModuleLinearizationComputed()) {
         for (SymbolRef a : mixins()) {
             if (a == sym) {
@@ -125,7 +133,7 @@ bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
         }
     }
     if (this->superClass().exists()) {
-        return sym == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
+        return SymbolRef(sym) == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
     }
     return false;
 }
@@ -212,6 +220,26 @@ ConstSymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
     }
 }
 
+SymbolData ClassOrModuleRef::dataAllowingNone(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
+    return SymbolData(gs.classAndModules[_id], gs);
+}
+
+SymbolData ClassOrModuleRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    return dataAllowingNone(gs);
+}
+
+ConstSymbolData ClassOrModuleRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    return dataAllowingNone(gs);
+}
+
+ConstSymbolData ClassOrModuleRef::dataAllowingNone(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
+    return ConstSymbolData(gs.classAndModules[_id], gs);
+}
+
 bool SymbolRef::isSynthetic() const {
     switch (this->kind()) {
         case Kind::ClassOrModule:
@@ -243,6 +271,10 @@ SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
     ENFORCE_NO_TIMER(id <= ID_MASK);
 }
 
+SymbolRef::SymbolRef(ClassOrModuleRef kls) : SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, kls.id()) {}
+
+ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, u4 id) : _id(id) {}
+
 string SymbolRef::showRaw(const GlobalState &gs) const {
     return dataAllowingNone(gs)->showRaw(gs);
 }
@@ -256,7 +288,6 @@ string SymbolRef::show(const GlobalState &gs) const {
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner;
     auto klass = owner.data(ctx)->enclosingClass(ctx);
-    ENFORCE(klass.isClassOrModule());
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(ctx, owner);
@@ -278,7 +309,7 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
     return Types::arrayOf(ctx, instantiated);
 }
 
-bool Symbol::addMixin(const GlobalState &gs, SymbolRef sym) {
+bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym) {
     ENFORCE(isClassOrModule());
     // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
     // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
@@ -957,7 +988,7 @@ bool Symbol::isSingletonClass(const GlobalState &gs) const {
     return isSingleton;
 }
 
-SymbolRef Symbol::singletonClass(GlobalState &gs) {
+ClassOrModuleRef Symbol::singletonClass(GlobalState &gs) {
     auto singleton = lookupSingletonClass(gs);
     if (singleton.exists()) {
         return singleton;
@@ -968,7 +999,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     auto selfLoc = this->loc();
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
-    singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
+    singleton = gs.enterClassSymbol(this->loc(), this->owner.asClassOrModuleRef(), singletonName);
     SymbolData singletonInfo = singleton.data(gs);
 
     prodCounterInc("types.input.singleton_classes.total");
@@ -988,7 +1019,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     return singleton;
 }
 
-SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
+ClassOrModuleRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModule());
     ENFORCE(this->name.isClassName(gs));
 
@@ -997,21 +1028,21 @@ SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
         return Symbols::untyped();
     }
 
-    return findMember(gs, Names::singleton());
+    return findMember(gs, Names::singleton()).asClassOrModuleRef();
 }
 
-SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
+ClassOrModuleRef Symbol::attachedClass(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModule());
     if (this->ref(gs) == Symbols::untyped()) {
         return Symbols::untyped();
     }
 
     SymbolRef singleton = findMember(gs, Names::attached());
-    return singleton;
+    return singleton.asClassOrModuleRef();
 }
 
-SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
-    auto classSymbol = this->ref(gs);
+ClassOrModuleRef Symbol::topAttachedClass(const GlobalState &gs) const {
+    ClassOrModuleRef classSymbol = this->ref(gs).asClassOrModuleRef();
 
     while (true) {
         auto attachedClass = classSymbol.data(gs)->attachedClass(gs);
@@ -1024,10 +1055,9 @@ SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
     return classSymbol;
 }
 
-void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
+void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass) {
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(ctx));
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
-    ENFORCE(subclass.isClassOrModule(), "Sealed subclass {} must be class", subclass.show(ctx));
 
     // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
     auto selfRef = this->ref(ctx);
@@ -1218,17 +1248,19 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         SymbolRef current2;
         switch (current.kind()) {
             case SymbolRef::Kind::ClassOrModule:
-                current2 = const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner, this->name);
+                current2 = const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner.asClassOrModuleRef(),
+                                                                          this->name);
                 break;
             case SymbolRef::Kind::Method:
                 current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(this->loc(), this->owner, this->name);
                 break;
             case SymbolRef::Kind::FieldOrStaticField:
                 if (isField()) {
-                    current2 = const_cast<GlobalState &>(gs).enterFieldSymbol(this->loc(), this->owner, this->name);
+                    current2 = const_cast<GlobalState &>(gs).enterFieldSymbol(
+                        this->loc(), this->owner.asClassOrModuleRef(), this->name);
                 } else {
-                    current2 =
-                        const_cast<GlobalState &>(gs).enterStaticFieldSymbol(this->loc(), this->owner, this->name);
+                    current2 = const_cast<GlobalState &>(gs).enterStaticFieldSymbol(
+                        this->loc(), this->owner.asClassOrModuleRef(), this->name);
                 }
                 break;
             case SymbolRef::Kind::TypeArgument:
@@ -1236,8 +1268,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
                                                                            this->variance());
                 break;
             case SymbolRef::Kind::TypeMember:
-                current2 = const_cast<GlobalState &>(gs).enterTypeMember(this->loc(), this->owner, this->name,
-                                                                         this->variance());
+                current2 = const_cast<GlobalState &>(gs).enterTypeMember(this->loc(), this->owner.asClassOrModuleRef(),
+                                                                         this->name, this->variance());
                 break;
         }
 
@@ -1271,13 +1303,13 @@ SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
     return owner;
 }
 
-SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
+ClassOrModuleRef Symbol::enclosingClass(const GlobalState &gs) const {
     SymbolRef owner = ref(gs);
     while (!owner.isClassOrModule()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
         owner = owner.data(gs)->owner;
     }
-    return owner;
+    return owner.asClassOrModuleRef();
 }
 
 u4 Symbol::hash(const GlobalState &gs) const {

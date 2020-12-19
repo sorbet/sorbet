@@ -51,7 +51,7 @@ public:
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
     static FoundDefinitionRef root() {
-        return FoundDefinitionRef(DefinitionKind::Symbol, core::Symbols::root().rawId());
+        return FoundDefinitionRef(DefinitionKind::Symbol, core::SymbolRef(core::Symbols::root()).rawId());
     }
 
     DefinitionKind kind() const {
@@ -773,8 +773,8 @@ class SymbolDefiner {
         emitRedefinedConstantError(ctx, errorLoc, symbol.data(ctx)->show(ctx), renamedSymbol.data(ctx)->loc());
     }
 
-    core::SymbolRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
-                                  core::LocOffsets loc) {
+    core::ClassOrModuleRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
+                                         core::LocOffsets loc) {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
         if (scope.isClassOrModule()) {
             // Check if original symbol was mangled away. If so, complain.
@@ -788,7 +788,7 @@ class SymbolDefiner {
                     e.addErrorLine(renamedSymbol.data(ctx)->loc(), "`{}` defined here", scopeName);
                 }
             }
-            return scope;
+            return scope.asClassOrModuleRef();
         }
 
         // Check if class was already mangled.
@@ -807,9 +807,10 @@ class SymbolDefiner {
         // Mangle this one out of the way, and re-enter a symbol with this name as a class.
         auto scopeName = scope.data(ctx)->name;
         ctx.state.mangleRenameSymbol(scope, scopeName);
-        scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope.data(ctx)->owner, scopeName);
-        scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
-        return scope;
+        auto scopeKlass = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc),
+                                                     scope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
+        scopeKlass.data(ctx)->singletonClass(ctx); // force singleton class into existance
+        return scopeKlass;
     }
 
     // Gets the symbol with the given name, or defines it as a class if it does not exist.
@@ -1107,7 +1108,7 @@ class SymbolDefiner {
         }
     }
 
-    core::SymbolRef getClassSymbol(core::MutableContext ctx, const FoundClass &klass) {
+    core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const FoundClass &klass) {
         core::SymbolRef symbol = squashNames(ctx, klass.klass, ctx.owner.data(ctx)->enclosingClass(ctx));
         ENFORCE(symbol.exists());
 
@@ -1125,14 +1126,14 @@ class SymbolDefiner {
 
             auto origName = symbol.data(ctx)->name;
             ctx.state.mangleRenameSymbol(symbol, symbol.data(ctx)->name);
-            symbol = ctx.state.enterClassSymbol(declLoc, symbol.data(ctx)->owner, origName);
-            symbol.data(ctx)->setIsModule(isModule);
+            klassSymbol = ctx.state.enterClassSymbol(declLoc, symbol.data(ctx)->owner.asClassOrModuleRef(), origName);
+            klassSymbol.data(ctx)->setIsModule(isModule);
 
             auto oldSymCount = ctx.state.classAndModulesUsed();
-            auto newSingleton = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-            ENFORCE(newSingleton.classOrModuleIndex() >= oldSymCount,
+            auto newSingleton = klassSymbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+            ENFORCE(newSingleton.id() >= oldSymCount,
                     "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
-            return symbol;
+            return klassSymbol;
         } else if (symbol.data(ctx)->isClassModuleSet() && isModule != symbol.data(ctx)->isClassOrModuleModule()) {
             if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.data(ctx)->show(ctx),
@@ -1151,7 +1152,7 @@ class SymbolDefiner {
                 emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol, renamed);
             }
         }
-        return symbol;
+        return symbol.asClassOrModuleRef();
     }
 
     core::SymbolRef insertClass(core::MutableContext ctx, const FoundClass &klass) {
@@ -1236,8 +1237,8 @@ class SymbolDefiner {
             }
         }
 
-        auto scope = squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner));
-        scope = ensureIsClass(ctx, scope, staticField.name, staticField.asgnLoc);
+        auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner)),
+                                   staticField.name, staticField.asgnLoc);
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
@@ -1277,7 +1278,7 @@ class SymbolDefiner {
         core::Variance variance = core::Variance::Invariant;
         const bool isTypeTemplate = typeMember.isTypeTemplete;
 
-        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
+        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner.asClassOrModuleRef();
 
         core::NameRef foundVariance = typeMember.varianceName;
         if (foundVariance.exists()) {
@@ -1554,18 +1555,19 @@ public:
             klass.symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
             ENFORCE(klass.symbol.exists());
         } else {
-            if (klass.symbol == core::Symbols::todo()) {
-                klass.symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass.name);
+            core::SymbolRef symbol = klass.symbol;
+            if (symbol == core::Symbols::todo()) {
+                symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass.name);
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
-                ENFORCE(klass.symbol == core::Symbols::root());
+                ENFORCE(symbol == core::Symbols::root());
             }
-            if (!klass.symbol.isClassOrModule()) {
-                auto klassSymbol =
-                    ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner, klass.symbol.data(ctx)->name);
-                ENFORCE(klassSymbol.exists());
-                klass.symbol = klassSymbol;
+            if (!symbol.isClassOrModule()) {
+                klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner, klass.symbol.data(ctx)->name);
+                ENFORCE(klass.symbol.exists());
+            } else {
+                klass.symbol = symbol.asClassOrModuleRef();
             }
         }
         return tree;

@@ -105,7 +105,7 @@ struct Path {
         }
     }
 
-    void enter(core::GlobalState &gs, core::SymbolRef parent, core::SymbolRef owner) {
+    void enter(core::GlobalState &gs, core::SymbolRef parent, core::ClassOrModuleRef owner) {
         if (children.empty()) {
             parent.data(gs)->resultType = myType;
         } else {

@@ -16,6 +16,7 @@ namespace sorbet::core {
 class NameRef;
 class Symbol;
 class SymbolRef;
+class ClassOrModuleRef;
 class GlobalSubstitution;
 class ErrorQueue;
 struct GlobalStateHash;
@@ -34,6 +35,7 @@ class GlobalState final {
     friend NameRef;
     friend Symbol;
     friend SymbolRef;
+    friend ClassOrModuleRef;
     friend File;
     friend FileRef;
     friend GlobalSubstitution;
@@ -72,14 +74,14 @@ public:
 
     ~GlobalState() = default;
 
-    SymbolRef enterClassSymbol(Loc loc, SymbolRef owner, NameRef name);
-    SymbolRef enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance);
+    ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    SymbolRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
     SymbolRef enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance);
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterNewMethodOverload(Loc loc, SymbolRef original, core::NameRef originalName, u4 num,
                                      const std::vector<bool> &argsToKeep);
-    SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
-    SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
+    SymbolRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    SymbolRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
 
     SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
@@ -88,8 +90,8 @@ public:
     SymbolRef lookupTypeMemberSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER);
     }
-    SymbolRef lookupClassSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE);
+    ClassOrModuleRef lookupClassSymbol(SymbolRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE).asClassOrModuleRef();
     }
     SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
@@ -104,10 +106,10 @@ public:
     SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
 
     SymbolRef staticInitForFile(Loc loc);
-    SymbolRef staticInitForClass(SymbolRef klass, Loc loc);
+    SymbolRef staticInitForClass(ClassOrModuleRef klass, Loc loc);
 
     SymbolRef lookupStaticInitForFile(Loc loc) const;
-    SymbolRef lookupStaticInitForClass(SymbolRef klass) const;
+    SymbolRef lookupStaticInitForClass(ClassOrModuleRef klass) const;
 
     NameRef enterNameUTF8(std::string_view nm);
     NameRef lookupNameUTF8(std::string_view nm) const;
@@ -287,13 +289,10 @@ private:
 
     void expandNames(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize);
 
-    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().classOrModuleIndex(),
-                              bool isModule = false);
+    ClassOrModuleRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().id(), bool isModule = false);
 
     SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
     SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;
-
-    SymbolRef getTopLevelClassSymbol(NameRef name);
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };

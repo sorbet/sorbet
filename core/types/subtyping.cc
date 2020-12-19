@@ -498,8 +498,8 @@ TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto c2 = cast_type_nonnull<ClassType>(t2);
     categoryCounterInc("lub", "<class>");
 
-    SymbolRef sym1 = c1.symbol;
-    SymbolRef sym2 = c2.symbol;
+    auto sym1 = c1.symbol;
+    auto sym2 = c2.symbol;
     if (sym1 == sym2 || sym2.data(gs)->derivesFrom(gs, sym1)) {
         categoryCounterInc("lub.<class>.collapsed", "yes");
         return t1;
@@ -541,8 +541,8 @@ TypePtr glbGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
     auto c2 = cast_type_nonnull<ClassType>(t2);
     categoryCounterInc("glb", "<class>");
 
-    SymbolRef sym1 = c1.symbol;
-    SymbolRef sym2 = c2.symbol;
+    auto sym1 = c1.symbol;
+    auto sym2 = c2.symbol;
     if (sym1 == sym2 || sym1.data(gs)->derivesFrom(gs, sym2)) {
         categoryCounterInc("glb.<class>.collapsed", "yes");
         return t1;
@@ -939,7 +939,7 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
 bool classSymbolIsAsGoodAs(const GlobalState &gs, SymbolRef c1, SymbolRef c2) {
     ENFORCE(c1.isClassOrModule());
     ENFORCE(c2.isClassOrModule());
-    return c1 == c2 || c1.data(gs)->derivesFrom(gs, c2);
+    return c1 == c2 || c1.data(gs)->derivesFrom(gs, c2.asClassOrModuleRef());
 }
 
 void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypePtr &ty, const TypePtr &blame) {
@@ -1317,22 +1317,22 @@ bool Types::equivNoUntyped(const GlobalState &gs, const TypePtr &t1, const TypeP
     return isAsSpecificAs(gs, t1, t2) && isAsSpecificAs(gs, t2, t1);
 }
 
-bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool ClassType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     if (symbol == Symbols::untyped() || symbol == klass) {
         return true;
     }
     return symbol.data(gs)->derivesFrom(gs, klass);
 }
 
-bool OrType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool OrType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     return left.derivesFrom(gs, klass) && right.derivesFrom(gs, klass);
 }
 
-bool AndType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool AndType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     return left.derivesFrom(gs, klass) || right.derivesFrom(gs, klass);
 }
 
-bool AliasType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool AliasType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise("AliasType.derivesfrom");
 }
 
@@ -1353,7 +1353,7 @@ void MetaType::_sanityCheck(const GlobalState &gs) const {
     this->wrapped.sanityCheck(gs);
 }
 
-bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool MetaType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     return false;
 }
 

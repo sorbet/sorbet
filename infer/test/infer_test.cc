@@ -85,8 +85,8 @@ TEST_CASE("Infer") {
         REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.showRaw(gs));
         REQUIRE_EQ("<C <U Foo>>", fooSymbol.data(gs)->name.showRaw(gs));
 
-        auto barType = core::make_type<core::ClassType>(barSymbol);
-        auto fooType = core::make_type<core::ClassType>(fooSymbol);
+        auto barType = core::make_type<core::ClassType>(barSymbol.asClassOrModuleRef());
+        auto fooType = core::make_type<core::ClassType>(fooSymbol.asClassOrModuleRef());
 
         REQUIRE(core::Types::isSubType(gs, fooType, barType));
         REQUIRE(core::Types::isSubType(gs, fooType, fooType));
@@ -105,9 +105,9 @@ TEST_CASE("Infer") {
         REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.showRaw(gs));
         REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.showRaw(gs));
 
-        auto barType = core::make_type<core::ClassType>(barSymbol);
-        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
-        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
+        auto barType = core::make_type<core::ClassType>(barSymbol.asClassOrModuleRef());
+        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol.asClassOrModuleRef());
+        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol.asClassOrModuleRef());
 
         auto barNfoo1 = core::Types::any(gs, barType, foo1Type);
         auto foo1Nbar = core::Types::any(gs, foo1Type, barType);
@@ -154,9 +154,9 @@ TEST_CASE("Infer") {
         REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.showRaw(gs));
         REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.showRaw(gs));
 
-        auto barType = core::make_type<core::ClassType>(barSymbol);
-        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
-        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
+        auto barType = core::make_type<core::ClassType>(barSymbol.asClassOrModuleRef());
+        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol.asClassOrModuleRef());
+        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol.asClassOrModuleRef());
 
         auto barOrfoo1 = core::Types::all(gs, barType, foo1Type);
         auto foo1Orbar = core::Types::all(gs, foo1Type, barType);

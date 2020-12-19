@@ -149,7 +149,7 @@ TypePtr Types::todo() {
     return res;
 }
 
-TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, SymbolRef klass) {
+TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassOrModuleRef klass) {
     TypePtr result;
 
     if (from.isUntyped()) {
@@ -184,7 +184,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, Symbol
             auto cdata = c.symbol.data(gs);
             if (c.symbol == core::Symbols::untyped()) {
                 result = from;
-            } else if (c.symbol == klass || c.derivesFrom(gs, klass)) {
+            } else if (SymbolRef(c.symbol) == klass || c.derivesFrom(gs, klass)) {
                 result = Types::bottom();
             } else if (c.symbol.data(gs)->isClassOrModuleClass() && klass.data(gs)->isClassOrModuleClass() &&
                        !klass.data(gs)->derivesFrom(gs, c.symbol)) {
@@ -313,7 +313,7 @@ std::optional<int> Types::getProcArity(const AppliedType &type) {
     return std::nullopt;
 }
 
-ClassType::ClassType(SymbolRef symbol) : symbol(symbol) {
+ClassType::ClassType(ClassOrModuleRef symbol) : symbol(symbol) {
     categoryCounterInc("types.allocated", "classtype");
     ENFORCE(symbol.exists());
 }
@@ -333,7 +333,7 @@ LiteralType::LiteralType(double val) : floatval(val), literalKind(LiteralTypeKin
     categoryCounterInc("types.allocated", "literaltype");
 }
 
-LiteralType::LiteralType(SymbolRef klass, NameRef val)
+LiteralType::LiteralType(ClassOrModuleRef klass, NameRef val)
     : nameId(val.rawId()), literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
     categoryCounterInc("types.allocated", "literaltype");
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
@@ -499,7 +499,8 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, Symb
                                                      const vector<TypePtr> &targs, SymbolRef asIf) {
     ENFORCE(asIf.isClassOrModule());
     ENFORCE(what.isClassOrModule());
-    ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf) || asIf.data(gs)->derivesFrom(gs, what),
+    ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf.asClassOrModuleRef()) ||
+                asIf.data(gs)->derivesFrom(gs, what.asClassOrModuleRef()),
             what.data(gs)->name.showRaw(gs), asIf.data(gs)->name.showRaw(gs));
     InlinedVector<SymbolRef, 4> currentAlignment;
     if (targs.empty()) {
@@ -548,8 +549,8 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
         return what;
     }
 
-    ENFORCE(inWhat == fromWhat || inWhat.data(gs)->derivesFrom(gs, fromWhat) ||
-                fromWhat.data(gs)->derivesFrom(gs, inWhat),
+    ENFORCE(inWhat == fromWhat || inWhat.data(gs)->derivesFrom(gs, fromWhat.asClassOrModuleRef()) ||
+                fromWhat.data(gs)->derivesFrom(gs, inWhat.asClassOrModuleRef()),
             "\n{}\nis unrelated to\n\n{}", fromWhat.data(gs)->toString(gs), inWhat.data(gs)->toString(gs));
 
     auto currentAlignment = alignBaseTypeArgs(gs, originalOwner, targs, inWhat);
@@ -577,7 +578,7 @@ bool Types::isSubType(const GlobalState &gs, const TypePtr &t1, const TypePtr &t
     return isSubTypeUnderConstraint(gs, TypeConstraint::EmptyFrozenConstraint, t1, t2, UntypedMode::AlwaysCompatible);
 }
 
-bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool TypeVar::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
 }
 
@@ -590,21 +591,19 @@ void TypeVar::_sanityCheck(const GlobalState &gs) const {
 }
 
 void AppliedType::_sanityCheck(const GlobalState &gs) const {
-    ENFORCE(this->klass.isClassOrModule());
     ENFORCE(this->klass != Symbols::untyped());
 
     ENFORCE(this->klass.data(gs)->typeMembers().size() == this->targs.size() ||
                 (this->klass == Symbols::Array() && (this->targs.size() == 1)) ||
                 (this->klass == Symbols::Hash() && (this->targs.size() == 3)) ||
-                this->klass.classOrModuleIndex() >= Symbols::Proc0().classOrModuleIndex() &&
-                    this->klass.classOrModuleIndex() <= Symbols::last_proc().classOrModuleIndex(),
+                this->klass.id() >= Symbols::Proc0().id() && this->klass.id() <= Symbols::last_proc().id(),
             this->klass.data(gs)->name.showRaw(gs));
     for (auto &targ : this->targs) {
         targ.sanityCheck(gs);
     }
 }
 
-bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool AppliedType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     ClassType und(this->klass);
     return und.derivesFrom(gs, klass);
 }
@@ -618,12 +617,12 @@ SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition
     categoryCounterInc("types.allocated", "selftypeparam");
 }
 
-bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool LambdaParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise(
         "LambdaParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool SelfTypeParam::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     return false;
 }
 
@@ -676,11 +675,11 @@ TypePtr TupleType::elementType() const {
 SelfType::SelfType() {
     categoryCounterInc("types.allocated", "selftype");
 };
-AppliedType::AppliedType(SymbolRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
+AppliedType::AppliedType(ClassOrModuleRef klass, vector<TypePtr> targs) : klass(klass), targs(std::move(targs)) {
     categoryCounterInc("types.allocated", "appliedtype");
 }
 
-bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) const {
+bool SelfType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise("should never happen");
 }
 

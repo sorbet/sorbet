@@ -303,7 +303,7 @@ TREE(ClassDef) {
 public:
     const core::LocOffsets loc;
     core::LocOffsets declLoc;
-    core::SymbolRef symbol;
+    core::ClassOrModuleRef symbol;
 
     enum class Kind : u1 {
         Module,
@@ -323,7 +323,7 @@ public:
     ANCESTORS_store ancestors;
     ANCESTORS_store singletonAncestors;
 
-    ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::SymbolRef symbol, TreePtr name,
+    ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOrModuleRef symbol, TreePtr name,
              ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
 
     TreePtr deepCopy() const;

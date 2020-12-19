@@ -101,7 +101,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     if (data->isClassOrModule() || data->isMethod()) {
         if (data->isClassOrModule()) {
             for (auto thing : data->mixins()) {
-                symbolProto.add_mixins(thing.rawId());
+                symbolProto.add_mixins(SymbolRef(thing).rawId());
             }
         } else {
             for (auto &thing : data->arguments()) {
@@ -110,7 +110,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         }
 
         if (data->isClassOrModule() && data->superClass().exists()) {
-            symbolProto.set_superclass(data->superClass().rawId());
+            symbolProto.set_superclass(SymbolRef(data->superClass()).rawId());
         }
     }
 
@@ -171,7 +171,7 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
         typ,
         [&](const ClassType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::CLASS);
-            proto.set_class_full_name(t.symbol.show(gs));
+            proto.set_class_full_name(t.symbol.data(gs)->show(gs));
         },
         [&](const AndType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::AND);
@@ -185,7 +185,7 @@ com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr
         },
         [&](const AppliedType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::APPLIED);
-            proto.mutable_applied()->set_symbol_full_name(t.klass.show(gs));
+            proto.mutable_applied()->set_symbol_full_name(t.klass.data(gs)->show(gs));
             for (auto &a : t.targs) {
                 *proto.mutable_applied()->add_type_args() = toProto(gs, a);
             }
