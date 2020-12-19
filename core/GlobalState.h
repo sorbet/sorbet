@@ -96,7 +96,13 @@ public:
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE).asClassOrModuleRef();
     }
     MethodRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD).asMethodRef();
+        // TODO: Maybe lookupSymbolWithFlags should accept a default symbol argument?
+        auto sym = lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
+        if (!sym.exists()) {
+            return Symbols::noMethod();
+        } else {
+            return sym.asMethodRef();
+        }
     }
     MethodRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const std::vector<u4> &methodHash) const;
     SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) const {
