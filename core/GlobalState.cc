@@ -1017,7 +1017,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef 
     return result;
 }
 
-SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
+SymbolRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance) {
     ENFORCE(owner.exists() || name == Names::Constants::NoTypeArgument());
     ENFORCE(name.exists());
     u4 flags;
@@ -1033,7 +1033,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
 
     flags = flags | Symbol::Flags::TYPE_ARGUMENT;
 
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    SymbolData ownerScope = core::SymbolRef(*this, core::SymbolRef::Kind::Method, owner.id()).dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
@@ -1056,7 +1056,10 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
     wasModified_ = true;
 
-    owner.dataAllowingNone(*this)->typeArguments().emplace_back(result);
+    core::SymbolRef(*this, core::SymbolRef::Kind::Method, owner.id())
+        .dataAllowingNone(*this)
+        ->typeArguments()
+        .emplace_back(result);
     return result;
 }
 
