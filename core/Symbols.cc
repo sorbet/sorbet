@@ -1319,18 +1319,6 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
 }
 
-SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
-    if (isMethod()) {
-        return ref(gs);
-    }
-    SymbolRef owner = this->owner;
-    while (owner != Symbols::root() && !owner.data(gs)->isMethod()) {
-        ENFORCE(owner.exists(), "non-existing owner in enclosingMethod");
-        owner = owner.data(gs)->owner;
-    }
-    return owner;
-}
-
 ClassOrModuleRef Symbol::enclosingClass(const GlobalState &gs) const {
     SymbolRef owner = ref(gs);
     while (!owner.isClassOrModule()) {

@@ -655,7 +655,6 @@ public:
 
     Symbol deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
-    SymbolRef enclosingMethod(const GlobalState &gs) const;
 
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
 
