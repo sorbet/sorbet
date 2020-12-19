@@ -8,9 +8,9 @@ namespace sorbet::realmain::lsp {
 ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr tree) {
     auto &local = ast::cast_tree_nonnull<ast::Local>(tree);
 
-    core::SymbolRef owner;
+    core::MethodRef owner;
     if (ctx.owner.data(ctx)->isMethod()) {
-        owner = ctx.owner;
+        owner = ctx.owner.asMethodRef();
     } else if (ctx.owner == core::Symbols::root()) {
         owner = ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local.loc));
     } else {
@@ -23,11 +23,13 @@ ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr t
         // Let the default constructor make tp.type an empty shared_ptr and tp.origins an empty vector
         core::TypeAndOrigins tp;
 
-        auto enclosingMethod = ctx.owner;
-        if (enclosingMethod.isClassOrModule()) {
+        core::MethodRef enclosingMethod;
+        if (ctx.owner.isClassOrModule()) {
             enclosingMethod = ctx.owner == core::Symbols::root()
                                   ? ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local.loc))
                                   : ctx.state.lookupStaticInitForClass(ctx.owner.asClassOrModuleRef());
+        } else {
+            enclosingMethod = ctx.owner.asMethodRef();
         }
 
         core::lsp::QueryResponse::pushQueryResponse(

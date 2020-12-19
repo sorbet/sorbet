@@ -1034,8 +1034,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                 if (lspQueryMatch && !bind.value->isSynthetic) {
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx,
-                        core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), i->what.data(inWhat), tp, ctx.owner));
+                        ctx, core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), i->what.data(inWhat), tp,
+                                                      ctx.owner.asMethodRef()));
                 }
 
                 ENFORCE(ctx.file.data(ctx).hasParseErrors || !tp.origins.empty(), "Inferencer did not assign location");
