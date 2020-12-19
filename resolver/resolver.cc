@@ -2365,9 +2365,9 @@ private:
         }
     }
 
-    static void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, core::LocOffsets exprLoc,
+    static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
                                   ParsedSig sig, bool isOverloaded, const ast::MethodDef &mdef) {
-        ENFORCE(isOverloaded || mdef.symbol == method.asMethodRef());
+        ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
 
         if (!sig.seen.returns && !sig.seen.void_) {
@@ -2723,7 +2723,7 @@ public:
         int i = -1;
         for (auto &sig : sigs) {
             i++;
-            core::SymbolRef overloadSym;
+            core::MethodRef overloadSym;
             if (isOverloaded) {
                 overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, sig.loc), mdef.symbol, originalName,
                                                                i, sig.argsToKeep);

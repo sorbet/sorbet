@@ -1093,7 +1093,7 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
     return result;
 }
 
-SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, core::NameRef originalName, u4 num,
+MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, core::NameRef originalName, u4 num,
                                               const vector<bool> &argsToKeep) {
     NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
     core::Loc loc = num == 0 ? original.data(*this)->loc()
