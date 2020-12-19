@@ -236,48 +236,48 @@ int getArity(const GlobalState &gs, SymbolRef method) {
 
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
-SymbolRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, SymbolRef primary, u2 numPosArgs,
+MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, u2 numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType,
                         const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
             "overload not permitted here");
-    SymbolRef fallback = primary;
-    vector<SymbolRef> allCandidates;
+    MethodRef fallback = primary;
+    vector<MethodRef> allCandidates;
 
     allCandidates.emplace_back(primary);
     { // create candidates and sort them by number of arguments(stable by symbol id)
         int i = 0;
-        SymbolRef current = primary;
+        MethodRef current = primary;
         while (current.data(gs)->isOverloaded()) {
             i++;
             NameRef overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, primary.data(gs)->name, i);
             SymbolRef overload = primary.data(gs)->owner.data(gs)->findMember(gs, overloadName);
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
-            } else {
-                allCandidates.emplace_back(overload);
-                current = overload;
+            } else if (overload.isMethod()) {
+                allCandidates.emplace_back(overload.asMethodRef());
+                current = overload.asMethodRef();
             }
         }
 
-        fast_sort(allCandidates, [&](SymbolRef s1, SymbolRef s2) -> bool {
+        fast_sort(allCandidates, [&](MethodRef s1, MethodRef s2) -> bool {
             if (getArity(gs, s1) < getArity(gs, s2)) {
                 return true;
             }
             if (getArity(gs, s1) == getArity(gs, s2)) {
-                return s1.rawId() < s2.rawId();
+                return s1.id() < s2.id();
             }
             return false;
         });
     }
 
-    vector<SymbolRef> leftCandidates = allCandidates;
+    vector<MethodRef> leftCandidates = allCandidates;
 
     {
         auto checkArg = [&](auto i, const TypePtr &arg) {
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
-                SymbolRef candidate = *it;
+                MethodRef candidate = *it;
                 if (i >= getArity(gs, candidate)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -649,9 +649,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     auto method = mayBeOverloaded.data(gs)->isOverloaded()
-                      ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, args.fullType, targs,
-                                      args.block != nullptr)
-                            .asMethodRef()
+                      ? guessOverload(gs, symbol, mayBeOverloaded.asMethodRef(), args.numPosArgs, args.args,
+                                      args.fullType, targs, args.block != nullptr)
                       : mayBeOverloaded.asMethodRef();
 
     DispatchResult result;
