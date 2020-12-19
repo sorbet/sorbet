@@ -16,6 +16,9 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     auto data = sym.data(gs);
+    if (!data->owner.exists()) {
+        return true;
+    }
     if (data->isClassOrModule() && data->attachedClass(gs).exists()) {
         return true;
     }

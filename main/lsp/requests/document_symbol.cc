@@ -98,7 +98,7 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
         {core::SymbolRef::Kind::TypeMember, gs.typeMembersUsed()},
     };
     for (auto [kind, used] : symbolTypes) {
-        for (u4 idx = 0; idx < used; idx++) {
+        for (u4 idx = 1; idx < used; idx++) {
             core::SymbolRef ref(gs, kind, idx);
             if (!hideSymbol(gs, ref) &&
                 // a bit counter-intuitive, but this actually should be `!= fref`, as it prevents duplicates.
