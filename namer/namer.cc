@@ -1910,7 +1910,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", (string)job.file.data(gs).path()}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::TreeMap::apply(ctx, inserter, std::move(job.tree));
+                job.tree = ast::ShallowMap::apply(ctx, inserter, std::move(job.tree));
                 output.emplace_back(move(job));
             }
         }
