@@ -1093,14 +1093,14 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
     return result;
 }
 
-SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, core::NameRef originalName, u4 num,
+SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, core::NameRef originalName, u4 num,
                                               const vector<bool> &argsToKeep) {
     NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
     core::Loc loc = num == 0 ? original.data(*this)->loc()
                              : sigLoc; // use original Loc for main overload so that we get right jump-to-def for it.
     auto owner = original.data(*this)->owner;
     auto res = enterMethodSymbol(loc, owner, name);
-    ENFORCE(res != original.asMethodRef());
+    ENFORCE(res != original);
     if (res.data(*this)->arguments().size() != original.data(*this)->arguments().size()) {
         ENFORCE(res.data(*this)->arguments().empty());
         res.data(*this)->arguments().reserve(original.data(*this)->arguments().size());
