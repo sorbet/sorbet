@@ -2060,7 +2060,7 @@ const vector<shared_ptr<File>> &GlobalState::getFiles() const {
     return files;
 }
 
-SymbolRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
+MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
     auto prevCount = methodsUsed();
     auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this), core::Names::staticInit());
     if (prevCount != methodsUsed()) {
@@ -2071,14 +2071,14 @@ SymbolRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
     return sym;
 }
 
-SymbolRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
+MethodRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
     auto classData = klass.data(*this);
     auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.data(*this)->toString(*this));
-    return ref;
+    return ref.asMethodRef();
 }
 
-SymbolRef GlobalState::staticInitForFile(Loc loc) {
+MethodRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto prevCount = this->methodsUsed();
     auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
@@ -2090,11 +2090,11 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
     return sym;
 }
 
-SymbolRef GlobalState::lookupStaticInitForFile(Loc loc) const {
+MethodRef GlobalState::lookupStaticInitForFile(Loc loc) const {
     auto nm = lookupNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto ref = core::Symbols::rootSingleton().data(*this)->findMember(*this, nm);
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", loc.toString(*this));
-    return ref;
+    return ref.asMethodRef();
 }
 
 spdlog::logger &GlobalState::tracer() const {
