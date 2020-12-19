@@ -265,7 +265,7 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
     }
 }
 
-void validateOverriding(const core::Context ctx, core::SymbolRef method) {
+void validateOverriding(const core::Context ctx, core::MethodRef method) {
     auto klass = method.data(ctx)->owner;
     auto name = method.data(ctx)->name;
     ENFORCE(klass.isClassOrModule());
@@ -276,13 +276,13 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     // interfaces
     if (klassData->isClassOrModuleInterface() && method.data(ctx)->isMethodPrivate()) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
-            e.setHeader("Interface method `{}` cannot be private", method.show(ctx));
+            e.setHeader("Interface method `{}` cannot be private", method.data(ctx)->show(ctx));
         }
     }
 
     if (klassData->isClassOrModuleInterface() && method.data(ctx)->isMethodProtected()) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
-            e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
+            e.setHeader("Interface method `{}` cannot be protected", method.data(ctx)->show(ctx));
         }
     }
 
