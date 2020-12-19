@@ -1544,9 +1544,11 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     static void resolveMethodAlias(core::MutableContext ctx, const ResolveMethodAliasItem &job) {
-        core::SymbolRef toMethod = ctx.owner.data(ctx)->findMemberNoDealias(ctx, job.toName);
-        if (toMethod.exists()) {
-            toMethod = toMethod.data(ctx)->dealiasMethod(ctx);
+        core::SymbolRef member = ctx.owner.data(ctx)->findMemberNoDealias(ctx, job.toName);
+        // TODO(jvilk): Would be nice to have findMember that returned MethodRef.
+        core::MethodRef toMethod = core::Symbols::noMethod();
+        if (member.exists()) {
+            toMethod = member.data(ctx)->dealiasMethod(ctx);
         }
 
         if (!toMethod.exists()) {
@@ -1558,7 +1560,7 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         core::SymbolRef fromMethod = ctx.owner.data(ctx)->findMemberNoDealias(ctx, job.fromName);
-        if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod.asMethodRef()) {
+        if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
             if (auto e = ctx.beginError(job.loc, core::errors::Resolver::BadAliasMethod)) {
                 auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
                 if (fromMethod == dealiased) {
@@ -1582,7 +1584,7 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         core::SymbolRef alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, job.loc), job.owner, job.fromName);
-        alias.data(ctx)->resultType = core::make_type<core::AliasType>(toMethod);
+        alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(toMethod));
     }
 
     // Returns `true` if `asgn` is a field declaration.
