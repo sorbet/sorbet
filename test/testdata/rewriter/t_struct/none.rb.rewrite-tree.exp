@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<C <todo sym>>>(&<blk>)
+    def initialize<<todo method>>(&<blk>)
       <self>.super(ZSuperArgs)
     end
 

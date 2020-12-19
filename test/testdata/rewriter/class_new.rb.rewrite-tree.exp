@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    def foo<<C <todo sym>>>(&<blk>)
+    def foo<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -18,7 +18,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Integer>)
     end
 
-    def bar<<C <todo sym>>>(&<blk>)
+    def bar<<todo method>>(&<blk>)
       0
     end
 
@@ -41,7 +41,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def self.qux<<C <todo sym>>>(&<blk>)
+    def self.qux<<todo method>>(&<blk>)
       <emptyTree>
     end
 

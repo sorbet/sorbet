@@ -1,22 +1,22 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C OpEq><<C <todo sym>>> < (::<todo sym>)
-    def b<<C <todo sym>>>(&<blk>)
+    def b<<todo method>>(&<blk>)
       <emptyTree>
     end
 
-    def b=<<C <todo sym>>>(_, &<blk>)
+    def b=<<todo method>>(_, &<blk>)
       <emptyTree>
     end
 
-    def y<<C <todo sym>>>(&<blk>)
+    def y<<todo method>>(&<blk>)
       <emptyTree>
     end
 
-    def z<<C <todo sym>>>(&<blk>)
+    def z<<todo method>>(&<blk>)
       <emptyTree>
     end
 
-    def example<<C <todo sym>>>(a, &<blk>)
+    def example<<todo method>>(a, &<blk>)
       begin
         if a
           a = :a

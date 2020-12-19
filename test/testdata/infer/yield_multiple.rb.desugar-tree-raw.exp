@@ -97,7 +97,7 @@ ClassDef{
 
     MethodDef{
       flags = {}
-      name = <U yield_two><<C <U <todo sym>>>>
+      name = <U yield_two><<U <todo method>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U blk>

@@ -53,7 +53,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C AClass>)
       end
 
-      def get_a<<C <todo sym>>>(&<blk>)
+      def get_a<<todo method>>(&<blk>)
         <emptyTree>::<C B>.get_a()
       end
 
@@ -67,7 +67,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Integer>)
       end
 
-      def one<<C <todo sym>>>(&<blk>)
+      def one<<todo method>>(&<blk>)
         1
       end
 
@@ -107,7 +107,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Integer>)
       end
 
-      def get_one<<C <todo sym>>>(&<blk>)
+      def get_one<<todo method>>(&<blk>)
         <emptyTree>::<C A>.one()
       end
 
@@ -121,7 +121,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C A>::<C AClass>)
       end
 
-      def get_a<<C <todo sym>>>(&<blk>)
+      def get_a<<todo method>>(&<blk>)
         <emptyTree>::<C A>::<C AClass>.new()
       end
 
