@@ -391,7 +391,7 @@ public:
                     std::move(block));
     }
 
-    static TreePtr DefineTopClassOrModule(core::LocOffsets loc, core::SymbolRef klass) {
+    static TreePtr DefineTopClassOrModule(core::LocOffsets loc, core::ClassOrModuleRef klass) {
         auto magic = Constant(loc, core::Symbols::Magic());
         Send::ARGS_store args;
         args.emplace_back(Constant(loc, klass));
