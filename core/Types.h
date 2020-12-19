@@ -181,7 +181,7 @@ struct Intrinsic {
         Instance = 1,
         Singleton = 2,
     };
-    const SymbolRef symbol;
+    const ClassOrModuleRef symbol;
     const Kind singleton;
     const NameRef method;
     const IntrinsicMethod *impl;
