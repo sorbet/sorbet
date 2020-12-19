@@ -14,7 +14,7 @@ namespace sorbet::infer {
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     Timer timeit(ctx.state.tracer(), "Inference::run",
                  {{"func", (string)cfg->symbol.data(ctx)->toStringFullName(ctx)}});
-    ENFORCE(cfg->symbol == ctx.owner);
+    ENFORCE(cfg->symbol == ctx.owner.asMethodRef());
     auto methodLoc = cfg->symbol.data(ctx)->loc();
     prodCounterInc("types.input.methods.typechecked");
     int typedSendCount = 0;
