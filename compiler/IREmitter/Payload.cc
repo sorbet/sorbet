@@ -284,7 +284,7 @@ llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuil
 }
 
 namespace {
-const vector<pair<core::SymbolRef, string>> optimizedTypeTests = {
+const vector<pair<core::ClassOrModuleRef, string>> optimizedTypeTests = {
     {core::Symbols::untyped(), "sorbet_isa_Untyped"},
     {core::Symbols::Array(), "sorbet_isa_Array"},
     {core::Symbols::FalseClass(), "sorbet_isa_FalseClass"},
@@ -308,7 +308,7 @@ static bool isProc(core::SymbolRef sym) {
         return false;
     }
     auto id = sym.classOrModuleIndex();
-    return id >= core::Symbols::Proc0().classOrModuleIndex() && id <= core::Symbols::last_proc().classOrModuleIndex();
+    return id >= core::Symbols::Proc0().id() && id <= core::Symbols::last_proc().id();
 }
 
 llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::Value *val, const core::TypePtr &type) {
@@ -343,7 +343,7 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
             ret = builder.CreateCall(cs.getFunction("sorbet_isa"), {val, Payload::getRubyConstant(cs, sym, builder)});
         },
         [&](const core::AppliedType &at) {
-            core::SymbolRef klass = at.klass;
+            core::ClassOrModuleRef klass = at.klass;
             auto base = typeTest(cs, builder, val, core::make_type<core::ClassType>(klass));
             ret = base;
             // todo: ranges, hashes, sets, enumerator, and, overall, enumerables

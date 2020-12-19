@@ -53,12 +53,13 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
 
 class CallCMethod : public SymbolBasedIntrinsicMethod {
 protected:
-    core::SymbolRef rubyClass;
+    core::ClassOrModuleRef rubyClass;
     string_view rubyMethod;
     string cMethod;
 
 public:
-    CallCMethod(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod, Intrinsics::HandleBlock handleBlocks)
+    CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod,
+                Intrinsics::HandleBlock handleBlocks)
         : SymbolBasedIntrinsicMethod(handleBlocks), rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod){};
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
@@ -83,7 +84,7 @@ public:
                                   "rawSendResult");
     };
 
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(CompilerState &cs) const override {
         return {rubyClass};
     };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -138,7 +139,7 @@ public:
         return Payload::varGet(cs, send->args[1].variable, builder, mcctx.irctx, mcctx.rubyBlockId);
     }
 
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(CompilerState &cs) const override {
         return {core::Symbols::Sorbet_Private_Static().data(cs)->lookupSingletonClass(cs)};
     };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -154,7 +155,7 @@ public:
         return Payload::rubyNil(mcctx.cs, builder);
     }
 
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(CompilerState &cs) const override {
         return {core::Symbols::Sorbet_Private_Static().data(cs)->lookupSingletonClass(cs)};
     };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -210,7 +211,7 @@ public:
         return phi;
     };
 
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(CompilerState &cs) const override {
         return {core::Symbols::Module()};
     };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -255,7 +256,7 @@ public:
         return Payload::cPtrToRubyRegexp(cs, builder, str, options);
     };
 
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(CompilerState &cs) const override {
         return {core::Symbols::Regexp().data(cs)->lookupSingletonClass(cs)};
     };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -288,7 +289,7 @@ public:
         return IREmitterHelpers::callViaRubyVMSimple(cs, mcctx.build, mcctx.irctx, self, argv, argc, kw_splat, "new");
     };
 
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(CompilerState &cs) const override {
         return {core::Symbols::T_Enum().data(cs)->lookupSingletonClass(cs)};
     };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -307,7 +308,7 @@ public:
         return Payload::rubyNil(mcctx.cs, builder);
     };
 
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(CompilerState &cs) const override {
         return {core::Symbols::T_Enum().data(cs)->lookupSingletonClass(cs)};
     };
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -317,11 +318,11 @@ public:
 
 class CallCMethodSingleton : public CallCMethod {
 public:
-    CallCMethodSingleton(core::SymbolRef rubyClass, string_view rubyMethod, string cMethod,
+    CallCMethodSingleton(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod,
                          Intrinsics::HandleBlock handleBlocks)
         : CallCMethod(rubyClass, rubyMethod, cMethod, handleBlocks){};
 
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const override {
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(CompilerState &cs) const override {
         return {rubyClass.data(cs)->lookupSingletonClass(cs)};
     };
 };

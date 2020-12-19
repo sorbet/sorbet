@@ -13,7 +13,7 @@ class SymbolBasedIntrinsicMethod {
 public:
     const Intrinsics::HandleBlock blockHandled;
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const = 0;
-    virtual InlinedVector<core::SymbolRef, 2> applicableClasses(CompilerState &cs) const = 0;
+    virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(CompilerState &cs) const = 0;
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const = 0;
 
     // Before emitting a call to a symbol-based intrinsic, the compiled code will emit a runtime
