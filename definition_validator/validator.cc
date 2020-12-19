@@ -270,7 +270,7 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
     auto name = method.data(ctx)->name;
     ENFORCE(klass.isClassOrModule());
     auto klassData = klass.data(ctx);
-    InlinedVector<core::SymbolRef, 4> overridenMethods;
+    InlinedVector<core::MethodRef, 4> overridenMethods;
 
     // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
     // interfaces
@@ -299,13 +299,13 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(ctx)->findMemberTransitive(ctx, name);
         if (superMethod.exists()) {
-            overridenMethods.emplace_back(superMethod);
+            overridenMethods.emplace_back(superMethod.asMethodRef());
         }
     }
     for (const auto &mixin : klassData->mixins()) {
         auto superMethod = mixin.data(ctx)->findMember(ctx, name);
         if (superMethod.exists()) {
-            overridenMethods.emplace_back(superMethod);
+            overridenMethods.emplace_back(superMethod.asMethodRef());
         }
     }
 
