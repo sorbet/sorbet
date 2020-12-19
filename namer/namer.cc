@@ -841,7 +841,8 @@ class SymbolDefiner {
         }
         // we know right now that pos >= arguments().size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &argInfo = ctx.state.enterMethodArgumentSymbol(core::Loc(ctx.file, parsedArg.loc), ctx.owner, name);
+        auto &argInfo =
+            ctx.state.enterMethodArgumentSymbol(core::Loc(ctx.file, parsedArg.loc), ctx.owner.asMethodRef(), name);
         // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
         // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many

@@ -84,7 +84,7 @@ public:
                                      const std::vector<bool> &argsToKeep);
     SymbolRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
-    ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
+    ArgInfo &enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name);
 
     SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, 0);
