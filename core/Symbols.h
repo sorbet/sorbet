@@ -587,8 +587,10 @@ public:
         return dealiasWithDefault(gs, depthLimit, Symbols::untyped());
     }
     // if dealiasing fails here, then we return a bad alias method stub instead
-    SymbolRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const {
-        return dealiasWithDefault(gs, depthLimit, core::Symbols::Sorbet_Private_Static_badAliasMethodStub());
+    MethodRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const {
+        ENFORCE_NO_TIMER(isMethod());
+        return dealiasWithDefault(gs, depthLimit, core::Symbols::Sorbet_Private_Static_badAliasMethodStub())
+            .asMethodRef();
     }
 
     SymbolRef dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const;

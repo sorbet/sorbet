@@ -13,7 +13,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     ENFORCE(!md.symbol.data(ctx)->isOverloaded());
     unique_ptr<CFG> res(new CFG); // private constructor
     res->file = ctx.file;
-    res->symbol = md.symbol.data(ctx)->dealiasMethod(ctx).asMethodRef();
+    res->symbol = md.symbol.data(ctx)->dealiasMethod(ctx);
     u4 temporaryCounter = 1;
     UnorderedMap<core::SymbolRef, LocalRef> aliases;
     UnorderedMap<core::NameRef, LocalRef> discoveredUndeclaredFields;

@@ -1558,7 +1558,7 @@ class ResolveTypeMembersAndFieldsWalk {
         }
 
         core::SymbolRef fromMethod = ctx.owner.data(ctx)->findMemberNoDealias(ctx, job.fromName);
-        if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod) {
+        if (fromMethod.exists() && fromMethod.data(ctx)->dealiasMethod(ctx) != toMethod.asMethodRef()) {
             if (auto e = ctx.beginError(job.loc, core::errors::Resolver::BadAliasMethod)) {
                 auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
                 if (fromMethod == dealiased) {
