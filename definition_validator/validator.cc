@@ -503,10 +503,10 @@ void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::C
 
 class ValidateWalk {
 private:
-    UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
+    UnorderedMap<core::ClassOrModuleRef, vector<core::MethodRef>> abstractCache;
 
-    const vector<core::SymbolRef> &getAbstractMethods(const core::GlobalState &gs, core::SymbolRef klass) {
-        vector<core::SymbolRef> abstract;
+    const vector<core::MethodRef> &getAbstractMethods(const core::GlobalState &gs, core::ClassOrModuleRef klass) {
+        vector<core::MethodRef> abstract;
         auto ent = abstractCache.find(klass);
         if (ent != abstractCache.end()) {
             return ent->second;
@@ -530,7 +530,7 @@ private:
         if (isAbstract) {
             for (auto [name, sym] : klass.data(gs)->members()) {
                 if (sym.exists() && sym.data(gs)->isMethod() && sym.data(gs)->isAbstract()) {
-                    abstract.emplace_back(sym);
+                    abstract.emplace_back(sym.asMethodRef());
                 }
             }
         }
@@ -558,7 +558,7 @@ private:
         }
     }
 
-    void validateAbstract(const core::GlobalState &gs, core::SymbolRef sym) {
+    void validateAbstract(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
         if (sym.data(gs)->isClassOrModuleAbstract()) {
             return;
         }
