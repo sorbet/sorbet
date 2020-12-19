@@ -76,7 +76,7 @@ public:
         auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
         auto inits = extractClassInit(ctx, classDef);
 
-        core::SymbolRef sym;
+        core::MethodRef sym;
         auto loc = core::Loc(ctx.file, classDef->declLoc);
         ast::TreePtr replacement;
         if (classDef->symbol == core::Symbols::root()) {
@@ -109,9 +109,8 @@ public:
         ast::MethodDef::ARGS_store args;
         args.emplace_back(ast::make_tree<ast::Local>(blkLoc, blkLocalVar));
 
-        auto init =
-            ast::make_tree<ast::MethodDef>(loc.offsets(), loc.offsets(), sym.asMethodRef(), core::Names::staticInit(),
-                                           std::move(args), std::move(inits), ast::MethodDef::Flags());
+        auto init = ast::make_tree<ast::MethodDef>(loc.offsets(), loc.offsets(), sym, core::Names::staticInit(),
+                                                   std::move(args), std::move(inits), ast::MethodDef::Flags());
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
 

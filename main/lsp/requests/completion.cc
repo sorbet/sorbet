@@ -446,7 +446,7 @@ unique_ptr<CompletionItem> getCompletionItemForLocal(const core::GlobalState &gs
 }
 
 vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPTypecheckerDelegate &typechecker,
-                                            const core::SymbolRef method) {
+                                            const core::MethodRef method) {
     auto files = vector<core::FileRef>{};
     for (auto loc : method.data(gs)->locs()) {
         files.emplace_back(loc.file());
