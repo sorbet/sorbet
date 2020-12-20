@@ -526,8 +526,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             // follow outer scopes
 
             // find scopes that would be considered for search
-            vector<SymbolRef> candidateScopes;
-            candidateScopes.emplace_back(base);
+            vector<ClassOrModuleRef> candidateScopes;
+            candidateScopes.emplace_back(base.asClassOrModuleRef());
             int i = 0;
             // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
             while (i < candidateScopes.size()) {
