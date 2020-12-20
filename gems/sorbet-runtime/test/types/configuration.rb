@@ -216,16 +216,9 @@ module Opus::Types::Test
         end
       end
 
-      describe 'when false' do
-        before do
-          T::Configuration.exclude_value_in_type_errors = false
-        end
-
-        after do
-          T::Configuration.exclude_value_in_type_errors = nil
-        end
-
+      describe 'when explicitly include' do
         it 'raises an error with a message including the value' do
+          T::Configuration.include_value_in_type_errors
           e = assert_raises(TypeError) do
             T.let("foo", Integer)
           end
@@ -233,13 +226,12 @@ module Opus::Types::Test
         end
       end
 
-      describe 'when true' do
+      describe 'when exclude' do
         before do
-          T::Configuration.exclude_value_in_type_errors = true
+          T::Configuration.exclude_value_in_type_errors
         end
-
         after do
-          T::Configuration.exclude_value_in_type_errors = nil
+          T::Configuration.include_value_in_type_errors
         end
 
         it 'raises an error with a message including the value' do

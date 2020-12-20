@@ -42,6 +42,34 @@ module T::Configuration
     T::Private::Methods.set_final_checks_on_hooks(false)
   end
 
+  @include_value_in_type_errors = true
+  # Whether to include values in TypeError messages.
+  #
+  # Including values is useful for debugging, but can potentially leak
+  # sensitive information to logs.
+  #
+  # @return [T::Boolean]
+  def self.include_value_in_type_errors?
+    @include_value_in_type_errors
+  end
+
+  # Configure if type errors excludes the value of the problematic type.
+  #
+  # The default is to include values in type errors:
+  #   TypeError: Expected type Integer, got String with value "foo"
+  #
+  # When values are excluded from type errors:
+  #   TypeError: Expected type Integer, got String
+  def self.exclude_value_in_type_errors
+    @include_value_in_type_errors = false
+  end
+
+  # Opposite of exclude_value_in_type_errors.
+  # (Including values in type errors is the default)
+  def self.include_value_in_type_errors
+    @include_value_in_type_errors = true
+  end
+
   # Configure the default checked level for a sig with no explicit `.checked`
   # builder. When unset, the default checked level is `:always`.
   #
@@ -424,21 +452,5 @@ module T::Configuration
     if !value.nil? && !value.respond_to?(:call)
       raise ArgumentError.new("Provided value must respond to :call")
     end
-  end
-
-  # Configure if type errors excludes the value of the problematic type.
-  #
-  # When true, the value is left out
-  # Example: 'Expected type Integer, got String'
-  #
-  # When false (default), the value of the problematic type is excluded in exceptions:
-  # Example: 'Expected type Integer, got String with value "foo"'
-  #
-  # @param [Boolean] exclude_value
-  def self.exclude_value_in_type_errors=(exclude_value)
-    @exclude_value = exclude_value
-  end
-  def self.exclude_value_in_type_errors
-    !!@exclude_value
   end
 end
