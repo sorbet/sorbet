@@ -157,7 +157,6 @@ public:
     /** Internal implementation. You should probably use any(). */
     static TypePtr lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
-    static TypePtr lubAll(const GlobalState &gs, const std::vector<TypePtr> &elements);
     static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr rangeOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr hashOf(const GlobalState &gs, const TypePtr &elem);
