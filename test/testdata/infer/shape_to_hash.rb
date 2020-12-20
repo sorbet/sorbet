@@ -12,8 +12,8 @@ class A
 end
 
 foo = {x: "hello", y: 333, z: A.new}
-T.reveal_type(foo) # error: Revealed type: `{x: String("hello"), y: Integer(333), z: A} (shape of T::Hash[T.untyped, T.untyped])`
-T.reveal_type(foo.to_hash) # error: Revealed type: `{x: String("hello"), y: Integer(333), z: A} (shape of T::Hash[T.untyped, T.untyped])`
+T.reveal_type(foo) # error: Revealed type: `{x: String("hello"), y: Integer(333), z: A} (shape of T::Hash[Symbol, T.any(String, Integer, A)])`
+T.reveal_type(foo.to_hash) # error: Revealed type: `{x: String("hello"), y: Integer(333), z: A} (shape of T::Hash[Symbol, T.any(String, Integer, A)])`
 
 bar = {x: "yolo", y: 209, z: "hello again"}
 
@@ -23,8 +23,8 @@ else
   baz = bar
 end
 
-T.reveal_type(baz) # error: Revealed type: `{x: String, y: Integer, z: T.any(A, String)} (shape of T::Hash[T.untyped, T.untyped])`
-T.reveal_type(baz.to_hash) # error: Revealed type: `{x: String, y: Integer, z: T.any(A, String)} (shape of T::Hash[T.untyped, T.untyped])`
+T.reveal_type(baz) # error: Revealed type: `{x: String, y: Integer, z: T.any(A, String)} (shape of T::Hash[Symbol, T.any(A, String, Integer)])`
+T.reveal_type(baz.to_hash) # error: Revealed type: `{x: String, y: Integer, z: T.any(A, String)} (shape of T::Hash[Symbol, T.any(A, String, Integer)])`
 
 if T.unsafe(false)
   qux = baz
