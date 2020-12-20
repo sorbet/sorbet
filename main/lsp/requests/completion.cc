@@ -179,7 +179,7 @@ SimilarMethodsByName similarMethodsForReceiver(const core::GlobalState &gs, cons
         },
         [&](const core::TypePtr &type) {
             if (is_proxy_type(receiver)) {
-                result = similarMethodsForReceiver(gs, receiver.underlying(), prefix);
+                result = similarMethodsForReceiver(gs, receiver.underlying(gs), prefix);
             }
         });
 

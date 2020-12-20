@@ -150,7 +150,7 @@ public:
      */
     static TypePtr approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc);
     static TypePtr dispatchCallWithoutBlock(const GlobalState &gs, const TypePtr &recv, const DispatchArgs &args);
-    static TypePtr dropLiteral(const TypePtr &tp);
+    static TypePtr dropLiteral(const GlobalState &gs, const TypePtr &tp);
 
     /** Internal implementation. You should probably use all(). */
     static TypePtr glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
@@ -472,7 +472,7 @@ public:
     LiteralType(int64_t val);
     LiteralType(double val);
     LiteralType(ClassOrModuleRef klass, NameRef val);
-    TypePtr underlying() const;
+    TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
     int64_t asInteger() const;
@@ -667,7 +667,7 @@ public:
                          const std::vector<TypePtr> &targs) const;
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
-    TypePtr underlying() const;
+    TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 };
 CheckSize(ShapeType, 64, 8);
@@ -694,8 +694,8 @@ public:
     TypePtr _instantiate(const GlobalState &gs, const TypeConstraint &tc) const;
 
     // Return the type of the underlying array that this tuple decays into
-    TypePtr elementType() const;
-    TypePtr underlying() const;
+    TypePtr elementType(const GlobalState &gs) const;
+    TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 };
 CheckSize(TupleType, 40, 8);
@@ -744,7 +744,7 @@ public:
     void _sanityCheck(const GlobalState &gs) const;
 
     TypePtr _approximate(const GlobalState &gs, const TypeConstraint &tc) const;
-    TypePtr underlying() const;
+    TypePtr underlying(const GlobalState &gs) const;
 };
 CheckSize(MetaType, 16, 8);
 

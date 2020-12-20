@@ -27,19 +27,19 @@ DispatchResult dispatchCallProxyType(const GlobalState &gs, TypePtr und, Dispatc
 } // namespace
 
 bool LiteralType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
-    return underlying().derivesFrom(gs, klass);
+    return underlying(gs).derivesFrom(gs, klass);
 }
 
 bool ShapeType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
-    return underlying().derivesFrom(gs, klass);
+    return underlying(gs).derivesFrom(gs, klass);
 }
 
 bool TupleType::derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const {
-    return underlying().derivesFrom(gs, klass);
+    return underlying(gs).derivesFrom(gs, klass);
 }
 
 DispatchResult LiteralType::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
-    return dispatchCallProxyType(gs, underlying(), args);
+    return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
 DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
@@ -124,7 +124,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
             return res;
         }
     }
-    return dispatchCallProxyType(gs, underlying(), args);
+    return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
 DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
@@ -138,7 +138,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
             return res;
         }
     }
-    return dispatchCallProxyType(gs, underlying(), args);
+    return dispatchCallProxyType(gs, underlying(gs), args);
 }
 
 namespace {
@@ -901,7 +901,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 } else if (spec.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = cast_type_nonnull<LiteralType>(*it);
-                        auto underlying = key.underlying();
+                        auto underlying = key.underlying(gs);
                         SymbolRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
                         if (klass != Symbols::Symbol()) {
                             continue;
@@ -932,7 +932,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
                     auto lit = cast_type_nonnull<LiteralType>(litType);
-                    auto underlying = lit.underlying();
+                    auto underlying = lit.underlying(gs);
                     return cast_type_nonnull<ClassType>(underlying).symbol == Symbols::Symbol() &&
                            lit.asName(gs) == spec.name;
                 });
@@ -958,7 +958,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
             for (auto &keyType : hash->keys) {
                 auto key = cast_type_nonnull<LiteralType>(keyType);
-                auto underlying = key.underlying();
+                auto underlying = key.underlying(gs);
                 SymbolRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
                 if (klass == Symbols::Symbol() && consumed.find(key.asName(gs)) != consumed.end()) {
                     continue;
@@ -1182,13 +1182,13 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                     }
                 }
             }
-            return dispatchCallProxyType(gs, underlying(), args);
+            return dispatchCallProxyType(gs, underlying(gs), args);
     }
 }
 
 namespace {
 
-SymbolRef unwrapSymbol(const TypePtr &type) {
+SymbolRef unwrapSymbol(const GlobalState &gs, const TypePtr &type) {
     SymbolRef result;
     TypePtr typePtr = type;
     while (!result.exists()) {
@@ -1201,7 +1201,7 @@ SymbolRef unwrapSymbol(const TypePtr &type) {
 
             [&](const TypePtr &ty) {
                 if (is_proxy_type(ty)) {
-                    typePtr = ty.underlying();
+                    typePtr = ty.underlying(gs);
                 } else {
                     ENFORCE(false, "Unexpected type: {}", ty.typeName());
                 }
@@ -1326,7 +1326,7 @@ public:
 class Object_class : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        SymbolRef self = unwrapSymbol(args.thisType);
+        SymbolRef self = unwrapSymbol(gs, args.thisType);
         auto singleton = self.data(gs)->lookupSingletonClass(gs);
         if (singleton.exists()) {
             res.returnType = singleton.data(gs)->externalType();
@@ -1339,7 +1339,7 @@ public:
 class Class_new : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        SymbolRef self = unwrapSymbol(args.thisType);
+        SymbolRef self = unwrapSymbol(gs, args.thisType);
 
         auto attachedClass = self.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
@@ -1385,7 +1385,7 @@ public:
     // Unfortunately, this means that some errors are double reported (once by resolver, and then
     // again by infer).
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        SymbolRef self = unwrapSymbol(args.thisType);
+        SymbolRef self = unwrapSymbol(gs, args.thisType);
         auto attachedClass = self.data(gs)->attachedClass(gs);
 
         if (!attachedClass.exists()) {
@@ -1587,12 +1587,12 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 3, "Magic_buildRange called with missing arguments");
 
-        auto rangeElemType = Types::dropLiteral(args.args[0]->type);
+        auto rangeElemType = Types::dropLiteral(gs, args.args[0]->type);
         auto firstArgIsNil = rangeElemType.isNilClass();
         if (!firstArgIsNil) {
             rangeElemType = Types::dropNil(gs, rangeElemType);
         }
-        auto other = Types::dropLiteral(args.args[1]->type);
+        auto other = Types::dropLiteral(gs, args.args[1]->type);
         auto secondArgIsNil = other.isNilClass();
         if (firstArgIsNil) {
             if (secondArgIsNil) {
@@ -1642,8 +1642,8 @@ public:
         auto val = args.args.front()->type;
         auto beforeLit = cast_type_nonnull<LiteralType>(args.args[1]->type);
         auto afterLit = cast_type_nonnull<LiteralType>(args.args[2]->type);
-        if (!(beforeLit.underlying().derivesFrom(gs, Symbols::Integer()) &&
-              afterLit.underlying().derivesFrom(gs, Symbols::Integer()))) {
+        if (!(beforeLit.underlying(gs).derivesFrom(gs, Symbols::Integer()) &&
+              afterLit.underlying(gs).derivesFrom(gs, Symbols::Integer()))) {
             res.returnType = Types::untypedUntracked();
             return;
         }
@@ -2131,7 +2131,7 @@ public:
         }
 
         auto selfTy = args.args[0]->type;
-        SymbolRef self = unwrapSymbol(selfTy);
+        SymbolRef self = unwrapSymbol(gs, selfTy);
 
         u2 numPosArgs = args.numPosArgs - 1;
 
@@ -2216,7 +2216,7 @@ public:
         }
 
         auto lit = cast_type_nonnull<LiteralType>(argType);
-        if (!lit.underlying().derivesFrom(gs, Symbols::Integer())) {
+        if (!lit.underlying(gs).derivesFrom(gs, Symbols::Integer())) {
             return;
         }
 
@@ -2278,7 +2278,7 @@ public:
         if (tuple->elems.empty()) {
             res.returnType = Types::nilClass();
         } else {
-            res.returnType = tuple->elementType();
+            res.returnType = tuple->elementType(gs);
         }
     }
 } Tuple_minMax;
@@ -2390,7 +2390,7 @@ class Array_flatten : public IntrinsicMethod {
         typecase(
             type,
 
-            // This only shows up because t->elementType() for tuples returns an OrType of all its elements.
+            // This only shows up because t->elementType(gs) for tuples returns an OrType of all its elements.
             // So to properly handle nested tuples, we have to descend into the OrType's.
             [&](const OrType &o) {
                 result = Types::any(gs, recursivelyFlattenArrays(gs, o.left, newDepth),
@@ -2406,7 +2406,7 @@ class Array_flatten : public IntrinsicMethod {
                 result = recursivelyFlattenArrays(gs, a.targs.front(), newDepth);
             },
 
-            [&](const TupleType &t) { result = recursivelyFlattenArrays(gs, t.elementType(), newDepth); },
+            [&](const TupleType &t) { result = recursivelyFlattenArrays(gs, t.elementType(gs), newDepth); },
 
             [&](const TypePtr &t) { result = std::move(type); });
         return result;
@@ -2421,7 +2421,7 @@ public:
             ENFORCE(!ap->targs.empty());
             element = ap->targs.front();
         } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
-            element = tuple->elementType();
+            element = tuple->elementType(gs);
         } else {
             ENFORCE(false, "Array#flatten on unexpected type: {}", args.selfType.show(gs));
         }
@@ -2473,7 +2473,7 @@ public:
             ENFORCE(!ap->targs.empty());
             unwrappedElems.emplace_back(ap->targs.front());
         } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
-            unwrappedElems.emplace_back(tuple->elementType());
+            unwrappedElems.emplace_back(tuple->elementType(gs));
         } else {
             // We will have only dispatched to this intrinsic when we knew the receiver.
             // Did we register this intrinsic on the wrong symbol?
@@ -2489,7 +2489,7 @@ public:
                 ENFORCE(!ap->targs.empty());
                 unwrappedElems.emplace_back(ap->targs.front());
             } else if (auto *tuple = cast_type<TupleType>(argTyp)) {
-                unwrappedElems.emplace_back(tuple->elementType());
+                unwrappedElems.emplace_back(tuple->elementType(gs));
             } else {
                 // Arg type didn't match; we already reported an error for the arg type; just return untyped to recover.
                 res.returnType = Types::untypedUntracked();
@@ -2510,7 +2510,7 @@ public:
             ENFORCE(!ap->targs.empty());
             element = ap->targs.front();
         } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
-            element = tuple->elementType();
+            element = tuple->elementType(gs);
         } else {
             ENFORCE(false, "Array#compact on unexpected type: {}", args.selfType.show(gs));
         }

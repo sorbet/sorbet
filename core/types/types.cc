@@ -209,7 +209,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
             }
         },
         [&](const TypePtr &) {
-            if (is_proxy_type(from) && dropSubtypesOf(gs, from.underlying(), klass).isBottom()) {
+            if (is_proxy_type(from) && dropSubtypesOf(gs, from.underlying(gs), klass).isBottom()) {
                 result = Types::bottom();
             } else {
                 result = from;
@@ -238,7 +238,7 @@ bool Types::canBeTruthy(const GlobalState &gs, const TypePtr &what) {
         },
         [&](const TypePtr &) {
             if (is_proxy_type(what)) {
-                isTruthy = canBeTruthy(gs, what.underlying());
+                isTruthy = canBeTruthy(gs, what.underlying(gs));
             } else {
                 isTruthy = true;
             }
@@ -268,10 +268,10 @@ TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, c
     return result;
 }
 
-TypePtr Types::dropLiteral(const TypePtr &tp) {
+TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
     if (isa_type<LiteralType>(tp)) {
         auto a = cast_type_nonnull<LiteralType>(tp);
-        return a.underlying();
+        return a.underlying(gs);
     }
     return tp;
 }
@@ -359,7 +359,7 @@ core::NameRef LiteralType::unsafeAsName() const {
     return NameRef::fromRawUnchecked(nameId);
 }
 
-TypePtr LiteralType::underlying() const {
+TypePtr LiteralType::underlying(const GlobalState &gs) const {
     switch (literalKind) {
         case LiteralTypeKind::Integer:
             return Types::Integer();
@@ -388,7 +388,7 @@ AndType::AndType(const TypePtr &left, const TypePtr &right) : left(move(left)), 
 }
 
 void LiteralType::_sanityCheck(const GlobalState &gs) const {
-    sanityCheckProxyType(gs, underlying());
+    sanityCheckProxyType(gs, underlying(gs));
 }
 
 bool LiteralType::equals(const LiteralType &rhs) const {
@@ -437,7 +437,7 @@ TypePtr TupleType::underlying() const {
 }
 
 void ShapeType::_sanityCheck(const GlobalState &gs) const {
-    sanityCheckProxyType(gs, underlying());
+    sanityCheckProxyType(gs, underlying(gs));
     ENFORCE(this->values.size() == this->keys.size());
     for (auto &v : this->keys) {
         v.sanityCheck(gs);
@@ -698,7 +698,7 @@ TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
         },
         [&](const TypePtr &) {
             if (is_proxy_type(type)) {
-                ret = Types::widen(gs, type.underlying());
+                ret = Types::widen(gs, type.underlying(gs));
             } else {
                 ret = type;
             }

@@ -221,7 +221,7 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::TupleType:
         case Tag::ShapeType:
         case Tag::LiteralType: {
-            return this->underlying().getCallArguments(gs, name);
+            return this->underlying(gs).getCallArguments(gs, name);
         }
         case Tag::OrType: {
             auto &orType = cast_type_nonnull<OrType>(*this);
