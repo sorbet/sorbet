@@ -3342,6 +3342,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::params(), &DeclBuilderForProcs_params},
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::bind(), &DeclBuilderForProcs_bind},
 
+    // TODO(jez) Make or find an issue recording that we should also have Shape_squareBrackets
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::first(), &Tuple_first},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::last(), &Tuple_last},
