@@ -81,7 +81,7 @@ class MyTest
 
   test_each ["foo", 5, {x: false}] do |v|
     it "handles lists with several types" do
-      T.reveal_type(v) # error: Revealed type: `T.any(String, Integer, T::Hash[T.untyped, T.untyped])`
+      T.reveal_type(v) # error: Revealed type: `T.any(String, Integer, T::Hash[Symbol, FalseClass])`
     end
   end
 
@@ -98,10 +98,8 @@ class MyTest
 
   test_each_hash({foo: 1, bar: 2, baz: 3}) do |k, v|
     it "handles lists with several types" do
-      # we don't decay literal hash types like we do for arrays, so
-      # these will still be untyped here
-      T.reveal_type(k) # error: Revealed type: `T.untyped`
-      T.reveal_type(v) # error: Revealed type: `T.untyped`
+      T.reveal_type(k) # error: Revealed type: `Symbol`
+      T.reveal_type(v) # error: Revealed type: `Integer`
     end
   end
 

@@ -85,8 +85,10 @@ class TestArgs
   def call_mixed
     mixed(0, u: 1)
     mixed(0, 1, u: 1)
-    mixed(0, 1, {z: 1}, u: 1)
-    mixed(0, 1, {z: 1}, "hi", "there", u: 1, v: 0)
+    mixed(0, 1, {z: 1}, u: 1) # error: Expected `T::Hash[Integer, Integer]` but found `{z: Integer(1)}` for argument `z`
+    mixed(0, 1, {z: 1}, "hi", "there", u: 1, v: 0) # error: Expected `T::Hash[Integer, Integer]` but found `{z: Integer(1)}` for argument `z`
+    mixed(0, 1, {2 => 1}, u: 1)
+    mixed(0, 1, {2 => 1}, "hi", "there", u: 1, v: 0)
   end
 
   def optkw(x, y=T.unsafe(nil), u:)
