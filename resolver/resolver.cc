@@ -447,8 +447,7 @@ private:
         auto ancestorType =
             core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
 
-        core::SymbolRef uaSym =
-            ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
+        auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
         core::TypePtr resultType = uaSym.data(ctx)->resultType;
         if (!resultType) {
             uaSym.data(ctx)->resultType = core::TupleType::build(ctx, {ancestorType});
@@ -1098,7 +1097,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     struct ResolveMethodAliasItem {
         core::FileRef file;
-        core::SymbolRef owner;
+        core::ClassOrModuleRef owner;
         core::LocOffsets loc;
         core::LocOffsets toNameLoc;
         core::NameRef toName;
@@ -1790,8 +1789,8 @@ class ResolveTypeMembersAndFieldsWalk {
         }
     }
 
-    core::SymbolRef methodOwner(core::Context ctx) {
-        core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+    core::ClassOrModuleRef methodOwner(core::Context ctx) {
+        core::ClassOrModuleRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (owner == core::Symbols::root()) {
             // Root methods end up going on object
             owner = core::Symbols::Object();

@@ -1280,7 +1280,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
                                                                           this->name);
                 break;
             case SymbolRef::Kind::Method:
-                current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(this->loc(), this->owner, this->name);
+                current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(
+                    this->loc(), this->owner.asClassOrModuleRef(), this->name);
                 break;
             case SymbolRef::Kind::FieldOrStaticField:
                 if (isField()) {

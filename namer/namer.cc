@@ -985,7 +985,7 @@ class SymbolDefiner {
     }
 
     core::SymbolRef defineMethod(core::MutableContext ctx, const FoundMethod &method) {
-        core::SymbolRef owner = methodOwner(ctx, method.flags);
+        auto owner = methodOwner(ctx, method.flags);
 
         // There are three symbols in play here, because there's:
         //

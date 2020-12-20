@@ -81,7 +81,7 @@ void GlobalState::initEmpty() {
     SymbolRef id;
     id = synthesizeClass(core::Names::Constants::NoSymbol(), 0);
     ENFORCE(id == Symbols::noSymbol());
-    id = enterMethodSymbol(Loc::none(), Symbols::noSymbol(), Names::noMethod());
+    id = enterMethodSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noMethod());
     ENFORCE(id == Symbols::noMethod());
     id = enterFieldSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noFieldOrStaticField());
     ENFORCE(id == Symbols::noField());
@@ -800,7 +800,7 @@ void GlobalState::initEmpty() {
 
 void GlobalState::installIntrinsics() {
     for (auto &entry : intrinsicMethods) {
-        SymbolRef symbol;
+        ClassOrModuleRef symbol;
         switch (entry.singleton) {
             case Intrinsic::Kind::Instance:
                 symbol = entry.symbol;
@@ -1063,10 +1063,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name,
     return result;
 }
 
-MethodRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    bool isBlock = name.kind() == NameKind::UNIQUE && name.dataUnique(*this)->original == Names::blockTemp();
-    ENFORCE(isBlock || owner.isClassOrModule(), "entering method symbol into not-a-class");
-
+MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     auto flags = Symbol::Flags::METHOD;
 
     SymbolData ownerScope = owner.dataAllowingNone(*this);
@@ -1101,7 +1098,7 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
     NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
     core::Loc loc = num == 0 ? original.data(*this)->loc()
                              : sigLoc; // use original Loc for main overload so that we get right jump-to-def for it.
-    auto owner = original.data(*this)->owner;
+    auto owner = original.data(*this)->owner.asClassOrModuleRef();
     auto res = enterMethodSymbol(loc, owner, name);
     ENFORCE(res != original);
     if (res.data(*this)->arguments().size() != original.data(*this)->arguments().size()) {
