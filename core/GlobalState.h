@@ -89,10 +89,10 @@ public:
     SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, 0);
     }
-    SymbolRef lookupTypeMemberSymbol(SymbolRef owner, NameRef name) const {
+    SymbolRef lookupTypeMemberSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER);
     }
-    ClassOrModuleRef lookupClassSymbol(SymbolRef owner, NameRef name) const {
+    ClassOrModuleRef lookupClassSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE).asClassOrModuleRef();
     }
     MethodRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {

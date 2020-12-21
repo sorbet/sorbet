@@ -787,7 +787,8 @@ class SymbolDefiner {
         }
 
         // Check if class was already mangled.
-        auto klassSymbol = ctx.state.lookupClassSymbol(scope.data(ctx)->owner, scope.data(ctx)->name);
+        auto klassSymbol =
+            ctx.state.lookupClassSymbol(scope.data(ctx)->owner.asClassOrModuleRef(), scope.data(ctx)->name);
         if (klassSymbol.exists()) {
             return klassSymbol;
         }
@@ -1112,7 +1113,8 @@ class SymbolDefiner {
         auto declLoc = core::Loc(ctx.file, klass.declLoc);
         if (!symbol.isClassOrModule()) {
             // we might have already mangled the class symbol, so see if we have a symbol that is a class already
-            auto klassSymbol = ctx.state.lookupClassSymbol(symbol.data(ctx)->owner, symbol.data(ctx)->name);
+            auto klassSymbol =
+                ctx.state.lookupClassSymbol(symbol.data(ctx)->owner.asClassOrModuleRef(), symbol.data(ctx)->name);
             if (klassSymbol.exists()) {
                 return klassSymbol;
             }
@@ -1447,7 +1449,7 @@ class TreeSymbolizer {
 
         const bool firstNameRecursive = false;
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
-        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner, constLit->cnst);
+        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
         if (firstName && !existing.exists()) {
             existing = ctx.state.lookupStaticFieldSymbol(newOwner, constLit->cnst);
             if (existing.exists()) {
@@ -1560,7 +1562,8 @@ public:
                 ENFORCE(symbol == core::Symbols::root());
             }
             if (!symbol.isClassOrModule()) {
-                klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner, klass.symbol.data(ctx)->name);
+                klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner.asClassOrModuleRef(),
+                                                           klass.symbol.data(ctx)->name);
                 ENFORCE(klass.symbol.exists());
             } else {
                 klass.symbol = symbol.asClassOrModuleRef();
@@ -1686,7 +1689,7 @@ public:
         core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
         if (!scope.isClassOrModule()) {
             auto scopeName = scope.data(ctx)->name;
-            scope = ctx.state.lookupClassSymbol(scope.data(ctx)->owner, scopeName);
+            scope = ctx.state.lookupClassSymbol(scope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
         }
 
         core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
@@ -1734,7 +1737,7 @@ public:
             bool isTypeTemplate = send->fun == core::Names::typeTemplate();
             auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
             ENFORCE(onSymbol.exists());
-            core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
+            core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
             ENFORCE(sym.exists());
 
             if (send->hasKwArgs()) {
