@@ -2373,6 +2373,31 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
 
 } // namespace
 
+// TODO(jez) Add tests for this
+class Shape_squareBrackets : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto &shape = cast_type_nonnull<ShapeType>(args.thisType);
+
+        if (args.args.size() != 1) {
+            // Skip over cases for which arg matching should report errors
+            return;
+        }
+
+        if (!isa_type<LiteralType>(args.args.front()->type)) {
+            return;
+        }
+
+        auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
+        if (auto idx = indexForKey(shape, argLit)) {
+            res.returnType = shape.values[*idx];
+        } else {
+            // TODO(jez) This could be another "if you're in `typed: strict` you have to have better hashes"
+            res.returnType = Types::untypedUntracked();
+        }
+    }
+} Shape_squareBrackets;
+
 class Shape_squareBracketsEq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -2813,6 +2838,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::toA(), &Tuple_to_a},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Shape_squareBrackets},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBracketsEq(), &Shape_squareBracketsEq},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
