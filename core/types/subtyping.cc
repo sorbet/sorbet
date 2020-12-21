@@ -375,8 +375,10 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 [&](const LiteralType &l1) {
                     if (isa_type<LiteralType>(t2)) {
                         auto l2 = cast_type_nonnull<LiteralType>(t2);
-                        auto u1 = cast_type_nonnull<ClassType>(l1.underlying());
-                        auto u2 = cast_type_nonnull<ClassType>(l2.underlying());
+                        auto underlyingL1 = l1.underlying();
+                        auto underlyingL2 = l2.underlying();
+                        auto u1 = cast_type_nonnull<ClassType>(underlyingL1);
+                        auto u2 = cast_type_nonnull<ClassType>(underlyingL2);
                         if (u1.symbol == u2.symbol) {
                             if (l1.equals(l2)) {
                                 result = t1;
@@ -723,8 +725,10 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 },
                 [&](const LiteralType &l1) {
                     auto l2 = cast_type_nonnull<LiteralType>(t2);
-                    auto u1 = cast_type_nonnull<ClassType>(l1.underlying());
-                    auto u2 = cast_type_nonnull<ClassType>(l2.underlying());
+                    auto underlyingL1 = l1.underlying();
+                    auto underlyingL2 = l2.underlying();
+                    auto u1 = cast_type_nonnull<ClassType>(underlyingL1);
+                    auto u2 = cast_type_nonnull<ClassType>(underlyingL2);
                     if (u1.symbol == u2.symbol) {
                         if (l1.equals(l2)) {
                             result = t1;

@@ -57,6 +57,8 @@ public:
     template <class To> static bool isa(const TypePtr &what);
 
     template <class To> static typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast(const TypePtr &what);
+    template <class To>
+    static typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast(TypePtr &&what) = delete;
 
     template <class To> static auto cast(TypePtr &what) {
         return const_cast_type<To>(cast<To>(static_cast<const TypePtr &>(what)));

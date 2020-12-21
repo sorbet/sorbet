@@ -277,11 +277,17 @@ template <class To> To *cast_type(TypePtr &what) {
     return const_cast<To *>(cast_type<To>(static_cast<const TypePtr &>(what)));
 }
 
+template <class To> To *cast_type(TypePtr &&what) = delete;
+
 template <class To>
 typename TypePtr::TypeToCastType<To, TypePtr::TypeToIsInlined<To>::value>::type cast_type_nonnull(const TypePtr &what) {
     ENFORCE_NO_TIMER(isa_type<To>(what));
     return *reinterpret_cast<const To *>(what.get());
 }
+
+template <class To>
+typename TypePtr::TypeToCastType<To, TypePtr::TypeToIsInlined<To>::value>::type
+cast_type_nonnull(TypePtr &&what) = delete;
 
 // Simple forwarders defined on TypePtr which make `typecase` work.
 template <class To> inline bool TypePtr::isa(const TypePtr &what) {

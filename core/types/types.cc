@@ -412,7 +412,8 @@ OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), ri
 
 void TupleType::_sanityCheck(const GlobalState &gs) const {
     sanityCheckProxyType(gs, underlying());
-    auto *applied = cast_type<AppliedType>(this->underlying());
+    auto underlying = this->underlying();
+    auto *applied = cast_type<AppliedType>(underlying);
     ENFORCE(applied);
     ENFORCE(applied->klass == Symbols::Array());
 }
@@ -665,7 +666,8 @@ optional<int> SendAndBlockLink::fixedArity() const {
 }
 
 TypePtr TupleType::elementType() const {
-    auto *ap = cast_type<AppliedType>(this->underlying());
+    auto underlying = this->underlying();
+    auto *ap = cast_type<AppliedType>(underlying);
     ENFORCE(ap);
     ENFORCE(ap->klass == Symbols::Array());
     ENFORCE(ap->targs.size() == 1);

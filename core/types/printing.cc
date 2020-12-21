@@ -57,7 +57,8 @@ string LiteralType::show(const GlobalState &gs) const {
 }
 
 string LiteralType::showValue(const GlobalState &gs) const {
-    SymbolRef undSymbol = cast_type_nonnull<ClassType>(this->underlying()).symbol;
+    auto underlying = this->underlying();
+    SymbolRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
     if (undSymbol == Symbols::String()) {
         return fmt::format("\"{}\"", absl::CEscape(asName(gs).show(gs)));
     } else if (undSymbol == Symbols::Symbol()) {
@@ -128,7 +129,8 @@ string ShapeType::show(const GlobalState &gs) const {
         } else {
             fmt::format_to(buf, ", ");
         }
-        SymbolRef undSymbol = cast_type_nonnull<ClassType>(cast_type_nonnull<LiteralType>(key).underlying()).symbol;
+        auto underlying = cast_type_nonnull<LiteralType>(key).underlying();
+        SymbolRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
         if (undSymbol == Symbols::Symbol()) {
             fmt::format_to(buf, "{}: {}", cast_type_nonnull<LiteralType>(key).asName(gs).show(gs),
                            (*valueIterator).show(gs));
