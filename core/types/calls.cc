@@ -2338,6 +2338,11 @@ public:
         if (auto idx = indexForKey(shape, argLit)) {
             res.returnType = shape.values[*idx];
         } else {
+            auto argLoc = core::Loc(args.locs.file, args.locs.args[0]);
+            if (auto e = gs.beginError(argLoc, core::errors::Infer::MethodArgumentMismatch)) {
+                e.setHeader("Key `{}` not present in shape `{}`", argLit.show(gs), shape.show(gs));
+            }
+
             // TODO(jez) This could be another "if you're in `typed: strict` you have to have better hashes"
             res.returnType = Types::untypedUntracked();
         }
@@ -2361,13 +2366,33 @@ public:
 
         auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
         if (auto idx = indexForKey(shape, argLit)) {
+            auto valueType = shape.values[*idx];
+            auto expectedType = valueType;
+            auto actualType = *args.args[1];
+            // TODO(jez) I'm almost certain this doesn't handle generics properly
+            if (!core::Types::isSubType(gs, actualType.type, expectedType)) {
+                auto argLoc = core::Loc(args.locs.file, args.locs.args[1]);
+
+                if (auto e = gs.beginError(argLoc, core::errors::Infer::MethodArgumentMismatch)) {
+                    e.setHeader("Expected `{}` but found `{}` for key `{}`", expectedType.show(gs),
+                                actualType.type.show(gs), shape.keys[*idx].show(gs));
+                    e.addErrorSection(
+                        core::ErrorSection("Got " + actualType.type.showWithMoreInfo(gs) + " originating from:",
+                                           actualType.origins2Explanations(gs, args.originForUninitialized)));
+                }
+            }
+
             // Returning here without setting res.resultType will cause dispatchCall to fall back to
             // Hash#[]=, which will have the effect of checking the arg types.
             //
             // TODO(jez) We could do something smarter here, like check that the new value is
             // compatible with the old value.
-            return;
         } else {
+            auto argLoc = core::Loc(args.locs.file, args.locs.args[1]);
+            if (auto e = gs.beginError(argLoc, core::errors::Infer::MethodArgumentMismatch)) {
+                e.setHeader("Key `{}` not present in shape `{}`", argLit.show(gs), shape.show(gs));
+            }
+
             // Key not found. To preserve legacy compatibility, allow any arguments here.
             // I would love to remove this one day, but we'll have to figure out a way to migrate
             // people's codebases to it.
