@@ -2261,7 +2261,7 @@ class ResolveSignaturesWalk {
 public:
     struct ResolveSignatureJob {
         core::FileRef file;
-        core::SymbolRef owner;
+        core::ClassOrModuleRef owner;
         ast::MethodDef *mdef;
         core::LocOffsets loc;
         ParsedSig sig;
@@ -2276,7 +2276,7 @@ public:
 
     struct ResolveMultiSignatureJob {
         core::FileRef file;
-        core::SymbolRef owner;
+        core::ClassOrModuleRef owner;
         ast::MethodDef *mdef;
         bool isOverloaded;
         InlinedVector<OverloadedMethodSignature, 2> sigs;
@@ -2666,7 +2666,8 @@ private:
 
                     if (lastSigs.size() == 1) {
                         auto &lastSig = lastSigs.front();
-                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.file, ctx.owner, &mdef, lastSig->loc,
+                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.file, ctx.owner.asClassOrModuleRef(), &mdef,
+                                                                       lastSig->loc,
                                                                        parseSig(ctx, sigOwner, *lastSig, mdef)});
                     } else {
                         bool isOverloaded = ctx.permitOverloadDefinitions(ctx.file);
@@ -2687,8 +2688,8 @@ private:
                             sigs.emplace_back(OverloadedMethodSignature{lastSig->loc, move(sig), move(argsToKeep)});
                         }
 
-                        multiSignatureJobs.emplace_back(
-                            ResolveMultiSignatureJob{ctx.file, ctx.owner, &mdef, isOverloaded, std::move(sigs)});
+                        multiSignatureJobs.emplace_back(ResolveMultiSignatureJob{
+                            ctx.file, ctx.owner.asClassOrModuleRef(), &mdef, isOverloaded, std::move(sigs)});
                     }
 
                     lastSigs.clear();
