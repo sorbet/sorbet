@@ -225,26 +225,12 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &build, st
 }
 
 namespace {
-core::SymbolRef removeRoot(core::SymbolRef sym) {
-    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
-        // Root methods end up going on object
-        sym = core::Symbols::Object();
-    }
-    return sym;
-}
-
-std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
-    auto name = sym.data(gs)->name;
-    if (name.kind() == core::NameKind::UNIQUE) {
-        return name.dataUnique(gs)->original.show(gs);
-    }
-    return name.show(gs);
-}
-
 std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
-    bool includeOwner = sym.data(gs)->owner.exists() && sym.data(gs)->owner != core::Symbols::root();
-    string owner = includeOwner ? showClassName(gs, sym.data(gs)->owner) + "::" : "";
-    return owner + showClassNameWithoutOwner(gs, sym);
+    auto owner = sym.data(gs)->owner;
+    bool includeOwner = owner.exists() && owner != core::Symbols::root() && owner != core::Symbols::PackageRegistry() &&
+                        owner.data(gs)->name != core::Names::Constants::PkgRoot_Package();
+    string ownerStr = includeOwner ? showClassName(gs, owner) + "::" : "";
+    return ownerStr + IREmitterHelpers::showClassNameWithoutOwner(gs, sym);
 }
 
 } // namespace
@@ -252,7 +238,7 @@ std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
 llvm::Value *Payload::getRubyConstant(CompilerState &cs, core::SymbolRef sym, llvm::IRBuilderBase &build) {
     ENFORCE(sym.data(cs)->isClassOrModule() || sym.data(cs)->isStaticField() || sym.data(cs)->isTypeMember());
     auto &builder = builderCast(build);
-    sym = removeRoot(sym);
+    sym = IREmitterHelpers::fixupOwningSymbol(cs, sym);
     auto str = showClassName(cs, sym);
     ENFORCE(str.length() < 2 || (str[0] != ':'), "implementation assumes that strings dont start with ::");
     auto functionName = sym.data(cs)->isClassOrModule() ? "sorbet_i_getRubyClass" : "sorbet_i_getRubyConstant";

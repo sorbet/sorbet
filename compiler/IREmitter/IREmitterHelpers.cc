@@ -5,6 +5,8 @@
 
 #include "Payload.h"
 #include "absl/base/casts.h"
+#include "absl/strings/match.h"
+#include "absl/strings/str_replace.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "cfg/CFG.h"
@@ -948,6 +950,43 @@ bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::Sy
     }
 
     return args.back().flags.isBlock;
+}
+
+core::SymbolRef IREmitterHelpers::fixupOwningSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
+    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton() ||
+        sym == core::Symbols::PackageRegistry() || sym.data(gs)->name == core::Names::Constants::PkgRoot_Package()) {
+        // Root methods end up going on Object.
+        return core::Symbols::Object();
+    }
+
+    return sym;
+}
+
+std::string IREmitterHelpers::showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
+    std::string withoutOwnerStr;
+
+    auto name = sym.data(gs)->name;
+    if (name.kind() == core::NameKind::UNIQUE) {
+        withoutOwnerStr = name.dataUnique(gs)->original.show(gs);
+    } else {
+        withoutOwnerStr = name.show(gs);
+    };
+
+    // This is a little bit gross.  Symbol performs this sort of logic itself, but
+    // the above calls are done inside NameRef, which doesn't have the necessary
+    // symbol ownership information to do this sort of munging.  So we have to
+    // duplicate the Symbol logic here.
+    if (sym.data(gs)->owner != core::Symbols::PackageRegistry()) {
+        return withoutOwnerStr;
+    }
+
+    constexpr string_view packageNameSuffix = "_Package"sv;
+    if (!absl::EndsWith(withoutOwnerStr, packageNameSuffix)) {
+        return withoutOwnerStr;
+    }
+
+    return absl::StrReplaceAll(withoutOwnerStr.substr(0, withoutOwnerStr.size() - packageNameSuffix.size()),
+                               {{"_", "::"}});
 }
 
 } // namespace sorbet::compiler

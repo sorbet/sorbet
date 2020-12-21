@@ -128,6 +128,12 @@ public:
 
     // Return true if the given blockId has a block argument.
     static bool hasBlockArgument(CompilerState &gs, int blockId, core::SymbolRef method, const IREmitterContext &irctx);
+
+    // Given an owner as the Sorbet-visible symbol, return the parent symbol
+    // as seen by the Ruby VM.
+    static core::SymbolRef fixupOwningSymbol(const core::GlobalState &gs, core::SymbolRef sym);
+
+    static std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym);
 };
 } // namespace sorbet::compiler
 #endif

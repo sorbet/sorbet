@@ -28,15 +28,6 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
     return static_cast<llvm::IRBuilder<> &>(builder);
 };
 
-// TODO(jez) I copy pasted this from NameBasedIntrinsics.cc for sake of prototyping. DONT COMMIT
-core::SymbolRef removeRoot(core::SymbolRef sym) {
-    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
-        // Root methods end up going on object
-        sym = core::Symbols::Object();
-    }
-    return sym;
-}
-
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     core::SymbolRef sym;
     if (core::isa_type<core::ClassType>(typ)) {
@@ -46,7 +37,7 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     } else {
         ENFORCE(false);
     }
-    sym = removeRoot(sym);
+    sym = IREmitterHelpers::fixupOwningSymbol(gs, sym);
     ENFORCE(sym.data(gs)->isClassOrModule());
     return sym;
 }

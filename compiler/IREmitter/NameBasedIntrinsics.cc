@@ -24,14 +24,6 @@
 using namespace std;
 namespace sorbet::compiler {
 namespace {
-core::SymbolRef removeRoot(core::SymbolRef sym) {
-    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
-        // Root methods end up going on object
-        sym = core::Symbols::Object();
-    }
-    return sym;
-}
-
 core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     core::SymbolRef sym;
     if (core::isa_type<core::ClassType>(typ)) {
@@ -41,7 +33,7 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     } else {
         ENFORCE(false);
     }
-    sym = removeRoot(sym);
+    sym = IREmitterHelpers::fixupOwningSymbol(gs, sym);
     ENFORCE(sym.data(gs)->isClassOrModule());
     return sym;
 }
@@ -62,14 +54,6 @@ public:
     }
 } DoNothingIntrinsic;
 
-std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym) {
-    auto name = sym.data(gs)->name;
-    if (name.kind() == core::NameKind::UNIQUE) {
-        return name.dataUnique(gs)->original.show(gs);
-    }
-    return name.show(gs);
-}
-
 class DefineClassIntrinsic : public NameBasedIntrinsicMethod {
 public:
     DefineClassIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
@@ -88,11 +72,11 @@ public:
         }
 
         // this is wrong and will not work for `class <<self`
-        auto classNameCStr = Payload::toCString(cs, showClassNameWithoutOwner(cs, sym), builder);
+        auto classNameCStr = Payload::toCString(cs, IREmitterHelpers::showClassNameWithoutOwner(cs, sym), builder);
         auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
         auto funcSym = cs.gs.lookupStaticInitForClass(attachedClass);
 
-        if (sym.data(cs)->owner != core::Symbols::root()) {
+        if (sym.data(cs)->owner != core::Symbols::root() && sym.data(cs)->owner != core::Symbols::PackageRegistry()) {
             auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
             if (isModule) {
                 builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
