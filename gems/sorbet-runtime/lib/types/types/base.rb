@@ -119,8 +119,10 @@ module T::Types
         # Default inspect behavior of, eg; `#<Object:0x0...>` is ugly; just print the hash instead, which is more concise/readable.
         if obj.method(:inspect).owner == Kernel
           "type #{obj.class} with hash #{obj.hash}"
-        else
+        elsif T::Configuration.include_value_in_type_errors?
           "type #{obj.class} with value #{T::Utils.string_truncate_middle(obj.inspect, 30, 30)}"
+        else
+          "type #{obj.class}"
         end
       rescue StandardError, SystemStackError
         "type #{obj.class} with unprintable value"

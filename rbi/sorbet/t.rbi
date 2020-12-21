@@ -119,6 +119,12 @@ module T::Configuration
   def self.enable_final_checks_on_hooks; end
   def self.enable_legacy_t_enum_migration_mode; end
   def self.reset_final_checks_on_hooks; end
+  sig {returns(T::Boolean)}
+  def self.include_value_in_type_errors?; end
+  sig {void}
+  def self.exclude_value_in_type_errors; end
+  sig {void}
+  def self.include_value_in_type_errors; end
   def self.hard_assert_handler(str, extra); end
   def self.hard_assert_handler=(value); end
   def self.inline_type_error_handler(error); end
