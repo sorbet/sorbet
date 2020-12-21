@@ -2310,6 +2310,73 @@ public:
     }
 } Tuple_concat;
 
+namespace {
+
+optional<size_t> indexForKey(const ShapeType &shape, const LiteralType &argLit) {
+    auto fnd = absl::c_find_if(
+        shape.keys, [&argLit](auto &elemLit) { return argLit.equals(cast_type_nonnull<LiteralType>(elemLit)); });
+
+    if (fnd == shape.keys.end()) {
+        return nullopt;
+    } else {
+        return fnd - shape.keys.begin();
+    }
+}
+
+} // namespace
+
+// TODO(jez) Add tests for this
+class Shape_squareBracketsEq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto &shape = cast_type_nonnull<ShapeType>(args.thisType);
+
+        if (args.args.size() != 2) {
+            // Skip over cases for which arg matching should report errors
+            return;
+        }
+
+        if (!isa_type<LiteralType>(args.args.front()->type)) {
+            return;
+        }
+
+        auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
+        if (auto idx = indexForKey(shape, argLit)) {
+            auto valueType = shape.values[*idx];
+            auto expectedType = valueType;
+            auto actualType = *args.args[1];
+            // TODO(jez) I'm almost certain this doesn't handle generics properly
+            if (!core::Types::isSubType(gs, actualType.type, expectedType)) {
+                auto argLoc = core::Loc(args.locs.file, args.locs.args[1]);
+
+                if (auto e = gs.beginError(argLoc, core::errors::Infer::MethodArgumentMismatch)) {
+                    e.setHeader("Expected `{}` but found `{}` for key `{}`", expectedType.show(gs),
+                                actualType.type.show(gs), shape.keys[*idx].show(gs));
+                    e.addErrorSection(
+                        core::ErrorSection("Got " + actualType.type.showWithMoreInfo(gs) + " originating from:",
+                                           actualType.origins2Explanations(gs, args.originForUninitialized)));
+                }
+            }
+
+            // Returning here without setting res.resultType will cause dispatchCall to fall back to
+            // Hash#[]=, which will have the effect of checking the arg types.
+            //
+            // TODO(jez) We could do something smarter here, like check that the new value is
+            // compatible with the old value.
+            // TODO(jez) Right now ShapeType::underlying always returns T::Hash[T.untyped, T.untyped]
+            // so it doesn't matter whether we return or not.
+            return;
+        } else {
+            // Key not found. To preserve legacy compatibility, allow any arguments here.
+            // I would love to remove this one day, but we'll have to figure out a way to migrate
+            // people's codebases to it.
+            //
+            // TODO(jez) This could be another "if you're in `typed: strict` you need typed shapes"
+            res.returnType = Types::untypedUntracked();
+        }
+    }
+} Shape_squareBracketsEq;
+
 class Shape_merge : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -2689,6 +2756,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::toA(), &Tuple_to_a},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBracketsEq(), &Shape_squareBracketsEq},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
 
