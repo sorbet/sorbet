@@ -1,5 +1,7 @@
 # typed: true
 
+extend T::Sig
+
 xs = {
   foo: T.let(nil, T.nilable(Integer)),
   bar: nil,
@@ -59,3 +61,24 @@ three_five = {
 }
 T.reveal_type(one_three.merge(three_five)) # error: Revealed type: `{one: Integer(1), three: String("3"), five: String("5")} (shape of T::Hash[Symbol, T.any(Integer, String)])`
 
+# Fixes https://github.com/sorbet/sorbet/issues/3751
+sig {params(xs: T::Array[Integer]).void}
+def test1(xs = [])
+  T.reveal_type(xs) # error: Revealed type: `T::Array[Integer]`
+end
+
+sig {params(x: T::Array[String]).void}
+def test2(x)
+  x = []
+  T.reveal_type(x) # error: Revealed type: `[] (0-tuple)`
+
+  if T.unsafe(nil)
+    y = []
+    z = T::Array[Integer].new
+  else
+    y = T::Array[Integer].new
+    z = []
+  end
+  T.reveal_type(y) # error: Revealed type: `T::Array[Integer]`
+  T.reveal_type(z) # error: Revealed type: `T::Array[Integer]`
+end
