@@ -1582,7 +1582,7 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        core::SymbolRef alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, job.loc), job.owner, job.fromName);
+        auto alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, job.loc), job.owner, job.fromName);
         alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(toMethod));
     }
 
@@ -1622,7 +1622,7 @@ class ResolveTypeMembersAndFieldsWalk {
         Timer timeit(gs.tracer(), "resolver.computeExternalType");
         // Ensure all symbols have `externalType` computed.
         for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
-            core::SymbolRef(gs, core::SymbolRef::Kind::ClassOrModule, i).data(gs)->unsafeComputeExternalType(gs);
+            core::ClassOrModuleRef(gs, i).data(gs)->unsafeComputeExternalType(gs);
         }
     }
 
@@ -2580,7 +2580,7 @@ private:
         seq.stats.erase(toRemove, seq.stats.end());
     }
 
-    ParsedSig parseSig(core::Context ctx, core::SymbolRef sigOwner, ast::Send &send, ast::MethodDef &mdef) {
+    ParsedSig parseSig(core::Context ctx, core::ClassOrModuleRef sigOwner, ast::Send &send, ast::MethodDef &mdef) {
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
@@ -2655,13 +2655,13 @@ private:
                     // process signatures in the context of either the current
                     // class, or the current singleton class, depending on if
                     // the current method is a self method.
-                    core::SymbolRef sigOwner;
+                    core::ClassOrModuleRef sigOwner;
                     if (mdef.flags.isSelfMethod) {
                         sigOwner = ctx.owner.data(ctx)->lookupSingletonClass(ctx);
                         // namer ensures that all method owners are defined.
                         ENFORCE_NO_TIMER(sigOwner.exists());
                     } else {
-                        sigOwner = ctx.owner;
+                        sigOwner = ctx.owner.asClassOrModuleRef();
                     }
 
                     if (lastSigs.size() == 1) {
