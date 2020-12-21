@@ -711,8 +711,8 @@ public:
  */
 class SymbolDefiner {
     unique_ptr<const FoundDefinitions> foundDefs;
-    vector<core::SymbolRef> definedClasses;
-    vector<core::SymbolRef> definedMethods;
+    vector<core::ClassOrModuleRef> definedClasses;
+    vector<core::MethodRef> definedMethods;
 
     // Returns a symbol to the referenced name. Name must be a class or module.
     // Prerequisite: Owner is a class or module.
@@ -985,7 +985,7 @@ class SymbolDefiner {
         }
     }
 
-    core::SymbolRef defineMethod(core::MutableContext ctx, const FoundMethod &method) {
+    core::MethodRef defineMethod(core::MutableContext ctx, const FoundMethod &method) {
         auto owner = methodOwner(ctx, method.flags);
 
         // There are three symbols in play here, because there's:
@@ -1048,7 +1048,7 @@ class SymbolDefiner {
         return sym;
     }
 
-    core::SymbolRef insertMethod(core::MutableContext ctx, const FoundMethod &method) {
+    core::MethodRef insertMethod(core::MutableContext ctx, const FoundMethod &method) {
         auto symbol = defineMethod(ctx, method);
         auto implicitlyPrivate = ctx.owner.data(ctx)->enclosingClass(ctx) == core::Symbols::root();
         if (implicitlyPrivate) {
@@ -1153,7 +1153,7 @@ class SymbolDefiner {
         return symbol.asClassOrModuleRef();
     }
 
-    core::SymbolRef insertClass(core::MutableContext ctx, const FoundClass &klass) {
+    core::ClassOrModuleRef insertClass(core::MutableContext ctx, const FoundClass &klass) {
         auto symbol = getClassSymbol(ctx, klass);
 
         if (klass.classKind == ast::ClassDef::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
@@ -1553,20 +1553,20 @@ public:
             klass.symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
             ENFORCE(klass.symbol.exists());
         } else {
-            core::SymbolRef symbol = klass.symbol;
+            auto symbol = klass.symbol;
             if (symbol == core::Symbols::todo()) {
-                symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass.name);
+                auto squashedSymbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass.name);
+                if (!squashedSymbol.isClassOrModule()) {
+                    klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner.asClassOrModuleRef(),
+                                                               klass.symbol.data(ctx)->name);
+                    ENFORCE(klass.symbol.exists());
+                } else {
+                    klass.symbol = squashedSymbol.asClassOrModuleRef();
+                }
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
                 ENFORCE(symbol == core::Symbols::root());
-            }
-            if (!symbol.isClassOrModule()) {
-                klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner.asClassOrModuleRef(),
-                                                           klass.symbol.data(ctx)->name);
-                ENFORCE(klass.symbol.exists());
-            } else {
-                klass.symbol = symbol.asClassOrModuleRef();
             }
         }
         return tree;
@@ -1665,7 +1665,7 @@ public:
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
-        core::SymbolRef owner = methodOwner(ctx, method.flags);
+        auto owner = methodOwner(ctx, method.flags);
         auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
         auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
         ENFORCE(sym.exists());
@@ -1820,7 +1820,7 @@ public:
     }
 
 private:
-    UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
+    UnorderedMap<core::ClassOrModuleRef, core::Loc> classBehaviorLocs;
 };
 
 vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
