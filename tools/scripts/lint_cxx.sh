@@ -4,7 +4,7 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
-bazel build //tools:clang-tidy
+./bazel build //tools:clang-tidy
 ./tools/scripts/build_compilation_db.sh
 
 got_cc=

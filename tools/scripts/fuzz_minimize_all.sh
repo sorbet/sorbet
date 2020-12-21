@@ -25,7 +25,7 @@ target="$1"
 shift
 
 echo "building $target"
-bazel build "//test/fuzz:$target" --config=fuzz -c opt
+./bazel build "//test/fuzz:$target" --config=fuzz -c opt
 
 echo "making command file"
 cmds="$(mktemp)"
