@@ -57,6 +57,9 @@ public:
     template <class To> static bool isa(const TypePtr &what);
 
     template <class To> static typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast(const TypePtr &what);
+    // We disallow casting on temporary values because the lifetime of the returned value is
+    // tied to the temporary, but it is possible for the temporary to be destroyed at the end
+    // of the current statement, leading to use-after-free bugs.
     template <class To>
     static typename TypeToCastType<To, TypeToIsInlined<To>::value>::type cast(TypePtr &&what) = delete;
 
