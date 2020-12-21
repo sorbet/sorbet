@@ -2304,6 +2304,71 @@ public:
     }
 } Tuple_concat;
 
+namespace {
+
+optional<size_t> indexForKey(const ShapeType &shape, const LiteralType &argLit) {
+    auto fnd = absl::c_find_if(
+        shape.keys, [&argLit](auto &elemLit) { return argLit.equals(cast_type_nonnull<LiteralType>(elemLit)); });
+
+    if (fnd == shape.keys.end()) {
+        return nullopt;
+    } else {
+        return fnd - shape.keys.begin();
+    }
+}
+
+} // namespace
+
+// TODO(jez) Add tests for this
+class Shape_squareBrackets : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto &shape = cast_type_nonnull<ShapeType>(args.thisType);
+
+        if (args.args.size() != 1) {
+            // Skip over cases for which arg matching should report errors
+            return;
+        }
+
+        if (!isa_type<LiteralType>(args.args.front()->type)) {
+            return;
+        }
+
+        auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
+        if (auto idx = indexForKey(shape, argLit)) {
+            res.returnType = shape.values[*idx];
+        } else {
+            // TODO(jez) This could be another "if you're in `typed: strict` you have to have better hashes"
+            res.returnType = Types::untypedUntracked();
+        }
+    }
+} Shape_squareBrackets;
+
+// TODO(jez) Add tests for this
+class Shape_squareBracketsEq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        // auto &shape = cast_type_nonnull<ShapeType>(args.thisType);
+
+        // if (args.args.size() != 2) {
+        //     // Skip over cases for which arg matching should report errors
+        //     return;
+        // }
+
+        // if (!isa_type<LiteralType>(args.args.front()->type)) {
+        //     return;
+        // }
+
+        // auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
+        // if (auto idx = indexForKey(shape, argLit)) {
+        //     res.returnType = shape.values[*idx];
+        // } else {
+        //     // TODO(jez) This could be another "if you're in `typed: strict` you have to have better hashes"
+        //     res.returnType = Types::untypedUntracked();
+        // }
+    }
+} Shape_squareBracketsEq;
+
 class Shape_merge : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -2637,7 +2702,6 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::params(), &DeclBuilderForProcs_params},
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::bind(), &DeclBuilderForProcs_bind},
 
-    // TODO(jez) Make or find an issue recording that we should also have Shape_squareBrackets
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::first(), &Tuple_first},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::last(), &Tuple_last},
@@ -2646,6 +2710,8 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::toA(), &Tuple_to_a},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBrackets(), &Shape_squareBrackets},
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBracketsEq(), &Shape_squareBracketsEq},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
 
