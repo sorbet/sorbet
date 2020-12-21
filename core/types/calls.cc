@@ -899,7 +899,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 } else if (spec.flags.isRepeated) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = cast_type_nonnull<LiteralType>(*it);
-                        SymbolRef klass = cast_type_nonnull<ClassType>(key.underlying()).symbol;
+                        auto underlying = key.underlying();
+                        SymbolRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
                         if (klass != Symbols::Symbol()) {
                             continue;
                         }
@@ -929,7 +930,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                 auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
                     auto lit = cast_type_nonnull<LiteralType>(litType);
-                    return cast_type_nonnull<ClassType>(lit.underlying()).symbol == Symbols::Symbol() &&
+                    auto underlying = lit.underlying();
+                    return cast_type_nonnull<ClassType>(underlying).symbol == Symbols::Symbol() &&
                            lit.asName(gs) == spec.name;
                 });
                 if (arg == hash->keys.end()) {
@@ -954,7 +956,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
             for (auto &keyType : hash->keys) {
                 auto key = cast_type_nonnull<LiteralType>(keyType);
-                SymbolRef klass = cast_type_nonnull<ClassType>(key.underlying()).symbol;
+                auto underlying = key.underlying();
+                SymbolRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
                 if (klass == Symbols::Symbol() && consumed.find(key.asName(gs)) != consumed.end()) {
                     continue;
                 }
