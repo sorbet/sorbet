@@ -96,7 +96,7 @@ class ResolveConstantsWalk {
 
 private:
     // TODO: Figure out ideal size.
-    typedef InlinedVector<core::ClassOrModuleRef, 4> Nesting;
+    typedef InlinedVector<core::ClassOrModuleRef, 6> Nesting;
     Nesting nesting_;
 
     struct ResolutionItem {
@@ -112,7 +112,7 @@ private:
         ResolutionItem(const ResolutionItem &rhs) = delete;
         const ResolutionItem &operator=(const ResolutionItem &rhs) = delete;
     };
-    CheckSize(ResolutionItem, 48, 8);
+    CheckSize(ResolutionItem, 56, 8);
     struct AncestorResolutionItem {
         ast::ConstantLit *ancestor;
         core::ClassOrModuleRef klass;
