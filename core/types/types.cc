@@ -418,18 +418,13 @@ void TupleType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(applied->klass == Symbols::Array());
 }
 
-ShapeType::ShapeType() : underlying_(Types::hashOfUntyped()) {
-    categoryCounterInc("types.allocated", "shapetype");
-}
-
-ShapeType::ShapeType(TypePtr underlying, vector<TypePtr> keys, vector<TypePtr> values)
-    : keys(move(keys)), values(move(values)), underlying_(std::move(underlying)) {
+ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(keys)), values(move(values)) {
     DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(isa_type<LiteralType>(k)); };);
     categoryCounterInc("types.allocated", "shapetype");
 }
 
 TypePtr ShapeType::underlying(const GlobalState &gs) const {
-    return this->underlying_;
+    return Types::hashOfUntyped();
 }
 
 TypePtr TupleType::underlying(const GlobalState &gs) const {
@@ -732,10 +727,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
         [&](const OrType &orType) {
             ret = OrType::make_shared(unwrapSelfTypeParam(ctx, orType.left), unwrapSelfTypeParam(ctx, orType.right));
         },
-        [&](const ShapeType &shape) {
-            ret = make_type<ShapeType>(unwrapSelfTypeParam(ctx, shape.underlying_), shape.keys,
-                                       unwrapTypeVector(ctx, shape.values));
-        },
+        [&](const ShapeType &shape) { ret = make_type<ShapeType>(shape.keys, unwrapTypeVector(ctx, shape.values)); },
         [&](const TupleType &tuple) {
             ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple.underlying_), unwrapTypeVector(ctx, tuple.elems));
         },

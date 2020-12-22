@@ -385,7 +385,6 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         }
         case TypePtr::Tag::ShapeType: {
             auto &hash = cast_type_nonnull<ShapeType>(what);
-            pickle(p, hash.underlying_);
             p.putU4(hash.keys.size());
             ENFORCE(hash.keys.size() == hash.values.size());
             for (auto &el : hash.keys) {
@@ -475,7 +474,6 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             return result;
         }
         case TypePtr::Tag::ShapeType: {
-            auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
             vector<TypePtr> keys(sz);
             vector<TypePtr> values(sz);
@@ -485,7 +483,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             for (auto &value : values) {
                 value = unpickleType(p, gs);
             }
-            auto result = make_type<ShapeType>(underlying, move(keys), move(values));
+            auto result = make_type<ShapeType>(move(keys), move(values));
             return result;
         }
         case TypePtr::Tag::AliasType:

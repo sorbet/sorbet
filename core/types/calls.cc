@@ -409,7 +409,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         for (auto &value : shapeType->values) {
             unwrappedValues.emplace_back(unwrapType(gs, loc, value));
         }
-        return make_type<ShapeType>(Types::hashOfUntyped(), shapeType->keys, move(unwrappedValues));
+        return make_type<ShapeType>(shapeType->keys, move(unwrappedValues));
     } else if (auto *tupleType = cast_type<TupleType>(tp)) {
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(tupleType->elems.size());
@@ -786,7 +786,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (auto *hash = cast_type<ShapeType>(kwSplatType)) {
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
-                    kwargs = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
+                    kwargs = make_type<ShapeType>(move(keys), move(values));
                     --aend;
                 } else {
                     if (kwSplatType.isUntyped()) {
@@ -819,7 +819,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 --aend;
             }
         } else {
-            kwargs = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
+            kwargs = make_type<ShapeType>(move(keys), move(values));
         }
 
         // Detect the case where not all positional arguments were supplied, causing the keyword args to be consumed as
@@ -1550,7 +1550,7 @@ public:
             keys.emplace_back(args.args[i]->type);
             values.emplace_back(args.args[i + 1]->type);
         }
-        res.returnType = make_type<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
+        res.returnType = make_type<ShapeType>(move(keys), move(values));
     }
 } Magic_buildHashOrKeywordArgs;
 
@@ -2366,7 +2366,7 @@ public:
             }
         }
 
-        res.returnType = make_type<ShapeType>(Types::hashOfUntyped(), std::move(keys), std::move(values));
+        res.returnType = make_type<ShapeType>(std::move(keys), std::move(values));
     }
 } Shape_merge;
 
