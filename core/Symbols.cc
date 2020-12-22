@@ -233,11 +233,6 @@ SymbolData ClassOrModuleRef::dataAllowingNone(GlobalState &gs) const {
     return SymbolData(gs.classAndModules[_id], gs);
 }
 
-MethodRef SymbolRef::asMethodRef() const {
-    ENFORCE_NO_TIMER(kind() == Kind::Method);
-    return MethodRef::fromRaw(unsafeTableIndex());
-}
-
 SymbolData ClassOrModuleRef::data(GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     return dataAllowingNone(gs);

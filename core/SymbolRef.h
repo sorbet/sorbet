@@ -217,7 +217,10 @@ public:
     }
 
     // If Kind is Method, returns a MethodRef.
-    MethodRef asMethodRef() const;
+    MethodRef asMethodRef() const {
+        ENFORCE_NO_TIMER(kind() == Kind::Method);
+        return MethodRef::fromRaw(unsafeTableIndex());
+    }
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
