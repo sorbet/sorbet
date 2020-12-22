@@ -108,21 +108,32 @@ public:
         ENFORCE(funcSym.exists());
         ENFORCE(funcSym.data(cs)->isMethod());
 
-        // Don't define the method if it's abstract
-        if (!funcSym.data(cs)->isAbstract()) {
-            auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
-            auto universalSignature =
-                llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
-            auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
-
-            auto rubyFunc = cs.getFunction(isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod");
-            ENFORCE(rubyFunc);
-            builder.CreateCall(rubyFunc, {Payload::getRubyConstant(cs, ownerSym, builder),
-                                          Payload::toCString(cs, funcNameRef.show(cs), builder), ptr,
-                                          llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
-
-            builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
+        const char *rubyFuncName;
+        if (funcSym.data(cs)->isAbstract()) {
+            if (isSelf) {
+                rubyFuncName = "sorbet_defineAbstractMethodSingleton";
+            } else {
+                rubyFuncName = "sorbet_defineAbstractMethod";
+            }
+        } else {
+            if (isSelf) {
+                rubyFuncName = "sorbet_defineMethodSingleton";
+            } else {
+                rubyFuncName = "sorbet_defineMethod";
+            }
         }
+
+        auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
+        auto universalSignature =
+            llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
+        auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
+
+        auto rubyFunc = cs.getFunction(rubyFuncName);
+        builder.CreateCall(rubyFunc, {Payload::getRubyConstant(cs, ownerSym, builder),
+                                      Payload::toCString(cs, funcNameRef.show(cs), builder), ptr,
+                                      llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
+
+        builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
 
         // Return the symbol of the method name even if we don't emit a definition. This will be a problem if there are
         // meta-progrmaming methods applied to an abstract method definition, see
