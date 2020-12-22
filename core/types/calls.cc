@@ -1557,10 +1557,6 @@ public:
 class Magic_buildArray : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        if (args.args.empty()) {
-            res.returnType = Types::arrayOfUntyped();
-            return;
-        }
         vector<TypePtr> elems;
         elems.reserve(args.args.size());
         bool isType = absl::c_any_of(args.args, [](auto ty) { return isa_type<MetaType>(ty->type); });
