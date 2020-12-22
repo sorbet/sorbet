@@ -228,6 +228,19 @@ public:
         if (location == nullptr) {
             return;
         }
+
+        // Have we already edited this exact location?
+        // If we're renaming the exact same place twice, silently ignore it. We reach this condition when we find the
+        // same method send through multiple definitions (e.g. in the case of union types)
+        auto it = edits.find(location->uri);
+        if (it != edits.end()) {
+            for (auto &textedit : it->second) {
+                if (location->range->cmp(*textedit->range) == 0) {
+                    return;
+                }
+            }
+        }
+
         string newsrc;
         if (auto sendResp = response->isSend()) {
             newsrc = replaceMethodNameInSend(source, sendResp);
