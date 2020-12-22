@@ -205,6 +205,7 @@ NameDef names[] = {
     {"Types", "Types", true},
     {"DocumentDecoratorHelper", "DocumentDecoratorHelper", true},
     {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
+    {"allowDirectMutation", "allow_direct_mutation"},
 
     {"prefix"},
     {"to"},
