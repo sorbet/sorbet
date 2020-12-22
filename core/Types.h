@@ -655,8 +655,7 @@ TYPE(ShapeType) final {
 public:
     std::vector<TypePtr> keys; // TODO: store sorted by whatever
     std::vector<TypePtr> values;
-    const TypePtr underlying_;
-    ShapeType(TypePtr underlying, std::vector<TypePtr> keys, std::vector<TypePtr> values);
+    ShapeType(std::vector<TypePtr> keys, std::vector<TypePtr> values);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
@@ -669,7 +668,7 @@ public:
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 };
-CheckSize(ShapeType, 64, 8);
+CheckSize(ShapeType, 48, 8);
 
 TYPE(TupleType) final {
 private:

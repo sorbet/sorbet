@@ -659,7 +659,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                     }
                 }
             }
-            result.type = core::make_type<core::ShapeType>(core::Types::hashOfUntyped(), move(keys), move(values));
+            result.type = core::make_type<core::ShapeType>(move(keys), move(values));
         },
         [&](const ast::ConstantLit &i) {
             auto maybeAliased = i.symbol;
