@@ -422,7 +422,11 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
 }
 
 TypePtr TupleType::underlying(const GlobalState &gs) const {
-    return Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, this->elems)));
+    if (this->elems.empty()) {
+        return Types::arrayOfUntyped();
+    } else {
+        return Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, this->elems)));
+    }
 }
 
 void ShapeType::_sanityCheck(const GlobalState &gs) const {
