@@ -425,7 +425,7 @@ ShapeType::ShapeType(TypePtr underlying, vector<TypePtr> keys, vector<TypePtr> v
 }
 
 TypePtr ShapeType::underlying(const GlobalState &gs) const {
-    return this->underlying_;
+    return Types::hashOfUntyped();
 }
 
 TypePtr TupleType::underlying(const GlobalState &gs) const {
