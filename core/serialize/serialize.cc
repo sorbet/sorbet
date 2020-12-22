@@ -376,7 +376,6 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         }
         case TypePtr::Tag::TupleType: {
             auto &arr = cast_type_nonnull<TupleType>(what);
-            pickle(p, arr.underlying_);
             p.putU4(arr.elems.size());
             for (auto &el : arr.elems) {
                 pickle(p, el);
@@ -464,13 +463,12 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
         case TypePtr::Tag::AndType:
             return AndType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
         case TypePtr::Tag::TupleType: {
-            auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
             vector<TypePtr> elems(sz);
             for (auto &elem : elems) {
                 elem = unpickleType(p, gs);
             }
-            auto result = make_type<TupleType>(underlying, std::move(elems));
+            auto result = make_type<TupleType>(std::move(elems));
             return result;
         }
         case TypePtr::Tag::ShapeType: {

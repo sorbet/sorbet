@@ -416,7 +416,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
         for (auto &elem : tupleType->elems) {
             unwrappedElems.emplace_back(unwrapType(gs, loc, elem));
         }
-        return TupleType::build(gs, move(unwrappedElems));
+        return make_type<TupleType>(move(unwrappedElems));
     } else if (isa_type<LiteralType>(tp)) {
         if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unsupported usage of literal type");
@@ -1133,7 +1133,7 @@ TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRe
         }
         args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner.asClassOrModuleRef(), klass, targs));
     }
-    return TupleType::build(gs, move(args));
+    return make_type<TupleType>(move(args));
 }
 
 TypePtr ClassType::getCallArguments(const GlobalState &gs, NameRef name) const {
@@ -1495,7 +1495,7 @@ public:
                 ++it;
             } else if (attachedClass == Symbols::Hash() && i == 2) {
                 auto tupleArgs = targs;
-                targs.emplace_back(TupleType::build(gs, tupleArgs));
+                targs.emplace_back(make_type<TupleType>(tupleArgs));
             } else {
                 targs.emplace_back(Types::untypedUntracked());
             }
@@ -1574,7 +1574,7 @@ public:
             }
         }
 
-        auto tuple = TupleType::build(gs, move(elems));
+        auto tuple = make_type<TupleType>(move(elems));
         if (isType) {
             tuple = make_type<MetaType>(move(tuple));
         }
@@ -1630,7 +1630,7 @@ class Magic_expandSplat : public IntrinsicMethod {
             types.resize(expandTo, Types::nilClass());
         }
 
-        return TupleType::build(gs, move(types));
+        return make_type<TupleType>(move(types));
     }
 
 public:
@@ -2304,7 +2304,7 @@ public:
                 return;
             }
         }
-        res.returnType = TupleType::build(gs, std::move(elems));
+        res.returnType = make_type<TupleType>(std::move(elems));
     }
 } Tuple_concat;
 
@@ -2497,7 +2497,7 @@ public:
             }
         }
 
-        res.returnType = Types::arrayOf(gs, TupleType::build(gs, move(unwrappedElems)));
+        res.returnType = Types::arrayOf(gs, make_type<TupleType>(move(unwrappedElems)));
     }
 } Array_product;
 

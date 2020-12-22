@@ -296,7 +296,7 @@ TypePtr Types::rangeOf(const GlobalState &gs, const TypePtr &elem) {
 
 TypePtr Types::hashOf(const GlobalState &gs, const TypePtr &elem) {
     vector<TypePtr> tupleArgs{Types::Symbol(), elem};
-    vector<TypePtr> targs{Types::Symbol(), elem, TupleType::build(gs, move(tupleArgs))};
+    vector<TypePtr> targs{Types::Symbol(), elem, make_type<TupleType>(move(tupleArgs))};
     return make_type<AppliedType>(Symbols::Hash(), move(targs));
 }
 
@@ -373,8 +373,7 @@ TypePtr LiteralType::underlying(const GlobalState &gs) const {
     Exception::raise("should never be reached");
 }
 
-TupleType::TupleType(TypePtr underlying, vector<TypePtr> elements)
-    : elems(move(elements)), underlying_(std::move(underlying)) {
+TupleType::TupleType(vector<TypePtr> elements) : elems(move(elements)) {
     categoryCounterInc("types.allocated", "tupletype");
 }
 
@@ -723,9 +722,7 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
             ret = OrType::make_shared(unwrapSelfTypeParam(ctx, orType.left), unwrapSelfTypeParam(ctx, orType.right));
         },
         [&](const ShapeType &shape) { ret = make_type<ShapeType>(shape.keys, unwrapTypeVector(ctx, shape.values)); },
-        [&](const TupleType &tuple) {
-            ret = make_type<TupleType>(unwrapSelfTypeParam(ctx, tuple.underlying_), unwrapTypeVector(ctx, tuple.elems));
-        },
+        [&](const TupleType &tuple) { ret = make_type<TupleType>(unwrapTypeVector(ctx, tuple.elems)); },
         [&](const MetaType &meta) { ret = make_type<MetaType>(unwrapSelfTypeParam(ctx, meta.wrapped)); },
         [&](const AppliedType &appliedType) {
             ret = make_type<AppliedType>(appliedType.klass, unwrapTypeVector(ctx, appliedType.targs));
