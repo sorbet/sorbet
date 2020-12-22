@@ -268,6 +268,11 @@ template <class To> const To *cast_tree(const TreePtr &what) {
     }
 }
 
+// We disallow casting on temporary values because the lifetime of the returned value is
+// tied to the temporary, but it is possible for the temporary to be destroyed at the end
+// of the current statement, leading to use-after-free bugs.
+template <class To> To *cast_tree(TreePtr &&what) = delete;
+
 template <class To> To &cast_tree_nonnull(TreePtr &what) {
     ENFORCE(isa_tree<To>(what), "cast_tree_nonnull failed!");
     return *reinterpret_cast<To *>(what.get());
@@ -277,6 +282,11 @@ template <class To> const To &cast_tree_nonnull(const TreePtr &what) {
     ENFORCE(isa_tree<To>(what), "cast_tree_nonnull failed!");
     return *reinterpret_cast<To *>(what.get());
 }
+
+// We disallow casting on temporary values because the lifetime of the returned value is
+// tied to the temporary, but it is possible for the temporary to be destroyed at the end
+// of the current statement, leading to use-after-free bugs.
+template <class To> To *cast_tree_nonnull(TreePtr &&what) = delete;
 
 template <class To> inline bool TreePtr::isa(const TreePtr &what) {
     return isa_tree<To>(what);
