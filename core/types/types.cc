@@ -276,7 +276,7 @@ TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
     return tp;
 }
 
-TypePtr Types::lubAll(const GlobalState &gs, vector<TypePtr> &elements) {
+TypePtr Types::lubAll(const GlobalState &gs, const vector<TypePtr> &elements) {
     TypePtr acc = Types::bottom();
     for (auto &el : elements) {
         acc = Types::lub(gs, acc, el);
@@ -378,11 +378,6 @@ TupleType::TupleType(TypePtr underlying, vector<TypePtr> elements)
     categoryCounterInc("types.allocated", "tupletype");
 }
 
-TypePtr TupleType::build(const GlobalState &gs, vector<TypePtr> elements) {
-    TypePtr underlying = Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, elements)));
-    return make_type<TupleType>(move(underlying), move(elements));
-}
-
 AndType::AndType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
     categoryCounterInc("types.allocated", "andtype");
 }
@@ -428,7 +423,7 @@ TypePtr ShapeType::underlying(const GlobalState &gs) const {
 }
 
 TypePtr TupleType::underlying(const GlobalState &gs) const {
-    return this->underlying_;
+    return Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, this->elems)));
 }
 
 void ShapeType::_sanityCheck(const GlobalState &gs) const {
