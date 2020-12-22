@@ -665,6 +665,8 @@ public:
         }
         auto loc = c.loc;
         auto out = ast::make_tree<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
+        // TODO: Remove once I collect metrics.
+        prodHistogramInc("nesting_size", nesting_.size());
         ResolutionItem job{nesting_, ctx.file, ast::cast_tree<ast::ConstantLit>(out)};
         if (resolveJob(ctx, job)) {
             categoryCounterInc("resolve.constants.nonancestor", "firstpass");
