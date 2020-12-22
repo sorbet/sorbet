@@ -20,8 +20,8 @@ T.assert_type!([1, 2].last, Integer)
 # Empty arrays are T::Array[T.untyped]
 empty = []
 T.assert_type!(empty, T::Array[T.untyped])
-T.assert_type!(empty[0], NilClass) # error: unable to infer the type
-T.assert_type!(empty.first, NilClass) # error: unable to infer the type
+T.assert_type!(empty[0], NilClass)
+T.assert_type!(empty.first, NilClass)
 empty << 1
 empty << 4
 
