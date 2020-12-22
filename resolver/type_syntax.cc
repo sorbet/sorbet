@@ -1001,7 +1001,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
         },
         [&](const ast::Literal &lit) {
-            auto underlying = core::isa_type<core::LiteralType>(lit.value) ? lit.value.underlying() : lit.value;
+            auto underlying = core::isa_type<core::LiteralType>(lit.value) ? lit.value.underlying(ctx) : lit.value;
             if (auto e = ctx.beginError(lit.loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Unsupported literal in type syntax", lit.value.show(ctx));
                 e.replaceWith("Replace with underlying type", core::Loc(ctx.file, lit.loc), "{}", underlying.show(ctx));

@@ -376,7 +376,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         }
         case TypePtr::Tag::TupleType: {
             auto &arr = cast_type_nonnull<TupleType>(what);
-            pickle(p, arr.underlying());
+            pickle(p, arr.underlying_);
             p.putU4(arr.elems.size());
             for (auto &el : arr.elems) {
                 pickle(p, el);
@@ -385,7 +385,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         }
         case TypePtr::Tag::ShapeType: {
             auto &hash = cast_type_nonnull<ShapeType>(what);
-            pickle(p, hash.underlying());
+            pickle(p, hash.underlying_);
             p.putU4(hash.keys.size());
             ENFORCE(hash.keys.size() == hash.values.size());
             for (auto &el : hash.keys) {

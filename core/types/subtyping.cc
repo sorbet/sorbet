@@ -37,9 +37,9 @@ TypePtr Types::any(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     return ret;
 }
 
-const TypePtr underlying(const TypePtr &t1) {
+const TypePtr underlying(const GlobalState &gs, const TypePtr &t1) {
     if (is_proxy_type(t1)) {
-        return t1.underlying();
+        return t1.underlying(gs);
     }
     return t1;
 }
@@ -100,7 +100,7 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
     if (typesConsumed.empty()) {
         // t1 has no components that overlap with t2
         categoryCounterInc("lubDistributeOr.outcome", "worst");
-        return OrType::make_shared(t1, underlying(t2));
+        return OrType::make_shared(t1, underlying(gs, t2));
     }
     // lub back everything except typesConsumed
     auto remainingTypes = filterOrComponents(t1, typesConsumed);
@@ -110,7 +110,7 @@ TypePtr lubDistributeOr(const GlobalState &gs, const TypePtr &t1, const TypePtr 
         return t2;
     }
     categoryCounterInc("lubDistributeOr.outcome", "consumedComponent");
-    return OrType::make_shared(move(remainingTypes), underlying(t2));
+    return OrType::make_shared(move(remainingTypes), underlying(gs, t2));
 }
 
 TypePtr glbDistributeAnd(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) {
@@ -220,7 +220,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         return lubDistributeOr(gs, t2, t1);
     } else if (auto *a2 = cast_type<AndType>(t2)) { // 2, 4
         categoryCounterInc("lub", "and>");
-        auto t1d = underlying(t1);
+        auto t1d = underlying(gs, t1);
         auto t2filtered = dropLubComponents(gs, t2, t1d);
         if (t2filtered != t2) {
             return lub(gs, t1, t2filtered);
@@ -329,7 +329,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             result = Types::arrayOfUntyped();
                         }
                     } else {
-                        result = lub(gs, a1.underlying(), t2.underlying());
+                        result = lub(gs, a1.underlying(gs), t2.underlying(gs));
                     }
                 },
                 [&](const ShapeType &h1) { // Warning: this implements COVARIANT hashes
@@ -369,27 +369,27 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             result = Types::hashOfUntyped();
                         }
                     } else {
-                        result = lub(gs, h1.underlying(), t2.underlying());
+                        result = lub(gs, h1.underlying(gs), t2.underlying(gs));
                     }
                 },
                 [&](const LiteralType &l1) {
                     if (isa_type<LiteralType>(t2)) {
                         auto l2 = cast_type_nonnull<LiteralType>(t2);
-                        auto underlyingL1 = l1.underlying();
-                        auto underlyingL2 = l2.underlying();
+                        auto underlyingL1 = l1.underlying(gs);
+                        auto underlyingL2 = l2.underlying(gs);
                         auto u1 = cast_type_nonnull<ClassType>(underlyingL1);
                         auto u2 = cast_type_nonnull<ClassType>(underlyingL2);
                         if (u1.symbol == u2.symbol) {
                             if (l1.equals(l2)) {
                                 result = t1;
                             } else {
-                                result = l1.underlying();
+                                result = l1.underlying(gs);
                             }
                         } else {
-                            result = lubGround(gs, l1.underlying(), l2.underlying());
+                            result = lubGround(gs, l1.underlying(gs), l2.underlying(gs));
                         }
                     } else {
-                        result = lub(gs, l1.underlying(), t2.underlying());
+                        result = lub(gs, l1.underlying(gs), t2.underlying(gs));
                     }
                 },
                 [&](const MetaType &m1) {
@@ -399,14 +399,14 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                             return;
                         }
                     }
-                    result = lub(gs, m1.underlying(), t2.underlying());
+                    result = lub(gs, m1.underlying(gs), t2.underlying(gs));
                 });
             ENFORCE(result != nullptr);
             return result;
         } else {
             bool allowProxyInLub = isa_type<TupleType>(t1) || isa_type<ShapeType>(t1);
             // only 1st is proxy
-            TypePtr und = t1.underlying();
+            TypePtr und = t1.underlying(gs);
             if (isSubType(gs, und, t2)) {
                 return t2;
             } else if (allowProxyInLub) {
@@ -419,7 +419,7 @@ TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
         // only 2nd is proxy
         bool allowProxyInLub = isa_type<TupleType>(t2) || isa_type<ShapeType>(t2);
         // only 1st is proxy
-        TypePtr und = t2.underlying();
+        TypePtr und = t2.underlying(gs);
         if (isSubType(gs, und, t1)) {
             return t1;
         } else if (allowProxyInLub) {
@@ -725,8 +725,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
                 },
                 [&](const LiteralType &l1) {
                     auto l2 = cast_type_nonnull<LiteralType>(t2);
-                    auto underlyingL1 = l1.underlying();
-                    auto underlyingL2 = l2.underlying();
+                    auto underlyingL1 = l1.underlying(gs);
+                    auto underlyingL2 = l2.underlying(gs);
                     auto u1 = cast_type_nonnull<ClassType>(underlyingL1);
                     auto u2 = cast_type_nonnull<ClassType>(underlyingL2);
                     if (u1.symbol == u2.symbol) {
@@ -947,7 +947,7 @@ bool classSymbolIsAsGoodAs(const GlobalState &gs, ClassOrModuleRef c1, ClassOrMo
 void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypePtr &ty, const TypePtr &blame) {
     ENFORCE(blame.isUntyped());
     if (is_proxy_type(ty)) {
-        compareToUntyped(gs, constr, ty.underlying(), blame);
+        compareToUntyped(gs, constr, ty.underlying(gs), blame);
     }
 
     if (auto *t = cast_type<AppliedType>(ty)) {
@@ -1139,7 +1139,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
     }
     if (isa_type<AppliedType>(t2)) {
         if (is_proxy_type(t1)) {
-            return Types::isSubTypeUnderConstraint(gs, constr, t1.underlying(), t2, mode);
+            return Types::isSubTypeUnderConstraint(gs, constr, t1.underlying(gs), t2, mode);
         }
         return false;
     }
@@ -1211,7 +1211,7 @@ bool isSubTypeUnderConstraintSingle(const GlobalState &gs, TypeConstraint &const
             // both are proxy
         } else {
             // only 1st is proxy
-            TypePtr und = t1.underlying();
+            TypePtr und = t1.underlying(gs);
             return isSubTypeUnderConstraintSingle(gs, constr, mode, und, t2);
         }
     } else if (is_proxy_type(t2)) {
@@ -1368,7 +1368,7 @@ TypePtr MetaType::_approximate(const GlobalState &gs, const TypeConstraint &tc) 
     return nullptr;
 }
 
-TypePtr MetaType::underlying() const {
+TypePtr MetaType::underlying(const GlobalState &gs) const {
     return Types::Object();
 }
 

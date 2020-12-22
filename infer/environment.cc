@@ -901,7 +901,7 @@ core::TypePtr flattenArrays(core::Context ctx, const core::TypePtr &type) {
             result = a.targs.front();
         },
 
-        [&](const core::TupleType &t) { result = t.elementType(); },
+        [&](const core::TupleType &t) { result = t.elementType(ctx); },
 
         [&](const core::TypePtr &t) { result = std::move(type); });
     return result;
@@ -1314,8 +1314,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             const core::TypeAndOrigins &cur =
                 (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(ctx, bind.bind.variable);
 
-            bool asGoodAs =
-                core::Types::isSubType(ctx, core::Types::dropLiteral(tp.type), core::Types::dropLiteral(cur.type));
+            bool asGoodAs = core::Types::isSubType(ctx, core::Types::dropLiteral(ctx, tp.type),
+                                                   core::Types::dropLiteral(ctx, cur.type));
 
             {
                 switch (bindMinLoops) {

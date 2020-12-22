@@ -51,9 +51,9 @@ GENERATE_CALL_MEMBER(_replaceSelfType, return nullptr, declval<const GlobalState
 GENERATE_CALL_MEMBER(_approximate, return nullptr, declval<const GlobalState &>(), declval<const TypeConstraint &>())
 
 GENERATE_CALL_MEMBER(underlying,
-                     Exception::raise("should never happen: underlying on {}",
+                     Exception::raise("TypePtr::underlying called on non-proxy-type `{}`",
                                       TypePtr::tagToString(TypePtr::TypeToTag<typename remove_const<T>::type>::value));
-                     return nullptr);
+                     return nullptr, std::declval<const GlobalState &>());
 
 } // namespace
 
@@ -221,7 +221,7 @@ TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
         case Tag::TupleType:
         case Tag::ShapeType:
         case Tag::LiteralType: {
-            return this->underlying().getCallArguments(gs, name);
+            return this->underlying(gs).getCallArguments(gs, name);
         }
         case Tag::OrType: {
             auto &orType = cast_type_nonnull<OrType>(*this);
@@ -346,8 +346,9 @@ DispatchResult TypePtr::dispatchCall(const GlobalState &gs, DispatchArgs args) c
 #undef DISPATCH_CALL
 }
 
-TypePtr TypePtr::underlying() const {
-#define UNDERLYING(T) return CALL_MEMBER_underlying<const T>::call(cast_type_nonnull<T>(*this));
+TypePtr TypePtr::underlying(const GlobalState &gs) const {
+    ENFORCE(is_proxy_type(*this), "underlying() only makes sense on a proxy type");
+#define UNDERLYING(T) return CALL_MEMBER_underlying<const T>::call(cast_type_nonnull<T>(*this), gs);
     GENERATE_TAG_SWITCH(tag(), UNDERLYING)
 #undef UNDERLYING
 }

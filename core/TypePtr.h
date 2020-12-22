@@ -304,7 +304,7 @@ public:
                          const std::vector<TypePtr> &targs) const;
 
     // If this TypePtr `is_proxy_type`, returns its underlying type.
-    TypePtr underlying() const;
+    TypePtr underlying(const GlobalState &gs) const;
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string toString(const GlobalState &gs) const {

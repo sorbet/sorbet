@@ -209,7 +209,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
             }
         },
         [&](const TypePtr &) {
-            if (is_proxy_type(from) && dropSubtypesOf(gs, from.underlying(), klass).isBottom()) {
+            if (is_proxy_type(from) && dropSubtypesOf(gs, from.underlying(gs), klass).isBottom()) {
                 result = Types::bottom();
             } else {
                 result = from;
@@ -238,7 +238,7 @@ bool Types::canBeTruthy(const GlobalState &gs, const TypePtr &what) {
         },
         [&](const TypePtr &) {
             if (is_proxy_type(what)) {
-                isTruthy = canBeTruthy(gs, what.underlying());
+                isTruthy = canBeTruthy(gs, what.underlying(gs));
             } else {
                 isTruthy = true;
             }
@@ -268,10 +268,10 @@ TypePtr Types::approximateSubtract(const GlobalState &gs, const TypePtr &from, c
     return result;
 }
 
-TypePtr Types::dropLiteral(const TypePtr &tp) {
+TypePtr Types::dropLiteral(const GlobalState &gs, const TypePtr &tp) {
     if (isa_type<LiteralType>(tp)) {
         auto a = cast_type_nonnull<LiteralType>(tp);
-        return a.underlying();
+        return a.underlying(gs);
     }
     return tp;
 }
@@ -359,7 +359,7 @@ core::NameRef LiteralType::unsafeAsName() const {
     return NameRef::fromRawUnchecked(nameId);
 }
 
-TypePtr LiteralType::underlying() const {
+TypePtr LiteralType::underlying(const GlobalState &gs) const {
     switch (literalKind) {
         case LiteralTypeKind::Integer:
             return Types::Integer();
@@ -379,7 +379,7 @@ TupleType::TupleType(TypePtr underlying, vector<TypePtr> elements)
 }
 
 TypePtr TupleType::build(const GlobalState &gs, vector<TypePtr> elements) {
-    TypePtr underlying = Types::arrayOf(gs, Types::dropLiteral(Types::lubAll(gs, elements)));
+    TypePtr underlying = Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, elements)));
     return make_type<TupleType>(move(underlying), move(elements));
 }
 
@@ -388,7 +388,7 @@ AndType::AndType(const TypePtr &left, const TypePtr &right) : left(move(left)), 
 }
 
 void LiteralType::_sanityCheck(const GlobalState &gs) const {
-    sanityCheckProxyType(gs, underlying());
+    sanityCheckProxyType(gs, underlying(gs));
 }
 
 bool LiteralType::equals(const LiteralType &rhs) const {
@@ -411,8 +411,8 @@ OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), ri
 }
 
 void TupleType::_sanityCheck(const GlobalState &gs) const {
-    sanityCheckProxyType(gs, underlying());
-    auto underlying = this->underlying();
+    sanityCheckProxyType(gs, underlying(gs));
+    auto underlying = this->underlying(gs);
     auto *applied = cast_type<AppliedType>(underlying);
     ENFORCE(applied);
     ENFORCE(applied->klass == Symbols::Array());
@@ -428,16 +428,16 @@ ShapeType::ShapeType(TypePtr underlying, vector<TypePtr> keys, vector<TypePtr> v
     categoryCounterInc("types.allocated", "shapetype");
 }
 
-TypePtr ShapeType::underlying() const {
+TypePtr ShapeType::underlying(const GlobalState &gs) const {
     return this->underlying_;
 }
 
-TypePtr TupleType::underlying() const {
+TypePtr TupleType::underlying(const GlobalState &gs) const {
     return this->underlying_;
 }
 
 void ShapeType::_sanityCheck(const GlobalState &gs) const {
-    sanityCheckProxyType(gs, underlying());
+    sanityCheckProxyType(gs, underlying(gs));
     ENFORCE(this->values.size() == this->keys.size());
     for (auto &v : this->keys) {
         v.sanityCheck(gs);
@@ -660,8 +660,8 @@ optional<int> SendAndBlockLink::fixedArity() const {
     return arity;
 }
 
-TypePtr TupleType::elementType() const {
-    auto underlying = this->underlying();
+TypePtr TupleType::elementType(const GlobalState &gs) const {
+    auto underlying = this->underlying(gs);
     auto *ap = cast_type<AppliedType>(underlying);
     ENFORCE(ap);
     ENFORCE(ap->klass == Symbols::Array());
@@ -698,7 +698,7 @@ TypePtr Types::widen(const GlobalState &gs, const TypePtr &type) {
         },
         [&](const TypePtr &) {
             if (is_proxy_type(type)) {
-                ret = Types::widen(gs, type.underlying());
+                ret = Types::widen(gs, type.underlying(gs));
             } else {
                 ret = type;
             }
