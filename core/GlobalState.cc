@@ -1056,9 +1056,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name,
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
     wasModified_ = true;
 
-    core::SymbolRef(owner).dataAllowingNone(*this)
-        ->typeArguments()
-        .emplace_back(result);
+    core::SymbolRef(owner).dataAllowingNone(*this)->typeArguments().emplace_back(result);
     return result;
 }
 
