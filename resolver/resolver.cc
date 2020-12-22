@@ -95,16 +95,12 @@ class ResolveConstantsWalk {
     friend class ResolveSanityCheckWalk;
 
 private:
-    struct Nesting {
-        const shared_ptr<Nesting> parent;
-        const core::SymbolRef scope;
-
-        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
-    };
-    shared_ptr<Nesting> nesting_;
+    // TODO: Figure out ideal size.
+    typedef InlinedVector<core::ClassOrModuleRef, 4> Nesting;
+    Nesting nesting_;
 
     struct ResolutionItem {
-        shared_ptr<Nesting> scope;
+        Nesting scope;
         core::FileRef file;
         ast::ConstantLit *out;
         bool resolutionFailed = false;
@@ -116,6 +112,7 @@ private:
         ResolutionItem(const ResolutionItem &rhs) = delete;
         const ResolutionItem &operator=(const ResolutionItem &rhs) = delete;
     };
+    CheckSize(ResolutionItem, 48, 8);
     struct AncestorResolutionItem {
         ast::ConstantLit *ancestor;
         core::ClassOrModuleRef klass;
@@ -131,6 +128,7 @@ private:
         AncestorResolutionItem(const AncestorResolutionItem &rhs) = delete;
         const AncestorResolutionItem &operator=(const AncestorResolutionItem &rhs) = delete;
     };
+    CheckSize(AncestorResolutionItem, 24, 8);
 
     struct ClassAliasResolutionItem {
         core::SymbolRef lhs;
@@ -144,6 +142,7 @@ private:
         ClassAliasResolutionItem(const ClassAliasResolutionItem &) = delete;
         const ClassAliasResolutionItem &operator=(const ClassAliasResolutionItem &) = delete;
     };
+    CheckSize(ClassAliasResolutionItem, 16, 8);
 
     struct TypeAliasResolutionItem {
         core::SymbolRef lhs;
@@ -156,6 +155,7 @@ private:
         TypeAliasResolutionItem(const TypeAliasResolutionItem &) = delete;
         const TypeAliasResolutionItem &operator=(const TypeAliasResolutionItem &) = delete;
     };
+    CheckSize(TypeAliasResolutionItem, 16, 8);
 
     struct ClassMethodsResolutionItem {
         core::FileRef file;
@@ -168,6 +168,7 @@ private:
         ClassMethodsResolutionItem(const ClassMethodsResolutionItem &) = delete;
         const ClassMethodsResolutionItem &operator=(const ClassMethodsResolutionItem &) = delete;
     };
+    CheckSize(ClassMethodsResolutionItem, 16, 8);
 
     vector<ResolutionItem> todo_;
     vector<AncestorResolutionItem> todoAncestors_;
@@ -175,16 +176,16 @@ private:
     vector<TypeAliasResolutionItem> todoTypeAliases_;
     vector<ClassMethodsResolutionItem> todoClassMethods_;
 
-    static core::SymbolRef resolveLhs(core::Context ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
-        Nesting *scope = nesting.get();
-        while (scope != nullptr) {
-            auto lookup = scope->scope.data(ctx)->findMember(ctx, name);
+    static core::SymbolRef resolveLhs(core::Context ctx, const Nesting &nesting, core::NameRef name) {
+        ENFORCE_NO_TIMER(!nesting.empty());
+        for (auto it = nesting.rbegin(); it != nesting.rend(); it++) {
+            auto scope = *it;
+            auto lookup = scope.data(ctx)->findMember(ctx, name);
             if (lookup.exists()) {
                 return lookup;
             }
-            scope = scope->parent.get();
         }
-        return nesting->scope.data(ctx)->findMemberTransitive(ctx, name);
+        return nesting.back().data(ctx)->findMemberTransitive(ctx, name);
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
@@ -220,7 +221,7 @@ private:
         return !checker.seenUnresolved;
     }
 
-    static core::SymbolRef resolveConstant(core::Context ctx, shared_ptr<Nesting> nesting,
+    static core::SymbolRef resolveConstant(core::Context ctx, const Nesting &nesting,
                                            const ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
@@ -268,7 +269,7 @@ private:
     static void constantResolutionFailed(core::MutableContext ctx, ResolutionItem &job, bool suggestDidYouMean) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
 
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx.withOwner(job.scope.back()), job.scope, original, job.resolutionFailed);
         if (resolved.exists() && resolved.data(ctx)->isTypeAlias()) {
             if (resolved.data(ctx)->resultType == nullptr) {
                 // This is actually a use-site error, but we limit ourselves to emitting it once by checking resultType
@@ -310,19 +311,11 @@ private:
                 job.out->resolutionScopes = {originalScope};
             }
         } else {
-            auto nesting = job.scope;
-            while (true) {
-                job.out->resolutionScopes.emplace_back(nesting->scope);
-                if (nesting->parent == nullptr) {
-                    break;
-                }
-
-                nesting = nesting->parent;
-            }
+            job.out->resolutionScopes.insert(job.out->resolutionScopes.end(), job.scope.rbegin(), job.scope.rend());
         }
 
         ENFORCE(!job.out->resolutionScopes.empty());
-        ENFORCE(job.scope->scope != core::Symbols::StubModule());
+        ENFORCE(job.scope.back() != core::Symbols::StubModule());
 
         auto customAutogenError = original.cnst == core::Symbols::Subclasses().data(ctx)->name;
         if (!alreadyReported || customAutogenError) {
@@ -360,7 +353,7 @@ private:
             return true;
         }
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(job.out->original);
-        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, original, job.resolutionFailed);
+        auto resolved = resolveConstant(ctx.withOwner(job.scope.back()), job.scope, original, job.resolutionFailed);
         if (!resolved.exists()) {
             return false;
         }
@@ -610,12 +603,15 @@ private:
     void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::TreePtr &ancestor, bool isInclude,
                            bool isSuperclass = false) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
-            auto scopeTmp = nesting_;
+            core::ClassOrModuleRef scopeTemp;
             if (isSuperclass) {
-                nesting_ = nesting_->parent;
+                scopeTemp = nesting_.back();
+                nesting_.pop_back();
             }
             ancestor = postTransformUnresolvedConstantLit(ctx, std::move(ancestor));
-            nesting_ = scopeTmp;
+            if (isSuperclass) {
+                nesting_.push_back(scopeTemp);
+            }
         }
         AncestorResolutionItem job;
         job.klass = klass;
@@ -657,10 +653,8 @@ private:
     }
 
 public:
-    ResolveConstantsWalk() : nesting_(nullptr) {}
-
     ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
-        nesting_ = make_unique<Nesting>(std::move(nesting_), ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
+        nesting_.push_back(ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
         return tree;
     }
 
@@ -699,7 +693,7 @@ public:
             transformAncestor(ctx.withOwner(klass), singleton, ancst, isInclude);
         }
 
-        nesting_ = nesting_->parent;
+        nesting_.pop_back();
         return tree;
     }
 
