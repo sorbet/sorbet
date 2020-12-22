@@ -6,7 +6,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def package_method<<C <todo sym>>>(&<blk>)
+    def package_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -14,7 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def self.static_method<<C <todo sym>>>(&<blk>)
+    def self.static_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -51,11 +51,11 @@ end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C MyPackage_Package><<C <todo sym>>> < ()
     class ::<root>::<C PackageSpec><<C <todo sym>>> < (::<todo sym>)
-      def self.some_method<<C <todo sym>>>(x, &<blk>)
+      def self.some_method<<todo method>>(x, &<blk>)
         <emptyTree>
       end
 
-      def self.method_call_arg<<C <todo sym>>>(&<blk>)
+      def self.method_call_arg<<todo method>>(&<blk>)
         <emptyTree>
       end
 

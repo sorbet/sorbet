@@ -447,8 +447,7 @@ private:
         auto ancestorType =
             core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
 
-        core::SymbolRef uaSym =
-            ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
+        auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
         core::TypePtr resultType = uaSym.data(ctx)->resultType;
         if (!resultType) {
             uaSym.data(ctx)->resultType = core::TupleType::build(ctx, {ancestorType});
@@ -459,7 +458,7 @@ private:
         }
     }
 
-    static core::SymbolRef stubSymbolForAncestor(const AncestorResolutionItem &item) {
+    static core::ClassOrModuleRef stubSymbolForAncestor(const AncestorResolutionItem &item) {
         if (item.isSuperclass) {
             return core::Symbols::StubSuperClass();
         } else {
@@ -473,68 +472,72 @@ private:
             return false;
         }
 
-        core::SymbolRef resolved;
-        if (ancestorSym.data(ctx)->isTypeAlias()) {
-            if (!lastRun) {
-                return false;
+        core::ClassOrModuleRef resolvedClass;
+        {
+            core::SymbolRef resolved;
+            if (ancestorSym.data(ctx)->isTypeAlias()) {
+                if (!lastRun) {
+                    return false;
+                }
+                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
+                    e.setHeader("Superclasses and mixins may not be type aliases");
+                }
+                resolved = stubSymbolForAncestor(job);
+            } else {
+                resolved = ancestorSym.data(ctx)->dealias(ctx);
             }
-            if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins may not be type aliases");
+
+            if (!resolved.isClassOrModule()) {
+                if (!lastRun) {
+                    return false;
+                }
+                if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
+                    e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
+                }
+                resolved = stubSymbolForAncestor(job);
             }
-            resolved = stubSymbolForAncestor(job);
-        } else {
-            resolved = ancestorSym.data(ctx)->dealias(ctx);
+            resolvedClass = resolved.asClassOrModuleRef();
         }
 
-        if (!resolved.isClassOrModule()) {
-            if (!lastRun) {
-                return false;
-            }
-            if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
-            }
-            resolved = stubSymbolForAncestor(job);
-        }
-
-        if (resolved == job.klass) {
+        if (resolvedClass == job.klass) {
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.data(ctx)->show(ctx));
-                e.addErrorLine(resolved.data(ctx)->loc(), "Class definition");
+                e.addErrorLine(resolvedClass.data(ctx)->loc(), "Class definition");
             }
-            resolved = stubSymbolForAncestor(job);
-        } else if (resolved.data(ctx)->derivesFrom(ctx, job.klass)) {
+            resolvedClass = stubSymbolForAncestor(job);
+        } else if (resolvedClass.data(ctx)->derivesFrom(ctx, job.klass)) {
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
-                            job.klass.data(ctx)->show(ctx), resolved.data(ctx)->show(ctx));
+                            job.klass.data(ctx)->show(ctx), resolvedClass.data(ctx)->show(ctx));
                 e.addErrorLine(job.klass.data(ctx)->loc(), "One definition");
-                e.addErrorLine(resolved.data(ctx)->loc(), "Other definition");
+                e.addErrorLine(resolvedClass.data(ctx)->loc(), "Other definition");
             }
-            resolved = stubSymbolForAncestor(job);
+            resolvedClass = stubSymbolForAncestor(job);
         }
 
         bool ancestorPresent = true;
         if (job.isSuperclass) {
-            if (resolved == core::Symbols::todo()) {
+            if (resolvedClass == core::Symbols::todo()) {
                 // No superclass specified
                 ancestorPresent = false;
             } else if (!job.klass.data(ctx)->superClass().exists() ||
                        job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
-                       job.klass.data(ctx)->superClass() == resolved.asClassOrModuleRef()) {
-                job.klass.data(ctx)->setSuperClass(resolved.asClassOrModuleRef());
+                       job.klass.data(ctx)->superClass() == resolvedClass) {
+                job.klass.data(ctx)->setSuperClass(resolvedClass);
             } else {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
                     e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.data(ctx)->show(ctx),
-                                job.klass.data(ctx)->superClass().data(ctx)->show(ctx), resolved.show(ctx));
+                                job.klass.data(ctx)->superClass().data(ctx)->show(ctx),
+                                resolvedClass.data(ctx)->show(ctx));
                 }
             }
         } else {
-            ENFORCE(resolved.isClassOrModule());
-            if (!job.klass.data(ctx)->addMixin(ctx, resolved.asClassOrModuleRef())) {
+            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass)) {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
-                                resolved.data(ctx)->show(ctx));
-                    e.addErrorLine(resolved.data(ctx)->loc(), "`{}` defined as a class here",
-                                   resolved.data(ctx)->show(ctx));
+                                resolvedClass.data(ctx)->show(ctx));
+                    e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
+                                   resolvedClass.data(ctx)->show(ctx));
                 }
             }
         }
@@ -1062,7 +1065,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     struct ResolveAttachedClassItem {
         core::SymbolRef owner;
-        core::SymbolRef klass;
+        core::ClassOrModuleRef klass;
         core::FileRef file;
     };
 
@@ -1094,7 +1097,7 @@ class ResolveTypeMembersAndFieldsWalk {
 
     struct ResolveMethodAliasItem {
         core::FileRef file;
-        core::SymbolRef owner;
+        core::ClassOrModuleRef owner;
         core::LocOffsets loc;
         core::LocOffsets toNameLoc;
         core::NameRef toName;
@@ -1441,20 +1444,19 @@ class ResolveTypeMembersAndFieldsWalk {
         // Once the owner has had all of its type members resolved, resolve the
         // AttachedClass on its singleton.
         if (isGenericResolved(ctx, owner)) {
-            resolveAttachedClass(ctx, owner, resolvedAttachedClasses);
+            resolveAttachedClass(ctx, owner.asClassOrModuleRef(), resolvedAttachedClasses);
         }
     }
 
-    static void resolveAttachedClass(core::MutableContext ctx, core::SymbolRef sym,
+    static void resolveAttachedClass(core::MutableContext ctx, core::ClassOrModuleRef sym,
                                      vector<bool> &resolvedAttachedClasses) {
-        ENFORCE(sym.isClassOrModule());
         // Avoid trying to re-resolve symbols that are already resolved.
         // This avoids (relatively) expensive findMember operations.
-        if (resolvedAttachedClasses[sym.classOrModuleIndex()] == true) {
+        if (resolvedAttachedClasses[sym.id()] == true) {
             return;
         }
 
-        resolvedAttachedClasses[sym.classOrModuleIndex()] = true;
+        resolvedAttachedClasses[sym.id()] = true;
 
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
         if (!singleton.exists()) {
@@ -1541,9 +1543,11 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     static void resolveMethodAlias(core::MutableContext ctx, const ResolveMethodAliasItem &job) {
-        core::SymbolRef toMethod = ctx.owner.data(ctx)->findMemberNoDealias(ctx, job.toName);
-        if (toMethod.exists()) {
-            toMethod = toMethod.data(ctx)->dealiasMethod(ctx);
+        core::SymbolRef member = ctx.owner.data(ctx)->findMemberNoDealias(ctx, job.toName);
+        // TODO(jvilk): Would be nice to have findMember that returned MethodRef.
+        core::MethodRef toMethod = core::Symbols::noMethod();
+        if (member.exists()) {
+            toMethod = member.data(ctx)->dealiasMethod(ctx);
         }
 
         if (!toMethod.exists()) {
@@ -1578,8 +1582,8 @@ class ResolveTypeMembersAndFieldsWalk {
             return;
         }
 
-        core::SymbolRef alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, job.loc), job.owner, job.fromName);
-        alias.data(ctx)->resultType = core::make_type<core::AliasType>(toMethod);
+        auto alias = ctx.state.enterMethodSymbol(core::Loc(ctx.file, job.loc), job.owner, job.fromName);
+        alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(toMethod));
     }
 
     // Returns `true` if `asgn` is a field declaration.
@@ -1618,7 +1622,7 @@ class ResolveTypeMembersAndFieldsWalk {
         Timer timeit(gs.tracer(), "resolver.computeExternalType");
         // Ensure all symbols have `externalType` computed.
         for (u4 i = 1; i < gs.classAndModulesUsed(); i++) {
-            core::SymbolRef(gs, core::SymbolRef::Kind::ClassOrModule, i).data(gs)->unsafeComputeExternalType(gs);
+            core::ClassOrModuleRef(gs, i).data(gs)->unsafeComputeExternalType(gs);
         }
     }
 
@@ -1785,8 +1789,8 @@ class ResolveTypeMembersAndFieldsWalk {
         }
     }
 
-    core::SymbolRef methodOwner(core::Context ctx) {
-        core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+    core::ClassOrModuleRef methodOwner(core::Context ctx) {
+        core::ClassOrModuleRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (owner == core::Symbols::root()) {
             // Root methods end up going on object
             owner = core::Symbols::Object();
@@ -2257,7 +2261,7 @@ class ResolveSignaturesWalk {
 public:
     struct ResolveSignatureJob {
         core::FileRef file;
-        core::SymbolRef owner;
+        core::ClassOrModuleRef owner;
         ast::MethodDef *mdef;
         core::LocOffsets loc;
         ParsedSig sig;
@@ -2272,7 +2276,7 @@ public:
 
     struct ResolveMultiSignatureJob {
         core::FileRef file;
-        core::SymbolRef owner;
+        core::ClassOrModuleRef owner;
         ast::MethodDef *mdef;
         bool isOverloaded;
         InlinedVector<OverloadedMethodSignature, 2> sigs;
@@ -2360,7 +2364,7 @@ private:
         }
     }
 
-    static void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, core::LocOffsets exprLoc,
+    static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
                                   ParsedSig sig, bool isOverloaded, const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
@@ -2576,7 +2580,7 @@ private:
         seq.stats.erase(toRemove, seq.stats.end());
     }
 
-    ParsedSig parseSig(core::Context ctx, core::SymbolRef sigOwner, ast::Send &send, ast::MethodDef &mdef) {
+    ParsedSig parseSig(core::Context ctx, core::ClassOrModuleRef sigOwner, ast::Send &send, ast::MethodDef &mdef) {
         auto allowSelfType = true;
         auto allowRebind = false;
         auto allowTypeMember = true;
@@ -2651,18 +2655,19 @@ private:
                     // process signatures in the context of either the current
                     // class, or the current singleton class, depending on if
                     // the current method is a self method.
-                    core::SymbolRef sigOwner;
+                    core::ClassOrModuleRef sigOwner;
                     if (mdef.flags.isSelfMethod) {
                         sigOwner = ctx.owner.data(ctx)->lookupSingletonClass(ctx);
                         // namer ensures that all method owners are defined.
                         ENFORCE_NO_TIMER(sigOwner.exists());
                     } else {
-                        sigOwner = ctx.owner;
+                        sigOwner = ctx.owner.asClassOrModuleRef();
                     }
 
                     if (lastSigs.size() == 1) {
                         auto &lastSig = lastSigs.front();
-                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.file, ctx.owner, &mdef, lastSig->loc,
+                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.file, ctx.owner.asClassOrModuleRef(), &mdef,
+                                                                       lastSig->loc,
                                                                        parseSig(ctx, sigOwner, *lastSig, mdef)});
                     } else {
                         bool isOverloaded = ctx.permitOverloadDefinitions(ctx.file);
@@ -2683,8 +2688,8 @@ private:
                             sigs.emplace_back(OverloadedMethodSignature{lastSig->loc, move(sig), move(argsToKeep)});
                         }
 
-                        multiSignatureJobs.emplace_back(
-                            ResolveMultiSignatureJob{ctx.file, ctx.owner, &mdef, isOverloaded, std::move(sigs)});
+                        multiSignatureJobs.emplace_back(ResolveMultiSignatureJob{
+                            ctx.file, ctx.owner.asClassOrModuleRef(), &mdef, isOverloaded, std::move(sigs)});
                     }
 
                     lastSigs.clear();
@@ -2718,7 +2723,7 @@ public:
         int i = -1;
         for (auto &sig : sigs) {
             i++;
-            core::SymbolRef overloadSym;
+            core::MethodRef overloadSym;
             if (isOverloaded) {
                 overloadSym = ctx.state.enterNewMethodOverload(core::Loc(ctx.file, sig.loc), mdef.symbol, originalName,
                                                                i, sig.argsToKeep);
@@ -2768,7 +2773,7 @@ public:
     }
     ast::TreePtr postTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
+        ENFORCE(original.symbol != core::Symbols::todoMethod(), "These should have all been resolved: {}",
                 tree.toString(ctx));
         return tree;
     }

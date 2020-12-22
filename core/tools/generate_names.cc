@@ -403,6 +403,7 @@ NameDef names[] = {
     {"Class", "Class", true},
     {"Module", "Module", true},
     {"Todo", "<todo sym>", true},
+    {"TodoMethod", "<todo method>", false},
     {"NoSymbol", "<none>", true},
     {"noFieldOrStaticField", "<no-field-or-static-field>", false},
     {"noMethod", "<no-method>", false},

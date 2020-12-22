@@ -156,9 +156,9 @@ CheckSize(GetCurrentException, 16, 8);
 class LoadArg final : public Instruction {
 public:
     u2 argId;
-    core::SymbolRef method;
+    core::MethodRef method;
 
-    LoadArg(core::SymbolRef method, u2 argId) : argId(argId), method(method) {
+    LoadArg(core::MethodRef method, u2 argId) : argId(argId), method(method) {
         categoryCounterInc("cfg", "loadarg");
     };
 
@@ -171,9 +171,9 @@ CheckSize(LoadArg, 16, 8);
 class ArgPresent final : public Instruction {
 public:
     u2 argId;
-    core::SymbolRef method;
+    core::MethodRef method;
 
-    ArgPresent(core::SymbolRef method, u2 argId) : argId(argId), method(method) {
+    ArgPresent(core::MethodRef method, u2 argId) : argId(argId), method(method) {
         categoryCounterInc("cfg", "argpresent");
     }
 

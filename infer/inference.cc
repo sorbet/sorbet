@@ -14,7 +14,7 @@ namespace sorbet::infer {
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     Timer timeit(ctx.state.tracer(), "Inference::run",
                  {{"func", (string)cfg->symbol.data(ctx)->toStringFullName(ctx)}});
-    ENFORCE(cfg->symbol == ctx.owner);
+    ENFORCE(cfg->symbol == ctx.owner.asMethodRef());
     auto methodLoc = cfg->symbol.data(ctx)->loc();
     prodCounterInc("types.input.methods.typechecked");
     int typedSendCount = 0;
@@ -63,8 +63,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         auto enclosingClass = cfg->symbol.data(ctx)->enclosingClass(ctx);
         methodReturnType = core::Types::instantiate(
             ctx,
-            core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol.data(ctx)->resultType, cfg->symbol.data(ctx)->owner,
-                                              enclosingClass, enclosingClass.data(ctx)->selfTypeArgs(ctx)),
+            core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol.data(ctx)->resultType,
+                                              cfg->symbol.data(ctx)->owner.asClassOrModuleRef(), enclosingClass,
+                                              enclosingClass.data(ctx)->selfTypeArgs(ctx)),
             *constr);
         methodReturnType = core::Types::replaceSelfType(ctx, methodReturnType, enclosingClass.data(ctx)->selfType(ctx));
     }

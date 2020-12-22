@@ -8,7 +8,7 @@ ClassDef{
   rhs = [
     MethodDef{
       flags = {}
-      name = <U foo><<C <U <todo sym>>>>
+      name = <U foo><<U <todo method>>>
       args = [BlockArg{ expr = UnresolvedIdent{
           kind = Local
           name = <U <blk>>

@@ -27,7 +27,7 @@ ast::TreePtr LocalVarFinder::preTransformMethodDef(core::Context ctx, ast::TreeP
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     ENFORCE(methodDef.symbol.exists());
-    ENFORCE(methodDef.symbol != core::Symbols::todo());
+    ENFORCE(methodDef.symbol != core::Symbols::todoMethod());
 
     auto currentMethod = methodDef.symbol;
 

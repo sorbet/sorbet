@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:blk, <emptyTree>::<C T>.proc().params(:args, <emptyTree>::<C Integer>).void()).void()
   end
 
-  def foo<<C <todo sym>>>(&blk)
+  def foo<<todo method>>(&blk)
     <emptyTree>
   end
 

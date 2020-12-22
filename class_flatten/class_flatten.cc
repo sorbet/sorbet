@@ -76,7 +76,7 @@ public:
         auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
         auto inits = extractClassInit(ctx, classDef);
 
-        core::SymbolRef sym;
+        core::MethodRef sym;
         auto loc = core::Loc(ctx.file, classDef->declLoc);
         ast::TreePtr replacement;
         if (classDef->symbol == core::Symbols::root()) {

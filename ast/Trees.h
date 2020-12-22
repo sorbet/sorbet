@@ -350,7 +350,7 @@ TREE(MethodDef) {
 public:
     const core::LocOffsets loc;
     core::LocOffsets declLoc;
-    core::SymbolRef symbol;
+    core::MethodRef symbol;
 
     TreePtr rhs;
 
@@ -370,7 +370,7 @@ public:
 
     Flags flags;
 
-    MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::SymbolRef symbol, core::NameRef name,
+    MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,
               ARGS_store args, TreePtr rhs, Flags flags);
 
     TreePtr deepCopy() const;

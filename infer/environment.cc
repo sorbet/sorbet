@@ -1009,9 +1009,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx,
-                        core::lsp::SendResponse(core::Loc(ctx.file, bind.loc), retainedResult, send->fun,
-                                                send->isPrivateOk, ctx.owner, core::Loc(ctx.file, send->receiverLoc)));
+                        ctx, core::lsp::SendResponse(core::Loc(ctx.file, bind.loc), retainedResult, send->fun,
+                                                     send->isPrivateOk, ctx.owner.asMethodRef(),
+                                                     core::Loc(ctx.file, send->receiverLoc)));
                 }
                 if (send->link) {
                     // This should eventually become ENFORCEs but currently they are wrong
@@ -1034,8 +1034,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                 if (lspQueryMatch && !bind.value->isSynthetic) {
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx,
-                        core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), i->what.data(inWhat), tp, ctx.owner));
+                        ctx, core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), i->what.data(inWhat), tp,
+                                                      ctx.owner.asMethodRef()));
                 }
 
                 ENFORCE(ctx.file.data(ctx).hasParseErrors || !tp.origins.empty(), "Inferencer did not assign location");
@@ -1062,7 +1062,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             }
                         } else if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
-                                ctx, symbol.data(ctx)->resultType, symbol.data(ctx)->owner,
+                                ctx, symbol.data(ctx)->resultType, symbol.data(ctx)->owner.asClassOrModuleRef(),
                                 ctx.owner.data(ctx)->enclosingClass(ctx),
                                 ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
                         } else {

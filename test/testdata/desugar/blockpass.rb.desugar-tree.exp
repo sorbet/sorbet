@@ -1,43 +1,43 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C HasMeth><<C <todo sym>>> < (::<todo sym>)
-    def meth<<C <todo sym>>>(&<blk>)
+    def meth<<todo method>>(&<blk>)
       "meth"
     end
   end
 
-  def returns_lambda<<C <todo sym>>>(&<blk>)
+  def returns_lambda<<todo method>>(&<blk>)
     <self>.lambda() do |x|
       "returns_lambda"
     end
   end
 
   class <emptyTree>::<C HasToProc><<C <todo sym>>> < (::<todo sym>)
-    def to_proc<<C <todo sym>>>(&<blk>)
+    def to_proc<<todo method>>(&<blk>)
       <self>.returns_lambda()
     end
   end
 
-  def calls_arg_with_object<<C <todo sym>>>(arg, &blk)
+  def calls_arg_with_object<<todo method>>(arg, &blk)
     blk.call(arg)
   end
 
-  def calls_with_object<<C <todo sym>>>(&blk)
+  def calls_with_object<<todo method>>(&blk)
     ::<Magic>.<call-with-block>(<self>, :calls_arg_with_object, blk, <emptyTree>::<C HasMeth>.new())
   end
 
   class <emptyTree>::<C CallsWithObject><<C <todo sym>>> < (::<todo sym>)
-    def self.calls_with_object<<C <todo sym>>>(&blk)
+    def self.calls_with_object<<todo method>>(&blk)
       blk.call(<emptyTree>::<C HasMeth>.new())
     end
   end
 
   class <emptyTree>::<C CallsWithObjectChild><<C <todo sym>>> < (<emptyTree>::<C CallsWithObject>)
-    def self.calls_with_object<<C <todo sym>>>(&blk)
+    def self.calls_with_object<<todo method>>(&blk)
       ::<Magic>.<call-with-block>(<self>, :super, blk)
     end
   end
 
-  def foo<<C <todo sym>>>(&blk)
+  def foo<<todo method>>(&blk)
     begin
       <self>.calls_with_object() do |<block-pass>$2|
         <block-pass>$2.meth()

@@ -14,7 +14,6 @@
 #include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
-#include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/LocalVarSaver.h"
 #include "main/lsp/QueryCollector.h"
 #include "main/lsp/ShowOperation.h"

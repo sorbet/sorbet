@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
-    def a<<C <todo sym>>>(&<blk>)
+    def a<<todo method>>(&<blk>)
       @a
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:a, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
-    def a=<<C <todo sym>>>(a, &<blk>)
+    def a=<<todo method>>(a, &<blk>)
       @a = ::T.let(a, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
     end
 
@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
-    def b<<C <todo sym>>>(&<blk>)
+    def b<<todo method>>(&<blk>)
       @b
     end
 
@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
-    def c<<C <todo sym>>>(&<blk>)
+    def c<<todo method>>(&<blk>)
       @c
     end
 
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:b, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
-    def b=<<C <todo sym>>>(b, &<blk>)
+    def b=<<todo method>>(b, &<blk>)
       @b = ::T.let(b, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:c, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>)).returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
-    def c=<<C <todo sym>>>(c, &<blk>)
+    def c=<<todo method>>(c, &<blk>)
       @c = ::T.let(c, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>))
     end
 
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def d<<C <todo sym>>>(&<blk>)
+    def d<<todo method>>(&<blk>)
       @d
     end
 
@@ -60,7 +60,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def e<<C <todo sym>>>(&<blk>)
+    def e<<todo method>>(&<blk>)
       @e
     end
 
@@ -68,7 +68,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C String>)
     end
 
-    def f<<C <todo sym>>>(&<blk>)
+    def f<<todo method>>(&<blk>)
       @f
     end
 
@@ -76,7 +76,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:g, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
-    def g=<<C <todo sym>>>(g, &<blk>)
+    def g=<<todo method>>(g, &<blk>)
       @g = g
     end
 
@@ -84,7 +84,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:h, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
-    def h=<<C <todo sym>>>(h, &<blk>)
+    def h=<<todo method>>(h, &<blk>)
       @h = h
     end
 
@@ -92,7 +92,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:i, <emptyTree>::<C String>).params(:h, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
     end
 
-    def i=<<C <todo sym>>>(i, &<blk>)
+    def i=<<todo method>>(i, &<blk>)
       @i = i
     end
 

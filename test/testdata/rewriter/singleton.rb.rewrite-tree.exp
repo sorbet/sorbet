@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.attached_class())
     end
 
-    def self.instance<<C <todo sym>>>(&<blk>)
+    def self.instance<<todo method>>(&<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.attached_class())
     end
 
-    def self.instance<<C <todo sym>>>(&<blk>)
+    def self.instance<<todo method>>(&<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 

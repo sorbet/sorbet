@@ -940,10 +940,8 @@ TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2) 
     return glbGround(gs, t1, t2);
 }
 
-bool classSymbolIsAsGoodAs(const GlobalState &gs, SymbolRef c1, SymbolRef c2) {
-    ENFORCE(c1.isClassOrModule());
-    ENFORCE(c2.isClassOrModule());
-    return c1 == c2 || c1.data(gs)->derivesFrom(gs, c2.asClassOrModuleRef());
+bool classSymbolIsAsGoodAs(const GlobalState &gs, ClassOrModuleRef c1, ClassOrModuleRef c2) {
+    return c1 == c2 || c1.data(gs)->derivesFrom(gs, c2);
 }
 
 void compareToUntyped(const GlobalState &gs, TypeConstraint &constr, const TypePtr &ty, const TypePtr &blame) {

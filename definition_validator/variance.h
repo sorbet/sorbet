@@ -5,7 +5,7 @@
 
 namespace sorbet::definition_validator::variance {
 
-void validateMethodVariance(const core::Context ctx, const core::SymbolRef method);
+void validateMethodVariance(const core::Context ctx, const core::MethodRef method);
 
 };
 

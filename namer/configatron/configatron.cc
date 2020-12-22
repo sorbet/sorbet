@@ -216,7 +216,7 @@ void configatron::fillInFromFileSystem(core::GlobalState &gs, const vector<strin
         handleFile(gs, file, rootNode);
     }
 
-    core::SymbolRef configatron =
+    auto configatron =
         gs.enterMethodSymbol(core::Loc::none(), core::Symbols::Kernel(), gs.enterNameUTF8("configatron"));
     rootNode->enter(gs, configatron, core::Symbols::root());
 

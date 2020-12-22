@@ -496,12 +496,9 @@ void ClassType::_sanityCheck(const GlobalState &gs) const {
 /** Returns type parameters of what reordered in the order of type parameters of asIf
  * If some typeArgs are not present, return NoSymbol
  * */
-InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, SymbolRef what,
-                                                     const vector<TypePtr> &targs, SymbolRef asIf) {
-    ENFORCE(asIf.isClassOrModule());
-    ENFORCE(what.isClassOrModule());
-    ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf.asClassOrModuleRef()) ||
-                asIf.data(gs)->derivesFrom(gs, what.asClassOrModuleRef()),
+InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, ClassOrModuleRef what,
+                                                     const vector<TypePtr> &targs, ClassOrModuleRef asIf) {
+    ENFORCE(what == asIf || what.data(gs)->derivesFrom(gs, asIf) || asIf.data(gs)->derivesFrom(gs, what),
             what.data(gs)->name.showRaw(gs), asIf.data(gs)->name.showRaw(gs));
     InlinedVector<SymbolRef, 4> currentAlignment;
     if (targs.empty()) {
@@ -537,11 +534,9 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, Symb
  * fromWhat - where the generic type was written
  * inWhat   - where the generic type is observed
  */
-TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, SymbolRef fromWhat, SymbolRef inWhat,
-                                    const vector<TypePtr> &targs) {
-    SymbolRef originalOwner = fromWhat;
-    ENFORCE(fromWhat.isClassOrModule());
-    ENFORCE(inWhat.isClassOrModule());
+TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, ClassOrModuleRef fromWhat,
+                                    ClassOrModuleRef inWhat, const vector<TypePtr> &targs) {
+    auto originalOwner = fromWhat;
 
     // TODO: the ENFORCE below should be above this conditional, but there is
     // currently a problem with the handling of `module_function` that causes it
@@ -550,8 +545,8 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
         return what;
     }
 
-    ENFORCE(inWhat == fromWhat || inWhat.data(gs)->derivesFrom(gs, fromWhat.asClassOrModuleRef()) ||
-                fromWhat.data(gs)->derivesFrom(gs, inWhat.asClassOrModuleRef()),
+    ENFORCE(inWhat == fromWhat || inWhat.data(gs)->derivesFrom(gs, fromWhat) ||
+                fromWhat.data(gs)->derivesFrom(gs, inWhat),
             "\n{}\nis unrelated to\n\n{}", fromWhat.data(gs)->toString(gs), inWhat.data(gs)->toString(gs));
 
     auto currentAlignment = alignBaseTypeArgs(gs, originalOwner, targs, inWhat);

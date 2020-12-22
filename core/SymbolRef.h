@@ -74,6 +74,36 @@ public:
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
+class MethodRef final {
+    u4 _id;
+
+public:
+    MethodRef() : _id(0){};
+    MethodRef(const GlobalState &from, u4 id);
+
+    u4 id() const {
+        return _id;
+    }
+
+    bool exists() const {
+        return _id != 0;
+    }
+
+    static MethodRef fromRaw(u4 id) {
+        MethodRef ref;
+        ref._id = id;
+        return ref;
+    }
+
+    SymbolData data(GlobalState &gs) const;
+    ConstSymbolData data(const GlobalState &gs) const;
+
+    bool operator==(const MethodRef &rhs) const;
+
+    bool operator!=(const MethodRef &rhs) const;
+};
+CheckSize(MethodRef, 4, 4);
+
 class SymbolRef final {
     friend class GlobalState;
     friend class Symbol;
@@ -160,6 +190,7 @@ public:
     // This constructor is not marked explicit so that we can implicitly convert ClassOrModuleRef to SymbolRefs as
     // method arguments. This conversion is always safe and never throws.
     SymbolRef(ClassOrModuleRef kls);
+    SymbolRef(MethodRef kls);
     SymbolRef() : _id(0){};
 
     // From experimentation, in the common case, methods typically have 2 or fewer arguments.
@@ -183,6 +214,12 @@ public:
     ClassOrModuleRef asClassOrModuleRef() const {
         ENFORCE_NO_TIMER(kind() == Kind::ClassOrModule);
         return ClassOrModuleRef::fromRaw(unsafeTableIndex());
+    }
+
+    // If Kind is Method, returns a MethodRef.
+    MethodRef asMethodRef() const {
+        ENFORCE_NO_TIMER(kind() == Kind::Method);
+        return MethodRef::fromRaw(unsafeTableIndex());
     }
 
     SymbolData data(GlobalState &gs) const;
@@ -463,8 +500,8 @@ public:
         return ClassOrModuleRef::fromRaw(61);
     }
 
-    static SymbolRef noMethod() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 0);
+    static MethodRef noMethod() {
+        return MethodRef();
     }
 
     static SymbolRef noField() {
@@ -479,8 +516,8 @@ public:
         return SymbolRef(nullptr, SymbolRef::Kind::TypeMember, 0);
     }
 
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 1);
+    static MethodRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
+        return MethodRef::fromRaw(1);
     }
 
     static SymbolRef
@@ -500,8 +537,8 @@ public:
         return SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, 1);
     }
 
-    static SymbolRef Sorbet_Private_Static_badAliasMethodStub() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 2);
+    static MethodRef Sorbet_Private_Static_badAliasMethodStub() {
+        return MethodRef::fromRaw(2);
     }
 
     static ClassOrModuleRef T_Helpers() {
@@ -552,8 +589,8 @@ public:
         return ClassOrModuleRef::fromRaw(74);
     }
 
-    static SymbolRef sig() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 3);
+    static MethodRef sig() {
+        return MethodRef::fromRaw(3);
     }
 
     static ClassOrModuleRef Enumerator_Lazy() {
@@ -584,8 +621,8 @@ public:
         return ClassOrModuleRef::fromRaw(81);
     }
 
-    static SymbolRef sigWithoutRuntime() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 4);
+    static MethodRef sigWithoutRuntime() {
+        return MethodRef::fromRaw(4);
     }
 
     static ClassOrModuleRef T_NonForcingConstants() {
@@ -600,8 +637,8 @@ public:
         return ClassOrModuleRef::fromRaw(84);
     }
 
-    static SymbolRef SorbetPrivateStaticSingleton_sig() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 5);
+    static MethodRef SorbetPrivateStaticSingleton_sig() {
+        return MethodRef::fromRaw(5);
     }
 
     static ClassOrModuleRef PackageRegistry() {
@@ -616,24 +653,28 @@ public:
         return ClassOrModuleRef::fromRaw(87);
     }
 
-    static SymbolRef PackageSpec_import() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 6);
+    static MethodRef PackageSpec_import() {
+        return MethodRef::fromRaw(6);
     }
 
-    static SymbolRef PackageSpec_export() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 7);
+    static MethodRef PackageSpec_export() {
+        return MethodRef::fromRaw(7);
     }
 
-    static SymbolRef PackageSpec_export_methods() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 8);
+    static MethodRef PackageSpec_export_methods() {
+        return MethodRef::fromRaw(8);
     }
 
     static ClassOrModuleRef Encoding() {
         return ClassOrModuleRef::fromRaw(88);
     }
 
-    static SymbolRef Class_new() {
-        return SymbolRef(nullptr, SymbolRef::Kind::Method, 9);
+    static MethodRef Class_new() {
+        return MethodRef::fromRaw(9);
+    }
+
+    static MethodRef todoMethod() {
+        return MethodRef::fromRaw(10);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
@@ -659,7 +700,7 @@ public:
     }
 
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 200;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 33;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 34;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 3;
     static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 100;

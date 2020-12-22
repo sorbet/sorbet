@@ -265,24 +265,24 @@ void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMe
     }
 }
 
-void validateOverriding(const core::Context ctx, core::SymbolRef method) {
+void validateOverriding(const core::Context ctx, core::MethodRef method) {
     auto klass = method.data(ctx)->owner;
     auto name = method.data(ctx)->name;
     ENFORCE(klass.isClassOrModule());
     auto klassData = klass.data(ctx);
-    InlinedVector<core::SymbolRef, 4> overridenMethods;
+    InlinedVector<core::MethodRef, 4> overridenMethods;
 
     // both of these match the behavior of the runtime checks, which will only allow public methods to be defined in
     // interfaces
     if (klassData->isClassOrModuleInterface() && method.data(ctx)->isMethodPrivate()) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
-            e.setHeader("Interface method `{}` cannot be private", method.show(ctx));
+            e.setHeader("Interface method `{}` cannot be private", method.data(ctx)->show(ctx));
         }
     }
 
     if (klassData->isClassOrModuleInterface() && method.data(ctx)->isMethodProtected()) {
         if (auto e = ctx.state.beginError(method.data(ctx)->loc(), core::errors::Resolver::NonPublicAbstract)) {
-            e.setHeader("Interface method `{}` cannot be protected", method.show(ctx));
+            e.setHeader("Interface method `{}` cannot be protected", method.data(ctx)->show(ctx));
         }
     }
 
@@ -299,13 +299,13 @@ void validateOverriding(const core::Context ctx, core::SymbolRef method) {
     if (klassData->superClass().exists()) {
         auto superMethod = klassData->superClass().data(ctx)->findMemberTransitive(ctx, name);
         if (superMethod.exists()) {
-            overridenMethods.emplace_back(superMethod);
+            overridenMethods.emplace_back(superMethod.asMethodRef());
         }
     }
     for (const auto &mixin : klassData->mixins()) {
         auto superMethod = mixin.data(ctx)->findMember(ctx, name);
         if (superMethod.exists()) {
-            overridenMethods.emplace_back(superMethod);
+            overridenMethods.emplace_back(superMethod.asMethodRef());
         }
     }
 
@@ -503,10 +503,10 @@ void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::C
 
 class ValidateWalk {
 private:
-    UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
+    UnorderedMap<core::ClassOrModuleRef, vector<core::MethodRef>> abstractCache;
 
-    const vector<core::SymbolRef> &getAbstractMethods(const core::GlobalState &gs, core::SymbolRef klass) {
-        vector<core::SymbolRef> abstract;
+    const vector<core::MethodRef> &getAbstractMethods(const core::GlobalState &gs, core::ClassOrModuleRef klass) {
+        vector<core::MethodRef> abstract;
         auto ent = abstractCache.find(klass);
         if (ent != abstractCache.end()) {
             return ent->second;
@@ -530,7 +530,7 @@ private:
         if (isAbstract) {
             for (auto [name, sym] : klass.data(gs)->members()) {
                 if (sym.exists() && sym.data(gs)->isMethod() && sym.data(gs)->isAbstract()) {
-                    abstract.emplace_back(sym);
+                    abstract.emplace_back(sym.asMethodRef());
                 }
             }
         }
@@ -558,7 +558,7 @@ private:
         }
     }
 
-    void validateAbstract(const core::GlobalState &gs, core::SymbolRef sym) {
+    void validateAbstract(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
         if (sym.data(gs)->isClassOrModuleAbstract()) {
             return;
         }

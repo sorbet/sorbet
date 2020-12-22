@@ -81,7 +81,7 @@ void GlobalState::initEmpty() {
     SymbolRef id;
     id = synthesizeClass(core::Names::Constants::NoSymbol(), 0);
     ENFORCE(id == Symbols::noSymbol());
-    id = enterMethodSymbol(Loc::none(), Symbols::noSymbol(), Names::noMethod());
+    id = enterMethodSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noMethod());
     ENFORCE(id == Symbols::noMethod());
     id = enterFieldSymbol(Loc::none(), Symbols::noClassOrModule(), Names::noFieldOrStaticField());
     ENFORCE(id == Symbols::noField());
@@ -303,16 +303,16 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::T_Enum());
 
     // T::Sig#sig
-    id = enterMethodSymbol(Loc::none(), Symbols::T_Sig(), Names::sig());
+    auto method = enterMethodSymbol(Loc::none(), Symbols::T_Sig(), Names::sig());
     {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.flags.isDefault = true;
     }
     {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    ENFORCE(id == Symbols::sig());
+    ENFORCE(method == Symbols::sig());
 
     // Enumerable::Lazy
     id = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
@@ -335,16 +335,16 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::T_Sig_WithoutRuntimeSingleton());
 
     // T::Sig::WithoutRuntime.sig
-    id = enterMethodSymbol(Loc::none(), Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig());
+    method = enterMethodSymbol(Loc::none(), Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig());
     {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.flags.isDefault = true;
     }
     {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    ENFORCE(id == Symbols::sigWithoutRuntime());
+    ENFORCE(method == Symbols::sigWithoutRuntime());
 
     id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::NonForcingConstants());
     ENFORCE(id == Symbols::T_NonForcingConstants());
@@ -355,17 +355,17 @@ void GlobalState::initEmpty() {
     id = enterClassSymbol(Loc::none(), Symbols::Chalk_ODM(), Names::Constants::DocumentDecoratorHelper());
     ENFORCE(id == Symbols::Chalk_ODM_DocumentDecoratorHelper());
 
-    id = enterMethodSymbol(Loc::none(), Symbols::Sorbet_Private_StaticSingleton(), Names::sig());
-    { enterMethodArgumentSymbol(Loc::none(), id, Names::arg0()); }
+    method = enterMethodSymbol(Loc::none(), Symbols::Sorbet_Private_StaticSingleton(), Names::sig());
+    { enterMethodArgumentSymbol(Loc::none(), method, Names::arg0()); }
     {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg1());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
         arg.flags.isDefault = true;
     }
     {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    ENFORCE(id == Symbols::SorbetPrivateStaticSingleton_sig());
+    ENFORCE(method == Symbols::SorbetPrivateStaticSingleton_sig());
 
     id = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageRegistry());
     ENFORCE(id == Symbols::PackageRegistry());
@@ -378,30 +378,30 @@ void GlobalState::initEmpty() {
     id = id.data(*this)->singletonClass(*this);
     ENFORCE(id == Symbols::PackageSpecSingleton());
 
-    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::import());
-    ENFORCE(id == Symbols::PackageSpec_import());
+    method = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::import());
+    ENFORCE(method == Symbols::PackageSpec_import());
     {
-        auto &importArg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        auto &importArg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         // T.class_of(PackageSpec)
         importArg.type = make_type<ClassType>(Symbols::PackageSpecSingleton());
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
 
-    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::export_());
-    ENFORCE(id == Symbols::PackageSpec_export());
+    method = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::export_());
+    ENFORCE(method == Symbols::PackageSpec_export());
     {
-        enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
 
-    id = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::exportMethods());
-    ENFORCE(id == Symbols::PackageSpec_export_methods());
+    method = enterMethodSymbol(Loc::none(), Symbols::PackageSpecSingleton(), Names::exportMethods());
+    ENFORCE(method == Symbols::PackageSpec_export_methods());
     {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::arg0());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.flags.isRepeated = true;
-        auto &blkArg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        auto &blkArg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         blkArg.flags.isBlock = true;
     }
 
@@ -409,16 +409,20 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Encoding());
 
     // Class#new
-    id = enterMethodSymbol(Loc::none(), Symbols::Class(), Names::new_());
+    method = enterMethodSymbol(Loc::none(), Symbols::Class(), Names::new_());
     {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::args());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::args());
         arg.flags.isRepeated = true;
     }
     {
-        auto &arg = enterMethodArgumentSymbol(Loc::none(), id, Names::blkArg());
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
     }
-    ENFORCE(id == Symbols::Class_new());
+    ENFORCE(method == Symbols::Class_new());
+
+    method = enterMethodSymbol(Loc::none(), Symbols::noClassOrModule(), Names::TodoMethod());
+    enterMethodArgumentSymbol(Loc::none(), method, Names::args());
+    ENFORCE(method == Symbols::todoMethod());
 
     // Root members
     Symbols::root().data(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
@@ -430,7 +434,7 @@ void GlobalState::initEmpty() {
     id.data(*this)->resultType = make_type<LiteralType>(Symbols::String(), enterNameUTF8(sorbet_full_version_string));
 
     // Synthesize <Magic>.<build-hash>(*vs : T.untyped) => Hash
-    SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::buildHash());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
         arg.flags.isRepeated = true;
@@ -796,7 +800,7 @@ void GlobalState::initEmpty() {
 
 void GlobalState::installIntrinsics() {
     for (auto &entry : intrinsicMethods) {
-        SymbolRef symbol;
+        ClassOrModuleRef symbol;
         switch (entry.singleton) {
             case Intrinsic::Kind::Instance:
                 symbol = entry.symbol;
@@ -806,7 +810,7 @@ void GlobalState::installIntrinsics() {
                 break;
         }
         auto countBefore = methodsUsed();
-        SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
+        auto method = enterMethodSymbol(Loc::none(), symbol, entry.method);
         method.data(*this)->intrinsic = entry.impl;
         if (countBefore != methodsUsed()) {
             auto &blkArg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
@@ -843,7 +847,7 @@ void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 f
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const vector<u4> &methodHash) const {
+MethodRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const vector<u4> &methodHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
@@ -858,7 +862,7 @@ SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name,
         if ((resData->flags & Symbol::Flags::METHOD) == Symbol::Flags::METHOD &&
             (resData->methodArgumentHash(*this) == methodHash ||
              (resData->intrinsic != nullptr && !resData->hasSig()))) {
-            return res->second;
+            return res->second.asMethodRef();
         }
         lookupName = lookupNameUnique(UniqueNameKind::MangleRename, name, unique);
         if (!lookupName.exists()) {
@@ -867,7 +871,7 @@ SymbolRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name,
         res = ownerScope->members().find(lookupName);
         unique++;
     }
-    return Symbols::noSymbol();
+    return Symbols::noMethod();
 }
 
 // look up a symbol whose flags match the desired flags. This might look through mangled names to discover one whose
@@ -1013,7 +1017,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef 
     return result;
 }
 
-SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
+SymbolRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance) {
     ENFORCE(owner.exists() || name == Names::Constants::NoTypeArgument());
     ENFORCE(name.exists());
     u4 flags;
@@ -1029,7 +1033,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
 
     flags = flags | Symbol::Flags::TYPE_ARGUMENT;
 
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    SymbolData ownerScope = core::SymbolRef(*this, core::SymbolRef::Kind::Method, owner.id()).dataAllowingNone(*this);
     histogramInc("symbol_enter_by_name", ownerScope->members().size());
 
     auto &store = ownerScope->members()[name];
@@ -1052,14 +1056,11 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
     DEBUG_ONLY(categoryCounterInc("symbols", "type_argument"));
     wasModified_ = true;
 
-    owner.dataAllowingNone(*this)->typeArguments().emplace_back(result);
+    core::SymbolRef(owner).dataAllowingNone(*this)->typeArguments().emplace_back(result);
     return result;
 }
 
-SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    bool isBlock = name.kind() == NameKind::UNIQUE && name.dataUnique(*this)->original == Names::blockTemp();
-    ENFORCE(isBlock || owner.isClassOrModule(), "entering method symbol into not-a-class");
-
+MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     auto flags = Symbol::Flags::METHOD;
 
     SymbolData ownerScope = owner.dataAllowingNone(*this);
@@ -1069,16 +1070,16 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
     if (store.exists()) {
         ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asMethodRef();
     }
 
     ENFORCE(!symbolTableFrozen);
 
-    auto result = SymbolRef(this, SymbolRef::Kind::Method, methods.size());
+    auto result = MethodRef(*this, methods.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on methods invalidates `store`
     methods.emplace_back();
 
-    SymbolData data = result.dataAllowingNone(*this);
+    SymbolData data = SymbolRef(result).dataAllowingNone(*this);
     data->name = name;
     data->flags = flags;
     data->owner = owner;
@@ -1089,13 +1090,13 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
     return result;
 }
 
-SymbolRef GlobalState::enterNewMethodOverload(Loc sigLoc, SymbolRef original, core::NameRef originalName, u4 num,
+MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, core::NameRef originalName, u4 num,
                                               const vector<bool> &argsToKeep) {
     NameRef name = num == 0 ? originalName : freshNameUnique(UniqueNameKind::Overload, originalName, num);
     core::Loc loc = num == 0 ? original.data(*this)->loc()
                              : sigLoc; // use original Loc for main overload so that we get right jump-to-def for it.
-    auto owner = original.data(*this)->owner;
-    SymbolRef res = enterMethodSymbol(loc, owner, name);
+    auto owner = original.data(*this)->owner.asClassOrModuleRef();
+    auto res = enterMethodSymbol(loc, owner, name);
     ENFORCE(res != original);
     if (res.data(*this)->arguments().size() != original.data(*this)->arguments().size()) {
         ENFORCE(res.data(*this)->arguments().empty());
@@ -1185,11 +1186,10 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, N
     return ret;
 }
 
-ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name) {
+ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name) {
     ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
-    ENFORCE(owner.data(*this)->isMethod(), "entering method argument symbol into not-a-method");
     ENFORCE(name.exists(), "entering symbol with non-existing name");
-    SymbolData ownerScope = owner.dataAllowingNone(*this);
+    SymbolData ownerScope = owner.data(*this);
 
     for (auto &arg : ownerScope->arguments()) {
         if (arg.name == name) {
@@ -2057,7 +2057,7 @@ const vector<shared_ptr<File>> &GlobalState::getFiles() const {
     return files;
 }
 
-SymbolRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
+MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
     auto prevCount = methodsUsed();
     auto sym = enterMethodSymbol(loc, klass.data(*this)->singletonClass(*this), core::Names::staticInit());
     if (prevCount != methodsUsed()) {
@@ -2068,14 +2068,14 @@ SymbolRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
     return sym;
 }
 
-SymbolRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
+MethodRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
     auto classData = klass.data(*this);
     auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.data(*this)->toString(*this));
-    return ref;
+    return ref.asMethodRef();
 }
 
-SymbolRef GlobalState::staticInitForFile(Loc loc) {
+MethodRef GlobalState::staticInitForFile(Loc loc) {
     auto nm = freshNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto prevCount = this->methodsUsed();
     auto sym = enterMethodSymbol(loc, core::Symbols::rootSingleton(), nm);
@@ -2087,11 +2087,11 @@ SymbolRef GlobalState::staticInitForFile(Loc loc) {
     return sym;
 }
 
-SymbolRef GlobalState::lookupStaticInitForFile(Loc loc) const {
+MethodRef GlobalState::lookupStaticInitForFile(Loc loc) const {
     auto nm = lookupNameUnique(core::UniqueNameKind::Namer, core::Names::staticInit(), loc.file().id());
     auto ref = core::Symbols::rootSingleton().data(*this)->findMember(*this, nm);
     ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", loc.toString(*this));
-    return ref;
+    return ref.asMethodRef();
 }
 
 spdlog::logger &GlobalState::tracer() const {

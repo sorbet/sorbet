@@ -19,7 +19,7 @@ ClassDef{
       rhs = [
         MethodDef{
           flags = {}
-          name = <U take_arguments><<C <U <todo sym>>>>
+          name = <U take_arguments><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
               name = <U a>

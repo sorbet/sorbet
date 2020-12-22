@@ -26,7 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params(:value, <emptyTree>::<C Integer>).void()
       end
 
-      def initialize<<C <todo sym>>>(value, &<blk>)
+      def initialize<<todo method>>(value, &<blk>)
         @value = <emptyTree>::<C T>.let(value, <emptyTree>::<C Integer>)
       end
 
@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Project>::<C Foo>::<C Foo>)
       end
 
-      def build_foo<<C <todo sym>>>(&<blk>)
+      def build_foo<<todo method>>(&<blk>)
         <emptyTree>::<C Project>::<C Foo>::<C Foo>.new(10)
       end
 
@@ -51,7 +51,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Bar>)
       end
 
-      def build_bar<<C <todo sym>>>(&<blk>)
+      def build_bar<<todo method>>(&<blk>)
         <emptyTree>::<C Project>::<C Foo>.build_bar()
       end
 
@@ -91,7 +91,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.params(:value, <emptyTree>::<C Integer>).void()
       end
 
-      def initialize<<C <todo sym>>>(value, &<blk>)
+      def initialize<<todo method>>(value, &<blk>)
         @value = <emptyTree>::<C T>.let(value, <emptyTree>::<C Integer>)
       end
 
@@ -108,7 +108,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Project>::<C Bar>::<C Bar>)
       end
 
-      def build_bar<<C <todo sym>>>(&<blk>)
+      def build_bar<<todo method>>(&<blk>)
         <emptyTree>::<C Project>::<C Bar>::<C Bar>.new(10)
       end
 
@@ -116,7 +116,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Foo>)
       end
 
-      def build_foo<<C <todo sym>>>(&<blk>)
+      def build_foo<<todo method>>(&<blk>)
         <emptyTree>::<C Project>::<C Bar>.build_foo()
       end
 

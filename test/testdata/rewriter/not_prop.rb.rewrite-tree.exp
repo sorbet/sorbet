@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Array>)
     end
 
-    def array_of_explicit<<C <todo sym>>>(&<blk>)
+    def array_of_explicit<<todo method>>(&<blk>)
       begin
         arg2 = <self>.instance_variable_get(:@array_of_explicit)
         <self>.class().decorator().prop_get_logic(<self>, :array_of_explicit, arg2)
@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.params(:arg0, <emptyTree>::<C Array>).returns(<emptyTree>::<C Array>)
     end
 
-    def array_of_explicit=<<C <todo sym>>>(arg0, &<blk>)
+    def array_of_explicit=<<todo method>>(arg0, &<blk>)
       begin
         if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
           ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :array_of_explicit)

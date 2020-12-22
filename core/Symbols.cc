@@ -37,6 +37,14 @@ bool ClassOrModuleRef::operator!=(const ClassOrModuleRef &rhs) const {
     return rhs._id != this->_id;
 }
 
+bool MethodRef::operator==(const MethodRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool MethodRef::operator!=(const MethodRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
 vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
@@ -240,6 +248,18 @@ ConstSymbolData ClassOrModuleRef::dataAllowingNone(const GlobalState &gs) const 
     return ConstSymbolData(gs.classAndModules[_id], gs);
 }
 
+SymbolData MethodRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.methodsUsed());
+    return SymbolData(gs.methods[_id], gs);
+}
+
+ConstSymbolData MethodRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.methodsUsed());
+    return ConstSymbolData(gs.methods[_id], gs);
+}
+
 bool SymbolRef::isSynthetic() const {
     switch (this->kind()) {
         case Kind::ClassOrModule:
@@ -273,7 +293,11 @@ SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
 
 SymbolRef::SymbolRef(ClassOrModuleRef kls) : SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, kls.id()) {}
 
+SymbolRef::SymbolRef(MethodRef kls) : SymbolRef(nullptr, SymbolRef::Kind::Method, kls.id()) {}
+
 ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, u4 id) : _id(id) {}
+
+MethodRef::MethodRef(const GlobalState &from, u4 id) : _id(id) {}
 
 string SymbolRef::showRaw(const GlobalState &gs) const {
     return dataAllowingNone(gs)->showRaw(gs);
@@ -497,8 +521,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             // follow outer scopes
 
             // find scopes that would be considered for search
-            vector<SymbolRef> candidateScopes;
-            candidateScopes.emplace_back(base);
+            vector<ClassOrModuleRef> candidateScopes;
+            candidateScopes.emplace_back(base.asClassOrModuleRef());
             int i = 0;
             // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
             while (i < candidateScopes.size()) {
@@ -544,12 +568,11 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         // find the closest by global dfs.
         auto globalBestDistance = best.distance - 1;
         vector<Symbol::FuzzySearchResult> globalBest;
-        vector<SymbolRef> yetToGoDeeper;
+        vector<ClassOrModuleRef> yetToGoDeeper;
         yetToGoDeeper.emplace_back(Symbols::root());
         while (!yetToGoDeeper.empty()) {
-            const SymbolRef thisIter = yetToGoDeeper.back();
+            const ClassOrModuleRef thisIter = yetToGoDeeper.back();
             yetToGoDeeper.pop_back();
-            ENFORCE(thisIter.isClassOrModule());
             for (auto member : thisIter.data(gs)->membersStableOrderSlow(gs)) {
                 if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
                     member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
@@ -570,7 +593,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                         globalBest.emplace_back(best);
                     }
                     if (member.second.isClassOrModule()) {
-                        yetToGoDeeper.emplace_back(member.second);
+                        yetToGoDeeper.emplace_back(member.second.asClassOrModuleRef());
                     }
                 }
             }
@@ -1252,7 +1275,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
                                                                           this->name);
                 break;
             case SymbolRef::Kind::Method:
-                current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(this->loc(), this->owner, this->name);
+                current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(
+                    this->loc(), this->owner.asClassOrModuleRef(), this->name);
                 break;
             case SymbolRef::Kind::FieldOrStaticField:
                 if (isField()) {
@@ -1264,8 +1288,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
                 }
                 break;
             case SymbolRef::Kind::TypeArgument:
-                current2 = const_cast<GlobalState &>(gs).enterTypeArgument(this->loc(), this->owner, this->name,
-                                                                           this->variance());
+                current2 = const_cast<GlobalState &>(gs).enterTypeArgument(this->loc(), this->owner.asMethodRef(),
+                                                                           this->name, this->variance());
                 break;
             case SymbolRef::Kind::TypeMember:
                 current2 = const_cast<GlobalState &>(gs).enterTypeMember(this->loc(), this->owner.asClassOrModuleRef(),
@@ -1289,18 +1313,6 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
             ENFORCE_NO_TIMER(!this->arguments().empty(), this->show(gs));
         }
     }
-}
-
-SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
-    if (isMethod()) {
-        return ref(gs);
-    }
-    SymbolRef owner = this->owner;
-    while (owner != Symbols::root() && !owner.data(gs)->isMethod()) {
-        ENFORCE(owner.exists(), "non-existing owner in enclosingMethod");
-        owner = owner.data(gs)->owner;
-    }
-    return owner;
 }
 
 ClassOrModuleRef Symbol::enclosingClass(const GlobalState &gs) const {

@@ -173,7 +173,7 @@ private:
                 // current implementation will alias an instance method as a
                 // class method.
                 if (aliasSym.data(ctx)->isMethod()) {
-                    validateMethod(ctx, polarity, aliasSym);
+                    validateMethod(ctx, polarity, aliasSym.asMethodRef());
                 } else {
                     Exception::raise("Unexpected type alias: {}", type.toString(ctx));
                 }
@@ -193,7 +193,7 @@ public:
 
     // Variance checking, parameterized on the external polarity of the method
     // context.
-    static void validateMethod(const core::Context ctx, const Polarity polarity, const core::SymbolRef method) {
+    static void validateMethod(const core::Context ctx, const Polarity polarity, const core::MethodRef method) {
         auto methodData = method.data(ctx);
 
         // Negate the polarity for checking arguments in a ContraVariant
@@ -213,7 +213,7 @@ public:
 };
 
 // Validates uses of type members according to their variance.
-void validateMethodVariance(const core::Context ctx, const core::SymbolRef method) {
+void validateMethodVariance(const core::Context ctx, const core::MethodRef method) {
     VarianceValidator::validateMethod(ctx, Polarity::Positive, method);
 }
 

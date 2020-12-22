@@ -36,37 +36,37 @@ bool isValidRenameLocation(const core::SymbolRef &symbol, const core::GlobalStat
 }
 
 // Checks if s is a subclass of root or contains root as a mixin, and updates visited and memoized vectors.
-bool isSubclassOrMixin(const core::GlobalState &gs, core::SymbolRef root, core::SymbolRef s, vector<bool> &memoized,
-                       vector<bool> &visited) {
+bool isSubclassOrMixin(const core::GlobalState &gs, core::ClassOrModuleRef root, core::ClassOrModuleRef s,
+                       vector<bool> &memoized, vector<bool> &visited) {
     // don't visit the same class twice
-    if (visited[s.classOrModuleIndex()] == true) {
-        return memoized[s.classOrModuleIndex()];
+    if (visited[s.id()] == true) {
+        return memoized[s.id()];
     }
-    visited[s.classOrModuleIndex()] = true;
+    visited[s.id()] = true;
 
-    for (core::SymbolRef a : s.data(gs)->mixins()) {
+    for (auto a : s.data(gs)->mixins()) {
         if (a == root) {
-            memoized[s.classOrModuleIndex()] = true;
+            memoized[s.id()] = true;
             return true;
         }
     }
     if (s.data(gs)->superClass().exists()) {
-        memoized[s.classOrModuleIndex()] = isSubclassOrMixin(gs, root, s.data(gs)->superClass(), memoized, visited);
+        memoized[s.id()] = isSubclassOrMixin(gs, root, s.data(gs)->superClass(), memoized, visited);
     }
 
-    return memoized[s.classOrModuleIndex()];
+    return memoized[s.id()];
 }
 
 // Returns all subclasses of root (including root)
-vector<core::SymbolRef> getSubclasses(const core::GlobalState &gs, core::SymbolRef root) {
+vector<core::ClassOrModuleRef> getSubclasses(const core::GlobalState &gs, core::ClassOrModuleRef root) {
     vector<bool> memoized(gs.classAndModulesUsed());
     vector<bool> visited(gs.classAndModulesUsed());
-    memoized[root.classOrModuleIndex()] = true;
-    visited[root.classOrModuleIndex()] = true;
+    memoized[root.id()] = true;
+    visited[root.id()] = true;
 
-    vector<core::SymbolRef> subclasses;
+    vector<core::ClassOrModuleRef> subclasses;
     for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto s = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
+        auto s = core::ClassOrModuleRef(gs, i);
         if (isSubclassOrMixin(gs, root, s, memoized, visited)) {
             subclasses.emplace_back(s);
         }
@@ -76,9 +76,9 @@ vector<core::SymbolRef> getSubclasses(const core::GlobalState &gs, core::SymbolR
 
 // Follow superClass links until we find the highest class that contains the given method. In other words we find the
 // "root" of the tree of classes that define a method.
-core::SymbolRef findRootClassWithMethod(const core::GlobalState &gs, core::SymbolRef klass, core::NameRef methodName) {
+core::ClassOrModuleRef findRootClassWithMethod(const core::GlobalState &gs, core::ClassOrModuleRef klass,
+                                               core::NameRef methodName) {
     auto root = klass;
-    ENFORCE(klass.isClassOrModule());
     while (true) {
         auto tmp = root.data(gs)->superClass();
         ENFORCE(tmp.exists()); // everything derives from Kernel::Object so we can't ever reach the actual top type
@@ -118,7 +118,7 @@ private:
 };
 
 // Add subclass-related methods (methods overriding and overridden by `symbol`) to the `methods` vector.
-void addSubclassRelatedMethods(const core::GlobalState &gs, core::SymbolRef symbol, UniqueSymbolQueue &methods) {
+void addSubclassRelatedMethods(const core::GlobalState &gs, core::MethodRef symbol, UniqueSymbolQueue &methods) {
     auto symbolData = symbol.data(gs);
 
     // We have to check for methods as part of a class hierarchy: Follow superClass() links till we find the root;
@@ -140,7 +140,7 @@ void addSubclassRelatedMethods(const core::GlobalState &gs, core::SymbolRef symb
         if (!member.exists()) {
             continue;
         }
-        methods.tryEnqueue(member);
+        methods.tryEnqueue(member.asMethodRef());
     }
 }
 
@@ -349,7 +349,7 @@ void RenameTask::getRenameEdits(LSPTypecheckerDelegate &typechecker, core::Symbo
     UniqueSymbolQueue symbolQueue;
     if (symbolData->isMethod()) {
         renamer = make_unique<MethodRenamer>(gs, config, symbolQueue, originalName, newName);
-        addSubclassRelatedMethods(gs, symbol, symbolQueue);
+        addSubclassRelatedMethods(gs, symbol.asMethodRef(), symbolQueue);
     } else {
         renamer = make_unique<ConstRenamer>(gs, config, originalName, newName);
         symbolQueue.tryEnqueue(symbol);

@@ -52,11 +52,11 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
 ast::TreePtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::TreePtr tree) {
     auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
     if (id.kind == ast::UnresolvedIdent::Kind::Instance || id.kind == ast::UnresolvedIdent::Kind::Class) {
-        core::SymbolRef klass;
+        core::ClassOrModuleRef klass;
         // Logic cargo culted from `global2Local` in `walker_build.cc`.
         if (id.kind == ast::UnresolvedIdent::Kind::Instance) {
             ENFORCE(ctx.owner.data(ctx)->isMethod());
-            klass = ctx.owner.data(ctx)->owner;
+            klass = ctx.owner.data(ctx)->owner.asClassOrModuleRef();
         } else {
             // Class var.
             klass = ctx.owner.data(ctx)->enclosingClass(ctx);

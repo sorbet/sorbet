@@ -117,7 +117,7 @@ DispatchResult ShapeType::dispatchCall(const GlobalState &gs, const DispatchArgs
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method.asMethodRef(), {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -131,7 +131,7 @@ DispatchResult TupleType::dispatchCall(const GlobalState &gs, const DispatchArgs
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(gs)->findMember(gs, args.name);
     if (method.exists() && method.data(gs)->intrinsic != nullptr) {
-        DispatchComponent comp{args.selfType, method, {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
+        DispatchComponent comp{args.selfType, method.asMethodRef(), {}, nullptr, nullptr, nullptr, ArgInfo{}, nullptr};
         DispatchResult res{nullptr, std::move(comp)};
         method.data(gs)->intrinsic->apply(gs, args, res);
         if (res.returnType != nullptr) {
@@ -174,10 +174,11 @@ core::Loc smallestLocWithin(core::Loc callLoc, const core::TypeAndOrigins &argTp
 }
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
-                               SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe, const ArgInfo &argSym,
-                               const TypePtr &selfType, const vector<TypePtr> &targs, Loc loc,
+                               ClassOrModuleRef inClass, SymbolRef method, const TypeAndOrigins &argTpe,
+                               const ArgInfo &argSym, const TypePtr &selfType, const vector<TypePtr> &targs, Loc loc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
-    TypePtr expectedType = Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner, inClass, targs);
+    TypePtr expectedType =
+        Types::resultTypeAsSeenFrom(gs, argSym.type, method.data(gs)->owner.asClassOrModuleRef(), inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(gs, method);
     }
@@ -235,55 +236,56 @@ int getArity(const GlobalState &gs, SymbolRef method) {
 
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
-SymbolRef guessOverload(const GlobalState &gs, SymbolRef inClass, SymbolRef primary, u2 numPosArgs,
+MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, u2 numPosArgs,
                         InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType,
                         const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
             "overload not permitted here");
-    SymbolRef fallback = primary;
-    vector<SymbolRef> allCandidates;
+    MethodRef fallback = primary;
+    vector<MethodRef> allCandidates;
 
     allCandidates.emplace_back(primary);
     { // create candidates and sort them by number of arguments(stable by symbol id)
         int i = 0;
-        SymbolRef current = primary;
+        MethodRef current = primary;
         while (current.data(gs)->isOverloaded()) {
             i++;
             NameRef overloadName = gs.lookupNameUnique(UniqueNameKind::Overload, primary.data(gs)->name, i);
             SymbolRef overload = primary.data(gs)->owner.data(gs)->findMember(gs, overloadName);
             if (!overload.exists()) {
                 Exception::raise("Corruption of overloads?");
-            } else {
-                allCandidates.emplace_back(overload);
-                current = overload;
+            } else if (overload.isMethod()) {
+                allCandidates.emplace_back(overload.asMethodRef());
+                current = overload.asMethodRef();
             }
         }
 
-        fast_sort(allCandidates, [&](SymbolRef s1, SymbolRef s2) -> bool {
+        fast_sort(allCandidates, [&](MethodRef s1, MethodRef s2) -> bool {
             if (getArity(gs, s1) < getArity(gs, s2)) {
                 return true;
             }
             if (getArity(gs, s1) == getArity(gs, s2)) {
-                return s1.rawId() < s2.rawId();
+                return s1.id() < s2.id();
             }
             return false;
         });
     }
 
-    vector<SymbolRef> leftCandidates = allCandidates;
+    vector<MethodRef> leftCandidates = allCandidates;
 
     {
         auto checkArg = [&](auto i, const TypePtr &arg) {
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
-                SymbolRef candidate = *it;
+                MethodRef candidate = *it;
                 if (i >= getArity(gs, candidate)) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
 
-                auto argType = Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments()[i].type,
-                                                           candidate.data(gs)->owner, inClass, targs);
+                auto argType =
+                    Types::resultTypeAsSeenFrom(gs, candidate.data(gs)->arguments()[i].type,
+                                                candidate.data(gs)->owner.asClassOrModuleRef(), inClass, targs);
                 if (argType.isFullyDefined() && !Types::isSubType(gs, arg, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -502,18 +504,18 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalSta
 //  - We never allow a non-shaped Hash to satisfy keyword arguments;
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : untyped
 //    (with a subtype check on the key type, once we have generics)
-DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::SymbolRef symbol,
+DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &args, core::ClassOrModuleRef symbol,
                                   const vector<TypePtr> &targs) {
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(gs, args.thisType.untypedBlame()), std::move(args.selfType),
-                              Symbols::noSymbol());
+                              Symbols::noMethod());
     } else if (symbol == Symbols::void_()) {
         if (!args.suppressErrors) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod)) {
                 e.setHeader("Can not call method `{}` on void type", args.name.show(gs));
             }
         }
-        return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+        return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
     }
 
     SymbolRef mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
@@ -524,7 +526,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             // `BasicObject`, but our method-resolution order is wrong, and
             // putting it there will inadvertently shadow real definitions in
             // some cases, so we special-case it here as a last resort.
-            auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+            auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
             if (!args.args.empty() && !args.suppressErrors) {
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
@@ -535,9 +537,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             }
             return result;
         } else if (args.name == core::Names::super()) {
-            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+            return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         }
-        auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
+        auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noMethod());
         if (args.suppressErrors) {
             // Short circuit here to avoid constructing an expensive error message.
             return result;
@@ -646,10 +648,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         return result;
     }
 
-    SymbolRef method = mayBeOverloaded.data(gs)->isOverloaded()
-                           ? guessOverload(gs, symbol, mayBeOverloaded, args.numPosArgs, args.args, args.fullType,
-                                           targs, args.block != nullptr)
-                           : mayBeOverloaded;
+    auto method = mayBeOverloaded.data(gs)->isOverloaded()
+                      ? guessOverload(gs, symbol, mayBeOverloaded.asMethodRef(), args.numPosArgs, args.args,
+                                      args.fullType, targs, args.block != nullptr)
+                      : mayBeOverloaded.asMethodRef();
 
     DispatchResult result;
     auto &component = result.main;
@@ -1022,7 +1024,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         const auto &bspec = data->arguments().back();
         ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg: {}", data->show(gs));
 
-        TypePtr blockType = Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner, symbol, targs);
+        TypePtr blockType =
+            Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner.asClassOrModuleRef(), symbol, targs);
         if (!blockType) {
             blockType = Types::untyped(gs, method);
         }
@@ -1054,8 +1057,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         } else if (args.args.size() == 2 && method.data(gs)->name == Names::squareBracketsEq()) {
             resultType = args.args[1]->type;
         } else {
-            resultType =
-                Types::resultTypeAsSeenFrom(gs, method.data(gs)->resultType, method.data(gs)->owner, symbol, targs);
+            resultType = Types::resultTypeAsSeenFrom(gs, method.data(gs)->resultType,
+                                                     method.data(gs)->owner.asClassOrModuleRef(), symbol, targs);
         }
     }
     if (args.block == nullptr) {
@@ -1107,7 +1110,7 @@ DispatchResult AppliedType::dispatchCall(const GlobalState &gs, const DispatchAr
     return dispatchCallSymbol(gs, args, this->klass, this->targs);
 }
 
-TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name, const vector<TypePtr> &targs) {
+TypePtr getMethodArguments(const GlobalState &gs, ClassOrModuleRef klass, NameRef name, const vector<TypePtr> &targs) {
     SymbolRef method = klass.data(gs)->findMemberTransitive(gs, name);
 
     if (!method.exists()) {
@@ -1121,13 +1124,14 @@ TypePtr getMethodArguments(const GlobalState &gs, SymbolRef klass, NameRef name,
         if (arg.flags.isRepeated) {
             ENFORCE(args.empty(), "getCallArguments with positional and repeated args is not supported: {}",
                     data->toString(gs));
-            return Types::arrayOf(gs, Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
+            return Types::arrayOf(
+                gs, Types::resultTypeAsSeenFrom(gs, arg.type, data->owner.asClassOrModuleRef(), klass, targs));
         }
         ENFORCE(!arg.flags.isKeyword, "getCallArguments does not support kwargs: {}", data->toString(gs));
         if (arg.flags.isBlock) {
             continue;
         }
-        args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner, klass, targs));
+        args.emplace_back(Types::resultTypeAsSeenFrom(gs, arg.type, data->owner.asClassOrModuleRef(), klass, targs));
     }
     return TupleType::build(gs, move(args));
 }
@@ -1835,10 +1839,6 @@ private:
             return;
         }
 
-        if (dispatchComp.method.isClassOrModule()) {
-            return;
-        }
-
         const auto &methodArgs = dispatchComp.method.data(gs)->arguments();
         ENFORCE(!methodArgs.empty());
         const auto &bspec = methodArgs.back();
@@ -1897,7 +1897,7 @@ private:
         {
             auto it = &dispatched;
             while (it != nullptr) {
-                if (it->main.method.exists() && !it->main.method.isClassOrModule()) {
+                if (it->main.method.exists()) {
                     const auto &methodArgs = it->main.method.data(gs)->arguments();
                     ENFORCE(!methodArgs.empty());
                     const auto &bspec = methodArgs.back();

@@ -1,15 +1,15 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def main<<C <todo sym>>>(&<blk>)
+  def main<<todo method>>(&<blk>)
     <self>.a()
   ensure
     <self>.b()
   end
 
-  def a<<C <todo sym>>>(&<blk>)
+  def a<<todo method>>(&<blk>)
     <emptyTree>
   end
 
-  def b<<C <todo sym>>>(&<blk>)
+  def b<<todo method>>(&<blk>)
     <emptyTree>
   end
 

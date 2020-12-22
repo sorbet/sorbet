@@ -57,7 +57,7 @@ optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context
 }
 
 core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
-    ENFORCE(component.method.exists() && component.method != core::Symbols::untyped());
+    ENFORCE(component.method.exists());
     const auto &args = component.method.data(ctx)->arguments();
     if (argId >= args.size()) {
         return nullptr;
@@ -110,7 +110,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
         core::TypePtr thisType;
         auto iter = &dispatchInfo;
         while (iter != nullptr) {
-            if (iter->main.method.exists() && iter->main.method != core::Symbols::untyped()) {
+            if (iter->main.method.exists()) {
                 auto argType = extractArgType(ctx, *snd, iter->main, i);
                 if (argType && !argType.isUntyped()) {
                     if (!thisType) {
@@ -247,27 +247,26 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
     return argTypesForBBToPass[cfg->deadBlock()->id];
 }
 
-core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclosingClassSymbol, core::NameRef name) {
+core::MethodRef closestOverridenMethod(core::Context ctx, core::ClassOrModuleRef enclosingClassSymbol,
+                                       core::NameRef name) {
     auto enclosingClass = enclosingClassSymbol.data(ctx);
     ENFORCE(enclosingClass->isClassOrModuleLinearizationComputed(), "Should have been linearized by resolver");
 
     for (const auto &mixin : enclosingClass->mixins()) {
         auto mixinMethod = mixin.data(ctx)->findMember(ctx, name);
         if (mixinMethod.exists()) {
-            ENFORCE(mixinMethod.data(ctx)->isMethod());
-            return mixinMethod;
+            return mixinMethod.asMethodRef();
         }
     }
 
     auto superClass = enclosingClass->superClass();
     if (!superClass.exists()) {
-        core::SymbolRef none;
-        return none;
+        return core::Symbols::noMethod();
     }
 
     auto superMethod = superClass.data(ctx)->findMember(ctx, name);
     if (superMethod.exists()) {
-        return superMethod;
+        return superMethod.asMethodRef();
     } else {
         return closestOverridenMethod(ctx, superClass, name);
     }
