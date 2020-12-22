@@ -656,7 +656,6 @@ public:
     std::vector<TypePtr> keys; // TODO: store sorted by whatever
     std::vector<TypePtr> values;
     const TypePtr underlying_;
-    ShapeType();
     ShapeType(TypePtr underlying, std::vector<TypePtr> keys, std::vector<TypePtr> values);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;

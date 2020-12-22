@@ -418,10 +418,6 @@ void TupleType::_sanityCheck(const GlobalState &gs) const {
     ENFORCE(applied->klass == Symbols::Array());
 }
 
-ShapeType::ShapeType() : underlying_(Types::hashOfUntyped()) {
-    categoryCounterInc("types.allocated", "shapetype");
-}
-
 ShapeType::ShapeType(TypePtr underlying, vector<TypePtr> keys, vector<TypePtr> values)
     : keys(move(keys)), values(move(values)), underlying_(std::move(underlying)) {
     DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(isa_type<LiteralType>(k)); };);
