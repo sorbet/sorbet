@@ -395,32 +395,37 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
             nonNilType = ASTUtil::dupType(ret.foreign);
         }
 
-        // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
-        nodes.emplace_back(
-            ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc), std::move(type)));
+        ast::TreePtr boolean = ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean());
+        ast::TreePtr nilableBoolean = ast::MK::Nilable(loc, std::move(boolean));
 
-        // def $fk_method(**opts)
+        // sig {params(allow_direct_mutation: T.nilable(Boolean)).returns(T.nilable($foreign))}
+        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
+                                         nilableBoolean.deepCopy(), std::move(type)));
+
+        // def $fk_method(allow_direct_mutation: nil)
         //  T.unsafe(nil)
         // end
 
         auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
 
-        ast::TreePtr arg =
-            ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
+        ast::TreePtr arg = ast::MK::OptionalArg(
+            nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
+            ast::MK::Nil(nameLoc));
         nodes.emplace_back(
             ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
 
-        // sig {params(opts: T.untyped).returns($foreign)}
-        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
-                                         std::move(nonNilType)));
+        // sig {params(allow_direct_mutation: T.nilable(Boolean)).returns($foreign)}
+        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
+                                         std::move(nilableBoolean), std::move(nonNilType)));
 
-        // def $fk_method_!(**opts)
+        // def $fk_method_!(allow_direct_mutation: nil)
         //  T.unsafe(nil)
         // end
 
         auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
-        ast::TreePtr arg2 =
-            ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
+        ast::TreePtr arg2 = ast::MK::OptionalArg(
+            nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
+            ast::MK::Nil(nameLoc));
         nodes.emplace_back(
             ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::RaiseUnimplemented(loc)));
     }
