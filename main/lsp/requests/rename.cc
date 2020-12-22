@@ -198,7 +198,6 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> Renamer::buildEdit() {
         if (location == nullptr) {
             continue;
         }
-        auto textedit = make_unique<TextEdit>(move(location->range), newsrc);
         tmpEdits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
     }
     for (auto &item : tmpEdits) {
@@ -209,7 +208,7 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> Renamer::buildEdit() {
     auto we = make_unique<WorkspaceEdit>();
     we->documentChanges = move(textDocEdits);
     return we;
-} // namespace
+}
 
 class MethodRenamer : public Renamer {
 public:
