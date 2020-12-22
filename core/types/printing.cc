@@ -143,6 +143,10 @@ string ShapeType::show(const GlobalState &gs) const {
     return to_string(buf);
 }
 
+string ShapeType::showWithMoreInfo(const GlobalState &gs) const {
+    return fmt::format("{} (shape of {})", show(gs), this->underlying(gs).show(gs));
+}
+
 string AliasType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     return fmt::format("AliasType {{ symbol = {} }}", this->symbol.data(gs)->toStringFullName(gs));
 }
