@@ -379,7 +379,7 @@ TupleType::TupleType(TypePtr underlying, vector<TypePtr> elements)
 }
 
 TypePtr TupleType::build(const GlobalState &gs, vector<TypePtr> elements) {
-    TypePtr underlying = Types::arrayOf(gs, Types::dropLiteral(Types::lubAll(gs, elements)));
+    TypePtr underlying = Types::arrayOf(gs, Types::dropLiteral(gs, Types::lubAll(gs, elements)));
     return make_type<TupleType>(move(underlying), move(elements));
 }
 
@@ -411,8 +411,8 @@ OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), ri
 }
 
 void TupleType::_sanityCheck(const GlobalState &gs) const {
-    sanityCheckProxyType(gs, underlying());
-    auto underlying = this->underlying();
+    sanityCheckProxyType(gs, underlying(gs));
+    auto underlying = this->underlying(gs);
     auto *applied = cast_type<AppliedType>(underlying);
     ENFORCE(applied);
     ENFORCE(applied->klass == Symbols::Array());
@@ -428,11 +428,11 @@ ShapeType::ShapeType(TypePtr underlying, vector<TypePtr> keys, vector<TypePtr> v
     categoryCounterInc("types.allocated", "shapetype");
 }
 
-TypePtr ShapeType::underlying() const {
+TypePtr ShapeType::underlying(const GlobalState &gs) const {
     return this->underlying_;
 }
 
-TypePtr TupleType::underlying() const {
+TypePtr TupleType::underlying(const GlobalState &gs) const {
     return this->underlying_;
 }
 
@@ -660,8 +660,8 @@ optional<int> SendAndBlockLink::fixedArity() const {
     return arity;
 }
 
-TypePtr TupleType::elementType() const {
-    auto underlying = this->underlying();
+TypePtr TupleType::elementType(const GlobalState &gs) const {
+    auto underlying = this->underlying(gs);
     auto *ap = cast_type<AppliedType>(underlying);
     ENFORCE(ap);
     ENFORCE(ap->klass == Symbols::Array());

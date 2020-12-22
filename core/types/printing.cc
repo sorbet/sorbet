@@ -57,7 +57,7 @@ string LiteralType::show(const GlobalState &gs) const {
 }
 
 string LiteralType::showValue(const GlobalState &gs) const {
-    auto underlying = this->underlying();
+    auto underlying = this->underlying(gs);
     SymbolRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
     if (undSymbol == Symbols::String()) {
         return fmt::format("\"{}\"", absl::CEscape(asName(gs).show(gs)));
