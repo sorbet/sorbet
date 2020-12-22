@@ -157,7 +157,7 @@ public:
     /** Internal implementation. You should probably use any(). */
     static TypePtr lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
 
-    static TypePtr lubAll(const GlobalState &gs, std::vector<TypePtr> &elements);
+    static TypePtr lubAll(const GlobalState &gs, const std::vector<TypePtr> &elements);
     static TypePtr arrayOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr rangeOf(const GlobalState &gs, const TypePtr &elem);
     static TypePtr hashOf(const GlobalState &gs, const TypePtr &elem);
@@ -676,10 +676,8 @@ private:
 
 public:
     std::vector<TypePtr> elems;
-    const TypePtr underlying_;
 
-    TupleType(TypePtr underlying, std::vector<TypePtr> elements);
-    static TypePtr build(const GlobalState &gs, std::vector<TypePtr> elements);
+    TupleType(std::vector<TypePtr> elements);
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
@@ -696,7 +694,7 @@ public:
     TypePtr underlying(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 };
-CheckSize(TupleType, 40, 8);
+CheckSize(TupleType, 24, 8);
 
 TYPE(AppliedType) final {
 public:

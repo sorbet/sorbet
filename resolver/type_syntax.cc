@@ -639,7 +639,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             for (auto &el : arr.elems) {
                 elems.emplace_back(getResultTypeWithSelfTypeParams(ctx, el, sigBeingParsed, args.withoutSelfType()));
             }
-            result.type = core::TupleType::build(ctx, move(elems));
+            result.type = core::make_type<core::TupleType>(move(elems));
         },
         [&](const ast::Hash &hash) {
             vector<core::TypePtr> keys;
