@@ -291,7 +291,7 @@ package(default_visibility = ["//visibility:public"])
         name = "rubyfmt",
         build_file = "@com_stripe_ruby_typer//third_party/rubyfmt:rubyfmt.BUILD",
         strip_prefix = "tmp/rubyfmt_source",
-        urls = _github_public_urls("penelopezone/rubyfmt/releases/download/v0.4.0/rubyfmt-v0.4.0-sources.tar.gz"),
+        urls = _github_public_urls("penelopezone/rubyfmt/releases/download/v0.5.0/rubyfmt-v0.5.0-sources.tar.gz"),
     )
 
     http_archive(
