@@ -7,7 +7,7 @@ module IFoo
   extend T::Helpers
   interface!
 
-  sig {abstract.returns(Float)}
+  sig {abstract.returns(Integer)}
   def foo; end
 end
 

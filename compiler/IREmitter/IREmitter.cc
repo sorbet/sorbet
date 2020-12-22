@@ -712,7 +712,11 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
         IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, void_);
         return;
     }
-    IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "Return value");
+    // sorbet-runtime doesn't check this type for abstract methods, so we won't either.
+    // TODO(froydnj): we should check this type.
+    if (!cfg.symbol.data(cs)->isAbstract()) {
+        IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "Return value");
+    }
     IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, var);
 }
 
