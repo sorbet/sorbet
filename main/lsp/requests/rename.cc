@@ -44,7 +44,7 @@ bool isSubclassOrMixin(const core::GlobalState &gs, core::ClassOrModuleRef root,
     }
     visited[s.id()] = true;
 
-    for (core::ClassOrModuleRef a : s.data(gs)->mixins()) {
+    for (auto a : s.data(gs)->mixins()) {
         if (a == root) {
             memoized[s.id()] = true;
             return true;
