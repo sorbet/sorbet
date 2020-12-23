@@ -78,11 +78,11 @@ class A
 
   sig {returns(Integer)}
   def return_from_block
-    yields do # error: Returning value that does not conform to method result type
+    yields do # error: Expected `Integer` but found `String` for method result type
       if _
         return 7
       else
-        return :hi # error: Returning value that does not conform to method result type
+        return :hi # error: Expected `Integer` but found `Symbol(:hi)` for method result type
       end
     end
   end

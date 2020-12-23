@@ -7,6 +7,6 @@ class A
 
   sig {returns(String)}
   def self.foo
-    @@x # error: Returning value that does not conform to method result type
+    @@x # error: Expected `String` but found `T.nilable(String)` for method result type
   end
 end

@@ -68,7 +68,7 @@ class ControlFlow
   sig {params(a: T.any(Integer, NilClass)).returns(Integer)}
   def orZero4(a)
     if (a || true)
-      return a # error: does not conform to method result type
+      return a # error: Expected `Integer` but found `T.nilable(Integer)` for method result type
     else
       return 0 # error: This code is unreachable
     end

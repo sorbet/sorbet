@@ -7,7 +7,7 @@ class A
       .returns(nil) # error: Unsupported literal in type syntax
   end
   def foo(x)
-    0 # error: Returning value that does not conform to method result type
+    0 # error: Expected `NilClass` but found `Integer(0)` for method result type
   end
 
   sig do
