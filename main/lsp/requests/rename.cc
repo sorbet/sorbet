@@ -177,7 +177,7 @@ protected:
     const LSPConfiguration &config;
     string oldName;
     string newName;
-    UnorderedMap<string, vector<unique_ptr<TextEdit>>> edits;
+    UnorderedMap<core::Loc, string> edits;
     bool invalid;
     string error;
 };
@@ -187,13 +187,25 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> Renamer::buildEdit() {
         return JSONNullObject();
     }
 
-    auto we = make_unique<WorkspaceEdit>();
+    UnorderedMap<string, vector<unique_ptr<TextEdit>>> tmpEdits;
     vector<unique_ptr<TextDocumentEdit>> textDocEdits;
+    // collect changes per file
     for (auto &item : edits) {
+        core::Loc loc = item.first;
+        string newsrc = item.second;
+        auto location = config.loc2Location(gs, loc);
+        ENFORCE(location != nullptr); // loc should always exist
+        if (location == nullptr) {
+            continue;
+        }
+        tmpEdits[location->uri].push_back(make_unique<TextEdit>(move(location->range), move(newsrc)));
+    }
+    for (auto &item : tmpEdits) {
         // TODO: Version.
         textDocEdits.push_back(make_unique<TextDocumentEdit>(
             make_unique<VersionedTextDocumentIdentifier>(item.first, JSONNullObject()), move(item.second)));
     }
+    auto we = make_unique<WorkspaceEdit>();
     we->documentChanges = move(textDocEdits);
     return we;
 }
@@ -223,24 +235,15 @@ public:
             return;
         }
         auto loc = response->getLoc();
-        auto source = loc.source(gs);
-        auto location = config.loc2Location(gs, loc);
-        if (location == nullptr) {
+
+        // If we're renaming the exact same place twice, silently ignore it. We reach this condition when we find the
+        // same method send through multiple definitions (e.g. in the case of union types)
+        auto it = edits.find(loc);
+        if (it != edits.end()) {
             return;
         }
 
-        // Have we already edited this exact location?
-        // If we're renaming the exact same place twice, silently ignore it. We reach this condition when we find the
-        // same method send through multiple definitions (e.g. in the case of union types)
-        auto it = edits.find(location->uri);
-        if (it != edits.end()) {
-            for (auto &textedit : it->second) {
-                if (location->range->cmp(*textedit->range) == 0) {
-                    return;
-                }
-            }
-        }
-
+        auto source = loc.source(gs);
         string newsrc;
         if (auto sendResp = response->isSend()) {
             newsrc = replaceMethodNameInSend(source, sendResp);
@@ -250,7 +253,7 @@ public:
             ENFORCE(0, "Unexpected query response type while renaming method");
             return;
         }
-        edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+        edits[loc] = newsrc;
     }
 
 private:
@@ -316,7 +319,7 @@ private:
         auto suffixOffset = pos + oldName.length();
         return absl::StrCat(input.substr(0, pos), newName, input.substr(suffixOffset, input.length() - suffixOffset));
     }
-};
+}; // namespace
 class ConstRenamer : public Renamer {
 public:
     ConstRenamer(const core::GlobalState &gs, const LSPConfiguration &config, const string oldName,
@@ -326,14 +329,10 @@ public:
     void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         auto loc = response->getLoc();
         auto source = loc.source(gs);
-        auto location = config.loc2Location(gs, loc);
-        if (location == nullptr) {
-            return;
-        }
         vector<string> strs = absl::StrSplit(source, "::");
         strs[strs.size() - 1] = string(newName);
         auto newsrc = absl::StrJoin(strs, "::");
-        edits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+        edits[loc] = newsrc;
     }
 };
 
