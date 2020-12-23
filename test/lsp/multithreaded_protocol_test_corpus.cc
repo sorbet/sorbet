@@ -136,8 +136,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     // Send a no-op to clear out the pipeline. Should have errors in bar and baz, but not foo.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                       {
-                          {"bar.rb", 7, "Returning value that does not conform to method result type"},
-                          {"baz.rb", 7, "Returning value that does not conform to method result type"},
+                          {"bar.rb", 7, "Expected `Integer` but found `String(\"hi\")` for method result type"},
+                          {"baz.rb", 7, "Expected `String` but found `Integer` for method result type"},
                       });
 
     auto counters = getCounters();
@@ -207,8 +207,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelsSlowPathWhenNewEditWouldTak
     // Send a no-op to clear out the pipeline. Should have one error per file.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                       {
-                          {"foo.rb", 6, "Returning value that does not conform to method result type"},
-                          {"bar.rb", 6, "Returning value that does not conform to method result type"},
+                          {"foo.rb", 6, "Expected `Integer` but found `String` for method result type"},
+                          {"bar.rb", 6, "Expected `String` but found `Integer(10)` for method result type"},
                       });
 
     auto counters = getCounters();
@@ -323,7 +323,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHoverAndRetu
     // Send a no-op to clear out the pipeline. Should have one error in `foo.rb`.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                       {
-                          {"foo.rb", 6, "Returning value that does not conform to method result type"},
+                          {"foo.rb", 6, "Expected `String` but found `Integer(3)` for method result type"},
                       });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 2,
                          /* assertUniqueStartTimes */ false);
@@ -365,8 +365,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
     // path.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                       {
-                          {"foo.rb", 9, "Returning value that does not conform to method result type"},
-                          {"bar.rb", 5, "Returning value that does not conform to method result type"},
+                          {"foo.rb", 9, "Expected `Float` but found `String(\"not a float\")` for method result type"},
+                          {"bar.rb", 5, "Expected `String` but found `Integer(1)` for method result type"},
                       });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
@@ -453,8 +453,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndT
     // Fast path [cancel]: Fix syntax error. Foo should not have any errors.
     assertDiagnostics(send(*changeFile("foo.rb", "# typed: true\nclass Foo\nextend T::Sig\nend", 4)),
                       {
-                          {"bar.rb", 5, "Returning value that does not conform to method result type"},
-                          {"baz.rb", 5, "Returning value that does not conform to method result type"},
+                          {"bar.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
+                          {"baz.rb", 5, "Expected `String` but found `Integer` for method result type"},
                       });
 
     auto counters = getCounters();
@@ -502,8 +502,8 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathAndB
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
                       {
                           {"foo.rb", 2, "unexpected token"},
-                          {"bar.rb", 5, "Returning value that does not conform to method result type"},
-                          {"baz.rb", 5, "Returning value that does not conform to method result type"},
+                          {"bar.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
+                          {"baz.rb", 5, "Expected `String` but found `Integer` for method result type"},
                       });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
@@ -526,7 +526,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
         send(*openFile(
             "baz.rb",
             "# typed: true\nclass Baz\nextend T::Sig\nsig{returns(String)}\ndef bar\nBar.new.str\nend\nend\n")),
-        {{"baz.rb", 5, "Returning value that does not conform to method result type"}});
+        {{"baz.rb", 5, "Expected `String` but found `Integer` for method result type"}});
 
     // Slow path: Introduce syntax error to foo.rb and change method sig in bar.rb to fix error in baz.rb
     sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
@@ -552,7 +552,7 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
 
     // Send a no-op to clear out the pipeline. Should have one error on baz.rb.
     assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-                      {{"baz.rb", 5, "Returning value that does not conform to method result type"}});
+                      {{"baz.rb", 5, "Expected `String` but found `Integer` for method result type"}});
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 7,
                          /* assertUniqueStartTimes */ false);
 }
@@ -599,9 +599,9 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
     sendAsync(*openFile("bar.rb", "# typed: true\nclass Bar\nextend T::Sig\nsig{returns(Integer)}\ndef hi\n10\nend"));
 
     // Send fence to clear out the pipeline.
-    assertDiagnostics(
-        send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
-        {{"foo.rb", 5, "Returning value that does not conform to method result type"}, {"bar.rb", 6, "unexpected"}});
+    assertDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))),
+                      {{"foo.rb", 5, "Expected `Integer` but found `String(\"hi\")` for method result type"},
+                       {"bar.rb", 6, "unexpected"}});
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
 }
