@@ -268,6 +268,57 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     return ret;
 }
 
+void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::TreePtr> &nodes) {
+    const auto loc = ret.loc;
+    const auto name = ret.name;
+    const auto nameLoc = ret.nameLoc;
+
+    ast::TreePtr type;
+    ast::TreePtr nonNilType;
+    if (ASTUtil::dupType(ret.foreign) == nullptr) {
+        // If it's not a valid type, just use untyped
+        type = ast::MK::Untyped(loc);
+        nonNilType = ast::MK::Untyped(loc);
+    } else {
+        type = ast::MK::Nilable(loc, ASTUtil::dupType(ret.foreign));
+        nonNilType = ASTUtil::dupType(ret.foreign);
+    }
+
+    ast::TreePtr boolean = ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean());
+    ast::TreePtr nilableBoolean = ast::MK::Nilable(loc, std::move(boolean));
+
+    // sig {params(allow_direct_mutation: T.nilable(Boolean)).returns(T.nilable($foreign))}
+    nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
+                                     nilableBoolean.deepCopy(), std::move(type)));
+
+    // def $fk_method(allow_direct_mutation: nil)
+    //  T.unsafe(nil)
+    // end
+
+    auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
+
+    ast::TreePtr arg = ast::MK::OptionalArg(
+                                            nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
+                                            ast::MK::Nil(nameLoc));
+    nodes.emplace_back(
+                       ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
+
+    // sig {params(allow_direct_mutation: T.nilable(Boolean)).returns($foreign)}
+    nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
+                                     std::move(nilableBoolean), std::move(nonNilType)));
+
+    // def $fk_method_!(allow_direct_mutation: nil)
+    //  T.unsafe(nil)
+    // end
+
+    auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
+    ast::TreePtr arg2 = ast::MK::OptionalArg(
+                                             nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
+                                             ast::MK::Nil(nameLoc));
+    nodes.emplace_back(
+                       ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::RaiseUnimplemented(loc)));
+}
+
 vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropContext propContext) {
     vector<ast::TreePtr> nodes;
 
@@ -384,50 +435,7 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
 
     // Compute the `_` foreign accessor
     if (ret.foreign) {
-        ast::TreePtr type;
-        ast::TreePtr nonNilType;
-        if (ASTUtil::dupType(ret.foreign) == nullptr) {
-            // If it's not a valid type, just use untyped
-            type = ast::MK::Untyped(loc);
-            nonNilType = ast::MK::Untyped(loc);
-        } else {
-            type = ast::MK::Nilable(loc, ASTUtil::dupType(ret.foreign));
-            nonNilType = ASTUtil::dupType(ret.foreign);
-        }
-
-        ast::TreePtr boolean = ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean());
-        ast::TreePtr nilableBoolean = ast::MK::Nilable(loc, std::move(boolean));
-
-        // sig {params(allow_direct_mutation: T.nilable(Boolean)).returns(T.nilable($foreign))}
-        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
-                                         nilableBoolean.deepCopy(), std::move(type)));
-
-        // def $fk_method(allow_direct_mutation: nil)
-        //  T.unsafe(nil)
-        // end
-
-        auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
-
-        ast::TreePtr arg = ast::MK::OptionalArg(
-            nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
-            ast::MK::Nil(nameLoc));
-        nodes.emplace_back(
-            ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
-
-        // sig {params(allow_direct_mutation: T.nilable(Boolean)).returns($foreign)}
-        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
-                                         std::move(nilableBoolean), std::move(nonNilType)));
-
-        // def $fk_method_!(allow_direct_mutation: nil)
-        //  T.unsafe(nil)
-        // end
-
-        auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
-        ast::TreePtr arg2 = ast::MK::OptionalArg(
-            nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
-            ast::MK::Nil(nameLoc));
-        nodes.emplace_back(
-            ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::RaiseUnimplemented(loc)));
+        buildForeignAccessors(ctx, ret, nodes);
     }
 
     return nodes;
