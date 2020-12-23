@@ -32,7 +32,7 @@ mkdir -p tmp/bench
 # TODO(jez) Careful! These must use the same configuration!
 # (Alternatively: be sure to compile the right one right before it's used.)
 ./bazel build //main:sorbet -c opt
-./bazel run @sorbet_ruby//:ruby -c opt -- --version
+./bazel run @sorbet_ruby_2_7//:ruby -c opt -- --version
 
 if [ "${#benchmarks[@]}" -eq 0 ]; then
   paths=(test/testdata/ruby_benchmark)
@@ -43,7 +43,7 @@ if [ "${#benchmarks[@]}" -eq 0 ]; then
 fi
 
 
-ruby="${repo_root}/bazel-bin/external/sorbet_ruby/ruby"
+ruby="${repo_root}/bazel-bin/external/sorbet_ruby_2_7/ruby"
 sorbet="${repo_root}/bazel-sorbet_llvm/external/com_stripe_ruby_typer"
 
 command=()

@@ -25,7 +25,6 @@ ruby(
     ],
     extra_srcs = [
         "@com_stripe_ruby_typer//sorbet_version:sorbet_version_srcs",
-        "@com_stripe_sorbet_llvm//compiler/IREmitter/Payload:vm_payload_srcs",
     ],
     gems = [
         "@bundler_stripe//file",

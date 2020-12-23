@@ -26,7 +26,9 @@ err=0
 # Build sorbet_ruby once with gcc, to ensure that this build will work on
 # pay-server
 echo "--- building ruby with gcc"
-./bazel build @sorbet_ruby//:ruby \
+./bazel build \
+  @sorbet_ruby//:ruby \
+  @sorbet_ruby_2_7//:ruby \
   --crosstool_top=@bazel_tools//tools/cpp:toolchain
 
 echo "--- running tests"

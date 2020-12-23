@@ -68,8 +68,8 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "@com_stripe_ruby_typer//sorbet_version",
-        "@sorbet_ruby//:headers",
-        "@sorbet_ruby//:headers-internal",
+        "@sorbet_ruby_2_7//:headers",
+        "@sorbet_ruby_2_7//:headers-internal",
     ],
 )
 

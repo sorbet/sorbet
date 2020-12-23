@@ -20,17 +20,17 @@ if [ -z "$rb_file" ]; then
   exit 1
 fi
 
-ruby="./bazel-bin/external/sorbet_ruby/toolchain/bin/ruby"
+ruby="./bazel-bin/external/sorbet_ruby_2_7/toolchain/bin/ruby"
 sorbet_runtime="./bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb"
 
 echo
 info "Building Ruby..."
 
 if [ -n "$debug" ]; then
-  ./bazel build @sorbet_ruby//:ruby --config dbg
+  ./bazel build @sorbet_ruby_2_7//:ruby --config dbg
   command=("lldb" "--" "${ruby}")
 else
-  ./bazel build @sorbet_ruby//:ruby -c opt
+  ./bazel build @sorbet_ruby_2_7//:ruby -c opt
   command=( "${ruby}" )
 fi
 

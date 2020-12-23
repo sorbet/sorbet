@@ -40,7 +40,7 @@ sh_binary(
     data = [
         "patch_require.rb",
         "@com_stripe_ruby_typer//gems/sorbet-runtime",
-        "@sorbet_ruby//:ruby",
+        "@sorbet_ruby_2_7//:ruby",
     ],
     deps = [
         ":logging",

@@ -18,7 +18,7 @@
 #define SORBET_ATTRIBUTE(...) __attribute__((__VA_ARGS__))
 #define SORBET_INLINE __attribute__((always_inline))
 
-typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, VALUE *args, VALUE blockArg);
+typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, const VALUE *args, VALUE blockArg);
 typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE *iseq_encoded, VALUE closure);
 
 // compiler is closely aware of layout of this struct
@@ -925,8 +925,7 @@ void sorbet_setLineNumber(int offset, VALUE *iseq_encoded, VALUE **storeLocation
 
 SORBET_INLINE
 VALUE sorbet_callBlock(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat) {
-    // TODO(froydnj) use rb_yield_values_kw in 2.7
-    return rb_yield_values2(argc, argv);
+    return rb_yield_values_kw(argc, argv, kw_splat);
 }
 
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.h#L123
@@ -1073,7 +1072,7 @@ VALUE sorbet_callSuper(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const r
         rb_raise(rb_eRuntimeError, "unimplemented super with a missing method");
         return Qnil;
     } else {
-        return rb_vm_call(ec, recv, id, argc, argv, me);
+        return rb_vm_call_kw(ec, recv, id, argc, argv, me, kw_splat);
     }
 }
 
@@ -1083,11 +1082,12 @@ struct sorbet_iterSuperArg {
     int argc;
     const VALUE *argv;
     const rb_callable_method_entry_t *me;
+    int kw_splat;
 };
 
 static VALUE sorbet_iterSuper(VALUE obj) {
     struct sorbet_iterSuperArg *arg = (struct sorbet_iterSuperArg *)obj;
-    return rb_vm_call(GET_EC(), arg->recv, arg->func, arg->argc, arg->argv, arg->me);
+    return rb_vm_call_kw(GET_EC(), arg->recv, arg->func, arg->argc, arg->argv, arg->me, arg->kw_splat);
 }
 
 SORBET_INLINE
@@ -1119,6 +1119,7 @@ VALUE sorbet_callSuperBlock(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *co
     arg.argc = argc;
     arg.argv = argv;
     arg.me = me;
+    arg.kw_splat = kw_splat;
 
     return rb_iterate(sorbet_iterSuper, (VALUE)&arg, blockImpl, closure);
 }
@@ -1152,11 +1153,11 @@ static VALUE sorbet_applyExceptionClosure(VALUE arg) {
     return sorbet_rubyUndef();
 }
 
-static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr) {
+static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr, VALUE errinfo) {
     VALUE *exceptionValue = (VALUE *)exceptionValuePtr;
 
-    // fetch the last exception, and store it in the dest var passed in;
-    *exceptionValue = rb_errinfo();
+    // store the exception
+    *exceptionValue = errinfo;
 
     return sorbet_rubyUndef();
 }
@@ -1263,5 +1264,5 @@ VALUE sorbet_i_getRubyConstant(const char *const className, long classNameLen) _
 VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) {
     // this function will be nuked but it exists to keep forward definitions alive for clang
     return (long)&sorbet_i_getRubyClass + (long)&sorbet_i_getRubyConstant + (long)&sorbet_getConstantEpoch +
-           (long)&sorbet_getConstant + (long)&rb_id2sym;
+           (long)&sorbet_getConstant + (long)&rb_id2sym + (long)&rb_errinfo;
 }

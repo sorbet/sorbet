@@ -6,7 +6,7 @@
 
 #include "ruby.h"
 
-typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, VALUE *args, VALUE blockArg);
+typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, const VALUE *args, VALUE blockArg);
 
 // Array#+
 // Calling convention: 1

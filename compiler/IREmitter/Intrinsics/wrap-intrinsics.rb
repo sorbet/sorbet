@@ -492,7 +492,7 @@ module Intrinsics
 
       #include "ruby.h"
 
-      typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, VALUE *args, VALUE blockArg);
+      typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, const VALUE *args, VALUE blockArg);
 
       EOF
 
@@ -594,12 +594,12 @@ if __FILE__ == $0
   topdir = File.dirname($0) + '/../../..'
 
   if /darwin/ =~ RUBY_PLATFORM
-    ruby = topdir + '/bazel-bin/external/sorbet_ruby_unpatched/toolchain/lib/libruby.2.6.dylib'
+    ruby = topdir + '/bazel-bin/external/sorbet_ruby_2_7_unpatched/toolchain/lib/libruby.2.7.dylib'
   else
-    ruby = topdir + '/bazel-bin/external/sorbet_ruby_unpatched/toolchain/lib/libruby.so.2.6'
+    ruby = topdir + '/bazel-bin/external/sorbet_ruby_2_7_unpatched/toolchain/lib/libruby.so.2.7'
   end
 
-  ruby_source = topdir + '/bazel-sorbet_llvm/external/sorbet_ruby_unpatched'
+  ruby_source = topdir + '/bazel-sorbet_llvm/external/sorbet_ruby_2_7_unpatched'
 
   OptionParser.new do |opts|
 
