@@ -188,6 +188,13 @@ public:
         return InsSeq(loc, std::move(stats), std::move(expr));
     }
 
+    static TreePtr InsSeq2(core::LocOffsets loc, TreePtr stat1, TreePtr stat2, TreePtr expr) {
+        InsSeq::STATS_store stats;
+        stats.emplace_back(std::move(stat1));
+        stats.emplace_back(std::move(stat2));
+        return InsSeq(loc, std::move(stats), std::move(expr));
+    }
+
     static TreePtr True(core::LocOffsets loc) {
         return make_tree<ast::Literal>(loc, core::Types::trueClass());
     }

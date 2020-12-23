@@ -291,6 +291,8 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
                                      nilableBoolean.deepCopy(), std::move(type)));
 
+    // cf. sorbet-runtime/lib/types/props/decorator.rb, T::Props::Decorator#define_foreign_method
+    //
     // def $fk_method(allow_direct_mutation: nil)
     //  T.unsafe(nil)
     // end
@@ -307,16 +309,37 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
                                      std::move(nilableBoolean), std::move(nonNilType)));
 
+    // cf. sorbet-runtime/lib/types/props/decorator.rb, T::Props::Decorator#define_foreign_method
+    //
     // def $fk_method_!(allow_direct_mutation: nil)
-    //  T.unsafe(nil)
+    //  loaded_foreign = $fk_method(allow_direct_mutation: allow_direct_mutation)
+    //  if !loaded_foreign
+    //    raiseUnimplemented()
+    //  end
+    //  loaded_foreign
     // end
 
     auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
+    auto loadedForeign = [&]() -> ast::TreePtr {
+        return ast::MK::Local(loc, core::Names::loadedForeign());
+    };
+
     ast::TreePtr arg2 = ast::MK::OptionalArg(
                                              nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
                                              ast::MK::Nil(nameLoc));
+    ast::TreePtr callFkMethod = ast::MK::Send2(loc, ast::MK::Self(loc),
+                                               fkMethod,
+                                               ast::MK::Symbol(loc, core::Names::allowDirectMutation()),
+                                               ast::MK::Local(loc, core::Names::allowDirectMutation()));
+    ast::TreePtr assign = ast::MK::Assign(loc, loadedForeign(), std::move(callFkMethod));
+    ast::TreePtr check = ast::MK::Send0(loc, loadedForeign(), core::Names::bang());
+    // TODO(froydnj): call T::Configuration.hard_assert_handler for better errors.
+    ast::TreePtr failure = ast::MK::RaiseUnimplemented(loc);
+    ast::TreePtr conditional = ast::MK::If(loc, std::move(check), std::move(failure), nullptr);
+    ast::TreePtr insSeq = ast::MK::InsSeq2(loc, std::move(assign), std::move(conditional),
+                                           loadedForeign());
     nodes.emplace_back(
-                       ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::RaiseUnimplemented(loc)));
+                       ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), std::move(insSeq)));
 }
 
 vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropContext propContext) {
