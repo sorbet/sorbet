@@ -169,7 +169,12 @@ class Resolv::DNS
   # addresses will be a
   # [`Resolv::IPv4`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv4.html) or
   # [`Resolv::IPv6`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv6.html)
-  sig { params(name: String, block: T.proc.params(address: String).void).void }
+  sig do
+    params(
+      name: T.any(String, Resolv::DNS::Name),
+      block: T.proc.params(address: String).void
+    ).void
+  end
   def each_address(name, &block); end
 
   # Iterates over all hostnames for `address` retrieved from the
@@ -182,7 +187,12 @@ class Resolv::DNS
   # will be
   # [`Resolv::DNS::Name`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Name.html)
   # instances.
-  sig { params(address: String, block: T.proc.params(name: String).void).void }
+  sig do
+    params(
+      address: T.any(String, Resolv::IPv4, Resolv::IPv6),
+      block: T.proc.params(name: String).void)
+    .void 
+  end
   def each_name(address, &block); end
 
   # Iterates over all `typeclass`
@@ -210,7 +220,10 @@ class Resolv::DNS
   # address will be a
   # [`Resolv::IPv4`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv4.html) or
   # [`Resolv::IPv6`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv6.html)
-  sig { params(name: String).returns(String) }
+  sig do
+    params(name: T.any(String, Resolv::DNS::Name))
+    .returns(T.any(Resolv::IPv4, Resolv::IPv6))
+  end 
   def getaddress(name); end
 
   # Gets all IP addresses for `name` from the
@@ -222,7 +235,10 @@ class Resolv::DNS
   # addresses will be a
   # [`Resolv::IPv4`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv4.html) or
   # [`Resolv::IPv6`](https://docs.ruby-lang.org/en/2.6.0/Resolv/IPv6.html)
-  sig { params(name: String).returns(T::Array[String]) }
+  sig do
+    params(name: T.any(String, Resolv::DNS::Name))
+    .returns(T.any(Resolv::IPv4, Resolv::IPv6))
+  end
   def getaddresses(name); end
 
   # Gets the hostname for `address` from the
@@ -234,7 +250,10 @@ class Resolv::DNS
   # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). Retrieved name
   # will be a
   # [`Resolv::DNS::Name`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Name.html).
-  sig { params(address: String).returns(String) }
+  sig do
+    params(address: T.any(String, Resolv::IPv4, Resolv::IPv6))
+    .returns(Resolv::DNS::Name)
+  end
   def gname(address); end
 
   # Gets all hostnames for `address` from the
@@ -247,7 +266,10 @@ class Resolv::DNS
   # will be
   # [`Resolv::DNS::Name`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS/Name.html)
   # instances.
-  sig { params(address: String).returns(T::Array[String]) }
+  sig do
+    params(address: T.any(String, Resolv::IPv4, Resolv::IPv6))
+    .returns(T::Array[Resolv::DNS::Name])
+  end
   def getnames(address); end
 
   # Look up the `typeclass`
@@ -1535,3 +1557,4 @@ class Resolv::ResolvError < ::StandardError; end
 
 # Indicates a timeout resolving a name or address.
 class Resolv::ResolvTimeout < ::Timeout::Error; end
+
