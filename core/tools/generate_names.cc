@@ -207,6 +207,11 @@ NameDef names[] = {
     {"DocumentDecoratorHelper", "DocumentDecoratorHelper", true},
     {"Chalk_ODM_Document", "::Chalk::ODM::Document"},
     {"allowDirectMutation", "allow_direct_mutation"},
+    {"klass"},
+    {"define_method"},
+    {"resolvedForeign", "resolved_foreign"},
+    {"load"},
+    {"foreignPropGet", "foreign_prop_get"},
 
     {"prefix"},
     {"to"},
@@ -335,6 +340,7 @@ NameDef names[] = {
 
     {"isA_p", "is_a?"},
     {"kindOf_p", "kind_of?"},
+    {"respondTo_p", "respond_to?"},
     {"lessThan", "<"},
     {"equal_p", "equal?"},
     {"eqeq", "=="},
