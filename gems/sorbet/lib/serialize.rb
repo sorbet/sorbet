@@ -253,7 +253,9 @@ class Sorbet::Private::Serialize
 
   def valid_class_name(name)
     name.split("::").each do |piece|
-      return false unless piece =~ /^[[:upper:]][[:word:]]*$/
+      return false unless piece =~ /^[[:upper:]]/
+      return false if piece =~ /[[:space:][:cntrl:]]/
+      return false if piece =~ /[[:punct:]&&[^_]]/
     end
     return false if [
       'Sorbet::Private::GemGeneratorTracepoint::Tracer::ClassOverride',
