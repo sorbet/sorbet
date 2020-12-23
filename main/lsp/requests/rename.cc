@@ -198,7 +198,7 @@ variant<JSONNullObject, unique_ptr<WorkspaceEdit>> Renamer::buildEdit() {
         if (location == nullptr) {
             continue;
         }
-        tmpEdits[location->uri].push_back(make_unique<TextEdit>(move(location->range), newsrc));
+        tmpEdits[location->uri].push_back(make_unique<TextEdit>(move(location->range), move(newsrc)));
     }
     for (auto &item : tmpEdits) {
         // TODO: Version.
