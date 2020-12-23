@@ -938,7 +938,7 @@ public:
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
                 u4 retry = 0;
-                for (auto &todosForFile : todos) {
+                auto it = remove_if(todos.begin(), todos.end(), [&gs, &retry](auto &todosForFile) -> bool {
                     auto &todo = todosForFile.todo;
                     auto file = todosForFile.file;
                     int origSize = todo.size();
@@ -948,7 +948,9 @@ public:
                     });
                     todo.erase(it, todo.end());
                     retry += origSize - todo.size();
-                }
+                    return todosForFile.todo.empty() && todosForFile.todoAncestors.empty();
+                });
+                todos.erase(it, todos.end());
                 progress = progress || retry > 0;
                 categoryCounterAdd("resolve.constants.nonancestor", "retry", retry);
             }
