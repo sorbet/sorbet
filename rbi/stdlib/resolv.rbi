@@ -172,7 +172,7 @@ class Resolv::DNS
   sig do
     params(
       name: T.any(String, Resolv::DNS::Name),
-      block: T.proc.params(address: String).void
+      block: T.proc.params(address: T.any(Resolv::IPv4, Resolv::IPv6)).void
     ).void
   end
   def each_address(name, &block); end
@@ -190,7 +190,7 @@ class Resolv::DNS
   sig do
     params(
       address: T.any(String, Resolv::IPv4, Resolv::IPv6),
-      block: T.proc.params(name: String).void)
+      block: T.proc.params(name: Resolv::DNS::Name).void)
     .void 
   end
   def each_name(address, &block); end
@@ -254,7 +254,7 @@ class Resolv::DNS
     params(address: T.any(String, Resolv::IPv4, Resolv::IPv6))
     .returns(Resolv::DNS::Name)
   end
-  def gname(address); end
+  def getname(address); end
 
   # Gets all hostnames for `address` from the
   # [`DNS`](https://docs.ruby-lang.org/en/2.6.0/Resolv/DNS.html) resolver.
