@@ -569,6 +569,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
             }
+            e.addErrorSection(ErrorSection("Got " + args.fullType.type.show(gs) + " originating from:",
+                                           args.fullType.origins2Explanations(gs, args.originForUninitialized)));
             if (args.fullType.type != args.thisType && symbol == Symbols::NilClass()) {
                 e.replaceWith("Wrap in `T.must`", core::Loc(args.locs.file, args.locs.receiver), "T.must({})",
                               core::Loc(args.locs.file, args.locs.receiver).source(gs));
