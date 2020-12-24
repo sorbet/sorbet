@@ -863,6 +863,7 @@ public:
         vector<ClassMethodsResolutionItem> todoClassMethods;
 
         {
+            Timer timeit1(gs.tracer(), "resolver.resolve_constants.parallel_phase");
             ResolveWalkResult threadResult;
             for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
                  !result.done();
@@ -887,24 +888,27 @@ public:
             }
         }
 
-        fast_sort(todo, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.out->loc), core::Loc(rhs.file, rhs.out->loc));
-        });
-        fast_sort(todoAncestors, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.ancestor->loc), core::Loc(rhs.file, rhs.ancestor->loc));
-        });
-        fast_sort(todoClassAliases, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.rhs->loc), core::Loc(rhs.file, rhs.rhs->loc));
-        });
-        fast_sort(todoTypeAliases, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, (*lhs.rhs).loc()), core::Loc(rhs.file, (*rhs.rhs).loc()));
-        });
-        fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
-        });
-        fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.tree.loc()), core::Loc(rhs.file, rhs.tree.loc()));
-        });
+        {
+            Timer timeit1(gs.tracer(), "resolver.resolve_constants.sorting");
+            fast_sort(todo, [](const auto &lhs, const auto &rhs) -> bool {
+                return locCompare(core::Loc(lhs.file, lhs.out->loc), core::Loc(rhs.file, rhs.out->loc));
+            });
+            fast_sort(todoAncestors, [](const auto &lhs, const auto &rhs) -> bool {
+                return locCompare(core::Loc(lhs.file, lhs.ancestor->loc), core::Loc(rhs.file, rhs.ancestor->loc));
+            });
+            fast_sort(todoClassAliases, [](const auto &lhs, const auto &rhs) -> bool {
+                return locCompare(core::Loc(lhs.file, lhs.rhs->loc), core::Loc(rhs.file, rhs.rhs->loc));
+            });
+            fast_sort(todoTypeAliases, [](const auto &lhs, const auto &rhs) -> bool {
+                return locCompare(core::Loc(lhs.file, (*lhs.rhs).loc()), core::Loc(rhs.file, (*rhs.rhs).loc()));
+            });
+            fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool {
+                return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
+            });
+            fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool {
+                return locCompare(core::Loc(lhs.file, lhs.tree.loc()), core::Loc(rhs.file, rhs.tree.loc()));
+            });
+        }
 
         Timer timeit1(gs.tracer(), "resolver.resolve_constants.fixed_point");
 
