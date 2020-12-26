@@ -14,6 +14,12 @@ if defined?(DelegateClass)
   end
 end
 
+# Only define the `ruby2_keywords` method if the Ruby version is less than 2.7
+# and the method isn't already defined.
+if RUBY_VERSION < '2.7' && !respond_to?(:ruby2_keywords, true)
+  def ruby2_keywords(*); end
+end
+
 module Sorbet::Private
   module GemGeneratorTracepoint
     class Tracer
@@ -36,7 +42,15 @@ module Sorbet::Private
       Object.prepend(ObjectOverride)
 
       module ClassOverride
-        def new(*)
+        # This is a hack due to changes in kwargs with Ruby 2.7 and 3.0. Using
+        # `*` for method delegation is deprecated in Ruby 2.7 and doesn't work
+        # in Ruby 3.0.
+        # See the "compatible delegation" section in this blog post:
+        # https://www.ruby-lang.org/en/news/2019/12/12/separation-of-positional-and-keyword-arguments-in-ruby-3-0/
+        #
+        # Once Sorbet supports exclusively 2.7+ we can remove ruby2_keywords and
+        # use the `...` delegation syntax instead.
+        ruby2_keywords def new(*)
           result = super
           Sorbet::Private::GemGeneratorTracepoint::Tracer.on_module_created(result)
           result
