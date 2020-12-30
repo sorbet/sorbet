@@ -78,6 +78,20 @@ bool isTProc(core::Context ctx, const ast::Send *send) {
     return false;
 }
 
+bool isNilableTProc(core::Context ctx, const ast::Send *send) {
+    if (send->fun.rawId() == core::Names::nilable().rawId()) {
+        if (send->numPosArgs != 1 || send->hasKwArgs()) {
+            return false;
+        }
+        if (auto arr = ast::cast_tree<ast::Send>(send->args[0])) {
+            if (isTProc(ctx, arr)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
     if (send.fun != core::Names::sig()) {
         return false;
@@ -457,7 +471,9 @@ core::TypePtr interpretTCombinator(core::Context ctx, const ast::Send &send, con
             if (send.numPosArgs != 1 || send.hasKwArgs()) {
                 return core::Types::untypedUntracked(); // error will be reported in infer.
             }
-            return core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, send.args[0], sig, args),
+            return core::Types::any(ctx,
+                                    getResultTypeAndBindWithSelfTypeParams(ctx, send.args[0], sig,
+                                        isNilableTProc(ctx, &send) ? args.withRebind() : args.withoutRebind()).type,
                                     core::Types::nilClass());
         case core::Names::all().rawId(): {
             if (send.args.empty()) {
@@ -864,6 +880,9 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
             if (recvi->symbol == core::Symbols::T()) {
                 result.type = interpretTCombinator(ctx, s, sigBeingParsed, args);
+                if (isNilableTProc(ctx, &s)) {
+                    result.rebind = getResultTypeAndBindWithSelfTypeParams(ctx, s.args[0], sigBeingParsed, args.withRebind()).rebind;
+                }
                 return;
             }
 
