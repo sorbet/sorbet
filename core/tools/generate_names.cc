@@ -355,10 +355,11 @@ NameDef names[] = {
     // Enumerable#flat_map has special-case logic in Infer
     {"flatMap", "flat_map"},
 
-    // Array#flatten, #product and #compact are also custom-implemented
+    // Array#flatten, #product, #compact and #zip are also custom-implemented
     {"flatten"},
     {"product"},
     {"compact"},
+    {"zip"},
 
     // Pattern matching
     {"patternMatch", "<pattern-match>"},
