@@ -110,12 +110,9 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
             methodName = lit->asSymbol(ctx);
         }
         // sig {params(arg0: T.untyped, blk: Proc).returns(T.untyped)}
-        ast::Send::ARGS_store sigArgs;
-        sigArgs.emplace_back(ast::MK::Symbol(loc, core::Names::arg0()));
-        sigArgs.emplace_back(ast::MK::Untyped(loc));
-
-        sigArgs.emplace_back(ast::MK::Symbol(loc, core::Names::blkArg()));
-        sigArgs.emplace_back(ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
+        auto sigArgs = ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
+                                         ast::MK::Symbol(loc, core::Names::blkArg()),
+                                         ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
 
         methodStubs.push_back(ast::MK::Sig(loc, std::move(sigArgs), ast::MK::Untyped(loc)));
 
