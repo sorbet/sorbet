@@ -284,25 +284,21 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
         nonNilType = ASTUtil::dupType(ret.foreign);
     }
 
-    ast::TreePtr boolean = ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean());
-    ast::TreePtr nilableBoolean = ast::MK::Nilable(loc, std::move(boolean));
-
-    // sig {params(allow_direct_mutation: T.nilable(Boolean)).returns(T.nilable($foreign))}
-    nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
-                                     nilableBoolean.deepCopy(), std::move(type)));
+    // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
+    nodes.emplace_back(
+        ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc), std::move(type)));
 
     // cf. sorbet-runtime/lib/types/props/decorator.rb, T::Props::Decorator#define_foreign_method
     //
-    // def $fk_method(allow_direct_mutation: nil)
+    // def $fk_method(**opts)
     //  T.unsafe(nil)
     // end
 
-    // TODO(froydnj): make this take **opts again
     auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
 
-    ast::TreePtr arg = ast::MK::OptionalArg(
-                                            nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
-                                            ast::MK::Nil(nameLoc));
+    // TODO(froydnj): make this stub method take an allow_direct_mutation kwarg.
+    ast::TreePtr arg =
+        ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
     nodes.emplace_back(
                        ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
 
@@ -384,6 +380,8 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     nodes.emplace_back(std::move(callLambda));
 
     // sig {params(allow_direct_mutation: T.nilable(Boolean)).returns($foreign)}
+    ast::TreePtr boolean = ast::MK::UnresolvedConstant(loc, ast::MK::T(loc), core::Names::Constants::Boolean());
+    ast::TreePtr nilableBoolean = ast::MK::Nilable(loc, std::move(boolean));
     nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
                                      std::move(nilableBoolean), std::move(nonNilType)));
 
