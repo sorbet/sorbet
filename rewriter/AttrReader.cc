@@ -56,12 +56,7 @@ bool isT(const ast::TreePtr &expr) {
     if (t == nullptr || t->cnst != core::Names::Constants::T()) {
         return false;
     }
-    auto &scope = t->scope;
-    if (ast::isa_tree<ast::EmptyTree>(scope)) {
-        return true;
-    }
-    auto root = ast::cast_tree<ast::ConstantLit>(scope);
-    return root != nullptr && root->symbol == core::Symbols::root();
+    return ast::MK::isRootScope(t->scope);
 }
 
 bool isTNilableOrUntyped(const ast::TreePtr &expr) {

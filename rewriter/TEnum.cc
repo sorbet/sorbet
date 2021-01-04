@@ -36,14 +36,7 @@ bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     if (scope->cnst != core::Names::Constants::T()) {
         return false;
     }
-    if (ast::isa_tree<ast::EmptyTree>(scope->scope)) {
-        return true;
-    }
-    auto *id = ast::cast_tree<ast::ConstantLit>(scope->scope);
-    if (id == nullptr) {
-        return false;
-    }
-    return id->symbol == core::Symbols::root();
+    return ast::MK::isRootScope(scope->scope);
 }
 
 ast::Send *asEnumsDo(ast::TreePtr &stat) {

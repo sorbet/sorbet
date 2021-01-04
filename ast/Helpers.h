@@ -411,7 +411,7 @@ public:
         return ret;
     }
 
-    static bool isRootScope(ast::TreePtr &scope) {
+    static bool isRootScope(const ast::TreePtr &scope) {
         if (ast::isa_tree<ast::EmptyTree>(scope)) {
             return true;
         }

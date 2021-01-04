@@ -28,14 +28,7 @@ bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
     if (scope->cnst != core::Names::Constants::Opus()) {
         return false;
     }
-    if (ast::isa_tree<ast::EmptyTree>(scope->scope)) {
-        return true;
-    }
-    auto *id = ast::cast_tree<ast::ConstantLit>(scope->scope);
-    if (id == nullptr) {
-        return false;
-    }
-    return id->symbol == core::Symbols::root();
+    return ast::MK::isRootScope(scope->scope);
 }
 
 void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
