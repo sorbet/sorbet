@@ -28,6 +28,13 @@ public:
         return Block(loc, std::move(body), std::move(args));
     }
 
+    static TreePtr Block2(core::LocOffsets loc, TreePtr body, TreePtr arg1, TreePtr arg2) {
+        MethodDef::ARGS_store args;
+        args.emplace_back(std::move(arg1));
+        args.emplace_back(std::move(arg2));
+        return Block(loc, std::move(body), std::move(args));
+    }
+
     template <typename... Args> static Send::ARGS_store SendArgs(Args &&... args) {
         Send::ARGS_store store;
         (store.emplace_back(std::forward<Args>(args)), ...);

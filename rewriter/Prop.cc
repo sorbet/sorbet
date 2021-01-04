@@ -370,13 +370,16 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
                                                 std::move(defineMethodBlock));
 
     // Build the "toplevel" lambda and call it.
-    // TODO: this is going to need two args so we can evaluate foreign in its original context.
-    auto block = ast::MK::Block1(loc, std::move(defineMethodSend), klass());
+    auto block = ast::MK::Block2(loc, std::move(defineMethodSend), klass(), foreign());
     auto immediateLambda = ast::MK::Send0Block(loc, ast::MK::Symbol(loc, core::Names::Constants::Kernel()),
                                                core::Names::lambda(),
                                                std::move(block));
-    auto callLambda = ast::MK::Send1(loc, std::move(immediateLambda), core::Names::call(),
-                                     ast::MK::Self(loc));
+    // ret.foreign was the body of the lambda that was in the original source, so
+    // reconstitute the lambda here.
+    auto foreignLambda = ast::MK::Send0Block(loc, ast::MK::Self(loc), core::Names::lambda(),
+                                             ast::MK::Block0(loc, std::move(ret.foreign)));
+    auto callLambda = ast::MK::Send2(loc, std::move(immediateLambda), core::Names::call(),
+                                     ast::MK::Self(loc), std::move(foreignLambda));
 
     nodes.emplace_back(std::move(callLambda));
 
