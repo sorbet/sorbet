@@ -403,10 +403,11 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     ast::TreePtr arg2 = ast::MK::OptionalArg(
                                              nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
                                              ast::MK::Nil(nameLoc));
-    ast::TreePtr callFkMethod = ast::MK::Send2(loc, ast::MK::Self(loc),
-                                               fkMethod,
-                                               ast::MK::Symbol(loc, core::Names::allowDirectMutation()),
-                                               ast::MK::Local(loc, core::Names::allowDirectMutation()));
+    ast::TreePtr callFkMethod = ast::MK::Send(loc, ast::MK::Self(loc),
+                                              fkMethod,
+                                              0,
+                                              ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::allowDirectMutation()),
+                                                                ast::MK::Local(loc, core::Names::allowDirectMutation())));
     ast::TreePtr assign = ast::MK::Assign(loc, loadedForeign(), std::move(callFkMethod));
     ast::TreePtr check = ast::MK::Send0(loc, loadedForeign(), core::Names::bang());
     // TODO(froydnj): call T::Configuration.hard_assert_handler for better errors.
