@@ -113,12 +113,12 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
 
     // Elem = type_member(fixed: T.untyped)
     {
-        ast::Send::ARGS_store typeMemberArgs;
-        typeMemberArgs.emplace_back(ast::MK::Symbol(loc, core::Names::fixed()));
-        typeMemberArgs.emplace_back(ast::MK::Untyped(loc));
-        body.emplace_back(ast::MK::Assign(
-            loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
-            ast::MK::Send(loc, ast::MK::Self(loc), core::Names::typeMember(), 0, std::move(typeMemberArgs))));
+        auto typeMember =
+            ast::MK::Send(loc, ast::MK::Self(loc), core::Names::typeMember(), 0,
+                          ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::fixed()), ast::MK::Untyped(loc)));
+        body.emplace_back(
+            ast::MK::Assign(loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Elem()),
+                            std::move(typeMember)));
     }
 
     if (send->block != nullptr) {

@@ -256,10 +256,8 @@ ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
         // can freely copy into methoddef scope
         auto iteratee = getIteratee(send->args.front());
         // and then reconstruct the send but with a modified body
-        ast::Send::ARGS_store args;
-        args.emplace_back(move(send->args.front()));
         return ast::MK::Send(
-            send->loc, ast::MK::Self(send->loc), send->fun, 1, std::move(args), send->flags,
+            send->loc, ast::MK::Self(send->loc), send->fun, 1, ast::MK::SendArgs(move(send->args.front())), send->flags,
             ast::MK::Block(send->block.loc(),
                            prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, iteratee),
                            std::move(block->args)));
