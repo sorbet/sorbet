@@ -32,8 +32,8 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U AdvancedODM>><U foreign=> (foreign, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=52:5 end=52:49}
       argument foreign<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=52:11 end=52:18}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_> (allow_direct_mutation, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=52:5 end=52:49}
-      argument allow_direct_mutation<optional, keyword> -> T.nilable(T::Boolean) @ Loc {file=test/testdata/rewriter/prop.rb start=52:11 end=52:18}
+    method <C <U AdvancedODM>><U foreign_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=52:5 end=52:49}
+      argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=52:11 end=52:18}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U foreign_!> (allow_direct_mutation, <blk>) -> ForeignClass @ Loc {file=test/testdata/rewriter/prop.rb start=52:5 end=52:49}
       argument allow_direct_mutation<optional, keyword> -> T.nilable(T::Boolean) @ Loc {file=test/testdata/rewriter/prop.rb start=52:11 end=52:18}
@@ -43,8 +43,8 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U AdvancedODM>><U foreign_invalid=> (foreign_invalid, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=55:5 end=55:65}
       argument foreign_invalid<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=55:11 end=55:26}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_invalid_> (allow_direct_mutation, <blk>) -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=55:5 end=55:65}
-      argument allow_direct_mutation<optional, keyword> -> T.nilable(T::Boolean) @ Loc {file=test/testdata/rewriter/prop.rb start=55:11 end=55:26}
+    method <C <U AdvancedODM>><U foreign_invalid_> (opts, <blk>) -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=55:5 end=55:65}
+      argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=55:11 end=55:26}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U foreign_invalid_!> (allow_direct_mutation, <blk>) -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=55:5 end=55:65}
       argument allow_direct_mutation<optional, keyword> -> T.nilable(T::Boolean) @ Loc {file=test/testdata/rewriter/prop.rb start=55:11 end=55:26}
@@ -54,8 +54,8 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U AdvancedODM>><U foreign_lazy=> (foreign_lazy, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=53:5 end=53:59}
       argument foreign_lazy<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=53:11 end=53:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_lazy_> (allow_direct_mutation, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=53:5 end=53:59}
-      argument allow_direct_mutation<optional, keyword> -> T.nilable(T::Boolean) @ Loc {file=test/testdata/rewriter/prop.rb start=53:11 end=53:23}
+    method <C <U AdvancedODM>><U foreign_lazy_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=53:5 end=53:59}
+      argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=53:11 end=53:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U foreign_lazy_!> (allow_direct_mutation, <blk>) -> ForeignClass @ Loc {file=test/testdata/rewriter/prop.rb start=53:5 end=53:59}
       argument allow_direct_mutation<optional, keyword> -> T.nilable(T::Boolean) @ Loc {file=test/testdata/rewriter/prop.rb start=53:11 end=53:23}
@@ -65,8 +65,8 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U AdvancedODM>><U foreign_proc=> (foreign_proc, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=54:5 end=54:61}
       argument foreign_proc<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=54:11 end=54:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_proc_> (allow_direct_mutation, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=54:5 end=54:61}
-      argument allow_direct_mutation<optional, keyword> -> T.nilable(T::Boolean) @ Loc {file=test/testdata/rewriter/prop.rb start=54:11 end=54:23}
+    method <C <U AdvancedODM>><U foreign_proc_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=54:5 end=54:61}
+      argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=54:11 end=54:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U foreign_proc_!> (allow_direct_mutation, <blk>) -> ForeignClass @ Loc {file=test/testdata/rewriter/prop.rb start=54:5 end=54:61}
       argument allow_direct_mutation<optional, keyword> -> T.nilable(T::Boolean) @ Loc {file=test/testdata/rewriter/prop.rb start=54:11 end=54:23}

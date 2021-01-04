@@ -3538,23 +3538,16 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :allow_direct_mutation }
+                  Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U nilable>
+                    fun = <U untyped>
                     block = nullptr
-                    pos_args = 1
+                    pos_args = 0
                     args = [
-                      UnresolvedConstantLit{
-                        scope = ConstantLit{
-                          orig = nullptr
-                          symbol = (module ::T)
-                        }
-                        cnst = <C <U Boolean>>
-                      }
                     ]
                   }
                 ]
@@ -3593,13 +3586,10 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_><<U <todo method>>>
-          args = [OptionalArg{
-              expr = KeywordArg{ expr = UnresolvedIdent{
-                kind = Local
-                name = <U allow_direct_mutation>
-              } }
-              default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3700,28 +3690,71 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U loaded_foreign>
                 }
-              ]
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U __send__>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = :foreign_ }
+                    Literal{ value = :allow_direct_mutation }
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <U allow_direct_mutation>
+                    }
+                  ]
+                }
+              }
+            ],
+            expr = If{
+              cond = Send{
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U loaded_foreign>
+                }
+                fun = <U !>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+              thenp = Send{
+                recv = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = (module ::T)
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = (module ::Kernel)
+                    }
+                  ]
+                }
+                fun = <U raise>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                ]
+              }
+              elsep = UnresolvedIdent{
+                kind = Local
+                name = <U loaded_foreign>
+              }
             }
-            fun = <U raise>
-            block = nullptr
-            pos_args = 1
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -3947,23 +3980,16 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :allow_direct_mutation }
+                  Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U nilable>
+                    fun = <U untyped>
                     block = nullptr
-                    pos_args = 1
+                    pos_args = 0
                     args = [
-                      UnresolvedConstantLit{
-                        scope = ConstantLit{
-                          orig = nullptr
-                          symbol = (module ::T)
-                        }
-                        cnst = <C <U Boolean>>
-                      }
                     ]
                   }
                 ]
@@ -4002,13 +4028,10 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_lazy_><<U <todo method>>>
-          args = [OptionalArg{
-              expr = KeywordArg{ expr = UnresolvedIdent{
-                kind = Local
-                name = <U allow_direct_mutation>
-              } }
-              default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4109,28 +4132,71 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U loaded_foreign>
                 }
-              ]
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U __send__>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = :foreign_lazy_ }
+                    Literal{ value = :allow_direct_mutation }
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <U allow_direct_mutation>
+                    }
+                  ]
+                }
+              }
+            ],
+            expr = If{
+              cond = Send{
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U loaded_foreign>
+                }
+                fun = <U !>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+              thenp = Send{
+                recv = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = (module ::T)
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = (module ::Kernel)
+                    }
+                  ]
+                }
+                fun = <U raise>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                ]
+              }
+              elsep = UnresolvedIdent{
+                kind = Local
+                name = <U loaded_foreign>
+              }
             }
-            fun = <U raise>
-            block = nullptr
-            pos_args = 1
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -4356,23 +4422,16 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :allow_direct_mutation }
+                  Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U nilable>
+                    fun = <U untyped>
                     block = nullptr
-                    pos_args = 1
+                    pos_args = 0
                     args = [
-                      UnresolvedConstantLit{
-                        scope = ConstantLit{
-                          orig = nullptr
-                          symbol = (module ::T)
-                        }
-                        cnst = <C <U Boolean>>
-                      }
                     ]
                   }
                 ]
@@ -4411,13 +4470,10 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_proc_><<U <todo method>>>
-          args = [OptionalArg{
-              expr = KeywordArg{ expr = UnresolvedIdent{
-                kind = Local
-                name = <U allow_direct_mutation>
-              } }
-              default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4518,28 +4574,71 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U loaded_foreign>
                 }
-              ]
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U __send__>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = :foreign_proc_ }
+                    Literal{ value = :allow_direct_mutation }
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <U allow_direct_mutation>
+                    }
+                  ]
+                }
+              }
+            ],
+            expr = If{
+              cond = Send{
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U loaded_foreign>
+                }
+                fun = <U !>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+              thenp = Send{
+                recv = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = (module ::T)
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = (module ::Kernel)
+                    }
+                  ]
+                }
+                fun = <U raise>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                ]
+              }
+              elsep = UnresolvedIdent{
+                kind = Local
+                name = <U loaded_foreign>
+              }
             }
-            fun = <U raise>
-            block = nullptr
-            pos_args = 1
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -4765,23 +4864,16 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :allow_direct_mutation }
+                  Literal{ value = :opts }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U nilable>
+                    fun = <U untyped>
                     block = nullptr
-                    pos_args = 1
+                    pos_args = 0
                     args = [
-                      UnresolvedConstantLit{
-                        scope = ConstantLit{
-                          orig = nullptr
-                          symbol = (module ::T)
-                        }
-                        cnst = <C <U Boolean>>
-                      }
                     ]
                   }
                 ]
@@ -4816,13 +4908,10 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_invalid_><<U <todo method>>>
-          args = [OptionalArg{
-              expr = KeywordArg{ expr = UnresolvedIdent{
-                kind = Local
-                name = <U allow_direct_mutation>
-              } }
-              default_ = Literal{ value = nil }
-            }, BlockArg{ expr = UnresolvedIdent{
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4930,28 +5019,71 @@ ClassDef{
               kind = Local
               name = <U <blk>>
             } }]
-          rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
+          rhs = InsSeq{
+            stats = [
+              Assign{
+                lhs = UnresolvedIdent{
+                  kind = Local
+                  name = <U loaded_foreign>
                 }
-              ]
+                rhs = Send{
+                  recv = Local{
+                    localVariable = <U <self>>
+                  }
+                  fun = <U __send__>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    Literal{ value = :foreign_invalid_ }
+                    Literal{ value = :allow_direct_mutation }
+                    UnresolvedIdent{
+                      kind = Local
+                      name = <U allow_direct_mutation>
+                    }
+                  ]
+                }
+              }
+            ],
+            expr = If{
+              cond = Send{
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U loaded_foreign>
+                }
+                fun = <U !>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+              thenp = Send{
+                recv = Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = (module ::T)
+                  }
+                  fun = <U unsafe>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = (module ::Kernel)
+                    }
+                  ]
+                }
+                fun = <U raise>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                ]
+              }
+              elsep = UnresolvedIdent{
+                kind = Local
+                name = <U loaded_foreign>
+              }
             }
-            fun = <U raise>
-            block = nullptr
-            pos_args = 1
-            args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
-            ]
           }
         }
 
@@ -6227,6 +6359,281 @@ ClassDef{
         }
 
         Send{
+          recv = Send{
+            recv = Literal{ value = :Kernel }
+            fun = <U lambda>
+            block = Block {
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U klass>
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U foreign>
+                }
+              ]
+              body = Send{
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U klass>
+                }
+                fun = <U define_method>
+                block = Block {
+                  args = [
+                    OptionalArg{
+                      expr = KeywordArg{ expr = UnresolvedIdent{
+                        kind = Local
+                        name = <U allow_direct_mutation>
+                      } }
+                      default_ = Literal{ value = nil }
+                    }
+                  ]
+                  body = InsSeq{
+                    stats = [
+                      If{
+                        cond = Send{
+                          recv = UnresolvedIdent{
+                            kind = Local
+                            name = <U foreign>
+                          }
+                          fun = <U is_a?>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = :Proc }
+                          ]
+                        }
+                        thenp = InsSeq{
+                          stats = [
+                            Assign{
+                              lhs = UnresolvedIdent{
+                                kind = Local
+                                name = <U resolved_foreign>
+                              }
+                              rhs = Send{
+                                recv = UnresolvedIdent{
+                                  kind = Local
+                                  name = <U foreign>
+                                }
+                                fun = <U call>
+                                block = nullptr
+                                pos_args = 0
+                                args = [
+                                ]
+                              }
+                            }
+                            If{
+                              cond = Send{
+                                recv = Send{
+                                  recv = UnresolvedIdent{
+                                    kind = Local
+                                    name = <U resolved_foreign>
+                                  }
+                                  fun = <U respond_to?>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    Literal{ value = :load }
+                                  ]
+                                }
+                                fun = <U !>
+                                block = nullptr
+                                pos_args = 0
+                                args = [
+                                ]
+                              }
+                              thenp = Send{
+                                recv = Send{
+                                  recv = ConstantLit{
+                                    orig = nullptr
+                                    symbol = (module ::T)
+                                  }
+                                  fun = <U unsafe>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    ConstantLit{
+                                      orig = nullptr
+                                      symbol = (module ::Kernel)
+                                    }
+                                  ]
+                                }
+                                fun = <U raise>
+                                block = nullptr
+                                pos_args = 1
+                                args = [
+                                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                                ]
+                              }
+                              elsep = EmptyTree
+                            }
+                          ],
+                          expr = Assign{
+                            lhs = UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            rhs = UnresolvedIdent{
+                              kind = Local
+                              name = <U resolved_foreign>
+                            }
+                          }
+                        }
+                        elsep = EmptyTree
+                      }
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U opts>
+                        }
+                        rhs = If{
+                          cond = Send{
+                            recv = UnresolvedIdent{
+                              kind = Local
+                              name = <U allow_direct_mutation>
+                            }
+                            fun = <U nil?>
+                            block = nullptr
+                            pos_args = 0
+                            args = [
+                            ]
+                          }
+                          thenp = Hash{
+                            pairs = [
+                            ]
+                          }
+                          elsep = Hash{
+                            pairs = [
+                              [
+                                key = Literal{ value = :allow_direct_mutation }
+                                value = UnresolvedIdent{
+                                  kind = Local
+                                  name = <U allow_direct_mutation>
+                                }
+                              ]
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    expr = Send{
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = (module ::T)
+                      }
+                      fun = <U let>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        Send{
+                          recv = Send{
+                            recv = Send{
+                              recv = ConstantLit{
+                                orig = nullptr
+                                symbol = (module ::T)
+                              }
+                              fun = <U unsafe>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                Send{
+                                  recv = Local{
+                                    localVariable = <U <self>>
+                                  }
+                                  fun = <U class>
+                                  block = nullptr
+                                  pos_args = 0
+                                  args = [
+                                  ]
+                                }
+                              ]
+                            }
+                            fun = <U decorator>
+                            block = nullptr
+                            pos_args = 0
+                            args = [
+                            ]
+                          }
+                          fun = <U foreign_prop_get>
+                          block = nullptr
+                          pos_args = 5
+                          args = [
+                            Local{
+                              localVariable = <U <self>>
+                            }
+                            Literal{ value = :foreign }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            Hash{
+                              pairs = [
+                              ]
+                            }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U opts>
+                            }
+                          ]
+                        }
+                        Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = (module ::T)
+                          }
+                          fun = <U nilable>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <C <U ForeignClass>>
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+                pos_args = 1
+                args = [
+                  Literal{ value = :foreign_ }
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+          fun = <U call>
+          block = nullptr
+          pos_args = 2
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U lambda>
+              block = Block {
+                args = [
+                ]
+                body = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U ForeignClass>>
+                }
+              }
+              pos_args = 0
+              args = [
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
@@ -6324,6 +6731,281 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_lazy_ }
+          ]
+        }
+
+        Send{
+          recv = Send{
+            recv = Literal{ value = :Kernel }
+            fun = <U lambda>
+            block = Block {
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U klass>
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U foreign>
+                }
+              ]
+              body = Send{
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U klass>
+                }
+                fun = <U define_method>
+                block = Block {
+                  args = [
+                    OptionalArg{
+                      expr = KeywordArg{ expr = UnresolvedIdent{
+                        kind = Local
+                        name = <U allow_direct_mutation>
+                      } }
+                      default_ = Literal{ value = nil }
+                    }
+                  ]
+                  body = InsSeq{
+                    stats = [
+                      If{
+                        cond = Send{
+                          recv = UnresolvedIdent{
+                            kind = Local
+                            name = <U foreign>
+                          }
+                          fun = <U is_a?>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = :Proc }
+                          ]
+                        }
+                        thenp = InsSeq{
+                          stats = [
+                            Assign{
+                              lhs = UnresolvedIdent{
+                                kind = Local
+                                name = <U resolved_foreign>
+                              }
+                              rhs = Send{
+                                recv = UnresolvedIdent{
+                                  kind = Local
+                                  name = <U foreign>
+                                }
+                                fun = <U call>
+                                block = nullptr
+                                pos_args = 0
+                                args = [
+                                ]
+                              }
+                            }
+                            If{
+                              cond = Send{
+                                recv = Send{
+                                  recv = UnresolvedIdent{
+                                    kind = Local
+                                    name = <U resolved_foreign>
+                                  }
+                                  fun = <U respond_to?>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    Literal{ value = :load }
+                                  ]
+                                }
+                                fun = <U !>
+                                block = nullptr
+                                pos_args = 0
+                                args = [
+                                ]
+                              }
+                              thenp = Send{
+                                recv = Send{
+                                  recv = ConstantLit{
+                                    orig = nullptr
+                                    symbol = (module ::T)
+                                  }
+                                  fun = <U unsafe>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    ConstantLit{
+                                      orig = nullptr
+                                      symbol = (module ::Kernel)
+                                    }
+                                  ]
+                                }
+                                fun = <U raise>
+                                block = nullptr
+                                pos_args = 1
+                                args = [
+                                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                                ]
+                              }
+                              elsep = EmptyTree
+                            }
+                          ],
+                          expr = Assign{
+                            lhs = UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            rhs = UnresolvedIdent{
+                              kind = Local
+                              name = <U resolved_foreign>
+                            }
+                          }
+                        }
+                        elsep = EmptyTree
+                      }
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U opts>
+                        }
+                        rhs = If{
+                          cond = Send{
+                            recv = UnresolvedIdent{
+                              kind = Local
+                              name = <U allow_direct_mutation>
+                            }
+                            fun = <U nil?>
+                            block = nullptr
+                            pos_args = 0
+                            args = [
+                            ]
+                          }
+                          thenp = Hash{
+                            pairs = [
+                            ]
+                          }
+                          elsep = Hash{
+                            pairs = [
+                              [
+                                key = Literal{ value = :allow_direct_mutation }
+                                value = UnresolvedIdent{
+                                  kind = Local
+                                  name = <U allow_direct_mutation>
+                                }
+                              ]
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    expr = Send{
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = (module ::T)
+                      }
+                      fun = <U let>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        Send{
+                          recv = Send{
+                            recv = Send{
+                              recv = ConstantLit{
+                                orig = nullptr
+                                symbol = (module ::T)
+                              }
+                              fun = <U unsafe>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                Send{
+                                  recv = Local{
+                                    localVariable = <U <self>>
+                                  }
+                                  fun = <U class>
+                                  block = nullptr
+                                  pos_args = 0
+                                  args = [
+                                  ]
+                                }
+                              ]
+                            }
+                            fun = <U decorator>
+                            block = nullptr
+                            pos_args = 0
+                            args = [
+                            ]
+                          }
+                          fun = <U foreign_prop_get>
+                          block = nullptr
+                          pos_args = 5
+                          args = [
+                            Local{
+                              localVariable = <U <self>>
+                            }
+                            Literal{ value = :foreign_lazy }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            Hash{
+                              pairs = [
+                              ]
+                            }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U opts>
+                            }
+                          ]
+                        }
+                        Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = (module ::T)
+                          }
+                          fun = <U nilable>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <C <U ForeignClass>>
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+                pos_args = 1
+                args = [
+                  Literal{ value = :foreign_lazy_ }
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+          fun = <U call>
+          block = nullptr
+          pos_args = 2
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U lambda>
+              block = Block {
+                args = [
+                ]
+                body = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U ForeignClass>>
+                }
+              }
+              pos_args = 0
+              args = [
+              ]
+            }
           ]
         }
 
@@ -6428,6 +7110,281 @@ ClassDef{
         }
 
         Send{
+          recv = Send{
+            recv = Literal{ value = :Kernel }
+            fun = <U lambda>
+            block = Block {
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U klass>
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U foreign>
+                }
+              ]
+              body = Send{
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U klass>
+                }
+                fun = <U define_method>
+                block = Block {
+                  args = [
+                    OptionalArg{
+                      expr = KeywordArg{ expr = UnresolvedIdent{
+                        kind = Local
+                        name = <U allow_direct_mutation>
+                      } }
+                      default_ = Literal{ value = nil }
+                    }
+                  ]
+                  body = InsSeq{
+                    stats = [
+                      If{
+                        cond = Send{
+                          recv = UnresolvedIdent{
+                            kind = Local
+                            name = <U foreign>
+                          }
+                          fun = <U is_a?>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = :Proc }
+                          ]
+                        }
+                        thenp = InsSeq{
+                          stats = [
+                            Assign{
+                              lhs = UnresolvedIdent{
+                                kind = Local
+                                name = <U resolved_foreign>
+                              }
+                              rhs = Send{
+                                recv = UnresolvedIdent{
+                                  kind = Local
+                                  name = <U foreign>
+                                }
+                                fun = <U call>
+                                block = nullptr
+                                pos_args = 0
+                                args = [
+                                ]
+                              }
+                            }
+                            If{
+                              cond = Send{
+                                recv = Send{
+                                  recv = UnresolvedIdent{
+                                    kind = Local
+                                    name = <U resolved_foreign>
+                                  }
+                                  fun = <U respond_to?>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    Literal{ value = :load }
+                                  ]
+                                }
+                                fun = <U !>
+                                block = nullptr
+                                pos_args = 0
+                                args = [
+                                ]
+                              }
+                              thenp = Send{
+                                recv = Send{
+                                  recv = ConstantLit{
+                                    orig = nullptr
+                                    symbol = (module ::T)
+                                  }
+                                  fun = <U unsafe>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    ConstantLit{
+                                      orig = nullptr
+                                      symbol = (module ::Kernel)
+                                    }
+                                  ]
+                                }
+                                fun = <U raise>
+                                block = nullptr
+                                pos_args = 1
+                                args = [
+                                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                                ]
+                              }
+                              elsep = EmptyTree
+                            }
+                          ],
+                          expr = Assign{
+                            lhs = UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            rhs = UnresolvedIdent{
+                              kind = Local
+                              name = <U resolved_foreign>
+                            }
+                          }
+                        }
+                        elsep = EmptyTree
+                      }
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U opts>
+                        }
+                        rhs = If{
+                          cond = Send{
+                            recv = UnresolvedIdent{
+                              kind = Local
+                              name = <U allow_direct_mutation>
+                            }
+                            fun = <U nil?>
+                            block = nullptr
+                            pos_args = 0
+                            args = [
+                            ]
+                          }
+                          thenp = Hash{
+                            pairs = [
+                            ]
+                          }
+                          elsep = Hash{
+                            pairs = [
+                              [
+                                key = Literal{ value = :allow_direct_mutation }
+                                value = UnresolvedIdent{
+                                  kind = Local
+                                  name = <U allow_direct_mutation>
+                                }
+                              ]
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    expr = Send{
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = (module ::T)
+                      }
+                      fun = <U let>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        Send{
+                          recv = Send{
+                            recv = Send{
+                              recv = ConstantLit{
+                                orig = nullptr
+                                symbol = (module ::T)
+                              }
+                              fun = <U unsafe>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                Send{
+                                  recv = Local{
+                                    localVariable = <U <self>>
+                                  }
+                                  fun = <U class>
+                                  block = nullptr
+                                  pos_args = 0
+                                  args = [
+                                  ]
+                                }
+                              ]
+                            }
+                            fun = <U decorator>
+                            block = nullptr
+                            pos_args = 0
+                            args = [
+                            ]
+                          }
+                          fun = <U foreign_prop_get>
+                          block = nullptr
+                          pos_args = 5
+                          args = [
+                            Local{
+                              localVariable = <U <self>>
+                            }
+                            Literal{ value = :foreign_proc }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            Hash{
+                              pairs = [
+                              ]
+                            }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U opts>
+                            }
+                          ]
+                        }
+                        Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = (module ::T)
+                          }
+                          fun = <U nilable>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <C <U ForeignClass>>
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+                pos_args = 1
+                args = [
+                  Literal{ value = :foreign_proc_ }
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+          fun = <U call>
+          block = nullptr
+          pos_args = 2
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U lambda>
+              block = Block {
+                args = [
+                ]
+                body = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U ForeignClass>>
+                }
+              }
+              pos_args = 0
+              args = [
+              ]
+            }
+          ]
+        }
+
+        Send{
           recv = ConstantLit{
             orig = nullptr
             symbol = (module ::Sorbet::Private::Static)
@@ -6521,6 +7478,274 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_invalid_ }
+          ]
+        }
+
+        Send{
+          recv = Send{
+            recv = Literal{ value = :Kernel }
+            fun = <U lambda>
+            block = Block {
+              args = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U klass>
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = <U foreign>
+                }
+              ]
+              body = Send{
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <U klass>
+                }
+                fun = <U define_method>
+                block = Block {
+                  args = [
+                    OptionalArg{
+                      expr = KeywordArg{ expr = UnresolvedIdent{
+                        kind = Local
+                        name = <U allow_direct_mutation>
+                      } }
+                      default_ = Literal{ value = nil }
+                    }
+                  ]
+                  body = InsSeq{
+                    stats = [
+                      If{
+                        cond = Send{
+                          recv = UnresolvedIdent{
+                            kind = Local
+                            name = <U foreign>
+                          }
+                          fun = <U is_a?>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = :Proc }
+                          ]
+                        }
+                        thenp = InsSeq{
+                          stats = [
+                            Assign{
+                              lhs = UnresolvedIdent{
+                                kind = Local
+                                name = <U resolved_foreign>
+                              }
+                              rhs = Send{
+                                recv = UnresolvedIdent{
+                                  kind = Local
+                                  name = <U foreign>
+                                }
+                                fun = <U call>
+                                block = nullptr
+                                pos_args = 0
+                                args = [
+                                ]
+                              }
+                            }
+                            If{
+                              cond = Send{
+                                recv = Send{
+                                  recv = UnresolvedIdent{
+                                    kind = Local
+                                    name = <U resolved_foreign>
+                                  }
+                                  fun = <U respond_to?>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    Literal{ value = :load }
+                                  ]
+                                }
+                                fun = <U !>
+                                block = nullptr
+                                pos_args = 0
+                                args = [
+                                ]
+                              }
+                              thenp = Send{
+                                recv = Send{
+                                  recv = ConstantLit{
+                                    orig = nullptr
+                                    symbol = (module ::T)
+                                  }
+                                  fun = <U unsafe>
+                                  block = nullptr
+                                  pos_args = 1
+                                  args = [
+                                    ConstantLit{
+                                      orig = nullptr
+                                      symbol = (module ::Kernel)
+                                    }
+                                  ]
+                                }
+                                fun = <U raise>
+                                block = nullptr
+                                pos_args = 1
+                                args = [
+                                  Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                                ]
+                              }
+                              elsep = EmptyTree
+                            }
+                          ],
+                          expr = Assign{
+                            lhs = UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            rhs = UnresolvedIdent{
+                              kind = Local
+                              name = <U resolved_foreign>
+                            }
+                          }
+                        }
+                        elsep = EmptyTree
+                      }
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U opts>
+                        }
+                        rhs = If{
+                          cond = Send{
+                            recv = UnresolvedIdent{
+                              kind = Local
+                              name = <U allow_direct_mutation>
+                            }
+                            fun = <U nil?>
+                            block = nullptr
+                            pos_args = 0
+                            args = [
+                            ]
+                          }
+                          thenp = Hash{
+                            pairs = [
+                            ]
+                          }
+                          elsep = Hash{
+                            pairs = [
+                              [
+                                key = Literal{ value = :allow_direct_mutation }
+                                value = UnresolvedIdent{
+                                  kind = Local
+                                  name = <U allow_direct_mutation>
+                                }
+                              ]
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    expr = Send{
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = (module ::T)
+                      }
+                      fun = <U let>
+                      block = nullptr
+                      pos_args = 2
+                      args = [
+                        Send{
+                          recv = Send{
+                            recv = Send{
+                              recv = ConstantLit{
+                                orig = nullptr
+                                symbol = (module ::T)
+                              }
+                              fun = <U unsafe>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                Send{
+                                  recv = Local{
+                                    localVariable = <U <self>>
+                                  }
+                                  fun = <U class>
+                                  block = nullptr
+                                  pos_args = 0
+                                  args = [
+                                  ]
+                                }
+                              ]
+                            }
+                            fun = <U decorator>
+                            block = nullptr
+                            pos_args = 0
+                            args = [
+                            ]
+                          }
+                          fun = <U foreign_prop_get>
+                          block = nullptr
+                          pos_args = 5
+                          args = [
+                            Local{
+                              localVariable = <U <self>>
+                            }
+                            Literal{ value = :foreign_invalid }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            Hash{
+                              pairs = [
+                              ]
+                            }
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U opts>
+                            }
+                          ]
+                        }
+                        Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = (module ::T)
+                          }
+                          fun = <U untyped>
+                          block = nullptr
+                          pos_args = 0
+                          args = [
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+                pos_args = 1
+                args = [
+                  Literal{ value = :foreign_invalid_ }
+                ]
+              }
+            }
+            pos_args = 0
+            args = [
+            ]
+          }
+          fun = <U call>
+          block = nullptr
+          pos_args = 2
+          args = [
+            Local{
+              localVariable = <U <self>>
+            }
+            Send{
+              recv = Local{
+                localVariable = <U <self>>
+              }
+              fun = <U lambda>
+              block = Block {
+                args = [
+                ]
+                body = Literal{ value = :not_a_type }
+              }
+              pos_args = 0
+              args = [
+              ]
+            }
           ]
         }
 

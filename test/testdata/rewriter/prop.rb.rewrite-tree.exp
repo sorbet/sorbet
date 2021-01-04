@@ -332,10 +332,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(::T::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+      <self>.params(:opts, ::T.untyped()).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
     end
 
-    def foreign_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def foreign_<<todo method>>(*opts:, &<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -344,7 +344,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        loaded_foreign = <self>.__send__(:foreign_, :allow_direct_mutation, allow_direct_mutation)
+        if loaded_foreign.!()
+          ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        else
+          loaded_foreign
+        end
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -374,10 +381,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(::T::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+      <self>.params(:opts, ::T.untyped()).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
     end
 
-    def foreign_lazy_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def foreign_lazy_<<todo method>>(*opts:, &<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -386,7 +393,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_lazy_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        loaded_foreign = <self>.__send__(:foreign_lazy_, :allow_direct_mutation, allow_direct_mutation)
+        if loaded_foreign.!()
+          ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        else
+          loaded_foreign
+        end
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -416,10 +430,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(::T::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
+      <self>.params(:opts, ::T.untyped()).returns(::T.nilable(<emptyTree>::<C ForeignClass>))
     end
 
-    def foreign_proc_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def foreign_proc_<<todo method>>(*opts:, &<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -428,7 +442,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_proc_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        loaded_foreign = <self>.__send__(:foreign_proc_, :allow_direct_mutation, allow_direct_mutation)
+        if loaded_foreign.!()
+          ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        else
+          loaded_foreign
+        end
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -458,10 +479,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(::T::<C Boolean>)).returns(::T.untyped())
+      <self>.params(:opts, ::T.untyped()).returns(::T.untyped())
     end
 
-    def foreign_invalid_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
+    def foreign_invalid_<<todo method>>(*opts:, &<blk>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
@@ -470,7 +491,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_invalid_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      begin
+        loaded_foreign = <self>.__send__(:foreign_invalid_, :allow_direct_mutation, allow_direct_mutation)
+        if loaded_foreign.!()
+          ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        else
+          loaded_foreign
+        end
+      end
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -618,6 +646,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_)
 
+    :Kernel.lambda() do |klass, foreign|
+      klass.define_method(:foreign_) do |allow_direct_mutation: = nil|
+        begin
+          if foreign.is_a?(:Proc)
+            begin
+              resolved_foreign = foreign.call()
+              if resolved_foreign.respond_to?(:load).!()
+                ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              else
+                <emptyTree>
+              end
+              foreign = resolved_foreign
+            end
+          else
+            <emptyTree>
+          end
+          opts = if allow_direct_mutation.nil?()
+            {}
+          else
+            {:allow_direct_mutation => allow_direct_mutation}
+          end
+          ::T.let(::T.unsafe(<self>.class()).decorator().foreign_prop_get(<self>, :foreign, foreign, {}, opts), ::T.nilable(<emptyTree>::<C ForeignClass>))
+        end
+      end
+    end.call(<self>, <self>.lambda() do ||
+        <emptyTree>::<C ForeignClass>
+      end)
+
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_!)
 
     <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.lambda() do ||
@@ -629,6 +685,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy=)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy_)
+
+    :Kernel.lambda() do |klass, foreign|
+      klass.define_method(:foreign_lazy_) do |allow_direct_mutation: = nil|
+        begin
+          if foreign.is_a?(:Proc)
+            begin
+              resolved_foreign = foreign.call()
+              if resolved_foreign.respond_to?(:load).!()
+                ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              else
+                <emptyTree>
+              end
+              foreign = resolved_foreign
+            end
+          else
+            <emptyTree>
+          end
+          opts = if allow_direct_mutation.nil?()
+            {}
+          else
+            {:allow_direct_mutation => allow_direct_mutation}
+          end
+          ::T.let(::T.unsafe(<self>.class()).decorator().foreign_prop_get(<self>, :foreign_lazy, foreign, {}, opts), ::T.nilable(<emptyTree>::<C ForeignClass>))
+        end
+      end
+    end.call(<self>, <self>.lambda() do ||
+        <emptyTree>::<C ForeignClass>
+      end)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy_!)
 
@@ -642,6 +726,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc_)
 
+    :Kernel.lambda() do |klass, foreign|
+      klass.define_method(:foreign_proc_) do |allow_direct_mutation: = nil|
+        begin
+          if foreign.is_a?(:Proc)
+            begin
+              resolved_foreign = foreign.call()
+              if resolved_foreign.respond_to?(:load).!()
+                ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              else
+                <emptyTree>
+              end
+              foreign = resolved_foreign
+            end
+          else
+            <emptyTree>
+          end
+          opts = if allow_direct_mutation.nil?()
+            {}
+          else
+            {:allow_direct_mutation => allow_direct_mutation}
+          end
+          ::T.let(::T.unsafe(<self>.class()).decorator().foreign_prop_get(<self>, :foreign_proc, foreign, {}, opts), ::T.nilable(<emptyTree>::<C ForeignClass>))
+        end
+      end
+    end.call(<self>, <self>.lambda() do ||
+        <emptyTree>::<C ForeignClass>
+      end)
+
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc_!)
 
     <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
@@ -653,6 +765,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid=)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid_)
+
+    :Kernel.lambda() do |klass, foreign|
+      klass.define_method(:foreign_invalid_) do |allow_direct_mutation: = nil|
+        begin
+          if foreign.is_a?(:Proc)
+            begin
+              resolved_foreign = foreign.call()
+              if resolved_foreign.respond_to?(:load).!()
+                ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              else
+                <emptyTree>
+              end
+              foreign = resolved_foreign
+            end
+          else
+            <emptyTree>
+          end
+          opts = if allow_direct_mutation.nil?()
+            {}
+          else
+            {:allow_direct_mutation => allow_direct_mutation}
+          end
+          ::T.let(::T.unsafe(<self>.class()).decorator().foreign_prop_get(<self>, :foreign_invalid, foreign, {}, opts), ::T.untyped())
+        end
+      end
+    end.call(<self>, <self>.lambda() do ||
+        :not_a_type
+      end)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid_!)
 
