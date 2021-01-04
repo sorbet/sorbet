@@ -7,7 +7,7 @@
     <link rel="alternate" href="https://sorbet.org/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Sorbet news and events.</subtitle>
     <logo>https://sorbet.org/img/sorbet-logo-white-sparkles.svg</logo>
-    <rights>© 2020 Stripe</rights>
+    <rights>© 2021 Stripe</rights>
     <entry>
         <title type="html"><![CDATA[Types in Ruby 3, RBS, and Sorbet]]></title>
         <id>https://sorbet.org/blog/2020/07/30/ruby-3-rbs-sorbet.html</id>
