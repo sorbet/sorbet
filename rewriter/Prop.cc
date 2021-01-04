@@ -184,11 +184,11 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             // Type must have been inferred from prop method (like created_prop) or
             // been given in second argument.
             return nullopt;
-        } else {
-            ret.type = ASTUtil::dupType(send->args[1]);
-            if (ret.type == nullptr) {
-                return nullopt;
-            }
+        }
+
+        ret.type = ASTUtil::dupType(send->args[1]);
+        if (ret.type == nullptr) {
+            return nullopt;
         }
     }
 
@@ -433,35 +433,35 @@ ast::TreePtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send)
 
     if (prop.hasWithoutAccessors) {
         return result;
+    }
+
+    auto withoutAccessors = ast::MK::Symbol(send->loc, core::Names::withoutAccessors());
+    auto true_ = ast::MK::True(send->loc);
+
+    auto *copy = ast::cast_tree<ast::Send>(result);
+    if (copy->hasKwArgs() || copy->args.empty()) {
+        // append to the inline keyword arguments of the send
+        auto pos = copy->args.end();
+        if (copy->hasKwSplat()) {
+            pos--;
+        }
+
+        pos = copy->args.insert(pos, move(withoutAccessors));
+        pos++;
+        copy->args.insert(pos, move(true_));
     } else {
-        auto withoutAccessors = ast::MK::Symbol(send->loc, core::Names::withoutAccessors());
-        auto true_ = ast::MK::True(send->loc);
-
-        auto *copy = ast::cast_tree<ast::Send>(result);
-        if (copy->hasKwArgs() || copy->args.empty()) {
-            // append to the inline keyword arguments of the send
+        if (auto *hash = ast::cast_tree<ast::Hash>(copy->args.back())) {
+            hash->keys.emplace_back(move(withoutAccessors));
+            hash->values.emplace_back(move(true_));
+        } else {
             auto pos = copy->args.end();
-            if (copy->hasKwSplat()) {
-                pos--;
-            }
-
             pos = copy->args.insert(pos, move(withoutAccessors));
             pos++;
             copy->args.insert(pos, move(true_));
-        } else {
-            if (auto *hash = ast::cast_tree<ast::Hash>(copy->args.back())) {
-                hash->keys.emplace_back(move(withoutAccessors));
-                hash->values.emplace_back(move(true_));
-            } else {
-                auto pos = copy->args.end();
-                pos = copy->args.insert(pos, move(withoutAccessors));
-                pos++;
-                copy->args.insert(pos, move(true_));
-            }
         }
-
-        return result;
     }
+
+    return result;
 }
 
 vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
