@@ -1621,7 +1621,7 @@ class IO < Object
     )
     .returns(String)
   end
-  def sysread(maxlen, outbuf); end
+  def sysread(maxlen, outbuf=T.unsafe(nil)); end
 
   # Seeks to a given *offset* in the stream according to the value of *whence*
   # (see `IO#seek` for values of *whence*). Returns the new offset into the
