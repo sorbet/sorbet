@@ -306,8 +306,7 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     // TODO(froydnj): make this stub method take an allow_direct_mutation kwarg.
     ast::TreePtr arg =
         ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-    nodes.emplace_back(
-                       ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
+    nodes.emplace_back(ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
 
     // We just defined the version Sorbet will use to type-check things.  Now build
     // the body that simulates the definition of the method.  We're going to use an
@@ -316,72 +315,58 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     auto allowDirectMutation = [&]() -> ast::TreePtr {
         return ast::MK::Local(loc, core::Names::allowDirectMutation());
     };
-    auto klass = [&]() -> ast::TreePtr {
-        return ast::MK::Local(loc, core::Names::klass());
-    };
-    auto foreign = [&]() -> ast::TreePtr {
-        return ast::MK::Local(loc, core::Names::foreign());
-    };
-    auto resolvedForeign = [&]() -> ast::TreePtr {
-        return ast::MK::Local(loc, core::Names::resolvedForeign());
-    };
+    auto klass = [&]() -> ast::TreePtr { return ast::MK::Local(loc, core::Names::klass()); };
+    auto foreign = [&]() -> ast::TreePtr { return ast::MK::Local(loc, core::Names::foreign()); };
+    auto resolvedForeign = [&]() -> ast::TreePtr { return ast::MK::Local(loc, core::Names::resolvedForeign()); };
 
     // Build the code to resolve the handler, if necessary.
     auto resolve = ast::MK::Assign(loc, resolvedForeign(), ast::MK::Send0(loc, foreign(), core::Names::call()));
     // TODO(froydnj): make this raise ArgumentError
-    auto checkLoad = ast::MK::If(loc, ast::MK::Send0(loc,
-                                                     ast::MK::Send1(loc, resolvedForeign(), core::Names::respondTo_p(),
-                                                                    ast::MK::Symbol(loc, core::Names::load())),
-                                                     core::Names::bang()),
-                                 ast::MK::RaiseUnimplemented(loc),
-                                 ast::MK::EmptyTree());
+    auto checkLoad = ast::MK::If(loc,
+                                 ast::MK::Send0(loc,
+                                                ast::MK::Send1(loc, resolvedForeign(), core::Names::respondTo_p(),
+                                                               ast::MK::Symbol(loc, core::Names::load())),
+                                                core::Names::bang()),
+                                 ast::MK::RaiseUnimplemented(loc), ast::MK::EmptyTree());
     auto cacheForeign = ast::MK::Assign(loc, foreign(), resolvedForeign());
 
     auto resolveConsequent = ast::MK::InsSeq2(loc, std::move(resolve), std::move(checkLoad), std::move(cacheForeign));
-    auto resolveConditional = ast::MK::If(loc, ast::MK::Send1(loc, foreign(), core::Names::isA_p(),
-                                                              ast::MK::Symbol(loc, core::Names::Constants::Proc())),
-                                          std::move(resolveConsequent),
-                                          ast::MK::EmptyTree());
+    auto resolveConditional = ast::MK::If(
+        loc, ast::MK::Send1(loc, foreign(), core::Names::isA_p(), ast::MK::Symbol(loc, core::Names::Constants::Proc())),
+        std::move(resolveConsequent), ast::MK::EmptyTree());
 
     // Build the code to call back through the decorator's foreign_prop_get.
-    auto opts = ast::MK::Assign(loc, ast::MK::Local(loc, core::Names::opts()),
-                                ast::MK::If(loc, ast::MK::Send0(loc, allowDirectMutation(), core::Names::nil_p()),
-                                            ast::MK::Hash0(loc),
-                                            ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::allowDirectMutation()),
-                                                           allowDirectMutation())));
+    auto opts = ast::MK::Assign(
+        loc, ast::MK::Local(loc, core::Names::opts()),
+        ast::MK::If(
+            loc, ast::MK::Send0(loc, allowDirectMutation(), core::Names::nil_p()), ast::MK::Hash0(loc),
+            ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::allowDirectMutation()), allowDirectMutation())));
 
-    auto callForeignPropGet = ast::MK::Send5(loc, decorator(loc),
-                                             core::Names::foreignPropGet(),
-                                             ast::MK::Self(loc),
-                                             ast::MK::Symbol(loc, name),
-                                             foreign(),
+    auto callForeignPropGet = ast::MK::Send5(loc, decorator(loc), core::Names::foreignPropGet(), ast::MK::Self(loc),
+                                             ast::MK::Symbol(loc, name), foreign(),
                                              // TODO: we need to default this?
-                                             ast::MK::Hash0(loc),
-                                             ast::MK::Local(loc, core::Names::opts()));
+                                             ast::MK::Hash0(loc), ast::MK::Local(loc, core::Names::opts()));
 
     // Build up the actual call to define_method.
-    auto defineMethodBody = ast::MK::InsSeq2(loc, std::move(resolveConditional),
-                                              std::move(opts),
-                                              std::move(callForeignPropGet));
-    auto defineMethodBlock = ast::MK::Block1(loc, std::move(defineMethodBody),
-                                             ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, allowDirectMutation()),
-                                                                  ast::MK::Nil(loc)));
+    auto defineMethodBody =
+        ast::MK::InsSeq2(loc, std::move(resolveConditional), std::move(opts), std::move(callForeignPropGet));
+    auto defineMethodBlock =
+        ast::MK::Block1(loc, std::move(defineMethodBody),
+                        ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, allowDirectMutation()), ast::MK::Nil(loc)));
 
     auto defineMethodSend = ast::MK::Send1Block(loc, klass(), core::Names::define_method(),
-                                                ast::MK::Symbol(loc, fkMethod),
-                                                std::move(defineMethodBlock));
+                                                ast::MK::Symbol(loc, fkMethod), std::move(defineMethodBlock));
 
     // Build the "toplevel" lambda and call it.
     auto block = ast::MK::Block2(loc, std::move(defineMethodSend), klass(), foreign());
     auto immediateLambda = ast::MK::Send0Block(loc, ast::MK::Symbol(loc, core::Names::Constants::Kernel()),
-                                               core::Names::lambda(),
-                                               std::move(block));
+                                               core::Names::lambda(), std::move(block));
     // ret.foreign was the body of the lambda that was in the original source, so
     // reconstitute the lambda here.
     auto foreignLambda = ast::MK::Send0Block(loc, ast::MK::Self(loc), core::Names::lambda(),
                                              ast::MK::Block0(loc, std::move(ret.foreign)));
-    auto callLambda = ast::MK::Send2(loc, std::move(immediateLambda), core::Names::call(),
-                                     ast::MK::Self(loc), std::move(foreignLambda));
+    auto callLambda = ast::MK::Send2(loc, std::move(immediateLambda), core::Names::call(), ast::MK::Self(loc),
+                                     std::move(foreignLambda));
 
     nodes.emplace_back(std::move(callLambda));
 
@@ -402,27 +387,22 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     // end
 
     auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
-    auto loadedForeign = [&]() -> ast::TreePtr {
-        return ast::MK::Local(loc, core::Names::loadedForeign());
-    };
+    auto loadedForeign = [&]() -> ast::TreePtr { return ast::MK::Local(loc, core::Names::loadedForeign()); };
 
     ast::TreePtr arg2 = ast::MK::OptionalArg(
-                                             nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
-                                             ast::MK::Nil(nameLoc));
-    ast::TreePtr callFkMethod = ast::MK::Send(loc, ast::MK::Self(loc),
-                                              fkMethod,
-                                              0,
-                                              ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::allowDirectMutation()),
-                                                                ast::MK::Local(loc, core::Names::allowDirectMutation())));
+        nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
+        ast::MK::Nil(nameLoc));
+    ast::TreePtr callFkMethod =
+        ast::MK::Send(loc, ast::MK::Self(loc), fkMethod, 0,
+                      ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::allowDirectMutation()),
+                                        ast::MK::Local(loc, core::Names::allowDirectMutation())));
     ast::TreePtr assign = ast::MK::Assign(loc, loadedForeign(), std::move(callFkMethod));
     ast::TreePtr check = ast::MK::Send0(loc, loadedForeign(), core::Names::bang());
     // TODO(froydnj): call T::Configuration.hard_assert_handler for better errors.
     ast::TreePtr failure = ast::MK::RaiseUnimplemented(loc);
     ast::TreePtr conditional = ast::MK::If(loc, std::move(check), std::move(failure), ast::MK::EmptyTree());
-    ast::TreePtr insSeq = ast::MK::InsSeq2(loc, std::move(assign), std::move(conditional),
-                                           loadedForeign());
-    nodes.emplace_back(
-                       ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), std::move(insSeq)));
+    ast::TreePtr insSeq = ast::MK::InsSeq2(loc, std::move(assign), std::move(conditional), loadedForeign());
+    nodes.emplace_back(ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), std::move(insSeq)));
 }
 
 vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropContext propContext) {
