@@ -268,6 +268,13 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     return ret;
 }
 
+ast::TreePtr decorator(core::LocOffsets loc) {
+    auto class_ = ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::class_());
+    // Use T.unsafe here to convince Sorbet that we really can access decorator.
+    auto unsafe = ast::MK::Unsafe(loc, std::move(class_));
+    return ast::MK::Send0(loc, std::move(unsafe), core::Names::decorator());
+}
+
 void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::TreePtr> &nodes) {
     const auto loc = ret.loc;
     const auto name = ret.name;
@@ -343,8 +350,7 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
                                             ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::allowDirectMutation()),
                                                            allowDirectMutation())));
 
-    auto callForeignPropGet = ast::MK::Send5(loc, ast::MK::Send0(loc, ast::MK::Send0(loc, ast::MK::Self(loc), core::Names::class_()),
-                                                                 core::Names::decorator()),
+    auto callForeignPropGet = ast::MK::Send5(loc, decorator(loc),
                                              core::Names::foreignPropGet(),
                                              ast::MK::Self(loc),
                                              ast::MK::Symbol(loc, name),
