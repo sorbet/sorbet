@@ -1188,17 +1188,17 @@ void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAnc
     // We store the required ancestors into a fake property called `<required-ancestors>`
     auto ancestors = this->findMember(gs, prop);
     if (!ancestors.exists()) {
-        ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs), prop);
+        ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs).asClassOrModuleRef(), prop);
         ancestors.data(gs)->locs_.clear(); // Remove the original location
 
         // Create the return type tuple to store RequiredAncestor.symbol
         vector<TypePtr> tsymbols;
-        ancestors.data(gs)->resultType = TupleType::build(gs, move(tsymbols));
+        ancestors.data(gs)->resultType = make_type<TupleType>(move(tsymbols));
 
         // Create the first argument typed as a tuple to store RequiredAncestor.origin
-        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors, core::Names::arg());
+        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors.asMethodRef(), core::Names::arg());
         vector<TypePtr> torigins;
-        arg.type = TupleType::build(gs, move(torigins));
+        arg.type = make_type<TupleType>(move(torigins));
     }
 
     // Do not require the same ancestor twice
@@ -1254,8 +1254,8 @@ vector<Symbol::RequiredAncestor> Symbol::readRequiredAncestorsInternal(const Glo
 }
 
 // Record a required ancestor for this class of module
-void Symbol::recordRequiredAncestor(GlobalState &gs, SymbolRef ancestor, Loc loc) {
-    RequiredAncestor req = {this->ref(gs), ancestor, loc};
+void Symbol::recordRequiredAncestor(GlobalState &gs, ClassOrModuleRef ancestor, Loc loc) {
+    RequiredAncestor req = {this->ref(gs).asClassOrModuleRef(), ancestor, loc};
     recordRequiredAncestorInternal(gs, req, Names::requiredAncestors());
 }
 
@@ -1266,16 +1266,16 @@ vector<Symbol::RequiredAncestor> Symbol::requiredAncestors(const GlobalState &gs
 
 // All required ancestors by this class or module
 std::vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitiveInternal(GlobalState &gs,
-                                                                                  std::vector<SymbolRef> &seen) {
-    if (absl::c_find(seen, this->ref(gs)) != seen.end()) {
+                                                                                  std::vector<ClassOrModuleRef> &seen) {
+    if (absl::c_find(seen, this->ref(gs).asClassOrModuleRef()) != seen.end()) {
         return requiredAncestors(gs); // Break recursive loops if we already visited this ancestor
     }
-    seen.emplace_back(this->ref(gs));
+    seen.emplace_back(this->ref(gs).asClassOrModuleRef());
 
     for (auto ancst : requiredAncestors(gs)) {
         recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
         for (auto sancst : ancst.symbol.data(gs)->requiredAncestorsTransitiveInternal(gs, seen)) {
-            if (sancst.symbol != this->ref(gs)) {
+            if (sancst.symbol != this->ref(gs).asClassOrModuleRef()) {
                 recordRequiredAncestorInternal(gs, sancst, Names::requiredAncestorsLin());
             }
         }
@@ -1284,7 +1284,7 @@ std::vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitiveInterna
     auto parent = superClass();
     if (parent.exists()) {
         for (auto ancst : parent.data(gs)->requiredAncestorsTransitiveInternal(gs, seen)) {
-            if (ancst.symbol != this->ref(gs)) {
+            if (ancst.symbol != this->ref(gs).asClassOrModuleRef()) {
                 recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
             }
         }
@@ -1292,7 +1292,7 @@ std::vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitiveInterna
 
     for (auto mixin : mixins()) {
         for (auto ancst : mixin.data(gs)->requiredAncestors(gs)) {
-            if (ancst.symbol != this->ref(gs)) {
+            if (ancst.symbol != this->ref(gs).asClassOrModuleRef()) {
                 recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
             }
         }
@@ -1308,7 +1308,7 @@ vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitive(const Globa
 
 void Symbol::computeRequiredAncestorLinearization(GlobalState &gs) {
     ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
-    std::vector<SymbolRef> seen;
+    std::vector<ClassOrModuleRef> seen;
     requiredAncestorsTransitiveInternal(gs, seen);
 }
 

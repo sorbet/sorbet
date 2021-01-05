@@ -588,15 +588,16 @@ public:
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
     // Record a required ancestor for this class of module
-    void recordRequiredAncestor(GlobalState &gs, SymbolRef ancestor, Loc loc);
+    void recordRequiredAncestor(GlobalState &gs, ClassOrModuleRef ancestor, Loc loc);
 
     // Associate a required ancestor with the loc it's required at
     struct RequiredAncestor {
-        SymbolRef origin; // The class or module that required `symbol`
-        SymbolRef symbol; // The symbol required
-        Loc loc;          // The location it was required at
+        ClassOrModuleRef origin; // The class or module that required `symbol`
+        ClassOrModuleRef symbol; // The symbol required
+        Loc loc;                 // The location it was required at
 
-        RequiredAncestor(SymbolRef origin, SymbolRef symbol, Loc loc) : origin(origin), symbol(symbol), loc(loc) {}
+        RequiredAncestor(ClassOrModuleRef origin, ClassOrModuleRef symbol, Loc loc)
+            : origin(origin), symbol(symbol), loc(loc) {}
     };
 
     void computeRequiredAncestorLinearization(GlobalState &gs);
@@ -724,7 +725,8 @@ private:
     // Read required ancestors for this class of module from a magic property
     std::vector<RequiredAncestor> readRequiredAncestorsInternal(const GlobalState &gs, NameRef prop) const;
 
-    std::vector<RequiredAncestor> requiredAncestorsTransitiveInternal(GlobalState &gs, std::vector<SymbolRef> &seen);
+    std::vector<RequiredAncestor> requiredAncestorsTransitiveInternal(GlobalState &gs,
+                                                                      std::vector<ClassOrModuleRef> &seen);
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                            int maxDepth = 100) const;

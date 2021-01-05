@@ -683,7 +683,7 @@ private:
                 return;
             }
 
-            owner.data(gs)->recordRequiredAncestor(gs, id->symbol, argLoc);
+            owner.data(gs)->recordRequiredAncestor(gs, id->symbol.asClassOrModuleRef(), argLoc);
         }
     }
 

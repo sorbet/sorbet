@@ -543,7 +543,8 @@ void validateUnsatisfiableClassAncestors(core::Context ctx, const core::SymbolRe
 
     if (data->isClassOrModuleAbstract()) {
         for (auto ancst : requiredClasses) {
-            if (!sym.data(ctx)->derivesFrom(ctx, ancst.symbol) && !ancst.symbol.data(ctx)->derivesFrom(ctx, sym)) {
+            if (!sym.data(ctx)->derivesFrom(ctx, ancst.symbol) &&
+                !ancst.symbol.data(ctx)->derivesFrom(ctx, sym.asClassOrModuleRef())) {
                 if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
                     e.setHeader("`{}` requires unrelated class `{}` making it impossible to inherit", data->show(ctx),
                                 ancst.symbol.data(ctx)->show(ctx));
