@@ -33,8 +33,8 @@ module Find
     params(
       paths: String,
       ignore_error: T::Boolean,
-      blk: T.proc.params(path: String).void
-    ).void
+      blk: T.nilable(T.proc.params(path: String).void)
+    ).returns(T.nilable(T::Enumerator[String]))
   end
   def self.find(*paths, ignore_error: true, &blk); end
 
