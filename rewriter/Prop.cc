@@ -386,16 +386,16 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
     if (ret.foreign) {
         ast::TreePtr type;
         ast::TreePtr nonNilType;
-        if (ASTUtil::dupType(ret.foreign) == nullptr) {
+        if (ASTUtil::dupType(ret.type) == nullptr) {
             // If it's not a valid type, just use untyped
             type = ast::MK::Untyped(loc);
             nonNilType = ast::MK::Untyped(loc);
         } else {
-            type = ast::MK::Nilable(loc, ASTUtil::dupType(ret.foreign));
-            nonNilType = ASTUtil::dupType(ret.foreign);
+            type = ast::MK::Nilable(loc, ASTUtil::dupType(ret.type));
+            nonNilType = ASTUtil::dupType(ret.type);
         }
 
-        // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
+        // sig {params(opts: T.untyped).returns(T.nilable($type))}
         nodes.emplace_back(
             ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc), std::move(type)));
 
@@ -410,7 +410,7 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
         nodes.emplace_back(
             ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
 
-        // sig {params(opts: T.untyped).returns($foreign)}
+        // sig {params(opts: T.untyped).returns($type)}
         nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
                                          std::move(nonNilType)));
 

@@ -481,6 +481,35 @@ ClassDef{
             ]
           }
           Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U T>>
+            }
+            fun = <U reveal_type>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Send{
+                recv = Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <C <U AdvancedODM>>
+                  }
+                  fun = <U new>
+                  block = nullptr
+                  pos_args = 0
+                  args = [
+                  ]
+                }
+                fun = <U foreign_proc_>
+                block = nullptr
+                pos_args = 0
+                args = [
+                ]
+              }
+            ]
+          }
+          Send{
             recv = Send{
               recv = UnresolvedConstantLit{
                 scope = EmptyTree
@@ -3567,7 +3596,7 @@ ClassDef{
                   args = [
                     UnresolvedConstantLit{
                       scope = EmptyTree
-                      cnst = <C <U ForeignClass>>
+                      cnst = <C <U String>>
                     }
                   ]
                 }
@@ -3656,7 +3685,7 @@ ClassDef{
               args = [
                 UnresolvedConstantLit{
                   scope = EmptyTree
-                  cnst = <C <U ForeignClass>>
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -3956,7 +3985,7 @@ ClassDef{
                   args = [
                     UnresolvedConstantLit{
                       scope = EmptyTree
-                      cnst = <C <U ForeignClass>>
+                      cnst = <C <U String>>
                     }
                   ]
                 }
@@ -4045,7 +4074,7 @@ ClassDef{
               args = [
                 UnresolvedConstantLit{
                   scope = EmptyTree
-                  cnst = <C <U ForeignClass>>
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -4345,7 +4374,7 @@ ClassDef{
                   args = [
                     UnresolvedConstantLit{
                       scope = EmptyTree
-                      cnst = <C <U ForeignClass>>
+                      cnst = <C <U String>>
                     }
                   ]
                 }
@@ -4434,7 +4463,7 @@ ClassDef{
               args = [
                 UnresolvedConstantLit{
                   scope = EmptyTree
-                  cnst = <C <U ForeignClass>>
+                  cnst = <C <U String>>
                 }
               ]
             }
@@ -4728,10 +4757,14 @@ ClassDef{
                     orig = nullptr
                     symbol = (module ::T)
                   }
-                  fun = <U untyped>
+                  fun = <U nilable>
                   block = nullptr
-                  pos_args = 0
+                  pos_args = 1
                   args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <C <U String>>
+                    }
                   ]
                 }
               ]
@@ -4817,16 +4850,9 @@ ClassDef{
               block = nullptr
               pos_args = 1
               args = [
-                Send{
-                  recv = ConstantLit{
-                    orig = nullptr
-                    symbol = (module ::T)
-                  }
-                  fun = <U untyped>
-                  block = nullptr
-                  pos_args = 0
-                  args = [
-                  ]
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <C <U String>>
                 }
               ]
             }

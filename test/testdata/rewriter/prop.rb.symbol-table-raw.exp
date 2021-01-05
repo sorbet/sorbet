@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=2:1 end=148:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=2:1 end=149:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <C <U AdvancedODM>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=38:1 end=38:18}
     method <C <U AdvancedODM>><U array> (<blk>) -> AppliedType {       klass = <C <U Array>>       targs = [         <C <U Elem>> = T.untyped       ]     } @ Loc {file=test/testdata/rewriter/prop.rb start=43:5 end=43:23}
@@ -32,10 +32,10 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U AdvancedODM>><U foreign=> (foreign, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=52:5 end=52:49}
       argument foreign<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=52:11 end=52:18}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=52:5 end=52:49}
+    method <C <U AdvancedODM>><U foreign_> (opts, <blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=52:5 end=52:49}
       argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=52:11 end=52:18}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_!> (opts, <blk>) -> ForeignClass @ Loc {file=test/testdata/rewriter/prop.rb start=52:5 end=52:49}
+    method <C <U AdvancedODM>><U foreign_!> (opts, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=52:5 end=52:49}
       argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=52:11 end=52:18}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U foreign_invalid> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=55:5 end=55:65}
@@ -43,10 +43,10 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U AdvancedODM>><U foreign_invalid=> (foreign_invalid, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=55:5 end=55:65}
       argument foreign_invalid<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=55:11 end=55:26}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_invalid_> (opts, <blk>) -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=55:5 end=55:65}
+    method <C <U AdvancedODM>><U foreign_invalid_> (opts, <blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=55:5 end=55:65}
       argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=55:11 end=55:26}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_invalid_!> (opts, <blk>) -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=55:5 end=55:65}
+    method <C <U AdvancedODM>><U foreign_invalid_!> (opts, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=55:5 end=55:65}
       argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=55:11 end=55:26}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U foreign_lazy> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=53:5 end=53:59}
@@ -54,10 +54,10 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U AdvancedODM>><U foreign_lazy=> (foreign_lazy, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=53:5 end=53:59}
       argument foreign_lazy<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=53:11 end=53:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_lazy_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=53:5 end=53:59}
+    method <C <U AdvancedODM>><U foreign_lazy_> (opts, <blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=53:5 end=53:59}
       argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=53:11 end=53:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_lazy_!> (opts, <blk>) -> ForeignClass @ Loc {file=test/testdata/rewriter/prop.rb start=53:5 end=53:59}
+    method <C <U AdvancedODM>><U foreign_lazy_!> (opts, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=53:5 end=53:59}
       argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=53:11 end=53:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U foreign_proc> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=54:5 end=54:61}
@@ -65,10 +65,10 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U AdvancedODM>><U foreign_proc=> (foreign_proc, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=54:5 end=54:61}
       argument foreign_proc<> -> String @ Loc {file=test/testdata/rewriter/prop.rb start=54:11 end=54:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_proc_> (opts, <blk>) -> ForeignClass | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=54:5 end=54:61}
+    method <C <U AdvancedODM>><U foreign_proc_> (opts, <blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=54:5 end=54:61}
       argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=54:11 end=54:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
-    method <C <U AdvancedODM>><U foreign_proc_!> (opts, <blk>) -> ForeignClass @ Loc {file=test/testdata/rewriter/prop.rb start=54:5 end=54:61}
+    method <C <U AdvancedODM>><U foreign_proc_!> (opts, <blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=54:5 end=54:61}
       argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=54:11 end=54:23}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
     method <C <U AdvancedODM>><U hash_of> (<blk>) -> AppliedType {       klass = <C <U Hash>>       targs = [         <C <U K>> = Symbol         <C <U V>> = String         <C <U Elem>> = TupleType {             0 = Symbol             1 = String           }       ]     } @ Loc {file=test/testdata/rewriter/prop.rb start=45:5 end=45:43}

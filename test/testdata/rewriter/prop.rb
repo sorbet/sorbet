@@ -110,9 +110,10 @@ def main
     T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `String`
     AdvancedODM.new.enum_prop = "hello"
 
-    T.reveal_type(AdvancedODM.new.foreign_) # error: Revealed type: `T.nilable(ForeignClass)`
-    T.reveal_type(AdvancedODM.new.foreign_!) # error: Revealed type: `ForeignClass`
-    T.reveal_type(AdvancedODM.new.foreign_lazy_) # error: Revealed type: `T.nilable(ForeignClass)`
+    T.reveal_type(AdvancedODM.new.foreign_) # error: Revealed type: `T.nilable(String)`
+    T.reveal_type(AdvancedODM.new.foreign_!) # error: Revealed type: `String`
+    T.reveal_type(AdvancedODM.new.foreign_lazy_) # error: Revealed type: `T.nilable(String)`
+    T.reveal_type(AdvancedODM.new.foreign_proc_) # error: Revealed type: `T.nilable(String)`
 
     # Check that the method still exists even if we can't parse the type
     AdvancedODM.new.foreign_invalid_
