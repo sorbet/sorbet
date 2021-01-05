@@ -292,8 +292,8 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     }
 
     // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
-    nodes.emplace_back(
-        ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc), std::move(type)));
+    nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
+                                     ASTUtil::dupType(type)));
 
     // cf. sorbet-runtime/lib/types/props/decorator.rb, T::Props::Decorator#define_foreign_method
     //
@@ -342,10 +342,13 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
             loc, ast::MK::Send0(loc, allowDirectMutation(), core::Names::nil_p()), ast::MK::Hash0(loc),
             ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::allowDirectMutation()), allowDirectMutation())));
 
-    auto callForeignPropGet = ast::MK::Send5(loc, decorator(loc), core::Names::foreignPropGet(), ast::MK::Self(loc),
-                                             ast::MK::Symbol(loc, name), foreign(),
-                                             // TODO: we need to default this?
-                                             ast::MK::Hash0(loc), ast::MK::Local(loc, core::Names::opts()));
+    auto callForeignPropGet =
+        ast::MK::Let(loc,
+                     ast::MK::Send5(loc, decorator(loc), core::Names::foreignPropGet(), ast::MK::Self(loc),
+                                    ast::MK::Symbol(loc, name), foreign(),
+                                    // TODO: we need to default this?
+                                    ast::MK::Hash0(loc), ast::MK::Local(loc, core::Names::opts())),
+                     ASTUtil::dupType(type));
 
     // Build up the actual call to define_method.
     auto defineMethodBody =
@@ -382,8 +385,9 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     //  loaded_foreign = $fk_method(allow_direct_mutation: allow_direct_mutation)
     //  if !loaded_foreign
     //    raiseUnimplemented()
+    //  else
+    //    loaded_foreign
     //  end
-    //  loaded_foreign
     // end
 
     auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
@@ -400,8 +404,8 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     ast::TreePtr check = ast::MK::Send0(loc, loadedForeign(), core::Names::bang());
     // TODO(froydnj): call T::Configuration.hard_assert_handler for better errors.
     ast::TreePtr failure = ast::MK::RaiseUnimplemented(loc);
-    ast::TreePtr conditional = ast::MK::If(loc, std::move(check), std::move(failure), ast::MK::EmptyTree());
-    ast::TreePtr insSeq = ast::MK::InsSeq2(loc, std::move(assign), std::move(conditional), loadedForeign());
+    ast::TreePtr conditional = ast::MK::If(loc, std::move(check), std::move(failure), loadedForeign());
+    ast::TreePtr insSeq = ast::MK::InsSeq1(loc, std::move(assign), std::move(conditional));
     nodes.emplace_back(ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), std::move(insSeq)));
 }
 
