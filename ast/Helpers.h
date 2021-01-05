@@ -30,6 +30,7 @@ public:
 
     template <typename... Args> static Send::ARGS_store SendArgs(Args &&... args) {
         Send::ARGS_store store;
+        store.reserve(sizeof...(args));
         (store.emplace_back(std::forward<Args>(args)), ...);
         return store;
     }

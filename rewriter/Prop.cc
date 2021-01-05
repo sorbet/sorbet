@@ -337,10 +337,9 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
     // Compute the setter
     if (!ret.isImmutable) {
         auto setType = ASTUtil::dupType(ret.type);
-        ast::Send::ARGS_store sigArgs;
-        sigArgs.emplace_back(ast::MK::Symbol(nameLoc, core::Names::arg0()));
-        sigArgs.emplace_back(ASTUtil::dupType(setType));
-        nodes.emplace_back(ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType)));
+        nodes.emplace_back(ast::MK::Sig(
+            loc, ast::MK::SendArgs(ast::MK::Symbol(nameLoc, core::Names::arg0()), ASTUtil::dupType(setType)),
+            ASTUtil::dupType(setType)));
 
         if (propContext.classDefKind == ast::ClassDef::Kind::Module) {
             // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
