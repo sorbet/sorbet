@@ -78,20 +78,6 @@ bool isTProc(core::Context ctx, const ast::Send *send) {
     return false;
 }
 
-bool isNilableTProc(core::Context ctx, const ast::Send *send) {
-    if (send->fun.rawId() == core::Names::nilable().rawId()) {
-        if (send->numPosArgs != 1 || send->hasKwArgs()) {
-            return false;
-        }
-        if (auto arr = ast::cast_tree<ast::Send>(send->args[0])) {
-            if (isTProc(ctx, arr)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 bool TypeSyntax::isSig(core::Context ctx, const ast::Send &send) {
     if (send.fun != core::Names::sig()) {
         return false;
@@ -467,19 +453,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
 TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &send, const ParsedSig &sig,
                                             TypeSyntaxArgs args) {
     switch (send.fun.rawId()) {
-        case core::Names::nilable().rawId():
+        case core::Names::nilable().rawId(): {
             if (send.numPosArgs != 1 || send.hasKwArgs()) {
                 return TypeSyntax::ResultType{core::Types::untypedUntracked(),
                                               core::SymbolRef()}; // error will be reported in infer.
             }
-            if (isNilableTProc(ctx, &send)) {
-                auto tproc = getResultTypeAndBindWithSelfTypeParams(ctx, send.args[0], sig, args.withRebind());
-                return TypeSyntax::ResultType{core::Types::any(ctx, tproc.type, core::Types::nilClass()), tproc.rebind};
-            }
-            return TypeSyntax::ResultType{
-                core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, send.args[0], sig, args),
-                                 core::Types::nilClass()),
-                core::SymbolRef()};
+            auto result = getResultTypeAndBindWithSelfTypeParams(ctx, send.args.front(), sig, args);
+            return TypeSyntax::ResultType{core::Types::any(ctx, result.type, core::Types::nilClass()), result.rebind};
+        }
         case core::Names::all().rawId(): {
             if (send.args.empty()) {
                 // Error will be reported in infer
