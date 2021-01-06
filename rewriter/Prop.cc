@@ -543,26 +543,23 @@ ast::TreePtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send)
     auto true_ = ast::MK::True(send->loc);
 
     auto *copy = ast::cast_tree<ast::Send>(result);
-    if (copy->hasKwArgs() || copy->args.empty()) {
-        // append to the inline keyword arguments of the send
+    ast::Hash *hash = nullptr;
+    if (!copy->args.empty()) {
+        hash = ast::cast_tree<ast::Hash>(copy->args.back());
+    }
+
+    if (hash) {
+        hash->keys.emplace_back(move(withoutAccessors));
+        hash->values.emplace_back(move(true_));
+    } else {
         auto pos = copy->args.end();
-        if (copy->hasKwSplat()) {
+        if (copy->hasKwArgs() && copy->hasKwSplat()) {
             pos--;
         }
 
         pos = copy->args.insert(pos, move(withoutAccessors));
         pos++;
         copy->args.insert(pos, move(true_));
-    } else {
-        if (auto *hash = ast::cast_tree<ast::Hash>(copy->args.back())) {
-            hash->keys.emplace_back(move(withoutAccessors));
-            hash->values.emplace_back(move(true_));
-        } else {
-            auto pos = copy->args.end();
-            pos = copy->args.insert(pos, move(withoutAccessors));
-            pos++;
-            copy->args.insert(pos, move(true_));
-        }
     }
 
     return result;
