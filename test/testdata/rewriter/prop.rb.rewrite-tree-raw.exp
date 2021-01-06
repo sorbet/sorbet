@@ -6307,6 +6307,8 @@ ClassDef{
             }
             Literal{ value = :without_accessors }
             Literal{ value = true }
+            Literal{ value = :without_foreign_accessors }
+            Literal{ value = true }
           ]
         }
 
@@ -6683,6 +6685,8 @@ ClassDef{
             }
             Literal{ value = :without_accessors }
             Literal{ value = true }
+            Literal{ value = :without_foreign_accessors }
+            Literal{ value = true }
           ]
         }
 
@@ -7058,6 +7062,8 @@ ClassDef{
             }
             Literal{ value = :without_accessors }
             Literal{ value = true }
+            Literal{ value = :without_foreign_accessors }
+            Literal{ value = true }
           ]
         }
 
@@ -7429,6 +7435,8 @@ ClassDef{
               ]
             }
             Literal{ value = :without_accessors }
+            Literal{ value = true }
+            Literal{ value = :without_foreign_accessors }
             Literal{ value = true }
           ]
         }
