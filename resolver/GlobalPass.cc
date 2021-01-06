@@ -236,7 +236,6 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
             } else {
                 if (!core::Symbols::BasicObject().data(gs)->derivesFrom(gs, ref) &&
                     core::Symbols::BasicObject() != ref) {
-                    // This is where we set the superclass for `Mixin`
                     ref.data(gs)->setSuperClass(core::Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
                 }
             }
