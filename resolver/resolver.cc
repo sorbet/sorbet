@@ -575,6 +575,13 @@ private:
                 }
                 continue;
             }
+            if (!id->symbol.isClassOrModule()) {
+                if (auto e =
+                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
+                }
+                continue;
+            }
             if (id->symbol.data(gs)->isClassOrModuleClass()) {
                 if (auto e =
                         gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
