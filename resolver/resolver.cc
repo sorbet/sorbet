@@ -607,16 +607,17 @@ private:
             if (!mixMethod.exists()) {
                 // We never stored a mixin in this symbol
                 // Create a the fake property that will hold the mixed in modules
-                mixMethod = gs.enterMethodSymbol(loc, owner, core::Names::mixedInClassMethods());
+                mixMethod = gs.enterMethodSymbol(loc, owner.asClassOrModuleRef(), core::Names::mixedInClassMethods());
                 vector<core::TypePtr> targs;
-                mixMethod.data(gs)->resultType = core::TupleType::build(gs, move(targs));
+                mixMethod.data(gs)->resultType = core::make_type<core::TupleType>(move(targs));
 
                 // Create a dummy block argument to satisfy sanitycheck during GlobalState::expandNames
-                auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), mixMethod, core::Names::blkArg());
+                auto &arg =
+                    gs.enterMethodArgumentSymbol(core::Loc::none(), mixMethod.asMethodRef(), core::Names::blkArg());
                 arg.flags.isBlock = true;
             }
 
-            auto type = core::make_type<core::ClassType>(id->symbol);
+            auto type = core::make_type<core::ClassType>(id->symbol.asClassOrModuleRef());
             (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems.emplace_back(type);
         }
     }
