@@ -319,6 +319,8 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     auto foreign = [&]() -> ast::TreePtr { return ast::MK::Local(loc, core::Names::foreign()); };
     auto resolvedForeign = [&]() -> ast::TreePtr { return ast::MK::Local(loc, core::Names::resolvedForeign()); };
 
+    // Convince the typechecker that we don't care about the type of `foreign`.
+    auto foreignWiden = ast::MK::Assign(loc, foreign(), ast::MK::Let(loc, foreign(), ast::MK::Untyped(loc)));
     // Build the code to resolve the handler, if necessary.
     auto resolve = ast::MK::Assign(loc, resolvedForeign(), ast::MK::Send0(loc, foreign(), core::Names::call()));
     // TODO(froydnj): make this raise ArgumentError
@@ -352,7 +354,7 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
 
     // Build up the actual call to define_method.
     auto defineMethodBody =
-        ast::MK::InsSeq2(loc, std::move(resolveConditional), std::move(opts), std::move(callForeignPropGet));
+        ast::MK::InsSeq3(loc, std::move(foreignWiden), std::move(resolveConditional), std::move(opts), std::move(callForeignPropGet));
     auto defineMethodBlock =
         ast::MK::Block1(loc, std::move(defineMethodBody),
                         ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, allowDirectMutation()), ast::MK::Nil(loc)));
