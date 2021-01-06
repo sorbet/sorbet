@@ -649,7 +649,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     :Kernel.lambda() do |klass, foreign|
       klass.define_method(:foreign_) do |allow_direct_mutation: = nil|
         begin
-          if foreign.is_a?(:Proc)
+          if foreign.is_a?(<emptyTree>::<C Proc>)
             begin
               resolved_foreign = foreign.call()
               if resolved_foreign.respond_to?(:load).!()
@@ -689,7 +689,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     :Kernel.lambda() do |klass, foreign|
       klass.define_method(:foreign_lazy_) do |allow_direct_mutation: = nil|
         begin
-          if foreign.is_a?(:Proc)
+          if foreign.is_a?(<emptyTree>::<C Proc>)
             begin
               resolved_foreign = foreign.call()
               if resolved_foreign.respond_to?(:load).!()
@@ -729,7 +729,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     :Kernel.lambda() do |klass, foreign|
       klass.define_method(:foreign_proc_) do |allow_direct_mutation: = nil|
         begin
-          if foreign.is_a?(:Proc)
+          if foreign.is_a?(<emptyTree>::<C Proc>)
             begin
               resolved_foreign = foreign.call()
               if resolved_foreign.respond_to?(:load).!()
@@ -769,7 +769,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     :Kernel.lambda() do |klass, foreign|
       klass.define_method(:foreign_invalid_) do |allow_direct_mutation: = nil|
         begin
-          if foreign.is_a?(:Proc)
+          if foreign.is_a?(<emptyTree>::<C Proc>)
             begin
               resolved_foreign = foreign.call()
               if resolved_foreign.respond_to?(:load).!()
