@@ -2515,6 +2515,43 @@ public:
     }
 } Array_compact;
 
+class Array_zip : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        vector<TypePtr> unwrappedElems;
+        unwrappedElems.reserve(args.args.size() + 1);
+
+        if (auto *ap = cast_type<AppliedType>(args.thisType)) {
+            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
+            ENFORCE(!ap->targs.empty());
+            unwrappedElems.emplace_back(ap->targs.front());
+        } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
+            unwrappedElems.emplace_back(tuple->elementType(gs));
+        } else {
+            ENFORCE(false, "Array#zip on unexpected type: {}", args.selfType.show(gs));
+            res.returnType = Types::untypedUntracked();
+            return;
+        }
+
+        for (auto arg : args.args) {
+            auto argTyp = arg->type;
+            if (auto *ap = cast_type<AppliedType>(argTyp)) {
+                ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
+                ENFORCE(!ap->targs.empty());
+                unwrappedElems.emplace_back(Types::any(gs, ap->targs.front(), Types::nilClass()));
+            } else if (auto *tuple = cast_type<TupleType>(argTyp)) {
+                unwrappedElems.emplace_back(Types::any(gs, tuple->elementType(gs), Types::nilClass()));
+            } else {
+                // Arg type didn't match; we already reported an error for the arg type; just return untyped to recover.
+                res.returnType = Types::untypedUntracked();
+                return;
+            }
+        }
+
+        res.returnType = Types::arrayOf(gs, make_type<TupleType>(move(unwrappedElems)));
+    }
+} Array_zip;
+
 class Kernel_proc : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -2651,6 +2688,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
+    {Symbols::Array(), Intrinsic::Kind::Instance, Names::zip(), &Array_zip},
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
