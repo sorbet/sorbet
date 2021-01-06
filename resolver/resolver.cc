@@ -568,19 +568,12 @@ private:
         for (auto &arg : send->args) {
             auto *id = ast::cast_tree<ast::ConstantLit>(arg);
 
-            if (id == nullptr) {
+            if (id == nullptr || !id->symbol.exists()) {
                 if (auto e = gs.beginError(core::Loc(todo.file, send->loc),
                                            core::errors::Resolver::InvalidMixinDeclaration)) {
                     e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
                 }
-                return;
-            }
-            if (!id->symbol.exists() || !id->symbol.isClassOrModule()) {
-                if (auto e =
-                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                    e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
-                }
-                return;
+                continue;
             }
             if (id->symbol.data(gs)->isClassOrModuleClass()) {
                 if (auto e =
@@ -618,7 +611,14 @@ private:
             }
 
             auto type = core::make_type<core::ClassType>(id->symbol.asClassOrModuleRef());
-            (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems.emplace_back(type);
+            auto &elems = (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems;
+            // Make sure we are not adding existing symbols to our tuple
+            for (auto &elem : elems) {
+                if (type == elem) {
+                    continue;
+                }
+            }
+            elems.emplace_back(type);
         }
     }
 

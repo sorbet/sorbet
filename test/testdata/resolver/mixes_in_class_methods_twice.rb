@@ -10,9 +10,16 @@
 # actually fine.
 
 module A
-  module ClassMethods; end
   extend T::Helpers
+  module ClassMethods1; end
+  module ClassMethods2; end
+  mixes_in_class_methods(ClassMethods1)
+  mixes_in_class_methods(ClassMethods2)
+end
 
+module B
+  extend T::Helpers
+  module ClassMethods; end
   mixes_in_class_methods(ClassMethods)
   mixes_in_class_methods(ClassMethods) # explicitly not an error
 end
