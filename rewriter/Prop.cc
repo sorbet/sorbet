@@ -332,7 +332,7 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
 
     auto resolveConsequent = ast::MK::InsSeq2(loc, std::move(resolve), std::move(checkLoad), std::move(cacheForeign));
     auto resolveConditional = ast::MK::If(
-        loc, ast::MK::Send1(loc, foreign(), core::Names::isA_p(), ast::MK::Symbol(loc, core::Names::Constants::Proc())),
+                                          loc, ast::MK::Send1(loc, foreign(), core::Names::isA_p(), ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Proc())),
         std::move(resolveConsequent), ast::MK::EmptyTree());
 
     // Build the code to call back through the decorator's foreign_prop_get.
