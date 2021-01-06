@@ -212,6 +212,7 @@ NameDef names[] = {
     {"resolvedForeign", "resolved_foreign"},
     {"load"},
     {"foreignPropGet", "foreign_prop_get"},
+    {"send"},
 
     {"prefix"},
     {"to"},

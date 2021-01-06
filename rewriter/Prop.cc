@@ -382,7 +382,7 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     // cf. sorbet-runtime/lib/types/props/decorator.rb, T::Props::Decorator#define_foreign_method
     //
     // def $fk_method_!(allow_direct_mutation: nil)
-    //  loaded_foreign = $fk_method(allow_direct_mutation: allow_direct_mutation)
+    //  loaded_foreign = send($fk_method, allow_direct_mutation: allow_direct_mutation)
     //  if !loaded_foreign
     //    raiseUnimplemented()
     //  else
@@ -397,8 +397,9 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
         nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::allowDirectMutation())),
         ast::MK::Nil(nameLoc));
     ast::TreePtr callFkMethod =
-        ast::MK::Send(loc, ast::MK::Self(loc), fkMethod, 0,
-                      ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::allowDirectMutation()),
+        ast::MK::Send(loc, ast::MK::Self(loc), core::Names::send(), 1,
+                      ast::MK::SendArgs(ast::MK::Symbol(loc, fkMethod),
+                                        ast::MK::Symbol(loc, core::Names::allowDirectMutation()),
                                         ast::MK::Local(loc, core::Names::allowDirectMutation())));
     ast::TreePtr assign = ast::MK::Assign(loc, loadedForeign(), std::move(callFkMethod));
     ast::TreePtr check = ast::MK::Send0(loc, loadedForeign(), core::Names::bang());
