@@ -367,7 +367,7 @@ void buildForeignAccessors(core::MutableContext ctx, PropInfo &ret, vector<ast::
     // ret.foreign was the body of the lambda that was in the original source, so
     // reconstitute the lambda here.
     auto foreignLambda = ast::MK::Send0Block(loc, ast::MK::Self(loc), core::Names::lambda(),
-                                             ast::MK::Block0(loc, std::move(ret.foreign)));
+                                             ast::MK::Block0(loc, ret.foreign.deepCopy()));
     auto callLambda = ast::MK::Send2(loc, std::move(immediateLambda), core::Names::call(), ast::MK::Self(loc),
                                      std::move(foreignLambda));
 
@@ -532,15 +532,22 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
     return nodes;
 }
 
+
 ast::TreePtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send) {
     ast::TreePtr result = send->deepCopy();
 
-    if (prop.hasWithoutAccessors) {
+    bool insertWithoutAccessors = !prop.hasWithoutAccessors;
+    // TODO(froydnj): do we have to check for the user writing this kwarg?
+    bool insertWithoutForeignAccessors = prop.foreign != nullptr;
+
+    if (!insertWithoutAccessors && !insertWithoutForeignAccessors) {
         return result;
     }
 
     auto withoutAccessors = ast::MK::Symbol(send->loc, core::Names::withoutAccessors());
-    auto true_ = ast::MK::True(send->loc);
+    auto withoutForeignAccessors = ast::MK::Symbol(send->loc, core::Names::withoutForeignAccessors());
+    auto true1 = ast::MK::True(send->loc);
+    auto true2 = ast::MK::True(send->loc);
 
     auto *copy = ast::cast_tree<ast::Send>(result);
     ast::Hash *hash = nullptr;
@@ -549,17 +556,31 @@ ast::TreePtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send)
     }
 
     if (hash) {
-        hash->keys.emplace_back(move(withoutAccessors));
-        hash->values.emplace_back(move(true_));
+        if (insertWithoutAccessors) {
+            hash->keys.emplace_back(move(withoutAccessors));
+            hash->values.emplace_back(move(true1));
+        }
+        if (insertWithoutForeignAccessors) {
+            hash->keys.emplace_back(move(withoutForeignAccessors));
+            hash->values.emplace_back(move(true2));
+        }
     } else {
         auto pos = copy->args.end();
         if (copy->hasKwArgs() && copy->hasKwSplat()) {
             pos--;
         }
 
-        pos = copy->args.insert(pos, move(withoutAccessors));
-        pos++;
-        copy->args.insert(pos, move(true_));
+        if (insertWithoutAccessors) {
+            pos = copy->args.insert(pos, move(withoutAccessors));
+            pos++;
+            pos = copy->args.insert(pos, move(true1));
+            pos++;
+        }
+        if (insertWithoutForeignAccessors) {
+            pos = copy->args.insert(pos, move(withoutForeignAccessors));
+            pos++;
+            copy->args.insert(pos, move(true2));
+        }
     }
 
     return result;

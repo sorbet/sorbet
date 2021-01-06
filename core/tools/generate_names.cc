@@ -191,6 +191,7 @@ NameDef names[] = {
     {"loadedForeign", "loaded_foreign"},
     {"ifunset"},
     {"withoutAccessors", "without_accessors"},
+    {"withoutForeignAccessors", "without_foreign_accessors"},
     {"instanceVariableGet", "instance_variable_get"},
     {"instanceVariableSet", "instance_variable_set"},
     {"decorator"},

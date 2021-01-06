@@ -64,6 +64,7 @@ class T::Props::Decorator
     redaction
     sensitivity
     without_accessors
+    without_foreign_accessors
     clobber_existing_method!
     extra
     setter_validate
@@ -603,7 +604,7 @@ class T::Props::Decorator
       MESSAGE
     end
 
-    define_foreign_method(prop_name, rules, foreign)
+    define_foreign_method(prop_name, rules, foreign) unless rules[:without_foreign_accessors]
   end
 
   # TODO: rename this to props_inherited
