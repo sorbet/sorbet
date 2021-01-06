@@ -13,6 +13,7 @@
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "common/Timer.h"
@@ -620,12 +621,9 @@ private:
             auto type = core::make_type<core::ClassType>(id->symbol.asClassOrModuleRef());
             auto &elems = (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems;
             // Make sure we are not adding existing symbols to our tuple
-            for (auto &elem : elems) {
-                if (type == elem) {
-                    continue;
-                }
+            if (absl::c_find(elems, type) == elems.end()) {
+                elems.emplace_back(type);
             }
-            elems.emplace_back(type);
         }
     }
 
