@@ -6393,6 +6393,38 @@ ClassDef{
                   ]
                   body = InsSeq{
                     stats = [
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U foreign>
+                        }
+                        rhs = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = (module ::T)
+                          }
+                          fun = <U let>
+                          block = nullptr
+                          pos_args = 2
+                          args = [
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            Send{
+                              recv = ConstantLit{
+                                orig = nullptr
+                                symbol = (module ::T)
+                              }
+                              fun = <U untyped>
+                              block = nullptr
+                              pos_args = 0
+                              args = [
+                              ]
+                            }
+                          ]
+                        }
+                      }
                       If{
                         cond = Send{
                           recv = UnresolvedIdent{
@@ -6774,6 +6806,38 @@ ClassDef{
                   ]
                   body = InsSeq{
                     stats = [
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U foreign>
+                        }
+                        rhs = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = (module ::T)
+                          }
+                          fun = <U let>
+                          block = nullptr
+                          pos_args = 2
+                          args = [
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            Send{
+                              recv = ConstantLit{
+                                orig = nullptr
+                                symbol = (module ::T)
+                              }
+                              fun = <U untyped>
+                              block = nullptr
+                              pos_args = 0
+                              args = [
+                              ]
+                            }
+                          ]
+                        }
+                      }
                       If{
                         cond = Send{
                           recv = UnresolvedIdent{
@@ -7154,6 +7218,38 @@ ClassDef{
                   ]
                   body = InsSeq{
                     stats = [
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U foreign>
+                        }
+                        rhs = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = (module ::T)
+                          }
+                          fun = <U let>
+                          block = nullptr
+                          pos_args = 2
+                          args = [
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            Send{
+                              recv = ConstantLit{
+                                orig = nullptr
+                                symbol = (module ::T)
+                              }
+                              fun = <U untyped>
+                              block = nullptr
+                              pos_args = 0
+                              args = [
+                              ]
+                            }
+                          ]
+                        }
+                      }
                       If{
                         cond = Send{
                           recv = UnresolvedIdent{
@@ -7531,6 +7627,38 @@ ClassDef{
                   ]
                   body = InsSeq{
                     stats = [
+                      Assign{
+                        lhs = UnresolvedIdent{
+                          kind = Local
+                          name = <U foreign>
+                        }
+                        rhs = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = (module ::T)
+                          }
+                          fun = <U let>
+                          block = nullptr
+                          pos_args = 2
+                          args = [
+                            UnresolvedIdent{
+                              kind = Local
+                              name = <U foreign>
+                            }
+                            Send{
+                              recv = ConstantLit{
+                                orig = nullptr
+                                symbol = (module ::T)
+                              }
+                              fun = <U untyped>
+                              block = nullptr
+                              pos_args = 0
+                              args = [
+                              ]
+                            }
+                          ]
+                        }
+                      }
                       If{
                         cond = Send{
                           recv = UnresolvedIdent{

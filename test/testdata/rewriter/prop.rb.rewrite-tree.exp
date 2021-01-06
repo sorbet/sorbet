@@ -649,6 +649,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     :Kernel.lambda() do |klass, foreign|
       klass.define_method(:foreign_) do |allow_direct_mutation: = nil|
         begin
+          foreign = ::T.let(foreign, ::T.untyped())
           if foreign.is_a?(<emptyTree>::<C Proc>)
             begin
               resolved_foreign = foreign.call()
@@ -689,6 +690,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     :Kernel.lambda() do |klass, foreign|
       klass.define_method(:foreign_lazy_) do |allow_direct_mutation: = nil|
         begin
+          foreign = ::T.let(foreign, ::T.untyped())
           if foreign.is_a?(<emptyTree>::<C Proc>)
             begin
               resolved_foreign = foreign.call()
@@ -729,6 +731,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     :Kernel.lambda() do |klass, foreign|
       klass.define_method(:foreign_proc_) do |allow_direct_mutation: = nil|
         begin
+          foreign = ::T.let(foreign, ::T.untyped())
           if foreign.is_a?(<emptyTree>::<C Proc>)
             begin
               resolved_foreign = foreign.call()
@@ -769,6 +772,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     :Kernel.lambda() do |klass, foreign|
       klass.define_method(:foreign_invalid_) do |allow_direct_mutation: = nil|
         begin
+          foreign = ::T.let(foreign, ::T.untyped())
           if foreign.is_a?(<emptyTree>::<C Proc>)
             begin
               resolved_foreign = foreign.call()
