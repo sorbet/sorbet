@@ -469,18 +469,21 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
     switch (send.fun.rawId()) {
         case core::Names::nilable().rawId():
             if (send.numPosArgs != 1 || send.hasKwArgs()) {
-                return {.type = core::Types::untypedUntracked()}; // error will be reported in infer.
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(),
+                                              core::SymbolRef()}; // error will be reported in infer.
             }
             if (isNilableTProc(ctx, &send)) {
                 auto tproc = getResultTypeAndBindWithSelfTypeParams(ctx, send.args[0], sig, args.withRebind());
-                return {.type = core::Types::any(ctx, tproc.type, core::Types::nilClass()), .rebind = tproc.rebind};
+                return TypeSyntax::ResultType{core::Types::any(ctx, tproc.type, core::Types::nilClass()), tproc.rebind};
             }
-            return {.type = core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, send.args[0], sig, args),
-                                             core::Types::nilClass())};
+            return TypeSyntax::ResultType{
+                core::Types::any(ctx, getResultTypeWithSelfTypeParams(ctx, send.args[0], sig, args),
+                                 core::Types::nilClass()),
+                core::SymbolRef()};
         case core::Names::all().rawId(): {
             if (send.args.empty()) {
                 // Error will be reported in infer
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
             auto result = getResultTypeWithSelfTypeParams(ctx, send.args[0], sig, args);
             int i = 1;
@@ -488,12 +491,12 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 result = core::Types::all(ctx, result, getResultTypeWithSelfTypeParams(ctx, send.args[i], sig, args));
                 i++;
             }
-            return {.type = result};
+            return TypeSyntax::ResultType{result, core::SymbolRef()};
         }
         case core::Names::any().rawId(): {
             if (send.args.empty()) {
                 // Error will be reported in infer
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
             auto result = getResultTypeWithSelfTypeParams(ctx, send.args[0], sig, args);
             int i = 1;
@@ -501,48 +504,48 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 result = core::Types::any(ctx, result, getResultTypeWithSelfTypeParams(ctx, send.args[i], sig, args));
                 i++;
             }
-            return {.type = result};
+            return TypeSyntax::ResultType{result, core::SymbolRef()};
         }
         case core::Names::typeParameter().rawId(): {
             if (send.args.size() != 1) {
                 // Error will be reported in infer
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
             auto arr = ast::cast_tree<ast::Literal>(send.args[0]);
             if (!arr || !arr->isSymbol(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("type_parameter requires a symbol");
                 }
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
             auto fnd = sig.findTypeArgByName(arr->asSymbol(ctx));
             if (!fnd.type) {
                 if (auto e = ctx.beginError(arr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unspecified type parameter");
                 }
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
-            return {.type = fnd.type};
+            return TypeSyntax::ResultType{fnd.type, core::SymbolRef()};
         }
         case core::Names::enum_().rawId(): {
             if (send.args.size() != 1) {
                 // Error will be reported in infer
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
             auto arr = ast::cast_tree<ast::Array>(send.args[0]);
             if (arr == nullptr) {
                 // TODO(pay-server) unsilence this error and support enums from pay-server
-                { return {.type = core::Types::Object()}; }
+                { return TypeSyntax::ResultType{core::Types::Object(), core::SymbolRef()}; }
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
                 }
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
             if (arr->elems.empty()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("enum([]) is invalid");
                 }
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
             auto result = getResultLiteral(ctx, arr->elems[0]);
             int i = 1;
@@ -550,12 +553,12 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 result = core::Types::any(ctx, result, getResultLiteral(ctx, arr->elems[i]));
                 i++;
             }
-            return {.type = result};
+            return TypeSyntax::ResultType{result, core::SymbolRef()};
         }
         case core::Names::classOf().rawId(): {
             if (send.args.size() != 1) {
                 // Error will be reported in infer
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
 
             auto *obj = ast::cast_tree<ast::ConstantLit>(send.args[0]);
@@ -563,27 +566,27 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of needs a Class as its argument");
                 }
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
             auto maybeAliased = obj->symbol;
             if (maybeAliased.data(ctx)->isTypeAlias()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a T.type_alias");
                 }
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
             if (maybeAliased.isTypeMember()) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a T.type_member");
                 }
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
             auto sym = maybeAliased.data(ctx)->dealias(ctx);
             if (sym.isStaticField(ctx)) {
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of can't be used with a constant field");
                 }
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
 
             auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
@@ -591,20 +594,20 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                 if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unknown class");
                 }
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             }
-            return {.type = singleton.data(ctx)->externalType()};
+            return TypeSyntax::ResultType{singleton.data(ctx)->externalType(), core::SymbolRef()};
         }
         case core::Names::untyped().rawId():
-            return {.type = core::Types::untyped(ctx, args.untypedBlame)};
+            return TypeSyntax::ResultType{core::Types::untyped(ctx, args.untypedBlame), core::SymbolRef()};
         case core::Names::selfType().rawId():
             if (args.allowSelfType) {
-                return {.type = core::make_type<core::SelfType>()};
+                return TypeSyntax::ResultType{core::make_type<core::SelfType>(), core::SymbolRef()};
             }
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Only top-level T.self_type is supported");
             }
-            return {.type = core::Types::untypedUntracked()};
+            return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
         case core::Names::experimentalAttachedClass().rawId():
         case core::Names::attachedClass().rawId():
             if (send.fun == core::Names::experimentalAttachedClass()) {
@@ -620,21 +623,21 @@ TypeSyntax::ResultType interpretTCombinator(core::Context ctx, const ast::Send &
                     e.setHeader("`{}` may only be used in a singleton class method context",
                                 "T." + core::Names::attachedClass().show(ctx));
                 }
-                return {.type = core::Types::untypedUntracked()};
+                return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
             } else {
                 // All singletons have an AttachedClass type member, created by
                 // `singletonClass`
                 auto attachedClass = ctx.owner.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-                return {.type = attachedClass.data(ctx)->resultType};
+                return TypeSyntax::ResultType{attachedClass.data(ctx)->resultType, core::SymbolRef()};
             }
         case core::Names::noreturn().rawId():
-            return {.type = core::Types::bottom()};
+            return TypeSyntax::ResultType{core::Types::bottom(), core::SymbolRef()};
 
         default:
             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Unsupported method `{}`", "T." + send.fun.show(ctx));
             }
-            return {.type = core::Types::untypedUntracked()};
+            return TypeSyntax::ResultType{core::Types::untypedUntracked(), core::SymbolRef()};
     }
 }
 
