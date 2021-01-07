@@ -1164,7 +1164,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                                            core::UntypedMode::AlwaysCompatible)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         auto ownerData = ctx.owner.data(ctx);
-                        e.setHeader("Returning value that does not conform to method result type");
+                        e.setHeader("Expected `{}` but found `{}` for method result type", methodReturnType.show(ctx),
+                                    typeAndOrigin.type.show(ctx));
                         e.addErrorSection(core::ErrorSection(
                             "Expected " + methodReturnType.show(ctx),
                             {

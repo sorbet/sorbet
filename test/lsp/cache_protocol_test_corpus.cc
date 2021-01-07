@@ -63,8 +63,9 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         writeFilesToFS({{relativeFilepath, fileContents}});
 
         lspWrapper->opts->inputFileNames.push_back(filePath);
-        assertDiagnostics(initializeLSP(),
-                          {{relativeFilepath, 4, "Returning value that does not conform to method result type"}});
+        assertDiagnostics(
+            initializeLSP(),
+            {{relativeFilepath, 4, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
 
         // Update the file on disk to a different version. This change should not be synced to disk.
         assertDiagnostics(send(*openFile(relativeFilepath, updatedFileContents)), {});
@@ -105,8 +106,9 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         resetState();
         lspWrapper->opts->inputFileNames.push_back(filePath);
         writeFilesToFS({{relativeFilepath, fileContents}});
-        assertDiagnostics(initializeLSP(),
-                          {{relativeFilepath, 4, "Returning value that does not conform to method result type"}});
+        assertDiagnostics(
+            initializeLSP(),
+            {{relativeFilepath, 4, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
 
         auto counters = getCounters();
         CHECK_EQ(counters.getCounter("types.input.files.kvstore.miss"), 0);
@@ -164,8 +166,9 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         writeFilesToFS({{relativeFilepath, fileContents}});
 
         lspWrapper->opts->inputFileNames.push_back(filePath);
-        assertDiagnostics(initializeLSP(),
-                          {{relativeFilepath, 4, "Returning value that does not conform to method result type"}});
+        assertDiagnostics(
+            initializeLSP(),
+            {{relativeFilepath, 4, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
     }
 
     auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
@@ -241,8 +244,9 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
 
             lspWrapper->opts->inputFileNames.push_back(filePath);
             writeFilesToFS({{relativeFilepath, fileContents}});
-            assertDiagnostics(initializeLSP(),
-                              {{relativeFilepath, 4, "Returning value that does not conform to method result type"}});
+            assertDiagnostics(
+                initializeLSP(),
+                {{relativeFilepath, 4, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
 
             // We should not use the cache since it has been dirtied.
             auto counters = getCounters();

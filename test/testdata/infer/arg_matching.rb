@@ -5,7 +5,7 @@ class TestArgs
   def any; end
 
   sig {returns(T::Hash[Integer, Integer])}
-  def a_hash; end # error: does not conform to method result type
+  def a_hash; end # error: Expected `T::Hash[Integer, Integer]` but found `NilClass` for method result type
 
   def required(a, b)
   end

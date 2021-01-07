@@ -34,32 +34,32 @@ class Foo
 
   sig { returns(Array) }
   def bad_array_method
-    1 # error: Returning value that does not conform to method result type
+    1 # error: Expected `T::Array[T.untyped]` but found `Integer(1)` for method result type
   end
 
   sig { returns(Hash) }
   def bad_hash_method
-    1 # error: Returning value that does not conform to method result type
+    1 # error: Expected `T::Hash[T.untyped, T.untyped]` but found `Integer(1)` for method result type
   end
 
   sig { returns(Set) }
   def bad_set_method
-    1 # error: Returning value that does not conform to method result type
+    1 # error: Expected `T::Set[T.untyped]` but found `Integer(1)` for method result type
   end
 
   sig { returns(Range) }
   def bad_range_method
-    1 # error: Returning value that does not conform to method result type
+    1 # error: Expected `T::Range[T.untyped]` but found `Integer(1)` for method result type
   end
 
   sig { returns(Enumerable) }
   def bad_enumerable_method
-    1 # error: Returning value that does not conform to method result type
+    1 # error: Expected `T::Enumerable[T.untyped]` but found `Integer(1)` for method result type
   end
 
   sig { returns(Enumerator) }
   def bad_enumerator_method
-    1 # error: Returning value that does not conform to method result type
+    1 # error: Expected `T::Enumerator[T.untyped]` but found `Integer(1)` for method result type
   end
 end
 

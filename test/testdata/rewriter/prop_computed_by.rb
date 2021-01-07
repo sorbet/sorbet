@@ -24,7 +24,7 @@ class ComputingProps
   const :num_wrong_type, Integer, computed_by: :compute_num_wrong_type
   sig {params(inputs: T.untyped).returns(Integer)}
   def self.compute_num_wrong_type(inputs)
-    'not_an_integer' # error: Returning value that does not conform to method result type
+    'not_an_integer' # error: Expected `Integer` but found `String("not_an_integer")` for method result type
   end
 
   const :not_a_symbol, String, computed_by: 'not_a_symbol'

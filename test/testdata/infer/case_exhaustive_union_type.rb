@@ -69,7 +69,7 @@ def exhaustive_unreachable_when_after(x)
 end
 
 sig {params(x: T.any(Integer, String)).returns(Integer)}
-def non_exhaustive_some_cases(x) # error: Returning value that does not conform to method result type
+def non_exhaustive_some_cases(x) # error: Expected `Integer` but found `T.nilable(Integer)` for method result type
   case x
   when Integer
     x
@@ -77,7 +77,7 @@ def non_exhaustive_some_cases(x) # error: Returning value that does not conform 
 end
 
 sig {params(x: T.any(Integer, String)).returns(Integer)}
-def non_exhaustive_some_cases_unreachable_when(x) # error: Returning value that does not conform to method result type
+def non_exhaustive_some_cases_unreachable_when(x) # error: Expected `Integer` but found `T.nilable(Integer)` for method result type
   case x
   when Integer
     x
