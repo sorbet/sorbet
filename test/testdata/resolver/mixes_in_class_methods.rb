@@ -25,7 +25,7 @@ Test.new.mixin_method
 module Bad1
   extend T::Sig
   extend T::Helpers
-  mixes_in_class_methods # error: Not enough arguments provided for method `T::Helpers#mixes_in_class_methods`. Expected: `1`, got: `0`
+  mixes_in_class_methods # error: Not enough arguments provided for method `T::Helpers#mixes_in_class_methods`. Expected: `1+`, got: `0`
 end
 
 class Bad2
@@ -53,5 +53,13 @@ end
 module Bad5
   extend T::Sig
   extend T::Helpers
-  mixes_in_class_methods(Bad5) # error: Must not pass your self
+
+  RUBY_CONSTANT = 0
+  mixes_in_class_methods(RUBY_CONSTANT) # error: must be statically resolvable to a module
+end
+
+module Bad6
+  extend T::Sig
+  extend T::Helpers
+  mixes_in_class_methods(Bad6) # error: Must not pass your self
 end

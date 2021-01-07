@@ -13,6 +13,7 @@
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "common/Timer.h"
@@ -556,46 +557,74 @@ private:
                     gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.show(gs));
             }
-            // Keep processing it anyways
+            return;
         }
 
-        if (send->args.size() != 1) {
+        if (send->args.size() < 1) {
             // The arity mismatch error will be emitted later by infer.
             return;
         }
-        auto &front = send->args.front();
-        auto *id = ast::cast_tree<ast::ConstantLit>(front);
-        if (id == nullptr || !id->symbol.exists() || !id->symbol.isClassOrModule()) {
-            if (auto e =
-                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
+
+        auto encounteredError = false;
+        for (auto &arg : send->args) {
+            auto *id = ast::cast_tree<ast::ConstantLit>(arg);
+
+            if (id == nullptr || !id->symbol.exists()) {
+                if (auto e = gs.beginError(core::Loc(todo.file, send->loc),
+                                           core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
+                }
+                continue;
             }
-            return;
-        }
-        if (id->symbol.data(gs)->isClassOrModuleClass()) {
-            if (auto e =
-                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` is a class, not a module; Only modules may be mixins", id->symbol.data(gs)->show(gs));
+            if (!id->symbol.isClassOrModule()) {
+                if (auto e =
+                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("Argument to `{}` must be statically resolvable to a module", send->fun.show(gs));
+                }
+                continue;
             }
-            return;
-        }
-        if (id->symbol == owner) {
-            if (auto e =
-                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Must not pass your self to `{}`", send->fun.show(gs));
+            if (id->symbol.data(gs)->isClassOrModuleClass()) {
+                if (auto e =
+                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
+                                id->symbol.data(gs)->show(gs));
+                }
+                encounteredError = true;
             }
-            return;
-        }
-        auto existing = owner.data(gs)->findMember(gs, core::Names::classMethods());
-        if (existing.exists() && existing != id->symbol) {
-            if (auto e =
-                    gs.beginError(core::Loc(todo.file, send->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Redeclaring `{}` from module `{}` to module `{}`", send->fun.show(gs),
-                            existing.data(gs)->show(gs), id->symbol.data(gs)->show(gs));
+            if (id->symbol == owner) {
+                if (auto e =
+                        gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
+                    e.setHeader("Must not pass your self to `{}`", send->fun.show(gs));
+                }
+                encounteredError = true;
             }
-            return;
+            if (encounteredError) {
+                continue;
+            }
+
+            // Get the fake property holding the mixes
+            auto mixMethod = owner.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
+            auto loc = core::Loc(owner.data(gs)->loc().file(), send->loc);
+            if (!mixMethod.exists()) {
+                // We never stored a mixin in this symbol
+                // Create a the fake property that will hold the mixed in modules
+                mixMethod = gs.enterMethodSymbol(loc, owner.asClassOrModuleRef(), core::Names::mixedInClassMethods());
+                vector<core::TypePtr> targs;
+                mixMethod.data(gs)->resultType = core::make_type<core::TupleType>(move(targs));
+
+                // Create a dummy block argument to satisfy sanitycheck during GlobalState::expandNames
+                auto &arg =
+                    gs.enterMethodArgumentSymbol(core::Loc::none(), mixMethod.asMethodRef(), core::Names::blkArg());
+                arg.flags.isBlock = true;
+            }
+
+            auto type = core::make_type<core::ClassType>(id->symbol.asClassOrModuleRef());
+            auto &elems = (core::cast_type<core::TupleType>(mixMethod.data(gs)->resultType))->elems;
+            // Make sure we are not adding existing symbols to our tuple
+            if (absl::c_find(elems, type) == elems.end()) {
+                elems.emplace_back(type);
+            }
         }
-        owner.data(gs)->members()[core::Names::classMethods()] = id->symbol;
     }
 
     static void tryRegisterSealedSubclass(core::MutableContext ctx, AncestorResolutionItem &job) {

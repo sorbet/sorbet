@@ -701,7 +701,7 @@ bool Symbol::isPrintable(const GlobalState &gs) const {
 
     for (auto childPair : this->members()) {
         if (childPair.first == Names::singleton() || childPair.first == Names::attached() ||
-            childPair.first == Names::classMethods()) {
+            childPair.first == Names::mixedInClassMethods()) {
             continue;
         }
 
@@ -872,7 +872,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         }
 
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-            pair.first == Names::classMethods()) {
+            pair.first == Names::mixedInClassMethods()) {
             continue;
         }
 
