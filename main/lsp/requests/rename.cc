@@ -109,7 +109,7 @@ public:
             symbols.pop_front();
             return s;
         }
-        return core::SymbolRef();
+        return core::Symbols::noSymbol();
     }
 
 private:
