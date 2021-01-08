@@ -11,6 +11,8 @@ else
   print="cfg"
 fi
 
+sys="$(uname -s)"
+
 if [ "${REMOTE:-}" != "" ]; then
   # Finds the path you are currently in (relative to HOME) and assumes that a
   # Sorbet repo exists in an identically named path on the remote server
@@ -29,7 +31,7 @@ fi
 
 "${sorbet_exe[@]}" --silence-dev-message --suppress-non-critical --typed=true --print "$print" "$@" > "$dot"
 dot -Tsvg "$dot" > "$svg"
-if command -v open &> /dev/null; then
+if command -v open &> /dev/null && test "$sys" != Linux; then
   open -a "Google Chrome" "$svg"
 elif command -v sensible-browser &> /dev/null; then
   sensible-browser "$svg"
