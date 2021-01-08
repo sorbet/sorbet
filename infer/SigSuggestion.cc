@@ -93,9 +93,9 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
     // core::Loc::none() should be okay here.
     auto originForUninitialized = core::Loc::none();
     core::DispatchArgs dispatchArgs{snd->fun,       locs,           snd->numPosArgs,
-                                    args,           snd->recv.type, snd->recv.type,
-                                    snd->recv.type, snd->link,      originForUninitialized};
-    auto dispatchInfo = snd->recv.type.dispatchCall(ctx, dispatchArgs);
+                                    args,           snd->recvType, snd->recvType,
+                                    snd->recvType, snd->link,      originForUninitialized};
+    auto dispatchInfo = snd->recvType.dispatchCall(ctx, dispatchArgs);
 
     int i = -1;
 

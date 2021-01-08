@@ -113,18 +113,18 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             if (auto *v = cast_instruction<Ident>(bind.value.get())) {
                 blockReads.add(v->what.id());
             } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
-                blockReads.add(v->recv.variable.id());
+                blockReads.add(v->recv.id());
                 for (auto &arg : v->args) {
                     blockReads.add(arg.variable.id());
                 }
             } else if (auto *v = cast_instruction<TAbsurd>(bind.value.get())) {
-                blockReads.add(v->what.variable.id());
+                blockReads.add(v->variable.id());
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
-                blockReads.add(v->what.variable.id());
+                blockReads.add(v->variable.id());
             } else if (auto *v = cast_instruction<BlockReturn>(bind.value.get())) {
-                blockReads.add(v->what.variable.id());
+                blockReads.add(v->variable.id());
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
-                blockReads.add(v->value.variable.id());
+                blockReads.add(v->variable.id());
             } else if (auto *v = cast_instruction<LoadSelf>(bind.value.get())) {
                 blockReads.add(v->fallback.id());
             } else if (auto *v = cast_instruction<SolveConstraint>(bind.value.get())) {

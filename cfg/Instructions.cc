@@ -20,9 +20,28 @@ string spacesForTabLevel(int tabs) {
     }
     return to_string(ss);
 }
+string varUseSiteToString(const core::GlobalState &gs, const CFG &cfg,
+                          LocalRef variable, const core::TypePtr &type) {
+    if (variable == LocalRef::unconditional() || type == nullptr) {
+        return variable.toString(gs, cfg);
+    } else {
+        return fmt::format("{}: {}", variable.toString(gs, cfg), type.show(gs));
+    }
+}
+
+string varUseSiteShowRaw(const core::GlobalState &gs, const CFG &cfg, int tabs,
+                         LocalRef variable, const core::TypePtr &type) {
+    if (variable == LocalRef::unconditional() || type == nullptr) {
+        return fmt::format("VariableUseSite {{ variable = {} }}", variable.showRaw(gs, cfg));
+    } else {
+        return fmt::format("VariableUseSite {{\n{0}&nbsp;variable = {1},\n{0}&nbsp;type = {2},\n{0}}}",
+                           spacesForTabLevel(tabs), variable.showRaw(gs, cfg), type.show(gs));
+    }
+}
+
 } // namespace
 
-Return::Return(LocalRef what) : what(what) {
+Return::Return(LocalRef what) : variable(what) {
     categoryCounterInc("cfg", "return");
 }
 
@@ -35,25 +54,27 @@ string SolveConstraint::showRaw(const core::GlobalState &gs, const CFG &cfg, int
 }
 
 string Return::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("return {}", this->what.toString(gs, cfg));
+    return fmt::format("return {}", varUseSiteToString(gs, cfg, variable, type));
 }
 
 string Return::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("Return {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs),
-                       this->what.showRaw(gs, cfg, tabs + 1));
+                       varUseSiteShowRaw(gs, cfg, tabs + 1, variable, type));
 }
 
-BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, LocalRef what) : link(std::move(link)), what(what) {
+BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, LocalRef what) : variable(what), link(std::move(link)) {
     categoryCounterInc("cfg", "blockreturn");
 }
 
 string BlockReturn::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("blockreturn<{}> {}", this->link->fun.toString(gs), this->what.toString(gs, cfg));
+    return fmt::format("blockreturn<{}> {}", this->link->fun.toString(gs),
+                       varUseSiteToString(gs, cfg, this->variable, this->type));
 }
 
 string BlockReturn::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("BlockReturn {{\n{0}&nbsp;link = {1},\n{0}&nbsp;what = {2},\n{0}}}", spacesForTabLevel(tabs),
-                       this->link->fun.showRaw(gs), this->what.showRaw(gs, cfg, tabs + 1));
+                       this->link->fun.showRaw(gs),
+                       varUseSiteShowRaw(gs, cfg, tabs + 1, this->variable, this->type));
 }
 
 LoadSelf::LoadSelf(shared_ptr<core::SendAndBlockLink> link, LocalRef fallback)
@@ -150,14 +171,14 @@ string Alias::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 
 string Send::toString(const core::GlobalState &gs, const CFG &cfg) const {
     return fmt::format(
-        "{}.{}({})", this->recv.toString(gs, cfg), this->fun.toString(gs),
+        "{}.{}({})", varUseSiteToString(gs, cfg, this->recv, this->recvType), this->fun.toString(gs),
         fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(gs, cfg); }));
 }
 
 string Send::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format(
         "Send {{\n{0}&nbsp;recv = {1},\n{0}&nbsp;fun = {2},\n{0}&nbsp;args = ({3}),\n{0}}}", spacesForTabLevel(tabs),
-        this->recv.toString(gs, cfg), this->fun.showRaw(gs),
+        varUseSiteToString(gs, cfg, this->recv, this->recvType), this->fun.showRaw(gs),
         fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.showRaw(gs, cfg, tabs + 1); }));
 }
 
@@ -202,39 +223,31 @@ string GetCurrentException::showRaw(const core::GlobalState &gs, const CFG &cfg,
 }
 
 string Cast::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("cast({}, {});", this->value.toString(gs, cfg), this->type.toString(gs));
+    return fmt::format("cast({}, {});", varUseSiteToString(gs, cfg, this->variable, this->resultType), this->type.toString(gs));
 }
 
 string Cast::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("Cast {{\n{0}&nbsp;cast = T.{1},\n{0}&nbsp;value = {2},\n{0}&nbsp;type = {3},\n{0}}}",
-                       spacesForTabLevel(tabs), this->cast.show(gs), this->value.showRaw(gs, cfg, tabs + 1),
+                       spacesForTabLevel(tabs), this->cast.show(gs),
+                       varUseSiteShowRaw(gs, cfg, tabs + 1, this->variable, this->resultType),
                        this->type.show(gs));
 }
 
 string TAbsurd::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("T.absurd({})", this->what.toString(gs, cfg));
+    return fmt::format("T.absurd({})", varUseSiteToString(gs, cfg, this->variable, this->type));
 }
 
 string TAbsurd::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("TAbsurd {{\n{0}&nbsp;what = {1},\n{0}}}", spacesForTabLevel(tabs),
-                       this->what.showRaw(gs, cfg, tabs + 1));
+                       varUseSiteShowRaw(gs, cfg, tabs + 1, this->variable, this->type));
 }
 
 string VariableUseSite::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    if (this->variable == LocalRef::unconditional() || this->type == nullptr) {
-        return this->variable.toString(gs, cfg);
-    } else {
-        return fmt::format("{}: {}", this->variable.toString(gs, cfg), this->type.show(gs));
-    }
+    return varUseSiteToString(gs, cfg, this->variable, this->type);
 }
 
 string VariableUseSite::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    if (this->variable == LocalRef::unconditional() || this->type == nullptr) {
-        return fmt::format("VariableUseSite {{ variable = {} }}", this->variable.showRaw(gs, cfg));
-    } else {
-        return fmt::format("VariableUseSite {{\n{0}&nbsp;variable = {1},\n{0}&nbsp;type = {2},\n{0}}}",
-                           spacesForTabLevel(tabs), this->variable.showRaw(gs, cfg), this->type.show(gs));
-    }
+    return varUseSiteShowRaw(gs, cfg, tabs, this->variable, this->type);
 }
 
 } // namespace sorbet::cfg

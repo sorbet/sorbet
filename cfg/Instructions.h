@@ -87,7 +87,8 @@ public:
     bool isPrivateOk;
     u2 numPosArgs;
     core::NameRef fun;
-    VariableUseSite recv;
+    LocalRef recv;
+    core::TypePtr recvType;
     core::LocOffsets receiverLoc;
     InlinedVector<VariableUseSite, 2> args;
     InlinedVector<core::LocOffsets, 2> argLocs;
@@ -104,24 +105,26 @@ CheckSize(Send, 144, 8);
 
 class Return final : public Instruction {
 public:
-    VariableUseSite what;
+    LocalRef variable;
+    core::TypePtr type;
 
     Return(LocalRef what);
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Return, 40, 8);
+CheckSize(Return, 32, 8);
 
 class BlockReturn final : public Instruction {
 public:
+    LocalRef variable;
+    core::TypePtr type;
     std::shared_ptr<core::SendAndBlockLink> link;
-    VariableUseSite what;
 
     BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, LocalRef what);
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(BlockReturn, 56, 8);
+CheckSize(BlockReturn, 48, 8);
 
 class LoadSelf final : public Instruction {
 public:
@@ -198,10 +201,11 @@ CheckSize(LoadYieldParams, 32, 8);
 class Cast final : public Instruction {
 public:
     core::NameRef cast;
-    VariableUseSite value;
+    LocalRef variable;
+    core::TypePtr resultType; // TODO(froydnj) is this is the result type or the cast type?
     core::TypePtr type;
 
-    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), value(value), type(type) {}
+    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), variable(value), type(type) {}
 
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
@@ -210,16 +214,17 @@ CheckSize(Cast, 56, 8);
 
 class TAbsurd final : public Instruction {
 public:
-    VariableUseSite what;
+    LocalRef variable;
+    core::TypePtr type;
 
-    TAbsurd(LocalRef what) : what(what) {
+    TAbsurd(LocalRef what) : variable(what) {
         categoryCounterInc("cfg", "tabsurd");
     }
 
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(TAbsurd, 40, 8);
+CheckSize(TAbsurd, 32, 8);
 
 } // namespace sorbet::cfg
 
