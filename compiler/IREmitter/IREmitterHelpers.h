@@ -134,6 +134,9 @@ public:
     static core::SymbolRef fixupOwningSymbol(const core::GlobalState &gs, core::SymbolRef sym);
 
     static std::string showClassNameWithoutOwner(const core::GlobalState &gs, core::SymbolRef sym);
+
+    // Return true if the given symbol is a "root" symbol.
+    static bool isRootishSymbol(const core::GlobalState &gs, core::SymbolRef sym);
 };
 } // namespace sorbet::compiler
 #endif

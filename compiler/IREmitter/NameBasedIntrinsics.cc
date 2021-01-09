@@ -76,7 +76,7 @@ public:
         auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
         auto funcSym = cs.gs.lookupStaticInitForClass(attachedClass);
 
-        if (sym.data(cs)->owner != core::Symbols::root() && sym.data(cs)->owner != core::Symbols::PackageRegistry()) {
+        if (!IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)) {
             auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
             if (isModule) {
                 builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});

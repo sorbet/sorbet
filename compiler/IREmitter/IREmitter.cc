@@ -774,7 +774,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
     llvm::IRBuilder<> builder(cs);
 
     auto owner = sym.data(cs)->owner;
-    auto isRoot = owner == core::Symbols::rootSingleton();
+    auto isRoot = IREmitterHelpers::isRootishSymbol(cs, owner);
     llvm::Function *entryFunc;
 
     if (IREmitterHelpers::isFileOrClassStaticInit(cs, sym)) {

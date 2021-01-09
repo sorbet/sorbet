@@ -227,8 +227,7 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &build, st
 namespace {
 std::string showClassName(const core::GlobalState &gs, core::SymbolRef sym) {
     auto owner = sym.data(gs)->owner;
-    bool includeOwner = owner.exists() && owner != core::Symbols::root() && owner != core::Symbols::PackageRegistry() &&
-                        owner.data(gs)->name != core::Names::Constants::PkgRoot_Package();
+    bool includeOwner = !IREmitterHelpers::isRootishSymbol(gs, owner);
     string ownerStr = includeOwner ? showClassName(gs, owner) + "::" : "";
     return ownerStr + IREmitterHelpers::showClassNameWithoutOwner(gs, sym);
 }

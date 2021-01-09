@@ -725,8 +725,9 @@ string getFunctionNamePrefix(CompilerState &cs, core::SymbolRef sym) {
     } else {
         suffix = name.toString(cs);
     }
-    string prefix =
-        sym.data(cs)->owner == core::Symbols::root() ? "" : getFunctionNamePrefix(cs, sym.data(cs)->owner) + "::";
+    string prefix = IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)
+                        ? ""
+                        : getFunctionNamePrefix(cs, sym.data(cs)->owner) + "::";
 
     return prefix + suffix;
 }
@@ -953,8 +954,7 @@ bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::Sy
 }
 
 core::SymbolRef IREmitterHelpers::fixupOwningSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
-    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton() ||
-        sym == core::Symbols::PackageRegistry() || sym.data(gs)->name == core::Names::Constants::PkgRoot_Package()) {
+    if (isRootishSymbol(gs, sym)) {
         // Root methods end up going on Object.
         return core::Symbols::Object();
     }
@@ -987,6 +987,25 @@ std::string IREmitterHelpers::showClassNameWithoutOwner(const core::GlobalState 
 
     return absl::StrReplaceAll(withoutOwnerStr.substr(0, withoutOwnerStr.size() - packageNameSuffix.size()),
                                {{"_", "::"}});
+}
+
+bool IREmitterHelpers::isRootishSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
+    if (!sym.exists()) {
+        return false;
+    }
+
+    // These are the obvious cases.
+    if (sym == core::Symbols::root() || sym == core::Symbols::rootSingleton()) {
+        return true;
+    }
+
+    // --stripe-packages interposes its own set of symbols at the toplevel.
+    // Absent any runtime support, we need to consider these as rootish.
+    if (sym == core::Symbols::PackageRegistry() || sym.data(gs)->name == core::Names::Constants::PkgRoot_Package()) {
+        return true;
+    }
+
+    return false;
 }
 
 } // namespace sorbet::compiler
