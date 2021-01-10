@@ -20,7 +20,7 @@ namespace {
 string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &opts,
                    const shared_ptr<spdlog::logger> &logger) {
     if (opts.rawInputDirNames.size() != 1) {
-        auto msg = fmt::format("Sorbet's language server requires a single input directory. {} are configured: {}", opts.rawInputDirNames.size(), opts.rawInputDirNames);
+        auto msg = fmt::format("Sorbet's language server requires a single input directory. However, {} are configured: {}", opts.rawInputDirNames.size(), opts.rawInputDirNames);
         logger->error(msg);
         auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
         output->write(make_unique<LSPMessage>(
