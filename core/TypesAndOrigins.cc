@@ -49,6 +49,9 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(const GlobalState &gs, Lo
         if (o == last) {
             continue;
         }
+        if (!o.exists()) {
+            continue;
+        }
         last = o;
 
         if (originForUninitialized.exists() && o == originForUninitialized) {
