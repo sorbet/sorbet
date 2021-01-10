@@ -1,6 +1,7 @@
 #ifndef RUBY_TYPER_OPTIONS_H
 #define RUBY_TYPER_OPTIONS_H
 #include "common/ConstExprStr.h"
+#include "common/EarlyReturnWithCode.h"
 #include "common/FileSystem.h"
 #include "common/common.h"
 #include "core/StrictLevel.h"
@@ -8,13 +9,6 @@
 #include "spdlog/spdlog.h"
 
 namespace sorbet::realmain::options {
-
-// Terminate execution of sorbet with specific return code
-class EarlyReturnWithCode : public SorbetException {
-public:
-    EarlyReturnWithCode(int returnCode);
-    const int returnCode;
-};
 
 class PrinterConfig {
 public:
@@ -45,6 +39,7 @@ private:
 struct Printers {
     PrinterConfig ParseTree;
     PrinterConfig ParseTreeJson;
+    PrinterConfig ParseTreeJsonWithLocs;
     PrinterConfig ParseTreeWhitequark;
     PrinterConfig DesugarTree;
     PrinterConfig DesugarTreeRaw;
@@ -108,12 +103,15 @@ struct AutoloaderConfig {
     std::string rootDir;
     std::string preamble;
     std::string registryModule;
+    std::string rootObject;
     std::vector<std::string> requireExcludes;
     std::vector<std::vector<std::string>> sameFileModules;
     std::vector<std::string> stripPrefixes;
 
     std::vector<std::string> absoluteIgnorePatterns;
     std::vector<std::string> relativeIgnorePatterns;
+
+    bool packagedAutoloader;
 };
 
 struct Options {
@@ -160,6 +158,7 @@ struct Options {
     std::string storeState = "";
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";
+    bool ruby3KeywordArgs = false;
     std::set<int> errorCodeWhiteList;
     std::set<int> errorCodeBlackList;
     /** Prefix to remove from all printed paths. */
@@ -170,7 +169,9 @@ struct Options {
     u4 reserveFieldTableCapacity = 0;
     u4 reserveTypeArgumentTableCapacity = 0;
     u4 reserveTypeMemberTableCapacity = 0;
-    u4 reserveNameTableCapacity = 0;
+    u4 reserveUtf8NameTableCapacity = 0;
+    u4 reserveConstantNameTableCapacity = 0;
+    u4 reserveUniqueNameTableCapacity = 0;
 
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";
@@ -212,7 +213,6 @@ struct Options {
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspGoToImplementationEnabled = false;
-    bool lspRenameEnabled = false;
 
     std::string inlineInput; // passed via -e
     std::string debugLogFile;

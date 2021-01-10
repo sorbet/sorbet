@@ -58,10 +58,7 @@ module T::Props
           # from disk) are correct, so we use more thorough runtime
           # checks there
           if non_nil_type.recursively_valid?(val)
-            if validate
-              validate.call(prop, val)
-            end
-            instance_variable_set(accessor_key, val)
+            validate&.call(prop, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(
               klass,
@@ -69,8 +66,8 @@ module T::Props
               non_nil_type,
               val,
             )
-            instance_variable_set(accessor_key, val)
           end
+          instance_variable_set(accessor_key, val)
         end
       end
 
@@ -94,9 +91,7 @@ module T::Props
           # from disk) are correct, so we use more thorough runtime
           # checks there
           elsif non_nil_type.recursively_valid?(val)
-            if validate
-              validate.call(prop, val)
-            end
+            validate&.call(prop, val)
             instance_variable_set(accessor_key, val)
           else
             T::Props::Private::SetterFactory.raise_pretty_error(

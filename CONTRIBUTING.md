@@ -39,7 +39,7 @@ Documentation improvements are very welcome. The source of [sorbet.org](https://
 * Your PR description should have details on what the PR does. If it fixes an existing issue it should end with "Fixes #XXX".
 * When all of the tests are passing and all other conditions described herein are satisfied, a maintainer will be assigned to review and merge the PR.
 * We expect that once a PR is opened, it will be actively worked on until it is merged or closed. We reserve the right to close PRs that are not making progress. This is generally defined as no changes for 7 days. Obviously PRs that are closed due to lack of activity can be reopened later. Closing stale PRs helps us to keep on top of all of the work currently in flight.
-* Please consider joining the [sorbet-slack](https://sorbet-ruby.slack.com).
+* Please consider joining the [sorbet-slack](https://sorbet.org/slack).
 
 # PR review policy for maintainers
 * Typically we try to turn around reviews within two business days.

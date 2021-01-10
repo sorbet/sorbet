@@ -19,11 +19,11 @@ class TestCasts
     s = T.cast(6, Integer) # error: Useless cast
     s = T.cast(6, T.untyped) # error: Please use `T.unsafe(...)`
 
-    s = T.cast(6, 7) # error: Please use `T.unsafe(...)` to cast to T.untyped
-                # ^ error: Unsupported type syntax
+    s = T.cast(6, 7) # error: Useless cast
+                # ^ error: Unsupported literal in type syntax
 
-    # s ends up as `untyped`, so these are all OK
-    s + "hi"
+    # s ends up as `Integer`
+    s + "hi" # error: Expected `Integer` but found `String("hi")`
     s + 3
   end
 end

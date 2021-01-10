@@ -8,6 +8,7 @@
 #include "rewriter/Cleanup.h"
 #include "rewriter/Command.h"
 #include "rewriter/DSLBuilder.h"
+#include "rewriter/DefDelegator.h"
 #include "rewriter/Delegate.h"
 #include "rewriter/Flatfiles.h"
 #include "rewriter/Flatten.h"
@@ -23,6 +24,7 @@
 #include "rewriter/Regexp.h"
 #include "rewriter/SelfNew.h"
 #include "rewriter/SigRewriter.h"
+#include "rewriter/Singleton.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
 #include "rewriter/TypeMembers.h"
@@ -44,6 +46,7 @@ public:
         Flatfiles::run(ctx, classDef);
         Prop::run(ctx, classDef);
         TypeMembers::run(ctx, classDef);
+        Singleton::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);
@@ -53,80 +56,86 @@ public:
         UnorderedMap<void *, vector<ast::TreePtr>> replaceNodes;
         for (auto &stat : classDef->rhs) {
             typecase(
-                stat.get(),
-                [&](ast::Assign *assign) {
+                stat,
+                [&](ast::Assign &assign) {
                     vector<ast::TreePtr> nodes;
 
-                    nodes = Struct::run(ctx, assign);
+                    nodes = Struct::run(ctx, &assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = ClassNew::run(ctx, assign);
+                    nodes = ClassNew::run(ctx, &assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = Regexp::run(ctx, assign);
+                    nodes = Regexp::run(ctx, &assign);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
                 },
 
-                [&](ast::Send *send) {
+                [&](ast::Send &send) {
                     vector<ast::TreePtr> nodes;
 
-                    nodes = MixinEncryptedProp::run(ctx, send);
+                    nodes = MixinEncryptedProp::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = Minitest::run(ctx, send);
+                    nodes = Minitest::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = move(nodes);
                         return;
                     }
 
-                    nodes = DSLBuilder::run(ctx, send);
+                    nodes = DSLBuilder::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = Private::run(ctx, send);
+                    nodes = Private::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
-                    nodes = Delegate::run(ctx, send);
+                    nodes = DefDelegator::run(ctx, &send);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = Delegate::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
                     // This one is different: it gets an extra prevStat argument.
-                    nodes = AttrReader::run(ctx, send, prevStat);
+                    nodes = AttrReader::run(ctx, &send, prevStat);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
 
                     // This one is also a little different: it gets the ClassDef kind
-                    nodes = Mattr::run(ctx, send, classDef->kind);
+                    nodes = Mattr::run(ctx, &send, classDef->kind);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
                     }
                 },
 
-                [&](ast::MethodDef *mdef) { Initializer::run(ctx, mdef, prevStat); },
+                [&](ast::MethodDef &mdef) { Initializer::run(ctx, &mdef, prevStat); },
 
-                [&](ast::Expression *e) {});
+                [&](const ast::TreePtr &e) {});
 
             prevStat = &stat;
         }

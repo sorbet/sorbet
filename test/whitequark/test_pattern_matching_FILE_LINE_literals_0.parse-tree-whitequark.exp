@@ -1,0 +1,12 @@
+s(:case_match,
+  s(:array,
+    s(:__FILE__),
+    s(:send,
+      s(:__LINE__), :+,
+      s(:int, "1")),
+    s(:__ENCODING__)),
+  s(:in_pattern,
+    s(:array_pattern,
+      s(:__FILE__),
+      s(:__LINE__),
+      s(:__ENCODING__)), nil, nil), nil)

@@ -50,7 +50,7 @@ private:
                 return classOrModuleMatches[ref.classOrModuleIndex()];
             case core::SymbolRef::Kind::Method:
                 return methodMatches[ref.methodIndex()];
-            case core::SymbolRef::Kind::Field:
+            case core::SymbolRef::Kind::FieldOrStaticField:
                 return fieldMatches[ref.fieldIndex()];
             case core::SymbolRef::Kind::TypeArgument:
                 return typeArgumentMatches[ref.typeArgumentIndex()];
@@ -109,8 +109,8 @@ inline bool canMatchWordBoundary(char ch) {
     return isspace(ch);
 }
 
-inline bool isEligibleSymbol(const core::NameData &nameData) {
-    if (nameData->kind == core::NameKind::UNIQUE) {
+inline bool isEligibleSymbol(core::NameRef name, const core::GlobalState &gs) {
+    if (name.kind() == core::NameKind::UNIQUE) {
         return false;
     }
     return true;
@@ -187,11 +187,10 @@ PartialMatch partialMatchSymbol(string_view symbol, string_view::const_iterator 
 void SymbolMatcher::updatePartialMatch(core::SymbolRef symbolRef, string_view::const_iterator queryBegin,
                                        string_view::const_iterator queryEnd, size_t &ceilingScore) {
     auto symbolData = symbolRef.data(gs);
-    auto nameData = symbolData->name.data(gs);
-    if (!isEligibleSymbol(nameData)) {
+    if (!isEligibleSymbol(symbolData->name, gs)) {
         return;
     }
-    auto shortName = nameData->shortName(gs);
+    auto shortName = symbolData->name.shortName(gs);
     auto &partialMatch = getPartialMatch(symbolRef);
     partialMatch = partialMatchSymbol(shortName, queryBegin, queryEnd, true, ceilingScore);
     for (auto previousAncestorRef = symbolRef, ancestorRef = symbolData->owner;
@@ -235,7 +234,7 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
 
     const vector<pair<core::SymbolRef::Kind, uint>> symbolKinds = {
         {core::SymbolRef::Kind::ClassOrModule, gs.classAndModulesUsed()},
-        {core::SymbolRef::Kind::Field, gs.fieldsUsed()},
+        {core::SymbolRef::Kind::FieldOrStaticField, gs.fieldsUsed()},
         {core::SymbolRef::Kind::Method, gs.methodsUsed()},
     };
 
@@ -266,11 +265,10 @@ vector<unique_ptr<SymbolInformation>> SymbolMatcher::doQuery(string_view query_v
                     continue;
                 }
                 auto symbolData = symbolRef.data(gs);
-                auto nameData = symbolData->name.data(gs);
-                if (!isEligibleSymbol(nameData)) {
+                if (!isEligibleSymbol(symbolData->name, gs)) {
                     continue;
                 }
-                auto shortName = nameData->shortName(gs);
+                auto shortName = symbolData->name.shortName(gs);
                 uint bestScore = ceilingScore;
                 auto [partialScore, partialMatchEnd] =
                     partialMatchSymbol(shortName, queryBegin, queryEnd, false, ceilingScore);

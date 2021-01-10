@@ -16,7 +16,7 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"Foo")
+        ::Sorbet::Private::Static.keep_def(<self>, :Foo)
         begin
           ::<Magic>.<define-top-class-or-module>(::A::Foo)
           ::Sorbet::Private::Static.keep_for_ide(::A::Foo)

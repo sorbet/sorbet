@@ -16,6 +16,9 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     auto data = sym.data(gs);
+    if (!data->owner.exists()) {
+        return true;
+    }
     if (data->isClassOrModule() && data->attachedClass(gs).exists()) {
         return true;
     }
@@ -29,20 +32,20 @@ bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
         return true;
     }
     // static-init for a file
-    if (data->name.data(gs)->kind == core::NameKind::UNIQUE &&
-        data->name.data(gs)->unique.original == core::Names::staticInit()) {
+    if (data->name.kind() == core::NameKind::UNIQUE &&
+        data->name.dataUnique(gs)->original == core::Names::staticInit()) {
         return true;
     }
     // <block>
-    if (data->name.data(gs)->kind == core::NameKind::UNIQUE &&
-        data->name.data(gs)->unique.original == core::Names::blockTemp()) {
+    if (data->name.kind() == core::NameKind::UNIQUE &&
+        data->name.dataUnique(gs)->original == core::Names::blockTemp()) {
         return true;
     }
     return false;
 }
 
 bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view pattern) {
-    string_view view = name.data(gs)->shortName(gs);
+    string_view view = name.shortName(gs);
     auto fnd = view.find(pattern);
     return fnd != string_view::npos;
 }
@@ -81,11 +84,11 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
         retType = getResultType(gs, method.data(gs)->resultType, method, receiver, constraint);
     }
     string methodReturnType =
-        (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType->show(gs), ")");
+        (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType.show(gs), ")");
     vector<string> typeAndArgNames;
 
     vector<string> flags;
-    const core::SymbolData &sym = method.data(gs);
+    auto sym = method.data(gs);
     string sigCall = "sig";
     if (sym->isMethod()) {
         if (sym->isFinalMethod()) {
@@ -105,7 +108,7 @@ string prettySigForMethod(const core::GlobalState &gs, core::SymbolRef method, c
             if (!argSym.isSyntheticBlockArgument()) {
                 typeAndArgNames.emplace_back(
                     absl::StrCat(argSym.argumentName(gs), ": ",
-                                 getResultType(gs, argSym.type, method, receiver, constraint)->show(gs)));
+                                 getResultType(gs, argSym.type, method, receiver, constraint).show(gs)));
             }
         }
     }
@@ -152,10 +155,10 @@ string prettyDefForMethod(const core::GlobalState &gs, core::SymbolRef method) {
     ENFORCE(methodNameRef.exists());
     string methodName = "???";
     if (methodNameRef.exists()) {
-        methodName = methodNameRef.data(gs)->toString(gs);
+        methodName = methodNameRef.toString(gs);
     }
     string methodNamePrefix = "";
-    if (methodData->owner.exists() && methodData->owner.data(gs)->isClassOrModule() &&
+    if (methodData->owner.exists() && methodData->owner.isClassOrModule() &&
         methodData->owner.data(gs)->attachedClass(gs).exists()) {
         methodNamePrefix = "self.";
     }
@@ -222,7 +225,7 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
     ENFORCE(constant == constant.data(gs)->dealias(gs));
 
     core::TypePtr result;
-    if (constant.data(gs)->isClassOrModule()) {
+    if (constant.isClassOrModule()) {
         auto targetClass = constant;
         if (!targetClass.data(gs)->attachedClass(gs).exists()) {
             targetClass = targetClass.data(gs)->lookupSingletonClass(gs);
@@ -237,14 +240,14 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
         // By wrapping the type in `MetaType`, it displays as `<Type: Foo>` rather than `Foo`.
         result = core::make_type<core::MetaType>(result);
     }
-    return result->showWithMoreInfo(gs);
+    return result.showWithMoreInfo(gs);
 }
 
 core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &type, core::SymbolRef inWhat,
                             core::TypePtr receiver, const core::TypeConstraint *constr) {
     auto resultType = type;
-    if (auto *proxy = core::cast_type<core::ProxyType>(receiver)) {
-        receiver = proxy->underlying();
+    if (core::is_proxy_type(receiver)) {
+        receiver = receiver.underlying(gs);
     }
     if (auto *applied = core::cast_type<core::AppliedType>(receiver)) {
         /* instantiate generic classes */
@@ -370,12 +373,12 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
 
             string_view comment = line.substr(line.find('#') + skip_after_hash);
 
-            documentation_lines.push_back(comment);
+            documentation_lines.emplace_back(comment);
 
             // Account for yarddoc lines by inserting an extra newline right before
             // the yarddoc line (note that we are reverse iterating)
             if (absl::StartsWith(comment, "@")) {
-                documentation_lines.push_back(string_view(""));
+                documentation_lines.emplace_back("");
             }
         }
 
@@ -386,11 +389,11 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     }
 
     string documentation = absl::StrJoin(documentation_lines.rbegin(), documentation_lines.rend(), "\n");
-    documentation = absl::StripTrailingAsciiWhitespace(documentation);
+    documentation = string(absl::StripTrailingAsciiWhitespace(documentation));
 
-    if (documentation.empty())
+    if (documentation.empty()) {
         return nullopt;
-    else {
+    } else {
         return documentation;
     }
 }

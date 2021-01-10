@@ -15,7 +15,7 @@ module T::Props::Serializable
   #   exception if this object has mandatory props with missing
   #   values.
   # @return [Hash] A serialization of this object.
-  def serialize(strict=true)
+  def serialize(strict=true) # rubocop:disable Style/OptionalBooleanParameter (changing this API is unfortunately not feasible)
     begin
       h = __t_props_generated_serialize(strict)
     rescue => e
@@ -56,7 +56,7 @@ module T::Props::Serializable
   #  the hash contains keys that do not correspond to any known
   #  props on this instance.
   # @return [void]
-  def deserialize(hash, strict=false)
+  def deserialize(hash, strict=false) # rubocop:disable Style/OptionalBooleanParameter (changing this API is unfortunately not feasible)
     begin
       hash_keys_matching_props = __t_props_generated_deserialize(hash)
     rescue => e
@@ -180,7 +180,7 @@ module T::Props::Serializable::DecoratorMethods
   def prop_dont_store?(prop); prop_rules(prop)[:dont_store]; end
   def prop_by_serialized_forms; @class.prop_by_serialized_forms; end
 
-  def from_hash(hash, strict=false)
+  def from_hash(hash, strict=false) # rubocop:disable Style/OptionalBooleanParameter (changing this API is unfortunately not feasible)
     raise ArgumentError.new("#{hash.inspect} provided to from_hash") if !(hash && hash.is_a?(Hash))
 
     i = @class.allocate
@@ -227,7 +227,7 @@ module T::Props::Serializable::DecoratorMethods
     source_lines = self.send(generate_source_method).split("\n")
     previous_blank = source_lines[0...line_num].rindex(&:empty?) || 0
     next_blank = line_num + (source_lines[line_num..-1]&.find_index(&:empty?) || 0)
-    context = "  " + source_lines[(previous_blank + 1)...(next_blank)].join("\n  ")
+    context = "  #{source_lines[(previous_blank + 1)...next_blank].join("\n  ")}"
     <<~MSG
       Error in #{decorated_class.name}##{generated_method}: #{error.message}
       at line #{line_num-previous_blank-1} in:
@@ -318,7 +318,7 @@ module T::Props::Serializable::ClassMethods
   # Allocate a new instance and call {#deserialize} to load a new
   # object from a hash.
   # @return [Serializable]
-  def from_hash(hash, strict=false)
+  def from_hash(hash, strict=false) # rubocop:disable Style/OptionalBooleanParameter (changing this API is unfortunately not feasible)
     self.decorator.from_hash(hash, strict)
   end
 

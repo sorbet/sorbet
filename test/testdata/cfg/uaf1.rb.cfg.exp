@@ -84,7 +84,7 @@ subgraph "cluster_::A#initialize" {
 
     "bb::A#initialize_11" -> "bb::A#initialize_10" [style="bold"];
     "bb::A#initialize_12" [
-        label = "block[id=12, rubyBlockId=3](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$9: T.nilable(Integer))\louterLoops: 1\l<gotoDeadTemp>$16: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=12, rubyBlockId=3](<self>: A, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: A, <blockReturnTemp>$9: T.nilable(Integer))\louterLoops: 1\l<gotoDeadTemp>$16: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::A#initialize_12" -> "bb::A#initialize_10" [style="bold"];
@@ -102,7 +102,7 @@ subgraph "cluster_::<Class:A>#<static-init>" {
     "bb::<Class:A>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:A>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:\"initialize\") = :\"initialize\"\l<returnMethodTemp>$2: Symbol(:\"initialize\") = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(A), <statTemp>$6: Symbol(:\"initialize\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:\"initialize\")\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:initialize) = :initialize\l<returnMethodTemp>$2: Symbol(:initialize) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(A), <statTemp>$6: Symbol(:initialize))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:initialize)\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_1" [style="bold"];

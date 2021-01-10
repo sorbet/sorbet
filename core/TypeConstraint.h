@@ -17,6 +17,8 @@ class TypeConstraint {
     TypePtr &findLowerBound(SymbolRef forWhat);
     TypePtr &findSolution(SymbolRef forWhat);
 
+    UnorderedMap<SymbolRef, std::pair<TypePtr, TypePtr>> collateBounds(const GlobalState &gs) const;
+
 public:
     TypeConstraint() = default;
     TypeConstraint(const TypeConstraint &) = delete;
@@ -45,6 +47,8 @@ public:
     InlinedVector<SymbolRef, 4> getDomain() const;
     static TypeConstraint EmptyFrozenConstraint;
     std::string toString(const core::GlobalState &gs) const;
+
+    std::vector<ErrorLine> toExplanation(const core::GlobalState &gs) const;
 };
 
 } // namespace sorbet::core

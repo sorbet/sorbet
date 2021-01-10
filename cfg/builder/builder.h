@@ -10,7 +10,7 @@ public:
     static std::unique_ptr<CFG> buildFor(core::Context ctx, ast::MethodDef &md);
 
 private:
-    static BasicBlock *walk(CFGContext cctx, const ast::TreePtr &what, BasicBlock *current);
+    static BasicBlock *walk(CFGContext cctx, ast::TreePtr &what, BasicBlock *current);
     static void fillInTopoSorts(core::Context ctx, CFG &cfg);
     static void dealias(core::Context ctx, CFG &cfg);
     static void simplify(core::Context ctx, CFG &cfg);
@@ -26,7 +26,7 @@ private:
     static void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::LocOffsets loc);
     static void jumpToDead(BasicBlock *from, CFG &inWhat, core::LocOffsets loc);
     static void synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets loc, std::unique_ptr<Instruction> inst);
-    static BasicBlock *walkHash(CFGContext cctx, ast::Hash *h, BasicBlock *current, core::NameRef method);
+    static BasicBlock *walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method);
     static std::tuple<LocalRef, BasicBlock *, BasicBlock *>
     walkDefault(CFGContext cctx, int argIndex, const core::ArgInfo &argInfo, LocalRef argLocal, core::LocOffsets argLoc,
                 ast::TreePtr &def, BasicBlock *presentCont, BasicBlock *defaultCont);

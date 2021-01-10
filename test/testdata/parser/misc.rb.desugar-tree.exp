@@ -1,5 +1,5 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  <self>.alias_method(:"afoo", :"bar")
+  <self>.alias_method(:afoo, :bar)
 
   @iv = 1
 
@@ -34,7 +34,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.b()
   end
 
-  def bfoo<<C <todo sym>>>(&x)
+  def bfoo<<todo method>>(&x)
     <emptyTree>
   end
 
@@ -59,7 +59,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   ::Kernel.Complex(0, "1.5")
 
-  def self.classmeth<<C <todo sym>>>(&<blk>)
+  def self.classmeth<<todo method>>(&<blk>)
     <emptyTree>
   end
 
@@ -102,7 +102,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <self>.super(ZSuperArgs)
 
-  def kwfoo<<C <todo sym>>>(x:, y: = 1, *z:, &<blk>)
+  def kwfoo<<todo method>>(x:, y: = 1, *z:, &<blk>)
     <emptyTree>
   end
 
@@ -163,11 +163,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   4
 
-  def optfoo<<C <todo sym>>>(x = 1, *y, &<blk>)
+  def optfoo<<todo method>>(x = 1, *y, &<blk>)
     <emptyTree>
   end
 
-  {x => y, :"foo" => 1}
+  {x => y, :foo => 1}
 
   <emptyTree>
 
@@ -190,7 +190,7 @@ rescue <emptyTree>::<C E> => x
 
   ::<Magic>.<string-interpolate>("foo", <self>.bar()).intern()
 
-  [:"sym"]
+  [:sym]
 
   if x
     1
@@ -198,7 +198,7 @@ rescue <emptyTree>::<C E> => x
     7
   end
 
-  ::Kernel.undef(:"x", :"y")
+  ::Kernel.undef(:x, :y)
 
   ["a", "b"]
 
@@ -214,16 +214,16 @@ rescue <emptyTree>::<C E> => x
       <emptyTree>
     end)
 
-  def sfoo<<C <todo sym>>>(**$2, &<blk>)
+  def sfoo<<todo method>>(**$2, &<blk>)
     <emptyTree>
   end
 
-  def ssfoo<<C <todo sym>>>(***$3:, &<blk>)
+  def ssfoo<<todo method>>(***$3:, &<blk>)
     <emptyTree>
   end
 
   module <emptyTree>::<C Foo><<C <todo sym>>> < ()
-    def foo<<C <todo sym>>>(&<blk>)
+    def foo<<todo method>>(&<blk>)
       <emptyTree>::<C Kernel>.lambda() do |a, b|
         a.+(b)
       end

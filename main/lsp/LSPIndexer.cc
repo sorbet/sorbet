@@ -236,14 +236,14 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
 
     // Index changes in initialGS. pipeline::index sorts output by file id, but we need to reorder to match the order of
     // other fields.
-    UnorderedMap<u2, int> fileToPos;
+    UnorderedMap<core::FileRef, int> fileToPos;
     {
         int i = -1;
         for (auto fref : frefs) {
             // We should have ensured before reaching here that there are no duplicates.
-            ENFORCE(!fileToPos.contains(fref.id()));
+            ENFORCE(!fileToPos.contains(fref));
             i++;
-            fileToPos[fref.id()] = i;
+            fileToPos[fref] = i;
         }
     }
 
@@ -257,7 +257,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
         auto trees = pipeline::index(initialGS, frefs, config->opts, *emptyWorkers, kvstore);
         update.updatedFileIndexes.resize(trees.size());
         for (auto &ast : trees) {
-            const int i = fileToPos[ast.file.id()];
+            const int i = fileToPos[ast.file];
             update.updatedFileIndexes[i] = move(ast);
         }
     }

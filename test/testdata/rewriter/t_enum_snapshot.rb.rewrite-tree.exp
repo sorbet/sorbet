@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C EnumsDoEnum><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)
-    def something_outside<<C <todo sym>>>(&<blk>)
+    def something_outside<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -57,7 +57,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"something_outside")
+    ::Sorbet::Private::Static.keep_def(<self>, :something_outside)
   end
 
   class <emptyTree>::<C BadConsts><<C <todo sym>>> < (<emptyTree>::<C T>::<C Enum>)

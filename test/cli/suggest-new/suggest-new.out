@@ -9,5 +9,4 @@ test/cli/suggest-new/suggest-new.rb:9: Method `ABC` does not exist on `T.class_o
     test/cli/suggest-new/suggest-new.rb:9: Replace with `ABD.new`
      9 |ABC(1)
         ^^^
-
 Errors: 1

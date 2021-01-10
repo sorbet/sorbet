@@ -53,13 +53,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C AClass>)
       end
 
-      def get_a<<C <todo sym>>>(&<blk>)
+      def get_a<<todo method>>(&<blk>)
         <emptyTree>::<C B>.get_a()
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"get_a")
+      ::Sorbet::Private::Static.keep_def(<self>, :get_a)
     end
 
     module <emptyTree>::<C AModule><<C <todo sym>>> < ()
@@ -67,13 +67,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Integer>)
       end
 
-      def one<<C <todo sym>>>(&<blk>)
+      def one<<todo method>>(&<blk>)
         1
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"one")
+      ::Sorbet::Private::Static.keep_def(<self>, :one)
     end
   end
 end
@@ -107,13 +107,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Integer>)
       end
 
-      def get_one<<C <todo sym>>>(&<blk>)
+      def get_one<<todo method>>(&<blk>)
         <emptyTree>::<C A>.one()
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"get_one")
+      ::Sorbet::Private::Static.keep_def(<self>, :get_one)
     end
 
     module <emptyTree>::<C BModule><<C <todo sym>>> < ()
@@ -121,13 +121,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C A>::<C AClass>)
       end
 
-      def get_a<<C <todo sym>>>(&<blk>)
+      def get_a<<todo method>>(&<blk>)
         <emptyTree>::<C A>::<C AClass>.new()
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :"get_a")
+      ::Sorbet::Private::Static.keep_def(<self>, :get_a)
     end
   end
 end

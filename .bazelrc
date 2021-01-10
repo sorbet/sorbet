@@ -38,7 +38,7 @@ build --copt=-fno-omit-frame-pointer
 
 build --copt=-fstack-protector
 
-build --copt=-Werror --copt=-Wimplicit-fallthrough
+build --copt=-Werror --copt=-Wimplicit-fallthrough --copt=-Wmissing-field-initializers
 
 build --host_copt=-O1
 build --host_copt=-DFORCE_DEBUG

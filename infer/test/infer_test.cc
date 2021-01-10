@@ -57,7 +57,7 @@ TEST_CASE("Infer") {
         auto intClass = core::make_type<core::ClassType>(core::Symbols::Integer());
         auto floatLit = core::make_type<core::LiteralType>(1.0f);
         auto floatClass = core::make_type<core::ClassType>(core::Symbols::Float());
-        auto trueLit = core::make_type<core::LiteralType>(true);
+        auto trueLit = core::Types::trueClass();
         auto trueClass = core::make_type<core::ClassType>(core::Symbols::TrueClass());
         auto stringLit = core::make_type<core::LiteralType>(core::Symbols::String(), core::Names::assignTemp());
         auto stringClass = core::make_type<core::ClassType>(core::Symbols::String());
@@ -82,11 +82,11 @@ TEST_CASE("Infer") {
 
         auto barSymbol = rootScope->findMember(gs, gs.enterNameConstant("Bar"));
         auto fooSymbol = rootScope->findMember(gs, gs.enterNameConstant("Foo"));
-        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.data(gs)->showRaw(gs));
-        REQUIRE_EQ("<C <U Foo>>", fooSymbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.showRaw(gs));
+        REQUIRE_EQ("<C <U Foo>>", fooSymbol.data(gs)->name.showRaw(gs));
 
-        auto barType = core::make_type<core::ClassType>(barSymbol);
-        auto fooType = core::make_type<core::ClassType>(fooSymbol);
+        auto barType = core::make_type<core::ClassType>(barSymbol.asClassOrModuleRef());
+        auto fooType = core::make_type<core::ClassType>(fooSymbol.asClassOrModuleRef());
 
         REQUIRE(core::Types::isSubType(gs, fooType, barType));
         REQUIRE(core::Types::isSubType(gs, fooType, fooType));
@@ -101,13 +101,13 @@ TEST_CASE("Infer") {
         auto barSymbol = rootScope->findMember(gs, gs.enterNameConstant("Bar"));
         auto foo1Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo1"));
         auto foo2Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo2"));
-        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.data(gs)->showRaw(gs));
-        REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.data(gs)->showRaw(gs));
-        REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.showRaw(gs));
+        REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.showRaw(gs));
+        REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.showRaw(gs));
 
-        auto barType = core::make_type<core::ClassType>(barSymbol);
-        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
-        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
+        auto barType = core::make_type<core::ClassType>(barSymbol.asClassOrModuleRef());
+        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol.asClassOrModuleRef());
+        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol.asClassOrModuleRef());
 
         auto barNfoo1 = core::Types::any(gs, barType, foo1Type);
         auto foo1Nbar = core::Types::any(gs, foo1Type, barType);
@@ -116,16 +116,16 @@ TEST_CASE("Infer") {
         auto foo1Nfoo2 = core::Types::any(gs, foo1Type, foo2Type);
         auto foo2Nfoo1 = core::Types::any(gs, foo2Type, foo1Type);
 
-        REQUIRE_EQ("ClassType", barNfoo1->typeName());
+        REQUIRE_EQ("ClassType", barNfoo1.typeName());
         REQUIRE(core::Types::isSubType(gs, barType, barNfoo1));
         REQUIRE(core::Types::isSubType(gs, foo1Type, barNfoo1));
-        REQUIRE_EQ("ClassType", barNfoo2->typeName());
+        REQUIRE_EQ("ClassType", barNfoo2.typeName());
         REQUIRE(core::Types::isSubType(gs, barType, barNfoo2));
         REQUIRE(core::Types::isSubType(gs, foo2Type, barNfoo2));
-        REQUIRE_EQ("ClassType", foo1Nbar->typeName());
+        REQUIRE_EQ("ClassType", foo1Nbar.typeName());
         REQUIRE(core::Types::isSubType(gs, barType, foo1Nbar));
         REQUIRE(core::Types::isSubType(gs, foo1Type, foo1Nbar));
-        REQUIRE_EQ("ClassType", foo2Nbar->typeName());
+        REQUIRE_EQ("ClassType", foo2Nbar.typeName());
         REQUIRE(core::Types::isSubType(gs, barType, foo2Nbar));
         REQUIRE(core::Types::isSubType(gs, foo2Type, foo2Nbar));
 
@@ -150,13 +150,13 @@ TEST_CASE("Infer") {
         auto barSymbol = rootScope->findMember(gs, gs.enterNameConstant("Bar"));
         auto foo1Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo1"));
         auto foo2Symbol = rootScope->findMember(gs, gs.enterNameConstant("Foo2"));
-        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.data(gs)->showRaw(gs));
-        REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.data(gs)->showRaw(gs));
-        REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.data(gs)->showRaw(gs));
+        REQUIRE_EQ("<C <U Bar>>", barSymbol.data(gs)->name.showRaw(gs));
+        REQUIRE_EQ("<C <U Foo1>>", foo1Symbol.data(gs)->name.showRaw(gs));
+        REQUIRE_EQ("<C <U Foo2>>", foo2Symbol.data(gs)->name.showRaw(gs));
 
-        auto barType = core::make_type<core::ClassType>(barSymbol);
-        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
-        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
+        auto barType = core::make_type<core::ClassType>(barSymbol.asClassOrModuleRef());
+        auto foo1Type = core::make_type<core::ClassType>(foo1Symbol.asClassOrModuleRef());
+        auto foo2Type = core::make_type<core::ClassType>(foo2Symbol.asClassOrModuleRef());
 
         auto barOrfoo1 = core::Types::all(gs, barType, foo1Type);
         auto foo1Orbar = core::Types::all(gs, foo1Type, barType);
@@ -165,16 +165,16 @@ TEST_CASE("Infer") {
         auto foo1Orfoo2 = core::Types::all(gs, foo1Type, foo2Type);
         auto foo2Orfoo1 = core::Types::all(gs, foo2Type, foo1Type);
 
-        REQUIRE_EQ("ClassType", barOrfoo1->typeName());
+        REQUIRE_EQ("ClassType", barOrfoo1.typeName());
         REQUIRE(core::Types::isSubType(gs, barOrfoo1, barType));
         REQUIRE(core::Types::isSubType(gs, barOrfoo1, foo1Type));
-        REQUIRE_EQ("ClassType", barOrfoo2->typeName());
+        REQUIRE_EQ("ClassType", barOrfoo2.typeName());
         REQUIRE(core::Types::isSubType(gs, barOrfoo2, barType));
         REQUIRE(core::Types::isSubType(gs, barOrfoo2, foo2Type));
-        REQUIRE_EQ("ClassType", foo1Orbar->typeName());
+        REQUIRE_EQ("ClassType", foo1Orbar.typeName());
         REQUIRE(core::Types::isSubType(gs, foo1Orbar, barType));
         REQUIRE(core::Types::isSubType(gs, foo1Orbar, foo1Type));
-        REQUIRE_EQ("ClassType", foo2Orbar->typeName());
+        REQUIRE_EQ("ClassType", foo2Orbar.typeName());
         REQUIRE(core::Types::isSubType(gs, foo2Orbar, barType));
         REQUIRE(core::Types::isSubType(gs, foo2Orbar, foo2Type));
 

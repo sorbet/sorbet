@@ -54,7 +54,7 @@ class T::Props::Decorator
     @props = @props.merge(prop => rules.freeze).freeze
   end
 
-  VALID_RULE_KEYS = T.let(%i{
+  VALID_RULE_KEYS = T.let(%i[
     enum
     foreign
     foreign_hint_only
@@ -68,7 +68,7 @@ class T::Props::Decorator
     extra
     setter_validate
     _tnilable
-  }.map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
+  ].map {|k| [k, true]}.to_h.freeze, T::Hash[Symbol, T::Boolean])
   private_constant :VALID_RULE_KEYS
 
   sig {params(key: Symbol).returns(T::Boolean).checked(:never)}
@@ -153,12 +153,10 @@ class T::Props::Decorator
     val = instance.instance_variable_get(rules[:accessor_key])
     if !val.nil?
       val
+    elsif (d = rules[:ifunset])
+      T::Props::Utils.deep_clone_object(d)
     else
-      if (d = rules[:ifunset])
-        T::Props::Utils.deep_clone_object(d)
-      else
-        nil
-      end
+      nil
     end
   end
 
@@ -219,15 +217,13 @@ class T::Props::Decorator
       raise ArgumentError.new("At least one invalid prop arg supplied in #{self}: #{rules.keys.inspect}")
     end
 
-    if !(rules[:clobber_existing_method!]) && !(rules[:without_accessors])
-      if BANNED_METHOD_NAMES.include?(name.to_sym)
-        raise ArgumentError.new(
-          "#{name} can't be used as a prop in #{@class} because a method with " \
-          "that name already exists (defined by #{@class.instance_method(name).owner} " \
-          "at #{@class.instance_method(name).source_location || '<unknown>'}). " \
-          "(If using this name is unavoidable, try `without_accessors: true`.)"
-        )
-      end
+    if !rules[:clobber_existing_method!] && !rules[:without_accessors] && BANNED_METHOD_NAMES.include?(name.to_sym)
+      raise ArgumentError.new(
+        "#{name} can't be used as a prop in #{@class} because a method with " \
+        "that name already exists (defined by #{@class.instance_method(name).owner} " \
+        "at #{@class.instance_method(name).source_location || '<unknown>'}). " \
+        "(If using this name is unavoidable, try `without_accessors: true`.)"
+      )
     end
 
     extra = rules[:extra]
@@ -238,7 +234,7 @@ class T::Props::Decorator
     nil
   end
 
-  SAFE_NAME = /\A[A-Za-z_][A-Za-z0-9_-]*\z/
+  SAFE_NAME = T.let(/\A[A-Za-z_][A-Za-z0-9_-]*\z/.freeze, Regexp)
 
   # Used to validate both prop names and serialized forms
   sig {params(name: T.any(Symbol, String)).void}
@@ -312,13 +308,12 @@ class T::Props::Decorator
     sensitivity_and_pii = {sensitivity: rules[:sensitivity]}
     if defined?(Opus) && defined?(Opus::Sensitivity) && defined?(Opus::Sensitivity::Utils)
       sensitivity_and_pii = Opus::Sensitivity::Utils.normalize_sensitivity_and_pii_annotation(sensitivity_and_pii)
-    end
-    # We check for Class so this is only applied on concrete
-    # documents/models; We allow mixins containing props to not
-    # specify their PII nature, as long as every class into which they
-    # are ultimately included does.
-    #
-    if defined?(Opus) && defined?(Opus::Sensitivity) && defined?(Opus::Sensitivity::PIIable)
+
+      # We check for Class so this is only applied on concrete
+      # documents/models; We allow mixins containing props to not
+      # specify their PII nature, as long as every class into which they
+      # are ultimately included does.
+      #
       if sensitivity_and_pii[:pii] && @class.is_a?(Class) && !T.unsafe(@class).contains_pii?
         raise ArgumentError.new(
           'Cannot include a pii prop in a class that declares `contains_no_pii`'
@@ -488,7 +483,7 @@ class T::Props::Decorator
     .void
   end
   private def handle_foreign_hint_only_option(prop_name, prop_cls, foreign_hint_only)
-    if ![String, Array].include?(prop_cls) && !(prop_cls.is_a?(T::Props::CustomType))
+    if ![String, Array].include?(prop_cls) && !prop_cls.is_a?(T::Props::CustomType)
       raise ArgumentError.new(
         "`foreign_hint_only` can only be used with String or Array prop types"
       )
@@ -546,10 +541,10 @@ class T::Props::Decorator
         # of the method, optimizing it so this only runs on the first invocation.
         foreign = resolved_foreign
       end
-      if allow_direct_mutation.nil?
-        opts = {}
+      opts = if allow_direct_mutation.nil?
+        {}
       else
-        opts = {allow_direct_mutation: allow_direct_mutation}
+        {allow_direct_mutation: allow_direct_mutation}
       end
 
       T.unsafe(self.class).decorator.foreign_prop_get(self, prop_name, foreign, rules, opts)
@@ -644,23 +639,31 @@ class T::Props::Decorator
       # (b) it's safe because the getter was defined by this file.
       #
       unless rules[:without_accessors]
-        if child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
-            child.instance_method(name).source_location&.first == __FILE__
+        if clobber_getter?(child, name)
           child.send(:define_method, name) do
             T.unsafe(self.class).decorator.prop_get(self, name, rules)
           end
         end
 
-        unless rules[:immutable]
-          if child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
-              child.instance_method("#{name}=").source_location&.first == __FILE__
-            child.send(:define_method, "#{name}=") do |val|
-              T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
-            end
+        if !rules[:immutable] && clobber_setter?(child, name)
+          child.send(:define_method, "#{name}=") do |val|
+            T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
           end
         end
       end
     end
+  end
+
+  sig {params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never)}
+  private def clobber_getter?(child, prop)
+    !!(child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
+       child.instance_method(prop).source_location&.first == __FILE__)
+  end
+
+  sig {params(child: T.all(Module, T::Props::ClassMethods), prop: Symbol).returns(T::Boolean).checked(:never)}
+  private def clobber_setter?(child, prop)
+    !!(child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
+       child.instance_method("#{prop}=").source_location&.first == __FILE__)
   end
 
   sig {params(mod: Module).void.checked(:never)}

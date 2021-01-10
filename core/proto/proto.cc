@@ -17,13 +17,13 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
     com::stripe::rubytyper::Name protoName;
     protoName.set_name(name.show(gs));
     protoName.set_unique(com::stripe::rubytyper::Name::NOT_UNIQUE);
-    switch (name.data(gs)->kind) {
+    switch (name.kind()) {
         case NameKind::UTF8:
             protoName.set_kind(com::stripe::rubytyper::Name::UTF8);
             break;
         case NameKind::UNIQUE:
             protoName.set_kind(com::stripe::rubytyper::Name::UNIQUE);
-            switch (name.data(gs)->unique.uniqueNameKind) {
+            switch (name.dataUnique(gs)->uniqueNameKind) {
                 case UniqueNameKind::Parser:
                     protoName.set_unique(com::stripe::rubytyper::Name::PARSER);
                     break;
@@ -101,7 +101,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     if (data->isClassOrModule() || data->isMethod()) {
         if (data->isClassOrModule()) {
             for (auto thing : data->mixins()) {
-                symbolProto.add_mixins(thing.rawId());
+                symbolProto.add_mixins(SymbolRef(thing).rawId());
             }
         } else {
             for (auto &thing : data->arguments()) {
@@ -110,19 +110,20 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         }
 
         if (data->isClassOrModule() && data->superClass().exists()) {
-            symbolProto.set_superclass(data->superClass().rawId());
+            symbolProto.set_superclass(SymbolRef(data->superClass()).rawId());
         }
     }
 
     if (data->isStaticField()) {
-        if (auto type = core::cast_type<core::AliasType>(data->resultType)) {
-            symbolProto.set_aliasto(type->symbol.rawId());
+        if (core::isa_type<core::AliasType>(data->resultType)) {
+            auto type = core::cast_type_nonnull<AliasType>(data->resultType);
+            symbolProto.set_aliasto(type.symbol.rawId());
         }
     }
 
     for (auto pair : data->membersStableOrderSlow(gs)) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-            pair.first == Names::classMethods() || pair.first == Names::Constants::AttachedClass()) {
+            pair.first == Names::mixedInClassMethods() || pair.first == Names::Constants::AttachedClass()) {
             continue;
         }
 
@@ -146,27 +147,19 @@ com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, cons
     switch (lit.literalKind) {
         case LiteralType::LiteralTypeKind::Integer:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::INTEGER);
-            proto.set_integer(lit.value);
+            proto.set_integer(lit.asInteger());
             break;
         case LiteralType::LiteralTypeKind::String:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::STRING);
-            proto.set_string(NameRef(gs, lit.value).show(gs));
+            proto.set_string(lit.asName(gs).show(gs));
             break;
         case LiteralType::LiteralTypeKind::Symbol:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::SYMBOL);
-            proto.set_symbol(NameRef(gs, lit.value).show(gs));
-            break;
-        case LiteralType::LiteralTypeKind::True:
-            proto.set_kind(com::stripe::rubytyper::Type::Literal::TRUE);
-            proto.set_bool_(true);
-            break;
-        case LiteralType::LiteralTypeKind::False:
-            proto.set_kind(com::stripe::rubytyper::Type::Literal::FALSE);
-            proto.set_bool_(false);
+            proto.set_symbol(lit.asName(gs).show(gs));
             break;
         case LiteralType::LiteralTypeKind::Float:
             proto.set_kind(com::stripe::rubytyper::Type::Literal::FLOAT);
-            proto.set_float_(lit.floatval);
+            proto.set_float_(lit.asFloat());
             break;
     }
     return proto;
@@ -175,49 +168,49 @@ com::stripe::rubytyper::Type::Literal Proto::toProto(const GlobalState &gs, cons
 com::stripe::rubytyper::Type Proto::toProto(const GlobalState &gs, const TypePtr &typ) {
     com::stripe::rubytyper::Type proto;
     typecase(
-        typ.get(),
-        [&](const ClassType *t) {
+        typ,
+        [&](const ClassType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::CLASS);
-            proto.set_class_full_name(t->symbol.show(gs));
+            proto.set_class_full_name(t.symbol.data(gs)->show(gs));
         },
-        [&](const AndType *t) {
+        [&](const AndType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::AND);
-            *proto.mutable_and_()->mutable_left() = toProto(gs, t->left);
-            *proto.mutable_and_()->mutable_right() = toProto(gs, t->right);
+            *proto.mutable_and_()->mutable_left() = toProto(gs, t.left);
+            *proto.mutable_and_()->mutable_right() = toProto(gs, t.right);
         },
-        [&](const OrType *t) {
+        [&](const OrType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::OR);
-            *proto.mutable_or_()->mutable_left() = toProto(gs, t->left);
-            *proto.mutable_or_()->mutable_right() = toProto(gs, t->right);
+            *proto.mutable_or_()->mutable_left() = toProto(gs, t.left);
+            *proto.mutable_or_()->mutable_right() = toProto(gs, t.right);
         },
-        [&](const AppliedType *t) {
+        [&](const AppliedType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::APPLIED);
-            proto.mutable_applied()->set_symbol_full_name(t->klass.show(gs));
-            for (auto &a : t->targs) {
+            proto.mutable_applied()->set_symbol_full_name(t.klass.data(gs)->show(gs));
+            for (auto &a : t.targs) {
                 *proto.mutable_applied()->add_type_args() = toProto(gs, a);
             }
         },
-        [&](const ShapeType *t) {
+        [&](const ShapeType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::SHAPE);
-            for (auto &k : t->keys) {
+            for (auto &k : t.keys) {
                 *proto.mutable_shape()->add_keys() = toProto(gs, k);
             }
-            for (auto &v : t->values) {
+            for (auto &v : t.values) {
                 *proto.mutable_shape()->add_values() = toProto(gs, v);
             }
         },
-        [&](const LiteralType *t) {
+        [&](const LiteralType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::LITERAL);
-            *proto.mutable_literal() = toProto(gs, *t);
+            *proto.mutable_literal() = toProto(gs, t);
         },
-        [&](const TupleType *t) {
+        [&](const TupleType &t) {
             proto.set_kind(com::stripe::rubytyper::Type::TUPLE);
-            for (auto &e : t->elems) {
+            for (auto &e : t.elems) {
                 *proto.mutable_tuple()->add_elems() = toProto(gs, e);
             }
         },
         // TODO later: add more types
-        [&](const Type *t) { proto.set_kind(com::stripe::rubytyper::Type::UNKNOWN); });
+        [&](const TypePtr &t) { proto.set_kind(com::stripe::rubytyper::Type::UNKNOWN); });
     return proto;
 }
 

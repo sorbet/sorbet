@@ -698,9 +698,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     end
 
     assert_equal(
-      [
-        :singleton_method_added,
-        :post_hook,
+      %i[
+        singleton_method_added
+        post_hook
       ],
       klass.instance_variable_get(:@called)
     )

@@ -176,7 +176,7 @@ module T::Utils
     def self.get_type_info(prop_type)
       if prop_type.is_a?(T::Types::Union)
         non_nilable_type = T::Utils.unwrap_nilable(prop_type)
-        if non_nilable_type && non_nilable_type.is_a?(T::Types::Simple)
+        if non_nilable_type&.is_a?(T::Types::Simple)
           non_nilable_type = non_nilable_type.raw_type
         end
         TypeInfo.new(true, non_nilable_type)

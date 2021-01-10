@@ -29,6 +29,22 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
     return !(rhs == *this);
 }
 
+bool ClassOrModuleRef::operator==(const ClassOrModuleRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool ClassOrModuleRef::operator!=(const ClassOrModuleRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
+bool MethodRef::operator==(const MethodRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool MethodRef::operator!=(const MethodRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
 vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
@@ -50,7 +66,7 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
     if (typeMembers().empty()) {
         return externalType();
     } else {
-        return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
+        return make_type<AppliedType>(ref(gs).asClassOrModuleRef(), selfTypeArgs(gs));
     }
 }
 
@@ -67,7 +83,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
 
     // note that sometimes resultType is set externally to not be a result of this computation
     // this happens e.g. in case this is a stub class
-    auto ref = this->ref(gs);
+    auto ref = this->ref(gs).asClassOrModuleRef();
     if (typeMembers().empty()) {
         resultType = make_type<ClassType>(ref);
     } else {
@@ -110,7 +126,7 @@ TypePtr Symbol::unsafeComputeExternalType(GlobalState &gs) {
     return resultType;
 }
 
-bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
+bool Symbol::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
     if (isClassOrModuleLinearizationComputed()) {
         for (SymbolRef a : mixins()) {
             if (a == sym) {
@@ -125,7 +141,7 @@ bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
         }
     }
     if (this->superClass().exists()) {
-        return sym == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
+        return SymbolRef(sym) == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
     }
     return false;
 }
@@ -140,7 +156,7 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
         type = SymbolRef::Kind::Method;
         distance = this - gs.methods.data();
     } else if (isField() || isStaticField()) {
-        type = SymbolRef::Kind::Field;
+        type = SymbolRef::Kind::FieldOrStaticField;
         distance = this - gs.fields.data();
     } else if (isTypeMember()) {
         type = SymbolRef::Kind::TypeMember;
@@ -153,6 +169,13 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
     }
 
     return SymbolRef(gs, type, distance);
+}
+
+bool SymbolRef::isField(const GlobalState &gs) const {
+    return isFieldOrStaticField() && data(gs)->isField();
+}
+bool SymbolRef::isStaticField(const GlobalState &gs) const {
+    return isFieldOrStaticField() && data(gs)->isStaticField();
 }
 
 SymbolData SymbolRef::data(GlobalState &gs) const {
@@ -168,7 +191,7 @@ SymbolData SymbolRef::dataAllowingNone(GlobalState &gs) const {
         case SymbolRef::Kind::Method:
             ENFORCE_NO_TIMER(methodIndex() < gs.methods.size());
             return SymbolData(gs.methods[methodIndex()], gs);
-        case SymbolRef::Kind::Field:
+        case SymbolRef::Kind::FieldOrStaticField:
             ENFORCE_NO_TIMER(fieldIndex() < gs.fields.size());
             return SymbolData(gs.fields[fieldIndex()], gs);
         case SymbolRef::Kind::TypeArgument:
@@ -180,29 +203,61 @@ SymbolData SymbolRef::dataAllowingNone(GlobalState &gs) const {
     }
 }
 
-const SymbolData SymbolRef::data(const GlobalState &gs) const {
+ConstSymbolData SymbolRef::data(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(this->exists());
     return dataAllowingNone(gs);
 }
 
-const SymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
+ConstSymbolData SymbolRef::dataAllowingNone(const GlobalState &gs) const {
     switch (kind()) {
         case SymbolRef::Kind::ClassOrModule:
             ENFORCE_NO_TIMER(classOrModuleIndex() < gs.classAndModules.size());
-            return SymbolData(const_cast<Symbol &>(gs.classAndModules[classOrModuleIndex()]), gs);
+            return ConstSymbolData(gs.classAndModules[classOrModuleIndex()], gs);
         case SymbolRef::Kind::Method:
             ENFORCE_NO_TIMER(methodIndex() < gs.methods.size());
-            return SymbolData(const_cast<Symbol &>(gs.methods[methodIndex()]), gs);
-        case SymbolRef::Kind::Field:
+            return ConstSymbolData(gs.methods[methodIndex()], gs);
+        case SymbolRef::Kind::FieldOrStaticField:
             ENFORCE_NO_TIMER(fieldIndex() < gs.fields.size());
-            return SymbolData(const_cast<Symbol &>(gs.fields[fieldIndex()]), gs);
+            return ConstSymbolData(gs.fields[fieldIndex()], gs);
         case SymbolRef::Kind::TypeArgument:
             ENFORCE_NO_TIMER(typeArgumentIndex() < gs.typeArguments.size());
-            return SymbolData(const_cast<Symbol &>(gs.typeArguments[typeArgumentIndex()]), gs);
+            return ConstSymbolData(gs.typeArguments[typeArgumentIndex()], gs);
         case SymbolRef::Kind::TypeMember:
             ENFORCE_NO_TIMER(typeMemberIndex() < gs.typeMembers.size());
-            return SymbolData(const_cast<Symbol &>(gs.typeMembers[typeMemberIndex()]), gs);
+            return ConstSymbolData(gs.typeMembers[typeMemberIndex()], gs);
     }
+}
+
+SymbolData ClassOrModuleRef::dataAllowingNone(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
+    return SymbolData(gs.classAndModules[_id], gs);
+}
+
+SymbolData ClassOrModuleRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    return dataAllowingNone(gs);
+}
+
+ConstSymbolData ClassOrModuleRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    return dataAllowingNone(gs);
+}
+
+ConstSymbolData ClassOrModuleRef::dataAllowingNone(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(_id < gs.classAndModulesUsed());
+    return ConstSymbolData(gs.classAndModules[_id], gs);
+}
+
+SymbolData MethodRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.methodsUsed());
+    return SymbolData(gs.methods[_id], gs);
+}
+
+ConstSymbolData MethodRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.methodsUsed());
+    return ConstSymbolData(gs.methods[_id], gs);
 }
 
 bool SymbolRef::isSynthetic() const {
@@ -211,7 +266,7 @@ bool SymbolRef::isSynthetic() const {
             return classOrModuleIndex() < Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS;
         case Kind::Method:
             return methodIndex() < Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS;
-        case Kind::Field:
+        case Kind::FieldOrStaticField:
             return fieldIndex() < Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS;
         case Kind::TypeArgument:
             return typeArgumentIndex() < Symbols::MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS;
@@ -236,6 +291,14 @@ SymbolRef::SymbolRef(GlobalState const *from, SymbolRef::Kind kind, u4 id)
     ENFORCE_NO_TIMER(id <= ID_MASK);
 }
 
+SymbolRef::SymbolRef(ClassOrModuleRef kls) : SymbolRef(nullptr, SymbolRef::Kind::ClassOrModule, kls.id()) {}
+
+SymbolRef::SymbolRef(MethodRef kls) : SymbolRef(nullptr, SymbolRef::Kind::Method, kls.id()) {}
+
+ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, u4 id) : _id(id) {}
+
+MethodRef::MethodRef(const GlobalState &from, u4 id) : _id(id) {}
+
 string SymbolRef::showRaw(const GlobalState &gs) const {
     return dataAllowingNone(gs)->showRaw(gs);
 }
@@ -249,7 +312,6 @@ string SymbolRef::show(const GlobalState &gs) const {
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner;
     auto klass = owner.data(ctx)->enclosingClass(ctx);
-    ENFORCE(klass.data(ctx)->isClassOrModule());
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(ctx, owner);
@@ -269,6 +331,40 @@ TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConst
         return Types::hashOf(ctx, instantiated);
     }
     return Types::arrayOf(ctx, instantiated);
+}
+
+bool Symbol::addMixin(const GlobalState &gs, ClassOrModuleRef sym) {
+    ENFORCE(isClassOrModule());
+    // Note: Symbols without an explicit declaration may not have class or module set. They default to modules in
+    // GlobalPass.cc. We also do not complain if the mixin is BasicObject.
+    bool isValidMixin = !sym.data(gs)->isClassModuleSet() || sym.data(gs)->isClassOrModuleModule() ||
+                        sym == core::Symbols::BasicObject();
+
+    if (!isClassOrModuleLinearizationComputed()) {
+        // Symbol hasn't been linearized yet, so add symbol unconditionally (order matters, so dupes are OK and
+        // semantically important!)
+        // This is the 99% common case.
+        mixins_.emplace_back(sym);
+    } else {
+        // Symbol has been linearized, but we are trying to add another mixin. This is bad behavior and we shouldn't
+        // allow it, but we currently allow it for the following circumstances:
+        // * To support mixing in items to classes defined in payload, which have already been linearized.
+        // * To support no-op addMixin during incrementalResolver, which shouldn't be introducing new mixins.
+        //   * In other words, we expect the mixin to already be present.
+        //   * incrementalResolver contains an ENFORCE that verifies that symbols haven't received new mixins via
+        //   checking the linearization bit.
+
+        // Ignore superclass (as in GlobalPass.cc's `computeClassLinearization`)
+        if (sym != superClass() && absl::c_find(mixins_, sym) == mixins_.end()) {
+            auto parent = superClass();
+            // Don't include as mixin if it derives from the parent class (as in GlobalPass.cc's `maybeAddMixin`)
+            if (!parent.exists() || !parent.data(gs)->derivesFrom(gs, sym)) {
+                mixins_.emplace_back(sym);
+                unsetClassOrModuleLinearizationComputed();
+            }
+        }
+    }
+    return isValidMixin;
 }
 
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
@@ -366,7 +462,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
         return res;
     }
 
-    if (name.data(gs)->kind == NameKind::UTF8) {
+    if (name.kind() == NameKind::UTF8) {
         auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
         if (sym.symbol.exists()) {
             res.emplace_back(sym);
@@ -389,12 +485,12 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
                 }
             }
         }
-        auto shortName = name.data(gs)->shortName(gs);
+        auto shortName = name.shortName(gs);
         if (!shortName.empty() && std::isupper(shortName.front())) {
             vector<Symbol::FuzzySearchResult> constant_matches = findMemberFuzzyMatchConstant(gs, name, betterThan);
             res.insert(res.end(), constant_matches.begin(), constant_matches.end());
         }
-    } else if (name.data(gs)->kind == NameKind::CONSTANT) {
+    } else if (name.kind() == NameKind::CONSTANT) {
         res = findMemberFuzzyMatchConstant(gs, name, betterThan);
     }
     return res;
@@ -413,7 +509,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
     best.symbol = Symbols::noSymbol();
     best.name = NameRef::noName();
     best.distance = betterThan;
-    auto currentName = name.data(gs)->shortName(gs);
+    auto currentName = name.shortName(gs);
     if (best.distance < 0) {
         best.distance = 1 + (currentName.size() / 2);
     }
@@ -425,8 +521,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             // follow outer scopes
 
             // find scopes that would be considered for search
-            vector<SymbolRef> candidateScopes;
-            candidateScopes.emplace_back(base);
+            vector<ClassOrModuleRef> candidateScopes;
+            candidateScopes.emplace_back(base.asClassOrModuleRef());
             int i = 0;
             // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
             while (i < candidateScopes.size()) {
@@ -445,11 +541,10 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             }
             for (const auto scope : candidateScopes) {
                 for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
-                    if (member.first.data(gs)->kind == NameKind::CONSTANT &&
-                        member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8 &&
-                        member.second.exists()) {
+                    if (member.first.kind() == NameKind::CONSTANT &&
+                        member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
                         auto thisDistance = Levenstein::distance(
-                            currentName, member.first.data(gs)->cnst.original.data(gs)->raw.utf8, best.distance);
+                            currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                         if (thisDistance <= best.distance) {
                             best.distance = thisDistance;
                             best.symbol = member.second;
@@ -473,22 +568,20 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         // find the closest by global dfs.
         auto globalBestDistance = best.distance - 1;
         vector<Symbol::FuzzySearchResult> globalBest;
-        vector<SymbolRef> yetToGoDeeper;
+        vector<ClassOrModuleRef> yetToGoDeeper;
         yetToGoDeeper.emplace_back(Symbols::root());
         while (!yetToGoDeeper.empty()) {
-            const SymbolRef thisIter = yetToGoDeeper.back();
+            const ClassOrModuleRef thisIter = yetToGoDeeper.back();
             yetToGoDeeper.pop_back();
-            ENFORCE(thisIter.data(gs)->isClassOrModule());
             for (auto member : thisIter.data(gs)->membersStableOrderSlow(gs)) {
-                if (member.second.exists() && member.first.exists() &&
-                    member.first.data(gs)->kind == NameKind::CONSTANT &&
-                    member.first.data(gs)->cnst.original.data(gs)->kind == NameKind::UTF8) {
-                    if (member.second.data(gs)->isClassOrModule() &&
+                if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
+                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
+                    if (member.second.isClassOrModule() &&
                         member.second.data(gs)->derivesFrom(gs, core::Symbols::StubModule())) {
                         continue;
                     }
                     auto thisDistance = Levenstein::distance(
-                        currentName, member.first.data(gs)->cnst.original.data(gs)->raw.utf8, best.distance);
+                        currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                     if (thisDistance <= globalBestDistance) {
                         if (thisDistance < globalBestDistance) {
                             globalBest.clear();
@@ -499,8 +592,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                         best.name = member.first;
                         globalBest.emplace_back(best);
                     }
-                    if (member.second.data(gs)->isClassOrModule()) {
-                        yetToGoDeeper.emplace_back(member.second);
+                    if (member.second.isClassOrModule()) {
+                        yetToGoDeeper.emplace_back(member.second.asClassOrModuleRef());
                     }
                 }
             }
@@ -518,19 +611,18 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
     result.symbol = Symbols::noSymbol();
     result.name = NameRef::noName();
     result.distance = betterThan;
-    ENFORCE(name.data(gs)->kind == NameKind::UTF8);
 
-    auto currentName = name.data(gs)->raw.utf8;
+    auto currentName = name.dataUtf8(gs)->utf8;
     if (result.distance < 0) {
         result.distance = 1 + (currentName.size() / 2);
     }
 
     for (auto pair : members()) {
         auto thisName = pair.first;
-        if (thisName.data(gs)->kind != NameKind::UTF8) {
+        if (thisName.kind() != NameKind::UTF8) {
             continue;
         }
-        auto utf8 = thisName.data(gs)->raw.utf8;
+        auto utf8 = thisName.dataUtf8(gs)->utf8;
         int thisDistance = Levenstein::distance(currentName, utf8, result.distance);
         if (thisDistance < result.distance ||
             (thisDistance == result.distance && result.symbol._id > pair.second._id)) {
@@ -546,7 +638,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
         auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
-            ENFORCE(subResult.name.data(gs)->kind == NameKind::UTF8);
+            ENFORCE(subResult.name.kind() == NameKind::UTF8);
             result = subResult;
         }
     }
@@ -554,7 +646,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
         auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
-            ENFORCE(subResult.name.data(gs)->kind == NameKind::UTF8);
+            ENFORCE(subResult.name.kind() == NameKind::UTF8);
             result = subResult;
         }
     }
@@ -609,7 +701,7 @@ bool Symbol::isPrintable(const GlobalState &gs) const {
 
     for (auto childPair : this->members()) {
         if (childPair.first == Names::singleton() || childPair.first == Names::attached() ||
-            childPair.first == Names::classMethods()) {
+            childPair.first == Names::mixedInClassMethods()) {
             continue;
         }
 
@@ -621,11 +713,7 @@ bool Symbol::isPrintable(const GlobalState &gs) const {
     return false;
 }
 
-string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
-    fmt::memory_buffer buf;
-
-    printTabs(buf, tabs);
-
+string_view Symbol::showKind(const GlobalState &gs) const {
     string_view type = "unknown"sv;
     if (this->isClassOrModule()) {
         if (this->isClassOrModuleClass()) {
@@ -649,6 +737,16 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         type = "type-argument"sv;
     }
 
+    return type;
+}
+
+string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    string_view type = this->showKind(gs);
+
     string_view variance = ""sv;
 
     if (this->isTypeArgument() || this->isTypeMember()) {
@@ -667,10 +765,32 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
 
     if (this->isClassOrModule() || this->isMethod()) {
         if (this->isMethod()) {
+            auto methodFlags = InlinedVector<string, 3>{};
+
             if (this->isMethodPrivate()) {
-                fmt::format_to(buf, " : private");
+                methodFlags.emplace_back("private");
             } else if (this->isMethodProtected()) {
-                fmt::format_to(buf, " : protected");
+                methodFlags.emplace_back("protected");
+            }
+
+            if (this->isAbstract()) {
+                methodFlags.emplace_back("abstract");
+            }
+            if (this->isOverridable()) {
+                methodFlags.emplace_back("overridable");
+            }
+            if (this->isOverride()) {
+                methodFlags.emplace_back("override");
+            }
+            if (this->isIncompatibleOverride()) {
+                methodFlags.emplace_back("allow_incompatible");
+            }
+            if (this->isFinalMethod()) {
+                methodFlags.emplace_back("final");
+            }
+
+            if (!methodFlags.empty()) {
+                fmt::format_to(buf, " : {}", fmt::map_join(methodFlags, "|", [](const auto &flag) { return flag; }));
             }
         }
 
@@ -701,13 +821,19 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
                                return symb.argumentName(gs);
                            }));
         }
+
+        if (this->isClassOrModule() && this->isClassOrModulePrivate()) {
+            fmt::format_to(buf, " : private");
+        }
+    } else if (this->isStaticField() && this->isStaticFieldPrivate()) {
+        fmt::format_to(buf, " : private");
     }
     if (this->resultType && !isClassOrModule()) {
         string resultType;
         if (showRaw) {
-            resultType = absl::StrReplaceAll(this->resultType->toStringWithTabs(gs, tabs), {{"\n", " "}});
+            resultType = absl::StrReplaceAll(this->resultType.toStringWithTabs(gs, tabs), {{"\n", " "}});
         } else {
-            resultType = this->resultType->show(gs);
+            resultType = this->resultType.show(gs);
         }
         fmt::format_to(buf, " -> {}", resultType);
     }
@@ -746,7 +872,7 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
         }
 
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-            pair.first == Names::classMethods()) {
+            pair.first == Names::mixedInClassMethods()) {
             continue;
         }
 
@@ -795,7 +921,7 @@ string ArgInfo::toString(const GlobalState &gs) const {
     }
     fmt::format_to(buf, "<{}>", fmt::join(flagTexts, ", "));
     if (this->type) {
-        fmt::format_to(buf, " -> {}", this->type->show(gs));
+        fmt::format_to(buf, " -> {}", this->type.show(gs));
     }
 
     fmt::format_to(buf, " @ {}", loc.showRaw(gs));
@@ -821,7 +947,7 @@ string Symbol::show(const GlobalState &gs) const {
     }
 
     if (!this->owner.exists() || this->owner == Symbols::root()) {
-        return this->name.data(gs)->show(gs);
+        return this->name.show(gs);
     }
 
     if (this->owner == core::Symbols::PackageRegistry()) {
@@ -840,39 +966,36 @@ string Symbol::show(const GlobalState &gs) const {
         return fmt::format("T.attached_class (of {})", attached.data(gs)->show(gs));
     }
 
-    if (this->isMethod() && this->owner.data(gs)->isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
-        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs),
-                           this->name.data(gs)->show(gs));
+    if (this->isMethod() && this->owner.isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
+        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs), this->name.show(gs));
     }
 
     auto needsColonColon = this->isClassOrModule() || this->isStaticField() || this->isTypeMember();
 
-    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#",
-                       this->name.data(gs)->show(gs));
+    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#", this->name.show(gs));
 }
 
 string ArgInfo::argumentName(const GlobalState &gs) const {
     if (flags.isKeyword) {
-        return (string)name.data(gs)->shortName(gs);
+        return (string)name.shortName(gs);
     } else {
         // positional arg
         if (loc.exists()) {
             return loc.source(gs);
         } else {
-            return (string)name.data(gs)->shortName(gs);
+            return (string)name.shortName(gs);
         }
     }
 }
 
 namespace {
 bool isSingletonName(const GlobalState &gs, core::NameRef name) {
-    return name.data(gs)->kind == NameKind::UNIQUE && name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
+    return name.kind() == NameKind::UNIQUE && name.dataUnique(gs)->uniqueNameKind == UniqueNameKind::Singleton;
 }
 
 bool isMangledSingletonName(const GlobalState &gs, core::NameRef name) {
-    return name.data(gs)->kind == NameKind::UNIQUE &&
-           name.data(gs)->unique.uniqueNameKind == UniqueNameKind::MangleRename &&
-           isSingletonName(gs, name.data(gs)->unique.original);
+    return name.kind() == NameKind::UNIQUE && name.dataUnique(gs)->uniqueNameKind == UniqueNameKind::MangleRename &&
+           isSingletonName(gs, name.dataUnique(gs)->original);
 }
 } // namespace
 
@@ -888,7 +1011,7 @@ bool Symbol::isSingletonClass(const GlobalState &gs) const {
     return isSingleton;
 }
 
-SymbolRef Symbol::singletonClass(GlobalState &gs) {
+ClassOrModuleRef Symbol::singletonClass(GlobalState &gs) {
     auto singleton = lookupSingletonClass(gs);
     if (singleton.exists()) {
         return singleton;
@@ -899,7 +1022,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     auto selfLoc = this->loc();
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
-    singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
+    singleton = gs.enterClassSymbol(this->loc(), this->owner.asClassOrModuleRef(), singletonName);
     SymbolData singletonInfo = singleton.data(gs);
 
     prodCounterInc("types.input.singleton_classes.total");
@@ -919,30 +1042,30 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     return singleton;
 }
 
-SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
+ClassOrModuleRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModule());
-    ENFORCE(this->name.data(gs)->isClassName(gs));
+    ENFORCE(this->name.isClassName(gs));
 
     SymbolRef selfRef = this->ref(gs);
     if (selfRef == Symbols::untyped()) {
         return Symbols::untyped();
     }
 
-    return findMember(gs, Names::singleton());
+    return findMember(gs, Names::singleton()).asClassOrModuleRef();
 }
 
-SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
+ClassOrModuleRef Symbol::attachedClass(const GlobalState &gs) const {
     ENFORCE(this->isClassOrModule());
     if (this->ref(gs) == Symbols::untyped()) {
         return Symbols::untyped();
     }
 
     SymbolRef singleton = findMember(gs, Names::attached());
-    return singleton;
+    return singleton.asClassOrModuleRef();
 }
 
-SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
-    auto classSymbol = this->ref(gs);
+ClassOrModuleRef Symbol::topAttachedClass(const GlobalState &gs) const {
+    ClassOrModuleRef classSymbol = this->ref(gs).asClassOrModuleRef();
 
     while (true) {
         auto attachedClass = classSymbol.data(gs)->attachedClass(gs);
@@ -955,10 +1078,12 @@ SymbolRef Symbol::topAttachedClass(const GlobalState &gs) const {
     return classSymbol;
 }
 
-void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
+void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass) {
     ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(ctx));
     ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
-    ENFORCE(subclass.data(ctx)->isClassOrModule(), "Sealed subclass {} must be class", subclass.show(ctx));
+
+    // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
+    auto selfRef = this->ref(ctx);
 
     // We record sealed subclasses on a magical method called core::Names::sealedSubclasses(). This is so we don't
     // bloat the `sizeof class Symbol` with an extra field that most class sybmols will never use.
@@ -966,7 +1091,8 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     // that didn't require running with the help of Stripe's autoloader, specifically because we might want to allow
     // subclassing a sealed class across multiple files, not just one file.
     auto classOfSubclass = subclass.data(ctx)->singletonClass(ctx);
-    auto sealedSubclasses = this->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
+    auto sealedSubclasses =
+        selfRef.data(ctx)->lookupSingletonClass(ctx).data(ctx)->findMember(ctx, core::Names::sealedSubclasses());
 
     auto data = sealedSubclasses.data(ctx);
     ENFORCE(data->resultType != nullptr, "Should have been populated in namer");
@@ -978,15 +1104,14 @@ void Symbol::recordSealedSubclass(MutableContext ctx, SymbolRef subclass) {
     const TypePtr *iter = &currentClasses;
     const OrType *orT = nullptr;
     while ((orT = cast_type<OrType>(*iter))) {
-        auto right = cast_type<ClassType>(orT->right);
+        auto right = cast_type_nonnull<ClassType>(orT->right);
         ENFORCE(left);
-        if (right->symbol == classOfSubclass) {
+        if (right.symbol == classOfSubclass) {
             return;
         }
         iter = &orT->left;
     }
-    ENFORCE(isa_type<ClassType>(*iter));
-    if (cast_type<ClassType>(*iter)->symbol == classOfSubclass) {
+    if (cast_type_nonnull<ClassType>(*iter).symbol == classOfSubclass) {
         return;
     }
     if (currentClasses != core::Types::bottom()) {
@@ -1023,16 +1148,17 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 
     auto result = Types::bottom();
     while (auto orType = cast_type<OrType>(currentClasses)) {
-        auto classType = cast_type<ClassType>(orType->right);
-        ENFORCE(classType != nullptr, "Something in sealedSubclasses that's not a ClassType");
-        auto subclass = classType->symbol.data(gs)->attachedClass(gs);
+        ENFORCE(isa_type<ClassType>(orType->right), "Something in sealedSubclasses that's not a ClassType");
+        auto classType = cast_type_nonnull<ClassType>(orType->right);
+        auto subclass = classType.symbol.data(gs)->attachedClass(gs);
         ENFORCE(subclass.exists());
         result = Types::any(gs, make_type<ClassType>(subclass), result);
         currentClasses = orType->left;
     }
-    auto lastClassType = cast_type<ClassType>(currentClasses);
-    ENFORCE(lastClassType != nullptr, "Last element of sealedSubclasses must be ClassType");
-    auto subclass = lastClassType->symbol.data(gs)->attachedClass(gs);
+
+    ENFORCE(isa_type<ClassType>(currentClasses), "Last element of sealedSubclasses must be ClassType");
+    auto lastClassType = cast_type_nonnull<ClassType>(currentClasses);
+    auto subclass = lastClassType.symbol.data(gs)->attachedClass(gs);
     ENFORCE(subclass.exists());
     result = Types::any(gs, make_type<ClassType>(subclass), result);
 
@@ -1040,16 +1166,17 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 }
 
 SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
-    if (auto alias = cast_type<AliasType>(resultType)) {
+    if (isa_type<AliasType>(resultType)) {
+        auto alias = cast_type_nonnull<AliasType>(resultType);
         if (depthLimit == 0) {
             if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
                 e.setHeader("Too many alias expansions for symbol {}, the alias is either too long or infinite. Next "
                             "expansion would have been to {}",
-                            showFullName(gs), alias->symbol.data(gs)->showFullName(gs));
+                            showFullName(gs), alias.symbol.data(gs)->showFullName(gs));
             }
             return def;
         }
-        return alias->symbol.data(gs)->dealiasWithDefault(gs, depthLimit - 1, def);
+        return alias.symbol.data(gs)->dealiasWithDefault(gs, depthLimit - 1, def);
     }
     return this->ref(gs);
 }
@@ -1103,7 +1230,7 @@ Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
     result.flags = this->flags;
     result.mixins_ = this->mixins_;
     result.resultType = this->resultType;
-    result.name = NameRef(to, this->name.id());
+    result.name = NameRef(to, this->name);
     result.locs_ = this->locs_;
     result.typeParams = this->typeParams;
     if (keepGsId) {
@@ -1111,13 +1238,13 @@ Symbol Symbol::deepCopy(const GlobalState &to, bool keepGsId) const {
     } else {
         result.members_.reserve(this->members().size());
         for (auto &mem : this->members_) {
-            result.members_[NameRef(to, mem.first.id())] = mem.second;
+            result.members_[NameRef(to, mem.first)] = mem.second;
         }
     }
     result.arguments_.reserve(this->arguments_.size());
     for (auto &mem : this->arguments_) {
         auto &store = result.arguments_.emplace_back(mem.deepCopy());
-        store.name = NameRef(to, mem.name.id());
+        store.name = NameRef(to, mem.name);
     }
     result.superClassOrRebind = this->superClassOrRebind;
     result.intrinsic = this->intrinsic;
@@ -1144,26 +1271,29 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         SymbolRef current2;
         switch (current.kind()) {
             case SymbolRef::Kind::ClassOrModule:
-                current2 = const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner, this->name);
+                current2 = const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner.asClassOrModuleRef(),
+                                                                          this->name);
                 break;
             case SymbolRef::Kind::Method:
-                current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(this->loc(), this->owner, this->name);
+                current2 = const_cast<GlobalState &>(gs).enterMethodSymbol(
+                    this->loc(), this->owner.asClassOrModuleRef(), this->name);
                 break;
-            case SymbolRef::Kind::Field:
+            case SymbolRef::Kind::FieldOrStaticField:
                 if (isField()) {
-                    current2 = const_cast<GlobalState &>(gs).enterFieldSymbol(this->loc(), this->owner, this->name);
+                    current2 = const_cast<GlobalState &>(gs).enterFieldSymbol(
+                        this->loc(), this->owner.asClassOrModuleRef(), this->name);
                 } else {
-                    current2 =
-                        const_cast<GlobalState &>(gs).enterStaticFieldSymbol(this->loc(), this->owner, this->name);
+                    current2 = const_cast<GlobalState &>(gs).enterStaticFieldSymbol(
+                        this->loc(), this->owner.asClassOrModuleRef(), this->name);
                 }
                 break;
             case SymbolRef::Kind::TypeArgument:
-                current2 = const_cast<GlobalState &>(gs).enterTypeArgument(this->loc(), this->owner, this->name,
-                                                                           this->variance());
+                current2 = const_cast<GlobalState &>(gs).enterTypeArgument(this->loc(), this->owner.asMethodRef(),
+                                                                           this->name, this->variance());
                 break;
             case SymbolRef::Kind::TypeMember:
-                current2 = const_cast<GlobalState &>(gs).enterTypeMember(this->loc(), this->owner, this->name,
-                                                                         this->variance());
+                current2 = const_cast<GlobalState &>(gs).enterTypeMember(this->loc(), this->owner.asClassOrModuleRef(),
+                                                                         this->name, this->variance());
                 break;
         }
 
@@ -1185,42 +1315,30 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
 }
 
-SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
-    if (isMethod()) {
-        return ref(gs);
-    }
-    SymbolRef owner = this->owner;
-    while (owner != Symbols::root() && !owner.data(gs)->isMethod()) {
-        ENFORCE(owner.exists(), "non-existing owner in enclosingMethod");
-        owner = owner.data(gs)->owner;
-    }
-    return owner;
-}
-
-SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
+ClassOrModuleRef Symbol::enclosingClass(const GlobalState &gs) const {
     SymbolRef owner = ref(gs);
-    while (!owner.data(gs)->isClassOrModule()) {
+    while (!owner.isClassOrModule()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
         owner = owner.data(gs)->owner;
     }
-    return owner;
+    return owner.asClassOrModuleRef();
 }
 
 u4 Symbol::hash(const GlobalState &gs) const {
-    u4 result = _hash(name.data(gs)->shortName(gs));
-    result = mix(result, !this->resultType ? 0 : this->resultType->hash(gs));
+    u4 result = _hash(name.shortName(gs));
+    result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
     // argumentsOrMixins, typeParams, typeAliases
     for (auto e : membersStableOrderSlow(gs)) {
         if (e.second.exists() && !e.second.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.second.data(gs)->name.data(gs)->shortName(gs)));
+            result = mix(result, _hash(e.second.data(gs)->name.shortName(gs)));
         }
     }
     for (const auto &e : mixins_) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
     for (const auto &arg : arguments_) {
@@ -1229,12 +1347,12 @@ u4 Symbol::hash(const GlobalState &gs) const {
         if (!type) {
             type = Types::untypedUntracked();
         }
-        result = mix(result, type->hash(gs));
-        result = mix(result, _hash(arg.name.data(gs)->shortName(gs)));
+        result = mix(result, type.hash(gs));
+        result = mix(result, _hash(arg.name.shortName(gs)));
     }
     for (const auto &e : typeParams) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.data(gs)->name.data(gs)->shortName(gs)));
+            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
 
@@ -1244,7 +1362,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
 u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     ENFORCE(isMethod());
 
-    u4 result = _hash(name.data(gs)->shortName(gs));
+    u4 result = _hash(name.shortName(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
@@ -1257,7 +1375,7 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
         // This is a synthetic method that encodes the superclasses of its owning class in its return type.
         // If the return type changes, we must take the slow path.
         ENFORCE(resultType);
-        result = mix(result, resultType->hash(gs));
+        result = mix(result, resultType.hash(gs));
     }
 
     return result;
@@ -1270,7 +1388,7 @@ vector<u4> Symbol::methodArgumentHash(const GlobalState &gs) const {
         u4 arg = 0;
         // Changing name of keyword arg is a shape change.
         if (e.flags.isKeyword) {
-            arg = mix(arg, _hash(e.name.data(gs)->shortName(gs)));
+            arg = mix(arg, _hash(e.name.shortName(gs)));
         }
         // Changing an argument from e.g. keyword to position-based is a shape change.
         result.push_back(mix(arg, e.flags.toU1()));
@@ -1282,7 +1400,7 @@ bool Symbol::ignoreInHashing(const GlobalState &gs) const {
     if (isClassOrModule()) {
         return superClass() == core::Symbols::StubModule();
     } else if (isMethod()) {
-        return name.data(gs)->kind == NameKind::UNIQUE && name.data(gs)->unique.original == core::Names::staticInit();
+        return name.kind() == NameKind::UNIQUE && name.dataUnique(gs)->original == core::Names::staticInit();
     }
     return false;
 }
@@ -1337,20 +1455,20 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
         result.emplace_back(e);
     }
     fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
-        auto lhsShort = lhs.first.data(gs)->shortName(gs);
-        auto rhsShort = rhs.first.data(gs)->shortName(gs);
+        auto lhsShort = lhs.first.shortName(gs);
+        auto rhsShort = rhs.first.shortName(gs);
         auto compareShort = lhsShort.compare(rhsShort);
         if (compareShort != 0) {
             return compareShort < 0;
         }
-        auto lhsRaw = lhs.first.data(gs)->showRaw(gs);
-        auto rhsRaw = rhs.first.data(gs)->showRaw(gs);
+        auto lhsRaw = lhs.first.showRaw(gs);
+        auto rhsRaw = rhs.first.showRaw(gs);
         auto compareRaw = lhsRaw.compare(rhsRaw);
         if (compareRaw != 0) {
             return compareRaw < 0;
         }
-        auto lhsSym = lhs.second.data(gs)->showRaw(gs);
-        auto rhsSym = rhs.second.data(gs)->showRaw(gs);
+        auto lhsSym = lhs.second.showRaw(gs);
+        auto rhsSym = rhs.second.showRaw(gs);
         auto compareSym = lhsSym.compare(rhsSym);
         if (compareSym != 0) {
             return compareSym < 0;
@@ -1361,7 +1479,9 @@ vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const Globa
     return result;
 }
 
-SymbolData::SymbolData(Symbol &ref, const GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
+SymbolData::SymbolData(Symbol &ref, GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
+
+ConstSymbolData::ConstSymbolData(const Symbol &ref, const GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}
 
 SymbolDataDebugCheck::SymbolDataDebugCheck(const GlobalState &gs)
     : gs(gs), symbolCountAtCreation(gs.symbolsUsedTotal()) {}
@@ -1376,6 +1496,11 @@ Symbol *SymbolData::operator->() {
 };
 
 const Symbol *SymbolData::operator->() const {
+    runDebugOnlyCheck();
+    return &symbol;
+};
+
+const Symbol *ConstSymbolData::operator->() const {
     runDebugOnlyCheck();
     return &symbol;
 };

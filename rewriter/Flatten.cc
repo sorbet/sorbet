@@ -211,7 +211,7 @@ class FlattenWalk {
     };
 
     // extract all the methods from the current queue and put them at the end of the class's current body
-    ast::ClassDef::RHS_store addClassDefMethods(core::Context ctx, ast::ClassDef::RHS_store rhs, core::Loc loc) {
+    ast::ClassDef::RHS_store addClassDefMethods(core::Context ctx, ast::ClassDef::RHS_store rhs, core::LocOffsets loc) {
         auto currentMethodDefs = popCurMethodDefs();
         // this adds all the methods at the appropriate 'staticness' level
 
@@ -279,7 +279,7 @@ class FlattenWalk {
 
         // generate the nested `class << self` blocks as needed and add them to the class
         for (auto &body : nestedClassBodies) {
-            auto classDef = ast::MK::Class(loc.offsets(), loc,
+            auto classDef = ast::MK::Class(loc, loc,
                                            ast::make_tree<ast::UnresolvedIdent>(core::LocOffsets::none(),
                                                                                 ast::UnresolvedIdent::Kind::Class,
                                                                                 core::Names::singleton()),
@@ -308,8 +308,7 @@ public:
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-        classDef.rhs =
-            addClassDefMethods(ctx, std::move(classDef.rhs), core::Loc(classDef.declLoc.file(), classDef.loc));
+        classDef.rhs = addClassDefMethods(ctx, std::move(classDef.rhs), classDef.loc);
         auto &methods = curMethodSet();
         if (curMethodSet().stack.empty()) {
             return tree;
@@ -371,8 +370,8 @@ public:
 
         methods.addExpr(*md, move(tree));
 
-        return ast::MK::Send2(loc.offsets(), ast::MK::Constant(loc.offsets(), core::Symbols::Sorbet_Private_Static()),
-                              keepName, ast::MK::Self(loc.offsets()), ast::MK::Symbol(loc.offsets(), name));
+        return ast::MK::Send2(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,
+                              ast::MK::Self(loc), ast::MK::Symbol(loc, name));
     };
 
     ast::TreePtr addTopLevelMethods(core::Context ctx, ast::TreePtr tree) {

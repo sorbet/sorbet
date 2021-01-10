@@ -110,8 +110,8 @@ TEST_CASE("Substitute") { // NOLINT
     GlobalState gs2(errorQueue);
     gs2.initEmpty();
 
-    NameRef foo1, bar1, other1;
-    NameRef foo2, bar2;
+    NameRef foo1, bar1, other1, cnstBaz1, uniqueBaz1, otherCnstBart1;
+    NameRef foo2, bar2, cnstBaz2, uniqueBaz2;
     {
         UnfreezeNameTable thaw1(gs1);
         UnfreezeNameTable thaw2(gs2);
@@ -119,20 +119,27 @@ TEST_CASE("Substitute") { // NOLINT
         foo1 = gs1.enterNameUTF8("foo");
         bar1 = gs1.enterNameUTF8("bar");
         other1 = gs1.enterNameUTF8("other");
+        cnstBaz1 = gs1.enterNameConstant("Baz");
+        uniqueBaz1 = gs1.freshNameUnique(UniqueNameKind::Namer, cnstBaz1, 1);
+        otherCnstBart1 = gs1.enterNameConstant("Bart");
 
         foo2 = gs2.enterNameUTF8("foo");
+        bar2 = gs2.enterNameUTF8("bar");
+        cnstBaz2 = gs2.enterNameConstant("Baz");
+        uniqueBaz2 = gs2.freshNameUnique(UniqueNameKind::Namer, cnstBaz1, 1);
         gs1.enterNameUTF8("name");
-        bar2 = gs1.enterNameUTF8("bar");
     }
 
     GlobalSubstitution subst(gs1, gs2);
 
     CHECK_EQ(subst.substitute(foo1), foo2);
     CHECK_EQ(subst.substitute(bar1), bar2);
+    CHECK_EQ(subst.substitute(uniqueBaz1), uniqueBaz2);
+    CHECK_EQ(subst.substitute(cnstBaz1), cnstBaz2);
 
     auto other2 = subst.substitute(other1);
     REQUIRE(other2.exists());
-    REQUIRE(other2.data(gs2)->kind == NameKind::UTF8);
+    REQUIRE(other2.kind() == NameKind::UTF8);
     REQUIRE_EQ("<U other>", other2.showRaw(gs2));
 }
 
@@ -140,26 +147,46 @@ TEST_CASE("Substitute") { // NOLINT
 class TypePtrTestHelper {
 public:
     static std::atomic<u4> *counter(const TypePtr &ptr) {
+        CHECK(ptr.containsPtr());
         return ptr.counter;
+    }
+
+    static u8 value(const TypePtr &ptr) {
+        CHECK(!ptr.containsPtr());
+        return ptr.value;
+    }
+
+    static u4 inlinedValue(const TypePtr &ptr) {
+        CHECK(!ptr.containsPtr());
+        return ptr.inlinedValue();
     }
 
     static TypePtr::tagged_storage store(const TypePtr &ptr) {
         return ptr.store;
     }
 
-    static TypePtr create(TypePtr::Tag tag, Type *type) {
+    static void *get(const TypePtr &ptr) {
+        CHECK(ptr.containsPtr());
+        return ptr.get();
+    }
+
+    static TypePtr create(TypePtr::Tag tag, void *type) {
         return TypePtr(tag, type);
+    }
+
+    static TypePtr createInlined(TypePtr::Tag tag, u4 inlinedValue, u8 value) {
+        return TypePtr(tag, inlinedValue, value);
     }
 };
 
 TEST_SUITE("TypePtr") {
     TEST_CASE("Does not allocate a counter for null type") {
         TypePtr ptr;
-        CHECK_EQ(nullptr, TypePtrTestHelper::counter(ptr));
+        CHECK_EQ(0, TypePtrTestHelper::value(ptr));
     }
 
     TEST_CASE("Properly manages counter") {
-        auto ptr = make_type<ClassType>(Symbols::untyped());
+        auto ptr = make_type<UnresolvedClassType>(Symbols::untyped(), vector<NameRef>{});
         auto counter = TypePtrTestHelper::counter(ptr);
         REQUIRE_NE(nullptr, counter);
         CHECK_EQ(1, counter->load());
@@ -185,7 +212,7 @@ TEST_SUITE("TypePtr") {
             CHECK_EQ(1, counter->load());
 
             // Moving should clear counter from ptrCopy and make it an empty TypePtr
-            CHECK_EQ(nullptr, TypePtrTestHelper::counter(ptrCopy));
+            CHECK_EQ(0, TypePtrTestHelper::value(ptrCopy));
             CHECK_EQ(0, TypePtrTestHelper::store(ptrCopy));
             CHECK_EQ(TypePtr(), ptrCopy);
 
@@ -200,18 +227,36 @@ TEST_SUITE("TypePtr") {
     TEST_CASE("Tagging works as expected") {
         // This tag is < 8. Will be deleted / managed by TypePtr.
         {
-            auto rawPtr = new ClassType(Symbols::untyped());
-            auto ptr = TypePtrTestHelper::create(TypePtr::Tag::ClassType, rawPtr);
-            CHECK_EQ(TypePtr::Tag::ClassType, ptr.tag());
-            CHECK_EQ(rawPtr, ptr.get());
+            auto rawPtr = new SelfType();
+            auto ptr = TypePtrTestHelper::create(TypePtr::Tag::SelfType, rawPtr);
+            CHECK_EQ(TypePtr::Tag::SelfType, ptr.tag());
+            CHECK_EQ(rawPtr, TypePtrTestHelper::get(ptr));
         }
 
         // This tag is > 8
         {
-            auto rawPtr = new BlamedUntyped(Symbols::untyped());
-            auto ptr = TypePtrTestHelper::create(TypePtr::Tag::BlamedUntyped, rawPtr);
-            CHECK_EQ(TypePtr::Tag::BlamedUntyped, ptr.tag());
-            CHECK_EQ(rawPtr, ptr.get());
+            auto rawPtr = new UnresolvedClassType(Symbols::untyped(), {});
+            auto ptr = TypePtrTestHelper::create(TypePtr::Tag::UnresolvedClassType, rawPtr);
+            CHECK_EQ(TypePtr::Tag::UnresolvedClassType, ptr.tag());
+            CHECK_EQ(rawPtr, TypePtrTestHelper::get(ptr));
+        }
+    }
+
+    TEST_CASE("Supports inlined values") {
+        // Let's try edge cases.
+        std::list<pair<u4, u8>> valuesArray = {
+            {0, 0},
+            {1, 1},
+            {0xFFFFFFFF, 0xFFFFFFFFFFFFFFFF},
+        };
+
+        for (auto values : valuesArray) {
+            SUBCASE(fmt::format("{}, {}", values.first, values.second).c_str()) {
+                auto type = TypePtrTestHelper::createInlined(TypePtr::Tag::SelfType, values.first, values.second);
+                CHECK_EQ(TypePtr::Tag::SelfType, type.tag());
+                CHECK_EQ(values.first, TypePtrTestHelper::inlinedValue(type));
+                CHECK_EQ(values.second, TypePtrTestHelper::value(type));
+            }
         }
     }
 }

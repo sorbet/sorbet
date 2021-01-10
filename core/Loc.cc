@@ -230,7 +230,7 @@ string Loc::showRaw(const GlobalState &gs) const {
     return fmt::format("Loc {{file={} start={}:{} end={}:{}}}", path, start.line, start.column, end.line, end.column);
 }
 
-string Loc::filePosToString(const GlobalState &gs) const {
+string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
     stringstream buf;
     if (!file().exists()) {
         buf << "???";
@@ -251,7 +251,16 @@ string Loc::filePosToString(const GlobalState &gs) const {
                 buf << ":";
             }
             buf << pos.first.line;
-            // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
+            if (showFull) {
+                buf << ":";
+                buf << pos.first.column;
+                buf << "-";
+                buf << pos.second.line;
+                buf << ":";
+                buf << pos.second.column;
+            } else {
+                // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
+            }
         }
     }
     return buf.str();

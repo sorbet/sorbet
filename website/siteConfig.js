@@ -46,6 +46,11 @@ const users = [
     infoLink: 'https://www.kickstarter.com/',
   },
   {
+    caption: 'Marketplacer',
+    image: 'img/marketplacer-logo.png',
+    infoLink: 'https://marketplacer.com/',
+  },
+  {
     caption: 'Vonage',
     image: 'img/vonage-logo.png',
     infoLink: 'https://www.vonage.com/',

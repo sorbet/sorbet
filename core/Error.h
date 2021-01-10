@@ -46,11 +46,27 @@ public:
 struct ErrorLine {
     const Loc loc;
     const std::string formattedMessage;
-    ErrorLine(Loc loc, std::string formattedMessage) : loc(loc), formattedMessage(move(formattedMessage)){};
+    enum class LocDisplay {
+        Shown,
+        Hidden,
+    };
+    LocDisplay displayLoc;
 
+    ErrorLine(Loc loc, std::string formattedMessage, LocDisplay displayLoc = LocDisplay::Shown)
+        : loc(loc), formattedMessage(move(formattedMessage)), displayLoc(displayLoc){};
+
+    // Use this (instead of the constructor) if you want `{}` to mean "turn this cyan if should use
+    // colors, or just backticks otherwise".
     template <typename... Args> static ErrorLine from(Loc loc, std::string_view msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg, args...);
         return ErrorLine(loc, move(formatted));
+    }
+
+    // You should ALMOST ALWAYS prefer the variant above that takes a Loc.
+    // The best error messages show context associated with locations.
+    template <typename... Args> static ErrorLine fromWithoutLoc(std::string_view msg, const Args &... args) {
+        std::string formatted = ErrorColors::format(msg, args...);
+        return ErrorLine(core::Loc::none(), move(formatted), LocDisplay::Hidden);
     }
     std::string toString(const GlobalState &gs, bool color = true) const;
 };
@@ -121,7 +137,9 @@ class ErrorBuilder {
 
 public:
     ErrorBuilder(const ErrorBuilder &) = delete;
-    ErrorBuilder(ErrorBuilder &&) = default;
+    // If you undelete this, you will need to make sure the moved ErrorBuilder is marked as 'DidBuild' so Sorbet does
+    // not report an empty error.
+    ErrorBuilder(ErrorBuilder &&) = delete;
     ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what);
     ~ErrorBuilder();
 
@@ -133,6 +151,9 @@ public:
     template <typename... Args> void addErrorLine(Loc loc, ConstExprStr msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg.str, args...);
         addErrorSection(ErrorSection({ErrorLine(loc, formatted)}));
+    }
+    template <typename... Args> void addErrorNote(ConstExprStr msg, const Args &... args) {
+        addErrorSection(ErrorSection("Note:", {ErrorLine::fromWithoutLoc(msg.str, args...)}));
     }
 
     template <typename... Args> void setHeader(ConstExprStr msg, const Args &... args) {

@@ -141,6 +141,18 @@ module GC
   # ```
   def self.stress=(_); end
 
+  # Verify compaction reference consistency.
+  #
+  # This method is implementation specific. During compaction, objects that
+  # were moved are replaced with T_MOVED objects. No object should have a
+  # reference to a T_MOVED object after compaction.
+  #
+  # This function doubles the heap to ensure room to move all objects, compacts
+  # the heap to make sure everything moves, updates all references, then
+  # performs a full GC. If any object contains a reference to a T_MOVED object,
+  # that object should be pushed on the mark stack, and will make a SEGV.
+  def self.verify_compaction_references; end
+
   # Verify internal consistency.
   #
   # This method is implementation specific. Now this method checks generational

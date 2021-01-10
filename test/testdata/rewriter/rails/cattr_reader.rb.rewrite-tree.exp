@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def both<<C <todo sym>>>(&<blk>)
+    def both<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.both<<C <todo sym>>>(&<blk>)
+    def self.both<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def foo<<C <todo sym>>>(&<blk>)
+    def foo<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -28,7 +28,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.foo<<C <todo sym>>>(&<blk>)
+    def self.foo<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -36,7 +36,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.no_instance<<C <todo sym>>>(&<blk>)
+    def self.no_instance<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -44,7 +44,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.bar<<C <todo sym>>>(&<blk>)
+    def self.bar<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -52,7 +52,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::T.untyped())
     end
 
-    def self.no_reader<<C <todo sym>>>(&<blk>)
+    def self.no_reader<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -60,7 +60,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def usages<<C <todo sym>>>(&<blk>)
+    def usages<<todo method>>(&<blk>)
       begin
         <self>.both()
         <self>.no_instance()
@@ -70,21 +70,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"both")
+    ::Sorbet::Private::Static.keep_def(<self>, :both)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"both")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :both)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"foo")
+    ::Sorbet::Private::Static.keep_def(<self>, :foo)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"foo")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :foo)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_instance")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"bar")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :bar)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"no_reader")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :no_reader)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"usages")
+    ::Sorbet::Private::Static.keep_def(<self>, :usages)
 
     <self>.both()
 
@@ -96,7 +96,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
     <self>.cattr_reader()
 
-    <self>.cattr_reader(:"instance_accessor", false)
+    <self>.cattr_reader(:instance_accessor, false)
 
     <self>.cattr_reader("foo")
   end

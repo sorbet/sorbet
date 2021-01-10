@@ -40,7 +40,7 @@ passes=(
   package-tree
 )
 
-bazel build //main:sorbet //test:print_document_symbols -c opt
+./bazel build //main:sorbet //test:print_document_symbols -c opt
 
 if [ $# -eq 0 ]; then
   paths=(test/testdata)

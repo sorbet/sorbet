@@ -39,10 +39,10 @@ public:
     bool operator!=(const LocalVariable &rhs) const;
 
     inline bool operator<(const LocalVariable &rhs) const {
-        if (this->_name.id() < rhs._name.id()) {
+        if (this->_name.rawId() < rhs._name.rawId()) {
             return true;
         }
-        if (this->_name.id() > rhs._name.id()) {
+        if (this->_name.rawId() > rhs._name.rawId()) {
             return false;
         }
         return this->unique < rhs.unique;

@@ -64,14 +64,14 @@ begin
 
     def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz1")
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz2")
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz3")
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz4")
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz5")
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz6")
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz7")
-        ::Sorbet::Private::Static.keep_def(<self>, :"baz8")
+        ::Sorbet::Private::Static.keep_def(<self>, :baz1)
+        ::Sorbet::Private::Static.keep_def(<self>, :baz2)
+        ::Sorbet::Private::Static.keep_def(<self>, :baz3)
+        ::Sorbet::Private::Static.keep_def(<self>, :baz4)
+        ::Sorbet::Private::Static.keep_def(<self>, :baz5)
+        ::Sorbet::Private::Static.keep_def(<self>, :baz6)
+        ::Sorbet::Private::Static.keep_def(<self>, :baz7)
+        ::Sorbet::Private::Static.keep_def(<self>, :baz8)
         <emptyTree>
       end
     end

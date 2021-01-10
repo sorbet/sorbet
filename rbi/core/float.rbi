@@ -1181,8 +1181,8 @@ class Float < Numeric
   #
   # Also aliased as:
   # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-inspect)
-  sig {params(base: Integer).returns(String)}
-  def to_s(base=10); end
+  sig {returns(String)}
+  def to_s(); end
 
   # Returns `float` truncated (toward zero) to a precision of `ndigits` decimal
   # digits (default: 0).

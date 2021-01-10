@@ -187,7 +187,7 @@ subgraph "cluster_::TestRescue#multiple_rescue" {
 
     "bb::TestRescue#multiple_rescue_9" -> "bb::TestRescue#multiple_rescue_6" [style="bold"];
     "bb::TestRescue#multiple_rescue_10" [
-        label = "block[id=10, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$16: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=10, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$16: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#multiple_rescue_10" -> "bb::TestRescue#multiple_rescue_6" [style="bold"];
@@ -255,7 +255,7 @@ subgraph "cluster_::TestRescue#multiple_rescue_classes" {
     "bb::TestRescue#multiple_rescue_classes_8" -> "bb::TestRescue#multiple_rescue_classes_9" [style="tapered"];
 
     "bb::TestRescue#multiple_rescue_classes_9" [
-        label = "block[id=9, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$13: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#multiple_rescue_classes_9" -> "bb::TestRescue#multiple_rescue_classes_6" [style="bold"];
@@ -316,7 +316,7 @@ subgraph "cluster_::TestRescue#parse_rescue_ensure" {
 
     "bb::TestRescue#parse_rescue_ensure_7" -> "bb::TestRescue#parse_rescue_ensure_6" [style="bold"];
     "bb::TestRescue#parse_rescue_ensure_8" [
-        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_ensure_8" -> "bb::TestRescue#parse_rescue_ensure_6" [style="bold"];
@@ -377,7 +377,7 @@ subgraph "cluster_::TestRescue#parse_bug_rescue_empty_else" {
 
     "bb::TestRescue#parse_bug_rescue_empty_else_7" -> "bb::TestRescue#parse_bug_rescue_empty_else_6" [style="bold"];
     "bb::TestRescue#parse_bug_rescue_empty_else_8" [
-        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$9: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2]()\l<gotoDeadTemp>$9: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_bug_rescue_empty_else_8" -> "bb::TestRescue#parse_bug_rescue_empty_else_6" [style="bold"];
@@ -438,7 +438,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12686" {
 
     "bb::TestRescue#parse_ruby_bug_12686_7" -> "bb::TestRescue#parse_ruby_bug_12686_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12686_8" [
-        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <statTemp>$4: T.untyped)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <statTemp>$4: T.untyped)\l<gotoDeadTemp>$12: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12686_8" -> "bb::TestRescue#parse_ruby_bug_12686_6" [style="bold"];
@@ -499,7 +499,7 @@ subgraph "cluster_::TestRescue#parse_rescue_mod" {
 
     "bb::TestRescue#parse_rescue_mod_7" -> "bb::TestRescue#parse_rescue_mod_6" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_mod_8" -> "bb::TestRescue#parse_rescue_mod_6" [style="bold"];
@@ -560,7 +560,7 @@ subgraph "cluster_::TestRescue#parse_resbody_list_var" {
 
     "bb::TestRescue#parse_resbody_list_var_7" -> "bb::TestRescue#parse_resbody_list_var_6" [style="bold"];
     "bb::TestRescue#parse_resbody_list_var_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_resbody_list_var_8" -> "bb::TestRescue#parse_resbody_list_var_6" [style="bold"];
@@ -621,7 +621,7 @@ subgraph "cluster_::TestRescue#parse_rescue_else_ensure" {
 
     "bb::TestRescue#parse_rescue_else_ensure_7" -> "bb::TestRescue#parse_rescue_else_ensure_6" [style="bold"];
     "bb::TestRescue#parse_rescue_else_ensure_8" [
-        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<self>: TestRescue, <returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$12: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_else_ensure_8" -> "bb::TestRescue#parse_rescue_else_ensure_6" [style="bold"];
@@ -682,7 +682,7 @@ subgraph "cluster_::TestRescue#parse_rescue" {
 
     "bb::TestRescue#parse_rescue_7" -> "bb::TestRescue#parse_rescue_6" [style="bold"];
     "bb::TestRescue#parse_rescue_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_8" -> "bb::TestRescue#parse_rescue_6" [style="bold"];
@@ -743,7 +743,7 @@ subgraph "cluster_::TestRescue#parse_resbody_var" {
 
     "bb::TestRescue#parse_resbody_var_7" -> "bb::TestRescue#parse_resbody_var_6" [style="bold"];
     "bb::TestRescue#parse_resbody_var_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$11: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_resbody_var_8" -> "bb::TestRescue#parse_resbody_var_6" [style="bold"];
@@ -804,7 +804,7 @@ subgraph "cluster_::TestRescue#parse_resbody_var_1" {
 
     "bb::TestRescue#parse_resbody_var_1_7" -> "bb::TestRescue#parse_resbody_var_1_6" [style="bold"];
     "bb::TestRescue#parse_resbody_var_1_8" [
-        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$13: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_resbody_var_1_8" -> "bb::TestRescue#parse_resbody_var_1_6" [style="bold"];
@@ -865,7 +865,7 @@ subgraph "cluster_::TestRescue#parse_rescue_mod_op_assign" {
 
     "bb::TestRescue#parse_rescue_mod_op_assign_7" -> "bb::TestRescue#parse_rescue_mod_op_assign_6" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_op_assign_8" [
-        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: T.untyped)\l<gotoDeadTemp>$13: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: T.untyped)\l<gotoDeadTemp>$13: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_8" -> "bb::TestRescue#parse_rescue_mod_op_assign_6" [style="bold"];
@@ -926,7 +926,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402" {
 
     "bb::TestRescue#parse_ruby_bug_12402_7" -> "bb::TestRescue#parse_ruby_bug_12402_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_8" [
-        label = "block[id=8, rubyBlockId=2](foo: NilClass)\l<gotoDeadTemp>$12: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](foo: NilClass)\l<gotoDeadTemp>$12: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_8" -> "bb::TestRescue#parse_ruby_bug_12402_6" [style="bold"];
@@ -987,7 +987,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_1" {
 
     "bb::TestRescue#parse_ruby_bug_12402_1_7" -> "bb::TestRescue#parse_ruby_bug_12402_1_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_1_8" [
-        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: NilClass)\l<gotoDeadTemp>$14: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2](<statTemp>$3: NilClass, <statTemp>$4: NilClass)\l<gotoDeadTemp>$14: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_8" -> "bb::TestRescue#parse_ruby_bug_12402_1_6" [style="bold"];
@@ -1048,7 +1048,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_2" {
 
     "bb::TestRescue#parse_ruby_bug_12402_2_7" -> "bb::TestRescue#parse_ruby_bug_12402_2_6" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_8" [
-        label = "block[id=8, rubyBlockId=2]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass)\l<gotoDeadTemp>$22: TrueClass(true) = true\l<unconditional>\l"
+        label = "block[id=8, rubyBlockId=2]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass)\l<gotoDeadTemp>$22: TrueClass = true\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_8" -> "bb::TestRescue#parse_ruby_bug_12402_2_6" [style="bold"];
@@ -1066,7 +1066,7 @@ subgraph "cluster_::<Class:TestRescue>#<static-init>" {
     "bb::<Class:TestRescue>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:TestRescue>#<static-init>_0" [
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(TestRescue) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestRescue>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestRescue>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: Symbol(:\"meth\") = :\"meth\"\l<statTemp>$3: Symbol(:\"meth\") = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$7: Symbol(:\"meth\"))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$12: Symbol(:\"foo\") = :\"foo\"\l<statTemp>$8: Symbol(:\"foo\") = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$12: Symbol(:\"foo\"))\l<cfgAlias>$15: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$17: Symbol(:\"bar\") = :\"bar\"\l<statTemp>$13: Symbol(:\"bar\") = <cfgAlias>$15: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$17: Symbol(:\"bar\"))\l<cfgAlias>$20: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$22: Symbol(:\"baz\") = :\"baz\"\l<statTemp>$18: Symbol(:\"baz\") = <cfgAlias>$20: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$22: Symbol(:\"baz\"))\l<cfgAlias>$25: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$27: Symbol(:\"take_arg\") = :\"take_arg\"\l<statTemp>$23: Symbol(:\"take_arg\") = <cfgAlias>$25: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$27: Symbol(:\"take_arg\"))\l<cfgAlias>$30: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$32: Symbol(:\"initialize\") = :\"initialize\"\l<statTemp>$28: Symbol(:\"initialize\") = <cfgAlias>$30: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$32: Symbol(:\"initialize\"))\l<cfgAlias>$35: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$37: Symbol(:\"multiple_rescue\") = :\"multiple_rescue\"\l<statTemp>$33: Symbol(:\"multiple_rescue\") = <cfgAlias>$35: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$37: Symbol(:\"multiple_rescue\"))\l<cfgAlias>$40: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$42: Symbol(:\"multiple_rescue_classes\") = :\"multiple_rescue_classes\"\l<statTemp>$38: Symbol(:\"multiple_rescue_classes\") = <cfgAlias>$40: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$42: Symbol(:\"multiple_rescue_classes\"))\l<cfgAlias>$45: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$47: Symbol(:\"parse_rescue_ensure\") = :\"parse_rescue_ensure\"\l<statTemp>$43: Symbol(:\"parse_rescue_ensure\") = <cfgAlias>$45: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$47: Symbol(:\"parse_rescue_ensure\"))\l<cfgAlias>$50: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$52: Symbol(:\"parse_bug_rescue_empty_else\") = :\"parse_bug_rescue_empty_else\"\l<statTemp>$48: Symbol(:\"parse_bug_rescue_empty_else\") = <cfgAlias>$50: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$52: Symbol(:\"parse_bug_rescue_empty_else\"))\l<cfgAlias>$55: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$57: Symbol(:\"parse_ruby_bug_12686\") = :\"parse_ruby_bug_12686\"\l<statTemp>$53: Symbol(:\"parse_ruby_bug_12686\") = <cfgAlias>$55: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$57: Symbol(:\"parse_ruby_bug_12686\"))\l<cfgAlias>$60: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$62: Symbol(:\"parse_rescue_mod\") = :\"parse_rescue_mod\"\l<statTemp>$58: Symbol(:\"parse_rescue_mod\") = <cfgAlias>$60: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$62: Symbol(:\"parse_rescue_mod\"))\l<cfgAlias>$65: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$67: Symbol(:\"parse_resbody_list_var\") = :\"parse_resbody_list_var\"\l<statTemp>$63: Symbol(:\"parse_resbody_list_var\") = <cfgAlias>$65: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$67: Symbol(:\"parse_resbody_list_var\"))\l<cfgAlias>$70: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$72: Symbol(:\"parse_rescue_else_ensure\") = :\"parse_rescue_else_ensure\"\l<statTemp>$68: Symbol(:\"parse_rescue_else_ensure\") = <cfgAlias>$70: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$72: Symbol(:\"parse_rescue_else_ensure\"))\l<cfgAlias>$75: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$77: Symbol(:\"parse_rescue\") = :\"parse_rescue\"\l<statTemp>$73: Symbol(:\"parse_rescue\") = <cfgAlias>$75: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$77: Symbol(:\"parse_rescue\"))\l<cfgAlias>$80: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$82: Symbol(:\"parse_resbody_var\") = :\"parse_resbody_var\"\l<statTemp>$78: Symbol(:\"parse_resbody_var\") = <cfgAlias>$80: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$82: Symbol(:\"parse_resbody_var\"))\l<cfgAlias>$85: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$87: Symbol(:\"parse_resbody_var_1\") = :\"parse_resbody_var_1\"\l<statTemp>$83: Symbol(:\"parse_resbody_var_1\") = <cfgAlias>$85: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$87: Symbol(:\"parse_resbody_var_1\"))\l<cfgAlias>$90: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$92: Symbol(:\"parse_rescue_mod_op_assign\") = :\"parse_rescue_mod_op_assign\"\l<statTemp>$88: Symbol(:\"parse_rescue_mod_op_assign\") = <cfgAlias>$90: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$92: Symbol(:\"parse_rescue_mod_op_assign\"))\l<cfgAlias>$95: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$97: Symbol(:\"parse_ruby_bug_12402\") = :\"parse_ruby_bug_12402\"\l<statTemp>$93: Symbol(:\"parse_ruby_bug_12402\") = <cfgAlias>$95: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$97: Symbol(:\"parse_ruby_bug_12402\"))\l<cfgAlias>$100: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$102: Symbol(:\"parse_ruby_bug_12402_1\") = :\"parse_ruby_bug_12402_1\"\l<statTemp>$98: Symbol(:\"parse_ruby_bug_12402_1\") = <cfgAlias>$100: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$102: Symbol(:\"parse_ruby_bug_12402_1\"))\l<cfgAlias>$105: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$107: Symbol(:\"parse_ruby_bug_12402_2\") = :\"parse_ruby_bug_12402_2\"\l<statTemp>$103: Symbol(:\"parse_ruby_bug_12402_2\") = <cfgAlias>$105: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$107: Symbol(:\"parse_ruby_bug_12402_2\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(TestRescue) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestRescue>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestRescue>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: Symbol(:meth) = :meth\l<statTemp>$3: Symbol(:meth) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$7: Symbol(:meth))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$12: Symbol(:foo) = :foo\l<statTemp>$8: Symbol(:foo) = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$12: Symbol(:foo))\l<cfgAlias>$15: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$17: Symbol(:bar) = :bar\l<statTemp>$13: Symbol(:bar) = <cfgAlias>$15: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$17: Symbol(:bar))\l<cfgAlias>$20: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$22: Symbol(:baz) = :baz\l<statTemp>$18: Symbol(:baz) = <cfgAlias>$20: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$22: Symbol(:baz))\l<cfgAlias>$25: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$27: Symbol(:take_arg) = :take_arg\l<statTemp>$23: Symbol(:take_arg) = <cfgAlias>$25: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$27: Symbol(:take_arg))\l<cfgAlias>$30: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$32: Symbol(:initialize) = :initialize\l<statTemp>$28: Symbol(:initialize) = <cfgAlias>$30: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$32: Symbol(:initialize))\l<cfgAlias>$35: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$37: Symbol(:multiple_rescue) = :multiple_rescue\l<statTemp>$33: Symbol(:multiple_rescue) = <cfgAlias>$35: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$37: Symbol(:multiple_rescue))\l<cfgAlias>$40: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$42: Symbol(:multiple_rescue_classes) = :multiple_rescue_classes\l<statTemp>$38: Symbol(:multiple_rescue_classes) = <cfgAlias>$40: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$42: Symbol(:multiple_rescue_classes))\l<cfgAlias>$45: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$47: Symbol(:parse_rescue_ensure) = :parse_rescue_ensure\l<statTemp>$43: Symbol(:parse_rescue_ensure) = <cfgAlias>$45: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$47: Symbol(:parse_rescue_ensure))\l<cfgAlias>$50: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$52: Symbol(:parse_bug_rescue_empty_else) = :parse_bug_rescue_empty_else\l<statTemp>$48: Symbol(:parse_bug_rescue_empty_else) = <cfgAlias>$50: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$52: Symbol(:parse_bug_rescue_empty_else))\l<cfgAlias>$55: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$57: Symbol(:parse_ruby_bug_12686) = :parse_ruby_bug_12686\l<statTemp>$53: Symbol(:parse_ruby_bug_12686) = <cfgAlias>$55: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$57: Symbol(:parse_ruby_bug_12686))\l<cfgAlias>$60: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$62: Symbol(:parse_rescue_mod) = :parse_rescue_mod\l<statTemp>$58: Symbol(:parse_rescue_mod) = <cfgAlias>$60: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$62: Symbol(:parse_rescue_mod))\l<cfgAlias>$65: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$67: Symbol(:parse_resbody_list_var) = :parse_resbody_list_var\l<statTemp>$63: Symbol(:parse_resbody_list_var) = <cfgAlias>$65: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$67: Symbol(:parse_resbody_list_var))\l<cfgAlias>$70: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$72: Symbol(:parse_rescue_else_ensure) = :parse_rescue_else_ensure\l<statTemp>$68: Symbol(:parse_rescue_else_ensure) = <cfgAlias>$70: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$72: Symbol(:parse_rescue_else_ensure))\l<cfgAlias>$75: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$77: Symbol(:parse_rescue) = :parse_rescue\l<statTemp>$73: Symbol(:parse_rescue) = <cfgAlias>$75: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$77: Symbol(:parse_rescue))\l<cfgAlias>$80: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$82: Symbol(:parse_resbody_var) = :parse_resbody_var\l<statTemp>$78: Symbol(:parse_resbody_var) = <cfgAlias>$80: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$82: Symbol(:parse_resbody_var))\l<cfgAlias>$85: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$87: Symbol(:parse_resbody_var_1) = :parse_resbody_var_1\l<statTemp>$83: Symbol(:parse_resbody_var_1) = <cfgAlias>$85: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$87: Symbol(:parse_resbody_var_1))\l<cfgAlias>$90: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$92: Symbol(:parse_rescue_mod_op_assign) = :parse_rescue_mod_op_assign\l<statTemp>$88: Symbol(:parse_rescue_mod_op_assign) = <cfgAlias>$90: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$92: Symbol(:parse_rescue_mod_op_assign))\l<cfgAlias>$95: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$97: Symbol(:parse_ruby_bug_12402) = :parse_ruby_bug_12402\l<statTemp>$93: Symbol(:parse_ruby_bug_12402) = <cfgAlias>$95: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$97: Symbol(:parse_ruby_bug_12402))\l<cfgAlias>$100: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$102: Symbol(:parse_ruby_bug_12402_1) = :parse_ruby_bug_12402_1\l<statTemp>$98: Symbol(:parse_ruby_bug_12402_1) = <cfgAlias>$100: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$102: Symbol(:parse_ruby_bug_12402_1))\l<cfgAlias>$105: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$107: Symbol(:parse_ruby_bug_12402_2) = :parse_ruby_bug_12402_2\l<statTemp>$103: Symbol(:parse_ruby_bug_12402_2) = <cfgAlias>$105: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestRescue), <statTemp>$107: Symbol(:parse_ruby_bug_12402_2))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:TestRescue>#<static-init>_0" -> "bb::<Class:TestRescue>#<static-init>_1" [style="bold"];

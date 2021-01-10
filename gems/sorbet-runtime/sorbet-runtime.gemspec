@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://sorbet.run'
   s.license     = 'Apache-2.0'
   s.metadata = {
-    "source_code_uri" => "https://github.com/sorbet/sorbet"
+    "source_code_uri" => "https://github.com/sorbet/sorbet",
   }
 
   s.required_ruby_version = ['>= 2.3.0']

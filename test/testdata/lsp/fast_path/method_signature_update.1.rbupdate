@@ -5,7 +5,7 @@ class A
   # Change 'String' to 'Integer'
   sig {params(x: Integer).returns(Integer)}
   def bar(x)
-    x.to_s # error: Returning value that does not conform to method result type
+    x.to_s # error: Expected `Integer` but found `String` for method result type
   end
 end
 

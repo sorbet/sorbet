@@ -980,7 +980,7 @@ class IO < Object
       fd: T.any(String, Integer),
       mode: T.any(Integer, String),
       opt: T.nilable(T::Hash[Symbol, T.untyped]),
-      blk: T.proc.params(io: IO).returns(T.type_parameter(:U))
+      blk: T.proc.params(io: T.attached_class).returns(T.type_parameter(:U))
     ).returns(T.type_parameter(:U))
   end
   def self.open(fd, mode='r', opt=nil, &blk); end
@@ -1621,7 +1621,7 @@ class IO < Object
     )
     .returns(String)
   end
-  def sysread(maxlen, outbuf); end
+  def sysread(maxlen, outbuf=T.unsafe(nil)); end
 
   # Seeks to a given *offset* in the stream according to the value of *whence*
   # (see `IO#seek` for values of *whence*). Returns the new offset into the
@@ -1771,9 +1771,9 @@ class IO < Object
         name: String,
         arg0: String,
         offset: Integer,
-        external_encoding: String,
-        internal_encoding: String,
-        encoding: String,
+        external_encoding: T.any(String, Encoding),
+        internal_encoding: T.any(String, Encoding),
+        encoding: T.any(String, Encoding),
         textmode: BasicObject,
         binmode: BasicObject,
         autoclose: BasicObject,
@@ -1991,9 +1991,9 @@ class IO < Object
         name: T.any(String, Tempfile, File, Pathname),
         length: Integer,
         offset: Integer,
-        external_encoding: String,
-        internal_encoding: String,
-        encoding: String,
+        external_encoding: T.any(String, Encoding),
+        internal_encoding: T.any(String, Encoding),
+        encoding: T.any(String, Encoding),
         textmode: BasicObject,
         binmode: BasicObject,
         autoclose: BasicObject,
@@ -2033,9 +2033,9 @@ class IO < Object
         name: T.any(String, Tempfile, File, Pathname),
         sep: String,
         limit: Integer,
-        external_encoding: String,
-        internal_encoding: String,
-        encoding: String,
+        external_encoding: T.any(String, Encoding),
+        internal_encoding: T.any(String, Encoding),
+        encoding: T.any(String, Encoding),
         textmode: BasicObject,
         binmode: BasicObject,
         autoclose: BasicObject,
@@ -2285,9 +2285,9 @@ class IO < Object
         name: T.any(String, Tempfile, File, Pathname),
         string: Object,
         offset: Integer,
-        external_encoding: String,
-        internal_encoding: String,
-        encoding: String,
+        external_encoding: T.any(String, Encoding),
+        internal_encoding: T.any(String, Encoding),
+        encoding: T.any(String, Encoding),
         textmode: BasicObject,
         binmode: BasicObject,
         autoclose: BasicObject,

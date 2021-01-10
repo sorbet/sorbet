@@ -9,6 +9,7 @@
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
+#include "main/autogen/packages.h"
 #include "main/autogen/subclasses.h"
 #include "main/lsp/LSPInput.h"
 #include "main/lsp/LSPOutput.h"
@@ -199,6 +200,17 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 WorkerPool &workers, vector<ast::ParsedFile> &indexed) {
     Timer timeit(logger, "autogen");
 
+    // extract all the packages we can find. (This ought to be pretty fast: if it's not, then we can move this into the
+    // parallel loop below.)
+    vector<autogen::Package> packageq;
+    for (auto i = 0; i < indexed.size(); ++i) {
+        if (indexed[i].file.data(gs).isPackage()) {
+            auto &tree = indexed[i];
+            core::Context ctx(gs, core::Symbols::root(), tree.file);
+            packageq.emplace_back(autogen::Packages::extractPackage(ctx, move(tree)));
+        }
+    }
+
     auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
     for (int i = 0; i < indexed.size(); ++i) {
@@ -215,7 +227,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
                 ++n;
                 auto &tree = indexed[idx];
-                if (tree.file.data(gs).isRBI()) {
+                if (tree.file.data(gs).isRBI() || tree.file.data(gs).isPackage()) {
                     continue;
                 }
 
@@ -326,6 +338,11 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
 
         opts.print.AutogenSubclasses.fmt(
             "{}\n", fmt::join(serializedDescendantsMap.begin(), serializedDescendantsMap.end(), "\n"));
+    }
+
+    if (opts.autoloaderConfig.packagedAutoloader) {
+        autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
+                                                       packageq);
     }
 }
 #endif
@@ -444,13 +461,15 @@ int realmain(int argc, char *argv[]) {
     }
     gs->preallocateTables(opts.reserveClassTableCapacity, opts.reserveMethodTableCapacity,
                           opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
-                          opts.reserveTypeMemberTableCapacity, opts.reserveNameTableCapacity);
+                          opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
+                          opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
     for (auto code : opts.errorCodeWhiteList) {
         gs->onlyShowErrorClass(code);
     }
     for (auto code : opts.errorCodeBlackList) {
         gs->suppressErrorClass(code);
     }
+    gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
     for (auto &plugin : opts.dslPluginTriggers) {
         core::UnfreezeNameTable nameTableAccess(*gs);
         gs->addDslPlugin(plugin.first, plugin.second);
@@ -531,7 +550,9 @@ int realmain(int argc, char *argv[]) {
             gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition.code);
             gs->suppressErrorClass(core::errors::Resolver::StubConstant.code);
 
+            indexed = pipeline::package(*gs, move(indexed), opts, *workers);
             indexed = move(pipeline::name(*gs, move(indexed), opts, *workers).result());
+
             autogen::AutoloaderConfig autoloaderCfg;
             {
                 core::UnfreezeNameTable nameTableAccess(*gs);

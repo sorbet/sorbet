@@ -10,11 +10,12 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-    bool lspQueryMatch = lspQuery.matchesLoc(methodDef.declLoc) || lspQuery.matchesSymbol(methodDef.symbol);
+    bool lspQueryMatch =
+        lspQuery.matchesLoc(core::Loc(ctx.file, methodDef.declLoc)) || lspQuery.matchesSymbol(methodDef.symbol);
 
     if (lspQueryMatch) {
         // Query matches against the method definition as a whole.
-        auto &symbolData = methodDef.symbol.data(ctx);
+        auto symbolData = methodDef.symbol.data(ctx);
         auto &argTypes = symbolData->arguments();
         core::TypeAndOrigins tp;
 
@@ -39,9 +40,10 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
         }
 
         tp.type = symbolData->resultType;
-        tp.origins.emplace_back(methodDef.declLoc);
+        tp.origins.emplace_back(core::Loc(ctx.file, methodDef.declLoc));
         core::lsp::QueryResponse::pushQueryResponse(
-            ctx, core::lsp::DefinitionResponse(methodDef.symbol, methodDef.declLoc, methodDef.name, tp));
+            ctx, core::lsp::DefinitionResponse(methodDef.symbol, core::Loc(ctx.file, methodDef.declLoc), methodDef.name,
+                                               tp));
     }
 
     return tree;
@@ -50,11 +52,11 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
 ast::TreePtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::TreePtr tree) {
     auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
     if (id.kind == ast::UnresolvedIdent::Kind::Instance || id.kind == ast::UnresolvedIdent::Kind::Class) {
-        core::SymbolRef klass;
+        core::ClassOrModuleRef klass;
         // Logic cargo culted from `global2Local` in `walker_build.cc`.
         if (id.kind == ast::UnresolvedIdent::Kind::Instance) {
             ENFORCE(ctx.owner.data(ctx)->isMethod());
-            klass = ctx.owner.data(ctx)->owner;
+            klass = ctx.owner.data(ctx)->owner.asClassOrModuleRef();
         } else {
             // Class var.
             klass = ctx.owner.data(ctx)->enclosingClass(ctx);
@@ -85,7 +87,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
             core::TypeAndOrigins tp;
             tp.origins.emplace_back(symbol.data(ctx)->loc());
 
-            if (symbol.data(ctx)->isClassOrModule()) {
+            if (symbol.isClassOrModule()) {
                 tp.type = symbol.data(ctx)->lookupSingletonClass(ctx).data(ctx)->externalType();
             } else {
                 auto resultType = symbol.data(ctx)->resultType;

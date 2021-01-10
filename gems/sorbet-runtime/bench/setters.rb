@@ -19,7 +19,7 @@ module SorbetBenchmarks
 
     class OverrideStruct < T::Struct
       class SetHookDecorator < T::Props::Decorator
-        def prop_set(instance, prop, val, rules=prop_rules())
+        def prop_set(instance, prop, val, rules=prop_rules)
           super
         end
       end

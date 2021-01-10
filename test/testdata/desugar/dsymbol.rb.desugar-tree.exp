@@ -1,9 +1,9 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  :"foo"
+  :foo
 
-  :"foo"
+  :foo
 
-  :""
+  :
 
   ::<Magic>.<string-interpolate>("hello_", <self>.name(), "!").intern()
 end

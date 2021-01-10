@@ -7,14 +7,14 @@
 # from the second, incrementalResolve, pass).
 #
 # If the second one we see is the same as the one we saw previously, this is
-# actually fine. But if the class is different, that's an error.
+# actually fine.
 
 module A
   extend T::Helpers
   module ClassMethods1; end
   module ClassMethods2; end
   mixes_in_class_methods(ClassMethods1)
-  mixes_in_class_methods(ClassMethods2) # error: Redeclaring `mixes_in_class_methods` from module `A::ClassMethods1` to module `A::ClassMethods2`
+  mixes_in_class_methods(ClassMethods2)
 end
 
 module B

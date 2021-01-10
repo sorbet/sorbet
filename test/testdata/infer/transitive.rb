@@ -5,7 +5,7 @@ class A
   sig do
     returns(Integer)
   end
-  def foo # error: does not conform to method result type
+  def foo # error: Expected `Integer` but found `NilClass` for method result type
   end
 end
 

@@ -27,10 +27,16 @@ class SerializerImpl;
 }
 class IntrinsicMethod {
 public:
-    virtual void apply(const GlobalState &gs, DispatchArgs args, DispatchResult &res) const = 0;
+    virtual void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const = 0;
 };
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
+
+enum class Visibility : u1 {
+    Public = 1,
+    Protected,
+    Private,
+};
 
 class Symbol final {
 public:
@@ -77,6 +83,7 @@ public:
         static constexpr u4 CLASS_OR_MODULE_LINEARIZATION_COMPUTED = 0x0000'0100;
         static constexpr u4 CLASS_OR_MODULE_FINAL = 0x0000'0200;
         static constexpr u4 CLASS_OR_MODULE_SEALED = 0x0000'0400;
+        static constexpr u4 CLASS_OR_MODULE_PRIVATE = 0x0000'0800;
 
         // Method flags
         static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
@@ -99,6 +106,7 @@ public:
 
         // Static Field flags
         static constexpr u4 STATIC_FIELD_TYPE_ALIAS = 0x0000'0010;
+        static constexpr u4 STATIC_FIELD_PRIVATE = 0x0000'0020;
     };
 
     Loc loc() const;
@@ -122,21 +130,19 @@ public:
     // have access to a mutable GlobalState and thus shouldn't be able to call it).
     TypePtr unsafeComputeExternalType(GlobalState &gs);
 
-    inline InlinedVector<SymbolRef, 4> &mixins() {
+    inline InlinedVector<ClassOrModuleRef, 4> &mixins() {
         ENFORCE_NO_TIMER(isClassOrModule());
         return mixins_;
     }
 
-    inline const InlinedVector<SymbolRef, 4> &mixins() const {
+    inline const InlinedVector<ClassOrModuleRef, 4> &mixins() const {
         ENFORCE_NO_TIMER(isClassOrModule());
         return mixins_;
     }
 
-    void addMixin(SymbolRef sym) {
-        ENFORCE(isClassOrModule());
-        mixins_.emplace_back(sym);
-        unsetClassOrModuleLinearizationComputed();
-    }
+    // Attempts to add the given mixin to the symbol. If the mixin is invalid because it is not a module, it returns
+    // `false` (but still adds the mixin for processing during linearization) and the caller should report an error.
+    [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym);
 
     inline InlinedVector<SymbolRef, 4> &typeMembers() {
         ENFORCE(isClassOrModule());
@@ -163,7 +169,7 @@ public:
         return typeParams;
     }
 
-    bool derivesFrom(const GlobalState &gs, SymbolRef sym) const;
+    bool derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const;
 
     // TODO(dmitry) perf: most calls to this method could be eliminated as part of perf work.
     SymbolRef ref(const GlobalState &gs) const;
@@ -269,6 +275,18 @@ public:
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
     }
 
+    Visibility methodVisibility() const {
+        if (this->isMethodPublic()) {
+            return Visibility::Public;
+        } else if (this->isMethodProtected()) {
+            return Visibility::Protected;
+        } else if (this->isMethodPrivate()) {
+            return Visibility::Private;
+        } else {
+            Exception::raise("Expected method to have visibility");
+        }
+    }
+
     inline bool isClassOrModuleModule() const {
         ENFORCE_NO_TIMER(isClassOrModule());
         if (flags & Symbol::Flags::CLASS_OR_MODULE_MODULE)
@@ -310,6 +328,16 @@ public:
     inline bool isClassOrModuleSealed() const {
         ENFORCE_NO_TIMER(isClassOrModule());
         return (flags & Symbol::Flags::CLASS_OR_MODULE_SEALED) != 0;
+    }
+
+    inline bool isClassOrModulePrivate() const {
+        ENFORCE_NO_TIMER(isClassOrModule());
+        return (flags & Symbol::Flags::CLASS_OR_MODULE_PRIVATE) != 0;
+    }
+
+    inline bool isStaticFieldPrivate() const {
+        ENFORCE_NO_TIMER(isStaticField());
+        return (flags & Symbol::Flags::STATIC_FIELD_PRIVATE) != 0;
     }
 
     inline void setClassOrModule() {
@@ -432,6 +460,21 @@ public:
         flags |= Symbol::Flags::METHOD_PRIVATE;
     }
 
+    void setMethodVisibility(Visibility visibility) {
+        ENFORCE(isMethod());
+        switch (visibility) {
+            case Visibility::Public:
+                this->setMethodPublic();
+                break;
+            case Visibility::Protected:
+                this->setMethodProtected();
+                break;
+            case Visibility::Private:
+                this->setMethodPrivate();
+                break;
+        }
+    }
+
     inline void setClassOrModuleAbstract() {
         ENFORCE(isClassOrModule());
         flags |= Symbol::Flags::CLASS_OR_MODULE_ABSTRACT;
@@ -457,6 +500,11 @@ public:
         flags |= Symbol::Flags::CLASS_OR_MODULE_SEALED;
     }
 
+    inline void setClassOrModulePrivate() {
+        ENFORCE(isClassOrModule());
+        flags |= Symbol::Flags::CLASS_OR_MODULE_PRIVATE;
+    }
+
     inline void setTypeAlias() {
         ENFORCE(isStaticField());
         flags |= Symbol::Flags::STATIC_FIELD_TYPE_ALIAS;
@@ -467,6 +515,11 @@ public:
         // To make things nicer, we relax the ENFORCE here to also allow asking whether "some constant" is a type alias.
         ENFORCE(isClassOrModule() || isStaticField() || isTypeMember());
         return isStaticField() && (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
+    }
+
+    inline void setStaticFieldPrivate() {
+        ENFORCE(isStaticField());
+        flags |= Symbol::Flags::STATIC_FIELD_PRIVATE;
     }
 
     inline void setRewriterSynthesized() {
@@ -507,23 +560,25 @@ public:
         bool showRaw = false;
         return toStringWithOptions(gs, 0, showFull, showRaw);
     }
-    std::string toJSON(const GlobalState &gs, int tabs = 0, bool showFull = false) const;
+    std::string toJSON(const GlobalState &gs, int tabs = 0) const;
     // Renders the full name of this Symbol in a form suitable for user display.
     std::string show(const GlobalState &gs) const;
 
+    std::string_view showKind(const GlobalState &gs) const;
+
     // Returns the singleton class for this class, lazily instantiating it if it
     // doesn't exist.
-    SymbolRef singletonClass(GlobalState &gs);
+    ClassOrModuleRef singletonClass(GlobalState &gs);
 
     // Returns the singleton class or noSymbol
-    SymbolRef lookupSingletonClass(const GlobalState &gs) const;
+    ClassOrModuleRef lookupSingletonClass(const GlobalState &gs) const;
 
     // Returns attached class or noSymbol if it does not exist
-    SymbolRef attachedClass(const GlobalState &gs) const;
+    ClassOrModuleRef attachedClass(const GlobalState &gs) const;
 
-    SymbolRef topAttachedClass(const GlobalState &gs) const;
+    ClassOrModuleRef topAttachedClass(const GlobalState &gs) const;
 
-    void recordSealedSubclass(MutableContext ctx, SymbolRef subclass);
+    void recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass);
     const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
@@ -532,8 +587,10 @@ public:
         return dealiasWithDefault(gs, depthLimit, Symbols::untyped());
     }
     // if dealiasing fails here, then we return a bad alias method stub instead
-    SymbolRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const {
-        return dealiasWithDefault(gs, depthLimit, core::Symbols::Sorbet_Private_Static_badAliasMethodStub());
+    MethodRef dealiasMethod(const GlobalState &gs, int depthLimit = 42) const {
+        ENFORCE_NO_TIMER(isMethod());
+        return dealiasWithDefault(gs, depthLimit, core::Symbols::Sorbet_Private_Static_badAliasMethodStub())
+            .asMethodRef();
     }
 
     SymbolRef dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const;
@@ -541,14 +598,14 @@ public:
     bool ignoreInHashing(const GlobalState &gs) const;
 
     SymbolRef owner;
-    SymbolRef superClassOrRebind; // method arugments store rebind here
+    SymbolRef superClassOrRebind; // method arguments store rebind here
 
-    inline SymbolRef superClass() const {
+    inline ClassOrModuleRef superClass() const {
         ENFORCE_NO_TIMER(isClassOrModule());
-        return superClassOrRebind;
+        return superClassOrRebind.asClassOrModuleRef();
     }
 
-    inline void setSuperClass(SymbolRef claz) {
+    inline void setSuperClass(ClassOrModuleRef claz) {
         ENFORCE(isClassOrModule());
         superClassOrRebind = claz;
     }
@@ -598,9 +655,8 @@ public:
 
     Symbol deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
-    SymbolRef enclosingMethod(const GlobalState &gs) const;
 
-    SymbolRef enclosingClass(const GlobalState &gs) const;
+    ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
 
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
     // why raw pointers are safe.
@@ -629,7 +685,7 @@ private:
      *   implicit superclass (`class Foo` with no `< Parent`); Once we hit
      *   Resolver::finalize(), these will be rewritten to `Object()`.
      */
-    InlinedVector<SymbolRef, 4> mixins_;
+    InlinedVector<ClassOrModuleRef, 4> mixins_;
 
     /** For Class or module - ordered type members of the class,
      * for method - ordered type generic type arguments of the class

@@ -31,7 +31,7 @@ begin
     end
 
     def self.<static-init>(<blk>)
-      ::Sorbet::Private::Static.keep_def(<self>, :"method")
+      ::Sorbet::Private::Static.keep_def(<self>, :method)
     end
   end
   <emptyTree>

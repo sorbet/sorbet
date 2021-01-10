@@ -242,6 +242,10 @@ public:
 
     void ensureGoodCondition(core::Context ctx, cfg::LocalRef cond) {}
     void ensureGoodAssignTarget(core::Context ctx, cfg::LocalRef target) {}
+
+    core::Loc locForUninitialized() const {
+        return ownerLoc;
+    }
 };
 
 } // namespace sorbet::infer

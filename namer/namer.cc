@@ -9,7 +9,6 @@
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/sort.h"
-#include "common/typecase.h"
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
@@ -52,7 +51,7 @@ public:
     FoundDefinitionRef &operator=(const FoundDefinitionRef &rhs) = default;
 
     static FoundDefinitionRef root() {
-        return FoundDefinitionRef(DefinitionKind::Symbol, core::Symbols::root().rawId());
+        return FoundDefinitionRef(DefinitionKind::Symbol, core::SymbolRef(core::Symbols::root()).rawId());
     }
 
     DefinitionKind kind() const {
@@ -96,7 +95,7 @@ struct FoundClass final {
     FoundDefinitionRef owner;
     FoundDefinitionRef klass;
     core::LocOffsets loc;
-    core::Loc declLoc;
+    core::LocOffsets declLoc;
     ast::ClassDef::Kind classKind;
 };
 
@@ -124,20 +123,30 @@ struct FoundMethod final {
     FoundDefinitionRef owner;
     core::NameRef name;
     core::LocOffsets loc;
-    core::Loc declLoc;
+    core::LocOffsets declLoc;
     ast::MethodDef::Flags flags;
     vector<ast::ParsedArg> parsedArgs;
     vector<u4> argsHash;
 };
 
 struct Modifier {
-    DefinitionKind kind;
+    enum class Kind : u1 {
+        Class = 0,
+        Method = 1,
+        ClassOrStaticField = 2,
+    };
+    Kind kind;
     FoundDefinitionRef owner;
     core::LocOffsets loc;
     // The name of the modification.
     core::NameRef name;
     // For methods: The name of the method being modified.
-    core::NameRef methodName;
+    // For constants: The name of the constant being modified.
+    core::NameRef target;
+
+    Modifier withTarget(core::NameRef target) {
+        return Modifier{this->kind, this->owner, this->loc, this->name, target};
+    }
 };
 
 class FoundDefinitions final {
@@ -291,33 +300,30 @@ struct SymbolFinderResult {
     unique_ptr<FoundDefinitions> names;
 };
 
-core::SymbolRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flags) {
-    core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+core::ClassOrModuleRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flags) {
+    auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
     if (owner == core::Symbols::root()) {
         // Root methods end up going on object
         owner = core::Symbols::Object();
     }
 
     if (flags.isSelfMethod) {
-        if (owner.data(ctx)->isClassOrModule()) {
-            owner = owner.data(ctx)->lookupSingletonClass(ctx);
-        }
+        owner = owner.data(ctx)->lookupSingletonClass(ctx);
     }
     ENFORCE(owner.exists());
-    ENFORCE(owner.data(ctx)->isClassOrModule());
     return owner;
 }
 
 // Returns the SymbolRef corresponding to the class `self.class`, unless the
 // context is a class, in which case return it.
-core::SymbolRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat) {
+core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat) {
     core::SymbolRef owner = ofWhat;
     while (true) {
         ENFORCE(owner.exists(), "non-existing owner in contextClass");
         const auto &data = owner.data(gs);
 
         if (data->isClassOrModule()) {
-            break;
+            return owner.asClassOrModuleRef();
         }
         if (data->name == core::Names::staticInit()) {
             owner = data->owner.data(gs)->attachedClass(gs);
@@ -325,7 +331,6 @@ core::SymbolRef contextClass(const core::GlobalState &gs, core::SymbolRef ofWhat
             owner = data->owner;
         }
     }
-    return owner;
 }
 
 /**
@@ -339,6 +344,9 @@ class SymbolFinder {
     // The tree doesn't have symbols yet, so `ctx.owner`, which is a SymbolRef, is meaningless.
     // Instead, we track the owner manually via FoundDefinitionRefs.
     vector<FoundDefinitionRef> ownerStack;
+    // `private` with no arguments toggles the visibility of all methods below in the class def.
+    // This tracks those as they appear.
+    vector<optional<Modifier>> methodVisiStack = {nullopt};
 
     void findClassModifiers(core::Context ctx, FoundDefinitionRef klass, ast::TreePtr &line) {
         auto *send = ast::cast_tree<ast::Send>(line);
@@ -346,13 +354,13 @@ class SymbolFinder {
             return;
         }
 
-        switch (send->fun._id) {
-            case core::Names::declareFinal()._id:
-            case core::Names::declareSealed()._id:
-            case core::Names::declareInterface()._id:
-            case core::Names::declareAbstract()._id: {
+        switch (send->fun.rawId()) {
+            case core::Names::declareFinal().rawId():
+            case core::Names::declareSealed().rawId():
+            case core::Names::declareInterface().rawId():
+            case core::Names::declareAbstract().rawId(): {
                 Modifier mod;
-                mod.kind = DefinitionKind::Class;
+                mod.kind = Modifier::Kind::Class;
                 mod.owner = klass;
                 mod.loc = send->loc;
                 mod.name = send->fun;
@@ -426,6 +434,7 @@ public:
         }
 
         ownerStack.emplace_back(foundDefs->addClass(move(found)));
+        methodVisiStack.emplace_back(nullopt);
         return tree;
     }
 
@@ -434,6 +443,7 @@ public:
 
         FoundDefinitionRef klassName = ownerStack.back();
         ownerStack.pop_back();
+        methodVisiStack.pop_back();
 
         for (auto &exp : klass.rhs) {
             findClassModifiers(ctx, klassName, exp);
@@ -453,6 +463,10 @@ public:
         foundMethod.parsedArgs = ast::ArgParsing::parseArgs(method.args);
         foundMethod.argsHash = ast::ArgParsing::hashArgs(ctx, foundMethod.parsedArgs);
         ownerStack.emplace_back(foundDefs->addMethod(move(foundMethod)));
+
+        // After flatten, method defs have been hoisted and reordered, so instead we look for the
+        // keep_def / keep_self_def calls, which will still be ordered correctly relative to
+        // visibility modifiers.
         return tree;
     }
 
@@ -464,32 +478,96 @@ public:
     ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
 
-        if (original.args.size() == 1) {
-            // Common case: Send is not to a modifier.
-            switch (original.fun._id) {
-                case core::Names::private_()._id:
-                case core::Names::privateClassMethod()._id:
-                case core::Names::protected_()._id:
-                case core::Names::public_()._id:
-                    break;
-                default:
-                    return tree;
-            }
+        switch (original.fun.rawId()) {
+            case core::Names::privateClassMethod().rawId():
+                for (const auto &arg : original.args) {
+                    addMethodModifier(ctx, original.fun, arg);
+                }
+                break;
+            case core::Names::private_().rawId():
+            case core::Names::protected_().rawId():
+            case core::Names::public_().rawId():
+                if (original.args.empty()) {
+                    ENFORCE(!methodVisiStack.empty());
+                    methodVisiStack.back() = optional<Modifier>{Modifier{
+                        Modifier::Kind::Method,
+                        getOwner(),
+                        original.loc,
+                        original.fun,
+                        core::NameRef::noName(),
+                    }};
+                } else {
+                    for (const auto &arg : original.args) {
+                        addMethodModifier(ctx, original.fun, arg);
+                    }
+                }
+                break;
+            case core::Names::privateConstant().rawId():
+                for (const auto &arg : original.args) {
+                    addConstantModifier(ctx, original.fun, arg);
+                }
+                break;
+            case core::Names::keepDef().rawId():
+                // ^ visibility toggle doesn't look at `self.*` methods, only instance methods
+                // (need to use `class << self` to use nullary private with singleton class methods)
 
-            Modifier methodModifier;
-            methodModifier.kind = DefinitionKind::Method;
-            methodModifier.owner = getOwner();
-            methodModifier.loc = original.loc;
-            methodModifier.name = original.fun;
-            methodModifier.methodName = unwrapLiteralToMethodName(ctx, original, original.args[0]);
-            if (methodModifier.methodName.exists()) {
-                foundDefs->addModifier(move(methodModifier));
-            }
+                if (original.args.size() != 2) {
+                    break;
+                }
+
+                ENFORCE(!methodVisiStack.empty());
+                if (!methodVisiStack.back().has_value()) {
+                    break;
+                }
+
+                auto recv = ast::cast_tree<ast::ConstantLit>(original.recv);
+                if (recv == nullptr || recv->symbol != core::Symbols::Sorbet_Private_Static()) {
+                    break;
+                }
+
+                auto methodName = unwrapLiteralToMethodName(ctx, original.args[1]);
+                foundDefs->addModifier(methodVisiStack.back()->withTarget(methodName));
+
+                break;
         }
         return tree;
     }
 
-    core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::Send &original, ast::TreePtr &expr) {
+    void addMethodModifier(core::Context ctx, core::NameRef modifierName, const ast::TreePtr &arg) {
+        auto target = unwrapLiteralToMethodName(ctx, arg);
+        if (target.exists()) {
+            foundDefs->addModifier(Modifier{
+                Modifier::Kind::Method,
+                getOwner(),
+                arg.loc(),
+                /*name*/ modifierName,
+                target,
+            });
+        }
+    }
+
+    void addConstantModifier(core::Context ctx, core::NameRef modifierName, const ast::TreePtr &arg) {
+        auto target = core::NameRef::noName();
+        if (auto sym = ast::cast_tree<ast::Literal>(arg)) {
+            if (sym->isSymbol(ctx)) {
+                target = sym->asSymbol(ctx);
+            } else if (sym->isString(ctx)) {
+                target = sym->asString(ctx);
+            }
+        }
+
+        if (target.exists()) {
+            foundDefs->addModifier(Modifier{
+                Modifier::Kind::ClassOrStaticField,
+                getOwner(),
+                arg.loc(),
+                /*name*/ modifierName,
+                target,
+            });
+        }
+    }
+
+    core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::TreePtr &expr) {
         if (auto sym = ast::cast_tree<ast::Literal>(expr)) {
             // this handles the `private :foo` case
             if (!sym->isSymbol(ctx)) {
@@ -514,7 +592,7 @@ public:
                 return core::NameRef::noName();
             }
 
-            return unwrapLiteralToMethodName(ctx, original, send->args[1]);
+            return unwrapLiteralToMethodName(ctx, send->args[1]);
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
             return core::NameRef::noName();
@@ -577,10 +655,9 @@ public:
             // Walk over the keyword args to find bounds annotations
             for (auto i = send->numPosArgs; i < end; i += 2) {
                 auto *key = ast::cast_tree<ast::Literal>(send->args[i]);
-                core::NameRef name;
                 if (key != nullptr && key->isSymbol(ctx)) {
-                    switch (key->asSymbol(ctx)._id) {
-                        case core::Names::fixed()._id:
+                    switch (key->asSymbol(ctx).rawId()) {
+                        case core::Names::fixed().rawId():
                             found.isFixed = true;
                             break;
                     }
@@ -613,11 +690,11 @@ public:
         } else if (!send->recv.isSelfReference()) {
             handleAssignment(ctx, asgn);
         } else {
-            switch (send->fun._id) {
-                case core::Names::typeTemplate()._id:
+            switch (send->fun.rawId()) {
+                case core::Names::typeTemplate().rawId():
                     handleTypeMemberDefinition(ctx, send, asgn, lhs);
                     break;
-                case core::Names::typeMember()._id:
+                case core::Names::typeMember().rawId():
                     handleTypeMemberDefinition(ctx, send, asgn, lhs);
                     break;
                 default:
@@ -634,13 +711,12 @@ public:
  */
 class SymbolDefiner {
     unique_ptr<const FoundDefinitions> foundDefs;
-    vector<core::SymbolRef> definedClasses;
-    vector<core::SymbolRef> definedMethods;
+    vector<core::ClassOrModuleRef> definedClasses;
+    vector<core::MethodRef> definedMethods;
 
     // Returns a symbol to the referenced name. Name must be a class or module.
-    core::SymbolRef squashNames(core::MutableContext ctx, FoundDefinitionRef ref, core::SymbolRef owner) {
-        // Prerequisite: Owner is a class or module.
-        ENFORCE(owner.data(ctx)->isClassOrModule());
+    // Prerequisite: Owner is a class or module.
+    core::SymbolRef squashNames(core::MutableContext ctx, FoundDefinitionRef ref, core::ClassOrModuleRef owner) {
         switch (ref.kind()) {
             case DefinitionKind::Empty:
                 return owner;
@@ -692,32 +768,33 @@ class SymbolDefiner {
         emitRedefinedConstantError(ctx, errorLoc, symbol.data(ctx)->show(ctx), renamedSymbol.data(ctx)->loc());
     }
 
-    core::SymbolRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
-                                  core::LocOffsets loc) {
+    core::ClassOrModuleRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
+                                         core::LocOffsets loc) {
         // Common case: Everything is fine, user is trying to define a symbol on a class or module.
-        if (scope.data(ctx)->isClassOrModule()) {
+        if (scope.isClassOrModule()) {
             // Check if original symbol was mangled away. If so, complain.
             auto renamedSymbol = ctx.state.findRenamedSymbol(scope.data(ctx)->owner, scope);
             if (renamedSymbol.exists()) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
-                    auto constLitName = name.data(ctx)->show(ctx);
+                    auto constLitName = name.show(ctx);
                     auto scopeName = scope.data(ctx)->show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
                                 scopeName, scopeName);
                     e.addErrorLine(renamedSymbol.data(ctx)->loc(), "`{}` defined here", scopeName);
                 }
             }
-            return scope;
+            return scope.asClassOrModuleRef();
         }
 
         // Check if class was already mangled.
-        auto klassSymbol = ctx.state.lookupClassSymbol(scope.data(ctx)->owner, scope.data(ctx)->name);
+        auto klassSymbol =
+            ctx.state.lookupClassSymbol(scope.data(ctx)->owner.asClassOrModuleRef(), scope.data(ctx)->name);
         if (klassSymbol.exists()) {
             return klassSymbol;
         }
 
         if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
-            auto constLitName = name.data(ctx)->show(ctx);
+            auto constLitName = name.show(ctx);
             auto newOwnerName = scope.data(ctx)->show(ctx);
             e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, newOwnerName,
                         newOwnerName);
@@ -726,9 +803,10 @@ class SymbolDefiner {
         // Mangle this one out of the way, and re-enter a symbol with this name as a class.
         auto scopeName = scope.data(ctx)->name;
         ctx.state.mangleRenameSymbol(scope, scopeName);
-        scope = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc), scope.data(ctx)->owner, scopeName);
-        scope.data(ctx)->singletonClass(ctx); // force singleton class into existance
-        return scope;
+        auto scopeKlass = ctx.state.enterClassSymbol(core::Loc(ctx.file, loc),
+                                                     scope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
+        scopeKlass.data(ctx)->singletonClass(ctx); // force singleton class into existance
+        return scopeKlass;
     }
 
     // Gets the symbol with the given name, or defines it as a class if it does not exist.
@@ -764,7 +842,8 @@ class SymbolDefiner {
         }
         // we know right now that pos >= arguments().size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &argInfo = ctx.state.enterMethodArgumentSymbol(core::Loc(ctx.file, parsedArg.loc), ctx.owner, name);
+        auto &argInfo =
+            ctx.state.enterMethodArgumentSymbol(core::Loc(ctx.file, parsedArg.loc), ctx.owner.asMethodRef(), name);
         // if enterMethodArgumentSymbol did not emplace a new argument into the list, then it means it's reusing an
         // existing one, which means we've seen a repeated kwarg (as it treats identically named kwargs as
         // identical). We know that we need to match the arity of the function as written, so if we don't have as many
@@ -906,8 +985,8 @@ class SymbolDefiner {
         }
     }
 
-    core::SymbolRef defineMethod(core::MutableContext ctx, const FoundMethod &method) {
-        core::SymbolRef owner = methodOwner(ctx, method.flags);
+    core::MethodRef defineMethod(core::MutableContext ctx, const FoundMethod &method) {
+        auto owner = methodOwner(ctx, method.flags);
 
         // There are three symbols in play here, because there's:
         //
@@ -929,7 +1008,8 @@ class SymbolDefiner {
         // enough in the file to see any other definition of `f`.
         auto &parsedArgs = method.parsedArgs;
         auto symTableSize = ctx.state.methodsUsed();
-        auto sym = ctx.state.enterMethodSymbol(method.declLoc, owner, method.name);
+        auto declLoc = core::Loc(ctx.file, method.declLoc);
+        auto sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
         const bool isNewSymbol = symTableSize != ctx.state.methodsUsed();
         if (!isNewSymbol) {
             // See if this is == to the method we're defining now, or if we have a redefinition error.
@@ -938,14 +1018,14 @@ class SymbolDefiner {
                 // we don't have a method definition with the right argument structure, so we need to mangle the
                 // existing one and create a new one
                 if (!isIntrinsic(sym.data(ctx))) {
-                    paramMismatchErrors(ctx.withOwner(sym), method.declLoc, parsedArgs);
+                    paramMismatchErrors(ctx.withOwner(sym), declLoc, parsedArgs);
                     ctx.state.mangleRenameSymbol(sym, method.name);
                     // Re-enter a new symbol.
-                    sym = ctx.state.enterMethodSymbol(method.declLoc, owner, method.name);
+                    sym = ctx.state.enterMethodSymbol(declLoc, owner, method.name);
                 } else {
                     // ...unless it's an intrinsic, because we allow multiple incompatible definitions of those in code
                     // TODO(jvilk): Wouldn't this always fail since `!sym.exists()`?
-                    matchingSym.data(ctx)->addLoc(ctx, method.declLoc);
+                    matchingSym.data(ctx)->addLoc(ctx, declLoc);
                 }
             } else {
                 // if the symbol does exist, then we're running in incremental mode, and we need to compare it to
@@ -953,14 +1033,14 @@ class SymbolDefiner {
                 auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym);
                 if (replacedSym.exists() && !paramsMatch(ctx, replacedSym, parsedArgs) &&
                     !isIntrinsic(replacedSym.data(ctx))) {
-                    paramMismatchErrors(ctx.withOwner(replacedSym), method.declLoc, parsedArgs);
+                    paramMismatchErrors(ctx.withOwner(replacedSym), declLoc, parsedArgs);
                 }
                 sym = matchingSym;
             }
         }
 
         defineArgs(ctx.withOwner(sym), parsedArgs);
-        sym.data(ctx)->addLoc(ctx, method.declLoc);
+        sym.data(ctx)->addLoc(ctx, declLoc);
         if (method.flags.isRewriterSynthesized) {
             sym.data(ctx)->setRewriterSynthesized();
         }
@@ -968,7 +1048,7 @@ class SymbolDefiner {
         return sym;
     }
 
-    core::SymbolRef insertMethod(core::MutableContext ctx, const FoundMethod &method) {
+    core::MethodRef insertMethod(core::MutableContext ctx, const FoundMethod &method) {
         auto symbol = defineMethod(ctx, method);
         auto implicitlyPrivate = ctx.owner.data(ctx)->enclosingClass(ctx) == core::Symbols::root();
         if (implicitlyPrivate) {
@@ -982,23 +1062,23 @@ class SymbolDefiner {
     }
 
     void modifyMethod(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == DefinitionKind::Method);
+        ENFORCE(mod.kind == Modifier::Kind::Method);
 
         auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
-        if (mod.name._id == core::Names::privateClassMethod()._id) {
+        if (mod.name == core::Names::privateClassMethod()) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
-        auto method = ctx.state.lookupMethodSymbol(owner, mod.methodName);
+        auto method = ctx.state.lookupMethodSymbol(owner, mod.target);
         if (method.exists()) {
-            switch (mod.name._id) {
-                case core::Names::private_()._id:
-                case core::Names::privateClassMethod()._id:
+            switch (mod.name.rawId()) {
+                case core::Names::private_().rawId():
+                case core::Names::privateClassMethod().rawId():
                     method.data(ctx)->setMethodPrivate();
                     break;
-                case core::Names::protected_()._id:
+                case core::Names::protected_().rawId():
                     method.data(ctx)->setMethodProtected();
                     break;
-                case core::Names::public_()._id:
+                case core::Names::public_().rawId():
                     method.data(ctx)->setMethodPublic();
                     break;
                 default:
@@ -1007,14 +1087,34 @@ class SymbolDefiner {
         }
     }
 
-    core::SymbolRef getClassSymbol(core::MutableContext ctx, const FoundClass &klass) {
+    void modifyConstant(core::MutableContext ctx, const Modifier &mod) {
+        ENFORCE(mod.kind == Modifier::Kind::ClassOrStaticField);
+
+        auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+        auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
+        auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
+        if (constant.exists() && mod.name == core::Names::privateConstant()) {
+            if (constant.isClassOrModule()) {
+                constant.data(ctx)->setClassOrModulePrivate();
+            } else if (constant.isStaticField(ctx)) {
+                constant.data(ctx)->setStaticFieldPrivate();
+            } else if (constant.isTypeMember()) {
+                // Visibility on type members is special (even more restrictive than private),
+                // so we ignore requests to mark type members private.
+            }
+        }
+    }
+
+    core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const FoundClass &klass) {
         core::SymbolRef symbol = squashNames(ctx, klass.klass, ctx.owner.data(ctx)->enclosingClass(ctx));
         ENFORCE(symbol.exists());
 
         const bool isModule = klass.classKind == ast::ClassDef::Kind::Module;
-        if (!symbol.data(ctx)->isClassOrModule()) {
+        auto declLoc = core::Loc(ctx.file, klass.declLoc);
+        if (!symbol.isClassOrModule()) {
             // we might have already mangled the class symbol, so see if we have a symbol that is a class already
-            auto klassSymbol = ctx.state.lookupClassSymbol(symbol.data(ctx)->owner, symbol.data(ctx)->name);
+            auto klassSymbol =
+                ctx.state.lookupClassSymbol(symbol.data(ctx)->owner.asClassOrModuleRef(), symbol.data(ctx)->name);
             if (klassSymbol.exists()) {
                 return klassSymbol;
             }
@@ -1024,21 +1124,21 @@ class SymbolDefiner {
 
             auto origName = symbol.data(ctx)->name;
             ctx.state.mangleRenameSymbol(symbol, symbol.data(ctx)->name);
-            symbol = ctx.state.enterClassSymbol(klass.declLoc, symbol.data(ctx)->owner, origName);
-            symbol.data(ctx)->setIsModule(isModule);
+            klassSymbol = ctx.state.enterClassSymbol(declLoc, symbol.data(ctx)->owner.asClassOrModuleRef(), origName);
+            klassSymbol.data(ctx)->setIsModule(isModule);
 
             auto oldSymCount = ctx.state.classAndModulesUsed();
-            auto newSingleton = symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
-            ENFORCE(newSingleton.classOrModuleIndex() >= oldSymCount,
+            auto newSingleton = klassSymbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
+            ENFORCE(newSingleton.id() >= oldSymCount,
                     "should be a fresh symbol. Otherwise we could be reusing an existing singletonClass");
-            return symbol;
+            return klassSymbol;
         } else if (symbol.data(ctx)->isClassModuleSet() && isModule != symbol.data(ctx)->isClassOrModuleModule()) {
-            if (auto e = ctx.state.beginError(klass.declLoc, core::errors::Namer::ModuleKindRedefinition)) {
+            if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.data(ctx)->show(ctx),
                             symbol.data(ctx)->isClassOrModuleModule() ? "module" : "class");
 
                 for (auto loc : symbol.data(ctx)->locs()) {
-                    if (loc != klass.declLoc) {
+                    if (loc != declLoc) {
                         e.addErrorLine(loc, "Previous definition");
                     }
                 }
@@ -1050,10 +1150,10 @@ class SymbolDefiner {
                 emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol, renamed);
             }
         }
-        return symbol;
+        return symbol.asClassOrModuleRef();
     }
 
-    core::SymbolRef insertClass(core::MutableContext ctx, const FoundClass &klass) {
+    core::ClassOrModuleRef insertClass(core::MutableContext ctx, const FoundClass &klass) {
         auto symbol = getClassSymbol(ctx, klass);
 
         if (klass.classKind == ast::ClassDef::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
@@ -1072,7 +1172,7 @@ class SymbolDefiner {
         // project) locs!
         if (symbol != core::Symbols::root() && symbol != core::Symbols::PackageRegistry() &&
             symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
-            symbol.data(ctx)->addLoc(ctx, klass.declLoc);
+            symbol.data(ctx)->addLoc(ctx, core::Loc(ctx.file, klass.declLoc));
         }
         symbol.data(ctx)->singletonClass(ctx); // force singleton class into existence
 
@@ -1087,7 +1187,7 @@ class SymbolDefiner {
     }
 
     void modifyClass(core::MutableContext ctx, const Modifier &mod) {
-        ENFORCE(mod.kind == DefinitionKind::Class);
+        ENFORCE(mod.kind == Modifier::Kind::Class);
         const auto fun = mod.name;
         auto symbolData = ctx.owner.data(ctx);
         if (fun == core::Names::declareFinal()) {
@@ -1135,14 +1235,14 @@ class SymbolDefiner {
             }
         }
 
-        auto scope = squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner));
-        scope = ensureIsClass(ctx, scope, staticField.name, staticField.asgnLoc);
+        auto scope = ensureIsClass(ctx, squashNames(ctx, staticField.klass, contextClass(ctx, ctx.owner)),
+                                   staticField.name, staticField.asgnLoc);
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, staticField.name);
         auto currSym = ctx.state.lookupSymbol(scope, staticField.name);
         auto name = sym.exists() ? sym.data(ctx)->name : staticField.name;
         if (!sym.exists() && currSym.exists()) {
-            emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc),
-                                       staticField.name.data(ctx)->show(ctx), currSym.data(ctx)->loc());
+            emitRedefinedConstantError(ctx, core::Loc(ctx.file, staticField.asgnLoc), staticField.name.show(ctx),
+                                       currSym.data(ctx)->loc());
             ctx.state.mangleRenameSymbol(currSym, currSym.data(ctx)->name);
         }
         if (sym.exists()) {
@@ -1155,7 +1255,7 @@ class SymbolDefiner {
         }
         sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope, name);
 
-        if (staticField.isTypeAlias && sym.data(ctx)->isStaticField()) {
+        if (staticField.isTypeAlias && sym.isStaticField(ctx)) {
             sym.data(ctx)->setTypeAlias();
         }
 
@@ -1176,7 +1276,7 @@ class SymbolDefiner {
         core::Variance variance = core::Variance::Invariant;
         const bool isTypeTemplate = typeMember.isTypeTemplete;
 
-        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner;
+        auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->singletonClass(ctx) : ctx.owner.asClassOrModuleRef();
 
         core::NameRef foundVariance = typeMember.varianceName;
         if (foundVariance.exists()) {
@@ -1202,12 +1302,12 @@ class SymbolDefiner {
             if (existingTypeMember.data(ctx)->loc().file() != ctx.file) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, typeMember.asgnLoc),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Duplicate type member `{}`", typeMember.name.data(ctx)->show(ctx));
+                    e.setHeader("Duplicate type member `{}`", typeMember.name.show(ctx));
                     e.addErrorLine(existingTypeMember.data(ctx)->loc(), "Also defined here");
                 }
                 if (auto e = ctx.state.beginError(existingTypeMember.data(ctx)->loc(),
                                                   core::errors::Namer::InvalidTypeDefinition)) {
-                    e.setHeader("Duplicate type member `{}`", typeMember.name.data(ctx)->show(ctx));
+                    e.setHeader("Duplicate type member `{}`", typeMember.name.show(ctx));
                     e.addErrorLine(core::Loc(ctx.file, typeMember.asgnLoc), "Also defined here");
                 }
             }
@@ -1243,8 +1343,8 @@ class SymbolDefiner {
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
                 if (oldSym.exists() && !(oldSym.data(ctx)->loc() == core::Loc(ctx.file, typeMember.asgnLoc) ||
                                          oldSym.data(ctx)->loc().isTombStoned(ctx))) {
-                    emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc),
-                                               typeMember.name.data(ctx)->show(ctx), oldSym.data(ctx)->loc());
+                    emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), typeMember.name.show(ctx),
+                                               oldSym.data(ctx)->loc());
                     ctx.state.mangleRenameSymbol(oldSym, typeMember.name);
                 }
                 auto alias =
@@ -1301,14 +1401,15 @@ public:
         for (const auto &modifier : foundDefs->modifiers()) {
             const auto owner = getOwnerSymbol(modifier.owner);
             switch (modifier.kind) {
-                case DefinitionKind::Method:
+                case Modifier::Kind::Method:
                     modifyMethod(ctx.withOwner(owner), modifier);
                     break;
-                case DefinitionKind::Class:
+                case Modifier::Kind::Class:
                     modifyClass(ctx.withOwner(owner), modifier);
                     break;
-                default:
-                    Exception::raise("Found invalid modifier");
+                case Modifier::Kind::ClassOrStaticField:
+                    modifyConstant(ctx.withOwner(owner), modifier);
+                    break;
             }
         }
     }
@@ -1348,7 +1449,7 @@ class TreeSymbolizer {
 
         const bool firstNameRecursive = false;
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
-        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner, constLit->cnst);
+        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
         if (firstName && !existing.exists()) {
             existing = ctx.state.lookupStaticFieldSymbol(newOwner, constLit->cnst);
             if (existing.exists()) {
@@ -1398,14 +1499,14 @@ class TreeSymbolizer {
 
         if (send->args.empty()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
-                e.setHeader("`{}` requires at least one argument", send->fun.data(ctx)->show(ctx));
+                e.setHeader("`{}` requires at least one argument", send->fun.show(ctx));
             }
             return;
         }
 
         if (send->block != nullptr) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
-                e.setHeader("`{}` can not be passed a block", send->fun.data(ctx)->show(ctx));
+                e.setHeader("`{}` can not be passed a block", send->fun.show(ctx));
             }
             return;
         }
@@ -1424,7 +1525,7 @@ class TreeSymbolizer {
                 dest->emplace_back(arg.deepCopy());
             } else {
                 if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::AncestorNotConstant)) {
-                    e.setHeader("`{}` must only contain constant literals", send->fun.data(ctx)->show(ctx));
+                    e.setHeader("`{}` must only contain constant literals", send->fun.show(ctx));
                 }
                 arg = ast::MK::EmptyTree();
             }
@@ -1452,18 +1553,20 @@ public:
             klass.symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
             ENFORCE(klass.symbol.exists());
         } else {
-            if (klass.symbol == core::Symbols::todo()) {
-                klass.symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass.name);
+            auto symbol = klass.symbol;
+            if (symbol == core::Symbols::todo()) {
+                auto squashedSymbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass.name);
+                if (!squashedSymbol.isClassOrModule()) {
+                    klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner.asClassOrModuleRef(),
+                                                               klass.symbol.data(ctx)->name);
+                    ENFORCE(klass.symbol.exists());
+                } else {
+                    klass.symbol = squashedSymbol.asClassOrModuleRef();
+                }
             } else {
                 // Desugar populates a top-level root() ClassDef.
                 // Nothing else should have been typeAlias by now.
-                ENFORCE(klass.symbol == core::Symbols::root());
-            }
-            if (!klass.symbol.data(ctx)->isClassOrModule()) {
-                auto klassSymbol =
-                    ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner, klass.symbol.data(ctx)->name);
-                ENFORCE(klassSymbol.exists());
-                klass.symbol = klassSymbol;
+                ENFORCE(symbol == core::Symbols::root());
             }
         }
         return tree;
@@ -1512,16 +1615,17 @@ public:
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass.ancestors.front().deepCopy()));
         }
 
-        if (klass.symbol != core::Symbols::root() && !klass.declLoc.file().data(ctx).isRBI() &&
+        if (klass.symbol != core::Symbols::root() && !ctx.file.data(ctx).isRBI() &&
             ast::BehaviorHelpers::checkClassDefinesBehavior(klass)) {
             // TODO(dmitry) This won't find errors in fast-incremental mode.
             auto prevLoc = classBehaviorLocs.find(klass.symbol);
             if (prevLoc == classBehaviorLocs.end()) {
-                classBehaviorLocs[klass.symbol] = klass.declLoc;
-            } else if (prevLoc->second.file() != klass.declLoc.file() &&
+                classBehaviorLocs[klass.symbol] = core::Loc(ctx.file, klass.declLoc);
+            } else if (prevLoc->second.file() != ctx.file &&
                        // Ignore packages, which have 'behavior defined in multiple files'.
                        klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
-                if (auto e = ctx.state.beginError(klass.declLoc, core::errors::Namer::MultipleBehaviorDefs)) {
+                if (auto e = ctx.state.beginError(core::Loc(ctx.file, klass.declLoc),
+                                                  core::errors::Namer::MultipleBehaviorDefs)) {
                     e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.data(ctx)->show(ctx));
                     e.addErrorLine(prevLoc->second, "Previous definition");
                 }
@@ -1534,7 +1638,7 @@ public:
         for (auto &stat : ideSeqs) {
             retSeqs.emplace_back(std::move(stat));
         }
-        return ast::MK::InsSeq(loc.offsets(), std::move(retSeqs), ast::MK::EmptyTree());
+        return ast::MK::InsSeq(loc, std::move(retSeqs), ast::MK::EmptyTree());
     }
 
     ast::MethodDef::ARGS_store fillInArgs(core::Context ctx, vector<ast::ParsedArg> parsedArgs,
@@ -1561,7 +1665,7 @@ public:
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
-        core::SymbolRef owner = methodOwner(ctx, method.flags);
+        auto owner = methodOwner(ctx, method.flags);
         auto parsedArgs = ast::ArgParsing::parseArgs(method.args);
         auto sym = ctx.state.lookupMethodSymbolWithHash(owner, method.name, ast::ArgParsing::hashArgs(ctx, parsedArgs));
         ENFORCE(sym.exists());
@@ -1583,9 +1687,9 @@ public:
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
         core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
-        if (!scope.data(ctx)->isClassOrModule()) {
+        if (!scope.isClassOrModule()) {
             auto scopeName = scope.data(ctx)->name;
-            scope = ctx.state.lookupClassSymbol(scope.data(ctx)->owner, scopeName);
+            scope = ctx.state.lookupClassSymbol(scope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
         }
 
         core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
@@ -1602,7 +1706,7 @@ public:
 
         ENFORCE(asgn.lhs.get() == typeName &&
                 asgn.rhs.get() == send); // this method assumes that `asgn` owns `send` and `typeName`
-        if (!ctx.owner.data(ctx)->isClassOrModule()) {
+        if (!ctx.owner.isClassOrModule()) {
             if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Types must be defined in class or module scopes");
             }
@@ -1633,7 +1737,7 @@ public:
             bool isTypeTemplate = send->fun == core::Names::typeTemplate();
             auto onSymbol = isTypeTemplate ? ctx.owner.data(ctx)->lookupSingletonClass(ctx) : ctx.owner;
             ENFORCE(onSymbol.exists());
-            core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
+            core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol.asClassOrModuleRef(), typeName->cnst);
             ENFORCE(sym.exists());
 
             if (send->hasKwArgs()) {
@@ -1644,13 +1748,13 @@ public:
                 for (auto i = start; i < end; i += 2) {
                     auto key = ast::cast_tree<ast::Literal>(send->args[i]);
                     if (key != nullptr && key->isSymbol(ctx)) {
-                        switch (key->asSymbol(ctx)._id) {
-                            case core::Names::fixed()._id:
+                        switch (key->asSymbol(ctx).rawId()) {
+                            case core::Names::fixed().rawId():
                                 fixed = true;
                                 break;
 
-                            case core::Names::lower()._id:
-                            case core::Names::upper()._id:
+                            case core::Names::lower().rawId():
+                            case core::Names::upper().rawId():
                                 bounded = true;
                                 break;
                         }
@@ -1705,10 +1809,10 @@ public:
             return handleAssignment(ctx, std::move(tree));
         }
 
-        switch (send->fun._id) {
-            case core::Names::typeTemplate()._id:
+        switch (send->fun.rawId()) {
+            case core::Names::typeTemplate().rawId():
                 return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
-            case core::Names::typeMember()._id:
+            case core::Names::typeMember().rawId():
                 return handleTypeMemberDefinition(ctx, send, std::move(tree), lhs);
             default:
                 return handleAssignment(ctx, std::move(tree));
@@ -1716,7 +1820,7 @@ public:
     }
 
 private:
-    UnorderedMap<core::SymbolRef, core::Loc> classBehaviorLocs;
+    UnorderedMap<core::ClassOrModuleRef, core::Loc> classBehaviorLocs;
 };
 
 vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
@@ -1739,7 +1843,7 @@ vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", (string)job.file.data(gs).path()}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::TreeMap::apply(ctx, finder, std::move(job.tree));
+                job.tree = ast::ShallowMap::apply(ctx, finder, std::move(job.tree));
                 SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
                 output.emplace_back(move(jobOutput));
             }
@@ -1805,7 +1909,7 @@ vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::
             if (result.gotItem()) {
                 Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", (string)job.file.data(gs).path()}});
                 core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::TreeMap::apply(ctx, inserter, std::move(job.tree));
+                job.tree = ast::ShallowMap::apply(ctx, inserter, std::move(job.tree));
                 output.emplace_back(move(job));
             }
         }

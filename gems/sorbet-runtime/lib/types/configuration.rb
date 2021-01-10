@@ -42,6 +42,34 @@ module T::Configuration
     T::Private::Methods.set_final_checks_on_hooks(false)
   end
 
+  @include_value_in_type_errors = true
+  # Whether to include values in TypeError messages.
+  #
+  # Including values is useful for debugging, but can potentially leak
+  # sensitive information to logs.
+  #
+  # @return [T::Boolean]
+  def self.include_value_in_type_errors?
+    @include_value_in_type_errors
+  end
+
+  # Configure if type errors excludes the value of the problematic type.
+  #
+  # The default is to include values in type errors:
+  #   TypeError: Expected type Integer, got String with value "foo"
+  #
+  # When values are excluded from type errors:
+  #   TypeError: Expected type Integer, got String
+  def self.exclude_value_in_type_errors
+    @include_value_in_type_errors = false
+  end
+
+  # Opposite of exclude_value_in_type_errors.
+  # (Including values in type errors is the default)
+  def self.include_value_in_type_errors
+    @include_value_in_type_errors = true
+  end
+
   # Configure the default checked level for a sig with no explicit `.checked`
   # builder. When unset, the default checked level is `:always`.
   #
@@ -338,7 +366,7 @@ module T::Configuration
     if values.nil?
       @scalar_types = values
     else
-      bad_values = values.select {|v| v.class != String}
+      bad_values = values.reject {|v| v.class == String}
       unless bad_values.empty?
         raise ArgumentError.new("Provided values must all be class name strings.")
       end
@@ -347,7 +375,7 @@ module T::Configuration
     end
   end
 
-  @default_scalar_types = Set.new(%w{
+  @default_scalar_types = Set.new(%w[
     NilClass
     TrueClass
     FalseClass
@@ -357,10 +385,31 @@ module T::Configuration
     Symbol
     Time
     T::Enum
-  }).freeze
+  ]).freeze
 
   def self.scalar_types
     @scalar_types || @default_scalar_types
+  end
+
+  # Guard against overrides of `name` or `to_s`
+  MODULE_NAME = Module.instance_method(:name)
+  private_constant :MODULE_NAME
+
+  @default_module_name_mangler = ->(type) {MODULE_NAME.bind(type).call}
+  @module_name_mangler = nil
+
+  def self.module_name_mangler
+    @module_name_mangler || @default_module_name_mangler
+  end
+
+  # Set to override the default behavior for converting types
+  #   to names in generated code. Used by the runtime implementation
+  #   associated with `--stripe-packages` mode.
+  #
+  # @param [Lambda, Proc, nil] value Proc that converts a type (Class/Module)
+  #   to a String (pass nil to reset to default behavior)
+  def self.module_name_mangler=(handler)
+    @module_name_mangler = handler
   end
 
   # Temporarily disable ruby warnings while executing the given block. This is
@@ -398,7 +447,7 @@ module T::Configuration
   #   should be allowed. Useful to whitelist benign violations, like shim files
   #   generated for an autoloader.
   def self.sealed_violation_whitelist=(sealed_violation_whitelist)
-    if @sealed_violation_whitelist != nil
+    if !@sealed_violation_whitelist.nil?
       raise ArgumentError.new("Cannot overwrite sealed_violation_whitelist after setting it")
     end
 

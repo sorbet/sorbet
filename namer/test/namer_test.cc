@@ -65,19 +65,19 @@ TEST_CASE("namer tests") {
         }
 
         const auto &objectScope = core::Symbols::Object().data(gs);
-        REQUIRE_EQ(core::Symbols::root(), objectScope->owner);
+        REQUIRE_EQ(core::Symbols::root(), objectScope->owner.asClassOrModuleRef());
 
         REQUIRE_EQ(4, objectScope->members().size());
         auto methodSym = objectScope->members().at(gs.enterNameUTF8("hello_world"));
         const auto &symbol = methodSym.data(gs);
-        REQUIRE_EQ(core::Symbols::Object(), symbol->owner);
+        REQUIRE_EQ(core::Symbols::Object(), symbol->owner.asClassOrModuleRef());
         REQUIRE_EQ(1, symbol->arguments().size());
     }
 
     SUBCASE("Idempotent") { // NOLINT
         auto baseSymbols = gs.symbolsUsedTotal();
         auto baseMethods = gs.methodsUsed();
-        auto baseNames = gs.namesUsed();
+        auto baseNames = gs.namesUsedTotal();
 
         auto tree = hello_world(gs);
         ast::ParsedFile treeCopy{tree.tree.deepCopy(), tree.file};
@@ -94,7 +94,7 @@ TEST_CASE("namer tests") {
 
         REQUIRE_EQ(baseSymbols + extraSymbols, gs.symbolsUsedTotal());
         REQUIRE_EQ(baseMethods + extraSymbols, gs.methodsUsed());
-        REQUIRE_EQ(baseNames + 2, gs.namesUsed());
+        REQUIRE_EQ(baseNames + 2, gs.namesUsedTotal());
 
         // Run it again and get the same numbers
         auto localTree = sorbet::local_vars::LocalVars::run(gs, move(treeCopy));
@@ -102,7 +102,7 @@ TEST_CASE("namer tests") {
 
         REQUIRE_EQ(baseSymbols + extraSymbols, gs.symbolsUsedTotal());
         REQUIRE_EQ(baseMethods + extraSymbols, gs.methodsUsed());
-        REQUIRE_EQ(baseNames + 2, gs.namesUsed());
+        REQUIRE_EQ(baseNames + 2, gs.namesUsedTotal());
     }
 
     SUBCASE("NameClass") { // NOLINT

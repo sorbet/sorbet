@@ -205,13 +205,12 @@ ast::TreePtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
 }
 
 ast::TreePtr ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs) {
-    return ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), name, move(rhs));
+    return ast::MK::SyntheticMethod0(loc, loc, name, move(rhs));
 }
 
 ast::TreePtr ASTUtil::mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name, core::LocOffsets argLoc,
                             ast::TreePtr rhs) {
-    return ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), name, ast::MK::Local(argLoc, core::Names::arg0()),
-                                     move(rhs));
+    return ast::MK::SyntheticMethod1(loc, loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs));
 }
 
 ast::TreePtr ASTUtil::mkNilable(core::LocOffsets loc, ast::TreePtr type) {

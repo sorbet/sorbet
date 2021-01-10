@@ -75,7 +75,7 @@ struct Path {
     string show(core::GlobalState &gs) const {
         fmt::memory_buffer buf;
         if (myType) {
-            fmt::format_to(buf, "{} -> {}", toString(), myType->toString(gs));
+            fmt::format_to(buf, "{} -> {}", toString(), myType.toString(gs));
         }
         fmt::format_to(buf, "{}",
                        fmt::map_join(children, "", [&](const auto &child) -> string { return child->show(gs); }));
@@ -105,7 +105,7 @@ struct Path {
         }
     }
 
-    void enter(core::GlobalState &gs, core::SymbolRef parent, core::SymbolRef owner) {
+    void enter(core::GlobalState &gs, core::SymbolRef parent, core::ClassOrModuleRef owner) {
         if (children.empty()) {
             parent.data(gs)->resultType = myType;
         } else {
@@ -216,7 +216,7 @@ void configatron::fillInFromFileSystem(core::GlobalState &gs, const vector<strin
         handleFile(gs, file, rootNode);
     }
 
-    core::SymbolRef configatron =
+    auto configatron =
         gs.enterMethodSymbol(core::Loc::none(), core::Symbols::Kernel(), gs.enterNameUTF8("configatron"));
     rootNode->enter(gs, configatron, core::Symbols::root());
 

@@ -549,9 +549,9 @@ There are a handful of such paired data structures: `Symbol`/`SymbolRef`, and
 
 Why not just use pointers? `Ref`s are usually smaller than an 8-byte pointer.
 It's also nice to have the distinction reinforced in the type system. Also the
-"dereference" operation on these types is written `foo.data()` instead of `*foo`
-or `foo->`. Sorbet subscribes to the philosophy that slow operations should be
-longer to type.
+"dereference" operation on these types is written `foo.data*()` instead of
+`*foo` or `foo->`. Sorbet subscribes to the philosophy that slow operations
+should be longer to type.
 
 We use various `.enterFoo` methods on `GlobalState` to create new
 objects owned directly by `GlobalState`. These methods return `FooRef`s. These

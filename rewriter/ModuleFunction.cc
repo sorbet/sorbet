@@ -119,7 +119,7 @@ vector<ast::TreePtr> ModuleFunction::run(core::MutableContext ctx, ast::Send *se
                 methodName = lit->asSymbol(ctx);
             } else if (lit->isString(ctx)) {
                 core::NameRef nameRef = lit->asString(ctx);
-                auto shortName = nameRef.data(ctx)->shortName(ctx);
+                auto shortName = nameRef.shortName(ctx);
                 bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
                                  absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
                 if (validAttr) {
@@ -135,8 +135,7 @@ vector<ast::TreePtr> ModuleFunction::run(core::MutableContext ctx, ast::Send *se
             ast::MethodDef::ARGS_store args;
             args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
             args.emplace_back(ast::make_tree<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
-            auto methodDef = ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), methodName, std::move(args),
-                                                      ast::MK::EmptyTree());
+            auto methodDef = ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::EmptyTree());
             ast::cast_tree_nonnull<ast::MethodDef>(methodDef).flags.isSelfMethod = true;
             stats.emplace_back(std::move(methodDef));
         } else {

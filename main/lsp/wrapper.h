@@ -52,7 +52,6 @@ public:
         SignatureHelp = 7,
         DocumentHighlight = 9,
         DocumentFormat = 10,
-        Rename = 11,
         GoToImplementation = 12,
     };
 

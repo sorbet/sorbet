@@ -47,7 +47,7 @@ begin
         end
         s = begin
           ::Sorbet::Private::Static.keep_for_typechecking(7)
-          T.cast(6, T.untyped)
+          T.cast(6, Integer)
         end
         s.+("hi")
         s.+(3)
@@ -56,8 +56,8 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"untyped")
-        ::Sorbet::Private::Static.keep_def(<self>, :"test_casts")
+        ::Sorbet::Private::Static.keep_def(<self>, :untyped)
+        ::Sorbet::Private::Static.keep_def(<self>, :test_casts)
         <emptyTree>
       end
     end

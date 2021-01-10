@@ -54,8 +54,8 @@ begin
 
     def self.<static-init>(<blk>)
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"normal_method")
-        ::Sorbet::Private::Static.keep_self_def(<self>, :"normal_static_method")
+        ::Sorbet::Private::Static.keep_def(<self>, :normal_method)
+        ::Sorbet::Private::Static.keep_self_def(<self>, :normal_static_method)
         begin
           ::<Magic>.<define-top-class-or-module>(::NormalClass::InnerClass)
           ::Sorbet::Private::Static.keep_for_ide(::NormalClass::InnerClass)

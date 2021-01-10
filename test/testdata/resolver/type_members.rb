@@ -15,9 +15,20 @@ class Invalids
   BadArg = type_member(junk: 1)
          # ^^^^^^^^^^^^^^^^^^^^ error: Missing required param `fixed`
          # ^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `junk` passed for method
-                           # ^ error: Unsupported type syntax
+                           # ^ error: Unsupported literal in type syntax
 end
 
+module TypeParamDependsOnTypeParam
+  extend T::Generic
+
+  # ResolveTypeMembersWalk corner case: The type of this type member depends on a class with a type parameter.
+  Test = type_member(:out, upper: Parent[Integer])
+end
+
+module TypeAliasDependsOnTypeParam
+  # ResolveTypeMembersWalk corner case: The type of this type alias depends on a class with a type parameter.
+  Test = T.type_alias{Parent[Integer]}
+end
 
 class Parent
   extend T::Generic

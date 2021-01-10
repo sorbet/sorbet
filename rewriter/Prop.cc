@@ -118,29 +118,29 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     ret.loc = send->loc;
 
     // ----- Is this a send we care about? -----
-    switch (send->fun._id) {
-        case core::Names::prop()._id:
+    switch (send->fun.rawId()) {
+        case core::Names::prop().rawId():
             // Nothing special
             break;
-        case core::Names::const_()._id:
+        case core::Names::const_().rawId():
             ret.isImmutable = true;
             break;
-        case core::Names::tokenProp()._id:
-        case core::Names::timestampedTokenProp()._id:
+        case core::Names::tokenProp().rawId():
+        case core::Names::timestampedTokenProp().rawId():
             ret.name = core::Names::token();
-            ret.nameLoc = core::LocOffsets{send->loc.beginPos() +
-                                               (send->fun._id == core::Names::timestampedTokenProp()._id ? 12 : 0),
-                                           send->loc.endPos() - 5}; // get the 'token' part of it
+            ret.nameLoc =
+                core::LocOffsets{send->loc.beginPos() + (send->fun == core::Names::timestampedTokenProp() ? 12 : 0),
+                                 send->loc.endPos() - 5}; // get the 'token' part of it
             ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
-        case core::Names::createdProp()._id:
+        case core::Names::createdProp().rawId():
             ret.name = core::Names::created();
             ret.nameLoc =
                 core::LocOffsets{send->loc.beginPos(),
                                  send->loc.endPos() - 5}; // 5 is the difference between `created_prop` and `created`
             ret.type = ast::MK::Constant(send->loc, core::Symbols::Float());
             break;
-        case core::Names::merchantProp()._id:
+        case core::Names::merchantProp().rawId():
             ret.isImmutable = true;
             ret.name = core::Names::merchant();
             ret.nameLoc =
@@ -184,11 +184,11 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             // Type must have been inferred from prop method (like created_prop) or
             // been given in second argument.
             return nullopt;
-        } else {
-            ret.type = ASTUtil::dupType(send->args[1]);
-            if (ret.type == nullptr) {
-                return nullopt;
-            }
+        }
+
+        ret.type = ASTUtil::dupType(send->args[1]);
+        if (ret.type == nullptr) {
+            return nullopt;
         }
     }
 
@@ -403,12 +403,12 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
         //  T.unsafe(nil)
         // end
 
-        auto fkMethod = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_");
+        auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
 
         ast::TreePtr arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        nodes.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), fkMethod, std::move(arg),
-                                                     ast::MK::RaiseUnimplemented(loc)));
+        nodes.emplace_back(
+            ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
 
         // sig {params(opts: T.untyped).returns($foreign)}
         nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
@@ -418,11 +418,11 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
         //  T.unsafe(nil)
         // end
 
-        auto fkMethodBang = ctx.state.enterNameUTF8(name.data(ctx)->show(ctx) + "_!");
+        auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
         ast::TreePtr arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        nodes.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), fkMethodBang, std::move(arg2),
-                                                     ast::MK::RaiseUnimplemented(loc)));
+        nodes.emplace_back(
+            ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::RaiseUnimplemented(loc)));
     }
 
     return nodes;
@@ -433,39 +433,39 @@ ast::TreePtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send)
 
     if (prop.hasWithoutAccessors) {
         return result;
+    }
+
+    auto withoutAccessors = ast::MK::Symbol(send->loc, core::Names::withoutAccessors());
+    auto true_ = ast::MK::True(send->loc);
+
+    auto *copy = ast::cast_tree<ast::Send>(result);
+    if (copy->hasKwArgs() || copy->args.empty()) {
+        // append to the inline keyword arguments of the send
+        auto pos = copy->args.end();
+        if (copy->hasKwSplat()) {
+            pos--;
+        }
+
+        pos = copy->args.insert(pos, move(withoutAccessors));
+        pos++;
+        copy->args.insert(pos, move(true_));
     } else {
-        auto withoutAccessors = ast::MK::Symbol(send->loc, core::Names::withoutAccessors());
-        auto true_ = ast::MK::True(send->loc);
-
-        auto *copy = ast::cast_tree<ast::Send>(result);
-        if (copy->hasKwArgs() || copy->args.empty()) {
-            // append to the inline keyword arguments of the send
+        if (auto *hash = ast::cast_tree<ast::Hash>(copy->args.back())) {
+            hash->keys.emplace_back(move(withoutAccessors));
+            hash->values.emplace_back(move(true_));
+        } else {
             auto pos = copy->args.end();
-            if (copy->hasKwSplat()) {
-                pos--;
-            }
-
             pos = copy->args.insert(pos, move(withoutAccessors));
             pos++;
             copy->args.insert(pos, move(true_));
-        } else {
-            if (auto *hash = ast::cast_tree<ast::Hash>(copy->args.back())) {
-                hash->keys.emplace_back(move(withoutAccessors));
-                hash->values.emplace_back(move(true_));
-            } else {
-                auto pos = copy->args.end();
-                pos = copy->args.insert(pos, move(withoutAccessors));
-                pos++;
-                copy->args.insert(pos, move(true_));
-            }
         }
-
-        return result;
     }
+
+    return result;
 }
 
 vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
-                                       const vector<PropInfo> &props) {
+                                       core::LocOffsets klassDeclLoc, const vector<PropInfo> &props) {
     ast::MethodDef::ARGS_store args;
     ast::Send::ARGS_store sigArgs;
     args.reserve(props.size());
@@ -501,12 +501,12 @@ vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffset
         stats.emplace_back(ast::MK::Assign(prop.loc, ast::MK::Instance(prop.nameLoc, ivarName),
                                            ast::MK::Local(prop.nameLoc, prop.name)));
     }
-    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassLoc));
+    auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassDeclLoc));
 
     vector<ast::TreePtr> result;
-    result.emplace_back(ast::MK::SigVoid(klassLoc, std::move(sigArgs)));
-    result.emplace_back(ast::MK::SyntheticMethod(klassLoc, core::Loc(ctx.file, klassLoc), core::Names::initialize(),
-                                                 std::move(args), std::move(body)));
+    result.emplace_back(ast::MK::SigVoid(klassDeclLoc, std::move(sigArgs)));
+    result.emplace_back(
+        ast::MK::SyntheticMethod(klassLoc, klassDeclLoc, core::Names::initialize(), std::move(args), std::move(body)));
     return result;
 }
 
@@ -555,7 +555,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
     // we define our synthesized initialize first so that if the user wrote one themselves, it overrides ours.
     if (wantTypedInitialize(syntacticSuperClass)) {
         // For direct T::Struct subclasses, we know that seeing no props means the constructor should be zero-arity.
-        for (auto &stat : mkTypedInitialize(ctx, klass->loc, props)) {
+        for (auto &stat : mkTypedInitialize(ctx, klass->loc, klass->declLoc, props)) {
             klass->rhs.emplace_back(std::move(stat));
         }
     }

@@ -84,7 +84,7 @@ module T::Props
 
         cls = decorated_class
         cls.class_eval(source)
-        lazily_defined_methods.keys.each {|name| cls.send(:private, name)}
+        lazily_defined_methods.each_key {|name| cls.send(:private, name)}
         lazily_defined_methods.clear
       end
     end

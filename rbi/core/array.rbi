@@ -2361,8 +2361,13 @@ class Array < Object
   # ```ruby
   # a.shuffle(random: Random.new(1))  #=> [1, 3, 2]
   # ```
-  sig {returns(T::Array[Elem])}
-  def shuffle(); end
+  sig do
+    params(
+        random: T.nilable(Random)
+    )
+    .returns(T::Array[Elem])
+  end
+  def shuffle(random: nil); end
 
   # Shuffles elements in `self` in place.
   #
@@ -2377,8 +2382,13 @@ class Array < Object
   # ```ruby
   # a.shuffle!(random: Random.new(1))  #=> [1, 3, 2]
   # ```
-  sig {returns(T::Array[Elem])}
-  def shuffle!(); end
+  sig do
+    params(
+        random: T.nilable(Random)
+    )
+    .returns(T::Array[Elem])
+  end
+  def shuffle!(random: nil); end
 
   # Deletes the element(s) given by an `index` (optionally up to `length`
   # elements) or by a `range`.

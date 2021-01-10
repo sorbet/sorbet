@@ -243,3 +243,18 @@ module Foo
 end
 
 Primus::Require.for_autoload(Foo, "autogen-autoloader/inplace.rb")
+
+--- with different root object
+No errors! Great job.
+
+
+Opus::Require.autoload_map(MyRootObject, {
+  Foo: "autoloader/Foo.rb",
+})
+
+Opus::Require.on_autoload('Foo')
+
+module Foo
+end
+
+Opus::Require.for_autoload(Foo, "test/cli/autogen-autoloader/inplace.rb")

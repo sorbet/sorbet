@@ -242,7 +242,7 @@ TEST_CASE_FIXTURE(ProtocolTest, "DoesNotMergeFileChangesAcrossNonDelayableReques
         CHECK((*diagnosticParams)->uri.find("foo.rb") != string::npos);
         auto &diagnostics = (*diagnosticParams)->diagnostics;
         CHECK_EQ(diagnostics.size(), 1);
-        CHECK(diagnostics.at(0)->message.find("Returning value") != string::npos);
+        CHECK(diagnostics.at(0)->message.find("for method result type") != string::npos);
     }
     CHECK(msgs.at(1)->isResponse());
     if (auto diagnosticParams = getPublishDiagnosticParams(msgs.at(2)->asNotification())) {

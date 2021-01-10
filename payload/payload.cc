@@ -42,10 +42,19 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
         Timer timeit(gs->tracer(), "read_global_state.binary");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
     }
-    ENFORCE(gs->namesUsed() < core::GlobalState::PAYLOAD_MAX_NAME_COUNT,
-            "Payload defined `{}` names, which is greater than the expected maximum of `{}`. Consider updating "
-            "`PAYLOAD_MAX_NAME_COUNT` in `GlobalState`.",
-            gs->namesUsed(), core::GlobalState::PAYLOAD_MAX_NAME_COUNT);
+    ENFORCE(gs->utf8NamesUsed() < core::GlobalState::PAYLOAD_MAX_UTF8_NAME_COUNT,
+            "Payload defined `{}` UTF8 names, which is greater than the expected maximum of `{}`. Consider updating "
+            "`PAYLOAD_MAX_UTF8_NAME_COUNT` in `GlobalState`.",
+            gs->utf8NamesUsed(), core::GlobalState::PAYLOAD_MAX_UTF8_NAME_COUNT);
+    ENFORCE(
+        gs->constantNamesUsed() < core::GlobalState::PAYLOAD_MAX_CONSTANT_NAME_COUNT,
+        "Payload defined `{}` Constant names, which is greater than the expected maximum of `{}`. Consider updating "
+        "`PAYLOAD_MAX_CONSTANT_NAME_COUNT` in `GlobalState`.",
+        gs->constantNamesUsed(), core::GlobalState::PAYLOAD_MAX_CONSTANT_NAME_COUNT);
+    ENFORCE(gs->uniqueNamesUsed() < core::GlobalState::PAYLOAD_MAX_UNIQUE_NAME_COUNT,
+            "Payload defined `{}` Unique names, which is greater than the expected maximum of `{}`. Consider updating "
+            "`PAYLOAD_MAX_UNIQUE_NAME_COUNT` in `GlobalState`.",
+            gs->uniqueNamesUsed(), core::GlobalState::PAYLOAD_MAX_UNIQUE_NAME_COUNT);
     ENFORCE(gs->fieldsUsed() < core::GlobalState::PAYLOAD_MAX_FIELD_COUNT,
             "Payload defined `{}` fields, which is greater than the expected maximum of `{}`. Consider updating "
             "`PAYLOAD_MAX_FIELD_COUNT` in `GlobalState`.",

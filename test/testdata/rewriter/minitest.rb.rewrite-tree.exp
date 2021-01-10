@@ -1,10 +1,10 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
-  def junk<<C <todo sym>>>(&<blk>)
+  def junk<<todo method>>(&<blk>)
     <emptyTree>
   end
 
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (::<todo sym>)
-    def outside_method<<C <todo sym>>>(&<blk>)
+    def outside_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -12,7 +12,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <it 'works outside'><<C <todo sym>>>(&<blk>)
+    def <it 'works outside'><<todo method>>(&<blk>)
       <self>.outside_method()
     end
 
@@ -20,23 +20,23 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <it 'allows constants inside of IT'><<C <todo sym>>>(&<blk>)
-      ::Module.const_set(:"CONST", 10)
+    def <it 'allows constants inside of IT'><<todo method>>(&<blk>)
+      ::Module.const_set(:CONST, 10)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.void()
     end
 
-    def <it 'allows let-ed constants inside of IT'><<C <todo sym>>>(&<blk>)
-      ::Module.const_set(:"C2", <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
+    def <it 'allows let-ed constants inside of IT'><<todo method>>(&<blk>)
+      ::Module.const_set(:C2, <emptyTree>::<C T>.let(10, <emptyTree>::<C Integer>))
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
       <self>.void()
     end
 
-    def <it 'allows path constants inside of IT'><<C <todo sym>>>(&<blk>)
+    def <it 'allows path constants inside of IT'><<todo method>>(&<blk>)
       <emptyTree>::<C C3>.new()
     end
 
@@ -44,11 +44,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'><<C <todo sym>>>(&<blk>)
+    def <it '::<Magic>.<string-interpolate>("finds errors in the test name: ", <self>.bad_variable())'><<todo method>>(&<blk>)
       <emptyTree>
     end
 
-    def instance_helper<<C <todo sym>>>(&<blk>)
+    def instance_helper<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -56,7 +56,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def initialize<<C <todo sym>>>(&<blk>)
+    def initialize<<todo method>>(&<blk>)
       begin
         @foo = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
         <self>.instance_helper()
@@ -67,7 +67,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <after><<C <todo sym>>>(&<blk>)
+    def <after><<todo method>>(&<blk>)
       begin
         @foo = nil
         <self>.instance_helper()
@@ -78,22 +78,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def <it 'can read foo'><<C <todo sym>>>(&<blk>)
+    def <it 'can read foo'><<todo method>>(&<blk>)
       begin
         <emptyTree>::<C T>.assert_type!(@foo, <emptyTree>::<C Integer>)
         <self>.instance_helper()
       end
     end
 
-    def self.random_method<<C <todo sym>>>(&<blk>)
+    def self.random_method<<todo method>>(&<blk>)
       <emptyTree>
     end
 
-    def self.it<<C <todo sym>>>(*args, &<blk>)
+    def self.it<<todo method>>(*args, &<blk>)
       <emptyTree>
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"outside_method")
+    ::Sorbet::Private::Static.keep_def(<self>, :outside_method)
 
     begin
       "works outside"
@@ -130,7 +130,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     class <emptyTree>::<C <describe 'some inner tests'>><<C <todo sym>>> < (<self>)
-      def inside_method<<C <todo sym>>>(&<blk>)
+      def inside_method<<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -138,7 +138,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def <it 'works inside'><<C <todo sym>>>(&<blk>)
+      def <it 'works inside'><<todo method>>(&<blk>)
         begin
           <self>.outside_method()
           <self>.inside_method()
@@ -146,7 +146,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       begin
-        ::Sorbet::Private::Static.keep_def(<self>, :"inside_method")
+        ::Sorbet::Private::Static.keep_def(<self>, :inside_method)
         begin
           "works inside"
           ::Sorbet::Private::Static.keep_def(<self>, :"<it \'works inside\'>")
@@ -154,18 +154,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"instance_helper")
+    ::Sorbet::Private::Static.keep_def(<self>, :instance_helper)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"initialize")
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :"<after>")
+    ::Sorbet::Private::Static.keep_def(<self>, :<after>)
 
     begin
       "can read foo"
       ::Sorbet::Private::Static.keep_def(<self>, :"<it \'can read foo\'>")
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"random_method")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :random_method)
 
     <self>.random_method() do ||
       @random_method_ivar = <emptyTree>::<C T>.let(3, <emptyTree>::<C Integer>)
@@ -176,7 +176,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def <it 'Object'><<C <todo sym>>>(&<blk>)
+      def <it 'Object'><<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -184,7 +184,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def <it 'Object'><<C <todo sym>>>(&<blk>)
+      def <it 'Object'><<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -200,7 +200,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :"it")
+    ::Sorbet::Private::Static.keep_self_def(<self>, :it)
 
     <self>.it("ignores methods without a block")
 
@@ -213,7 +213,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.void()
       end
 
-      def <it 'contains nested describes'><<C <todo sym>>>(&<blk>)
+      def <it 'contains nested describes'><<todo method>>(&<blk>)
         <emptyTree>
       end
 
@@ -228,7 +228,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  ::Sorbet::Private::Static.keep_def(<self>, :"junk")
+  ::Sorbet::Private::Static.keep_def(<self>, :junk)
 
   module <emptyTree>::<C Mod><<C <todo sym>>> < ()
     class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)

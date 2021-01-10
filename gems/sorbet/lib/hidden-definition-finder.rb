@@ -121,6 +121,7 @@ class Sorbet::Private::HiddenMethodFinder
     puts "Printing #{TMP_RBI}'s symbol table into #{RBI_CONSTANTS}"
     io = IO.popen(
       [
+        {'SRB_SKIP_GEM_RBIS' => 'true'},
         File.realpath("#{__dir__}/../bin/srb"),
         'tc',
         # Make sure we don't load a sorbet/config in your cwd

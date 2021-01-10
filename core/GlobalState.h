@@ -13,10 +13,11 @@
 
 namespace sorbet::core {
 
-class Name;
 class NameRef;
 class Symbol;
 class SymbolRef;
+class ClassOrModuleRef;
+class MethodRef;
 class GlobalSubstitution;
 class ErrorQueue;
 struct GlobalStateHash;
@@ -32,10 +33,11 @@ class SerializerImpl;
 } // namespace serialize
 
 class GlobalState final {
-    friend Name;
     friend NameRef;
     friend Symbol;
     friend SymbolRef;
+    friend ClassOrModuleRef;
+    friend MethodRef;
     friend File;
     friend FileRef;
     friend GlobalSubstitution;
@@ -53,7 +55,9 @@ public:
 
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload. Enforced in payload.cc.
-    static constexpr unsigned int PAYLOAD_MAX_NAME_COUNT = 32768;
+    static constexpr unsigned int PAYLOAD_MAX_UTF8_NAME_COUNT = 16384;
+    static constexpr unsigned int PAYLOAD_MAX_CONSTANT_NAME_COUNT = 4096;
+    static constexpr unsigned int PAYLOAD_MAX_UNIQUE_NAME_COUNT = 4096;
     static constexpr unsigned int PAYLOAD_MAX_CLASS_AND_MODULE_COUNT = 8192;
     static constexpr unsigned int PAYLOAD_MAX_METHOD_COUNT = 32768;
     static constexpr unsigned int PAYLOAD_MAX_FIELD_COUNT = 4096;
@@ -65,46 +69,55 @@ public:
 
     // Expand symbol and name tables to the given lengths. Does nothing if the value is <= current capacity.
     void preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 fieldsSize, u4 typeArgumentsSize,
-                           u4 typeMembersSize, u4 nameSize);
+                           u4 typeMembersSize, u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize);
 
     GlobalState(const GlobalState &) = delete;
     GlobalState(GlobalState &&) = delete;
 
     ~GlobalState() = default;
 
-    SymbolRef enterClassSymbol(Loc loc, SymbolRef owner, NameRef name);
-    SymbolRef enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance);
-    SymbolRef enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance);
-    SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
-    SymbolRef enterNewMethodOverload(Loc loc, SymbolRef original, core::NameRef originalName, u4 num,
-                                     const std::vector<int> &argsToKeep);
-    SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
-    SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
-    ArgInfo &enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
+    ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    SymbolRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
+    SymbolRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
+    MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    MethodRef enterNewMethodOverload(Loc loc, MethodRef original, core::NameRef originalName, u4 num,
+                                     const std::vector<bool> &argsToKeep);
+    SymbolRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    SymbolRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    ArgInfo &enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name);
 
     SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, 0);
     }
-    SymbolRef lookupTypeMemberSymbol(SymbolRef owner, NameRef name) const {
+    SymbolRef lookupTypeMemberSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER);
     }
-    SymbolRef lookupClassSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE);
+    ClassOrModuleRef lookupClassSymbol(ClassOrModuleRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE).asClassOrModuleRef();
     }
-    SymbolRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
+    MethodRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
+        // TODO: Maybe lookupSymbolWithFlags should accept a default symbol argument?
+        auto sym = lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
+        if (!sym.exists()) {
+            return Symbols::noMethod();
+        } else {
+            return sym.asMethodRef();
+        }
     }
-    SymbolRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const std::vector<u4> &methodHash) const;
+    MethodRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const std::vector<u4> &methodHash) const;
     SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
     }
+    SymbolRef lookupFieldSymbol(SymbolRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::FIELD);
+    }
     SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
 
-    SymbolRef staticInitForFile(Loc loc);
-    SymbolRef staticInitForClass(SymbolRef klass, Loc loc);
+    MethodRef staticInitForFile(Loc loc);
+    MethodRef staticInitForClass(ClassOrModuleRef klass, Loc loc);
 
-    SymbolRef lookupStaticInitForFile(Loc loc) const;
-    SymbolRef lookupStaticInitForClass(SymbolRef klass) const;
+    MethodRef lookupStaticInitForFile(Loc loc) const;
+    MethodRef lookupStaticInitForClass(ClassOrModuleRef klass) const;
 
     NameRef enterNameUTF8(std::string_view nm);
     NameRef lookupNameUTF8(std::string_view nm) const;
@@ -128,7 +141,10 @@ public:
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName);
     spdlog::logger &tracer() const;
-    unsigned int namesUsed() const;
+    unsigned int namesUsedTotal() const;
+    unsigned int utf8NamesUsed() const;
+    unsigned int constantNamesUsed() const;
+    unsigned int uniqueNamesUsed() const;
 
     unsigned int classAndModulesUsed() const;
     unsigned int methodsUsed() const;
@@ -223,6 +239,10 @@ public:
     // Contains a string to be used as the base of the error URL.
     // The error code is appended to this string.
     std::string errorUrlBase;
+
+    // If 'true', enforce use of Ruby 3.0-style keyword args.
+    bool ruby3KeywordArgs = false;
+
     void ignoreErrorClassForSuggestTyped(int code);
     void suppressErrorClass(int code);
     void onlyShowErrorClass(int code);
@@ -238,7 +258,9 @@ private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
     struct DeepCloneHistoryEntry {
         int globalStateId;
-        unsigned int lastNameKnownByParentGlobalState;
+        unsigned int lastUTF8NameKnownByParentGlobalState;
+        unsigned int lastConstantNameKnownByParentGlobalState;
+        unsigned int lastUniqueNameKnownByParentGlobalState;
     };
     std::vector<DeepCloneHistoryEntry> deepCloneHistory;
 
@@ -246,14 +268,16 @@ private:
     std::vector<std::shared_ptr<std::vector<char>>> strings;
     std::string_view enterString(std::string_view nm);
     u2 stringsLastPageUsed = STRINGS_PAGE_SIZE + 1;
-    std::vector<Name> names;
+    std::vector<UTF8Name> utf8Names;
+    std::vector<ConstantName> constantNames;
+    std::vector<UniqueName> uniqueNames;
     UnorderedMap<std::string, FileRef> fileRefByPath;
     std::vector<Symbol> classAndModules;
     std::vector<Symbol> methods;
     std::vector<Symbol> fields;
     std::vector<Symbol> typeMembers;
     std::vector<Symbol> typeArguments;
-    std::vector<std::pair<unsigned int, unsigned int>> namesByHash;
+    std::vector<std::pair<unsigned int, u4>> namesByHash;
     std::vector<std::shared_ptr<File>> files;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
@@ -271,15 +295,12 @@ private:
     bool symbolTableFrozen = true;
     bool fileTableFrozen = true;
 
-    void expandNames(u4 newSize);
+    void expandNames(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNameSize);
 
-    SymbolRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().classOrModuleIndex(),
-                              bool isModule = false);
+    ClassOrModuleRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().id(), bool isModule = false);
 
     SymbolRef lookupSymbolSuchThat(SymbolRef owner, NameRef name, std::function<bool(SymbolRef)> pred) const;
     SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;
-
-    SymbolRef getTopLevelClassSymbol(NameRef name);
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };

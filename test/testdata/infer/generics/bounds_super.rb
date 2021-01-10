@@ -41,6 +41,6 @@ end
 class D1 < A
   T1 = type_member
      # ^^^^^^^^^^^ error: parent lower bound `Serval` is not a subtype of lower bound `T.noreturn`
-     # ^^^^^^^^^^^ error: upper bound `<any>` is not a subtype of parent upper bound `Animal`
+     # ^^^^^^^^^^^ error: upper bound `<top>` is not a subtype of parent upper bound `Animal`
 end
 

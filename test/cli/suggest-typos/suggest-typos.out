@@ -5,5 +5,4 @@
     -e:1: Replace with `to_c`
      1 |1.to_
           ^^^
-
 Errors: 1

@@ -105,7 +105,7 @@ class MyTest
     end
   end
 
-  test_each_hash([1, 2, 3]) do |k, v| # error: Expected `T::Hash[K, V]`
+  test_each_hash([1, 2, 3]) do |k, v| # error: Expected `T::Hash[T.type_parameter(:K), T.type_parameter(:V)]`
     it "fails to typecheck with non-hash arguments to `test_each-hash`" do
       puts k, v
     end

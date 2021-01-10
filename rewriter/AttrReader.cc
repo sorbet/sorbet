@@ -26,7 +26,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Tre
             loc = core::LocOffsets{loc.beginPos() + 1, loc.endPos()};
         } else if (lit->isString(ctx)) {
             core::NameRef nameRef = lit->asString(ctx);
-            auto shortName = nameRef.data(ctx)->shortName(ctx);
+            auto shortName = nameRef.shortName(ctx);
             bool validAttr = (isalpha(shortName.front()) || shortName.front() == '_') &&
                              absl::c_all_of(shortName, [](char c) { return isalnum(c) || c == '_'; });
             if (validAttr) {
@@ -56,12 +56,7 @@ bool isT(const ast::TreePtr &expr) {
     if (t == nullptr || t->cnst != core::Names::Constants::T()) {
         return false;
     }
-    auto &scope = t->scope;
-    if (ast::isa_tree<ast::EmptyTree>(scope)) {
-        return true;
-    }
-    auto root = ast::cast_tree<ast::ConstantLit>(scope);
-    return root != nullptr && root->symbol == core::Symbols::root();
+    return ast::MK::isRootScope(t->scope);
 }
 
 bool isTNilableOrUntyped(const ast::TreePtr &expr) {
@@ -245,8 +240,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
                 }
             }
 
-            stats.emplace_back(
-                ast::MK::SyntheticMethod0(loc, core::Loc(ctx.file, loc), name, ast::MK::Instance(argLoc, varName)));
+            stats.emplace_back(ast::MK::SyntheticMethod0(loc, loc, name, ast::MK::Instance(argLoc, varName)));
         }
     }
 
@@ -279,8 +273,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
             } else {
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
             }
-            stats.emplace_back(ast::MK::SyntheticMethod1(loc, core::Loc(ctx.file, loc), setName,
-                                                         ast::MK::Local(argLoc, name), move(body)));
+            stats.emplace_back(ast::MK::SyntheticMethod1(loc, loc, setName, ast::MK::Local(argLoc, name), move(body)));
         }
     }
 

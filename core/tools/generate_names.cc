@@ -149,6 +149,7 @@ NameDef names[] = {
     {"protected_", "protected"},
     {"public_", "public"},
     {"privateClassMethod", "private_class_method"},
+    {"privateConstant", "private_constant"},
     {"moduleFunction", "module_function"},
     {"aliasMethod", "alias_method"},
 
@@ -175,6 +176,7 @@ NameDef names[] = {
     {"merchantProp", "merchant_prop"},
     {"encryptedProp", "encrypted_prop"},
     {"array"},
+    {"defDelegator", "def_delegator"},
     {"delegate"},
     {"type"},
     {"optional"},
@@ -277,9 +279,8 @@ NameDef names[] = {
     // on a class to lookup an associated symbol with some extra info.
     {"sealedSubclasses", "sealed_subclasses"},
 
-    // This name is used as a key in SymbolInfo::members to store the module
-    // registered via the `mixes_in_class_method` name.
-    {"classMethods", "<class methods>"},
+    // Used to store arguments to a "mixes_in_class_methods()" call
+    {"mixedInClassMethods", "<mixed_in_class_methods>"},
     {"mixesInClassMethods", "mixes_in_class_methods"},
 
     {"blockTemp", "<block>"},
@@ -317,6 +318,7 @@ NameDef names[] = {
     {"arg1"},
     {"arg2"},
     {"opts"},
+    {"args"},
     {"Elem", "Elem", true},
     {"keepForIde", "keep_for_ide"},
     {"keepForTypechecking", "keep_for_typechecking"},
@@ -326,6 +328,7 @@ NameDef names[] = {
     {"retry", "<retry>"},
     {"unresolvedAncestors", "<unresolved-ancestors>"},
     {"defineTopClassOrModule", "<define-top-class-or-module>"},
+    {"nilForSafeNavigation", "<nil-for-safe-navigation>"},
 
     {"isA_p", "is_a?"},
     {"kindOf_p", "kind_of?"},
@@ -343,13 +346,22 @@ NameDef names[] = {
     {"min"},
     {"max"},
 
+    // Argument forwarding
+    {"fwdArgs", "<fwd-args>"},
+    {"fwdKwargs", "<fwd-kwargs>"},
+    {"fwdBlock", "<fwd-block>"},
+
     // Enumerable#flat_map has special-case logic in Infer
     {"flatMap", "flat_map"},
 
-    // Array#flatten, #product and #compact are also custom-implemented
+    // Array#flatten, #product, #compact and #zip are also custom-implemented
     {"flatten"},
     {"product"},
     {"compact"},
+    {"zip"},
+
+    // Pattern matching
+    {"patternMatch", "<pattern-match>"},
 
     {"staticInit", "<static-init>"},
 
@@ -369,9 +381,10 @@ NameDef names[] = {
     {"PackageRegistry", "<PackageRegistry>", true},
     {"exportMethods", "export_methods"},
     {"PackageMethods", "<PackageMethods>", true},
+    {"PkgRoot_Package", "PkgRoot_Package", true},
 
     // GlobalState initEmpty()
-    {"Top", "<any>", true},
+    {"Top", "<top>", true},
     {"Bottom", "T.noreturn", true},
     {"Untyped", "T.untyped", true},
     {"Root", "<root>", true},
@@ -390,7 +403,12 @@ NameDef names[] = {
     {"Class", "Class", true},
     {"Module", "Module", true},
     {"Todo", "<todo sym>", true},
+    {"TodoMethod", "<todo method>", false},
     {"NoSymbol", "<none>", true},
+    {"noFieldOrStaticField", "<no-field-or-static-field>", false},
+    {"noMethod", "<no-method>", false},
+    {"NoTypeArgument", "<no-type-argument>", true},
+    {"NoTypeMember", "<no-type-member>", true},
     {"Opus", "Opus", true},
     {"T", "T", true},
     {"BasicObject", "BasicObject", true},
@@ -448,6 +466,7 @@ NameDef names[] = {
     {"Singleton", "Singleton", true},
     {"AttachedClass", "<AttachedClass>", true},
     {"NonForcingConstants", "NonForcingConstants", true},
+    {"VERSION", "VERSION", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
@@ -455,7 +474,8 @@ void emit_name_header(ostream &out, NameDef &name) {
     out << "#define NAME_" << name.srcName << '\n';
     out << "    // \"" << name.val << "\"" << '\n';
     out << "    static inline constexpr NameRef " << name.srcName << "() {" << '\n';
-    out << "        return NameRef(NameRef::WellKnown{}, " << name.id << ");" << '\n';
+    out << "        return NameRef(NameRef::WellKnown{}, NameKind::" << (name.isConstant ? "CONSTANT" : "UTF8") << ", "
+        << name.id << ");" << '\n';
     out << "    }" << '\n';
     out << "#endif" << '\n';
     out << '\n';
@@ -478,22 +498,26 @@ void emit_register(ostream &out) {
     }
     out << '\n';
     for (auto &name : names) {
-        out << "    ENFORCE(" << name.srcName << "_id._id == " << name.id << "); /* " << name.srcName << "() */"
-            << '\n';
+        out << "    ENFORCE(" << name.srcName << "_id." << (name.isConstant ? "constantIndex" : "utf8Index")
+            << "() == " << name.id << "); /* " << name.srcName << "() */" << '\n';
     }
     out << '\n';
     out << "}" << '\n';
 }
 
 int main(int argc, char **argv) {
-    int i = 1;
+    int constantI = 0;
+    int utf8I = 0;
     for (auto &name : names) {
         if (name.isConstant) {
-            i++;
+            utf8I++;
+            name.id = constantI++;
+        } else {
+            name.id = utf8I++;
         }
-        name.id = i++;
     }
-    int lastId = i;
+    int lastConstantId = constantI;
+    int lastUtf8Id = utf8I;
 
     // emit header file
     {
@@ -522,9 +546,14 @@ int main(int argc, char **argv) {
         }
         header << "}" << '\n';
 
-        header << "#ifndef NAME_LAST_WELL_KNOWN_NAME" << '\n';
-        header << "#define NAME_LAST_WELL_KNOWN_NAME" << '\n';
-        header << "constexpr int LAST_WELL_KNOWN_NAME = " << lastId << ";" << '\n';
+        header << "#ifndef NAME_LAST_WELL_KNOWN_CONSTANT_NAME" << '\n';
+        header << "#define NAME_LAST_WELL_KNOWN_CONSTANT_NAME" << '\n';
+        header << "constexpr int LAST_WELL_KNOWN_CONSTANT_NAME = " << lastConstantId << ";" << '\n';
+        header << "#endif" << '\n';
+
+        header << "#ifndef NAME_LAST_WELL_KNOWN_UTF8_NAME" << '\n';
+        header << "#define NAME_LAST_WELL_KNOWN_UTF8_NAME" << '\n';
+        header << "constexpr int LAST_WELL_KNOWN_UTF8_NAME = " << lastUtf8Id << ";" << '\n';
         header << "#endif" << '\n';
 
         header << "    void registerNames(GlobalState &gs);" << '\n';

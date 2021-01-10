@@ -28,6 +28,12 @@ public:
         return Block(loc, std::move(body), std::move(args));
     }
 
+    template <typename... Args> static Send::ARGS_store SendArgs(Args &&... args) {
+        Send::ARGS_store store;
+        (store.emplace_back(std::forward<Args>(args)), ...);
+        return store;
+    }
+
     static TreePtr Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args,
                         Send::Flags flags = {}, TreePtr blk = nullptr) {
         auto send = make_tree<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), std::move(blk), flags);
@@ -45,25 +51,16 @@ public:
     }
 
     static TreePtr Send1(core::LocOffsets loc, TreePtr recv, core::NameRef fun, TreePtr arg1) {
-        Send::ARGS_store nargs;
-        nargs.emplace_back(std::move(arg1));
-        return Send(loc, std::move(recv), fun, 1, std::move(nargs));
+        return Send(loc, std::move(recv), fun, 1, SendArgs(std::move(arg1)));
     }
 
     static TreePtr Send2(core::LocOffsets loc, TreePtr recv, core::NameRef fun, TreePtr arg1, TreePtr arg2) {
-        Send::ARGS_store nargs;
-        nargs.emplace_back(std::move(arg1));
-        nargs.emplace_back(std::move(arg2));
-        return Send(loc, std::move(recv), fun, 2, std::move(nargs));
+        return Send(loc, std::move(recv), fun, 2, SendArgs(std::move(arg1), std::move(arg2)));
     }
 
     static TreePtr Send3(core::LocOffsets loc, TreePtr recv, core::NameRef fun, TreePtr arg1, TreePtr arg2,
                          TreePtr arg3) {
-        Send::ARGS_store nargs;
-        nargs.emplace_back(std::move(arg1));
-        nargs.emplace_back(std::move(arg2));
-        nargs.emplace_back(std::move(arg3));
-        return Send(loc, std::move(recv), fun, 3, std::move(nargs));
+        return Send(loc, std::move(recv), fun, 3, SendArgs(std::move(arg1), std::move(arg2), std::move(arg3)));
     }
 
     static TreePtr Literal(core::LocOffsets loc, const core::TypePtr &tpe) {
@@ -219,49 +216,50 @@ public:
         return make_tree<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::String(), value));
     }
 
-    static TreePtr Method(core::LocOffsets loc, core::Loc declLoc, core::NameRef name, MethodDef::ARGS_store args,
-                          TreePtr rhs) {
+    static TreePtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
+                          MethodDef::ARGS_store args, TreePtr rhs) {
         if (args.empty() || (!isa_tree<ast::Local>(args.back()) && !isa_tree<ast::BlockArg>(args.back()))) {
             auto blkLoc = core::LocOffsets::none();
             args.emplace_back(make_tree<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
         MethodDef::Flags flags;
-        return make_tree<MethodDef>(loc, declLoc, core::Symbols::todo(), name, std::move(args), std::move(rhs), flags);
+        return make_tree<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(args), std::move(rhs),
+                                    flags);
     }
 
-    static TreePtr SyntheticMethod(core::LocOffsets loc, core::Loc declLoc, core::NameRef name,
+    static TreePtr SyntheticMethod(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                                    MethodDef::ARGS_store args, TreePtr rhs) {
         auto mdef = Method(loc, declLoc, name, std::move(args), std::move(rhs));
         cast_tree<MethodDef>(mdef)->flags.isRewriterSynthesized = true;
         return mdef;
     }
 
-    static TreePtr SyntheticMethod0(core::LocOffsets loc, core::Loc declLoc, core::NameRef name, TreePtr rhs) {
+    static TreePtr SyntheticMethod0(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name, TreePtr rhs) {
         MethodDef::ARGS_store args;
         return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
-    static TreePtr SyntheticMethod1(core::LocOffsets loc, core::Loc declLoc, core::NameRef name, TreePtr arg0,
+    static TreePtr SyntheticMethod1(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name, TreePtr arg0,
                                     TreePtr rhs) {
         MethodDef::ARGS_store args;
         args.emplace_back(std::move(arg0));
         return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
-    static TreePtr ClassOrModule(core::LocOffsets loc, core::Loc declLoc, TreePtr name,
+    static TreePtr ClassOrModule(core::LocOffsets loc, core::LocOffsets declLoc, TreePtr name,
                                  ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs, ClassDef::Kind kind) {
         return make_tree<ClassDef>(loc, declLoc, core::Symbols::todo(), std::move(name), std::move(ancestors),
                                    std::move(rhs), kind);
     }
 
-    static TreePtr Class(core::LocOffsets loc, core::Loc declLoc, TreePtr name, ClassDef::ANCESTORS_store ancestors,
-                         ClassDef::RHS_store rhs) {
+    static TreePtr Class(core::LocOffsets loc, core::LocOffsets declLoc, TreePtr name,
+                         ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
         return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
                                  ClassDef::Kind::Class);
     }
 
-    static TreePtr Module(core::LocOffsets loc, core::Loc declLoc, TreePtr name, ClassDef::ANCESTORS_store ancestors,
-                          ClassDef::RHS_store rhs) {
+    static TreePtr Module(core::LocOffsets loc, core::LocOffsets declLoc, TreePtr name,
+                          ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
         return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
                                  ClassDef::Kind::Module);
     }
@@ -333,10 +331,7 @@ public:
     }
 
     static TreePtr Sig1(core::LocOffsets loc, TreePtr key, TreePtr value, TreePtr ret) {
-        Send::ARGS_store args;
-        args.emplace_back(std::move(key));
-        args.emplace_back(std::move(value));
-        return Sig(loc, std::move(args), std::move(ret));
+        return Sig(loc, SendArgs(std::move(key), std::move(value)), std::move(ret));
     }
 
     static TreePtr T(core::LocOffsets loc) {
@@ -390,15 +385,13 @@ public:
                     std::move(block));
     }
 
-    static TreePtr DefineTopClassOrModule(core::LocOffsets loc, core::SymbolRef klass) {
+    static TreePtr DefineTopClassOrModule(core::LocOffsets loc, core::ClassOrModuleRef klass) {
         auto magic = Constant(loc, core::Symbols::Magic());
-        Send::ARGS_store args;
-        args.emplace_back(Constant(loc, klass));
         Send::Flags flags;
         flags.isRewriterSynthesized = true;
         // Use a 0-sized loc so that LSP queries for "what is at this location" do not return this synthetic send.
         return Send(core::LocOffsets{loc.beginLoc, loc.beginLoc}, std::move(magic),
-                    core::Names::defineTopClassOrModule(), 1, std::move(args), flags);
+                    core::Names::defineTopClassOrModule(), 1, SendArgs(Constant(loc, klass)), flags);
     }
 
     static TreePtr RaiseUnimplemented(core::LocOffsets loc) {
@@ -410,7 +403,7 @@ public:
         return ret;
     }
 
-    static bool isRootScope(ast::TreePtr &scope) {
+    static bool isRootScope(const ast::TreePtr &scope) {
         if (ast::isa_tree<ast::EmptyTree>(scope)) {
             return true;
         }
@@ -444,13 +437,14 @@ public:
 
             // Recurse into structure to find the Local
             typecase(
-                cursor->get(), [&](class RestArg *rest) { cursor = &rest->expr; },
-                [&](class KeywordArg *kw) { cursor = &kw->expr; }, [&](class OptionalArg *opt) { cursor = &opt->expr; },
-                [&](class BlockArg *blk) { cursor = &blk->expr; },
-                [&](class ShadowArg *shadow) { cursor = &shadow->expr; },
+                *cursor, [&](const class RestArg &rest) { cursor = &rest.expr; },
+                [&](const class KeywordArg &kw) { cursor = &kw.expr; },
+                [&](const class OptionalArg &opt) { cursor = &opt.expr; },
+                [&](const class BlockArg &blk) { cursor = &blk.expr; },
+                [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
-                [&](UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
-                [&](Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+                [&](const UnresolvedIdent &opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
+                [&](const TreePtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
         }
     }
 };

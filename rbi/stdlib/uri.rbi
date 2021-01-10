@@ -468,7 +468,7 @@ module URI
     params(
         schemes: T::Array[T.untyped],
     )
-    .returns(T::Array[String])
+    .returns(Regexp)
   end
   def self.regexp(schemes=T.unsafe(nil)); end
 

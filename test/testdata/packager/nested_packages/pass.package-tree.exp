@@ -18,13 +18,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>)
       end
 
-      def self.subpkg_class<<C <todo sym>>>(&<blk>)
+      def self.subpkg_class<<todo method>>(&<blk>)
         <emptyTree>::<C Package>::<C Subpackage>::<C SubpackageClass>.new()
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :"subpkg_class")
+      ::Sorbet::Private::Static.keep_self_def(<self>, :subpkg_class)
     end
   end
 end
@@ -48,13 +48,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Package>::<C PackageClass>)
       end
 
-      def self.package_class<<C <todo sym>>>(&<blk>)
+      def self.package_class<<todo method>>(&<blk>)
         return <emptyTree>::<C Package>::<C PackageClass>.new()
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_self_def(<self>, :"package_class")
+      ::Sorbet::Private::Static.keep_self_def(<self>, :package_class)
     end
   end
 end

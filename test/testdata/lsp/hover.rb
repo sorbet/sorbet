@@ -5,8 +5,8 @@ class BigFoo; extend T::Sig
 
 # The docs for FOO_CONSTANT
   FOO_CONSTANT = 1
-# ^^^^^^^^^^^^ The docs for FOO_CONSTANT
-# ^^^^^^^^^^^^ Integer(1)
+# ^^^^^^^^^^^^ hover: The docs for FOO_CONSTANT
+# ^^^^^^^^^^^^ hover: Integer(1)
 
   # Docs for Bar#static_variable
   @@static_variable = T.let('asdf', String)
@@ -118,7 +118,7 @@ def main
   fl = 1.0
 # ^ hover: Float(1.000000)
   sym = :test
-# ^ hover: Symbol(:"test")
+# ^ hover: Symbol(:test)
   Mod
 # ^ hover: T.class_of(Mod)
   rational = Rational(2, 3)
@@ -138,9 +138,9 @@ def main
       # ^^^^^^ hover: T.class_of(BigFoo)
       # ^^^^^^ hover: The docs for BigFoo
 
-  # .new only works if we definte `initialize`
   foo = BigFoo.new
-             # ^^^ hover: (nothing)
+  #            ^^^ hover: sig {params(args: T.untyped).returns(BigFoo)}
+  #            ^^^ hover: def new(*args); end
   hoo = BigFoo::LittleFoo1.new
                          # ^^^ hover: sig {returns(BigFoo::LittleFoo1)}
   raise "error message"

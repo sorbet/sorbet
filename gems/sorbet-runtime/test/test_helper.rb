@@ -22,10 +22,8 @@ class MiniTest::Spec; end
 class Critic::Unit::UnitTest < MiniTest::Spec; end
 module Critic::Extensions; end
 module Critic::Extensions::TypeExt
-  def self.unpatch_types
-  end
-  def self.patch_types
-  end
+  def self.unpatch_types; end
+  def self.patch_types; end
 end
 
 module Opus; end
@@ -34,7 +32,7 @@ module Chalk; end
 module Chalk::Tools; end
 module Chalk::Tools::RedactionUtils
   def self.redact_with_directive(value, opts = [])
-    opts = [opts] unless opts.is_a?(Array)
+    opts = Array(opts)
     case opts[0]
     when :redact_digits
       value.gsub(/\d/, '*')
@@ -47,12 +45,12 @@ module Chalk::Tools::RedactionUtils
 end
 Chalk::Tools::RedactionUtils::RedactionDirectiveSpec = T.type_alias do
   T.any(
-    T.enum([
-      :redact_digits,
-      :redact_digits_except_last4,
-      :redact_card,
-      :redact_all,
-      :truncate,
+    T.enum(%i[
+      redact_digits
+      redact_digits_except_last4
+      redact_card
+      redact_all
+      truncate
     ]),
     [T.enum([:truncate]), Integer],
     [T.enum([:truncate_middle]), Integer, Integer],

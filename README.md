@@ -321,7 +321,7 @@ The first kind of test can be called either [test_corpus] tests or [testdata]
 tests, based on the name of the test harness or the folder containing these tests, respectively.
 
 
-[test_corpus]: test/test_corpus.cc
+[test_corpus]: test/pipeline_test_runner.cc
 [testdata]: test/testdata/
 
 To create a test_corpus test, add any file `<name>.rb` to `test/testdata`, in

@@ -64,6 +64,18 @@ NodeDef nodes[] = {
         "array",
         vector<FieldDef>({{"elts", FieldType::NodeVec}}),
     },
+    // Pattern matching case with an array: `in [x]`
+    {
+        "ArrayPattern",
+        "array_pattern",
+        vector<FieldDef>({{"elts", FieldType::NodeVec}}),
+    },
+    // Pattern matching case with an array containing a trailing comma: `in [x, ]`
+    {
+        "ArrayPatternWithTail",
+        "array_pattern_with_tail",
+        vector<FieldDef>({{"elts", FieldType::NodeVec}}),
+    },
     // Used for $`, $& etc magic regex globals
     {
         "Backref",
@@ -111,6 +123,12 @@ NodeDef nodes[] = {
         "case",
         vector<FieldDef>({{"condition", FieldType::Node}, {"whens", FieldType::NodeVec}, {"else_", FieldType::Node}}),
     },
+    // Pattern matching case: `case x; in a; end`
+    {
+        "CaseMatch",
+        "case_match",
+        vector<FieldDef>({{"expr", FieldType::Node}, {"inBodies", FieldType::NodeVec}, {"elseBody", FieldType::Node}}),
+    },
     // appears in the `scope` of a `::Constant` `Const` node
     {
         "Cbase",
@@ -143,6 +161,12 @@ NodeDef nodes[] = {
         "ConstLhs",
         "casgn",
         vector<FieldDef>({{"scope", FieldType::Node}, {"name", FieldType::Name}}),
+    },
+    // Pattern matching case with a const: `in A`
+    {
+        "ConstPattern",
+        "const_pattern",
+        vector<FieldDef>({{"scope", FieldType::Node}, {"pattern", FieldType::Node}}),
     },
     // &. "conditional-send"/safe-navigation operator
     {
@@ -205,6 +229,12 @@ NodeDef nodes[] = {
         "eflipflop",
         vector<FieldDef>({{"left", FieldType::Node}, {"right", FieldType::Node}}),
     },
+    // Pattern matching implicit empty `else` block
+    {
+        "EmptyElse",
+        "empty_else",
+        vector<FieldDef>(),
+    },
     // __ENCODING__
     {
         "EncodingLiteral",
@@ -241,6 +271,18 @@ NodeDef nodes[] = {
         "for",
         vector<FieldDef>({{"vars", FieldType::Node}, {"expr", FieldType::Node}, {"body", FieldType::Node}}),
     },
+    // "..." argument forwarding in definition site
+    {
+        "ForwardArgs",
+        "forward_args",
+        vector<FieldDef>(),
+    },
+    // "..." argument forwarding in call site
+    {
+        "ForwardedArgs",
+        "forwarded_args",
+        vector<FieldDef>(),
+    },
     // float literal like "1.2"
     {
         "Float",
@@ -265,6 +307,12 @@ NodeDef nodes[] = {
         "hash",
         vector<FieldDef>({{"kwargs", FieldType::Bool}, {"pairs", FieldType::NodeVec}}),
     },
+    // Pattern matching hash pattern: `in {x: y}`
+    {
+        "HashPattern",
+        "hash_pattern",
+        vector<FieldDef>({{"pairs", FieldType::NodeVec}}),
+    },
     // Bareword identifier (foo); should only exist transiently while parsing
     {
         "Ident",
@@ -276,11 +324,25 @@ NodeDef nodes[] = {
         "if",
         vector<FieldDef>({{"condition", FieldType::Node}, {"then_", FieldType::Node}, {"else_", FieldType::Node}}),
     },
+    // Pattern matching if guard: `in x if foo`
+    {"IfGuard", "if_guard", vector<FieldDef>({{"condition", FieldType::Node}})},
     // .. flip-flop operator inside a conditional
     {
         "IFlipflop",
         "iflipflop",
         vector<FieldDef>({{"left", FieldType::Node}, {"right", FieldType::Node}}),
+    },
+    // Pattern matching pattern   sion
+    {
+        "InMatch",
+        "in_match",
+        vector<FieldDef>({{"lhs", FieldType::Node}, {"rhs", FieldType::Node}}),
+    },
+    // Pattern matching pattern: `in x`
+    {
+        "InPattern",
+        "in_pattern",
+        vector<FieldDef>({{"pattern", FieldType::Node}, {"guard", FieldType::Node}, {"body", FieldType::Node}}),
     },
     // inclusive range. Subnodes need not be integers nor literals
     {
@@ -360,6 +422,18 @@ NodeDef nodes[] = {
         "lvasgn",
         vector<FieldDef>({{"name", FieldType::Name}}),
     },
+    // Pattern matching pattern variable with an alternation: `in A | B`
+    {
+        "MatchAlt",
+        "match_alt",
+        vector<FieldDef>({{"left", FieldType::Node}, {"right", FieldType::Node}}),
+    },
+    // Pattern matching pattern assigning a variable: `in A => x`
+    {
+        "MatchAs",
+        "match_as",
+        vector<FieldDef>({{"value", FieldType::Node}, {"as", FieldType::Node}}),
+    },
     // [regex literal] =~ value; autovivifies local vars from match grops
     {
         "MatchAsgn",
@@ -371,6 +445,30 @@ NodeDef nodes[] = {
         "MatchCurLine",
         "match_current_line",
         vector<FieldDef>({{"cond", FieldType::Node}}),
+    },
+    // Pattern matching pattern variable with nil
+    {
+        "MatchNilPattern",
+        "match_nil_pattern",
+        vector<FieldDef>(),
+    },
+    // Pattern matching pattern variable with rest
+    {
+        "MatchRest",
+        "match_rest",
+        vector<FieldDef>({{"var", FieldType::Node}}),
+    },
+    // Pattern matching pattern variable
+    {
+        "MatchVar",
+        "match_var",
+        vector<FieldDef>({{"name", FieldType::Name}}),
+    },
+    // Pattern matching pattern with a trailing comma: `in x,`
+    {
+        "MatchWithTrailingComma",
+        "match_with_trailing_comma",
+        vector<FieldDef>({{"match", FieldType::Node}}),
     },
     // multiple left hand sides: `@rules, invalid_rules = ...`
     {
@@ -447,6 +545,12 @@ NodeDef nodes[] = {
         "Pair",
         "pair",
         vector<FieldDef>({{"key", FieldType::Node}, {"value", FieldType::Node}}),
+    },
+    // Pattern matching pined variable: `in [a, b, ^x]`
+    {
+        "Pin",
+        "pin",
+        vector<FieldDef>({{"var", FieldType::Node}}),
     },
     // END {...}
     {
@@ -583,6 +687,12 @@ NodeDef nodes[] = {
         "undef",
         vector<FieldDef>({{"exprs", FieldType::NodeVec}}),
     },
+    // Pattern matching unless guard: `in x unless foo`
+    {
+        "UnlessGuard",
+        "unless_guard",
+        vector<FieldDef>({{"condition", FieldType::Node}}),
+    },
     {
         "Until",
         "until",
@@ -681,6 +791,8 @@ void emitNodeHeader(ostream &out, NodeDef &node) {
     out << '\n';
     out << "  virtual std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;" << '\n';
     out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  virtual std::string toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0);"
+        << '\n';
     out << "  virtual std::string toWhitequark(const core::GlobalState &gs, int tabs = 0);" << '\n';
     out << "  virtual std::string nodeName();" << '\n';
 
@@ -704,8 +816,8 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case FieldType::Name:
-                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name
-                    << ".data(gs)->showRaw(gs));" << '\n';
+                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name << ".showRaw(gs));"
+                    << '\n';
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(buf, \"" << arg.name << " = \");\n";
@@ -771,7 +883,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
         switch (arg.type) {
             case FieldType::Name:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma
-                    << "\\n\", JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                    << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \");\n";
@@ -804,6 +916,74 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
             case FieldType::Loc:
                 // quiet the compiler; we skip Loc fields above
                 abort();
+            case FieldType::Bool:
+                out << "    fmt::format_to(buf, \"" << arg.name << " = {}\\n\", " << arg.name << ");\n";
+                break;
+        }
+    }
+    out << "    printTabs(buf, tabs);" << '\n';
+    out << "    fmt::format_to(buf,  \"}}\");\n";
+    out << "    return to_string(buf);\n";
+    out << "  }" << '\n';
+    out << '\n';
+
+    // toJSONWithLocs
+    out << "  std::string " << node.name
+        << "::toJSONWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs) {" << '\n'
+        << "    fmt::memory_buffer buf;" << '\n';
+    out << "    fmt::format_to(buf,  \"{{\\n\");\n";
+    out << "    printTabs(buf, tabs + 1);" << '\n';
+    maybeComma = "";
+    if (!node.fields.empty()) {
+        maybeComma = ",";
+    }
+    out << R"(    fmt::format_to(buf,  "\"type\" : \")" << node.name << "\\\"" << maybeComma << "\\n\");\n";
+    i = -1;
+    // Generate fields
+    for (auto &arg : node.fields) {
+        i++;
+        maybeComma = "";
+        if (i < node.fields.size() - 1) {
+            maybeComma = ",";
+        }
+        out << "    printTabs(buf, tabs + 1);" << '\n';
+        switch (arg.type) {
+            case FieldType::Name:
+                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma
+                    << "\\n\", JSON::escape(" << arg.name << ".show(gs)));\n";
+                break;
+            case FieldType::Node:
+                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \");\n";
+                out << "    printNodeJSONWithLocs(buf, " << arg.name << ", gs, file, tabs + 1);\n";
+                out << "    fmt::format_to(buf,  \"" << maybeComma << "\\n\");\n";
+                break;
+            case FieldType::NodeVec:
+                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : [\\n\");\n";
+                out << "    int i = -1;" << '\n';
+                out << "    for (auto &&a: " << arg.name << ") { \n";
+                out << "      i++;\n";
+                out << "      printTabs(buf, tabs + 2);\n";
+                out << "      printNodeJSONWithLocs(buf, a, gs, file, tabs + 2);\n";
+                out << "      if (i + 1 < " << arg.name << ".size()) {\n";
+                out << "        fmt::format_to(buf,  \",\");" << '\n';
+                out << "      }" << '\n';
+                out << "      fmt::format_to(buf,  \"\\n\");\n";
+                out << "    }" << '\n';
+                out << "    printTabs(buf, tabs + 1);\n";
+                out << "    fmt::format_to(buf,  \"]" << maybeComma << "\\n\")\n;";
+                break;
+            case FieldType::String:
+                out << "    fmt::format_to(buf,  \"\\\"" << arg.name << "\\\" : \\\"{}\\\"" << maybeComma << "\\n\", "
+                    << arg.name << ");\n";
+                break;
+            case FieldType::Uint:
+                out << R"(    fmt::format_to(buf,  "\")" << arg.name << R"(\" : \"{}\")" << maybeComma << "\\n\", "
+                    << arg.name << ");\n";
+                break;
+            case FieldType::Loc:
+                out << "      bool showFull = true;";
+                out << R"(    fmt::format_to(buf,  "\"loc\" : \"{}\")" << maybeComma << "\\n\", "
+                    << "core::Loc(file, " << arg.name << ").filePosToString(gs, showFull));\n";
                 break;
             case FieldType::Bool:
                 out << R"(    fmt::format_to(buf,  "\")" << arg.name << R"(\" : \"{}\")" << maybeComma << "\\n\", "
@@ -828,7 +1008,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 if (node.whitequarkName == "str") {
                     out << "    fmt::format_to(buf, \", \\\"{}\\\"\", " << arg.name << ".toString(gs));\n";
                 } else {
-                    out << "    fmt::format_to(buf, \", :\" + JSON::escape(" << arg.name << ".data(gs)->show(gs)));\n";
+                    out << "    fmt::format_to(buf, \", :\" + JSON::escape(" << arg.name << ".show(gs)));\n";
                 }
                 break;
             case FieldType::Node:

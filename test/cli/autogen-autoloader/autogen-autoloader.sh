@@ -57,3 +57,15 @@ main/sorbet --silence-dev-message --stop-after=namer \
 
 cat strip-output/root.rb
 cat strip-output/Foo.rb
+
+echo
+echo "--- with different root object"
+rm -rf root-object
+mkdir -p root-object
+main/sorbet --silence-dev-message --stop-after=namer -p autogen-autoloader:root-object \
+  --autogen-autoloader-modules=Foo \
+  --autogen-root-object=MyRootObject \
+  test/cli/autogen-autoloader/inplace.rb 2>&1
+
+cat root-object/root.rb
+cat root-object/Foo.rb

@@ -8,29 +8,20 @@ namespace sorbet::realmain::lsp {
 ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr tree) {
     auto &local = ast::cast_tree_nonnull<ast::Local>(tree);
 
-    core::SymbolRef owner;
+    core::MethodRef enclosingMethod;
     if (ctx.owner.data(ctx)->isMethod()) {
-        owner = ctx.owner;
+        enclosingMethod = ctx.owner.asMethodRef();
     } else if (ctx.owner == core::Symbols::root()) {
-        owner = ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local.loc));
+        enclosingMethod = ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local.loc));
     } else {
-        ENFORCE(ctx.owner.data(ctx)->isClassOrModule());
-        owner = ctx.state.lookupStaticInitForClass(ctx.owner);
+        enclosingMethod = ctx.state.lookupStaticInitForClass(ctx.owner.asClassOrModuleRef());
     }
 
-    bool lspQueryMatch = ctx.state.lspQuery.matchesVar(owner, local.localVariable);
+    bool lspQueryMatch = ctx.state.lspQuery.matchesVar(enclosingMethod, local.localVariable);
     if (lspQueryMatch) {
         // No need for type information; this is for a reference request.
         // Let the default constructor make tp.type an empty shared_ptr and tp.origins an empty vector
         core::TypeAndOrigins tp;
-
-        auto enclosingMethod = ctx.owner;
-        if (enclosingMethod.data(ctx)->isClassOrModule()) {
-            enclosingMethod = ctx.owner == core::Symbols::root()
-                                  ? ctx.state.lookupStaticInitForFile(core::Loc(ctx.file, local.loc))
-                                  : ctx.state.lookupStaticInitForClass(ctx.owner);
-        }
-
         core::lsp::QueryResponse::pushQueryResponse(
             ctx, core::lsp::IdentResponse(core::Loc(ctx.file, local.loc), local.localVariable, tp, enclosingMethod));
     }

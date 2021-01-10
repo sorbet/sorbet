@@ -65,6 +65,8 @@ private:
     const char *te;
     int act;
 
+    const std::string FORWARD_ARGS = "FORWARD_ARGS";
+
     // State before =begin / =end block comment
     int cs_before_block_comment;
 
@@ -151,11 +153,17 @@ public:
     void set_state_expr_fname();
     void set_state_expr_value();
 
+    void unset_command_start() {
+        command_start = false;
+    }
+
     void extend_static();
     void extend_dynamic();
     void unextend();
     void declare(const std::string &name);
     bool is_declared(const std::string &identifier) const;
+    void declare_forward_args();
+    bool is_declared_forward_args();
 
     optional_size dedentLevel();
 };

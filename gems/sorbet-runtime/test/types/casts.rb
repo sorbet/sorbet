@@ -3,7 +3,7 @@ require_relative '../test_helper'
 
 module Opus::Types::Test
   class CastsTest < Critic::Unit::UnitTest
-    [:cast, :assert_type!].each do |cast_name|
+    %i[cast assert_type!].each do |cast_name|
       method = T.method(cast_name)
 
       describe "T.#{cast_name}" do

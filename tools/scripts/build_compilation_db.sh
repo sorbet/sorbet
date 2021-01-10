@@ -4,7 +4,7 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
-bazel build //tools:compdb -c opt
+./bazel build //tools:compdb -c opt
 
 execution_root="$(bazel info execution_root)"
 

@@ -83,10 +83,10 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
     bool useToAsPrefix = false;
     if (prefixNode) {
         if (isLiteralTrue(ctx, *prefixNode)) {
-            beforeUnderscore = toName.data(ctx)->shortName(ctx);
+            beforeUnderscore = toName.shortName(ctx);
             useToAsPrefix = true;
         } else if (auto result = stringOrSymbolNameRef(ctx, *prefixNode)) {
-            beforeUnderscore = result->data(ctx)->shortName(ctx);
+            beforeUnderscore = result->shortName(ctx);
         } else {
             return empty;
         }
@@ -104,18 +104,15 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
                 // Active Support raises at runtime for these cases
                 return empty;
             }
-            methodName = ctx.state.enterNameUTF8(
-                fmt::format("{}_{}", beforeUnderscore, lit->asSymbol(ctx).data(ctx)->shortName(ctx)));
+            methodName =
+                ctx.state.enterNameUTF8(fmt::format("{}_{}", beforeUnderscore, lit->asSymbol(ctx).shortName(ctx)));
         } else {
             methodName = lit->asSymbol(ctx);
         }
         // sig {params(arg0: T.untyped, blk: Proc).returns(T.untyped)}
-        ast::Send::ARGS_store sigArgs;
-        sigArgs.emplace_back(ast::MK::Symbol(loc, core::Names::arg0()));
-        sigArgs.emplace_back(ast::MK::Untyped(loc));
-
-        sigArgs.emplace_back(ast::MK::Symbol(loc, core::Names::blkArg()));
-        sigArgs.emplace_back(ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
+        auto sigArgs = ast::MK::SendArgs(ast::MK::Symbol(loc, core::Names::arg0()), ast::MK::Untyped(loc),
+                                         ast::MK::Symbol(loc, core::Names::blkArg()),
+                                         ast::MK::Nilable(loc, ast::MK::Constant(loc, core::Symbols::Proc())));
 
         methodStubs.push_back(ast::MK::Sig(loc, std::move(sigArgs), ast::MK::Untyped(loc)));
 
@@ -124,8 +121,7 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
         args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
         args.emplace_back(ast::make_tree<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
 
-        methodStubs.push_back(
-            ast::MK::SyntheticMethod(loc, core::Loc(ctx.file, loc), methodName, std::move(args), ast::MK::EmptyTree()));
+        methodStubs.push_back(ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::EmptyTree()));
     }
 
     return methodStubs;

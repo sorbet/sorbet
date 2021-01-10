@@ -7,11 +7,20 @@
 #include "core/GlobalState.h"
 #include "core/Names.h"
 
+#include "absl/strings/str_join.h"
+#include "absl/strings/str_replace.h"
+#include "absl/strings/str_split.h"
+
 using namespace std;
 namespace sorbet::autogen {
 
+// Like the rest of autogen, the `autoloader` pass works by walking an existing tree of data and converting it to a
+// different representation before using it. In this case, it takes the `autogen::ParsedFile` representation and
+// converts it to a `DefTree`, and then emits the autoloader files based on passed-in string fragments
+
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
-    return !nd.nameParts.empty() && topLevelNamespaceRefs.find(nd.nameParts[0]) != topLevelNamespaceRefs.end();
+    return !nd.qname.nameParts.empty() &&
+           topLevelNamespaceRefs.find(nd.qname.nameParts[0]) != topLevelNamespaceRefs.end();
 }
 
 bool AutoloaderConfig::includePath(string_view path) const {
@@ -43,6 +52,7 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     out.rootDir = cfg.rootDir;
     out.preamble = cfg.preamble;
     out.registryModule = cfg.registryModule;
+    out.rootObject = cfg.rootObject;
     for (auto &str : cfg.modules) {
         out.topLevelNamespaceRefs.emplace(gs.enterNameConstant(str));
     }
@@ -59,11 +69,12 @@ AutoloaderConfig AutoloaderConfig::enterConfig(core::GlobalState &gs, const real
     out.absoluteIgnorePatterns = cfg.absoluteIgnorePatterns;
     out.relativeIgnorePatterns = cfg.relativeIgnorePatterns;
     out.stripPrefixes = cfg.stripPrefixes;
+    out.packagedAutoloader = cfg.packagedAutoloader;
     return out;
 }
 
 NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile &parsedFile, DefinitionRef def) {
-    vector<core::NameRef> parentName;
+    QualifiedName parentName;
     if (def.data(parsedFile).parent_ref.exists()) {
         auto parentRef = def.data(parsedFile).parent_ref.data(parsedFile);
         if (!parentRef.resolved.empty()) {
@@ -74,13 +85,14 @@ NamedDefinition NamedDefinition::fromDef(const core::GlobalState &gs, ParsedFile
     }
     const auto &pathStr = parsedFile.tree.file.data(gs).path();
     u4 pathDepth = count(pathStr.begin(), pathStr.end(), '/'); // Pre-compute for comparison
-    return {def.data(parsedFile), parsedFile.showFullName(gs, def),
-            parentName,           parsedFile.requires,
-            parsedFile.tree.file, pathDepth};
+
+    auto fullName = parsedFile.showQualifiedName(gs, def);
+
+    return {def.data(parsedFile), fullName, parentName, parsedFile.requires, parsedFile.tree.file, pathDepth};
 }
 
 bool NamedDefinition::preferredTo(const core::GlobalState &gs, const NamedDefinition &lhs, const NamedDefinition &rhs) {
-    ENFORCE(lhs.nameParts == rhs.nameParts, "Can only compare definitions with same name");
+    ENFORCE(lhs.qname == rhs.qname, "Can only compare definitions with same name");
     // Load defs with a parent name first since others will tend to depend on them.
     // Secondarily, the same idea for defs with less nesting in their path.
     // Finally, sort alphabetically by path to break any ties.
@@ -112,8 +124,8 @@ string DefTree::show(const core::GlobalState &gs, int level) const {
 }
 
 string DefTree::fullName(const core::GlobalState &gs) const {
-    return fmt::format("{}",
-                       fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.show(gs); }));
+    return fmt::format(
+        "{}", fmt::map_join(qname.nameParts, "::", [&](core::NameRef nr) -> string_view { return nr.show(gs); }));
 }
 
 string join(string path, string file) {
@@ -163,12 +175,12 @@ bool DefTree::hasDifferentFile(core::FileRef file) const {
 }
 
 bool DefTree::root() const {
-    return nameParts.empty();
+    return qname.empty();
 }
 
 core::NameRef DefTree::name() const {
-    ENFORCE(!nameParts.empty());
-    return nameParts.back();
+    ENFORCE(!qname.empty());
+    return qname.name();
 }
 
 string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg) const {
@@ -189,9 +201,10 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
     string casgnArg;
     auto type = definitionType(gs);
     if (type == Definition::Type::Module || type == Definition::Type::Class) {
-        fullName = root() ? "Object" : fmt::format("{}", fmt::map_join(nameParts, "::", [&](const auto &nr) -> string {
-                                                       return nr.show(gs);
-                                                   }));
+        fullName = root() ? alCfg.rootObject
+                          : fmt::format("{}", fmt::map_join(qname.nameParts, "::", [&](const auto &nr) -> string {
+                                            return nr.show(gs);
+                                        }));
         if (!root()) {
             fmt::format_to(buf, "{}.on_autoload('{}')\n", alCfg.registryModule, fullName);
             predeclare(gs, fullName, buf);
@@ -209,11 +222,11 @@ string DefTree::renderAutoloadSrc(const core::GlobalState &gs, const AutoloaderC
             fmt::format_to(buf, "}})\n", fullName);
         }
     } else if (type == Definition::Type::Casgn || type == Definition::Type::Alias) {
-        ENFORCE(nameParts.size() > 1);
+        ENFORCE(qname.size() > 1);
         casgnArg = fmt::format(", [{}, :{}]",
-                               fmt::map_join(nameParts.begin(), --nameParts.end(),
+                               fmt::map_join(qname.nameParts.begin(), --qname.nameParts.end(),
                                              "::", [&](const auto &nr) -> string { return nr.show(gs); }),
-                               nameParts.back().show(gs));
+                               qname.name().show(gs));
     }
 
     if (definingFile.exists()) {
@@ -247,8 +260,9 @@ void DefTree::predeclare(const core::GlobalState &gs, string_view fullName, fmt:
         fmt::format_to(buf, "\nclass {}", fullName);
         auto &def = definition(gs);
         if (!def.parentName.empty()) {
-            fmt::format_to(buf, " < {}",
-                           fmt::map_join(def.parentName, "::", [&](const auto &nr) -> string { return nr.show(gs); }));
+            fmt::format_to(buf, " < {}", fmt::map_join(def.parentName.nameParts, "::", [&](const auto &nr) -> string {
+                               return nr.show(gs);
+                           }));
         }
     } else {
         fmt::format_to(buf, "\nmodule {}", fullName);
@@ -259,7 +273,7 @@ void DefTree::predeclare(const core::GlobalState &gs, string_view fullName, fmt:
 
 string DefTree::path(const core::GlobalState &gs) const {
     auto toPath = [&](const auto &fr) -> string { return fr.show(gs); };
-    return fmt::format("{}.rb", fmt::map_join(nameParts, "/", toPath));
+    return fmt::format("{}.rb", fmt::map_join(qname.nameParts, "/", toPath));
 }
 
 Definition::Type DefTree::definitionType(const core::GlobalState &gs) const {
@@ -303,13 +317,15 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
     if (!alCfg.include(ndef)) {
         return;
     }
+
     DefTree *node = root.get();
-    for (const auto &part : ndef.nameParts) {
+    for (const auto &part : ndef.qname.nameParts) {
         auto &child = node->children[part];
         if (!child) {
             child = make_unique<DefTree>();
-            child->nameParts = node->nameParts;
-            child->nameParts.emplace_back(part);
+            child->qname.package = ndef.qname.package;
+            child->qname.nameParts = node->qname.nameParts;
+            child->qname.nameParts.emplace_back(part);
         }
         node = child.get();
     }
@@ -321,7 +337,7 @@ void DefTreeBuilder::addSingleDef(const core::GlobalState &gs, const AutoloaderC
 }
 
 DefTree DefTreeBuilder::merge(const core::GlobalState &gs, DefTree lhs, DefTree rhs) {
-    ENFORCE(lhs.nameParts == rhs.nameParts, "Name mismatch for DefTreeBuilder::merge");
+    ENFORCE(lhs.qname == rhs.qname, "Name mismatch for DefTreeBuilder::merge");
     lhs.namedDefs.insert(lhs.namedDefs.end(), make_move_iterator(rhs.namedDefs.begin()),
                          make_move_iterator(rhs.namedDefs.end()));
     if (rhs.nonBehaviorDef) {
@@ -354,7 +370,7 @@ void DefTreeBuilder::collapseSameFileDefs(const core::GlobalState &gs, const Aut
     if (!root.namedDefs.empty()) {
         definingFile = root.file();
     }
-    if (!alCfg.sameFileCollapsable(root.nameParts)) {
+    if (!alCfg.sameFileCollapsable(root.qname.nameParts)) {
         return;
     }
 
@@ -390,7 +406,9 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
                            UnorderedSet<std::string> &toDelete, const DefTree &node) {
     string name = node.root() ? "root" : node.name().show(gs);
     string filePath = join(path, fmt::format("{}.rb", name));
-    FileOps::writeIfDifferent(filePath, node.renderAutoloadSrc(gs, alCfg));
+    if (!alCfg.packagedAutoloader || !node.root()) {
+        FileOps::writeIfDifferent(filePath, node.renderAutoloadSrc(gs, alCfg));
+    }
     toDelete.erase(filePath);
     if (!node.children.empty()) {
         auto subdir = join(path, node.root() ? "" : name);
@@ -398,9 +416,76 @@ void AutoloadWriter::write(const core::GlobalState &gs, const AutoloaderConfig &
             FileOps::createDir(subdir);
         }
         for (auto &[_, child] : node.children) {
-            write(gs, alCfg, subdir, toDelete, *child);
+            if (alCfg.packagedAutoloader && node.root()) {
+                // in a packaged context, we want to make sure that these constants are also put in their packages
+                ENFORCE(child->qname.package);
+                auto namespaceName = child->qname.package->show(gs);
+                // this package name will include the suffix _Package on the end, and we want to remove that
+                constexpr int suffixLen = "_Package"sv.length();
+                ENFORCE(namespaceName.size() > suffixLen);
+                string packageName = namespaceName.substr(0, namespaceName.size() - suffixLen);
+                auto pkgSubdir = join(subdir, packageName);
+                FileOps::ensureDir(pkgSubdir);
+                write(gs, alCfg, pkgSubdir, toDelete, *child);
+            } else {
+                write(gs, alCfg, subdir, toDelete, *child);
+            }
         }
     }
+}
+
+namespace {
+string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderConfig &alCfg, const Package &pkg,
+                                const string_view mangledName) {
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "{}\n", alCfg.preamble);
+
+    // TODO: what will the export_methods autoload actually look like? no idea, but this shows that the data is there
+    if (pkg.exportMethods) {
+        fmt::format_to(buf, "require_relative \"{}/{}.rb\"\n", mangledName, pkg.exportMethods->join(gs, "/"));
+        fmt::format_to(buf, "module ::PackageRoot::{}\n", mangledName);
+        fmt::format_to(buf, "  extend ::PackageRoot::{}::{}\n", mangledName, pkg.exportMethods->join(gs, "::"));
+        fmt::format_to(buf, "end\n");
+    }
+    fmt::format_to(buf, "{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule, mangledName);
+    for (auto expt : pkg.exports) {
+        auto name = expt.join(gs, "::");
+        fmt::format_to(buf, "  {}: \"{}/{}.rb\",\n", name, mangledName, name);
+    }
+    fmt::format_to(buf, "}})\n");
+
+    return to_string(buf);
+}
+} // namespace
+
+void AutoloadWriter::writePackageAutoloads(const core::GlobalState &gs, const AutoloaderConfig &alCfg,
+                                           const std::string &path, const vector<Package> &packages) {
+    // we're going to be building up the root package map as we walk all the other packages, so make that first
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "{}\n", alCfg.preamble);
+    fmt::format_to(buf, "{}.autoload_map(::PackageRoot, {{\n", alCfg.registryModule);
+
+    // walk over all the packages
+    for (auto &pkg : packages) {
+        auto pkgName = fmt::format(
+            "{}", fmt::map_join(pkg.package, "::", [&](core::NameRef nr) -> string { return nr.show(gs); }));
+        auto mangledName =
+            fmt::format("{}", fmt::map_join(pkg.package, "_", [&](core::NameRef nr) -> string { return nr.show(gs); }));
+        auto source = renderPackageAutoloadSrc(gs, alCfg, pkg, mangledName);
+
+        FileOps::ensureDir(join(path, mangledName));
+        auto targetPath = join(path, join(mangledName, "_root.rb"));
+
+        // write the package autoload into the appropriate file
+        FileOps::writeIfDifferent(targetPath, source);
+
+        // and add the entry for this file to the root autoload
+        fmt::format_to(buf, "  {}: \"{}\",\n", pkgName, join(mangledName, "_root.rb"));
+    }
+
+    fmt::format_to(buf, "}})\n");
+    auto rootSrc = to_string(buf);
+    FileOps::writeIfDifferent(join(path, "_root.rb"), rootSrc);
 }
 
 } // namespace sorbet::autogen

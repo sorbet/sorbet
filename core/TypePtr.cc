@@ -1,94 +1,356 @@
 #include "core/TypePtr.h"
-#include "core/SymbolRef.h"
+#include "common/has_member.h"
+#include "core/Hashing.h"
+#include "core/Symbols.h"
 #include "core/Types.h"
 
 using namespace std;
 
+#define CASE_STATEMENT(CASE_BODY, T) \
+    case TypePtr::Tag::T: {          \
+        CASE_BODY(T)                 \
+        break;                       \
+    }
+
+#define GENERATE_TAG_SWITCH(tag, CASE_BODY)              \
+    switch (tag) {                                       \
+        CASE_STATEMENT(CASE_BODY, ClassType)             \
+        CASE_STATEMENT(CASE_BODY, LambdaParam)           \
+        CASE_STATEMENT(CASE_BODY, SelfTypeParam)         \
+        CASE_STATEMENT(CASE_BODY, AliasType)             \
+        CASE_STATEMENT(CASE_BODY, SelfType)              \
+        CASE_STATEMENT(CASE_BODY, LiteralType)           \
+        CASE_STATEMENT(CASE_BODY, TypeVar)               \
+        CASE_STATEMENT(CASE_BODY, OrType)                \
+        CASE_STATEMENT(CASE_BODY, AndType)               \
+        CASE_STATEMENT(CASE_BODY, ShapeType)             \
+        CASE_STATEMENT(CASE_BODY, TupleType)             \
+        CASE_STATEMENT(CASE_BODY, AppliedType)           \
+        CASE_STATEMENT(CASE_BODY, MetaType)              \
+        CASE_STATEMENT(CASE_BODY, BlamedUntyped)         \
+        CASE_STATEMENT(CASE_BODY, UnresolvedClassType)   \
+        CASE_STATEMENT(CASE_BODY, UnresolvedAppliedType) \
+    }
+
 namespace sorbet::core {
+
+namespace {
+GENERATE_CALL_MEMBER(showWithMoreInfo, return self.show(std::forward<Args>(args)...),
+                     std::declval<const GlobalState &>())
+
+GENERATE_CALL_MEMBER(dispatchCall,
+                     Exception::raise("should never happen: dispatchCall on {}",
+                                      TypePtr::tagToString(TypePtr::TypeToTag<typename remove_const<T>::type>::value));
+                     return DispatchResult{};, std::declval<const GlobalState &>(), std::declval<DispatchArgs>())
+
+GENERATE_CALL_MEMBER(_instantiate, return nullptr, std::declval<const GlobalState &>(),
+                     std::declval<const TypeConstraint &>())
+
+GENERATE_CALL_MEMBER(_replaceSelfType, return nullptr, declval<const GlobalState &>(), declval<const TypePtr &>())
+
+GENERATE_CALL_MEMBER(_approximate, return nullptr, declval<const GlobalState &>(), declval<const TypeConstraint &>())
+
+GENERATE_CALL_MEMBER(underlying,
+                     Exception::raise("TypePtr::underlying called on non-proxy-type `{}`",
+                                      TypePtr::tagToString(TypePtr::TypeToTag<typename remove_const<T>::type>::value));
+                     return nullptr, std::declval<const GlobalState &>());
+
+} // namespace
 
 void TypePtr::deleteTagged(Tag tag, void *ptr) noexcept {
     ENFORCE(ptr != nullptr);
 
-    switch (tag) {
-        case Tag::ClassType:
-            delete reinterpret_cast<ClassType *>(ptr);
-            break;
+#define DELETE_TYPE(T) delete reinterpret_cast<T *>(ptr);
 
-        case Tag::LambdaParam:
-            delete reinterpret_cast<LambdaParam *>(ptr);
-            break;
+    GENERATE_TAG_SWITCH(tag, DELETE_TYPE)
 
-        case Tag::SelfTypeParam:
-            delete reinterpret_cast<SelfTypeParam *>(ptr);
-            break;
-
-        case Tag::AliasType:
-            delete reinterpret_cast<AliasType *>(ptr);
-            break;
-
-        case Tag::SelfType:
-            delete reinterpret_cast<SelfType *>(ptr);
-            break;
-
-        case Tag::LiteralType:
-            delete reinterpret_cast<LiteralType *>(ptr);
-            break;
-
-        case Tag::TypeVar:
-            delete reinterpret_cast<TypeVar *>(ptr);
-            break;
-
-        case Tag::OrType:
-            delete reinterpret_cast<OrType *>(ptr);
-            break;
-
-        case Tag::AndType:
-            delete reinterpret_cast<AndType *>(ptr);
-            break;
-
-        case Tag::ShapeType:
-            delete reinterpret_cast<ShapeType *>(ptr);
-            break;
-
-        case Tag::TupleType:
-            delete reinterpret_cast<TupleType *>(ptr);
-            break;
-
-        case Tag::AppliedType:
-            delete reinterpret_cast<AppliedType *>(ptr);
-            break;
-
-        case Tag::MetaType:
-            delete reinterpret_cast<MetaType *>(ptr);
-            break;
-
-        case Tag::BlamedUntyped:
-            delete reinterpret_cast<BlamedUntyped *>(ptr);
-            break;
-
-        case Tag::UnresolvedClassType:
-            delete reinterpret_cast<UnresolvedClassType *>(ptr);
-            break;
-
-        case Tag::UnresolvedAppliedType:
-            delete reinterpret_cast<UnresolvedAppliedType *>(ptr);
-            break;
-    }
+#undef DELETE_TYPE
 }
 
 bool TypePtr::isUntyped() const {
-    auto *t = cast_type<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::untyped();
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::untyped();
 }
 
 bool TypePtr::isNilClass() const {
-    auto *t = cast_type<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::NilClass();
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::NilClass();
 }
 
 bool TypePtr::isBottom() const {
-    auto *t = cast_type<ClassType>(*this);
-    return t != nullptr && t->symbol == Symbols::bottom();
+    return isa_type<ClassType>(*this) && cast_type_nonnull<ClassType>(*this).symbol == Symbols::bottom();
+}
+
+int TypePtr::kind() const {
+    switch (tag()) {
+        case Tag::AppliedType:
+            return 1;
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType:
+            return 2;
+        case Tag::LiteralType:
+            return 3;
+        case Tag::ShapeType:
+            return 4;
+        case Tag::TupleType:
+            return 5;
+        case Tag::LambdaParam:
+        case Tag::SelfTypeParam:
+            return 6;
+        case Tag::MetaType:
+            return 7;
+        case Tag::TypeVar:
+            return 8;
+        case Tag::AliasType:
+            return 9;
+        case Tag::OrType:
+            return 10;
+        case Tag::AndType:
+            return 11;
+        case Tag::SelfType:
+            return 12;
+    }
+}
+
+std::string TypePtr::tagToString(Tag tag) {
+#define TYPE_TO_STRING(T) return #T;
+    GENERATE_TAG_SWITCH(tag, TYPE_TO_STRING)
+#undef TYPE_TO_STRING
+}
+
+std::string TypePtr::typeName() const {
+    return TypePtr::tagToString(tag());
+}
+
+bool TypePtr::isFullyDefined() const {
+    switch (tag()) {
+        // Base cases.
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::BlamedUntyped:
+        case Tag::ClassType:
+        case Tag::LiteralType:
+        case Tag::AliasType:
+        case Tag::SelfTypeParam:
+        case Tag::MetaType: // MetaType: this is kinda true but kinda false. it's false for subtyping but true for
+                            // inferencer.
+            return true;
+
+        case Tag::TypeVar:
+        case Tag::LambdaParam:
+        case Tag::SelfType:
+            return false;
+
+        // Composite types
+        case Tag::ShapeType: {
+            auto &shape = cast_type_nonnull<ShapeType>(*this);
+            return absl::c_all_of(shape.values, [](const TypePtr &t) { return t.isFullyDefined(); });
+        }
+        case Tag::TupleType: {
+            auto &tuple = cast_type_nonnull<TupleType>(*this);
+            return absl::c_all_of(tuple.elems, [](const TypePtr &t) { return t.isFullyDefined(); });
+        }
+        case Tag::AndType: {
+            auto &andType = cast_type_nonnull<AndType>(*this);
+            return andType.left.isFullyDefined() && andType.right.isFullyDefined();
+        }
+        case Tag::OrType: {
+            auto &orType = cast_type_nonnull<OrType>(*this);
+            return orType.left.isFullyDefined() && orType.right.isFullyDefined();
+        }
+        case Tag::AppliedType: {
+            auto &app = cast_type_nonnull<AppliedType>(*this);
+            return absl::c_all_of(app.targs, [](const TypePtr &t) { return t.isFullyDefined(); });
+        }
+    }
+}
+
+bool TypePtr::hasUntyped() const {
+    switch (tag()) {
+        case Tag::TypeVar:
+        case Tag::LiteralType:
+        case Tag::SelfType:
+        case Tag::AliasType:
+        case Tag::SelfTypeParam:
+        case Tag::LambdaParam:
+        case Tag::MetaType:
+            // These cannot have untyped.
+            return false;
+
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType: {
+            auto c = cast_type_nonnull<ClassType>(*this);
+            return c.symbol == Symbols::untyped();
+        }
+        case Tag::OrType: {
+            auto &o = cast_type_nonnull<OrType>(*this);
+            return o.left.hasUntyped() || o.right.hasUntyped();
+        }
+        case Tag::AndType: {
+            auto &a = cast_type_nonnull<AndType>(*this);
+            return a.left.hasUntyped() || a.right.hasUntyped();
+        }
+        case Tag::AppliedType: {
+            auto &app = cast_type_nonnull<AppliedType>(*this);
+            return absl::c_any_of(app.targs, [](const TypePtr &t) { return t.hasUntyped(); });
+        }
+        case Tag::TupleType: {
+            auto &tuple = cast_type_nonnull<TupleType>(*this);
+            return absl::c_any_of(tuple.elems, [](const TypePtr &t) { return t.hasUntyped(); });
+        }
+        case Tag::ShapeType: {
+            auto &shape = cast_type_nonnull<ShapeType>(*this);
+            return absl::c_any_of(shape.values, [](const TypePtr &t) { return t.hasUntyped(); });
+        }
+    }
+}
+
+core::SymbolRef TypePtr::untypedBlame() const {
+    ENFORCE(hasUntyped());
+    if (isa_type<BlamedUntyped>(*this)) {
+        return cast_type_nonnull<BlamedUntyped>(*this).blame;
+    }
+    return Symbols::noSymbol();
+}
+
+TypePtr TypePtr::getCallArguments(const GlobalState &gs, NameRef name) const {
+    switch (tag()) {
+        case Tag::MetaType:
+        case Tag::TupleType:
+        case Tag::ShapeType:
+        case Tag::LiteralType: {
+            return this->underlying(gs).getCallArguments(gs, name);
+        }
+        case Tag::OrType: {
+            auto &orType = cast_type_nonnull<OrType>(*this);
+            return orType.getCallArguments(gs, name);
+        }
+        case Tag::AndType: {
+            auto &andType = cast_type_nonnull<AndType>(*this);
+            return andType.getCallArguments(gs, name);
+        }
+        case Tag::BlamedUntyped: {
+            auto c = cast_type_nonnull<BlamedUntyped>(*this);
+            return c.getCallArguments(gs, name);
+        }
+        case Tag::UnresolvedClassType:
+        case Tag::UnresolvedAppliedType:
+        case Tag::ClassType: {
+            auto c = cast_type_nonnull<ClassType>(*this);
+            return c.getCallArguments(gs, name);
+        }
+        case Tag::AppliedType: {
+            auto &app = cast_type_nonnull<AppliedType>(*this);
+            return app.getCallArguments(gs, name);
+        }
+        case Tag::SelfType:
+        case Tag::SelfTypeParam:
+        case Tag::LambdaParam:
+        case Tag::TypeVar:
+        case Tag::AliasType: {
+            Exception::raise("should never happen: getCallArguments on `{}`", typeName());
+        }
+    }
+}
+
+TypePtr TypePtr::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
+#define _APPROXIMATE(T) return CALL_MEMBER__approximate<const T>::call(cast_type_nonnull<T>(*this), gs, tc);
+    GENERATE_TAG_SWITCH(tag(), _APPROXIMATE)
+#undef _APPROXIMATE
+}
+
+TypePtr TypePtr::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
+#define _REPLACE_SELF_TYPE(T) \
+    return CALL_MEMBER__replaceSelfType<const T>::call(cast_type_nonnull<T>(*this), gs, receiver);
+    GENERATE_TAG_SWITCH(tag(), _REPLACE_SELF_TYPE)
+#undef _REPLACE_SELF_TYPE
+}
+
+TypePtr TypePtr::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
+#define _INSTANTIATE(T) return CALL_MEMBER__instantiate<const T>::call(cast_type_nonnull<T>(*this), gs, tc);
+    GENERATE_TAG_SWITCH(tag(), _INSTANTIATE)
+#undef _INSTANTIATE
+}
+
+TypePtr TypePtr::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
+                              const std::vector<TypePtr> &targs) const {
+    switch (tag()) {
+        case Tag::BlamedUntyped:
+        case Tag::UnresolvedAppliedType:
+        case Tag::UnresolvedClassType:
+        case Tag::ClassType:
+        case Tag::TypeVar:
+        case Tag::LiteralType:
+        case Tag::SelfTypeParam:
+        case Tag::SelfType:
+            return nullptr;
+
+        case Tag::TupleType:
+            return cast_type_nonnull<TupleType>(*this)._instantiate(gs, params, targs);
+        case Tag::ShapeType:
+            return cast_type_nonnull<ShapeType>(*this)._instantiate(gs, params, targs);
+        case Tag::OrType:
+            return cast_type_nonnull<OrType>(*this)._instantiate(gs, params, targs);
+        case Tag::AndType:
+            return cast_type_nonnull<AndType>(*this)._instantiate(gs, params, targs);
+        case Tag::AppliedType:
+            return cast_type_nonnull<AppliedType>(*this)._instantiate(gs, params, targs);
+        case Tag::LambdaParam:
+            return cast_type_nonnull<LambdaParam>(*this)._instantiate(gs, params, targs);
+
+        case Tag::MetaType:
+        case Tag::AliasType:
+            Exception::raise("should never happen: _instantiate on `{}`", typeName());
+    }
+}
+
+void TypePtr::_sanityCheck(const GlobalState &gs) const {
+#define SANITY_CHECK(T) return cast_type_nonnull<T>(*this)._sanityCheck(gs);
+    GENERATE_TAG_SWITCH(tag(), SANITY_CHECK)
+#undef SANITY_CHECK
+}
+
+string TypePtr::toStringWithTabs(const GlobalState &gs, int tabs) const {
+#define TO_STRING_WITH_TABS(T) return cast_type_nonnull<T>(*this).toStringWithTabs(gs, tabs);
+    GENERATE_TAG_SWITCH(tag(), TO_STRING_WITH_TABS)
+#undef TO_STRING_WITH_TABS
+}
+
+unsigned int TypePtr::hash(const GlobalState &gs) const {
+    return _hash(this->toString(gs)); // TODO: make something better
+}
+
+std::string TypePtr::show(const GlobalState &gs) const {
+#define SHOW(T) return cast_type_nonnull<T>(*this).show(gs);
+    GENERATE_TAG_SWITCH(tag(), SHOW)
+#undef SHOW
+}
+
+std::string TypePtr::showWithMoreInfo(const GlobalState &gs) const {
+#define SHOW_WITH_MORE_INFO(T) return CALL_MEMBER_showWithMoreInfo<const T>::call(cast_type_nonnull<T>(*this), gs);
+    GENERATE_TAG_SWITCH(tag(), SHOW_WITH_MORE_INFO)
+#undef SHOW_WITH_MORE_INFO
+}
+
+bool TypePtr::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
+#define DERIVES_FROM(T) return cast_type_nonnull<T>(*this).derivesFrom(gs, klass);
+    GENERATE_TAG_SWITCH(tag(), DERIVES_FROM)
+#undef DERIVES_FROM
+}
+
+DispatchResult TypePtr::dispatchCall(const GlobalState &gs, DispatchArgs args) const {
+#define DISPATCH_CALL(T) return CALL_MEMBER_dispatchCall<const T>::call(cast_type_nonnull<T>(*this), gs, args);
+    GENERATE_TAG_SWITCH(tag(), DISPATCH_CALL)
+#undef DISPATCH_CALL
+}
+
+TypePtr TypePtr::underlying(const GlobalState &gs) const {
+    ENFORCE(is_proxy_type(*this), "underlying() only makes sense on a proxy type");
+#define UNDERLYING(T) return CALL_MEMBER_underlying<const T>::call(cast_type_nonnull<T>(*this), gs);
+    GENERATE_TAG_SWITCH(tag(), UNDERLYING)
+#undef UNDERLYING
 }
 
 } // namespace sorbet::core

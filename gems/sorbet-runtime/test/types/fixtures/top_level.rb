@@ -1,7 +1,7 @@
 # typed: true
 require_relative '../../../lib/sorbet-runtime'
 
-extend T::Sig
+extend T::Sig # rubocop:disable Style/MixinUsage
 
 sig {returns(Integer)}
 def foo
@@ -20,13 +20,15 @@ end
 begin
   foo
   puts "foo() did not raise a TypeError!"
-rescue TypeError => exn
-  puts (/Expected.*got type.*$/).match(exn.message)&.to_s
+rescue TypeError => e
+  result = /Expected.*got type.*$/.match(e.message)&.to_s
+  puts result
 end
 
 begin
   bar
   puts "bar() did not raise a TypeError!"
-rescue TypeError => exn
-  puts (/Expected.*got type.*$/).match(exn.message)&.to_s
+rescue TypeError => e
+  result = /Expected.*got type.*$/.match(e.message)&.to_s
+  puts result
 end

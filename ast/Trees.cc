@@ -6,7 +6,6 @@
 #include <utility>
 
 // makes lldb work. Don't remove please
-template class std::unique_ptr<sorbet::ast::Expression>;
 template class std::unique_ptr<sorbet::ast::ClassDef>;
 template class std::unique_ptr<sorbet::ast::MethodDef>;
 template class std::unique_ptr<sorbet::ast::If>;
@@ -41,126 +40,56 @@ using namespace std;
 
 namespace sorbet::ast {
 
+#define CASE_STATEMENT(CASE_BODY, T) \
+    case Tag::T: {                   \
+        CASE_BODY(T)                 \
+        break;                       \
+    }
+
+#define GENERATE_TAG_SWITCH(tag, CASE_BODY)              \
+    switch (tag) {                                       \
+        CASE_STATEMENT(CASE_BODY, EmptyTree)             \
+        CASE_STATEMENT(CASE_BODY, Send)                  \
+        CASE_STATEMENT(CASE_BODY, ClassDef)              \
+        CASE_STATEMENT(CASE_BODY, MethodDef)             \
+        CASE_STATEMENT(CASE_BODY, If)                    \
+        CASE_STATEMENT(CASE_BODY, While)                 \
+        CASE_STATEMENT(CASE_BODY, Break)                 \
+        CASE_STATEMENT(CASE_BODY, Retry)                 \
+        CASE_STATEMENT(CASE_BODY, Next)                  \
+        CASE_STATEMENT(CASE_BODY, Return)                \
+        CASE_STATEMENT(CASE_BODY, RescueCase)            \
+        CASE_STATEMENT(CASE_BODY, Rescue)                \
+        CASE_STATEMENT(CASE_BODY, Local)                 \
+        CASE_STATEMENT(CASE_BODY, UnresolvedIdent)       \
+        CASE_STATEMENT(CASE_BODY, RestArg)               \
+        CASE_STATEMENT(CASE_BODY, KeywordArg)            \
+        CASE_STATEMENT(CASE_BODY, OptionalArg)           \
+        CASE_STATEMENT(CASE_BODY, BlockArg)              \
+        CASE_STATEMENT(CASE_BODY, ShadowArg)             \
+        CASE_STATEMENT(CASE_BODY, Assign)                \
+        CASE_STATEMENT(CASE_BODY, Cast)                  \
+        CASE_STATEMENT(CASE_BODY, Hash)                  \
+        CASE_STATEMENT(CASE_BODY, Array)                 \
+        CASE_STATEMENT(CASE_BODY, Literal)               \
+        CASE_STATEMENT(CASE_BODY, UnresolvedConstantLit) \
+        CASE_STATEMENT(CASE_BODY, ConstantLit)           \
+        CASE_STATEMENT(CASE_BODY, ZSuperArgs)            \
+        CASE_STATEMENT(CASE_BODY, Block)                 \
+        CASE_STATEMENT(CASE_BODY, InsSeq)                \
+    }
+
 void TreePtr::deleteTagged(Tag tag, void *ptr) noexcept {
     ENFORCE(ptr != nullptr);
-
-    switch (tag) {
-        case Tag::EmptyTree:
-            // explicitly not deleting the empty tree pointer
-            break;
-
-        case Tag::Send:
-            delete reinterpret_cast<Send *>(ptr);
-            break;
-
-        case Tag::ClassDef:
-            delete reinterpret_cast<ClassDef *>(ptr);
-            break;
-
-        case Tag::MethodDef:
-            delete reinterpret_cast<MethodDef *>(ptr);
-            break;
-
-        case Tag::If:
-            delete reinterpret_cast<If *>(ptr);
-            break;
-
-        case Tag::While:
-            delete reinterpret_cast<While *>(ptr);
-            break;
-
-        case Tag::Break:
-            delete reinterpret_cast<Break *>(ptr);
-            break;
-
-        case Tag::Retry:
-            delete reinterpret_cast<Retry *>(ptr);
-            break;
-
-        case Tag::Next:
-            delete reinterpret_cast<Next *>(ptr);
-            break;
-
-        case Tag::Return:
-            delete reinterpret_cast<Return *>(ptr);
-            break;
-
-        case Tag::RescueCase:
-            delete reinterpret_cast<RescueCase *>(ptr);
-            break;
-
-        case Tag::Rescue:
-            delete reinterpret_cast<Rescue *>(ptr);
-            break;
-
-        case Tag::Local:
-            delete reinterpret_cast<Local *>(ptr);
-            break;
-
-        case Tag::UnresolvedIdent:
-            delete reinterpret_cast<UnresolvedIdent *>(ptr);
-            break;
-
-        case Tag::RestArg:
-            delete reinterpret_cast<RestArg *>(ptr);
-            break;
-
-        case Tag::KeywordArg:
-            delete reinterpret_cast<KeywordArg *>(ptr);
-            break;
-
-        case Tag::OptionalArg:
-            delete reinterpret_cast<OptionalArg *>(ptr);
-            break;
-
-        case Tag::BlockArg:
-            delete reinterpret_cast<BlockArg *>(ptr);
-            break;
-
-        case Tag::ShadowArg:
-            delete reinterpret_cast<ShadowArg *>(ptr);
-            break;
-
-        case Tag::Assign:
-            delete reinterpret_cast<Assign *>(ptr);
-            break;
-
-        case Tag::Cast:
-            delete reinterpret_cast<Cast *>(ptr);
-            break;
-
-        case Tag::Hash:
-            delete reinterpret_cast<Hash *>(ptr);
-            break;
-
-        case Tag::Array:
-            delete reinterpret_cast<Array *>(ptr);
-            break;
-
-        case Tag::Literal:
-            delete reinterpret_cast<Literal *>(ptr);
-            break;
-
-        case Tag::UnresolvedConstantLit:
-            delete reinterpret_cast<UnresolvedConstantLit *>(ptr);
-            break;
-
-        case Tag::ConstantLit:
-            delete reinterpret_cast<ConstantLit *>(ptr);
-            break;
-
-        case Tag::ZSuperArgs:
-            delete reinterpret_cast<ZSuperArgs *>(ptr);
-            break;
-
-        case Tag::Block:
-            delete reinterpret_cast<Block *>(ptr);
-            break;
-
-        case Tag::InsSeq:
-            delete reinterpret_cast<InsSeq *>(ptr);
-            break;
+#define DELETE_TYPE(T)                                      \
+    if (tag != Tag::EmptyTree) {                            \
+        /* explicitly not deleting the empty tree pointer*/ \
+        delete reinterpret_cast<T *>(ptr);                  \
     }
+
+    GENERATE_TAG_SWITCH(tag, DELETE_TYPE)
+
+#undef DELETE_TYPE
 }
 
 string TreePtr::nodeName() const {
@@ -168,40 +97,8 @@ string TreePtr::nodeName() const {
 
     ENFORCE(ptr != nullptr);
 
-#define NODE_NAME(name) \
-    case Tag::name:     \
-        return reinterpret_cast<name *>(ptr)->nodeName();
-    switch (tag()) {
-        NODE_NAME(EmptyTree)
-        NODE_NAME(Send)
-        NODE_NAME(ClassDef)
-        NODE_NAME(MethodDef)
-        NODE_NAME(If)
-        NODE_NAME(While)
-        NODE_NAME(Break)
-        NODE_NAME(Retry)
-        NODE_NAME(Next)
-        NODE_NAME(Return)
-        NODE_NAME(RescueCase)
-        NODE_NAME(Rescue)
-        NODE_NAME(Local)
-        NODE_NAME(UnresolvedIdent)
-        NODE_NAME(RestArg)
-        NODE_NAME(KeywordArg)
-        NODE_NAME(OptionalArg)
-        NODE_NAME(BlockArg)
-        NODE_NAME(ShadowArg)
-        NODE_NAME(Assign)
-        NODE_NAME(Cast)
-        NODE_NAME(Hash)
-        NODE_NAME(Array)
-        NODE_NAME(Literal)
-        NODE_NAME(UnresolvedConstantLit)
-        NODE_NAME(ConstantLit)
-        NODE_NAME(ZSuperArgs)
-        NODE_NAME(Block)
-        NODE_NAME(InsSeq)
-    }
+#define NODE_NAME(name) return reinterpret_cast<name *>(ptr)->nodeName();
+    GENERATE_TAG_SWITCH(tag(), NODE_NAME)
 #undef NODE_NAME
 }
 
@@ -210,40 +107,8 @@ string TreePtr::showRaw(const core::GlobalState &gs, int tabs) {
 
     ENFORCE(ptr != nullptr);
 
-#define SHOW_RAW(name) \
-    case Tag::name:    \
-        return reinterpret_cast<name *>(ptr)->showRaw(gs, tabs);
-    switch (tag()) {
-        SHOW_RAW(EmptyTree)
-        SHOW_RAW(Send)
-        SHOW_RAW(ClassDef)
-        SHOW_RAW(MethodDef)
-        SHOW_RAW(If)
-        SHOW_RAW(While)
-        SHOW_RAW(Break)
-        SHOW_RAW(Retry)
-        SHOW_RAW(Next)
-        SHOW_RAW(Return)
-        SHOW_RAW(RescueCase)
-        SHOW_RAW(Rescue)
-        SHOW_RAW(Local)
-        SHOW_RAW(UnresolvedIdent)
-        SHOW_RAW(RestArg)
-        SHOW_RAW(KeywordArg)
-        SHOW_RAW(OptionalArg)
-        SHOW_RAW(BlockArg)
-        SHOW_RAW(ShadowArg)
-        SHOW_RAW(Assign)
-        SHOW_RAW(Cast)
-        SHOW_RAW(Hash)
-        SHOW_RAW(Array)
-        SHOW_RAW(Literal)
-        SHOW_RAW(UnresolvedConstantLit)
-        SHOW_RAW(ConstantLit)
-        SHOW_RAW(ZSuperArgs)
-        SHOW_RAW(Block)
-        SHOW_RAW(InsSeq)
-    }
+#define SHOW_RAW(name) return reinterpret_cast<name *>(ptr)->showRaw(gs, tabs);
+    GENERATE_TAG_SWITCH(tag(), SHOW_RAW)
 #undef SHOW_RAW
 }
 
@@ -252,40 +117,8 @@ core::LocOffsets TreePtr::loc() const {
 
     ENFORCE(ptr != nullptr);
 
-#define CASE(name)  \
-    case Tag::name: \
-        return reinterpret_cast<name *>(ptr)->loc;
-    switch (tag()) {
-        CASE(EmptyTree)
-        CASE(Send)
-        CASE(ClassDef)
-        CASE(MethodDef)
-        CASE(If)
-        CASE(While)
-        CASE(Break)
-        CASE(Retry)
-        CASE(Next)
-        CASE(Return)
-        CASE(RescueCase)
-        CASE(Rescue)
-        CASE(Local)
-        CASE(UnresolvedIdent)
-        CASE(RestArg)
-        CASE(KeywordArg)
-        CASE(OptionalArg)
-        CASE(BlockArg)
-        CASE(ShadowArg)
-        CASE(Assign)
-        CASE(Cast)
-        CASE(Hash)
-        CASE(Array)
-        CASE(Literal)
-        CASE(UnresolvedConstantLit)
-        CASE(ConstantLit)
-        CASE(ZSuperArgs)
-        CASE(Block)
-        CASE(InsSeq)
-    }
+#define CASE(name) return reinterpret_cast<name *>(ptr)->loc;
+    GENERATE_TAG_SWITCH(tag(), CASE)
 #undef CASE
 }
 
@@ -294,40 +127,8 @@ string TreePtr::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
 
     ENFORCE(ptr != nullptr);
 
-#define CASE(name)  \
-    case Tag::name: \
-        return reinterpret_cast<name *>(ptr)->toStringWithTabs(gs, tabs);
-    switch (tag()) {
-        CASE(EmptyTree)
-        CASE(Send)
-        CASE(ClassDef)
-        CASE(MethodDef)
-        CASE(If)
-        CASE(While)
-        CASE(Break)
-        CASE(Retry)
-        CASE(Next)
-        CASE(Return)
-        CASE(RescueCase)
-        CASE(Rescue)
-        CASE(Local)
-        CASE(UnresolvedIdent)
-        CASE(RestArg)
-        CASE(KeywordArg)
-        CASE(OptionalArg)
-        CASE(BlockArg)
-        CASE(ShadowArg)
-        CASE(Assign)
-        CASE(Cast)
-        CASE(Hash)
-        CASE(Array)
-        CASE(Literal)
-        CASE(UnresolvedConstantLit)
-        CASE(ConstantLit)
-        CASE(ZSuperArgs)
-        CASE(Block)
-        CASE(InsSeq)
-    }
+#define CASE(name) return reinterpret_cast<name *>(ptr)->toStringWithTabs(gs, tabs);
+    GENERATE_TAG_SWITCH(tag(), CASE)
 #undef CASE
 }
 
@@ -374,7 +175,7 @@ bool isa_declaration(const TreePtr &what) {
  * Desugar string concatenation into series of .to_s calls and string concatenations
  */
 
-ClassDef::ClassDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, TreePtr name,
+ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOrModuleRef symbol, TreePtr name,
                    ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind)
     : loc(loc), declLoc(declLoc), symbol(symbol), kind(kind), rhs(std::move(rhs)), name(std::move(name)),
       ancestors(std::move(ancestors)) {
@@ -384,7 +185,7 @@ ClassDef::ClassDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symb
     _sanityCheck();
 }
 
-MethodDef::MethodDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name,
+MethodDef::MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,
                      ARGS_store args, TreePtr rhs, Flags flags)
     : loc(loc), declLoc(declLoc), symbol(symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), flags(flags) {
     categoryCounterInc("trees", "methoddef");
@@ -635,7 +436,7 @@ string ClassDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
         fmt::format_to(buf, "class ");
     }
     fmt::format_to(buf, "{}<{}> < ", name.toStringWithTabs(gs, tabs),
-                   this->symbol.dataAllowingNone(gs)->name.data(gs)->toString(gs));
+                   this->symbol.dataAllowingNone(gs)->name.toString(gs));
     printArgs(gs, buf, this->ancestors, tabs);
 
     if (this->rhs.empty()) {
@@ -660,7 +461,7 @@ string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::format_to(buf, "kind = {}\n", kind == ClassDef::Kind::Module ? "module" : "class");
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "name = {}<{}>\n", name.showRaw(gs, tabs + 1),
-                   this->symbol.dataAllowingNone(gs)->name.data(gs)->showRaw(gs));
+                   this->symbol.dataAllowingNone(gs)->name.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "ancestors = [");
     bool first = true;
@@ -732,14 +533,14 @@ string MethodDef::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
     } else {
         fmt::format_to(buf, "def ");
     }
-    fmt::format_to(buf, "{}", name.data(gs)->toString(gs));
-    auto &data = this->symbol.dataAllowingNone(gs);
+    fmt::format_to(buf, "{}", name.toString(gs));
+    const auto data = this->symbol.data(gs);
     if (name != data->name) {
-        fmt::format_to(buf, "<{}>", data->name.data(gs)->toString(gs));
+        fmt::format_to(buf, "<{}>", data->name.toString(gs));
     }
     fmt::format_to(buf, "(");
     bool first = true;
-    if (this->symbol == core::Symbols::todo()) {
+    if (this->symbol == core::Symbols::todoMethod()) {
         for (auto &a : this->args) {
             if (!first) {
                 fmt::format_to(buf, ", ");
@@ -779,12 +580,11 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     fmt::format_to(buf, "flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
 
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "name = {}<{}>\n", name.data(gs)->showRaw(gs),
-                   this->symbol.dataAllowingNone(gs)->name.data(gs)->showRaw(gs));
+    fmt::format_to(buf, "name = {}<{}>\n", name.showRaw(gs), this->symbol.data(gs)->name.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "args = [");
     bool first = true;
-    if (this->symbol == core::Symbols::todo()) {
+    if (this->symbol == core::Symbols::todoMethod()) {
         for (auto &a : this->args) {
             if (!first) {
                 fmt::format_to(buf, ", ");
@@ -881,7 +681,7 @@ string EmptyTree::toStringWithTabs(const core::GlobalState &gs, int tabs) const 
 }
 
 string UnresolvedConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return fmt::format("{}::{}", this->scope.toStringWithTabs(gs, tabs), this->cnst.data(gs)->toString(gs));
+    return fmt::format("{}::{}", this->scope.toStringWithTabs(gs, tabs), this->cnst.toString(gs));
 }
 
 string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
@@ -891,7 +691,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "scope = {}\n", this->scope.showRaw(gs, tabs + 1));
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "cnst = {}\n", this->cnst.data(gs)->showRaw(gs));
+    fmt::format_to(buf, "cnst = {}\n", this->cnst.showRaw(gs));
     printTabs(buf, tabs);
     fmt::format_to(buf, "}}");
     return fmt::to_string(buf);
@@ -911,7 +711,8 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "orig = {}\n", this->original ? this->original.showRaw(gs, tabs + 1) : "nullptr");
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "symbol = {}\n", this->symbol.dataAllowingNone(gs)->showFullName(gs));
+    fmt::format_to(buf, "symbol = ({} {})\n", this->symbol.dataAllowingNone(gs)->showKind(gs),
+                   this->symbol.dataAllowingNone(gs)->showFullName(gs));
     if (!resolutionScopes.empty()) {
         printTabs(buf, tabs + 1);
         fmt::format_to(buf, "resolutionScopes = [{}]\n",
@@ -1013,19 +814,19 @@ string Literal::showRaw(const core::GlobalState &gs, int tabs) {
 string Literal::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     string res;
     typecase(
-        this->value.get(), [&](core::LiteralType *l) { res = l->showValue(gs); },
-        [&](core::ClassType *l) {
-            if (l->symbol == core::Symbols::NilClass()) {
+        this->value, [&](const core::LiteralType &l) { res = l.showValue(gs); },
+        [&](const core::ClassType &l) {
+            if (l.symbol == core::Symbols::NilClass()) {
                 res = "nil";
-            } else if (l->symbol == core::Symbols::FalseClass()) {
+            } else if (l.symbol == core::Symbols::FalseClass()) {
                 res = "false";
-            } else if (l->symbol == core::Symbols::TrueClass()) {
+            } else if (l.symbol == core::Symbols::TrueClass()) {
                 res = "true";
             } else {
-                res = "literal(" + this->value->toStringWithTabs(gs, tabs) + ")";
+                res = "literal(" + this->value.toStringWithTabs(gs, tabs) + ")";
             }
         },
-        [&](core::Type *t) { res = "literal(" + this->value->toStringWithTabs(gs, tabs) + ")"; });
+        [&](const core::TypePtr &t) { res = "literal(" + this->value.toStringWithTabs(gs, tabs) + ")"; });
     return res;
 }
 
@@ -1121,7 +922,7 @@ string Rescue::showRaw(const core::GlobalState &gs, int tabs) {
 
 string Send::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "{}.{}", this->recv.toStringWithTabs(gs, tabs), this->fun.data(gs)->toString(gs));
+    fmt::format_to(buf, "{}.{}", this->recv.toStringWithTabs(gs, tabs), this->fun.toString(gs));
     printArgs(gs, buf, this->args, tabs);
     if (this->block != nullptr) {
         fmt::format_to(buf, "{}", this->block.toStringWithTabs(gs, tabs));
@@ -1136,7 +937,7 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "recv = {}\n", this->recv.showRaw(gs, tabs + 1));
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "fun = {}\n", this->fun.data(gs)->showRaw(gs));
+    fmt::format_to(buf, "fun = {}\n", this->fun.showRaw(gs));
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "block = ");
     if (this->block) {
@@ -1163,7 +964,7 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
 string Cast::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "T.{}", this->cast.toString(gs));
-    fmt::format_to(buf, "({}, {})", this->arg.toStringWithTabs(gs, tabs), this->type->toStringWithTabs(gs, tabs));
+    fmt::format_to(buf, "({}, {})", this->arg.toStringWithTabs(gs, tabs), this->type.toStringWithTabs(gs, tabs));
 
     return fmt::to_string(buf);
 }
@@ -1176,7 +977,7 @@ string Cast::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 2);
     fmt::format_to(buf, "arg = {}\n", this->arg.showRaw(gs, tabs + 2));
     printTabs(buf, tabs + 2);
-    fmt::format_to(buf, "type = {},\n", this->type->toString(gs));
+    fmt::format_to(buf, "type = {},\n", this->type.toString(gs));
     printTabs(buf, tabs);
     fmt::format_to(buf, "}}\n");
 
@@ -1383,38 +1184,38 @@ string Literal::nodeName() {
 
 core::NameRef Literal::asString(const core::GlobalState &gs) const {
     ENFORCE(isString(gs));
-    auto t = core::cast_type<core::LiteralType>(value);
-    core::NameRef res(gs, t->value);
+    auto t = core::cast_type_nonnull<core::LiteralType>(value);
+    core::NameRef res = t.asName(gs);
     return res;
 }
 
 core::NameRef Literal::asSymbol(const core::GlobalState &gs) const {
     ENFORCE(isSymbol(gs));
-    auto t = core::cast_type<core::LiteralType>(value);
-    core::NameRef res(gs, t->value);
+    auto t = core::cast_type_nonnull<core::LiteralType>(value);
+    core::NameRef res = t.asName(gs);
     return res;
 }
 
 bool Literal::isSymbol(const core::GlobalState &gs) const {
-    auto t = core::cast_type<core::LiteralType>(value);
-    return t && t->derivesFrom(gs, core::Symbols::Symbol());
+    return core::isa_type<core::LiteralType>(value) &&
+           core::cast_type_nonnull<core::LiteralType>(value).derivesFrom(gs, core::Symbols::Symbol());
 }
 
 bool Literal::isNil(const core::GlobalState &gs) const {
-    return value->derivesFrom(gs, core::Symbols::NilClass());
+    return value.derivesFrom(gs, core::Symbols::NilClass());
 }
 
 bool Literal::isString(const core::GlobalState &gs) const {
-    auto t = core::cast_type<core::LiteralType>(value);
-    return t && t->derivesFrom(gs, core::Symbols::String());
+    return core::isa_type<core::LiteralType>(value) &&
+           core::cast_type_nonnull<core::LiteralType>(value).derivesFrom(gs, core::Symbols::String());
 }
 
 bool Literal::isTrue(const core::GlobalState &gs) const {
-    return value->derivesFrom(gs, core::Symbols::TrueClass());
+    return value.derivesFrom(gs, core::Symbols::TrueClass());
 }
 
 bool Literal::isFalse(const core::GlobalState &gs) const {
-    return value->derivesFrom(gs, core::Symbols::FalseClass());
+    return value.derivesFrom(gs, core::Symbols::FalseClass());
 }
 
 string UnresolvedConstantLit::nodeName() {

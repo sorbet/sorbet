@@ -866,7 +866,9 @@ result of any method call. This effectively means that Sorbet knew the type
 statically for 100% of calls within a file. This sigil is rarely used—usually
 the only files that are `# typed: strong` are RBI files and files with empty
 class definitions. Most Ruby files that actually do interesting things will have
-errors in `# typed: strong`.
+errors in `# typed: strong`. Support for `typed: strong` files is minimal, as
+Sorbet changes regularly and new features often bring new `T.untyped`
+intermediate values.
 
 ## 7019
 
@@ -984,5 +986,25 @@ did not cover all the cases.
 See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 [report an issue]: https://github.com/sorbet/sorbet/issues
+
+## 7034
+
+Sorbet detected that the safe navigation operator (`&.`) was being used on a
+receiver that can never be nil. Replace the offending occurrence of `&.` with a
+normal method call (`.`).
+
+```ruby
+# typed: true
+
+extend T::Sig
+
+sig {params(x: Integer, y: T.nilable(Integer)).void}
+def foo(x, y)
+  puts x&.to_s  # error: x can never be nil
+  puts x.to_s   # no error
+
+  puts y&.to_s  # no error: y may be nil
+end
+```
 
 <script src="/js/error-reference.js"></script>

@@ -21,7 +21,7 @@ LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
                 // Line not read. Abort. Store what was read thus far back into buffer
                 // for use in next call to function.
                 buffer = absl::StrCat(allRead, buffer);
-                return ReadOutput{maybeLine.result};
+                return ReadOutput{maybeLine.result, nullptr};
             }
             const string &line = *maybeLine.output;
             absl::StrAppend(&allRead, line, "\n");
@@ -37,7 +37,7 @@ LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
     if (length < 0) {
         logger->trace("No \"Content-Length: %i\" header found.");
         // Throw away what we've read and start over.
-        return ReadOutput{FileOps::ReadResult::Timeout};
+        return ReadOutput{FileOps::ReadResult::Timeout, nullptr};
     }
 
     if (buffer.length() < length) {
@@ -49,12 +49,12 @@ LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
             buffer.append(buf.begin(), buf.begin() + result);
         }
         if (result < 0) {
-            return ReadOutput{FileOps::ReadResult::ErrorOrEof};
+            return ReadOutput{FileOps::ReadResult::ErrorOrEof, nullptr};
         }
         if (result != moreNeeded) {
             // Didn't get enough data. Return read data to `buffer`.
             buffer = absl::StrCat(allRead, buffer);
-            return ReadOutput{FileOps::ReadResult::Timeout};
+            return ReadOutput{FileOps::ReadResult::Timeout, nullptr};
         }
     }
 
@@ -69,7 +69,7 @@ LSPInput::ReadOutput LSPFDInput::read(int timeoutMs) {
 LSPInput::ReadOutput LSPProgrammaticInput::read(int timeoutMs) {
     absl::MutexLock lock(&mtx);
     if (closed && available.empty()) {
-        return ReadOutput{FileOps::ReadResult::ErrorOrEof};
+        return ReadOutput{FileOps::ReadResult::ErrorOrEof, nullptr};
     }
 
     mtx.AwaitWithTimeout(
@@ -78,7 +78,7 @@ LSPInput::ReadOutput LSPProgrammaticInput::read(int timeoutMs) {
         absl::Milliseconds(timeoutMs));
 
     if (available.empty()) {
-        return ReadOutput{FileOps::ReadResult::Timeout};
+        return ReadOutput{FileOps::ReadResult::Timeout, nullptr};
     }
 
     auto msg = move(available.front());

@@ -3,7 +3,7 @@ ClassDef{
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
       orig = nullptr
-      symbol = ::<todo sym>
+      symbol = (class ::<todo sym>)
     }]
   rhs = [
     UnresolvedIdent{

@@ -3,10 +3,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <self>.sig() do ||
-      <self>.params(:"x", <emptyTree>::<C Complex>).void()
+      <self>.params(:x, <emptyTree>::<C Complex>).void()
     end
 
-    def foo<<C <todo sym>>>(x, &<blk>)
+    def foo<<todo method>>(x, &<blk>)
       <emptyTree>::<C Kernel>.puts(x)
     end
 
@@ -14,7 +14,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(<emptyTree>::<C Complex>)
     end
 
-    def bar<<C <todo sym>>>(&<blk>)
+    def bar<<todo method>>(&<blk>)
       ::Kernel.Complex(0, "11")
     end
 
@@ -22,7 +22,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def baz<<C <todo sym>>>(&<blk>)
+    def baz<<todo method>>(&<blk>)
       <emptyTree>::<C Kernel>.puts(::Kernel.Complex(0, "2"))
     end
   end
@@ -31,10 +31,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
     <self>.sig() do ||
-      <self>.params(:"x", <emptyTree>::<C Complex>).void()
+      <self>.params(:x, <emptyTree>::<C Complex>).void()
     end
 
-    def foo<<C <todo sym>>>(x, &<blk>)
+    def foo<<todo method>>(x, &<blk>)
       <self>.puts(x)
     end
   end

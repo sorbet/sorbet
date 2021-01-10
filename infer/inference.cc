@@ -14,7 +14,7 @@ namespace sorbet::infer {
 unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     Timer timeit(ctx.state.tracer(), "Inference::run",
                  {{"func", (string)cfg->symbol.data(ctx)->toStringFullName(ctx)}});
-    ENFORCE(cfg->symbol == ctx.owner);
+    ENFORCE(cfg->symbol == ctx.owner.asMethodRef());
     auto methodLoc = cfg->symbol.data(ctx)->loc();
     prodCounterInc("types.input.methods.typechecked");
     int typedSendCount = 0;
@@ -39,7 +39,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     core::TypePtr methodReturnType = cfg->symbol.data(ctx)->resultType;
     auto missingReturnType = methodReturnType == nullptr;
 
-    if (cfg->symbol.data(ctx)->name.data(ctx)->kind != core::NameKind::UTF8 ||
+    if (cfg->symbol.data(ctx)->name.kind() != core::NameKind::UTF8 ||
         cfg->symbol.data(ctx)->name == core::Names::staticInit() || !cfg->symbol.data(ctx)->loc().exists()) {
         guessTypes = false;
     }
@@ -63,8 +63,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         auto enclosingClass = cfg->symbol.data(ctx)->enclosingClass(ctx);
         methodReturnType = core::Types::instantiate(
             ctx,
-            core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol.data(ctx)->resultType, cfg->symbol.data(ctx)->owner,
-                                              enclosingClass, enclosingClass.data(ctx)->selfTypeArgs(ctx)),
+            core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol.data(ctx)->resultType,
+                                              cfg->symbol.data(ctx)->owner.asClassOrModuleRef(), enclosingClass,
+                                              enclosingClass.data(ctx)->selfTypeArgs(ctx)),
             *constr);
         methodReturnType = core::Types::replaceSelfType(ctx, methodReturnType, enclosingClass.data(ctx)->selfType(ctx));
     }
@@ -128,6 +129,21 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             bb->firstDeadInstructionIdx = 0;
             // this block is unreachable.
             if (!bb->exprs.empty()) {
+                // This is a bit complicated:
+                //
+                //   1. If the block consists only of synthetic bindings or T.absurd, we don't
+                //      want to issue an error.
+                //   2. If the block contains a send of the form <Magic>.<nil-for-safe-navigation>(x),
+                //      we want to issue an UnnecessarySafeNavigationError, extracting
+                //      type-and-origin info from x. (This magic form is inserted by the desugarer
+                //      for a "safe navigation" operation, e.g., `x&.foo`.)
+                //   3. Otherwise, we want to issue a DeadBranchInferencer error, taking the first
+                //      (non-synthetic, non-"T.absurd") instruction in the block as the loc of the
+                //      error.
+                cfg::Instruction *unreachableInstruction = nullptr;
+                core::LocOffsets locForUnreachable;
+                bool dueToSafeNavigation = false;
+
                 for (auto &expr : bb->exprs) {
                     if (expr.value->isSynthetic) {
                         continue;
@@ -135,10 +151,38 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (cfg::isa_instruction<cfg::TAbsurd>(expr.value.get())) {
                         continue;
                     }
-                    if (auto e = ctx.beginError(expr.loc, core::errors::Infer::DeadBranchInferencer)) {
+
+                    auto send = cfg::cast_instruction<cfg::Send>(expr.value.get());
+                    if (send != nullptr && send->fun == core::Names::nilForSafeNavigation()) {
+                        unreachableInstruction = expr.value.get();
+                        locForUnreachable = expr.loc;
+                        dueToSafeNavigation = true;
+                        break;
+                    } else if (unreachableInstruction == nullptr) {
+                        unreachableInstruction = expr.value.get();
+                        locForUnreachable = expr.loc;
+                    }
+                }
+
+                if (unreachableInstruction != nullptr) {
+                    auto send = cfg::cast_instruction<cfg::Send>(unreachableInstruction);
+
+                    if (dueToSafeNavigation && send != nullptr) {
+                        if (auto e =
+                                ctx.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
+                            e.setHeader("Used `{}` operator on a receiver which can never be nil", "&.");
+
+                            // Just a failsafe check; args.size() should always be 1.
+                            if (send->args.size() > 0) {
+                                auto ty = current.getAndFillTypeAndOrigin(ctx, send->args[0]);
+                                e.addErrorSection(core::ErrorSection(
+                                    core::ErrorColors::format("Type of receiver is `{}`, from:", ty.type.show(ctx)),
+                                    ty.origins2Explanations(ctx, current.locForUninitialized())));
+                            }
+                        }
+                    } else if (auto e = ctx.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
                         e.setHeader("This code is unreachable");
                     }
-                    break;
                 }
             }
             continue;
@@ -157,15 +201,17 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     totalSendCount++;
                     if (bind.bind.type && !bind.bind.type.isUntyped()) {
                         typedSendCount++;
-                    } else if (bind.bind.type->hasUntyped()) {
-                        DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type->untypedBlame().rawId()););
+                    } else if (bind.bind.type.hasUntyped()) {
+                        DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type.untypedBlame().rawId()););
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::UntypedValue)) {
                             e.setHeader("This code is untyped");
+                            e.addErrorNote("Support for `{}` is minimal. Consider using `{}` instead.", "typed: strong",
+                                           "typed: strict");
                         }
                     }
                 }
                 ENFORCE(bind.bind.type);
-                bind.bind.type->sanityCheck(ctx);
+                bind.bind.type.sanityCheck(ctx);
                 if (bind.bind.type.isBottom()) {
                     current.isDead = true;
                     madeBlockDead = core::Loc(ctx.file, bind.loc);

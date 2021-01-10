@@ -153,16 +153,16 @@ TEST_CASE("CountTrees") {
     args.emplace_back(std::move(arg));
 
     ast::MethodDef::Flags flags;
-    auto methodDef =
-        ast::make_tree<ast::MethodDef>(loc.offsets(), loc, methodSym, name, std::move(args), std::move(rhs), flags);
+    auto methodDef = ast::make_tree<ast::MethodDef>(loc.offsets(), loc.offsets(), methodSym, name, std::move(args),
+                                                    std::move(rhs), flags);
     auto emptyTree = ast::MK::EmptyTree();
     auto cnst = ast::make_tree<ast::UnresolvedConstantLit>(loc.offsets(), std::move(emptyTree), name);
 
     ast::ClassDef::RHS_store classrhs;
     classrhs.emplace_back(std::move(methodDef));
-    auto tree =
-        ast::make_tree<ast::ClassDef>(loc.offsets(), loc, classSym, std::move(cnst), ast::ClassDef::ANCESTORS_store(),
-                                      std::move(classrhs), ast::ClassDef::Kind::Class);
+    auto tree = ast::make_tree<ast::ClassDef>(loc.offsets(), loc.offsets(), classSym, std::move(cnst),
+                                              ast::ClassDef::ANCESTORS_store(), std::move(classrhs),
+                                              ast::ClassDef::Kind::Class);
     Counter c;
     sorbet::core::MutableContext ctx(cb, core::Symbols::root(), loc.file());
 

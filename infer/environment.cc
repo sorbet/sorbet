@@ -145,7 +145,7 @@ KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, core
         auto fnd = absl::c_find_if(copy->yesTypeTests, [&](auto const &e) -> bool { return e.first == local; });
         if (fnd == copy->yesTypeTests.end()) {
             // add info from env to knowledge
-            ENFORCE(state.typeAndOrigins.type.get() != nullptr);
+            ENFORCE(state.typeAndOrigins.type != nullptr);
             // This handles code snippets such as
             //
             //    if (...)
@@ -219,11 +219,11 @@ void KnowledgeFact::sanityCheck() const {
         return;
     }
     for (auto &a : yesTypeTests) {
-        ENFORCE(a.second.get() != nullptr);
+        ENFORCE(a.second != nullptr);
         ENFORCE(!a.second.isUntyped());
     }
     for (auto &a : noTypeTests) {
-        ENFORCE(a.second.get() != nullptr);
+        ENFORCE(a.second != nullptr);
         ENFORCE(!a.second.isUntyped());
     }
 }
@@ -233,11 +233,11 @@ string KnowledgeFact::toString(const core::GlobalState &gs, const cfg::CFG &cfg)
 
     for (auto &el : yesTypeTests) {
         buf1.emplace_back(
-            fmt::format("    {} to be {}\n", el.first.showRaw(gs, cfg), el.second->toStringWithTabs(gs, 0)));
+            fmt::format("    {} to be {}\n", el.first.showRaw(gs, cfg), el.second.toStringWithTabs(gs, 0)));
     }
     for (auto &el : noTypeTests) {
         buf2.emplace_back(
-            fmt::format("    {} NOT to be {}\n", el.first.showRaw(gs, cfg), el.second->toStringWithTabs(gs, 0)));
+            fmt::format("    {} NOT to be {}\n", el.first.showRaw(gs, cfg), el.second.toStringWithTabs(gs, 0)));
     }
     fast_sort(buf1);
     fast_sort(buf2);
@@ -373,8 +373,8 @@ string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) c
         sorted.emplace_back(pair);
     }
     fast_sort(sorted, [&cfg](const auto &lhs, const auto &rhs) -> bool {
-        return lhs.first.data(cfg)._name.id() < rhs.first.data(cfg)._name.id() ||
-               (lhs.first.data(cfg)._name.id() == rhs.first.data(cfg)._name.id() &&
+        return lhs.first.data(cfg)._name.rawId() < rhs.first.data(cfg)._name.rawId() ||
+               (lhs.first.data(cfg)._name.rawId() == rhs.first.data(cfg)._name.rawId() &&
                 lhs.first.data(cfg).unique < rhs.first.data(cfg).unique);
     });
     for (const auto &pair : sorted) {
@@ -383,7 +383,7 @@ string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) c
         if (var.data(cfg)._name == core::Names::debugEnvironmentTemp()) {
             continue;
         }
-        fmt::format_to(buf, "{}: {}{}\n{}\n", var.showRaw(gs, cfg), state.typeAndOrigins.type->toStringWithTabs(gs, 0),
+        fmt::format_to(buf, "{}: {}{}\n{}\n", var.showRaw(gs, cfg), state.typeAndOrigins.type.toStringWithTabs(gs, 0),
                        state.knownTruthy ? " (and truthy)\n" : "", state.knowledge.toString(gs, cfg));
     }
     return to_string(buf);
@@ -395,7 +395,7 @@ bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
         return false;
     }
     // We don't distinguish between nullptr and "not set"
-    return fnd->second.typeAndOrigins.type.get() != nullptr;
+    return fnd->second.typeAndOrigins.type != nullptr;
 }
 
 const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const {
@@ -403,7 +403,7 @@ const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, cfg
     if (fnd == _vars.end()) {
         return uninitialized;
     }
-    ENFORCE(fnd->second.typeAndOrigins.type.get() != nullptr);
+    ENFORCE(fnd->second.typeAndOrigins.type != nullptr);
     return fnd->second.typeAndOrigins;
 }
 
@@ -430,10 +430,10 @@ void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::L
         toState.knownTruthy = fromState.knownTruthy;
         auto &toKnowledge = toState.knowledge;
         auto &fromKnowledge = fromState.knowledge;
-        if (fromState.typeAndOrigins.type.get() == nullptr) {
+        if (fromState.typeAndOrigins.type == nullptr) {
             fromState.typeAndOrigins.type = core::Types::nilClass();
         }
-        if (toState.typeAndOrigins.type.get() == nullptr) {
+        if (toState.typeAndOrigins.type == nullptr) {
             toState.typeAndOrigins.type = core::Types::nilClass();
         }
 
@@ -486,7 +486,7 @@ bool isSingleton(core::Context ctx, core::SymbolRef sym) {
     }
 
     // T::Enum values are modeled as singletons of their own fake class.
-    if (sym.data(ctx)->name.data(ctx)->isTEnumName(ctx)) {
+    if (sym.data(ctx)->name.isTEnumName(ctx)) {
         return true;
     }
 
@@ -585,25 +585,27 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &truthy = funIsEq ? whoKnows.truthy() : whoKnows.falsy();
         auto &falsy = funIsEq ? whoKnows.falsy() : whoKnows.truthy();
 
-        ENFORCE(argType.get() != nullptr);
-        ENFORCE(recvType.get() != nullptr);
+        ENFORCE(argType != nullptr);
+        ENFORCE(recvType != nullptr);
         if (!argType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
         }
         if (!recvType.isUntyped()) {
             truthy.addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
         }
-        if (auto s = core::cast_type<core::ClassType>(argType)) {
+        if (core::isa_type<core::ClassType>(argType)) {
+            auto s = core::cast_type_nonnull<core::ClassType>(argType);
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s->symbol)) {
+            if (isSingleton(ctx, s.symbol)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->recv.variable, argType);
             }
         }
-        if (auto s = core::cast_type<core::ClassType>(recvType)) {
+        if (core::isa_type<core::ClassType>(recvType)) {
+            auto s = core::cast_type_nonnull<core::ClassType>(recvType);
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s->symbol)) {
+            if (isSingleton(ctx, s.symbol)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
         }
@@ -626,10 +628,11 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         // `when` against singleton
-        if (auto s = core::cast_type<core::ClassType>(recvType)) {
+        if (core::isa_type<core::ClassType>(recvType)) {
+            auto s = core::cast_type_nonnull<core::ClassType>(recvType);
             // check if s is a singleton. in this case we can learn that
             // a failed comparison means that type test would also fail
-            if (isSingleton(ctx, s->symbol)) {
+            if (isSingleton(ctx, s.symbol)) {
                 whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
                 whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->args[0].variable, recvType);
             }
@@ -640,13 +643,14 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         const auto &recvKlass = send->recv.type;
         const auto &argType = send->args[0].type;
 
-        if (auto *argClass = core::cast_type<core::ClassType>(argType)) {
-            if (!recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
-                !argClass->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
+        if (core::isa_type<core::ClassType>(argType)) {
+            auto argClass = core::cast_type_nonnull<core::ClassType>(argType);
+            if (!recvKlass.derivesFrom(ctx, core::Symbols::Class()) ||
+                !argClass.symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
         } else if (auto *argClass = core::cast_type<core::AppliedType>(argType)) {
-            if (!recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
+            if (!recvKlass.derivesFrom(ctx, core::Symbols::Class()) ||
                 !argClass->klass.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
                 return;
             }
@@ -662,7 +666,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 }
 
 void Environment::setTypeAndOrigin(cfg::LocalRef symbol, const core::TypeAndOrigins &typeAndOrigins) {
-    ENFORCE(typeAndOrigins.type.get() != nullptr);
+    ENFORCE(typeAndOrigins.type != nullptr);
     _vars[symbol].typeAndOrigins = typeAndOrigins;
 }
 
@@ -763,9 +767,9 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
         auto var = pair.first;
         const auto &otherTO = other.getTypeAndOrigin(ctx, var);
         auto &thisTO = pair.second.typeAndOrigins;
-        if (thisTO.type.get() != nullptr) {
+        if (thisTO.type != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
-            thisTO.type->sanityCheck(ctx);
+            thisTO.type.sanityCheck(ctx);
             for (auto origin : otherTO.origins) {
                 if (!absl::c_linear_search(thisTO.origins, origin)) {
                     thisTO.origins.emplace_back(origin);
@@ -841,7 +845,7 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
                             tp.origins.emplace_back(origin);
                         }
                     }
-                    tp.type->sanityCheck(ctx);
+                    tp.type.sanityCheck(ctx);
                 } else {
                     tp = otherPin->second;
                 }
@@ -867,7 +871,7 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
 }
 
 core::TypePtr Environment::getReturnType(core::Context ctx, const core::TypePtr &procType) {
-    if (!procType->derivesFrom(ctx, core::Symbols::Proc())) {
+    if (!procType.derivesFrom(ctx, core::Symbols::Proc())) {
         return core::Types::untypedUntracked();
     }
     auto *applied = core::cast_type<core::AppliedType>(procType);
@@ -882,24 +886,24 @@ core::TypePtr flattenArrays(core::Context ctx, const core::TypePtr &type) {
     core::TypePtr result;
 
     typecase(
-        type.get(),
+        type,
 
-        [&](const core::OrType *o) {
-            result = core::Types::any(ctx, flattenArrays(ctx, o->left), flattenArrays(ctx, o->right));
+        [&](const core::OrType &o) {
+            result = core::Types::any(ctx, flattenArrays(ctx, o.left), flattenArrays(ctx, o.right));
         },
 
-        [&](const core::AppliedType *a) {
-            if (a->klass != core::Symbols::Array()) {
+        [&](const core::AppliedType &a) {
+            if (a.klass != core::Symbols::Array()) {
                 result = type;
                 return;
             }
-            ENFORCE(a->targs.size() == 1);
-            result = a->targs.front();
+            ENFORCE(a.targs.size() == 1);
+            result = a.targs.front();
         },
 
-        [&](const core::TupleType *t) { result = t->elementType(); },
+        [&](const core::TupleType &t) { result = t.elementType(ctx); },
 
-        [&](const core::Type *t) { result = std::move(type); });
+        [&](const core::TypePtr &t) { result = std::move(type); });
     return result;
 }
 
@@ -908,11 +912,11 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     if (fun != core::Names::flatMap()) {
         return returnType;
     }
-    if (!receiver->derivesFrom(ctx, core::Symbols::Enumerable())) {
+    if (!receiver.derivesFrom(ctx, core::Symbols::Enumerable())) {
         return returnType;
     }
 
-    if (!receiver.isUntyped() && receiver->derivesFrom(ctx, core::Symbols::Enumerator_Lazy())) {
+    if (!receiver.isUntyped() && receiver.derivesFrom(ctx, core::Symbols::Enumerator_Lazy())) {
         return returnType;
     }
 
@@ -955,9 +959,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                 core::DispatchArgs dispatchArgs{send->fun,     locs,          send->numPosArgs, args,    recvType.type,
                                                 recvType.type, recvType.type, send->link,       ownerLoc};
-                auto dispatched = recvType.type->dispatchCall(ctx, dispatchArgs);
+                auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
+                auto multipleComponents = it->secondary != nullptr;
                 while (it != nullptr) {
                     for (auto &err : it->main.errors) {
                         ctx.state._error(std::move(err));
@@ -976,8 +981,16 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (it->main.method.exists() && it->main.method.data(ctx)->isMethodPrivate() &&
                         !send->isPrivateOk) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PrivateMethod)) {
-                            e.setHeader("Non-private call to private method `{}`", it->main.method.show(ctx));
-                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined as");
+                            if (multipleComponents) {
+                                e.setHeader("Non-private call to private method `{}` on `{}` component of `{}`",
+                                            it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx),
+                                            recvType.type.show(ctx));
+                            } else {
+                                e.setHeader("Non-private call to private method `{}` on `{}`",
+                                            it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx));
+                            }
+                            e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
+                                           it->main.method.data(ctx)->owner.data(ctx)->show(ctx));
                         }
                     }
 
@@ -997,7 +1010,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 if (lspQueryMatch) {
                     core::lsp::QueryResponse::pushQueryResponse(
                         ctx, core::lsp::SendResponse(core::Loc(ctx.file, bind.loc), retainedResult, send->fun,
-                                                     send->isPrivateOk, ctx.owner));
+                                                     send->isPrivateOk, ctx.owner.asMethodRef(),
+                                                     core::Loc(ctx.file, send->receiverLoc)));
                 }
                 if (send->link) {
                     // This should eventually become ENFORCEs but currently they are wrong
@@ -1020,8 +1034,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                 if (lspQueryMatch && !bind.value->isSynthetic) {
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx,
-                        core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), i->what.data(inWhat), tp, ctx.owner));
+                        ctx, core::lsp::IdentResponse(core::Loc(ctx.file, bind.loc), i->what.data(inWhat), tp,
+                                                      ctx.owner.asMethodRef()));
                 }
 
                 ENFORCE(ctx.file.data(ctx).hasParseErrors || !tp.origins.empty(), "Inferencer did not assign location");
@@ -1035,7 +1049,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     tp.type = singletonClass.data(ctx)->externalType();
                     tp.origins.emplace_back(symbol.data(ctx)->loc());
                 } else if (data->isField() || (data->isStaticField() && !data->isTypeAlias()) || data->isTypeMember()) {
-                    if (data->resultType.get() != nullptr) {
+                    if (data->resultType != nullptr) {
                         if (data->isTypeMember()) {
                             if (data->isFixed()) {
                                 // pick the upper bound here, as
@@ -1048,7 +1062,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             }
                         } else if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
-                                ctx, symbol.data(ctx)->resultType, symbol.data(ctx)->owner,
+                                ctx, symbol.data(ctx)->resultType, symbol.data(ctx)->owner.asClassOrModuleRef(),
                                 ctx.owner.data(ctx)->enclosingClass(ctx),
                                 ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
                         } else {
@@ -1060,7 +1074,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         tp.type = core::Types::untyped(ctx, symbol);
                     }
                 } else if (data->isTypeAlias()) {
-                    ENFORCE(data->resultType.get() != nullptr);
+                    ENFORCE(data->resultType != nullptr);
                     tp.origins.emplace_back(data->loc());
                     tp.type = core::make_type<core::MetaType>(data->resultType);
                 } else {
@@ -1118,7 +1132,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 ENFORCE(insn->link->result);
                 ENFORCE(insn->link->result->main.blockPreType);
                 auto &procType = insn->link->result->main.blockPreType;
-                auto params = procType->getCallArguments(ctx, core::Names::call());
+                auto params = procType.getCallArguments(ctx, core::Names::call());
 
                 // A multi-arg proc, if provided a single arg which is an array,
                 // will implicitly splat it out.
@@ -1129,7 +1143,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 auto &blkArgs = insn->link->argFlags;
                 auto *tuple = core::cast_type<core::TupleType>(params);
                 if (blkArgs.size() > 1 && !blkArgs.front().isRepeated && tuple && tuple->elems.size() == 1 &&
-                    tuple->elems.front()->derivesFrom(ctx, core::Symbols::Array())) {
+                    tuple->elems.front().derivesFrom(ctx, core::Symbols::Array())) {
                     tp.type = std::move(tuple->elems.front());
                 } else if (params == nullptr) {
                     tp.type = core::Types::untypedUntracked();
@@ -1150,15 +1164,16 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                                            core::UntypedMode::AlwaysCompatible)) {
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         auto ownerData = ctx.owner.data(ctx);
-                        e.setHeader("Returning value that does not conform to method result type");
+                        e.setHeader("Expected `{}` but found `{}` for method result type", methodReturnType.show(ctx),
+                                    typeAndOrigin.type.show(ctx));
                         e.addErrorSection(core::ErrorSection(
-                            "Expected " + methodReturnType->show(ctx),
+                            "Expected " + methodReturnType.show(ctx),
                             {
                                 core::ErrorLine::from(ownerData->loc(), "Method `{}` has return type `{}`",
-                                                      ownerData->name.show(ctx), methodReturnType->show(ctx)),
+                                                      ownerData->name.show(ctx), methodReturnType.show(ctx)),
                             }));
                         e.addErrorSection(
-                            core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
+                            core::ErrorSection("Got " + typeAndOrigin.type.show(ctx) + " originating from:",
                                                typeAndOrigin.origins2Explanations(ctx, ownerLoc)));
                     }
                 }
@@ -1174,10 +1189,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
                 bool isSubtype;
                 if (i->link->result->main.constr) {
-                    isSubtype = core::Types::isSubTypeUnderConstraint(ctx, *i->link->result->main.constr,
-
-                                                                      typeAndOrigin.type, expectedType,
-                                                                      core::UntypedMode::AlwaysCompatible);
+                    isSubtype =
+                        core::Types::isSubTypeUnderConstraint(ctx, *i->link->result->main.constr, typeAndOrigin.type,
+                                                              expectedType, core::UntypedMode::AlwaysCompatible);
                 } else {
                     isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType);
                 }
@@ -1188,9 +1202,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         e.setHeader("Returning value that does not conform to block result type");
-                        e.addErrorSection(core::ErrorSection("Expected " + expectedType->show(ctx)));
+                        e.addErrorSection(core::ErrorSection("Expected " + expectedType.show(ctx)));
                         e.addErrorSection(
-                            core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
+                            core::ErrorSection("Got " + typeAndOrigin.type.show(ctx) + " originating from:",
                                                typeAndOrigin.origins2Explanations(ctx, ownerLoc)));
                     }
                 }
@@ -1215,7 +1229,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd", "T.untyped");
                     } else {
                         e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled", "T.absurd",
-                                    typeAndOrigin.type->show(ctx));
+                                    typeAndOrigin.type.show(ctx));
                     }
                     e.addErrorSection(
                         core::ErrorSection("Originating from:", typeAndOrigin.origins2Explanations(ctx, ownerLoc)));
@@ -1256,15 +1270,16 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (c->cast == core::Names::assertType() && ty.type.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("The typechecker was unable to infer the type of the asserted value");
-                            e.addErrorSection(core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
+                            e.addErrorSection(core::ErrorSection("Got " + ty.type.show(ctx) + " originating from:",
                                                                  ty.origins2Explanations(ctx, ownerLoc)));
-                            e.addErrorSection(core::ErrorSection("You may need to add additional `sig` annotations"));
+                            e.addErrorNote("You may need to add additional `{}` annotations", "sig");
                         }
                     } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
-                            e.setHeader("Argument does not have asserted type `{}`", castType->show(ctx));
-                            e.addErrorSection(core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
-                                                                 ty.origins2Explanations(ctx, ownerLoc)));
+                            e.setHeader("Argument does not have asserted type `{}`", castType.show(ctx));
+                            e.addErrorSection(
+                                core::ErrorSection("Got " + ty.type.showWithMoreInfo(ctx) + " originating from:",
+                                                   ty.origins2Explanations(ctx, ownerLoc)));
                         }
                     }
                 } else if (!c->isSynthetic) {
@@ -1275,7 +1290,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Useless cast: inferred type `{}` is already a subtype of `{}`",
-                                        ty.type->show(ctx), castType->show(ctx));
+                                        ty.type.show(ctx), castType.show(ctx));
                         }
                     }
                 }
@@ -1284,10 +1299,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
             });
 
-        ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: {}", bind.value->toString(ctx, inWhat));
-        tp.type->sanityCheck(ctx);
+        ENFORCE(tp.type != nullptr, "Inferencer did not assign type: {}", bind.value->toString(ctx, inWhat));
+        tp.type.sanityCheck(ctx);
 
-        if (checkFullyDefined && !tp.type->isFullyDefined()) {
+        if (checkFullyDefined && !tp.type.isFullyDefined()) {
             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::IncompleteType)) {
                 e.setHeader("Expression does not have a fully-defined type (Did you reference another class's type "
                             "members?)");
@@ -1301,8 +1316,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
             const core::TypeAndOrigins &cur =
                 (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(ctx, bind.bind.variable);
 
-            bool asGoodAs =
-                core::Types::isSubType(ctx, core::Types::dropLiteral(tp.type), core::Types::dropLiteral(cur.type));
+            bool asGoodAs = core::Types::isSubType(ctx, core::Types::dropLiteral(ctx, tp.type),
+                                                   core::Types::dropLiteral(ctx, cur.type));
 
             {
                 switch (bindMinLoops) {
@@ -1311,7 +1326,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::FieldReassignmentTypeMismatch)) {
                                 e.setHeader(
                                     "Reassigning field with a value of wrong type: `{}` is not a subtype of `{}`",
-                                    tp.type->show(ctx), cur.type->show(ctx));
+                                    tp.type.show(ctx), cur.type.show(ctx));
                             }
                             tp = cur;
                         }
@@ -1322,7 +1337,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                     ctx.beginError(bind.loc, core::errors::Infer::GlobalReassignmentTypeMismatch)) {
                                 e.setHeader(
                                     "Reassigning global with a value of wrong type: `{}` is not a subtype of `{}`",
-                                    tp.type->show(ctx), cur.type->show(ctx));
+                                    tp.type.show(ctx), cur.type.show(ctx));
                             }
                             tp = cur;
                         }
@@ -1332,7 +1347,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
                                 e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
                                             "subtype of `{}`",
-                                            "let", tp.type->show(ctx), cur.type->show(ctx));
+                                            "let", tp.type.show(ctx), cur.type.show(ctx));
                             }
                             tp = cur;
                         }
@@ -1356,10 +1371,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                             }
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
                                 e.setHeader("Changing the type of a variable in a loop is not permitted");
+                                e.addErrorSection(core::ErrorSection(
+                                    core::ErrorColors::format("Existing variable has type: `{}`", cur.type.show(ctx))));
                                 e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
-                                    "Existing variable has type: `{}`", cur.type->show(ctx))));
-                                e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
-                                    "Attempting to change type to: `{}`\n", tp.type->show(ctx))));
+                                    "Attempting to change type to: `{}`\n", tp.type.show(ctx))));
 
                                 if (cur.origins.size() == 1) {
                                     // NOTE(nelhage): We assume that if there is
@@ -1370,8 +1385,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                     // other source (e.g. a function argument)
                                     auto suggest =
                                         core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
-                                    e.replaceWith(fmt::format("Initialize as `{}`", suggest->show(ctx)), cur.origins[0],
-                                                  "T.let({}, {})", cur.origins[0].source(ctx), suggest->show(ctx));
+                                    e.replaceWith(fmt::format("Initialize as `{}`", suggest.show(ctx)), cur.origins[0],
+                                                  "T.let({}, {})", cur.origins[0].source(ctx), suggest.show(ctx));
                                 } else {
                                     e.addErrorSection(core::ErrorSection("Original type from:",
                                                                          cur.origins2Explanations(ctx, ownerLoc)));
@@ -1431,11 +1446,11 @@ void Environment::initializeBasicBlockArgs(const cfg::BasicBlock &bb) {
 
 void Environment::setUninitializedVarsToNil(const core::Context &ctx, core::Loc origin) {
     for (auto &uninitialized : _vars) {
-        if (uninitialized.second.typeAndOrigins.type.get() == nullptr) {
+        if (uninitialized.second.typeAndOrigins.type == nullptr) {
             uninitialized.second.typeAndOrigins.type = core::Types::nilClass();
             uninitialized.second.typeAndOrigins.origins.emplace_back(origin);
         } else {
-            uninitialized.second.typeAndOrigins.type->sanityCheck(ctx);
+            uninitialized.second.typeAndOrigins.type.sanityCheck(ctx);
         }
     }
 }

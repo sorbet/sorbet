@@ -4,7 +4,6 @@
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/sort.h"
-#include "common/typecase.h"
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
@@ -15,7 +14,6 @@
 #include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPOutput.h"
-#include "main/lsp/LocalVarFinder.h"
 #include "main/lsp/LocalVarSaver.h"
 #include "main/lsp/QueryCollector.h"
 #include "main/lsp/ShowOperation.h"
@@ -542,7 +540,7 @@ LSPQueryResult LSPTypechecker::query(const core::lsp::Query &q, const std::vecto
     pipeline::typecheck(gs, move(resolved), config->opts, workers, /*presorted*/ true);
     gs->lspTypecheckCount++;
     gs->lspQuery = core::lsp::Query::noQuery();
-    return LSPQueryResult{queryCollector->drainQueryResponses()};
+    return LSPQueryResult{queryCollector->drainQueryResponses(), nullptr};
 }
 
 LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) const {

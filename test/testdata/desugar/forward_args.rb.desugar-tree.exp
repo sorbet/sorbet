@@ -1,0 +1,29 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Foo><<C <todo sym>>> < (::<todo sym>)
+    def bar<<todo method>>(a, b, k1:, k2:, &block)
+      <emptyTree>
+    end
+
+    def foo<<todo method>>(*<fwd-args>, *<fwd-kwargs>:, &<fwd-block>)
+      ::<Magic>.<call-with-splat-and-block>(<emptyTree>::<C T>.unsafe(<self>), :bar, <fwd-args>.to_a().concat([<fwd-kwargs>.to_hash()]), nil, <fwd-block>)
+    end
+
+    def foo2<<todo method>>(*args, *kwargs:, &block)
+      ::<Magic>.<call-with-splat-and-block>(<emptyTree>::<C T>.unsafe(<self>), :bar, args.to_a().concat([kwargs.to_hash()]), nil, block)
+    end
+  end
+
+  <emptyTree>::<C Foo>.new().foo()
+
+  <emptyTree>::<C Foo>.new().foo(1, 2)
+
+  <emptyTree>::<C Foo>.new().foo(:k1, 1, :k2, 2)
+
+  <emptyTree>::<C Foo>.new().foo() do ||
+    <self>.puts("foo")
+  end
+
+  <emptyTree>::<C Foo>.new().foo(1, 2, :k1, 1, :k2, 2) do ||
+    <self>.puts("foo")
+  end
+end

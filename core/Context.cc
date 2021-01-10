@@ -18,9 +18,9 @@ using namespace std;
 
 namespace sorbet::core {
 
-SymbolRef MutableContext::selfClass() {
+ClassOrModuleRef MutableContext::selfClass() {
     SymbolData data = this->owner.data(this->state);
-    if (data->isClassOrModule()) {
+    if (this->owner.isClassOrModule()) {
         return data->singletonClass(this->state);
     }
     return data->enclosingClass(this->state);
@@ -40,6 +40,10 @@ bool Context::permitOverloadDefinitions(const core::GlobalState &gs, FileRef sig
 
     constexpr string_view whitelistedTest = "overloads_test.rb"sv;
     return FileOps::getFileName(sigLoc.data(gs).path()) == whitelistedTest;
+}
+
+bool Context::permitOverloadDefinitions(FileRef sigLoc) const {
+    return Context::permitOverloadDefinitions(state, sigLoc, owner);
 }
 
 bool MutableContext::permitOverloadDefinitions(FileRef sigLoc) const {
@@ -83,7 +87,7 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
     ENFORCE(from.typeArguments.size() == to.typeArguments.size(), "Can't substitute symbols yet");
     ENFORCE(from.typeMembers.size() == to.typeMembers.size(), "Can't substitute symbols yet");
 
-    const_cast<GlobalState &>(from).sanityCheck();
+    from.sanityCheck();
     {
         UnfreezeFileTable unfreezeFiles(to);
         int fileIdx = 0; // Skip file 0
@@ -102,43 +106,56 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
 
     fastPath = false;
     if (optionalCommonParent != nullptr) {
-        if (from.namesUsed() == optionalCommonParent->namesUsed() &&
+        if (from.namesUsedTotal() == optionalCommonParent->namesUsedTotal() &&
             from.symbolsUsedTotal() == optionalCommonParent->symbolsUsedTotal()) {
-            ENFORCE(to.namesUsed() >= from.namesUsed());
+            ENFORCE(to.namesUsedTotal() >= from.namesUsedTotal());
             ENFORCE(to.symbolsUsedTotal() >= from.symbolsUsedTotal());
             fastPath = true;
         }
     }
 
     if (!fastPath || debug_mode) {
-        bool seenEmpty = false;
         {
             UnfreezeNameTable unfreezeNames(to);
-            nameSubstitution.reserve(from.names.size());
+            utf8NameSubstitution.reserve(from.utf8Names.size());
+            constantNameSubstitution.reserve(from.constantNames.size());
+            uniqueNameSubstitution.reserve(from.uniqueNames.size());
             int i = -1;
-            for (const Name &nm : from.names) {
+            for (const UTF8Name &nm : from.utf8Names) {
                 i++;
-                ENFORCE(nameSubstitution.size() == i, "Name substitution has wrong size");
-                if (seenEmpty) {
-                    switch (nm.kind) {
-                        case NameKind::UNIQUE:
-                            nameSubstitution.emplace_back(to.freshNameUnique(
-                                nm.unique.uniqueNameKind, substitute(nm.unique.original), nm.unique.num));
-                            break;
-                        case NameKind::UTF8:
-                            nameSubstitution.emplace_back(to.enterNameUTF8(nm.raw.utf8));
-                            break;
-                        case NameKind::CONSTANT:
-                            nameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.cnst.original)));
-                            break;
-                        default:
-                            ENFORCE(false, "NameKind missing");
+                ENFORCE_NO_TIMER(utf8NameSubstitution.size() == i, "UTF8 name substitution has wrong size");
+                utf8NameSubstitution.emplace_back(to.enterNameUTF8(nm.utf8));
+                ENFORCE(!fastPath || utf8NameSubstitution.back().utf8Index() == i);
+            }
+            // UniqueNames and ConstantNames may reference each other, necessitating some special logic here to avoid
+            // crashing. We process UniqueNames first because there are fewer of them, so fewer loop iterations require
+            // this special check. Tested in `core_test.cc`.
+            i = -1;
+            for (const UniqueName &nm : from.uniqueNames) {
+                i++;
+                ENFORCE(uniqueNameSubstitution.size() == i, "Unique name substitution has wrong size");
+                if (nm.original.kind() == NameKind::CONSTANT &&
+                    nm.original.constantIndex() >= constantNameSubstitution.size()) {
+                    // Note: Duplicate of loop body below. If you change one, change the other!
+                    for (u4 i = constantNameSubstitution.size(); i <= nm.original.constantIndex(); i++) {
+                        auto &cnst = from.constantNames[i];
+                        ENFORCE_NO_TIMER(constantNameSubstitution.size() == i,
+                                         "Constant name substitution has wrong size");
+                        // N.B.: cnst may reference a UniqueName, but since names are linearizeable we should have
+                        // already substituted it by now.
+                        constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(cnst.original)));
                     }
-                } else {
-                    nameSubstitution.emplace_back(to, 0);
-                    seenEmpty = true;
                 }
-                ENFORCE(!fastPath || nameSubstitution.back()._id == i);
+
+                uniqueNameSubstitution.emplace_back(
+                    to.freshNameUnique(nm.uniqueNameKind, substitute(nm.original), nm.num));
+                ENFORCE(!fastPath || uniqueNameSubstitution.back().uniqueIndex() == i);
+            }
+            for (i = constantNameSubstitution.size(); i < from.constantNames.size(); i++) {
+                ENFORCE_NO_TIMER(constantNameSubstitution.size() == i, "Constant name substitution has wrong size");
+                auto &nm = from.constantNames[i];
+                constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.original)));
+                ENFORCE(!fastPath || constantNameSubstitution.back().constantIndex() == i);
             }
         }
 

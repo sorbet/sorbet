@@ -23,8 +23,8 @@ message Type {
             INTEGER = 0;
             STRING = 1;
             SYMBOL = 2;
-            TRUE = 3;
-            FALSE = 4;
+            // TRUE = 3;
+            // FALSE = 4;
             FLOAT = 5;
         }
 

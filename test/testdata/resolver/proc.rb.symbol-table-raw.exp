@@ -6,8 +6,8 @@ class <C <U <root>>> < <C <U Object>> ()
     method <C <U TestProc>><U bad> (x, y, z, w, <blk>) -> NilClass @ Loc {file=test/testdata/resolver/proc.rb start=32:3 end=32:22}
       argument x<> -> T.proc.returns(T.untyped) @ Loc {file=test/testdata/resolver/proc.rb start=24:7 end=24:8}
       argument y<> -> T.proc.returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=25:7 end=25:8}
-      argument z<> -> T.proc.returns(T.untyped) @ Loc {file=test/testdata/resolver/proc.rb start=26:7 end=26:8}
-      argument w<> -> T.proc.params(arg0: T.untyped).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=29:7 end=29:8}
+      argument z<> -> T.proc.returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=26:7 end=26:8}
+      argument w<> -> T.proc.params(arg0: Symbol).returns(Integer) @ Loc {file=test/testdata/resolver/proc.rb start=29:7 end=29:8}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/proc.rb start=??? end=???}
     method <C <U TestProc>><U foo> (x, <blk>) -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=36:3 end=36:13}
       argument x<> -> Integer @ Loc {file=test/testdata/resolver/proc.rb start=35:15 end=35:16}

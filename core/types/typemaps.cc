@@ -1,7 +1,6 @@
 #include "absl/base/casts.h"
 #include "common/common.h"
 #include "core/Context.h"
-#include "core/Hashing.h"
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
@@ -11,8 +10,8 @@ namespace sorbet::core {
 
 TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, const InlinedVector<SymbolRef, 4> &params,
                            const vector<TypePtr> &targs) {
-    ENFORCE(what.get());
-    auto t = what->_instantiate(gs, params, targs);
+    ENFORCE(what != nullptr);
+    auto t = what._instantiate(gs, params, targs);
     if (t) {
         return t;
     }
@@ -24,8 +23,8 @@ TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, const Typ
     if (tc.isEmpty()) {
         return what;
     }
-    ENFORCE(what.get());
-    auto t = what->_instantiate(gs, tc);
+    ENFORCE(what != nullptr);
+    auto t = what._instantiate(gs, tc);
     if (t) {
         return t;
     }
@@ -33,27 +32,22 @@ TypePtr Types::instantiate(const GlobalState &gs, const TypePtr &what, const Typ
 }
 
 TypePtr Types::approximate(const GlobalState &gs, const TypePtr &what, const TypeConstraint &tc) {
-    ENFORCE(what.get());
-    auto t = what->_approximate(gs, tc);
+    ENFORCE(what != nullptr);
+    auto t = what._approximate(gs, tc);
     if (t) {
         return t;
     }
     return what;
 }
 
-TypePtr TypeVar::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                              const vector<TypePtr> &targs) {
-    return nullptr;
-}
-
-TypePtr TypeVar::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
+TypePtr TypeVar::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
     return tc.getInstantiation(sym);
 }
 
-TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
+TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
     if (tc.hasUpperBound(sym)) {
         auto bound = tc.findUpperBound(sym);
-        if (bound->isFullyDefined()) {
+        if (bound.isFullyDefined()) {
             return bound;
         }
     }
@@ -62,184 +56,123 @@ TypePtr TypeVar::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
     return Types::top();
 }
 
-TypePtr ClassType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                                const vector<TypePtr> &targs) {
-    return nullptr;
+namespace {
+
+template <typename... MethodArgs>
+optional<vector<TypePtr>> instantiateElems(const vector<TypePtr> &elems, const MethodArgs &... methodArgs) {
+    optional<vector<TypePtr>> newElems;
+    int i = -1;
+    for (auto &e : elems) {
+        ++i;
+        auto t = e._instantiate(methodArgs...);
+        if (!newElems.has_value() && !t) {
+            continue;
+        }
+
+        if (!newElems.has_value()) {
+            // Oops, need to fixup all the elements that should be there.
+            newElems.emplace();
+            newElems->reserve(elems.size());
+            for (int j = 0; j < i; ++j) {
+                newElems->emplace_back(elems[j]);
+            }
+        }
+
+        if (!t) {
+            t = e;
+        }
+
+        ENFORCE(newElems->size() == i);
+        newElems->emplace_back(move(t));
+    }
+    return newElems;
 }
 
-TypePtr LiteralType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                                  const vector<TypePtr> &targs) {
-    return nullptr;
+optional<vector<TypePtr>> approximateElems(const vector<TypePtr> &elems, const GlobalState &gs,
+                                           const TypeConstraint &tc) {
+    optional<vector<TypePtr>> newElems;
+    int i = -1;
+    for (auto &e : elems) {
+        ++i;
+        auto t = e._approximate(gs, tc);
+        if (!newElems.has_value() && !t) {
+            continue;
+        }
+
+        if (!newElems.has_value()) {
+            // Oops, need to fixup all the elements that should be there.
+            newElems.emplace();
+            newElems->reserve(elems.size());
+            for (int j = 0; j < i; ++j) {
+                newElems->emplace_back(elems[j]);
+            }
+        }
+
+        if (!t) {
+            t = e;
+        }
+
+        ENFORCE(newElems->size() == i);
+        newElems->emplace_back(move(t));
+    }
+    return newElems;
 }
+} // anonymous namespace
 
 TypePtr TupleType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                                const vector<TypePtr> &targs) {
-    bool changed = false;
-    vector<TypePtr> newElems;
-    newElems.reserve(this->elems.size());
-    for (auto &a : this->elems) {
-        auto t = a->_instantiate(gs, params, targs);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newElems.emplace_back(t);
-        } else {
-            newElems.emplace_back(nullptr);
-        }
+                                const vector<TypePtr> &targs) const {
+    optional<vector<TypePtr>> newElems = instantiateElems(this->elems, gs, params, targs);
+    if (!newElems) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newElems[i]) {
-            newElems[i] = this->elems[i];
-            i++;
-        }
-        return TupleType::build(gs, move(newElems));
-    }
-    return nullptr;
+    return make_type<TupleType>(move(*newElems));
 }
 
-TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
-    bool changed = false;
-    vector<TypePtr> newElems;
-    newElems.reserve(this->elems.size());
-    for (auto &a : this->elems) {
-        auto t = a->_instantiate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newElems.emplace_back(t);
-        } else {
-            newElems.emplace_back(nullptr);
-        }
+TypePtr TupleType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
+    optional<vector<TypePtr>> newElems = instantiateElems(this->elems, gs, tc);
+    if (!newElems) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newElems[i]) {
-            newElems[i] = this->elems[i];
-            i++;
-        }
-        return TupleType::build(gs, move(newElems));
-    }
-    return nullptr;
+    return make_type<TupleType>(move(*newElems));
 }
 
-TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
-    bool changed = false;
-    vector<TypePtr> newElems;
-    newElems.reserve(this->elems.size());
-    for (auto &a : this->elems) {
-        auto t = a->_approximate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newElems.emplace_back(t);
-        } else {
-            newElems.emplace_back(nullptr);
-        }
+TypePtr TupleType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
+    optional<vector<TypePtr>> newElems = approximateElems(this->elems, gs, tc);
+    if (!newElems) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newElems[i]) {
-            newElems[i] = this->elems[i];
-            i++;
-        }
-        return TupleType::build(gs, move(newElems));
-    }
-    return nullptr;
+    return make_type<TupleType>(move(*newElems));
 };
 
 TypePtr ShapeType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                                const vector<TypePtr> &targs) {
-    bool changed = false;
-    vector<TypePtr> newValues;
-    newValues.reserve(this->values.size());
-    for (auto &a : this->values) {
-        auto t = a->_instantiate(gs, params, targs);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newValues.emplace_back(t);
-        } else {
-            newValues.emplace_back(nullptr);
-        }
+                                const vector<TypePtr> &targs) const {
+    optional<vector<TypePtr>> newValues = instantiateElems(this->values, gs, params, targs);
+    if (!newValues) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newValues[i]) {
-            newValues[i] = this->values[i];
-            i++;
-        }
-        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(newValues));
-    }
-    return nullptr;
+    return make_type<ShapeType>(this->keys, move(*newValues));
 }
 
-TypePtr ShapeType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
-    bool changed = false;
-    vector<TypePtr> newValues;
-    newValues.reserve(this->values.size());
-    for (auto &a : this->values) {
-        auto t = a->_instantiate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newValues.emplace_back(t);
-        } else {
-            newValues.emplace_back(nullptr);
-        }
+TypePtr ShapeType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
+    optional<vector<TypePtr>> newValues = instantiateElems(this->values, gs, tc);
+    if (!newValues) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newValues[i]) {
-            newValues[i] = this->values[i];
-            i++;
-        }
-        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(newValues));
-    }
-    return nullptr;
+    return make_type<ShapeType>(this->keys, move(*newValues));
 }
 
-TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
-    bool changed = false;
-    vector<TypePtr> newValues;
-    newValues.reserve(this->values.size());
-    for (auto &a : this->values) {
-        auto t = a->_approximate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newValues.emplace_back(t);
-        } else {
-            newValues.emplace_back(nullptr);
-        }
+TypePtr ShapeType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
+    optional<vector<TypePtr>> newValues = approximateElems(this->values, gs, tc);
+    if (!newValues) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newValues[i]) {
-            newValues[i] = this->values[i];
-            i++;
-        }
-        return make_type<ShapeType>(Types::hashOfUntyped(), this->keys, move(newValues));
-    }
-    return nullptr;
+    return make_type<ShapeType>(this->keys, move(*newValues));
 }
 
 TypePtr OrType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                             const vector<TypePtr> &targs) {
-    auto left = this->left->_instantiate(gs, params, targs);
-    auto right = this->right->_instantiate(gs, params, targs);
+                             const vector<TypePtr> &targs) const {
+    auto left = this->left._instantiate(gs, params, targs);
+    auto right = this->right._instantiate(gs, params, targs);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -252,9 +185,9 @@ TypePtr OrType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRe
     return nullptr;
 }
 
-TypePtr OrType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
-    auto left = this->left->_instantiate(gs, tc);
-    auto right = this->right->_instantiate(gs, tc);
+TypePtr OrType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
+    auto left = this->left._instantiate(gs, tc);
+    auto right = this->right._instantiate(gs, tc);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -267,9 +200,9 @@ TypePtr OrType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
     return nullptr;
 }
 
-TypePtr OrType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
-    auto left = this->left->_approximate(gs, tc);
-    auto right = this->right->_approximate(gs, tc);
+TypePtr OrType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
+    auto left = this->left._approximate(gs, tc);
+    auto right = this->right._approximate(gs, tc);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -283,9 +216,9 @@ TypePtr OrType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
 }
 
 TypePtr AndType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                              const vector<TypePtr> &targs) {
-    auto left = this->left->_instantiate(gs, params, targs);
-    auto right = this->right->_instantiate(gs, params, targs);
+                              const vector<TypePtr> &targs) const {
+    auto left = this->left._instantiate(gs, params, targs);
+    auto right = this->right._instantiate(gs, params, targs);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -298,9 +231,9 @@ TypePtr AndType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolR
     return nullptr;
 }
 
-TypePtr AndType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
-    auto left = this->left->_instantiate(gs, tc);
-    auto right = this->right->_instantiate(gs, tc);
+TypePtr AndType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
+    auto left = this->left._instantiate(gs, tc);
+    auto right = this->right._instantiate(gs, tc);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -313,9 +246,9 @@ TypePtr AndType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
     return nullptr;
 }
 
-TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
-    auto left = this->left->_approximate(gs, tc);
-    auto right = this->right->_approximate(gs, tc);
+TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
+    auto left = this->left._approximate(gs, tc);
+    auto right = this->right._approximate(gs, tc);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -329,100 +262,32 @@ TypePtr AndType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
 }
 
 TypePtr AppliedType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                                  const vector<TypePtr> &targs) {
-    bool changed = false;
-    vector<TypePtr> newTargs;
-    newTargs.reserve(this->targs.size());
-    // TODO: make it not allocate if returns nullptr
-    for (auto &a : this->targs) {
-        auto t = a->_instantiate(gs, params, targs);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newTargs.emplace_back(t);
-        } else {
-            newTargs.emplace_back(nullptr);
-        }
+                                  const vector<TypePtr> &targs) const {
+    optional<vector<TypePtr>> newTargs = instantiateElems(this->targs, gs, params, targs);
+    if (!newTargs) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newTargs[i]) {
-            newTargs[i] = this->targs[i];
-            i++;
-        }
-        return make_type<AppliedType>(this->klass, move(newTargs));
-    }
-
-    return nullptr;
+    return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
-TypePtr AppliedType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
-    bool changed = false;
-    vector<TypePtr> newTargs;
-    newTargs.reserve(this->targs.size());
-    // TODO: make it not allocate if returns nullptr
-    for (auto &a : this->targs) {
-        auto t = a->_instantiate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newTargs.emplace_back(t);
-        } else {
-            newTargs.emplace_back(nullptr);
-        }
+TypePtr AppliedType::_instantiate(const GlobalState &gs, const TypeConstraint &tc) const {
+    optional<vector<TypePtr>> newTargs = instantiateElems(this->targs, gs, tc);
+    if (!newTargs) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newTargs[i]) {
-            newTargs[i] = this->targs[i];
-            i++;
-        }
-        return make_type<AppliedType>(this->klass, move(newTargs));
-    }
-
-    return nullptr;
+    return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
-TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
-    bool changed = false;
-    vector<TypePtr> newTargs;
-    newTargs.reserve(this->targs.size());
-    // TODO: make it not allocate if returns nullptr
-    for (auto &a : this->targs) {
-        auto t = a->_approximate(gs, tc);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newTargs.emplace_back(t);
-        } else {
-            newTargs.emplace_back(nullptr);
-        }
+TypePtr AppliedType::_approximate(const GlobalState &gs, const TypeConstraint &tc) const {
+    optional<vector<TypePtr>> newTargs = approximateElems(this->targs, gs, tc);
+    if (!newTargs) {
+        return nullptr;
     }
-    if (changed) {
-        int i = 0;
-        while (!newTargs[i]) {
-            newTargs[i] = this->targs[i];
-            i++;
-        }
-        return make_type<AppliedType>(this->klass, move(newTargs));
-    }
-
-    return nullptr;
-}
-
-TypePtr SelfTypeParam::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                                    const vector<TypePtr> &targs) {
-    return nullptr;
+    return make_type<AppliedType>(this->klass, move(*newTargs));
 }
 
 TypePtr LambdaParam::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                                  const vector<TypePtr> &targs) {
+                                  const vector<TypePtr> &targs) const {
     ENFORCE(params.size() == targs.size());
     for (auto &el : params) {
         if (el == this->definition) {
@@ -432,39 +297,22 @@ TypePtr LambdaParam::_instantiate(const GlobalState &gs, const InlinedVector<Sym
     return nullptr;
 }
 
-TypePtr Type::_approximate(const GlobalState &gs, const TypeConstraint &tc) {
-    return nullptr;
-}
-
-TypePtr Type::_instantiate(const GlobalState &gs, const TypeConstraint &tc) {
-    return nullptr;
-}
-
-TypePtr SelfType::_instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
-                               const vector<TypePtr> &targs) {
-    return nullptr;
-}
-
 TypePtr Types::replaceSelfType(const GlobalState &gs, const TypePtr &what, const TypePtr &receiver) {
-    ENFORCE(what.get());
-    auto t = what->_replaceSelfType(gs, receiver);
+    ENFORCE(what != nullptr);
+    auto t = what._replaceSelfType(gs, receiver);
     if (t) {
         return t;
     }
     return what;
 }
 
-TypePtr SelfType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) {
+TypePtr SelfType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
     return receiver;
 }
 
-TypePtr Type::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) {
-    return nullptr;
-}
-
-TypePtr OrType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) {
-    auto left = this->left->_replaceSelfType(gs, receiver);
-    auto right = this->right->_replaceSelfType(gs, receiver);
+TypePtr OrType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
+    auto left = this->left._replaceSelfType(gs, receiver);
+    auto right = this->right._replaceSelfType(gs, receiver);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -477,9 +325,9 @@ TypePtr OrType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver)
     return nullptr;
 }
 
-TypePtr AndType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) {
-    auto left = this->left->_replaceSelfType(gs, receiver);
-    auto right = this->right->_replaceSelfType(gs, receiver);
+TypePtr AndType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const {
+    auto left = this->left._replaceSelfType(gs, receiver);
+    auto right = this->right._replaceSelfType(gs, receiver);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -490,10 +338,6 @@ TypePtr AndType::_replaceSelfType(const GlobalState &gs, const TypePtr &receiver
         return Types::all(gs, left, right);
     }
     return nullptr;
-}
-
-unsigned int Type::hash(const GlobalState &gs) const {
-    return _hash(this->toString(gs)); // TODO: make something better
 }
 
 } // namespace sorbet::core

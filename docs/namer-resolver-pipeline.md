@@ -87,12 +87,6 @@ For a fuller picture of Sorbet's pipeline, see [pipeline.md](pipeline.md).
 │                                                   │ ast::Expression │                                                   │
 │                                                   └─────────────────┘                                                   │
 │                                                            │                                                            │
-│                                                            │ resolveMixesInClassMethods                                 │
-│                                                            ▼                                                            │
-│                                                   ┌─────────────────┐                                                   │
-│                                                   │ ast::Expression │                                                   │
-│                                                   └─────────────────┘                                                   │
-│                                                            │                                                            │
 │                                                            │ ResolveTypeMembersWalk                                     │
 │                                                            ▼                                                            │
 │                                                   ┌─────────────────┐                                                   │

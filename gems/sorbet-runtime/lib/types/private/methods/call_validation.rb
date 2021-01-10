@@ -195,7 +195,7 @@ module T::Private::Methods::CallValidation
       raise "Should have used create_validator_procedure_fast"
     end
     # trampoline to reduce stack frame size
-    if method_sig.arg_types.length == 0
+    if method_sig.arg_types.empty?
       create_validator_method_fast0(mod, original_method, method_sig, method_sig.return_type.raw_type)
     elsif method_sig.arg_types.length == 1
       create_validator_method_fast1(mod, original_method, method_sig, method_sig.return_type.raw_type,
@@ -708,7 +708,7 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_procedure_fast(mod, original_method, method_sig)
     # trampoline to reduce stack frame size
-    if method_sig.arg_types.length == 0
+    if method_sig.arg_types.empty?
       create_validator_procedure_fast0(mod, original_method, method_sig)
     elsif method_sig.arg_types.length == 1
       create_validator_procedure_fast1(mod, original_method, method_sig,

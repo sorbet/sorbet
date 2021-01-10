@@ -3,7 +3,7 @@ ClassDef{
   name = EmptyTree<<C <U <root>>>>
   ancestors = [ConstantLit{
       orig = nullptr
-      symbol = ::<todo sym>
+      symbol = (class ::<todo sym>)
     }]
   rhs = [
     ClassDef{
@@ -14,12 +14,12 @@ ClassDef{
       }<<C <U <todo sym>>>>
       ancestors = [ConstantLit{
           orig = nullptr
-          symbol = ::<todo sym>
+          symbol = (class ::<todo sym>)
         }]
       rhs = [
         MethodDef{
           flags = {}
-          name = <U take_arguments><<C <U <todo sym>>>>
+          name = <U take_arguments><<U <todo method>>>
           args = [UnresolvedIdent{
               kind = Local
               name = <U a>

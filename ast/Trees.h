@@ -63,15 +63,20 @@ enum class Tag {
 // A mapping from tree type to its corresponding tag.
 template <typename T> struct TreeToTag;
 
-class Expression;
-
 class TreePtr {
 public:
     // We store tagged pointers as 64-bit values.
     using tagged_storage = u8;
 
+    // Required for typecase
+    template <class To> static bool isa(const TreePtr &tree);
+    template <class To> static const To &cast(const TreePtr &tree);
+    template <class To> static To &cast(TreePtr &tree) {
+        return const_cast<To &>(cast<To>(static_cast<const TreePtr &>(tree)));
+    }
+
 private:
-    static constexpr tagged_storage TAG_MASK = 0xffff000000000007;
+    static constexpr tagged_storage TAG_MASK = 0xffff;
 
     static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
 
@@ -80,13 +85,9 @@ private:
     template <typename E, typename... Args> friend TreePtr make_tree(Args &&...);
 
     static tagged_storage tagPtr(Tag tag, void *expr) {
+        // Store the tag in the lower 16 bits of the pointer, regardless of size.
         auto val = static_cast<tagged_storage>(tag);
-        if (val >= 8) {
-            // Store the tag in the upper 16 bits of the pointer, as it won't fit in the lower three bits.
-            val <<= 48;
-        }
-
-        auto maskedPtr = reinterpret_cast<tagged_storage>(expr) & PTR_MASK;
+        auto maskedPtr = reinterpret_cast<tagged_storage>(expr) << 16;
 
         return maskedPtr | val;
     }
@@ -172,36 +173,18 @@ public:
         ENFORCE(ptr != 0);
 
         auto value = reinterpret_cast<tagged_storage>(ptr) & TAG_MASK;
-        if (value <= 7) {
-            return static_cast<Tag>(value);
-        } else {
-            return static_cast<Tag>(value >> 48);
-        }
+        return static_cast<Tag>(value);
     }
 
-    Expression *get() const noexcept {
+    void *get() const noexcept {
         auto val = ptr & PTR_MASK;
-
-        if constexpr (sizeof(void *) == 4) {
-            return reinterpret_cast<Expression *>(val);
-        } else {
-            // sign extension for the upper 16 bits
-            return reinterpret_cast<Expression *>((val << 16) >> 16);
-        }
+        return reinterpret_cast<void *>(val >> 16);
     }
 
     // Fetch the tagged pointer. This is needed for:
     // * ResolveConstantsWalk::isFullyResolved
     tagged_storage getTagged() const noexcept {
         return ptr;
-    }
-
-    Expression *operator->() const noexcept {
-        return get();
-    }
-
-    Expression *operator*() const noexcept {
-        return get();
     }
 
     explicit operator bool() const noexcept {
@@ -238,12 +221,6 @@ public:
 template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
     return TreePtr(TreeToTag<E>::value, new E(std::forward<Args>(args)...));
 }
-
-class Expression {
-public:
-    virtual ~Expression() = default;
-};
-CheckSize(Expression, 8, 8);
 
 struct ParsedFile {
     TreePtr tree;
@@ -291,6 +268,11 @@ template <class To> const To *cast_tree(const TreePtr &what) {
     }
 }
 
+// We disallow casting on temporary values because the lifetime of the returned value is
+// tied to the temporary, but it is possible for the temporary to be destroyed at the end
+// of the current statement, leading to use-after-free bugs.
+template <class To> To *cast_tree(TreePtr &&what) = delete;
+
 template <class To> To &cast_tree_nonnull(TreePtr &what) {
     ENFORCE(isa_tree<To>(what), "cast_tree_nonnull failed!");
     return *reinterpret_cast<To *>(what.get());
@@ -301,16 +283,37 @@ template <class To> const To &cast_tree_nonnull(const TreePtr &what) {
     return *reinterpret_cast<To *>(what.get());
 }
 
+// We disallow casting on temporary values because the lifetime of the returned value is
+// tied to the temporary, but it is possible for the temporary to be destroyed at the end
+// of the current statement, leading to use-after-free bugs.
+template <class To> To *cast_tree_nonnull(TreePtr &&what) = delete;
+
+template <class To> inline bool TreePtr::isa(const TreePtr &what) {
+    return isa_tree<To>(what);
+}
+
+template <class To> inline To const &TreePtr::cast(const TreePtr &what) {
+    return cast_tree_nonnull<To>(what);
+}
+
+template <> inline bool TreePtr::isa<TreePtr>(const TreePtr &tree) {
+    return true;
+}
+
+template <> inline const TreePtr &TreePtr::cast<TreePtr>(const TreePtr &tree) {
+    return tree;
+}
+
 #define TREE(name)                                                                  \
     class name;                                                                     \
     template <> struct TreeToTag<name> { static constexpr Tag value = Tag::name; }; \
     class __attribute__((aligned(8))) name final
 
-TREE(ClassDef) : public Expression {
+TREE(ClassDef) {
 public:
     const core::LocOffsets loc;
-    core::Loc declLoc;
-    core::SymbolRef symbol;
+    core::LocOffsets declLoc;
+    core::ClassOrModuleRef symbol;
 
     enum class Kind : u1 {
         Module,
@@ -330,8 +333,8 @@ public:
     ANCESTORS_store ancestors;
     ANCESTORS_store singletonAncestors;
 
-    ClassDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, TreePtr name, ANCESTORS_store ancestors,
-             RHS_store rhs, ClassDef::Kind kind);
+    ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOrModuleRef symbol, TreePtr name,
+             ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
 
     TreePtr deepCopy() const;
 
@@ -341,13 +344,13 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(ClassDef, 136, 8);
+CheckSize(ClassDef, 120, 8);
 
-TREE(MethodDef) : public Expression {
+TREE(MethodDef) {
 public:
     const core::LocOffsets loc;
-    core::Loc declLoc;
-    core::SymbolRef symbol;
+    core::LocOffsets declLoc;
+    core::MethodRef symbol;
 
     TreePtr rhs;
 
@@ -367,8 +370,8 @@ public:
 
     Flags flags;
 
-    MethodDef(core::LocOffsets loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
-              TreePtr rhs, Flags flags);
+    MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,
+              ARGS_store args, TreePtr rhs, Flags flags);
 
     TreePtr deepCopy() const;
 
@@ -378,9 +381,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(MethodDef, 72, 8);
+CheckSize(MethodDef, 64, 8);
 
-TREE(If) : public Expression {
+TREE(If) {
 public:
     const core::LocOffsets loc;
 
@@ -398,9 +401,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(If, 40, 8);
+CheckSize(If, 32, 8);
 
-TREE(While) : public Expression {
+TREE(While) {
 public:
     const core::LocOffsets loc;
 
@@ -417,9 +420,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(While, 32, 8);
+CheckSize(While, 24, 8);
 
-TREE(Break) : public Expression {
+TREE(Break) {
 public:
     const core::LocOffsets loc;
 
@@ -435,9 +438,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Break, 24, 8);
+CheckSize(Break, 16, 8);
 
-TREE(Retry) : public Expression {
+TREE(Retry) {
 public:
     const core::LocOffsets loc;
 
@@ -451,9 +454,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Retry, 16, 8);
+CheckSize(Retry, 8, 8);
 
-TREE(Next) : public Expression {
+TREE(Next) {
 public:
     const core::LocOffsets loc;
 
@@ -469,9 +472,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Next, 24, 8);
+CheckSize(Next, 16, 8);
 
-TREE(Return) : public Expression {
+TREE(Return) {
 public:
     const core::LocOffsets loc;
 
@@ -487,9 +490,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Return, 24, 8);
+CheckSize(Return, 16, 8);
 
-TREE(RescueCase) : public Expression {
+TREE(RescueCase) {
 public:
     const core::LocOffsets loc;
 
@@ -513,9 +516,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(RescueCase, 56, 8);
+CheckSize(RescueCase, 48, 8);
 
-TREE(Rescue) : public Expression {
+TREE(Rescue) {
 public:
     const core::LocOffsets loc;
 
@@ -537,9 +540,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Rescue, 64, 8);
+CheckSize(Rescue, 56, 8);
 
-TREE(Local) : public Expression {
+TREE(Local) {
 public:
     const core::LocOffsets loc;
 
@@ -555,9 +558,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Local, 24, 8);
+CheckSize(Local, 16, 8);
 
-TREE(UnresolvedIdent) : public Expression {
+TREE(UnresolvedIdent) {
 public:
     const core::LocOffsets loc;
 
@@ -580,9 +583,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(UnresolvedIdent, 24, 8);
+CheckSize(UnresolvedIdent, 16, 8);
 
-TREE(RestArg) : public Expression {
+TREE(RestArg) {
 public:
     const core::LocOffsets loc;
 
@@ -598,9 +601,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(RestArg, 24, 8);
+CheckSize(RestArg, 16, 8);
 
-TREE(KeywordArg) : public Expression {
+TREE(KeywordArg) {
 public:
     const core::LocOffsets loc;
 
@@ -616,9 +619,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(KeywordArg, 24, 8);
+CheckSize(KeywordArg, 16, 8);
 
-TREE(OptionalArg) : public Expression {
+TREE(OptionalArg) {
 public:
     const core::LocOffsets loc;
 
@@ -635,9 +638,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(OptionalArg, 32, 8);
+CheckSize(OptionalArg, 24, 8);
 
-TREE(BlockArg) : public Expression {
+TREE(BlockArg) {
 public:
     const core::LocOffsets loc;
 
@@ -653,9 +656,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(BlockArg, 24, 8);
+CheckSize(BlockArg, 16, 8);
 
-TREE(ShadowArg) : public Expression {
+TREE(ShadowArg) {
 public:
     const core::LocOffsets loc;
 
@@ -671,9 +674,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(ShadowArg, 24, 8);
+CheckSize(ShadowArg, 16, 8);
 
-TREE(Assign) : public Expression {
+TREE(Assign) {
 public:
     const core::LocOffsets loc;
 
@@ -690,9 +693,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Assign, 32, 8);
+CheckSize(Assign, 24, 8);
 
-TREE(Send) : public Expression {
+TREE(Send) {
 public:
     const core::LocOffsets loc;
 
@@ -767,9 +770,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Send, 64, 8);
+CheckSize(Send, 56, 8);
 
-TREE(Cast) : public Expression {
+TREE(Cast) {
 public:
     const core::LocOffsets loc;
 
@@ -789,9 +792,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Cast, 48, 8);
+CheckSize(Cast, 40, 8);
 
-TREE(Hash) : public Expression {
+TREE(Hash) {
 public:
     const core::LocOffsets loc;
 
@@ -811,9 +814,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Hash, 64, 8);
+CheckSize(Hash, 56, 8);
 
-TREE(Array) : public Expression {
+TREE(Array) {
 public:
     const core::LocOffsets loc;
 
@@ -832,9 +835,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Array, 56, 8);
+CheckSize(Array, 48, 8);
 
-TREE(Literal) : public Expression {
+TREE(Literal) {
 public:
     const core::LocOffsets loc;
 
@@ -857,9 +860,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(Literal, 32, 8);
+CheckSize(Literal, 24, 8);
 
-TREE(UnresolvedConstantLit) : public Expression {
+TREE(UnresolvedConstantLit) {
 public:
     const core::LocOffsets loc;
 
@@ -876,9 +879,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(UnresolvedConstantLit, 32, 8);
+CheckSize(UnresolvedConstantLit, 24, 8);
 
-TREE(ConstantLit) : public Expression {
+TREE(ConstantLit) {
 public:
     const core::LocOffsets loc;
 
@@ -901,9 +904,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(ConstantLit, 56, 8);
+CheckSize(ConstantLit, 48, 8);
 
-TREE(ZSuperArgs) : public Expression {
+TREE(ZSuperArgs) {
 public:
     const core::LocOffsets loc;
 
@@ -918,9 +921,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(ZSuperArgs, 16, 8);
+CheckSize(ZSuperArgs, 8, 8);
 
-TREE(Block) : public Expression {
+TREE(Block) {
 public:
     const core::LocOffsets loc;
 
@@ -936,9 +939,9 @@ public:
     std::string nodeName();
     void _sanityCheck();
 };
-CheckSize(Block, 48, 8);
+CheckSize(Block, 40, 8);
 
-TREE(InsSeq) : public Expression {
+TREE(InsSeq) {
 public:
     const core::LocOffsets loc;
 
@@ -960,9 +963,9 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(InsSeq, 64, 8);
+CheckSize(InsSeq, 56, 8);
 
-TREE(EmptyTree) : public Expression {
+TREE(EmptyTree) {
 public:
     const core::LocOffsets loc;
 
@@ -976,7 +979,7 @@ public:
 
     void _sanityCheck();
 };
-CheckSize(EmptyTree, 16, 8);
+CheckSize(EmptyTree, 8, 8);
 
 // This specialization of make_tree exists to ensure that we only ever create one empty tree.
 template <> TreePtr make_tree<EmptyTree>();

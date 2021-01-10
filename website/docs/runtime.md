@@ -284,6 +284,39 @@ For example, this should probably be placed as the first line of any `rake test`
 target, as well as any other entry point to a project's tests. If this line is
 absent, `.checked(:tests)` sigs behave as if they had been `.checked(:never)`.
 
+## `T::Sig::WithoutRuntime.sig`
+
+Even with `.checked(:never)`, there is some slight runtime overhead. The block
+for a `sig {...}` above a method is not evaluated until the first time that
+method is called. But Sorbet can only know whether a sig is `.checked(:never)`
+or not until the block is evaluated. So even if a sig is marked
+`.checked(:never)`, Sorbet will still wrap the method. The first time the method
+is called, Sorbet will discover the `.checked(:never)` and put back the original
+method.
+
+Sometimes even this tiny amount of runtime metaprogramming is unnacceptable at
+runtime. To completely eliminate all runtime side effects when defining a
+signature, replace `sig` with `T::Sig::WithoutRuntime.sig` when annotating
+methods:
+
+```ruby
+# typed: true
+require "sorbet-runtime"
+
+class Foo
+  extend T::Sig
+  # This signature will raise both statically and at runtime
+  # (because `NotFound` doesn't exist, and causes a NameError)
+  sig { params(x: NotFound).void.checked(:never) }
+  def foo(x); end
+
+  # This signature will only raise statically
+  # (the sig block is ignored completely at runtime)
+  T::Sig::WithoutRuntime.sig { params(x: NotFound).void }
+  def bar(x); end
+end
+```
+
 ## What's next?
 
 - [Signatures](sigs.md)

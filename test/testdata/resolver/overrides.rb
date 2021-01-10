@@ -55,3 +55,37 @@ class B5 < A5
   sig { override.void }
   def foo; end
 end
+
+# however, not using override when overriding B5#foo should be an error
+class C5 < B5
+  extend T::Sig
+  sig {void}
+  def foo; end
+# ^^^^^^^ error: Method `C5#foo` overrides an overridable method
+end
+
+class A6
+  extend T::Sig
+  sig {void}
+  def foo; end
+end
+
+class B6 < A6
+  extend T::Sig
+  sig {override.params(x: String).void}
+  def foo(x); end
+# ^^^^^^^^^^ error: Override of method `A6#foo` must accept no more than `0` required argument(s)
+end
+
+class A7
+  extend T::Sig
+  sig {void}
+  def foo; end
+end
+
+class B7 < A7
+  extend T::Sig
+  sig {override.returns(String)}
+  def foo; 'foo' end
+# ^^^^^^^ error: Return type `String` does not match return type of overridden method `A7#foo`
+end

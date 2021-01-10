@@ -131,6 +131,9 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     if (print.ParseTreeJson.enabled) {
         print.ParseTreeJson.fmt("{}\n", nodes->toJSON(gs, 0));
     }
+    if (print.ParseTreeJsonWithLocs.enabled) {
+        print.ParseTreeJson.fmt("{}\n", nodes->toJSONWithLocs(gs, file, 0));
+    }
     if (print.ParseTreeWhitequark.enabled) {
         print.ParseTreeWhitequark.fmt("{}\n", nodes->toWhitequark(gs, 0));
     }
@@ -312,18 +315,30 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
             // Cancellation cannot occur during incremental namer.
             ENFORCE(result.hasResult());
             what = move(result.result());
+
+            // Required for autogen tests, which need to control which phase to stop after.
+            if (opts.stopAfterPhase == options::Phase::NAMER) {
+                return what;
+            }
         }
 
         {
             Timer timeit(gs.tracer(), "incremental_resolve");
             gs.tracer().trace("Resolving (incremental pass)...");
+            // TODO: We should eventually be able to freeze the symbol and name tables, but overloads currently pose
+            // a problem.
             core::UnfreezeSymbolTable symbolTable(gs);
             core::UnfreezeNameTable nameTable(gs);
 
-            auto result = sorbet::resolver::Resolver::runTreePasses(gs, move(what));
+            auto result = sorbet::resolver::Resolver::runIncremental(gs, move(what));
             // incrementalResolve is not cancelable.
             ENFORCE(result.hasResult());
             what = move(result.result());
+
+            // Required for autogen tests, which need to control which phase to stop after.
+            if (opts.stopAfterPhase == options::Phase::RESOLVER) {
+                return what;
+            }
         }
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
@@ -778,8 +793,7 @@ public:
             unresolvedConstants.emplace_back(fmt::format(
                 "{}::{}",
                 unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.data(ctx)->show(ctx) : "",
-                fmt::map_join(unresolvedPath->second,
-                              "::", [&](const auto &el) -> string { return el.data(ctx)->show(ctx); })));
+                fmt::map_join(unresolvedPath->second, "::", [&](const auto &el) -> string { return el.show(ctx); })));
         }
         return tree;
     }
@@ -1208,19 +1222,19 @@ class AllNamesCollector {
 public:
     core::UsageHash acc;
     ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
-        acc.sends.emplace_back(ctx, ast::cast_tree_nonnull<ast::Send>(tree).fun.data(ctx));
+        acc.sends.emplace_back(ctx, ast::cast_tree_nonnull<ast::Send>(tree).fun);
         return tree;
     }
 
     ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        acc.constants.emplace_back(ctx, original.name.data(ctx));
+        acc.constants.emplace_back(ctx, original.name);
         return tree;
     }
 
     void handleUnresolvedConstantLit(core::Context ctx, ast::UnresolvedConstantLit *expr) {
         while (expr) {
-            acc.constants.emplace_back(ctx, expr->cnst.data(ctx));
+            acc.constants.emplace_back(ctx, expr->cnst);
             // Handle references to 'Foo' in 'Foo::Bar'.
             expr = ast::cast_tree<ast::UnresolvedConstantLit>(expr->scope);
         }
@@ -1228,7 +1242,7 @@ public:
 
     ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-        acc.constants.emplace_back(ctx, original.symbol.data(ctx)->name.data(ctx));
+        acc.constants.emplace_back(ctx, original.symbol.data(ctx)->name);
 
         handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(original.name));
 
@@ -1249,7 +1263,7 @@ public:
     ast::TreePtr postTransformUnresolvedIdent(core::Context ctx, ast::TreePtr tree) {
         auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         if (id.kind != ast::UnresolvedIdent::Kind::Local) {
-            acc.constants.emplace_back(ctx, id.name.data(ctx));
+            acc.constants.emplace_back(ctx, id.name);
         }
         return tree;
     }
@@ -1289,7 +1303,7 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
 }
 }; // namespace
 
-void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logger &logger, WorkerPool &workers) {
+void computeFileHashes(const vector<shared_ptr<core::File>> &files, spdlog::logger &logger, WorkerPool &workers) {
     Timer timeit(logger, "computeFileHashes");
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
     for (int i = 0; i < files.size(); i++) {
@@ -1301,7 +1315,7 @@ void computeFileHashes(const vector<shared_ptr<core::File>> files, spdlog::logge
 
     shared_ptr<BlockingBoundedQueue<vector<pair<int, unique_ptr<const core::FileHash>>>>> resultq =
         make_shared<BlockingBoundedQueue<vector<pair<int, unique_ptr<const core::FileHash>>>>>(files.size());
-    workers.multiplexJob("lspStateHash", [fileq, resultq, files, &logger]() {
+    workers.multiplexJob("lspStateHash", [fileq, resultq, &files, &logger]() {
         vector<pair<int, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
         int job;

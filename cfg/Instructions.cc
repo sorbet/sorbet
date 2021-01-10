@@ -57,7 +57,7 @@ string BlockReturn::showRaw(const core::GlobalState &gs, const CFG &cfg, int tab
 }
 
 LoadSelf::LoadSelf(shared_ptr<core::SendAndBlockLink> link, LocalRef fallback)
-    : link(std::move(link)), fallback(fallback) {
+    : fallback(fallback), link(std::move(link)) {
     categoryCounterInc("cfg", "loadself");
 }
 
@@ -72,8 +72,8 @@ string LoadSelf::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) 
 Send::Send(LocalRef recv, core::NameRef fun, core::LocOffsets receiverLoc, u2 numPosArgs,
            const InlinedVector<LocalRef, 2> &args, InlinedVector<core::LocOffsets, 2> argLocs, bool isPrivateOk,
            const shared_ptr<core::SendAndBlockLink> &link)
-    : recv(recv), fun(fun), receiverLoc(receiverLoc), numPosArgs{numPosArgs}, argLocs(std::move(argLocs)),
-      isPrivateOk(isPrivateOk), link(move(link)) {
+    : isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), fun(fun), recv(recv), receiverLoc(receiverLoc),
+      argLocs(std::move(argLocs)), link(move(link)) {
     ENFORCE(numPosArgs <= args.size(), "Expected {} positional arguments, but only have {} args", numPosArgs,
             args.size());
 
@@ -94,24 +94,24 @@ Literal::Literal(const core::TypePtr &value) : value(move(value)) {
 string Literal::toString(const core::GlobalState &gs, const CFG &cfg) const {
     string res;
     typecase(
-        this->value.get(), [&](core::LiteralType *l) { res = l->showValue(gs); },
-        [&](const core::ClassType *l) {
-            if (l->symbol == core::Symbols::NilClass()) {
+        this->value, [&](const core::LiteralType &l) { res = l.showValue(gs); },
+        [&](const core::ClassType &l) {
+            if (l.symbol == core::Symbols::NilClass()) {
                 res = "nil";
-            } else if (l->symbol == core::Symbols::FalseClass()) {
+            } else if (l.symbol == core::Symbols::FalseClass()) {
                 res = "false";
-            } else if (l->symbol == core::Symbols::TrueClass()) {
+            } else if (l.symbol == core::Symbols::TrueClass()) {
                 res = "true";
             } else {
-                res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0));
+                res = fmt::format("literal({})", this->value.toStringWithTabs(gs, 0));
             }
         },
-        [&](const core::Type *t) { res = fmt::format("literal({})", this->value->toStringWithTabs(gs, 0)); });
+        [&](const core::TypePtr &t) { res = fmt::format("literal({})", this->value.toStringWithTabs(gs, 0)); });
     return res;
 }
 
 string Literal::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("Literal {{ value = {} }}", this->value->show(gs));
+    return fmt::format("Literal {{ value = {} }}", this->value.show(gs));
 }
 
 Ident::Ident(LocalRef what) : what(what) {
@@ -138,9 +138,9 @@ string Ident::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 
 string Alias::toString(const core::GlobalState &gs, const CFG &cfg) const {
     if (name.exists()) {
-        return fmt::format("alias {} ({})", this->what.data(gs)->name.data(gs)->toString(gs), name.toString(gs));
+        return fmt::format("alias {} ({})", this->what.data(gs)->name.toString(gs), name.toString(gs));
     } else {
-        return fmt::format("alias {}", this->what.data(gs)->name.data(gs)->toString(gs));
+        return fmt::format("alias {}", this->what.data(gs)->name.toString(gs));
     }
 }
 
@@ -150,14 +150,14 @@ string Alias::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) con
 
 string Send::toString(const core::GlobalState &gs, const CFG &cfg) const {
     return fmt::format(
-        "{}.{}({})", this->recv.toString(gs, cfg), this->fun.data(gs)->toString(gs),
+        "{}.{}({})", this->recv.toString(gs, cfg), this->fun.toString(gs),
         fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(gs, cfg); }));
 }
 
 string Send::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format(
         "Send {{\n{0}&nbsp;recv = {1},\n{0}&nbsp;fun = {2},\n{0}&nbsp;args = ({3}),\n{0}}}", spacesForTabLevel(tabs),
-        this->recv.toString(gs, cfg), this->fun.data(gs)->showRaw(gs),
+        this->recv.toString(gs, cfg), this->fun.showRaw(gs),
         fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.showRaw(gs, cfg, tabs + 1); }));
 }
 
@@ -202,13 +202,13 @@ string GetCurrentException::showRaw(const core::GlobalState &gs, const CFG &cfg,
 }
 
 string Cast::toString(const core::GlobalState &gs, const CFG &cfg) const {
-    return fmt::format("cast({}, {});", this->value.toString(gs, cfg), this->type->toString(gs));
+    return fmt::format("cast({}, {});", this->value.toString(gs, cfg), this->type.toString(gs));
 }
 
 string Cast::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
     return fmt::format("Cast {{\n{0}&nbsp;cast = T.{1},\n{0}&nbsp;value = {2},\n{0}&nbsp;type = {3},\n{0}}}",
-                       spacesForTabLevel(tabs), this->cast.data(gs)->show(gs), this->value.showRaw(gs, cfg, tabs + 1),
-                       this->type->show(gs));
+                       spacesForTabLevel(tabs), this->cast.show(gs), this->value.showRaw(gs, cfg, tabs + 1),
+                       this->type.show(gs));
 }
 
 string TAbsurd::toString(const core::GlobalState &gs, const CFG &cfg) const {
@@ -224,7 +224,7 @@ string VariableUseSite::toString(const core::GlobalState &gs, const CFG &cfg) co
     if (this->variable == LocalRef::unconditional() || this->type == nullptr) {
         return this->variable.toString(gs, cfg);
     } else {
-        return fmt::format("{}: {}", this->variable.toString(gs, cfg), this->type->show(gs));
+        return fmt::format("{}: {}", this->variable.toString(gs, cfg), this->type.show(gs));
     }
 }
 
@@ -233,7 +233,7 @@ string VariableUseSite::showRaw(const core::GlobalState &gs, const CFG &cfg, int
         return fmt::format("VariableUseSite {{ variable = {} }}", this->variable.showRaw(gs, cfg));
     } else {
         return fmt::format("VariableUseSite {{\n{0}&nbsp;variable = {1},\n{0}&nbsp;type = {2},\n{0}}}",
-                           spacesForTabLevel(tabs), this->variable.showRaw(gs, cfg), this->type->show(gs));
+                           spacesForTabLevel(tabs), this->variable.showRaw(gs, cfg), this->type.show(gs));
     }
 }
 

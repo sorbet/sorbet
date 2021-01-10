@@ -202,8 +202,7 @@ ast::TreePtr runUnderEach(core::MutableContext ctx, core::NameRef eachName, ast:
             auto blk = ast::MK::Block(send->loc, move(body), std::move(new_args));
             auto each = ast::MK::Send0Block(send->loc, iteratee.deepCopy(), core::Names::each(), move(blk));
             // put that into a method def named the appropriate thing
-            auto method = addSigVoid(
-                ast::MK::SyntheticMethod0(send->loc, core::Loc(ctx.file, send->loc), move(name), move(each)));
+            auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, move(name), move(each)));
             // add back any moved constants
             return constantMover.addConstantsToExpression(send->loc, move(method));
         }
@@ -257,10 +256,8 @@ ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
         // can freely copy into methoddef scope
         auto iteratee = getIteratee(send->args.front());
         // and then reconstruct the send but with a modified body
-        ast::Send::ARGS_store args;
-        args.emplace_back(move(send->args.front()));
         return ast::MK::Send(
-            send->loc, ast::MK::Self(send->loc), send->fun, 1, std::move(args), send->flags,
+            send->loc, ast::MK::Self(send->loc), send->fun, 1, ast::MK::SendArgs(move(send->args.front())), send->flags,
             ast::MK::Block(send->block.loc(),
                            prepareTestEachBody(ctx, send->fun, std::move(block->body), block->args, iteratee),
                            std::move(block->args)));
@@ -270,8 +267,8 @@ ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
         auto name = send->fun == core::Names::after() ? core::Names::afterAngles() : core::Names::initialize();
         ConstantMover constantMover;
         block->body = ast::TreeMap::apply(ctx, constantMover, move(block->body));
-        auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, core::Loc(ctx.file, send->loc), name,
-                                                           prepareBody(ctx, std::move(block->body))));
+        auto method =
+            addSigVoid(ast::MK::SyntheticMethod0(send->loc, send->loc, name, prepareBody(ctx, std::move(block->body))));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
 
@@ -288,14 +285,13 @@ ast::TreePtr runSingle(core::MutableContext ctx, ast::Send *send) {
         rhs.emplace_back(prepareBody(ctx, std::move(block->body)));
         auto name = ast::MK::UnresolvedConstant(arg.loc(), ast::MK::EmptyTree(),
                                                 ctx.state.enterNameConstant("<describe '" + argString + "'>"));
-        return ast::MK::Class(send->loc, core::Loc(ctx.file, send->loc), std::move(name), std::move(ancestors),
-                              std::move(rhs));
+        return ast::MK::Class(send->loc, send->loc, std::move(name), std::move(ancestors), std::move(rhs));
     } else if (send->fun == core::Names::it()) {
         ConstantMover constantMover;
         block->body = ast::TreeMap::apply(ctx, constantMover, move(block->body));
         auto name = ctx.state.enterNameUTF8("<it '" + argString + "'>");
-        auto method = addSigVoid(ast::MK::SyntheticMethod0(send->loc, core::Loc(ctx.file, send->loc), std::move(name),
-                                                           prepareBody(ctx, std::move(block->body))));
+        auto method = addSigVoid(
+            ast::MK::SyntheticMethod0(send->loc, send->loc, std::move(name), prepareBody(ctx, std::move(block->body))));
         method = ast::MK::InsSeq1(send->loc, send->args.front().deepCopy(), move(method));
         return constantMover.addConstantsToExpression(send->loc, move(method));
     }
