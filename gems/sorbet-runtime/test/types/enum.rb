@@ -513,4 +513,19 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   it 'can be used with an assert' do
     assert(CardSuit::SPADE, 'some message')
   end
+
+  class Card < T::Struct
+    prop :rank, Integer
+    prop :suit, CardSuit
+  end
+
+  # This test previously didn't work because T::Struct#with relies on
+  # the #deserialize method being able to robustly handle being handed
+  # a value that was already of the correct type and needed no
+  # deserialization, which enums did not do
+  it "works correctly when used in #with on a T::Struct" do
+    card = Card.new(rank: 5, suit: CardSuit::CLUB)
+    card.with(suit: CardSuit::SPADE)
+    assert_equal(CardSuite::SPADE, card.suit)
+  end
 end
