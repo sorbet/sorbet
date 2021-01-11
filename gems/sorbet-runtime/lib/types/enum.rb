@@ -90,6 +90,7 @@ class T::Enum
   # @raise [KeyError] if serialized value does not match any instance.
   sig {overridable.params(serialized_val: SerializedVal).returns(T.attached_class).checked(:never)}
   def self.from_serialized(serialized_val)
+    return serialized_val if serialized_val.is_a?(self)
     res = try_deserialize(serialized_val)
     if res.nil?
       raise KeyError.new("Enum #{self} key not found: #{serialized_val.inspect}")
