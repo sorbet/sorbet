@@ -851,8 +851,15 @@ public:
                 auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
                 this->todoClassMethods_.emplace_back(move(item));
             } else if (send.fun == core::Names::requiresAncestor()) {
-                auto item = RequireAncestorResolutionItem{ctx.file, ctx.owner, &send};
-                this->todoRequiredAncestors_.emplace_back(move(item));
+                if (!ctx.state.requiresAncestorEnabled) {
+                    if (auto e = ctx.beginError(send.loc, core::errors::Resolver::ExperimentalRequiredAncestor)) {
+                        e.setHeader("`{}` is an experimental feature. Use `{}` to enable it", "requires_ancestor",
+                                    "--enable-experimental-requires-ancestor");
+                    }
+                } else {
+                    auto item = RequireAncestorResolutionItem{ctx.file, ctx.owner, &send};
+                    this->todoRequiredAncestors_.emplace_back(move(item));
+                }
             }
         } else {
             auto recvAsConstantLit = ast::cast_tree<ast::ConstantLit>(send.recv);

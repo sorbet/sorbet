@@ -211,6 +211,9 @@ struct Options {
     bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
 
+    // Experimental feature `requires_ancestor`
+    bool requiresAncestorEnabled = false;
+
     std::string inlineInput; // passed via -e
     std::string debugLogFile;
     std::string webTraceFile;

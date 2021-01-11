@@ -190,6 +190,7 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         gs->semanticExtensions.emplace_back(provider->defaultInstance());
     }
 
+    gs->requiresAncestorEnabled = true;
     gs->censorForSnapshotTests = true;
     auto workers = WorkerPool::create(0, gs->tracer());
 

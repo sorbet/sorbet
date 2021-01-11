@@ -442,6 +442,8 @@ int realmain(int argc, char *argv[]) {
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
 
+    gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
+
     logger->trace("building initial global state");
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(opts);
     payload::createInitialGlobalState(gs, opts, kvstore);
