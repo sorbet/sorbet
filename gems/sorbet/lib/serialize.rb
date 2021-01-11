@@ -196,7 +196,9 @@ class Sorbet::Private::Serialize
   end
 
   def blacklisted_method(method)
-    method.name =~ /__validator__[0-9]{8}/ || method.name =~ /.*:.*/
+    return true if /__validator__[0-9]{8}/ || method.name =~ /.*:.*/
+    return true if method.parameters.map { |(kind, name)| name }.filter { |name| name.to_s == "_" }.length >= 2
+    false
   end
 
   def valid_method_name(name)
@@ -328,7 +330,7 @@ class Sorbet::Private::Serialize
   def from_method(method)
     uniq = 0
     method.parameters.map.with_index do |(kind, name), index|
-      if !name || name.to_s == "_"
+      if !name
         arg_name = method.name.to_s[0...-1]
         if (!KEYWORDS.include?(arg_name.to_sym)) && method.name.to_s.end_with?('=') && arg_name =~ /\A[a-z_][a-z0-9A-Z_]*\Z/ && index == 0
           name = arg_name
