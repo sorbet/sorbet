@@ -525,7 +525,7 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   # deserialization, which enums did not do
   it "works correctly when used in #with on a T::Struct" do
     card = Card.new(rank: 5, suit: CardSuit::CLUB)
-    card.with(suit: CardSuit::SPADE)
-    assert_equal(CardSuite::SPADE, card.suit)
+    new_card = card.with(suit: CardSuit::SPADE)
+    assert_equal(CardSuit::SPADE, new_card.suit)
   end
 end
