@@ -7,22 +7,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-vector<core::SymbolRef> findChildren(const core::GlobalState &gs, core::SymbolRef ancestorClass) {
-    vector<core::SymbolRef> results;
-    auto used = gs.classAndModulesUsed();
-    for (u4 idx = 1; idx < used; idx++) {
-        core::SymbolRef ref(gs, core::SymbolRef::Kind::ClassOrModule, idx);
-        if (ref.data(gs)->derivesFrom(gs, ancestorClass)) {
-            results.push_back(ref);
-        }
-    }
-    return results;
-}
-
 variant<vector<core::Loc>, unique_ptr<ResponseError>> findMethodImplementations(const core::GlobalState &gs,
                                                                                 core::SymbolRef method) {
     vector<core::Loc> locations;
-    auto owningClassSymbolRef = method.data(gs)->owner;
+    auto owningClassSymbolRef = method.data(gs)->superClass();
     auto isAbstract = owningClassSymbolRef.data(gs)->isClassOrModuleAbstract();
     if (!isAbstract) {
         return make_unique<ResponseError>(
@@ -30,7 +18,7 @@ variant<vector<core::Loc>, unique_ptr<ResponseError>> findMethodImplementations(
             "Go to implementation can be used only for methods or references of abstract classes");
     }
 
-    auto childClasses = findChildren(gs, owningClassSymbolRef);
+    auto childClasses = owningClassSymbolRef.getSubclasses(gs);
     auto methodName = method.data(gs)->name;
     for (const auto &childClass : childClasses) {
         auto methodImplementation = childClass.data(gs)->findMember(gs, methodName);
@@ -87,7 +75,7 @@ unique_ptr<ResponseMessage> GoToImplementationTask::runRequest(LSPTypecheckerDel
             return response;
         }
 
-        auto childClasses = findChildren(gs, classSymbol);
+        auto childClasses = classSymbol.asClassOrModuleRef().getSubclasses(gs);
         for (const auto &childClass : childClasses) {
             addLocIfExists(gs, result, childClass.data(gs)->loc());
         }
