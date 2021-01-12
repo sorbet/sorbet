@@ -103,10 +103,6 @@ SORBET_ALIVE(VALUE, sorbet_rb_int_gt_slowpath, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_rb_int_le_slowpath, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_rb_int_ge_slowpath, (VALUE, VALUE));
 
-SORBET_ALIVE(void, sorbet_defineAbstractMethod, (VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc));
-SORBET_ALIVE(void, sorbet_defineAbstractMethodSingleton,
-             (VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc));
-
 SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
 

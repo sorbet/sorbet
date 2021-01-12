@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # typed: true
-# compiled:true
+# compiled: true
 
 class Module
   include T::Sig

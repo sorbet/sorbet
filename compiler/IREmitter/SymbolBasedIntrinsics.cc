@@ -109,18 +109,10 @@ public:
         ENFORCE(funcSym.data(cs)->isMethod());
 
         const char *rubyFuncName;
-        if (funcSym.data(cs)->isAbstract()) {
-            if (isSelf) {
-                rubyFuncName = "sorbet_defineAbstractMethodSingleton";
-            } else {
-                rubyFuncName = "sorbet_defineAbstractMethod";
-            }
+        if (isSelf) {
+            rubyFuncName = "sorbet_defineMethodSingleton";
         } else {
-            if (isSelf) {
-                rubyFuncName = "sorbet_defineMethodSingleton";
-            } else {
-                rubyFuncName = "sorbet_defineMethod";
-            }
+            rubyFuncName = "sorbet_defineMethod";
         }
 
         auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);

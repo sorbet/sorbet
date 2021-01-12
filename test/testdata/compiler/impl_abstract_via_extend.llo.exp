@@ -141,9 +141,9 @@ declare i64 @sorbet_callFuncWithCache(i64, i64, i32, i64* nocapture, i32, %struc
 
 declare void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct*, %struct.rb_control_frame_struct*, %struct.rb_iseq_struct*) local_unnamed_addr #1
 
-declare void @sorbet_defineAbstractMethod(i64, i8*, i64 (...)*, i32) local_unnamed_addr #1
-
 declare i64 @rb_define_module(i8*) local_unnamed_addr #1
+
+declare extern_weak void @rb_define_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr #1
 
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #1
 
@@ -428,7 +428,7 @@ afterSend.i.i:                                    ; preds = %81, %sorbet_writeLo
   store i64* %134, i64** %54, align 8, !dbg !52, !tbaa !8
   %rubyId_foo.i.i1 = load i64, i64* @rubyIdPrecomputed_foo, align 8, !dbg !53
   %rawSym.i.i = call i64 @rb_id2sym(i64 %rubyId_foo.i.i1) #6, !dbg !53
-  call void @sorbet_defineAbstractMethod(i64 %47, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_IFoo#foo" to i64 (...)*), i32 -1) #6, !dbg !53
+  call void @rb_define_method(i64 %47, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_IFoo#foo" to i64 (...)*), i32 -1) #6, !dbg !53
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %50) #6
   %135 = getelementptr inbounds i64, i64* %40, i64 14, !dbg !54
   store i64* %135, i64** %35, align 8, !dbg !54, !tbaa !8

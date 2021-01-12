@@ -175,28 +175,6 @@ void sorbet_setConstant(VALUE mod, const char *name, long nameLen, VALUE value) 
     return rb_const_set(mod, id, value);
 }
 
-void sorbet_defineAbstractMethod(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc) {
-    VALUE id = rb_intern(name);
-
-    // TODO(froydnj): this check is not quite correct.
-    if (rb_respond_to(klass, id)) {
-        return;
-    }
-
-    rb_define_method_id(klass, id, methodPtr, argc);
-}
-
-void sorbet_defineAbstractMethodSingleton(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc) {
-    VALUE id = rb_intern(name);
-
-    // TODO(froydnj): this check is not quite correct.
-    if (rb_respond_to(klass, id)) {
-        return;
-    }
-
-    rb_define_singleton_method(klass, name, methodPtr, argc);
-}
-
 // ****
 // ****                       Calls
 // ****
