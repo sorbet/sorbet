@@ -955,6 +955,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             auto correctedSingleton = corrected.data(ctx)->lookupSingletonClass(ctx);
             ENFORCE_NO_TIMER(correctedSingleton.exists());
             auto ctype = core::make_type<core::ClassType>(correctedSingleton);
+            auto ctypeAndOrigins = core::TypeAndOrigins{ctype, {core::Loc(ctx.file, s.loc)}};
             // In `dispatchArgs` this is ordinarily used to specify the origin tag for
             // uninitialized variables. Inside of a signature we shouldn't need this:
             auto originForUninitialized = core::Loc::none();
@@ -965,7 +966,7 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                 argLocs,
             };
             core::DispatchArgs dispatchArgs{
-                core::Names::squareBrackets(), locs, s.numPosArgs, targs, ctype, ctype, ctype, nullptr,
+                core::Names::squareBrackets(), locs, s.numPosArgs, targs, ctype, ctypeAndOrigins, ctype, nullptr,
                 originForUninitialized};
             auto out = core::Types::dispatchCallWithoutBlock(ctx, ctype, dispatchArgs);
 

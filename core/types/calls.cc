@@ -237,8 +237,7 @@ int getArity(const GlobalState &gs, SymbolRef method) {
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
 MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodRef primary, u2 numPosArgs,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType,
-                        const vector<TypePtr> &targs, bool hasBlock) {
+                        InlinedVector<const TypeAndOrigins *, 2> &args, const vector<TypePtr> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(Context::permitOverloadDefinitions(gs, primary.data(gs)->loc().file(), primary),
             "overload not permitted here");
@@ -552,9 +551,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UnknownMethod);
         if (e) {
             string thisStr = args.thisType.show(gs);
-            if (args.fullType != args.thisType) {
+            if (args.fullType.type != args.thisType) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.show(gs), thisStr,
-                            args.fullType.show(gs));
+                            args.fullType.type.show(gs));
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", args.name.show(gs), thisStr);
 
@@ -570,7 +569,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 }
             }
-            if (args.fullType != args.thisType && symbol == Symbols::NilClass()) {
+            auto explanations = args.fullType.origins2Explanations(gs, args.originForUninitialized);
+            if (!explanations.empty()) {
+                e.addErrorSection(
+                    ErrorSection("Got " + args.fullType.type.show(gs) + " originating from:", explanations));
+            }
+            if (args.fullType.type != args.thisType && symbol == Symbols::NilClass()) {
                 e.replaceWith("Wrap in `T.must`", core::Loc(args.locs.file, args.locs.receiver), "T.must({})",
                               core::Loc(args.locs.file, args.locs.receiver).source(gs));
             } else {
@@ -649,8 +653,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     auto method = mayBeOverloaded.data(gs)->isOverloaded()
-                      ? guessOverload(gs, symbol, mayBeOverloaded.asMethodRef(), args.numPosArgs, args.args,
-                                      args.fullType, targs, args.block != nullptr)
+                      ? guessOverload(gs, symbol, mayBeOverloaded.asMethodRef(), args.numPosArgs, args.args, targs,
+                                      args.block != nullptr)
                       : mayBeOverloaded.asMethodRef();
 
     DispatchResult result;
@@ -857,11 +861,11 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (!(pit->flags.isKeyword || pit->flags.isDefault || pit->flags.isRepeated || pit->flags.isBlock)) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                        errors::Infer::MethodArgumentCountMismatch)) {
-                if (args.fullType != args.thisType) {
+                if (args.fullType.type != args.thisType) {
                     e.setHeader(
                         "Not enough arguments provided for method `{}` on `{}` component of `{}`. Expected: `{}`, got: "
                         "`{}`",
-                        data->show(gs), args.thisType.show(gs), args.fullType.show(gs), prettyArity(gs, method),
+                        data->show(gs), args.thisType.show(gs), args.fullType.type.show(gs), prettyArity(gs, method),
                         posArgs); // TODO: should use position and print the source tree, not the cfg one.
                 } else {
                     e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`",
@@ -1160,7 +1164,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                                           args.numPosArgs,
                                           args.args,
                                           wrapped,
-                                          wrapped,
+                                          {wrapped, args.fullType.origins},
                                           wrapped,
                                           args.block,
                                           args.originForUninitialized};
@@ -1353,7 +1357,7 @@ public:
         }
         auto instanceTy = attachedClass.data(gs)->externalType();
         DispatchArgs innerArgs{Names::initialize(), args.locs,  args.numPosArgs,
-                               args.args,           instanceTy, instanceTy,
+                               args.args,           instanceTy, {instanceTy, args.fullType.origins},
                                instanceTy,          args.block, args.originForUninitialized};
         auto dispatched = instanceTy.dispatchCall(gs, innerArgs);
 
@@ -1526,9 +1530,9 @@ public:
             dispatchArgsArgs.emplace_back(*arg);
         }
 
-        auto recv = args.args[0]->type;
-        res = recv.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv, recv, recv,
-                                     args.block, args.originForUninitialized});
+        auto recv = *args.args[0];
+        res = recv.type.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv.type, recv,
+                                          recv.type, args.block, args.originForUninitialized});
     }
 } SorbetPrivateStatic_sig;
 
@@ -1752,7 +1756,7 @@ public:
                                numPosArgs,
                                sendArgs,
                                receiver->type,
-                               receiver->type,
+                               *receiver,
                                receiver->type,
                                args.block,
                                args.originForUninitialized};
@@ -1777,15 +1781,15 @@ class Magic_callWithBlock : public IntrinsicMethod {
     friend class Magic_callWithSplatAndBlock;
 
 private:
-    static TypePtr typeToProc(const GlobalState &gs, TypePtr blockType, core::FileRef file, LocOffsets callLoc,
-                              LocOffsets receiverLoc, Loc originForUninitialized) {
+    static TypePtr typeToProc(const GlobalState &gs, const TypeAndOrigins &blockType, core::FileRef file,
+                              LocOffsets callLoc, LocOffsets receiverLoc, Loc originForUninitialized) {
         auto nonNilBlockType = blockType;
         auto typeIsNilable = false;
-        if (Types::isSubType(gs, Types::nilClass(), blockType)) {
-            nonNilBlockType = Types::dropNil(gs, blockType);
+        if (Types::isSubType(gs, Types::nilClass(), blockType.type)) {
+            nonNilBlockType = TypeAndOrigins{Types::dropNil(gs, blockType.type), blockType.origins};
             typeIsNilable = true;
 
-            if (nonNilBlockType.isBottom()) {
+            if (nonNilBlockType.type.isBottom()) {
                 return Types::nilClass();
             }
         }
@@ -1794,10 +1798,16 @@ private:
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;
         CallLocs sendLocs{file, callLoc, receiverLoc, sendArgLocs};
-        DispatchArgs innerArgs{to_proc,         sendLocs,        0,
-                               sendArgs,        nonNilBlockType, nonNilBlockType,
-                               nonNilBlockType, nullptr,         originForUninitialized};
-        auto dispatched = nonNilBlockType.dispatchCall(gs, innerArgs);
+        DispatchArgs innerArgs{to_proc,
+                               sendLocs,
+                               0,
+                               sendArgs,
+                               nonNilBlockType.type,
+                               nonNilBlockType,
+                               nonNilBlockType.type,
+                               nullptr,
+                               originForUninitialized};
+        auto dispatched = nonNilBlockType.type.dispatchCall(gs, innerArgs);
         for (auto &err : dispatched.main.errors) {
             gs._error(std::move(err));
         }
@@ -1977,7 +1987,7 @@ public:
         }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
 
-        TypePtr finalBlockType = Magic_callWithBlock::typeToProc(gs, args.args[2]->type, args.locs.file, args.locs.call,
+        TypePtr finalBlockType = Magic_callWithBlock::typeToProc(gs, *args.args[2], args.locs.file, args.locs.call,
                                                                  args.locs.args[2], args.originForUninitialized);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
@@ -1988,7 +1998,7 @@ public:
                                numPosArgs,
                                sendArgs,
                                receiver->type,
-                               receiver->type,
+                               *receiver,
                                receiver->type,
                                link,
                                args.originForUninitialized};
@@ -2071,7 +2081,7 @@ public:
         InlinedVector<LocOffsets, 2> sendArgLocs(sendArgs.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
 
-        TypePtr finalBlockType = Magic_callWithBlock::typeToProc(gs, args.args[4]->type, args.locs.file, args.locs.call,
+        TypePtr finalBlockType = Magic_callWithBlock::typeToProc(gs, *args.args[4], args.locs.file, args.locs.call,
                                                                  args.locs.args[4], args.originForUninitialized);
         std::optional<int> blockArity = Magic_callWithBlock::getArityForBlock(finalBlockType);
         auto link = make_shared<core::SendAndBlockLink>(fn, Magic_callWithBlock::argInfoByArity(blockArity), -1);
@@ -2082,7 +2092,7 @@ public:
                                numPosArgs,
                                sendArgs,
                                receiver->type,
-                               receiver->type,
+                               *receiver,
                                receiver->type,
                                link,
                                args.originForUninitialized};
@@ -2126,8 +2136,8 @@ public:
             return;
         }
 
-        auto selfTy = args.args[0]->type;
-        SymbolRef self = unwrapSymbol(gs, selfTy);
+        auto selfTy = *args.args[0];
+        SymbolRef self = unwrapSymbol(gs, selfTy.type);
 
         u2 numPosArgs = args.numPosArgs - 1;
 
@@ -2139,10 +2149,10 @@ public:
         }
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.args[0], sendArgLocs};
 
-        DispatchArgs innerArgs{Names::new_(), sendLocs,   numPosArgs,
-                               sendArgStore,  selfTy,     selfTy,
-                               selfTy,        args.block, args.originForUninitialized};
-        auto dispatched = selfTy.dispatchCall(gs, innerArgs);
+        DispatchArgs innerArgs{Names::new_(), sendLocs,    numPosArgs,
+                               sendArgStore,  selfTy.type, selfTy,
+                               selfTy.type,   args.block,  args.originForUninitialized};
+        auto dispatched = selfTy.type.dispatchCall(gs, innerArgs);
         auto returnTy = dispatched.returnType;
 
         // If we actually dispatch to something that looks like a construtor, replace return with `T.attached_class`
@@ -2585,8 +2595,9 @@ public:
         TypeAndOrigins myType{args.selfType, {core::Loc(args.locs.file, args.locs.receiver)}};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs{&myType};
 
-        DispatchArgs dispatch{core::Names::enumerableToH(), locs, 1, innerArgs, hash, hash, hash, nullptr,
-                              args.originForUninitialized};
+        DispatchArgs dispatch{
+            core::Names::enumerableToH(), locs, 1, innerArgs, hash, {hash, args.fullType.origins}, hash, nullptr,
+            args.originForUninitialized};
         auto dispatched = hash.dispatchCall(gs, dispatch);
         for (auto &err : dispatched.main.errors) {
             res.main.errors.emplace_back(std::move(err));

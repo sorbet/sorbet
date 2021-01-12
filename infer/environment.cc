@@ -957,8 +957,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     send->argLocs,
                 };
 
-                core::DispatchArgs dispatchArgs{send->fun,     locs,          send->numPosArgs, args,    recvType.type,
-                                                recvType.type, recvType.type, send->link,       ownerLoc};
+                core::DispatchArgs dispatchArgs{send->fun, locs,          send->numPosArgs, args,    recvType.type,
+                                                recvType,  recvType.type, send->link,       ownerLoc};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
 
                 auto it = &dispatched;
@@ -1047,7 +1047,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     auto singletonClass = data->lookupSingletonClass(ctx);
                     ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
                     tp.type = singletonClass.data(ctx)->externalType();
-                    tp.origins.emplace_back(symbol.data(ctx)->loc());
+                    tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
                 } else if (data->isField() || (data->isStaticField() && !data->isTypeAlias()) || data->isTypeMember()) {
                     if (data->resultType != nullptr) {
                         if (data->isTypeMember()) {

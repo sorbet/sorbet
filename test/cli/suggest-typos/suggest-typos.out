@@ -1,6 +1,10 @@
 -e:1: Method `to_` does not exist on `Integer` component of `Integer(1)` https://srb.help/7003
      1 |1.to_
         ^^^^^
+  Got Integer(1) originating from:
+    -e:1:
+     1 |1.to_
+        ^
   Autocorrect: Use `-a` to autocorrect
     -e:1: Replace with `to_c`
      1 |1.to_
