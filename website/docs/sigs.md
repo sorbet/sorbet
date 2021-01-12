@@ -79,13 +79,14 @@ Here's the syntax for required and optional **positional** parameters:
 ```ruby
 sig do
   params(
-    x: String, # required positional param
-    y: String  # optional positional param
+    x: String,           # required positional param
+    y: String,           # optional positional param
+    z: T.nilable(String) # optional *AND* nilable param
   )
   .returns(String)
 end
-def self.main(x, y = 'foo')
-  x + y
+def self.main(x, y = 'foo', z = nil)
+  x + y + (z ? z : '')
 end
 ```
 
@@ -97,11 +98,12 @@ Here's the syntax for required and optional **keyword** parameters:
 sig do
   params(
     x: String,            # required keyword param
-    y: T.nilable(String)  # optional keyword param
+    y: String,            # optional keyword param
+    z: T.nilable(String)  # optional *AND* nilable keyword param
   )
   .void
 end
-def self.main(x:, y: nil)
+def self.main(x:, y: 'foo', z: nil)
   # ...
 end
 ```
