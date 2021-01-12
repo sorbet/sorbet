@@ -197,7 +197,7 @@ class Sorbet::Private::Serialize
 
   def blacklisted_method(method)
     return true if /__validator__[0-9]{8}/ || method.name =~ /.*:.*/
-    return true if method.parameters.map { |(kind, name)| name }.filter { |name| name.to_s == "_" }.length >= 2
+    return true if method.parameters.map { |(kind, name)| name }.select { |name| name.to_s == "_" }.length >= 2
     false
   end
 
