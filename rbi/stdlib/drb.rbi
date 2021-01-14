@@ -314,7 +314,7 @@ module DRb
   # [`current_server`](https://docs.ruby-lang.org/en/2.6.0/DRb.html#method-i-current_server)
   # and DRbServer::make\_config.
   sig { returns(T::Hash[Symbol, T.untyped]) }
-  def self.config; end
+  module_function def config; end
 
   # Get the 'current' server.
   #
@@ -326,7 +326,7 @@ module DRb
   # If the above rule fails to find a server, a DRbServerNotFound error is
   # raised.
   sig { returns(DRb::DRbServer) }
-  def self.current_server; end
+  module_function def current_server; end
 
   # Retrieves the server with the given `uri`.
   #
@@ -334,19 +334,19 @@ module DRb
   # [`regist_server`](https://docs.ruby-lang.org/en/2.6.0/DRb.html#method-c-regist_server)
   # and remove\_server.
   sig { params(uri: String).returns(T.nilable(DRb::DRbServer)) }
-  def self.fetch_server(uri); end
+  module_function def fetch_server(uri); end
 
   # Get the front object of the current server.
   #
   # This raises a DRbServerNotFound error if there is no current server. See
   # [`current_server`](https://docs.ruby-lang.org/en/2.6.0/DRb.html#method-i-current_server).
   sig { returns(T.nilable(Object)) }
-  def self.front; end
+  module_function def front; end
 
   # Is `uri` the [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) for the
   # current local server?
   sig { params(uri: String).returns(T::Boolean) }
-  def self.here?(uri); end
+  module_function def here?(uri); end
 
   # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the default
   # [`ACL`](https://docs.ruby-lang.org/en/2.6.0/ACL.html) to `acl`.
@@ -354,7 +354,7 @@ module DRb
   # See
   # [`DRb::DRbServer.default_acl`](https://docs.ruby-lang.org/en/2.6.0/DRb/DRbServer.html#method-c-default_acl).
   sig { params(acl: T.nilable(Object)).returns(T.nilable(Object)) }
-  def self.install_acl(acl); end
+  module_function def install_acl(acl); end
 
   # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the default id
   # conversion object.
@@ -369,7 +369,7 @@ module DRb
   #
   # See DRbServer#default\_id\_conv.
   sig { params(idconv: T.nilable(Object)).returns(T.nilable(Object)) }
-  def self.install_id_conv(idconv); end
+  module_function def install_id_conv(idconv); end
 
   # The primary local dRuby server.
   #
@@ -377,7 +377,7 @@ module DRb
   # [`start_service`](https://docs.ruby-lang.org/en/2.6.0/DRb.html#method-i-start_service)
   # call.
   sig { returns(T.nilable(DRb::DRbServer)) }
-  def self.primary_server; end
+  module_function def primary_server; end
 
   # The primary local dRuby server.
   #
@@ -385,7 +385,7 @@ module DRb
   # [`start_service`](https://docs.ruby-lang.org/en/2.6.0/DRb.html#method-i-start_service)
   # call.
   sig { params(server: T.nilable(DRb::DRbServer)).returns(T.nilable(DRb::DRbServer)) }
-  def self.primary_server=(server); end
+  module_function def primary_server=(server); end
 
   # Registers `server` with
   # [`DRb`](https://docs.ruby-lang.org/en/2.6.0/DRb.html).
@@ -405,11 +405,11 @@ module DRb
   # DRb.fetch_server s.uri #=> #<DRb::DRbServer:0x...>
   # ```
   sig { params(server: DRb::DRbServer).void }
-  def self.regist_server(server); end
+  module_function def regist_server(server); end
 
   # Removes `server` from the list of registered servers.
   sig { params(server: DRb::DRbServer).void }
-  def self.remove_server(server); end
+  module_function def remove_server(server); end
 
   # Start a dRuby server locally.
   #
@@ -432,35 +432,35 @@ module DRb
       config: T.nilable(T::Hash[Symbol, T.untyped])
     ).returns(DRb::DRbServer)
   end
-  def self.start_service(uri = _, front = _, config = _); end
+  module_function def start_service(uri = _, front = _, config = _); end
 
   # Stop the local dRuby server.
   #
   # This operates on the primary server. If there is no primary server currently
   # running, it is a noop.
   sig { void }
-  def self.stop_service; end
+  module_function def stop_service; end
 
   # Get the thread of the primary server.
   #
   # This returns nil if there is no primary server. See
   # [`primary_server`](https://docs.ruby-lang.org/en/2.6.0/DRb.html#attribute-i-primary_server).
   sig { returns(T.nilable(Thread)) }
-  def self.thread; end
+  module_function def thread; end
 
   # Get a reference id for an object using the current server.
   #
   # This raises a DRbServerNotFound error if there is no current server. See
   # [`current_server`](https://docs.ruby-lang.org/en/2.6.0/DRb.html#method-i-current_server).
   sig { params(obj: T.nilable(Object)).returns(T.nilable(Integer)) }
-  def self.to_id(obj); end
+  module_function def to_id(obj); end
 
   # Convert a reference into an object using the current server.
   #
   # This raises a DRbServerNotFound error if there is no current server. See
   # [`current_server`](https://docs.ruby-lang.org/en/2.6.0/DRb.html#method-i-current_server).
   sig { params(ref: T.nilable(Integer)).returns(T.nilable(Object)) }
-  def self.to_obj(ref); end
+  module_function def to_obj(ref); end
 
   # Get the [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) defining the
   # local dRuby space.
@@ -469,7 +469,7 @@ module DRb
   # current server. See
   # [`current_server`](https://docs.ruby-lang.org/en/2.6.0/DRb.html#method-i-current_server).
   sig { returns(String) }
-  def self.uri; end
+  module_function def uri; end
 end
 
 # An [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) wrapper that can
@@ -742,7 +742,7 @@ module DRb::DRbProtocol
   # [`DRbProtocol`](https://docs.ruby-lang.org/en/2.6.0/DRb/DRbProtocol.html)
   # module.
   sig { params(prot: T.nilable(Object)).returns(T::Array[T.nilable(Object)]) }
-  def self.add_protocol(prot); end
+  module_function def add_protocol(prot); end
 
   # Open a client connection to `uri` with the configuration `config`.
   #
@@ -764,7 +764,7 @@ module DRb::DRbProtocol
       first: T::Boolean
     ).returns(DRb::DRbTCPSocket)
   end
-  def self.open(uri, config, first = true); end
+  module_function def open(uri, config, first = true); end
 
   # Open a server listening for connections at `uri` with configuration
   # `config`.
@@ -787,7 +787,7 @@ module DRb::DRbProtocol
       first: T::Boolean
     ).returns(DRb::DRbTCPSocket)
   end
-  def self.open_server(uri, config, first = true); end
+  module_function def open_server(uri, config, first = true); end
 
   # Parse `uri` into a [uri, option] pair.
   #
@@ -807,7 +807,7 @@ module DRb::DRbProtocol
       first: T::Boolean
     ).returns([String, T.nilable(Object)])
   end
-  def self.uri_option(uri, config, first = _); end
+  module_function def uri_option(uri, config, first = _); end
 end
 
 # An exception wrapping an error object
