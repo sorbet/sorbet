@@ -133,7 +133,7 @@ module Shellwords
   # Also aliased as:
   # [`escape`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-escape)
   sig { params(str: String).returns(String) }
-  def self.shellescape(str); end
+  module_function def shellescape(str); end
   
   # Builds a command line string from an argument list, `array`.
   #
@@ -167,7 +167,7 @@ module Shellwords
   # Also aliased as:
   # [`join`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-join)
   sig { params(str: T::Array[String]).returns(String) }
-  def self.shelljoin(str); end
+  module_function def shelljoin(str); end
 
   # Splits a string into an array of tokens in the same way the UNIX Bourne
   # shell does.
@@ -200,12 +200,12 @@ module Shellwords
   # [`shellwords`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-shellwords),
   # [`split`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-split)
   sig { params(str: String).returns(T::Array[String]) }
-  def self.shellsplit(str); end
+  module_function def shellsplit(str); end
 
   # Alias for:
   # [`shellsplit`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-i-shellsplit)
   sig { params(str: String).returns(T::Array[String]) }
-  def self.shellwords(str); end
+  module_function def shellwords(str); end
 
   # Alias for:
   # [`shellsplit`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html#method-c-shellsplit)
