@@ -513,4 +513,5 @@ class T::Enum::Test::EnumTest < Critic::Unit::UnitTest
   it 'can be used with an assert' do
     assert(CardSuit::SPADE, 'some message')
   end
+
 end
