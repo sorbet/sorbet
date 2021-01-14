@@ -157,8 +157,7 @@ module T::Props
         when Serialize
           "#{varname}.serialize(strict)"
         when Deserialize
-          type_name = T.must(module_name(type))
-          "#{type_name}.from_hash(#{varname})"
+          "#{type}.from_hash(#{varname})"
         else
           T.absurd(mode)
         end
@@ -170,8 +169,7 @@ module T::Props
         when Serialize
           "T::Props::CustomType.checked_serialize(#{varname})"
         when Deserialize
-          type_name = T.must(module_name(type))
-          "#{type_name}.deserialize(#{varname})"
+          "#{type}.deserialize(#{varname})"
         else
           T.absurd(mode)
         end
