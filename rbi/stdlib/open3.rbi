@@ -103,7 +103,7 @@ module Open3
       block: T.nilable(T.proc.params(stdin: IO, stdout: IO, stderr: IO, wait_thr: Process::Waiter).void)
     ).returns([IO, IO, IO, Process::Waiter])
   end
-  def self.popen3(*cmd, **opts, &block); end
+  module_function def popen3(*cmd, **opts, &block); end
 
   # [`Open3.popen2`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-popen2)
   # is similar to
@@ -161,7 +161,7 @@ module Open3
       block: T.nilable(T.proc.params(stdin: IO, stdout: IO, wait_thr: Process::Waiter).void)
     ).returns([IO, IO, Process::Waiter])
   end
-  def self.popen2(*cmd, **opts, &block); end
+  module_function def popen2(*cmd, **opts, &block); end
 
   # [`Open3.popen2e`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-popen2e)
   # is similar to
@@ -212,7 +212,7 @@ module Open3
       block: T.nilable(T.proc.params(stdin: IO, stdout_and_stderr: IO, wait_thr: Process::Waiter).void)
     ).returns([IO, IO, Process::Waiter])
   end
-  def self.popen2e(*cmd, **opts, &block); end
+  module_function def popen2e(*cmd, **opts, &block); end
 
   # [`Open3.capture3`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-capture3)
   # captures the standard output and the standard error of a command.
@@ -268,7 +268,7 @@ module Open3
       opts: T::Hash[Symbol, T.untyped]
     ).returns([String, String, Process::Status])
   end
-  def self.capture3(*cmd, stdin_data: '', binmode: false, **opts); end
+  module_function def capture3(*cmd, stdin_data: '', binmode: false, **opts); end
 
   # [`Open3.capture2`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-capture2)
   # captures the standard output of a command.
@@ -314,7 +314,7 @@ module Open3
       opts: T::Hash[Symbol, T.untyped]
     ).returns([String, Process::Status])
   end
-  def self.capture2(*cmd, stdin_data: nil, binmode: false, **opts); end
+  module_function def capture2(*cmd, stdin_data: nil, binmode: false, **opts); end
 
   # [`Open3.capture2e`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-capture2e)
   # captures the standard output and the standard error of a command.
@@ -347,7 +347,7 @@ module Open3
       opts: T::Hash[Symbol, T.untyped]
     ).returns([String, Process::Status])
   end
-  def self.capture2e(*cmd, stdin_data: nil, binmode: false, **opts); end
+  module_function def capture2e(*cmd, stdin_data: nil, binmode: false, **opts); end
 
   # [`Open3.pipeline_rw`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-pipeline_rw)
   # starts a list of commands as a pipeline with pipes which connect to stdin of
@@ -407,7 +407,7 @@ module Open3
       block: T.nilable(T.proc.params(first_stdin: IO, last_stdout: IO, wait_threads: T::Array[Process::Waiter]).void)
     ).returns([IO, IO, T::Array[Process::Waiter]])
   end
-  def self.pipeline_rw(*cmds, **opts, &block); end
+  module_function def pipeline_rw(*cmds, **opts, &block); end
 
   # [`Open3.pipeline_r`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-pipeline_r)
   # starts a list of commands as a pipeline with a pipe which connects to stdout
@@ -461,7 +461,7 @@ module Open3
       block: T.nilable(T.proc.params(last_stdout: IO, wait_threads: T::Array[Process::Waiter]).void)
     ).returns([IO, T::Array[Process::Waiter]])
   end
-  def self.pipeline_r(*cmds, **opts, &block); end
+  module_function def pipeline_r(*cmds, **opts, &block); end
 
   # [`Open3.pipeline_w`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-pipeline_w)
   # starts a list of commands as a pipeline with a pipe which connects to stdin
@@ -505,7 +505,7 @@ module Open3
       block: T.nilable(T.proc.params(first_stdin: IO, wait_threads: T::Array[Process::Waiter]).void)
     ).returns([IO, T::Array[Process::Waiter]])
   end
-  def self.pipeline_w(*cmds, **opts, &block); end
+  module_function def pipeline_w(*cmds, **opts, &block); end
 
   # [`Open3.pipeline_start`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-pipeline_start)
   # starts a list of commands as a pipeline. No pipes are created for stdin of
@@ -564,7 +564,7 @@ module Open3
       block: T.nilable(T.proc.params(wait_threads: T::Array[Process::Waiter]).void)
     ).returns(T::Array[Process::Waiter])
   end
-  def self.pipeline_start(*cmds, **opts, &block); end
+  module_function def pipeline_start(*cmds, **opts, &block); end
 
   # [`Open3.pipeline`](https://docs.ruby-lang.org/en/2.6.0/Open3.html#method-c-pipeline)
   # starts a list of commands as a pipeline. It waits for the completion of the
@@ -630,5 +630,5 @@ module Open3
       opts: T::Hash[Symbol, T.untyped]
     ).returns(T::Array[Process::Status])
   end
-  def self.pipeline(*cmds, **opts); end
+  module_function def pipeline(*cmds, **opts); end
 end
