@@ -36,7 +36,7 @@ module Find
       blk: T.nilable(T.proc.params(path: String).void)
     ).returns(T.nilable(T::Enumerator[String]))
   end
-  def self.find(*paths, ignore_error: true, &blk); end
+  module_function def find(*paths, ignore_error: true, &blk); end
 
   # Skips the current file or directory, restarting the loop with the next
   # entry. If the current file is a directory, that directory will not be
@@ -45,5 +45,5 @@ module Find
   #
   # See the `Find` module documentation for an example.
   sig { void }
-  def self.prune; end
+  module_function def prune; end
 end
