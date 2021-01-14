@@ -29,58 +29,58 @@ module Kconv
   # Guess input encoding by
   # [`NKF.guess`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#method-c-guess)
   sig { params(str: String).returns(Encoding) }
-  def self.guess(str); end
+  module_function def guess(str); end
 
   # Returns whether input encoding is EUC-JP or not.
   #
   # **Note** don't expect this return value is
   # [`MatchData`](https://docs.ruby-lang.org/en/2.6.0/MatchData.html).
   sig { params(str: String).returns(T::Boolean) }
-  def self.iseuc(str); end
+  module_function def iseuc(str); end
 
   # Returns whether input encoding is ISO-2022-JP or not.
   sig { params(str: String).returns(T::Boolean) }
-  def self.isjis(str); end
+  module_function def isjis(str); end
 
   # Returns whether input encoding is Shift\_JIS or not.
   sig { params(str: String).returns(T::Boolean) }
-  def self.issjis(str); end
+  module_function def issjis(str); end
 
   # Returns whether input encoding is UTF-8 or not.
   sig { params(str: String).returns(T::Boolean) }
-  def self.isutf8(str); end
+  module_function def isutf8(str); end
 
   # Convert `str` to `to_enc`. `to_enc` and `from_enc` are given as constants of
   # [`Kconv`](https://docs.ruby-lang.org/en/2.6.0/Kconv.html) or
   # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) objects.
   sig { params(str: String, to_enc: Encoding, from_enc: Encoding).returns(String) }
-  def self.kconv(str, to_enc, from_enc = to_enc); end
+  module_function def kconv(str, to_enc, from_enc = to_enc); end
 
   # Convert `str` to EUC-JP
   sig { params(str: String).returns(String) }
-  def self.toeuc(str); end
+  module_function def toeuc(str); end
 
   # Convert `str` to ISO-2022-JP
   sig { params(str: String).returns(String) }
-  def self.tojis(str); end
+  module_function def tojis(str); end
 
   # Convert `self` to locale encoding
   sig { params(str: String).returns(String) }
-  def self.tolocale(str); end
+  module_function def tolocale(str); end
 
   # Convert `str` to Shift\_JIS
   sig { params(str: String).returns(String) }
-  def self.tosjis(str); end
+  module_function def tosjis(str); end
 
   # Convert `str` to UTF-16
   sig { params(str: String).returns(String) }
-  def self.toutf16(str); end
+  module_function def toutf16(str); end
 
   # Convert `str` to UTF-32
   sig { params(str: String).returns(String) }
-  def self.toutf32(str); end
+  module_function def toutf32(str); end
 
   # Convert `str` to UTF-8
   sig { params(str: String).returns(String) }
-  def self.toutf8(str); end
+  module_function def toutf8(str); end
 end
