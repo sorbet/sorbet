@@ -130,7 +130,7 @@ module FileUtils
       remove_destination: T.nilable(T::Boolean)
     ).returns(T::Array[String])
   end
-  def self.cp_r(src, dest, preserve: nil, noop: nil, verbose: nil, dereference_root: true, remove_destination: nil); end
+  module_function def cp_r(src, dest, preserve: nil, noop: nil, verbose: nil, dereference_root: true, remove_destination: nil); end
 
   # remove files `list[0]` `list[1]`... If `list[n]` is a directory, removes its
   # all contents recursively. This method ignores
@@ -163,7 +163,7 @@ module FileUtils
       secure: T.nilable(T::Boolean)
     ).returns(T::Array[String])
   end
-  def self.rm_r(list, force: nil, noop: nil, verbose: nil, secure: nil); end
+  module_function def rm_r(list, force: nil, noop: nil, verbose: nil, secure: nil); end
 
   # Creates a directory and all its parent directories. For example,
   #
@@ -192,7 +192,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T::Array[String])
   end
-  def self.mkdir_p(list, mode: nil, noop: nil, verbose: nil); end
+  module_function def mkdir_p(list, mode: nil, noop: nil, verbose: nil); end
 
   # Alias for:
   # [`mkdir_p`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-mkdir_p)
@@ -204,7 +204,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T::Array[String])
   end
-  def self.makedirs(list, mode: nil, noop: nil, verbose: nil); end
+  module_function def makedirs(list, mode: nil, noop: nil, verbose: nil); end
 
   # Alias for:
   # [`mkdir_p`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-mkdir_p)
@@ -216,7 +216,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T::Array[String])
   end
-  def self.mkpath(list, mode: nil, noop: nil, verbose: nil); end
+  module_function def mkpath(list, mode: nil, noop: nil, verbose: nil); end
 
   # Updates modification time (mtime) and access time (atime) of file(s) in
   # `list`. Files are created if they don't exist.
@@ -234,7 +234,7 @@ module FileUtils
       nocreate: T.nilable(T::Boolean),
     ).void
   end
-  def self.touch(list, noop: nil, verbose: nil, mtime: nil, nocreate: nil); end
+  module_function def touch(list, noop: nil, verbose: nil, mtime: nil, nocreate: nil); end
 
   # Changes the current directory to the directory `dir`.
   #
@@ -253,12 +253,12 @@ module FileUtils
   # Also aliased as:
   # [`chdir`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-chdir)
   sig {params(dir: T.untyped, verbose: T.nilable(T::Boolean), block: T.untyped).returns(T.untyped)}
-  def self.cd(dir, verbose: nil, &block); end
+  module_function def cd(dir, verbose: nil, &block); end
 
   # Alias for:
   # [`cd`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-cd)
   sig {params(dir: T.untyped, verbose: T.nilable(T::Boolean), block: T.untyped).returns(T.untyped)}
-  def self.chdir(dir, verbose: nil, &block); end
+  module_function def chdir(dir, verbose: nil, &block); end
 
   # Changes permission bits on the named files (in `list`) to the bit pattern
   # represented by `mode`.
@@ -316,7 +316,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.chmod(mode, list, noop: nil, verbose: nil); end
+  module_function def chmod(mode, list, noop: nil, verbose: nil); end
 
   # Changes permission bits on the named files (in `list`) to the bit pattern
   # represented by `mode`.
@@ -334,7 +334,7 @@ module FileUtils
       force: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.chmod_R(mode, list, noop: nil, verbose: nil, force: nil); end
+  module_function def chmod_R(mode, list, noop: nil, verbose: nil, force: nil); end
 
   # Changes owner and group on the named files (in `list`) to the user `user`
   # and the group `group`. `user` and `group` may be an ID (Integer/String) or a
@@ -354,7 +354,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.chown(user, group, list, noop: nil, verbose: nil); end
+  module_function def chown(user, group, list, noop: nil, verbose: nil); end
 
   # Changes owner and group on the named files (in `list`) to the user `user`
   # and the group `group` recursively. `user` and `group` may be an ID
@@ -375,7 +375,7 @@ module FileUtils
       force: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.chown_R(user, group, list, noop: nil, verbose: nil, force: nil); end
+  module_function def chown_R(user, group, list, noop: nil, verbose: nil, force: nil); end
 
   # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
   # method names which have the option `opt`.
@@ -407,21 +407,21 @@ module FileUtils
   # [`identical?`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-identical-3F),
   # [`cmp`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-cmp)
   sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
-  def self.compare_file(a, b); end
+  module_function def compare_file(a, b); end
 
   # Alias for:
   # [`compare_file`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-compare_file)
   sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
-  def self.cmp(a, b); end
+  module_function def cmp(a, b); end
 
   # Alias for:
   # [`compare_file`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-compare_file)
   sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
-  def self.identical?(a, b); end
+  module_function def identical?(a, b); end
 
   # Returns true if the contents of a stream `a` and `b` are identical.
   sig {params(a: T.untyped, b: T.untyped).returns(T::Boolean)}
-  def self.compare_stream(a, b); end
+  module_function def compare_stream(a, b); end
 
   # Copies a file content `src` to `dest`. If `dest` is a directory, copies
   # `src` to `dest/src`.
@@ -447,7 +447,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.cp(src, dest, preserve: nil, noop: nil, verbose: nil); end
+  module_function def cp(src, dest, preserve: nil, noop: nil, verbose: nil); end
 
   # Alias for:
   # [`cp`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-cp)
@@ -460,7 +460,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.copy(src, dest, preserve: nil, noop: nil, verbose: nil); end
+  module_function def copy(src, dest, preserve: nil, noop: nil, verbose: nil); end
 
   # Copies a file system entry `src` to `dest`. If `src` is a directory, this
   # method copies its contents recursively. This method preserves file types,
@@ -486,7 +486,7 @@ module FileUtils
       remove_destination: T::Boolean
     ).returns(T.untyped)
   end
-  def self.copy_entry(src, dest, preserve = false, dereference_root = false, remove_destination = false); end
+  module_function def copy_entry(src, dest, preserve = false, dereference_root = false, remove_destination = false); end
 
   # Copies file contents of `src` to `dest`. Both of `src` and `dest` must be a
   # path name.
@@ -498,12 +498,12 @@ module FileUtils
       dereference: T::Boolean
     ).returns(T.untyped)
   end
-  def self.copy_file(src, dest, preserve = false, dereference = true); end
+  module_function def copy_file(src, dest, preserve = false, dereference = true); end
 
   # Copies stream `src` to `dest`. `src` must respond to read(n) and `dest` must
   # respond to write(str).
   sig {params(src: T.untyped, dest: T.untyped).returns(T.untyped)}
-  def self.copy_stream(src, dest); end
+  module_function def copy_stream(src, dest); end
 
   # Hard link `src` to `dest`. If `src` is a directory, this method links all
   # its contents recursively. If `dest` is a directory, links `src` to
@@ -535,7 +535,7 @@ module FileUtils
       remove_destination: T::Boolean
     ).returns(T.untyped)
   end
-  def self.cp_lr(src, dest, noop: nil, verbose: nil, dereference_root: true, remove_destination: false); end
+  module_function def cp_lr(src, dest, noop: nil, verbose: nil, dereference_root: true, remove_destination: false); end
 
   # Returns true if the method `mid` have an option `opt`.
   #
@@ -567,7 +567,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.install(src, dest, mode: nil, owner: nil, group: nil, preserve: nil, noop: nil, verbose: nil); end
+  module_function def install(src, dest, mode: nil, owner: nil, group: nil, preserve: nil, noop: nil, verbose: nil); end
 
   # In the first form, creates a hard link `link` which points to `target`. If
   # `link` already exists, raises Errno::EEXIST. But if the :force option is
@@ -599,7 +599,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.ln(src, dest, force: nil, noop: nil, verbose: nil); end
+  module_function def ln(src, dest, force: nil, noop: nil, verbose: nil); end
 
   # Alias for:
   # [`ln`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-ln)
@@ -612,7 +612,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.link(src, dest, force: nil, noop: nil, verbose: nil); end
+  module_function def link(src, dest, force: nil, noop: nil, verbose: nil); end
 
   # Hard links a file system entry `src` to `dest`. If `src` is a directory,
   # this method links its contents recursively.
@@ -632,7 +632,7 @@ module FileUtils
       remove_destination: T::Boolean
     ).returns(T.untyped)
   end
-  def self.link_entry(src, dest, dereference_root = false, remove_destination = false); end
+  module_function def link_entry(src, dest, dereference_root = false, remove_destination = false); end
 
   # In the first form, creates a symbolic link `link` which points to `target`.
   # If `link` already exists, raises Errno::EEXIST. But if the :force option is
@@ -664,7 +664,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.ln_s(src, dest, force: nil, noop: nil, verbose: nil); end
+  module_function def ln_s(src, dest, force: nil, noop: nil, verbose: nil); end
 
   # Alias for:
   # [`ln_s`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-ln_s)
@@ -677,7 +677,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.symlink(src, dest, force: nil, noop: nil, verbose: nil); end
+  module_function def symlink(src, dest, force: nil, noop: nil, verbose: nil); end
 
   # Same as
   #
@@ -692,7 +692,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.ln_sf(src, dest, noop: nil, verbose: nil); end
+  module_function def ln_sf(src, dest, noop: nil, verbose: nil); end
 
   # Creates one or more directories.
   #
@@ -710,7 +710,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.mkdir(list, mode: nil, noop: nil, verbose: nil); end
+  module_function def mkdir(list, mode: nil, noop: nil, verbose: nil); end
 
   # Moves file(s) `src` to `dest`. If `file` and `dest` exist on the different
   # disk partition, the file is copied then the original file is removed.
@@ -736,7 +736,7 @@ module FileUtils
       secure: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.mv(src, dest, force: nil, noop: nil, verbose: nil, secure: nil); end
+  module_function def mv(src, dest, force: nil, noop: nil, verbose: nil, secure: nil); end
 
   # Alias for:
   # [`mv`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-mv)
@@ -750,7 +750,7 @@ module FileUtils
       secure: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.move(src, dest, force: nil, noop: nil, verbose: nil, secure: nil); end
+  module_function def move(src, dest, force: nil, noop: nil, verbose: nil, secure: nil); end
 
   # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
   # option names.
@@ -778,18 +778,18 @@ module FileUtils
   # Also aliased as:
   # [`getwd`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-getwd)
   sig {returns(T.untyped)}
-  def self.pwd; end
+  module_function def pwd; end
 
   # Alias for:
   # [`pwd`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-pwd)
   sig {returns(T.untyped)}
-  def self.getwd; end
+  module_function def getwd; end
 
   # Removes a directory `dir` and its contents recursively. This method ignores
   # [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html) if
   # `force` is true.
   sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
-  def self.remove_dir(path, force = false); end
+  module_function def remove_dir(path, force = false); end
 
   # This method removes a file system entry `path`. `path` might be a regular
   # file, a directory, or something. If `path` is a directory, remove it
@@ -798,7 +798,7 @@ module FileUtils
   # See also
   # [`remove_entry_secure`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-remove_entry_secure).
   sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
-  def self.remove_entry(path, force = false); end
+  module_function def remove_entry(path, force = false); end
 
   # This method removes a file system entry `path`. `path` shall be a regular
   # file, a directory, or something. If `path` is a directory, remove it
@@ -834,13 +834,13 @@ module FileUtils
   #
   # For fileutils.rb, this vulnerability is reported in [ruby-dev:26100].
   sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
-  def self.remove_entry_secure(path, force = false); end
+  module_function def remove_entry_secure(path, force = false); end
 
   # Removes a file `path`. This method ignores
   # [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html) if
   # `force` is true.
   sig {params(path: T.untyped, force: T::Boolean).returns(T.untyped)}
-  def self.remove_file(path, force = false); end
+  module_function def remove_file(path, force = false); end
 
   # Remove file(s) specified in `list`. This method cannot remove directories.
   # All StandardErrors are ignored when the :force option is set.
@@ -862,7 +862,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.rm(list, force: nil, noop: nil, verbose: nil); end
+  module_function def rm(list, force: nil, noop: nil, verbose: nil); end
 
   # Alias for:
   # [`rm`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm)
@@ -874,7 +874,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.remove(list, force: nil, noop: nil, verbose: nil); end
+  module_function def remove(list, force: nil, noop: nil, verbose: nil); end
 
   # Equivalent to
   #
@@ -886,12 +886,12 @@ module FileUtils
   # Also aliased as:
   # [`safe_unlink`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-safe_unlink)
   sig {params(list: T.untyped, noop: T.nilable(T::Boolean), verbose: T.nilable(T::Boolean)).returns(T.untyped)}
-  def self.rm_f(list, noop: nil, verbose: nil); end
+  module_function def rm_f(list, noop: nil, verbose: nil); end
 
   # Alias for:
   # [`rm_f`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm_f)
   sig {params(list: T.untyped, noop: T.nilable(T::Boolean), verbose: T.nilable(T::Boolean)).returns(T.untyped)}
-  def self.safe_unlink(list, noop: nil, verbose: nil); end
+  module_function def safe_unlink(list, noop: nil, verbose: nil); end
 
   # Equivalent to
   #
@@ -913,7 +913,7 @@ module FileUtils
       secure: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.rm_rf(list, noop: nil, verbose: nil, secure: nil); end
+  module_function def rm_rf(list, noop: nil, verbose: nil, secure: nil); end
 
   # Alias for:
   # [`rm_rf`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm_rf)
@@ -925,7 +925,7 @@ module FileUtils
       secure: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.rmtree(list, noop: nil, verbose: nil, secure: nil); end
+  module_function def rmtree(list, noop: nil, verbose: nil, secure: nil); end
 
   # Removes one or more directories.
   #
@@ -943,7 +943,7 @@ module FileUtils
       verbose: T.nilable(T::Boolean)
     ).returns(T.untyped)
   end
-  def self.rmdir(list, parents: nil, noop: nil, verbose: nil); end
+  module_function def rmdir(list, parents: nil, noop: nil, verbose: nil); end
 
   # Returns true if `new` is newer than all `old_list`. Non-existent files are
   # older than any file.
@@ -953,7 +953,7 @@ module FileUtils
   #     system 'make hello.o'
   # ```
   sig {params(new: T.untyped, old_list: T.untyped).returns(T::Boolean)}
-  def self.uptodate?(new, old_list); end
+  module_function def uptodate?(new, old_list); end
 end
 
 # This module has all methods of
