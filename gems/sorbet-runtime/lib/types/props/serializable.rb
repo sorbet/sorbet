@@ -112,7 +112,7 @@ module T::Props::Serializable
       end
     elsif obj.is_a?(Array)
       new_obj = obj.map {|v| recursive_stringify_keys(v)}
-    elsif obj.is_a?(T::Enum) || obj.is_a?(T::Struct)
+    elsif obj.is_a?(T::Props::Serializable) || obj.is_a?(T::Enum)
       new_obj = obj.serialize
     else
       new_obj = obj

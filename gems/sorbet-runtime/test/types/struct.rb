@@ -31,6 +31,7 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
 
   class SimpleStruct < T::Struct
     prop :value, Integer
+    prop :recursed, T::Array[SimpleStruct], default: []
   end
 
   class SimpleEnum < T::Enum
@@ -60,6 +61,24 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       assert_equal(SimpleEnum::That, d.enum)
       # this should be unchanged by #with
       assert_equal(5, d.struct.value)
+    end
+
+    it "works correctly when a value is whatever" do
+      c = Outer.new(struct: SimpleStruct.new(value: 5, recursed: [SimpleStruct.new(value: 8)]), enum: SimpleEnum::This)
+      d = c.with(struct: SimpleStruct.new(value: 6, recursed: [SimpleStruct.new(value: 7)]))
+      assert_equal(6, d.struct.value)
+      assert_equal(7, d.struct.recursed.first.value)
+      # this should be unchanged by #with
+      assert_equal(SimpleEnum::This, d.enum)
+    end
+
+    it "works correctly when a value is a different whatever" do
+      c = Outer.new(struct: SimpleStruct.new(value: 5, recursed: [SimpleStruct.new(value: 8)]), enum: SimpleEnum::This)
+      d = c.with(enum: SimpleEnum::That)
+      assert_equal(SimpleEnum::That, d.enum)
+      # this should be unchanged by #with
+      assert_equal(5, d.struct.value)
+      assert_equal(8, d.struct.recursed.first.value)
     end
   end
 end
