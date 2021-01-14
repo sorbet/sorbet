@@ -52,19 +52,6 @@ module T::Utils
     end.uniq
   end
 
-  # Associates a signature with a forwarder method that matches the signature of the method it
-  # forwards to. This is necessary because forwarder methods are often declared with catch-all
-  # splat parameters, rather than the exact set of parameters ultimately used by the target method,
-  # so they cannot be validated as strictly.
-  #
-  # The caller of this method must ensure that the forwarder method properly forwards all parameters
-  # such that the signature is accurate.
-  def self.register_forwarder(from_method, to_method, remove_first_param: false)
-    T::Private::Methods.register_forwarder(
-      from_method, to_method, remove_first_param: remove_first_param
-    )
-  end
-
   # Returns the signature for the instance method on the supplied module, or nil if it's not found or not typed.
   #
   # @example T::Utils.signature_for_instance_method(MyClass, :my_method)

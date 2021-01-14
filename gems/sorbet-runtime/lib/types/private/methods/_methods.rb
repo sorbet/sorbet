@@ -75,40 +75,6 @@ module T::Private::Methods
     T::Types::Proc.new(decl.params, decl.returns)
   end
 
-  # See docs at T::Utils.register_forwarder.
-  def self.register_forwarder(from_method, to_method, mode: Modes.overridable, remove_first_param: false)
-    # Normalize the method (see comment in signature_for_key).
-    from_method = from_method.owner.instance_method(from_method.name)
-
-    from_key = method_to_key(from_method)
-    maybe_run_sig_block_for_key(from_key)
-    if @signatures_by_method.key?(from_key)
-      raise "#{from_method} already has a method signature"
-    end
-
-    from_params = from_method.parameters
-    if from_params.length != 2 || from_params[0][0] != :rest || from_params[1][0] != :block
-      raise "forwarder methods should take a single splat param and a block param. `#{from_method}` " \
-            "takes these params: #{from_params}. For help, ask #dev-productivity."
-    end
-
-    # If there's already a signature for to_method, we get `parameters` from there, to enable
-    # chained forwarding. NB: we don't use `signature_for_key` here, because the normalization it
-    # does is broken when `to_method` has been clobbered by another method.
-    to_key = method_to_key(to_method)
-    maybe_run_sig_block_for_key(to_key)
-    to_params = @signatures_by_method[to_key]&.parameters || to_method.parameters
-
-    if remove_first_param
-      to_params = to_params[1..-1]
-    end
-
-    # We don't bother trying to preserve any types from to_signature because this won't be
-    # statically analyzed, and the types will just get checked when the forwarding happens.
-    from_signature = Signature.new_untyped(method: from_method, mode: mode, parameters: to_params)
-    @signatures_by_method[from_key] = from_signature
-  end
-
   # Returns the signature for a method whose definition was preceded by `sig`.
   #
   # @param method [UnboundMethod]
