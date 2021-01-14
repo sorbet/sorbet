@@ -28,38 +28,4 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       c.arr = [1, 2]
     end
   end
-
-  class SimpleStruct < T::Struct
-    prop :value, Integer
-  end
-
-  class SimpleEnum < T::Enum
-    enums do
-      This = new
-      That = new
-    end
-  end
-
-  class Outer < T::Struct
-    prop :struct, SimpleStruct
-    prop :enum, SimpleEnum
-  end
-
-  describe "T::Struct#with" do
-    it "works correctly when a value is a T::Struct" do
-      c = Outer.new(struct: SimpleStruct.new(value: 5), enum: SimpleEnum::This)
-      d = c.with(struct: SimpleStruct.new(value: 8))
-      assert_equal(8, d.struct.value)
-      # this should be unchanged by #with
-      assert_equal(SimpleEnum::This, d.enum)
-    end
-
-    it "works correctly when a value is a T::Enum" do
-      c = Outer.new(struct: SimpleStruct.new(value: 5), enum: SimpleEnum::This)
-      d = c.with(enum: SimpleEnum::That)
-      assert_equal(SimpleEnum::That, d.enum)
-      # this should be unchanged by #with
-      assert_equal(5, d.struct.value)
-    end
-  end
 end
