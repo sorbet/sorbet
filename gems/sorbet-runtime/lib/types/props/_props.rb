@@ -100,6 +100,7 @@ module T::Props
     #   form.
     #
     # @return [void]
+    sig {params(name: Symbol, cls: T.untyped, rules: T.untyped).void}
     def prop(name, cls, rules={})
       cls = T::Utils.coerce(cls) if !cls.is_a?(Module)
       decorator.prop_defined(name, cls, rules)
