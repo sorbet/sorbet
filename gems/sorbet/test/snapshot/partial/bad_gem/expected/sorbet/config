@@ -1,2 +1,4 @@
 --dir
 .
+--ignore
+vendor/bundle
