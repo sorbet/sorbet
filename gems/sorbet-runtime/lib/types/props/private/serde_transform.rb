@@ -174,11 +174,6 @@ module T::Props
           T.absurd(mode)
         end
       end
-
-      sig {params(type: Module).returns(T.nilable(String)).checked(:never)}
-      private_class_method def self.module_name(type)
-        T::Configuration.module_name_mangler.call(type)
-      end
     end
   end
 end
