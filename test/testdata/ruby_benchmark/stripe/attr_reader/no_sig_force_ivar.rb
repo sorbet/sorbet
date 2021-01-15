@@ -2,13 +2,14 @@
 # typed: true
 # compiled: true
 
-class MyStruct
+class AttrReaderNoSigForceIVAR
   extend T::Sig
   sig {params(foo: Integer).void}
-  def initialize(foo:)
+  def initialize(foo)
     @foo = foo
   end
 
+  # no sig
   attr_reader :foo
 
   # This is here to trick the compiler into redefining the method using
@@ -16,15 +17,15 @@ class MyStruct
   self.send(:attr_reader, :foo)
 end
 
-my_struct = MyStruct.new(foo: 430)
+x = AttrReaderNoSigForceIVAR.new(1248)
 
 i = 0
 while i < 10_000_000
 
-  my_struct.foo
+  x.foo
 
   i += 1
 end
 
 puts i
-puts my_struct.foo
+puts x.foo
