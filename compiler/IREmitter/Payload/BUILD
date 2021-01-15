@@ -47,8 +47,17 @@ filegroup(
 )
 
 payload_files = [
-    ("vm_payload_for_compile_commands", ["vm-payload.c"]),
-    ("pseudo_lib", ["PayloadIntrinsics.c", "code-payload.c"]),
+    (
+        "vm_payload_for_compile_commands",
+        ["vm-payload.c"],
+    ),
+    (
+        "pseudo_lib",
+        [
+            "PayloadIntrinsics.c",
+            "code-payload.c",
+        ],
+    ),
 ]
 
 [cc_library(
