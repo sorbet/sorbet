@@ -9,7 +9,7 @@ class B < T::Struct
   const :using_t_struct_const, Integer
 end
 
-class C < T::Struct
+class C
   def using_bare_method
     @using_bare_method
   end

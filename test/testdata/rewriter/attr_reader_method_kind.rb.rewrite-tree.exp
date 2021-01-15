@@ -57,20 +57,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_const, :attr_reader)
   end
 
-  class <emptyTree>::<C C><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
-    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.void()
-    end
-
-    def initialize<<todo method>>(&<blk>)
-      <self>.super(ZSuperArgs)
-    end
-
+  class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
     def using_bare_method<<todo method>>(&<blk>)
       @using_bare_method
     end
-
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
     ::Sorbet::Private::Static.keep_def(<self>, :using_bare_method, :attr_reader)
   end
