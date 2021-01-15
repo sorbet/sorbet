@@ -2289,7 +2289,6 @@ public:
 class ResolveSignaturesWalk {
 public:
     struct ResolveSignatureJob {
-        core::FileRef file;
         core::ClassOrModuleRef owner;
         ast::MethodDef *mdef;
         core::LocOffsets loc;
@@ -2304,16 +2303,20 @@ public:
     };
 
     struct ResolveMultiSignatureJob {
-        core::FileRef file;
         core::ClassOrModuleRef owner;
         ast::MethodDef *mdef;
         bool isOverloaded;
         InlinedVector<OverloadedMethodSignature, 2> sigs;
     };
 
+    struct ResolveFileSignatures {
+        core::FileRef file;
+        vector<ResolveSignatureJob> sigs;
+        vector<ResolveMultiSignatureJob> multiSigs;
+    };
+
     struct ResolveSignaturesWalkResult {
-        vector<ResolveSignatureJob> signatureJobs;
-        vector<ResolveMultiSignatureJob> multiSignatureJobs;
+        vector<ResolveFileSignatures> fileSigs;
         vector<ast::ParsedFile> trees;
     };
 
@@ -2695,7 +2698,7 @@ private:
 
                     if (lastSigs.size() == 1) {
                         auto &lastSig = lastSigs.front();
-                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.file, ctx.owner.asClassOrModuleRef(), &mdef,
+                        signatureJobs.emplace_back(ResolveSignatureJob{ctx.owner.asClassOrModuleRef(), &mdef,
                                                                        lastSig->loc,
                                                                        parseSig(ctx, sigOwner, *lastSig, mdef)});
                     } else {
@@ -2717,8 +2720,8 @@ private:
                             sigs.emplace_back(OverloadedMethodSignature{lastSig->loc, move(sig), move(argsToKeep)});
                         }
 
-                        multiSignatureJobs.emplace_back(ResolveMultiSignatureJob{
-                            ctx.file, ctx.owner.asClassOrModuleRef(), &mdef, isOverloaded, std::move(sigs)});
+                        multiSignatureJobs.emplace_back(ResolveMultiSignatureJob{ctx.owner.asClassOrModuleRef(), &mdef,
+                                                                                 isOverloaded, std::move(sigs)});
                     }
 
                     lastSigs.clear();
@@ -2870,21 +2873,20 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
             if (result.gotItem()) {
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));
+                if (!walk.multiSignatureJobs.empty() || !walk.multiSignatureJobs.empty()) {
+                    output.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
+                        job.file, move(walk.signatureJobs), move(walk.multiSignatureJobs)});
+                }
                 output.trees.emplace_back(move(job));
             }
         }
         if (!output.trees.empty()) {
-            output.signatureJobs = move(walk.signatureJobs);
-            output.multiSignatureJobs = move(walk.multiSignatureJobs);
             auto count = output.trees.size();
             outputq->push(move(output), count);
         }
     });
 
-    // Note: We don't flatten these into one array because it's an expensive operation (a flat array has # of sigs
-    // elements in it!)
-    vector<vector<ResolveSignaturesWalk::ResolveSignatureJob>> combinedSignatures;
-    vector<vector<ResolveSignaturesWalk::ResolveMultiSignatureJob>> combinedMultiSignatures;
+    vector<ResolveSignaturesWalk::ResolveFileSignatures> combinedFileJobs;
     vector<ast::ParsedFile> combinedTrees;
     {
         ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
@@ -2894,23 +2896,28 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
             if (result.gotItem()) {
                 combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadResult.trees.begin()),
                                      make_move_iterator(threadResult.trees.end()));
-                combinedSignatures.emplace_back(move(threadResult.signatureJobs));
-                combinedMultiSignatures.emplace_back(move(threadResult.multiSignatureJobs));
+                combinedFileJobs.insert(combinedFileJobs.end(), make_move_iterator(threadResult.fileSigs.begin()),
+                                        make_move_iterator(threadResult.fileSigs.end()));
             }
         }
     }
 
+    // We need to define sigs in a stable order since, when there are conflicting sigs in multiple RBI files, the last
+    // sig 'wins'.
+    fast_sort(
+        combinedFileJobs,
+        [&](const ResolveSignaturesWalk::ResolveFileSignatures &left,
+            const ResolveSignaturesWalk::ResolveFileSignatures &right) -> bool { return left.file < right.file; });
+
     {
         Timer timeit(gs.tracer(), "resolver.resolve_sigs");
-        for (auto &threadSignatures : combinedSignatures) {
-            for (auto &job : threadSignatures) {
-                core::MutableContext ctx(gs, job.owner, job.file);
+        for (auto &file : combinedFileJobs) {
+            for (auto &job : file.sigs) {
+                core::MutableContext ctx(gs, job.owner, file.file);
                 ResolveSignaturesWalk::resolveSignatureJob(ctx, job);
             }
-        }
-        for (auto &threadMultiSignatures : combinedMultiSignatures) {
-            for (auto &job : threadMultiSignatures) {
-                core::MutableContext ctx(gs, job.owner, job.file);
+            for (auto &job : file.multiSigs) {
+                core::MutableContext ctx(gs, job.owner, file.file);
                 ResolveSignaturesWalk::resolveMultiSignatureJob(ctx, job);
             }
         }
