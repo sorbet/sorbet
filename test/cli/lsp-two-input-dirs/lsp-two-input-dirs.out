@@ -1,3 +1,0 @@
-Content-Length: 139
-
-{"jsonrpc":"2.0","method":"window/showMessage","params":{"type":1,"message":"Sorbet's language server requires a single input directory."}}
