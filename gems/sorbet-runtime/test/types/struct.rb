@@ -28,4 +28,20 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       c.arr = [1, 2]
     end
   end
+
+  it "errors when using string typed props" do
+    assert_raises(TypeError) do
+      Class.new(T::Struct) do
+        prop "foo", T::Array[String]
+      end
+    end
+  end
+
+  it "errors when using string typed const" do
+    assert_raises(TypeError) do
+      Class.new(T::Struct) do
+        const "foo", T::Array[String]
+      end
+    end
+  end
 end
