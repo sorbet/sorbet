@@ -258,6 +258,7 @@ NameDef names[] = {
     {"Compatibility", "Compatibility", true},
 
     {"instance"},
+    {"normal"},
 
     {"raise"},
     {"rewriterRaiseUnimplemented", "Sorbet rewriter pass partially unimplemented"},

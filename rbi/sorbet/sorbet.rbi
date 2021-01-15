@@ -31,18 +31,18 @@ module Sorbet::Private::Static
 
   sig do
     type_parameters(:U)
-      .params(this: T.untyped, fun: T.all(T.type_parameter(:U), Symbol))
+      .params(this: T.untyped, fun: T.all(T.type_parameter(:U), Symbol), kind: Symbol)
       .returns(T.type_parameter(:U))
   end
-  def self.keep_def(this, fun)
+  def self.keep_def(this, fun, kind)
   end
 
   sig do
     type_parameters(:U)
-      .params(this: T.untyped, fun: T.all(T.type_parameter(:U), Symbol))
+      .params(this: T.untyped, fun: T.all(T.type_parameter(:U), Symbol), kind: Symbol)
       .returns(T.type_parameter(:U))
   end
-  def self.keep_self_def(this, fun)
+  def self.keep_self_def(this, fun, kind)
   end
 
   # Used to implement Enumerable#to_h, which forwards here in C++.

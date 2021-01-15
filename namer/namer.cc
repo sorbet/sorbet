@@ -511,7 +511,7 @@ public:
                 // ^ visibility toggle doesn't look at `self.*` methods, only instance methods
                 // (need to use `class << self` to use nullary private with singleton class methods)
 
-                if (original.args.size() != 2) {
+                if (original.args.size() != 3) {
                     break;
                 }
 
@@ -588,7 +588,7 @@ public:
                 return core::NameRef::noName();
             }
 
-            if (send->args.size() != 2) {
+            if (send->args.size() != 3) {
                 return core::NameRef::noName();
             }
 
