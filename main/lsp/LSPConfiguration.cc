@@ -1,5 +1,6 @@
 #include "main/lsp/LSPConfiguration.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_replace.h"
 #include "common/FileOps.h"
 #include "main/lsp/LSPMessage.h"
@@ -20,7 +21,9 @@ namespace {
 string getRootPath(const shared_ptr<LSPOutput> &output, const options::Options &opts,
                    const shared_ptr<spdlog::logger> &logger) {
     if (opts.rawInputDirNames.size() != 1) {
-        auto msg = "Sorbet's language server requires a single input directory.";
+        auto msg =
+            fmt::format("Sorbet's language server requires a single input directory. However, {} are configured: [{}]",
+                        opts.rawInputDirNames.size(), absl::StrJoin(opts.rawInputDirNames, ", "));
         logger->error(msg);
         auto params = make_unique<ShowMessageParams>(MessageType::Error, msg);
         output->write(make_unique<LSPMessage>(
