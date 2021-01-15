@@ -16,6 +16,7 @@ compilation_database(
         "//compiler/ObjectFileEmitter:ObjectFileEmitter",
         "//compiler/Passes:Passes",
         "//compiler/Linker:Linker",
+        "//compiler/IREmitter/Payload:vm_payload_for_compile_commands",
         "//compiler/IREmitter/Payload:pseudo_lib",
         "//compiler/IREmitter/Payload:generate_load_payload",
         "//compiler/IREmitter:IREmitter",

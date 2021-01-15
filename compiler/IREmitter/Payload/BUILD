@@ -46,12 +46,14 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
-cc_library(
-    name = "pseudo_lib",
-    srcs = [
-        "PayloadIntrinsics.c",
-        "code-payload.c",
-    ],
+payload_files = [
+    ("vm_payload_for_compile_commands", ["vm-payload.c"]),
+    ("pseudo_lib", ["PayloadIntrinsics.c", "code-payload.c"]),
+]
+
+[cc_library(
+    name = name,
+    srcs = srcs,
     copts = [
         "-Wno-gcc-compat",
         "-fembed-bitcode",
@@ -71,7 +73,7 @@ cc_library(
         "@sorbet_ruby_2_7//:headers",
         "@sorbet_ruby_2_7//:headers-internal",
     ],
-)
+) for name, srcs in payload_files]
 
 sh_binary(
     name = "payload_postprocess",
