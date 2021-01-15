@@ -14,3 +14,9 @@ class C < T::Struct
     @using_bare_method
   end
 end
+
+class D
+  def self.using_bare_self_method
+    @using_bare_self_method
+  end
+end

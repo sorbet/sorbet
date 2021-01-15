@@ -74,4 +74,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :using_bare_method, :attr_reader)
   end
+
+  class <emptyTree>::<C D><<C <todo sym>>> < (::<todo sym>)
+    def self.using_bare_self_method<<todo method>>(&<blk>)
+      @using_bare_self_method
+    end
+
+    ::Sorbet::Private::Static.keep_self_def(<self>, :using_bare_self_method, :attr_reader)
+  end
 end
