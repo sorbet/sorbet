@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_attr_reader
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_attr_reader)
+    ::Sorbet::Private::Static.keep_def(<self>, :using_attr_reader, :attr_reader)
   end
 
   class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
@@ -44,17 +44,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_t_struct_const
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize)
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
     <self>.prop(:using_t_struct_prop, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_prop)
+    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_prop, :attr_reader)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_prop=)
+    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_prop=, :normal)
 
     <self>.const(:using_t_struct_const, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_const)
+    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_const, :attr_reader)
   end
 
   class <emptyTree>::<C C><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
@@ -70,8 +70,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_bare_method
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize)
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_bare_method)
+    ::Sorbet::Private::Static.keep_def(<self>, :using_bare_method, :attr_reader)
   end
 end
