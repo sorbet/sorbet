@@ -2,5 +2,4 @@
 --typed=true
 --dir
 .
---ignore
-vendor/bundle
+--ignore=/vendor/bundle
