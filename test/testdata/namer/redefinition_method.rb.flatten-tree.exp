@@ -28,9 +28,9 @@ begin
           <self>.params(:a, ::Integer).returns(::Integer)
         end
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_def(<self>, :foo)
-        ::Sorbet::Private::Static.keep_def(<self>, :foo)
-        ::Sorbet::Private::Static.keep_def(<self>, :foo)
+        ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
         <emptyTree>
       end
     end

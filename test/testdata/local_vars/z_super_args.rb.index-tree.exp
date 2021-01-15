@@ -34,19 +34,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.p(blk)
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_two_keyword)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_two_keyword, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional_then_keyword)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional_then_keyword, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_rest)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_rest, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword_rest)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword_rest, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_block)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_block, :normal)
   end
 
   class <emptyTree>::<C Child><<C <todo sym>>> < (<emptyTree>::<C Parent>)
@@ -78,18 +78,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.super()
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_two_keyword)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_two_keyword, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional_then_keyword)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_positional_then_keyword, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_rest)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_rest, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword_rest)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_keyword_rest, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :takes_block)
+    ::Sorbet::Private::Static.keep_def(<self>, :takes_block, :normal)
   end
 end

@@ -32,7 +32,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize)
+      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
   end
 end
@@ -57,9 +57,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :build_foo)
+      ::Sorbet::Private::Static.keep_def(<self>, :build_foo, :normal)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :build_bar)
+      ::Sorbet::Private::Static.keep_def(<self>, :build_bar, :normal)
     end
   end
 end
@@ -97,7 +97,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize)
+      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
   end
 end
@@ -122,9 +122,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :build_bar)
+      ::Sorbet::Private::Static.keep_def(<self>, :build_bar, :normal)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :build_foo)
+      ::Sorbet::Private::Static.keep_def(<self>, :build_foo, :normal)
     end
   end
 end

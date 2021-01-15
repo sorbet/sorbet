@@ -60,15 +60,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C Forwardable>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
 
     <self>.def_delegator(:thing, :foo)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar)
+    ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar, :normal)
 
     <self>.def_delegator(:thing, :bar, :aliased_bar)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :usages)
+    ::Sorbet::Private::Static.keep_def(<self>, :usages, :normal)
   end
 
   class <emptyTree>::<C WorksWithoutExtendingTSig><<C <todo sym>>> < (::<todo sym>)
@@ -90,11 +90,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C Forwardable>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
 
     <self>.def_delegator(:thing, :foo)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar)
+    ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar, :normal)
 
     <self>.def_delegator(:thing, :bar, :aliased_bar)
   end
@@ -116,11 +116,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
 
     <self>.def_delegator(:thing, :foo)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar)
+    ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar, :normal)
 
     <self>.def_delegator(:thing, :bar, :aliased_bar)
   end
@@ -168,7 +168,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <emptyTree>::<C Elem> = <self>.type_member()
 
-    ::Sorbet::Private::Static.keep_def(<self>, :each)
+    ::Sorbet::Private::Static.keep_def(<self>, :each, :normal)
 
     <self>.def_delegator(:thing, :each)
   end
