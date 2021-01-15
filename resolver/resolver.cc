@@ -2873,7 +2873,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
             if (result.gotItem()) {
                 core::Context ctx(gs, core::Symbols::root(), job.file);
                 job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));
-                if (!walk.multiSignatureJobs.empty() || !walk.multiSignatureJobs.empty()) {
+                if (!walk.signatureJobs.empty() || !walk.multiSignatureJobs.empty()) {
                     output.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
                         job.file, move(walk.signatureJobs), move(walk.multiSignatureJobs)});
                 }
