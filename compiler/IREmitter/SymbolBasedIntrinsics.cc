@@ -92,7 +92,7 @@ public:
         auto *send = mcctx.send;
 
         bool isSelf = send->fun == core::Names::keepSelfDef();
-        ENFORCE(send->args.size() == 2, "Invariant established by rewriter/Flatten.cc");
+        ENFORCE(send->args.size() == 2 || send->args.size() == 3, "Invariant established by rewriter/Flatten.cc");
         auto ownerSym = typeToSym(cs, send->args[0].type);
 
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
