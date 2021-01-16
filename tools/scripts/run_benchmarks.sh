@@ -3,11 +3,17 @@
 set -euo pipefail
 
 verbose=
+baseline=""
 benchmarks=()
-while getopts 'vf:' optname; do
+while getopts 'vb:f:' optname; do
   case $optname in
     v)
       verbose=1
+      ;;
+
+    b)
+      # Used to subtract the "unimportant" parts out of the comparisons
+      baseline="$OPTARG"
       ;;
 
     f)
@@ -15,7 +21,7 @@ while getopts 'vf:' optname; do
       ;;
 
     *)
-      echo "Usage: $0 [-v] [-f path/to/benchmark.rb]*"
+      echo "Usage: $0 [-v] [[-b path/to/baseline.rb] -f path/to/benchmark.rb]*"
       exit 1
       ;;
   esac
@@ -35,6 +41,10 @@ mkdir -p tmp/bench
 ./bazel run @sorbet_ruby_2_7//:ruby -c opt -- --version
 
 if [ "${#benchmarks[@]}" -eq 0 ]; then
+  if [ "$baseline" != "" ]; then
+    echo "-b <baseline> is not supported with no -f <benchmark>"
+    exit 1
+  fi
   paths=(test/testdata/ruby_benchmark)
 
   while IFS='' read -r line; do
@@ -100,8 +110,17 @@ compile_benchmark() {
 
 echo "ruby vm startup time: $(set_startup; measure)"
 
+baseline_interpreted=
+baseline_compiled=
+
 echo -e "source\tinterpreted\tcompiled"
-for benchmark in "${benchmarks[@]}"; do
+for benchmark in "$baseline" "${benchmarks[@]}"; do
+  if [ "$benchmark" = "" ]; then
+    # No baseline, skip this iteration
+    continue
+  fi
+
+
   echo -en "${benchmark#test/testdata/ruby_benchmark/}\t"
 
   compile_benchmark "$benchmark"
@@ -110,13 +129,27 @@ for benchmark in "${benchmarks[@]}"; do
   if [ -n "$verbose" ]; then
     echo "interpreted: ${command[*]}" >&2
   fi
-  echo -en "$(measure)\t"
+  time_interpreted="$(measure)"
+  echo -en "$time_interpreted\t"
+  if [ "$benchmark" = "$baseline" ]; then
+    baseline_interpreted="$time_interpreted"
+  fi
 
   set_compiled
   if [ -n "$verbose" ]; then
     echo "compiled: ${command[*]}" >&2
   fi
-  echo -en "$(measure)\n"
+  time_compiled="$(measure)"
+  echo "$time_compiled"
+  if [ "$benchmark" = "$baseline" ]; then
+    baseline_compiled="$time_compiled"
+  fi
+
+  if [ "$baseline" != "" ] && [ "$benchmark" != "$baseline" ]; then
+    echo -en "${benchmark#test/testdata/ruby_benchmark/} - baseline\t"
+    echo -en "$(echo "$time_interpreted - $baseline_interpreted" | bc)\t"
+    echo "$time_compiled - $baseline_compiled" | bc
+  fi
 
 done
 
