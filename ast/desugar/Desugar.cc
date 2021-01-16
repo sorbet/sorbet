@@ -1107,6 +1107,19 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 }
             },
             [&](parser::CSend *csend) {
+                auto chainLvarName = core::NameRef::noName();
+                auto *chainTemp = csend;
+                while (chainTemp != nullptr) {
+                    if (chainTemp != csend) {
+                        if (auto *lvar = parser::cast_node<parser::LVar>(chainTemp->receiver.get())) {
+                            chainLvarName = lvar->name;
+                        } else {
+                            chainLvarName = core::NameRef::noName();
+                        }
+                    }
+                    chainTemp = parser::cast_node<parser::CSend>(chainTemp->receiver.get());
+                }
+
                 core::NameRef tempRecv = dctx.ctx.state.freshNameUnique(
                     core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++dctx.uniqueCounter);
                 auto recvLoc = csend->receiver->loc;
@@ -1128,6 +1141,15 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                 TreePtr nil = MK::Send1(zeroLengthRecvLoc, ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
                                         core::Names::nilForSafeNavigation(), MK::Local(zeroLengthRecvLoc, tempRecv));
                 auto iff = MK::If(zeroLengthLoc, std::move(cond), std::move(nil), std::move(send));
+
+                if (chainLvarName.exists()) {
+                    cond = MK::Send1(zeroLengthLoc, ast::MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
+                                     core::Names::tripleEq(), MK::Local(zeroLengthRecvLoc, chainLvarName));
+                    nil = MK::Send1(zeroLengthRecvLoc, ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
+                                    core::Names::nilForSafeNavigation(), MK::Local(zeroLengthRecvLoc, chainLvarName));
+                    iff = MK::If(zeroLengthLoc, std::move(cond), std::move(nil), std::move(iff));
+                }
+
                 auto res = MK::InsSeq1(zeroLengthLoc, std::move(assgn), std::move(iff));
                 result = std::move(res);
             },

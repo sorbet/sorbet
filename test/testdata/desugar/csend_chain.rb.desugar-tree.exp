@@ -1,0 +1,85 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.sig() do ||
+      <self>.params(:x, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>)).void()
+    end
+
+    def self.foo<<todo method>>(x, &<blk>)
+      begin
+        begin
+          <assignTemp>$2 = begin
+            <assignTemp>$3 = x
+            if ::NilClass.===(<assignTemp>$3)
+              ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$3)
+            else
+              <assignTemp>$3.downcase()
+            end
+          end
+          if ::NilClass.===(x)
+            ::<Magic>.<nil-for-safe-navigation>(x)
+          else
+            if ::NilClass.===(<assignTemp>$2)
+              ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
+            else
+              <assignTemp>$2.end_with?(x.upcase())
+            end
+          end
+        end
+        begin
+          <assignTemp>$4 = begin
+            <assignTemp>$5 = begin
+              <assignTemp>$6 = x
+              if ::NilClass.===(<assignTemp>$6)
+                ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$6)
+              else
+                <assignTemp>$6.downcase()
+              end
+            end
+            if ::NilClass.===(x)
+              ::<Magic>.<nil-for-safe-navigation>(x)
+            else
+              if ::NilClass.===(<assignTemp>$5)
+                ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$5)
+              else
+                <assignTemp>$5.capitalize()
+              end
+            end
+          end
+          if ::NilClass.===(x)
+            ::<Magic>.<nil-for-safe-navigation>(x)
+          else
+            if ::NilClass.===(<assignTemp>$4)
+              ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$4)
+            else
+              <assignTemp>$4.end_with?(x.upcase())
+            end
+          end
+        end
+      end
+    end
+
+    <self>.sig() do ||
+      <self>.params(:y, <emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)).void()
+    end
+
+    def self.bar<<todo method>>(y, &<blk>)
+      begin
+        <assignTemp>$2 = begin
+          <assignTemp>$3 = y.first()
+          if ::NilClass.===(<assignTemp>$3)
+            ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$3)
+          else
+            <assignTemp>$3.downcase()
+          end
+        end
+        if ::NilClass.===(<assignTemp>$2)
+          ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
+        else
+          <assignTemp>$2.end_with?(y.first().upcase())
+        end
+      end
+    end
+  end
+end
