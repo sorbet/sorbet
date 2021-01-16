@@ -452,6 +452,16 @@ public:
         return tree;
     }
 
+    ast::TreePtr preTransformBlock(core::Context ctx, ast::TreePtr block) {
+        methodVisiStack.emplace_back(nullopt);
+        return block;
+    }
+
+    ast::TreePtr postTransformBlock(core::Context ctx, ast::TreePtr block) {
+        methodVisiStack.pop_back();
+        return block;
+    }
+
     ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         FoundMethod foundMethod;
