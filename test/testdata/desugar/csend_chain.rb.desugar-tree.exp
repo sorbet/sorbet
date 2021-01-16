@@ -57,6 +57,32 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
             end
           end
         end
+        begin
+          <assignTemp>$7 = begin
+            <assignTemp>$8 = x
+            if ::NilClass.===(<assignTemp>$8)
+              ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$8)
+            else
+              <assignTemp>$8.downcase()
+            end
+          end
+          if ::NilClass.===(x)
+            ::<Magic>.<nil-for-safe-navigation>(x)
+          else
+            if ::NilClass.===(<assignTemp>$7)
+              ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$7)
+            else
+              <assignTemp>$7.end_with?(begin
+                  <assignTemp>$9 = x
+                  if ::NilClass.===(<assignTemp>$9)
+                    ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$9)
+                  else
+                    <assignTemp>$9.upcase()
+                  end
+                end)
+            end
+          end
+        end
       end
     end
 
