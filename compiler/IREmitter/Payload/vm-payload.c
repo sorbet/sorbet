@@ -808,7 +808,19 @@ VALUE sorbet_callFuncWithCache(VALUE recv, ID func, int argc,
         UNLIKELY(sorbet_getClassSerial(recv) != cache->class_serial)) {
         sorbet_inlineCacheInvalidated(recv, cache, func);
     }
-    return rb_vm_call_kw(GET_EC(), recv, func, argc, argv, cache->me, kw_splat);
+
+    switch (cache->me->def->type) {
+        case VM_METHOD_TYPE_IVAR:
+            // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/vm_eval.c#L158-L167
+            if (kw_splat && argc > 0 && RB_TYPE_P(argv[argc - 1], T_HASH) && RHASH_EMPTY_P(argv[argc - 1])) {
+                argc--;
+            }
+
+            rb_check_arity(argc, 0, 0);
+            return rb_attr_get(recv, cache->me->def->body.attr.id);
+        default:
+            return rb_vm_call_kw(GET_EC(), recv, func, argc, argv, cache->me, kw_splat);
+    }
 }
 
 SORBET_ATTRIBUTE(noinline)
