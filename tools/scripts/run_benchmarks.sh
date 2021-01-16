@@ -3,12 +3,17 @@
 set -euo pipefail
 
 verbose=
+delim=$'\t'
 baseline=""
 benchmarks=()
-while getopts 'vb:f:' optname; do
+while getopts 'vd:b:f:' optname; do
   case $optname in
     v)
       verbose=1
+      ;;
+
+    d)
+      delim="$OPTARG"
       ;;
 
     b)
@@ -21,7 +26,7 @@ while getopts 'vb:f:' optname; do
       ;;
 
     *)
-      echo "Usage: $0 [-v] [[-b path/to/baseline.rb] -f path/to/benchmark.rb]*"
+      echo "Usage: $0 [-v] [-d delimiter] [[-b path/to/baseline.rb] -f path/to/benchmark.rb]*"
       exit 1
       ;;
   esac
@@ -113,7 +118,7 @@ echo "ruby vm startup time: $(set_startup; measure)"
 baseline_interpreted=
 baseline_compiled=
 
-echo -e "source\tinterpreted\tcompiled"
+echo -e "source${delim}interpreted${delim}compiled"
 for benchmark in "$baseline" "${benchmarks[@]}"; do
   if [ "$benchmark" = "" ]; then
     # No baseline, skip this iteration
@@ -121,7 +126,7 @@ for benchmark in "$baseline" "${benchmarks[@]}"; do
   fi
 
 
-  echo -en "${benchmark#test/testdata/ruby_benchmark/}\t"
+  echo -en "${benchmark#test/testdata/ruby_benchmark/}$delim"
 
   compile_benchmark "$benchmark"
 
@@ -130,7 +135,7 @@ for benchmark in "$baseline" "${benchmarks[@]}"; do
     echo "interpreted: ${command[*]}" >&2
   fi
   time_interpreted="$(measure)"
-  echo -en "$time_interpreted\t"
+  echo -en "$time_interpreted$delim"
   if [ "$benchmark" = "$baseline" ]; then
     baseline_interpreted="$time_interpreted"
   fi
@@ -146,8 +151,8 @@ for benchmark in "$baseline" "${benchmarks[@]}"; do
   fi
 
   if [ "$baseline" != "" ] && [ "$benchmark" != "$baseline" ]; then
-    echo -en "${benchmark#test/testdata/ruby_benchmark/} - baseline\t"
-    echo -en "$(echo "$time_interpreted - $baseline_interpreted" | bc)\t"
+    echo -en "${benchmark#test/testdata/ruby_benchmark/} - baseline$delim"
+    echo -en "$(echo "$time_interpreted - $baseline_interpreted" | bc)$delim"
     echo "$time_compiled - $baseline_compiled" | bc
   fi
 
