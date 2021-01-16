@@ -764,7 +764,11 @@ class TypeAndOrigins final {
 public:
     TypePtr type;
     InlinedVector<Loc, 1> origins;
+
     std::vector<ErrorLine> origins2Explanations(const GlobalState &gs, Loc originForUninitialized) const;
+
+    ErrorSection explainGot(const GlobalState &gs, Loc originForUninitialized) const;
+
     ~TypeAndOrigins() noexcept;
     TypeAndOrigins() = default;
     TypeAndOrigins(const TypeAndOrigins &) = default;

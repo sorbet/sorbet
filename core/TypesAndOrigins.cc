@@ -63,6 +63,12 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(const GlobalState &gs, Lo
     return result;
 }
 
+ErrorSection TypeAndOrigins::explainGot(const GlobalState &gs, Loc originForUninitialized) const {
+    // TODO(jez) Make the type cyan
+    return ErrorSection("Got " + this->type.show(gs) + " originating from:",
+                        this->origins2Explanations(gs, originForUninitialized));
+}
+
 TypeAndOrigins::~TypeAndOrigins() noexcept {
     histogramInc("TypeAndOrigins.origins.size", origins.size());
 }
