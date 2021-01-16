@@ -10,7 +10,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
   end
 
   class <emptyTree>::<C B><<C <todo sym>>> < (::<todo sym>)
@@ -43,12 +43,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :initialize)
+    ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
     <self>.puts("hi")
 
-    ::Sorbet::Private::Static.keep_def(<self>, :test)
+    ::Sorbet::Private::Static.keep_def(<self>, :test, :normal)
   end
 end

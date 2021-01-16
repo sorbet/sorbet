@@ -34,15 +34,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foo, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
 
     <self>.prop(:bar, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar)
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :bar=)
+    ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
   end
 
   <emptyTree>::<C Inexact>.new()
@@ -80,8 +80,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:qux, <emptyTree>::<C Symbol>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :qux)
+    ::Sorbet::Private::Static.keep_def(<self>, :qux, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :qux=)
+    ::Sorbet::Private::Static.keep_def(<self>, :qux=, :normal)
   end
 end

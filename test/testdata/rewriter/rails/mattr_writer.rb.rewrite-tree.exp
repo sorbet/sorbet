@@ -70,21 +70,21 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :both=)
+    ::Sorbet::Private::Static.keep_def(<self>, :both=, :normal)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :both=)
+    ::Sorbet::Private::Static.keep_self_def(<self>, :both=, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo=)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :foo=)
+    ::Sorbet::Private::Static.keep_self_def(<self>, :foo=, :normal)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance=)
+    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance=, :normal)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :bar=)
+    ::Sorbet::Private::Static.keep_self_def(<self>, :bar=, :normal)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance_writer=)
+    ::Sorbet::Private::Static.keep_self_def(<self>, :no_instance_writer=, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :usages)
+    ::Sorbet::Private::Static.keep_def(<self>, :usages, :normal)
 
     <self>.both=(1)
 

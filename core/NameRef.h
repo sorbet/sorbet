@@ -167,6 +167,7 @@ public:
     NameRef addQuestion(GlobalState &gs) const;
 
     NameRef addAt(GlobalState &gs) const;
+    NameRef lookupWithAt(const GlobalState &gs) const;
 
     NameRef prepend(GlobalState &gs, std::string_view s) const;
 

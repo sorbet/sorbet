@@ -76,14 +76,14 @@ begin
           <self>.returns(::String)
         end
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_def(<self>, :initialize)
-        ::Sorbet::Private::Static.keep_def(<self>, :v1)
-        ::Sorbet::Private::Static.keep_def(<self>, :v1=)
-        ::Sorbet::Private::Static.keep_def(<self>, :v2)
-        ::Sorbet::Private::Static.keep_def(<self>, :v2=)
-        ::Sorbet::Private::Static.keep_def(<self>, :v3)
-        ::Sorbet::Private::Static.keep_def(<self>, :v4=)
-        ::Sorbet::Private::Static.keep_def(<self>, :v5=)
+        ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :v1, :attr_reader)
+        ::Sorbet::Private::Static.keep_def(<self>, :v1=, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :v2, :attr_reader)
+        ::Sorbet::Private::Static.keep_def(<self>, :v2=, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :v3, :attr_reader)
+        ::Sorbet::Private::Static.keep_def(<self>, :v4=, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :v5=, :normal)
         <emptyTree>
       end
     end

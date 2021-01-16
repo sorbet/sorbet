@@ -41,10 +41,10 @@ begin
           <self>.params(:w, ::String).returns(::String)
         end
         <self>.extend(::T::Sig)
-        ::Sorbet::Private::Static.keep_def(<self>, :foo)
-        ::Sorbet::Private::Static.keep_def(<self>, :bar)
-        ::Sorbet::Private::Static.keep_def(<self>, :qux)
-        ::Sorbet::Private::Static.keep_def(<self>, :baz)
+        ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :qux, :normal)
+        ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
         <emptyTree>
       end
     end

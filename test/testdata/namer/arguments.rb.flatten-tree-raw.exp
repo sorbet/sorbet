@@ -215,12 +215,13 @@ InsSeq{
             }
             fun = <U keep_def>
             block = nullptr
-            pos_args = 2
+            pos_args = 3
             args = [
               Local{
                 localVariable = <U <self>>
               }
               Literal{ value = :take_arguments }
+              Literal{ value = :normal }
             ]
           }
         }

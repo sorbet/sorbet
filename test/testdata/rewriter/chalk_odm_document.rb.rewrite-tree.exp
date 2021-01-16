@@ -25,9 +25,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:my_parent_method, <emptyTree>::<C String>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method)
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method=)
+    ::Sorbet::Private::Static.keep_def(<self>, :my_parent_method=, :normal)
   end
 
   class <emptyTree>::<C MyChildDocument><<C <todo sym>>> < (<emptyTree>::<C MyParentDocument>)
@@ -59,9 +59,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:my_child_method, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method)
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method=)
+    ::Sorbet::Private::Static.keep_def(<self>, :my_child_method=, :normal)
   end
 
   <emptyTree>::<C MyParentDocument>.new()

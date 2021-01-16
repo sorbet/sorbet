@@ -1041,12 +1041,13 @@ ClassDef{
           }
           fun = <U keep_self_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :prop }
+            Literal{ value = :normal }
           ]
         }
 
@@ -1718,12 +1719,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foo }
+            Literal{ value = :normal }
           ]
         }
 
@@ -1734,12 +1736,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foo= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -1750,12 +1753,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foo2 }
+            Literal{ value = :normal }
           ]
         }
 
@@ -1766,12 +1770,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foo2= }
+            Literal{ value = :normal }
           ]
         }
       ]
@@ -5680,12 +5685,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :default }
+            Literal{ value = :normal }
           ]
         }
 
@@ -5696,12 +5702,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :default= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -5741,12 +5748,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :t_nilable }
+            Literal{ value = :normal }
           ]
         }
 
@@ -5757,12 +5765,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :t_nilable= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -5791,12 +5800,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :array }
+            Literal{ value = :normal }
           ]
         }
 
@@ -5807,12 +5817,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :array= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -5855,12 +5866,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :t_array }
+            Literal{ value = :normal }
           ]
         }
 
@@ -5871,12 +5883,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :t_array= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -5923,12 +5936,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :hash_of }
+            Literal{ value = :normal }
           ]
         }
 
@@ -5939,12 +5953,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :hash_of= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -5975,12 +5990,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :const_explicit }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6009,12 +6025,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :const }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6050,12 +6067,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :enum_prop }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6066,12 +6084,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :enum_prop= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6105,12 +6124,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6121,12 +6141,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6137,12 +6158,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_ }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6153,12 +6175,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_! }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6206,12 +6229,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_lazy }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6222,12 +6246,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_lazy= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6238,12 +6263,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_lazy_ }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6254,12 +6280,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_lazy_! }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6306,12 +6333,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_proc }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6322,12 +6350,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_proc= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6338,12 +6367,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_proc_ }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6354,12 +6384,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_proc_! }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6403,12 +6434,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_invalid }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6419,12 +6451,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_invalid= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6435,12 +6468,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_invalid_ }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6451,12 +6485,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_invalid_! }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6487,12 +6522,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :ifunset }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6503,12 +6539,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :ifunset= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6550,12 +6587,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :ifunset_nilable }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6566,12 +6604,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :ifunset_nilable= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6606,12 +6645,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :empty_hash_rules }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6622,12 +6662,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :empty_hash_rules= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6671,12 +6712,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :hash_rules }
+            Literal{ value = :normal }
           ]
         }
 
@@ -6687,12 +6729,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :hash_rules= }
+            Literal{ value = :normal }
           ]
         }
       ]
@@ -7180,12 +7223,13 @@ ClassDef{
           }
           fun = <U keep_self_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :token_prop }
+            Literal{ value = :normal }
           ]
         }
 
@@ -7196,12 +7240,13 @@ ClassDef{
           }
           fun = <U keep_self_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :created_prop }
+            Literal{ value = :normal }
           ]
         }
 
@@ -7225,12 +7270,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :token }
+            Literal{ value = :normal }
           ]
         }
 
@@ -7241,12 +7287,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :token= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -7270,12 +7317,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :created }
+            Literal{ value = :normal }
           ]
         }
 
@@ -7286,12 +7334,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :created= }
+            Literal{ value = :normal }
           ]
         }
       ]
@@ -7670,12 +7719,13 @@ ClassDef{
           }
           fun = <U keep_self_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :timestamped_token_prop }
+            Literal{ value = :normal }
           ]
         }
 
@@ -7686,12 +7736,13 @@ ClassDef{
           }
           fun = <U keep_self_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :created_prop }
+            Literal{ value = :normal }
           ]
         }
 
@@ -7715,12 +7766,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :token }
+            Literal{ value = :normal }
           ]
         }
 
@@ -7731,12 +7783,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :token= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -7762,12 +7815,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :created }
+            Literal{ value = :normal }
           ]
         }
       ]
@@ -7923,12 +7977,13 @@ ClassDef{
           }
           fun = <U keep_self_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :merchant_prop }
+            Literal{ value = :normal }
           ]
         }
 
@@ -7952,12 +8007,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :merchant }
+            Literal{ value = :normal }
           ]
         }
       ]
@@ -8586,12 +8642,13 @@ ClassDef{
           }
           fun = <U keep_self_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :encrypted_prop }
+            Literal{ value = :normal }
           ]
         }
 
@@ -8602,12 +8659,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foo }
+            Literal{ value = :normal }
           ]
         }
 
@@ -8618,12 +8676,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :encrypted_foo }
+            Literal{ value = :normal }
           ]
         }
 
@@ -8634,12 +8693,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :foo= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -8650,12 +8710,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :encrypted_foo= }
+            Literal{ value = :normal }
           ]
         }
 
@@ -8666,12 +8727,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :bar }
+            Literal{ value = :normal }
           ]
         }
 
@@ -8682,12 +8744,13 @@ ClassDef{
           }
           fun = <U keep_def>
           block = nullptr
-          pos_args = 2
+          pos_args = 3
           args = [
             Local{
               localVariable = <U <self>>
             }
             Literal{ value = :encrypted_bar }
+            Literal{ value = :normal }
           ]
         }
       ]
@@ -8700,12 +8763,13 @@ ClassDef{
       }
       fun = <U keep_def>
       block = nullptr
-      pos_args = 2
+      pos_args = 3
       args = [
         Local{
           localVariable = <U <self>>
         }
         Literal{ value = :main }
+        Literal{ value = :normal }
       ]
     }
   ]
