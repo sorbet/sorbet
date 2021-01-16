@@ -1172,9 +1172,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 core::ErrorLine::from(ownerData->loc(), "Method `{}` has return type `{}`",
                                                       ownerData->name.show(ctx), methodReturnType.show(ctx)),
                             }));
-                        e.addErrorSection(
-                            core::ErrorSection("Got " + typeAndOrigin.type.show(ctx) + " originating from:",
-                                               typeAndOrigin.origins2Explanations(ctx, ownerLoc)));
+                        e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                     }
                 }
             },
@@ -1203,9 +1201,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         e.setHeader("Returning value that does not conform to block result type");
                         e.addErrorSection(core::ErrorSection("Expected " + expectedType.show(ctx)));
-                        e.addErrorSection(
-                            core::ErrorSection("Got " + typeAndOrigin.type.show(ctx) + " originating from:",
-                                               typeAndOrigin.origins2Explanations(ctx, ownerLoc)));
+                        e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                     }
                 }
 
@@ -1270,8 +1266,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (c->cast == core::Names::assertType() && ty.type.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("The typechecker was unable to infer the type of the asserted value");
-                            e.addErrorSection(core::ErrorSection("Got " + ty.type.show(ctx) + " originating from:",
-                                                                 ty.origins2Explanations(ctx, ownerLoc)));
+                            e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                             e.addErrorNote("You may need to add additional `{}` annotations", "sig");
                         }
                     } else if (!core::Types::isSubType(ctx, ty.type, castType)) {

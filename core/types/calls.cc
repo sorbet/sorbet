@@ -201,8 +201,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
                                 argSym.argumentName(gs), expectedType.show(gs)),
             }));
         }
-        e.addErrorSection(ErrorSection("Got " + argTpe.type.show(gs) + " originating from:",
-                                       argTpe.origins2Explanations(gs, originForUninitialized)));
+        e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
         auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
         if (!withoutNil.isBottom() &&
             Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
