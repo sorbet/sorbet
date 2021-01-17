@@ -6,7 +6,7 @@ test/cli/print-procs/print-procs.rb:11: Malformed T.proc: Too many arguments (ma
 test/cli/print-procs/print-procs.rb:16: Revealed type: `T.proc.returns(T::Hash[Integer, String])` https://srb.help/7014
     16 |  T.reveal_type(a)
           ^^^^^^^^^^^^^^^^
-  From:
+  Got `T.proc.returns(T::Hash[Integer, String])` originating from:
     test/cli/print-procs/print-procs.rb:15:
     15 |def foo(a, b, c, d, e)
                 ^
@@ -14,7 +14,7 @@ test/cli/print-procs/print-procs.rb:16: Revealed type: `T.proc.returns(T::Hash[I
 test/cli/print-procs/print-procs.rb:17: Revealed type: `T.proc.params(arg0: String).returns(T::Hash[Integer, String])` https://srb.help/7014
     17 |  T.reveal_type(b)
           ^^^^^^^^^^^^^^^^
-  From:
+  Got `T.proc.params(arg0: String).returns(T::Hash[Integer, String])` originating from:
     test/cli/print-procs/print-procs.rb:15:
     15 |def foo(a, b, c, d, e)
                    ^
@@ -22,7 +22,7 @@ test/cli/print-procs/print-procs.rb:17: Revealed type: `T.proc.params(arg0: Stri
 test/cli/print-procs/print-procs.rb:18: Revealed type: `T.proc.params(arg0: String, arg1: Integer, arg2: Float).returns(T::Hash[Integer, String])` https://srb.help/7014
     18 |  T.reveal_type(c)
           ^^^^^^^^^^^^^^^^
-  From:
+  Got `T.proc.params(arg0: String, arg1: Integer, arg2: Float).returns(T::Hash[Integer, String])` originating from:
     test/cli/print-procs/print-procs.rb:15:
     15 |def foo(a, b, c, d, e)
                       ^
@@ -30,7 +30,7 @@ test/cli/print-procs/print-procs.rb:18: Revealed type: `T.proc.params(arg0: Stri
 test/cli/print-procs/print-procs.rb:19: Revealed type: `T.proc.params(arg0: String, arg1: Integer, arg2: Float, arg3: String, arg4: Integer, arg5: Float, arg6: String, arg7: Integer, arg8: Float, arg9: String).returns(T::Hash[Integer, String])` https://srb.help/7014
     19 |  T.reveal_type(d)
           ^^^^^^^^^^^^^^^^
-  From:
+  Got `T.proc.params(arg0: String, arg1: Integer, arg2: Float, arg3: String, arg4: Integer, arg5: Float, arg6: String, arg7: Integer, arg8: Float, arg9: String).returns(T::Hash[Integer, String])` originating from:
     test/cli/print-procs/print-procs.rb:15:
     15 |def foo(a, b, c, d, e)
                          ^
@@ -38,7 +38,7 @@ test/cli/print-procs/print-procs.rb:19: Revealed type: `T.proc.params(arg0: Stri
 test/cli/print-procs/print-procs.rb:20: Revealed type: `T.untyped` https://srb.help/7014
     20 |  T.reveal_type(e)
           ^^^^^^^^^^^^^^^^
-  From:
+  Got `T.untyped` originating from:
     test/cli/print-procs/print-procs.rb:15:
     15 |def foo(a, b, c, d, e)
                             ^
