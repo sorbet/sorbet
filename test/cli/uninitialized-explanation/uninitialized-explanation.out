@@ -1,7 +1,8 @@
 test/cli/uninitialized-explanation/uninitialized.rb:15: Expected `Integer` but found `T.nilable(Integer)` for argument `x` https://srb.help/7002
     15 |  takes_int(x)
           ^^^^^^^^^^^^
-    test/cli/uninitialized-explanation/uninitialized.rb:5: Method `Object#takes_int` has specified `x` as `Integer`
+  Expected `Integer` for argument `x` of method `Object#takes_int`:
+    test/cli/uninitialized-explanation/uninitialized.rb:5:
      5 |sig {params(x: Integer).void}
                     ^
   Got T.nilable(Integer) originating from:
