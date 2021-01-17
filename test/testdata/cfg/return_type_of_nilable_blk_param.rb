@@ -22,11 +22,11 @@ class A
 end
 
 def main
-  A.new.bar do |r| # error: Returning value that does not conform to block result type
+  A.new.bar do |r| # error: Expected `Integer` but found `String` for block result type
     r.to_s
   end
 
-  A.new.baz do |r| # error: Returning value that does not conform to block result type
+  A.new.baz do |r| # error: Expected `Integer` but found `String` for block result type
     r.to_s
   end
 
