@@ -1283,8 +1283,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         }
                     } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
-                            e.setHeader("Useless cast: inferred type `{}` is already a subtype of `{}`",
+                            e.setHeader("`{}` is useless because `{}` is already a subtype of `{}`", "T.cast",
                                         ty.type.show(ctx), castType.show(ctx));
+                            e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                         }
                     }
                 }
