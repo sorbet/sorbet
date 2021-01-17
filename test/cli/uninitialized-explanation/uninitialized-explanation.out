@@ -5,7 +5,7 @@ test/cli/uninitialized-explanation/uninitialized.rb:15: Expected `Integer` but f
     test/cli/uninitialized-explanation/uninitialized.rb:5:
      5 |sig {params(x: Integer).void}
                     ^
-  Got T.nilable(Integer) originating from:
+  Got `T.nilable(Integer)` originating from:
     test/cli/uninitialized-explanation/uninitialized.rb:10:
     10 |    x = 1
                 ^

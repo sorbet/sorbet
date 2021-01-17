@@ -5,7 +5,7 @@ test/cli/escaping/escaping.rb:10: Expected `Integer` but found `String("\n")` fo
     test/cli/escaping/escaping.rb:4:
      4 |sig{params(a: Integer).void}
                    ^
-  Got String("\n") originating from:
+  Got `String("\n")` originating from:
     test/cli/escaping/escaping.rb:10:
     10 |'
     11 |'

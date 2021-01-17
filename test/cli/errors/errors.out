@@ -16,7 +16,7 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2658:
     .. |        arg0: String,
                   ^^^^
-  Got Integer originating from:
+  Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
     .. |  def foo(arg)
                   ^^^
@@ -28,7 +28,7 @@ test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for a
     test/cli/errors/errors.rb:12:
     .. |  sig {params(arg: Integer).returns(NilClass)}
                       ^^^
-  Got String("foo") originating from:
+  Got `String("foo")` originating from:
     test/cli/errors/errors.rb:19:
     .. |    foo("foo")
                 ^^^^^
@@ -40,7 +40,7 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     test/cli/errors/errors.rb:36:
     .. |  sig {params(a: Integer).returns(Integer)}
                       ^
-  Got T.nilable(Integer) originating from:
+  Got `T.nilable(Integer)` originating from:
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^
@@ -73,7 +73,7 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2658:
     .. |        arg0: String,
                   ^^^^
-  Got Integer originating from:
+  Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
     .. |  def foo(arg)
                   ^^^
@@ -85,7 +85,7 @@ test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for a
     test/cli/errors/errors.rb:12:
     .. |  sig {params(arg: Integer).returns(NilClass)}
                       ^^^
-  Got String("foo") originating from:
+  Got `String("foo")` originating from:
     test/cli/errors/errors.rb:19:
     .. |    foo("foo")
                 ^^^^^
@@ -97,7 +97,7 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     test/cli/errors/errors.rb:36:
     .. |  sig {params(a: Integer).returns(Integer)}
                       ^
-  Got T.nilable(Integer) originating from:
+  Got `T.nilable(Integer)` originating from:
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^
@@ -130,7 +130,7 @@ test/cli/errors/errors.rb:15: Expected `String` but found `Integer` for argument
     https://github.com/sorbet/sorbet/tree/master/rbi/core/kernel.rbi#L2658:
     .. |        arg0: String,
                   ^^^^
-  Got Integer originating from:
+  Got `Integer` originating from:
     test/cli/errors/errors.rb:13:
     .. |  def foo(arg)
                   ^^^
@@ -142,7 +142,7 @@ test/cli/errors/errors.rb:19: Expected `Integer` but found `String("foo")` for a
     test/cli/errors/errors.rb:12:
     .. |  sig {params(arg: Integer).returns(NilClass)}
                       ^^^
-  Got String("foo") originating from:
+  Got `String("foo")` originating from:
     test/cli/errors/errors.rb:19:
     .. |    foo("foo")
                 ^^^^^
@@ -154,7 +154,7 @@ test/cli/errors/errors.rb:33: Expected `Integer` but found `T.nilable(Integer)` 
     test/cli/errors/errors.rb:36:
     .. |  sig {params(a: Integer).returns(Integer)}
                       ^
-  Got T.nilable(Integer) originating from:
+  Got `T.nilable(Integer)` originating from:
     test/cli/errors/errors.rb:29:
     .. |          nil
                   ^^^

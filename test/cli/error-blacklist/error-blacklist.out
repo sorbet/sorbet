@@ -5,7 +5,7 @@ test/cli/error-blacklist/error-blacklist.rb:3: Expected `Integer` but found `Str
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
      148 |        arg0: Integer,
                   ^^^^
-  Got String("1") originating from:
+  Got `String("1")` originating from:
     test/cli/error-blacklist/error-blacklist.rb:3:
      3 |1 + "1"
             ^^^

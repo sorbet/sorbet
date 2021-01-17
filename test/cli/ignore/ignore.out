@@ -5,7 +5,7 @@ subfolder2/subfolder/bar.rb:4: Expected `Integer` but found `String("subfolder2/
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
      148 |        arg0: Integer,
                   ^^^^
-  Got String("subfolder2/subfolder/bar.rb") originating from:
+  Got `String("subfolder2/subfolder/bar.rb")` originating from:
     subfolder2/subfolder/bar.rb:4:
      4 |1 + "subfolder2/subfolder/bar.rb"
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -17,7 +17,7 @@ bar.rb:4: Expected `Integer` but found `String("bar.rb")` for argument `arg0` ht
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
      148 |        arg0: Integer,
                   ^^^^
-  Got String("bar.rb") originating from:
+  Got `String("bar.rb")` originating from:
     bar.rb:4:
      4 |1 + "bar.rb"
             ^^^^^^^^

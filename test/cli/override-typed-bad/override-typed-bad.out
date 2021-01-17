@@ -7,7 +7,7 @@ test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but foun
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
      148 |        arg0: Integer,
                   ^^^^
-  Got String("s") originating from:
+  Got `String("s")` originating from:
     test/cli/override-typed-bad/override-typed-bad.rb:2:
      2 |1 + "s"
             ^^^
@@ -20,7 +20,7 @@ test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but foun
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
      148 |        arg0: Integer,
                   ^^^^
-  Got String("s") originating from:
+  Got `String("s")` originating from:
     test/cli/override-typed-bad/override-typed-bad.rb:2:
      2 |1 + "s"
             ^^^
@@ -33,7 +33,7 @@ test/cli/override-typed-bad/override-typed-bad.rb:2: Expected `Integer` but foun
     https://github.com/sorbet/sorbet/tree/master/rbi/core/integer.rbi#L148:
      148 |        arg0: Integer,
                   ^^^^
-  Got String("s") originating from:
+  Got `String("s")` originating from:
     test/cli/override-typed-bad/override-typed-bad.rb:2:
      2 |1 + "s"
             ^^^

@@ -9,7 +9,7 @@ kwarg-loc.rb:17: Expected `Integer` but found `String("1")` for argument `d` htt
     kwarg-loc.rb:8:
      8 |    d: Integer,
             ^
-  Got String("1") originating from:
+  Got `String("1")` originating from:
     kwarg-loc.rb:17:
     17 |  a: 1,
     18 |  b: 1,
@@ -25,7 +25,7 @@ kwarg-loc.rb:42: Expected `Integer` but found `String("1")` for argument `d` htt
     kwarg-loc.rb:30:
     30 |    d: Integer,
             ^
-  Got String("1") originating from:
+  Got `String("1")` originating from:
     kwarg-loc.rb:42:
     42 |  "1",
           ^^^

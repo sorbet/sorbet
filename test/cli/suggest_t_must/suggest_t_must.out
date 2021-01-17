@@ -17,7 +17,7 @@ test/cli/suggest_t_must/suggest_t_must.rb:6: Expected `String` but found `T.nila
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L58:
     58 |        arg0: String,
                 ^^^^
-  Got T.nilable(String) originating from:
+  Got `T.nilable(String)` originating from:
     test/cli/suggest_t_must/suggest_t_must.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
