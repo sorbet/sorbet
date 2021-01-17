@@ -1194,13 +1194,15 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType);
                 }
                 if (!isSubtype) {
-                    // TODO(nelhage): We should somehow report location
-                    // information about the `send` and/or the
-                    // definition of the block type
-
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
-                        e.setHeader("Returning value that does not conform to block result type");
-                        e.addErrorSection(core::ErrorSection("Expected " + expectedType.show(ctx)));
+                        e.setHeader("Expected `{}` but found `{}` for block result type", expectedType.show(ctx),
+                                    typeAndOrigin.type.show(ctx));
+
+                        const auto &bspec = i->link->result->main.method.data(ctx)->arguments().back();
+                        ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg");
+                        e.addErrorSection(
+                            core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));
+
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                     }
                 }
