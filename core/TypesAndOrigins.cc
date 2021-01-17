@@ -70,7 +70,7 @@ ErrorSection TypeAndOrigins::explainExpected(const GlobalState &gs, TypePtr type
 
 ErrorSection TypeAndOrigins::explainGot(const GlobalState &gs, Loc originForUninitialized) const {
     // TODO(jez) Make the type cyan
-    return ErrorSection("Got " + this->type.show(gs) + " originating from:",
+    return ErrorSection("Got " + this->type.showWithMoreInfo(gs) + " originating from:",
                         this->origins2Explanations(gs, originForUninitialized));
 }
 

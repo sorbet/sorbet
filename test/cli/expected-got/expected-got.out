@@ -139,7 +139,7 @@ test/cli/expected-got/expected-got.rb:73: Expected `T::Array[Integer]` but found
     test/cli/expected-got/expected-got.rb:70:
     70 |sig {params(xs: T::Array[Integer]).void}
                     ^^
-  Got [Integer(1), Integer(2), T.nilable(Integer)] originating from:
+  Got [Integer(1), Integer(2), T.nilable(Integer)] (3-tuple) originating from:
     test/cli/expected-got/expected-got.rb:72:
     72 |xs = [1, 2, T.let(3, T.nilable(Integer))]
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
