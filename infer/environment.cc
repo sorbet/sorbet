@@ -1283,7 +1283,20 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 } else if (!c->isSynthetic) {
                     if (castType.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
-                            e.setHeader("Please use `T.unsafe(...)` to cast to T.untyped");
+                            e.setHeader("Please use `{}` to cast to `{}`", "T.unsafe", "T.untyped");
+
+                            auto prefix = "T.cast(";
+                            auto suffix = ", T.untyped)";
+                            u4 beginPos = bind.loc.beginPos() + char_traits<char>::length(prefix);
+                            u4 endPos = bind.loc.endPos() - char_traits<char>::length(suffix);
+                            // Naive attempt at detecting when this heuristic will have failed.
+                            if ((beginPos <= endPos) &&
+                                (core::Loc{ctx.file, bind.loc.beginPos(), beginPos}.source(ctx) == prefix) &&
+                                (core::Loc{ctx.file, endPos, bind.loc.endPos()}.source(ctx) == suffix)) {
+                                const auto locWithoutTCast = core::Loc{ctx.file, beginPos, endPos};
+                                e.replaceWith("Replace with `T.unsafe`", core::Loc(ctx.file, bind.loc), "T.unsafe({})",
+                                              locWithoutTCast.source(ctx));
+                            }
                         }
                     } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {

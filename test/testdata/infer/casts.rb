@@ -17,7 +17,7 @@ class TestCasts
     s + 3 # error: Expected `String` but found `Integer(3)` for argument `arg0`
 
     s = T.cast(6, Integer) # error: `T.cast` is useless
-    s = T.cast(6, T.untyped) # error: Please use `T.unsafe(...)`
+    s = T.cast(6, T.untyped) # error: Please use `T.unsafe`
 
     s = T.cast(6, 7) # error: `T.cast` is useless
                 # ^ error: Unsupported literal in type syntax
