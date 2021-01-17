@@ -1270,9 +1270,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("Argument does not have asserted type `{}`", castType.show(ctx));
-                            e.addErrorSection(
-                                core::ErrorSection("Got " + ty.type.showWithMoreInfo(ctx) + " originating from:",
-                                                   ty.origins2Explanations(ctx, ownerLoc)));
+                            e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                         }
                     }
                 } else if (!c->isSynthetic) {
