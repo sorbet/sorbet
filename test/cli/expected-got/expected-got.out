@@ -91,10 +91,10 @@ test/cli/expected-got/expected-got.rb:47: Revealed type: `Integer(42)` https://s
     47 |T.reveal_type(42)
                       ^^
 
-test/cli/expected-got/expected-got.rb:57: Used `&.` operator on a receiver which can never be nil https://srb.help/7034
+test/cli/expected-got/expected-got.rb:57: Used `&.` operator on `Integer(1)`, which can never be nil https://srb.help/7034
     57 |1&.even?
         ^
-  Type of receiver is `Integer(1)`, from:
+  Got Integer(1) originating from:
     test/cli/expected-got/expected-got.rb:57:
     57 |1&.even?
         ^
