@@ -2,11 +2,11 @@ test/cli/expected-got/expected-got.rb:5: Expected `Integer` but found `NilClass`
      5 |def foo
      6 |
      7 |end
-  Expected Integer for result type of method `foo`:
+  Expected `Integer` for result type of method `foo`:
     test/cli/expected-got/expected-got.rb:11:
     11 |def foo
         ^^^^^^^
-  Got NilClass originating from:
+  Got `NilClass` originating from:
     test/cli/expected-got/expected-got.rb:11: Possibly uninitialized (`NilClass`) in:
     11 |def foo
         ^^^^^^^
@@ -14,11 +14,11 @@ test/cli/expected-got/expected-got.rb:5: Expected `Integer` but found `NilClass`
 test/cli/expected-got/expected-got.rb:12: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
     12 |  nil
           ^^^
-  Expected Integer for result type of method `foo`:
+  Expected `Integer` for result type of method `foo`:
     test/cli/expected-got/expected-got.rb:11:
     11 |def foo
         ^^^^^^^
-  Got NilClass originating from:
+  Got `NilClass` originating from:
     test/cli/expected-got/expected-got.rb:12:
     12 |  nil
           ^^^
@@ -26,11 +26,11 @@ test/cli/expected-got/expected-got.rb:12: Expected `Integer` but found `NilClass
 test/cli/expected-got/expected-got.rb:27: Expected `Integer` but found `T.any(String, Integer)` for argument `x` https://srb.help/7002
     27 |  takes_integer(x)
           ^^^^^^^^^^^^^^^^
-  Expected Integer for argument `x` of method `Object#takes_integer`:
+  Expected `Integer` for argument `x` of method `Object#takes_integer`:
     test/cli/expected-got/expected-got.rb:15:
     15 |sig {params(x: Integer).void}
                     ^
-  Got T.any(String, Integer) originating from:
+  Got `T.any(String, Integer)` originating from:
     test/cli/expected-got/expected-got.rb:22:
     22 |    x = ''
                 ^^
@@ -41,7 +41,7 @@ test/cli/expected-got/expected-got.rb:27: Expected `Integer` but found `T.any(St
 test/cli/expected-got/expected-got.rb:42: Expected `T.proc.returns(Integer)` but found `T.proc.returns(String)` for block argument https://srb.help/7002
     42 |  takes_int_block(&blk)
           ^^^^^^^^^^^^^^^^^^^^^
-  Expected T.proc.returns(Integer) for for block argument `blk` of method `Object#takes_int_block`:
+  Expected `T.proc.returns(Integer)` for for block argument `blk` of method `Object#takes_int_block`:
     test/cli/expected-got/expected-got.rb:32:
     32 |sig {params(blk: T.proc.returns(Integer)).void}
                     ^^^
@@ -49,7 +49,7 @@ test/cli/expected-got/expected-got.rb:42: Expected `T.proc.returns(Integer)` but
 test/cli/expected-got/expected-got.rb:53: Control flow could reach `T.absurd` because the type `Integer` wasn't handled https://srb.help/7026
     53 |  else T.absurd(x)
                ^^^^^^^^^^^
-  Got Integer originating from:
+  Got `Integer` originating from:
     test/cli/expected-got/expected-got.rb:50:
     50 |def t_absurd(x)
                      ^
@@ -60,7 +60,7 @@ test/cli/expected-got/expected-got.rb:53: Control flow could reach `T.absurd` be
 test/cli/expected-got/expected-got.rb:30: `T.must` called on `Integer(0)`, which is never `nil` https://srb.help/7015
     30 |T.must(0)
         ^^^^^^^^^
-  Got Integer(0) originating from:
+  Got `Integer(0)` originating from:
     test/cli/expected-got/expected-got.rb:30:
     30 |T.must(0)
                ^
@@ -73,11 +73,11 @@ test/cli/expected-got/expected-got.rb:36: Expected `Integer` but found `String("
     36 |takes_int_block do
     37 |  ''
     38 |end
-  Expected Integer for block result type:
+  Expected `Integer` for block result type:
     test/cli/expected-got/expected-got.rb:32:
     32 |sig {params(blk: T.proc.returns(Integer)).void}
                     ^^^
-  Got String("") originating from:
+  Got `String("")` originating from:
     test/cli/expected-got/expected-got.rb:37:
     37 |  ''
           ^^
@@ -85,7 +85,7 @@ test/cli/expected-got/expected-got.rb:36: Expected `Integer` but found `String("
 test/cli/expected-got/expected-got.rb:45: Expected a type but found `T.untyped` for `T.assert_type!` https://srb.help/7007
     45 |T.assert_type!(T.unsafe(nil), String)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Got T.untyped originating from:
+  Got `T.untyped` originating from:
     test/cli/expected-got/expected-got.rb:45:
     45 |T.assert_type!(T.unsafe(nil), String)
                        ^^^^^^^^^^^^^
@@ -95,7 +95,7 @@ test/cli/expected-got/expected-got.rb:45: Expected a type but found `T.untyped` 
 test/cli/expected-got/expected-got.rb:47: Revealed type: `Integer(42)` https://srb.help/7014
     47 |T.reveal_type(42)
         ^^^^^^^^^^^^^^^^^
-  Got Integer(42) originating from:
+  Got `Integer(42)` originating from:
     test/cli/expected-got/expected-got.rb:47:
     47 |T.reveal_type(42)
                       ^^
@@ -103,7 +103,7 @@ test/cli/expected-got/expected-got.rb:47: Revealed type: `Integer(42)` https://s
 test/cli/expected-got/expected-got.rb:57: Used `&.` operator on `Integer(1)`, which can never be nil https://srb.help/7034
     57 |1&.even?
         ^
-  Got Integer(1) originating from:
+  Got `Integer(1)` originating from:
     test/cli/expected-got/expected-got.rb:57:
     57 |1&.even?
         ^
@@ -115,7 +115,7 @@ test/cli/expected-got/expected-got.rb:59: Method `top_level_does_not_exist` does
 test/cli/expected-got/expected-got.rb:61: Argument does not have asserted type `Integer` https://srb.help/7007
     61 |T.let(nil, Integer)
         ^^^^^^^^^^^^^^^^^^^
-  Got NilClass originating from:
+  Got `NilClass` originating from:
     test/cli/expected-got/expected-got.rb:61:
     61 |T.let(nil, Integer)
               ^^^
@@ -123,7 +123,7 @@ test/cli/expected-got/expected-got.rb:61: Argument does not have asserted type `
 test/cli/expected-got/expected-got.rb:63: `T.cast` is useless because `Integer(1)` is already a subtype of `Integer` https://srb.help/7015
     63 |T.cast(1, Integer)
         ^^^^^^^^^^^^^^^^^^
-  Got Integer(1) originating from:
+  Got `Integer(1)` originating from:
     test/cli/expected-got/expected-got.rb:63:
     63 |T.cast(1, Integer)
                ^
@@ -135,11 +135,11 @@ test/cli/expected-got/expected-got.rb:68: Can not call method `foo` on void type
 test/cli/expected-got/expected-got.rb:73: Expected `T::Array[Integer]` but found `[Integer(1), Integer(2), T.nilable(Integer)]` for argument `xs` https://srb.help/7002
     73 |takes_int_array(xs)
         ^^^^^^^^^^^^^^^^^^^
-  Expected T::Array[Integer] for argument `xs` of method `Object#takes_int_array`:
+  Expected `T::Array[Integer]` for argument `xs` of method `Object#takes_int_array`:
     test/cli/expected-got/expected-got.rb:70:
     70 |sig {params(xs: T::Array[Integer]).void}
                     ^^
-  Got [Integer(1), Integer(2), T.nilable(Integer)] (3-tuple) originating from:
+  Got `[Integer(1), Integer(2), T.nilable(Integer)] (3-tuple)` originating from:
     test/cli/expected-got/expected-got.rb:72:
     72 |xs = [1, 2, T.let(3, T.nilable(Integer))]
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -147,7 +147,7 @@ test/cli/expected-got/expected-got.rb:73: Expected `T::Array[Integer]` but found
 test/cli/expected-got/expected-got.rb:74: Argument does not have asserted type `T::Array[Integer]` https://srb.help/7007
     74 |T.let(xs, T::Array[Integer])
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Got [Integer(1), Integer(2), T.nilable(Integer)] (3-tuple) originating from:
+  Got `[Integer(1), Integer(2), T.nilable(Integer)] (3-tuple)` originating from:
     test/cli/expected-got/expected-got.rb:72:
     72 |xs = [1, 2, T.let(3, T.nilable(Integer))]
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

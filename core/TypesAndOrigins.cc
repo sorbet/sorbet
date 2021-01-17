@@ -64,14 +64,13 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(const GlobalState &gs, Lo
 }
 
 ErrorSection TypeAndOrigins::explainExpected(const GlobalState &gs, TypePtr type, Loc origin, const string &for_) {
-    // TODO(jez) Make the type cyan
-    return ErrorSection("Expected " + type.show(gs) + " for " + for_ + ":", {ErrorLine{origin, ""}});
+    auto header = ErrorColors::format("Expected `{}` for {}:", type.show(gs), for_);
+    return ErrorSection(header, {ErrorLine{origin, ""}});
 }
 
 ErrorSection TypeAndOrigins::explainGot(const GlobalState &gs, Loc originForUninitialized) const {
-    // TODO(jez) Make the type cyan
-    return ErrorSection("Got " + this->type.showWithMoreInfo(gs) + " originating from:",
-                        this->origins2Explanations(gs, originForUninitialized));
+    auto header = ErrorColors::format("Got `{}` originating from:", this->type.showWithMoreInfo(gs));
+    return ErrorSection(header, this->origins2Explanations(gs, originForUninitialized));
 }
 
 TypeAndOrigins::~TypeAndOrigins() noexcept {
