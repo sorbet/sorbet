@@ -82,7 +82,7 @@ test/cli/expected-got/expected-got.rb:36: Expected `Integer` but found `String("
     37 |  ''
           ^^
 
-test/cli/expected-got/expected-got.rb:45: The typechecker was unable to infer the type of the asserted value https://srb.help/7007
+test/cli/expected-got/expected-got.rb:45: Expected a type but found `T.untyped` for `T.assert_type!` https://srb.help/7007
     45 |T.assert_type!(T.unsafe(nil), String)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got T.untyped originating from:
