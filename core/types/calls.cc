@@ -196,10 +196,9 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
         } else {
             e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs), argTpe.type.show(gs),
                         argSym.argumentName(gs));
-            e.addErrorSection(ErrorSection({
-                ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`", method.data(gs)->show(gs),
-                                argSym.argumentName(gs), expectedType.show(gs)),
-            }));
+            auto for_ =
+                ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.data(gs)->show(gs));
+            e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
         auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
