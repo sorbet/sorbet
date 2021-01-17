@@ -282,7 +282,7 @@ string TypeConstraint::toString(const core::GlobalState &gs) const {
     return to_string(buf);
 }
 
-vector<ErrorLine> TypeConstraint::toExplanation(const core::GlobalState &gs) const {
+ErrorSection TypeConstraint::explain(const core::GlobalState &gs) const {
     auto collated = this->collateBounds(gs);
     auto result = vector<ErrorLine>{};
 
@@ -304,7 +304,7 @@ vector<ErrorLine> TypeConstraint::toExplanation(const core::GlobalState &gs) con
         }
     }
 
-    return result;
+    return ErrorSection("Found no solution for these constraints:", result);
 }
 
 } // namespace sorbet::core

@@ -48,7 +48,7 @@ public:
     static TypeConstraint EmptyFrozenConstraint;
     std::string toString(const core::GlobalState &gs) const;
 
-    std::vector<ErrorLine> toExplanation(const core::GlobalState &gs) const;
+    ErrorSection explain(const core::GlobalState &gs) const;
 };
 
 } // namespace sorbet::core
