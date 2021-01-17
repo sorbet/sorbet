@@ -802,9 +802,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
                             e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
                                         "arguments");
-                            e.addErrorSection(
-                                ErrorSection("Got " + kwSplatType.show(gs) + " originating from:",
-                                             kwSplatArg->origins2Explanations(gs, args.originForUninitialized)));
+                            auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
+                            e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
                             result.main.errors.emplace_back(e.build());
                         }
                         kwargs = Types::untypedUntracked();
