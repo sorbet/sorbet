@@ -55,9 +55,13 @@ test/cli/expected-got/expected-got.rb:53: Control flow could reach `T.absurd` be
     52 |  when String then 'string'
                ^^^^^^
 
-test/cli/expected-got/expected-got.rb:30: T.must(): Expected a `T.nilable` type, got: `Integer(0)` https://srb.help/7015
+test/cli/expected-got/expected-got.rb:30: `T.must` called on `Integer(0)`, which is never `nil` https://srb.help/7015
     30 |T.must(0)
         ^^^^^^^^^
+  Got Integer(0) originating from:
+    test/cli/expected-got/expected-got.rb:30:
+    30 |T.must(0)
+               ^
   Autocorrect: Use `-a` to autocorrect
     test/cli/expected-got/expected-got.rb:30: Replace with `0`
     30 |T.must(0)
