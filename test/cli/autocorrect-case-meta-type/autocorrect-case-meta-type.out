@@ -11,7 +11,7 @@ autocorrect-case-meta-type.rb:9: Call to method `===` on `T::Array[Integer]` mis
 autocorrect-case-meta-type.rb:12: Control flow could reach `T.absurd` because the type `T::Array[Integer]` wasn't handled https://srb.help/7026
     12 |    T.absurd(input)
             ^^^^^^^^^^^^^^^
-  Originating from:
+  Got `T::Array[Integer]` originating from:
     autocorrect-case-meta-type.rb:5:
      5 |def get_value(input)
                       ^^^^^
