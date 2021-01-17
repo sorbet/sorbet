@@ -41,7 +41,8 @@ test/cli/expected-got/expected-got.rb:27: Expected `Integer` but found `T.any(St
 test/cli/expected-got/expected-got.rb:42: Expected `T.proc.returns(Integer)` but found `T.proc.returns(String)` for block argument https://srb.help/7002
     42 |  takes_int_block(&blk)
           ^^^^^^^^^^^^^^^^^^^^^
-    test/cli/expected-got/expected-got.rb:32: Method `Object#takes_int_block` has specified `blk` as `T.proc.returns(Integer)`
+  Expected T.proc.returns(Integer) for for block argument `blk` of method `Object#takes_int_block`:
+    test/cli/expected-got/expected-got.rb:32:
     32 |sig {params(blk: T.proc.returns(Integer)).void}
                     ^^^
 

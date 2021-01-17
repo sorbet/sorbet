@@ -1846,10 +1846,9 @@ private:
         ENFORCE(!methodArgs.empty());
         const auto &bspec = methodArgs.back();
         ENFORCE(bspec.flags.isBlock);
-        e.addErrorSection(ErrorSection({
-            ErrorLine::from(bspec.loc, "Method `{}` has specified `{}` as `{}`", dispatchComp.method.data(gs)->show(gs),
-                            bspec.argumentName(gs), blockType.show(gs)),
-        }));
+        auto for_ = ErrorColors::format("for block argument `{}` of method `{}`", bspec.argumentName(gs),
+                                        dispatchComp.method.data(gs)->show(gs));
+        e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, bspec.loc, for_));
     }
 
     static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, const DispatchArgs &innerArgs,
