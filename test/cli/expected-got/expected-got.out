@@ -2,8 +2,8 @@ test/cli/expected-got/expected-got.rb:5: Expected `Integer` but found `NilClass`
      5 |def foo
      6 |
      7 |end
-  Expected Integer
-    test/cli/expected-got/expected-got.rb:11: Method `foo` has return type `Integer`
+  Expected Integer for result type of method `foo`:
+    test/cli/expected-got/expected-got.rb:11:
     11 |def foo
         ^^^^^^^
   Got NilClass originating from:
@@ -14,8 +14,8 @@ test/cli/expected-got/expected-got.rb:5: Expected `Integer` but found `NilClass`
 test/cli/expected-got/expected-got.rb:12: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
     12 |  nil
           ^^^
-  Expected Integer
-    test/cli/expected-got/expected-got.rb:11: Method `foo` has return type `Integer`
+  Expected Integer for result type of method `foo`:
+    test/cli/expected-got/expected-got.rb:11:
     11 |def foo
         ^^^^^^^
   Got NilClass originating from:

@@ -1166,12 +1166,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         auto ownerData = ctx.owner.data(ctx);
                         e.setHeader("Expected `{}` but found `{}` for method result type", methodReturnType.show(ctx),
                                     typeAndOrigin.type.show(ctx));
-                        e.addErrorSection(core::ErrorSection(
-                            "Expected " + methodReturnType.show(ctx),
-                            {
-                                core::ErrorLine::from(ownerData->loc(), "Method `{}` has return type `{}`",
-                                                      ownerData->name.show(ctx), methodReturnType.show(ctx)),
-                            }));
+                        auto for_ = core::ErrorColors::format("result type of method `{}`", ownerData->name.show(ctx));
+                        e.addErrorSection(
+                            core::TypeAndOrigins::explainExpected(ctx, methodReturnType, ownerData->loc(), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                     }
                 }
