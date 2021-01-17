@@ -200,8 +200,10 @@ public:
     core::NameRef cast;
     VariableUseSite value;
     core::TypePtr type;
+    core::LocOffsets loc;
 
-    Cast(LocalRef value, const core::TypePtr &type, core::NameRef cast) : cast(cast), value(value), type(type) {}
+    Cast(LocalRef value, core::LocOffsets loc, const core::TypePtr &type, core::NameRef cast)
+        : cast(cast), value(value), type(type), loc(loc) {}
 
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;

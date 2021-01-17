@@ -169,7 +169,8 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
 
     if (argInfo.type != nullptr) {
         auto tmp = cctx.newTemporary(core::Names::castTemp());
-        synthesizeExpr(defaultNext, tmp, defLoc, make_unique<Cast>(result, argInfo.type, core::Names::let()));
+        // TODO(jez) Test this to make sure it's right
+        synthesizeExpr(defaultNext, tmp, defLoc, make_unique<Cast>(result, defLoc, argInfo.type, core::Names::let()));
         cctx.inWhat.minLoops[tmp.id()] = CFG::MIN_LOOP_LET;
     }
 
@@ -761,7 +762,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::TreePtr &what, BasicBlock *cu
                 if (c.cast == core::Names::uncheckedLet()) {
                     current->exprs.emplace_back(cctx.target, c.loc, make_unique<Ident>(tmp));
                 } else {
-                    current->exprs.emplace_back(cctx.target, c.loc, make_unique<Cast>(tmp, c.type, c.cast));
+                    current->exprs.emplace_back(cctx.target, c.loc,
+                                                make_unique<Cast>(tmp, c.arg.loc(), c.type, c.cast));
                 }
                 if (c.cast == core::Names::let()) {
                     cctx.inWhat.minLoops[cctx.target.id()] = CFG::MIN_LOOP_LET;

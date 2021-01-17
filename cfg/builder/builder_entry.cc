@@ -32,7 +32,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             selfClaz = md.symbol;
         }
         synthesizeExpr(entry, LocalRef::selfVariable(), core::LocOffsets::none(),
-                       make_unique<Cast>(LocalRef::selfVariable(),
+                       make_unique<Cast>(LocalRef::selfVariable(), core::LocOffsets::none(),
                                          selfClaz.data(ctx)->enclosingClass(ctx).data(ctx)->selfType(ctx),
                                          core::Names::cast()));
 
