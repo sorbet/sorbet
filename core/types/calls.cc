@@ -1299,8 +1299,7 @@ public:
 
         if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::RevealType)) {
             e.setHeader("Revealed type: `{}`", args.args[0]->type.showWithMoreInfo(gs));
-            e.addErrorSection(
-                ErrorSection("From:", args.args[0]->origins2Explanations(gs, args.originForUninitialized)));
+            e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
         }
         res.returnType = args.args[0]->type;
     }

@@ -86,7 +86,7 @@ test/cli/expected-got/expected-got.rb:45: The typechecker was unable to infer th
 test/cli/expected-got/expected-got.rb:47: Revealed type: `Integer(42)` https://srb.help/7014
     47 |T.reveal_type(42)
         ^^^^^^^^^^^^^^^^^
-  From:
+  Got Integer(42) originating from:
     test/cli/expected-got/expected-got.rb:47:
     47 |T.reveal_type(42)
                       ^^
