@@ -47,7 +47,7 @@ test/cli/expected-got/expected-got.rb:42: Expected `T.proc.returns(Integer)` but
 test/cli/expected-got/expected-got.rb:53: Control flow could reach `T.absurd` because the type `Integer` wasn't handled https://srb.help/7026
     53 |  else T.absurd(x)
                ^^^^^^^^^^^
-  Originating from:
+  Got Integer originating from:
     test/cli/expected-got/expected-got.rb:50:
     50 |def t_absurd(x)
                      ^

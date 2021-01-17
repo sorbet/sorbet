@@ -1227,8 +1227,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled", "T.absurd",
                                     typeAndOrigin.type.show(ctx));
                     }
-                    e.addErrorSection(
-                        core::ErrorSection("Originating from:", typeAndOrigin.origins2Explanations(ctx, ownerLoc)));
+                    e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                 }
 
                 tp.type = core::Types::bottom();
