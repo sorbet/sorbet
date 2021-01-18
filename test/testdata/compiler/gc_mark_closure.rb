@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: strong
+# typed: strict
 # compiled: true
 h = {}
 
