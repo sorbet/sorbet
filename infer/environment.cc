@@ -1090,7 +1090,11 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 if (main.constr) {
                     if (!main.constr->solve(ctx)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstaintUnsolved)) {
-                            e.setHeader("Could not find valid instantiation of type parameters");
+                            e.setHeader("Could not find valid instantiation of type parameters for `{}`",
+                                        main.method.data(ctx)->show(ctx));
+                            e.addErrorLine(main.method.data(ctx)->loc(), "`{}` defined here",
+                                           main.method.data(ctx)->show(ctx));
+                            e.addErrorSection(main.constr->explain(ctx));
                         }
                         type = core::Types::untypedUntracked();
                     } else {
