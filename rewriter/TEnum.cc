@@ -39,7 +39,7 @@ bool isTEnum(core::MutableContext ctx, ast::ClassDef *klass) {
     return ast::MK::isRootScope(scope->scope);
 }
 
-ast::Send *asEnumsDo(ast::TreePtr &stat) {
+ast::Send *asEnumsDo(ast::ExpressionPtr &stat) {
     auto *send = ast::cast_tree<ast::Send>(stat);
 
     if (send != nullptr && send->block != nullptr && send->fun == core::Names::enums()) {
@@ -49,7 +49,7 @@ ast::Send *asEnumsDo(ast::TreePtr &stat) {
     }
 }
 
-vector<ast::TreePtr> badConst(core::MutableContext ctx, core::LocOffsets headerLoc, core::LocOffsets line1Loc) {
+vector<ast::ExpressionPtr> badConst(core::MutableContext ctx, core::LocOffsets headerLoc, core::LocOffsets line1Loc) {
     if (auto e = ctx.beginError(headerLoc, core::errors::Rewriter::TEnumConstNotEnumValue)) {
         e.setHeader("All constants defined on an `{}` must be unique instances of the enum", "T::Enum");
         e.addErrorLine(core::Loc(ctx.file, line1Loc), "Enclosing definition here");
@@ -57,7 +57,7 @@ vector<ast::TreePtr> badConst(core::MutableContext ctx, core::LocOffsets headerL
     return {};
 }
 
-vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::TreePtr &stat,
+vector<ast::ExpressionPtr> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::ExpressionPtr &stat,
                                  FromWhere fromWhere) {
     auto *asgn = ast::cast_tree<ast::Assign>(stat);
     if (asgn == nullptr) {
@@ -147,14 +147,14 @@ vector<ast::TreePtr> processStat(core::MutableContext ctx, ast::ClassDef *klass,
             stat.loc(), ast::MK::Constant(stat.loc(), core::Symbols::T()), core::Names::uncheckedLet(),
             ast::MK::Send(stat.loc(), classCnst.deepCopy(), core::Names::new_(), numPosArgs, std::move(args), flags),
             std::move(classCnst)));
-    vector<ast::TreePtr> result;
+    vector<ast::ExpressionPtr> result;
     result.emplace_back(std::move(classDef));
     result.emplace_back(std::move(singletonAsgn));
     return result;
 }
 
-void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, ast::TreePtr stat, FromWhere fromWhere,
-                     vector<ast::TreePtr> &into) {
+void collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, ast::ExpressionPtr stat, FromWhere fromWhere,
+                     vector<ast::ExpressionPtr> &into) {
     auto newStats = processStat(ctx, klass, stat, fromWhere);
     if (newStats.empty()) {
         into.emplace_back(std::move(stat));
@@ -187,7 +187,7 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
             auto &block = ast::cast_tree_nonnull<ast::Block>(enumsDo->block);
-            vector<ast::TreePtr> newStats;
+            vector<ast::ExpressionPtr> newStats;
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(block.body)) {
                 for (auto &stat : insSeq->stats) {
                     collectNewStats(ctx, klass, std::move(stat), FromWhere::Inside, newStats);
@@ -205,7 +205,7 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
             block.body = ast::MK::InsSeq(block.loc, std::move(insSeqStats), ast::MK::Nil(block.loc));
             klass->rhs.emplace_back(std::move(stat));
         } else {
-            vector<ast::TreePtr> newStats;
+            vector<ast::ExpressionPtr> newStats;
             collectNewStats(ctx, klass, std::move(stat), FromWhere::Outside, newStats);
             for (auto &newStat : newStats) {
                 klass->rhs.emplace_back(std::move(newStat));

@@ -6,7 +6,7 @@
 namespace sorbet::core::serialize {
 struct CachedFile {
     std::shared_ptr<core::File> file;
-    ast::TreePtr tree;
+    ast::ExpressionPtr tree;
 };
 
 class Serializer {

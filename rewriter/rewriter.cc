@@ -38,7 +38,7 @@ class Rewriterer {
     friend class Rewriter;
 
 public:
-    ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto *classDef = ast::cast_tree<ast::ClassDef>(tree);
 
         Command::run(ctx, classDef);
@@ -53,13 +53,13 @@ public:
             extension->run(ctx, classDef);
         }
 
-        ast::TreePtr *prevStat = nullptr;
-        UnorderedMap<void *, vector<ast::TreePtr>> replaceNodes;
+        ast::ExpressionPtr *prevStat = nullptr;
+        UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
         for (auto &stat : classDef->rhs) {
             typecase(
                 stat,
                 [&](ast::Assign &assign) {
-                    vector<ast::TreePtr> nodes;
+                    vector<ast::ExpressionPtr> nodes;
 
                     nodes = Struct::run(ctx, &assign);
                     if (!nodes.empty()) {
@@ -81,7 +81,7 @@ public:
                 },
 
                 [&](ast::Send &send) {
-                    vector<ast::TreePtr> nodes;
+                    vector<ast::ExpressionPtr> nodes;
 
                     nodes = MixinEncryptedProp::run(ctx, &send);
                     if (!nodes.empty()) {
@@ -142,7 +142,7 @@ public:
 
                 [&](ast::MethodDef &mdef) { Initializer::run(ctx, &mdef, prevStat); },
 
-                [&](const ast::TreePtr &e) {});
+                [&](const ast::ExpressionPtr &e) {});
 
             prevStat = &stat;
         }
@@ -172,7 +172,7 @@ public:
 
     // NOTE: this case differs from the `Send` typecase branch in `postTransformClassDef` above, as it will apply to all
     // sends, not just those that are present in the RHS of a `ClassDef`.
-    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto *send = ast::cast_tree<ast::Send>(tree);
 
         if (auto expr = InterfaceWrapper::run(ctx, send)) {
@@ -194,7 +194,7 @@ private:
     Rewriterer() = default;
 };
 
-ast::TreePtr Rewriter::run(core::MutableContext ctx, ast::TreePtr tree) {
+ast::ExpressionPtr Rewriter::run(core::MutableContext ctx, ast::ExpressionPtr tree) {
     auto ast = std::move(tree);
 
     Rewriterer rewriter;

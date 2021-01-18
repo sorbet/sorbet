@@ -5,8 +5,8 @@
 
 namespace sorbet::rewriter {
 
-std::vector<ast::TreePtr> TestCase::run(core::MutableContext ctx, ast::Send *send) {
-    std::vector<ast::TreePtr> stats;
+std::vector<ast::ExpressionPtr> TestCase::run(core::MutableContext ctx, ast::Send *send) {
+    std::vector<ast::ExpressionPtr> stats;
     if (ctx.state.runningUnderAutogen) {
         return stats;
     }

@@ -16,7 +16,7 @@ namespace sorbet::rewriter {
  */
 class Private final {
 public:
-    static std::vector<ast::TreePtr> run(core::MutableContext ctx, ast::Send *send);
+    static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, ast::Send *send);
 
     Private() = delete;
 };

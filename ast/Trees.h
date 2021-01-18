@@ -63,16 +63,16 @@ enum class Tag {
 // A mapping from tree type to its corresponding tag.
 template <typename T> struct TreeToTag;
 
-class TreePtr {
+class ExpressionPtr {
 public:
     // We store tagged pointers as 64-bit values.
     using tagged_storage = u8;
 
     // Required for typecase
-    template <class To> static bool isa(const TreePtr &tree);
-    template <class To> static const To &cast(const TreePtr &tree);
-    template <class To> static To &cast(TreePtr &tree) {
-        return const_cast<To &>(cast<To>(static_cast<const TreePtr &>(tree)));
+    template <class To> static bool isa(const ExpressionPtr &tree);
+    template <class To> static const To &cast(const ExpressionPtr &tree);
+    template <class To> static To &cast(ExpressionPtr &tree) {
+        return const_cast<To &>(cast<To>(static_cast<const ExpressionPtr &>(tree)));
     }
 
 private:
@@ -82,7 +82,7 @@ private:
 
     tagged_storage ptr;
 
-    template <typename E, typename... Args> friend TreePtr make_tree(Args &&...);
+    template <typename E, typename... Args> friend ExpressionPtr make_tree(Args &&...);
 
     static tagged_storage tagPtr(Tag tag, void *expr) {
         // Store the tag in the lower 16 bits of the pointer, regardless of size.
@@ -92,7 +92,7 @@ private:
         return maskedPtr | val;
     }
 
-    TreePtr(Tag tag, void *expr) : ptr(tagPtr(tag, expr)) {}
+    ExpressionPtr(Tag tag, void *expr) : ptr(tagPtr(tag, expr)) {}
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
@@ -121,28 +121,28 @@ private:
     }
 
 public:
-    constexpr TreePtr() noexcept : ptr(0) {}
+    constexpr ExpressionPtr() noexcept : ptr(0) {}
 
-    TreePtr(std::nullptr_t) noexcept : TreePtr() {}
+    ExpressionPtr(std::nullptr_t) noexcept : ExpressionPtr() {}
 
     // Construction from a tagged pointer. This is needed for:
     // * ResolveConstantsWalk::isFullyResolved
-    explicit TreePtr(tagged_storage ptr) : ptr(ptr) {}
+    explicit ExpressionPtr(tagged_storage ptr) : ptr(ptr) {}
 
-    ~TreePtr() {
+    ~ExpressionPtr() {
         if (ptr != 0) {
             deleteTagged(tag(), get());
         }
     }
 
-    TreePtr(const TreePtr &) = delete;
-    TreePtr &operator=(const TreePtr &) = delete;
+    ExpressionPtr(const ExpressionPtr &) = delete;
+    ExpressionPtr &operator=(const ExpressionPtr &) = delete;
 
-    TreePtr(TreePtr &&other) noexcept {
+    ExpressionPtr(ExpressionPtr &&other) noexcept {
         ptr = other.releaseTagged();
     }
 
-    TreePtr &operator=(TreePtr &&other) noexcept {
+    ExpressionPtr &operator=(ExpressionPtr &&other) noexcept {
         if (*this == other) {
             return *this;
         }
@@ -191,15 +191,15 @@ public:
         return get() != nullptr;
     }
 
-    bool operator==(const TreePtr &other) const noexcept {
+    bool operator==(const ExpressionPtr &other) const noexcept {
         return get() == other.get();
     }
 
-    bool operator!=(const TreePtr &other) const noexcept {
+    bool operator!=(const ExpressionPtr &other) const noexcept {
         return get() != other.get();
     }
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string nodeName() const;
 
@@ -218,12 +218,12 @@ public:
     }
 };
 
-template <class E, typename... Args> TreePtr make_tree(Args &&... args) {
-    return TreePtr(TreeToTag<E>::value, new E(std::forward<Args>(args)...));
+template <class E, typename... Args> ExpressionPtr make_tree(Args &&... args) {
+    return ExpressionPtr(TreeToTag<E>::value, new E(std::forward<Args>(args)...));
 }
 
 struct ParsedFile {
-    TreePtr tree;
+    ExpressionPtr tree;
     core::FileRef file;
 };
 
@@ -244,15 +244,15 @@ public:
     std::vector<ParsedFile> &result();
 };
 
-template <class To> bool isa_tree(const TreePtr &what) {
+template <class To> bool isa_tree(const ExpressionPtr &what) {
     return what != nullptr && what.tag() == TreeToTag<To>::value;
 }
 
-bool isa_reference(const TreePtr &what);
+bool isa_reference(const ExpressionPtr &what);
 
-bool isa_declaration(const TreePtr &what);
+bool isa_declaration(const ExpressionPtr &what);
 
-template <class To> To *cast_tree(TreePtr &what) {
+template <class To> To *cast_tree(ExpressionPtr &what) {
     if (isa_tree<To>(what)) {
         return reinterpret_cast<To *>(what.get());
     } else {
@@ -260,7 +260,7 @@ template <class To> To *cast_tree(TreePtr &what) {
     }
 }
 
-template <class To> const To *cast_tree(const TreePtr &what) {
+template <class To> const To *cast_tree(const ExpressionPtr &what) {
     if (isa_tree<To>(what)) {
         return reinterpret_cast<To *>(what.get());
     } else {
@@ -271,14 +271,14 @@ template <class To> const To *cast_tree(const TreePtr &what) {
 // We disallow casting on temporary values because the lifetime of the returned value is
 // tied to the temporary, but it is possible for the temporary to be destroyed at the end
 // of the current statement, leading to use-after-free bugs.
-template <class To> To *cast_tree(TreePtr &&what) = delete;
+template <class To> To *cast_tree(ExpressionPtr &&what) = delete;
 
-template <class To> To &cast_tree_nonnull(TreePtr &what) {
+template <class To> To &cast_tree_nonnull(ExpressionPtr &what) {
     ENFORCE(isa_tree<To>(what), "cast_tree_nonnull failed!");
     return *reinterpret_cast<To *>(what.get());
 }
 
-template <class To> const To &cast_tree_nonnull(const TreePtr &what) {
+template <class To> const To &cast_tree_nonnull(const ExpressionPtr &what) {
     ENFORCE(isa_tree<To>(what), "cast_tree_nonnull failed!");
     return *reinterpret_cast<To *>(what.get());
 }
@@ -286,21 +286,21 @@ template <class To> const To &cast_tree_nonnull(const TreePtr &what) {
 // We disallow casting on temporary values because the lifetime of the returned value is
 // tied to the temporary, but it is possible for the temporary to be destroyed at the end
 // of the current statement, leading to use-after-free bugs.
-template <class To> To *cast_tree_nonnull(TreePtr &&what) = delete;
+template <class To> To *cast_tree_nonnull(ExpressionPtr &&what) = delete;
 
-template <class To> inline bool TreePtr::isa(const TreePtr &what) {
+template <class To> inline bool ExpressionPtr::isa(const ExpressionPtr &what) {
     return isa_tree<To>(what);
 }
 
-template <class To> inline To const &TreePtr::cast(const TreePtr &what) {
+template <class To> inline To const &ExpressionPtr::cast(const ExpressionPtr &what) {
     return cast_tree_nonnull<To>(what);
 }
 
-template <> inline bool TreePtr::isa<TreePtr>(const TreePtr &tree) {
+template <> inline bool ExpressionPtr::isa<ExpressionPtr>(const ExpressionPtr &tree) {
     return true;
 }
 
-template <> inline const TreePtr &TreePtr::cast<TreePtr>(const TreePtr &tree) {
+template <> inline const ExpressionPtr &ExpressionPtr::cast<ExpressionPtr>(const ExpressionPtr &tree) {
     return tree;
 }
 
@@ -321,22 +321,22 @@ public:
     };
     Kind kind;
     static constexpr int EXPECTED_RHS_COUNT = 4;
-    using RHS_store = InlinedVector<TreePtr, EXPECTED_RHS_COUNT>;
+    using RHS_store = InlinedVector<ExpressionPtr, EXPECTED_RHS_COUNT>;
 
     RHS_store rhs;
-    TreePtr name;
+    ExpressionPtr name;
     // For unresolved names. Once they are typeAlias to Symbols they go into the Symbol
 
     static constexpr int EXPECTED_ANCESTORS_COUNT = 2;
-    using ANCESTORS_store = InlinedVector<TreePtr, EXPECTED_ANCESTORS_COUNT>;
+    using ANCESTORS_store = InlinedVector<ExpressionPtr, EXPECTED_ANCESTORS_COUNT>;
 
     ANCESTORS_store ancestors;
     ANCESTORS_store singletonAncestors;
 
-    ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOrModuleRef symbol, TreePtr name,
+    ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOrModuleRef symbol, ExpressionPtr name,
              ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -352,9 +352,9 @@ public:
     core::LocOffsets declLoc;
     core::MethodRef symbol;
 
-    TreePtr rhs;
+    ExpressionPtr rhs;
 
-    using ARGS_store = InlinedVector<TreePtr, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
+    using ARGS_store = InlinedVector<ExpressionPtr, core::SymbolRef::EXPECTED_METHOD_ARGS_COUNT>;
     ARGS_store args;
 
     core::NameRef name;
@@ -372,9 +372,9 @@ public:
     Flags flags;
 
     MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,
-              ARGS_store args, TreePtr rhs, Flags flags);
+              ARGS_store args, ExpressionPtr rhs, Flags flags);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -388,13 +388,13 @@ TREE(If) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr cond;
-    TreePtr thenp;
-    TreePtr elsep;
+    ExpressionPtr cond;
+    ExpressionPtr thenp;
+    ExpressionPtr elsep;
 
-    If(core::LocOffsets loc, TreePtr cond, TreePtr thenp, TreePtr elsep);
+    If(core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr thenp, ExpressionPtr elsep);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -408,12 +408,12 @@ TREE(While) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr cond;
-    TreePtr body;
+    ExpressionPtr cond;
+    ExpressionPtr body;
 
-    While(core::LocOffsets loc, TreePtr cond, TreePtr body);
+    While(core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr body);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -427,11 +427,11 @@ TREE(Break) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr expr;
+    ExpressionPtr expr;
 
-    Break(core::LocOffsets loc, TreePtr expr);
+    Break(core::LocOffsets loc, ExpressionPtr expr);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -447,7 +447,7 @@ public:
 
     Retry(core::LocOffsets loc);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -461,11 +461,11 @@ TREE(Next) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr expr;
+    ExpressionPtr expr;
 
-    Next(core::LocOffsets loc, TreePtr expr);
+    Next(core::LocOffsets loc, ExpressionPtr expr);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -479,11 +479,11 @@ TREE(Return) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr expr;
+    ExpressionPtr expr;
 
-    Return(core::LocOffsets loc, TreePtr expr);
+    Return(core::LocOffsets loc, ExpressionPtr expr);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -498,18 +498,18 @@ public:
     const core::LocOffsets loc;
 
     static constexpr int EXPECTED_EXCEPTION_COUNT = 2;
-    using EXCEPTION_store = InlinedVector<TreePtr, EXPECTED_EXCEPTION_COUNT>;
+    using EXCEPTION_store = InlinedVector<ExpressionPtr, EXPECTED_EXCEPTION_COUNT>;
 
     EXCEPTION_store exceptions;
 
     // If present, var is always an UnresolvedIdent[kind=Local] up until the
     // namer, at which point it is a Local.
-    TreePtr var;
-    TreePtr body;
+    ExpressionPtr var;
+    ExpressionPtr body;
 
-    RescueCase(core::LocOffsets loc, EXCEPTION_store exceptions, TreePtr var, TreePtr body);
+    RescueCase(core::LocOffsets loc, EXCEPTION_store exceptions, ExpressionPtr var, ExpressionPtr body);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -524,16 +524,16 @@ public:
     const core::LocOffsets loc;
 
     static constexpr int EXPECTED_RESCUE_CASE_COUNT = 2;
-    using RESCUE_CASE_store = InlinedVector<TreePtr, EXPECTED_RESCUE_CASE_COUNT>;
+    using RESCUE_CASE_store = InlinedVector<ExpressionPtr, EXPECTED_RESCUE_CASE_COUNT>;
 
-    TreePtr body;
+    ExpressionPtr body;
     RESCUE_CASE_store rescueCases;
-    TreePtr else_;
-    TreePtr ensure;
+    ExpressionPtr else_;
+    ExpressionPtr ensure;
 
-    Rescue(core::LocOffsets loc, TreePtr body, RESCUE_CASE_store rescueCases, TreePtr else_, TreePtr ensure);
+    Rescue(core::LocOffsets loc, ExpressionPtr body, RESCUE_CASE_store rescueCases, ExpressionPtr else_, ExpressionPtr ensure);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -551,7 +551,7 @@ public:
 
     Local(core::LocOffsets loc, core::LocalVariable localVariable1);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -576,7 +576,7 @@ public:
 
     UnresolvedIdent(core::LocOffsets loc, Kind kind, core::NameRef name);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -590,11 +590,11 @@ TREE(RestArg) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr expr;
+    ExpressionPtr expr;
 
-    RestArg(core::LocOffsets loc, TreePtr arg);
+    RestArg(core::LocOffsets loc, ExpressionPtr arg);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -608,11 +608,11 @@ TREE(KeywordArg) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr expr;
+    ExpressionPtr expr;
 
-    KeywordArg(core::LocOffsets loc, TreePtr expr);
+    KeywordArg(core::LocOffsets loc, ExpressionPtr expr);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -626,12 +626,12 @@ TREE(OptionalArg) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr expr;
-    TreePtr default_;
+    ExpressionPtr expr;
+    ExpressionPtr default_;
 
-    OptionalArg(core::LocOffsets loc, TreePtr expr, TreePtr default_);
+    OptionalArg(core::LocOffsets loc, ExpressionPtr expr, ExpressionPtr default_);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -645,11 +645,11 @@ TREE(BlockArg) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr expr;
+    ExpressionPtr expr;
 
-    BlockArg(core::LocOffsets loc, TreePtr expr);
+    BlockArg(core::LocOffsets loc, ExpressionPtr expr);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -663,11 +663,11 @@ TREE(ShadowArg) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr expr;
+    ExpressionPtr expr;
 
-    ShadowArg(core::LocOffsets loc, TreePtr expr);
+    ShadowArg(core::LocOffsets loc, ExpressionPtr expr);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -681,12 +681,12 @@ TREE(Assign) {
 public:
     const core::LocOffsets loc;
 
-    TreePtr lhs;
-    TreePtr rhs;
+    ExpressionPtr lhs;
+    ExpressionPtr rhs;
 
-    Assign(core::LocOffsets loc, TreePtr lhs, TreePtr rhs);
+    Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -715,10 +715,10 @@ public:
 
     u2 numPosArgs;
 
-    TreePtr recv;
+    ExpressionPtr recv;
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
-    using ARGS_store = InlinedVector<TreePtr, EXPECTED_ARGS_COUNT>;
+    using ARGS_store = InlinedVector<ExpressionPtr, EXPECTED_ARGS_COUNT>;
 
     // The arguments vector has the following layout:
     //
@@ -739,12 +739,12 @@ public:
     // > <a, b, c, 10, d, nil>
     ARGS_store args;
 
-    TreePtr block; // null if no block passed
+    ExpressionPtr block; // null if no block passed
 
-    Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, u2 numPosArgs, ARGS_store args, TreePtr block = nullptr,
+    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, ARGS_store args, ExpressionPtr block = nullptr,
          Flags flags = {});
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -781,11 +781,11 @@ public:
     core::NameRef cast;
 
     core::TypePtr type;
-    TreePtr arg;
+    ExpressionPtr arg;
 
-    Cast(core::LocOffsets loc, core::TypePtr ty, TreePtr arg, core::NameRef cast);
+    Cast(core::LocOffsets loc, core::TypePtr ty, ExpressionPtr arg, core::NameRef cast);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -800,14 +800,14 @@ public:
     const core::LocOffsets loc;
 
     static constexpr int EXPECTED_ENTRY_COUNT = 2;
-    using ENTRY_store = InlinedVector<TreePtr, EXPECTED_ENTRY_COUNT>;
+    using ENTRY_store = InlinedVector<ExpressionPtr, EXPECTED_ENTRY_COUNT>;
 
     ENTRY_store keys;
     ENTRY_store values;
 
     Hash(core::LocOffsets loc, ENTRY_store keys, ENTRY_store values);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -822,13 +822,13 @@ public:
     const core::LocOffsets loc;
 
     static constexpr int EXPECTED_ENTRY_COUNT = 4;
-    using ENTRY_store = InlinedVector<TreePtr, EXPECTED_ENTRY_COUNT>;
+    using ENTRY_store = InlinedVector<ExpressionPtr, EXPECTED_ENTRY_COUNT>;
 
     ENTRY_store elems;
 
     Array(core::LocOffsets loc, ENTRY_store elems);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -846,7 +846,7 @@ public:
 
     Literal(core::LocOffsets loc, const core::TypePtr &value);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -868,11 +868,11 @@ public:
     const core::LocOffsets loc;
 
     core::NameRef cnst;
-    TreePtr scope;
+    ExpressionPtr scope;
 
-    UnresolvedConstantLit(core::LocOffsets loc, TreePtr scope, core::NameRef cnst);
+    UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -891,11 +891,11 @@ public:
     // will be set to whatever nesting scope we estimate the constant could have been defined in.
     using ResolutionScopes = InlinedVector<core::SymbolRef, 1>;
     ResolutionScopes resolutionScopes;
-    TreePtr original;
+    ExpressionPtr original;
 
-    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, TreePtr original);
+    ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, ExpressionPtr original);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -914,7 +914,7 @@ public:
     // null if no block passed
     ZSuperArgs(core::LocOffsets loc);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -929,11 +929,11 @@ public:
     const core::LocOffsets loc;
 
     MethodDef::ARGS_store args;
-    TreePtr body;
+    ExpressionPtr body;
 
-    Block(core::LocOffsets loc, MethodDef::ARGS_store args, TreePtr body);
+    Block(core::LocOffsets loc, MethodDef::ARGS_store args, ExpressionPtr body);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -947,16 +947,16 @@ public:
     const core::LocOffsets loc;
 
     static constexpr int EXPECTED_STATS_COUNT = 4;
-    using STATS_store = InlinedVector<TreePtr, EXPECTED_STATS_COUNT>;
+    using STATS_store = InlinedVector<ExpressionPtr, EXPECTED_STATS_COUNT>;
     // Statements
     STATS_store stats;
 
     // The distinguished final expression (determines return value)
-    TreePtr expr;
+    ExpressionPtr expr;
 
-    InsSeq(core::LocOffsets locOffsets, STATS_store stats, TreePtr expr);
+    InsSeq(core::LocOffsets locOffsets, STATS_store stats, ExpressionPtr expr);
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -972,7 +972,7 @@ public:
 
     EmptyTree();
 
-    TreePtr deepCopy() const;
+    ExpressionPtr deepCopy() const;
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -983,7 +983,7 @@ public:
 CheckSize(EmptyTree, 8, 8);
 
 // This specialization of make_tree exists to ensure that we only ever create one empty tree.
-template <> TreePtr make_tree<EmptyTree>();
+template <> ExpressionPtr make_tree<EmptyTree>();
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *

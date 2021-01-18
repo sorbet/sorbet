@@ -7,7 +7,7 @@ namespace sorbet::rewriter {
 
 class Rewriter final {
 public:
-    static ast::TreePtr run(core::MutableContext ctx, ast::TreePtr tree);
+    static ast::ExpressionPtr run(core::MutableContext ctx, ast::ExpressionPtr tree);
 
     Rewriter() = delete;
 };

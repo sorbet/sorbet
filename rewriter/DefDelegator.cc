@@ -8,8 +8,8 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<ast::TreePtr> DefDelegator::run(core::MutableContext ctx, const ast::Send *send) {
-    vector<ast::TreePtr> methodStubs;
+vector<ast::ExpressionPtr> DefDelegator::run(core::MutableContext ctx, const ast::Send *send) {
+    vector<ast::ExpressionPtr> methodStubs;
     auto loc = send->loc;
 
     if (send->fun != core::Names::defDelegator()) {

@@ -79,7 +79,7 @@ namespace sorbet::ast {
         CASE_STATEMENT(CASE_BODY, InsSeq)                \
     }
 
-void TreePtr::deleteTagged(Tag tag, void *ptr) noexcept {
+void ExpressionPtr::deleteTagged(Tag tag, void *ptr) noexcept {
     ENFORCE(ptr != nullptr);
 #define DELETE_TYPE(T)                                      \
     if (tag != Tag::EmptyTree) {                            \
@@ -92,7 +92,7 @@ void TreePtr::deleteTagged(Tag tag, void *ptr) noexcept {
 #undef DELETE_TYPE
 }
 
-string TreePtr::nodeName() const {
+string ExpressionPtr::nodeName() const {
     auto *ptr = get();
 
     ENFORCE(ptr != nullptr);
@@ -102,7 +102,7 @@ string TreePtr::nodeName() const {
 #undef NODE_NAME
 }
 
-string TreePtr::showRaw(const core::GlobalState &gs, int tabs) {
+string ExpressionPtr::showRaw(const core::GlobalState &gs, int tabs) {
     auto *ptr = get();
 
     ENFORCE(ptr != nullptr);
@@ -112,7 +112,7 @@ string TreePtr::showRaw(const core::GlobalState &gs, int tabs) {
 #undef SHOW_RAW
 }
 
-core::LocOffsets TreePtr::loc() const {
+core::LocOffsets ExpressionPtr::loc() const {
     auto *ptr = get();
 
     ENFORCE(ptr != nullptr);
@@ -122,7 +122,7 @@ core::LocOffsets TreePtr::loc() const {
 #undef CASE
 }
 
-string TreePtr::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
+string ExpressionPtr::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     auto *ptr = get();
 
     ENFORCE(ptr != nullptr);
@@ -132,20 +132,20 @@ string TreePtr::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
 #undef CASE
 }
 
-bool TreePtr::isSelfReference() const {
+bool ExpressionPtr::isSelfReference() const {
     if (auto *local = cast_tree<Local>(*this)) {
         return local->localVariable == core::LocalVariable::selfVariable();
     }
     return false;
 }
 
-bool isa_reference(const TreePtr &what) {
+bool isa_reference(const ExpressionPtr &what) {
     return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestArg>(what) ||
            isa_tree<KeywordArg>(what) || isa_tree<OptionalArg>(what) || isa_tree<BlockArg>(what) ||
            isa_tree<ShadowArg>(what);
 }
 
-bool isa_declaration(const TreePtr &what) {
+bool isa_declaration(const ExpressionPtr &what) {
     return isa_tree<MethodDef>(what) || isa_tree<ClassDef>(what);
 }
 
@@ -175,7 +175,7 @@ bool isa_declaration(const TreePtr &what) {
  * Desugar string concatenation into series of .to_s calls and string concatenations
  */
 
-ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOrModuleRef symbol, TreePtr name,
+ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOrModuleRef symbol, ExpressionPtr name,
                    ANCESTORS_store ancestors, RHS_store rhs, ClassDef::Kind kind)
     : loc(loc), declLoc(declLoc), symbol(symbol), kind(kind), rhs(std::move(rhs)), name(std::move(name)),
       ancestors(std::move(ancestors)) {
@@ -186,26 +186,26 @@ ClassDef::ClassDef(core::LocOffsets loc, core::LocOffsets declLoc, core::ClassOr
 }
 
 MethodDef::MethodDef(core::LocOffsets loc, core::LocOffsets declLoc, core::MethodRef symbol, core::NameRef name,
-                     ARGS_store args, TreePtr rhs, Flags flags)
+                     ARGS_store args, ExpressionPtr rhs, Flags flags)
     : loc(loc), declLoc(declLoc), symbol(symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), flags(flags) {
     categoryCounterInc("trees", "methoddef");
     histogramInc("trees.methodDef.args", this->args.size());
     _sanityCheck();
 }
 
-If::If(core::LocOffsets loc, TreePtr cond, TreePtr thenp, TreePtr elsep)
+If::If(core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr thenp, ExpressionPtr elsep)
     : loc(loc), cond(std::move(cond)), thenp(std::move(thenp)), elsep(std::move(elsep)) {
     categoryCounterInc("trees", "if");
     _sanityCheck();
 }
 
-While::While(core::LocOffsets loc, TreePtr cond, TreePtr body)
+While::While(core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr body)
     : loc(loc), cond(std::move(cond)), body(std::move(body)) {
     categoryCounterInc("trees", "while");
     _sanityCheck();
 }
 
-Break::Break(core::LocOffsets loc, TreePtr expr) : loc(loc), expr(std::move(expr)) {
+Break::Break(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), expr(std::move(expr)) {
     categoryCounterInc("trees", "break");
     _sanityCheck();
 }
@@ -215,24 +215,24 @@ Retry::Retry(core::LocOffsets loc) : loc(loc) {
     _sanityCheck();
 }
 
-Next::Next(core::LocOffsets loc, TreePtr expr) : loc(loc), expr(std::move(expr)) {
+Next::Next(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), expr(std::move(expr)) {
     categoryCounterInc("trees", "next");
     _sanityCheck();
 }
 
-Return::Return(core::LocOffsets loc, TreePtr expr) : loc(loc), expr(std::move(expr)) {
+Return::Return(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), expr(std::move(expr)) {
     categoryCounterInc("trees", "return");
     _sanityCheck();
 }
 
-RescueCase::RescueCase(core::LocOffsets loc, EXCEPTION_store exceptions, TreePtr var, TreePtr body)
+RescueCase::RescueCase(core::LocOffsets loc, EXCEPTION_store exceptions, ExpressionPtr var, ExpressionPtr body)
     : loc(loc), exceptions(std::move(exceptions)), var(std::move(var)), body(std::move(body)) {
     categoryCounterInc("trees", "rescuecase");
     histogramInc("trees.rescueCase.exceptions", this->exceptions.size());
     _sanityCheck();
 }
 
-Rescue::Rescue(core::LocOffsets loc, TreePtr body, RESCUE_CASE_store rescueCases, TreePtr else_, TreePtr ensure)
+Rescue::Rescue(core::LocOffsets loc, ExpressionPtr body, RESCUE_CASE_store rescueCases, ExpressionPtr else_, ExpressionPtr ensure)
     : loc(loc), body(std::move(body)), rescueCases(std::move(rescueCases)), else_(std::move(else_)),
       ensure(std::move(ensure)) {
     categoryCounterInc("trees", "rescue");
@@ -252,12 +252,12 @@ UnresolvedIdent::UnresolvedIdent(core::LocOffsets loc, Kind kind, core::NameRef 
     _sanityCheck();
 }
 
-Assign::Assign(core::LocOffsets loc, TreePtr lhs, TreePtr rhs) : loc(loc), lhs(std::move(lhs)), rhs(std::move(rhs)) {
+Assign::Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs) : loc(loc), lhs(std::move(lhs)), rhs(std::move(rhs)) {
     categoryCounterInc("trees", "assign");
     _sanityCheck();
 }
 
-Send::Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args, TreePtr block,
+Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args, ExpressionPtr block,
            Flags flags)
     : loc(loc), fun(fun), flags(flags), numPosArgs(numPosArgs), recv(std::move(recv)), args(std::move(args)),
       block(std::move(block)) {
@@ -269,7 +269,7 @@ Send::Send(core::LocOffsets loc, TreePtr recv, core::NameRef fun, u2 numPosArgs,
     _sanityCheck();
 }
 
-Cast::Cast(core::LocOffsets loc, core::TypePtr ty, TreePtr arg, core::NameRef cast)
+Cast::Cast(core::LocOffsets loc, core::TypePtr ty, ExpressionPtr arg, core::NameRef cast)
     : loc(loc), cast(cast), type(std::move(ty)), arg(std::move(arg)) {
     categoryCounterInc("trees", "cast");
     _sanityCheck();
@@ -280,28 +280,28 @@ ZSuperArgs::ZSuperArgs(core::LocOffsets loc) : loc(loc) {
     _sanityCheck();
 }
 
-RestArg::RestArg(core::LocOffsets loc, TreePtr arg) : loc(loc), expr(std::move(arg)) {
+RestArg::RestArg(core::LocOffsets loc, ExpressionPtr arg) : loc(loc), expr(std::move(arg)) {
     categoryCounterInc("trees", "restarg");
     _sanityCheck();
 }
 
-KeywordArg::KeywordArg(core::LocOffsets loc, TreePtr expr) : loc(loc), expr(std::move(expr)) {
+KeywordArg::KeywordArg(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), expr(std::move(expr)) {
     categoryCounterInc("trees", "keywordarg");
     _sanityCheck();
 }
 
-OptionalArg::OptionalArg(core::LocOffsets loc, TreePtr expr, TreePtr default_)
+OptionalArg::OptionalArg(core::LocOffsets loc, ExpressionPtr expr, ExpressionPtr default_)
     : loc(loc), expr(std::move(expr)), default_(std::move(default_)) {
     categoryCounterInc("trees", "optionalarg");
     _sanityCheck();
 }
 
-ShadowArg::ShadowArg(core::LocOffsets loc, TreePtr expr) : loc(loc), expr(std::move(expr)) {
+ShadowArg::ShadowArg(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), expr(std::move(expr)) {
     categoryCounterInc("trees", "shadowarg");
     _sanityCheck();
 }
 
-BlockArg::BlockArg(core::LocOffsets loc, TreePtr expr) : loc(loc), expr(std::move(expr)) {
+BlockArg::BlockArg(core::LocOffsets loc, ExpressionPtr expr) : loc(loc), expr(std::move(expr)) {
     categoryCounterInc("trees", "blockarg");
     _sanityCheck();
 }
@@ -311,13 +311,13 @@ Literal::Literal(core::LocOffsets loc, const core::TypePtr &value) : loc(loc), v
     _sanityCheck();
 }
 
-UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, TreePtr scope, core::NameRef cnst)
+UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr scope, core::NameRef cnst)
     : loc(loc), cnst(cnst), scope(std::move(scope)) {
     categoryCounterInc("trees", "constantlit");
     _sanityCheck();
 }
 
-ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, TreePtr original)
+ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol, ExpressionPtr original)
     : loc(loc), symbol(symbol), original(std::move(original)) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
@@ -350,7 +350,7 @@ ConstantLit::fullUnresolvedPath(const core::GlobalState &gs) const {
     return make_pair(prefix, move(namesFailedToResolve));
 }
 
-Block::Block(core::LocOffsets loc, MethodDef::ARGS_store args, TreePtr body)
+Block::Block(core::LocOffsets loc, MethodDef::ARGS_store args, ExpressionPtr body)
     : loc(loc), args(std::move(args)), body(std::move(body)) {
     categoryCounterInc("trees", "block");
     _sanityCheck();
@@ -369,7 +369,7 @@ Array::Array(core::LocOffsets loc, ENTRY_store elems) : loc(loc), elems(std::mov
     _sanityCheck();
 }
 
-InsSeq::InsSeq(core::LocOffsets loc, STATS_store stats, TreePtr expr)
+InsSeq::InsSeq(core::LocOffsets loc, STATS_store stats, ExpressionPtr expr)
     : loc(loc), stats(std::move(stats)), expr(std::move(expr)) {
     categoryCounterInc("trees", "insseq");
     histogramInc("trees.insseq.stats", this->stats.size());
@@ -387,8 +387,8 @@ EmptyTree singletonEmptyTree{};
 
 } // namespace
 
-template <> TreePtr make_tree<EmptyTree>() {
-    TreePtr result = nullptr;
+template <> ExpressionPtr make_tree<EmptyTree>() {
+    ExpressionPtr result = nullptr;
     result.reset(&singletonEmptyTree);
     return result;
 }

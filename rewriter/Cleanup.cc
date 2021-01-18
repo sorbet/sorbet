@@ -12,7 +12,7 @@ namespace sorbet::rewriter {
 // pass, specifically by removing EmptyTree nodes in places where they can be safely removed (i.e. as part of longer
 // sequences of expressions where they are not a return value)
 struct CleanupWalk {
-    ast::TreePtr postTransformInsSeq(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformInsSeq(core::Context ctx, ast::ExpressionPtr tree) {
         auto &insSeq = ast::cast_tree_nonnull<ast::InsSeq>(tree);
 
         ast::InsSeq::STATS_store newStore;
@@ -28,7 +28,7 @@ struct CleanupWalk {
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         ast::ClassDef::RHS_store newStore;
@@ -42,7 +42,7 @@ struct CleanupWalk {
     }
 };
 
-ast::TreePtr Cleanup::run(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr Cleanup::run(core::Context ctx, ast::ExpressionPtr tree) {
     CleanupWalk cleanup;
     return ast::TreeMap::apply(ctx, cleanup, std::move(tree));
 }

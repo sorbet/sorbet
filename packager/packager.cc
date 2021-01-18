@@ -21,7 +21,7 @@ constexpr string_view PACKAGE_FILE_NAME = "__package.rb"sv;
 struct FullyQualifiedName {
     vector<core::NameRef> parts;
     core::Loc loc;
-    ast::TreePtr toLiteral(core::LocOffsets loc) const;
+    ast::ExpressionPtr toLiteral(core::LocOffsets loc) const;
 };
 
 class NameFormatter final {
@@ -198,17 +198,17 @@ PackageName getPackageName(core::MutableContext ctx, ast::UnresolvedConstantLit 
     return pName;
 }
 
-bool isReferenceToPackageSpec(core::Context ctx, ast::TreePtr &expr) {
+bool isReferenceToPackageSpec(core::Context ctx, ast::ExpressionPtr &expr) {
     auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
 }
 
-ast::TreePtr name2Expr(core::NameRef name, ast::TreePtr scope = ast::MK::EmptyTree()) {
+ast::ExpressionPtr name2Expr(core::NameRef name, ast::ExpressionPtr scope = ast::MK::EmptyTree()) {
     return ast::MK::UnresolvedConstant(core::LocOffsets::none(), move(scope), name);
 }
 
-ast::TreePtr FullyQualifiedName::toLiteral(core::LocOffsets loc) const {
-    ast::TreePtr name = ast::MK::EmptyTree();
+ast::ExpressionPtr FullyQualifiedName::toLiteral(core::LocOffsets loc) const {
+    ast::ExpressionPtr name = ast::MK::EmptyTree();
     for (auto part : parts) {
         name = name2Expr(part, move(name));
     }
@@ -219,7 +219,7 @@ ast::TreePtr FullyQualifiedName::toLiteral(core::LocOffsets loc) const {
     return name;
 }
 
-ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::TreePtr &expr) {
+ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
         if (auto e = ctx.beginError(expr.loc(), core::errors::Packager::InvalidImportOrExport)) {
@@ -235,7 +235,7 @@ struct PackageInfoFinder {
     vector<FullyQualifiedName> exportedMethods;
     core::LocOffsets exportMethodsLoc = core::LocOffsets::none();
 
-    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         // Ignore methods
@@ -316,7 +316,7 @@ struct PackageInfoFinder {
         return tree;
     }
 
-    ast::TreePtr preTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
@@ -344,7 +344,7 @@ struct PackageInfoFinder {
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol != core::Symbols::root() || info == nullptr || exportedMethods.empty()) {
             return tree;
@@ -372,7 +372,7 @@ struct PackageInfoFinder {
     }
 
     // Bar::Baz => <PackageRegistry>::Foo_Package::Bar::Baz
-    ast::TreePtr prependInternalPackageName(ast::TreePtr scope) {
+    ast::ExpressionPtr prependInternalPackageName(ast::ExpressionPtr scope) {
         ENFORCE(info != nullptr);
         // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
         ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
@@ -437,72 +437,72 @@ struct PackageInfoFinder {
         }
     }
 
-    ast::TreePtr preTransformIf(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformIf(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`if`");
         return original;
     }
 
-    ast::TreePtr preTransformWhile(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformWhile(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`while`");
         return original;
     }
 
-    ast::TreePtr postTransformBreak(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr postTransformBreak(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`break`");
         return original;
     }
 
-    ast::TreePtr postTransformRetry(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr postTransformRetry(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`retry`");
         return original;
     }
 
-    ast::TreePtr postTransformNext(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr postTransformNext(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`next`");
         return original;
     }
 
-    ast::TreePtr preTransformReturn(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformReturn(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`return`");
         return original;
     }
 
-    ast::TreePtr preTransformRescueCase(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformRescueCase(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`rescue case`");
         return original;
     }
 
-    ast::TreePtr preTransformRescue(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformRescue(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`rescue`");
         return original;
     }
 
-    ast::TreePtr preTransformAssign(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformAssign(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`=`");
         return original;
     }
 
-    ast::TreePtr preTransformHash(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformHash(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "hash literals");
         return original;
     }
 
-    ast::TreePtr preTransformArray(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformArray(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "array literals");
         return original;
     }
 
-    ast::TreePtr preTransformMethodDef(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "method definitions");
         return original;
     }
 
-    ast::TreePtr preTransformBlock(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "blocks");
         return original;
     }
 
-    ast::TreePtr preTransformInsSeq(core::MutableContext ctx, ast::TreePtr original) {
+    ast::ExpressionPtr preTransformInsSeq(core::MutableContext ctx, ast::ExpressionPtr original) {
         illegalNode(ctx, original.loc(), "`begin` and `end`");
         return original;
     }

@@ -8,21 +8,21 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-static bool literalSymbolEqual(const core::GlobalState &gs, const ast::TreePtr &node, core::NameRef name) {
+static bool literalSymbolEqual(const core::GlobalState &gs, const ast::ExpressionPtr &node, core::NameRef name) {
     if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == name;
     }
     return false;
 }
 
-static bool isLiteralTrue(const core::GlobalState &gs, const ast::TreePtr &node) {
+static bool isLiteralTrue(const core::GlobalState &gs, const ast::ExpressionPtr &node) {
     if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isTrue(gs);
     }
     return false;
 }
 
-static optional<core::NameRef> stringOrSymbolNameRef(const core::GlobalState &gs, const ast::TreePtr &node) {
+static optional<core::NameRef> stringOrSymbolNameRef(const core::GlobalState &gs, const ast::ExpressionPtr &node) {
     auto lit = ast::cast_tree<ast::Literal>(node);
     if (!lit) {
         return nullopt;
@@ -36,8 +36,8 @@ static optional<core::NameRef> stringOrSymbolNameRef(const core::GlobalState &gs
     }
 }
 
-vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *send) {
-    vector<ast::TreePtr> empty;
+vector<ast::ExpressionPtr> Delegate::run(core::MutableContext ctx, const ast::Send *send) {
+    vector<ast::ExpressionPtr> empty;
     auto loc = send->loc;
 
     if (send->fun != core::Names::delegate()) {
@@ -59,7 +59,7 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
         return empty;
     }
 
-    ast::TreePtr const *prefixNode = nullptr;
+    ast::ExpressionPtr const *prefixNode = nullptr;
     core::NameRef toName;
     {
         optional<core::NameRef> to;
@@ -92,7 +92,7 @@ vector<ast::TreePtr> Delegate::run(core::MutableContext ctx, const ast::Send *se
         }
     }
 
-    vector<ast::TreePtr> methodStubs;
+    vector<ast::ExpressionPtr> methodStubs;
     for (int i = 0; i < send->numPosArgs; i++) {
         auto *lit = ast::cast_tree<ast::Literal>(send->args[i]);
         if (!lit || !lit->isSymbol(ctx)) {

@@ -589,7 +589,7 @@ private:
     }
 
 public:
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         auto sym = classDef.symbol;
         auto singleton = sym.data(ctx)->lookupSingletonClass(ctx);
@@ -605,7 +605,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         auto methodData = methodDef.symbol.data(ctx);
         auto ownerData = methodData->owner.data(ctx);

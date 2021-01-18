@@ -34,7 +34,7 @@ public:
     static void pickle(Pickler &p, const TypePtr &what);
     static void pickle(Pickler &p, const ArgInfo &a);
     static void pickle(Pickler &p, const Symbol &what);
-    static void pickle(Pickler &p, const ast::TreePtr &what);
+    static void pickle(Pickler &p, const ast::ExpressionPtr &what);
     static void pickle(Pickler &p, core::LocOffsets loc);
     static void pickle(Pickler &p, core::Loc loc);
     static void pickle(Pickler &p, shared_ptr<const FileHash> fh);
@@ -50,7 +50,7 @@ public:
     static u4 unpickleGSUUID(UnPickler &p);
     static LocOffsets unpickleLocOffsets(UnPickler &p);
     static Loc unpickleLoc(UnPickler &p);
-    static ast::TreePtr unpickleExpr(UnPickler &p, const GlobalState &, FileRef file);
+    static ast::ExpressionPtr unpickleExpr(UnPickler &p, const GlobalState &, FileRef file);
     static NameRef unpickleNameRef(UnPickler &p, const GlobalState &);
     static NameRef unpickleNameRef(UnPickler &p, GlobalState &);
     static unique_ptr<const FileHash> unpickleFileHash(UnPickler &p);
@@ -901,7 +901,7 @@ CachedFile Serializer::loadFile(const core::GlobalState &gs, core::FileRef fref,
     return CachedFile{move(file), move(tree)};
 }
 
-void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
+void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
     if (what == nullptr) {
         p.putU4(0);
         return;
@@ -1193,7 +1193,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::TreePtr &what) {
     }
 }
 
-ast::TreePtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs, FileRef file) {
+ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs, FileRef file) {
     auto kind = p.getU4();
     if (kind == 0) {
         return nullptr;
@@ -1212,7 +1212,7 @@ ast::TreePtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalS
             auto argsSize = p.getU4();
             auto recv = unpickleExpr(p, gs, file);
             auto blkt = unpickleExpr(p, gs, file);
-            ast::TreePtr blk;
+            ast::ExpressionPtr blk;
             if (blkt) {
                 blk.reset(static_cast<ast::Block *>(blkt.release()));
             }

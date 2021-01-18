@@ -56,7 +56,7 @@ string singleTest;
 class CFGCollectorAndTyper {
 public:
     vector<unique_ptr<cfg::CFG>> cfgs;
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         if (m.symbol.data(ctx)->isOverloaded()) {

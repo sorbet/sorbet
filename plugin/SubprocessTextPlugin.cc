@@ -13,7 +13,7 @@ struct Namespace {
     Type type;
     InlinedVector<core::NameRef, 3> components;
 
-    Namespace(ast::TreePtr &tree) {
+    Namespace(ast::ExpressionPtr &tree) {
         auto *klass = ast::cast_tree<ast::ClassDef>(tree);
         type = (klass->kind == ast::ClassDef::Kind::Module ? Namespace::Type::Module : Namespace::Type::Class);
         fillComponents(klass->name);
@@ -22,7 +22,7 @@ struct Namespace {
     Namespace(Namespace &&) = default;
 
 private:
-    void fillComponents(ast::TreePtr &constant) {
+    void fillComponents(ast::ExpressionPtr &constant) {
         auto *cursor = &constant;
         while (cursor) {
             if (auto unresolved = ast::cast_tree<ast::UnresolvedConstantLit>(*cursor)) {
@@ -49,7 +49,7 @@ struct SpawningWalker {
 
     SpawningWalker() {}
 
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto *klass = ast::cast_tree<ast::ClassDef>(tree);
         if (klass->symbol == core::Symbols::root()) {
             return tree;
@@ -123,7 +123,7 @@ struct SpawningWalker {
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr klass) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr klass) {
         if (ast::cast_tree<ast::ClassDef>(klass)->symbol != core::Symbols::root()) {
             nesting.pop_back();
         }
@@ -131,7 +131,7 @@ struct SpawningWalker {
     }
 };
 
-pair<ast::TreePtr, vector<shared_ptr<core::File>>> SubprocessTextPlugin::run(core::Context ctx, ast::TreePtr tree) {
+pair<ast::ExpressionPtr, vector<shared_ptr<core::File>>> SubprocessTextPlugin::run(core::Context ctx, ast::ExpressionPtr tree) {
     if (!ctx.state.hasAnyDslPlugin()) {
         vector<shared_ptr<core::File>> empty;
         return {move(tree), empty};

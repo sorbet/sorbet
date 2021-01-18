@@ -15,8 +15,8 @@ namespace sorbet::rewriter {
 void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     // once we see a bare `module_function`, we should replace every subsequent definition
     bool moduleFunctionActive = false;
-    ast::TreePtr *prevStat = nullptr;
-    UnorderedMap<void *, vector<ast::TreePtr>> replaceNodes;
+    ast::ExpressionPtr *prevStat = nullptr;
+    UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
     for (auto &stat : cdef->rhs) {
         if (auto send = ast::cast_tree<ast::Send>(stat)) {
             // we only care about sends if they're `module_function`
@@ -27,7 +27,7 @@ void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
                     moduleFunctionActive = true;
                     // putting in an empty statement list, which means we remove this statement when we get around to
                     // updating the statement list
-                    vector<ast::TreePtr> empty;
+                    vector<ast::ExpressionPtr> empty;
                     replaceNodes[stat.get()] = move(empty);
                 } else {
                     // if we do have arguments, then we can rewrite them appropriately
@@ -68,9 +68,9 @@ void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
     }
 }
 
-vector<ast::TreePtr> ModuleFunction::rewriteDefn(core::MutableContext ctx, const ast::TreePtr &expr,
-                                                 const ast::TreePtr *prevStat) {
-    vector<ast::TreePtr> stats;
+vector<ast::ExpressionPtr> ModuleFunction::rewriteDefn(core::MutableContext ctx, const ast::ExpressionPtr &expr,
+                                                 const ast::ExpressionPtr *prevStat) {
+    vector<ast::ExpressionPtr> stats;
     auto mdef = ast::cast_tree<ast::MethodDef>(expr);
     // only do this rewrite to method defs that aren't self methods
     if (mdef == nullptr || mdef->flags.isSelfMethod) {
@@ -102,8 +102,8 @@ vector<ast::TreePtr> ModuleFunction::rewriteDefn(core::MutableContext ctx, const
     return stats;
 }
 
-vector<ast::TreePtr> ModuleFunction::run(core::MutableContext ctx, ast::Send *send, const ast::TreePtr *prevStat) {
-    vector<ast::TreePtr> stats;
+vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Send *send, const ast::ExpressionPtr *prevStat) {
+    vector<ast::ExpressionPtr> stats;
 
     if (send->fun != core::Names::moduleFunction()) {
         return stats;

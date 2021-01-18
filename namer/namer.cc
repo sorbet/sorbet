@@ -348,7 +348,7 @@ class SymbolFinder {
     // This tracks those as they appear.
     vector<optional<Modifier>> methodVisiStack = {nullopt};
 
-    void findClassModifiers(core::Context ctx, FoundDefinitionRef klass, ast::TreePtr &line) {
+    void findClassModifiers(core::Context ctx, FoundDefinitionRef klass, ast::ExpressionPtr &line) {
         auto *send = ast::cast_tree<ast::Send>(line);
         if (send == nullptr) {
             return;
@@ -380,7 +380,7 @@ class SymbolFinder {
     }
 
     // Returns index to foundDefs containing the given name. Recursively inserts class refs for its owners.
-    FoundDefinitionRef squashNames(core::Context ctx, const ast::TreePtr &node) {
+    FoundDefinitionRef squashNames(core::Context ctx, const ast::ExpressionPtr &node) {
         if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
             // Already defined. Insert a foundname so we can reference it.
             auto sym = id->symbol.data(ctx)->dealias(ctx);
@@ -407,7 +407,7 @@ public:
         return rv;
     }
 
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         FoundClass found;
@@ -438,7 +438,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         FoundDefinitionRef klassName = ownerStack.back();
@@ -452,17 +452,17 @@ public:
         return tree;
     }
 
-    ast::TreePtr preTransformBlock(core::Context ctx, ast::TreePtr block) {
+    ast::ExpressionPtr preTransformBlock(core::Context ctx, ast::ExpressionPtr block) {
         methodVisiStack.emplace_back(nullopt);
         return block;
     }
 
-    ast::TreePtr postTransformBlock(core::Context ctx, ast::TreePtr block) {
+    ast::ExpressionPtr postTransformBlock(core::Context ctx, ast::ExpressionPtr block) {
         methodVisiStack.pop_back();
         return block;
     }
 
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         FoundMethod foundMethod;
         foundMethod.owner = getOwner();
@@ -480,12 +480,12 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         ownerStack.pop_back();
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (original.fun.rawId()) {
@@ -543,7 +543,7 @@ public:
         return tree;
     }
 
-    void addMethodModifier(core::Context ctx, core::NameRef modifierName, const ast::TreePtr &arg) {
+    void addMethodModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
         auto target = unwrapLiteralToMethodName(ctx, arg);
         if (target.exists()) {
             foundDefs->addModifier(Modifier{
@@ -556,7 +556,7 @@ public:
         }
     }
 
-    void addConstantModifier(core::Context ctx, core::NameRef modifierName, const ast::TreePtr &arg) {
+    void addConstantModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
         auto target = core::NameRef::noName();
         if (auto sym = ast::cast_tree<ast::Literal>(arg)) {
             if (sym->isSymbol(ctx)) {
@@ -577,7 +577,7 @@ public:
         }
     }
 
-    core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::TreePtr &expr) {
+    core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::ExpressionPtr &expr) {
         if (auto sym = ast::cast_tree<ast::Literal>(expr)) {
             // this handles the `private :foo` case
             if (!sym->isSymbol(ctx)) {
@@ -686,7 +686,7 @@ public:
         return foundRef;
     }
 
-    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
@@ -1431,7 +1431,7 @@ public:
 class TreeSymbolizer {
     friend class Namer;
 
-    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::TreePtr &node, bool firstName) {
+    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node, bool firstName) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
@@ -1473,13 +1473,13 @@ class TreeSymbolizer {
         return existing;
     }
 
-    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::TreePtr &node) {
+    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
         const bool firstName = true;
         return squashNamesInner(ctx, owner, node, firstName);
     }
 
-    ast::TreePtr arg2Symbol(core::Context ctx, int pos, ast::ParsedArg parsedArg, ast::TreePtr arg) {
-        ast::TreePtr localExpr = ast::make_tree<ast::Local>(parsedArg.loc, parsedArg.local);
+    ast::ExpressionPtr arg2Symbol(core::Context ctx, int pos, ast::ParsedArg parsedArg, ast::ExpressionPtr arg) {
+        ast::ExpressionPtr localExpr = ast::make_tree<ast::Local>(parsedArg.loc, parsedArg.local);
         if (parsedArg.flags.isDefault) {
             localExpr =
                 ast::MK::OptionalArg(parsedArg.loc, move(localExpr), ast::ArgParsing::getDefault(parsedArg, move(arg)));
@@ -1487,7 +1487,7 @@ class TreeSymbolizer {
         return localExpr;
     }
 
-    void addAncestor(core::Context ctx, ast::ClassDef &klass, ast::TreePtr &node) {
+    void addAncestor(core::Context ctx, ast::ClassDef &klass, ast::ExpressionPtr &node) {
         auto send = ast::cast_tree<ast::Send>(node);
         if (send == nullptr) {
             ENFORCE(node.get() != nullptr);
@@ -1542,7 +1542,7 @@ class TreeSymbolizer {
         }
     }
 
-    bool isValidAncestor(ast::TreePtr &exp) {
+    bool isValidAncestor(ast::ExpressionPtr &exp) {
         if (ast::isa_tree<ast::EmptyTree>(exp) || exp.isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
             return true;
         }
@@ -1553,7 +1553,7 @@ class TreeSymbolizer {
     }
 
 public:
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
@@ -1583,7 +1583,7 @@ public:
     }
 
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
-    bool shouldLeaveAncestorForIDE(const ast::TreePtr &anc) {
+    bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
         // used in Desugar <-> resolver to signal classes that did not have explicit superclass
         if (ast::isa_tree<ast::EmptyTree>(anc) || anc.isSelfReference()) {
             return false;
@@ -1595,7 +1595,7 @@ public:
         return true;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         // NameDefiner should have forced this class's singleton class into existence.
@@ -1672,7 +1672,7 @@ public:
         return args;
     }
 
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
         auto owner = methodOwner(ctx, method.flags);
@@ -1685,14 +1685,14 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(method.args.size() == method.symbol.data(ctx)->arguments().size(), "{}: {} != {}",
                 method.name.showRaw(ctx), method.args.size(), method.symbol.data(ctx)->arguments().size());
         return tree;
     }
 
-    ast::TreePtr handleAssignment(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr handleAssignment(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
@@ -1710,7 +1710,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr handleTypeMemberDefinition(core::Context ctx, ast::Send *send, ast::TreePtr tree,
+    ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::Send *send, ast::ExpressionPtr tree,
                                             const ast::UnresolvedConstantLit *typeName) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
@@ -1802,7 +1802,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);

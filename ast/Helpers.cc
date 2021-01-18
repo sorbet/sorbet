@@ -4,7 +4,7 @@ using namespace std;
 
 namespace sorbet::ast {
 
-bool definesBehavior(const TreePtr &expr) {
+bool definesBehavior(const ExpressionPtr &expr) {
     if (BehaviorHelpers::checkEmptyDeep(expr)) {
         return false;
     }
@@ -45,11 +45,11 @@ bool definesBehavior(const TreePtr &expr) {
         [&](const ast::MethodDef &methodDef) { result = !methodDef.flags.isRewriterSynthesized; },
         [&](const ast::Literal &methodDef) { result = false; },
 
-        [&](const TreePtr &klass) { result = true; });
+        [&](const ExpressionPtr &klass) { result = true; });
     return result;
 }
 
-bool BehaviorHelpers::checkClassDefinesBehavior(const TreePtr &expr) {
+bool BehaviorHelpers::checkClassDefinesBehavior(const ExpressionPtr &expr) {
     auto *klass = ast::cast_tree<ast::ClassDef>(expr);
     ENFORCE(klass);
     return BehaviorHelpers::checkClassDefinesBehavior(*klass);
@@ -71,7 +71,7 @@ bool BehaviorHelpers::checkClassDefinesBehavior(const ast::ClassDef &klass) {
     return absl::c_any_of(klass.rhs, [](auto &tree) { return definesBehavior(tree); });
 }
 
-bool BehaviorHelpers::checkEmptyDeep(const TreePtr &expr) {
+bool BehaviorHelpers::checkEmptyDeep(const ExpressionPtr &expr) {
     bool result = false;
 
     typecase(
@@ -90,7 +90,7 @@ bool BehaviorHelpers::checkEmptyDeep(const TreePtr &expr) {
                      checkEmptyDeep(seq.expr);
         },
 
-        [&](const TreePtr &klass) { result = false; });
+        [&](const ExpressionPtr &klass) { result = false; });
     return result;
 }
 

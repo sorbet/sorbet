@@ -146,7 +146,7 @@ BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b
 
 tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext cctx, int argIndex,
                                                                     const core::ArgInfo &argInfo, LocalRef argLocal,
-                                                                    core::LocOffsets argLoc, ast::TreePtr &def,
+                                                                    core::LocOffsets argLoc, ast::ExpressionPtr &def,
                                                                     BasicBlock *presentCont, BasicBlock *defaultCont) {
     auto defLoc = def.loc();
 
@@ -179,7 +179,7 @@ tuple<LocalRef, BasicBlock *, BasicBlock *> CFGBuilder::walkDefault(CFGContext c
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
-BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::TreePtr &what, BasicBlock *current) {
+BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlock *current) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
@@ -775,7 +775,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::TreePtr &what, BasicBlock *cu
             [&](const ast::ClassDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
             [&](const ast::MethodDef &c) { Exception::raise("Should have been removed by FlattenWalk"); },
 
-            [&](const ast::TreePtr &n) { Exception::raise("Unimplemented AST Node: {}", what.nodeName()); });
+            [&](const ast::ExpressionPtr &n) { Exception::raise("Unimplemented AST Node: {}", what.nodeName()); });
 
         // For, Rescue,
         // Symbol, Array,

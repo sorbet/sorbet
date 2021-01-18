@@ -57,7 +57,7 @@ public:
         nesting.emplace_back(def.id);
     }
 
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
@@ -150,7 +150,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         if (!ast::isa_tree<ast::ConstantLit>(original.name)) {
@@ -166,12 +166,12 @@ public:
         return tree;
     }
 
-    ast::TreePtr preTransformBlock(core::Context ctx, ast::TreePtr block) {
+    ast::ExpressionPtr preTransformBlock(core::Context ctx, ast::ExpressionPtr block) {
         scopeTypes.emplace_back(ScopeType::Block);
         return block;
     }
 
-    ast::TreePtr postTransformBlock(core::Context ctx, ast::TreePtr block) {
+    ast::ExpressionPtr postTransformBlock(core::Context ctx, ast::ExpressionPtr block) {
         scopeTypes.pop_back();
         return block;
     }
@@ -188,7 +188,7 @@ public:
         return false;
     }
 
-    ast::TreePtr postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         auto *original = ast::cast_tree<ast::ConstantLit>(tree);
 
         if (!ignoring.empty()) {
@@ -239,7 +239,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         // autogen only cares about constant assignments/definitions, so bail otherwise
@@ -281,7 +281,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto *original = ast::cast_tree<ast::Send>(tree);
 
         bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
@@ -303,7 +303,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto *original = ast::cast_tree<ast::Send>(tree);
         // if this send was something we were ignoring (i.e. a `keepForIde` or an `include` or `require`) then pop this
         if (!ignoring.empty() && ignoring.back() == original) {

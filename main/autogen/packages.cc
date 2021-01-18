@@ -27,7 +27,7 @@ class PackageWalk {
     }
 
 public:
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root() || classDef.ancestors.size() != 1 ||
             classDef.kind != ast::ClassDef::Kind::Class) {
@@ -42,7 +42,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         // we're not going to report errors about ill-formed things here: those errors should get reported elsewhere,
         // and instead we'll bail if things don't look like we expect

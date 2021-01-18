@@ -7,21 +7,21 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-static bool literalSymbolEqual(const core::GlobalState &gs, const ast::TreePtr &node, core::NameRef name) {
+static bool literalSymbolEqual(const core::GlobalState &gs, const ast::ExpressionPtr &node, core::NameRef name) {
     if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == name;
     }
     return false;
 }
 
-static bool isLiteralFalse(const core::GlobalState &gs, const ast::TreePtr &node) {
+static bool isLiteralFalse(const core::GlobalState &gs, const ast::ExpressionPtr &node) {
     if (auto lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isFalse(gs);
     }
     return false;
 }
 
-static void addInstanceCounterPart(vector<ast::TreePtr> &sink, const ast::TreePtr &sig, const ast::TreePtr &def) {
+static void addInstanceCounterPart(vector<ast::ExpressionPtr> &sink, const ast::ExpressionPtr &sig, const ast::ExpressionPtr &def) {
     sink.emplace_back(sig.deepCopy());
     auto instanceDef = def.deepCopy();
     ENFORCE(ast::isa_tree<ast::MethodDef>(def));
@@ -30,8 +30,8 @@ static void addInstanceCounterPart(vector<ast::TreePtr> &sink, const ast::TreePt
     sink.emplace_back(move(instanceDef));
 }
 
-vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send, ast::ClassDef::Kind classDefKind) {
-    vector<ast::TreePtr> empty;
+vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send *send, ast::ClassDef::Kind classDefKind) {
+    vector<ast::ExpressionPtr> empty;
     bool doReaders = false;
     bool doWriters = false;
     bool doPredicates = false;
@@ -84,7 +84,7 @@ vector<ast::TreePtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
         return empty;
     }
 
-    vector<ast::TreePtr> result;
+    vector<ast::ExpressionPtr> result;
     for (int i = 0; i < symbolArgsBound; i++) {
         auto *lit = ast::cast_tree<ast::Literal>(send->args[i]);
         if (!lit || !lit->isSymbol(ctx)) {

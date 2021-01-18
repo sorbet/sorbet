@@ -56,7 +56,7 @@ class CFGCollectorAndTyper {
 public:
     CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
 
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &m = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         if (ctx.file.data(ctx).strictLevel < core::StrictLevel::True || m.symbol.data(ctx)->isOverloaded()) {
             return tree;
@@ -109,7 +109,7 @@ unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs
     return nullptr;
 }
 
-ast::TreePtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
+ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
                                 const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     auto cachedFile = fetchFileFromCache(gs, fref, file, kvstore);
     if (cachedFile) {
@@ -140,10 +140,10 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
     return nodes;
 }
 
-ast::TreePtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
+ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
                         const options::Printers &print) {
     Timer timeit(gs.tracer(), "runDesugar", {{"file", (string)file.data(gs).path()}});
-    ast::TreePtr ast;
+    ast::ExpressionPtr ast;
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
@@ -158,7 +158,7 @@ ast::TreePtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<pa
     return ast;
 }
 
-ast::TreePtr runRewriter(core::GlobalState &gs, core::FileRef file, ast::TreePtr ast) {
+ast::ExpressionPtr runRewriter(core::GlobalState &gs, core::FileRef file, ast::ExpressionPtr ast) {
     core::MutableContext ctx(gs, core::Symbols::root(), file);
     Timer timeit(gs.tracer(), "runRewriter", {{"file", (string)file.data(gs).path()}});
     core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
@@ -175,7 +175,7 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
     return {ast::MK::EmptyTree(), file};
 }
 
-ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file, ast::TreePtr tree) {
+ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file, ast::ExpressionPtr tree) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
     ENFORCE(file.data(lgs).strictLevel == decideStrictLevel(lgs, file, opts));
@@ -229,7 +229,7 @@ pair<ast::ParsedFile, vector<shared_ptr<core::File>>> emptyPluginFile(core::File
 }
 
 pair<ast::ParsedFile, vector<shared_ptr<core::File>>>
-indexOneWithPlugins(const options::Options &opts, core::GlobalState &gs, core::FileRef file, ast::TreePtr tree) {
+indexOneWithPlugins(const options::Options &opts, core::GlobalState &gs, core::FileRef file, ast::ExpressionPtr tree) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
     vector<shared_ptr<core::File>> resultPluginFiles;
@@ -441,10 +441,10 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
 }
 
 // Returns a non-null ast::Expression if kvstore contains the AST.
-ast::TreePtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
+ast::ExpressionPtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
                                              const options::Options &opts,
                                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    ast::TreePtr ast;
+    ast::ExpressionPtr ast;
     if (file.dataAllowingUnsafe(*gs).sourceType != core::File::Type::NotYetRead) {
         return ast;
     }
@@ -787,7 +787,7 @@ ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> 
 class GatherUnresolvedConstantsWalk {
 public:
     vector<string> unresolvedConstants;
-    ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto unresolvedPath = ast::cast_tree_nonnull<ast::ConstantLit>(tree).fullUnresolvedPath(ctx);
         if (unresolvedPath.has_value()) {
             unresolvedConstants.emplace_back(fmt::format(
@@ -848,11 +848,11 @@ public:
         ENFORCE(file.exists());
     };
 
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         checkSym(ctx, ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
         return tree;
     }
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         checkSym(ctx, ast::cast_tree_nonnull<ast::MethodDef>(tree).symbol);
         return tree;
     }
@@ -1221,12 +1221,12 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
 class AllNamesCollector {
 public:
     core::UsageHash acc;
-    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         acc.sends.emplace_back(ctx, ast::cast_tree_nonnull<ast::Send>(tree).fun);
         return tree;
     }
 
-    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         acc.constants.emplace_back(ctx, original.name);
         return tree;
@@ -1240,7 +1240,7 @@ public:
         }
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         acc.constants.emplace_back(ctx, original.symbol.data(ctx)->name);
 
@@ -1254,13 +1254,13 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformUnresolvedConstantLit(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
         handleUnresolvedConstantLit(ctx, &original);
         return tree;
     }
 
-    ast::TreePtr postTransformUnresolvedIdent(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr tree) {
         auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         if (id.kind != ast::UnresolvedIdent::Kind::Local) {
             acc.constants.emplace_back(ctx, id.name);
@@ -1269,7 +1269,7 @@ public:
     }
 };
 
-core::UsageHash getAllNames(core::Context ctx, ast::TreePtr &tree) {
+core::UsageHash getAllNames(core::Context ctx, ast::ExpressionPtr &tree) {
     AllNamesCollector collector;
     tree = ast::TreeMap::apply(ctx, collector, move(tree));
     core::NameHash::sortAndDedupe(collector.acc.sends);

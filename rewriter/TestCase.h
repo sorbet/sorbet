@@ -23,7 +23,7 @@ namespace sorbet::rewriter {
  */
 class TestCase final {
 public:
-    static std::vector<ast::TreePtr> run(core::MutableContext ctx, ast::Send *send);
+    static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, ast::Send *send);
 
     TestCase() = delete;
 };

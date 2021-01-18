@@ -6,7 +6,7 @@
 using namespace std;
 namespace sorbet::realmain::lsp {
 
-ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
@@ -49,7 +49,7 @@ ast::TreePtr DefLocSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr
     return tree;
 }
 
-ast::TreePtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr tree) {
     auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
     if (id.kind == ast::UnresolvedIdent::Kind::Instance || id.kind == ast::UnresolvedIdent::Kind::Class) {
         core::ClassOrModuleRef klass;
@@ -111,7 +111,7 @@ void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Que
     }
 }
 
-ast::TreePtr DefLocSaver::postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
     auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     auto symbol = lit.symbol.data(ctx)->dealias(ctx);

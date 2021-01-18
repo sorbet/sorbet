@@ -22,7 +22,7 @@ namespace sorbet::rewriter {
  */
 class InterfaceWrapper final {
 public:
-    static ast::TreePtr run(core::MutableContext ctx, ast::Send *send);
+    static ast::ExpressionPtr run(core::MutableContext ctx, ast::Send *send);
 
     InterfaceWrapper() = delete;
 };

@@ -13,11 +13,11 @@ class PreemptionTaskManager;
 
 namespace sorbet::realmain::pipeline {
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         ast::TreePtr cachedTree = nullptr);
+                         ast::ExpressionPtr cachedTree = nullptr);
 
 std::pair<ast::ParsedFile, std::vector<std::shared_ptr<core::File>>>
 indexOneWithPlugins(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                    ast::TreePtr cachedTree = nullptr);
+                    ast::ExpressionPtr cachedTree = nullptr);
 
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files);
 

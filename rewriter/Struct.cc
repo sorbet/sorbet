@@ -14,7 +14,7 @@ namespace sorbet::rewriter {
 
 namespace {
 
-bool isKeywordInitKey(const core::GlobalState &gs, const ast::TreePtr &node) {
+bool isKeywordInitKey(const core::GlobalState &gs, const ast::ExpressionPtr &node) {
     if (auto *lit = ast::cast_tree<ast::Literal>(node)) {
         return lit->isSymbol(gs) && lit->asSymbol(gs) == core::Names::keywordInit();
     }
@@ -23,8 +23,8 @@ bool isKeywordInitKey(const core::GlobalState &gs, const ast::TreePtr &node) {
 
 } // namespace
 
-vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
-    vector<ast::TreePtr> empty;
+vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
+    vector<ast::ExpressionPtr> empty;
 
     if (ctx.state.runningUnderAutogen) {
         return empty;
@@ -145,7 +145,7 @@ vector<ast::TreePtr> Struct::run(core::MutableContext ctx, ast::Assign *asgn) {
     ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
                                                        core::Names::Constants::Struct()));
 
-    vector<ast::TreePtr> stats;
+    vector<ast::ExpressionPtr> stats;
     stats.emplace_back(ast::MK::Class(loc, loc, std::move(asgn->lhs), std::move(ancestors), std::move(body)));
     return stats;
 }

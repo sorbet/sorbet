@@ -10,7 +10,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<ast::TreePtr> Regexp::run(core::MutableContext ctx, ast::Assign *asgn) {
+vector<ast::ExpressionPtr> Regexp::run(core::MutableContext ctx, ast::Assign *asgn) {
     auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs);
     if (lhs == nullptr) {
         return {};
@@ -26,7 +26,7 @@ vector<ast::TreePtr> Regexp::run(core::MutableContext ctx, ast::Assign *asgn) {
         return {};
     }
 
-    vector<ast::TreePtr> stats;
+    vector<ast::ExpressionPtr> stats;
     auto type = ast::MK::Constant(send->loc, core::Symbols::Regexp());
     auto newRhs = ast::MK::Let(send->loc, std::move(asgn->rhs), std::move(type));
     stats.emplace_back(ast::MK::Assign(asgn->loc, std::move(asgn->lhs), std::move(newRhs)));

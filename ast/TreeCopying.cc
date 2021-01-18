@@ -7,7 +7,7 @@ namespace sorbet::ast {
 
 namespace {
 
-TreePtr deepCopy(const void *avoid, const TreePtr &tree, bool root = false);
+ExpressionPtr deepCopy(const void *avoid, const ExpressionPtr &tree, bool root = false);
 
 template <class T> T deepCopyVec(const void *avoid, const T &origin) {
     T copy;
@@ -20,7 +20,7 @@ template <class T> T deepCopyVec(const void *avoid, const T &origin) {
 
 class DeepCopyError {};
 
-TreePtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool root) {
+ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool root) {
     if (!root && tree == avoid) {
         throw DeepCopyError();
     }
@@ -159,7 +159,7 @@ TreePtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool root) 
 
         case Tag::ConstantLit: {
             auto *exp = reinterpret_cast<const ConstantLit *>(tree);
-            TreePtr originalC;
+            ExpressionPtr originalC;
             if (exp->original) {
                 originalC = deepCopy(avoid, exp->original);
             }
@@ -183,7 +183,7 @@ TreePtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool root) 
     }
 }
 
-TreePtr deepCopy(const void *avoid, const TreePtr &tree, bool root) {
+ExpressionPtr deepCopy(const void *avoid, const ExpressionPtr &tree, bool root) {
     ENFORCE(tree != nullptr);
 
     return deepCopy(avoid, tree.tag(), tree.get(), root);
@@ -191,7 +191,7 @@ TreePtr deepCopy(const void *avoid, const TreePtr &tree, bool root) {
 
 } // namespace
 
-TreePtr TreePtr::deepCopy() const {
+ExpressionPtr ExpressionPtr::deepCopy() const {
     try {
         return sorbet::ast::deepCopy(get(), tag(), get(), true);
     } catch (DeepCopyError &e) {
@@ -200,7 +200,7 @@ TreePtr TreePtr::deepCopy() const {
 }
 
 #define COPY_IMPL(name)                                                             \
-    TreePtr name::deepCopy() const {                                                \
+    ExpressionPtr name::deepCopy() const {                                                \
         try {                                                                       \
             return sorbet::ast::deepCopy(this, TreeToTag<name>::value, this, true); \
         } catch (DeepCopyError & e) {                                               \
