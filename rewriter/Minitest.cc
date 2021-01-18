@@ -179,7 +179,7 @@ ast::ExpressionPtr getIteratee(ast::ExpressionPtr &exp) {
 // this applies to each statement contained within a `test_each`: if it's an `it`-block, then convert it appropriately,
 // otherwise flag an error about it
 ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr stmt,
-                          ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee) {
+                                ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee) {
     // this statement must be a send
     if (auto *send = ast::cast_tree<ast::Send>(stmt)) {
         // the send must be a call to `it` with a single argument (the test name) and a block with no arguments
@@ -217,7 +217,7 @@ ast::ExpressionPtr runUnderEach(core::MutableContext ctx, core::NameRef eachName
 
 // this just walks the body of a `test_each` and tries to transform every statement
 ast::ExpressionPtr prepareTestEachBody(core::MutableContext ctx, core::NameRef eachName, ast::ExpressionPtr body,
-                                 ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee) {
+                                       ast::MethodDef::ARGS_store &args, ast::ExpressionPtr &iteratee) {
     auto *bodySeq = ast::cast_tree<ast::InsSeq>(body);
     if (bodySeq) {
         for (auto &exp : bodySeq->stats) {

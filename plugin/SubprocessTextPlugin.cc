@@ -131,7 +131,8 @@ struct SpawningWalker {
     }
 };
 
-pair<ast::ExpressionPtr, vector<shared_ptr<core::File>>> SubprocessTextPlugin::run(core::Context ctx, ast::ExpressionPtr tree) {
+pair<ast::ExpressionPtr, vector<shared_ptr<core::File>>> SubprocessTextPlugin::run(core::Context ctx,
+                                                                                   ast::ExpressionPtr tree) {
     if (!ctx.state.hasAnyDslPlugin()) {
         vector<shared_ptr<core::File>> empty;
         return {move(tree), empty};

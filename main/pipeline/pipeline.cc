@@ -110,7 +110,7 @@ unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs
 }
 
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
-                                const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+                                      const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     auto cachedFile = fetchFileFromCache(gs, fref, file, kvstore);
     if (cachedFile) {
         return move(cachedFile->tree);
@@ -141,7 +141,7 @@ unique_ptr<parser::Node> runParser(core::GlobalState &gs, core::FileRef file, co
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
-                        const options::Printers &print) {
+                              const options::Printers &print) {
     Timer timeit(gs.tracer(), "runDesugar", {{"file", (string)file.data(gs).path()}});
     ast::ExpressionPtr ast;
     core::MutableContext ctx(gs, core::Symbols::root(), file);
@@ -175,7 +175,8 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
     return {ast::MK::EmptyTree(), file};
 }
 
-ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file, ast::ExpressionPtr tree) {
+ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
+                         ast::ExpressionPtr tree) {
     auto &print = opts.print;
     ast::ParsedFile rewriten{nullptr, file};
     ENFORCE(file.data(lgs).strictLevel == decideStrictLevel(lgs, file, opts));
@@ -442,8 +443,8 @@ void incrementStrictLevelCounter(core::StrictLevel level) {
 
 // Returns a non-null ast::Expression if kvstore contains the AST.
 ast::ExpressionPtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::FileRef file,
-                                             const options::Options &opts,
-                                             const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+                                                   const options::Options &opts,
+                                                   const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ast::ExpressionPtr ast;
     if (file.dataAllowingUnsafe(*gs).sourceType != core::File::Type::NotYetRead) {
         return ast;

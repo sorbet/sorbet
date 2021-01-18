@@ -21,7 +21,8 @@ static bool isLiteralFalse(const core::GlobalState &gs, const ast::ExpressionPtr
     return false;
 }
 
-static void addInstanceCounterPart(vector<ast::ExpressionPtr> &sink, const ast::ExpressionPtr &sig, const ast::ExpressionPtr &def) {
+static void addInstanceCounterPart(vector<ast::ExpressionPtr> &sink, const ast::ExpressionPtr &sig,
+                                   const ast::ExpressionPtr &def) {
     sink.emplace_back(sig.deepCopy());
     auto instanceDef = def.deepCopy();
     ENFORCE(ast::isa_tree<ast::MethodDef>(def));
@@ -30,7 +31,8 @@ static void addInstanceCounterPart(vector<ast::ExpressionPtr> &sink, const ast::
     sink.emplace_back(move(instanceDef));
 }
 
-vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send *send, ast::ClassDef::Kind classDefKind) {
+vector<ast::ExpressionPtr> Mattr::run(core::MutableContext ctx, const ast::Send *send,
+                                      ast::ClassDef::Kind classDefKind) {
     vector<ast::ExpressionPtr> empty;
     bool doReaders = false;
     bool doWriters = false;

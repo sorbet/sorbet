@@ -34,8 +34,8 @@ public:
         return store;
     }
 
-    static ExpressionPtr Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args,
-                        Send::Flags flags = {}, ExpressionPtr blk = nullptr) {
+    static ExpressionPtr Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs,
+                              Send::ARGS_store args, Send::Flags flags = {}, ExpressionPtr blk = nullptr) {
         auto send = make_tree<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), std::move(blk), flags);
         return send;
     }
@@ -54,12 +54,13 @@ public:
         return Send(loc, std::move(recv), fun, 1, SendArgs(std::move(arg1)));
     }
 
-    static ExpressionPtr Send2(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, ExpressionPtr arg1, ExpressionPtr arg2) {
+    static ExpressionPtr Send2(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, ExpressionPtr arg1,
+                               ExpressionPtr arg2) {
         return Send(loc, std::move(recv), fun, 2, SendArgs(std::move(arg1), std::move(arg2)));
     }
 
-    static ExpressionPtr Send3(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, ExpressionPtr arg1, ExpressionPtr arg2,
-                         ExpressionPtr arg3) {
+    static ExpressionPtr Send3(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, ExpressionPtr arg1,
+                               ExpressionPtr arg2, ExpressionPtr arg3) {
         return Send(loc, std::move(recv), fun, 3, SendArgs(std::move(arg1), std::move(arg2), std::move(arg3)));
     }
 
@@ -177,7 +178,8 @@ public:
         return Send1(loc, Constant(loc, core::Symbols::Magic()), core::Names::splat(), std::move(to_a));
     }
 
-    static ExpressionPtr CallWithSplat(core::LocOffsets loc, ExpressionPtr recv, core::NameRef name, ExpressionPtr args) {
+    static ExpressionPtr CallWithSplat(core::LocOffsets loc, ExpressionPtr recv, core::NameRef name,
+                                       ExpressionPtr args) {
         return Send3(loc, Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(), std::move(recv),
                      MK::Symbol(loc, name), std::move(args));
     }
@@ -217,7 +219,7 @@ public:
     }
 
     static ExpressionPtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
-                          MethodDef::ARGS_store args, ExpressionPtr rhs) {
+                                MethodDef::ARGS_store args, ExpressionPtr rhs) {
         if (args.empty() || (!isa_tree<ast::Local>(args.back()) && !isa_tree<ast::BlockArg>(args.back()))) {
             auto blkLoc = core::LocOffsets::none();
             args.emplace_back(make_tree<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
@@ -228,38 +230,40 @@ public:
     }
 
     static ExpressionPtr SyntheticMethod(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
-                                   MethodDef::ARGS_store args, ExpressionPtr rhs) {
+                                         MethodDef::ARGS_store args, ExpressionPtr rhs) {
         auto mdef = Method(loc, declLoc, name, std::move(args), std::move(rhs));
         cast_tree<MethodDef>(mdef)->flags.isRewriterSynthesized = true;
         return mdef;
     }
 
-    static ExpressionPtr SyntheticMethod0(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name, ExpressionPtr rhs) {
+    static ExpressionPtr SyntheticMethod0(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
+                                          ExpressionPtr rhs) {
         MethodDef::ARGS_store args;
         return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
-    static ExpressionPtr SyntheticMethod1(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name, ExpressionPtr arg0,
-                                    ExpressionPtr rhs) {
+    static ExpressionPtr SyntheticMethod1(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
+                                          ExpressionPtr arg0, ExpressionPtr rhs) {
         MethodDef::ARGS_store args;
         args.emplace_back(std::move(arg0));
         return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
     }
 
     static ExpressionPtr ClassOrModule(core::LocOffsets loc, core::LocOffsets declLoc, ExpressionPtr name,
-                                 ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs, ClassDef::Kind kind) {
+                                       ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs,
+                                       ClassDef::Kind kind) {
         return make_tree<ClassDef>(loc, declLoc, core::Symbols::todo(), std::move(name), std::move(ancestors),
                                    std::move(rhs), kind);
     }
 
     static ExpressionPtr Class(core::LocOffsets loc, core::LocOffsets declLoc, ExpressionPtr name,
-                         ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
+                               ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
         return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
                                  ClassDef::Kind::Class);
     }
 
     static ExpressionPtr Module(core::LocOffsets loc, core::LocOffsets declLoc, ExpressionPtr name,
-                          ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
+                                ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs) {
         return MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
                                  ClassDef::Kind::Module);
     }
@@ -378,8 +382,8 @@ public:
         return Send1(loc, Self(loc), core::Names::super(), make_tree<ast::ZSuperArgs>(loc));
     }
 
-    static ExpressionPtr SelfNew(core::LocOffsets loc, int numPosArgs, ast::Send::ARGS_store args, Send::Flags flags = {},
-                           ExpressionPtr block = nullptr) {
+    static ExpressionPtr SelfNew(core::LocOffsets loc, int numPosArgs, ast::Send::ARGS_store args,
+                                 Send::Flags flags = {}, ExpressionPtr block = nullptr) {
         auto magic = Constant(loc, core::Symbols::Magic());
         return Send(loc, std::move(magic), core::Names::selfNew(), numPosArgs, std::move(args), flags,
                     std::move(block));

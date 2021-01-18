@@ -232,7 +232,8 @@ RescueCase::RescueCase(core::LocOffsets loc, EXCEPTION_store exceptions, Express
     _sanityCheck();
 }
 
-Rescue::Rescue(core::LocOffsets loc, ExpressionPtr body, RESCUE_CASE_store rescueCases, ExpressionPtr else_, ExpressionPtr ensure)
+Rescue::Rescue(core::LocOffsets loc, ExpressionPtr body, RESCUE_CASE_store rescueCases, ExpressionPtr else_,
+               ExpressionPtr ensure)
     : loc(loc), body(std::move(body)), rescueCases(std::move(rescueCases)), else_(std::move(else_)),
       ensure(std::move(ensure)) {
     categoryCounterInc("trees", "rescue");
@@ -252,13 +253,14 @@ UnresolvedIdent::UnresolvedIdent(core::LocOffsets loc, Kind kind, core::NameRef 
     _sanityCheck();
 }
 
-Assign::Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs) : loc(loc), lhs(std::move(lhs)), rhs(std::move(rhs)) {
+Assign::Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs)
+    : loc(loc), lhs(std::move(lhs)), rhs(std::move(rhs)) {
     categoryCounterInc("trees", "assign");
     _sanityCheck();
 }
 
-Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args, ExpressionPtr block,
-           Flags flags)
+Send::Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, Send::ARGS_store args,
+           ExpressionPtr block, Flags flags)
     : loc(loc), fun(fun), flags(flags), numPosArgs(numPosArgs), recv(std::move(recv)), args(std::move(args)),
       block(std::move(block)) {
     categoryCounterInc("trees", "send");

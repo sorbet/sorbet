@@ -34,10 +34,11 @@ public:
     ModuleFunction() = delete;
 
 private:
-    static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, ast::Send *send, const ast::ExpressionPtr *prevStat);
+    static std::vector<ast::ExpressionPtr> run(core::MutableContext ctx, ast::Send *send,
+                                               const ast::ExpressionPtr *prevStat);
 
     static std::vector<ast::ExpressionPtr> rewriteDefn(core::MutableContext ctx, const ast::ExpressionPtr &expr,
-                                                 const ast::ExpressionPtr *prevStat);
+                                                       const ast::ExpressionPtr *prevStat);
 };
 
 } // namespace sorbet::rewriter

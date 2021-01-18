@@ -531,7 +531,8 @@ public:
     ExpressionPtr else_;
     ExpressionPtr ensure;
 
-    Rescue(core::LocOffsets loc, ExpressionPtr body, RESCUE_CASE_store rescueCases, ExpressionPtr else_, ExpressionPtr ensure);
+    Rescue(core::LocOffsets loc, ExpressionPtr body, RESCUE_CASE_store rescueCases, ExpressionPtr else_,
+           ExpressionPtr ensure);
 
     ExpressionPtr deepCopy() const;
 
@@ -741,8 +742,8 @@ public:
 
     ExpressionPtr block; // null if no block passed
 
-    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, ARGS_store args, ExpressionPtr block = nullptr,
-         Flags flags = {});
+    Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs, ARGS_store args,
+         ExpressionPtr block = nullptr, Flags flags = {});
 
     ExpressionPtr deepCopy() const;
 

@@ -69,7 +69,7 @@ void ModuleFunction::run(core::MutableContext ctx, ast::ClassDef *cdef) {
 }
 
 vector<ast::ExpressionPtr> ModuleFunction::rewriteDefn(core::MutableContext ctx, const ast::ExpressionPtr &expr,
-                                                 const ast::ExpressionPtr *prevStat) {
+                                                       const ast::ExpressionPtr *prevStat) {
     vector<ast::ExpressionPtr> stats;
     auto mdef = ast::cast_tree<ast::MethodDef>(expr);
     // only do this rewrite to method defs that aren't self methods
@@ -102,7 +102,8 @@ vector<ast::ExpressionPtr> ModuleFunction::rewriteDefn(core::MutableContext ctx,
     return stats;
 }
 
-vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Send *send, const ast::ExpressionPtr *prevStat) {
+vector<ast::ExpressionPtr> ModuleFunction::run(core::MutableContext ctx, ast::Send *send,
+                                               const ast::ExpressionPtr *prevStat) {
     vector<ast::ExpressionPtr> stats;
 
     if (send->fun != core::Names::moduleFunction()) {

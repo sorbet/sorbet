@@ -639,8 +639,8 @@ private:
         ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
     }
 
-    void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::ExpressionPtr &ancestor, bool isInclude,
-                           bool isSuperclass = false) {
+    void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::ExpressionPtr &ancestor,
+                           bool isInclude, bool isSuperclass = false) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
             auto scopeTmp = nesting_;
             if (isSuperclass) {
@@ -2587,8 +2587,8 @@ private:
 
         processLeftoverSigs(ctx, lastSigs);
 
-        auto toRemove =
-            remove_if(klass.rhs.begin(), klass.rhs.end(), [](ast::ExpressionPtr &stat) -> bool { return stat == nullptr; });
+        auto toRemove = remove_if(klass.rhs.begin(), klass.rhs.end(),
+                                  [](ast::ExpressionPtr &stat) -> bool { return stat == nullptr; });
         klass.rhs.erase(toRemove, klass.rhs.end());
     }
 
@@ -2607,8 +2607,8 @@ private:
 
         processLeftoverSigs(classCtx, lastSigs);
 
-        auto toRemove =
-            remove_if(seq.stats.begin(), seq.stats.end(), [](ast::ExpressionPtr &stat) -> bool { return stat == nullptr; });
+        auto toRemove = remove_if(seq.stats.begin(), seq.stats.end(),
+                                  [](ast::ExpressionPtr &stat) -> bool { return stat == nullptr; });
         seq.stats.erase(toRemove, seq.stats.end());
     }
 

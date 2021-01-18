@@ -14,7 +14,7 @@ public:
 
     /** Removes the key, value matching key with symbol `name` from hash and returns it */
     static std::pair<ast::ExpressionPtr, ast::ExpressionPtr> extractHashValue(core::MutableContext ctx, ast::Hash &hash,
-                                                                  core::NameRef name);
+                                                                              core::NameRef name);
 
     static ast::Send *castSig(ast::ExpressionPtr &expr);
     static ast::Send *castSig(ast::Send *expr);
@@ -22,10 +22,10 @@ public:
     static ast::ExpressionPtr mkKwArgsHash(const ast::Send *send);
 
     static ast::ExpressionPtr mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::ExpressionPtr rhs,
-                              bool isAttrReader = false);
+                                    bool isAttrReader = false);
 
-    static ast::ExpressionPtr mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name, core::LocOffsets argLoc,
-                              ast::ExpressionPtr rhs);
+    static ast::ExpressionPtr mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name,
+                                    core::LocOffsets argLoc, ast::ExpressionPtr rhs);
 
     static ast::ExpressionPtr mkNilable(core::LocOffsets loc, ast::ExpressionPtr type);
 

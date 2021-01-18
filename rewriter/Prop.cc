@@ -466,7 +466,7 @@ ast::ExpressionPtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send 
 }
 
 vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
-                                       core::LocOffsets klassDeclLoc, const vector<PropInfo> &props) {
+                                             core::LocOffsets klassDeclLoc, const vector<PropInfo> &props) {
     ast::MethodDef::ARGS_store args;
     ast::Send::ARGS_store sigArgs;
     args.reserve(props.size());

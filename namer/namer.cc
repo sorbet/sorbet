@@ -1431,7 +1431,8 @@ public:
 class TreeSymbolizer {
     friend class Namer;
 
-    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node, bool firstName) {
+    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
+                                     bool firstName) {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
         if (constLit == nullptr) {
             if (auto *id = ast::cast_tree<ast::ConstantLit>(node)) {
@@ -1711,7 +1712,7 @@ public:
     }
 
     ast::ExpressionPtr handleTypeMemberDefinition(core::Context ctx, ast::Send *send, ast::ExpressionPtr tree,
-                                            const ast::UnresolvedConstantLit *typeName) {
+                                                  const ast::UnresolvedConstantLit *typeName) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         ENFORCE(asgn.lhs.get() == typeName &&
