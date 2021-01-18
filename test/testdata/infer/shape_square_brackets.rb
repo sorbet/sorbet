@@ -11,6 +11,15 @@ def test2(x)
   # We should work to make this stricter.
   x[:bar] = 1
   x[:bar] = ''
+
+  # Re-assigning a literal type doesn't need to be pinned, by analogy with normal pinned variables.
+  opts = {
+    foo: 'hello'
+  }
+  T.reveal_type(opts) # error: Revealed type: `{foo: String("hello")} (shape of T::Hash[T.untyped, T.untyped])`
+  opts[:foo] = 'world'
+  # This type is wrong, because the key `foo:` is now `String("world")`, but that's no worse than normal pinned variables
+  T.reveal_type(opts) # error: Revealed type: `{foo: String("hello")} (shape of T::Hash[T.untyped, T.untyped])`
 end
 
 sig {params(x: {foo: Integer, 'bar' => Float}).void}
