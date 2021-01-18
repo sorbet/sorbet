@@ -2386,10 +2386,12 @@ public:
             auto expectedType = valueType;
             auto actualType = *args.args[1];
             // TODO(jez) I'm almost certain this doesn't handle generics properly
-            if (!core::Types::isSubType(gs, actualType.type, expectedType)) {
-                auto argLoc = core::Loc(args.locs.file, args.locs.args[1]);
 
-                if (auto e = gs.beginError(argLoc, core::errors::Infer::MethodArgumentMismatch)) {
+            // This check (with the dropLiteral's) mimicks what we do for pinning errors in environment.cc
+            if (!Types::isSubType(gs, Types::dropLiteral(gs, actualType.type), Types::dropLiteral(gs, expectedType))) {
+                auto argLoc = Loc(args.locs.file, args.locs.args[1]);
+
+                if (auto e = gs.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {
                     e.setHeader("Expected `{}` but found `{}` for key `{}`", expectedType.show(gs),
                                 actualType.type.show(gs), shape.keys[*idx].show(gs));
                     e.addErrorSection(ErrorSection("Shape initialized here:", args.fullType.origins2Explanations(
@@ -2403,7 +2405,7 @@ public:
 
                         if (loc.has_value()) {
                             e.replaceWith("Initialize with `T.let`", *loc, "T.let({}, {})", loc->source(gs),
-                                          core::Types::any(gs, expectedType, actualType.type).show(gs));
+                                          Types::any(gs, expectedType, actualType.type).show(gs));
                         }
                     }
                 }
