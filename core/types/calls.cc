@@ -2365,7 +2365,6 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
 
 } // namespace
 
-// TODO(jez) Add tests for this
 class Shape_squareBracketsEq : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
