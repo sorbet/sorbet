@@ -1730,7 +1730,8 @@ public:
             auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
                                             ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
 
-            return handleAssignment(ctx, ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
+            return handleAssignment(ctx,
+                                    ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
         }
 
         if (!send->args.empty()) {
@@ -1741,8 +1742,8 @@ public:
                 }
                 auto send = ast::MK::Send1(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
                                            ast::MK::Untyped(asgn.loc));
-                return handleAssignment(ctx,
-                                        ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
+                return handleAssignment(
+                    ctx, ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
             }
 
             bool isTypeTemplate = send->fun == core::Names::typeTemplate();

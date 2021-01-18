@@ -1975,7 +1975,8 @@ public:
 
                     auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
                     auto expr = std::move(send.args[0]);
-                    auto cast = ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
+                    auto cast =
+                        ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
                     item.cast = ast::cast_tree<ast::Cast>(cast);
                     item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
 

@@ -110,7 +110,7 @@ public:
         args.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
 
         auto init = ast::make_expression<ast::MethodDef>(loc.offsets(), loc.offsets(), sym, core::Names::staticInit(),
-                                                   std::move(args), std::move(inits), ast::MethodDef::Flags());
+                                                         std::move(args), std::move(inits), ast::MethodDef::Flags());
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
 

@@ -36,7 +36,8 @@ public:
 
     static ExpressionPtr Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs,
                               Send::ARGS_store args, Send::Flags flags = {}, ExpressionPtr blk = nullptr) {
-        auto send = make_expression<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), std::move(blk), flags);
+        auto send =
+            make_expression<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), std::move(blk), flags);
         return send;
     }
 
@@ -225,8 +226,8 @@ public:
             args.emplace_back(make_expression<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
         MethodDef::Flags flags;
-        return make_expression<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(args), std::move(rhs),
-                                    flags);
+        return make_expression<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(args),
+                                          std::move(rhs), flags);
     }
 
     static ExpressionPtr SyntheticMethod(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
@@ -253,7 +254,7 @@ public:
                                        ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs,
                                        ClassDef::Kind kind) {
         return make_expression<ClassDef>(loc, declLoc, core::Symbols::todo(), std::move(name), std::move(ancestors),
-                                   std::move(rhs), kind);
+                                         std::move(rhs), kind);
     }
 
     static ExpressionPtr Class(core::LocOffsets loc, core::LocOffsets declLoc, ExpressionPtr name,

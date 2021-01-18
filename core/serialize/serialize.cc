@@ -1397,7 +1397,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
                 case_.reset(static_cast<ast::RescueCase *>(t.release()));
             }
             return ast::make_expression<ast::Rescue>(loc, std::move(body_), std::move(cases), std::move(else_),
-                                               std::move(ensure));
+                                                     std::move(ensure));
         }
         case ast::Tag::RescueCase: {
             auto loc = unpickleLocOffsets(p);

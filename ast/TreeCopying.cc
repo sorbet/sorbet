@@ -32,26 +32,27 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
         case Tag::Send: {
             auto *exp = reinterpret_cast<const Send *>(tree);
             return make_expression<Send>(exp->loc, deepCopy(avoid, exp->recv), exp->fun, exp->numPosArgs,
-                                   deepCopyVec(avoid, exp->args),
-                                   exp->block == nullptr ? nullptr : deepCopy(avoid, exp->block), exp->flags);
+                                         deepCopyVec(avoid, exp->args),
+                                         exp->block == nullptr ? nullptr : deepCopy(avoid, exp->block), exp->flags);
         }
 
         case Tag::ClassDef: {
             auto *exp = reinterpret_cast<const ClassDef *>(tree);
             return make_expression<ClassDef>(exp->loc, exp->declLoc, exp->symbol, deepCopy(avoid, exp->name),
-                                       deepCopyVec(avoid, exp->ancestors), deepCopyVec(avoid, exp->rhs), exp->kind);
+                                             deepCopyVec(avoid, exp->ancestors), deepCopyVec(avoid, exp->rhs),
+                                             exp->kind);
         }
 
         case Tag::MethodDef: {
             auto *exp = reinterpret_cast<const MethodDef *>(tree);
-            return make_expression<MethodDef>(exp->loc, exp->declLoc, exp->symbol, exp->name, deepCopyVec(avoid, exp->args),
-                                        deepCopy(avoid, exp->rhs), exp->flags);
+            return make_expression<MethodDef>(exp->loc, exp->declLoc, exp->symbol, exp->name,
+                                              deepCopyVec(avoid, exp->args), deepCopy(avoid, exp->rhs), exp->flags);
         }
 
         case Tag::If: {
             auto *exp = reinterpret_cast<const If *>(tree);
             return make_expression<If>(exp->loc, deepCopy(avoid, exp->cond), deepCopy(avoid, exp->thenp),
-                                 deepCopy(avoid, exp->elsep));
+                                       deepCopy(avoid, exp->elsep));
         }
 
         case Tag::While: {
@@ -82,14 +83,14 @@ ExpressionPtr deepCopy(const void *avoid, const Tag tag, const void *tree, bool 
         case Tag::RescueCase: {
             auto *exp = reinterpret_cast<const RescueCase *>(tree);
             return make_expression<RescueCase>(exp->loc, deepCopyVec(avoid, exp->exceptions), deepCopy(avoid, exp->var),
-                                         deepCopy(avoid, exp->body));
+                                               deepCopy(avoid, exp->body));
         }
 
         case Tag::Rescue: {
             auto *exp = reinterpret_cast<const Rescue *>(tree);
             return make_expression<Rescue>(exp->loc, deepCopy(avoid, exp->body),
-                                     deepCopyVec<Rescue::RESCUE_CASE_store>(avoid, exp->rescueCases),
-                                     deepCopy(avoid, exp->else_), deepCopy(avoid, exp->ensure));
+                                           deepCopyVec<Rescue::RESCUE_CASE_store>(avoid, exp->rescueCases),
+                                           deepCopy(avoid, exp->else_), deepCopy(avoid, exp->ensure));
         }
 
         case Tag::Local: {
@@ -199,13 +200,13 @@ ExpressionPtr ExpressionPtr::deepCopy() const {
     }
 }
 
-#define COPY_IMPL(name)                                                             \
-    ExpressionPtr name::deepCopy() const {                                          \
-        try {                                                                       \
+#define COPY_IMPL(name)                                                                   \
+    ExpressionPtr name::deepCopy() const {                                                \
+        try {                                                                             \
             return sorbet::ast::deepCopy(this, ExpressionToTag<name>::value, this, true); \
-        } catch (DeepCopyError & e) {                                               \
-            return nullptr;                                                         \
-        }                                                                           \
+        } catch (DeepCopyError & e) {                                                     \
+            return nullptr;                                                               \
+        }                                                                                 \
     }
 
 COPY_IMPL(EmptyTree);
