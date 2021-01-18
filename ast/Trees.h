@@ -217,6 +217,8 @@ public:
         return toStringWithTabs(gs);
     }
 };
+// TODO(jez) Remove this once this lands on master (prevent merge races)
+using TreePtr = ExpressionPtr;
 
 template <class E, typename... Args> ExpressionPtr make_expression(Args &&... args) {
     return ExpressionPtr(ExpressionToTag<E>::value, new E(std::forward<Args>(args)...));
