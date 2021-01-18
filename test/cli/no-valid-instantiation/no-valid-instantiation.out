@@ -1,57 +1,3 @@
-Exception::raise(): core/types/typemaps.cc:22 enforced condition tc.isSolved() has failed: (no message provided)
-
-Backtrace:
-  #3 0xb0a414 
-  #4 0x17bc936 sorbet::core::Types::instantiate()
-  #5 0x1214eb6 sorbet::infer::Environment::processBinding()::$_14::operator()()
-  #6 0x12123f5 sorbet::typecaseHelper<>()
-  #7 0x120d83d sorbet::typecase<>()
-  #8 0x120bc3f sorbet::infer::Environment::processBinding()
-  #9 0x11f9d1b sorbet::infer::Inference::run()
-  #10 0xed0948 sorbet::realmain::pipeline::CFGCollectorAndTyper::preTransformMethodDef()
-  #11 0xed071b sorbet::ast::CALL_MEMBER_impl_preTransformMethodDef<>::call<>()
-  #12 0xece7cc sorbet::ast::TreeMapper<>::mapMethodDef()
-  #13 0xecd2bf sorbet::ast::TreeMapper<>::mapIt()
-  #14 0xece6df sorbet::ast::TreeMapper<>::mapClassDef()
-  #15 0xecd23a sorbet::ast::TreeMapper<>::mapIt()
-  #16 0xed02c9 sorbet::ast::TreeMapper<>::mapInsSeq()
-  #17 0xecde5f sorbet::ast::TreeMapper<>::mapIt()
-  #18 0xebb499 sorbet::ast::TreeMap::apply<>()
-  #19 0xea1831 sorbet::realmain::pipeline::typecheckOne()
-  #20 0xeb2c86 sorbet::realmain::pipeline::typecheck()::$_4::operator()()
-  #21 0xeb298d std::__1::__invoke<>()
-  #22 0xeb293d std::__1::__invoke_void_return_wrapper<>::__call<>()
-  #23 0xeb290d std::__1::__function::__alloc_func<>::operator()()
-  #24 0xeb1aae std::__1::__function::__func<>::operator()()
-  #25 0x17784e5 std::__1::__function::__value_func<>::operator()()
-  #26 0x1778285 std::__1::function<>::operator()()
-  #27 0x17f6a8e sorbet::WorkerPoolImpl::multiplexJob()
-  #28 0xea44f3 sorbet::realmain::pipeline::typecheck()
-  #29 0xafa232 sorbet::realmain::realmain()
-  #30 0xaf60f2 main
-  #31 0x7ff0240470b3 __libc_start_main
-  #32 0xaf602e _start
-
-test/cli/no-valid-instantiation/no-valid-instantiation.rb:67: Failed to type (backtrace is above) https://srb.help/1001
-    67 |solve_constraint_fail(f) do # error: Could not find valid instantiation of type parameters for `Object#solve_constraint_fail`
-    68 |  0
-    69 |end
-
-test/cli/no-valid-instantiation/no-valid-instantiation.rb:2: Failed to process tree (backtrace is above) https://srb.help/1001
-     2 |extend T::Sig
-     3 |
-     4 |# These test cases are a little contrived. To make them easier to think about
-     5 |# when writing, I wrote diagrams using something like Haskell syntax and
-     6 |# diagramed the polarities of the type variables.
-       |...
-    65 |#
-    66 |# but they can't be.
-    67 |solve_constraint_fail(f) do # error: Could not find valid instantiation of type parameters for `Object#solve_constraint_fail`
-    68 |  0
-    69 |end
-
-test/cli/no-valid-instantiation/no-valid-instantiation.rb: Exception in cfg+infer: test/cli/no-valid-instantiation/no-valid-instantiation.rb (backtrace is above) https://srb.help/1001
-
 test/cli/no-valid-instantiation/no-valid-instantiation.rb:40: Could not find valid instantiation of type parameters for `Object#dispatch_call_fail` https://srb.help/7020
     40 |dispatch_call_fail(f, 0) # error: Could not find valid instantiation of type parameters
         ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -65,4 +11,4 @@ test/cli/no-valid-instantiation/no-valid-instantiation.rb:67: Could not find val
     67 |solve_constraint_fail(f) do # error: Could not find valid instantiation of type parameters for `Object#solve_constraint_fail`
     68 |  0
     69 |end
-Errors: 5
+Errors: 2
