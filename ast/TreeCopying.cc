@@ -202,7 +202,7 @@ ExpressionPtr ExpressionPtr::deepCopy() const {
 #define COPY_IMPL(name)                                                             \
     ExpressionPtr name::deepCopy() const {                                          \
         try {                                                                       \
-            return sorbet::ast::deepCopy(this, TreeToTag<name>::value, this, true); \
+            return sorbet::ast::deepCopy(this, ExpressionToTag<name>::value, this, true); \
         } catch (DeepCopyError & e) {                                               \
             return nullptr;                                                         \
         }                                                                           \

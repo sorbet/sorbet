@@ -61,7 +61,7 @@ enum class Tag {
 };
 
 // A mapping from tree type to its corresponding tag.
-template <typename T> struct TreeToTag;
+template <typename T> struct ExpressionToTag;
 
 class ExpressionPtr {
 public:
@@ -166,7 +166,7 @@ public:
     }
 
     template <typename T> void reset(T *expr = nullptr) noexcept {
-        resetTagged(tagPtr(TreeToTag<T>::value, expr));
+        resetTagged(tagPtr(ExpressionToTag<T>::value, expr));
     }
 
     Tag tag() const noexcept {
@@ -219,7 +219,7 @@ public:
 };
 
 template <class E, typename... Args> ExpressionPtr make_tree(Args &&... args) {
-    return ExpressionPtr(TreeToTag<E>::value, new E(std::forward<Args>(args)...));
+    return ExpressionPtr(ExpressionToTag<E>::value, new E(std::forward<Args>(args)...));
 }
 
 struct ParsedFile {
@@ -245,7 +245,7 @@ public:
 };
 
 template <class To> bool isa_tree(const ExpressionPtr &what) {
-    return what != nullptr && what.tag() == TreeToTag<To>::value;
+    return what != nullptr && what.tag() == ExpressionToTag<To>::value;
 }
 
 bool isa_reference(const ExpressionPtr &what);
@@ -306,7 +306,7 @@ template <> inline const ExpressionPtr &ExpressionPtr::cast<ExpressionPtr>(const
 
 #define TREE(name)                                                                  \
     class name;                                                                     \
-    template <> struct TreeToTag<name> { static constexpr Tag value = Tag::name; }; \
+    template <> struct ExpressionToTag<name> { static constexpr Tag value = Tag::name; }; \
     class __attribute__((aligned(8))) name final
 
 TREE(ClassDef) {
