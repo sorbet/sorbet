@@ -676,7 +676,7 @@ private:
             auto loc = ancestor.loc();
             auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
-            auto out = ast::make_tree<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
+            auto out = ast::make_expression<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor)) {
@@ -702,7 +702,7 @@ public:
             c.scope = postTransformUnresolvedConstantLit(ctx, std::move(c.scope));
         }
         auto loc = c.loc;
-        auto out = ast::make_tree<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
+        auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
         ResolutionItem job{nesting_, ctx.file, ast::cast_tree<ast::ConstantLit>(out)};
         if (resolveJob(ctx, job)) {
             categoryCounterInc("resolve.constants.nonancestor", "firstpass");
@@ -1975,7 +1975,7 @@ public:
 
                     auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
                     auto expr = std::move(send.args[0]);
-                    auto cast = ast::make_tree<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
+                    auto cast = ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
                     item.cast = ast::cast_tree<ast::Cast>(cast);
                     item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
 

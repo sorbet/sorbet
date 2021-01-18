@@ -57,7 +57,7 @@ vector<ast::ExpressionPtr> DefDelegator::run(core::MutableContext ctx, const ast
     // def $methodName(*arg0, &blk); end
     ast::MethodDef::ARGS_store args;
     args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    args.emplace_back(ast::make_tree<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
+    args.emplace_back(ast::make_expression<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
 
     methodStubs.push_back(
         ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::RaiseUnimplemented(loc)));

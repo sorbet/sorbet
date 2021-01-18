@@ -10,11 +10,11 @@ namespace sorbet::ast {
 class MK {
 public:
     static ExpressionPtr EmptyTree() {
-        return make_tree<ast::EmptyTree>();
+        return make_expression<ast::EmptyTree>();
     }
 
     static ExpressionPtr Block(core::LocOffsets loc, ExpressionPtr body, MethodDef::ARGS_store args) {
-        return make_tree<ast::Block>(loc, std::move(args), std::move(body));
+        return make_expression<ast::Block>(loc, std::move(args), std::move(body));
     }
 
     static ExpressionPtr Block0(core::LocOffsets loc, ExpressionPtr body) {
@@ -36,7 +36,7 @@ public:
 
     static ExpressionPtr Send(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, u2 numPosArgs,
                               Send::ARGS_store args, Send::Flags flags = {}, ExpressionPtr blk = nullptr) {
-        auto send = make_tree<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), std::move(blk), flags);
+        auto send = make_expression<ast::Send>(loc, std::move(recv), fun, numPosArgs, std::move(args), std::move(blk), flags);
         return send;
     }
 
@@ -65,63 +65,63 @@ public:
     }
 
     static ExpressionPtr Literal(core::LocOffsets loc, const core::TypePtr &tpe) {
-        return make_tree<ast::Literal>(loc, tpe);
+        return make_expression<ast::Literal>(loc, tpe);
     }
 
     static ExpressionPtr Return(core::LocOffsets loc, ExpressionPtr expr) {
-        return make_tree<ast::Return>(loc, std::move(expr));
+        return make_expression<ast::Return>(loc, std::move(expr));
     }
 
     static ExpressionPtr Next(core::LocOffsets loc, ExpressionPtr expr) {
-        return make_tree<ast::Next>(loc, std::move(expr));
+        return make_expression<ast::Next>(loc, std::move(expr));
     }
 
     static ExpressionPtr Break(core::LocOffsets loc, ExpressionPtr expr) {
-        return make_tree<ast::Break>(loc, std::move(expr));
+        return make_expression<ast::Break>(loc, std::move(expr));
     }
 
     static ExpressionPtr Nil(core::LocOffsets loc) {
-        return make_tree<ast::Literal>(loc, core::Types::nilClass());
+        return make_expression<ast::Literal>(loc, core::Types::nilClass());
     }
 
     static ExpressionPtr Constant(core::LocOffsets loc, core::SymbolRef symbol) {
         ENFORCE(symbol.exists());
-        return make_tree<ConstantLit>(loc, symbol, nullptr);
+        return make_expression<ConstantLit>(loc, symbol, nullptr);
     }
 
     static ExpressionPtr Local(core::LocOffsets loc, core::NameRef name) {
-        return make_tree<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Local, name);
+        return make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Local, name);
     }
 
     static ExpressionPtr OptionalArg(core::LocOffsets loc, ExpressionPtr inner, ExpressionPtr default_) {
-        return make_tree<ast::OptionalArg>(loc, std::move(inner), std::move(default_));
+        return make_expression<ast::OptionalArg>(loc, std::move(inner), std::move(default_));
     }
 
     static ExpressionPtr KeywordArg(core::LocOffsets loc, ExpressionPtr inner) {
-        return make_tree<ast::KeywordArg>(loc, std::move(inner));
+        return make_expression<ast::KeywordArg>(loc, std::move(inner));
     }
 
     static ExpressionPtr RestArg(core::LocOffsets loc, ExpressionPtr inner) {
-        return make_tree<ast::RestArg>(loc, std::move(inner));
+        return make_expression<ast::RestArg>(loc, std::move(inner));
     }
 
     static ExpressionPtr BlockArg(core::LocOffsets loc, ExpressionPtr inner) {
-        return make_tree<ast::BlockArg>(loc, std::move(inner));
+        return make_expression<ast::BlockArg>(loc, std::move(inner));
     }
 
     static ExpressionPtr ShadowArg(core::LocOffsets loc, ExpressionPtr inner) {
-        return make_tree<ast::ShadowArg>(loc, std::move(inner));
+        return make_expression<ast::ShadowArg>(loc, std::move(inner));
     }
 
     static ExpressionPtr Instance(core::LocOffsets loc, core::NameRef name) {
-        return make_tree<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, name);
+        return make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, name);
     }
 
     static ExpressionPtr cpRef(ExpressionPtr &name) {
         if (auto *nm = cast_tree<UnresolvedIdent>(name)) {
-            return make_tree<UnresolvedIdent>(nm->loc, nm->kind, nm->name);
+            return make_expression<UnresolvedIdent>(nm->loc, nm->kind, nm->name);
         } else if (auto *nm = cast_tree<ast::Local>(name)) {
-            return make_tree<ast::Local>(nm->loc, nm->localVariable);
+            return make_expression<ast::Local>(nm->loc, nm->localVariable);
         }
         Exception::notImplemented();
     }
@@ -147,7 +147,7 @@ public:
         }
 
         // otherwise, just assign to it!
-        return make_tree<ast::Assign>(loc, std::move(lhs), std::move(rhs));
+        return make_expression<ast::Assign>(loc, std::move(lhs), std::move(rhs));
     }
 
     static ExpressionPtr Assign(core::LocOffsets loc, core::NameRef name, ExpressionPtr rhs) {
@@ -155,20 +155,20 @@ public:
     }
 
     static ExpressionPtr If(core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr thenp, ExpressionPtr elsep) {
-        return make_tree<ast::If>(loc, std::move(cond), std::move(thenp), std::move(elsep));
+        return make_expression<ast::If>(loc, std::move(cond), std::move(thenp), std::move(elsep));
     }
 
     static ExpressionPtr While(core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr body) {
-        return make_tree<ast::While>(loc, std::move(cond), std::move(body));
+        return make_expression<ast::While>(loc, std::move(cond), std::move(body));
     }
 
     static ExpressionPtr Self(core::LocOffsets loc) {
-        return make_tree<ast::Local>(loc, core::LocalVariable::selfVariable());
+        return make_expression<ast::Local>(loc, core::LocalVariable::selfVariable());
     }
 
     static ExpressionPtr InsSeq(core::LocOffsets loc, InsSeq::STATS_store stats, ExpressionPtr expr) {
         if (!stats.empty()) {
-            return make_tree<ast::InsSeq>(loc, std::move(stats), std::move(expr));
+            return make_expression<ast::InsSeq>(loc, std::move(stats), std::move(expr));
         }
         return expr;
     }
@@ -191,41 +191,41 @@ public:
     }
 
     static ExpressionPtr True(core::LocOffsets loc) {
-        return make_tree<ast::Literal>(loc, core::Types::trueClass());
+        return make_expression<ast::Literal>(loc, core::Types::trueClass());
     }
 
     static ExpressionPtr False(core::LocOffsets loc) {
-        return make_tree<ast::Literal>(loc, core::Types::falseClass());
+        return make_expression<ast::Literal>(loc, core::Types::falseClass());
     }
 
     static ExpressionPtr UnresolvedConstant(core::LocOffsets loc, ExpressionPtr scope, core::NameRef name) {
-        return make_tree<UnresolvedConstantLit>(loc, std::move(scope), name);
+        return make_expression<UnresolvedConstantLit>(loc, std::move(scope), name);
     }
 
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {
-        return make_tree<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
+        return make_expression<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
     }
 
     static ExpressionPtr Float(core::LocOffsets loc, double val) {
-        return make_tree<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
+        return make_expression<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
     }
 
     static ExpressionPtr Symbol(core::LocOffsets loc, core::NameRef name) {
-        return make_tree<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), name));
+        return make_expression<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), name));
     }
 
     static ExpressionPtr String(core::LocOffsets loc, core::NameRef value) {
-        return make_tree<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::String(), value));
+        return make_expression<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::String(), value));
     }
 
     static ExpressionPtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                                 MethodDef::ARGS_store args, ExpressionPtr rhs) {
         if (args.empty() || (!isa_tree<ast::Local>(args.back()) && !isa_tree<ast::BlockArg>(args.back()))) {
             auto blkLoc = core::LocOffsets::none();
-            args.emplace_back(make_tree<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
+            args.emplace_back(make_expression<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
         MethodDef::Flags flags;
-        return make_tree<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(args), std::move(rhs),
+        return make_expression<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(args), std::move(rhs),
                                     flags);
     }
 
@@ -252,7 +252,7 @@ public:
     static ExpressionPtr ClassOrModule(core::LocOffsets loc, core::LocOffsets declLoc, ExpressionPtr name,
                                        ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs,
                                        ClassDef::Kind kind) {
-        return make_tree<ClassDef>(loc, declLoc, core::Symbols::todo(), std::move(name), std::move(ancestors),
+        return make_expression<ClassDef>(loc, declLoc, core::Symbols::todo(), std::move(name), std::move(ancestors),
                                    std::move(rhs), kind);
     }
 
@@ -269,11 +269,11 @@ public:
     }
 
     static ExpressionPtr Array(core::LocOffsets loc, Array::ENTRY_store entries) {
-        return make_tree<ast::Array>(loc, std::move(entries));
+        return make_expression<ast::Array>(loc, std::move(entries));
     }
 
     static ExpressionPtr Hash(core::LocOffsets loc, Hash::ENTRY_store keys, Hash::ENTRY_store values) {
-        return make_tree<ast::Hash>(loc, std::move(keys), std::move(values));
+        return make_expression<ast::Hash>(loc, std::move(keys), std::move(values));
     }
 
     static ExpressionPtr Hash0(core::LocOffsets loc) {
@@ -379,7 +379,7 @@ public:
     }
 
     static ExpressionPtr ZSuper(core::LocOffsets loc) {
-        return Send1(loc, Self(loc), core::Names::super(), make_tree<ast::ZSuperArgs>(loc));
+        return Send1(loc, Self(loc), core::Names::super(), make_expression<ast::ZSuperArgs>(loc));
     }
 
     static ExpressionPtr SelfNew(core::LocOffsets loc, int numPosArgs, ast::Send::ARGS_store args,

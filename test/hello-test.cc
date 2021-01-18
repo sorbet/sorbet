@@ -148,19 +148,19 @@ TEST_CASE("CountTrees") {
     auto empty = vector<core::SymbolRef>();
     auto argumentSym = core::LocalVariable(name, 0);
     auto rhs(ast::MK::Int(loc.offsets(), 5));
-    auto arg = ast::make_tree<ast::Local>(loc.offsets(), argumentSym);
+    auto arg = ast::make_expression<ast::Local>(loc.offsets(), argumentSym);
     ast::MethodDef::ARGS_store args;
     args.emplace_back(std::move(arg));
 
     ast::MethodDef::Flags flags;
-    auto methodDef = ast::make_tree<ast::MethodDef>(loc.offsets(), loc.offsets(), methodSym, name, std::move(args),
+    auto methodDef = ast::make_expression<ast::MethodDef>(loc.offsets(), loc.offsets(), methodSym, name, std::move(args),
                                                     std::move(rhs), flags);
     auto emptyTree = ast::MK::EmptyTree();
-    auto cnst = ast::make_tree<ast::UnresolvedConstantLit>(loc.offsets(), std::move(emptyTree), name);
+    auto cnst = ast::make_expression<ast::UnresolvedConstantLit>(loc.offsets(), std::move(emptyTree), name);
 
     ast::ClassDef::RHS_store classrhs;
     classrhs.emplace_back(std::move(methodDef));
-    auto tree = ast::make_tree<ast::ClassDef>(loc.offsets(), loc.offsets(), classSym, std::move(cnst),
+    auto tree = ast::make_expression<ast::ClassDef>(loc.offsets(), loc.offsets(), classSym, std::move(cnst),
                                               ast::ClassDef::ANCESTORS_store(), std::move(classrhs),
                                               ast::ClassDef::Kind::Class);
     Counter c;

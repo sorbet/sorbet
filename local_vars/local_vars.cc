@@ -50,7 +50,7 @@ class LocalNameInserter {
                 named.name = nm.name;
                 named.local = enterLocal(named.name);
                 named.loc = arg.loc();
-                named.expr = ast::make_tree<ast::Local>(arg.loc(), named.local);
+                named.expr = ast::make_expression<ast::Local>(arg.loc(), named.local);
             },
             [&](ast::RestArg &rest) {
                 named = nameArg(move(rest.expr));
@@ -80,7 +80,7 @@ class LocalNameInserter {
                 named.name = local.localVariable._name;
                 named.local = enterLocal(named.name);
                 named.loc = arg.loc();
-                named.expr = ast::make_tree<ast::Local>(local.loc, named.local);
+                named.expr = ast::make_expression<ast::Local>(local.loc, named.local);
             });
 
         return named;
@@ -235,12 +235,12 @@ public:
                 for (auto arg : scopeStack.back().args) {
                     if (arg.flags.isPositional()) {
                         ENFORCE(!seenKeywordArgs, "Saw positional arg after keyword arg");
-                        original.args.emplace_back(ast::make_tree<ast::Local>(original.loc, arg.arg));
+                        original.args.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
                         ++original.numPosArgs;
                     } else if (arg.flags.isKeyword()) {
                         seenKeywordArgs = true;
                         original.args.emplace_back(ast::MK::Symbol(original.loc, arg.arg._name));
-                        original.args.emplace_back(ast::make_tree<ast::Local>(original.loc, arg.arg));
+                        original.args.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
                     } else if (arg.flags.repeated || arg.flags.block) {
                         // Explicitly skip for now.
                         // Involves synthesizing a call to callWithSplat, callWithBlock, or callWithSplatAndBlock
@@ -293,7 +293,7 @@ public:
                 cur = enterLocal(nm.name);
                 frame.locals[nm.name] = cur;
             }
-            return ast::make_tree<ast::Local>(nm.loc, cur);
+            return ast::make_expression<ast::Local>(nm.loc, cur);
         } else {
             return tree;
         }

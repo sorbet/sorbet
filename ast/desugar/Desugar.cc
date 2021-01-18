@@ -1271,7 +1271,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 ClassDef::ANCESTORS_store emptyAncestors;
                 ExpressionPtr res =
                     MK::Class(sclass->loc, sclass->declLoc,
-                              make_tree<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Kind::Class,
+                              make_expression<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Kind::Class,
                                                          core::Names::singleton()),
                               std::move(emptyAncestors), std::move(body));
                 result = std::move(res);
@@ -1320,15 +1320,15 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::IVar *var) {
-                ExpressionPtr res = make_tree<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, var->name);
+                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, var->name);
                 result = std::move(res);
             },
             [&](parser::GVar *var) {
-                ExpressionPtr res = make_tree<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global, var->name);
+                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global, var->name);
                 result = std::move(res);
             },
             [&](parser::CVar *var) {
-                ExpressionPtr res = make_tree<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Class, var->name);
+                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Class, var->name);
                 result = std::move(res);
             },
             [&](parser::LVarLhs *var) {
@@ -1336,19 +1336,19 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::GVarLhs *var) {
-                ExpressionPtr res = make_tree<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global, var->name);
+                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global, var->name);
                 result = std::move(res);
             },
             [&](parser::CVarLhs *var) {
-                ExpressionPtr res = make_tree<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Class, var->name);
+                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Class, var->name);
                 result = std::move(res);
             },
             [&](parser::IVarLhs *var) {
-                ExpressionPtr res = make_tree<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, var->name);
+                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, var->name);
                 result = std::move(res);
             },
             [&](parser::NthRef *var) {
-                ExpressionPtr res = make_tree<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global,
+                ExpressionPtr res = make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Global,
                                                                dctx.ctx.state.enterNameUTF8(to_string(var->ref)));
                 result = std::move(res);
             },
@@ -1738,7 +1738,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
             },
             [&](parser::Retry *ret) {
-                ExpressionPtr res = make_tree<Retry>(loc);
+                ExpressionPtr res = make_expression<Retry>(loc);
                 result = std::move(res);
             },
             [&](parser::Yield *ret) {
@@ -1779,7 +1779,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     ENFORCE(isa_tree<RescueCase>(cases.back()), "node2TreeImpl failed to produce a rescue case");
                 }
                 ExpressionPtr res =
-                    make_tree<Rescue>(loc, node2TreeImpl(dctx, std::move(rescue->body)), std::move(cases),
+                    make_expression<Rescue>(loc, node2TreeImpl(dctx, std::move(rescue->body)), std::move(cases),
                                       node2TreeImpl(dctx, std::move(rescue->else_)), MK::EmptyTree());
                 result = std::move(res);
             },
@@ -1828,7 +1828,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
 
                 ExpressionPtr res =
-                    make_tree<RescueCase>(loc, std::move(exceptions), MK::Local(varLoc, var), std::move(body));
+                    make_expression<RescueCase>(loc, std::move(exceptions), MK::Local(varLoc, var), std::move(body));
                 result = std::move(res);
             },
             [&](parser::Ensure *ensure) {
@@ -1840,7 +1840,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     result = std::move(bodyExpr);
                 } else {
                     Rescue::RESCUE_CASE_store cases;
-                    ExpressionPtr res = make_tree<Rescue>(loc, std::move(bodyExpr), std::move(cases), MK::EmptyTree(),
+                    ExpressionPtr res = make_expression<Rescue>(loc, std::move(bodyExpr), std::move(cases), MK::EmptyTree(),
                                                           std::move(ensureExpr));
                     result = std::move(res);
                 }
@@ -2064,7 +2064,7 @@ ExpressionPtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, Expression
     } else {
         rhs.emplace_back(std::move(what));
     }
-    return make_tree<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(), std::move(ancestors), std::move(rhs),
+    return make_expression<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(), std::move(ancestors), std::move(rhs),
                                ClassDef::Kind::Class);
 }
 } // namespace

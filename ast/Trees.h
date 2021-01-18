@@ -82,7 +82,7 @@ private:
 
     tagged_storage ptr;
 
-    template <typename E, typename... Args> friend ExpressionPtr make_tree(Args &&...);
+    template <typename E, typename... Args> friend ExpressionPtr make_expression(Args &&...);
 
     static tagged_storage tagPtr(Tag tag, void *expr) {
         // Store the tag in the lower 16 bits of the pointer, regardless of size.
@@ -218,7 +218,7 @@ public:
     }
 };
 
-template <class E, typename... Args> ExpressionPtr make_tree(Args &&... args) {
+template <class E, typename... Args> ExpressionPtr make_expression(Args &&... args) {
     return ExpressionPtr(ExpressionToTag<E>::value, new E(std::forward<Args>(args)...));
 }
 
@@ -983,8 +983,8 @@ public:
 };
 CheckSize(EmptyTree, 8, 8);
 
-// This specialization of make_tree exists to ensure that we only ever create one empty tree.
-template <> ExpressionPtr make_tree<EmptyTree>();
+// This specialization of make_expression exists to ensure that we only ever create one empty tree.
+template <> ExpressionPtr make_expression<EmptyTree>();
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *

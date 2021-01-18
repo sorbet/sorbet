@@ -1470,7 +1470,7 @@ class TreeSymbolizer {
         // NameInserter should have created this symbol.
         ENFORCE(existing.exists());
 
-        node = ast::make_tree<ast::ConstantLit>(constLit->loc, existing, std::move(node));
+        node = ast::make_expression<ast::ConstantLit>(constLit->loc, existing, std::move(node));
         return existing;
     }
 
@@ -1480,7 +1480,7 @@ class TreeSymbolizer {
     }
 
     ast::ExpressionPtr arg2Symbol(core::Context ctx, int pos, ast::ParsedArg parsedArg, ast::ExpressionPtr arg) {
-        ast::ExpressionPtr localExpr = ast::make_tree<ast::Local>(parsedArg.loc, parsedArg.local);
+        ast::ExpressionPtr localExpr = ast::make_expression<ast::Local>(parsedArg.loc, parsedArg.local);
         if (parsedArg.flags.isDefault) {
             localExpr =
                 ast::MK::OptionalArg(parsedArg.loc, move(localExpr), ast::ArgParsing::getDefault(parsedArg, move(arg)));
@@ -1661,7 +1661,7 @@ public:
             auto localVariable = arg.local;
 
             if (arg.flags.isShadow) {
-                auto localExpr = ast::make_tree<ast::Local>(arg.loc, localVariable);
+                auto localExpr = ast::make_expression<ast::Local>(arg.loc, localVariable);
                 args.emplace_back(move(localExpr));
             } else {
                 ENFORCE(i < oldArgs.size());
@@ -1706,7 +1706,7 @@ public:
         core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
         ENFORCE(cnst.exists());
         auto loc = lhs.loc;
-        asgn.lhs = ast::make_tree<ast::ConstantLit>(loc, cnst, std::move(asgn.lhs));
+        asgn.lhs = ast::make_expression<ast::ConstantLit>(loc, cnst, std::move(asgn.lhs));
 
         return tree;
     }
@@ -1730,7 +1730,7 @@ public:
             auto send = ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
                                             ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
 
-            return handleAssignment(ctx, ast::make_tree<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
+            return handleAssignment(ctx, ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
         }
 
         if (!send->args.empty()) {
@@ -1742,7 +1742,7 @@ public:
                 auto send = ast::MK::Send1(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(),
                                            ast::MK::Untyped(asgn.loc));
                 return handleAssignment(ctx,
-                                        ast::make_tree<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
+                                        ast::make_expression<ast::Assign>(asgn.loc, std::move(asgn.lhs), std::move(send)));
             }
 
             bool isTypeTemplate = send->fun == core::Names::typeTemplate();

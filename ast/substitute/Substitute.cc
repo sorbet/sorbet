@@ -22,7 +22,7 @@ private:
         auto scope = substClassName(ctx, std::move(constLit->scope));
         auto cnst = subst.substitute(constLit->cnst);
 
-        return make_tree<UnresolvedConstantLit>(constLit->loc, std::move(scope), cnst);
+        return make_expression<UnresolvedConstantLit>(constLit->loc, std::move(scope), cnst);
     }
 
     ExpressionPtr substArg(core::MutableContext ctx, ExpressionPtr argp) {

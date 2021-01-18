@@ -280,7 +280,7 @@ class FlattenWalk {
         // generate the nested `class << self` blocks as needed and add them to the class
         for (auto &body : nestedClassBodies) {
             auto classDef = ast::MK::Class(loc, loc,
-                                           ast::make_tree<ast::UnresolvedIdent>(core::LocOffsets::none(),
+                                           ast::make_expression<ast::UnresolvedIdent>(core::LocOffsets::none(),
                                                                                 ast::UnresolvedIdent::Kind::Class,
                                                                                 core::Names::singleton()),
                                            {}, std::move(body));
@@ -390,7 +390,7 @@ public:
         auto insSeq = ast::cast_tree<ast::InsSeq>(tree);
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
-            tree = ast::make_tree<ast::InsSeq>(tree.loc(), std::move(stats), std::move(tree));
+            tree = ast::make_expression<ast::InsSeq>(tree.loc(), std::move(stats), std::move(tree));
             return addTopLevelMethods(ctx, std::move(tree));
         }
 

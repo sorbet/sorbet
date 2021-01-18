@@ -389,7 +389,7 @@ EmptyTree singletonEmptyTree{};
 
 } // namespace
 
-template <> ExpressionPtr make_tree<EmptyTree>() {
+template <> ExpressionPtr make_expression<EmptyTree>() {
     ExpressionPtr result = nullptr;
     result.reset(&singletonEmptyTree);
     return result;
