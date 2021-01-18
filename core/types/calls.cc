@@ -2385,8 +2385,6 @@ public:
             auto valueType = shape.values[*idx];
             auto expectedType = valueType;
             auto actualType = *args.args[1];
-            // TODO(jez) I'm almost certain this doesn't handle generics properly
-
             // This check (with the dropLiteral's) mimicks what we do for pinning errors in environment.cc
             if (!Types::isSubType(gs, Types::dropLiteral(gs, actualType.type), Types::dropLiteral(gs, expectedType))) {
                 auto argLoc = Loc(args.locs.file, args.locs.args[1]);
@@ -2414,8 +2412,6 @@ public:
             // Returning here without setting res.resultType will cause dispatchCall to fall back to
             // Hash#[]=, which will have the effect of checking the arg types.
             //
-            // TODO(jez) We could do something smarter here, like check that the new value is
-            // compatible with the old value.
             // TODO(jez) Right now ShapeType::underlying always returns T::Hash[T.untyped, T.untyped]
             // so it doesn't matter whether we return or not.
             return;
