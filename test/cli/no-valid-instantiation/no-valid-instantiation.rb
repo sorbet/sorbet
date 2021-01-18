@@ -61,7 +61,8 @@ end
 
 # These constraints must be true:
 #
-#   TODO(jez) what are the constraints?
+#   T.type_parameter(:U) <: String
+#   Integer <: T.type_parameter(:U)
 #
 # but they can't be.
 solve_constraint_fail(f) do # error: Could not find valid instantiation of type parameters for `Object#solve_constraint_fail`
