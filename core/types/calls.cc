@@ -2323,6 +2323,46 @@ optional<size_t> indexForKey(const ShapeType &shape, const LiteralType &argLit) 
     }
 }
 
+optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const NameRef key, const TypePtr expectedType) {
+    if (!isa_type<ClassType>(expectedType)) {
+        return nullopt;
+    }
+    auto ct = cast_type_nonnull<ClassType>(expectedType);
+
+    // Unlike with normal `T.let` autocorrects, we don't have location information for "the value
+    // for a specific key". To make up for this, we hard-code the most common pinning errors by
+    // scannign the source directly.
+
+    const char *valueStr;
+    if (ct.symbol == core::Symbols::NilClass()) {
+        valueStr = "nil";
+    } else if (ct.symbol == core::Symbols::TrueClass()) {
+        valueStr = "true";
+    } else if (ct.symbol == core::Symbols::FalseClass()) {
+        valueStr = "false";
+    } else {
+        return nullopt;
+    }
+
+    auto source = origin.source(gs);
+    auto keySymbol = fmt::format("{}:", key.shortName(gs));
+    auto keyStart = source.find(keySymbol);
+    if (keyStart == string::npos) {
+        return nullopt;
+    }
+
+    u4 valueBegin = origin.beginPos() + keyStart + keySymbol.size() + char_traits<char>::length(" ");
+    u4 valueEnd = valueBegin + char_traits<char>::length(valueStr);
+    if (valueEnd <= origin.file().data(gs).source().size()) {
+        auto loc = Loc{origin.file(), valueBegin, valueEnd};
+        if (loc.source(gs) == valueStr) {
+            return loc;
+        }
+    }
+
+    return nullopt;
+}
+
 } // namespace
 
 // TODO(jez) Add tests for this
@@ -2352,9 +2392,20 @@ public:
                 if (auto e = gs.beginError(argLoc, core::errors::Infer::MethodArgumentMismatch)) {
                     e.setHeader("Expected `{}` but found `{}` for key `{}`", expectedType.show(gs),
                                 actualType.type.show(gs), shape.keys[*idx].show(gs));
-                    e.addErrorSection(
-                        core::ErrorSection("Got " + actualType.type.showWithMoreInfo(gs) + " originating from:",
-                                           actualType.origins2Explanations(gs, args.originForUninitialized)));
+                    e.addErrorSection(ErrorSection("Shape initialized here:", args.fullType.origins2Explanations(
+                                                                                  gs, args.originForUninitialized)));
+                    e.addErrorSection(actualType.explainGot(gs, args.originForUninitialized));
+
+                    if (args.fullType.origins.size() == 1 &&
+                        argLit.literalKind == LiteralType::LiteralTypeKind::Symbol) {
+                        auto key = argLit.asName(gs);
+                        auto loc = locOfValueForKey(gs, args.fullType.origins[0], key, expectedType);
+
+                        if (loc.has_value()) {
+                            e.replaceWith("Initialize with `T.let`", *loc, "T.let({}, {})", loc->source(gs),
+                                          core::Types::any(gs, expectedType, actualType.type).show(gs));
+                        }
+                    }
                 }
             }
 
