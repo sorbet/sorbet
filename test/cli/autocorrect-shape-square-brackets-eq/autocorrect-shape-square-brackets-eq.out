@@ -1,0 +1,71 @@
+autocorrect-shape-square-brackets-eq.rb:9: Expected `NilClass` but found `Integer(1)` for key `Symbol(:foo)` https://srb.help/7002
+     9 |xs[:foo] = 1
+                   ^
+  Shape initialized here:
+    autocorrect-shape-square-brackets-eq.rb:3:
+     3 |xs = {
+     4 |  foo: nil,
+     5 |  bar: false,
+     6 |  qux: true,
+     7 |}
+  Got `Integer(1)` originating from:
+    autocorrect-shape-square-brackets-eq.rb:9:
+     9 |xs[:foo] = 1
+                   ^
+  Autocorrect: Done
+    autocorrect-shape-square-brackets-eq.rb:4: Replaced with `T.let(nil, T.nilable(Integer))`
+     4 |  foo: nil,
+               ^^^
+
+autocorrect-shape-square-brackets-eq.rb:10: Expected `FalseClass` but found `TrueClass` for key `Symbol(:bar)` https://srb.help/7002
+    10 |xs[:bar] = true
+                   ^^^^
+  Shape initialized here:
+    autocorrect-shape-square-brackets-eq.rb:3:
+     3 |xs = {
+     4 |  foo: nil,
+     5 |  bar: false,
+     6 |  qux: true,
+     7 |}
+  Got `TrueClass` originating from:
+    autocorrect-shape-square-brackets-eq.rb:10:
+    10 |xs[:bar] = true
+                   ^^^^
+  Autocorrect: Done
+    autocorrect-shape-square-brackets-eq.rb:5: Replaced with `T.let(false, T::Boolean)`
+     5 |  bar: false,
+               ^^^^^
+
+autocorrect-shape-square-brackets-eq.rb:11: Expected `TrueClass` but found `FalseClass` for key `Symbol(:qux)` https://srb.help/7002
+    11 |xs[:qux] = false
+                   ^^^^^
+  Shape initialized here:
+    autocorrect-shape-square-brackets-eq.rb:3:
+     3 |xs = {
+     4 |  foo: nil,
+     5 |  bar: false,
+     6 |  qux: true,
+     7 |}
+  Got `FalseClass` originating from:
+    autocorrect-shape-square-brackets-eq.rb:11:
+    11 |xs[:qux] = false
+                   ^^^^^
+  Autocorrect: Done
+    autocorrect-shape-square-brackets-eq.rb:6: Replaced with `T.let(true, T::Boolean)`
+     6 |  qux: true,
+               ^^^^
+Errors: 3
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+xs = {
+  foo: T.let(nil, T.nilable(Integer)),
+  bar: T.let(false, T::Boolean),
+  qux: T.let(true, T::Boolean),
+}
+
+xs[:foo] = 1
+xs[:bar] = true
+xs[:qux] = false
