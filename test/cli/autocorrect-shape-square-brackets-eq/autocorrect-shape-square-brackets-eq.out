@@ -54,7 +54,93 @@ autocorrect-shape-square-brackets-eq.rb:11: Expected `TrueClass` but found `Fals
     autocorrect-shape-square-brackets-eq.rb:6: Replaced with `T.let(true, T::Boolean)`
      6 |  qux: true,
                ^^^^
-Errors: 3
+
+autocorrect-shape-square-brackets-eq.rb:17: Expected `[]` but found `T::Array[Integer]` for key `Symbol(:first)` https://srb.help/7002
+    17 |ys[:first] = T::Array[Integer].new
+                     ^^^^^^^^^^^^^^^^^^^^^
+  Shape initialized here:
+    autocorrect-shape-square-brackets-eq.rb:13:
+    13 |ys = {
+    14 |  first: [],
+    15 |  second: {},
+    16 |}
+  Got `T::Array[Integer]` originating from:
+    autocorrect-shape-square-brackets-eq.rb:17:
+    17 |ys[:first] = T::Array[Integer].new
+                     ^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-shape-square-brackets-eq.rb:18: Expected `{}` but found `T::Hash[Symbol, String]` for key `Symbol(:second)` https://srb.help/7002
+    18 |ys[:second] = T::Hash[Symbol, String].new
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Shape initialized here:
+    autocorrect-shape-square-brackets-eq.rb:13:
+    13 |ys = {
+    14 |  first: [],
+    15 |  second: {},
+    16 |}
+  Got `T::Hash[Symbol, String]` originating from:
+    autocorrect-shape-square-brackets-eq.rb:18:
+    18 |ys[:second] = T::Hash[Symbol, String].new
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+autocorrect-shape-square-brackets-eq.rb:24: Expected `FalseClass` but found `TrueClass` for key `String("foo")` https://srb.help/7002
+    24 |zs['foo'] = true
+                    ^^^^
+  Shape initialized here:
+    autocorrect-shape-square-brackets-eq.rb:20:
+    20 |zs = {
+    21 |  'foo' => false,
+    22 |  :bar => false,
+    23 |}
+  Got `TrueClass` originating from:
+    autocorrect-shape-square-brackets-eq.rb:24:
+    24 |zs['foo'] = true
+                    ^^^^
+
+autocorrect-shape-square-brackets-eq.rb:25: Expected `FalseClass` but found `TrueClass` for key `Symbol(:bar)` https://srb.help/7002
+    25 |zs[:bar] = true
+                   ^^^^
+  Shape initialized here:
+    autocorrect-shape-square-brackets-eq.rb:20:
+    20 |zs = {
+    21 |  'foo' => false,
+    22 |  :bar => false,
+    23 |}
+  Got `TrueClass` originating from:
+    autocorrect-shape-square-brackets-eq.rb:25:
+    25 |zs[:bar] = true
+                   ^^^^
+
+autocorrect-shape-square-brackets-eq.rb:30: Expected `NilClass` but found `Integer(1)` for key `Symbol(:foo)` https://srb.help/7002
+    30 |spacing_is_important[:foo] = 1
+                                     ^
+  Shape initialized here:
+    autocorrect-shape-square-brackets-eq.rb:27:
+    27 |spacing_is_important = {
+    28 |  foo:nil,
+    29 |}
+  Got `Integer(1)` originating from:
+    autocorrect-shape-square-brackets-eq.rb:30:
+    30 |spacing_is_important[:foo] = 1
+                                     ^
+
+autocorrect-shape-square-brackets-eq.rb:41: Expected `T.nilable(FalseClass)` but found `TrueClass` for key `Symbol(:foo)` https://srb.help/7002
+    41 |initialized_twice[:foo] = true
+                                  ^^^^
+  Shape initialized here:
+    autocorrect-shape-square-brackets-eq.rb:33:
+    33 |  initialized_twice = {
+    34 |    foo: nil,
+    35 |  }
+    autocorrect-shape-square-brackets-eq.rb:37:
+    37 |  initialized_twice = {
+    38 |    foo: false,
+    39 |  }
+  Got `TrueClass` originating from:
+    autocorrect-shape-square-brackets-eq.rb:41:
+    41 |initialized_twice[:foo] = true
+                                  ^^^^
+Errors: 9
 
 --------------------------------------------------------------------------
 
@@ -69,3 +155,33 @@ xs = {
 xs[:foo] = 1
 xs[:bar] = true
 xs[:qux] = false
+
+ys = {
+  first: [],
+  second: {},
+}
+ys[:first] = T::Array[Integer].new
+ys[:second] = T::Hash[Symbol, String].new
+
+zs = {
+  'foo' => false,
+  :bar => false,
+}
+zs['foo'] = true
+zs[:bar] = true
+
+spacing_is_important = {
+  foo:nil,
+}
+spacing_is_important[:foo] = 1
+
+if T.unsafe(nil)
+  initialized_twice = {
+    foo: nil,
+  }
+else
+  initialized_twice = {
+    foo: false,
+  }
+end
+initialized_twice[:foo] = true

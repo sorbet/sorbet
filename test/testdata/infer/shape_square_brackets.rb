@@ -20,6 +20,9 @@ def test2(x)
   opts[:foo] = 'world'
   # This type is wrong, because the key `foo:` is now `String("world")`, but that's no worse than normal pinned variables
   T.reveal_type(opts) # error: Revealed type: `{foo: String("hello")} (shape of T::Hash[T.untyped, T.untyped])`
+
+  # Non-literal type for key
+  opts[String.new] = 0
 end
 
 sig {params(x: {foo: Integer, 'bar' => Float}).void}
