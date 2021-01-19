@@ -27,6 +27,7 @@
 #include "rewriter/Singleton.h"
 #include "rewriter/Struct.h"
 #include "rewriter/TEnum.h"
+#include "rewriter/TestCase.h"
 #include "rewriter/TypeMembers.h"
 
 using namespace std;
@@ -113,6 +114,12 @@ public:
                     }
 
                     nodes = Delegate::run(ctx, &send);
+                    if (!nodes.empty()) {
+                        replaceNodes[stat.get()] = std::move(nodes);
+                        return;
+                    }
+
+                    nodes = TestCase::run(ctx, &send);
                     if (!nodes.empty()) {
                         replaceNodes[stat.get()] = std::move(nodes);
                         return;
