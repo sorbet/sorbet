@@ -3,9 +3,7 @@
 class A
   extend T::Sig
 
-  sig do
-  ${1}
-end${0} {void}
+  sig${0} {void}
   #  ^ apply-completion: [A] item: 0
   def already_sigged
     42

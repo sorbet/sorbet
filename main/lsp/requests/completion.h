@@ -14,10 +14,11 @@ class CompletionTask final : public LSPRequestTask {
                               std::vector<std::unique_ptr<CompletionItem>> &items) const;
 
     std::unique_ptr<CompletionItem> getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker,
+                                                               core::DispatchResult &dispatchResult,
                                                                core::SymbolRef what, const core::TypePtr &receiverType,
                                                                const core::TypeConstraint *constraint,
                                                                core::Loc queryLoc, std::string_view prefix,
-                                                               size_t sortIdx) const;
+                                                               size_t sortIdx, u2 totalArgs) const;
 
 public:
     CompletionTask(const LSPConfiguration &config, MessageId id, std::unique_ptr<CompletionParams> params);
