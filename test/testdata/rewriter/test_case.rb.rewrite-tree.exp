@@ -3,7 +3,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MyTest><<C <todo sym>>> < (<emptyTree>::<C ActiveSupport>::<C TestCase>)
-    def assert<<C <todo sym>>>(test, &<blk>)
+    def assert<<todo method>>(test, &<blk>)
       if test
         true
       else
@@ -11,7 +11,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    def self.test<<C <todo sym>>>(*args, &<blk>)
+    def self.test<<todo method>>(*args, &<blk>)
       <emptyTree>
     end
 
@@ -19,7 +19,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def test_valid_method_call<<C <todo sym>>>(&<blk>)
+    def test_valid_method_call<<todo method>>(&<blk>)
       <emptyTree>
     end
 
@@ -27,13 +27,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.void()
     end
 
-    def test_block_is_evaluated_in_the_context_of_an_instance<<C <todo sym>>>(&<blk>)
+    def test_block_is_evaluated_in_the_context_of_an_instance<<todo method>>(&<blk>)
       <self>.assert(true)
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :assert)
+    ::Sorbet::Private::Static.keep_def(<self>, :assert, :normal)
 
-    ::Sorbet::Private::Static.keep_self_def(<self>, :test)
+    ::Sorbet::Private::Static.keep_self_def(<self>, :test, :normal)
 
     <self>.tesst("invalid", "method name") do ||
       <emptyTree>
@@ -53,8 +53,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.assert(true)
     end
 
-    ::Sorbet::Private::Static.keep_def(<self>, :test_valid_method_call)
+    ::Sorbet::Private::Static.keep_def(<self>, :test_valid_method_call, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :test_block_is_evaluated_in_the_context_of_an_instance)
+    ::Sorbet::Private::Static.keep_def(<self>, :test_block_is_evaluated_in_the_context_of_an_instance, :normal)
   end
 end
