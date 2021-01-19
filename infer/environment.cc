@@ -1166,15 +1166,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         auto ownerData = ctx.owner.data(ctx);
                         e.setHeader("Expected `{}` but found `{}` for method result type", methodReturnType.show(ctx),
                                     typeAndOrigin.type.show(ctx));
-                        e.addErrorSection(core::ErrorSection(
-                            "Expected " + methodReturnType.show(ctx),
-                            {
-                                core::ErrorLine::from(ownerData->loc(), "Method `{}` has return type `{}`",
-                                                      ownerData->name.show(ctx), methodReturnType.show(ctx)),
-                            }));
+                        auto for_ = core::ErrorColors::format("result type of method `{}`", ownerData->name.show(ctx));
                         e.addErrorSection(
-                            core::ErrorSection("Got " + typeAndOrigin.type.show(ctx) + " originating from:",
-                                               typeAndOrigin.origins2Explanations(ctx, ownerLoc)));
+                            core::TypeAndOrigins::explainExpected(ctx, methodReturnType, ownerData->loc(), for_));
+                        e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                     }
                 }
             },
@@ -1196,16 +1191,16 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType);
                 }
                 if (!isSubtype) {
-                    // TODO(nelhage): We should somehow report location
-                    // information about the `send` and/or the
-                    // definition of the block type
-
                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
-                        e.setHeader("Returning value that does not conform to block result type");
-                        e.addErrorSection(core::ErrorSection("Expected " + expectedType.show(ctx)));
+                        e.setHeader("Expected `{}` but found `{}` for block result type", expectedType.show(ctx),
+                                    typeAndOrigin.type.show(ctx));
+
+                        const auto &bspec = i->link->result->main.method.data(ctx)->arguments().back();
+                        ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg");
                         e.addErrorSection(
-                            core::ErrorSection("Got " + typeAndOrigin.type.show(ctx) + " originating from:",
-                                               typeAndOrigin.origins2Explanations(ctx, ownerLoc)));
+                            core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));
+
+                        e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                     }
                 }
 
@@ -1231,8 +1226,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled", "T.absurd",
                                     typeAndOrigin.type.show(ctx));
                     }
-                    e.addErrorSection(
-                        core::ErrorSection("Originating from:", typeAndOrigin.origins2Explanations(ctx, ownerLoc)));
+                    e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                 }
 
                 tp.type = core::Types::bottom();
@@ -1269,17 +1263,14 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 if (c->cast != core::Names::cast()) {
                     if (c->cast == core::Names::assertType() && ty.type.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
-                            e.setHeader("The typechecker was unable to infer the type of the asserted value");
-                            e.addErrorSection(core::ErrorSection("Got " + ty.type.show(ctx) + " originating from:",
-                                                                 ty.origins2Explanations(ctx, ownerLoc)));
+                            e.setHeader("Expected a type but found `{}` for `{}`", "T.untyped", "T.assert_type!");
+                            e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                             e.addErrorNote("You may need to add additional `{}` annotations", "sig");
                         }
                     } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("Argument does not have asserted type `{}`", castType.show(ctx));
-                            e.addErrorSection(
-                                core::ErrorSection("Got " + ty.type.showWithMoreInfo(ctx) + " originating from:",
-                                                   ty.origins2Explanations(ctx, ownerLoc)));
+                            e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                         }
                     }
                 } else if (!c->isSynthetic) {
@@ -1289,8 +1280,9 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         }
                     } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
-                            e.setHeader("Useless cast: inferred type `{}` is already a subtype of `{}`",
+                            e.setHeader("`{}` is useless because `{}` is already a subtype of `{}`", "T.cast",
                                         ty.type.show(ctx), castType.show(ctx));
+                            e.addErrorSection(ty.explainGot(ctx, ownerLoc));
                         }
                     }
                 }

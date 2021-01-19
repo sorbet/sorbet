@@ -196,13 +196,11 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
         } else {
             e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs), argTpe.type.show(gs),
                         argSym.argumentName(gs));
-            e.addErrorSection(ErrorSection({
-                ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`", method.data(gs)->show(gs),
-                                argSym.argumentName(gs), expectedType.show(gs)),
-            }));
+            auto for_ =
+                ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.data(gs)->show(gs));
+            e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
-        e.addErrorSection(ErrorSection("Got " + argTpe.type.show(gs) + " originating from:",
-                                       argTpe.origins2Explanations(gs, originForUninitialized)));
+        e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
         auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
         if (!withoutNil.isBottom() &&
             Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
@@ -803,9 +801,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                                 gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
                             e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
                                         "arguments");
-                            e.addErrorSection(
-                                ErrorSection("Got " + kwSplatType.show(gs) + " originating from:",
-                                             kwSplatArg->origins2Explanations(gs, args.originForUninitialized)));
+                            auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
+                            e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
                             result.main.errors.emplace_back(e.build());
                         }
                         kwargs = Types::untypedUntracked();
@@ -1244,7 +1241,8 @@ public:
         auto ret = Types::approximateSubtract(gs, args.args[0]->type, Types::nilClass());
         if (ret == args.args[0]->type) {
             if (auto e = gs.beginError(loc, errors::Infer::InvalidCast)) {
-                e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args.args[0]->type.show(gs));
+                e.setHeader("`{}` called on `{}`, which is never `{}`", "T.must", args.args[0]->type.show(gs), "nil");
+                e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
                 const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
                 e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs));
             }
@@ -1300,8 +1298,7 @@ public:
 
         if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::RevealType)) {
             e.setHeader("Revealed type: `{}`", args.args[0]->type.showWithMoreInfo(gs));
-            e.addErrorSection(
-                ErrorSection("From:", args.args[0]->origins2Explanations(gs, args.originForUninitialized)));
+            e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
         }
         res.returnType = args.args[0]->type;
     }
@@ -1849,10 +1846,9 @@ private:
         ENFORCE(!methodArgs.empty());
         const auto &bspec = methodArgs.back();
         ENFORCE(bspec.flags.isBlock);
-        e.addErrorSection(ErrorSection({
-            ErrorLine::from(bspec.loc, "Method `{}` has specified `{}` as `{}`", dispatchComp.method.data(gs)->show(gs),
-                            bspec.argumentName(gs), blockType.show(gs)),
-        }));
+        auto for_ = ErrorColors::format("for block argument `{}` of method `{}`", bspec.argumentName(gs),
+                                        dispatchComp.method.data(gs)->show(gs));
+        e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, bspec.loc, for_));
     }
 
     static void simulateCall(const GlobalState &gs, const TypeAndOrigins *receiver, const DispatchArgs &innerArgs,

@@ -1,7 +1,7 @@
 # typed: strict
 T.let("foo", String)
 T.assert_type!("foo", String)
-T.cast("foo", String) # error: Useless cast
+T.cast("foo", String) # error: `T.cast` is useless
 T.unsafe(String)
 T.nilable(String)
 T.proc

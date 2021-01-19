@@ -12,7 +12,7 @@ class A
 
   sig {params(x: T1).void}
   def test1(x)
-    T.cast(x, Animal) # error: Useless cast
+    T.cast(x, Animal) # error: `T.cast` is useless
   end
 end
 

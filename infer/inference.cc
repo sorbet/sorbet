@@ -170,15 +170,11 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     if (dueToSafeNavigation && send != nullptr) {
                         if (auto e =
                                 ctx.beginError(locForUnreachable, core::errors::Infer::UnnecessarySafeNavigation)) {
-                            e.setHeader("Used `{}` operator on a receiver which can never be nil", "&.");
+                            ENFORCE(send->args.size() == 1, "Broken invariant from desugar");
+                            auto ty = current.getAndFillTypeAndOrigin(ctx, send->args[0]);
 
-                            // Just a failsafe check; args.size() should always be 1.
-                            if (send->args.size() > 0) {
-                                auto ty = current.getAndFillTypeAndOrigin(ctx, send->args[0]);
-                                e.addErrorSection(core::ErrorSection(
-                                    core::ErrorColors::format("Type of receiver is `{}`, from:", ty.type.show(ctx)),
-                                    ty.origins2Explanations(ctx, current.locForUninitialized())));
-                            }
+                            e.setHeader("Used `{}` operator on `{}`, which can never be nil", "&.", ty.type.show(ctx));
+                            e.addErrorSection(ty.explainGot(ctx, current.locForUninitialized()));
                         }
                     } else if (auto e = ctx.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
                         e.setHeader("This code is unreachable");
