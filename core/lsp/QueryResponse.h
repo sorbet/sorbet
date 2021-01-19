@@ -11,7 +11,7 @@ class TypeConstraint;
 class SendResponse final {
 public:
     SendResponse(core::Loc termLoc, std::shared_ptr<core::DispatchResult> dispatchResult, core::NameRef callerSideName,
-                 bool isPrivateOk, core::MethodRef enclosingMethod, core::Loc receiverLoc, u2 totalArgs)
+                 bool isPrivateOk, core::MethodRef enclosingMethod, core::Loc receiverLoc, size_t totalArgs)
         : dispatchResult(std::move(dispatchResult)), callerSideName(callerSideName), termLoc(termLoc),
           isPrivateOk(isPrivateOk), enclosingMethod(enclosingMethod), receiverLoc(receiverLoc), totalArgs(totalArgs){};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
@@ -20,7 +20,7 @@ public:
     const bool isPrivateOk;
     const core::MethodRef enclosingMethod;
     const core::Loc receiverLoc;
-    const u2 totalArgs;
+    const size_t totalArgs;
 
     const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
