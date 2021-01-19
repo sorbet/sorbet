@@ -240,11 +240,20 @@ vector<core::LocalVariable> allSimilarLocals(const core::GlobalState &gs, const 
     return result;
 }
 
-string methodSnippet(const core::GlobalState &gs, core::SymbolRef method, const core::TypePtr &receiverType,
-                     const core::TypeConstraint *constraint) {
+string methodSnippet(const core::GlobalState &gs, core::DispatchResult &dispatchResult, core::SymbolRef method,
+                     const core::TypePtr &receiverType, const core::TypeConstraint *constraint, u2 totalArgs) {
     fmt::memory_buffer result;
     fmt::format_to(result, "{}", method.data(gs)->name.shortName(gs));
     auto nextTabstop = 1;
+
+    /* If we are completing an existing send that either has some arguments
+     * or a block specified already then simply complete the method name
+     * since the rest is likely useless
+     */
+    if (totalArgs > 0 || dispatchResult.main.blockReturnType != nullptr) {
+        fmt::format_to(result, "${{0}}");
+        return to_string(result);
+    }
 
     vector<string> typeAndArgNames;
     for (auto &argSym : method.data(gs)->arguments()) {
@@ -644,9 +653,10 @@ CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, uni
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentCompletion), params(move(params)) {}
 
 unique_ptr<CompletionItem>
-CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::SymbolRef maybeAlias,
-                                           const core::TypePtr &receiverType, const core::TypeConstraint *constraint,
-                                           core::Loc queryLoc, string_view prefix, size_t sortIdx) const {
+CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::DispatchResult &dispatchResult,
+                                           core::SymbolRef maybeAlias, const core::TypePtr &receiverType,
+                                           const core::TypeConstraint *constraint, core::Loc queryLoc,
+                                           string_view prefix, size_t sortIdx, u2 totalArgs) const {
     const auto &gs = typechecker.state();
     ENFORCE(maybeAlias.exists());
     ENFORCE(maybeAlias.data(gs)->isMethod());
@@ -678,7 +688,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     string replacementText;
     if (supportsSnippets) {
         item->insertTextFormat = InsertTextFormat::Snippet;
-        replacementText = methodSnippet(gs, what, receiverType, constraint);
+        replacementText = methodSnippet(gs, dispatchResult, what, receiverType, constraint, totalArgs);
     } else {
         item->insertTextFormat = InsertTextFormat::PlainText;
         replacementText = label;
@@ -792,8 +802,8 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
 
         // isPrivateOk means that there is no syntactic receiver. This check prevents completing `x.de` to `x.def`
         auto similarKeywords = sendResp->isPrivateOk ? allSimilarKeywords(prefix) : vector<RubyKeyword>{};
-
-        auto similarMethodsByName = allSimilarMethods(gs, *sendResp->dispatchResult, prefix);
+        auto dispatchResult = sendResp->dispatchResult;
+        auto similarMethodsByName = allSimilarMethods(gs, *dispatchResult, prefix);
         for (auto &[methodName, similarMethods] : similarMethodsByName) {
             fast_sort(similarMethods, [&](const auto &left, const auto &right) -> bool {
                 if (left.depth != right.depth) {
@@ -857,8 +867,9 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
             items.push_back(getCompletionItemForLocal(gs, config, similarLocal, queryLoc, prefix, items.size()));
         }
         for (auto &similarMethod : deduped) {
-            items.push_back(getCompletionItemForMethod(typechecker, similarMethod.method, similarMethod.receiverType,
-                                                       similarMethod.constr.get(), queryLoc, prefix, items.size()));
+            items.push_back(getCompletionItemForMethod(typechecker, *dispatchResult, similarMethod.method,
+                                                       similarMethod.receiverType, similarMethod.constr.get(), queryLoc,
+                                                       prefix, items.size(), sendResp->totalArgs));
         }
     } else if (auto constantResp = resp->isConstant()) {
         findSimilarConstants(gs, *constantResp, queryLoc, items);
