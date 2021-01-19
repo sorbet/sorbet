@@ -1084,20 +1084,27 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 pinnedTypes[bind.bind.variable] = tp;
             },
             [&](cfg::SolveConstraint *i) {
-                if (i->link->result->main.constr && !i->link->result->main.constr->solve(ctx)) {
-                    if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstaintUnsolved)) {
-                        e.setHeader("Could not find valid instantiation of type parameters");
-                    }
-                }
-
                 core::TypePtr type;
-                if (i->link->result->main.constr) {
-                    // TODO: this should repeat the same dance with Or and And components that dispatchCall does
-                    type = core::Types::instantiate(ctx, i->link->result->main.sendTp, *i->link->result->main.constr);
+                // TODO: this should repeat the same dance with Or and And components that dispatchCall does
+                const auto &main = i->link->result->main;
+                if (main.constr) {
+                    if (!main.constr->solve(ctx)) {
+                        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstaintUnsolved)) {
+                            e.setHeader("Could not find valid instantiation of type parameters for `{}`",
+                                        main.method.data(ctx)->show(ctx));
+                            e.addErrorLine(main.method.data(ctx)->loc(), "`{}` defined here",
+                                           main.method.data(ctx)->show(ctx));
+                            e.addErrorSection(main.constr->explain(ctx));
+                        }
+                        type = core::Types::untypedUntracked();
+                    } else {
+                        type = core::Types::instantiate(ctx, main.sendTp, *main.constr);
+                    }
                 } else {
                     type = i->link->result->returnType;
                 }
-                type = flatmapHack(ctx, i->link->result->main.receiver, type, i->link->fun);
+
+                type = flatmapHack(ctx, main.receiver, type, i->link->fun);
                 tp.type = std::move(type);
                 tp.origins.emplace_back(core::Loc(ctx.file, bind.loc));
             },

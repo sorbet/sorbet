@@ -1071,7 +1071,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.setHeader("Could not find valid instantiation of type parameters for `{}`",
                             method.data(gs)->show(gs));
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.data(gs)->show(gs));
-                e.addErrorSection(ErrorSection("Found no solution for these constraints:", constr->toExplanation(gs)));
+                e.addErrorSection(constr->explain(gs));
                 result.main.errors.emplace_back(e.build());
             }
         }
