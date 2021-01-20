@@ -4,7 +4,39 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @using_attr_reader
     end
 
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def using_attr_reader_sig_checked<<todo method>>(&<blk>)
+      @using_attr_reader_sig_checked
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.returns(<emptyTree>::<C Integer>).checked(:tests)
+    end
+
+    def using_attr_reader_sig_checked_tests<<todo method>>(&<blk>)
+      @using_attr_reader_sig_checked_tests
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.returns(<emptyTree>::<C Integer>).checked(:never)
+    end
+
+    def using_attr_reader_sig_checked_never<<todo method>>(&<blk>)
+      @using_attr_reader_sig_checked_never
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
     ::Sorbet::Private::Static.keep_def(<self>, :using_attr_reader, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :using_attr_reader_sig_checked, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :using_attr_reader_sig_checked_tests, :attr_reader)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :using_attr_reader_sig_checked_never, :attr_reader)
   end
 
   class <emptyTree>::<C B><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
