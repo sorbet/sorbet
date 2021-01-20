@@ -531,13 +531,22 @@ void validateUnsatisfiedRequiredAncestors(core::Context ctx, const core::SymbolR
     }
 }
 
-void validateUnsatisfiableClassAncestors(core::Context ctx, const core::SymbolRef sym) {
+void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
     auto data = sym.data(ctx);
 
     vector<core::Symbol::RequiredAncestor> requiredClasses;
     for (auto ancst : data->requiredAncestorsTransitive(ctx)) {
         if (ancst.symbol.data(ctx)->isClassOrModuleClass()) {
             requiredClasses.emplace_back(ancst);
+        }
+
+        if (ancst.symbol.data(ctx)->typeArity(ctx) > 0) {
+            if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
+                e.setHeader("`{}` can't require generic ancestor `{}` (unsupported)", data->show(ctx),
+                            ancst.symbol.data(ctx)->show(ctx));
+                e.addErrorLine(ancst.loc, "`{}` is required by `{}` here", ancst.symbol.data(ctx)->show(ctx),
+                               ancst.origin.data(ctx)->show(ctx));
+            }
         }
     }
 
@@ -582,7 +591,7 @@ void validateUnsatisfiableClassAncestors(core::Context ctx, const core::SymbolRe
 void validateRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
     validateUselessRequiredAncestors(ctx, sym);
     validateUnsatisfiedRequiredAncestors(ctx, sym);
-    validateUnsatisfiableClassAncestors(ctx, sym);
+    validateUnsatisfiableRequiredAncestors(ctx, sym);
 }
 
 class ValidateWalk {
