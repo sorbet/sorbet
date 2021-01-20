@@ -75,23 +75,21 @@ def sorbet_llvm_externals():
         sha256 = "7bfe4e5e274191e56da8d127c79df10d9120feb8650e4bad29238f4b2773a661",
     )
 
+    ruby_unpatched_build = "@com_stripe_sorbet_llvm//third_party/ruby:ruby.BUILD"
+    ruby_patched_build = "@com_stripe_sorbet_llvm//third_party/ruby:ruby_2_7.BUILD"
+
     http_archive(
         name = "sorbet_ruby",
         urls = _ruby_urls("2.6/ruby-2.6.5.tar.gz"),
         sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
         strip_prefix = "ruby-2.6.5",
-        build_file = "@com_stripe_sorbet_llvm//third_party/ruby:ruby.BUILD",
-        # If you're trying to use `git diff` to generate this patch, pass the `--no-prefix` flag
-        # (Removes the `a/` and `b/` prefixes that `patch` doesn't understand.)
-        patches = [],
-        patch_tool = "patch",
+        build_file = ruby_unpatched_build,
     )
 
     for apply_patch in [True, False]:
         urls = _ruby_urls("2.7/ruby-2.7.2.tar.gz")
         sha256 = "6e5706d0d4ee4e1e2f883db9d768586b4d06567debea353c796ec45e8321c3d4"
         strip_prefix = "ruby-2.7.2"
-        build_file = "@com_stripe_sorbet_llvm//third_party/ruby:ruby_2_7.BUILD"
 
         if apply_patch:
             http_archive(
@@ -99,7 +97,7 @@ def sorbet_llvm_externals():
                 urls = urls,
                 sha256 = sha256,
                 strip_prefix = strip_prefix,
-                build_file = build_file,
+                build_file = ruby_patched_build,
                 # If you're trying to use `git diff` to generate this patch, pass the `--no-prefix` flag
                 # (Removes the `a/` and `b/` prefixes that `patch` doesn't understand.)
                 patches = [
@@ -114,5 +112,5 @@ def sorbet_llvm_externals():
                 urls = urls,
                 sha256 = sha256,
                 strip_prefix = strip_prefix,
-                build_file = build_file,
+                build_file = ruby_unpatched_build,
             )
