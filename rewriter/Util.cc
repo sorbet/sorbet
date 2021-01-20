@@ -204,8 +204,11 @@ ast::TreePtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
     }
 }
 
-ast::TreePtr ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs) {
-    return ast::MK::SyntheticMethod0(loc, loc, name, move(rhs));
+ast::TreePtr ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs,
+                            bool isAttrReader) {
+    auto ret = ast::MK::SyntheticMethod0(loc, loc, name, move(rhs));
+    ast::cast_tree_nonnull<ast::MethodDef>(ret).flags.isAttrReader = isAttrReader;
+    return ret;
 }
 
 ast::TreePtr ASTUtil::mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name, core::LocOffsets argLoc,

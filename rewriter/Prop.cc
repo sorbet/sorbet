@@ -301,13 +301,14 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
         nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseUnimplemented(loc)));
     } else if (ret.ifunset == nullptr) {
         if (knownNonModel(propContext.syntacticSuperClass)) {
+            auto isAttrReader = true;
             if (wantTypedInitialize(propContext.syntacticSuperClass)) {
-                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName)));
+                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName), isAttrReader));
             } else {
                 // Need to hide the instance variable access, because there wasn't a typed constructor to declare it
                 auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(),
                                               ast::MK::Symbol(nameLoc, ivarName));
-                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet)));
+                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet), isAttrReader));
             }
         } else {
             // Models have a custom decorator, which means we have to forward the prop get to it.
