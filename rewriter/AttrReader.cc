@@ -65,7 +65,7 @@ bool isTNilableOrUntyped(const ast::TreePtr &expr) {
            isT(send->recv);
 }
 
-ast::Send *findSendReturns(core::MutableContext ctx, ast::Send *sharedSig) {
+ast::Send *findSendReturns(ast::Send *sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
     auto block = ast::cast_tree<ast::Block>(sharedSig->block);
@@ -78,10 +78,10 @@ ast::Send *findSendReturns(core::MutableContext ctx, ast::Send *sharedSig) {
     return body->fun == core::Names::returns() ? body : nullptr;
 }
 
-bool hasNilableOrUntypedReturns(core::MutableContext ctx, ast::TreePtr &sharedSig) {
+bool hasNilableOrUntypedReturns(ast::TreePtr &sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
-    auto *body = findSendReturns(ctx, ASTUtil::castSig(sharedSig));
+    auto *body = findSendReturns(ASTUtil::castSig(sharedSig));
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->args.size() != 1) {
@@ -90,10 +90,10 @@ bool hasNilableOrUntypedReturns(core::MutableContext ctx, ast::TreePtr &sharedSi
     return isTNilableOrUntyped(body->args[0]);
 }
 
-ast::TreePtr dupReturnsType(core::MutableContext ctx, ast::Send *sharedSig) {
+ast::TreePtr dupReturnsType(ast::Send *sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
-    auto *body = findSendReturns(ctx, ASTUtil::castSig(sharedSig));
+    auto *body = findSendReturns(ASTUtil::castSig(sharedSig));
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->args.size() != 1) {
@@ -121,8 +121,7 @@ void ensureSafeSig(core::MutableContext ctx, const core::NameRef attrFun, ast::S
 
 // To convert a sig into a writer sig with argument `name`, we copy the `returns(...)`
 // value into the `sig {params(...)}` using whatever name we have for the setter.
-ast::TreePtr toWriterSigForName(core::MutableContext ctx, ast::Send *sharedSig, const core::NameRef name,
-                                core::LocOffsets nameLoc) {
+ast::TreePtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef name, core::LocOffsets nameLoc) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
     // There's a bit of work here because deepCopy gives us back an Expression when we know it's a Send.
@@ -130,7 +129,7 @@ ast::TreePtr toWriterSigForName(core::MutableContext ctx, ast::Send *sharedSig, 
     auto *sig = ast::cast_tree<ast::Send>(sigExpr);
     ENFORCE(sig != nullptr, "Just deep copied this, so it should be non-null");
 
-    auto *body = findSendReturns(ctx, sig);
+    auto *body = findSendReturns(sig);
 
     ENFORCE(body->fun == core::Names::returns());
     if (body->args.size() != 1) {
@@ -210,7 +209,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
     ast::Send *sig = nullptr;
     if (prevStat) {
         sig = ASTUtil::castSig(*prevStat);
-        if (sig != nullptr && findSendReturns(ctx, sig) == nullptr) {
+        if (sig != nullptr && findSendReturns(sig) == nullptr) {
             sig = nullptr;
         } else if (sig != nullptr) {
             ensureSafeSig(ctx, send->fun, sig);
@@ -218,7 +217,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
     }
 
     bool declareIvars = false;
-    if (sig != nullptr && hasNilableOrUntypedReturns(ctx, *prevStat)) {
+    if (sig != nullptr && hasNilableOrUntypedReturns(*prevStat)) {
         declareIvars = true;
     }
 
@@ -256,7 +255,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
 
             if (sig != nullptr) {
                 if (usedPrevSig) {
-                    auto writerSig = toWriterSigForName(ctx, sig, name, argLoc);
+                    auto writerSig = toWriterSigForName(sig, name, argLoc);
                     if (!writerSig) {
                         return empty;
                     }
@@ -269,7 +268,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
             ast::TreePtr body;
             if (declareIvars) {
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName),
-                                       ast::MK::Let(loc, ast::MK::Local(loc, name), dupReturnsType(ctx, sig)));
+                                       ast::MK::Let(loc, ast::MK::Local(loc, name), dupReturnsType(sig)));
             } else {
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName), ast::MK::Local(loc, name));
             }
