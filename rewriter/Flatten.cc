@@ -40,17 +40,6 @@ using namespace std;
 // has been replaced with the verbatim symbol `:bar`.
 namespace sorbet::rewriter {
 
-namespace {
-
-bool isAttrReaderMethodDef(core::Context ctx, ast::MethodDef &methodDef) {
-    auto *ivar = ast::cast_tree<ast::UnresolvedIdent>(methodDef.rhs);
-    auto expectedIvarName = methodDef.name.lookupWithAt(ctx);
-    return ivar != nullptr && ivar->kind == ast::UnresolvedIdent::Kind::Instance && expectedIvarName.exists() &&
-           ivar->name == expectedIvarName;
-}
-
-} // namespace
-
 class FlattenWalk {
     enum class ScopeType { ClassScope, StaticMethodScope, InstanceMethodScope };
 
@@ -379,7 +368,7 @@ public:
         auto name = methodDef.name;
         auto keepName = methodDef.flags.isSelfMethod ? core::Names::keepSelfDef() : core::Names::keepDef();
 
-        auto kind = isAttrReaderMethodDef(ctx, methodDef) ? core::Names::attrReader() : core::Names::normal();
+        auto kind = methodDef.flags.isAttrReader ? core::Names::attrReader() : core::Names::normal();
         methods.addExpr(*md, move(tree));
 
         return ast::MK::Send3(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,
