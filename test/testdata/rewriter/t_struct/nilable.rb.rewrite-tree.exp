@@ -31,7 +31,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C Integer>), :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
   end

@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foo, :attr_reader)
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
 
     ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
 
