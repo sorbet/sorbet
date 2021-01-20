@@ -294,6 +294,19 @@ void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodP
     rb_define_singleton_method(klass, name, methodPtr, argc);
 }
 
+SORBET_INLINE
+void sorbet_defineIvarMethod(VALUE klass, const char *name) {
+    // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/vm_method.c#L1190-L1193
+    ID mid = rb_intern(name);
+    ID attriv = rb_intern_str(rb_sprintf("@%" PRIsVALUE, rb_id2str(mid)));
+    rb_add_method(klass, mid, VM_METHOD_TYPE_IVAR, (void *)attriv, METHOD_VISI_PUBLIC);
+}
+
+SORBET_INLINE
+void sorbet_defineIvarMethodSingleton(VALUE klass, const char *name) {
+    sorbet_defineIvarMethod(rb_singleton_class(klass), name);
+}
+
 // ****
 // ****                       Variables
 // ****

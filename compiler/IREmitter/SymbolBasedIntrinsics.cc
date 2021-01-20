@@ -92,40 +92,57 @@ public:
         auto *send = mcctx.send;
 
         bool isSelf = send->fun == core::Names::keepSelfDef();
-        ENFORCE(send->args.size() == 2 || send->args.size() == 3, "Invariant established by rewriter/Flatten.cc");
+
+        ENFORCE(send->args.size() == 3, "Invariant established by rewriter/Flatten.cc");
+
+        // First arg: define method on what
         auto ownerSym = typeToSym(cs, send->args[0].type);
+        auto klass = Payload::getRubyConstant(cs, ownerSym, builder);
 
-        auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
-        ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        core::NameRef funcNameRef = lit.asName(cs);
+        // Second arg: name of method to define
+        auto litName = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
+        ENFORCE(litName.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto funcNameRef = litName.asName(cs);
+        auto name = Payload::toCString(cs, funcNameRef.show(cs), builder);
 
-        auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
-        if (ownerSym == core::Symbols::Object() && !isSelf) {
-            // TODO Figure out if this speicial case is right
-            lookupSym = core::Symbols::Object();
+        // Third arg: method kind (normal or attr_reader)
+        auto litMethodKind = core::cast_type_nonnull<core::LiteralType>(send->args[2].type);
+        ENFORCE(litMethodKind.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto methodKind = litMethodKind.asName(cs);
+
+        switch (methodKind.rawId()) {
+            case core::Names::attrReader().rawId(): {
+                const char *payloadFuncName = isSelf ? "sorbet_defineIvarMethodSingleton" : "sorbet_defineIvarMethod";
+                auto payloadFunc = cs.getFunction(payloadFuncName);
+
+                builder.CreateCall(payloadFunc, {klass, name});
+                break;
+            }
+            case core::Names::normal().rawId(): {
+                auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
+                if (ownerSym == core::Symbols::Object() && !isSelf) {
+                    // TODO Figure out if this speicial case is right
+                    lookupSym = core::Symbols::Object();
+                }
+                auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
+                ENFORCE(funcSym.exists());
+                ENFORCE(funcSym.data(cs)->isMethod());
+
+                auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
+                auto universalSignature =
+                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
+                auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
+
+                const char *payloadFuncName = isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod";
+                auto rubyFunc = cs.getFunction(payloadFuncName);
+                builder.CreateCall(rubyFunc, {klass, name, ptr, llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
+
+                builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
+                break;
+            }
+            default:
+                Exception::raise("Unknown method kind: {}", methodKind.show(cs));
         }
-        auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
-        ENFORCE(funcSym.exists());
-        ENFORCE(funcSym.data(cs)->isMethod());
-
-        const char *rubyFuncName;
-        if (isSelf) {
-            rubyFuncName = "sorbet_defineMethodSingleton";
-        } else {
-            rubyFuncName = "sorbet_defineMethod";
-        }
-
-        auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
-        auto universalSignature =
-            llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
-        auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
-
-        auto rubyFunc = cs.getFunction(rubyFuncName);
-        builder.CreateCall(rubyFunc, {Payload::getRubyConstant(cs, ownerSym, builder),
-                                      Payload::toCString(cs, funcNameRef.show(cs), builder), ptr,
-                                      llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
-
-        builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
 
         // Return the symbol of the method name even if we don't emit a definition. This will be a problem if there are
         // meta-progrmaming methods applied to an abstract method definition, see
