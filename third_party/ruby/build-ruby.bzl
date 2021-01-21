@@ -63,6 +63,7 @@ export PATH="$(dirname "{cc}"):$PATH"
 cp -aL "{src_dir}"/* "$build_dir"
 
 {install_extra_srcs}
+{install_append_srcs}
 
 pushd "$build_dir" > /dev/null
 
@@ -160,6 +161,10 @@ mkdir -p "$build_dir/{dirname}"
 cp "{file}" "$build_dir/{dirname}/{basename}"
 """
 
+_INSTALL_APPEND_SRC = """
+cat "{file}" >> "$build_dir/{target}"
+"""
+
 _INSTALL_GEM = """
 
 # Copy {file} locally to avoid having the gem command accidentally interpret it
@@ -244,12 +249,17 @@ def _build_ruby_impl(ctx):
                 extra_obj = "{dirname}/{without_ext}.$(OBJEXT)".format(without_ext = without_ext, dirname = dirname)
                 extra_srcs_object_files.append(extra_obj)
 
+    install_append_srcs = []
+    for append_src in ctx.attr.append_srcs:
+        for file in append_src.files.to_list():
+            install_append_srcs.append(_INSTALL_APPEND_SRC.format(file = file.path, target = file.basename))
+
     install_gems = [_INSTALL_GEM.format(file = file.path) for file in ctx.files.gems]
 
     # Build
     ctx.actions.run_shell(
         mnemonic = "BuildRuby",
-        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.gems + ctx.files.extra_srcs,
+        inputs = deps + ctx.files.src + ctx.files.rubygems + ctx.files.gems + ctx.files.extra_srcs + ctx.files.append_srcs,
         outputs = outputs,
         command = ctx.expand_location(_BUILD_RUBY.format(
             cc = cc,
@@ -266,6 +276,7 @@ def _build_ruby_impl(ctx):
             sysroot_flag = ctx.attr.sysroot_flag,
             install_extra_srcs = "\n".join(install_extra_srcs),
             extra_srcs_object_files = " ".join(extra_srcs_object_files),
+            install_append_srcs = "\n".join(install_append_srcs),
             install_gems = "\n".join(install_gems),
         )),
     )
@@ -297,6 +308,9 @@ _build_ruby = rule(
         ),
         "extra_srcs": attr.label_list(
             doc = "A list of *.c and *.h files to treat as extra source files to libruby",
+        ),
+        "append_srcs": attr.label_list(
+            doc = "A list of *.c files to append to the file of the same name in the ruby vm",
         ),
         "configure_flags": attr.string_list(
             doc = "Additional arguments to configure",
@@ -507,7 +521,7 @@ _ruby_internal_headers = rule(
     implementation = _ruby_internal_headers_impl,
 )
 
-def ruby(rubygems, gems, extra_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
+def ruby(rubygems, gems, extra_srcs = None, append_srcs = None, configure_flags = [], copts = [], cppopts = [], linkopts = [], deps = []):
     """
     Define a ruby build.
     """
@@ -522,6 +536,7 @@ def ruby(rubygems, gems, extra_srcs = None, configure_flags = [], copts = [], cp
         name = "ruby-dist",
         src = ":source",
         extra_srcs = extra_srcs,
+        append_srcs = append_srcs,
         rubygems = rubygems,
         configure_flags = configure_flags,
         copts = copts,
