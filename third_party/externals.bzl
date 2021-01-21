@@ -75,8 +75,8 @@ def sorbet_llvm_externals():
         sha256 = "7bfe4e5e274191e56da8d127c79df10d9120feb8650e4bad29238f4b2773a661",
     )
 
-    ruby_unpatched_build = "@com_stripe_sorbet_llvm//third_party/ruby:ruby.BUILD"
-    ruby_patched_build = "@com_stripe_sorbet_llvm//third_party/ruby:ruby_2_7.BUILD"
+    ruby_unpatched_build = "@com_stripe_sorbet_llvm//third_party/ruby:ruby_unpatched.BUILD"
+    ruby_patched_build = "@com_stripe_sorbet_llvm//third_party/ruby:ruby_patched.BUILD"
 
     http_archive(
         name = "sorbet_ruby",
