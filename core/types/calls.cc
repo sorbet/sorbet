@@ -201,11 +201,16 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
-        auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
-        if (!withoutNil.isBottom() &&
-            Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
-            if (loc.exists()) {
-                e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(gs));
+        if (gs.suggestUnsafe.has_value()) {
+            e.replaceWith(fmt::format("Wrap in `{}`", *gs.suggestUnsafe), loc, "{}({})", *gs.suggestUnsafe,
+                          loc.source(gs));
+        } else {
+            auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
+            if (!withoutNil.isBottom() &&
+                Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
+                if (loc.exists()) {
+                    e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(gs));
+                }
             }
         }
         return e.build();
@@ -572,9 +577,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.addErrorSection(
                     ErrorSection("Got " + args.fullType.type.show(gs) + " originating from:", explanations));
             }
-            if (args.fullType.type != args.thisType && symbol == Symbols::NilClass()) {
-                e.replaceWith("Wrap in `T.must`", core::Loc(args.locs.file, args.locs.receiver), "T.must({})",
-                              core::Loc(args.locs.file, args.locs.receiver).source(gs));
+            auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
+            if (gs.suggestUnsafe.has_value()) {
+                e.replaceWith(fmt::format("Wrap in `{}`", *gs.suggestUnsafe), receiverLoc, "{}({})", *gs.suggestUnsafe,
+                              receiverLoc.source(gs));
+            } else if (args.fullType.type != args.thisType && symbol == Symbols::NilClass()) {
+                e.replaceWith("Wrap in `T.must`", receiverLoc, "T.must({})", receiverLoc.source(gs));
             } else {
                 if (symbol.data(gs)->isClassOrModuleModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMemberTransitive(gs, args.name);
