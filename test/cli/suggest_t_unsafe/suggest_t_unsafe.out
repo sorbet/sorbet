@@ -1,0 +1,37 @@
+suggest_t_unsafe.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+     4 |foo[0]
+        ^^^^^^
+  Got T.nilable(String) originating from:
+    suggest_t_unsafe.rb:3:
+     3 |foo = T.let(nil, T.nilable(String))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:4: Replaced with `T.unsafe(foo)`
+     4 |foo[0]
+        ^^^
+
+suggest_t_unsafe.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
+     6 |"hi" + foo
+        ^^^^^^^^^^
+  Expected `String` for argument `arg0` of method `String#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L58:
+    58 |        arg0: String,
+                ^^^^
+  Got `T.nilable(String)` originating from:
+    suggest_t_unsafe.rb:3:
+     3 |foo = T.let(nil, T.nilable(String))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:6: Replaced with `T.unsafe(foo)`
+     6 |"hi" + foo
+               ^^^
+Errors: 2
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+foo = T.let(nil, T.nilable(String))
+T.unsafe(foo)[0]
+
+"hi" + T.unsafe(foo)
