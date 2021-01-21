@@ -805,9 +805,11 @@ void readOptions(Options &opts,
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
+        opts.storeState = raw["store-state"].as<string>();
 
-        opts.threads = opts.runLSP ? raw["max-threads"].as<int>()
-                                   : min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
+        opts.threads = (opts.runLSP || !opts.storeState.empty())
+                           ? raw["max-threads"].as<int>()
+                           : min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
 
         if (raw["h"].as<bool>()) {
             logger->info("{}", options.help({""}));
@@ -838,7 +840,6 @@ void readOptions(Options &opts,
             opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
         }
         opts.skipRewriterPasses = raw["skip-rewriter-passes"].as<bool>();
-        opts.storeState = raw["store-state"].as<string>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
