@@ -7,6 +7,7 @@
 #include "core/StrictLevel.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
+#include <optional>
 
 namespace sorbet::realmain::options {
 
@@ -129,6 +130,7 @@ struct Options {
 
     bool showProgress = false;
     bool suggestTyped = false;
+    std::optional<std::string> suggestUnsafe = std::nullopt;
     bool silenceErrors = false;
     bool silenceDevMessage = false;
     bool suggestSig = false;
