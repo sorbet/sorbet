@@ -21,7 +21,8 @@ public:
 
     static ast::TreePtr mkKwArgsHash(const ast::Send *send);
 
-    static ast::TreePtr mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs);
+    static ast::TreePtr mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs,
+                              bool isAttrReader = false);
 
     static ast::TreePtr mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name, core::LocOffsets argLoc,
                               ast::TreePtr rhs);

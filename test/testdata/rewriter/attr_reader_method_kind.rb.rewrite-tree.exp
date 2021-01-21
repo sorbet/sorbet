@@ -80,13 +80,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.prop(:using_t_struct_prop, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_prop, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_prop, :attr_reader)
 
     ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_prop=, :normal)
 
     <self>.const(:using_t_struct_const, <emptyTree>::<C Integer>, :without_accessors, true)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_const, :normal)
+    ::Sorbet::Private::Static.keep_def(<self>, :using_t_struct_const, :attr_reader)
   end
 
   class <emptyTree>::<C C><<C <todo sym>>> < (::<todo sym>)
