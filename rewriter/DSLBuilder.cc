@@ -18,8 +18,8 @@ using namespace std;
 //
 
 namespace sorbet::rewriter {
-vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) {
-    vector<ast::TreePtr> empty;
+vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) {
+    vector<ast::ExpressionPtr> empty;
 
     if (ctx.state.runningUnderAutogen) {
         return empty;
@@ -29,7 +29,7 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
     bool implied = false;
     bool skipGetter = false;
     bool skipSetter = false;
-    ast::TreePtr type;
+    ast::ExpressionPtr type;
     core::NameRef name;
 
     if (send->fun == core::Names::dslOptional()) {
@@ -56,7 +56,7 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
         return empty;
     }
 
-    ast::TreePtr optsTree = ASTUtil::mkKwArgsHash(send);
+    ast::ExpressionPtr optsTree = ASTUtil::mkKwArgsHash(send);
     if (auto *opts = ast::cast_tree<ast::Hash>(optsTree)) {
         if (ASTUtil::hasHashValue(ctx, *opts, core::Names::default_())) {
             nilable = false;
@@ -74,7 +74,7 @@ vector<ast::TreePtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *send) 
 
     auto loc = send->loc;
 
-    vector<ast::TreePtr> stats;
+    vector<ast::ExpressionPtr> stats;
 
     // def self.<prop>
     if (!skipSetter) {

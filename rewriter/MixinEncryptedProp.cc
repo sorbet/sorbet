@@ -11,7 +11,7 @@ namespace sorbet::rewriter {
 
 namespace {
 
-ast::TreePtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets loc) {
+ast::ExpressionPtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets loc) {
     auto opus = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Opus());
     auto db = ast::MK::UnresolvedConstant(loc, move(opus), core::Names::Constants::DB());
     auto model = ast::MK::UnresolvedConstant(loc, move(db), core::Names::Constants::Model());
@@ -21,14 +21,14 @@ ast::TreePtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets 
     return ASTUtil::mkNilable(loc, move(ev));
 }
 
-ast::TreePtr mkNilableString(core::LocOffsets loc) {
+ast::ExpressionPtr mkNilableString(core::LocOffsets loc) {
     return ASTUtil::mkNilable(loc, ast::MK::Constant(loc, core::Symbols::String()));
 }
 
 } // namespace
 
-vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send *send) {
-    vector<ast::TreePtr> empty;
+vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send *send) {
+    vector<ast::ExpressionPtr> empty;
 
     if (ctx.state.runningUnderAutogen) {
         return empty;
@@ -56,7 +56,7 @@ vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send
     auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     enc_name = name.prepend(ctx, "encrypted_");
 
-    ast::TreePtr rules;
+    ast::ExpressionPtr rules;
     if (!send->args.empty()) {
         rules = ASTUtil::mkKwArgsHash(send);
     }
@@ -67,7 +67,7 @@ vector<ast::TreePtr> MixinEncryptedProp::run(core::MutableContext ctx, ast::Send
         }
     }
 
-    vector<ast::TreePtr> stats;
+    vector<ast::ExpressionPtr> stats;
 
     // Compute the getters
 

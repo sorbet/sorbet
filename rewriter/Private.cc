@@ -11,8 +11,8 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<ast::TreePtr> Private::run(core::MutableContext ctx, ast::Send *send) {
-    vector<ast::TreePtr> empty;
+vector<ast::ExpressionPtr> Private::run(core::MutableContext ctx, ast::Send *send) {
+    vector<ast::ExpressionPtr> empty;
 
     if (send->args.size() != 1) {
         return empty;

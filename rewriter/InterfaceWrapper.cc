@@ -11,7 +11,7 @@
 using namespace std;
 
 namespace sorbet::rewriter {
-ast::TreePtr InterfaceWrapper::run(core::MutableContext ctx, ast::Send *send) {
+ast::ExpressionPtr InterfaceWrapper::run(core::MutableContext ctx, ast::Send *send) {
     if (ctx.state.runningUnderAutogen) {
         return nullptr;
     }

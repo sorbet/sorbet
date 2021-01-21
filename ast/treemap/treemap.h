@@ -18,62 +18,62 @@ public:
     // Not including the member will skip the branch
     // you may return the same pointer that you are given
     // caller is responsible to handle it
-    TreePtr preTransformClassDef(core::MutableContext ctx, ClassDef *original);
-    TreePtr postTransformClassDef(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformClassDef(core::MutableContext ctx, ClassDef *original);
+    ExpressionPtr postTransformClassDef(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformMethodDef(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformMethodDef(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformMethodDef(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformIf(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformIf(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformIf(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformIf(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformWhile(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformWhile(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformWhile(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformWhile(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr postTransformBreak(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr postTransformBreak(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr postTransformRetry(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr postTransformRetry(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr postTransformNext(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr postTransformNext(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformReturn(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformReturn(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformReturn(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformReturn(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformRescueCase(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformRescueCase(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformRescueCase(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformRescueCase(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformRescue(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformRescue(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformRescue(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformRescue(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformAssign(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformAssign(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformAssign(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformAssign(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformSend(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformSend(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformSend(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformSend(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformHash(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformHash(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformHash(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformHash(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformArray(core::MutableContext ctx, TreePtr original);
-    TreePtr postransformArray(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformArray(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postransformArray(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr postTransformConstantLit(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr postTransformConstantLit(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr postTransformUnresolvedConstantLit(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformBlock(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformBlock(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformBlock(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformBlock(core::MutableContext ctx, ExpressionPtr original);
 
-    TreePtr preTransformInsSeq(core::MutableContext ctx, TreePtr original);
-    TreePtr postTransformInsSeq(core::MutableContext ctx, TreePtr original);
+    ExpressionPtr preTransformInsSeq(core::MutableContext ctx, ExpressionPtr original);
+    ExpressionPtr postTransformInsSeq(core::MutableContext ctx, ExpressionPtr original);
 };
 
 // NOTE: Implementations must use a context type parameter that `MutableContext` is convertable to.
 // That is, either `Context` or `MutableContext`.
 #define GENERATE_HAS_MEMBER_VISITOR(X) \
-    GENERATE_HAS_MEMBER(X, std::declval<core::MutableContext>(), std::declval<TreePtr>())
+    GENERATE_HAS_MEMBER(X, std::declval<core::MutableContext>(), std::declval<ExpressionPtr>())
 
 // used to check for ABSENCE of method
 GENERATE_HAS_MEMBER_VISITOR(preTransformUnresolvedIdent);
@@ -84,11 +84,11 @@ GENERATE_HAS_MEMBER_VISITOR(preTransformLiteral);
 
 #define GENERATE_POSTPONE_PRECLASS(X)                                                                            \
     GENERATE_CALL_MEMBER(preTransform##X, Exception::raise("should never be called. Incorrect use of TreeMap?"); \
-                         return nullptr, std::declval<core::MutableContext>(), std::declval<TreePtr>())
+                         return nullptr, std::declval<core::MutableContext>(), std::declval<ExpressionPtr>())
 
 #define GENERATE_POSTPONE_POSTCLASS(X)                                                                            \
     GENERATE_CALL_MEMBER(postTransform##X, Exception::raise("should never be called. Incorrect use of TreeMap?"); \
-                         return nullptr, std::declval<core::MutableContext>(), std::declval<TreePtr>())
+                         return nullptr, std::declval<core::MutableContext>(), std::declval<ExpressionPtr>())
 
 GENERATE_POSTPONE_PRECLASS(Expression);
 GENERATE_POSTPONE_PRECLASS(ClassDef);
@@ -158,7 +158,7 @@ private:
 
     TreeMapper(FUNC &func) : func(func) {}
 
-    TreePtr mapClassDef(TreePtr v, CTX ctx) {
+    ExpressionPtr mapClassDef(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformClassDef<FUNC>()) {
             v = CALL_MEMBER_preTransformClassDef<FUNC>::call(func, ctx, std::move(v));
         }
@@ -175,7 +175,7 @@ private:
         return v;
     }
 
-    TreePtr mapMethodDef(TreePtr v, CTX ctx) {
+    ExpressionPtr mapMethodDef(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformMethodDef<FUNC>()) {
             v = CALL_MEMBER_preTransformMethodDef<FUNC>::call(func, ctx, std::move(v));
         }
@@ -196,7 +196,7 @@ private:
         return v;
     }
 
-    TreePtr mapIf(TreePtr v, CTX ctx) {
+    ExpressionPtr mapIf(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformIf<FUNC>()) {
             v = CALL_MEMBER_preTransformIf<FUNC>::call(func, ctx, std::move(v));
         }
@@ -210,7 +210,7 @@ private:
         return v;
     }
 
-    TreePtr mapWhile(TreePtr v, CTX ctx) {
+    ExpressionPtr mapWhile(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformWhile<FUNC>()) {
             v = CALL_MEMBER_preTransformWhile<FUNC>::call(func, ctx, std::move(v));
         }
@@ -223,7 +223,7 @@ private:
         return v;
     }
 
-    TreePtr mapBreak(TreePtr v, CTX ctx) {
+    ExpressionPtr mapBreak(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformBreak<FUNC>()) {
             return CALL_MEMBER_preTransformBreak<FUNC>::call(func, ctx, std::move(v));
         }
@@ -235,14 +235,14 @@ private:
         }
         return v;
     }
-    TreePtr mapRetry(TreePtr v, CTX ctx) {
+    ExpressionPtr mapRetry(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformRetry<FUNC>()) {
             return CALL_MEMBER_postTransformRetry<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapNext(TreePtr v, CTX ctx) {
+    ExpressionPtr mapNext(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformNext<FUNC>()) {
             return CALL_MEMBER_preTransformNext<FUNC>::call(func, ctx, std::move(v));
         }
@@ -255,7 +255,7 @@ private:
         return v;
     }
 
-    TreePtr mapReturn(TreePtr v, CTX ctx) {
+    ExpressionPtr mapReturn(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformReturn<FUNC>()) {
             v = CALL_MEMBER_preTransformReturn<FUNC>::call(func, ctx, std::move(v));
         }
@@ -268,7 +268,7 @@ private:
         return v;
     }
 
-    TreePtr mapRescueCase(TreePtr v, CTX ctx) {
+    ExpressionPtr mapRescueCase(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformRescueCase<FUNC>()) {
             v = CALL_MEMBER_preTransformRescueCase<FUNC>::call(func, ctx, std::move(v));
         }
@@ -287,7 +287,7 @@ private:
 
         return v;
     }
-    TreePtr mapRescue(TreePtr v, CTX ctx) {
+    ExpressionPtr mapRescue(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformRescue<FUNC>()) {
             v = CALL_MEMBER_preTransformRescue<FUNC>::call(func, ctx, std::move(v));
         }
@@ -310,14 +310,14 @@ private:
         return v;
     }
 
-    TreePtr mapUnresolvedIdent(TreePtr v, CTX ctx) {
+    ExpressionPtr mapUnresolvedIdent(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>()) {
             return CALL_MEMBER_postTransformUnresolvedIdent<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapAssign(TreePtr v, CTX ctx) {
+    ExpressionPtr mapAssign(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformAssign<FUNC>()) {
             v = CALL_MEMBER_preTransformAssign<FUNC>::call(func, ctx, std::move(v));
         }
@@ -332,7 +332,7 @@ private:
         return v;
     }
 
-    TreePtr mapSend(TreePtr v, CTX ctx) {
+    ExpressionPtr mapSend(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
             v = CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, std::move(v));
         }
@@ -355,7 +355,7 @@ private:
         return v;
     }
 
-    TreePtr mapHash(TreePtr v, CTX ctx) {
+    ExpressionPtr mapHash(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformHash<FUNC>()) {
             v = CALL_MEMBER_preTransformHash<FUNC>::call(func, ctx, std::move(v));
         }
@@ -373,7 +373,7 @@ private:
         return v;
     }
 
-    TreePtr mapArray(TreePtr v, CTX ctx) {
+    ExpressionPtr mapArray(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformArray<FUNC>()) {
             v = CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, std::move(v));
         }
@@ -387,28 +387,28 @@ private:
         return v;
     }
 
-    TreePtr mapLiteral(TreePtr v, CTX ctx) {
+    ExpressionPtr mapLiteral(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>()) {
             return CALL_MEMBER_postTransformLiteral<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapUnresolvedConstantLit(TreePtr v, CTX ctx) {
+    ExpressionPtr mapUnresolvedConstantLit(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>()) {
             return CALL_MEMBER_postTransformUnresolvedConstantLit<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapConstantLit(TreePtr v, CTX ctx) {
+    ExpressionPtr mapConstantLit(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformConstantLit<FUNC>()) {
             return CALL_MEMBER_postTransformConstantLit<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapBlock(TreePtr v, CTX ctx) {
+    ExpressionPtr mapBlock(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformBlock<FUNC>()) {
             v = CALL_MEMBER_preTransformBlock<FUNC>::call(func, ctx, std::move(v));
         }
@@ -427,7 +427,7 @@ private:
         return v;
     }
 
-    TreePtr mapInsSeq(TreePtr v, CTX ctx) {
+    ExpressionPtr mapInsSeq(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformInsSeq<FUNC>()) {
             v = CALL_MEMBER_preTransformInsSeq<FUNC>::call(func, ctx, std::move(v));
         }
@@ -445,14 +445,14 @@ private:
         return v;
     }
 
-    TreePtr mapLocal(TreePtr v, CTX ctx) {
+    ExpressionPtr mapLocal(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformLocal<FUNC>()) {
             return CALL_MEMBER_postTransformLocal<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapCast(TreePtr v, CTX ctx) {
+    ExpressionPtr mapCast(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformCast<FUNC>()) {
             v = CALL_MEMBER_preTransformCast<FUNC>::call(func, ctx, std::move(v));
         }
@@ -465,7 +465,7 @@ private:
         return v;
     }
 
-    TreePtr mapIt(TreePtr what, CTX ctx) {
+    ExpressionPtr mapIt(ExpressionPtr what, CTX ctx) {
         if (what == nullptr) {
             return what;
         }
@@ -582,7 +582,7 @@ private:
 
 class TreeMap {
 public:
-    template <typename CTX, typename FUNC> static TreePtr apply(CTX ctx, FUNC &func, TreePtr to) {
+    template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
         TreeMapper<FUNC, CTX> walker(func);
         try {
             return walker.mapIt(std::move(to), ctx);
@@ -616,7 +616,7 @@ private:
 
     ShallowMapper(FUNC &func) : func(func) {}
 
-    TreePtr mapClassDef(TreePtr v, CTX ctx) {
+    ExpressionPtr mapClassDef(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformClassDef<FUNC>()) {
             v = CALL_MEMBER_preTransformClassDef<FUNC>::call(func, ctx, std::move(v));
         }
@@ -633,7 +633,7 @@ private:
         return v;
     }
 
-    TreePtr mapMethodDef(TreePtr v, CTX ctx) {
+    ExpressionPtr mapMethodDef(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformMethodDef<FUNC>()) {
             v = CALL_MEMBER_preTransformMethodDef<FUNC>::call(func, ctx, std::move(v));
         }
@@ -653,7 +653,7 @@ private:
         return v;
     }
 
-    TreePtr mapIf(TreePtr v, CTX ctx) {
+    ExpressionPtr mapIf(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformIf<FUNC>()) {
             v = CALL_MEMBER_preTransformIf<FUNC>::call(func, ctx, std::move(v));
         }
@@ -667,7 +667,7 @@ private:
         return v;
     }
 
-    TreePtr mapWhile(TreePtr v, CTX ctx) {
+    ExpressionPtr mapWhile(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformWhile<FUNC>()) {
             v = CALL_MEMBER_preTransformWhile<FUNC>::call(func, ctx, std::move(v));
         }
@@ -680,7 +680,7 @@ private:
         return v;
     }
 
-    TreePtr mapBreak(TreePtr v, CTX ctx) {
+    ExpressionPtr mapBreak(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformBreak<FUNC>()) {
             return CALL_MEMBER_preTransformBreak<FUNC>::call(func, ctx, std::move(v));
         }
@@ -692,14 +692,14 @@ private:
         }
         return v;
     }
-    TreePtr mapRetry(TreePtr v, CTX ctx) {
+    ExpressionPtr mapRetry(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformRetry<FUNC>()) {
             return CALL_MEMBER_postTransformRetry<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapNext(TreePtr v, CTX ctx) {
+    ExpressionPtr mapNext(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformNext<FUNC>()) {
             return CALL_MEMBER_preTransformNext<FUNC>::call(func, ctx, std::move(v));
         }
@@ -712,7 +712,7 @@ private:
         return v;
     }
 
-    TreePtr mapReturn(TreePtr v, CTX ctx) {
+    ExpressionPtr mapReturn(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformReturn<FUNC>()) {
             v = CALL_MEMBER_preTransformReturn<FUNC>::call(func, ctx, std::move(v));
         }
@@ -725,7 +725,7 @@ private:
         return v;
     }
 
-    TreePtr mapRescueCase(TreePtr v, CTX ctx) {
+    ExpressionPtr mapRescueCase(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformRescueCase<FUNC>()) {
             v = CALL_MEMBER_preTransformRescueCase<FUNC>::call(func, ctx, std::move(v));
         }
@@ -744,7 +744,7 @@ private:
 
         return v;
     }
-    TreePtr mapRescue(TreePtr v, CTX ctx) {
+    ExpressionPtr mapRescue(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformRescue<FUNC>()) {
             v = CALL_MEMBER_preTransformRescue<FUNC>::call(func, ctx, std::move(v));
         }
@@ -767,14 +767,14 @@ private:
         return v;
     }
 
-    TreePtr mapUnresolvedIdent(TreePtr v, CTX ctx) {
+    ExpressionPtr mapUnresolvedIdent(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>()) {
             return CALL_MEMBER_postTransformUnresolvedIdent<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapAssign(TreePtr v, CTX ctx) {
+    ExpressionPtr mapAssign(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformAssign<FUNC>()) {
             v = CALL_MEMBER_preTransformAssign<FUNC>::call(func, ctx, std::move(v));
         }
@@ -789,7 +789,7 @@ private:
         return v;
     }
 
-    TreePtr mapSend(TreePtr v, CTX ctx) {
+    ExpressionPtr mapSend(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformSend<FUNC>()) {
             v = CALL_MEMBER_preTransformSend<FUNC>::call(func, ctx, std::move(v));
         }
@@ -812,7 +812,7 @@ private:
         return v;
     }
 
-    TreePtr mapHash(TreePtr v, CTX ctx) {
+    ExpressionPtr mapHash(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformHash<FUNC>()) {
             v = CALL_MEMBER_preTransformHash<FUNC>::call(func, ctx, std::move(v));
         }
@@ -830,7 +830,7 @@ private:
         return v;
     }
 
-    TreePtr mapArray(TreePtr v, CTX ctx) {
+    ExpressionPtr mapArray(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformArray<FUNC>()) {
             v = CALL_MEMBER_preTransformArray<FUNC>::call(func, ctx, std::move(v));
         }
@@ -844,28 +844,28 @@ private:
         return v;
     }
 
-    TreePtr mapLiteral(TreePtr v, CTX ctx) {
+    ExpressionPtr mapLiteral(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>()) {
             return CALL_MEMBER_postTransformLiteral<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapUnresolvedConstantLit(TreePtr v, CTX ctx) {
+    ExpressionPtr mapUnresolvedConstantLit(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>()) {
             return CALL_MEMBER_postTransformUnresolvedConstantLit<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapConstantLit(TreePtr v, CTX ctx) {
+    ExpressionPtr mapConstantLit(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformConstantLit<FUNC>()) {
             return CALL_MEMBER_postTransformConstantLit<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapBlock(TreePtr v, CTX ctx) {
+    ExpressionPtr mapBlock(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformBlock<FUNC>()) {
             v = CALL_MEMBER_preTransformBlock<FUNC>::call(func, ctx, std::move(v));
         }
@@ -884,7 +884,7 @@ private:
         return v;
     }
 
-    TreePtr mapInsSeq(TreePtr v, CTX ctx) {
+    ExpressionPtr mapInsSeq(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformInsSeq<FUNC>()) {
             v = CALL_MEMBER_preTransformInsSeq<FUNC>::call(func, ctx, std::move(v));
         }
@@ -902,14 +902,14 @@ private:
         return v;
     }
 
-    TreePtr mapLocal(TreePtr v, CTX ctx) {
+    ExpressionPtr mapLocal(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_postTransformLocal<FUNC>()) {
             return CALL_MEMBER_postTransformLocal<FUNC>::call(func, ctx, std::move(v));
         }
         return v;
     }
 
-    TreePtr mapCast(TreePtr v, CTX ctx) {
+    ExpressionPtr mapCast(ExpressionPtr v, CTX ctx) {
         if constexpr (HAS_MEMBER_preTransformCast<FUNC>()) {
             v = CALL_MEMBER_preTransformCast<FUNC>::call(func, ctx, std::move(v));
         }
@@ -922,7 +922,7 @@ private:
         return v;
     }
 
-    TreePtr mapIt(TreePtr what, CTX ctx) {
+    ExpressionPtr mapIt(ExpressionPtr what, CTX ctx) {
         if (what == nullptr) {
             return what;
         }
@@ -1039,7 +1039,7 @@ private:
 
 class ShallowMap {
 public:
-    template <typename CTX, typename FUNC> static TreePtr apply(CTX ctx, FUNC &func, TreePtr to) {
+    template <typename CTX, typename FUNC> static ExpressionPtr apply(CTX ctx, FUNC &func, ExpressionPtr to) {
         ShallowMapper<FUNC, CTX> walker(func);
         try {
             return walker.mapIt(std::move(to), ctx);

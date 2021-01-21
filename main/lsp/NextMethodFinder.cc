@@ -5,7 +5,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-ast::TreePtr NextMethodFinder::preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr NextMethodFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
     ENFORCE(methodDef.symbol.exists());
     ENFORCE(methodDef.symbol != core::Symbols::todoMethod());

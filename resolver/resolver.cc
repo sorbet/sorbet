@@ -149,7 +149,7 @@ private:
     struct TypeAliasResolutionItem {
         core::SymbolRef lhs;
         core::FileRef file;
-        ast::TreePtr *rhs;
+        ast::ExpressionPtr *rhs;
 
         TypeAliasResolutionItem(TypeAliasResolutionItem &&) noexcept = default;
         TypeAliasResolutionItem &operator=(TypeAliasResolutionItem &&rhs) noexcept = default;
@@ -205,16 +205,16 @@ private:
     public:
         bool seenUnresolved = false;
 
-        ast::TreePtr postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
+        ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
             auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
             seenUnresolved |= !isAlreadyResolved(ctx, original);
             return tree;
         };
     };
 
-    static bool isFullyResolved(core::Context ctx, const ast::TreePtr &expression) {
+    static bool isFullyResolved(core::Context ctx, const ast::ExpressionPtr &expression) {
         ResolutionChecker checker;
-        ast::TreePtr dummy(expression.getTagged());
+        ast::ExpressionPtr dummy(expression.getTagged());
         dummy = ast::TreeMap::apply(ctx, checker, std::move(dummy));
         ENFORCE(dummy == expression);
         dummy.release();
@@ -639,8 +639,8 @@ private:
         ancestorSym.data(ctx)->recordSealedSubclass(ctx, job.klass);
     }
 
-    void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::TreePtr &ancestor, bool isInclude,
-                           bool isSuperclass = false) {
+    void transformAncestor(core::Context ctx, core::ClassOrModuleRef klass, ast::ExpressionPtr &ancestor,
+                           bool isInclude, bool isSuperclass = false) {
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor)) {
             auto scopeTmp = nesting_;
             if (isSuperclass) {
@@ -676,7 +676,7 @@ private:
             auto loc = ancestor.loc();
             auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
-            auto out = ast::make_tree<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
+            auto out = ast::make_expression<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
             ancestor = std::move(out);
         } else if (ast::isa_tree<ast::EmptyTree>(ancestor)) {
@@ -691,18 +691,18 @@ private:
 public:
     ResolveConstantsWalk() : nesting_(nullptr) {}
 
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         nesting_ = make_unique<Nesting>(std::move(nesting_), ast::cast_tree_nonnull<ast::ClassDef>(tree).symbol);
         return tree;
     }
 
-    ast::TreePtr postTransformUnresolvedConstantLit(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         auto &c = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
         if (ast::isa_tree<ast::UnresolvedConstantLit>(c.scope)) {
             c.scope = postTransformUnresolvedConstantLit(ctx, std::move(c.scope));
         }
         auto loc = c.loc;
-        auto out = ast::make_tree<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
+        auto out = ast::make_expression<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(tree));
         ResolutionItem job{nesting_, ctx.file, ast::cast_tree<ast::ConstantLit>(out)};
         if (resolveJob(ctx, job)) {
             categoryCounterInc("resolve.constants.nonancestor", "firstpass");
@@ -712,7 +712,7 @@ public:
         return out;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         auto klass = original.symbol;
@@ -735,7 +735,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn.lhs);
@@ -784,7 +784,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         if (send.recv.isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
             auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
@@ -1101,7 +1101,7 @@ class ResolveTypeMembersAndFieldsWalk {
     struct ResolveCastItem {
         core::FileRef file;
         core::SymbolRef owner;
-        ast::TreePtr *typeArg;
+        ast::ExpressionPtr *typeArg;
         ast::Cast *cast;
     };
 
@@ -1167,7 +1167,7 @@ class ResolveTypeMembersAndFieldsWalk {
         }
     }
 
-    static bool isT(const ast::TreePtr &expr) {
+    static bool isT(const ast::ExpressionPtr &expr) {
         auto *tMod = ast::cast_tree<ast::ConstantLit>(expr);
         return tMod && tMod->symbol == core::Symbols::T();
     }
@@ -1316,7 +1316,7 @@ class ResolveTypeMembersAndFieldsWalk {
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::TreePtr &expr) {
+    [[nodiscard]] static core::TypePtr resolveConstantType(core::Context ctx, const ast::ExpressionPtr &expr) {
         core::TypePtr result;
         typecase(
             expr, [&](const ast::Literal &a) { result = a.value; },
@@ -1333,7 +1333,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 result = cast.type;
             },
             [&](const ast::InsSeq &outer) { result = resolveConstantType(ctx, outer.expr); },
-            [&](const ast::TreePtr &expr) {});
+            [&](const ast::ExpressionPtr &expr) {});
         return result;
     }
 
@@ -1832,7 +1832,7 @@ public:
         nestedBlockCounts.emplace_back(0);
     }
 
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         nestedBlockCounts.emplace_back(0);
 
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
@@ -1847,34 +1847,34 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         nestedBlockCounts.pop_back();
         return tree;
     }
 
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         nestedBlockCounts.emplace_back(0);
         return tree;
     }
 
-    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         nestedBlockCounts.pop_back();
         return tree;
     }
 
-    ast::TreePtr preTransformBlock(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformBlock(core::Context ctx, ast::ExpressionPtr tree) {
         ENFORCE_NO_TIMER(!nestedBlockCounts.empty());
         nestedBlockCounts.back() += 1;
         return tree;
     }
 
-    ast::TreePtr postTransformBlock(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformBlock(core::Context ctx, ast::ExpressionPtr tree) {
         ENFORCE_NO_TIMER(!nestedBlockCounts.empty());
         nestedBlockCounts.back() -= 1;
         return tree;
     }
 
-    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         switch (send.fun.rawId()) {
             case core::Names::typeAlias().rawId():
@@ -1901,7 +1901,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformConstantLit(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
         if (trackDependencies_) {
@@ -1934,7 +1934,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
 
         switch (send.fun.rawId()) {
@@ -1975,7 +1975,8 @@ public:
 
                     auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
                     auto expr = std::move(send.args[0]);
-                    auto cast = ast::make_tree<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
+                    auto cast =
+                        ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
                     item.cast = ast::cast_tree<ast::Cast>(cast);
                     item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
 
@@ -2054,7 +2055,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         if (handleFieldDeclaration(ctx, asgn)) {
             return tree;
@@ -2587,8 +2588,8 @@ private:
 
         processLeftoverSigs(ctx, lastSigs);
 
-        auto toRemove =
-            remove_if(klass.rhs.begin(), klass.rhs.end(), [](ast::TreePtr &stat) -> bool { return stat == nullptr; });
+        auto toRemove = remove_if(klass.rhs.begin(), klass.rhs.end(),
+                                  [](ast::ExpressionPtr &stat) -> bool { return stat == nullptr; });
         klass.rhs.erase(toRemove, klass.rhs.end());
     }
 
@@ -2607,8 +2608,8 @@ private:
 
         processLeftoverSigs(classCtx, lastSigs);
 
-        auto toRemove =
-            remove_if(seq.stats.begin(), seq.stats.end(), [](ast::TreePtr &stat) -> bool { return stat == nullptr; });
+        auto toRemove = remove_if(seq.stats.begin(), seq.stats.end(),
+                                  [](ast::ExpressionPtr &stat) -> bool { return stat == nullptr; });
         seq.stats.erase(toRemove, seq.stats.end());
     }
 
@@ -2620,7 +2621,7 @@ private:
                                     TypeSyntaxArgs{allowSelfType, allowRebind, allowTypeMember, mdef.symbol});
     }
 
-    void processStatement(core::Context ctx, ast::TreePtr &stat, InlinedVector<ast::Send *, 1> &lastSigs) {
+    void processStatement(core::Context ctx, ast::ExpressionPtr &stat, InlinedVector<ast::Send *, 1> &lastSigs) {
         typecase(
             stat,
 
@@ -2735,7 +2736,7 @@ private:
 
             [&](const ast::EmptyTree &e) { stat.reset(nullptr); },
 
-            [&](const ast::TreePtr &e) {});
+            [&](const ast::ExpressionPtr &e) {});
     }
 
 public:
@@ -2778,13 +2779,13 @@ public:
         handleAbstractMethod(ctx, mdef);
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         processClassBody(ctx.withOwner(klass.symbol), klass);
         return tree;
     }
 
-    ast::TreePtr postTransformInsSeq(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformInsSeq(core::Context ctx, ast::ExpressionPtr tree) {
         processInSeq(ctx, ast::cast_tree_nonnull<ast::InsSeq>(tree));
         return tree;
     }
@@ -2792,7 +2793,7 @@ public:
 
 class ResolveSanityCheckWalk {
 public:
-    ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todo(), "These should have all been resolved: {}",
                 tree.toString(ctx));
@@ -2803,23 +2804,23 @@ public:
         }
         return tree;
     }
-    ast::TreePtr postTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         ENFORCE(original.symbol != core::Symbols::todoMethod(), "These should have all been resolved: {}",
                 tree.toString(ctx));
         return tree;
     }
-    ast::TreePtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
         ENFORCE(false, "These should have all been removed: {}", tree.toString(ctx));
         return tree;
     }
-    ast::TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         ENFORCE(original.kind != ast::UnresolvedIdent::Kind::Local, "{} should have been removed by local_vars",
                 tree.toString(ctx));
         return tree;
     }
-    ast::TreePtr postTransformConstantLit(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformConstantLit(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
         ENFORCE(ResolveConstantsWalk::isAlreadyResolved(ctx, original));
         return tree;

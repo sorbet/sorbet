@@ -6,7 +6,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-ast::TreePtr LocalVarFinder::postTransformAssign(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr LocalVarFinder::postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
     ENFORCE(!methodStack.empty());
 
     auto &assign = ast::cast_tree_nonnull<ast::Assign>(tree);
@@ -23,7 +23,7 @@ ast::TreePtr LocalVarFinder::postTransformAssign(core::Context ctx, ast::TreePtr
     return tree;
 }
 
-ast::TreePtr LocalVarFinder::preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr LocalVarFinder::preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     ENFORCE(methodDef.symbol.exists());
@@ -43,12 +43,12 @@ ast::TreePtr LocalVarFinder::preTransformMethodDef(core::Context ctx, ast::TreeP
     return tree;
 }
 
-ast::TreePtr LocalVarFinder::postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr LocalVarFinder::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
     this->methodStack.pop_back();
     return tree;
 }
 
-ast::TreePtr LocalVarFinder::preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr LocalVarFinder::preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
     auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
     ENFORCE(classDef.symbol.exists());
     ENFORCE(classDef.symbol != core::Symbols::todo());
@@ -62,7 +62,7 @@ ast::TreePtr LocalVarFinder::preTransformClassDef(core::Context ctx, ast::TreePt
     return tree;
 }
 
-ast::TreePtr LocalVarFinder::postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr LocalVarFinder::postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
     this->methodStack.pop_back();
     return tree;
 }

@@ -15,7 +15,7 @@ namespace sorbet::rewriter {
 
 namespace {
 
-pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::TreePtr &name) {
+pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::ExpressionPtr &name) {
     core::LocOffsets loc;
     core::NameRef res;
     if (auto *lit = ast::cast_tree<ast::Literal>(name)) {
@@ -51,7 +51,7 @@ pair<core::NameRef, core::LocOffsets> getName(core::MutableContext ctx, ast::Tre
 // these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
 // users, but we don't know that information in the Rewriter passes.
-bool isT(const ast::TreePtr &expr) {
+bool isT(const ast::ExpressionPtr &expr) {
     auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (t == nullptr || t->cnst != core::Names::Constants::T()) {
         return false;
@@ -59,7 +59,7 @@ bool isT(const ast::TreePtr &expr) {
     return ast::MK::isRootScope(t->scope);
 }
 
-bool isTNilableOrUntyped(const ast::TreePtr &expr) {
+bool isTNilableOrUntyped(const ast::ExpressionPtr &expr) {
     auto *send = ast::cast_tree<ast::Send>(expr);
     return send != nullptr && (send->fun == core::Names::nilable() || send->fun == core::Names::untyped()) &&
            isT(send->recv);
@@ -78,7 +78,7 @@ ast::Send *findSendReturns(ast::Send *sharedSig) {
     return body->fun == core::Names::returns() ? body : nullptr;
 }
 
-bool hasNilableOrUntypedReturns(ast::TreePtr &sharedSig) {
+bool hasNilableOrUntypedReturns(ast::ExpressionPtr &sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
     auto *body = findSendReturns(ASTUtil::castSig(sharedSig));
@@ -90,7 +90,7 @@ bool hasNilableOrUntypedReturns(ast::TreePtr &sharedSig) {
     return isTNilableOrUntyped(body->args[0]);
 }
 
-ast::TreePtr dupReturnsType(ast::Send *sharedSig) {
+ast::ExpressionPtr dupReturnsType(ast::Send *sharedSig) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
     auto *body = findSendReturns(ASTUtil::castSig(sharedSig));
@@ -165,11 +165,11 @@ bool sigIsUnchecked(core::MutableContext ctx, ast::Send *sig) {
 
 // To convert a sig into a writer sig with argument `name`, we copy the `returns(...)`
 // value into the `sig {params(...)}` using whatever name we have for the setter.
-ast::TreePtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef name, core::LocOffsets nameLoc) {
+ast::ExpressionPtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef name, core::LocOffsets nameLoc) {
     ENFORCE(ASTUtil::castSig(sharedSig), "We weren't given a send node that's a valid signature");
 
     // There's a bit of work here because deepCopy gives us back an Expression when we know it's a Send.
-    ast::TreePtr sigExpr = sharedSig->deepCopy();
+    ast::ExpressionPtr sigExpr = sharedSig->deepCopy();
     auto *sig = ast::cast_tree<ast::Send>(sigExpr);
     ENFORCE(sig != nullptr, "Just deep copied this, so it should be non-null");
 
@@ -179,7 +179,7 @@ ast::TreePtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef name, 
     if (body->args.size() != 1) {
         return nullptr;
     }
-    ast::TreePtr resultType = body->args[0].deepCopy();
+    ast::ExpressionPtr resultType = body->args[0].deepCopy();
     ast::Send *cur = body;
     while (cur != nullptr) {
         auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv);
@@ -227,8 +227,8 @@ ast::TreePtr toWriterSigForName(ast::Send *sharedSig, const core::NameRef name, 
 // Also note that the burden is on the user to provide an accurate type signature.
 // All attr_accessor's should probably have `T.nilable(...)` to account for a
 // read-before-write.
-vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, ast::TreePtr *prevStat) {
-    vector<ast::TreePtr> empty;
+vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, ast::ExpressionPtr *prevStat) {
+    vector<ast::ExpressionPtr> empty;
 
     if (ctx.state.runningUnderAutogen) {
         return empty;
@@ -248,7 +248,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
     }
 
     auto loc = send->loc;
-    vector<ast::TreePtr> stats;
+    vector<ast::ExpressionPtr> stats;
 
     ast::Send *sig = nullptr;
     if (prevStat) {
@@ -313,7 +313,7 @@ vector<ast::TreePtr> AttrReader::run(core::MutableContext ctx, ast::Send *send, 
                 }
             }
 
-            ast::TreePtr body;
+            ast::ExpressionPtr body;
             if (declareIvars) {
                 body = ast::MK::Assign(loc, ast::MK::Instance(argLoc, varName),
                                        ast::MK::Let(loc, ast::MK::Local(loc, name), dupReturnsType(sig)));

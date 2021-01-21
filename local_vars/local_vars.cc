@@ -35,13 +35,13 @@ class LocalNameInserter {
         core::NameRef name;
         core::LocalVariable local;
         core::LocOffsets loc;
-        ast::TreePtr expr;
+        ast::ExpressionPtr expr;
         ArgFlags flags;
     };
 
     // Map through the reference structure, naming the locals, and preserving
     // the outer structure for the namer proper.
-    NamedArg nameArg(ast::TreePtr arg) {
+    NamedArg nameArg(ast::ExpressionPtr arg) {
         NamedArg named;
 
         typecase(
@@ -50,7 +50,7 @@ class LocalNameInserter {
                 named.name = nm.name;
                 named.local = enterLocal(named.name);
                 named.loc = arg.loc();
-                named.expr = ast::make_tree<ast::Local>(arg.loc(), named.local);
+                named.expr = ast::make_expression<ast::Local>(arg.loc(), named.local);
             },
             [&](ast::RestArg &rest) {
                 named = nameArg(move(rest.expr));
@@ -80,7 +80,7 @@ class LocalNameInserter {
                 named.name = local.localVariable._name;
                 named.local = enterLocal(named.name);
                 named.loc = arg.loc();
-                named.expr = ast::make_tree<ast::Local>(local.loc, named.local);
+                named.expr = ast::make_expression<ast::Local>(local.loc, named.local);
             });
 
         return named;
@@ -202,17 +202,17 @@ class LocalNameInserter {
     }
 
 public:
-    ast::TreePtr preTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         enterClass();
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         exitScope();
         return tree;
     }
 
-    ast::TreePtr preTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         enterMethod();
 
         auto &method = ast::cast_tree_nonnull<ast::MethodDef>(tree);
@@ -220,12 +220,12 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformMethodDef(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         exitScope();
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &original = ast::cast_tree_nonnull<ast::Send>(tree);
         if (original.args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original.args[0])) {
             original.numPosArgs = 0;
@@ -235,12 +235,12 @@ public:
                 for (auto arg : scopeStack.back().args) {
                     if (arg.flags.isPositional()) {
                         ENFORCE(!seenKeywordArgs, "Saw positional arg after keyword arg");
-                        original.args.emplace_back(ast::make_tree<ast::Local>(original.loc, arg.arg));
+                        original.args.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
                         ++original.numPosArgs;
                     } else if (arg.flags.isKeyword()) {
                         seenKeywordArgs = true;
                         original.args.emplace_back(ast::MK::Symbol(original.loc, arg.arg._name));
-                        original.args.emplace_back(ast::make_tree<ast::Local>(original.loc, arg.arg));
+                        original.args.emplace_back(ast::make_expression<ast::Local>(original.loc, arg.arg));
                     } else if (arg.flags.repeated || arg.flags.block) {
                         // Explicitly skip for now.
                         // Involves synthesizing a call to callWithSplat, callWithBlock, or callWithSplatAndBlock
@@ -260,7 +260,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr preTransformBlock(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformBlock(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &blk = ast::cast_tree_nonnull<ast::Block>(tree);
         auto outerArgs = scopeStack.back().args;
         auto &frame = enterBlock();
@@ -279,12 +279,12 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformBlock(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformBlock(core::MutableContext ctx, ast::ExpressionPtr tree) {
         exitScope();
         return tree;
     }
 
-    ast::TreePtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &nm = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
         if (nm.kind == ast::UnresolvedIdent::Kind::Local) {
             auto &frame = scopeStack.back();
@@ -293,7 +293,7 @@ public:
                 cur = enterLocal(nm.name);
                 frame.locals[nm.name] = cur;
             }
-            return ast::make_tree<ast::Local>(nm.loc, cur);
+            return ast::make_expression<ast::Local>(nm.loc, cur);
         } else {
             return tree;
         }

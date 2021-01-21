@@ -8,28 +8,28 @@
 namespace sorbet::rewriter {
 class ASTUtil {
 public:
-    static ast::TreePtr dupType(const ast::TreePtr &orig);
+    static ast::ExpressionPtr dupType(const ast::ExpressionPtr &orig);
     static bool hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name);
     static bool hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name);
 
     /** Removes the key, value matching key with symbol `name` from hash and returns it */
-    static std::pair<ast::TreePtr, ast::TreePtr> extractHashValue(core::MutableContext ctx, ast::Hash &hash,
-                                                                  core::NameRef name);
+    static std::pair<ast::ExpressionPtr, ast::ExpressionPtr> extractHashValue(core::MutableContext ctx, ast::Hash &hash,
+                                                                              core::NameRef name);
 
-    static ast::Send *castSig(ast::TreePtr &expr);
+    static ast::Send *castSig(ast::ExpressionPtr &expr);
     static ast::Send *castSig(ast::Send *expr);
 
-    static ast::TreePtr mkKwArgsHash(const ast::Send *send);
+    static ast::ExpressionPtr mkKwArgsHash(const ast::Send *send);
 
-    static ast::TreePtr mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs,
-                              bool isAttrReader = false);
+    static ast::ExpressionPtr mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::ExpressionPtr rhs,
+                                    bool isAttrReader = false);
 
-    static ast::TreePtr mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name, core::LocOffsets argLoc,
-                              ast::TreePtr rhs);
+    static ast::ExpressionPtr mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name,
+                                    core::LocOffsets argLoc, ast::ExpressionPtr rhs);
 
-    static ast::TreePtr mkNilable(core::LocOffsets loc, ast::TreePtr type);
+    static ast::ExpressionPtr mkNilable(core::LocOffsets loc, ast::ExpressionPtr type);
 
-    static ast::TreePtr thunkBody(core::MutableContext ctx, ast::TreePtr &node);
+    static ast::ExpressionPtr thunkBody(core::MutableContext ctx, ast::ExpressionPtr &node);
 
     ASTUtil() = delete;
 };

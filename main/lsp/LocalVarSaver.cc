@@ -5,7 +5,7 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::ExpressionPtr tree) {
     auto &local = ast::cast_tree_nonnull<ast::Local>(tree);
 
     core::MethodRef enclosingMethod;
@@ -29,7 +29,7 @@ ast::TreePtr LocalVarSaver::postTransformLocal(core::Context ctx, ast::TreePtr t
     return tree;
 }
 
-ast::TreePtr LocalVarSaver::postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr LocalVarSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
     auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
 
     // Check args.

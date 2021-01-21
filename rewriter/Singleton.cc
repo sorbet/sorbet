@@ -11,7 +11,7 @@ namespace sorbet::rewriter {
 
 namespace {
 
-bool isFinal(const ast::TreePtr &stmt) {
+bool isFinal(const ast::ExpressionPtr &stmt) {
     auto *send = ast::cast_tree<ast::Send>(stmt);
     if (send == nullptr) {
         return false;
@@ -32,7 +32,7 @@ bool isFinal(const ast::TreePtr &stmt) {
     return true;
 }
 
-bool isIncludeSingleton(const ast::TreePtr &stmt) {
+bool isIncludeSingleton(const ast::ExpressionPtr &stmt) {
     const auto *send = ast::cast_tree<ast::Send>(stmt);
     if (send == nullptr) {
         return false;

@@ -8,7 +8,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
+ast::ExpressionPtr ASTUtil::dupType(const ast::ExpressionPtr &orig) {
     auto send = ast::cast_tree<ast::Send>(orig);
     if (send) {
         ast::Send::ARGS_store args;
@@ -58,7 +58,7 @@ ast::TreePtr ASTUtil::dupType(const ast::TreePtr &orig) {
         if (ident->original && !orig) {
             return nullptr;
         }
-        return ast::make_tree<ast::ConstantLit>(ident->loc, ident->symbol, std::move(orig));
+        return ast::make_expression<ast::ConstantLit>(ident->loc, ident->symbol, std::move(orig));
     }
 
     auto *cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
@@ -115,8 +115,8 @@ bool ASTUtil::hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash
     return false;
 }
 
-pair<ast::TreePtr, ast::TreePtr> ASTUtil::extractHashValue(core::MutableContext ctx, ast::Hash &hash,
-                                                           core::NameRef name) {
+pair<ast::ExpressionPtr, ast::ExpressionPtr> ASTUtil::extractHashValue(core::MutableContext ctx, ast::Hash &hash,
+                                                                       core::NameRef name) {
     int i = -1;
     for (auto &keyExpr : hash.keys) {
         i++;
@@ -132,7 +132,7 @@ pair<ast::TreePtr, ast::TreePtr> ASTUtil::extractHashValue(core::MutableContext 
     return make_pair(nullptr, nullptr);
 }
 
-ast::Send *ASTUtil::castSig(ast::TreePtr &expr) {
+ast::Send *ASTUtil::castSig(ast::ExpressionPtr &expr) {
     auto *send = ast::cast_tree<ast::Send>(expr);
     if (send == nullptr) {
         return nullptr;
@@ -171,7 +171,7 @@ ast::Send *ASTUtil::castSig(ast::Send *send) {
     }
 }
 
-ast::TreePtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
+ast::ExpressionPtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
     if (send->args.empty()) {
         return nullptr;
     }
@@ -204,26 +204,26 @@ ast::TreePtr ASTUtil::mkKwArgsHash(const ast::Send *send) {
     }
 }
 
-ast::TreePtr ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::TreePtr rhs,
-                            bool isAttrReader) {
+ast::ExpressionPtr ASTUtil::mkGet(core::Context ctx, core::LocOffsets loc, core::NameRef name, ast::ExpressionPtr rhs,
+                                  bool isAttrReader) {
     auto ret = ast::MK::SyntheticMethod0(loc, loc, name, move(rhs));
     ast::cast_tree_nonnull<ast::MethodDef>(ret).flags.isAttrReader = isAttrReader;
     return ret;
 }
 
-ast::TreePtr ASTUtil::mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name, core::LocOffsets argLoc,
-                            ast::TreePtr rhs) {
+ast::ExpressionPtr ASTUtil::mkSet(core::Context ctx, core::LocOffsets loc, core::NameRef name, core::LocOffsets argLoc,
+                                  ast::ExpressionPtr rhs) {
     return ast::MK::SyntheticMethod1(loc, loc, name, ast::MK::Local(argLoc, core::Names::arg0()), move(rhs));
 }
 
-ast::TreePtr ASTUtil::mkNilable(core::LocOffsets loc, ast::TreePtr type) {
+ast::ExpressionPtr ASTUtil::mkNilable(core::LocOffsets loc, ast::ExpressionPtr type) {
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::nilable(), move(type));
 }
 
 namespace {
 
 // Returns `true` when the expression passed is an UnresolvedConstantLit with the name `Kernel` and no additional scope.
-bool isKernel(const ast::TreePtr &expr) {
+bool isKernel(const ast::ExpressionPtr &expr) {
     if (auto *constRecv = ast::cast_tree<ast::UnresolvedConstantLit>(expr)) {
         return ast::isa_tree<ast::EmptyTree>(constRecv->scope) && constRecv->cnst == core::Names::Constants::Kernel();
     }
@@ -232,7 +232,7 @@ bool isKernel(const ast::TreePtr &expr) {
 
 } // namespace
 
-ast::TreePtr ASTUtil::thunkBody(core::MutableContext ctx, ast::TreePtr &node) {
+ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionPtr &node) {
     auto *send = ast::cast_tree<ast::Send>(node);
     if (send == nullptr) {
         return nullptr;

@@ -8,8 +8,8 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-vector<ast::TreePtr> DefDelegator::run(core::MutableContext ctx, const ast::Send *send) {
-    vector<ast::TreePtr> methodStubs;
+vector<ast::ExpressionPtr> DefDelegator::run(core::MutableContext ctx, const ast::Send *send) {
+    vector<ast::ExpressionPtr> methodStubs;
     auto loc = send->loc;
 
     if (send->fun != core::Names::defDelegator()) {
@@ -57,7 +57,7 @@ vector<ast::TreePtr> DefDelegator::run(core::MutableContext ctx, const ast::Send
     // def $methodName(*arg0, &blk); end
     ast::MethodDef::ARGS_store args;
     args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
-    args.emplace_back(ast::make_tree<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
+    args.emplace_back(ast::make_expression<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
 
     methodStubs.push_back(
         ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::RaiseUnimplemented(loc)));

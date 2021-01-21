@@ -18,11 +18,11 @@ class LocalVarFinder {
 public:
     LocalVarFinder(core::MethodRef targetMethod) : targetMethod(targetMethod) {}
 
-    ast::TreePtr postTransformAssign(core::Context ctx, ast::TreePtr assign);
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr methodDef);
-    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr methodDef);
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr classDef);
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr classDef);
+    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr assign);
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr methodDef);
+    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr methodDef);
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr classDef);
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr classDef);
 
     const std::vector<core::LocalVariable> &result() const;
 };

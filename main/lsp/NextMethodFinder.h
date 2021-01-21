@@ -13,7 +13,7 @@ class NextMethodFinder {
 public:
     NextMethodFinder(core::Loc queryLoc) : queryLoc(queryLoc), result_(core::Symbols::noSymbol()) {}
 
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr methodDef);
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr methodDef);
 
     const core::SymbolRef result() const;
 };

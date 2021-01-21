@@ -8,7 +8,7 @@ using namespace std;
 namespace sorbet::ast {
 
 namespace {
-ParsedArg parseArg(const ast::TreePtr &arg) {
+ParsedArg parseArg(const ast::ExpressionPtr &arg) {
     ParsedArg parsedArg;
 
     typecase(
@@ -41,8 +41,8 @@ ParsedArg parseArg(const ast::TreePtr &arg) {
     return parsedArg;
 }
 
-TreePtr getDefaultValue(TreePtr arg) {
-    TreePtr default_;
+ExpressionPtr getDefaultValue(ExpressionPtr arg) {
+    ExpressionPtr default_;
     typecase(
         arg, [&](ast::RestArg &rest) { default_ = getDefaultValue(move(rest.expr)); },
         [&](ast::KeywordArg &kw) { default_ = getDefaultValue(move(kw.expr)); },
@@ -98,7 +98,7 @@ std::vector<u4> ArgParsing::hashArgs(core::Context ctx, const std::vector<Parsed
     return result;
 }
 
-TreePtr ArgParsing::getDefault(const ParsedArg &parsedArg, TreePtr arg) {
+ExpressionPtr ArgParsing::getDefault(const ParsedArg &parsedArg, ExpressionPtr arg) {
     if (!parsedArg.flags.isDefault) {
         return nullptr;
     }

@@ -12,7 +12,7 @@ namespace {
 // We can't actually use a T.type_parameter type in the body of a method, so this prevents us from copying those.
 //
 // TODO: remove once https://github.com/sorbet/sorbet/issues/1715 is fixed
-bool isCopyableType(const ast::TreePtr &typeExpr) {
+bool isCopyableType(const ast::ExpressionPtr &typeExpr) {
     auto send = ast::cast_tree<ast::Send>(typeExpr);
     if (send && send->fun == core::Names::typeParameter()) {
         return false;
@@ -22,8 +22,8 @@ bool isCopyableType(const ast::TreePtr &typeExpr) {
 
 // if expr is of the form `@var = local`, and `local` is typed, then replace it with with `@var = T.let(local,
 // type_of_local)`
-void maybeAddLet(core::MutableContext ctx, ast::TreePtr &expr,
-                 const UnorderedMap<core::NameRef, const ast::TreePtr *> &argTypeMap) {
+void maybeAddLet(core::MutableContext ctx, ast::ExpressionPtr &expr,
+                 const UnorderedMap<core::NameRef, const ast::ExpressionPtr *> &argTypeMap) {
     auto assn = ast::cast_tree<ast::Assign>(expr);
     if (assn == nullptr) {
         return;
@@ -59,7 +59,7 @@ const ast::Send *findParams(const ast::Send *send) {
 
 } // namespace
 
-void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::TreePtr *prevStat) {
+void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::ExpressionPtr *prevStat) {
     // this should only run in an `initialize` that has a sig
     if (methodDef->name != core::Names::initialize()) {
         return;
@@ -85,7 +85,7 @@ void Initializer::run(core::MutableContext ctx, ast::MethodDef *methodDef, ast::
 
     // build a lookup table that maps from names to the types they have
     auto [kwStart, kwEnd] = params->kwArgsRange();
-    UnorderedMap<core::NameRef, const ast::TreePtr *> argTypeMap;
+    UnorderedMap<core::NameRef, const ast::ExpressionPtr *> argTypeMap;
     for (int i = kwStart; i < kwEnd; i += 2) {
         auto *argName = ast::cast_tree<ast::Literal>(params->args[i]);
         auto *argVal = &params->args[i + 1];

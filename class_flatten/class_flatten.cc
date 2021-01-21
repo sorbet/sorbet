@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet::class_flatten {
 
-bool shouldExtract(core::Context ctx, const ast::TreePtr &what) {
+bool shouldExtract(core::Context ctx, const ast::ExpressionPtr &what) {
     if (ast::isa_tree<ast::MethodDef>(what)) {
         return false;
     }
@@ -32,7 +32,7 @@ bool shouldExtract(core::Context ctx, const ast::TreePtr &what) {
 // pull all the non-definitions (i.e. anything that's not a method definition, a class definition, or a constant
 // defintion) from a class or file into their own instruction sequence (or, if there is only one, simply move it out of
 // the class body and return it.)
-ast::TreePtr extractClassInit(core::Context ctx, ast::ClassDef *klass) {
+ast::ExpressionPtr extractClassInit(core::Context ctx, ast::ClassDef *klass) {
     ast::InsSeq::STATS_store inits;
 
     for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
@@ -61,14 +61,14 @@ public:
         ENFORCE(classStack.empty());
     }
 
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         classStack.emplace_back(classes.size());
         classes.emplace_back();
 
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         ENFORCE(!classStack.empty());
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
@@ -78,7 +78,7 @@ public:
 
         core::MethodRef sym;
         auto loc = core::Loc(ctx.file, classDef->declLoc);
-        ast::TreePtr replacement;
+        ast::ExpressionPtr replacement;
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
             //
@@ -107,10 +107,10 @@ public:
         auto blkLoc = core::LocOffsets::none();
         core::LocalVariable blkLocalVar(core::Names::blkArg(), 0);
         ast::MethodDef::ARGS_store args;
-        args.emplace_back(ast::make_tree<ast::Local>(blkLoc, blkLocalVar));
+        args.emplace_back(ast::make_expression<ast::Local>(blkLoc, blkLocalVar));
 
-        auto init = ast::make_tree<ast::MethodDef>(loc.offsets(), loc.offsets(), sym, core::Names::staticInit(),
-                                                   std::move(args), std::move(inits), ast::MethodDef::Flags());
+        auto init = ast::make_expression<ast::MethodDef>(loc.offsets(), loc.offsets(), sym, core::Names::staticInit(),
+                                                         std::move(args), std::move(inits), ast::MethodDef::Flags());
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isRewriterSynthesized = false;
         ast::cast_tree_nonnull<ast::MethodDef>(init).flags.isSelfMethod = true;
 
@@ -122,7 +122,7 @@ public:
         return replacement;
     };
 
-    ast::TreePtr addClasses(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr addClasses(core::Context ctx, ast::ExpressionPtr tree) {
         if (classes.empty()) {
             ENFORCE(sortedClasses().empty());
             return tree;
@@ -148,7 +148,7 @@ public:
     }
 
 private:
-    vector<ast::TreePtr> sortedClasses() {
+    vector<ast::ExpressionPtr> sortedClasses() {
         ENFORCE(classStack.empty());
         auto ret = std::move(classes);
         classes.clear();
@@ -164,7 +164,7 @@ private:
     // would result in an "bottom-up" ordering, so instead we store a stack of
     // "where does the next definition belong" into `classStack`
     // which we push onto in the `preTransform* hook, and pop from in the `postTransform` hook.
-    vector<ast::TreePtr> classes;
+    vector<ast::ExpressionPtr> classes;
     vector<int> classStack;
 };
 

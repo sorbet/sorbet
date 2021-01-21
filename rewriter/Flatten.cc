@@ -93,9 +93,9 @@ class FlattenWalk {
     // can reconstruct the preorder traversal)'static' it should be: i.e. whether it should have a `self.` qualifier and
     // whether it should be in a `class << self` block.
     struct MovedItem {
-        ast::TreePtr expr;
+        ast::ExpressionPtr expr;
         u4 staticLevel;
-        MovedItem(ast::TreePtr expr, u4 staticLevel) : expr(move(expr)), staticLevel(staticLevel){};
+        MovedItem(ast::ExpressionPtr expr, u4 staticLevel) : expr(move(expr)), staticLevel(staticLevel){};
         MovedItem() = default;
     };
 
@@ -138,7 +138,7 @@ class FlattenWalk {
         }
 
         // this moves an expression to the already-allocated space
-        void addExpr(MethodData md, ast::TreePtr expr) {
+        void addExpr(MethodData md, ast::ExpressionPtr expr) {
             ENFORCE(md.targetLocation);
             int idx = *md.targetLocation;
             ENFORCE(moveQueue.size() > idx);
@@ -253,7 +253,7 @@ class FlattenWalk {
             targets.emplace_back(&target);
         }
 
-        vector<vector<ast::TreePtr>> expressionsToBePutInTargets;
+        vector<vector<ast::ExpressionPtr>> expressionsToBePutInTargets;
         // This makes each element be a length-0 vector
         expressionsToBePutInTargets.resize(targets.size());
 
@@ -280,9 +280,9 @@ class FlattenWalk {
         // generate the nested `class << self` blocks as needed and add them to the class
         for (auto &body : nestedClassBodies) {
             auto classDef = ast::MK::Class(loc, loc,
-                                           ast::make_tree<ast::UnresolvedIdent>(core::LocOffsets::none(),
-                                                                                ast::UnresolvedIdent::Kind::Class,
-                                                                                core::Names::singleton()),
+                                           ast::make_expression<ast::UnresolvedIdent>(core::LocOffsets::none(),
+                                                                                      ast::UnresolvedIdent::Kind::Class,
+                                                                                      core::Names::singleton()),
                                            {}, std::move(body));
             rhs.emplace_back(std::move(classDef));
         }
@@ -298,7 +298,7 @@ public:
         ENFORCE(classScopes.empty());
     }
 
-    ast::TreePtr preTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         if (!curMethodSet().stack.empty()) {
             curMethodSet().pushScope(computeScopeInfo(ScopeType::InstanceMethodScope));
         }
@@ -306,7 +306,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformClassDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         classDef.rhs = addClassDefMethods(ctx, std::move(classDef.rhs), classDef.loc);
         auto &methods = curMethodSet();
@@ -321,7 +321,7 @@ public:
         return ast::MK::EmptyTree();
     };
 
-    ast::TreePtr preTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         // we might want to move sigs, so we mostly use the same logic that we use for methods. The one exception is
         // that we don't know the 'staticness level' of a sig, as it depends on the method that follows it (whether that
@@ -333,7 +333,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformSend(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
         auto &methods = curMethodSet();
         // if it's not a send, then we didn't make a stack frame for it
@@ -348,7 +348,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr preTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         // add a new scope for this method def
         curMethodSet().pushScope(computeScopeInfo(methodDef.flags.isSelfMethod ? ScopeType::StaticMethodScope
@@ -356,7 +356,7 @@ public:
         return tree;
     }
 
-    ast::TreePtr postTransformMethodDef(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
         auto &methods = curMethodSet();
         // if we get a MethodData back, then we need to move this and replace it
@@ -375,7 +375,7 @@ public:
                               ast::MK::Self(loc), ast::MK::Symbol(loc, name), ast::MK::Symbol(loc, kind));
     };
 
-    ast::TreePtr addTopLevelMethods(core::Context ctx, ast::TreePtr tree) {
+    ast::ExpressionPtr addTopLevelMethods(core::Context ctx, ast::ExpressionPtr tree) {
         auto &methods = curMethodSet().moveQueue;
         if (methods.empty()) {
             ENFORCE(popCurMethodDefs().empty());
@@ -383,14 +383,14 @@ public:
         }
         if (methods.size() == 1 && ast::isa_tree<ast::EmptyTree>(tree)) {
             // It was only 1 method to begin with, put it back
-            ast::TreePtr methodDef = std::move(popCurMethodDefs()[0].expr);
+            ast::ExpressionPtr methodDef = std::move(popCurMethodDefs()[0].expr);
             return methodDef;
         }
 
         auto insSeq = ast::cast_tree<ast::InsSeq>(tree);
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
-            tree = ast::make_tree<ast::InsSeq>(tree.loc(), std::move(stats), std::move(tree));
+            tree = ast::make_expression<ast::InsSeq>(tree.loc(), std::move(stats), std::move(tree));
             return addTopLevelMethods(ctx, std::move(tree));
         }
 
@@ -402,7 +402,7 @@ public:
     }
 };
 
-ast::TreePtr Flatten::run(core::Context ctx, ast::TreePtr tree) {
+ast::ExpressionPtr Flatten::run(core::Context ctx, ast::ExpressionPtr tree) {
     FlattenWalk flatten;
     tree = ast::TreeMap::apply(ctx, flatten, std::move(tree));
     tree = flatten.addTopLevelMethods(ctx, std::move(tree));

@@ -15,27 +15,27 @@ namespace {
 // these helpers work on a purely syntactic level. for instance, this function determines if an expression is `T`,
 // either with no scope or with the root scope (i.e. `::T`). this might not actually refer to the `T` that we define for
 // users, but we don't know that information in the Rewriter passes.
-bool isT(ast::TreePtr &expr) {
+bool isT(ast::ExpressionPtr &expr) {
     auto *t = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return t != nullptr && t->cnst == core::Names::Constants::T() && ast::MK::isRootScope(t->scope);
 }
 
-bool isTNilable(ast::TreePtr &expr) {
+bool isTNilable(ast::ExpressionPtr &expr) {
     auto *nilable = ast::cast_tree<ast::Send>(expr);
     return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
 }
 
-bool isTStruct(ast::TreePtr &expr) {
+bool isTStruct(ast::ExpressionPtr &expr) {
     auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && isT(struct_->scope);
 }
 
-bool isTInexactStruct(ast::TreePtr &expr) {
+bool isTInexactStruct(ast::ExpressionPtr &expr) {
     auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::InexactStruct() && isT(struct_->scope);
 }
 
-bool isChalkODMDocument(ast::TreePtr &expr) {
+bool isChalkODMDocument(ast::ExpressionPtr &expr) {
     auto *document = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (document == nullptr || document->cnst != core::Names::Constants::Document()) {
         return false;
@@ -99,17 +99,17 @@ struct PropInfo {
     bool hasWithoutAccessors = false;
     core::NameRef name;
     core::LocOffsets nameLoc;
-    ast::TreePtr type;
-    ast::TreePtr default_;
+    ast::ExpressionPtr type;
+    ast::ExpressionPtr default_;
     core::NameRef computedByMethodName;
     core::LocOffsets computedByMethodNameLoc;
-    ast::TreePtr foreign;
-    ast::TreePtr enum_;
-    ast::TreePtr ifunset;
+    ast::ExpressionPtr foreign;
+    ast::ExpressionPtr enum_;
+    ast::ExpressionPtr ifunset;
 };
 
 struct NodesAndPropInfo {
-    vector<ast::TreePtr> nodes;
+    vector<ast::ExpressionPtr> nodes;
     PropInfo propInfo;
 };
 
@@ -198,7 +198,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
 
     // Deep copy the rules hash so that we can destruct it at will to parse things,
     // without having to worry about whether we stole things from the tree.
-    ast::TreePtr rulesTree = ASTUtil::mkKwArgsHash(send);
+    ast::ExpressionPtr rulesTree = ASTUtil::mkKwArgsHash(send);
     if (rulesTree == nullptr && send->numPosArgs >= expectedPosArgs) {
         // No rules, but 3 args including name and type. Also not a T::Props
         return std::nullopt;
@@ -268,8 +268,8 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
     return ret;
 }
 
-vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropContext propContext) {
-    vector<ast::TreePtr> nodes;
+vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, PropContext propContext) {
+    vector<ast::ExpressionPtr> nodes;
 
     const auto loc = ret.loc;
     const auto name = ret.name;
@@ -385,8 +385,8 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
 
     // Compute the `_` foreign accessor
     if (ret.foreign) {
-        ast::TreePtr type;
-        ast::TreePtr nonNilType;
+        ast::ExpressionPtr type;
+        ast::ExpressionPtr nonNilType;
         if (ASTUtil::dupType(ret.foreign) == nullptr) {
             // If it's not a valid type, just use untyped
             type = ast::MK::Untyped(loc);
@@ -406,7 +406,7 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
 
         auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
 
-        ast::TreePtr arg =
+        ast::ExpressionPtr arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         nodes.emplace_back(
             ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
@@ -420,7 +420,7 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
         // end
 
         auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
-        ast::TreePtr arg2 =
+        ast::ExpressionPtr arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         nodes.emplace_back(
             ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::RaiseUnimplemented(loc)));
@@ -429,8 +429,8 @@ vector<ast::TreePtr> processProp(core::MutableContext ctx, PropInfo &ret, PropCo
     return nodes;
 }
 
-ast::TreePtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send) {
-    ast::TreePtr result = send->deepCopy();
+ast::ExpressionPtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send) {
+    ast::ExpressionPtr result = send->deepCopy();
 
     if (prop.hasWithoutAccessors) {
         return result;
@@ -465,8 +465,8 @@ ast::TreePtr ensureWithoutAccessors(const PropInfo &prop, const ast::Send *send)
     return result;
 }
 
-vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
-                                       core::LocOffsets klassDeclLoc, const vector<PropInfo> &props) {
+vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffsets klassLoc,
+                                             core::LocOffsets klassDeclLoc, const vector<PropInfo> &props) {
     ast::MethodDef::ARGS_store args;
     ast::Send::ARGS_store sigArgs;
     args.reserve(props.size());
@@ -504,7 +504,7 @@ vector<ast::TreePtr> mkTypedInitialize(core::MutableContext ctx, core::LocOffset
     }
     auto body = ast::MK::InsSeq(klassLoc, std::move(stats), ast::MK::ZSuper(klassDeclLoc));
 
-    vector<ast::TreePtr> result;
+    vector<ast::ExpressionPtr> result;
     result.emplace_back(ast::MK::SigVoid(klassDeclLoc, std::move(sigArgs)));
     result.emplace_back(
         ast::MK::SyntheticMethod(klassLoc, klassDeclLoc, core::Names::initialize(), std::move(args), std::move(body)));
@@ -529,7 +529,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         }
     }
     auto propContext = PropContext{syntacticSuperClass, klass->kind};
-    UnorderedMap<void *, vector<ast::TreePtr>> replaceNodes;
+    UnorderedMap<void *, vector<ast::ExpressionPtr>> replaceNodes;
     replaceNodes.reserve(klass->rhs.size());
     vector<PropInfo> props;
     for (auto &stat : klass->rhs) {
@@ -544,7 +544,7 @@ void Prop::run(core::MutableContext ctx, ast::ClassDef *klass) {
         auto processed = processProp(ctx, propInfo.value(), propContext);
         ENFORCE(!processed.empty(), "if parseProp completed successfully, processProp must complete too");
 
-        vector<ast::TreePtr> nodes;
+        vector<ast::ExpressionPtr> nodes;
         nodes.emplace_back(ensureWithoutAccessors(propInfo.value(), send));
         nodes.insert(nodes.end(), make_move_iterator(processed.begin()), make_move_iterator(processed.end()));
         replaceNodes[stat.get()] = std::move(nodes);

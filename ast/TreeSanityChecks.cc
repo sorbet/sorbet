@@ -5,7 +5,7 @@ using namespace std;
 
 namespace sorbet::ast {
 
-void TreePtr::_sanityCheck() const {
+void ExpressionPtr::_sanityCheck() const {
     auto *ptr = get();
     ENFORCE(ptr != nullptr);
 

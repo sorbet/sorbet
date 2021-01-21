@@ -6,7 +6,7 @@ namespace sorbet::rewriter {
 
 class Flatten final {
 public:
-    static ast::TreePtr run(core::Context ctx, ast::TreePtr tree);
+    static ast::ExpressionPtr run(core::Context ctx, ast::ExpressionPtr tree);
 
     Flatten() = delete;
 };
