@@ -960,6 +960,10 @@ string Symbol::show(const GlobalState &gs) const {
         }
     }
 
+    if (this->owner.data(gs)->name.isPackagerName(gs)) {
+        return this->name.show(gs);
+    }
+
     if (this->name == core::Names::Constants::AttachedClass()) {
         auto attached = this->owner.data(gs)->attachedClass(gs);
         ENFORCE(attached.exists());
