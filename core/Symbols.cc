@@ -663,11 +663,11 @@ string Symbol::toStringFullName(const GlobalState &gs) const {
 string Symbol::showFullName(const GlobalState &gs) const {
     if (this->owner == core::Symbols::PackageRegistry()) {
         // Pretty print package name (only happens when `--stripe-packages` is enabled)
-        auto nameStr = this->name.show(gs);
-        constexpr string_view packageNameSuffix = "_Package"sv;
-        if (absl::EndsWith(nameStr, packageNameSuffix)) {
+        if (this->name.isPackagerName(gs)) {
+            auto nameStr = this->name.shortName(gs);
+            constexpr size_t packageSuffix = char_traits<char>::length("_Package");
             // Foo_Bar_Package => Foo::Bar
-            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageNameSuffix.size()), {{"_", "::"}});
+            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageSuffix), {{"_", "::"}});
         }
     }
     bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
@@ -952,11 +952,11 @@ string Symbol::show(const GlobalState &gs) const {
 
     if (this->owner == core::Symbols::PackageRegistry()) {
         // Pretty print package name (only happens when `--stripe-packages` is enabled)
-        auto nameStr = this->name.show(gs);
-        constexpr string_view packageNameSuffix = "_Package"sv;
-        if (absl::EndsWith(nameStr, packageNameSuffix)) {
+        if (this->name.isPackagerName(gs)) {
+            auto nameStr = this->name.shortName(gs);
+            constexpr size_t packageSuffix = char_traits<char>::length("_Package");
             // Foo_Bar_Package => Foo::Bar
-            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageNameSuffix.size()), {{"_", "::"}});
+            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageSuffix), {{"_", "::"}});
         }
     }
 

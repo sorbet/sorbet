@@ -46,6 +46,7 @@ enum class UniqueNameKind : u1 {
     ResolverMissingClass, // used by resolver when we want to enter a stub class into a static field. see
                           // test/resolver/stub_missing_class_alias.rb
     TEnum,
+    Packager,
 };
 
 struct UniqueName final {

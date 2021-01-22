@@ -1317,7 +1317,8 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
     ENFORCE(original.kind() == NameKind::UTF8 ||
                 original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum,
+                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum ||
+                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::Packager,
             "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.rawId());
@@ -1380,7 +1381,8 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
     }
     ENFORCE(original.kind() == NameKind::UTF8 ||
                 original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::ResolverMissingClass ||
-                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum,
+                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::TEnum ||
+                original.dataUnique(*this)->uniqueNameKind == UniqueNameKind::Packager,
             "looking up a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.rawId());
