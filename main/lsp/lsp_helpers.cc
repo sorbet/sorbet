@@ -240,6 +240,28 @@ string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef consta
         // By wrapping the type in `MetaType`, it displays as `<Type: Foo>` rather than `Foo`.
         result = core::make_type<core::MetaType>(result);
     }
+
+    if (result == nullptr) {
+        // This is a crash! Print out useful information.
+        cerr << "CRASH!!\n";
+        if (constant.isClassOrModule()) {
+            cerr << "Is constant with ID: " << constant.classOrModuleIndex() << "\n";
+            if (!constant.data(gs)->attachedClass(gs).exists()) {
+                auto singleton = constant.data(gs)->lookupSingletonClass(gs);
+                if (singleton.exists()) {
+                    cerr << "Singleton: " << core::SymbolRef(singleton).toString(gs) << "\n";
+                } else {
+                    cerr << "No singleton found!\n";
+                }
+            }
+        } else {
+            cerr << "Non-constant with ID: " << constant.rawId() << "\n";
+        }
+        if (constant.exists()) {
+            cerr << "Constant " << constant.toString(gs) << "\n";
+        }
+    }
+
     return result.showWithMoreInfo(gs);
 }
 
