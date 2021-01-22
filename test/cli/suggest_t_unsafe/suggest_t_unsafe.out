@@ -1,37 +1,72 @@
-suggest_t_unsafe.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
-     4 |foo[0]
+suggest_t_unsafe.rb:6: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+     6 |foo[0]
         ^^^^^^
   Got T.nilable(String) originating from:
-    suggest_t_unsafe.rb:3:
-     3 |foo = T.let(nil, T.nilable(String))
+    suggest_t_unsafe.rb:5:
+     5 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest_t_unsafe.rb:4: Replaced with `T.unsafe(foo)`
-     4 |foo[0]
+    suggest_t_unsafe.rb:6: Replaced with `T.unsafe(foo)`
+     6 |foo[0]
         ^^^
 
-suggest_t_unsafe.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
-     6 |"hi" + foo
+suggest_t_unsafe.rb:8: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
+     8 |"hi" + foo
         ^^^^^^^^^^
   Expected `String` for argument `arg0` of method `String#+`:
     https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L58:
     58 |        arg0: String,
                 ^^^^
   Got `T.nilable(String)` originating from:
-    suggest_t_unsafe.rb:3:
-     3 |foo = T.let(nil, T.nilable(String))
+    suggest_t_unsafe.rb:5:
+     5 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    suggest_t_unsafe.rb:6: Replaced with `T.unsafe(foo)`
-     6 |"hi" + foo
+    suggest_t_unsafe.rb:8: Replaced with `T.unsafe(foo)`
+     8 |"hi" + foo
                ^^^
-Errors: 2
+
+suggest_t_unsafe.rb:11: Method `even?` does not exist on `String` component of `T.any(Integer, String)` https://srb.help/7003
+    11 |bar.even?
+        ^^^^^^^^^
+  Got T.any(Integer, String) originating from:
+    suggest_t_unsafe.rb:10:
+    10 |bar = T.let(1, T.any(Integer, String))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:11: Replaced with `T.unsafe(bar)`
+    11 |bar.even?
+        ^^^
+
+suggest_t_unsafe.rb:13: Expected `String` but found `Integer(1)` for argument `arg0` https://srb.help/7002
+    13 |"hi" + 1
+               ^
+  Expected `String` for argument `arg0` of method `String#+`:
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/string.rbi#L58:
+    58 |        arg0: String,
+                ^^^^
+  Got `Integer(1)` originating from:
+    suggest_t_unsafe.rb:13:
+    13 |"hi" + 1
+               ^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:13: Replaced with `T.unsafe(1)`
+    13 |"hi" + 1
+               ^
+Errors: 4
 
 --------------------------------------------------------------------------
 
 # typed: true
 
+def custom_wrapper(arg0); end
+
 foo = T.let(nil, T.nilable(String))
 T.unsafe(foo)[0]
 
 "hi" + T.unsafe(foo)
+
+bar = T.let(1, T.any(Integer, String))
+T.unsafe(bar).even?
+
+"hi" + T.unsafe(1)
