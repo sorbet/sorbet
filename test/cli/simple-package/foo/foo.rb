@@ -7,4 +7,6 @@ class Foo
   def initialize(value)
     @value = T.let(value, Integer)
   end
+
+  Project::Bar::Bard
 end
