@@ -1388,7 +1388,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
                                     "Attempting to change type to: `{}`\n", tp.type.show(ctx))));
 
-                                if (cur.origins.size() == 1) {
+                                if (cur.origins.size() == 1 && cur.origins[0].exists()) {
                                     // NOTE(nelhage): We assume that if there is
                                     // a single definition location, that
                                     // corresponds to an initial
