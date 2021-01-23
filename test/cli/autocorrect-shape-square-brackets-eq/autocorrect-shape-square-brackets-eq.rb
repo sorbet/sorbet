@@ -39,3 +39,10 @@ else
   }
 end
 initialized_twice[:foo] = true
+
+# This one currently picks the wrong key, because the heuristic is naive.
+ws = {
+  another_key_with_suffix: nil,
+  suffix: nil,
+}
+ws[:suffix] = 1

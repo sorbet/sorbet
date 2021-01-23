@@ -140,7 +140,25 @@ autocorrect-shape-square-brackets-eq.rb:41: Expected `T.nilable(FalseClass)` but
     autocorrect-shape-square-brackets-eq.rb:41:
     41 |initialized_twice[:foo] = true
                                   ^^^^
-Errors: 9
+
+autocorrect-shape-square-brackets-eq.rb:48: Expected `NilClass` but found `Integer(1)` for key `Symbol(:suffix)` https://srb.help/7002
+    48 |ws[:suffix] = 1
+                      ^
+  Shape originates from here:
+    autocorrect-shape-square-brackets-eq.rb:44:
+    44 |ws = {
+    45 |  another_key_with_suffix: nil,
+    46 |  suffix: nil,
+    47 |}
+  Got `Integer(1)` originating from:
+    autocorrect-shape-square-brackets-eq.rb:48:
+    48 |ws[:suffix] = 1
+                      ^
+  Autocorrect: Done
+    autocorrect-shape-square-brackets-eq.rb:45: Replaced with `T.let(nil, T.nilable(Integer))`
+    45 |  another_key_with_suffix: nil,
+                                   ^^^
+Errors: 10
 
 --------------------------------------------------------------------------
 
@@ -185,3 +203,10 @@ else
   }
 end
 initialized_twice[:foo] = true
+
+# This one currently picks the wrong key, because the heuristic is naive.
+ws = {
+  another_key_with_suffix: T.let(nil, T.nilable(Integer)),
+  suffix: nil,
+}
+ws[:suffix] = 1
