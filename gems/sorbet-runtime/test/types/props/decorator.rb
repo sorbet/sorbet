@@ -388,13 +388,20 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
   it 'applies the supplied sensitivity and PII handler' do
     begin
       T::Configuration.normalize_sensitivity_and_pii_handler = ->(meta) do
+        meta[:pii] = :set
         meta[:sensitivity] += 1
         meta
       end
       e = Class.new(T::Struct) do
+        # needs this annotation for the `:pii` field
+        def self.contains_pii?
+          true
+        end
+
         prop :foo, Integer, sensitivity: 5
       end
-      assert_equal(e.props[:foo][:sensitivity], 6)
+      assert_equal(6, e.props[:foo][:sensitivity])
+      assert_equal(:set, e.props[:foo][:pii])
     ensure
       T::Configuration.normalize_sensitivity_and_pii_handler = nil
     end
