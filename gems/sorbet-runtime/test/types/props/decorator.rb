@@ -362,4 +362,19 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
     end
     assert_match(/has the word 'secret' in its name/, e.message)
   end
+
+  it 'applies the supplied sensitivity and PII handler' do
+    begin
+      T::Configuration.normalize_sensitivity_and_pii_handler = ->(meta) do
+        meta[:sensitivity] += 1
+        meta
+      end
+      e = Class.new(T::Struct) do
+        prop :foo, Integer, sensitivity: 5
+      end
+      assert_equal(e.props[:foo][:sensitivity], 6)
+    ensure
+      T::Configuration.normalize_sensitivity_and_pii_handler = nil
+    end
+  end
 end

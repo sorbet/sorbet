@@ -412,6 +412,19 @@ module T::Configuration
     @module_name_mangler = handler
   end
 
+  # Set to a PII handler function. This will be called with the `sensitivity:`
+  # annotations on things that use `T::Props` and can modify them ahead-of-time.
+  #
+  # @param [Lambda, Proc, nil] value Proc that takes a hash mapping symbols to the
+  # prop values. Pass nil to avoid changing `sensitivity:` annotations.
+  def self.normalize_sensitivity_and_pii_handler=(handler)
+    @sensitivity_and_pii_handler = handler
+  end
+
+  def self.normalize_sensitivity_and_pii_handler
+    @sensitivity_and_pii_handler
+  end
+
   # Temporarily disable ruby warnings while executing the given block. This is
   # useful when doing something that would normally cause a warning to be
   # emitted in Ruby verbose mode ($VERBOSE = true).
