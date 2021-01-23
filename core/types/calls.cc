@@ -2318,6 +2318,122 @@ public:
     }
 } Tuple_concat;
 
+namespace {
+
+optional<size_t> indexForKey(const ShapeType &shape, const LiteralType &argLit) {
+    auto fnd = absl::c_find_if(
+        shape.keys, [&argLit](auto &elemLit) { return argLit.equals(cast_type_nonnull<LiteralType>(elemLit)); });
+
+    if (fnd == shape.keys.end()) {
+        return nullopt;
+    } else {
+        return std::distance(shape.keys.begin(), fnd);
+    }
+}
+
+optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const NameRef key, const TypePtr expectedType) {
+    if (!isa_type<ClassType>(expectedType)) {
+        return nullopt;
+    }
+    auto ct = cast_type_nonnull<ClassType>(expectedType);
+
+    // Unlike with normal `T.let` autocorrects, we don't have location information for "the value
+    // for a specific key". To make up for this, we hard-code the most common pinning errors by
+    // scanning the source directly.
+
+    const char *valueStr;
+    if (ct.symbol == core::Symbols::NilClass()) {
+        valueStr = "nil";
+    } else if (ct.symbol == core::Symbols::TrueClass()) {
+        valueStr = "true";
+    } else if (ct.symbol == core::Symbols::FalseClass()) {
+        valueStr = "false";
+    } else {
+        return nullopt;
+    }
+
+    auto source = origin.source(gs);
+    auto keySymbol = fmt::format("{}:", key.shortName(gs));
+    auto keyStart = source.find(keySymbol);
+    if (keyStart == string::npos) {
+        return nullopt;
+    }
+
+    u4 valueBegin = origin.beginPos() + keyStart + keySymbol.size() + char_traits<char>::length(" ");
+    u4 valueEnd = valueBegin + char_traits<char>::length(valueStr);
+    if (valueEnd <= origin.file().data(gs).source().size()) {
+        auto loc = Loc{origin.file(), valueBegin, valueEnd};
+        if (loc.source(gs) == valueStr) {
+            return loc;
+        }
+    }
+
+    return nullopt;
+}
+
+} // namespace
+
+class Shape_squareBracketsEq : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        auto &shape = cast_type_nonnull<ShapeType>(args.thisType);
+
+        if (args.args.size() != 2) {
+            // Skip over cases for which arg matching should report errors
+            return;
+        }
+
+        if (!isa_type<LiteralType>(args.args.front()->type)) {
+            return;
+        }
+
+        auto argLit = cast_type_nonnull<LiteralType>(args.args.front()->type);
+        if (auto idx = indexForKey(shape, argLit)) {
+            auto valueType = shape.values[*idx];
+            auto expectedType = valueType;
+            auto actualType = *args.args[1];
+            // This check (with the dropLiteral's) mimicks what we do for pinning errors in environment.cc
+            if (!Types::isSubType(gs, Types::dropLiteral(gs, actualType.type), Types::dropLiteral(gs, expectedType))) {
+                auto argLoc = Loc(args.locs.file, args.locs.args[1]);
+
+                if (auto e = gs.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {
+                    e.setHeader("Expected `{}` but found `{}` for key `{}`", expectedType.show(gs),
+                                actualType.type.show(gs), shape.keys[*idx].show(gs));
+                    e.addErrorSection(
+                        ErrorSection("Shape originates from here:",
+                                     args.fullType.origins2Explanations(gs, args.originForUninitialized)));
+                    e.addErrorSection(actualType.explainGot(gs, args.originForUninitialized));
+
+                    if (args.fullType.origins.size() == 1 &&
+                        argLit.literalKind == LiteralType::LiteralTypeKind::Symbol) {
+                        auto key = argLit.asName(gs);
+                        auto loc = locOfValueForKey(gs, args.fullType.origins[0], key, expectedType);
+
+                        if (loc.has_value()) {
+                            e.replaceWith("Initialize with `T.let`", *loc, "T.let({}, {})", loc->source(gs),
+                                          Types::any(gs, expectedType, actualType.type).show(gs));
+                        }
+                    }
+                }
+            }
+
+            // Returning here without setting res.resultType will cause dispatchCall to fall back to
+            // Hash#[]=, which will have the effect of checking the arg types.
+            //
+            // TODO(jez) Right now ShapeType::underlying always returns T::Hash[T.untyped, T.untyped]
+            // so it doesn't matter whether we return or not.
+            return;
+        } else {
+            // Key not found. To preserve legacy compatibility, allow any arguments here.
+            // I would love to remove this one day, but we'll have to figure out a way to migrate
+            // people's codebases to it.
+            //
+            // TODO(jez) This could be another "if you're in `typed: strict` you need typed shapes"
+            res.returnType = Types::untypedUntracked();
+        }
+    }
+} Shape_squareBracketsEq;
+
 class Shape_merge : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -2697,6 +2813,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::toA(), &Tuple_to_a},
     {Symbols::Tuple(), Intrinsic::Kind::Instance, Names::concat(), &Tuple_concat},
 
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBracketsEq(), &Shape_squareBracketsEq},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
 
