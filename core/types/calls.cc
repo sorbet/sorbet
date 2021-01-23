@@ -2319,7 +2319,7 @@ optional<size_t> indexForKey(const ShapeType &shape, const LiteralType &argLit) 
     if (fnd == shape.keys.end()) {
         return nullopt;
     } else {
-        return fnd - shape.keys.begin();
+        return std::distance(shape.keys.begin(), fnd);
     }
 }
 
@@ -2331,7 +2331,7 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
 
     // Unlike with normal `T.let` autocorrects, we don't have location information for "the value
     // for a specific key". To make up for this, we hard-code the most common pinning errors by
-    // scannign the source directly.
+    // scanning the source directly.
 
     const char *valueStr;
     if (ct.symbol == core::Symbols::NilClass()) {
