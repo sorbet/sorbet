@@ -425,6 +425,19 @@ module T::Configuration
     @sensitivity_and_pii_handler
   end
 
+  # Set to a function which can get the 'owner' of a class. This is
+  # used in reporting deserialization errors
+  #
+  # @param [Lambda, Proc, nil] value Proc that takes a class and
+  # produces its owner, or `nil` if it does not have one.
+  def self.class_owner_finder=(handler)
+    @class_owner_finder = handler
+  end
+
+  def self.class_owner_finder
+    @class_owner_finder
+  end
+
   # Temporarily disable ruby warnings while executing the given block. This is
   # useful when doing something that would normally cause a warning to be
   # emitted in Ruby verbose mode ($VERBOSE = true).
