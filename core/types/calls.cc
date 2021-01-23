@@ -2391,8 +2391,9 @@ public:
                 if (auto e = gs.beginError(argLoc, errors::Infer::MethodArgumentMismatch)) {
                     e.setHeader("Expected `{}` but found `{}` for key `{}`", expectedType.show(gs),
                                 actualType.type.show(gs), shape.keys[*idx].show(gs));
-                    e.addErrorSection(ErrorSection("Shape initialized here:", args.fullType.origins2Explanations(
-                                                                                  gs, args.originForUninitialized)));
+                    e.addErrorSection(
+                        ErrorSection("Shape originates from here:",
+                                     args.fullType.origins2Explanations(gs, args.originForUninitialized)));
                     e.addErrorSection(actualType.explainGot(gs, args.originForUninitialized));
 
                     if (args.fullType.origins.size() == 1 &&

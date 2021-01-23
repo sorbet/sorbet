@@ -1,7 +1,7 @@
 autocorrect-shape-square-brackets-eq.rb:9: Expected `NilClass` but found `Integer(1)` for key `Symbol(:foo)` https://srb.help/7002
      9 |xs[:foo] = 1
                    ^
-  Shape initialized here:
+  Shape originates from here:
     autocorrect-shape-square-brackets-eq.rb:3:
      3 |xs = {
      4 |  foo: nil,
@@ -20,7 +20,7 @@ autocorrect-shape-square-brackets-eq.rb:9: Expected `NilClass` but found `Intege
 autocorrect-shape-square-brackets-eq.rb:10: Expected `FalseClass` but found `TrueClass` for key `Symbol(:bar)` https://srb.help/7002
     10 |xs[:bar] = true
                    ^^^^
-  Shape initialized here:
+  Shape originates from here:
     autocorrect-shape-square-brackets-eq.rb:3:
      3 |xs = {
      4 |  foo: nil,
@@ -39,7 +39,7 @@ autocorrect-shape-square-brackets-eq.rb:10: Expected `FalseClass` but found `Tru
 autocorrect-shape-square-brackets-eq.rb:11: Expected `TrueClass` but found `FalseClass` for key `Symbol(:qux)` https://srb.help/7002
     11 |xs[:qux] = false
                    ^^^^^
-  Shape initialized here:
+  Shape originates from here:
     autocorrect-shape-square-brackets-eq.rb:3:
      3 |xs = {
      4 |  foo: nil,
@@ -58,7 +58,7 @@ autocorrect-shape-square-brackets-eq.rb:11: Expected `TrueClass` but found `Fals
 autocorrect-shape-square-brackets-eq.rb:17: Expected `[]` but found `T::Array[Integer]` for key `Symbol(:first)` https://srb.help/7002
     17 |ys[:first] = T::Array[Integer].new
                      ^^^^^^^^^^^^^^^^^^^^^
-  Shape initialized here:
+  Shape originates from here:
     autocorrect-shape-square-brackets-eq.rb:13:
     13 |ys = {
     14 |  first: [],
@@ -72,7 +72,7 @@ autocorrect-shape-square-brackets-eq.rb:17: Expected `[]` but found `T::Array[In
 autocorrect-shape-square-brackets-eq.rb:18: Expected `{}` but found `T::Hash[Symbol, String]` for key `Symbol(:second)` https://srb.help/7002
     18 |ys[:second] = T::Hash[Symbol, String].new
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Shape initialized here:
+  Shape originates from here:
     autocorrect-shape-square-brackets-eq.rb:13:
     13 |ys = {
     14 |  first: [],
@@ -86,7 +86,7 @@ autocorrect-shape-square-brackets-eq.rb:18: Expected `{}` but found `T::Hash[Sym
 autocorrect-shape-square-brackets-eq.rb:24: Expected `FalseClass` but found `TrueClass` for key `String("foo")` https://srb.help/7002
     24 |zs['foo'] = true
                     ^^^^
-  Shape initialized here:
+  Shape originates from here:
     autocorrect-shape-square-brackets-eq.rb:20:
     20 |zs = {
     21 |  'foo' => false,
@@ -100,7 +100,7 @@ autocorrect-shape-square-brackets-eq.rb:24: Expected `FalseClass` but found `Tru
 autocorrect-shape-square-brackets-eq.rb:25: Expected `FalseClass` but found `TrueClass` for key `Symbol(:bar)` https://srb.help/7002
     25 |zs[:bar] = true
                    ^^^^
-  Shape initialized here:
+  Shape originates from here:
     autocorrect-shape-square-brackets-eq.rb:20:
     20 |zs = {
     21 |  'foo' => false,
@@ -114,7 +114,7 @@ autocorrect-shape-square-brackets-eq.rb:25: Expected `FalseClass` but found `Tru
 autocorrect-shape-square-brackets-eq.rb:30: Expected `NilClass` but found `Integer(1)` for key `Symbol(:foo)` https://srb.help/7002
     30 |spacing_is_important[:foo] = 1
                                      ^
-  Shape initialized here:
+  Shape originates from here:
     autocorrect-shape-square-brackets-eq.rb:27:
     27 |spacing_is_important = {
     28 |  foo:nil,
@@ -127,7 +127,7 @@ autocorrect-shape-square-brackets-eq.rb:30: Expected `NilClass` but found `Integ
 autocorrect-shape-square-brackets-eq.rb:41: Expected `T.nilable(FalseClass)` but found `TrueClass` for key `Symbol(:foo)` https://srb.help/7002
     41 |initialized_twice[:foo] = true
                                   ^^^^
-  Shape initialized here:
+  Shape originates from here:
     autocorrect-shape-square-brackets-eq.rb:33:
     33 |  initialized_twice = {
     34 |    foo: nil,
