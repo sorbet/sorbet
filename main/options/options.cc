@@ -501,6 +501,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         options.add_options("dev")("suggest-sig", "Report typing candidates. Only supported in debug builds");
     }
     options.add_options("dev")("suggest-typed", "Suggest which typed: sigils to add or upgrade");
+    options.add_options("dev")("suggest-unsafe",
+                               "In as many errors as possible, suggest autocorrects to wrap problem code with "
+                               "<method>. Omit the =<method> to default to wrapping with T.unsafe. "
+                               "This supercedes certain autocorrects, especially T.must.",
+                               cxxopts::value<std::string>()->implicit_value("T.unsafe"), "<method>");
     options.add_options("dev")("statsd-prefix", "StatsD prefix",
                                cxxopts::value<string>()->default_value(empty.statsdPrefix), "prefix");
     options.add_options("dev")("statsd-port", "StatsD server port",
@@ -841,6 +846,9 @@ void readOptions(Options &opts,
         }
         opts.skipRewriterPasses = raw["skip-rewriter-passes"].as<bool>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
+        if (raw.count("suggest-unsafe") > 0) {
+            opts.suggestUnsafe = raw["suggest-unsafe"].as<string>();
+        }
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.stressIncrementalResolver = raw["stress-incremental-resolver"].as<bool>();
         opts.sleepInSlowPath = raw["sleep-in-slow-path"].as<bool>();

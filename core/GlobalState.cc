@@ -1785,6 +1785,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->ignoredForSuggestTypedErrorClasses = this->ignoredForSuggestTypedErrorClasses;
     result->suppressedErrorClasses = this->suppressedErrorClasses;
     result->onlyErrorClasses = this->onlyErrorClasses;
+    result->suggestUnsafe = this->suggestUnsafe;
     result->dslPlugins = this->dslPlugins;
     result->dslRubyExtraArgs = this->dslRubyExtraArgs;
     result->utf8Names.reserve(this->utf8Names.capacity());

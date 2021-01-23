@@ -488,6 +488,7 @@ int realmain(int argc, char *argv[]) {
             gs->ignoreErrorClassForSuggestTyped(core::errors::Namer::MultipleBehaviorDefs.code);
         }
     }
+    gs->suggestUnsafe = opts.suggestUnsafe;
 
     logger->trace("done building initial global state");
 

@@ -1,16 +1,16 @@
-test/cli/suggest_t_must/suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
+suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` https://srb.help/7003
      4 |foo[0]
         ^^^^^^
   Got T.nilable(String) originating from:
-    test/cli/suggest_t_must/suggest_t_must.rb:3:
+    suggest_t_must.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest_t_must/suggest_t_must.rb:4: Replace with `T.must(foo)`
+  Autocorrect: Done
+    suggest_t_must.rb:4: Replaced with `T.must(foo)`
      4 |foo[0]
         ^^^
 
-test/cli/suggest_t_must/suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
+suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argument `arg0` https://srb.help/7002
      6 |"hi" + foo
         ^^^^^^^^^^
   Expected `String` for argument `arg0` of method `String#+`:
@@ -18,11 +18,20 @@ test/cli/suggest_t_must/suggest_t_must.rb:6: Expected `String` but found `T.nila
     58 |        arg0: String,
                 ^^^^
   Got `T.nilable(String)` originating from:
-    test/cli/suggest_t_must/suggest_t_must.rb:3:
+    suggest_t_must.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest_t_must/suggest_t_must.rb:6: Replace with `T.must(foo)`
+  Autocorrect: Done
+    suggest_t_must.rb:6: Replaced with `T.must(foo)`
      6 |"hi" + foo
                ^^^
 Errors: 2
+
+--------------------------------------------------------------------------
+
+# typed: true
+
+foo = T.let(nil, T.nilable(String))
+T.must(foo)[0]
+
+"hi" + T.must(foo)

@@ -247,6 +247,8 @@ public:
     void suppressErrorClass(int code);
     void onlyShowErrorClass(int code);
 
+    std::optional<std::string> suggestUnsafe;
+
     std::vector<std::string> dslRubyExtraArgs;
     void addDslPlugin(std::string_view method, std::string_view command);
     std::optional<std::string_view> findDslPlugin(NameRef method) const;
