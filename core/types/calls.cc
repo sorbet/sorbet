@@ -928,10 +928,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         tpe.origins = {kwargsLoc};
                         auto offset = it - hash->keys.begin();
                         tpe.type = hash->values[offset];
-                        if (auto e =
-                                matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
-                                             core::Loc(args.locs.file, args.locs.receiver), symbol, method, tpe, spec,
-                                             args.selfType, targs, Loc::none(), args.originForUninitialized)) {
+                        if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
+                                                  core::Loc(args.locs.file, args.locs.receiver), symbol, method, tpe,
+                                                  spec, args.selfType, targs, kwargsLoc, args.originForUninitialized)) {
                             result.main.errors.emplace_back(std::move(e));
                         }
                     }
@@ -961,7 +960,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 tpe.type = hash->values[offset];
                 if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
                                           core::Loc(args.locs.file, args.locs.receiver), symbol, method, tpe, spec,
-                                          args.selfType, targs, Loc::none(), args.originForUninitialized)) {
+                                          args.selfType, targs, kwargsLoc, args.originForUninitialized)) {
                     result.main.errors.emplace_back(std::move(e));
                 }
             }
