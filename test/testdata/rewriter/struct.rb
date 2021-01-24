@@ -57,22 +57,29 @@ class MixinStruct
     include MyMixin
     self.new.x
     self.new.foo
-    self.new(1, 2) # error: Too many positional arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
-    self.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
+    self.new(1, 2)
+  # ^^^^^^^^^^^^^^ error: Too many positional arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
+    self.new(giberish: 1)
+  # ^^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
   end
 
-  MyKeywordInitStruct.new(1, 2) # error: Too many positional arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
-  MyKeywordInitStruct.new(giberish: 1) # error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
+  MyKeywordInitStruct.new(1, 2)
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Too many positional arguments provided for method `MixinStruct::MyKeywordInitStruct#initialize`. Expected: `0`, got: `2`
+  MyKeywordInitStruct.new(giberish: 1)
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Unrecognized keyword argument `giberish` passed for method `MixinStruct::MyKeywordInitStruct#initialize`
   MyStruct.new.x
   MyStruct.new.foo
 end
 
 class BadUsages
   A = Struct.new # error: Not enough arguments provided for method `Struct#initialize`. Expected: `1+`, got: `0`
-  B = Struct.new(giberish: 1) # error: Expected `T.any(Symbol, String)` but found `{giberish: Integer(1)}` for argument `arg0`
-  C = Struct.new(keyword_init: true) # error: Expected `T.any(Symbol, String)` but found `{keyword_init: TrueClass}` for argument `arg0`
+  B = Struct.new(giberish: 1)
+  #              ^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{giberish: Integer(1)}` for argument `arg0`
+  C = Struct.new(keyword_init: true)
+  #              ^^^^^^^^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{keyword_init: TrueClass}` for argument `arg0`
   local = true
-  D = Struct.new(keyword_init: local) # error: Expected `T.any(Symbol, String)` but found `{keyword_init: TrueClass}` for argument `arg0`
+  D = Struct.new(keyword_init: local)
+  #              ^^^^^^^^^^^^^^^^^^^ error: Expected `T.any(Symbol, String)` but found `{keyword_init: TrueClass}` for argument `arg0`
   E = Struct.new(:a, keyword_init: local) # we run too early in to be able to support this
 end
 
@@ -93,7 +100,8 @@ class Main
         T.assert_type!(RealStruct::KeywordInit.new, RealStruct::KeywordInit)
         T.assert_type!(RealStruct::KeywordInit.new(foo: 1), RealStruct::KeywordInit)
         T.assert_type!(RealStruct::KeywordInit.new(foo: 2, bar: 3), RealStruct::KeywordInit)
-        RealStruct::KeywordInit.new(1, 2) # error: Too many positional arguments provided for method `RealStruct::KeywordInit#initialize`. Expected: `0`, got: `2`
+        RealStruct::KeywordInit.new(1, 2)
+      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Too many positional arguments provided for method `RealStruct::KeywordInit#initialize`. Expected: `0`, got: `2`
 
         T.assert_type!(RealStructDesugar::A.new(2, 3), RealStructDesugar::A)
     end

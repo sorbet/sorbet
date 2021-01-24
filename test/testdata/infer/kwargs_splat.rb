@@ -30,6 +30,9 @@ f(3, **untyped_hash)
 g(3, **untyped_hash, w: 2.0)
 
 untyped_values_hash = T.let(shaped_hash, T::Hash[Symbol, T.untyped])
-f(3, untyped_values_hash) # error: Passing a hash where the specific keys are unknown to a method taking keyword arguments
-f(3, **untyped_values_hash) # error: Passing a hash where the specific keys are unknown to a method taking keyword arguments
-g(3, **untyped_values_hash, w: 2.0) # error: Passing a hash where the specific keys are unknown to a method taking keyword arguments
+  f(3, untyped_values_hash)
+# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: Passing a hash where the specific keys are unknown to a method taking keyword arguments
+  f(3, **untyped_values_hash)
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Passing a hash where the specific keys are unknown to a method taking keyword arguments
+  g(3, **untyped_values_hash, w: 2.0)
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Passing a hash where the specific keys are unknown to a method taking keyword arguments
