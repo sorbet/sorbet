@@ -9,10 +9,10 @@ def test1
 
   if T.unsafe(nil)
   #  ^ error: This code is unreachable
-    do_something # error: This code is unreachable
+    do_something
   end
 
-  do_something # error: This code is unreachable
+  do_something
 end
 
 sig {params(x: T.any(Integer, String)).void}
@@ -39,8 +39,8 @@ def test3(x)
 
     if T.unsafe(nil)
     #  ^ error: This code is unreachable
-      do_something # error: This code is unreachable
+      do_something
     end
-    do_something # error: This code is unreachable
+    do_something
   end
 end
