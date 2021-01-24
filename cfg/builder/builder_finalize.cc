@@ -58,6 +58,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     bb->bexit.cond.variable = thenb->bexit.cond.variable;
                     bb->bexit.thenb = thenb->bexit.thenb;
                     bb->bexit.elseb = thenb->bexit.elseb;
+                    bb->bexit.loc = thenb->bexit.loc;
                     bb->bexit.thenb->backEdges.emplace_back(bb);
                     if (bb->bexit.thenb != bb->bexit.elseb) {
                         bb->bexit.elseb->backEdges.emplace_back(bb);
@@ -70,6 +71,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     bb->bexit.cond.variable = thenb->bexit.cond.variable;
                     bb->bexit.thenb = thenb->bexit.thenb;
                     bb->bexit.elseb = thenb->bexit.elseb;
+                    bb->bexit.loc = thenb->bexit.loc;
                     thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                            thenb->backEdges.end());
                     bb->bexit.thenb->backEdges.emplace_back(bb);
