@@ -171,10 +171,6 @@ class Environment {
 
     bool getKnownTruthy(cfg::LocalRef var) const;
 
-    // NB: you can't call this function on vars in the first basic block since
-    // their type will be nullptr
-    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const;
-
     /* propagate knowledge on `to = from` */
     void propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::LocalRef from, KnowledgeFilter &knowledgeFilter);
 
@@ -213,6 +209,10 @@ public:
     void setUninitializedVarsToNil(const core::Context &ctx, core::Loc origin);
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
+
+    // NB: you can't call this function on vars in the first basic block since
+    // their type will be nullptr
+    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, cfg::LocalRef symbol) const;
 
     const core::TypeAndOrigins &getAndFillTypeAndOrigin(core::Context ctx, cfg::VariableUseSite &symbol) const;
 

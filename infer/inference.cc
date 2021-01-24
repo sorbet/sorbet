@@ -183,6 +183,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         e.setHeader("This code is unreachable");
 
                         for (const auto &prevBasicBlock : bb->backEdges) {
+                            const auto &prevEnv = outEnvironments[prevBasicBlock->id];
+
                             const auto &cond = prevBasicBlock->bexit.cond;
                             if (cond.type == nullptr) {
                                 // This previous block is actually a future block we haven't processed yet.
@@ -196,6 +198,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                             auto bexitLoc = core::Loc(ctx.file, prevBasicBlock->bexit.loc);
                             e.addErrorLine(bexitLoc, "This condition was always `{}` (`{}`)", alwaysWhat,
                                            cond.type.show(ctx));
+
+                            auto ty = prevEnv.getTypeAndOrigin(ctx, cond.variable);
+                            e.addErrorSection(ty.explainGot(ctx, prevEnv.locForUninitialized()));
                         }
                     }
                 }
