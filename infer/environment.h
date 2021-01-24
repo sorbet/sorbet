@@ -79,7 +79,7 @@ public:
     /**
      * Computes all possible implications of this knowledge holding as an exit from environment env in block bb
      */
-    KnowledgeRef under(core::Context ctx, const Environment &env, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
+    KnowledgeRef under(core::Context ctx, const Environment &env, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                        bool isNeeded) const;
 
     void removeReferencesToVar(cfg::LocalRef ref);
@@ -228,7 +228,7 @@ public:
     static const Environment &withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
                                        const UnorderedMap<cfg::LocalRef, VariableState> &filter);
 
-    void mergeWith(core::Context ctx, const Environment &other, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
+    void mergeWith(core::Context ctx, const Environment &other, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                    KnowledgeFilter &knowledgeFilter);
 
     void computePins(core::Context ctx, const std::vector<Environment> &envs, const cfg::CFG &inWhat,

@@ -111,8 +111,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
-                    current.mergeWith(ctx, envAsSeenFromBranch, core::Loc(ctx.file, parent->bexit.loc), *cfg.get(), bb,
-                                      knowledgeFilter);
+                    current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
                 }
             }
         }
