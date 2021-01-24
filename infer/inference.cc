@@ -181,6 +181,22 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         }
                     } else if (auto e = ctx.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
                         e.setHeader("This code is unreachable");
+
+                        for (const auto &prevBasicBlock : bb->backEdges) {
+                            const auto &cond = prevBasicBlock->bexit.cond;
+                            if (cond.type == nullptr) {
+                                // This previous block is actually a future block we haven't processed yet.
+                                // (Remember: our inference pass is an approximate forwards toposort
+                                // of a graph that can have cycles). It can't have been a block that
+                                // caused the current error.
+                                continue;
+                            }
+
+                            auto alwaysWhat = prevBasicBlock->bexit.thenb->id == bb->id ? "falsy" : "truthy";
+                            auto bexitLoc = core::Loc(ctx.file, prevBasicBlock->bexit.loc);
+                            e.addErrorLine(bexitLoc, "This condition was always `{}` (`{}`)", alwaysWhat,
+                                           cond.type.show(ctx));
+                        }
                     }
                 }
             }
