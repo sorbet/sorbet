@@ -199,6 +199,11 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                             e.addErrorLine(bexitLoc, "This condition was always `{}` (`{}`)", alwaysWhat,
                                            cond.type.show(ctx));
 
+                            if (ctx.state.suggestUnsafe.has_value() && bexitLoc.exists()) {
+                                e.replaceWith(fmt::format("Wrap in `{}`", *ctx.state.suggestUnsafe), bexitLoc, "{}({})",
+                                              *ctx.state.suggestUnsafe, bexitLoc.source(ctx));
+                            }
+
                             auto ty = prevEnv.getTypeAndOrigin(ctx, cond.variable);
                             e.addErrorSection(ty.explainGot(ctx, prevEnv.locForUninitialized()));
                         }
