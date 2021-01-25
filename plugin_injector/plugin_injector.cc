@@ -139,6 +139,12 @@ public:
             return;
         }
 
+        // This method will be handled as a VM_METHOD_TYPE_IVAR method by the
+        // standard VM mechanisms, so we don't need to generate code for it.
+        if (md.flags.isAttrReader) {
+            return;
+        }
+
         if (md.symbol.data(gs)->name == core::Names::staticInit()) {
             auto attachedClass = md.symbol.data(gs)->owner.data(gs)->attachedClass(gs);
             if (attachedClass.exists() && attachedClass.data(gs)->name.isTEnumName(gs)) {
