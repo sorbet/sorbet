@@ -43,8 +43,8 @@ MarkupKind getPreferredMarkupKind(vector<MarkupKind> formats) {
 } // namespace
 
 LSPConfiguration::LSPConfiguration(const options::Options &opts, const shared_ptr<LSPOutput> &output,
-                                   const shared_ptr<spdlog::logger> &logger, bool skipConfigatron, bool disableFastPath)
-    : initialized(atomic<bool>(false)), opts(opts), output(output), logger(logger), skipConfigatron(skipConfigatron),
+                                   const shared_ptr<spdlog::logger> &logger, bool disableFastPath)
+    : initialized(atomic<bool>(false)), opts(opts), output(output), logger(logger),
       disableFastPath(disableFastPath), rootPath(getRootPath(output, opts, logger)) {}
 
 void LSPConfiguration::assertHasClientConfig() const {

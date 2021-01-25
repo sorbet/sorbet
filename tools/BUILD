@@ -70,7 +70,6 @@ compilation_database(
         "//payload/text:text",
         "//payload/binary:binary",
         "//packager:packager",
-        "//namer/configatron:configatron",
         "//namer:namer",
         "//local_vars:local_vars",
         "//infer:infer",

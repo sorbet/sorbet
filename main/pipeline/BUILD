@@ -30,7 +30,6 @@ cc_library(
         "//local_vars",
         "//main/options",
         "//namer",
-        "//namer/configatron",
         "//packager",
         "//parser",
         "//payload/binary",

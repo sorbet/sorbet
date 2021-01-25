@@ -439,7 +439,6 @@ NameDef names[] = {
     {"StubModule", "StubModule", true},
     {"StubSuperClass", "StubSuperClass", true},
     {"StubMixin", "StubMixin", true},
-    {"Configatron", "Configatron", true},
     {"Store", "Store", true},
     {"RootStore", "RootStore", true},
     {"Base", "Base", true},

@@ -35,7 +35,7 @@ auto nullOpts = makeOptions("");
 auto logger = make_shared<spdlog::logger>("console", nullSink);
 
 shared_ptr<LSPConfiguration> makeConfig() {
-    auto config = make_shared<LSPConfiguration>(nullOpts, make_shared<LSPOutputToVector>(), logger, true, false);
+    auto config = make_shared<LSPConfiguration>(nullOpts, make_shared<LSPOutputToVector>(), logger, false);
     InitializeParams initParams("", make_unique<ClientCapabilities>());
     initParams.rootPath = "";
     initParams.initializationOptions = make_unique<SorbetInitializationOptions>();

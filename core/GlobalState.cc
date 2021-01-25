@@ -186,12 +186,6 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::T_Range());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Set());
     ENFORCE(id == Symbols::T_Set());
-    id = synthesizeClass(core::Names::Constants::Configatron());
-    ENFORCE(id == Symbols::Configatron());
-    id = enterClassSymbol(Loc::none(), Symbols::Configatron(), core::Names::Constants::Store());
-    ENFORCE(id == Symbols::Configatron_Store());
-    id = enterClassSymbol(Loc::none(), Symbols::Configatron(), core::Names::Constants::RootStore());
-    ENFORCE(id == Symbols::Configatron_RootStore());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
     id.data(*this)->setIsModule(false);
     ENFORCE(id == Symbols::void_());

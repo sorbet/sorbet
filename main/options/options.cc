@@ -323,10 +323,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("dir", "Input directory", cxxopts::value<vector<string>>());
     options.add_options("advanced")("file", "Input file", cxxopts::value<vector<string>>());
     options.add_options("advanced")("allowed-extension", "Allowed extension", cxxopts::value<vector<string>>());
-    options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
-                                    cxxopts::value<vector<string>>(), "path");
-    options.add_options("advanced")("configatron-file", "Path to configatron yaml files",
-                                    cxxopts::value<vector<string>>(), "path");
     options.add_options("advanced")("web-trace-file", "Web trace file. For use with chrome about://tracing",
                                     cxxopts::value<string>()->default_value(empty.webTraceFile), "file");
     options.add_options("advanced")("debug-log-file", "Path to debug log file",
@@ -838,12 +834,6 @@ void readOptions(Options &opts,
         }
 
         opts.showProgress = raw["P"].as<bool>();
-        if (raw.count("configatron-dir") > 0) {
-            opts.configatronDirs = raw["configatron-dir"].as<vector<string>>();
-        }
-        if (raw.count("configatron-file")) {
-            opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
-        }
         opts.skipRewriterPasses = raw["skip-rewriter-passes"].as<bool>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         if (raw.count("suggest-unsafe") > 0) {
