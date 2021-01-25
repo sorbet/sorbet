@@ -39,7 +39,9 @@ T.reveal_type(xsss.flatten(2)) # error: Revealed type: `T::Array[Integer]`
 
 xs.flatten(1 + 1) # error: You must pass an Integer literal to specify a depth
 
-xs.flatten(true) # error: Expected `Integer` but found `TrueClass` for argument `depth`
-         # ^^^^ error: You must pass an Integer literal to specify a depth with Array#flatten
+xs.flatten(true)
+#          ^^^^ error: Expected `Integer` but found `TrueClass` for argument `depth`
+#          ^^^^ error: You must pass an Integer literal to specify a depth with Array#flatten
 
-xs.flatten(1, 1) # error: Too many arguments provided for method `Array#flatten`. Expected: `0..1`, got: `2`
+  xs.flatten(1, 1)
+# ^^^^^^^^^^^^^^^^ error: Too many arguments provided for method `Array#flatten`. Expected: `0..1`, got: `2`

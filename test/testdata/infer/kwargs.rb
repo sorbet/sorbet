@@ -12,5 +12,6 @@ class A
 end
 
 # Each repeated argument is checked as element type
-A.foo(x: 1, y: 2, z: '') # error: Expected `Integer` but found `String("")` for argument `kwargs`
+A.foo(x: 1, y: 2, z: '')
+#     ^^^^^^^^^^^^^^^^^ error: Expected `Integer` but found `String("")` for argument `kwargs`
 A.foo(x: 1, y: 2, z: 3)
