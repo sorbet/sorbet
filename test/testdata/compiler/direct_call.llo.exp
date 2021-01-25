@@ -87,7 +87,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @rubyIdPrecomputed_bar = internal unnamed_addr global i64 0, align 8
 @str_bar = private unnamed_addr constant [4 x i8] c"bar\00", align 1
 @ic_callFunc_foo = internal global %struct.FunctionInlineCache zeroinitializer
-@"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
+@"stackFramePrecomputed_func_<root>.<static-init>$152" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
 @"<static-init-locals-storage>" = internal global [0 x i64] zeroinitializer
@@ -260,7 +260,7 @@ entry:
   %"rubyId_<top (required)>.i.i" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %"rubyStr_test/testdata/compiler/direct_call.rb.i4.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/direct_call.rb", align 8
   %13 = call i8* @sorbet_allocateRubyStackFrame(i64 %12, i64 %"rubyId_<top (required)>.i.i", i64 %"rubyStr_test/testdata/compiler/direct_call.rb.i4.i", i64 %realpath, i8* null, i32 1, i32 1, i32 12, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @"<static-init-locals-storage>", i64 0, i64 0), i32 0)
-  store i8* %13, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
+  store i8* %13, i8** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
   %14 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !12
   %15 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %14, i64 0, i32 18
   %16 = load i64, i64* %15, align 8, !tbaa !39
@@ -379,7 +379,7 @@ attributes #7 = { nounwind }
 !46 = !{!"rb_hook_list_struct", !13, i64 0, !16, i64 8, !16, i64 12, !16, i64 16}
 !47 = !{!"", !5, i64 0, !5, i64 8, !5, i64 16, !5, i64 24}
 !48 = !DILocation(line: 0, scope: !49)
-!49 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$153", scope: null, file: !2, line: 4, type: !9, scopeLine: 4, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
+!49 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$152", scope: null, file: !2, line: 4, type: !9, scopeLine: 4, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
 !50 = !DILocation(line: 4, column: 1, scope: !49)
 !51 = !DILocation(line: 8, column: 1, scope: !49)
 !52 = !DILocation(line: 12, column: 6, scope: !49)

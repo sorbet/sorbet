@@ -77,7 +77,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @rb_eRuntimeError = external local_unnamed_addr global i64, align 8
 @.str.7 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @.str.8 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
-@"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
+@"stackFramePrecomputed_func_<root>.<static-init>$152" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
 @"rubyStrFrozen_<top (required)>" = internal unnamed_addr global i64 0, align 8
@@ -152,7 +152,7 @@ entry:
   %"rubyId_<top (required)>.i.i" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %"rubyStr_<top (required)>.i.i" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
   %6 = tail call i8* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>.i.i", i64 %"rubyId_<top (required)>.i.i", i64 %5, i64 %realpath, i8* null, i32 1, i32 1, i32 4, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @"<static-init-locals-storage>", i64 0, i64 0), i32 0)
-  store i8* %6, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
+  store i8* %6, i8** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
   %7 = bitcast [4 x i64]* %argArray.i.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 32, i8* nonnull %7)
   %rubyId_a.i.i = load i64, i64* @rubyIdPrecomputed_a, align 8
@@ -175,14 +175,14 @@ entry:
   %10 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %9, i64 0, i32 18
   %11 = load i64, i64* %10, align 8, !tbaa !10
   call void @llvm.lifetime.start.p0i8(i64 32, i8* nonnull %7)
-  %"stackFrame_func_<root>.<static-init>$153.i" = load i8*, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
-  %12 = bitcast i8* %"stackFrame_func_<root>.<static-init>$153.i" to %struct.rb_iseq_struct*
+  %"stackFrame_func_<root>.<static-init>$152.i" = load i8*, i8** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
+  %12 = bitcast i8* %"stackFrame_func_<root>.<static-init>$152.i" to %struct.rb_iseq_struct*
   %13 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !8
   %14 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %13, i64 0, i32 2
   %15 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %14, align 8, !tbaa !20
   %16 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %15, i64 0, i32 2
   %17 = bitcast %struct.rb_iseq_struct** %16 to i8**
-  store i8* %"stackFrame_func_<root>.<static-init>$153.i", i8** %17, align 8, !tbaa !23
+  store i8* %"stackFrame_func_<root>.<static-init>$152.i", i8** %17, align 8, !tbaa !23
   %18 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %15, i64 0, i32 4
   %19 = load i64*, i64** %18, align 8, !tbaa !25
   %20 = load i64, i64* %19, align 8, !tbaa !4
@@ -265,7 +265,7 @@ attributes #6 = { nounwind }
 !35 = !{!"iseq_insn_info", !9, i64 0, !9, i64 8, !15, i64 16, !9, i64 24}
 !36 = !{!"", !5, i64 0, !5, i64 8, !5, i64 16, !9, i64 24}
 !37 = !DILocation(line: 0, scope: !38)
-!38 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$153", scope: null, file: !2, line: 4, type: !39, scopeLine: 4, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
+!38 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$152", scope: null, file: !2, line: 4, type: !39, scopeLine: 4, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
 !39 = !DISubroutineType(types: !40)
 !40 = !{!41}
 !41 = !DIBasicType(name: "VALUE", size: 64, encoding: DW_ATE_signed)

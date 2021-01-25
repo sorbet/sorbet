@@ -99,7 +99,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @str_times = private unnamed_addr constant [6 x i8] c"times\00", align 1
 @ic_callFuncWithBlock_times = internal global %struct.FunctionInlineCache zeroinitializer
 @ic_callFunc_puts.1 = internal global %struct.FunctionInlineCache zeroinitializer
-@"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
+@"stackFramePrecomputed_func_<root>.<static-init>$152" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
 @"<static-init-locals-storage>" = internal global [0 x i64] zeroinitializer
@@ -428,21 +428,21 @@ entry:
   %"rubyId_<top (required)>.i.i" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %"rubyStr_test/testdata/compiler/block_no_args_captures_constant.rb.i2.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/block_no_args_captures_constant.rb", align 8
   %15 = call i8* @sorbet_allocateRubyStackFrame(i64 %14, i64 %"rubyId_<top (required)>.i.i", i64 %"rubyStr_test/testdata/compiler/block_no_args_captures_constant.rb.i2.i", i64 %realpath, i8* null, i32 1, i32 1, i32 12, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @"<static-init-locals-storage>", i64 0, i64 0), i32 0)
-  store i8* %15, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
+  store i8* %15, i8** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
   %16 = call i64 @rb_fstring_new(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @str_hi, i64 0, i64 0), i64 2) #7
   call void @rb_gc_register_mark_object(i64 %16) #7
   store i64 %16, i64* @rubyStrFrozen_hi, align 8
   %17 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !21
   %18 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %17, i64 0, i32 18
   %19 = load i64, i64* %18, align 8, !tbaa !56
-  %"stackFrame_func_<root>.<static-init>$153.i" = load i8*, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
-  %20 = bitcast i8* %"stackFrame_func_<root>.<static-init>$153.i" to %struct.rb_iseq_struct*
+  %"stackFrame_func_<root>.<static-init>$152.i" = load i8*, i8** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
+  %20 = bitcast i8* %"stackFrame_func_<root>.<static-init>$152.i" to %struct.rb_iseq_struct*
   %21 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !21
   %22 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %21, i64 0, i32 2
   %23 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %22, align 8, !tbaa !22
   %24 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %23, i64 0, i32 2
   %25 = bitcast %struct.rb_iseq_struct** %24 to i8**
-  store i8* %"stackFrame_func_<root>.<static-init>$153.i", i8** %25, align 8, !tbaa !25
+  store i8* %"stackFrame_func_<root>.<static-init>$152.i", i8** %25, align 8, !tbaa !25
   %26 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %23, i64 0, i32 4
   %27 = load i64*, i64** %26, align 8, !tbaa !27
   %28 = load i64, i64* %27, align 8, !tbaa !16
@@ -564,7 +564,7 @@ attributes #8 = { noreturn nounwind }
 !62 = !{!"rb_hook_list_struct", !10, i64 0, !9, i64 8, !9, i64 12, !9, i64 16}
 !63 = !{!"", !6, i64 0, !6, i64 8, !6, i64 16, !6, i64 24}
 !64 = !DILocation(line: 0, scope: !65)
-!65 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$153", scope: null, file: !2, line: 4, type: !18, scopeLine: 4, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
+!65 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$152", scope: null, file: !2, line: 4, type: !18, scopeLine: 4, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
 !66 = !DILocation(line: 4, column: 5, scope: !65)
 !67 = !DILocation(line: 5, column: 1, scope: !65)
 !68 = !DILocation(line: 12, column: 1, scope: !65)

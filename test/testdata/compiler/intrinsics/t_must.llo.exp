@@ -82,7 +82,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @rb_eException = external local_unnamed_addr global i64, align 8
 @.str.7 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @.str.8 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
-@"stackFramePrecomputed_func_<root>.<static-init>$153" = internal unnamed_addr global i8* null, align 8
+@"stackFramePrecomputed_func_<root>.<static-init>$152" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
 @"rubyStrFrozen_<top (required)>" = internal unnamed_addr global i64 0, align 8
@@ -290,7 +290,7 @@ entry:
   %"rubyId_<top (required)>.i.i" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %"rubyStr_<top (required)>.i.i" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
   %19 = tail call i8* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>.i.i", i64 %"rubyId_<top (required)>.i.i", i64 %18, i64 %realpath, i8* null, i32 1, i32 1, i32 27, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @"<static-init-locals-storage>.7", i64 0, i64 0), i32 0)
-  store i8* %19, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
+  store i8* %19, i8** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
   %20 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @str_test_known_nil, i64 0, i64 0), i64 14) #10
   tail call void @rb_gc_register_mark_object(i64 %20) #10
   %21 = bitcast [5 x i64]* %locals1.i.i to i8*
@@ -381,14 +381,14 @@ entry:
   store i8* %43, i8** @"stackFramePrecomputed_func_Test.<static-init>", align 8
   %44 = bitcast [1 x i64]* %callArgs.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %44)
-  %"stackFrame_func_<root>.<static-init>$153.i" = load i8*, i8** @"stackFramePrecomputed_func_<root>.<static-init>$153", align 8
-  %45 = bitcast i8* %"stackFrame_func_<root>.<static-init>$153.i" to %struct.rb_iseq_struct*
+  %"stackFrame_func_<root>.<static-init>$152.i" = load i8*, i8** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
+  %45 = bitcast i8* %"stackFrame_func_<root>.<static-init>$152.i" to %struct.rb_iseq_struct*
   %46 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !15
   %47 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %46, i64 0, i32 2
   %48 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %47, align 8, !tbaa !16
   %49 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %48, i64 0, i32 2
   %50 = bitcast %struct.rb_iseq_struct** %49 to i8**
-  store i8* %"stackFrame_func_<root>.<static-init>$153.i", i8** %50, align 8, !tbaa !20
+  store i8* %"stackFrame_func_<root>.<static-init>$152.i", i8** %50, align 8, !tbaa !20
   %51 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %48, i64 0, i32 4
   %52 = load i64*, i64** %51, align 8, !tbaa !22
   %53 = load i64, i64* %52, align 8, !tbaa !14
@@ -1674,7 +1674,7 @@ attributes #11 = { noreturn nounwind }
 !32 = !{!"iseq_insn_info", !6, i64 0, !6, i64 8, !18, i64 16, !6, i64 24}
 !33 = !{!"", !9, i64 0, !9, i64 8, !9, i64 16, !6, i64 24}
 !34 = !DILocation(line: 0, scope: !35)
-!35 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$153", scope: null, file: !2, line: 5, type: !36, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
+!35 = distinct !DISubprogram(name: "<root>.<static-init>", linkageName: "func_<root>.<static-init>$152", scope: null, file: !2, line: 5, type: !36, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
 !36 = !DISubroutineType(types: !37)
 !37 = !{!38}
 !38 = !DIBasicType(name: "VALUE", size: 64, encoding: DW_ATE_signed)
