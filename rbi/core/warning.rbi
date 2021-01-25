@@ -16,7 +16,35 @@
 # is overridden, super can be called to get the default behavior of printing the
 # warning to $stderr.
 module Warning
+  # Returns the flag to show the warning messages for category. Supported
+  # categories are:
+  #
+  # :deprecated -- deprecation warnings
+  #   - assignment of non-nil value to $, and $;
+  #   - keyword arguments
+  #   - proc/lambda without block
+  #   - etc.
+  #
+  # :experimental -- experimental features
+  #   - patterrn matching
+  sig {params(category: Symbol).returns(T::Boolean)}
+  def self.[](category); end
+
+  # Sets the warning flags for category. Supported categories are:
+  #
+  # :deprecated -- deprecation warnings
+  #   - assignment of non-nil value to $, and $;
+  #   - keyword arguments
+  #   - proc/lambda without block
+  #   - etc.
+  #
+  # :experimental -- experimental features
+  #   - patterrn matching
+  sig {params(category: Symbol, setting: T::Boolean).returns(T::Boolean)}
+  def self.[]=(category, setting); end
+
   # Writes warning message `msg` to $stderr. This method is called by Ruby for
   # all emitted warnings.
+  sig {params(msg: Object).returns(NilClass)}
   def warn(msg); end
 end
