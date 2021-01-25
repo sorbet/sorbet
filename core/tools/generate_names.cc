@@ -439,8 +439,6 @@ NameDef names[] = {
     {"StubModule", "StubModule", true},
     {"StubSuperClass", "StubSuperClass", true},
     {"StubMixin", "StubMixin", true},
-    {"Store", "Store", true},
-    {"RootStore", "RootStore", true},
     {"Base", "Base", true},
     {"Void", "Void", true},
     {"TypeAlias", "<TypeAlias>", true},
