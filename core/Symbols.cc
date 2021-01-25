@@ -72,7 +72,7 @@ TypePtr Symbol::selfType(const GlobalState &gs) const {
 
 TypePtr Symbol::externalType() const {
     ENFORCE_NO_TIMER(resultType);
-    if (!resultType) {
+    if (resultType == nullptr) {
         // Don't return nullptr in prod builds, which would cause a disruptive crash
         // Emit a metric and return untyped instead.
         prodCounterInc("symbol.externalType.nullptr");
