@@ -1538,7 +1538,7 @@ class BigDecimal < Numeric
     params(
         arg0: Integer,
     )
-    .returns(Rational)
+    .returns(BigDecimal)
   end
   def truncate(arg0=T.unsafe(nil)); end
 
