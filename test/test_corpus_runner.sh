@@ -43,8 +43,12 @@ stderr="$(mktemp)"
 # Test wrapper
 runfile="$(mktemp)"
 
+# Filtered versions of stderrs
+stderr_filtered=$(mktemp)
+rberr_filtered=$(mktemp)
+
 cleanup() {
-  rm -f "$stdout" "$stderr" "$runfile"
+  rm -f "$stdout" "$stderr" "$runfile" "$stderr_filtered" "$rberr_filtered"
 }
 trap cleanup EXIT
 
@@ -199,8 +203,6 @@ filter_stderr() {
 if grep -q '^# skip_stderr_check$' "$rbmain"; then
   attn "└─ skipping stderr check."
 else
-  stderr_filtered=$(mktemp)
-  rberr_filtered=$(mktemp)
   filter_stderr < "$rberr" > "$rberr_filtered"
   filter_stderr < "$stderr" > "$stderr_filtered"
   if ! diff -au "$rberr_filtered" "$stderr_filtered" > stderr.diff; then
