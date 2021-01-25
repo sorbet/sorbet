@@ -804,9 +804,9 @@
 * [   ] `flo_eq` (`Float#===`)
 * [   ] `flo_cmp` (`Float#<=>`)
 * [✔  ] `rb_float_gt` (`Float#>`)
-* [   ] `flo_ge` (`Float#>=`)
-* [   ] `flo_lt` (`Float#<`)
-* [   ] `flo_le` (`Float#<=`)
+* [  ✔] `flo_ge` (`Float#>=`)
+* [  ✔] `flo_lt` (`Float#<`)
+* [  ✔] `flo_le` (`Float#<=`)
 * [   ] `flo_eql` (`Float#eql?`)
 * [   ] `flo_hash` (`Float#hash`)
 * [   ] `flo_to_f` (`Float#to_f`)
@@ -1564,4 +1564,4 @@
 
 ## Stats
 * Total:   1488
-* Visible: 231
+* Visible: 234

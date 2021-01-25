@@ -198,6 +198,26 @@ VALUE sorbet_int_rb_float_uminus(VALUE recv, ID fun, int argc, VALUE *const rest
     return rb_float_uminus(recv);
 }
 
+// Float#<
+// Calling convention: 1
+extern VALUE sorbet_flo_lt(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_flo_lt(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk, VALUE closure) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return sorbet_flo_lt(recv, arg_0);
+}
+
+// Float#<=
+// Calling convention: 1
+extern VALUE sorbet_flo_le(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_flo_le(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk, VALUE closure) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return sorbet_flo_le(recv, arg_0);
+}
+
 // Float#>
 // Calling convention: 1
 extern VALUE rb_float_gt(VALUE obj, VALUE arg_0);
@@ -207,6 +227,16 @@ VALUE sorbet_int_rb_float_gt(VALUE recv, ID fun, int argc, VALUE *const restrict
     rb_check_arity(argc, 1, 1);
     VALUE arg_0 = args[0];
     return rb_float_gt(recv, arg_0);
+}
+
+// Float#>=
+// Calling convention: 1
+extern VALUE sorbet_flo_ge(VALUE obj, VALUE arg_0);
+
+VALUE sorbet_int_flo_ge(VALUE recv, ID fun, int argc, VALUE *const restrict args, BlockFFIType blk, VALUE closure) {
+    rb_check_arity(argc, 1, 1);
+    VALUE arg_0 = args[0];
+    return sorbet_flo_ge(recv, arg_0);
 }
 
 // Float#abs

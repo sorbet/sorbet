@@ -39,7 +39,6 @@ compiler/IREmitter/Intrinsics/PayloadIntrinsics.c
 compiler/IREmitter/Intrinsics/PayloadIntrinsics.formatted.c
 compiler/IREmitter/Intrinsics/WrappedIntrinsics.h
 compiler/IREmitter/Intrinsics/WrappedIntrinsics.formatted.h
-compiler/IREmitter/Intrinsics/export-intrinsics.patch
 
 # clangd caches data in this folder.
 /.clangd

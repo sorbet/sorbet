@@ -1,15 +1,12 @@
 TOPDIR := ../../..
 BAZEL := $(TOPDIR)/bazel
 
-all: intrinsics-report.md ../WrappedIntrinsics.h ../Payload/PayloadIntrinsics.c $(TOPDIR)/third_party/ruby/export-intrinsics.patch
+all: intrinsics-report.md ../WrappedIntrinsics.h ../Payload/PayloadIntrinsics.c
 
 ../WrappedIntrinsics.h: WrappedIntrinsics.formatted.h
 	cp $< $@
 
 ../Payload/PayloadIntrinsics.c: PayloadIntrinsics.formatted.c
-	cp $< $@
-
-$(TOPDIR)/third_party/ruby/export-intrinsics.patch: export-intrinsics.patch
 	cp $< $@
 
 %.formatted.c: %.c
@@ -23,9 +20,8 @@ ensure-ruby:
 write-files: wrap-intrinsics.rb ensure-ruby
 	$(TOPDIR)/bazel-bin/external/sorbet_ruby_2_7_unpatched/toolchain/bin/ruby wrap-intrinsics.rb
 
-intrinsics-report.md WrappedIntrinsics.h PayloadIntrinsics.c export-intrinsics.patch: write-files
+intrinsics-report.md WrappedIntrinsics.h PayloadIntrinsics.c: write-files
 
 clean:
 	$(RM) WrappedIntrinsics.h WrappedIntrinsics.formatted.h
 	$(RM) PayloadIntrinsics.c PayloadIntrinsics.formatted.c
-	$(RM) export-intrinsics.patch

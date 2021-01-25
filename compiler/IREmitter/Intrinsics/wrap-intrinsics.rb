@@ -1,8 +1,10 @@
+# coding: utf-8
 # frozen_string_literal: true
 # typed: strict
 
 require 'set'
 require 'optparse'
+require 'stringio'
 require_relative '../../../bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime'
 
 class Module
@@ -10,20 +12,172 @@ class Module
 end
 
 module Intrinsics
+  class ExportStatus < T::Enum
+    enums do
+      Exported = new
+      NotExported = new
+      PatchExported = new
+    end
+  end
+
+  class Unlimited; end
+  class ArgRubyArray; end
+  class FixedArity < T::Struct
+    const :n, Integer
+  end
+
   class Method < T::Struct
-    prop :already_exported, T::Boolean
-    prop :did_export, T::Boolean
+    prop :export_status, ExportStatus
     prop :file, String
     prop :klass, String
     prop :rb_name, String
     prop :c_name, String
-    prop :argc, Integer
-  end
+    prop :argc, T.any(FixedArity, ArgRubyArray, Unlimited)
 
-  class Edit < T::Struct
-    prop :orig, String
-    prop :edited, String
-    prop :line, Integer
+    sig {params(argc: Integer).returns(T.any(FixedArity, ArgRubyArray, Unlimited))}
+    def self.arity_for_ruby_callconv(argc)
+      case argc
+      when -2
+        return ArgRubyArray.new
+      when -1
+        return Unlimited.new
+      else
+        return FixedArity.new(n: argc)
+      end
+    end
+
+    sig {returns(T::Boolean)}
+    def already_exported
+      export_status == ExportStatus::Exported
+    end
+
+    sig {returns(T::Boolean)}
+    def did_export
+      export_status == ExportStatus::PatchExported
+    end
+
+    sig {void}
+    def mark_patch_exported
+      case export_status
+      when ExportStatus::NotExported
+        @export_status = ExportStatus::PatchExported
+      else
+        T.absurd(self)
+      end
+    end
+
+    sig {returns(T::Boolean)}
+    def takes_ruby_array
+      argc.is_a?(ArgRubyArray)
+    end
+
+    sig {returns(Integer)}
+    def ruby_callconv
+      case argc
+      when ArgRubyArray
+        -2
+      when Unlimited
+        -1
+      when FixedArity
+        argc.n
+      end
+    end
+
+    sig {params(func_name: String).returns(String)}
+    def signature(func_name)
+      StringIO.open do |io|
+        io << "VALUE #{func_name}("
+
+        case argc
+        when Unlimited
+          io << 'int argc, const VALUE *args, VALUE obj'
+        when ArgRubyArray
+          $stderr.puts 'Need to implement calling convention -2'
+          exit 1
+        when FixedArity
+          args = ['VALUE obj']
+
+          argc.n.times do |i|
+            args << "VALUE arg_#{i}"
+          end
+
+          io << args.join(', ')
+        end
+
+        io << ')'
+
+        io.string
+      end
+    end
+
+    sig {returns(String)}
+    def function_signature
+      signature(c_name)
+    end
+
+    sig {returns(String)}
+    def exported_wrapper_signature
+      signature(exported_c_name)
+    end
+
+    sig {returns(String)}
+    def exported_c_name
+      case export_status
+      when ExportStatus::Exported
+        c_name
+      when ExportStatus::PatchExported
+        "sorbet_#{c_name}"
+      else
+        T.absurd(self.c_name)
+      end
+    end
+
+    sig {returns(String)}
+    def sorbet_payload_wrapper_name
+      return "sorbet_int_#{c_name}"
+    end
+
+    sig {returns(String)}
+    def sorbet_payload_wrapper
+      # NOTE: the sorbet calling convention differs from -1, in that we put the
+      # receiver first, and pass the ID of the function explicitly.
+      StringIO.open do |io|
+        io << "VALUE #{sorbet_payload_wrapper_name}("
+        io << 'VALUE recv, '
+        io << 'ID fun, '
+        io << 'int argc, '
+        io << "VALUE *const restrict args, BlockFFIType blk, VALUE closure) {\n"
+
+        case argc
+
+        when Unlimited
+          # dispatch directly to the underlying intrinsic
+          io << "    return #{exported_c_name}(argc, args, recv);\n"
+
+        when ArgRubyArray
+          puts "Need to implement calling convention -2"
+          exit 1
+
+        when FixedArity
+          # check the arity
+          io << "    rb_check_arity(argc, #{argc.n}, #{argc.n});\n"
+
+          # extract individual arguments
+          args = ["recv"]
+          argc.n.times do |i|
+            args << "arg_#{i}"
+            io << "    VALUE arg_#{i} = args[#{i}];\n"
+          end
+
+          # call the underlying intrinsic
+          io << "    return #{exported_c_name}(#{args.join(', ')});\n"
+        end
+
+        io << "}\n"
+
+        io.string
+      end
+    end
   end
 
   class Main
@@ -82,6 +236,9 @@ module Intrinsics
       "Float#+",
       "Float#-@",
       "Float#>",
+      "Float#>=",
+      "Float#<",
+      "Float#<=",
       "Float#abs",
       "Float#finite?",
       "Float#infinite?",
@@ -123,18 +280,15 @@ module Intrinsics
       "String#succ",
     ], T::Set[String])
 
-    sig {params(ruby: String, ruby_source: String).void}
-    def self.run(ruby:, ruby_source:)
+    sig {params(topdir: String, ruby: String, ruby_source: String).void}
+    def self.run(topdir:, ruby:, ruby_source:)
       puts "ruby object: #{ruby}"
       puts "ruby source: #{ruby_source}"
 
       exported = exported_symbols(ruby: ruby)
       methods = methods_defined(ruby_source: ruby_source, exported: exported)
 
-      File.open('export-intrinsics.patch', 'w') do |diff|
-        puts 'Writing export-intrinsics.patch'
-        write_diff(ruby_source, diff, methods)
-      end
+      expose_methods(topdir, ruby_source, methods)
 
       File.open('intrinsic-report.md', 'w') do |report|
         puts 'Writing intrinsic-report.md'
@@ -288,14 +442,18 @@ module Intrinsics
               c_name = m3.lstrip.rstrip
               argc = m4.chomp.to_i
 
+              status = if exported.include?(c_name)
+                         ExportStatus::Exported
+                       else
+                         ExportStatus::NotExported
+                       end
               methods << Method.new(
-                already_exported: exported.include?(c_name),
-                did_export: false,
+                export_status: status,
                 file: file,
                 klass: klass_value,
                 rb_name: rb_name,
                 c_name: c_name,
-                argc: argc
+                argc: Method.arity_for_ruby_callconv(argc)
               )
             end
           end
@@ -339,100 +497,92 @@ module Intrinsics
 
     sig do
       params(
+        topdir: String,
         ruby_source: String,
-        diff: File,
         methods: T::Hash[String, T::Array[Method]]
       )
         .void
     end
-    def self.write_diff(ruby_source, diff, methods)
-      Dir.chdir(ruby_source) do
-        methods.each do |file,methods|
-          hidden = methods.filter {|m| should_patch?(m)}
-          if !hidden.empty?
-            edits = File.open(file, 'r') do |io|
-              expose_methods(hidden, io)
-            end
+    def self.expose_methods(topdir, ruby_source, methods)
+      methods.each do |file,methods|
+        ruby_file = File.join(ruby_source, file)
+        hidden = methods.filter {|m| should_patch?(m)}
+        if !hidden.empty?
+          wrappers = File.open(ruby_file, 'r') do |io|
+            nonstatic_wrappers_for_methods(topdir, hidden, io)
+          end
 
-            if !edits.empty?
-              diff_header(diff, file)
-              edits.each do |edit|
-                diff_chunk(diff, edit)
-              end
+          if !wrappers.empty?
+            static_export_file = "#{topdir}/compiler/ruby-static-exports/#{file}"
+            puts "Writing #{static_export_file}\n"
+            File.open(static_export_file, 'w') do |io|
+              io << wrappers.join("\n")
             end
           end
         end
       end
     end
 
-    sig {params(io: File, file: String).void}
-    def self.diff_header(io, file)
-      io << "--- #{file}\n"
-      io << "+++ #{file}\n"
-    end
+    sig {params(topdir: String, hidden: T::Array[Method], io: File).returns(T::Array[String])}
+    def self.nonstatic_wrappers_for_methods(topdir, hidden, io)
+      to_export = T.let([], T::Array[Method])
 
-    sig {params(io: File, edit: Edit).void}
-    def self.diff_chunk(io, edit)
-      io << "@@ -#{edit.line} +#{edit.line} @@\n"
-      io << "-#{edit.orig}"
-      io << "+#{edit.edited}"
-    end
-
-    sig {params(hidden: T::Array[Method], io: File).returns(T::Array[Edit])}
-    def self.expose_methods(hidden, io)
-      edits = T.let([], T::Array[Edit])
-
-      previous = ''
-      io.each_line.each_with_index do |line,idx|
-        hidden.each_with_index do |method|
-          # idx is 0-based
-          edit = generate_edit(previous, line, idx+1, method)
-          if !edit.nil?
-            edits << edit
-            method.did_export = true
-            break
+      lines = io.each_line.to_a
+      # Assume that we're never going to see a definition on the very first line.
+      lines.each_cons(2).each_with_index do |window, idx|
+        previous = window[0]
+        line = window[1]
+        # idx is 0-based, but the first line is actually line two.
+        idx = idx + 2
+        mi = hidden.find_index do |method|
+          if !line.match?(Regexp.new("#{method.c_name}\\("))
+            next false
           end
+
+          if previous.match?('^static VALUE$')
+            next true
+          end
+
+          next line.match?('static VALUE')
         end
 
-        previous = line
+        if !mi.nil?
+          method = hidden[mi]
+          to_export << method
+          method.mark_patch_exported
+        end
       end
 
-      edits
-    end
+      wrappers = T.let([], T::Array[String])
 
-    # Heuristic for finding a method definition given a line and the previous
-    # line for context.
-    sig do
-      params(
-        previous: String,
-        line: String,
-        idx: Integer,
-        method: Method
-      )
-        .returns(T.nilable(Intrinsics::Edit))
-    end
-    def self.generate_edit(previous, line, idx, method)
-      if !line.match?(Regexp.new("#{method.c_name}\\("))
-        return nil
+      to_export.each do |method|
+         wrappers << StringIO.open do |strio|
+          strio << method.exported_wrapper_signature
+          strio << " {\n"
+          case method.argc
+          when ::Intrinsics::Unlimited
+            strio << "    return #{method.c_name}(argc, args, obj);\n"
+
+          when ::Intrinsics::ArgRubyArray
+            puts "Need to implement calling convention -2"
+            exit 1
+
+          when ::Intrinsics::FixedArity
+            args = ['obj']
+
+            method.argc.n.times do |i|
+              args << "arg_#{i}"
+            end
+
+            strio << "    return #{method.c_name}(#{args.join(', ')});\n"
+            strio << "}\n"
+          end
+
+          strio.string
+        end
       end
 
-      if previous.match?('^static VALUE$')
-        return Edit.new(
-          orig: previous,
-          edited: previous.sub('static ', ''),
-          line: idx - 1
-        )
-      end
-
-      if line.match?('static VALUE')
-        return Edit.new(
-          orig: line,
-          edited: line.sub('static ', ''),
-          line: idx
-        )
-      end
-
-      nil
+      wrappers
     end
 
     # Make this method return `true` to emit all methods
@@ -451,7 +601,7 @@ module Intrinsics
       !method.already_exported && \
         have_symbol_ref?(method.klass) && \
         method_whitelisted?(method) && \
-        method.argc != -2
+        !method.takes_ruby_array
     end
 
     sig {params(method: Method).returns(T.nilable(T::Boolean))}
@@ -459,7 +609,7 @@ module Intrinsics
       (method.already_exported || method.did_export) && \
         have_symbol_ref?(method.klass) && \
         method_whitelisted?(method) && \
-        method.argc != -2
+        !method.takes_ruby_array
     end
 
     sig {params(header: File, grouped_methods: T::Array[T::Array[Method]]).void}
@@ -471,10 +621,10 @@ module Intrinsics
 
       grouped_methods.each do |methods|
         method = methods.fetch(0)
-        if should_wrap? method
+        if should_wrap?(method)
           header << "    {core::Symbols::#{method.klass}(), "
           header << "\"#{method.rb_name}\", "
-          header << "\"sorbet_int_#{method.c_name}\", Intrinsics::HandleBlock::Unhandled},\n"
+          header << "\"#{method.sorbet_payload_wrapper_name}\", Intrinsics::HandleBlock::Unhandled},\n"
         end
       end
       header << "    // clang-format on\n"
@@ -498,7 +648,7 @@ module Intrinsics
 
       grouped_methods.each do |methods|
         method = methods.fetch(0)
-        if should_wrap? method
+        if should_wrap?(method)
 
           # TODO: comment about the ruby method
           wrapper << "\n"
@@ -517,7 +667,7 @@ module Intrinsics
       methods.each do |m|
         wrapper  << "// #{m.klass}##{m.rb_name}\n"
       end
-      wrapper << "// Calling convention: #{method.argc}\n"
+      wrapper << "// Calling convention: #{method.ruby_callconv}\n"
 
       extern_override = EXTERN_OVERRIDES[method.c_name]
       if extern_override
@@ -526,64 +676,12 @@ module Intrinsics
         return
       end
 
-      wrapper << "extern VALUE #{method.c_name}("
-
-      case method.argc
-      when -1
-        wrapper << 'int argc, const VALUE *args, VALUE obj'
-      when -2
-        puts "Need to implement calling convention -2"
-        exit 1
-      else
-        args = ['VALUE obj']
-
-        method.argc.times do |i|
-          args << "VALUE arg_#{i}"
-        end
-
-        wrapper << args.join(', ')
-      end
-
-      wrapper << ");\n"
+      wrapper << "extern #{method.exported_wrapper_signature};\n"
     end
 
     sig {params(wrapper: File, method: Method).void}
     def self.wrapper_implementation(wrapper, method)
-
-      # NOTE: the sorbet calling convention differs from -1, in that we put the
-      # receiver first, and pass the ID of the fun explicitly.
-      wrapper << "VALUE sorbet_int_#{method.c_name}("
-      wrapper << 'VALUE recv, '
-      wrapper << 'ID fun, '
-      wrapper << 'int argc, '
-      wrapper << "VALUE *const restrict args, BlockFFIType blk, VALUE closure) {\n"
-
-      case method.argc
-
-      when -1
-        # dispatch directly to the underlying intrinsic
-        wrapper << "    return #{method.c_name}(argc, args, recv);\n"
-
-      when -2
-        puts "Need to implement calling convention -2"
-        exit 1
-
-      else
-        # check the arity
-        wrapper << "    rb_check_arity(argc, #{method.argc}, #{method.argc});\n"
-
-        # extract individual arguments
-        args = ["recv"]
-        method.argc.times do |i|
-          args << "arg_#{i}"
-          wrapper << "    VALUE arg_#{i} = args[#{i}];\n"
-        end
-
-        # call the underlying intrinsic
-        wrapper << "    return #{method.c_name}(#{args.join(', ')});\n"
-      end
-
-      wrapper << "}\n"
+      wrapper << method.sorbet_payload_wrapper
     end
 
   end
@@ -620,5 +718,5 @@ if __FILE__ == $0
 
   end.parse!
 
-  Intrinsics::Main.run(ruby: ruby, ruby_source: ruby_source)
+  Intrinsics::Main.run(topdir: topdir, ruby: ruby, ruby_source: ruby_source)
 end

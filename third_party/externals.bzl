@@ -101,7 +101,6 @@ def sorbet_llvm_externals():
                 # If you're trying to use `git diff` to generate this patch, pass the `--no-prefix` flag
                 # (Removes the `a/` and `b/` prefixes that `patch` doesn't understand.)
                 patches = [
-                    "@com_stripe_sorbet_llvm//third_party/ruby:export-intrinsics.patch",
                     "@com_stripe_sorbet_llvm//third_party/ruby:gc-remove-write-barrier.patch",
                 ],
                 patch_tool = "patch",

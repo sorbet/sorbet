@@ -3,6 +3,9 @@
 load("@com_stripe_sorbet_llvm//third_party/ruby:build-ruby.bzl", "ruby")
 
 ruby(
+    append_srcs = [
+        "@com_stripe_sorbet_llvm//compiler/ruby-static-exports:vm_append_files",
+    ],
     configure_flags = [
         "--enable-shared",
         "--sysconfdir=/etc",
