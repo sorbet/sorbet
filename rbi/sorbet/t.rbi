@@ -168,8 +168,6 @@ module T::Utils
 
   # only one caller; delete
   def self.methods_excluding_object(mod); end
-  # only one caller; delete
-  def self.register_forwarder(from_method, to_method, remove_first_param: nil); end
 end
 
 
