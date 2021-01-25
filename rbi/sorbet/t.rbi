@@ -143,6 +143,10 @@ module T::Configuration
   def self.sig_validation_error_handler=(value); end
   def self.soft_assert_handler(str, extra); end
   def self.soft_assert_handler=(value); end
+  def self.normalize_sensitivity_and_pii_handler=(handler); end
+  def self.normalize_sensitivity_and_pii_handler; end
+  def self.class_owner_finder=(handler); end
+  def self.class_owner_finder; end
 end
 
 module T::Profile
