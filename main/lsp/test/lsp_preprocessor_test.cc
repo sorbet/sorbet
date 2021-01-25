@@ -44,7 +44,7 @@ auto workers = WorkerPool::create(0, *logger);
 
 shared_ptr<LSPConfiguration> makeConfig(const options::Options &opts = nullOpts, bool enableShowOpNotifs = false,
                                         bool initialize = true) {
-    auto config = make_shared<LSPConfiguration>(opts, make_shared<LSPOutputToVector>(), logger, true, false);
+    auto config = make_shared<LSPConfiguration>(opts, make_shared<LSPOutputToVector>(), logger, false);
     InitializeParams initParams("", make_unique<ClientCapabilities>());
     initParams.rootPath = "";
     initParams.initializationOptions = make_unique<SorbetInitializationOptions>();

@@ -41,8 +41,6 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.autogenVersion, opts.autogenVersion);
     CHECK_EQ(empty.typedSource, opts.typedSource);
     CHECK_EQ(empty.cacheDir, opts.cacheDir);
-    CHECK_EQ(empty.configatronDirs.size(), opts.configatronDirs.size());
-    CHECK_EQ(empty.configatronFiles.size(), opts.configatronFiles.size());
     CHECK_EQ(empty.strictnessOverrides.size(), opts.strictnessOverrides.size());
     CHECK_EQ(empty.dslPluginTriggers.size(), opts.dslPluginTriggers.size());
     CHECK_EQ(empty.dslRubyExtraArgs.size(), opts.dslRubyExtraArgs.size());

@@ -5,7 +5,6 @@
 #include "core/proto/proto.h"
 // ^^ has to go first
 #include "common/json2msgpack/json2msgpack.h"
-#include "namer/configatron/configatron.h"
 #include "packager/packager.h"
 #include "plugin/Plugins.h"
 #include "plugin/SubprocessTextPlugin.h"
@@ -767,23 +766,13 @@ vector<ast::ParsedFile> package(core::GlobalState &gs, vector<ast::ParsedFile> w
 }
 
 ast::ParsedFilesOrCancelled name(core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-                                 WorkerPool &workers, bool skipConfigatron) {
+                                 WorkerPool &workers) {
     Timer timeit(gs.tracer(), "name");
-    if (!skipConfigatron) {
-#ifndef SORBET_REALMAIN_MIN
-        core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
-        core::UnfreezeSymbolTable symbolTableAccess(gs); // creates methods for them
-        namer::configatron::fillInFromFileSystem(gs, opts.configatronDirs, opts.configatronFiles);
-#endif
-    }
+    core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+    core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+    auto result = namer::Namer::run(gs, move(what), workers);
 
-    {
-        core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-        core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-        auto result = namer::Namer::run(gs, move(what), workers);
-
-        return result;
-    }
+    return result;
 }
 class GatherUnresolvedConstantsWalk {
 public:
@@ -867,12 +856,12 @@ ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, a
 }
 
 ast::ParsedFilesOrCancelled resolve(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> what,
-                                    const options::Options &opts, WorkerPool &workers, bool skipConfigatron) {
+                                    const options::Options &opts, WorkerPool &workers) {
     try {
         // packager intentionally runs outside of rewriter so that its output does not get cached.
         what = package(*gs, move(what), opts, workers);
 
-        auto result = name(*gs, move(what), opts, workers, skipConfigatron);
+        auto result = name(*gs, move(what), opts, workers);
         if (!result.hasResult()) {
             return result;
         }
@@ -1298,7 +1287,7 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     core::Context ctx(*lgs, core::Symbols::root(), single[0].file);
     auto allNames = getAllNames(ctx, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());
-    pipeline::resolve(lgs, move(single), emptyOpts, *workers, true);
+    pipeline::resolve(lgs, move(single), emptyOpts, *workers);
 
     return {move(*lgs->hash()), move(allNames)};
 }

@@ -384,7 +384,7 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
         if (gs->sleepInSlowPath) {
             Timer::timedSleep(3000ms, *logger, "slow_path.resolve.sleep");
         }
-        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers, config->skipConfigatron);
+        auto maybeResolved = pipeline::resolve(gs, move(indexedCopies), config->opts, workers);
         if (!maybeResolved.hasResult()) {
             return;
         }

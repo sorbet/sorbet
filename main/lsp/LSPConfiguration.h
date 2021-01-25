@@ -77,8 +77,6 @@ public:
     const options::Options &opts;
     const std::shared_ptr<LSPOutput> output;
     const std::shared_ptr<spdlog::logger> logger;
-    /** If true, LSPLoop will skip configatron during type checking */
-    const bool skipConfigatron;
     /** If true, all queries will hit the slow path. */
     const bool disableFastPath;
     /** File system root of LSP client workspace. May be empty if it is the current working directory. */
@@ -87,8 +85,7 @@ public:
     // The following properties are configured during initialization.
 
     LSPConfiguration(const options::Options &opts, const std::shared_ptr<LSPOutput> &output,
-                     const std::shared_ptr<spdlog::logger> &logger, bool skipConfigatron = false,
-                     bool disableFastPath = false);
+                     const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath = false);
 
     // Note: These two methods should only be called from the LSPPreprocessor thread, which is the only place that
     // should have mutable access to LSPConfiguration.

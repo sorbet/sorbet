@@ -152,8 +152,6 @@ struct Options {
     bool stripePackages = false;
     std::string typedSource = "";
     std::string cacheDir = "";
-    std::vector<std::string> configatronDirs;
-    std::vector<std::string> configatronFiles;
     UnorderedMap<std::string, core::StrictLevel> strictnessOverrides;
     UnorderedMap<std::string, std::string> dslPluginTriggers;
     std::vector<std::string> dslRubyExtraArgs;
