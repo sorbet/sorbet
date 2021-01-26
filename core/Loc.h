@@ -13,8 +13,8 @@ class MutableContext;
 
 constexpr int INVALID_POS_LOC = 0xffffff;
 struct LocOffsets {
-    u4 beginLoc;
-    u4 endLoc;
+    u4 beginLoc = INVALID_POS_LOC;
+    u4 endLoc = INVALID_POS_LOC;
     u4 beginPos() const {
         return beginLoc;
     };
