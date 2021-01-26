@@ -36,6 +36,8 @@ struct LocOffsets {
 
     std::string showRaw(const Context ctx) const;
     std::string showRaw(const MutableContext ctx) const;
+    std::string showRaw(const GlobalState &gs, const FileRef file) const;
+    std::string showRaw() const;
 };
 CheckSize(LocOffsets, 8, 4);
 

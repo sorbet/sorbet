@@ -19,6 +19,7 @@ public:
     FileRef() : _id(0){};
     FileRef(unsigned int id);
 
+    FileRef(FileRef &f) = default;
     FileRef(const FileRef &f) = default;
     FileRef(FileRef &&f) = default;
     FileRef &operator=(const FileRef &f) = default;

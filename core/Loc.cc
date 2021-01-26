@@ -204,6 +204,12 @@ string LocOffsets::showRaw(const Context ctx) const {
 string LocOffsets::showRaw(const MutableContext ctx) const {
     return Loc(ctx.file, *this).showRaw(ctx);
 }
+string LocOffsets::showRaw(const GlobalState &gs, const FileRef file) const {
+    return Loc(file, *this).showRaw(gs);
+}
+string LocOffsets::showRaw() const {
+    return fmt::format("LocOffsets {{beginPos={}, endPos={}}}", beginPos(), endPos());
+}
 
 string Loc::showRaw(const GlobalState &gs) const {
     string_view path;

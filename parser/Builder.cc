@@ -68,12 +68,13 @@ string Dedenter::dedent(string_view str) {
 
 class Builder::Impl {
 public:
-    Impl(GlobalState &gs, core::FileRef file) : gs_(gs) {
+    Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {
         this->maxOff_ = file.data(gs).source().size();
         foreignNodes_.emplace_back();
     }
 
     GlobalState &gs_;
+    core::FileRef file_;
     u2 uniqueCounter_ = 1;
     u4 maxOff_;
     ruby_parser::base_driver *driver_;
