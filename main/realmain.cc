@@ -28,6 +28,7 @@
 #include "core/errors/errors.h"
 #include "core/lsp/QueryResponse.h"
 #include "core/serialize/serialize.h"
+#include "hashing/hashing.h"
 #include "main/cache/cache.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
@@ -618,7 +619,7 @@ int realmain(int argc, char *argv[]) {
         if (!opts.storeState.empty()) {
             gs->markAsPayload();
             // Store file hashes for LSP.
-            pipeline::computeFileHashes(gs->getFiles(), *logger, *workers);
+            hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers);
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 
