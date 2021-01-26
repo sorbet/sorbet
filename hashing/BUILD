@@ -1,4 +1,4 @@
-cc_library (
+cc_library(
     name = "hashing",
     srcs = [
         "hashing.cc",
@@ -15,10 +15,10 @@ cc_library (
         "//core",
         "//main/options",
         "//main/pipeline",
-    ]
+    ],
 )
 
-cc_library (
+cc_library(
     name = "hashing-orig",
     srcs = [
         "hashing.cc",
@@ -35,5 +35,5 @@ cc_library (
         "//core",
         "//main/options",
         "//main/pipeline:pipeline-orig",
-    ]
+    ],
 )
