@@ -31,6 +31,8 @@ basename=
 srcs=()
 exp_extensions="llo ll stderr"
 
+syncback=()
+
 for this_src in "${rb_src[@]}" DUMMY; do
     this_base="${this_src%__*}"
     if [ "$this_base" = "$basename" ]; then
@@ -46,6 +48,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
         exp=${basename%.rb}.$ext.exp
         if [ -f "${basename%.rb}.$ext.exp" ]; then
             llvmir=$(mktemp -d)
+            syncback+=("$exp")
             echo \
                 bazel-bin/main/sorbet \
                 --silence-dev-message \
@@ -55,10 +58,20 @@ for this_src in "${rb_src[@]}" DUMMY; do
                 "$llvmir" \
                 "${srcs[@]}" \
                 2\> "$llvmir/update_testdata_exp.stderr"\; \
-                cat "$llvmir/$dir/*.$ext" \| grep -v \'^target triple =\' \> "$exp" \
+                \< "$llvmir/$dir/*.$ext" sed -e \'/^target triple =/d\' \> "$exp" \
             >> "$COMMAND_FILE"
         fi
     done
 done
 
-parallel --joblog - < "$COMMAND_FILE"
+if ! parallel --joblog - < "$COMMAND_FILE"; then
+  echo 'WARN: parallel exiited non-zero'
+fi
+
+if [ "${EMIT_SYNCBACK:-}" != "" ]; then
+  echo '### BEGIN SYNCBACK ###'
+  for file in "${syncback[@]}"; do
+    echo "$file"
+  done
+  echo '### END SYNCBACK ###'
+fi
