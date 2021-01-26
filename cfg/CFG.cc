@@ -216,13 +216,16 @@ string CFG::toString(const core::GlobalState &gs) const {
         auto text = basicBlock->toString(gs, *this);
         auto lines = absl::StrSplit(text, "\n");
 
+        // whole block red if whole block is dead
+        auto color = basicBlock->firstDeadInstructionIdx == 0 ? "red" : "black";
         fmt::format_to(
             buf,
             "    \"bb{}_{}\" [\n"
+            "        color = {};\n"
             "        label = \"{}\\l\"\n"
             "    ];\n\n"
             "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
-            symbolName, basicBlock->id,
+            symbolName, basicBlock->id, color,
             fmt::map_join(lines.begin(), lines.end(), "\\l", [](auto line) -> string { return absl::CEscape(line); }),
             symbolName, basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
 
@@ -249,13 +252,16 @@ string CFG::showRaw(core::Context ctx) const {
         auto text = basicBlock->showRaw(ctx, *this);
         auto lines = absl::StrSplit(text, "\n");
 
+        // whole block red if whole block is dead
+        auto color = basicBlock->firstDeadInstructionIdx == 0 ? "red" : "black";
         fmt::format_to(
             buf,
             "    \"bb{}_{}\" [\n"
+            "        color = {};\n"
             "        label = \"{}\\l\"\n"
             "    ];\n\n"
             "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
-            symbolName, basicBlock->id,
+            symbolName, basicBlock->id, color,
             fmt::map_join(lines.begin(), lines.end(), "\\l", [](auto line) -> string { return absl::CEscape(line); }),
             symbolName, basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
 
