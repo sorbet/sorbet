@@ -181,6 +181,38 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                         }
                     } else if (auto e = ctx.beginError(locForUnreachable, core::errors::Infer::DeadBranchInferencer)) {
                         e.setHeader("This code is unreachable");
+
+                        for (const auto &prevBasicBlock : bb->backEdges) {
+                            const auto &prevEnv = outEnvironments[prevBasicBlock->id];
+                            if (prevEnv.isDead) {
+                                // This prevous block doesn't actually matter, because it was dead
+                                // (never got to evaluating its jump condition), so don't clutter
+                                // the error message.
+                                continue;
+                            }
+
+                            const auto &cond = prevBasicBlock->bexit.cond;
+                            if (cond.type == nullptr) {
+                                // This previous block is actually a future block we haven't processed yet.
+                                // (Remember: our inference pass is an approximate forwards toposort
+                                // of a graph that can have cycles). It can't have been a block that
+                                // caused the current error.
+                                continue;
+                            }
+
+                            auto alwaysWhat = prevBasicBlock->bexit.thenb->id == bb->id ? "falsy" : "truthy";
+                            auto bexitLoc = core::Loc(ctx.file, prevBasicBlock->bexit.loc);
+                            e.addErrorLine(bexitLoc, "This condition was always `{}` (`{}`)", alwaysWhat,
+                                           cond.type.show(ctx));
+
+                            if (ctx.state.suggestUnsafe.has_value() && bexitLoc.exists()) {
+                                e.replaceWith(fmt::format("Wrap in `{}`", *ctx.state.suggestUnsafe), bexitLoc, "{}({})",
+                                              *ctx.state.suggestUnsafe, bexitLoc.source(ctx));
+                            }
+
+                            auto ty = prevEnv.getTypeAndOrigin(ctx, cond.variable);
+                            e.addErrorSection(ty.explainGot(ctx, prevEnv.locForUninitialized()));
+                        }
                     }
                 }
             }
