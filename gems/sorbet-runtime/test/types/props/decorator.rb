@@ -226,6 +226,28 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       end
       assert_match(/Opus::Types::Test::Props::DecoratorTest::OptionalMigrate.foo not set/, e.message)
     end
+
+    it "will try to alert the owner if possible" do
+      begin
+        found_team = nil
+        T::Configuration.class_owner_finder = ->(_klass) {:some_team}
+        # because `raise_nil_deserialize_error` has a final `ensure`
+        # block, we're going to end up calling this twice, and only
+        # once with the `project:` key set. Expressing that via
+        # `.expect` here is a bit messy, so we're going to set a
+        # variable if we get the assert handler called once with the
+        # right project
+        T::Configuration.hard_assert_handler = ->(_msg, kwargs) do
+          found_team = kwargs[:project] if kwargs.include?(:project)
+        end
+        OptionalMigrate.from_hash({})
+        assert_equal(:some_team, found_team)
+      ensure
+        T::Configuration.hard_assert_handler = nil
+        T::Configuration.class_owner_finder = nil
+      end
+    end
+
   end
 
   class OptionalMigrate2
@@ -361,5 +383,27 @@ class Opus::Types::Test::Props::DecoratorTest < Critic::Unit::UnitTest
       end
     end
     assert_match(/has the word 'secret' in its name/, e.message)
+  end
+
+  it 'applies the supplied sensitivity and PII handler' do
+    begin
+      T::Configuration.normalize_sensitivity_and_pii_handler = ->(meta) do
+        meta[:pii] = :set
+        meta[:sensitivity] += 1
+        meta
+      end
+      e = Class.new(T::Struct) do
+        # needs this annotation for the `:pii` field
+        def self.contains_pii?
+          true
+        end
+
+        prop :foo, Integer, sensitivity: 5
+      end
+      assert_equal(6, e.props[:foo][:sensitivity])
+      assert_equal(:set, e.props[:foo][:pii])
+    ensure
+      T::Configuration.normalize_sensitivity_and_pii_handler = nil
+    end
   end
 end

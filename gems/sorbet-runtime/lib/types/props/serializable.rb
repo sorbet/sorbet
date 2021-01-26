@@ -246,11 +246,11 @@ module T::Props::Serializable::DecoratorMethods
 
     # Notify the model owner if it exists, and always notify the API owner.
     begin
-      if defined?(Opus) && defined?(Opus::Ownership) && decorated_class < Opus::Ownership
+      if T::Configuration.class_owner_finder && (owner = T::Configuration.class_owner_finder.call(decorated_class))
         T::Configuration.hard_assert_handler(
           msg,
           storytime: storytime,
-          project: decorated_class.get_owner
+          project: owner
         )
       end
     ensure
