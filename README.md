@@ -318,6 +318,17 @@ Nearly all of the [Editor and
 environment](https://github.com/sorbet/sorbet#editor-and-environment) tips from
 the Sorbet repo apply here too.
 
+Especially the `--disk_cache` suggestions. If you're working on a Stripe devbox,
+you'll want to make the `.bazelrc.local` file on the devbox--it's gitignored by
+default, so you'll want to make it directly on the devbox.
+
+```bash
+# We're using `pay ssh` not `pay exec` to get shell expansion on the devbox
+pay ssh 'echo "build  --disk_cache=$HOME/.cache/sorbet_llvm/bazel-cache" >> ./.bazelrc.local'
+pay ssh 'echo "test   --disk_cache=$HOME/.cache/sorbet_llvm/bazel-cache" >> ./.bazelrc.local'
+pay ssh 'mkdir -p "$HOME/.cache/sorbet_llvm/bazel-cache"'
+```
+
 Sorbet compiler-specific recommendations:
 
 - Get yourself a syntax highlighting plugin for LLVM IR. For example:
