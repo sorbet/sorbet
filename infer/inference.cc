@@ -93,8 +93,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             bool isTrueBranch = parent->bexit.thenb == bb;
             if (!outEnvironments[parent->id].isDead) {
                 Environment tempEnv(methodLoc);
-                auto &envAsSeenFromBranch =
-                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
+                auto &envAsSeenFromBranch = Environment::withCond(ctx, outEnvironments[parent->id], tempEnv,
+                                                                  isTrueBranch, outEnvironments[parent->id].vars());
                 current.populateFrom(ctx, envAsSeenFromBranch);
             } else {
                 current.isDead = true;
@@ -107,8 +107,8 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 }
                 bool isTrueBranch = parent->bexit.thenb == bb;
                 Environment tempEnv(methodLoc);
-                auto &envAsSeenFromBranch =
-                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
+                auto &envAsSeenFromBranch = Environment::withCond(ctx, outEnvironments[parent->id], tempEnv,
+                                                                  isTrueBranch, outEnvironments[parent->id].vars());
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
                     current.mergeWith(ctx, envAsSeenFromBranch, core::Loc(ctx.file, parent->bexit.loc), *cfg.get(), bb,

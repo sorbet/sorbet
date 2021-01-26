@@ -200,7 +200,7 @@ subgraph "cluster_::ControlFlow#orZero3" {
     "bb::ControlFlow#orZero3_3" -> "bb::ControlFlow#orZero3_6" [style="tapered"];
 
     "bb::ControlFlow#orZero3_5" [
-        label = "block[id=5, rubyBlockId=0]()\l<returnTemp>$7: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$7: Integer(1)\l<unconditional>\l"
+        label = "block[id=5, rubyBlockId=0]()\l<returnTemp>$7 = 1\l<returnMethodTemp>$2 = return <returnTemp>$7\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero3_5" -> "bb::ControlFlow#orZero3_1" [style="bold"];

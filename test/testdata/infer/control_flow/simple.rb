@@ -49,7 +49,7 @@ class ControlFlow
   sig {params(a: T.any(Integer, NilClass)).returns(Integer)}
   def orZero3(a)
     if (a && 1 == 2)
-      return 1
+      return 1 # error: This code is unreachable
     else
       return 0
     end

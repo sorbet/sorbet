@@ -16,25 +16,33 @@ else
 end
 
 if !C.new
-  puts
+  puts # error: This code is unreachable
+  # TODO this should be reachable
 else
   puts # error: This code is unreachable
 end
 
 unless C.new
+  #    ^ error: This code is unreachable
+  # TODO this C.new should be reachable
   puts # error: This code is unreachable
 else
-  puts
+  puts # error: This code is unreachable
+  # TODO this should be reachable
 end
 
 unless !C.new
+  #     ^ error: This code is unreachable
+  # TODO this C.new should be reachable
   puts # error: This code is unreachable
 else
-  puts
+  puts # error: This code is unreachable
 end
 
 until C.new
-  puts # TODO this puts should be unreachable
+  #   ^ error: This code is unreachable
+  # TODO this C.new should be reachable
+  puts # error: This code is unreachable
 end
 
 until !C.new
