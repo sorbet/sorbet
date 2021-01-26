@@ -111,8 +111,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
-                    current.mergeWith(ctx, envAsSeenFromBranch, core::Loc(ctx.file, parent->bexit.loc), *cfg.get(), bb,
-                                      knowledgeFilter);
+                    current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
                 }
             }
         }
@@ -131,36 +130,40 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             if (!bb->exprs.empty()) {
                 // This is a bit complicated:
                 //
-                //   1. If the block consists only of synthetic bindings or T.absurd, we don't
+                //   1. If this block is only dead because all jumps into this block are dead,
+                //      we already reported an error and don't want a duplicate.
+                //   2. If the block consists only of synthetic bindings or T.absurd, we don't
                 //      want to issue an error.
-                //   2. If the block contains a send of the form <Magic>.<nil-for-safe-navigation>(x),
+                //   3. If the block contains a send of the form <Magic>.<nil-for-safe-navigation>(x),
                 //      we want to issue an UnnecessarySafeNavigationError, extracting
                 //      type-and-origin info from x. (This magic form is inserted by the desugarer
                 //      for a "safe navigation" operation, e.g., `x&.foo`.)
-                //   3. Otherwise, we want to issue a DeadBranchInferencer error, taking the first
+                //   4. Otherwise, we want to issue a DeadBranchInferencer error, taking the first
                 //      (non-synthetic, non-"T.absurd") instruction in the block as the loc of the
                 //      error.
                 cfg::Instruction *unreachableInstruction = nullptr;
                 core::LocOffsets locForUnreachable;
                 bool dueToSafeNavigation = false;
 
-                for (auto &expr : bb->exprs) {
-                    if (expr.value->isSynthetic) {
-                        continue;
-                    }
-                    if (cfg::isa_instruction<cfg::TAbsurd>(expr.value.get())) {
-                        continue;
-                    }
+                if (absl::c_any_of(bb->backEdges, [&](const auto &bb) { return !outEnvironments[bb->id].isDead; })) {
+                    for (auto &expr : bb->exprs) {
+                        if (expr.value->isSynthetic) {
+                            continue;
+                        }
+                        if (cfg::isa_instruction<cfg::TAbsurd>(expr.value.get())) {
+                            continue;
+                        }
 
-                    auto send = cfg::cast_instruction<cfg::Send>(expr.value.get());
-                    if (send != nullptr && send->fun == core::Names::nilForSafeNavigation()) {
-                        unreachableInstruction = expr.value.get();
-                        locForUnreachable = expr.loc;
-                        dueToSafeNavigation = true;
-                        break;
-                    } else if (unreachableInstruction == nullptr) {
-                        unreachableInstruction = expr.value.get();
-                        locForUnreachable = expr.loc;
+                        auto send = cfg::cast_instruction<cfg::Send>(expr.value.get());
+                        if (send != nullptr && send->fun == core::Names::nilForSafeNavigation()) {
+                            unreachableInstruction = expr.value.get();
+                            locForUnreachable = expr.loc;
+                            dueToSafeNavigation = true;
+                            break;
+                        } else if (unreachableInstruction == nullptr) {
+                            unreachableInstruction = expr.value.get();
+                            locForUnreachable = expr.loc;
+                        }
                     }
                 }
 

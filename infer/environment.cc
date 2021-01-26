@@ -125,8 +125,8 @@ bool KnowledgeFilter::isNeeded(cfg::LocalRef var) {
     return used_vars[var.id()];
 }
 
-KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, core::Loc loc, cfg::CFG &inWhat,
-                                 cfg::BasicBlock *bb, bool isNeeded) const {
+KnowledgeRef KnowledgeRef::under(core::Context ctx, const Environment &env, cfg::CFG &inWhat, cfg::BasicBlock *bb,
+                                 bool isNeeded) const {
     if (knowledge->yesTypeTests.empty() && !isNeeded) {
         return *this;
     }
@@ -760,8 +760,8 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
     }
 }
 
-void Environment::mergeWith(core::Context ctx, const Environment &other, core::Loc loc, cfg::CFG &inWhat,
-                            cfg::BasicBlock *bb, KnowledgeFilter &knowledgeFilter) {
+void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CFG &inWhat, cfg::BasicBlock *bb,
+                            KnowledgeFilter &knowledgeFilter) {
     this->isDead |= other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
@@ -789,9 +789,8 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
 
         if (canBeTruthy) {
             auto &thisKnowledge = getKnowledge(var);
-            auto otherTruthy = other.getKnowledge(var, false)
-                                   .truthy()
-                                   .under(ctx, other, loc, inWhat, bb, knowledgeFilter.isNeeded(var));
+            auto otherTruthy =
+                other.getKnowledge(var, false).truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherTruthy->isDead) {
                 if (!thisKnowledge.seenTruthyOption) {
                     thisKnowledge.seenTruthyOption = true;
@@ -804,9 +803,8 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
 
         if (canBeFalsy) {
             auto &thisKnowledge = getKnowledge(var);
-            auto otherFalsy = other.getKnowledge(var, false)
-                                  .falsy()
-                                  .under(ctx, other, loc, inWhat, bb, knowledgeFilter.isNeeded(var));
+            auto otherFalsy =
+                other.getKnowledge(var, false).falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherFalsy->isDead) {
                 if (!thisKnowledge.seenFalsyOption) {
                     thisKnowledge.seenFalsyOption = true;

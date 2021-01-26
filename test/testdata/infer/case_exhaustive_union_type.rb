@@ -62,7 +62,7 @@ def exhaustive_unreachable_when_after(x)
   when Integer
     x
   when Symbol # error: This code is unreachable
-    3 # error: This code is unreachable
+    3
   end
   T.reveal_type(ret) # error: Revealed type: `Integer`
   ret
