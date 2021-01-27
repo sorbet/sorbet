@@ -11,6 +11,7 @@ namespace sorbet::compiler {
 
 struct IREmitterContext;
 struct MethodCallContext;
+struct VMFlag;
 
 // TODO(jez) This shouldn't be at the top-level (sorbet::compiler). It should probably be nested in something.
 // (Confusing to see bare `Alias` when there is also `cfg::Alias`)
@@ -93,14 +94,17 @@ public:
     static SendArgInfo fillSendArgArray(MethodCallContext &mcctx, const std::size_t offset);
     static SendArgInfo fillSendArgArray(MethodCallContext &mcctx);
 
+    // Push all send args to the ruby stack, and return the call cache global that will be needed to call the method.
+    static llvm::Value *pushSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv, std::string methodName,
+                                     const std::size_t offset);
+    static llvm::Value *pushSendArgs(MethodCallContext &mcctx);
+
     static llvm::Value *emitMethodCall(MethodCallContext &mcctx);
 
-    static llvm::Value *makeInlineCache(CompilerState &cs, std::string slowFunName);
+    static llvm::Value *makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &build, std::string methodName,
+                                        const VMFlag &flag, int argc, const std::vector<std::string_view> &keywords);
 
-    static llvm::Value *callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build,
-                                            const IREmitterContext &irctx, llvm::Value *self, llvm::Value *argv,
-                                            llvm::Value *argc, llvm::Value *kw_splat, std::string_view name,
-                                            llvm::Function *blkFun = nullptr, llvm::Value *localsOffset = nullptr);
+    static llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx);
 
     static llvm::Value *emitMethodCallViaRubyVM(MethodCallContext &mcctx);
 

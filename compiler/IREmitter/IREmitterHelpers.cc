@@ -20,27 +20,55 @@
 using namespace std;
 namespace sorbet::compiler {
 
+namespace {
+
+optional<string_view> isSymbol(const core::GlobalState &gs, cfg::Instruction *insn) {
+    auto *liti = cfg::cast_instruction<cfg::Literal>(insn);
+    if (liti == nullptr) {
+        return std::nullopt;
+    }
+
+    if (!core::isa_type<core::LiteralType>(liti->value)) {
+        return std::nullopt;
+    }
+
+    const auto &lit = core::cast_type_nonnull<core::LiteralType>(liti->value);
+    if (lit.literalKind != core::LiteralType::LiteralTypeKind::Symbol) {
+        return std::nullopt;
+    }
+
+    return lit.asName(gs).shortName(gs);
+}
+
+} // namespace
+
+struct AliasesAndKeywords {
+    UnorderedMap<cfg::LocalRef, Alias> aliases;
+    UnorderedMap<cfg::LocalRef, string_view> symbols;
+};
+
 // Iterate over all instructions in the CFG, populating the alias map.
-UnorderedMap<cfg::LocalRef, Alias> setupAliases(CompilerState &cs, const cfg::CFG &cfg) {
-    UnorderedMap<cfg::LocalRef, Alias> aliases{};
+AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cfg) {
+    AliasesAndKeywords res;
 
     for (auto &bb : cfg.basicBlocks) {
         for (auto &bind : bb->exprs) {
             if (auto *i = cfg::cast_instruction<cfg::Alias>(bind.value.get())) {
-                ENFORCE(aliases.find(bind.bind.variable) == aliases.end(), "Overwriting an entry in the aliases map");
+                ENFORCE(res.aliases.find(bind.bind.variable) == res.aliases.end(),
+                        "Overwriting an entry in the aliases map");
 
                 if (i->what == core::Symbols::Magic_undeclaredFieldStub()) {
                     // When `i->what` is undeclaredFieldStub, `i->name` is populated
                     auto name = i->name.shortName(cs);
                     if (name.size() > 2 && name[0] == '@' && name[1] == '@') {
-                        aliases[bind.bind.variable] = Alias::forClassField(i->name);
+                        res.aliases[bind.bind.variable] = Alias::forClassField(i->name);
                     } else if (name.size() > 1 && name[0] == '@') {
-                        aliases[bind.bind.variable] = Alias::forInstanceField(i->name);
+                        res.aliases[bind.bind.variable] = Alias::forInstanceField(i->name);
                     } else if (name.size() > 1 && name[0] == '$') {
-                        aliases[bind.bind.variable] = Alias::forGlobalField(i->name);
+                        res.aliases[bind.bind.variable] = Alias::forGlobalField(i->name);
                     } else {
                         ENFORCE(stoi((string)name) > 0, "'" + ((string)name) + "' is not a valid global name");
-                        aliases[bind.bind.variable] = Alias::forGlobalField(i->name);
+                        res.aliases[bind.bind.variable] = Alias::forGlobalField(i->name);
                     }
                 } else {
                     // It's currently impossible in Sorbet to declare a global field with a T.let
@@ -50,22 +78,24 @@ UnorderedMap<cfg::LocalRef, Alias> setupAliases(CompilerState &cs, const cfg::CF
                     ENFORCE(!(shortName.size() > 0 && shortName[0] == '$'));
 
                     if (i->what.data(cs)->isField()) {
-                        aliases[bind.bind.variable] = Alias::forInstanceField(name);
+                        res.aliases[bind.bind.variable] = Alias::forInstanceField(name);
                     } else if (i->what.data(cs)->isStaticField()) {
                         if (shortName.size() > 2 && shortName[0] == '@' && shortName[1] == '@') {
-                            aliases[bind.bind.variable] = Alias::forClassField(name);
+                            res.aliases[bind.bind.variable] = Alias::forClassField(name);
                         } else {
-                            aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                            res.aliases[bind.bind.variable] = Alias::forConstant(i->what);
                         }
                     } else {
-                        aliases[bind.bind.variable] = Alias::forConstant(i->what);
+                        res.aliases[bind.bind.variable] = Alias::forConstant(i->what);
                     }
                 }
+            } else if (auto sym = isSymbol(cs, bind.value.get())) {
+                res.symbols[bind.bind.variable] = sym.value();
             }
         }
     }
 
-    return aliases;
+    return res;
 }
 
 UnorderedMap<cfg::LocalRef, llvm::AllocaInst *>
@@ -224,15 +254,25 @@ int getMaxSendArgCount(cfg::CFG &cfg) {
                 int numPosArgs = snd->numPosArgs;
                 int numKwArgs = snd->args.size() - numPosArgs;
 
-                // add one for the keyword arguments hash
-                if (numPosArgs < snd->args.size()) {
-                    numPosArgs++;
+                // add one for the receiver when pushing args on the ruby stack
+                int numArgs = 1 + numPosArgs;
+
+                if (numKwArgs % 2 == 1) {
+                    // Odd keyword args indicate a keyword splat, and in that case we merge all keyword args into a
+                    // single hash as the VM doesn't support mixed kwarg/kwsplat sends.
+                    numArgs += 1;
+                } else {
+                    // Otherwise the keyword args indicate the number of symbol/value pairs, and since we push only the
+                    // values on the stack the send arg count is increased by the number of keyword args / 2.
+                    numArgs += numKwArgs / 2;
                 }
 
-                int numArgs = std::max(numPosArgs, numKwArgs);
-                if (maxSendArgCount < numArgs) {
-                    maxSendArgCount = numArgs;
-                }
+                // For backwards compatibility with the fillSendArgArray method of argument passing, the allocated array
+                // must be large enough to hold all of the inlined keyword arguments when initializing a hash. This
+                // comes up in cases like `super` that will forward all kwargs as a single hash.
+                int buildHashArgs = numKwArgs & ~0x1;
+
+                maxSendArgCount = std::max({maxSendArgCount, numArgs, buildHashArgs});
             }
         }
     }
@@ -498,7 +538,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
 
     auto blockLevels = getBlockLevels(blockParents, blockTypes);
 
-    auto aliases = setupAliases(cs, cfg);
+    auto [aliases, symbols] = setupAliasesAndKeywords(cs, cfg);
     const int maxSendArgCount = getMaxSendArgCount(cfg);
     auto [variablesPrivateToBlocks, escapedVariableIndices, usesBlockArgs] = findCaptures(cs, md, cfg, aliases);
     vector<llvm::BasicBlock *> functionInitializersByFunction;
@@ -678,12 +718,14 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     IREmitterContext approximation{
         cfg,
         aliases,
+        symbols,
         functionInitializersByFunction,
         argumentSetupBlocksByFunction,
         userEntryBlockByFunction,
         llvmBlocks,
         move(basicBlockJumpOverrides),
         move(basicBlockRubyBlockId),
+        maxSendArgCount,
         move(sendArgArrayByBlock),
         useLocalsOffset,
         localsOffset,

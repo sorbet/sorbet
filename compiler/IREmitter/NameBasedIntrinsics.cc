@@ -125,47 +125,33 @@ public:
         // equivalent to (args[0]).args[1](*args[3..], &args[2])
 
         auto &cs = mcctx.cs;
-        auto &builder = builderCast(mcctx.build);
         auto &irctx = mcctx.irctx;
         auto rubyBlockId = mcctx.rubyBlockId;
         auto *send = mcctx.send;
 
         // TODO: this implementation generates code that is stupidly slow, we should be able to reuse instrinsics here
         // one day
-        auto recv = Payload::varGet(cs, send->args[0].variable, builder, irctx, rubyBlockId);
+        auto recv = send->args[0].variable;
         auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
-        core::NameRef funName = lit.asName(cs);
-        auto name = funName.shortName(cs);
-        auto rawId = Payload::idIntern(cs, builder, name);
+        auto name = lit.asName(cs).shortName(cs);
 
-        auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx, 3);
+        llvm::Value *blockHandler = nullptr;
 
-        // If our current block has a block argument and we are passing it though,
-        // we don't have to reify it into a full proc; we can set things up so
-        // the Ruby VM will pass the block argument along and avoid extra allocations.
-        if (IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx)) {
-            // We have a block argument, but it might not be the one used for the send.
-            if (send->args[2].variable == irctx.rubyBlockArgs[rubyBlockId].back()) {
-                auto functionName = "callWithBlock" + (string)name;
-                auto *cache = IREmitterHelpers::makeInlineCache(cs, functionName);
-
-                return builder.CreateCall(cs.getFunction("sorbet_callFuncWithBlockWithCache"),
-                                          {recv, rawId, argc, argv, kw_splat, cache}, functionName);
-            }
+        // If our current block has a block argument and we are passing it though, we don't have to reify it into a full
+        // proc; we can set things up so the Ruby VM will pass the block argument along and avoid extra allocations.
+        if (IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx) &&
+            send->args[2].variable == irctx.rubyBlockArgs[rubyBlockId].back()) {
+            blockHandler = Payload::getPassedBlockHandler(cs, mcctx.build);
+        } else {
+            // TODO(perf) `makeBlockHandlerProc` uses `to_proc` under the hood, and could be rewritten here to make an
+            // inline cache.
+            auto *block = Payload::varGet(cs, send->args[2].variable, mcctx.build, irctx, rubyBlockId);
+            blockHandler = Payload::makeBlockHandlerProc(cs, mcctx.build, block);
         }
 
-        auto block = Payload::varGet(cs, send->args[2].variable, builder, irctx, rubyBlockId);
-        auto blockAsProc = IREmitterHelpers::callViaRubyVMSimple(
-            cs, builder, irctx, block, llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
-            llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)), llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-            "to_proc");
-
-        auto slowFunctionName = "callWithProc" + (string)name;
-        auto *cache = IREmitterHelpers::makeInlineCache(cs, slowFunctionName);
-
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncProcWithCache"),
-                                  {recv, rawId, argc, argv, kw_splat, blockAsProc, cache}, slowFunctionName);
+        auto *cache = IREmitterHelpers::pushSendArgs(mcctx, recv, string(name), 3);
+        return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {core::Names::callWithBlock()};

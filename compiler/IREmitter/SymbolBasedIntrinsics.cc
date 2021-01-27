@@ -294,10 +294,9 @@ public:
             return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
         }
 
-        auto &builder = builderCast(mcctx.build);
-        auto self = Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, mcctx.irctx, mcctx.rubyBlockId);
-        auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx);
-        return IREmitterHelpers::callViaRubyVMSimple(cs, mcctx.build, mcctx.irctx, self, argv, argc, kw_splat, "new");
+        auto *blockHandler = Payload::vmBlockHandlerNone(cs, mcctx.build);
+        auto *cache = IREmitterHelpers::pushSendArgs(mcctx, cfg::LocalRef::selfVariable(), "new", 0);
+        return Payload::callFuncWithCache(cs, mcctx.build, cache, blockHandler);
     };
 
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {

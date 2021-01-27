@@ -236,6 +236,80 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
     return fillSendArgArray(mcctx, 0);
 }
 
+llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx) {
+    auto recv = mcctx.send->recv.variable;
+    auto methodName = string(mcctx.send->fun.shortName(mcctx.cs));
+    size_t offset = 0;
+    return IREmitterHelpers::pushSendArgs(mcctx, recv, methodName, offset);
+}
+
+llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv, string methodName,
+                                            const std::size_t offset) {
+    auto &cs = mcctx.cs;
+    auto &irctx = mcctx.irctx;
+    auto &builder = builderCast(mcctx.build);
+    auto &send = mcctx.send;
+    auto rubyBlockId = mcctx.rubyBlockId;
+
+    auto name = string(send->fun.shortName(cs));
+    auto flag = Payload::VM_CALL_ARGS_SIMPLE;
+    vector<string_view> keywords{};
+    vector<llvm::Value *> stack{};
+
+    // push the receiver
+    stack.emplace_back(Payload::varGet(mcctx.cs, recv, mcctx.build, mcctx.irctx, mcctx.rubyBlockId));
+
+    // push positional args onto the ruby stack
+    auto posEnd = send->numPosArgs;
+    auto argIdx = offset;
+    for (; argIdx < posEnd; ++argIdx) {
+        stack.emplace_back(Payload::varGet(cs, send->args[argIdx].variable, builder, irctx, rubyBlockId));
+    }
+
+    // push keyword argument values, and populate the keywords vector
+    auto kwEnd = send->args.size();
+    if (posEnd < kwEnd) {
+        // if there is a keyword splat, merge everything into a hash that's used for the last argument, otherwise
+        // keywords go in the inline cache, and values go on the stack.
+        int numKwArgs = kwEnd - posEnd;
+        bool hasKwSplat = numKwArgs & 0x1;
+        if (hasKwSplat) {
+            // The current desugaring behavior of keyword splats is that it will merge all keyword arguments into the
+            // splat, even inlined ones. As a result, we'll either see keyword args inlined, or one hash argument that
+            // we'll pass in. This enforce is here so that we remember to update the behavior of this function when we
+            // eventually fix that desugaring.
+            ENFORCE(numKwArgs == 1);
+
+            flag = Payload::VM_CALL_KW_SPLAT;
+
+            // TODO(perf) we can avoid duplicating the hash here if we know that it was created specifically for this
+            // kwsplat.
+            auto var = Payload::varGet(cs, send->args[argIdx].variable, builder, irctx, rubyBlockId);
+            stack.emplace_back(builder.CreateCall(cs.getFunction("sorbet_hashDup"), {var}, "kwsplat"));
+        } else {
+            flag = Payload::VM_CALL_KWARG;
+
+            while (argIdx < kwEnd) {
+                auto kwArg = send->args[argIdx++].variable;
+                auto it = irctx.symbols.find(kwArg);
+                ENFORCE(it != irctx.symbols.end(), "Keyword arg present with non-symbol keyword");
+                keywords.emplace_back(it->second);
+
+                stack.emplace_back(Payload::varGet(cs, send->args[argIdx++].variable, builder, irctx, rubyBlockId));
+            }
+        }
+    }
+
+    // the receiver isn't included in the arg count
+    int argc = stack.size() - 1;
+
+    for (auto *arg : stack) {
+        Payload::pushRubyStack(cs, builder, arg);
+    }
+
+    return makeInlineCache(cs, builder, methodName, flag, argc, keywords);
+}
+
 namespace {
 bool canCallBlockViaRubyVM(MethodCallContext &mcctx) {
     auto &cs = mcctx.cs;
@@ -268,17 +342,15 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     auto *send = mcctx.send;
     auto &irctx = mcctx.irctx;
     auto rubyBlockId = mcctx.rubyBlockId;
-    auto str = send->fun.shortName(cs);
-
-    // fill in args
-    auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx);
 
     // TODO(perf): call
     // https://github.com/ruby/ruby/blob/3e3cc0885a9100e9d1bfdb77e136416ec803f4ca/internal.h#L2372
     // to get inline caching.
     // before this, perf will not be good
-    auto *self = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
     if (send->fun == core::Names::super()) {
+        // fill in args
+        auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx);
+
         if (mcctx.blk != nullptr) {
             // blocks require a locals offset parameter
             llvm::Value *localsOffset = irctx.localsOffset[rubyBlockId];
@@ -294,53 +366,78 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
     if (send->fun == core::Names::call() &&
         IREmitterHelpers::hasBlockArgument(cs, rubyBlockId, irctx.cfg.symbol, irctx)) {
         if (canCallBlockViaRubyVM(mcctx)) {
+            // fill in args
+            auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx);
+
             return builder.CreateCall(cs.getFunction("sorbet_callBlock"), {argc, argv, kw_splat}, "rawBlockSendResult");
         }
     }
 
-    return callViaRubyVMSimple(cs, mcctx.build, irctx, self, argv, argc, kw_splat, str, mcctx.blk,
-                               irctx.localsOffset[rubyBlockId]);
+    return callViaRubyVMSimple(mcctx);
 }
 
-llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, string slowFunName) {
-    auto icValidatorFunc = cs.getFunction("sorbet_inlineCacheInvalidated");
-    auto inlineCacheType =
-        (llvm::StructType *)(((llvm::PointerType *)((icValidatorFunc->arg_begin() + 1)->getType()))->getElementType());
-    ENFORCE(inlineCacheType != nullptr);
+// Create a global to hold the FunctionInlineCache value, and setup its initialization in the `Init_` function.
+llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &build, string methodName,
+                                               const VMFlag &flag, int argc, const vector<string_view> &keywords) {
+    auto &builder = builderCast(build);
 
-    auto methodEntryType = (llvm::StructType *)(inlineCacheType->elements()[0]);
-    auto intTy = llvm::Type::getInt64Ty(cs);
-    auto nullv = llvm::ConstantPointerNull::get(methodEntryType->getPointerTo());
+    auto *setupFn = cs.getFunction("sorbet_setupFunctionInlineCache");
+    auto *cacheTy = static_cast<llvm::PointerType *>(setupFn->arg_begin()->getType())->getElementType();
+    auto *zero = llvm::ConstantAggregateZero::get(cacheTy);
 
-    auto *cache =
-        new llvm::GlobalVariable(*cs.module, inlineCacheType, false, llvm::GlobalVariable::InternalLinkage,
-                                 llvm::ConstantStruct::get(inlineCacheType, nullv, llvm::ConstantInt::get(intTy, 0),
-                                                           llvm::ConstantInt::get(intTy, 0)),
-                                 llvm::Twine("ic_") + slowFunName);
+    auto *cache = new llvm::GlobalVariable(*cs.module, cacheTy, false, llvm::GlobalVariable::InternalLinkage, zero,
+                                           llvm::Twine("ic_") + methodName);
+
+    // initialize the global during GlobalConstructorsInit
+    {
+        auto restore = builder.saveIP();
+
+        builder.SetInsertPoint(cs.globalConstructorsEntry);
+
+        auto *midVal = Payload::idIntern(cs, builder, methodName);
+
+        auto *argcVal = llvm::ConstantInt::get(cs, llvm::APInt(32, argc, true));
+
+        auto *keywordsLenVal = llvm::ConstantInt::get(cs, llvm::APInt(32, keywords.size(), true));
+        llvm::Value *keywordsVal = nullptr;
+
+        if (keywords.empty()) {
+            keywordsVal = llvm::ConstantPointerNull::get(llvm::Type::getInt64Ty(cs)->getPointerTo());
+        } else {
+            // NOTE: we may want to create one array that has the max number of slots available and re-use it for each
+            // initialization
+            auto *numKeywords = llvm::ConstantInt::get(cs, llvm::APInt(32, keywords.size()));
+            keywordsVal = builder.CreateAlloca(llvm::Type::getInt64Ty(cs), numKeywords, "keywords");
+
+            int index = 0;
+            for (auto kw : keywords) {
+                auto *kwVal = Payload::idIntern(cs, builder, kw);
+                auto *symVal = builder.CreateCall(cs.getFunction("sorbet_IDToSym"), {kwVal}, "symbol");
+
+                auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, index++, false));
+                llvm::Value *indices[] = {offset};
+                builder.CreateStore(symVal, builder.CreateGEP(keywordsVal, indices));
+            }
+        }
+
+        auto *flagVal = flag.build(cs, build);
+        builder.CreateCall(setupFn, {cache, midVal, flagVal, argcVal, keywordsLenVal, keywordsVal});
+
+        builder.restoreIP(restore);
+    }
 
     return cache;
 }
 
-llvm::Value *IREmitterHelpers::callViaRubyVMSimple(CompilerState &cs, llvm::IRBuilderBase &build,
-                                                   const IREmitterContext &irctx, llvm::Value *self, llvm::Value *argv,
-                                                   llvm::Value *argc, llvm::Value *kw_splat, string_view name,
-                                                   llvm::Function *blkFun, llvm::Value *localsOffset) {
-    auto &builder = builderCast(build);
+llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
+    auto *cache = IREmitterHelpers::pushSendArgs(mcctx);
 
-    auto rawId = Payload::idIntern(cs, builder, name);
-    if (blkFun != nullptr) {
-        // blocks require a locals offset parameter
-        ENFORCE(localsOffset != nullptr);
-
-        auto slowFunctionName = "callFuncWithBlock_" + (string)name;
-        auto *cache = makeInlineCache(cs, slowFunctionName);
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"),
-                                  {self, rawId, argc, argv, kw_splat, blkFun, localsOffset, cache}, slowFunctionName);
+    if (mcctx.blk != nullptr) {
+        auto *closure = mcctx.irctx.localsOffset[mcctx.rubyBlockId];
+        return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, mcctx.blk, closure);
     } else {
-        auto slowFunctionName = "callFunc_" + (string)name;
-        auto *cache = makeInlineCache(cs, slowFunctionName);
-        return builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"),
-                                  {self, rawId, argc, argv, kw_splat, cache}, slowFunctionName);
+        auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.build);
+        return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
     }
 }
 

@@ -259,7 +259,7 @@ void rb_iseq_insns_info_encode_positions(const rb_iseq_t *iseq);
 //
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L5669-L5671
 void *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename, VALUE realpath, unsigned char *parent,
-                                    int iseqType, int startline, int endline, ID *locals, int numLocals) {
+                                    int iseqType, int startline, int endline, ID *locals, int numLocals, int stackMax) {
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
 
@@ -322,6 +322,8 @@ void *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename, VAL
         iseq->body->local_table = ids;
         iseq->body->local_table_size = numLocals;
     }
+
+    iseq->body->stack_max = stackMax;
 
     // Cast it to something easy since teaching LLVM about structs is a huge PITA
     return (void *)iseq;
@@ -764,83 +766,79 @@ VALUE sorbet_stringInterpolate(VALUE recv, ID fun, int argc, VALUE *argv, BlockF
 // ****                       Used to implement inline caches
 // ****
 
-RUBY_EXTERN rb_serial_t ruby_vm_global_method_state;
-
-// Marked `static inline` because this is expected to only exist in the ruby vm
-static inline rb_serial_t sorbet_getMethodEpoch() {
-    return ruby_vm_global_method_state;
-}
-
-// Marked `static inline` because this is expected to only exist in the ruby vm
-static inline rb_serial_t sorbet_getClassSerial(VALUE obj) {
-    return RCLASS_SERIAL(rb_class_of(obj));
-}
-
 // compiler is closely aware of layout of this struct
 struct FunctionInlineCache {
-    const rb_callable_method_entry_t *me;
-
-    // used to compare for validity:
-    // https://github.com/ruby/ruby/blob/97d75639a9970ce3868ba91a57be1856a3957711/vm_method.c#L822-L823
-    rb_serial_t method_state;
-    rb_serial_t class_serial;
+    // We use an `rb_kwarg_call_data` instead of `rb_call_data` as they contain the same data, and the kwarg variant
+    // only adds a single pointer's worth of additional space.
+    struct rb_kwarg_call_data cd;
 };
 
-void sorbet_inlineCacheInvalidated(VALUE recv, struct FunctionInlineCache *cache, ID mid) {
-    // cargo cult https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_eval.c#L289
-    const rb_callable_method_entry_t *me;
-    me = rb_callable_method_entry(CLASS_OF(recv), mid);
-    if (!me) {
-        // cargo cult https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/vm_eval.c#L304-L306
-        rb_raise(rb_eRuntimeError, "unimplemented call with a missing method");
-    }
-    cache->me = me;
-    cache->method_state = sorbet_getMethodEpoch();
-    cache->class_serial = sorbet_getClassSerial(recv);
-}
+// Initialize a method send cache. The values passed in for the keys must all be symbol values, and argc includes
+// num_kwargs.
+void sorbet_setupFunctionInlineCache(struct FunctionInlineCache *cache, ID mid, unsigned int flags, int argc,
+                                     int num_kwargs, VALUE *keys) {
+    struct rb_kwarg_call_data *cd = &cache->cd;
 
-// NOTE: kw_splat is 1 when keyword arguments are present in the argument list. This will be used in ruby-2.7.
-SORBET_ATTRIBUTE(noinline)
-VALUE sorbet_callFuncWithCache(VALUE recv, ID func, int argc,
-                               SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-                               struct FunctionInlineCache *cache) {
-    if (UNLIKELY(sorbet_getMethodEpoch() != cache->method_state) ||
-        UNLIKELY(sorbet_getClassSerial(recv) != cache->class_serial)) {
-        sorbet_inlineCacheInvalidated(recv, cache, func);
-    }
+    cd->ci_kw.ci.mid = mid;
+    cd->ci_kw.ci.orig_argc = argc;
 
-    switch (cache->me->def->type) {
-        case VM_METHOD_TYPE_IVAR:
-            // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/vm_eval.c#L158-L167
-            if (kw_splat && argc > 0 && RB_TYPE_P(argv[argc - 1], T_HASH) && RHASH_EMPTY_P(argv[argc - 1])) {
-                argc--;
-            }
+    // TODO(trevor) will we need non-FCALL sends?
+    cd->ci_kw.ci.flag = VM_CALL_FCALL | flags;
 
-            rb_check_arity(argc, 0, 0);
-            return rb_attr_get(recv, cache->me->def->body.attr.id);
-        default:
-            return rb_vm_call_kw(GET_EC(), recv, func, argc, argv, cache->me, kw_splat);
+    if (num_kwargs > 0) {
+        // The layout for struct_rb_call_info_with_kwarg has a 1-element array as the last field, so allocating
+        // additional space will extend that array's length.
+        struct rb_call_info_kw_arg *kw_arg = (struct rb_call_info_kw_arg *)rb_xmalloc_mul_add(
+            num_kwargs - 1, sizeof(VALUE), sizeof(struct rb_call_info_kw_arg));
+
+        kw_arg->keyword_len = num_kwargs;
+        memcpy(&kw_arg->keywords, keys, num_kwargs * sizeof(VALUE));
+
+        cd->ci_kw.kw_arg = kw_arg;
+    } else {
+        cd->ci_kw.kw_arg = NULL;
     }
 }
 
-SORBET_ATTRIBUTE(noinline)
-VALUE sorbet_callFuncPassingBlockWithCache(VALUE recv, ID func, int argc,
-                                           SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-                                           struct FunctionInlineCache *cache) {
-    if (rb_block_given_p()) {
-        // this is an inlined version of PASS_PASSED_BLOCK_HANDLER()
-        rb_execution_context_t *ec = GET_EC();
-        const VALUE *ep = ec->cfp->ep;
-        while (!VM_ENV_LOCAL_P(ep)) {
-            ep = (void *)(ep[VM_ENV_DATA_INDEX_SPECVAL] & ~0x03);
-        }
-        VALUE block_handler = VM_ENV_BLOCK_HANDLER(ep);
-        vm_block_handler_verify(block_handler);
-        ec->passed_block_handler = block_handler;
-        VM_ENV_FLAGS_SET(ep, VM_FRAME_FLAG_PASSED);
+// This send primitive assumes that all argumenst have been pushed to the ruby stack, and will invoke the vm machinery
+// to execute the send.
+SORBET_INLINE
+VALUE sorbet_callFuncWithCache(struct FunctionInlineCache *cache, VALUE bh) {
+    extern VALUE sorbet_vm_sendish(
+        struct rb_execution_context_struct * ec, struct rb_control_frame_struct * reg_cfp, struct rb_call_data * cd,
+        VALUE block_handler,
+        void (*method_explorer)(const struct rb_control_frame_struct *reg_cfp, struct rb_call_data *cd, VALUE recv));
+
+    extern void sorbet_vm_search_method_wrap(const struct rb_control_frame_struct *reg_cfp, struct rb_call_data *cd,
+                                             VALUE recv);
+
+    extern VALUE rb_vm_exec(struct rb_execution_context_struct *, int);
+
+    rb_execution_context_t *ec = GET_EC();
+    rb_control_frame_t *cfp = ec->cfp;
+
+    VALUE val = sorbet_vm_sendish(ec, cfp, (struct rb_call_data *)&cache->cd, bh, sorbet_vm_search_method_wrap);
+    if (val == Qundef) {
+        VM_ENV_FLAGS_SET(ec->cfp->ep, VM_FRAME_FLAG_FINISH);
+
+        // false here because we don't want to consider jit frames
+        val = rb_vm_exec(ec, false);
     }
 
-    return sorbet_callFuncWithCache(recv, func, argc, argv, kw_splat, cache);
+    return val;
+}
+
+// This should only be called from a context where we know that a block handler has been passed.
+VALUE sorbet_getPassedBlockHandler() {
+    // this is an inlined version of PASS_PASSED_BLOCK_HANDLER()
+    rb_execution_context_t *ec = GET_EC();
+    const VALUE *ep = ec->cfp->ep;
+    while (!VM_ENV_LOCAL_P(ep)) {
+        ep = (void *)(ep[VM_ENV_DATA_INDEX_SPECVAL] & ~0x03);
+    }
+    VALUE block_handler = VM_ENV_BLOCK_HANDLER(ep);
+    vm_block_handler_verify(block_handler);
+    return block_handler;
 }
 
 // ****

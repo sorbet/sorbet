@@ -658,10 +658,12 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
         endLine = 0;
     }
     auto [locals, numLocals] = getLocals(cs1, builder, irctx, md, rubyBlockId);
-    auto ret = builder.CreateCall(cs.getFunction("sorbet_allocateRubyStackFrame"),
-                                  {funcNameValue, funcNameId, filenameValue, realpath, parent, iseqType,
-                                   llvm::ConstantInt::get(cs, llvm::APInt(32, startLine)),
-                                   llvm::ConstantInt::get(cs, llvm::APInt(32, endLine)), locals, numLocals});
+    auto sendMax = llvm::ConstantInt::get(cs, llvm::APInt(32, irctx.maxSendArgCount, true));
+    auto *fn = cs.getFunction("sorbet_allocateRubyStackFrame");
+    auto ret =
+        builder.CreateCall(fn, {funcNameValue, funcNameId, filenameValue, realpath, parent, iseqType,
+                                llvm::ConstantInt::get(cs, llvm::APInt(32, startLine)),
+                                llvm::ConstantInt::get(cs, llvm::APInt(32, endLine)), locals, numLocals, sendMax});
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     llvm::Constant *indices[] = {zero};
     builder.CreateStore(ret, llvm::ConstantExpr::getInBoundsGetElementPtr(store->getValueType(), store, indices));
@@ -923,5 +925,47 @@ void Payload::dbg_p(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *
     auto &builder = builderCast(build);
     builder.CreateCall(cs.getFunction("sorbet_dbg_p"), {val});
 }
+
+void Payload::pushRubyStack(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *val) {
+    auto &builder = builderCast(build);
+    builder.CreateCall(cs.getFunction("sorbet_push"), {val});
+}
+
+llvm::Value *Payload::vmBlockHandlerNone(CompilerState &cs, llvm::IRBuilderBase &build) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_vmBlockHandlerNone"), {}, "VM_BLOCK_HANDLER_NONE");
+}
+
+llvm::Value *Payload::makeBlockHandlerProc(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *block) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_makeBlockHandlerProc"), {block}, "blockHandlerProc");
+}
+
+llvm::Value *Payload::getPassedBlockHandler(CompilerState &cs, llvm::IRBuilderBase &build) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_getPassedBlockHandler"), {}, "passedBlockHandler");
+}
+
+llvm::Value *Payload::callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cache,
+                                        llvm::Value *blockHandler) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_callFuncWithCache"), {cache, blockHandler}, "send");
+}
+
+llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cache,
+                                             llvm::Value *blockFun, llvm::Value *closure) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_callFuncBlockWithCache"), {cache, blockFun, closure},
+                              "sendWithBlock");
+}
+
+llvm::Value *VMFlag::build(CompilerState &cs, llvm::IRBuilderBase &build) const {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction(fnName), {}, flagName);
+}
+
+const VMFlag Payload::VM_CALL_ARGS_SIMPLE{"sorbet_vmCallArgsSimple", "VM_CALL_ARGS_SIMPLE"};
+const VMFlag Payload::VM_CALL_KWARG{"sorbet_vmCallKwarg", "VM_CALL_KWARG"};
+const VMFlag Payload::VM_CALL_KW_SPLAT{"sorbet_vmCallKwSplat", "VM_CALL_KW_SPLAT"};
 
 }; // namespace sorbet::compiler

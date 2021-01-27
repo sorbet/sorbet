@@ -63,6 +63,13 @@ struct IREmitterContext {
     // this is the thing you should access instead"
     UnorderedMap<cfg::LocalRef, Alias> aliases;
 
+    // This is a mapping from local ref to the string that represents its symbol value. The mapping is used when
+    // building up the static data necessary for keyword arg sends that use the ruby value stack.
+    //
+    // key: local ref for the symbol keyword arg
+    // value: string_view of that keyword arg's contents
+    UnorderedMap<cfg::LocalRef, std::string_view> symbols;
+
     // Contains llvm::BasicBlocks (insertion points) to hold code for a Ruby method or block that runs first,
     // before starting to execute the user-written body.
     //
@@ -106,6 +113,11 @@ struct IREmitterContext {
     // idx: cfg::BasicBlock::id
     // val: cfg::BasicBlock::rubyBlockId
     std::vector<int> basicBlockRubyBlockId;
+
+    // This is the maximum number of argument seen in a given ruby method.
+    // TODO(trevor) this could be a vector, allowing for more specific information to be present when checking for stack
+    // overflow.
+    int maxSendArgCount;
 
     // For simplicity, all our compiled functions advertise themselves as variadic Ruby methods.
     // One reason why this is simpler is because we can pre-allocate a stack array big enough to

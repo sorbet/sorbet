@@ -11,6 +11,16 @@ struct IREmitterContext;
 struct Alias;
 class CompilerState;
 
+struct VMFlag {
+    // The sorbet function that returns the constant
+    std::string fnName;
+
+    // The name to give to the result of the sorbet function (useful when reading the llvm bitcode)
+    std::string flagName;
+
+    llvm::Value *build(CompilerState &cs, llvm::IRBuilderBase &build) const;
+};
+
 // This class serves as forwarder to payload.c, which are the c wrappers for
 // Ruby functions. These functions can (and do) use information known during
 // compile time to dispatch to different c functions, but other than that, they
@@ -69,6 +79,21 @@ public:
                        const IREmitterContext &irctx, int rubyBlockId);
 
     static llvm::Value *retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
+
+    static void pushRubyStack(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
+
+    static llvm::Value *vmBlockHandlerNone(CompilerState &cs, llvm::IRBuilderBase &builder);
+    static llvm::Value *makeBlockHandlerProc(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *block);
+    static llvm::Value *getPassedBlockHandler(CompilerState &cs, llvm::IRBuilderBase &builder);
+
+    static llvm::Value *callFuncWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
+                                          llvm::Value *blockHandler);
+    static llvm::Value *callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
+                                               llvm::Value *blockFun, llvm::Value *closure);
+
+    static const VMFlag VM_CALL_ARGS_SIMPLE;
+    static const VMFlag VM_CALL_KWARG;
+    static const VMFlag VM_CALL_KW_SPLAT;
 };
 } // namespace sorbet::compiler
 #endif

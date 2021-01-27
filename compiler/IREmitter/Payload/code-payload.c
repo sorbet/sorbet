@@ -23,12 +23,7 @@ typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE *iseq_encoded, VALUE closure
 
 // compiler is closely aware of layout of this struct
 struct FunctionInlineCache {
-    const rb_callable_method_entry_t *me;
-
-    // used to compare for validity:
-    // https://github.com/ruby/ruby/blob/97d75639a9970ce3868ba91a57be1856a3957711/vm_method.c#L822-L823
-    rb_serial_t method_state;
-    rb_serial_t class_serial;
+    struct rb_kwarg_call_data cd;
 };
 
 struct sorbet_iterMethodArg {
@@ -62,7 +57,7 @@ SORBET_ALIVE(VALUE, sorbet_t_absurd, (VALUE val) __attribute__((__cold__)));
 
 SORBET_ALIVE(void *, sorbet_allocateRubyStackFrame,
              (VALUE funcName, ID func, VALUE filename, VALUE realpath, unsigned char *parent, int iseqType,
-              int startline, int endline, ID *locals, int numLocals));
+              int startline, int endline, ID *locals, int numLocals, int stackMax));
 SORBET_ALIVE(VALUE, sorbet_getConstant, (const char *path, long pathLen));
 SORBET_ALIVE(VALUE, sorbet_setConstant, (VALUE mod, const char *name, long nameLen, VALUE value));
 
@@ -70,13 +65,10 @@ SORBET_ALIVE(const VALUE, sorbet_readRealpath, (void));
 SORBET_ALIVE(void, sorbet_popRubyStack, (void));
 
 SORBET_ALIVE(void, sorbet_vm_env_write_slowpath, (const VALUE *, int, VALUE));
-SORBET_ALIVE(void, sorbet_inlineCacheInvalidated, (VALUE recv, struct FunctionInlineCache *cache, ID mid));
-SORBET_ALIVE(VALUE, sorbet_callFuncWithCache,
-             (VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-              struct FunctionInlineCache *cache));
-SORBET_ALIVE(VALUE, sorbet_callFuncPassingBlockWithCache,
-             (VALUE recv, ID func, int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-              struct FunctionInlineCache *cache));
+SORBET_ALIVE(void, sorbet_setupFunctionInlineCache,
+             (struct FunctionInlineCache * cache, ID mid, unsigned int flags, int argc, int num_kwargs, VALUE *keys));
+SORBET_ALIVE(VALUE, sorbet_callFuncWithCache, (struct FunctionInlineCache * cache, VALUE bh));
+SORBET_ALIVE(VALUE, sorbet_getPassedBlockHandler, ());
 
 SORBET_ALIVE(void, sorbet_setMethodStackFrame,
              (rb_execution_context_t * ec, rb_control_frame_t *cfp, const rb_iseq_t *iseq));
@@ -940,6 +932,13 @@ VALUE sorbet_callBlock(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const r
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.h#L123
 #define GET_PREV_EP(ep) ((VALUE *)((ep)[VM_ENV_DATA_INDEX_SPECVAL] & ~0x03))
 
+// Push an entry to the ruby stack
+SORBET_INLINE
+void sorbet_push(const VALUE val) {
+    rb_execution_context_t *ec = GET_EC();
+    *(ec->cfp->sp++) = val;
+}
+
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L2919-L2928
 static const VALUE *vm_get_ep(const VALUE *const reg_ep, rb_num_t lv) {
     rb_num_t i;
@@ -994,47 +993,44 @@ void sorbet_writeLocal(long localsOffset, long index, long level, VALUE value) {
     vm_env_write(vm_get_ep(GET_EC()->cfp->ep, level), -offset, value);
 }
 
-SORBET_INLINE
-VALUE sorbet_callFuncProcWithCache(VALUE recv, ID func, int argc,
-                                   SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-                                   VALUE proc, struct FunctionInlineCache *cache) {
-    if (!NIL_P(proc)) {
-        // this is an inlined version of vm_passed_block_handler_set(GET_EC(), proc)
-        vm_block_handler_verify(proc);
-        GET_EC()->passed_block_handler = proc;
-    }
-
-    return sorbet_callFuncWithCache(recv, func, argc, argv, kw_splat, cache);
+VALUE sorbet_vmBlockHandlerNone() {
+    return VM_BLOCK_HANDLER_NONE;
 }
 
-SORBET_INLINE
-VALUE sorbet_callFuncWithBlockWithCache(VALUE recv, ID func, int argc,
-                                        SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-                                        struct FunctionInlineCache *cache) {
-    return sorbet_callFuncPassingBlockWithCache(recv, func, argc, argv, kw_splat, cache);
-}
-
-// This function doesn't benefit from inlining, as it's always indirectly used through rb_iterate. In the future, if we
-// end up with an inlined version of rb_iterate, it would be good to inline this.
 static VALUE sorbet_iterMethod(VALUE obj) {
-    struct sorbet_iterMethodArg *arg = (struct sorbet_iterMethodArg *)obj;
-    return sorbet_callFuncWithCache(arg->recv, arg->func, arg->argc, arg->argv, arg->kw_splat, arg->cache);
+    struct FunctionInlineCache *cache = (struct FunctionInlineCache *)obj;
+
+    // In this case we know that a block handler was set, as we only emit calls to this payload function from sends that
+    // pass a block argument.
+    rb_execution_context_t *ec = GET_EC();
+    VALUE bh = ec->passed_block_handler;
+
+    return sorbet_callFuncWithCache(cache, bh);
 }
 
 SORBET_INLINE
-VALUE sorbet_callFuncBlockWithCache(VALUE recv, ID func, int argc,
-                                    SORBET_ATTRIBUTE(noescape) const VALUE *const restrict argv, int kw_splat,
-                                    BlockFFIType blockImpl, VALUE closure, struct FunctionInlineCache *cache) {
-    struct sorbet_iterMethodArg arg;
-    arg.recv = recv;
-    arg.func = func;
-    arg.argc = argc;
-    arg.argv = argv;
-    arg.kw_splat = kw_splat;
-    arg.cache = cache;
-
-    return rb_iterate(sorbet_iterMethod, (VALUE)&arg, blockImpl, closure);
+VALUE sorbet_callFuncBlockWithCache(struct FunctionInlineCache *cache, BlockFFIType blockImpl, VALUE closure) {
+    return rb_iterate(sorbet_iterMethod, (VALUE)cache, blockImpl, closure);
 }
+
+SORBET_INLINE
+VALUE sorbet_makeBlockHandlerProc(VALUE block) {
+    return rb_funcall(block, rb_intern2("to_proc", 7), 0);
+}
+
+unsigned int sorbet_vmCallKwarg() {
+    return VM_CALL_KWARG;
+}
+
+unsigned int sorbet_vmCallArgsSimple() {
+    return VM_CALL_ARGS_SIMPLE;
+}
+
+unsigned int sorbet_vmCallKwSplat() {
+    return VM_CALL_KW_SPLAT;
+}
+
+// static struct rb_kwarg_call_data test_cd = {0};
 
 SORBET_INLINE
 const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isClassOrModuleStaticInit, int iseq_type,
