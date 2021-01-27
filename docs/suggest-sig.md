@@ -140,7 +140,7 @@ To opt all files into this strictness level and insert as many sigs as Sorbet
 can guess, run this:
 
 ```
-srb tc --typed=strict --error-white-list=7017 --autocorrect
+srb tc --typed=strict --error-code-include=7017 --autocorrect
 ```
 
 This

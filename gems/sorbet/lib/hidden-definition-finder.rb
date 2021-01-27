@@ -116,7 +116,7 @@ class Sorbet::Private::HiddenMethodFinder
     )
     File.write(SOURCE_CONSTANTS, io.read)
     io.close
-    raise "Your source can't be read by Sorbet.\nYou can try `find . -type f | xargs -L 1 -t bundle exec srb tc --no-config --error-white-list 1000` and hopefully the last file it is processing before it dies is the culprit.\nIf not, maybe the errors in this file will help: #{SOURCE_CONSTANTS_ERR}" if File.read(SOURCE_CONSTANTS).empty?
+    raise "Your source can't be read by Sorbet.\nYou can try `find . -type f | xargs -L 1 -t bundle exec srb tc --no-config --error-code-include 1000` and hopefully the last file it is processing before it dies is the culprit.\nIf not, maybe the errors in this file will help: #{SOURCE_CONSTANTS_ERR}" if File.read(SOURCE_CONSTANTS).empty?
 
     puts "Printing #{TMP_RBI}'s symbol table into #{RBI_CONSTANTS}"
     io = IO.popen(
@@ -130,16 +130,16 @@ class Sorbet::Private::HiddenMethodFinder
         # The hidden-definition serializer is not smart enough to put T::Enum
         # constants it discovers inside an `enums do` block. We probably want
         # to come up with a better long term solution here.
-        '--error-black-list=3506',
+        '--error-code-exclude=3506',
         # Method redefined with mismatched argument is ok since sometime
         # people monkeypatch over method
-        '--error-black-list=4010',
+        '--error-code-exclude=4010',
         # Redefining constant is needed because we serialize things both as
         # aliases and in-class constants.
-        '--error-black-list=4012',
+        '--error-code-exclude=4012',
         # Invalid nesting is ok because we don't generate all the intermediate
         # namespaces for aliases
-        '--error-black-list=4015',
+        '--error-code-exclude=4015',
         '--stdout-hup-hack',
         '--silence-dev-message',
         '--no-error-count',
@@ -344,7 +344,7 @@ class Sorbet::Private::HiddenMethodFinder
 
   # These methods are defined in C++ and we want our C++ definition to
   # win instead of a shim.
-  BLACKLIST = Set.new([
+  DENYLIST = Set.new([
     [Class.object_id, "new"],
     [BasicObject.object_id, "initialize"],
   ]).freeze
@@ -358,7 +358,7 @@ class Sorbet::Private::HiddenMethodFinder
       name = rbi_entry["name"]["name"]
       next if source_by_name[name]
 
-      next if BLACKLIST.include?([klass.object_id, name])
+      next if DENYLIST.include?([klass.object_id, name])
       next if name.start_with?('<') && name.end_with?('>')
 
       begin

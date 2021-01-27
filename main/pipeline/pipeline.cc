@@ -803,7 +803,7 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     return what;
 }
 
-class DefinitionLinesBlacklistEnforcer {
+class DefinitionLinesDenylistEnforcer {
 private:
     const core::FileRef file;
     const int prohibitedLinesStart;
@@ -829,7 +829,7 @@ private:
     }
 
 public:
-    DefinitionLinesBlacklistEnforcer(core::FileRef file, int prohibitedLinesStart, int prohibitedLinesEnd)
+    DefinitionLinesDenylistEnforcer(core::FileRef file, int prohibitedLinesStart, int prohibitedLinesEnd)
         : file(file), prohibitedLinesStart(prohibitedLinesStart), prohibitedLinesEnd(prohibitedLinesEnd) {
         // Can be equal if file was empty.
         ENFORCE(prohibitedLinesStart <= prohibitedLinesEnd);
@@ -848,7 +848,7 @@ public:
 
 ast::ParsedFile checkNoDefinitionsInsideProhibitedLines(core::GlobalState &gs, ast::ParsedFile what,
                                                         int prohibitedLinesStart, int prohibitedLinesEnd) {
-    DefinitionLinesBlacklistEnforcer enforcer(what.file, prohibitedLinesStart, prohibitedLinesEnd);
+    DefinitionLinesDenylistEnforcer enforcer(what.file, prohibitedLinesStart, prohibitedLinesEnd);
     what.tree = ast::TreeMap::apply(core::Context(gs, core::Symbols::root(), what.file), enforcer, move(what.tree));
     return what;
 }

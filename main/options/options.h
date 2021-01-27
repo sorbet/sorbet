@@ -159,8 +159,8 @@ struct Options {
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";
     bool ruby3KeywordArgs = false;
-    std::set<int> errorCodeWhiteList;
-    std::set<int> errorCodeBlackList;
+    std::set<int> errorCodeInclude;
+    std::set<int> errorCodeExclude;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 

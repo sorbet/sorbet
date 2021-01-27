@@ -47,8 +47,8 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.storeState, opts.storeState);
     CHECK_EQ(empty.enableCounters, opts.enableCounters);
     CHECK_EQ(empty.errorUrlBase, opts.errorUrlBase);
-    CHECK_EQ(empty.errorCodeWhiteList, opts.errorCodeWhiteList);
-    CHECK_EQ(empty.errorCodeBlackList, opts.errorCodeBlackList);
+    CHECK_EQ(empty.errorCodeInclude, opts.errorCodeInclude);
+    CHECK_EQ(empty.errorCodeExclude, opts.errorCodeExclude);
     CHECK_EQ(empty.pathPrefix, opts.pathPrefix);
     CHECK_EQ(empty.reserveUtf8NameTableCapacity, opts.reserveUtf8NameTableCapacity);
     CHECK_EQ(empty.reserveConstantNameTableCapacity, opts.reserveConstantNameTableCapacity);

@@ -210,14 +210,20 @@ Usage:
       --censor-for-snapshot-tests
                                 When printing raw location information, don't
                                 show line numbers
-      --error-white-list errorCode
-                                Error code to whitelist into reporting.
-                                Errors not mentioned will be silenced. This option
-                                can be passed multiple times.
-      --error-black-list errorCode
-                                Error code to blacklist from reporting.
-                                Errors mentioned will be silenced. This option can
+      --error-code-include errorCode
+                                Error code to include in reporting. Errors
+                                not mentioned will be silenced. This option can
                                 be passed multiple times.
+      --error-code-exclude errorCode
+                                Error code to exclude from reporting. Errors
+                                mentioned will be silenced. This option can be
+                                passed multiple times.
+      --error-white-list errorCode
+                                (DEPRECATED) Alias for --error-code-include.
+                                Will be removed in a later release.
+      --error-black-list errorCode
+                                (DEPRECATED) Alias for --error-code-exclude.
+                                Will be removed in a later release.
       --typed {false,true,strict,strong,[auto]}
                                 Force all code to specified strictness level
                                 (default: auto)
