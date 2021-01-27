@@ -41,6 +41,16 @@ module Sorbet::Private
           Sorbet::Private::GemGeneratorTracepoint::Tracer.on_module_created(result)
           result
         end
+
+        # This is a hack due to changes in kwargs with Ruby 2.7 and 3.0. Using
+        # `*` for method delegation is deprecated in Ruby 2.7 and doesn't work
+        # in Ruby 3.0.
+        # See the "compatible delegation" section in this blog post:
+        # https://www.ruby-lang.org/en/news/2019/12/12/separation-of-positional-and-keyword-arguments-in-ruby-3-0/
+        #
+        # Once Sorbet supports exclusively 2.7+ we can remove ruby2_keywords and
+        # use the `...` delegation syntax instead.
+        send(:ruby2_keywords, :new) if respond_to?(:ruby2_keywords, true)
       end
       Class.prepend(ClassOverride)
 
