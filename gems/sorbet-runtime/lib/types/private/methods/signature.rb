@@ -11,6 +11,10 @@ class T::Private::Methods::Signature
     # Using `Untyped` ensures we'll get an error if we ever try validation on these.
     not_typed = T::Private::Types::NotTyped.new
     raw_return_type = not_typed
+    # Map missing parameter names to "argN" positionally
+    parameters = parameters.each_with_index.map do |(param_kind, param_name), index|
+      [param_kind, param_name || "arg#{index}"]
+    end
     raw_arg_types = parameters.map do |_param_kind, param_name|
       [param_name, not_typed]
     end.to_h

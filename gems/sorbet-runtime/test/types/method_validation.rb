@@ -186,6 +186,16 @@ module Opus::Types::Test
     end
 
     describe "validation" do
+      it "accepts built-in method overrides" do
+        klass = Class.new do
+          extend T::Sig
+          sig {params(m: Symbol, include_private: T::Boolean).returns(T::Boolean)}
+          def respond_to_missing?(m, include_private=false); true; end
+        end
+
+        klass.new.respond_to?(:foo)
+      end
+
       it "raises an error when the return value is the wrong type" do
         @mod.sig {returns(String)}
         def @mod.foo
