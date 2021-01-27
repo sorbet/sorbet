@@ -7,10 +7,39 @@ pushd "$(dirname "$0")/.." > /dev/null
 source "test/logging.sh"
 
 debug=
-if [ "$1" == "-d" ]; then
-  debug=1
-  shift 1
-fi
+llvmir="${llvmir:-}"
+
+usage() {
+  cat << EOF
+Usage: test/run_compiled.sh [options] file_1.rb <file_2.rb .. file_n.rb>
+
+  -d       Run the ruby interpreter under the debugger [lldb]
+  -iPATH   Store intermediate outputs in PATH
+
+EOF
+}
+
+while getopts 'hdi:' opt; do
+  case $opt in
+    h)
+      usage
+      exit 0
+      ;;
+
+    d)
+      debug=1
+      ;;
+
+    i)
+      llvmir=$OPTARG
+      shift 1
+      ;;
+
+    *)
+      break;
+      ;;
+  esac
+done
 
 if [ 1 -gt "$#" ]; then
   echo "Usage: test/run_compiled.sh [-d] <main.rb> [<additional_n.rb> ...]"
@@ -33,10 +62,16 @@ if [ -z "${llvmir:-}" ]; then
   # Export llvmir so that run_sorbet picks it up. Real argument parsing in
   # run_sorbet.sh would probably be better.
   export llvmir
+elif [[ ! -d "$llvmir" ]]; then
+  fatal "llvm output directory '${llvmir}' does not exist"
 fi
 
 # ensure that the extension is built
-"test/run_sorbet.sh" "${rb_files[@]}"
+"test/run_sorbet.sh" -i "$llvmir" "${rb_files[@]}"
+
+if [[ "$llvmir" != /* ]]; then
+  llvmir="$PWD/$llvmir"
+fi
 
 ruby="./bazel-bin/external/sorbet_ruby_2_7/toolchain/bin/ruby"
 sorbet_runtime="./bazel-sorbet_llvm/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb"

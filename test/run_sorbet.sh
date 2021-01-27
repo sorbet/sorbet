@@ -6,25 +6,58 @@ pushd "$(dirname "$0")/.." > /dev/null
 
 source "test/logging.sh"
 
-debug=
-if [ "$1" == "-d" ]; then
-  debug=1
-  shift 1
-fi
+usage() {
+  cat <<EOF
+Usage: test/run_sorbet.sh [options] <test_file_1> [<test_file_n> ...]"
 
+  -h       Show this message
+  -d       Start sorbet under the debugger [lldb]
+  -iPATH   Place build outputs in PATH
+
+  NOTE: when running this script with tools/scripts/remote-script, an explicit
+  output path must be provided with -i to enable sync-back.
+EOF
+}
+
+debug=
+llvmir="${llvmir:-}"
+
+while getopts ":hdi:" opt; do
+  case $opt in
+    h)
+      usage
+      exit 0
+      ;;
+
+    d)
+      debug=1
+      ;;
+
+    i)
+      explicit_llvmir=1
+      llvmir="${OPTARG}"
+      shift 1
+      ;;
+
+    *)
+      break
+      ;;
+  esac
+done
+
+orig_llvmir=$llvmir
 rb_files=( "$@" )
 
-if [ -z "$*" ]; then
-  echo "Usage: test/run_sorbet.sh [-d] <test_file_1> [<test_file_n> ...]"
-  exit 1
-fi
-
-if [ -z "${llvmir:-}" ]; then
+if [ -z "$llvmir" ]; then
   llvmir=$(mktemp -d)
   cleanup() {
     rm -rf "$llvmir"
   }
   trap cleanup EXIT
+elif [[ ! -d "$llvmir" ]]; then
+  fatal "llvm output directory '${llvmir}' does not exist"
+elif [[ "$llvmir" != /* ]]; then
+  llvmir="$PWD/$llvmir"
 fi
 
 echo
@@ -50,6 +83,13 @@ info "├─ ${command[*]}"
 
 if "${command[@]}"; then
   success "└─ successfully generated LLVM output."
+
+  if [[ -n "$EMIT_SYNCBACK" && -n "$explicit_llvmir" ]]; then
+    echo '### BEGIN SYNCBACK ###'
+    find "$orig_llvmir" -name '*.ll' -o -name '*.llo'
+    echo '### END SYNCBACK ###'
+  fi
+
 else
   fatal "└─ compiling to LLVM failed. See above."
 fi
