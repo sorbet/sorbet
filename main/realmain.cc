@@ -464,10 +464,10 @@ int realmain(int argc, char *argv[]) {
                           opts.reserveFieldTableCapacity, opts.reserveTypeArgumentTableCapacity,
                           opts.reserveTypeMemberTableCapacity, opts.reserveUtf8NameTableCapacity,
                           opts.reserveConstantNameTableCapacity, opts.reserveUniqueNameTableCapacity);
-    for (auto code : opts.errorCodeWhiteList) {
+    for (auto code : opts.isolateErrorCode) {
         gs->onlyShowErrorClass(code);
     }
-    for (auto code : opts.errorCodeBlackList) {
+    for (auto code : opts.suppressErrorCode) {
         gs->suppressErrorClass(code);
     }
     gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
@@ -478,7 +478,7 @@ int realmain(int argc, char *argv[]) {
     gs->dslRubyExtraArgs = opts.dslRubyExtraArgs;
     if (!opts.stripeMode) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
-        if (opts.errorCodeWhiteList.empty()) {
+        if (opts.isolateErrorCode.empty()) {
             gs->suppressErrorClass(core::errors::Namer::MultipleBehaviorDefs.code);
         }
     }

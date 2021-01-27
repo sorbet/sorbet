@@ -460,15 +460,21 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
     options.add_options("dev")("censor-for-snapshot-tests",
                                "When printing raw location information, don't show line numbers");
-    options.add_options("dev")("error-white-list",
-                               "Error code to whitelist into reporting. "
+    options.add_options("dev")("isolate-error-code",
+                               "Error code to include in reporting. "
                                "Errors not mentioned will be silenced. "
                                "This option can be passed multiple times.",
                                cxxopts::value<vector<int>>(), "errorCode");
-    options.add_options("dev")("error-black-list",
-                               "Error code to blacklist from reporting. "
+    options.add_options("dev")("suppress-error-code",
+                               "Error code to exclude from reporting. "
                                "Errors mentioned will be silenced. "
                                "This option can be passed multiple times.",
+                               cxxopts::value<vector<int>>(), "errorCode");
+    options.add_options("dev")("error-white-list",
+                               "(DEPRECATED) Alias for --isolate-error-code. Will be removed in a later release.",
+                               cxxopts::value<vector<int>>(), "errorCode");
+    options.add_options("dev")("error-black-list",
+                               "(DEPRECATED) Alias for --suppress-error-code. Will be removed in a later release.",
                                cxxopts::value<vector<int>>(), "errorCode");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{false,true,strict,strong,[auto]}");
@@ -885,17 +891,30 @@ void readOptions(Options &opts,
         opts.errorUrlBase = raw["error-url-base"].as<string>();
         opts.ruby3KeywordArgs = raw["ruby3-keyword-args"].as<bool>();
         if (raw.count("error-white-list") > 0) {
+            logger->error("`{}` is deprecated; please use `{}` instead", "--error-white-list", "--isolate-error-code");
             auto rawList = raw["error-white-list"].as<vector<int>>();
-            opts.errorCodeWhiteList = set<int>(rawList.begin(), rawList.end());
+            opts.isolateErrorCode.insert(rawList.begin(), rawList.end());
         }
+        if (raw.count("isolate-error-code") > 0) {
+            auto rawList = raw["isolate-error-code"].as<vector<int>>();
+            opts.isolateErrorCode.insert(rawList.begin(), rawList.end());
+        }
+
         if (raw.count("error-black-list") > 0) {
-            if (raw.count("error-white-list") > 0) {
-                logger->error("You can't pass both `{}` and `{}`", "--error-black-list", "--error-white-list");
-                throw EarlyReturnWithCode(1);
-            }
+            logger->error("`{}` is deprecated; please use `{}` instead", "--error-black-list", "--suppress-error-code");
             auto rawList = raw["error-black-list"].as<vector<int>>();
-            opts.errorCodeBlackList = set<int>(rawList.begin(), rawList.end());
+            opts.suppressErrorCode.insert(rawList.begin(), rawList.end());
         }
+        if (raw.count("suppress-error-code") > 0) {
+            auto rawList = raw["suppress-error-code"].as<vector<int>>();
+            opts.suppressErrorCode.insert(rawList.begin(), rawList.end());
+        }
+
+        if (!opts.isolateErrorCode.empty() && !opts.suppressErrorCode.empty()) {
+            logger->error("You can't pass both `{}` and `{}`", "--isolate-error-code", "--suppress-error-code");
+            throw EarlyReturnWithCode(1);
+        }
+
         if (sorbet::debug_mode) {
             opts.suggestSig = raw["suggest-sig"].as<bool>();
         }
@@ -918,20 +937,20 @@ void readOptions(Options &opts,
         }
 
         if (opts.suggestTyped) {
-            if (opts.errorCodeWhiteList != set<int>{core::errors::Infer::SuggestTyped.code} &&
+            if (opts.isolateErrorCode != set<int>{core::errors::Infer::SuggestTyped.code} &&
                 raw["typed"].as<string>() != "strict") {
-                logger->error(
-                    "--suggest-typed must also include `{}`",
-                    fmt::format("{}{}", "--typed=strict --error-white-list=", core::errors::Infer::SuggestTyped.code));
-                throw EarlyReturnWithCode(1);
-            }
-            if (opts.errorCodeWhiteList != set<int>{core::errors::Infer::SuggestTyped.code}) {
                 logger->error("--suggest-typed must also include `{}`",
-                              fmt::format("{}{}", "--error-white-list=", core::errors::Infer::SuggestTyped.code));
+                              fmt::format("{}{}", "--typed=strict --isolate-error-code=",
+                                          core::errors::Infer::SuggestTyped.code));
                 throw EarlyReturnWithCode(1);
             }
-            if (!opts.errorCodeBlackList.empty()) {
-                logger->error("--suggest-typed can't include `{}`", "--error-black-list");
+            if (opts.isolateErrorCode != set<int>{core::errors::Infer::SuggestTyped.code}) {
+                logger->error("--suggest-typed must also include `{}`",
+                              fmt::format("{}{}", "--isolate-error-code=", core::errors::Infer::SuggestTyped.code));
+                throw EarlyReturnWithCode(1);
+            }
+            if (!opts.suppressErrorCode.empty()) {
+                logger->error("--suggest-typed can't include `{}`", "--suppress-error-code");
                 throw EarlyReturnWithCode(1);
             }
             if (raw["typed"].as<string>() != "strict") {

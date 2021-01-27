@@ -245,7 +245,7 @@ struct PackageInfoFinder {
             return tree;
         }
 
-        // Blacklisted methods
+        // Disallowed methods
         if (send.fun == core::Names::extend() || send.fun == core::Names::include()) {
             if (auto e = ctx.beginError(send.loc, core::errors::Packager::InvalidPackageExpression)) {
                 e.setHeader("Invalid expression in package: `{}` is not allowed", send.fun.shortName(ctx));
