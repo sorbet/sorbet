@@ -939,18 +939,18 @@ void readOptions(Options &opts,
         if (opts.suggestTyped) {
             if (opts.errorCodeInclude != set<int>{core::errors::Infer::SuggestTyped.code} &&
                 raw["typed"].as<string>() != "strict") {
-                logger->error(
-                    "--suggest-typed must also include `{}`",
-                    fmt::format("{}{}", "--typed=strict --error-white-list=", core::errors::Infer::SuggestTyped.code));
+                logger->error("--suggest-typed must also include `{}`",
+                              fmt::format("{}{}", "--typed=strict --error-code-include=",
+                                          core::errors::Infer::SuggestTyped.code));
                 throw EarlyReturnWithCode(1);
             }
             if (opts.errorCodeInclude != set<int>{core::errors::Infer::SuggestTyped.code}) {
                 logger->error("--suggest-typed must also include `{}`",
-                              fmt::format("{}{}", "--error-white-list=", core::errors::Infer::SuggestTyped.code));
+                              fmt::format("{}{}", "--error-code-include=", core::errors::Infer::SuggestTyped.code));
                 throw EarlyReturnWithCode(1);
             }
             if (!opts.errorCodeExclude.empty()) {
-                logger->error("--suggest-typed can't include `{}`", "--error-black-list");
+                logger->error("--suggest-typed can't include `{}`", "--error-code-exclude");
                 throw EarlyReturnWithCode(1);
             }
             if (raw["typed"].as<string>() != "strict") {
