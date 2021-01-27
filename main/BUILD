@@ -69,6 +69,7 @@ cc_library(
         "//common/statsd",
         "//core",
         "//core/proto",
+        "//hashing",
         "//main/autogen",
         "//main/cache",
         "//main/lsp",
@@ -93,6 +94,7 @@ cc_library(
     deps = [
         "//ast",
         "//core",
+        "//hashing:hashing-orig",
         "//main/cache:cache-orig",
         "//main/options",
         "//main/pipeline:pipeline-orig",

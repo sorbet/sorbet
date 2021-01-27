@@ -5,6 +5,7 @@
 #include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "hashing/hashing.h"
 #include "main/cache/cache.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/ShowOperation.h"
@@ -74,7 +75,7 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files, 
         return;
     }
 
-    pipeline::computeFileHashes(files, *config->logger, workers);
+    hashing::Hashing::computeFileHashes(files, *config->logger, workers);
 }
 
 void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) const {
@@ -179,7 +180,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
         }
     }
 
-    pipeline::computeFileHashes(initialGS->getFiles(), *config->logger, workers);
+    hashing::Hashing::computeFileHashes(initialGS->getFiles(), *config->logger, workers);
     cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
                                          workers, indexed);
 
