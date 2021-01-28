@@ -12,6 +12,8 @@
 using namespace std;
 namespace sorbet::hashing {
 namespace {
+
+// TODO: Replace with a no-op LazyGlobalSubstitution run.
 class AllNamesCollector {
 public:
     core::UsageHash acc;
@@ -76,27 +78,26 @@ core::UsageHash getAllNames(core::Context ctx, ast::ExpressionPtr &tree) {
     return move(collector.acc);
 };
 
-ast::ParsedFile rewriteAST(const core::GlobalState &originalGS, core::GlobalState &newGS, core::FileRef newFref,
-                           const ast::ParsedFile &ast) {
+pair<ast::ParsedFile, core::UsageHash> rewriteAST(const core::GlobalState &originalGS, core::GlobalState &newGS,
+                                                  core::FileRef newFref, const ast::ParsedFile &ast) {
     // TODO(jvilk): Switch to passing around compressed ASTs which are cheaper to copy + inflate.
     ast::ParsedFile rewritten{ast.tree.deepCopy(), newFref};
     core::LazyGlobalSubstitution subst(originalGS, newGS);
     core::MutableContext ctx(newGS, core::Symbols::root(), newFref);
     core::UnfreezeNameTable nameTableAccess(newGS);
     rewritten.tree = ast::Substitute::run(ctx, subst, move(rewritten.tree));
-    return rewritten;
+    return make_pair<ast::ParsedFile, core::UsageHash>(move(rewritten), subst.getAllNames());
 }
 
-core::FileHash computeFileHash(unique_ptr<core::GlobalState> &lgs, ast::ParsedFile file) {
+core::FileHash computeFileHash(unique_ptr<core::GlobalState> &lgs, core::UsageHash usageHash, ast::ParsedFile file) {
     vector<ast::ParsedFile> single;
     single.emplace_back(move(file));
 
     core::Context ctx(*lgs, core::Symbols::root(), single[0].file);
-    auto allNames = getAllNames(ctx, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());
     realmain::pipeline::resolve(lgs, move(single), opts(), *workers);
 
-    return {move(*lgs->hash()), move(allNames)};
+    return {move(*lgs->hash()), move(usageHash)};
 }
 
 // Note: lgs is an outparameter.
@@ -118,7 +119,9 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     Timer timeit(logger, "computeFileHash");
     unique_ptr<core::GlobalState> lgs;
     core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs);
-    return computeFileHash(lgs, realmain::pipeline::indexOne(opts(), *lgs, fref));
+    auto ast = realmain::pipeline::indexOne(opts(), *lgs, fref);
+    auto usageHash = getAllNames(core::Context(*lgs, core::Symbols::root(), fref), ast.tree);
+    return computeFileHash(lgs, move(usageHash), move(ast));
 }
 }; // namespace
 
@@ -208,9 +211,10 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
 
                     unique_ptr<core::GlobalState> lgs;
                     auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs);
+                    auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
 
-                    threadResult.emplace_back(job, make_unique<core::FileHash>(
-                                                       computeFileHash(lgs, rewriteAST(sharedGs, *lgs, newFref, ast))));
+                    threadResult.emplace_back(
+                        job, make_unique<core::FileHash>(computeFileHash(lgs, move(usageHash), move(rewrittenAST))));
                 }
             }
         }
