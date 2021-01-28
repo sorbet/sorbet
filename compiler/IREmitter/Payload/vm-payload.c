@@ -231,20 +231,6 @@ __attribute__((__cold__)) VALUE sorbet_t_absurd(VALUE val) {
 // ****
 
 /* From inseq.h */
-struct rb_compile_option_struct {
-    unsigned int inline_const_cache : 1;
-    unsigned int peephole_optimization : 1;
-    unsigned int tailcall_optimization : 1;
-    unsigned int specialized_instruction : 1;
-    unsigned int operands_unification : 1;
-    unsigned int instructions_unification : 1;
-    unsigned int stack_caching : 1;
-    unsigned int frozen_string_literal : 1;
-    unsigned int debug_frozen_string_literal : 1;
-    unsigned int coverage_enabled : 1;
-    int debug_level;
-};
-
 struct iseq_insn_info_entry {
     int line_no;
     rb_event_flag_t events;
@@ -378,128 +364,6 @@ static void sorbet_stackoverflow() {
     RUBY_LONGJMP(ec->tag->buf, 1);
 }
 
-// Taken from https://github.com/ruby/ruby/blob/ruby_2_7/vm_insnhelper.c#L261-L346
-static inline rb_control_frame_t *vm_push_frame(rb_execution_context_t *ec, const rb_iseq_t *iseq, VALUE type,
-                                                VALUE self, VALUE specval, VALUE cref_or_me, const VALUE *pc, VALUE *sp,
-                                                int local_size, int stack_max) {
-    rb_control_frame_t *const cfp = RUBY_VM_NEXT_CONTROL_FRAME(ec->cfp);
-
-    // no-op when VM_CHECK_MODE is 0
-    // vm_check_frame(type, specval, cref_or_me, iseq);
-    VM_ASSERT(local_size >= 0);
-
-    /* check stack overflow */
-    WHEN_VM_STACK_OVERFLOWED(cfp, sp, local_size + stack_max) sorbet_stackoverflow();
-    // no-op when VM_CHECK_MODE is 0
-    // vm_check_canary(ec, sp);
-
-    ec->cfp = cfp;
-
-    /* setup new frame */
-    cfp->pc = (VALUE *)pc;
-    cfp->iseq = (rb_iseq_t *)iseq;
-    cfp->self = self;
-    cfp->block_code = NULL;
-
-    /* setup vm value stack */
-
-    /* initialize local variables */
-    for (int i = 0; i < local_size; i++) {
-        *sp++ = Qnil;
-    }
-
-    /* setup ep with managing data */
-    VM_ASSERT(VM_ENV_DATA_INDEX_ME_CREF == -2);
-    VM_ASSERT(VM_ENV_DATA_INDEX_SPECVAL == -1);
-    VM_ASSERT(VM_ENV_DATA_INDEX_FLAGS == -0);
-    *sp++ = cref_or_me; /* ep[-2] / Qnil or T_IMEMO(cref) or T_IMEMO(ment) */
-    *sp++ = specval /* ep[-1] / block handler or prev env ptr */;
-    *sp = type; /* ep[-0] / ENV_FLAGS */
-
-    /* Store initial value of ep as bp to skip calculation cost of bp on JIT cancellation. */
-    cfp->ep = sp;
-    cfp->__bp__ = cfp->sp = sp + 1;
-
-#if VM_DEBUG_BP_CHECK
-    cfp->bp_check = sp + 1;
-#endif
-
-    if (VMDEBUG == 2) {
-        SDR();
-    }
-
-#if USE_DEBUG_COUNTER
-    RB_DEBUG_COUNTER_INC(frame_push);
-    switch (type & VM_FRAME_MAGIC_MASK) {
-        case VM_FRAME_MAGIC_METHOD:
-            RB_DEBUG_COUNTER_INC(frame_push_method);
-            break;
-        case VM_FRAME_MAGIC_BLOCK:
-            RB_DEBUG_COUNTER_INC(frame_push_block);
-            break;
-        case VM_FRAME_MAGIC_CLASS:
-            RB_DEBUG_COUNTER_INC(frame_push_class);
-            break;
-        case VM_FRAME_MAGIC_TOP:
-            RB_DEBUG_COUNTER_INC(frame_push_top);
-            break;
-        case VM_FRAME_MAGIC_CFUNC:
-            RB_DEBUG_COUNTER_INC(frame_push_cfunc);
-            break;
-        case VM_FRAME_MAGIC_IFUNC:
-            RB_DEBUG_COUNTER_INC(frame_push_ifunc);
-            break;
-        case VM_FRAME_MAGIC_EVAL:
-            RB_DEBUG_COUNTER_INC(frame_push_eval);
-            break;
-        case VM_FRAME_MAGIC_RESCUE:
-            RB_DEBUG_COUNTER_INC(frame_push_rescue);
-            break;
-        case VM_FRAME_MAGIC_DUMMY:
-            RB_DEBUG_COUNTER_INC(frame_push_dummy);
-            break;
-        default:
-            rb_bug("unreachable");
-    }
-    {
-        rb_control_frame_t *prev_cfp = RUBY_VM_PREVIOUS_CONTROL_FRAME(cfp);
-        if (RUBY_VM_END_CONTROL_FRAME(ec) != prev_cfp) {
-            int cur_ruby_frame = VM_FRAME_RUBYFRAME_P(cfp);
-            int pre_ruby_frame = VM_FRAME_RUBYFRAME_P(prev_cfp);
-
-            pre_ruby_frame ? (cur_ruby_frame ? RB_DEBUG_COUNTER_INC(frame_R2R) : RB_DEBUG_COUNTER_INC(frame_R2C))
-                           : (cur_ruby_frame ? RB_DEBUG_COUNTER_INC(frame_C2R) : RB_DEBUG_COUNTER_INC(frame_C2C));
-        }
-    }
-#endif
-
-    return cfp;
-}
-
-// NOTE: this is marked noinline so that there's only ever one copy that lives in the ruby runtime, cutting down on the
-// size of generated artifacts. If we decide that speed is more important, this could be marked alwaysinline to avoid
-// the function call.
-SORBET_ATTRIBUTE(noinline)
-void sorbet_setExceptionStackFrame(rb_execution_context_t *ec, rb_control_frame_t *cfp, const rb_iseq_t *iseq) {
-    // Self is the same in exception-handlers
-    VALUE self = cfp->self;
-
-    // there is only ever one local for rescue/ensure frames, this mirrors the implementation in
-    // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm.c#L2085-L2101
-    VALUE *sp = cfp->sp + 1;
-    int num_locals = iseq->body->local_table_size - 1;
-
-    VALUE blockHandler = VM_GUARDED_PREV_EP(cfp->ep);
-    VALUE me = 0;
-
-    // write the exception value on the stack (as an argument to the rescue frame)
-    cfp->sp[0] = rb_errinfo();
-
-    // NOTE: there's no explicit check for stack overflow, because `vm_push_frame` will do that check
-    cfp = vm_push_frame(ec, iseq, VM_FRAME_MAGIC_RESCUE, self, blockHandler, me, iseq->body->iseq_encoded, sp,
-                        num_locals, iseq->body->stack_max);
-}
-
 // NOTE: this is marked noinline so that there's only ever one copy that lives in the ruby runtime, cutting down on the
 // size of generated artifacts. If we decide that speed is more important, this could be marked alwaysinline to avoid
 // the function call.
@@ -533,12 +397,6 @@ void sorbet_setMethodStackFrame(rb_execution_context_t *ec, rb_control_frame_t *
     cfp->ep = sp;
     cfp->__bp__ = sp;
     cfp->sp = sp + 1;
-}
-
-extern void rb_vm_pop_frame(rb_execution_context_t *ec);
-
-void sorbet_popRubyStack() {
-    rb_vm_pop_frame(GET_EC());
 }
 
 // ****
@@ -605,37 +463,6 @@ VALUE sorbet_definedIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const r
 // ****                       Symbol Intrinsics. See CallCMethod in SymbolIntrinsics.cc
 // ****
 
-// https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L1583-1592
-static VALUE vm_rb_ary_aref2(VALUE ary, VALUE b, VALUE e) {
-    long beg = NUM2LONG(b);
-    long len = NUM2LONG(e);
-    if (beg < 0) {
-        beg += RARRAY_LEN(ary);
-    }
-    return rb_ary_subseq(ary, beg, len);
-}
-
-VALUE sorbet_rb_array_square_br_slowpath(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
-                                         BlockFFIType blk, VALUE closure) {
-    VALUE ary = recv;
-    if (argc == 2) {
-        return vm_rb_ary_aref2(ary, argv[0], argv[1]);
-    }
-    VALUE arg = argv[0];
-
-    long beg, len;
-
-    /* check if idx is Range */
-    switch (rb_range_beg_len(arg, &beg, &len, RARRAY_LEN(ary), 0)) {
-        case Qfalse:
-            break;
-        case Qnil:
-            return Qnil;
-        default:
-            return rb_ary_subseq(ary, beg, len);
-    }
-    return rb_ary_entry(ary, NUM2LONG(arg));
-}
 VALUE sorbet_enumerator_size_func_array_length(VALUE array, VALUE args, VALUE eobj) {
     return RARRAY_LEN(array);
 }
