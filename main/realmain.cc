@@ -515,6 +515,11 @@ int realmain(int argc, char *argv[]) {
         vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
 
+        if (!opts.storeState.empty()) {
+            // Compute file hashes for payload files (which aren't part of inputFiles) for LSP
+            hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers);
+        }
+
         { inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames); }
 
         {
@@ -534,7 +539,12 @@ int realmain(int argc, char *argv[]) {
         }
 
         {
-            indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore);
+            if (!opts.storeState.empty()) {
+                // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
+                indexed = hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFiles, *workers, kvstore);
+            } else {
+                indexed = pipeline::index(gs, inputFiles, opts, *workers, kvstore);
+            }
             if (gs->hadCriticalError()) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
@@ -618,8 +628,6 @@ int realmain(int argc, char *argv[]) {
 
         if (!opts.storeState.empty()) {
             gs->markAsPayload();
-            // Store file hashes for LSP.
-            hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers);
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 
