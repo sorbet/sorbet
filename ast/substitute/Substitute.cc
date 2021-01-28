@@ -55,7 +55,7 @@ public:
 
     ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ExpressionPtr tree) {
         auto &original = cast_tree_nonnull<MethodDef>(tree);
-        original.name = subst.substitute(original.name);
+        original.name = subst.substituteConstant(original.name);
         for (auto &arg : original.args) {
             arg = substArg(ctx, std::move(arg));
         }
