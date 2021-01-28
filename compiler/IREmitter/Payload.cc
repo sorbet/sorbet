@@ -283,7 +283,6 @@ const vector<pair<core::ClassOrModuleRef, string>> optimizedTypeTests = {
     {core::Symbols::Regexp(), "sorbet_isa_Regexp"},
     {core::Symbols::String(), "sorbet_isa_String"},
     {core::Symbols::Symbol(), "sorbet_isa_Symbol"},
-    {core::Symbols::Proc(), "sorbet_isa_Proc"},
     {core::Symbols::rootSingleton(), "sorbet_isa_RootSingleton"},
 };
 }
