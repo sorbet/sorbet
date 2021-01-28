@@ -171,25 +171,23 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     {
         Timer timeit(config->logger, "reIndexFromFileSystem");
         inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
-        for (auto &t : pipeline::index(initialGS, inputFiles, config->opts, workers, ownedKvstore)) {
-            int id = t.file.id();
-            if (id >= indexed.size()) {
-                indexed.resize(id + 1);
-            }
-            indexed[id] = move(t);
+        indexed.resize(initialGS->filesUsed());
+
+        auto asts = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger, inputFiles,
+                                                                workers, ownedKvstore);
+        // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so vector
+        // index != FileRef ID. Fix that by slotting them into `indexed`.
+        for (auto &ast : asts) {
+            int id = ast.file.id();
+            ENFORCE_NO_TIMER(id < indexed.size());
+            indexed[id] = move(ast);
         }
     }
 
-    hashing::Hashing::computeFileHashes(initialGS->getFiles(), *config->logger, workers);
     cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
                                          workers, indexed);
 
-    // When inputFileNames is 0 (as in tests), indexed ends up being size 0 because we don't index payload files.
-    // At the same time, we expect indexed to be the same size as GlobalStateHash, which _does_ have payload files.
-    // Resize the indexed array accordingly.
-    if (indexed.size() < initialGS->getFiles().size()) {
-        indexed.resize(initialGS->getFiles().size());
-    }
+    ENFORCE_NO_TIMER(indexed.size() == initialGS->filesUsed());
 
     updates.epoch = 0;
     updates.canTakeFastPath = false;

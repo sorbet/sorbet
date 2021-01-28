@@ -2,6 +2,7 @@
 #define SORBET_CORE_GLOBAL_SUBSTITUTION_H
 
 #include "common/common.h"
+#include "core/NameHash.h"
 #include "core/NameRef.h"
 #include "core/SymbolRef.h"
 #include <vector>
@@ -36,6 +37,14 @@ public:
         }
     }
 
+    NameRef substituteConstant(NameRef from, bool allowSameFromTo = false) const {
+        return substitute(from, allowSameFromTo);
+    }
+
+    NameRef substituteSend(NameRef from, bool allowSameFromTo = false) const {
+        return substitute(from, allowSameFromTo);
+    }
+
     bool useFastPath() const;
 
 private:
@@ -48,6 +57,43 @@ private:
     bool fastPath;
 
     const int toGlobalStateId;
+};
+
+/**
+ * GlobalSubstitution, but lazily populates `nameSubstitution`.
+ */
+class LazyGlobalSubstitution final {
+    const core::GlobalState &fromGS;
+    core::GlobalState &toGS;
+
+    UnorderedMap<core::NameRef, core::NameRef> nameSubstitution;
+    core::UsageHash acc;
+
+    NameRef defineName(NameRef from, bool allowSameFromTo);
+
+public:
+    LazyGlobalSubstitution(const GlobalState &fromGS, GlobalState &toGS);
+    ~LazyGlobalSubstitution() = default;
+
+    NameRef substitute(NameRef from, bool allowSameFromTo = false) {
+        auto it = nameSubstitution.find(from);
+        if (it == nameSubstitution.end()) {
+            return defineName(from, allowSameFromTo);
+        }
+        return it->second;
+    }
+
+    NameRef substituteConstant(NameRef from, bool allowSameFromTo = false) {
+        acc.constants.emplace_back(fromGS, from);
+        return substitute(from, allowSameFromTo);
+    }
+
+    NameRef substituteSend(NameRef from, bool allowSameFromTo = false) {
+        acc.sends.emplace_back(fromGS, from);
+        return substitute(from, allowSameFromTo);
+    }
+
+    core::UsageHash getAllNames();
 };
 
 } // namespace sorbet::core

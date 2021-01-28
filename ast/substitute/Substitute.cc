@@ -6,9 +6,9 @@
 namespace sorbet::ast {
 
 namespace {
-class SubstWalk {
+template <typename T> class SubstWalk {
 private:
-    const core::GlobalSubstitution &subst;
+    T &subst;
 
     ExpressionPtr substClassName(core::MutableContext ctx, ExpressionPtr node) {
         auto *constLit = cast_tree<UnresolvedConstantLit>(node);
@@ -20,7 +20,7 @@ private:
         }
 
         auto scope = substClassName(ctx, std::move(constLit->scope));
-        auto cnst = subst.substitute(constLit->cnst);
+        auto cnst = subst.substituteConstant(constLit->cnst);
 
         return make_expression<UnresolvedConstantLit>(constLit->loc, std::move(scope), cnst);
     }
@@ -42,36 +42,41 @@ private:
     }
 
 public:
-    SubstWalk(const core::GlobalSubstitution &subst) : subst(subst) {}
+    SubstWalk(T &subst) : subst(subst) {}
 
     ExpressionPtr preTransformClassDef(core::MutableContext ctx, ExpressionPtr tree) {
-        auto *original = cast_tree<ClassDef>(tree);
-        original->name = substClassName(ctx, std::move(original->name));
-        for (auto &anc : original->ancestors) {
+        auto &original = cast_tree_nonnull<ClassDef>(tree);
+        original.name = substClassName(ctx, std::move(original.name));
+        for (auto &anc : original.ancestors) {
             anc = substClassName(ctx, std::move(anc));
         }
         return tree;
     }
 
     ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ExpressionPtr tree) {
-        auto *original = cast_tree<MethodDef>(tree);
-        original->name = subst.substitute(original->name);
-        for (auto &arg : original->args) {
+        auto &original = cast_tree_nonnull<MethodDef>(tree);
+        original.name = subst.substitute(original.name);
+        for (auto &arg : original.args) {
             arg = substArg(ctx, std::move(arg));
         }
         return tree;
     }
 
     ExpressionPtr preTransformBlock(core::MutableContext ctx, ExpressionPtr tree) {
-        auto *original = cast_tree<Block>(tree);
-        for (auto &arg : original->args) {
+        auto &original = cast_tree_nonnull<Block>(tree);
+        for (auto &arg : original.args) {
             arg = substArg(ctx, std::move(arg));
         }
         return tree;
     }
 
     ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ExpressionPtr original) {
-        cast_tree<UnresolvedIdent>(original)->name = subst.substitute(cast_tree<UnresolvedIdent>(original)->name);
+        auto &id = cast_tree_nonnull<UnresolvedIdent>(original);
+        if (id.kind != ast::UnresolvedIdent::Kind::Local) {
+            id.name = subst.substituteConstant(cast_tree<UnresolvedIdent>(original)->name);
+        } else {
+            id.name = subst.substitute(cast_tree<UnresolvedIdent>(original)->name);
+        }
         return original;
     }
 
@@ -81,7 +86,7 @@ public:
     }
 
     ExpressionPtr preTransformSend(core::MutableContext ctx, ExpressionPtr original) {
-        cast_tree<Send>(original)->fun = subst.substitute(cast_tree<Send>(original)->fun);
+        cast_tree_nonnull<Send>(original).fun = subst.substituteSend(cast_tree_nonnull<Send>(original).fun);
         return original;
     }
 
@@ -114,7 +119,7 @@ public:
 
     ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ExpressionPtr tree) {
         auto *original = cast_tree<UnresolvedConstantLit>(tree);
-        original->cnst = subst.substitute(original->cnst);
+        original->cnst = subst.substituteConstant(original->cnst);
         original->scope = substClassName(ctx, std::move(original->scope));
         return tree;
     }
@@ -125,6 +130,12 @@ ExpressionPtr Substitute::run(core::MutableContext ctx, const core::GlobalSubsti
     if (subst.useFastPath()) {
         return what;
     }
+    SubstWalk walk(subst);
+    what = TreeMap::apply(ctx, walk, std::move(what));
+    return what;
+}
+
+ExpressionPtr Substitute::run(core::MutableContext ctx, core::LazyGlobalSubstitution &subst, TreePtr what) {
     SubstWalk walk(subst);
     what = TreeMap::apply(ctx, walk, std::move(what));
     return what;

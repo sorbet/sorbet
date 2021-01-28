@@ -1,7 +1,9 @@
 #include "hashing/hashing.h"
+#include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/ErrorQueue.h"
+#include "core/GlobalSubstitution.h"
 #include "core/NameHash.h"
 #include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
@@ -61,6 +63,11 @@ public:
     }
 };
 
+const realmain::options::Options &opts() {
+    const static realmain::options::Options emptyOpts{};
+    return emptyOpts;
+};
+
 core::UsageHash getAllNames(core::Context ctx, ast::ExpressionPtr &tree) {
     AllNamesCollector collector;
     tree = ast::TreeMap::apply(ctx, collector, move(tree));
@@ -69,28 +76,48 @@ core::UsageHash getAllNames(core::Context ctx, ast::ExpressionPtr &tree) {
     return move(collector.acc);
 };
 
-core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
-    Timer timeit(logger, "computeFileHash");
-    const static realmain::options::Options emptyOpts{};
-    unique_ptr<core::GlobalState> lgs = make_unique<core::GlobalState>(
-        (make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>())));
-    lgs->initEmpty();
-    lgs->silenceErrors = true;
-    core::FileRef fref;
-    {
-        core::UnfreezeFileTable fileTableAccess(*lgs);
-        fref = lgs->enterFile(forWhat);
-        fref.data(*lgs).strictLevel = realmain::pipeline::decideStrictLevel(*lgs, fref, emptyOpts);
-    }
-    vector<ast::ParsedFile> single;
+ast::ParsedFile rewriteAST(const core::GlobalState &originalGS, core::GlobalState &newGS, core::FileRef newFref,
+                           const ast::ParsedFile &ast) {
+    // TODO(jvilk): Switch to passing around compressed ASTs which are cheaper to copy + inflate.
+    ast::ParsedFile rewritten{ast.tree.deepCopy(), newFref};
+    core::LazyGlobalSubstitution subst(originalGS, newGS);
+    core::MutableContext ctx(newGS, core::Symbols::root(), newFref);
+    rewritten.tree = ast::Substitute::run(ctx, subst, move(rewritten.tree));
+    return rewritten;
+}
 
-    single.emplace_back(realmain::pipeline::indexOne(emptyOpts, *lgs, fref));
+core::FileHash computeFileHash(unique_ptr<core::GlobalState> &lgs, ast::ParsedFile file) {
+    vector<ast::ParsedFile> single;
+    single.emplace_back(move(file));
+
     core::Context ctx(*lgs, core::Symbols::root(), single[0].file);
     auto allNames = getAllNames(ctx, single[0].tree);
     auto workers = WorkerPool::create(0, lgs->tracer());
-    realmain::pipeline::resolve(lgs, move(single), emptyOpts, *workers);
+    realmain::pipeline::resolve(lgs, move(single), opts(), *workers);
 
     return {move(*lgs->hash()), move(allNames)};
+}
+
+// Note: lgs is an outparameter.
+core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<core::File> forWhat,
+                                          unique_ptr<core::GlobalState> &lgs) {
+    lgs = make_unique<core::GlobalState>(
+        (make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>())));
+    lgs->initEmpty();
+    lgs->silenceErrors = true;
+    {
+        core::UnfreezeFileTable fileTableAccess(*lgs);
+        auto fref = lgs->enterFile(forWhat);
+        fref.data(*lgs).strictLevel = realmain::pipeline::decideStrictLevel(*lgs, fref, opts());
+        return fref;
+    }
+}
+
+core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+    Timer timeit(logger, "computeFileHash");
+    unique_ptr<core::GlobalState> lgs;
+    core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs);
+    return computeFileHash(lgs, realmain::pipeline::indexOne(opts(), *lgs, fref));
 }
 }; // namespace
 
@@ -141,6 +168,70 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
             }
         }
     }
+}
+
+vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::GlobalState> &gs,
+                                                           const realmain::options::Options &opts,
+                                                           spdlog::logger &logger, vector<core::FileRef> &files,
+                                                           WorkerPool &workers,
+                                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
+
+    // In parallel, rewrite ASTs to an empty GlobalState and use them for hashing.
+    shared_ptr<ConcurrentBoundedQueue<size_t>> fileq = make_shared<ConcurrentBoundedQueue<size_t>>(asts.size());
+    for (size_t i = 0; i < asts.size(); i++) {
+        auto copy = i;
+        fileq->push(move(copy), 1);
+    }
+
+    logger.debug("Computing state hashes for {} files", asts.size());
+
+    const core::GlobalState &sharedGs = *gs;
+    shared_ptr<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>>(asts.size());
+    workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger]() {
+        vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
+        int processedByThread = 0;
+        size_t job;
+        {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    processedByThread++;
+
+                    auto &ast = asts[job];
+
+                    if (!ast.file.exists() || ast.file.data(sharedGs).getFileHash() != nullptr) {
+                        continue;
+                    }
+
+                    unique_ptr<core::GlobalState> lgs;
+                    auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs);
+
+                    // Rewrite AST
+                    threadResult.emplace_back(job, make_unique<core::FileHash>(
+                                                       computeFileHash(lgs, rewriteAST(sharedGs, *lgs, newFref, ast))));
+                }
+            }
+        }
+
+        if (processedByThread > 0) {
+            resultq->push(move(threadResult), processedByThread);
+        }
+    });
+
+    {
+        vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+            if (result.gotItem()) {
+                for (auto &a : threadResult) {
+                    files[a.first].data(*gs).setFileHash(move(a.second));
+                }
+            }
+        }
+    }
+
+    return asts;
 }
 
 } // namespace sorbet::hashing

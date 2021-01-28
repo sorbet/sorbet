@@ -5,6 +5,18 @@
 #include "common/concurrency/WorkerPool.h"
 #include "core/Files.h"
 
+namespace sorbet {
+class OwnedKeyValueStore;
+}
+
+namespace sorbet::ast {
+struct ParsedFile;
+}
+
+namespace sorbet::realmain::options {
+struct Options;
+}
+
 namespace sorbet::hashing {
 
 /**
@@ -22,6 +34,24 @@ public:
     // from the key-value store. Returns 'true' if it had to compute any file hashes.
     static void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, spdlog::logger &logger,
                                   WorkerPool &workers);
+
+    /**
+     * Parses and indexes the provided files using `gs` _and_ computes their hashes.
+     *
+     * For each `ParsedFile`, this function:
+     * - Parses and indexes the file with `gs`.
+     * - Checks if the file has a hash. If not, it uses the AST for hashing purposes, which involves copying and
+     * rewriting the AST to refer to NameRefs in a fresh GlobalState object. The NameHash is stored in the file object.
+     *
+     * This procedure is more efficient than indexing and computing file hashes independently as files are parsed from
+     * source text only once. If kvstore is supplied, this method attempts to fetch trees from the cache.
+     *
+     * Note: ASTs are returned in `FileRef` order (not input order).
+     */
+    static std::vector<ast::ParsedFile>
+    indexAndComputeFileHashes(std::unique_ptr<core::GlobalState> &gs, const realmain::options::Options &opts,
+                              spdlog::logger &logger, std::vector<core::FileRef> &files, WorkerPool &workers,
+                              const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 };
 } // namespace sorbet::hashing
 
