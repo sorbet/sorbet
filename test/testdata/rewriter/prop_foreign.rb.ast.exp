@@ -1,7 +1,7 @@
 begin
   <emptyTree>
   class <emptyTree><<C <root>>> < (::<todo sym>)
-    def self.<static-init><<static-init>$152>(<blk>)
+    def self.<static-init><<static-init>$CENSORED>(<blk>)
       begin
         begin
           ::<Magic>.<define-top-class-or-module>(::ForeignClass)

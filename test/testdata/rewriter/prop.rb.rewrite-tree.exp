@@ -616,10 +616,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign=, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_!, :normal)
-
     <self>.prop(:foreign_lazy, <emptyTree>::<C String>, :foreign, <emptyTree>::<C Kernel>.lambda() do ||
         <emptyTree>::<C ForeignClass>
       end, :without_accessors, true)
@@ -627,10 +623,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy, :normal)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy=, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy_, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_lazy_!, :normal)
 
     <self>.prop(:foreign_proc, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         <emptyTree>::<C ForeignClass>
@@ -640,10 +632,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc=, :normal)
 
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc_, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_proc_!, :normal)
-
     <self>.prop(:foreign_invalid, <emptyTree>::<C String>, :foreign, <self>.proc() do ||
         :not_a_type
       end, :without_accessors, true)
@@ -651,10 +639,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid, :normal)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid=, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid_, :normal)
-
-    ::Sorbet::Private::Static.keep_def(<self>, :foreign_invalid_!, :normal)
 
     <self>.prop(:ifunset, <emptyTree>::<C String>, :ifunset, "", :without_accessors, true)
 
