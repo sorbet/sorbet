@@ -82,6 +82,7 @@ ast::ParsedFile rewriteAST(const core::GlobalState &originalGS, core::GlobalStat
     ast::ParsedFile rewritten{ast.tree.deepCopy(), newFref};
     core::LazyGlobalSubstitution subst(originalGS, newGS);
     core::MutableContext ctx(newGS, core::Symbols::root(), newFref);
+    core::UnfreezeNameTable nameTableAccess(newGS);
     rewritten.tree = ast::Substitute::run(ctx, subst, move(rewritten.tree));
     return rewritten;
 }
@@ -176,6 +177,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
                                                            WorkerPool &workers,
                                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
+    ENFORCE_NO_TIMER(asts.size() == files.size());
 
     // In parallel, rewrite ASTs to an empty GlobalState and use them for hashing.
     shared_ptr<ConcurrentBoundedQueue<size_t>> fileq = make_shared<ConcurrentBoundedQueue<size_t>>(asts.size());
@@ -198,7 +200,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
                 if (result.gotItem()) {
                     processedByThread++;
 
-                    auto &ast = asts[job];
+                    const auto &ast = asts[job];
 
                     if (!ast.file.exists() || ast.file.data(sharedGs).getFileHash() != nullptr) {
                         continue;
@@ -207,7 +209,6 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
                     unique_ptr<core::GlobalState> lgs;
                     auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs);
 
-                    // Rewrite AST
                     threadResult.emplace_back(job, make_unique<core::FileHash>(
                                                        computeFileHash(lgs, rewriteAST(sharedGs, *lgs, newFref, ast))));
                 }
