@@ -17,12 +17,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
               <assignTemp>$3.downcase()
             end
           end
-          if ::NilClass.===(x)
-            ::<Magic>.<nil-for-safe-navigation>(x)
+          if ::NilClass.===(<assignTemp>$2)
+            ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
           else
-            if ::NilClass.===(<assignTemp>$2)
-              ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
-            else
+            begin
+              x = ::T.must(x)
               <assignTemp>$2.end_with?(x.upcase())
             end
           end
@@ -37,22 +36,20 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
                 <assignTemp>$6.downcase()
               end
             end
-            if ::NilClass.===(x)
-              ::<Magic>.<nil-for-safe-navigation>(x)
+            if ::NilClass.===(<assignTemp>$5)
+              ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$5)
             else
-              if ::NilClass.===(<assignTemp>$5)
-                ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$5)
-              else
+              begin
+                x = ::T.must(x)
                 <assignTemp>$5.capitalize()
               end
             end
           end
-          if ::NilClass.===(x)
-            ::<Magic>.<nil-for-safe-navigation>(x)
+          if ::NilClass.===(<assignTemp>$4)
+            ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$4)
           else
-            if ::NilClass.===(<assignTemp>$4)
-              ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$4)
-            else
+            begin
+              x = ::T.must(x)
               <assignTemp>$4.end_with?(x.upcase())
             end
           end
@@ -66,12 +63,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
               <assignTemp>$8.downcase()
             end
           end
-          if ::NilClass.===(x)
-            ::<Magic>.<nil-for-safe-navigation>(x)
+          if ::NilClass.===(<assignTemp>$7)
+            ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$7)
           else
-            if ::NilClass.===(<assignTemp>$7)
-              ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$7)
-            else
+            begin
+              x = ::T.must(x)
               <assignTemp>$7.end_with?(begin
                   <assignTemp>$9 = x
                   if ::NilClass.===(<assignTemp>$9)

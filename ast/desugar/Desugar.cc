@@ -1138,18 +1138,16 @@ TreePtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
                     loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method, std::move(csend->args));
                 auto send = node2TreeImpl(dctx, std::move(sendNode));
 
+                if (chainLvarName.exists()) {
+                    auto thing1 = MK::Local(zeroLengthRecvLoc, chainLvarName);
+                    auto thing2 = MK::Send1(zeroLengthLoc, MK::T(zeroLengthLoc), core::Names::must(), std::move(thing1));
+                    auto thing3 = MK::Assign(zeroLengthRecvLoc, chainLvarName, std::move(thing2));
+                    send = MK::InsSeq1(zeroLengthLoc, std::move(thing3), std::move(send));
+                }
+
                 TreePtr nil = MK::Send1(zeroLengthRecvLoc, ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
                                         core::Names::nilForSafeNavigation(), MK::Local(zeroLengthRecvLoc, tempRecv));
                 auto iff = MK::If(zeroLengthLoc, std::move(cond), std::move(nil), std::move(send));
-
-                if (chainLvarName.exists()) {
-                    cond = MK::Send1(zeroLengthLoc, ast::MK::Constant(zeroLengthRecvLoc, core::Symbols::NilClass()),
-                                     core::Names::tripleEq(), MK::Local(zeroLengthRecvLoc, chainLvarName));
-                    nil = MK::Send1(zeroLengthRecvLoc, ast::MK::Constant(zeroLengthLoc, core::Symbols::Magic()),
-                                    core::Names::nilForSafeNavigation(), MK::Local(zeroLengthRecvLoc, chainLvarName));
-                    iff = MK::If(zeroLengthLoc, std::move(cond), std::move(nil), std::move(iff));
-                }
-
                 auto res = MK::InsSeq1(zeroLengthLoc, std::move(assgn), std::move(iff));
                 result = std::move(res);
             },
