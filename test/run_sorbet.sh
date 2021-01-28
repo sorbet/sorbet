@@ -84,7 +84,7 @@ info "├─ ${command[*]}"
 if "${command[@]}"; then
   success "└─ successfully generated LLVM output."
 
-  if [[ -n "$EMIT_SYNCBACK" && -n "$explicit_llvmir" ]]; then
+  if [[ -n "${EMIT_SYNCBACK:-}" && -n "$explicit_llvmir" ]]; then
     echo '### BEGIN SYNCBACK ###'
     find "$orig_llvmir" -name '*.ll' -o -name '*.llo'
     echo '### END SYNCBACK ###'
