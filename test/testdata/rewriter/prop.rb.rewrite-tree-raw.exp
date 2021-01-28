@@ -6152,40 +6152,6 @@ ClassDef{
         }
 
         Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = (module ::Sorbet::Private::Static)
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_ }
-            Literal{ value = :normal }
-          ]
-        }
-
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = (module ::Sorbet::Private::Static)
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_! }
-            Literal{ value = :normal }
-          ]
-        }
-
-        Send{
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6252,40 +6218,6 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_lazy= }
-            Literal{ value = :normal }
-          ]
-        }
-
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = (module ::Sorbet::Private::Static)
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_lazy_ }
-            Literal{ value = :normal }
-          ]
-        }
-
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = (module ::Sorbet::Private::Static)
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_lazy_! }
             Literal{ value = :normal }
           ]
         }
@@ -6361,40 +6293,6 @@ ClassDef{
         }
 
         Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = (module ::Sorbet::Private::Static)
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_proc_ }
-            Literal{ value = :normal }
-          ]
-        }
-
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = (module ::Sorbet::Private::Static)
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_proc_! }
-            Literal{ value = :normal }
-          ]
-        }
-
-        Send{
           recv = Local{
             localVariable = <U <self>>
           }
@@ -6457,40 +6355,6 @@ ClassDef{
               localVariable = <U <self>>
             }
             Literal{ value = :foreign_invalid= }
-            Literal{ value = :normal }
-          ]
-        }
-
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = (module ::Sorbet::Private::Static)
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_invalid_ }
-            Literal{ value = :normal }
-          ]
-        }
-
-        Send{
-          recv = ConstantLit{
-            orig = nullptr
-            symbol = (module ::Sorbet::Private::Static)
-          }
-          fun = <U keep_def>
-          block = nullptr
-          pos_args = 3
-          args = [
-            Local{
-              localVariable = <U <self>>
-            }
-            Literal{ value = :foreign_invalid_! }
             Literal{ value = :normal }
           ]
         }

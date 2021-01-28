@@ -406,10 +406,12 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
         auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
 
-        ast::ExpressionPtr arg =
+        auto arg =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        nodes.emplace_back(
-            ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc)));
+        auto fkMethodDef =
+            ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc));
+        ast::cast_tree_nonnull<ast::MethodDef>(fkMethodDef).flags.isUnimplemented = true;
+        nodes.emplace_back(std::move(fkMethodDef));
 
         // sig {params(opts: T.untyped).returns($foreign)}
         nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
@@ -420,10 +422,12 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         // end
 
         auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
-        ast::ExpressionPtr arg2 =
+        auto arg2 =
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
-        nodes.emplace_back(
-            ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::RaiseUnimplemented(loc)));
+        auto fkMethodDefBang =
+            ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::RaiseUnimplemented(loc));
+        ast::cast_tree_nonnull<ast::MethodDef>(fkMethodDefBang).flags.isUnimplemented = true;
+        nodes.emplace_back(std::move(fkMethodDefBang));
     }
 
     return nodes;
