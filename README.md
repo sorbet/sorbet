@@ -39,8 +39,7 @@ docs about Stripe-specific development workflows and historical Stripe context.
 
 For the best chance of success:
 
-- Use Ubuntu 16.04 (18.04 *might* work, 20.04 almost definitely won't work)
-- Run `sudo apt-get install libncurses-dev`
+- Run `sudo apt-get install libncurses-dev libssl-dev`
 
 Then run:
 
