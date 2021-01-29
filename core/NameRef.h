@@ -186,7 +186,7 @@ public:
 
     bool isValidConstantName(const GlobalState &gs) const;
 
-    unsigned int hash(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
 
     std::string_view shortName(const GlobalState &gs) const;
     std::string showRaw(const GlobalState &gs) const;

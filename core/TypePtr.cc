@@ -318,7 +318,11 @@ string TypePtr::toStringWithTabs(const GlobalState &gs, int tabs) const {
 #undef TO_STRING_WITH_TABS
 }
 
-unsigned int TypePtr::hash(const GlobalState &gs) const {
+u4 TypePtr::hash(const GlobalState &gs) const {
+#define HASH(T) return cast_type_nonnull<T>(*this).hash(gs);
+    GENERATE_TAG_SWITCH(tag(), HASH)
+#undef HASH
+
     return _hash(this->toString(gs)); // TODO: make something better
 }
 
