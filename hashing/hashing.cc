@@ -127,7 +127,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     ENFORCE_NO_TIMER(asts.size() == files.size());
 
     // In parallel, rewrite ASTs to an empty GlobalState and use them for hashing.
-    shared_ptr<ConcurrentBoundedQueue<size_t>> fileq = make_shared<ConcurrentBoundedQueue<size_t>>(asts.size());
+    auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(asts.size());
     for (size_t i = 0; i < asts.size(); i++) {
         auto copy = i;
         fileq->push(move(copy), 1);
