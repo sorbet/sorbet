@@ -1053,7 +1053,7 @@ bool IREmitterHelpers::isRootishSymbol(const core::GlobalState &gs, core::Symbol
 
     // --stripe-packages interposes its own set of symbols at the toplevel.
     // Absent any runtime support, we need to consider these as rootish.
-    if (sym == core::Symbols::PackageRegistry() || sym.data(gs)->name == core::Names::Constants::PkgRoot_Package()) {
+    if (sym == core::Symbols::PackageRegistry() || sym.data(gs)->name.isPackagerName(gs)) {
         return true;
     }
 
