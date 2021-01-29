@@ -497,11 +497,12 @@ void fillLocals(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterCo
 
 // Fetches the global that points to the current static-init locals array, and the number of elements allocated.
 tuple<llvm::GlobalVariable *, llvm::GlobalVariable *, int> getStaticInitLocals(CompilerState &cs) {
+    static const bool allowInternalLinkage = true;
     auto *staticInitLocalsName = "<static-init-locals>";
-    auto *staticInitLocalsPtr = cs.module->getGlobalVariable(staticInitLocalsName, true);
+    auto *staticInitLocalsPtr = cs.module->getGlobalVariable(staticInitLocalsName, allowInternalLinkage);
 
     auto *staticInitLocalsSizeName = "<static-init-locals-size>";
-    auto *staticInitLocalsSizePtr = cs.module->getGlobalVariable(staticInitLocalsSizeName, true);
+    auto *staticInitLocalsSizePtr = cs.module->getGlobalVariable(staticInitLocalsSizeName, allowInternalLinkage);
 
     if (staticInitLocalsPtr != nullptr) {
         ENFORCE(staticInitLocalsSizePtr && staticInitLocalsSizePtr->hasInitializer());
@@ -510,45 +511,62 @@ tuple<llvm::GlobalVariable *, llvm::GlobalVariable *, int> getStaticInitLocals(C
         ENFORCE(llvm::isa<llvm::ConstantInt>(init));
 
         return {staticInitLocalsPtr, staticInitLocalsSizePtr, llvm::cast<llvm::ConstantInt>(init)->getZExtValue()};
-    } else {
-        ENFORCE(staticInitLocalsSizePtr == nullptr);
-
-        // the variable doesn't exist, so there haven't been any locals allocated for static-init.
-        {
-            auto *type = llvm::PointerType::getUnqual(llvm::Type::getInt64Ty(cs));
-            auto nullv = llvm::ConstantPointerNull::get(type);
-            staticInitLocalsPtr = new llvm::GlobalVariable(
-                *cs.module, type, false, llvm::GlobalVariable::InternalLinkage, nullv, staticInitLocalsName);
-        }
-
-        {
-            auto *type = llvm::Type::getInt32Ty(cs);
-            auto *zero = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, false));
-            staticInitLocalsSizePtr = new llvm::GlobalVariable(
-                *cs.module, type, false, llvm::GlobalVariable::InternalLinkage, zero, staticInitLocalsSizeName);
-        }
-
-        // Both globals do not change at runtime -- they only have their initializers changed during code generation.
-        staticInitLocalsPtr->setConstant(true);
-        staticInitLocalsSizePtr->setConstant(true);
-
-        return {staticInitLocalsPtr, staticInitLocalsSizePtr, 0};
     }
+
+    ENFORCE(staticInitLocalsSizePtr == nullptr);
+
+    // Both globals we are about to create do not change at runtime.  Only their
+    // initializers change as we translate the AST into LLVM IR.
+    static const bool isRuntimeConstant = true;
+
+    // the variable doesn't exist, so there haven't been any locals allocated for static-init.
+    {
+        auto *type = llvm::PointerType::getUnqual(llvm::Type::getInt64Ty(cs));
+        auto nullv = llvm::ConstantPointerNull::get(type);
+        staticInitLocalsPtr = new llvm::GlobalVariable(
+            *cs.module, type, isRuntimeConstant, llvm::GlobalVariable::InternalLinkage, nullv, staticInitLocalsName);
+    }
+
+    {
+        auto *type = llvm::Type::getInt32Ty(cs);
+        auto *zero = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, false));
+        staticInitLocalsSizePtr = new llvm::GlobalVariable(
+            *cs.module, type, isRuntimeConstant, llvm::GlobalVariable::InternalLinkage, zero, staticInitLocalsSizeName);
+    }
+
+    return {staticInitLocalsPtr, staticInitLocalsSizePtr, 0};
 }
 
-// Allocate an array to hold local variable ids before calling `sorbet_allocateRubyStackFrame`. There are three cases
-// that this addresses:
-//
-// (1) Normal methods:
-//     Allocate an array on the C stack (of the method we're emitting) that is large enough to contain all of the
-//     escaped locals, and place their ids inside of it
-//
-// (2) static-init methods:
-//     Re-focus on the file-level static-init method, extending its array of locals to include the ones required for
-//     this specific static-init method.
-//
-// (3) Blocks and exception-related functions:
-//     All locals are inherited from the containing method, so none need to be allocated in the iseq
+// A description of where local variables' IDs are held prior to calling
+// `sorbet_allocateRubyStackFrame`.
+enum class LocalsIDStorage {
+    // A normal method: we will allocate a temporary array on the C stack.
+    Stack,
+
+    // A file- or class-level static init method: we create one large array in static
+    // storage to hold all the IDs for these methods.
+    GlobalArray,
+
+    // Blocks and exception-related functions: locals are inherited from the containing
+    // method, which already allocated ID storage according to one of the other enum
+    // values.  We don't need to allocate any space.
+    Inherited,
+};
+
+LocalsIDStorage classifyStorageFor(CompilerState &cs, const IREmitterContext &irctx, const ast::MethodDef &md,
+                                   int rubyBlockId) {
+    if (!allocatesLocals(cs, irctx, md.symbol, rubyBlockId)) {
+        return LocalsIDStorage::Inherited;
+    }
+
+    if (!IREmitterHelpers::isFileOrClassStaticInit(cs, md.symbol)) {
+        return LocalsIDStorage::Stack;
+    }
+
+    return LocalsIDStorage::GlobalArray;
+}
+
+// Allocate an array to hold local variable ids before calling `sorbet_allocateRubyStackFrame`.
 tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilderBase &build,
                                               const IREmitterContext &irctx, const ast::MethodDef &md,
                                               int rubyBlockId) {
@@ -558,16 +576,20 @@ tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilder
     auto *idType = llvm::Type::getInt64Ty(cs);
     auto *idPtrType = llvm::PointerType::getUnqual(idType);
 
-    if (allocatesLocals(cs, irctx, md.symbol, rubyBlockId)) {
-        if (!IREmitterHelpers::isFileOrClassStaticInit(cs, md.symbol)) {
-            // case 1
+    auto storageKind = classifyStorageFor(cs, irctx, md, rubyBlockId);
+    switch (storageKind) {
+        case LocalsIDStorage::Inherited:
+            numLocals = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true));
+            locals = llvm::ConstantPointerNull::get(idPtrType);
+            break;
+
+        case LocalsIDStorage::Stack:
             numLocals = llvm::ConstantInt::get(cs, llvm::APInt(32, irctx.escapedVariableIndices.size(), true));
             locals = builder.CreateAlloca(idType, numLocals, "locals");
             fillLocals(cs, builder, irctx, rubyBlockId, 0, locals);
-        } else {
-            // case 2
+            break;
 
-            // fetch the global that holds the pointer to locals arrays, and the current size.
+        case LocalsIDStorage::GlobalArray: {
             auto [staticInitLocalsPtr, staticInitLocalsSizePtr, baseSize] = getStaticInitLocals(cs);
 
             // store the offset to the locals for this static-init method in a fresh global with a special name
@@ -601,20 +623,14 @@ tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilder
 
             // Finally, we only set the locals pointer to a non-null value if this is the top-level static-init, as
             // that is the function that will be responsible for allocating the frame used by all static-init methods.
-            // (The top-level static-init method has a name like `<static-init>$123>` not just `<static-init>`, which is
-            // why this check works)
-            if (md.symbol.data(cs)->name == core::Names::staticInit()) {
+            if (IREmitterHelpers::isClassStaticInit(cs, md.symbol)) {
                 numLocals = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true));
                 locals = llvm::ConstantPointerNull::get(idPtrType);
             } else {
                 numLocals = builder.CreateLoad(staticInitLocalsSizePtr, "numLocals");
                 locals = builder.CreateLoad(staticInitLocalsPtr, "locals");
             }
-        }
-    } else {
-        // case 3
-        numLocals = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true));
-        locals = llvm::ConstantPointerNull::get(idPtrType);
+        } break;
     }
 
     return {locals, numLocals};
@@ -966,5 +982,4 @@ llvm::Value *VMFlag::build(CompilerState &cs, llvm::IRBuilderBase &build) const 
 const VMFlag Payload::VM_CALL_ARGS_SIMPLE{"sorbet_vmCallArgsSimple", "VM_CALL_ARGS_SIMPLE"};
 const VMFlag Payload::VM_CALL_KWARG{"sorbet_vmCallKwarg", "VM_CALL_KWARG"};
 const VMFlag Payload::VM_CALL_KW_SPLAT{"sorbet_vmCallKwSplat", "VM_CALL_KW_SPLAT"};
-
-}; // namespace sorbet::compiler
+} // namespace sorbet::compiler

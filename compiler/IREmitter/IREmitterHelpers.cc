@@ -387,10 +387,7 @@ int resolveParent(const vector<FunctionType> &blockTypes, const vector<int> &blo
 void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector<int> &blockParents,
                          vector<int> &exceptionHandlingBlockHeaders, vector<int> &basicBlockJumpOverrides) {
     // ruby block 0 is always the top-level of the method being compiled
-    if (cfg.symbol.data(cs)->name == core::Names::staticInit()) {
-        // NOTE: We're explicitly not using IREmitterHelpers::isFileOrClassStaticInit here, as we want to distinguish
-        // between the file-level and class/module static-init methods.
-        //
+    if (IREmitterHelpers::isClassStaticInit(cs, cfg.symbol)) {
         // When ruby runs the `Init_` function to initialize the whole object for this function it pushes a c frame for
         // that function on the ruby stack, and we update that frame with the iseq that we make for tracking line
         // numbers.  However when we run our static-init methods for classes and modules we call the c functions
@@ -795,9 +792,22 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
     return prefix + suffix;
 }
 
-bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &cs, core::SymbolRef sym) {
-    auto name = sym.data(cs)->name;
-    return (name.kind() == core::NameKind::UTF8 ? name : name.dataUnique(cs)->original) == core::Names::staticInit();
+namespace {
+bool isFileStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
+    auto name = sym.data(gs)->name;
+    if (name.kind() != core::NameKind::UNIQUE) {
+        return false;
+    }
+    return name.dataUnique(gs)->original == core::Names::staticInit();
+}
+} // namespace
+
+bool IREmitterHelpers::isClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
+    return sym.data(gs)->name == core::Names::staticInit();
+}
+
+bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
+    return isFileStaticInit(gs, sym) || isClassStaticInit(gs, sym);
 }
 
 core::Loc IREmitterHelpers::getMethodLineBounds(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef file,
@@ -846,24 +856,24 @@ getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionT
 }; // namespace
 
 llvm::Function *IREmitterHelpers::lookupFunction(CompilerState &cs, core::SymbolRef sym) {
-    ENFORCE(sym.data(cs)->name != core::Names::staticInit(), "use special helper instead");
+    ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
     auto func = cs.getFunction(IREmitterHelpers::getFunctionName(cs, sym));
     return func;
 }
 llvm::Function *IREmitterHelpers::getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym) {
-    ENFORCE(sym.data(cs)->name != core::Names::staticInit(), "use special helper instead");
+    ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
     return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
                                        llvm::Function::WeakAnyLinkage);
 }
 
 llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
-    ENFORCE(sym.data(cs)->name != core::Names::staticInit(), "use special helper instead");
+    ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
     return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
                                        getFunctionLinkageType(cs, sym), true);
 }
 
 llvm::Function *IREmitterHelpers::getOrCreateStaticInit(CompilerState &cs, core::SymbolRef sym, core::LocOffsets loc) {
-    ENFORCE(sym.data(cs)->name == core::Names::staticInit(), "use general helper instead");
+    ENFORCE(isClassStaticInit(cs, sym), "use general helper instead");
     auto name = IREmitterHelpers::getFunctionName(cs, sym) + "L" + to_string(loc.beginPos());
     return getOrCreateFunctionWithName(cs, name, cs.getRubyFFIType(), getFunctionLinkageType(cs, sym), true);
 }

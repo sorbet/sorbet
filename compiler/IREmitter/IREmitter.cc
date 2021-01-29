@@ -726,10 +726,10 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
 
     llvm::Function *func;
 
-    if (md.symbol.data(cs)->name != core::Names::staticInit()) {
-        func = IREmitterHelpers::getOrCreateFunction(cs, md.symbol);
-    } else {
+    if (IREmitterHelpers::isClassStaticInit(cs, md.symbol)) {
         func = IREmitterHelpers::getOrCreateStaticInit(cs, md.symbol, md.declLoc);
+    } else {
+        func = IREmitterHelpers::getOrCreateFunction(cs, md.symbol);
     }
     func = IREmitterHelpers::cleanFunctionBody(cs, func);
     {
