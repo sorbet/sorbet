@@ -206,6 +206,12 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     // Ensure all files have hashes.
     computeFileHashes(edit.updates);
 
+    // TODO(jvilk): Use the new hashing package's new index and hash functionality here to avoid reparsing files twice.
+    // The challenge here is to update `canTakeFastPath` to take old hashes as an argument, since:
+    // - We need the _old_ and _new_ hashes to run `canTakeFastPath`
+    // - `canTakeFastPath` grabs the old hashes out of GlobalState
+    // - But the index and hash functionality updates the file hashes inside GlobalState.
+    // We can probably generalize the 'containsPendingTypecheckUpdate' parameter for this purpose.
     update.updatedFiles = move(edit.updates);
     update.canTakeFastPath = canTakeFastPath(update, /* containsPendingTypecheckUpdate */ false);
     update.cancellationExpected = edit.sorbetCancellationExpected;
