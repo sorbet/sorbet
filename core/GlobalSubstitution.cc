@@ -11,6 +11,8 @@ LazyGlobalSubstitution::LazyGlobalSubstitution(const GlobalState &fromGS, Global
 };
 
 NameRef LazyGlobalSubstitution::defineName(NameRef from, bool allowSameFromTo) {
+    ENFORCE_NO_TIMER(&fromGS != &toGS);
+
     // Avoid failures in debug builds.
     from = allowSameFromTo ? core::NameRef::fromRaw(fromGS, from.rawId()) : from;
     NameRef to;

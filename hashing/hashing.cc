@@ -12,70 +12,9 @@
 using namespace std;
 namespace sorbet::hashing {
 namespace {
-
-// TODO: Replace with a no-op LazyGlobalSubstitution run.
-class AllNamesCollector {
-public:
-    core::UsageHash acc;
-    ast::ExpressionPtr preTransformSend(core::Context ctx, ast::ExpressionPtr tree) {
-        acc.sends.emplace_back(ctx, ast::cast_tree_nonnull<ast::Send>(tree).fun);
-        return tree;
-    }
-
-    ast::ExpressionPtr postTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
-        auto &original = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-        acc.constants.emplace_back(ctx, original.name);
-        return tree;
-    }
-
-    void handleUnresolvedConstantLit(core::Context ctx, ast::UnresolvedConstantLit *expr) {
-        while (expr) {
-            acc.constants.emplace_back(ctx, expr->cnst);
-            // Handle references to 'Foo' in 'Foo::Bar'.
-            expr = ast::cast_tree<ast::UnresolvedConstantLit>(expr->scope);
-        }
-    }
-
-    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
-        auto &original = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-        acc.constants.emplace_back(ctx, original.symbol.data(ctx)->name);
-
-        handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(original.name));
-
-        // Grab names of superclasses. (N.B. `include` and `extend` are captured as ConstantLits.)
-        for (auto &ancst : original.ancestors) {
-            handleUnresolvedConstantLit(ctx, ast::cast_tree<ast::UnresolvedConstantLit>(ancst));
-        }
-
-        return tree;
-    }
-
-    ast::ExpressionPtr postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
-        auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree);
-        handleUnresolvedConstantLit(ctx, &original);
-        return tree;
-    }
-
-    ast::ExpressionPtr postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr tree) {
-        auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
-        if (id.kind != ast::UnresolvedIdent::Kind::Local) {
-            acc.constants.emplace_back(ctx, id.name);
-        }
-        return tree;
-    }
-};
-
 const realmain::options::Options &opts() {
     const static realmain::options::Options emptyOpts{};
     return emptyOpts;
-};
-
-core::UsageHash getAllNames(core::Context ctx, ast::ExpressionPtr &tree) {
-    AllNamesCollector collector;
-    tree = ast::TreeMap::apply(ctx, collector, move(tree));
-    core::NameHash::sortAndDedupe(collector.acc.sends);
-    core::NameHash::sortAndDedupe(collector.acc.constants);
-    return move(collector.acc);
 };
 
 pair<ast::ParsedFile, core::UsageHash> rewriteAST(const core::GlobalState &originalGS, core::GlobalState &newGS,
@@ -120,8 +59,13 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     unique_ptr<core::GlobalState> lgs;
     core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs);
     auto ast = realmain::pipeline::indexOne(opts(), *lgs, fref);
-    auto usageHash = getAllNames(core::Context(*lgs, core::Symbols::root(), fref), ast.tree);
-    return computeFileHash(lgs, move(usageHash), move(ast));
+
+    // Calculate UsageHash. We use LazyGlobalSubstitution for this purpose, but it will not do any actual substitution
+    // when fromGS == toGS (hence we intentionally do not unfreeze name table).
+    core::LazyGlobalSubstitution subst(*lgs, *lgs);
+    core::MutableContext ctx(*lgs, core::Symbols::root(), fref);
+    ast.tree = ast::Substitute::run(ctx, subst, move(ast.tree));
+    return computeFileHash(lgs, subst.getAllNames(), move(ast));
 }
 }; // namespace
 

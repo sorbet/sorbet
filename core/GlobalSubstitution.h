@@ -76,6 +76,10 @@ public:
     ~LazyGlobalSubstitution() = default;
 
     NameRef substitute(NameRef from, bool allowSameFromTo = false) {
+        if (&fromGS == &toGS) {
+            return from;
+        }
+
         auto it = nameSubstitution.find(from);
         if (it == nameSubstitution.end()) {
             return defineName(from, allowSameFromTo);
