@@ -12,7 +12,7 @@ namespace sorbet::ast {
 class Substitute {
 public:
     static ExpressionPtr run(core::MutableContext ctx, const core::GlobalSubstitution &subst, ExpressionPtr what);
-    static ExpressionPtr run(core::MutableContext ctx, core::LazyGlobalSubstitution &subst, TreePtr what);
+    static ExpressionPtr run(core::MutableContext ctx, core::LazyGlobalSubstitution &subst, ExpressionPtr what);
 };
 } // namespace sorbet::ast
 #endif // SORBET_SUBSTITUTE_H

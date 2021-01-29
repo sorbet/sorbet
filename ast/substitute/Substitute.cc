@@ -135,7 +135,7 @@ ExpressionPtr Substitute::run(core::MutableContext ctx, const core::GlobalSubsti
     return what;
 }
 
-ExpressionPtr Substitute::run(core::MutableContext ctx, core::LazyGlobalSubstitution &subst, TreePtr what) {
+ExpressionPtr Substitute::run(core::MutableContext ctx, core::LazyGlobalSubstitution &subst, ExpressionPtr what) {
     SubstWalk walk(subst);
     what = TreeMap::apply(ctx, walk, std::move(what));
     return what;
