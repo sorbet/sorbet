@@ -60,7 +60,9 @@ private:
 };
 
 /**
- * GlobalSubstitution, but lazily populates `nameSubstitution`.
+ * GlobalSubstitution, but lazily populates `nameSubstitution` _and_ builds up a UsageHash for the file.
+ * Used in the hashing package as a part of the AST hashing process, which rewrites ASTs from the main GlobalState into
+ * ASTs for new and empty GlobalStates.
  */
 class LazyGlobalSubstitution final {
     const core::GlobalState &fromGS;
