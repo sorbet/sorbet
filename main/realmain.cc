@@ -539,7 +539,7 @@ int realmain(int argc, char *argv[]) {
         }
 
         {
-            if (!opts.storeState.empty()) {
+            if (!opts.storeState.empty() || opts.forceHashing) {
                 // Calculate file hashes alongside indexing when --store-state is specified for LSP mode
                 indexed = hashing::Hashing::indexAndComputeFileHashes(gs, opts, *logger, inputFiles, *workers, kvstore);
             } else {

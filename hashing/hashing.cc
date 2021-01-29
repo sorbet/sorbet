@@ -194,13 +194,18 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     const core::GlobalState &sharedGs = *gs;
     shared_ptr<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>> resultq =
         make_shared<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>>(asts.size());
+    Timer timeit(logger, "computeFileHashes");
     workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger]() {
+        unique_ptr<Timer> timeit;
         vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
         size_t job;
         {
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
+                    if (timeit == nullptr) {
+                        timeit = make_unique<Timer>(logger, "computeFileHashesWorker");
+                    }
                     processedByThread++;
 
                     const auto &ast = asts[job];
