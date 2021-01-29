@@ -8,6 +8,10 @@ load("@com_stripe_ruby_typer//third_party:externals.bzl", "register_sorbet_depen
 
 register_sorbet_dependencies()
 
+load("@com_grail_bazel_toolchain//toolchain:deps.bzl", "bazel_toolchain_dependencies")
+
+bazel_toolchain_dependencies()
+
 load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
