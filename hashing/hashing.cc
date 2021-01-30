@@ -28,7 +28,8 @@ pair<ast::ParsedFile, core::UsageHash> rewriteAST(const core::GlobalState &origi
     return make_pair<ast::ParsedFile, core::UsageHash>(move(rewritten), subst.getAllNames());
 }
 
-core::FileHash computeFileHash(unique_ptr<core::GlobalState> &lgs, core::UsageHash usageHash, ast::ParsedFile file) {
+core::FileHash computeFileHashForAST(unique_ptr<core::GlobalState> &lgs, core::UsageHash usageHash,
+                                     ast::ParsedFile file) {
     vector<ast::ParsedFile> single;
     single.emplace_back(move(file));
 
@@ -54,7 +55,7 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
     }
 }
 
-core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+core::FileHash computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     unique_ptr<core::GlobalState> lgs;
     core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs);
@@ -65,7 +66,7 @@ core::FileHash computeFileHash(shared_ptr<core::File> forWhat, spdlog::logger &l
     core::LazyGlobalSubstitution subst(*lgs, *lgs);
     core::MutableContext ctx(*lgs, core::Symbols::root(), fref);
     ast.tree = ast::Substitute::run(ctx, subst, move(ast.tree));
-    return computeFileHash(lgs, subst.getAllNames(), move(ast));
+    return computeFileHashForAST(lgs, subst.getAllNames(), move(ast));
 }
 }; // namespace
 
@@ -95,7 +96,8 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
                         continue;
                     }
 
-                    threadResult.emplace_back(job, make_unique<core::FileHash>(computeFileHash(files[job], logger)));
+                    threadResult.emplace_back(job,
+                                              make_unique<core::FileHash>(computeFileHashForFile(files[job], logger)));
                 }
             }
         }
@@ -162,8 +164,8 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
                     auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs);
                     auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
 
-                    threadResult.emplace_back(
-                        job, make_unique<core::FileHash>(computeFileHash(lgs, move(usageHash), move(rewrittenAST))));
+                    threadResult.emplace_back(job, make_unique<core::FileHash>(computeFileHashForAST(
+                                                       lgs, move(usageHash), move(rewrittenAST))));
                 }
             }
         }
