@@ -82,7 +82,8 @@ public:
     }
 
     ExpressionPtr postTransformLocal(core::MutableContext ctx, ExpressionPtr local) {
-        cast_tree<Local>(local)->localVariable._name = subst.substitute(cast_tree<Local>(local)->localVariable._name);
+        cast_tree_nonnull<Local>(local).localVariable._name =
+            subst.substitute(cast_tree_nonnull<Local>(local).localVariable._name);
         return local;
     }
 
@@ -92,9 +93,9 @@ public:
     }
 
     ExpressionPtr postTransformLiteral(core::MutableContext ctx, ExpressionPtr tree) {
-        auto *original = cast_tree<Literal>(tree);
-        if (original->isString(ctx)) {
-            auto nameRef = original->asString(ctx);
+        auto &original = cast_tree_nonnull<Literal>(tree);
+        if (original.isString(ctx)) {
+            auto nameRef = original.asString(ctx);
             // The 'from' and 'to' GlobalState in this substitution will always be the same,
             // because the newly created nameRef reuses our current GlobalState id
             bool allowSameFromTo = true;
@@ -102,10 +103,10 @@ public:
             if (newName == nameRef) {
                 return tree;
             }
-            return MK::String(original->loc, newName);
+            return MK::String(original.loc, newName);
         }
-        if (original->isSymbol(ctx)) {
-            auto nameRef = original->asSymbol(ctx);
+        if (original.isSymbol(ctx)) {
+            auto nameRef = original.asSymbol(ctx);
             // The 'from' and 'to' GlobalState in this substitution will always be the same,
             // because the newly created nameRef reuses our current GlobalState id
             bool allowSameFromTo = true;
@@ -113,15 +114,15 @@ public:
             if (newName == nameRef) {
                 return tree;
             }
-            return MK::Symbol(original->loc, newName);
+            return MK::Symbol(original.loc, newName);
         }
         return tree;
     }
 
     ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ExpressionPtr tree) {
-        auto *original = cast_tree<UnresolvedConstantLit>(tree);
-        original->cnst = subst.substituteSymbolName(original->cnst);
-        original->scope = substClassName(ctx, std::move(original->scope));
+        auto &original = cast_tree_nonnull<UnresolvedConstantLit>(tree);
+        original.cnst = subst.substituteSymbolName(original.cnst);
+        original.scope = substClassName(ctx, std::move(original.scope));
         return tree;
     }
 };
