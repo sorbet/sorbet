@@ -10,6 +10,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//ast/substitute",
         "//ast/treemap",
         "//common/concurrency",
         "//core",
@@ -30,6 +31,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "//ast/substitute",
         "//ast/treemap",
         "//common/concurrency",
         "//core",

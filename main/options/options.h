@@ -145,6 +145,7 @@ struct Options {
     bool waitForDebugger = false;
     bool skipRewriterPasses = false;
     bool censorForSnapshotTests = false;
+    bool forceHashing = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;

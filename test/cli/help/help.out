@@ -261,5 +261,7 @@ Usage:
       --metrics-extra-tags key1=value1,key2=value2
                                 Extra tags to report, comma separated
                                 (default: "")
+      --force-hashing           Forces Sorbet to calculate file hashes when
+                                run from CLI. Useful for profiling purposes.
 
 --------------------------------------------------------------------------

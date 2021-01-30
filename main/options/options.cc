@@ -524,6 +524,8 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                cxxopts::value<string>()->default_value(empty.metricsRepo), "repo");
     options.add_options("dev")("metrics-extra-tags", "Extra tags to report, comma separated",
                                cxxopts::value<string>()->default_value(""), "key1=value1,key2=value2");
+    options.add_options("dev")(
+        "force-hashing", "Forces Sorbet to calculate file hashes when run from CLI. Useful for profiling purposes.");
 
     for (auto &provider : semanticExtensionProviders) {
         provider->injectOptions(options);
@@ -813,6 +815,7 @@ void readOptions(Options &opts,
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
         opts.storeState = raw["store-state"].as<string>();
+        opts.forceHashing = raw["force-hashing"].as<bool>();
 
         opts.threads = (opts.runLSP || !opts.storeState.empty())
                            ? raw["max-threads"].as<int>()
