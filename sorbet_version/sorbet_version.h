@@ -44,13 +44,13 @@ constexpr bool fuzz_mode = true;
 #endif
 // ^^^ __cplusplus
 
-extern const char *sorbet_version;
-extern const char *sorbet_codename;
-extern const char *sorbet_build_scm_revision;
+extern const char sorbet_version[];
+extern const char sorbet_codename[];
+extern const char sorbet_build_scm_revision[];
 extern const int sorbet_build_scm_commit_count;
-extern const char *sorbet_build_scm_clean;
+extern const char sorbet_build_scm_clean[];
 extern const long sorbet_build_timestamp;
-extern const char *sorbet_full_version_string;
+extern const char sorbet_full_version_string[];
 extern const int sorbet_is_release_build;
 extern const int sorbet_is_with_debug_symbols;
 
