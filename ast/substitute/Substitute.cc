@@ -6,6 +6,7 @@
 namespace sorbet::ast {
 
 namespace {
+// Is used with GlobalSubstitution and LazyGlobalSubstitution, which implement the same interface.
 template <typename T> class SubstWalk {
 private:
     T &subst;
@@ -20,7 +21,7 @@ private:
         }
 
         auto scope = substClassName(ctx, std::move(constLit->scope));
-        auto cnst = subst.substituteConstant(constLit->cnst);
+        auto cnst = subst.substituteSymbolName(constLit->cnst);
 
         return make_expression<UnresolvedConstantLit>(constLit->loc, std::move(scope), cnst);
     }
@@ -55,7 +56,7 @@ public:
 
     ExpressionPtr preTransformMethodDef(core::MutableContext ctx, ExpressionPtr tree) {
         auto &original = cast_tree_nonnull<MethodDef>(tree);
-        original.name = subst.substituteConstant(original.name);
+        original.name = subst.substituteSymbolName(original.name);
         for (auto &arg : original.args) {
             arg = substArg(ctx, std::move(arg));
         }
@@ -73,7 +74,7 @@ public:
     ExpressionPtr postTransformUnresolvedIdent(core::MutableContext ctx, ExpressionPtr original) {
         auto &id = cast_tree_nonnull<UnresolvedIdent>(original);
         if (id.kind != ast::UnresolvedIdent::Kind::Local) {
-            id.name = subst.substituteConstant(cast_tree<UnresolvedIdent>(original)->name);
+            id.name = subst.substituteSymbolName(cast_tree<UnresolvedIdent>(original)->name);
         } else {
             id.name = subst.substitute(cast_tree<UnresolvedIdent>(original)->name);
         }
@@ -119,7 +120,7 @@ public:
 
     ExpressionPtr postTransformUnresolvedConstantLit(core::MutableContext ctx, ExpressionPtr tree) {
         auto *original = cast_tree<UnresolvedConstantLit>(tree);
-        original->cnst = subst.substituteConstant(original->cnst);
+        original->cnst = subst.substituteSymbolName(original->cnst);
         original->scope = substClassName(ctx, std::move(original->scope));
         return tree;
     }

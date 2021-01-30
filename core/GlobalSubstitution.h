@@ -37,7 +37,7 @@ public:
         }
     }
 
-    NameRef substituteConstant(NameRef from, bool allowSameFromTo = false) const {
+    NameRef substituteSymbolName(NameRef from, bool allowSameFromTo = false) const {
         return substitute(from, allowSameFromTo);
     }
 
@@ -89,7 +89,7 @@ public:
         return it->second;
     }
 
-    NameRef substituteConstant(NameRef from, bool allowSameFromTo = false) {
+    NameRef substituteSymbolName(NameRef from, bool allowSameFromTo = false) {
         acc.constants.emplace_back(fromGS, from);
         return substitute(from, allowSameFromTo);
     }
