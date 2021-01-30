@@ -138,7 +138,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     logger.debug("Computing state hashes for {} files", asts.size());
 
     const core::GlobalState &sharedGs = *gs;
-    shared_ptr<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>> resultq =
+    auto resultq =
         make_shared<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>>(asts.size());
     Timer timeit(logger, "computeFileHashes");
     workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger]() {
