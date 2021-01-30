@@ -39,7 +39,7 @@ NameRef LazyGlobalSubstitution::defineName(NameRef from, bool allowSameFromTo) {
 
 core::UsageHash LazyGlobalSubstitution::getAllNames() {
     core::NameHash::sortAndDedupe(acc.sends);
-    core::NameHash::sortAndDedupe(acc.constants);
+    core::NameHash::sortAndDedupe(acc.symbolNames);
     return move(acc);
 }
 } // namespace sorbet::core

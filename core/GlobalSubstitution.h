@@ -101,7 +101,7 @@ public:
     }
 
     NameRef substituteSymbolName(NameRef from, bool allowSameFromTo = false) {
-        acc.constants.emplace_back(fromGS, from);
+        acc.symbolNames.emplace_back(fromGS, from);
         return substitute(from, allowSameFromTo);
     }
 
