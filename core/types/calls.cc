@@ -46,6 +46,16 @@ DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &a
     categoryCounterInc("dispatch_call", "ortype");
     auto leftRet = left.dispatchCall(gs, args.withSelfRef(left));
     auto rightRet = right.dispatchCall(gs, args.withSelfRef(right));
+
+    auto leftOk = leftRet.main.method.exists();
+    auto rightOk = rightRet.main.method.exists();
+    // If only one side is missing the method, dispatch to that one to force an error
+    if (!leftOk && rightOk) {
+        return leftRet;
+    } else if (leftOk && !rightOk) {
+        return rightRet;
+    }
+
     DispatchResult ret{Types::any(gs, leftRet.returnType, rightRet.returnType), move(leftRet.main),
                        make_unique<DispatchResult>(move(rightRet)), DispatchResult::Combinator::OR};
     return ret;
