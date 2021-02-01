@@ -241,8 +241,8 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
         p.putU4(key._hashValue);
         p.putU4(value);
     }
-    p.putU4(fh->usages.symbolNames.size());
-    for (const auto &e : fh->usages.symbolNames) {
+    p.putU4(fh->usages.symbols.size());
+    for (const auto &e : fh->usages.symbols) {
         p.putU4(e._hashValue);
     }
     p.putU4(fh->usages.sends.size());
@@ -267,11 +267,11 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         ret.definitions.methodHashes.emplace_back(key, p.getU4());
     }
     auto constantsSize = p.getU4();
-    ret.usages.symbolNames.reserve(constantsSize);
+    ret.usages.symbols.reserve(constantsSize);
     for (int it = 0; it < constantsSize; it++) {
         NameHash key;
         key._hashValue = p.getU4();
-        ret.usages.symbolNames.emplace_back(key);
+        ret.usages.symbols.emplace_back(key);
     }
     auto sendsSize = p.getU4();
     ret.usages.sends.reserve(sendsSize);

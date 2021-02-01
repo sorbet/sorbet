@@ -168,7 +168,7 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
         ENFORCE(file->getFileHash() != nullptr);
         const auto &hash = *file->getFileHash();
         const auto &usedSends = hash.usages.sends;
-        const auto &usedSymbolNames = hash.usages.symbolNames;
+        const auto &usedSymbolNames = hash.usages.symbols;
         auto ref = core::FileRef(i);
 
         const bool fileIsValid = ref.exists() && (ref.data(gs).sourceType == core::File::Type::Normal ||
