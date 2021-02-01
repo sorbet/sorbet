@@ -1,6 +1,8 @@
 #include "main/lsp/requests/definition.h"
+#include "common/FileOps.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
+#include <filesystem>
 
 using namespace std;
 
@@ -8,6 +10,26 @@ namespace sorbet::realmain::lsp {
 DefinitionTask::DefinitionTask(const LSPConfiguration &config, MessageId id,
                                unique_ptr<TextDocumentPositionParams> params)
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentDefinition), params(move(params)) {}
+
+core::Loc
+DefinitionTask::findRequireRelativeLoc(const core::GlobalState &gs,
+                                       const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &responses) {
+    if (responses.size() < 2)
+        return core::Loc::none();
+
+    auto parentSendResp = move(responses[1])->isSend();
+    const bool isRequireRelative = parentSendResp && parentSendResp->callerSideName == core::Names::require_relative();
+    auto literal = move(responses[0])->isLiteral();
+    if (isRequireRelative && literal) {
+        auto literalValue = core::cast_type_nonnull<core::LiteralType>(literal->retType.type).asName(gs).shortName(gs);
+        auto relativeFileName = fmt::format("{}.rb", literalValue);
+        auto baseFilePath = std::filesystem::path(config.uri2FileRef(gs, params->textDocument->uri).data(gs).path());
+        auto targetFilePath = baseFilePath.replace_filename(relativeFileName);
+        auto loc = core::Loc(gs.findFileByPath(targetFilePath.string()), 0, 0);
+        return loc;
+    }
+    return core::Loc::none();
+}
 
 unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &typechecker) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::TextDocumentDefinition);
@@ -20,7 +42,13 @@ unique_ptr<ResponseMessage> DefinitionTask::runRequest(LSPTypecheckerDelegate &t
     } else {
         auto &queryResponses = result.responses;
         vector<unique_ptr<Location>> result;
-        if (!queryResponses.empty()) {
+
+        // First, special case detecting require_relative and in that case go to the referenced file.
+        auto requireLoc = findRequireRelativeLoc(gs, queryResponses);
+
+        if (requireLoc.exists()) {
+            addLocIfExists(gs, result, requireLoc);
+        } else if (!queryResponses.empty()) {
             const bool fileIsTyped =
                 config.uri2FileRef(gs, params->textDocument->uri).data(gs).strictLevel >= core::StrictLevel::True;
             auto resp = move(queryResponses[0]);

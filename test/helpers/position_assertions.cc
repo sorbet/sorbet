@@ -10,6 +10,7 @@
 #include "main/lsp/LSPConfiguration.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
+#include <filesystem>
 #include <iterator>
 #include <regex>
 
@@ -35,6 +36,7 @@ const UnorderedMap<
         {"def", DefAssertion::make},
         {"type", TypeAssertion::make},
         {"type-def", TypeDefAssertion::make},
+        {"file-def", FileDefAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
@@ -431,7 +433,7 @@ tuple<string_view, vector<int>, string_view> getSymbolVersionAndOption(string_vi
 
 DefAssertion::DefAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view symbol,
                            int version, bool isDefOfSelf, bool isDefaultArgValue)
-    : RangeAssertion(filename, range, assertionLine), symbol(symbol), version(version), isDefOfSelf(isDefOfSelf),
+    : BaseDefAssertion(filename, range, assertionLine, symbol), version(version), isDefOfSelf(isDefOfSelf),
       isDefaultArgValue(isDefaultArgValue) {}
 
 shared_ptr<DefAssertion> DefAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
@@ -472,9 +474,13 @@ vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage
     return get<vector<unique_ptr<DocumentHighlight>>>(highlightsOrNull);
 }
 
-void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, LSPWrapper &lspWrapper,
-                         int &nextId, const Location &queryLoc,
-                         const std::vector<std::shared_ptr<DefAssertion>> &definitions) {
+BaseDefAssertion::BaseDefAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                   string_view symbol)
+    : RangeAssertion(filename, range, assertionLine), symbol(symbol) {}
+
+void BaseDefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
+                             LSPWrapper &lspWrapper, int &nextId, const Location &queryLoc,
+                             const std::vector<std::shared_ptr<BaseDefAssertion>> &definitions) {
     REQUIRE_FALSE(definitions.empty());
     const int line = queryLoc.range->start->line;
     // Can only query with one character, so just use the first one.
@@ -512,7 +518,7 @@ void DefAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sou
 
     vector<unique_ptr<Location>> expectedLocations;
     for (auto &def : definitions) {
-        expectedLocations.emplace_back(def->getLocation(config));
+        expectedLocations.emplace_back(def->getDefinitionLocation(config));
     }
     auto diff = diffLocations(expectedLocations, locations, [](const auto &a, const auto &b) -> int {
         // Note: Sorbet will point to the *statement* that defines the symbol, not just the symbol.
@@ -761,6 +767,39 @@ shared_ptr<TypeAssertion> TypeAssertion::make(string_view filename, unique_ptr<R
 
 string TypeAssertion::toString() const {
     return fmt::format("type: {}", symbol);
+}
+
+FileDefAssertion::FileDefAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                                   std::string targetFilename, int targetLine, int targetColumn)
+    : BaseDefAssertion(filename, range, assertionLine, ""sv), targetFilename(targetFilename), targetLine(targetLine),
+      targetColumn(targetColumn) {}
+
+std::shared_ptr<FileDefAssertion> FileDefAssertion::make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                         int assertionLine, std::string_view assertionContents,
+                                                         std::string_view assertionType) {
+    vector<string_view> split = absl::StrSplit(assertionContents, ' ');
+    CHECK_EQ(split.size(), 3);
+    {
+        INFO(fmt::format("Invalid file-def assertion; multiple words found:\n{}\nFile definition assertions should be "
+                         "of the form:\n# [^*] file-def: file-path line column",
+                         assertionContents));
+    }
+    auto file_path = split[0];
+    auto line = stoi(string(split[1]));
+    auto col = stoi(string(split[2]));
+
+    return make_shared<FileDefAssertion>(filename, range, assertionLine, string(file_path), line, col);
+}
+
+std::unique_ptr<Location> FileDefAssertion::getDefinitionLocation(const LSPConfiguration &config) const {
+    auto targetPath = std::filesystem::path(filename).replace_filename(targetFilename);
+    auto targetUri = filePathToUri(config, targetPath.string());
+    auto targetRange = RangeAssertion::makeRange(targetLine, targetColumn, targetColumn + 1);
+    return make_unique<Location>(targetUri, targetRange->copy());
+}
+
+string FileDefAssertion::toString() const {
+    return fmt::format("file: {}:{}+{}", targetFilename, targetLine, targetColumn);
 }
 
 void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine,
