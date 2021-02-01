@@ -47,7 +47,7 @@ struct GlobalStateHash {
 
 struct UsageHash {
     std::vector<core::NameHash> sends;
-    std::vector<core::NameHash> constants;
+    std::vector<core::NameHash> symbols;
 };
 
 struct FileHash {

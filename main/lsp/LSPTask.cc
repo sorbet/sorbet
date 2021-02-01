@@ -168,14 +168,14 @@ LSPQueryResult LSPTask::queryBySymbol(LSPTypecheckerDelegate &typechecker, core:
         ENFORCE(file->getFileHash() != nullptr);
         const auto &hash = *file->getFileHash();
         const auto &usedSends = hash.usages.sends;
-        const auto &usedConstants = hash.usages.constants;
+        const auto &usedSymbolNames = hash.usages.symbols;
         auto ref = core::FileRef(i);
 
         const bool fileIsValid = ref.exists() && (ref.data(gs).sourceType == core::File::Type::Normal ||
                                                   ref.data(gs).sourceType == core::File::Type::Package);
         if (fileIsValid &&
             (std::find(usedSends.begin(), usedSends.end(), symNameHash) != usedSends.end() ||
-             std::find(usedConstants.begin(), usedConstants.end(), symNameHash) != usedConstants.end())) {
+             std::find(usedSymbolNames.begin(), usedSymbolNames.end(), symNameHash) != usedSymbolNames.end())) {
             frefs.emplace_back(ref);
         }
     }
