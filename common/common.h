@@ -124,16 +124,18 @@ CheckSize(u8, 8, 8);
 
 template <class From, class To> To *fast_cast(From *what) {
     constexpr bool isFinal = std::is_final<To>::value;
-    if (std::is_same<From, To>::value)
+    if (std::is_same<From, To>::value) {
         return static_cast<To *>(what);
+    }
     if (what == nullptr) {
         return nullptr;
     }
     if (isFinal) {
         From &nonNull = *what;
         const std::type_info &ty = typeid(nonNull);
-        if (ty == typeid(To))
+        if (ty == typeid(To)) {
             return static_cast<To *>(what);
+        }
         return nullptr;
     }
     return dynamic_cast<To *>(what);
