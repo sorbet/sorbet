@@ -647,6 +647,23 @@ bool isSimilarConstant(const core::GlobalState &gs, string_view prefix, core::Sy
     return hasSimilarName(gs, name, prefix);
 }
 
+// Returns a symbol's members that match the given prefix. Sorts matches by name.
+vector<core::SymbolRef> getSimilarMemberConstants(const core::GlobalState &gs, string_view prefix,
+                                                  core::SymbolRef scope) {
+    vector<core::SymbolRef> matches;
+    for (auto [_name, sym] : scope.data(gs)->members()) {
+        if (isSimilarConstant(gs, prefix, sym)) {
+            matches.emplace_back(sym);
+        }
+    }
+    if (!matches.empty()) {
+        fast_sort(matches, [&gs](core::SymbolRef a, core::SymbolRef b) {
+            return a.data(gs)->name.shortName(gs).compare(b.data(gs)->name.shortName(gs)) < 0;
+        });
+    }
+    return matches;
+}
+
 } // namespace
 
 CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, unique_ptr<CompletionParams> params)
@@ -729,12 +746,8 @@ void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const cor
     }
 
     for (auto scope : resp.scopes) {
-        // TODO(jez) This membersStableOrderSlow is the only ordering we have on constant items right now.
-        // We should probably at least sort by whether the prefix of the suggested constant matches.
-        for (auto [_name, sym] : scope.data(gs)->membersStableOrderSlow(gs)) {
-            if (isSimilarConstant(gs, prefix, sym)) {
-                items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
-            }
+        for (auto sym : getSimilarMemberConstants(gs, prefix, scope)) {
+            items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
         }
     }
 
@@ -754,10 +767,8 @@ void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const cor
             continue;
         }
 
-        for (auto [_name, sym] : ancestor.data(gs)->membersStableOrderSlow(gs)) {
-            if (isSimilarConstant(gs, prefix, sym)) {
-                items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
-            }
+        for (auto sym : getSimilarMemberConstants(gs, prefix, ancestor)) {
+            items.push_back(getCompletionItemForConstant(gs, config, sym, queryLoc, prefix, items.size()));
         }
     }
 }
