@@ -322,8 +322,6 @@ u4 TypePtr::hash(const GlobalState &gs) const {
 #define HASH(T) return cast_type_nonnull<T>(*this).hash(gs);
     GENERATE_TAG_SWITCH(tag(), HASH)
 #undef HASH
-
-    return _hash(this->toString(gs)); // TODO: make something better
 }
 
 std::string TypePtr::show(const GlobalState &gs) const {

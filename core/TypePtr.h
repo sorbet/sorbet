@@ -318,9 +318,6 @@ public:
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
-    // Used in LSP's NameHash to determine the equivalence of types.
-    // Note: Types must not use any properties that are unstable across typechecking runs in this hash. Hashing must be
-    // deterministic.
     u4 hash(const GlobalState &gs) const;
 
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
