@@ -36,18 +36,20 @@ class LSPIndexer final {
      * that we correctly track the latency of canceled & rescheduled typechecking operations. */
     std::vector<std::unique_ptr<Timer>> pendingTypecheckDiagnosticLatencyTimers;
     /** Contains files evicted by `pendingTypecheckUpdates`. Used to make fast path decisions in the immediate past. */
-    UnorderedMap<int, std::shared_ptr<core::File>> evictedFiles;
+    UnorderedMap<core::FileRef, std::shared_ptr<core::File>> evictedFiles;
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
 
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
 
-    /** Determines if the given edit can take the fast path relative to the most recently committed edit. If
-     * `containsPendingTypecheckUpdates` is `true`, it will make the determination in the immediate past (just prior to
-     * the currently running slow path) using `evictedFiles`. */
-    bool canTakeFastPath(const LSPFileUpdates &edit, bool containsPendingTypecheckUpdates) const;
+    /**
+     * Determines if the given edit can take the fast path relative to the most recently committed edit.
+     * It compares the file hashes in the files in `edit` to those in `evictedFiles` and `initialGS` (in that order).
+     */
+    bool canTakeFastPath(const LSPFileUpdates &edit,
+                         const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
     bool canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                         bool containsPendingTypecheckUpdates) const;
+                         const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
 public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> initialGS,

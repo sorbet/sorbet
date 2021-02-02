@@ -18,8 +18,8 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 namespace {
 const core::File &getOldFile(core::FileRef fref, const core::GlobalState &gs,
-                             const UnorderedMap<int, shared_ptr<core::File>> &evictedFiles) {
-    const auto &it = evictedFiles.find(fref.id());
+                             const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) {
+    const auto &it = evictedFiles.find(fref);
     if (it != evictedFiles.end()) {
         return *it->second;
     }
@@ -28,8 +28,8 @@ const core::File &getOldFile(core::FileRef fref, const core::GlobalState &gs,
 }
 
 // Merges *oldEvictedFiles* into *newlyEvictedFiles*. Mutates newlyEvictedFiles.
-void mergeEvictedFiles(const UnorderedMap<int, shared_ptr<core::File>> &oldEvictedFiles,
-                       UnorderedMap<int, shared_ptr<core::File>> &newlyEvictedFiles) {
+void mergeEvictedFiles(const UnorderedMap<core::FileRef, shared_ptr<core::File>> &oldEvictedFiles,
+                       UnorderedMap<core::FileRef, shared_ptr<core::File>> &newlyEvictedFiles) {
     // Keep the older of the two file versions. We want the file version just prior to the currently pending slow path.
     for (const auto &entry : oldEvictedFiles) {
         newlyEvictedFiles[entry.first] = move(entry.second);
@@ -82,8 +82,8 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
     computeFileHashes(files, *emptyWorkers);
 }
 
-bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                                 bool containsPendingTypecheckUpdates) const {
+bool LSPIndexer::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFiles,
+                                 const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     Timer timeit(config->logger, "fast_path_decision");
     auto &logger = *config->logger;
     logger.debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
@@ -93,9 +93,6 @@ bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> 
         return false;
     }
 
-    const UnorderedMap<int, shared_ptr<core::File>> emptyMap;
-    const UnorderedMap<int, shared_ptr<core::File>> &evictedFilesRef =
-        containsPendingTypecheckUpdates ? evictedFiles : emptyMap;
     for (auto &f : changedFiles) {
         auto fref = initialGS->findFileByPath(f->path());
         if (!fref.exists()) {
@@ -103,7 +100,7 @@ bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> 
             prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
             return false;
         } else {
-            const auto &oldFile = getOldFile(fref, *initialGS, evictedFilesRef);
+            const auto &oldFile = getOldFile(fref, *initialGS, evictedFiles);
             // We don't yet have a content hash that works for package files yet. Instead, we check if the package file
             // source text has changed at all. If it does, we take the slow path.
             // Only relevant in `--stripe-packages` mode. This prevents LSP editing features like autocomplete from
@@ -137,7 +134,8 @@ bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> 
     return true;
 }
 
-bool LSPIndexer::canTakeFastPath(const LSPFileUpdates &edit, bool containsPendingTypecheckUpdates) const {
+bool LSPIndexer::canTakeFastPath(const LSPFileUpdates &edit,
+                                 const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     auto &logger = *config->logger;
     // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
     if (edit.hasNewFiles) {
@@ -145,11 +143,12 @@ bool LSPIndexer::canTakeFastPath(const LSPFileUpdates &edit, bool containsPendin
         prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
         return false;
     }
-    return canTakeFastPath(edit.updatedFiles, containsPendingTypecheckUpdates);
+    return canTakeFastPath(edit.updatedFiles, evictedFiles);
 }
 
-bool LSPIndexer::canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const {
-    return canTakeFastPath(changedFiles, false);
+bool LSPIndexer::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFiles) const {
+    static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
+    return canTakeFastPath(changedFiles, emptyMap);
 }
 
 void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
@@ -203,21 +202,12 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     LSPFileUpdates update;
     update.epoch = edit.epoch;
     update.editCount = edit.mergeCount + 1;
-    // Ensure all files have hashes.
-    computeFileHashes(edit.updates);
-
-    // TODO(jvilk): Use the new hashing package's new index and hash functionality here to avoid reparsing files twice.
-    // The challenge here is to update `canTakeFastPath` to take old hashes as an argument, since:
-    // - We need the _old_ and _new_ hashes to run `canTakeFastPath`
-    // - `canTakeFastPath` grabs the old hashes out of GlobalState
-    // - But the index and hash functionality updates the file hashes inside GlobalState.
-    // We can probably generalize the 'containsPendingTypecheckUpdate' parameter for this purpose.
     update.updatedFiles = move(edit.updates);
-    update.canTakeFastPath = canTakeFastPath(update, /* containsPendingTypecheckUpdate */ false);
     update.cancellationExpected = edit.sorbetCancellationExpected;
     update.preemptionsExpected = edit.sorbetPreemptionsExpected;
+    // _Wait_ to compute `canTakeFastPath` until after we compute hashes.
 
-    UnorderedMap<int, shared_ptr<core::File>> newlyEvictedFiles;
+    UnorderedMap<core::FileRef, shared_ptr<core::File>> newlyEvictedFiles;
     // Update globalStateHashes. Keep track of file IDs for these files, along with old hashes for these files.
     vector<core::FileRef> frefs;
     {
@@ -227,7 +217,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
             auto fref = initialGS->findFileByPath(file->path());
             i++;
             if (fref.exists()) {
-                newlyEvictedFiles[fref.id()] = initialGS->getFiles()[fref.id()];
+                newlyEvictedFiles[fref] = initialGS->getFiles()[fref.id()];
                 initialGS = core::GlobalState::replaceFile(move(initialGS), fref, file);
             } else {
                 // This file update adds a new file to GlobalState.
@@ -235,7 +225,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
                 fref = initialGS->enterFile(file);
                 fref.data(*initialGS).strictLevel = pipeline::decideStrictLevel(*initialGS, fref, config->opts);
             }
-            frefs.push_back(fref);
+            frefs.emplace_back(fref);
         }
     }
 
@@ -259,13 +249,17 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
         // which one it will be.
         initialGS->errorQueue = make_shared<core::ErrorQueue>(
             initialGS->errorQueue->logger, initialGS->errorQueue->tracer, make_shared<core::NullFlusher>());
-        auto trees = pipeline::index(initialGS, frefs, config->opts, *emptyWorkers, kvstore);
+        auto trees = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger, frefs,
+                                                                 *emptyWorkers, kvstore);
         update.updatedFileIndexes.resize(trees.size());
         for (auto &ast : trees) {
             const int i = fileToPos[ast.file];
             update.updatedFileIndexes[i] = move(ast);
         }
     }
+
+    // _Now_ that we've computed file hashes, we can make a fast path determination.
+    update.canTakeFastPath = canTakeFastPath(update, newlyEvictedFiles);
 
     auto runningSlowPath = initialGS->epochManager->getStatus();
     if (runningSlowPath.slowPathRunning) {
@@ -281,7 +275,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
             // Cancelation succeeded! Merge the updates from the cancelled run into the current update.
             update.mergeOlder(pendingTypecheckUpdates);
             // The two updates together could end up taking the fast path.
-            update.canTakeFastPath = canTakeFastPath(update, true);
+            update.canTakeFastPath = canTakeFastPath(update, evictedFiles);
             update.canceledSlowPath = true;
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
         }
