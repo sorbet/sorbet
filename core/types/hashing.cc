@@ -34,23 +34,23 @@ u4 LiteralType::hash(const GlobalState &gs) const {
     ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
     result = mix(result, undSymbol.id());
 
-    // Strings or numbers encode an extra value. True/False are completely represented by the class symbol.
-    // TODO: Casts are bad???
-    if (undSymbol == Symbols::String() || undSymbol == Symbols::Symbol()) {
-        result = mix(result, asName(gs).hash(gs));
-    } else if (undSymbol == Symbols::Integer()) {
-        u8 val = absl::bit_cast<u8>(asInteger());
-        u4 topBits = static_cast<u4>(val >> 32);
-        u4 bottomBits = static_cast<u4>(val & 0xFFFF);
-        result = mix(result, topBits);
-        result = mix(result, bottomBits);
-    } else if (undSymbol == Symbols::Float()) {
-        u8 val = absl::bit_cast<u8>(asFloat());
-        u4 topBits = static_cast<u4>(val >> 32);
-        u4 bottomBits = static_cast<u4>(val & 0xFFFF);
-        result = mix(result, topBits);
-        result = mix(result, bottomBits);
+    u8 rawValue;
+    switch (literalKind) {
+        case LiteralType::LiteralTypeKind::String:
+        case LiteralType::LiteralTypeKind::Symbol:
+            return mix(result, asName(gs).hash(gs));
+        case LiteralType::LiteralTypeKind::Float:
+            rawValue = absl::bit_cast<u8>(asFloat());
+            break;
+        case LiteralType::LiteralTypeKind::Integer:
+            rawValue = absl::bit_cast<u8>(asInteger());
+            break;
     }
+
+    u4 topBits = static_cast<u4>(rawValue >> 32);
+    u4 bottomBits = static_cast<u4>(rawValue & 0xFFFFFFFF);
+    result = mix(result, topBits);
+    result = mix(result, bottomBits);
     return result;
 }
 
