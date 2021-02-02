@@ -659,6 +659,20 @@ void GlobalState::initEmpty() {
     }
     method.data(*this)->resultType = core::make_type<core::ClassType>(core::Symbols::Encoding());
 
+    // Synthesize <Magic>.mixes_in_class_methods(self: T.untyped, arg: T.untyped) => Void
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::mixesInClassMethods());
+    {
+        auto &argSelf = enterMethodArgumentSymbol(Loc::none(), method, Names::selfLocal());
+        argSelf.type = Types::untyped(*this, method);
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::void_();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
     // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {
