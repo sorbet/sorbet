@@ -796,7 +796,8 @@ llvm::Value *Payload::voidSingleton(CompilerState &cs, llvm::IRBuilderBase &buil
             new llvm::GlobalVariable(*cs.module, tp, isConstant, llvm::GlobalVariable::InternalLinkage, zero, rawName);
 
         globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
-        auto *singletonValue = globalInitBuilder.CreateCall(cs.getFunction("sorbet_getVoidSingleton"), {}, "voidSingleton");
+        auto *singletonValue =
+            globalInitBuilder.CreateCall(cs.getFunction("sorbet_getVoidSingleton"), {}, "voidSingleton");
 
         globalInitBuilder.CreateStore(singletonValue, global);
 
