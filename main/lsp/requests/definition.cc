@@ -14,19 +14,33 @@ DefinitionTask::DefinitionTask(const LSPConfiguration &config, MessageId id,
 core::Loc
 DefinitionTask::findRequireRelativeLoc(const core::GlobalState &gs,
                                        const std::vector<std::unique_ptr<core::lsp::QueryResponse>> &responses) {
-    if (responses.size() < 2)
+    /* To detect a require_relative situation we have to match two individual
+     * entries from the query response list. The first one is the literal value
+     * that's passed in the function and will help us compute the final path
+     * we should navigate to. The second one is the `require_relative` call itself.
+     */
+    if (responses.size() < 2) {
         return core::Loc::none();
+    }
 
-    auto parentSendResp = move(responses[1])->isSend();
-    const bool isRequireRelative = parentSendResp && parentSendResp->callerSideName == core::Names::require_relative();
-    auto literal = move(responses[0])->isLiteral();
+    auto parentSendResp = responses[1]->isSend();
+    // Match the send response to make sure we are dealing with a top-level `require_relative` call
+    const bool isRequireRelative = parentSendResp
+        && parentSendResp->isPrivateOk
+        && parentSendResp->callerSideName == core::Names::require_relative();
+    auto literal = responses[0]->isLiteral();
     if (isRequireRelative && literal) {
         auto literalValue = core::cast_type_nonnull<core::LiteralType>(literal->retType.type).asName(gs).shortName(gs);
-        auto relativeFileName = fmt::format("{}.rb", literalValue);
-        auto baseFilePath = std::filesystem::path(config.uri2FileRef(gs, params->textDocument->uri).data(gs).path());
-        auto targetFilePath = baseFilePath.replace_filename(relativeFileName);
-        auto loc = core::Loc(gs.findFileByPath(targetFilePath.string()), 0, 0);
-        return loc;
+        auto baseFilePath = std::filesystem::path(literal->termLoc.file().data(gs).path());
+        auto targetFilePath = baseFilePath
+            .replace_filename(literalValue)
+            .replace_extension(".rb")
+            .lexically_normal();
+        auto targetFileRef = gs.findFileByPath(targetFilePath.string());
+        if (targetFileRef.exists()) {
+            auto loc = core::Loc(targetFileRef, 0, 0);
+            return loc;
+        }
     }
     return core::Loc::none();
 }
