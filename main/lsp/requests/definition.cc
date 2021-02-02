@@ -25,17 +25,13 @@ DefinitionTask::findRequireRelativeLoc(const core::GlobalState &gs,
 
     auto parentSendResp = responses[1]->isSend();
     // Match the send response to make sure we are dealing with a top-level `require_relative` call
-    const bool isRequireRelative = parentSendResp
-        && parentSendResp->isPrivateOk
-        && parentSendResp->callerSideName == core::Names::require_relative();
+    const bool isRequireRelative = parentSendResp && parentSendResp->isPrivateOk &&
+                                   parentSendResp->callerSideName == core::Names::require_relative();
     auto literal = responses[0]->isLiteral();
     if (isRequireRelative && literal) {
         auto literalValue = core::cast_type_nonnull<core::LiteralType>(literal->retType.type).asName(gs).shortName(gs);
         auto baseFilePath = std::filesystem::path(literal->termLoc.file().data(gs).path());
-        auto targetFilePath = baseFilePath
-            .replace_filename(literalValue)
-            .replace_extension(".rb")
-            .lexically_normal();
+        auto targetFilePath = baseFilePath.replace_filename(literalValue).replace_extension(".rb").lexically_normal();
         auto targetFileRef = gs.findFileByPath(targetFilePath.string());
         if (targetFileRef.exists()) {
             auto loc = core::Loc(targetFileRef, 0, 0);
