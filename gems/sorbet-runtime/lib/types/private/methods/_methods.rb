@@ -112,10 +112,16 @@ module T::Private::Methods
             ancestor.private_method_defined?(method_name) ||
             ancestor.protected_method_defined?(method_name)) &&
            final_method?(method_owner_and_name_to_key(ancestor, method_name))
-          raise(
-            "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
-            (target == ancestor ? "redefined" : "overridden in #{target}")
-          )
+          caller_loc = T.must(caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/types/private/methods/}) })
+          definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
+
+          error_message = "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
+                          (target == ancestor ? "redefined" : "overriden in #{target}")
+          pretty_message = "#{error_message}\n" \
+                           "Made final here: #{definition_file}:#{definition_line}\n" \
+                           "Overriden here: #{caller_loc.path}:#{caller_loc.lineno}\n"
+
+          T::Configuration.sig_validation_error_handler(pretty_message, {})
         end
       end
     end
@@ -446,6 +452,10 @@ module T::Private::Methods
       # where we need to install the hooks are special.
       mod.extend(SingletonMethodHooks) # def self.foo; end (at top level)
       Object.extend(MethodHooks)       # def foo; end      (at top level)
+      return
+    end
+
+    if !mod.is_a?(Module)
       return
     end
 

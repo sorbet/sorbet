@@ -11,6 +11,28 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     T::Configuration.reset_final_checks_on_hooks
   end
 
+  CLASS_REGEX_STR = "#<Class:0x[0-9a-f]+>"
+  CLASS_CLASS_REGEX_STR = "#<Class:#<Class:0x[0-9a-f]+>>"
+  MODULE_REGEX_STR = "#<Module:0x[0-9a-f]+>"
+
+  private def assert_msg_matches(regex, final_line, method_line, err)
+    lines = err.message.split("\n")
+    assert_equal(3, lines.length)
+    assert_match(regex, lines[0])
+    assert_match(%r{Made final here: .*test.*/types/final_method.rb:#{final_line}}, lines[1])
+    assert_match(%r{Overriden here: .*test.*/types/final_method.rb:#{method_line}}, lines[2])
+  end
+
+  private def assert_redefined_err(method_name, klass_str, final_line, method_line, err)
+    regex = %r{The method `#{method_name}` on #{klass_str} was declared as final and cannot be redefined}
+    assert_msg_matches(regex, final_line, method_line, err)
+  end
+
+  private def assert_overridden_err(method_name, klass_str, method_str, final_line, method_line, err)
+    regex = %r{The method `#{method_name}` on #{klass_str} was declared as final and cannot be overriden in #{method_str}}
+    assert_msg_matches(regex, final_line, method_line, err)
+  end
+
   it "allows declaring an instance method as final" do
     Class.new do
       extend T::Sig
@@ -37,7 +59,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_match(/^The method `foo` on #<Class:0x[0-9a-f]+> was declared as final and cannot be redefined$/, err.message)
+    assert_redefined_err('foo', CLASS_REGEX_STR, __LINE__ - 5, __LINE__ - 3, err)
   end
 
   it "forbids redefining a final class method with a final sig" do
@@ -50,7 +72,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def self.foo; end
       end
     end
-    assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be redefined$/, err.message)
+    assert_redefined_err('foo', CLASS_CLASS_REGEX_STR, __LINE__ - 5, __LINE__ - 3, err)
   end
 
   it "forbids redefining a final instance method with a regular sig" do
@@ -63,7 +85,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_match(/^The method `foo` on #<Class:0x[0-9a-f]+> was declared as final and cannot be redefined$/, err.message)
+    assert_redefined_err('foo', CLASS_REGEX_STR, __LINE__ - 5, __LINE__ - 3, err)
   end
 
   it "forbids redefining a final class method with a regular sig" do
@@ -76,7 +98,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def self.foo; end
       end
     end
-    assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be redefined$/, err.message)
+    assert_redefined_err('foo', CLASS_CLASS_REGEX_STR, __LINE__ - 5, __LINE__ - 3, err)
   end
 
   it "forbids redefining a final instance method with no sig" do
@@ -132,7 +154,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_match(/^The method `foo` on #<Class:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    assert_overridden_err('foo', CLASS_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 7, __LINE__ - 3, err)
   end
 
   it "forbids overriding a final class method" do
@@ -146,7 +168,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def self.foo; end
       end
     end
-    assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be overridden in #<Class:#<Class:0x[0-9a-f]+>>$/, err.message)
+    assert_overridden_err('foo', CLASS_CLASS_REGEX_STR, CLASS_CLASS_REGEX_STR, __LINE__ - 7, __LINE__ - 3, err)
   end
 
   it "allows toggling a final method's visbility in the same class" do
@@ -180,19 +202,19 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         public :becomes_public
       end
     end
-    assert_match(/^The method `becomes_public` on #<Class:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    assert_overridden_err('becomes_public', CLASS_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 13, __LINE__ - 3, err)
     err = assert_raises(RuntimeError) do
       Class.new(c) do
         private :becomes_private
       end
     end
-    assert_match(/^The method `becomes_private` on #<Class:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    assert_overridden_err('becomes_private', CLASS_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 16, __LINE__ - 3, err)
     err = assert_raises(RuntimeError) do
       Class.new(c) do
         private :protected_becomes_private
       end
     end
-    assert_match(/^The method `protected_becomes_private` on #<Class:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    assert_overridden_err('protected_becomes_private', CLASS_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 19, __LINE__ - 3, err)
   end
 
   it "forbids overriding a final method from an included module" do
@@ -207,7 +229,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 8, __LINE__ - 3, err)
   end
 
   it "forbids overriding a final method from an extended module" do
@@ -222,7 +244,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def self.foo; end
       end
     end
-    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:#<Class:0x[0-9a-f]+>>$/, err.message)
+    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_CLASS_REGEX_STR, __LINE__ - 8, __LINE__ - 3, err)
   end
 
   it "forbids overriding a final method by including two modules" do
@@ -239,7 +261,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         include m2, m1
       end
     end
-    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 10, __LINE__ - 3, err)
   end
 
   it "forbids overriding a final method by extending two modules" do
@@ -256,7 +278,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend m2, m1
       end
     end
-    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 10, __LINE__ - 3, err)
   end
 
   it "allows calling final methods" do
@@ -337,7 +359,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 10, __LINE__ - 3, err)
   end
 
   it "forbids overriding through many levels of include" do
@@ -358,7 +380,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         def foo; end
       end
     end
-    assert_match(/^The method `foo` on #<Module:0x[0-9a-f]+> was declared as final and cannot be overridden in #<Class:0x[0-9a-f]+>$/, err.message)
+    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 14, __LINE__ - 3, err)
   end
 
   it "allows including modules again" do
