@@ -42,11 +42,12 @@ unique_ptr<core::FileHash> computeFileHashForAST(unique_ptr<core::GlobalState> &
 
 // Note: lgs is an outparameter.
 core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<core::File> forWhat,
-                                          unique_ptr<core::GlobalState> &lgs) {
+                                          unique_ptr<core::GlobalState> &lgs, const realmain::options::Options &hashingOpts) {
     lgs = make_unique<core::GlobalState>(
         (make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>())));
     lgs->initEmpty();
     lgs->silenceErrors = true;
+    lgs->requiresAncestorEnabled = hashingOpts.requiresAncestorEnabled;
     {
         core::UnfreezeFileTable fileTableAccess(*lgs);
         auto fref = lgs->enterFile(forWhat);
@@ -55,10 +56,10 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
     }
 }
 
-unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::logger &logger, const realmain::options::Options &hashingOpts) {
     Timer timeit(logger, "computeFileHash");
     unique_ptr<core::GlobalState> lgs;
-    core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs);
+    core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs, hashingOpts);
     auto ast = realmain::pipeline::indexOne(opts(), *lgs, fref);
 
     // Calculate UsageHash. We use LazyGlobalSubstitution for this purpose, but it will not do any actual substitution
@@ -71,7 +72,7 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
 }; // namespace
 
 void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spdlog::logger &logger,
-                                WorkerPool &workers) {
+                                WorkerPool &workers, const realmain::options::Options &opts) {
     Timer timeit(logger, "computeFileHashes");
     auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
     for (size_t i = 0; i < files.size(); i++) {
@@ -83,7 +84,7 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
 
     auto resultq =
         make_shared<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>>(files.size());
-    workers.multiplexJob("lspStateHash", [fileq, resultq, &files, &logger]() {
+    workers.multiplexJob("lspStateHash", [fileq, resultq, &files, &logger, &opts]() {
         vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
         size_t job;
@@ -96,7 +97,7 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
                         continue;
                     }
 
-                    threadResult.emplace_back(job, computeFileHashForFile(files[job], logger));
+                    threadResult.emplace_back(job, computeFileHashForFile(files[job], logger, opts));
                 }
             }
         }
@@ -140,7 +141,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     auto resultq =
         make_shared<BlockingBoundedQueue<vector<pair<core::FileRef, unique_ptr<const core::FileHash>>>>>(asts.size());
     Timer timeit(logger, "computeFileHashes");
-    workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger]() {
+    workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger, &opts]() {
         unique_ptr<Timer> timeit;
         vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
@@ -160,7 +161,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
                     }
 
                     unique_ptr<core::GlobalState> lgs;
-                    auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs);
+                    auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs, opts);
                     auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
 
                     threadResult.emplace_back(ast.file,

@@ -33,7 +33,7 @@ public:
     // Computes file hashes for the given files, and stores them in the files. If supplied, attempts to retrieve hashes
     // from the key-value store. Returns 'true' if it had to compute any file hashes.
     static void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, spdlog::logger &logger,
-                                  WorkerPool &workers);
+                                  WorkerPool &workers, const realmain::options::Options &opts);
 
     /**
      * Parses and indexes the provided files using `gs` _and_ computes their hashes.
