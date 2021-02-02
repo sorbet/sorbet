@@ -1303,10 +1303,12 @@ std::vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitiveInterna
 
 // All required ancestors by this class or module
 vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitive(const GlobalState &gs) const {
+    ENFORCE(gs.requiresAncestorEnabled);
     return readRequiredAncestorsInternal(gs, Names::requiredAncestorsLin());
 }
 
 void Symbol::computeRequiredAncestorLinearization(GlobalState &gs) {
+    ENFORCE(gs.requiresAncestorEnabled);
     ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
     std::vector<ClassOrModuleRef> seen;
     requiredAncestorsTransitiveInternal(gs, seen);

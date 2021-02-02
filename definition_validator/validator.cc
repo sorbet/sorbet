@@ -691,12 +691,18 @@ public:
             // Only validateAbstract for this class if we haven't already (we already have if this
             // is a `class << self` ClassDef)
             validateAbstract(ctx, sym);
-            validateRequiredAncestors(ctx, sym);
+
+            if (ctx.state.requiresAncestorEnabled) {
+                validateRequiredAncestors(ctx, sym);
+            }
         }
         validateAbstract(ctx, singleton);
         validateFinal(ctx, sym, classDef);
         validateSealed(ctx, sym, classDef);
-        validateRequiredAncestors(ctx, singleton);
+
+        if (ctx.state.requiresAncestorEnabled) {
+            validateRequiredAncestors(ctx, singleton);
+        }
         return tree;
     }
 

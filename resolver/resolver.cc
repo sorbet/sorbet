@@ -851,12 +851,7 @@ public:
                 auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
                 this->todoClassMethods_.emplace_back(move(item));
             } else if (send.fun == core::Names::requiresAncestor()) {
-                if (!ctx.state.requiresAncestorEnabled) {
-                    if (auto e = ctx.beginError(send.loc, core::errors::Resolver::ExperimentalRequiredAncestor)) {
-                        e.setHeader("`{}` is an experimental feature. Use `{}` to enable it", "requires_ancestor",
-                                    "--enable-experimental-requires-ancestor");
-                    }
-                } else {
+                if (ctx.state.requiresAncestorEnabled) {
                     auto item = RequireAncestorResolutionItem{ctx.file, ctx.owner, &send};
                     this->todoRequiredAncestors_.emplace_back(move(item));
                 }
@@ -1019,6 +1014,8 @@ public:
         fast_sort(todoRequiredAncestors, [](const auto &lhs, const auto &rhs) -> bool {
             return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
         });
+
+        ENFORCE(todoRequiredAncestors.empty() || gs.requiresAncestorEnabled);
         fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool {
             return locCompare(core::Loc(lhs.file, lhs.tree.loc()), core::Loc(rhs.file, rhs.tree.loc()));
         });
