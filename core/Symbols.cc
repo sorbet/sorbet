@@ -1471,18 +1471,13 @@ vector<pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const GlobalStat
             return lhsHash < rhsHash;
         }
 
-        // Tiebreaker.
-        auto lhsSym = get<2>(lhs);
-        auto rhsSym = get<2>(rhs);
-        if (lhsSym.rawId() != rhsSym.rawId()) {
-            return lhsSym.rawId() < rhsSym.rawId();
-        }
+        // This should never happen, since the UnorderedMap is unique by NameRef!
         ENFORCE(false, "no stable sort");
         return 0;
     });
 
     vector<pair<NameRef, SymbolRef>> sortedMembers;
-    sortedMembers.reserve(members().size());
+    sortedMembers.reserve(result.size());
     for (auto &t : result) {
         sortedMembers.emplace_back(get<1>(t), get<2>(t));
     }
