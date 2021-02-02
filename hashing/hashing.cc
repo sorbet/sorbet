@@ -127,7 +127,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
     ENFORCE_NO_TIMER(asts.size() == files.size());
 
-    // In parallel, rewrite ASTs to an empty GlobalState and use them for hashing.
+    // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.
     auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(asts.size());
     for (size_t i = 0; i < asts.size(); i++) {
         auto copy = i;
@@ -138,11 +138,11 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
 
     const core::GlobalState &sharedGs = *gs;
     auto resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>>(asts.size());
+        make_shared<BlockingBoundedQueue<vector<pair<core::FileRef, unique_ptr<const core::FileHash>>>>>(asts.size());
     Timer timeit(logger, "computeFileHashes");
     workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger]() {
         unique_ptr<Timer> timeit;
-        vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
+        vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
         size_t job;
         {
@@ -163,7 +163,8 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
                     auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs);
                     auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
 
-                    threadResult.emplace_back(job, computeFileHashForAST(lgs, move(usageHash), move(rewrittenAST)));
+                    threadResult.emplace_back(ast.file,
+                                              computeFileHashForAST(lgs, move(usageHash), move(rewrittenAST)));
                 }
             }
         }
@@ -174,12 +175,12 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     });
 
     {
-        vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
+        vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
-                    files[a.first].data(*gs).setFileHash(move(a.second));
+                    a.first.data(*gs).setFileHash(move(a.second));
                 }
             }
         }
