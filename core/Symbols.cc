@@ -1458,35 +1458,35 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     }
 }
 
-vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const GlobalState &gs) const {
-    vector<pair<NameRef, SymbolRef>> result;
+vector<pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const GlobalState &gs) const {
+    vector<tuple<u4, NameRef, SymbolRef>> result;
     result.reserve(members().size());
     for (const auto &e : members()) {
-        result.emplace_back(e);
+        result.emplace_back(e.first.contentHash(gs), e.first, e.second);
     }
     fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
-        auto lhsShort = lhs.first.shortName(gs);
-        auto rhsShort = rhs.first.shortName(gs);
-        auto compareShort = lhsShort.compare(rhsShort);
-        if (compareShort != 0) {
-            return compareShort < 0;
+        auto lhsHash = get<0>(lhs);
+        auto rhsHash = get<0>(rhs);
+        if (lhsHash != rhsHash) {
+            return lhsHash < rhsHash;
         }
-        auto lhsRaw = lhs.first.showRaw(gs);
-        auto rhsRaw = rhs.first.showRaw(gs);
-        auto compareRaw = lhsRaw.compare(rhsRaw);
-        if (compareRaw != 0) {
-            return compareRaw < 0;
-        }
-        auto lhsSym = lhs.second.showRaw(gs);
-        auto rhsSym = rhs.second.showRaw(gs);
-        auto compareSym = lhsSym.compare(rhsSym);
-        if (compareSym != 0) {
-            return compareSym < 0;
+
+        // Tiebreaker.
+        auto lhsSym = get<2>(lhs);
+        auto rhsSym = get<2>(rhs);
+        if (lhsSym.rawId() != rhsSym.rawId()) {
+            return lhsSym.rawId() < rhsSym.rawId();
         }
         ENFORCE(false, "no stable sort");
         return 0;
     });
-    return result;
+
+    vector<pair<NameRef, SymbolRef>> sortedMembers;
+    sortedMembers.reserve(members().size());
+    for (auto &t : result) {
+        sortedMembers.emplace_back(get<1>(t), get<2>(t));
+    }
+    return sortedMembers;
 }
 
 SymbolData::SymbolData(Symbol &ref, GlobalState &gs) : DebugOnlyCheck(gs), symbol(ref) {}

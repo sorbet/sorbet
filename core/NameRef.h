@@ -186,7 +186,13 @@ public:
 
     bool isValidConstantName(const GlobalState &gs) const;
 
+    // A hash that is consistent with the given GlobalState and its descendants. Cannot be used in file hashes
+    // as it encodes Name IDs which are not stable between hashing GlobalStates.
     u4 hash(const GlobalState &gs) const;
+
+    // A hash of the NameRef's contents; does not encode Name IDs (and is thus more expensive than hash()!).
+    // Can be used during file hashing.
+    u4 contentHash(const GlobalState &gs) const;
 
     std::string_view shortName(const GlobalState &gs) const;
     std::string showRaw(const GlobalState &gs) const;
