@@ -567,6 +567,15 @@ private:
 
         auto encounteredError = false;
         for (auto &arg : send->args) {
+            auto self = ast::cast_tree<ast::Local>(arg);
+            if (self != nullptr && self->localVariable._name == core::Names::selfLocal()) {
+                auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
+                if (recv != nullptr && recv->symbol == core::Symbols::Magic()) {
+                    // This is the first argument of a Magic.mixes_in_class_methods() call
+                    continue;
+                }
+            }
+
             auto *id = ast::cast_tree<ast::ConstantLit>(arg);
 
             if (id == nullptr || !id->symbol.exists()) {
