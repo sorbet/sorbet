@@ -53,6 +53,9 @@ struct UsageHash {
 struct FileHash {
     GlobalStateHash definitions;
     UsageHash usages;
+
+    FileHash() = default;
+    FileHash(GlobalStateHash &&definitions, UsageHash &&usages);
 };
 
 }; // namespace sorbet::core

@@ -37,7 +37,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(unique_ptr<core::GlobalState> &
     auto workers = WorkerPool::create(0, lgs->tracer());
     realmain::pipeline::resolve(lgs, move(single), opts(), *workers);
 
-    return make_unique<core::FileHash>(core::FileHash{move(*lgs->hash()), move(usageHash)});
+    return make_unique<core::FileHash>(move(*lgs->hash()), move(usageHash));
 }
 
 // Note: lgs is an outparameter.
