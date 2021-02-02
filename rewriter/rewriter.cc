@@ -7,6 +7,7 @@
 #include "rewriter/ClassNew.h"
 #include "rewriter/Cleanup.h"
 #include "rewriter/Command.h"
+#include "rewriter/Concern.h"
 #include "rewriter/DSLBuilder.h"
 #include "rewriter/DefDelegator.h"
 #include "rewriter/Delegate.h"
@@ -48,6 +49,7 @@ public:
         Prop::run(ctx, classDef);
         TypeMembers::run(ctx, classDef);
         Singleton::run(ctx, classDef);
+        Concern::run(ctx, classDef);
 
         for (auto &extension : ctx.state.semanticExtensions) {
             extension->run(ctx, classDef);

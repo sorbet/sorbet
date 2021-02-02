@@ -257,6 +257,8 @@ NameDef names[] = {
     {"ActiveRecord", "ActiveRecord", true},
     {"Migration", "Migration", true},
     {"Compatibility", "Compatibility", true},
+    {"ActiveSupport", "ActiveSupport", true},
+    {"Concern", "Concern", true},
 
     {"instance"},
     {"normal"},
@@ -286,6 +288,8 @@ NameDef names[] = {
     // Used to store arguments to a "mixes_in_class_methods()" call
     {"mixedInClassMethods", "<mixed_in_class_methods>"},
     {"mixesInClassMethods", "mixes_in_class_methods"},
+    {"ClassMethods", "ClassMethods", true},
+    {"classMethods", "class_methods"},
 
     {"blockTemp", "<block>"},
     {"blockRetrunType", "<block-return-type>"},
