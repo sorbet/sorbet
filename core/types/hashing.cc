@@ -38,7 +38,7 @@ u4 LiteralType::hash(const GlobalState &gs) const {
     switch (literalKind) {
         case LiteralType::LiteralTypeKind::String:
         case LiteralType::LiteralTypeKind::Symbol:
-            return mix(result, asName(gs).hash(gs));
+            return mix(result, _hash(asName(gs).shortName(gs)));
         case LiteralType::LiteralTypeKind::Float:
             rawValue = absl::bit_cast<u8>(asFloat());
             break;
