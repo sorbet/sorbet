@@ -651,6 +651,7 @@ public:
         return arguments_;
     }
 
+    // The members of this symbol sorted in a stable order (by the hash of each member's name; _not_ alphabetical!)
     std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
 
     Symbol deepCopy(const GlobalState &to, bool keepGsId = false) const;
