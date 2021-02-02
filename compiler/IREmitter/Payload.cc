@@ -783,6 +783,29 @@ llvm::Value *Payload::retrySingleton(CompilerState &cs, llvm::IRBuilderBase &bui
     return builderCast(build).CreateLoad(global, rawName);
 }
 
+// Ensure that the VOID singleton is present during module initialization, and store it in a module-local global.
+llvm::Value *Payload::voidSingleton(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx) {
+    auto tp = llvm::Type::getInt64Ty(cs);
+    string rawName = "<void-singleton>";
+    auto *global = cs.module->getOrInsertGlobal(rawName, tp, [&] {
+        auto globalInitBuilder = llvm::IRBuilder<>(cs);
+
+        auto isConstant = false;
+        auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
+        auto global =
+            new llvm::GlobalVariable(*cs.module, tp, isConstant, llvm::GlobalVariable::InternalLinkage, zero, rawName);
+
+        globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+        auto *singletonValue = globalInitBuilder.CreateCall(cs.getFunction("sorbet_getVoidSingleton"), {}, "voidSingleton");
+
+        globalInitBuilder.CreateStore(singletonValue, global);
+
+        return global;
+    });
+
+    return builderCast(build).CreateLoad(global, rawName);
+}
+
 core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::Loc methodStart,
                                  core::Loc lastLoc, llvm::AllocaInst *iseqEncodedPtr, llvm::AllocaInst *lineNumberPtr) {
     if (!loc.exists()) {

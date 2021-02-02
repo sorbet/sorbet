@@ -136,6 +136,12 @@ VALUE sorbet_rubyTopSelf() {
 // ****                       Implementation helpers for type tests
 // ****
 
+SORBET_INLINE
+VALUE sorbet_getVoidSingleton() {
+    static const char name[] = "T::Private::Types::Void::VOID";
+    return sorbet_getConstant(name, sizeof(name));
+}
+
 SORBET_ATTRIBUTE(const)
 _Bool sorbet_isa_Integer(VALUE obj) {
     return RB_FIXNUM_P(obj);

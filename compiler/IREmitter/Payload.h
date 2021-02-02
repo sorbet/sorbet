@@ -79,6 +79,7 @@ public:
                        const IREmitterContext &irctx, int rubyBlockId);
 
     static llvm::Value *retrySingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
+    static llvm::Value *voidSingleton(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
 
     static void pushRubyStack(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val);
 
