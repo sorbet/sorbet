@@ -1,4 +1,5 @@
 # typed: true
+# enable-experimental-requires-ancestor: true
 
 module RA
   def foo; end

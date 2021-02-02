@@ -1,4 +1,5 @@
 # typed: true
+# enable-experimental-requires-ancestor: true
 
 module MyHelper
   extend T::Helpers

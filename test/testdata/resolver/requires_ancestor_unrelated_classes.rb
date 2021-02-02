@@ -1,4 +1,5 @@
 # typed: true
+# enable-experimental-requires-ancestor: true
 
 class R1; end
 class R2 < R1; end

@@ -1,4 +1,5 @@
 # typed: true
+# enable-experimental-requires-ancestor: true
 
 module Helper1
   requires_ancestor Object # error: Method `requires_ancestor` does not exist on `T.class_of(Helper1)`

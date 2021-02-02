@@ -1,4 +1,5 @@
 # typed: true
+# enable-experimental-requires-ancestor: true
 
 ### Requiring generic classes or modules is not supported yet
 
