@@ -42,7 +42,8 @@ unique_ptr<core::FileHash> computeFileHashForAST(unique_ptr<core::GlobalState> &
 
 // Note: lgs is an outparameter.
 core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<core::File> forWhat,
-                                          unique_ptr<core::GlobalState> &lgs, const realmain::options::Options &hashingOpts) {
+                                          unique_ptr<core::GlobalState> &lgs,
+                                          const realmain::options::Options &hashingOpts) {
     lgs = make_unique<core::GlobalState>(
         (make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>())));
     lgs->initEmpty();
@@ -56,7 +57,8 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
     }
 }
 
-unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::logger &logger, const realmain::options::Options &hashingOpts) {
+unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::logger &logger,
+                                                  const realmain::options::Options &hashingOpts) {
     Timer timeit(logger, "computeFileHash");
     unique_ptr<core::GlobalState> lgs;
     core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs, hashingOpts);
