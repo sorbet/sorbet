@@ -789,6 +789,13 @@ public:
         if (send.recv.isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
             auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
             this->todoClassMethods_.emplace_back(move(item));
+        } else {
+            auto recvAsConstantLit = ast::cast_tree<ast::ConstantLit>(send.recv);
+            if (recvAsConstantLit != nullptr && recvAsConstantLit->symbol == core::Symbols::Magic() &&
+                send.fun == core::Names::mixesInClassMethods()) {
+                auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
+                this->todoClassMethods_.emplace_back(move(item));
+            }
         }
         return tree;
     }
