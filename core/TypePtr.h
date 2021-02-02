@@ -318,7 +318,7 @@ public:
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
-    unsigned int hash(const GlobalState &gs) const;
+    u4 hash(const GlobalState &gs) const;
 
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 
