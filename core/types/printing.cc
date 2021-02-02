@@ -57,27 +57,21 @@ string LiteralType::show(const GlobalState &gs) const {
 }
 
 string LiteralType::showValue(const GlobalState &gs) const {
-    auto underlying = this->underlying(gs);
-    ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
-    if (undSymbol == Symbols::String()) {
-        return fmt::format("\"{}\"", absl::CEscape(asName(gs).show(gs)));
-    } else if (undSymbol == Symbols::Symbol()) {
-        auto shown = asName(gs).show(gs);
-        if (absl::StrContains(shown, " ")) {
-            return fmt::format(":\"{}\"", absl::CEscape(shown));
-        } else {
-            return fmt::format(":{}", shown);
+    switch (literalKind) {
+        case LiteralType::LiteralTypeKind::String:
+            return fmt::format("\"{}\"", absl::CEscape(asName(gs).show(gs)));
+        case LiteralType::LiteralTypeKind::Symbol: {
+            auto shown = asName(gs).show(gs);
+            if (absl::StrContains(shown, " ")) {
+                return fmt::format(":\"{}\"", absl::CEscape(shown));
+            } else {
+                return fmt::format(":{}", shown);
+            }
         }
-    } else if (undSymbol == Symbols::Integer()) {
-        return to_string(asInteger());
-    } else if (undSymbol == Symbols::Float()) {
-        return to_string(asFloat());
-    } else if (undSymbol == Symbols::TrueClass()) {
-        return "true";
-    } else if (undSymbol == Symbols::FalseClass()) {
-        return "false";
-    } else {
-        Exception::raise("should not be reachable");
+        case LiteralType::LiteralTypeKind::Integer:
+            return to_string(asInteger());
+        case LiteralType::LiteralTypeKind::Float:
+            return to_string(asFloat());
     }
 }
 
