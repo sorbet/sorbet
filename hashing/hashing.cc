@@ -28,8 +28,8 @@ pair<ast::ParsedFile, core::UsageHash> rewriteAST(const core::GlobalState &origi
     return make_pair<ast::ParsedFile, core::UsageHash>(move(rewritten), subst.getAllNames());
 }
 
-core::FileHash computeFileHashForAST(unique_ptr<core::GlobalState> &lgs, core::UsageHash usageHash,
-                                     ast::ParsedFile file) {
+unique_ptr<core::FileHash> computeFileHashForAST(unique_ptr<core::GlobalState> &lgs, core::UsageHash usageHash,
+                                                 ast::ParsedFile file) {
     vector<ast::ParsedFile> single;
     single.emplace_back(move(file));
 
@@ -37,7 +37,7 @@ core::FileHash computeFileHashForAST(unique_ptr<core::GlobalState> &lgs, core::U
     auto workers = WorkerPool::create(0, lgs->tracer());
     realmain::pipeline::resolve(lgs, move(single), opts(), *workers);
 
-    return {move(*lgs->hash()), move(usageHash)};
+    return make_unique<core::FileHash>(move(*lgs->hash()), move(usageHash));
 }
 
 // Note: lgs is an outparameter.
@@ -55,7 +55,7 @@ core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<cor
     }
 }
 
-core::FileHash computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
+unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::logger &logger) {
     Timer timeit(logger, "computeFileHash");
     unique_ptr<core::GlobalState> lgs;
     core::FileRef fref = makeEmptyGlobalStateForFile(logger, move(forWhat), /* out param */ lgs);
@@ -73,20 +73,20 @@ core::FileHash computeFileHashForFile(shared_ptr<core::File> forWhat, spdlog::lo
 void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spdlog::logger &logger,
                                 WorkerPool &workers) {
     Timer timeit(logger, "computeFileHashes");
-    shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
-    for (int i = 0; i < files.size(); i++) {
+    auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+    for (size_t i = 0; i < files.size(); i++) {
         auto copy = i;
         fileq->push(move(copy), 1);
     }
 
     logger.debug("Computing state hashes for {} files", files.size());
 
-    shared_ptr<BlockingBoundedQueue<vector<pair<int, unique_ptr<const core::FileHash>>>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<int, unique_ptr<const core::FileHash>>>>>(files.size());
+    auto resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>>(files.size());
     workers.multiplexJob("lspStateHash", [fileq, resultq, &files, &logger]() {
-        vector<pair<int, unique_ptr<const core::FileHash>>> threadResult;
+        vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
-        int job;
+        size_t job;
         {
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
@@ -96,8 +96,7 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
                         continue;
                     }
 
-                    threadResult.emplace_back(job,
-                                              make_unique<core::FileHash>(computeFileHashForFile(files[job], logger)));
+                    threadResult.emplace_back(job, computeFileHashForFile(files[job], logger));
                 }
             }
         }
@@ -108,7 +107,7 @@ void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spd
     });
 
     {
-        vector<pair<int, unique_ptr<const core::FileHash>>> threadResult;
+        vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
@@ -128,7 +127,7 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
     ENFORCE_NO_TIMER(asts.size() == files.size());
 
-    // In parallel, rewrite ASTs to an empty GlobalState and use them for hashing.
+    // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.
     auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(asts.size());
     for (size_t i = 0; i < asts.size(); i++) {
         auto copy = i;
@@ -139,11 +138,11 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
 
     const core::GlobalState &sharedGs = *gs;
     auto resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>>(asts.size());
+        make_shared<BlockingBoundedQueue<vector<pair<core::FileRef, unique_ptr<const core::FileHash>>>>>(asts.size());
     Timer timeit(logger, "computeFileHashes");
     workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger]() {
         unique_ptr<Timer> timeit;
-        vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
+        vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
         int processedByThread = 0;
         size_t job;
         {
@@ -164,8 +163,8 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
                     auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs);
                     auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
 
-                    threadResult.emplace_back(job, make_unique<core::FileHash>(computeFileHashForAST(
-                                                       lgs, move(usageHash), move(rewrittenAST))));
+                    threadResult.emplace_back(ast.file,
+                                              computeFileHashForAST(lgs, move(usageHash), move(rewrittenAST)));
                 }
             }
         }
@@ -176,12 +175,12 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     });
 
     {
-        vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
+        vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
-                    files[a.first].data(*gs).setFileHash(move(a.second));
+                    a.first.data(*gs).setFileHash(move(a.second));
                 }
             }
         }
