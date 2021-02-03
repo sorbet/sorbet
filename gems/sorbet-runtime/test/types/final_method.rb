@@ -15,22 +15,22 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   CLASS_CLASS_REGEX_STR = "#<Class:#<Class:0x[0-9a-f]+>>"
   MODULE_REGEX_STR = "#<Module:0x[0-9a-f]+>"
 
-  private def assert_msg_matches(regex, final_line, method_line, err)
+  private def assert_msg_matches(regex, final_line, method_line, explanation, err)
     lines = err.message.split("\n")
     assert_equal(3, lines.length)
     assert_match(regex, lines[0])
     assert_match(%r{Made final here: .*test.*/types/final_method.rb:#{final_line}}, lines[1])
-    assert_match(%r{Overriden here: .*test.*/types/final_method.rb:#{method_line}}, lines[2])
+    assert_match(%r{#{explanation} here: .*test.*/types/final_method.rb:#{method_line}}, lines[2])
   end
 
   private def assert_redefined_err(method_name, klass_str, final_line, method_line, err)
     regex = %r{The method `#{method_name}` on #{klass_str} was declared as final and cannot be redefined}
-    assert_msg_matches(regex, final_line, method_line, err)
+    assert_msg_matches(regex, final_line, method_line, "Redefined", err)
   end
 
   private def assert_overridden_err(method_name, klass_str, method_str, final_line, method_line, err)
     regex = %r{The method `#{method_name}` on #{klass_str} was declared as final and cannot be overriden in #{method_str}}
-    assert_msg_matches(regex, final_line, method_line, err)
+    assert_msg_matches(regex, final_line, method_line, "Overriden", err)
   end
 
   it "allows declaring an instance method as final" do
