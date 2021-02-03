@@ -163,6 +163,38 @@ module Opus::Types::Test
           assert_includes(ex.message, "was declared as final and cannot be redefined")
         end
       end
+
+      describe 'when overridden' do
+        before do
+          T::Configuration.sig_validation_error_handler = lambda do |*args|
+            CustomReceiver.receive(*args)
+          end
+        end
+
+        after do
+          T::Configuration.sig_validation_error_handler = nil
+        end
+
+        it 'handles a final method redefinition error' do
+          CustomReceiver.expects(:receive).once.with do |error, opts|
+            error.message.include?("was declared as final and cannot be redefined") &&
+              error.is_a?(RuntimeError) &&
+              opts.is_a?(Hash) &&
+              opts.empty?
+          end
+
+          @mod.sig(:final) {returns(Symbol)}
+          def @mod.final_method_redefined_ok
+            :bar
+          end
+          assert_equal(:bar, @mod.final_method_redefined_ok)
+          @mod.sig(:final) {returns(Symbol)}
+          def @mod.final_method_redefined_ok
+            :baz
+          end
+          assert_equal(:baz, @mod.final_method_redefined_ok)
+        end
+      end
     end
 
     describe 'call_validation_error_handler' do
