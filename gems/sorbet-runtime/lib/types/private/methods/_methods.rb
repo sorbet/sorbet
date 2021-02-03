@@ -129,6 +129,7 @@ module T::Private::Methods
           begin
             raise pretty_message
           rescue => e
+            T::Private::DeclState.current.reset!
             T::Configuration.sig_validation_error_handler(e, {})
           end
         end
