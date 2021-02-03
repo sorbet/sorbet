@@ -7,6 +7,7 @@ cc_library(
         ],
     ),
     hdrs = glob(["lib/**/*.h"]),
+    copts = ["-Wno-implicit-fallthrough"],
     defines = ["LIZARD_NO_HUFFMAN"],
     linkstatic = select({
         "@com_stripe_ruby_typer//tools/config:linkshared": 0,
