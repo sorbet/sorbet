@@ -13,6 +13,11 @@ namespace sorbet {
 
 /**
  * Path interface.
+ * Note that this base implementation is not functional
+ * rather you are meant to use one of the specialization
+ * (either for std::filesystem::path or raw std::string)
+ * which is conveniently selected for you by the "Path"
+ * typedef.
  */
 template <typename TInternalPath> class BasePath {
 public:
