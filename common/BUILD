@@ -23,7 +23,7 @@ cc_library(
         "UIntSet.h",
         "UIntSetForEach.h",
         "common.h",
-        "typecase.h",
+        "typecase.h"
     ],
     linkopts = select({
         "//tools/config:linux": ["-lm"],
@@ -32,6 +32,10 @@ cc_library(
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
+    }),
+    defines = select({
+        "//tools/config:webasm": [],
+        "//conditions:default": ["USE_STL_FILESYSTEM"],
     }),
     visibility = ["//visibility:public"],
     deps = [

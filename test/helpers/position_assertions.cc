@@ -5,12 +5,12 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
+#include "common/Path.h"
 #include "common/formatting.h"
 #include "common/sort.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
-#include <filesystem>
 #include <iterator>
 #include <regex>
 
@@ -792,7 +792,7 @@ std::shared_ptr<FileDefAssertion> FileDefAssertion::make(std::string_view filena
 }
 
 std::unique_ptr<Location> FileDefAssertion::getDefinitionLocation(const LSPConfiguration &config) const {
-    auto targetPath = std::filesystem::path(filename).replace_filename(targetFilename);
+    auto targetPath = make_path(filename).replace_filename(targetFilename);
     auto targetUri = filePathToUri(config, targetPath.string());
     auto targetRange = RangeAssertion::makeRange(targetLine, targetColumn, targetColumn + 1);
     return make_unique<Location>(targetUri, targetRange->copy());

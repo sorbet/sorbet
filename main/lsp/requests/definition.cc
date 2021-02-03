@@ -1,8 +1,8 @@
 #include "main/lsp/requests/definition.h"
 #include "common/FileOps.h"
+#include "common/Path.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/json_types.h"
-#include <filesystem>
 
 using namespace std;
 
@@ -30,12 +30,18 @@ DefinitionTask::findRequireRelativeLoc(const core::GlobalState &gs,
     auto literal = responses[0]->isLiteral();
     if (isRequireRelative && literal) {
         auto literalValue = core::cast_type_nonnull<core::LiteralType>(literal->retType.type).asName(gs).shortName(gs);
-        auto baseFilePath = std::filesystem::path(literal->termLoc.file().data(gs).path());
-        auto targetFilePath = baseFilePath.replace_filename(literalValue).replace_extension(".rb").lexically_normal();
-        auto targetFileRef = gs.findFileByPath(targetFilePath.string());
-        if (targetFileRef.exists()) {
-            auto loc = core::Loc(targetFileRef, 0, 0);
-            return loc;
+        auto srcFilePath = make_path(literal->termLoc.file().data(gs).path());
+        auto destRelativeFilePath =
+            srcFilePath.replace_filename(literalValue).replace_extension(".rb").lexically_normal();
+        // FileRefs are stored in GlobalState taking into account the rootPath thus
+        // format our destination path accordingly if it exists
+        auto destLocalPath =
+            !config.rootPath.empty() ? destRelativeFilePath.combine_left(config.rootPath) : destRelativeFilePath;
+        auto destFileRef = gs.findFileByPath(destLocalPath.string());
+        if (destFileRef.exists()) {
+            return core::Loc(destFileRef, 0, 0);
+        } else {
+            this->config.logger->warn("Couldn't match the given path to a FileRef: {}", destLocalPath.string());
         }
     }
     return core::Loc::none();
