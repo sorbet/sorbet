@@ -51,9 +51,9 @@ def register_sorbet_dependencies():
     # This statement defines the @com_google_protobuf repo.
     http_archive(
         name = "com_google_protobuf",
-        urls = _github_public_urls("protocolbuffers/protobuf/archive/v3.11.4.zip"),
-        sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
-        strip_prefix = "protobuf-3.11.4",
+        urls = _github_public_urls("protocolbuffers/protobuf/archive/v3.14.0.zip"),
+        sha256 = "bf0e5070b4b99240183b29df78155eee335885e53a8af8683964579c214ad301",
+        strip_prefix = "protobuf-3.14.0",
     )
 
     http_archive(
@@ -82,10 +82,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "lizard",
-        urls = _github_public_urls("inikep/lizard/archive/dda3b335e92ecd5caceccc9c577b39dd4e3c9950.zip"),
-        sha256 = "1d4e8c17d40ec56b7ecad60bcf4a9065df73d7e5997f78e75dbe5fc662ce6aa8",
+        urls = _github_public_urls("sorbet/lizard/archive/3ea5729b2a337999772cb86998f202a718dd46fb.zip"),
+        sha256 = "f9f0f75264c160b7b19db936730282d28ef061bf7473cb339694b39ac2eb472e",
         build_file = "@com_stripe_ruby_typer//third_party:lizard.BUILD",
-        strip_prefix = "lizard-dda3b335e92ecd5caceccc9c577b39dd4e3c9950",
+        strip_prefix = "lizard-3ea5729b2a337999772cb86998f202a718dd46fb",
     )
 
     http_archive(
@@ -114,10 +114,10 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "statsd",
-        urls = _github_public_urls("romanbsd/statsd-c-client/archive/0caa5ef05d6a786bb4695394534a7182a3c94427.zip"),
-        sha256 = "0c67e994fb809ac9b0fd2216333b0dff5592401f81dc04fb7a0c2179d6b76dca",
+        urls = _github_public_urls("romanbsd/statsd-c-client/archive/08ecca678345f157e72a1db1446facb403cbeb65.zip"),
+        sha256 = "825395556fb553383173e47dbce98165981d100587993292ec9d174ec40a7ba1",
         build_file = "@com_stripe_ruby_typer//third_party:statsd.BUILD",
-        strip_prefix = "statsd-c-client-0caa5ef05d6a786bb4695394534a7182a3c94427",
+        strip_prefix = "statsd-c-client-08ecca678345f157e72a1db1446facb403cbeb65",
     )
 
     http_archive(
