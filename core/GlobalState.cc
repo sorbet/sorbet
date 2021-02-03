@@ -38,6 +38,20 @@ inline unsigned int _hash_mix_unique(UniqueNameKind unk, unsigned int num, unsig
 inline unsigned int _hash_mix_constant(unsigned int id) {
     return id * HASH_MULT2 + static_cast<u4>(NameKind::CONSTANT);
 }
+
+inline unsigned int _hash_nameref(const GlobalState &gs, NameRef nref) {
+    switch (nref.kind()) {
+        case NameKind::UTF8:
+            return _hash(nref.shortName(gs));
+        case NameKind::CONSTANT:
+            return _hash_mix_constant(nref.dataCnst(gs)->original.rawId());
+        case NameKind::UNIQUE: {
+            auto data = nref.dataUnique(gs);
+            return _hash_mix_unique(data->uniqueNameKind, data->num, data->original.rawId());
+        }
+    }
+}
+
 } // namespace
 
 ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
@@ -1312,6 +1326,7 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     bucket.second = name.rawId();
     utf8Names.emplace_back(UTF8Name{enterString(nm)});
 
+    ENFORCE(_hash_nameref(*this, name) == hs);
     categoryCounterInc("names", "utf8");
 
     wasModified_ = true;
@@ -1366,6 +1381,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     bucket.second = name.rawId();
 
     constantNames.emplace_back(ConstantName{original});
+    ENFORCE(_hash_nameref(*this, name) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "constant");
     return name;
@@ -1520,6 +1536,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     bucket.second = name.rawId();
 
     uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
+    ENFORCE(_hash_nameref(*this, name) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "unique");
     return name;
@@ -1712,22 +1729,8 @@ void GlobalState::sanityCheck() const {
         if (ent.second == 0) {
             continue;
         }
-        auto nref = NameRef::fromRaw(*this, ent.second);
-        switch (nref.kind()) {
-            case NameKind::UTF8:
-                ENFORCE_NO_TIMER(ent.first == _hash(nref.shortName(*this)), "name hash table corruption");
-                break;
-            case NameKind::CONSTANT:
-                ENFORCE_NO_TIMER(ent.first == _hash_mix_constant(nref.dataCnst(*this)->original.rawId()),
-                                 "name hash table corruption");
-                break;
-            case NameKind::UNIQUE: {
-                auto data = nref.dataUnique(*this);
-                ENFORCE_NO_TIMER(ent.first == _hash_mix_unique(data->uniqueNameKind, data->num, data->original.rawId()),
-                                 "name hash table corruption");
-                break;
-            }
-        }
+        ENFORCE_NO_TIMER(ent.first == _hash_nameref(*this, NameRef::fromRaw(*this, ent.second)),
+                         "name hash table corruption");
     }
 }
 
