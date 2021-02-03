@@ -567,6 +567,14 @@ private:
 
         auto encounteredError = false;
         for (auto &arg : send->args) {
+            if (arg.isSelfReference()) {
+                auto recv = ast::cast_tree<ast::ConstantLit>(send->recv);
+                if (recv != nullptr && recv->symbol == core::Symbols::Magic()) {
+                    // This is the first argument of a Magic.mixes_in_class_methods() call
+                    continue;
+                }
+            }
+
             auto *id = ast::cast_tree<ast::ConstantLit>(arg);
 
             if (id == nullptr || !id->symbol.exists()) {
@@ -789,6 +797,13 @@ public:
         if (send.recv.isSelfReference() && send.fun == core::Names::mixesInClassMethods()) {
             auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
             this->todoClassMethods_.emplace_back(move(item));
+        } else {
+            auto recvAsConstantLit = ast::cast_tree<ast::ConstantLit>(send.recv);
+            if (recvAsConstantLit != nullptr && recvAsConstantLit->symbol == core::Symbols::Magic() &&
+                send.fun == core::Names::mixesInClassMethods()) {
+                auto item = ClassMethodsResolutionItem{ctx.file, ctx.owner, &send};
+                this->todoClassMethods_.emplace_back(move(item));
+            }
         }
         return tree;
     }
