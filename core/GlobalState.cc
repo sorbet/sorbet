@@ -28,6 +28,18 @@ using namespace std;
 
 namespace sorbet::core {
 
+namespace {
+// Hash functions used to determine position in namesByHash.
+
+inline unsigned int _hash_mix_unique(UniqueNameKind unk, unsigned int num, unsigned int rawId) {
+    return mix(mix(num, static_cast<u4>(unk)), rawId) * HASH_MULT2 + static_cast<u4>(NameKind::UNIQUE);
+}
+
+inline unsigned int _hash_mix_constant(unsigned int id) {
+    return id * HASH_MULT2 + static_cast<u4>(NameKind::CONSTANT);
+}
+} // namespace
+
 ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to Symbols::root().members later.
@@ -1300,7 +1312,6 @@ NameRef GlobalState::enterNameUTF8(string_view nm) {
     bucket.second = name.rawId();
     utf8Names.emplace_back(UTF8Name{enterString(nm)});
 
-    ENFORCE(name.hash(*this) == hs);
     categoryCounterInc("names", "utf8");
 
     wasModified_ = true;
@@ -1311,7 +1322,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
     ENFORCE(original.isValidConstantName(*this), "making a constant name over wrong name kind");
 
-    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.rawId());
+    const auto hs = _hash_mix_constant(original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1355,7 +1366,6 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     bucket.second = name.rawId();
 
     constantNames.emplace_back(ConstantName{original});
-    ENFORCE(name.hash(*this) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "constant");
     return name;
@@ -1371,7 +1381,7 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
     }
     ENFORCE(original.isValidConstantName(*this), "looking up a constant name over wrong name kind");
 
-    const auto hs = _hash_mix_constant(NameKind::CONSTANT, original.rawId());
+    const auto hs = _hash_mix_constant(original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1439,7 +1449,7 @@ void GlobalState::expandNames(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNam
 
 NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.rawId());
+    const auto hs = _hash_mix_unique(uniqueNameKind, num, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1465,7 +1475,7 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = _hash_mix_unique((u2)uniqueNameKind, NameKind::UNIQUE, num, original.rawId());
+    const auto hs = _hash_mix_unique(uniqueNameKind, num, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1510,7 +1520,6 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     bucket.second = name.rawId();
 
     uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
-    ENFORCE(name.hash(*this) == hs);
     wasModified_ = true;
     categoryCounterInc("names", "unique");
     return name;
@@ -1703,7 +1712,22 @@ void GlobalState::sanityCheck() const {
         if (ent.second == 0) {
             continue;
         }
-        ENFORCE_NO_TIMER(ent.first == NameRef::fromRaw(*this, ent.second).hash(*this), "name hash table corruption");
+        auto nref = NameRef::fromRaw(*this, ent.second);
+        switch (nref.kind()) {
+            case NameKind::UTF8:
+                ENFORCE_NO_TIMER(ent.first == _hash(nref.shortName(*this)), "name hash table corruption");
+                break;
+            case NameKind::CONSTANT:
+                ENFORCE_NO_TIMER(ent.first == _hash_mix_constant(nref.dataCnst(*this)->original.rawId()),
+                                 "name hash table corruption");
+                break;
+            case NameKind::UNIQUE: {
+                auto data = nref.dataUnique(*this);
+                ENFORCE_NO_TIMER(ent.first == _hash_mix_unique(data->uniqueNameKind, data->num, data->original.rawId()),
+                                 "name hash table corruption");
+                break;
+            }
+        }
     }
 }
 
