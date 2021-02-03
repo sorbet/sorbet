@@ -126,7 +126,11 @@ module T::Private::Methods
                            "Made final here: #{definition_file}:#{definition_line}\n" \
                            "#{extra_info}"
 
-          T::Configuration.sig_validation_error_handler(pretty_message, {})
+          begin
+            raise pretty_message
+          rescue => e
+            T::Configuration.sig_validation_error_handler(e, {})
+          end
         end
       end
     end
