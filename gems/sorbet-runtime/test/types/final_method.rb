@@ -29,8 +29,8 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   end
 
   private def assert_overridden_err(method_name, klass_str, method_str, final_line, method_line, err)
-    regex = %r{The method `#{method_name}` on #{klass_str} was declared as final and cannot be overriden in #{method_str}}
-    assert_msg_matches(regex, final_line, method_line, "Overriden", err)
+    regex = %r{The method `#{method_name}` on #{klass_str} was declared as final and cannot be overridden in #{method_str}}
+    assert_msg_matches(regex, final_line, method_line, "Overridden", err)
   end
 
   it "allows declaring an instance method as final" do

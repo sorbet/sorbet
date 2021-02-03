@@ -117,11 +117,11 @@ module T::Private::Methods
           caller_loc = caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/}) }
           extra_info = "\n"
           if caller_loc
-            extra_info = (is_redefined ? "Redefined" : "Overriden") + " here: #{caller_loc.path}:#{caller_loc.lineno}\n"
+            extra_info = (is_redefined ? "Redefined" : "Overridden") + " here: #{caller_loc.path}:#{caller_loc.lineno}\n"
           end
 
           error_message = "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
-                          (is_redefined ? "redefined" : "overriden in #{target}")
+                          (is_redefined ? "redefined" : "overridden in #{target}")
           pretty_message = "#{error_message}\n" \
                            "Made final here: #{definition_file}:#{definition_line}\n" \
                            "#{extra_info}"
