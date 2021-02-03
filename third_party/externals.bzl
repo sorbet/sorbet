@@ -137,6 +137,14 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
+        name = "xxhash",
+        urls = _github_public_urls("Cyan4973/xxHash/archive/v0.8.0.zip"),
+        sha256 = "064333c754f166837bbefefa497642a60b3f8035e54bae52eb304d3cb3ceb655",
+        build_file = "@com_stripe_ruby_typer//third_party:xxhash.BUILD",
+        strip_prefix = "xxHash-0.8.0",
+    )
+
+    http_archive(
         name = "com_google_absl",
         urls = _github_public_urls("abseil/abseil-cpp/archive/62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08.zip"),
         sha256 = "afcab9f226ac4ca6b6b7c9ec704a995fe32a6b555d6935b0de247ae6ac6940e0",

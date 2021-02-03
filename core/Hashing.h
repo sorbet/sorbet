@@ -2,6 +2,7 @@
 #define SORBET_HASHING_H
 
 #include "core/Names.h"
+#include "xxhash.h"
 
 namespace sorbet::core {
 static constexpr unsigned int HASH_MULT = 65599; // sdbm
