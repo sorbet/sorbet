@@ -1341,9 +1341,19 @@ u4 Symbol::hash(const GlobalState &gs) const {
     result = mix(result, this->owner._id);
     result = mix(result, this->superClassOrRebind._id);
     // argumentsOrMixins, typeParams, typeAliases
-    for (auto e : membersStableOrderSlow(gs)) {
-        if (e.second.exists() && !e.second.data(gs)->ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.second.data(gs)->name.shortName(gs)));
+    if (!members().empty()) {
+        // Rather than use membersStableOrderSlow, which is... slow..., use an order dictated by symbol ref ID.
+        // It's faster to sort, and SymbolRef IDs are stable during hashing.
+        vector<core::SymbolRef> membersToHash;
+        membersToHash.reserve(this->members().size());
+        for (auto e : this->members()) {
+            if (e.second.exists() && !e.second.data(gs)->ignoreInHashing(gs)) {
+                membersToHash.emplace_back(e.second);
+            }
+        }
+        fast_sort(membersToHash, [](const auto &a, const auto &b) -> bool { return a.rawId() < b.rawId(); });
+        for (auto member : membersToHash) {
+            result = mix(result, _hash(member.data(gs)->name.shortName(gs)));
         }
     }
     for (const auto &e : mixins_) {
