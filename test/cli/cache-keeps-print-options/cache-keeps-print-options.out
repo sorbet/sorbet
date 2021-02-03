@@ -1,22 +1,22 @@
 class ::<root> < ::Object ()
+  class ::<Class:CCCCCCCCC>[<AttachedClass>] < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
+    method ::<Class:CCCCCCCCC>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
+      argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
+    type-member(+) ::<Class:CCCCCCCCC>::<AttachedClass> -> T.attached_class (of CCCCCCCCC) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
   class ::CCCCCCCCC < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-  class ::<Class:CCCCCCCCC>[<AttachedClass>] < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-    type-member(+) ::<Class:CCCCCCCCC>::<AttachedClass> -> T.attached_class (of CCCCCCCCC) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-    method ::<Class:CCCCCCCCC>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-      argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
 
 class ::<root> < ::Object ()
+  class ::<Class:CCCCCCCCC>[<AttachedClass>] < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
+    method ::<Class:CCCCCCCCC>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
+      argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
+    type-member(+) ::<Class:CCCCCCCCC>::<AttachedClass> -> T.attached_class (of CCCCCCCCC) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
       argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
   class ::CCCCCCCCC < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-  class ::<Class:CCCCCCCCC>[<AttachedClass>] < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-    type-member(+) ::<Class:CCCCCCCCC>::<AttachedClass> -> T.attached_class (of CCCCCCCCC) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-    method ::<Class:CCCCCCCCC>#<static-init> (<blk>) @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-      argument <blk><block> @ Loc {file=test/cli/cache-keeps-print-options/cache-keeps-print-options.rb start=??? end=???}
 
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C CCCCCCCCC><<C <todo sym>>> < (::<todo sym>)
