@@ -12,7 +12,7 @@ common:test --test_env=GTEST_INSTALL_FAILURE_SIGNAL_HANDLER=1
 ##
 ##  Custom toolchain.
 ##
-build --crosstool_top=@llvm_toolchain//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
+build --crosstool_top=@llvm_toolchain_10_0_0//:toolchain --copt=-D_LIBCPP_ENABLE_NODISCARD
 
 ##
 ##  Common build options across all build configurations
@@ -186,9 +186,9 @@ build:ubsan --define unsanitized=false
 build:ubsan --copt=-DHAS_SANITIZER
 
 # Bazel links C++ files with $CC, not $CXX, this breaks UBSan
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
-build:sanitize-linux --linkopt=external/llvm_toolchain/lib/clang/9.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_10_0_0/lib/clang/10.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_10_0_0/lib/clang/10.0.0/lib/linux/libclang_rt.ubsan_standalone_cxx-x86_64.a
+build:sanitize-linux --linkopt=external/llvm_toolchain_10_0_0/lib/clang/10.0.0/lib/linux/libclang_rt.ubsan_standalone-x86_64.a
 build:sanitize-linux --config=sanitize
 
 build:sanitize-mac --config=sanitize
@@ -237,7 +237,7 @@ build:webasm --compilation_mode=opt
 build:webasm --copt=-DNDEBUG --linkopt=-DNDEBUG # for some reason emscripten doesn't pass those when -O2\-Oz are specified
 build:webasm --copt=--llvm-lto --copt=3 --linkopt=--llvm-lto --linkopt=3
 # Specify a "sane" C++ toolchain for the host platform.
-build:webasm --host_crosstool_top=@llvm_toolchain//:toolchain
+build:webasm --host_crosstool_top=@llvm_toolchain_10_0_0//:toolchain
 
 ##
 ## Stripe's ci passes --config=ci, we need it to exist

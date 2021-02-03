@@ -30,6 +30,6 @@ _clang_tool = rule(
 def clang_tool(name):
     _clang_tool(
         name = name,
-        tool = "@llvm_toolchain//:bin/" + name,
+        tool = "@llvm_toolchain_10_0_0//:bin/" + name,
         visibility = ["//visibility:public"],
     )

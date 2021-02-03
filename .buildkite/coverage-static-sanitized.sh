@@ -23,12 +23,12 @@ touch _tmp_/reports
     echo "bazel-testlogs/$path/coverage.dat" >> _tmp_/reports
 done
 
-find ./bazel-app/external/llvm_toolchain/
+find ./bazel-app/external/llvm_toolchain_10_0_0/
 
 rm -rf ./_tmp_/profdata_combined.profdata
 xargs .buildkite/tools/combine-coverage.sh < _tmp_/reports
 
-./bazel-app/external/llvm_toolchain/bin/llvm-cov show -instr-profile ./_tmp_/profdata_combined.profdata ./bazel-bin/test/test_corpus_sharded -object ./bazel-bin/main/sorbet > combined.coverage.txt
+./bazel-app/external/llvm_toolchain_10_0_0/bin/llvm-cov show -instr-profile ./_tmp_/profdata_combined.profdata ./bazel-bin/test/test_corpus_sharded -object ./bazel-bin/main/sorbet > combined.coverage.txt
 
 .buildkite/tools/codecov-bash -f combined.coverage.txt -X search
 

@@ -28,7 +28,7 @@ echo "building $target"
 ./bazel build "//test/fuzz:$target" --config=fuzz -c opt
 
 # we want the bazel build command to run before this check so that bazel can download itself.
-export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain/bin"
+export PATH="$PATH:$PWD/bazel-sorbet/external/llvm_toolchain_10_0_0/bin"
 if ! command -v llvm-symbolizer >/dev/null; then
   echo "fatal: command not found: llvm-symbolizer"
   exit 1
