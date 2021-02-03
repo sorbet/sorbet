@@ -114,13 +114,17 @@ module T::Private::Methods
            final_method?(method_owner_and_name_to_key(ancestor, method_name))
           definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
           is_redefined = target == ancestor
-          caller_loc = T.must(caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/types/private/methods/}) })
+          caller_loc = caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/types/private/methods/}) }
+          extra_info = "\n"
+          if caller_loc
+            extra_info = "Overriden here: #{caller_loc.path}:#{caller_loc.lineno}\n"
+          end
 
           error_message = "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
                           (is_redefined ? "redefined" : "overriden in #{target}")
           pretty_message = "#{error_message}\n" \
                            "Made final here: #{definition_file}:#{definition_line}\n" \
-                           "Overriden here: #{caller_loc.path}:#{caller_loc.lineno}\n"
+                           "#{extra_info}"
 
           T::Configuration.sig_validation_error_handler(pretty_message, {})
         end
