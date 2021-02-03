@@ -31,6 +31,7 @@ while getopts ":hdi:" opt; do
 
     d)
       debug=1
+      shift 1
       ;;
 
     i)

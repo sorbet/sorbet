@@ -93,6 +93,7 @@ public:
                                                llvm::Value *blockFun, llvm::Value *closure);
 
     static const VMFlag VM_CALL_ARGS_SIMPLE;
+    static const VMFlag VM_CALL_ARGS_SPLAT;
     static const VMFlag VM_CALL_KWARG;
     static const VMFlag VM_CALL_KW_SPLAT;
 };

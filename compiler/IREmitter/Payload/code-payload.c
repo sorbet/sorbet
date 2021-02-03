@@ -423,6 +423,11 @@ void sorbet_arrayPush(VALUE array, VALUE element) {
     rb_ary_push(array, element);
 }
 
+SORBET_INLINE
+VALUE sorbet_arrayDup(VALUE array) {
+    return rb_ary_dup(array);
+}
+
 // ****
 // ****                       Operations on Hashes
 // ****
@@ -1030,6 +1035,10 @@ unsigned int sorbet_vmCallKwarg() {
 
 unsigned int sorbet_vmCallArgsSimple() {
     return VM_CALL_ARGS_SIMPLE;
+}
+
+unsigned int sorbet_vmCallArgsSplat() {
+    return VM_CALL_ARGS_SPLAT;
 }
 
 unsigned int sorbet_vmCallKwSplat() {

@@ -335,6 +335,64 @@ public:
     }
 } BuildHash;
 
+class CallWithSplat : public NameBasedIntrinsicMethod {
+public:
+    CallWithSplat() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        // args[0] is the receiver
+        // args[1] is the method
+        // args[2] are the splat arguments
+        // args[3] are the keyword args
+        auto &cs = mcctx.cs;
+        auto &irctx = mcctx.irctx;
+        auto *send = mcctx.send;
+
+        auto recv = send->args[0].variable;
+
+        auto lit = core::cast_type_nonnull<core::LiteralType>(send->args[1].type);
+        ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
+        auto methodName = lit.asName(cs).shortName(cs);
+
+        auto splatArgArray = send->args[2].variable;
+
+        // TODO(aprocter): We don't support kwargs yet. Much of what follows below is borrowed from pushSendArgs, but
+        // supporting kwargs here isn't going to make much sense until we do a bit of refactoring there (which may also
+        // reduce code duplication here).
+        auto kwArgHashType = send->args[3].type;
+        if (!kwArgHashType.derivesFrom(mcctx.cs, core::Symbols::NilClass())) {
+            cs.failCompilation(core::Loc(irctx.cfg.file, send->receiverLoc),
+                               "mixing keyword args with splatted args is not supported yet");
+        }
+
+        // Push receiver and splatted arg array.
+        auto &builder = builderCast(mcctx.build);
+        Payload::pushRubyStack(cs, builder,
+                               Payload::varGet(mcctx.cs, recv, mcctx.build, mcctx.irctx, mcctx.rubyBlockId));
+        auto splatArgArrayVal = Payload::varGet(mcctx.cs, splatArgArray, mcctx.build, mcctx.irctx, mcctx.rubyBlockId);
+
+        // TODO(perf) we can avoid duplicating the array here if we know that it was created specifically for this
+        // splat.
+        Payload::pushRubyStack(cs, builder,
+                               builder.CreateCall(cs.getFunction("sorbet_arrayDup"), {splatArgArrayVal}, "argsplat"));
+
+        // Call the receiver with `VM_CALL_ARGS_SPLAT` set.
+        auto flag = Payload::VM_CALL_ARGS_SPLAT;
+        int argc = 1;
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flag, argc, {});
+
+        if (mcctx.blk != nullptr) {
+            auto *closure = mcctx.irctx.localsOffset[mcctx.rubyBlockId];
+            return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, mcctx.blk, closure);
+        } else {
+            auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.build);
+            return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
+        }
+    }
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::callWithSplat()};
+    }
+} CallWithSplat;
+
 static const vector<CallCMethod> knownCMethods{
     {"<expand-splat>", "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {"defined?", "sorbet_definedIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
@@ -348,9 +406,9 @@ static const vector<CallCMethod> knownCMethods{
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
-    vector<const NameBasedIntrinsicMethod *> ret{
-        &DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic, &CallWithBlock, &ExceptionRetry, &BuildHash,
-    };
+    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,
+                                                 &CallWithBlock,      &ExceptionRetry,       &BuildHash,
+                                                 &CallWithSplat};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }
