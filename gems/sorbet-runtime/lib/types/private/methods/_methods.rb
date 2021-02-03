@@ -465,10 +465,6 @@ module T::Private::Methods
       return
     end
 
-    if !mod.is_a?(Module)
-      return
-    end
-
     if mod.singleton_class?
       mod.include(SingletonMethodHooks)
     else
