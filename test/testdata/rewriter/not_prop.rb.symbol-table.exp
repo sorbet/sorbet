@@ -1,4 +1,8 @@
 class ::<root> < ::Object ()
+  class ::<Class:ThingsWhichUsedToBePropSyntax>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/rewriter/not_prop.rb:3
+    method ::<Class:ThingsWhichUsedToBePropSyntax>#<static-init> (<blk>) @ test/testdata/rewriter/not_prop.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
+    type-member(+) ::<Class:ThingsWhichUsedToBePropSyntax>::<AttachedClass> -> T.attached_class (of ThingsWhichUsedToBePropSyntax) @ test/testdata/rewriter/not_prop.rb:3
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
     method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/rewriter/not_prop.rb:3
       argument <blk><block> @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
@@ -8,8 +12,4 @@ class ::<root> < ::Object ()
     method ::ThingsWhichUsedToBePropSyntax#array_of_explicit= (array_of_explicit, <blk>) -> T::Array[T.untyped] @ test/testdata/rewriter/not_prop.rb:7
       argument array_of_explicit<> -> T::Array[T.untyped] @ Loc {file=test/testdata/rewriter/not_prop.rb start=7:9 end=7:26}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
-  class ::<Class:ThingsWhichUsedToBePropSyntax>[<AttachedClass>] < ::<Class:Object> () @ test/testdata/rewriter/not_prop.rb:3
-    type-member(+) ::<Class:ThingsWhichUsedToBePropSyntax>::<AttachedClass> -> T.attached_class (of ThingsWhichUsedToBePropSyntax) @ test/testdata/rewriter/not_prop.rb:3
-    method ::<Class:ThingsWhichUsedToBePropSyntax>#<static-init> (<blk>) @ test/testdata/rewriter/not_prop.rb:3
-      argument <blk><block> @ Loc {file=test/testdata/rewriter/not_prop.rb start=??? end=???}
 

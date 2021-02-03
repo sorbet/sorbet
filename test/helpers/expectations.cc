@@ -109,6 +109,8 @@ vector<string> listTrimmedTestFilesInDir(string_view dir, bool recursive) {
 }
 
 void populateSourceFileContents(Expectations &exp) {
+    // Sort sourceFiles by name so that order matches Sorbet on command line.
+    fast_sort(exp.sourceFiles);
     for (auto &file : exp.sourceFiles) {
         string filename = exp.folder + file;
         string fileContents = FileOps::read(filename);

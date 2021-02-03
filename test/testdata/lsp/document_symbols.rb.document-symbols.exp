@@ -29,32 +29,6 @@
             },
             "children": [
                 {
-                    "name": "@ivar",
-                    "detail": "",
-                    "kind": 8,
-                    "range": {
-                        "start": {
-                            "line": 7,
-                            "character": 4
-                        },
-                        "end": {
-                            "line": 7,
-                            "character": 9
-                        }
-                    },
-                    "selectionRange": {
-                        "start": {
-                            "line": 7,
-                            "character": 4
-                        },
-                        "end": {
-                            "line": 7,
-                            "character": 9
-                        }
-                    },
-                    "children": []
-                },
-                {
                     "name": "initialize",
                     "detail": "",
                     "kind": 9,
@@ -76,6 +50,32 @@
                         "end": {
                             "line": 6,
                             "character": 16
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "@ivar",
+                    "detail": "",
+                    "kind": 8,
+                    "range": {
+                        "start": {
+                            "line": 7,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 7,
+                            "character": 9
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 7,
+                            "character": 4
+                        },
+                        "end": {
+                            "line": 7,
+                            "character": 9
                         }
                     },
                     "children": []
@@ -160,27 +160,27 @@
             },
             "children": [
                 {
-                    "name": "@@greeting",
+                    "name": "hi",
                     "detail": "",
-                    "kind": 14,
+                    "kind": 6,
                     "range": {
                         "start": {
-                            "line": 29,
+                            "line": 32,
                             "character": 2
                         },
                         "end": {
-                            "line": 29,
-                            "character": 12
+                            "line": 32,
+                            "character": 11
                         }
                     },
                     "selectionRange": {
                         "start": {
-                            "line": 29,
+                            "line": 32,
                             "character": 2
                         },
                         "end": {
-                            "line": 29,
-                            "character": 12
+                            "line": 32,
+                            "character": 11
                         }
                     },
                     "children": []
@@ -212,27 +212,27 @@
                     "children": []
                 },
                 {
-                    "name": "hi",
+                    "name": "@@greeting",
                     "detail": "",
-                    "kind": 6,
+                    "kind": 14,
                     "range": {
                         "start": {
-                            "line": 32,
+                            "line": 29,
                             "character": 2
                         },
                         "end": {
-                            "line": 32,
-                            "character": 11
+                            "line": 29,
+                            "character": 12
                         }
                     },
                     "selectionRange": {
                         "start": {
-                            "line": 32,
+                            "line": 29,
                             "character": 2
                         },
                         "end": {
-                            "line": 32,
-                            "character": 11
+                            "line": 29,
+                            "character": 12
                         }
                     },
                     "children": []
@@ -371,32 +371,6 @@
             },
             "children": [
                 {
-                    "name": "InnerClass",
-                    "detail": "",
-                    "kind": 5,
-                    "range": {
-                        "start": {
-                            "line": 81,
-                            "character": 2
-                        },
-                        "end": {
-                            "line": 81,
-                            "character": 18
-                        }
-                    },
-                    "selectionRange": {
-                        "start": {
-                            "line": 81,
-                            "character": 2
-                        },
-                        "end": {
-                            "line": 81,
-                            "character": 18
-                        }
-                    },
-                    "children": []
-                },
-                {
                     "name": "InnerModule",
                     "detail": "",
                     "kind": 2,
@@ -418,6 +392,32 @@
                         "end": {
                             "line": 82,
                             "character": 20
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "InnerClass",
+                    "detail": "",
+                    "kind": 5,
+                    "range": {
+                        "start": {
+                            "line": 81,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 81,
+                            "character": 18
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 81,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 81,
+                            "character": 18
                         }
                     },
                     "children": []
@@ -450,32 +450,6 @@
             },
             "children": [
                 {
-                    "name": "InnerClass",
-                    "detail": "",
-                    "kind": 5,
-                    "range": {
-                        "start": {
-                            "line": 86,
-                            "character": 2
-                        },
-                        "end": {
-                            "line": 86,
-                            "character": 18
-                        }
-                    },
-                    "selectionRange": {
-                        "start": {
-                            "line": 86,
-                            "character": 2
-                        },
-                        "end": {
-                            "line": 86,
-                            "character": 18
-                        }
-                    },
-                    "children": []
-                },
-                {
                     "name": "InnerModule",
                     "detail": "",
                     "kind": 2,
@@ -497,6 +471,32 @@
                         "end": {
                             "line": 87,
                             "character": 20
+                        }
+                    },
+                    "children": []
+                },
+                {
+                    "name": "InnerClass",
+                    "detail": "",
+                    "kind": 5,
+                    "range": {
+                        "start": {
+                            "line": 86,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 86,
+                            "character": 18
+                        }
+                    },
+                    "selectionRange": {
+                        "start": {
+                            "line": 86,
+                            "character": 2
+                        },
+                        "end": {
+                            "line": 86,
+                            "character": 18
                         }
                     },
                     "children": []
