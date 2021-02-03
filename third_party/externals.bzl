@@ -36,6 +36,16 @@ def register_sorbet_dependencies():
         strip_prefix = "spdlog-c2b47430fb210c8822177407b9e4b82d4ef7455d",
     )
 
+    # We don't use this directly, but protobuf will skip defining its own
+    # `@zlib` if it's present.
+    http_archive(
+        name = "zlib",
+        urls = _github_public_urls("madler/zlib/archive/cacf7f1d4e3d44d871b605da3b647f07d718623f.zip"),
+        build_file = "@com_stripe_ruby_typer//third_party:zlib.BUILD",
+        sha256 = "1cce3828ec2ba80ff8a4cac0ab5aa03756026517154c4b450e617ede751d41bd",
+        strip_prefix = "zlib-cacf7f1d4e3d44d871b605da3b647f07d718623f",
+    )
+
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
     # depend on @com_google_protobuf for protoc and proto runtimes.
     # This statement defines the @com_google_protobuf repo.
