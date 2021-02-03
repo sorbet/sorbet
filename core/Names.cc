@@ -26,22 +26,6 @@ NameRef::NameRef(const GlobalState &gs, NameRef ref)
     ENFORCE_NO_TIMER(this->unsafeTableIndex() <= ID_MASK);
 }
 
-unsigned int NameRef::hash(const GlobalState &gs) const {
-    // TODO: use https://github.com/Cyan4973/xxHash
-    // !!! keep this in sync with GlobalState.enter*
-    switch (kind()) {
-        case NameKind::UTF8:
-            return _hash(dataUtf8(gs)->utf8);
-        case NameKind::UNIQUE: {
-            auto unique = dataUnique(gs);
-            return _hash_mix_unique((u2)unique->uniqueNameKind, NameKind::UNIQUE, unique->num,
-                                    unique->original.rawId());
-        }
-        case NameKind::CONSTANT:
-            return _hash_mix_constant(NameKind::CONSTANT, dataCnst(gs)->original.rawId());
-    }
-}
-
 string NameRef::showRaw(const GlobalState &gs) const {
     switch (kind()) {
         case NameKind::UTF8: {
