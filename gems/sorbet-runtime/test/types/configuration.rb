@@ -147,6 +147,24 @@ module Opus::Types::Test
       end
     end
 
+    describe 'final_checks_on_hooks' do
+      describe 'when in default state' do
+        it 'raises an error' do
+          @mod.sig(:final) {returns(Symbol)}
+          def @mod.final_method_redefined_ko
+            :bar
+          end
+          ex = assert_raises(RuntimeError) do
+            @mod.sig(:final) {returns(Symbol)}
+            def @mod.final_method_redefined_ko
+              :baz
+            end
+          end
+          assert_includes(ex.message, "was declared as final and cannot be redefined")
+        end
+      end
+    end
+
     describe 'call_validation_error_handler' do
       describe 'when in default state' do
         it 'raises an error' do
