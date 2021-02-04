@@ -3,9 +3,9 @@
 #include "common/Timer.h"
 #include "common/common.h"
 #include "core/GlobalSubstitution.h"
+#include "core/Hashing.h"
 #include "core/Types.h"
 #include "core/Unfreeze.h"
-#include "core/hashing/hashing.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <algorithm>
 #include <string>

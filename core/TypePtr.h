@@ -3,7 +3,6 @@
 #include "common/common.h"
 #include "core/NameRef.h"
 #include "core/SymbolRef.h"
-#include "core/hashing/hashing.h"
 #include <memory>
 
 namespace sorbet::core {
@@ -319,7 +318,7 @@ public:
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
 
     DispatchResult dispatchCall(const GlobalState &gs, DispatchArgs args) const;
 

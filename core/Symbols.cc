@@ -7,10 +7,10 @@
 #include "common/sort.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
+#include "core/Hashing.h"
 #include "core/Names.h"
 #include "core/Types.h"
 #include "core/errors/internal.h"
-#include "core/hashing/hashing.h"
 #include <string>
 
 template class std::vector<sorbet::core::TypeAndOrigins>;
@@ -1334,16 +1334,12 @@ ClassOrModuleRef Symbol::enclosingClass(const GlobalState &gs) const {
     return owner.asClassOrModuleRef();
 }
 
-void Symbol::hash(const GlobalState &gs, Hasher &hasher) const {
-    hasher.mixString(name.shortName(gs));
-    if (!this->resultType) {
-        hasher.mixUint(0);
-    } else {
-        this->resultType.hash(gs, hasher);
-    }
-    hasher.mixUint(this->flags);
-    hasher.mixUint(this->owner._id);
-    hasher.mixUint(this->superClassOrRebind._id);
+u4 Symbol::hash(const GlobalState &gs) const {
+    u4 result = _hash(name.shortName(gs));
+    result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
+    result = mix(result, this->flags);
+    result = mix(result, this->owner._id);
+    result = mix(result, this->superClassOrRebind._id);
     // argumentsOrMixins, typeParams, typeAliases
     if (!members().empty()) {
         // Rather than use membersStableOrderSlow, which is... slow..., use an order dictated by symbol ref ID.
@@ -1357,12 +1353,12 @@ void Symbol::hash(const GlobalState &gs, Hasher &hasher) const {
         }
         fast_sort(membersToHash, [](const auto &a, const auto &b) -> bool { return a.rawId() < b.rawId(); });
         for (auto member : membersToHash) {
-            hasher.mixString(member.data(gs)->name.shortName(gs));
+            result = mix(result, _hash(member.data(gs)->name.shortName(gs)));
         }
     }
     for (const auto &e : mixins_) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            hasher.mixString(e.data(gs)->name.shortName(gs));
+            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
     for (const auto &arg : arguments_) {
@@ -1371,51 +1367,51 @@ void Symbol::hash(const GlobalState &gs, Hasher &hasher) const {
         if (!type) {
             type = Types::untypedUntracked();
         }
-        type.hash(gs, hasher);
-        hasher.mixString(arg.name.shortName(gs));
+        result = mix(result, type.hash(gs));
+        result = mix(result, _hash(arg.name.shortName(gs)));
     }
     for (const auto &e : typeParams) {
         if (e.exists() && !e.data(gs)->ignoreInHashing(gs)) {
-            hasher.mixString(e.data(gs)->name.shortName(gs));
+            result = mix(result, _hash(e.data(gs)->name.shortName(gs)));
         }
     }
+
+    return result;
 }
 
-void Symbol::methodShapeHash(const GlobalState &gs, Hasher &hasher) const {
+u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     ENFORCE(isMethod());
 
-    hasher.mixString(name.shortName(gs));
-    hasher.mixUint(this->flags);
-    hasher.mixUint(this->owner._id);
-    hasher.mixUint(this->superClassOrRebind._id);
-    hasher.mixUint(this->hasSig());
-
+    u4 result = _hash(name.shortName(gs));
+    result = mix(result, this->flags);
+    result = mix(result, this->owner._id);
+    result = mix(result, this->superClassOrRebind._id);
+    result = mix(result, this->hasSig());
     for (auto &arg : this->methodArgumentHash(gs)) {
-        // TODO: fix methodArgumentHash
-        hasher.mixUint(arg);
+        result = mix(result, arg);
     }
 
     if (name == core::Names::unresolvedAncestors()) {
         // This is a synthetic method that encodes the superclasses of its owning class in its return type.
         // If the return type changes, we must take the slow path.
         ENFORCE(resultType);
-        resultType.hash(gs, hasher);
+        result = mix(result, resultType.hash(gs));
     }
+
+    return result;
 }
 
 vector<u4> Symbol::methodArgumentHash(const GlobalState &gs) const {
     vector<u4> result;
     result.reserve(arguments().size());
-    Hasher hasher;
     for (const auto &e : arguments()) {
+        u4 arg = 0;
         // Changing name of keyword arg is a shape change.
         if (e.flags.isKeyword) {
-            hasher.mixString(e.name.shortName(gs));
+            arg = mix(arg, _hash(e.name.shortName(gs)));
         }
-        hasher.mixUint(e.flags.toU1());
         // Changing an argument from e.g. keyword to position-based is a shape change.
-        result.push_back(hasher.digest());
-        hasher.reset();
+        result.push_back(mix(arg, e.flags.toU1()));
     }
     return result;
 }

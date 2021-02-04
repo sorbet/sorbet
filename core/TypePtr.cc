@@ -1,8 +1,8 @@
 #include "core/TypePtr.h"
 #include "common/has_member.h"
+#include "core/Hashing.h"
 #include "core/Symbols.h"
 #include "core/Types.h"
-#include "core/hashing/hashing.h"
 
 using namespace std;
 
@@ -318,8 +318,8 @@ string TypePtr::toStringWithTabs(const GlobalState &gs, int tabs) const {
 #undef TO_STRING_WITH_TABS
 }
 
-void TypePtr::hash(const GlobalState &gs, Hasher &hasher) const {
-#define HASH(T) return cast_type_nonnull<T>(*this).hash(gs, hasher);
+u4 TypePtr::hash(const GlobalState &gs) const {
+#define HASH(T) return cast_type_nonnull<T>(*this).hash(gs);
     GENERATE_TAG_SWITCH(tag(), HASH)
 #undef HASH
 }

@@ -25,6 +25,5 @@ cc_library(
     deps = [
         "//common",
         "//core",
-        "//core/hashing",
     ],
 )

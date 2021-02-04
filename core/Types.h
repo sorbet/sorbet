@@ -7,7 +7,6 @@
 #include "core/Error.h"
 #include "core/SymbolRef.h"
 #include "core/TypeConstraint.h"
-#include "core/hashing/hashing.h"
 #include <memory>
 #include <optional>
 #include <string>
@@ -331,7 +330,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
@@ -374,7 +373,7 @@ public:
     LambdaParam(SymbolRef definition, TypePtr lower, TypePtr upper);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
@@ -392,7 +391,7 @@ public:
     SelfTypeParam(const SymbolRef definition);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
@@ -415,7 +414,7 @@ public:
     AliasType(SymbolRef other);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
     const SymbolRef symbol;
@@ -446,7 +445,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     std::string showValue(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
 
     TypePtr _replaceSelfType(const GlobalState &gs, const TypePtr &receiver) const;
 
@@ -489,7 +488,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     std::string showValue(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
 
     bool equals(const LiteralType &rhs) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -558,7 +557,7 @@ public:
     TypeVar(SymbolRef sym);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
@@ -575,7 +574,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
@@ -626,7 +625,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
 
     TypePtr getCallArguments(const GlobalState &gs, NameRef name) const;
@@ -669,7 +668,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
     std::string showWithMoreInfo(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
@@ -694,7 +693,7 @@ public:
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     std::string showWithMoreInfo(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
                          const std::vector<TypePtr> &targs) const;
@@ -717,7 +716,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
     DispatchResult dispatchCall(const GlobalState &gs, const DispatchArgs &args) const;
     void _sanityCheck(const GlobalState &gs) const;
     TypePtr _instantiate(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &params,
@@ -747,7 +746,7 @@ public:
 
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const;
 
@@ -893,7 +892,7 @@ public:
         : ClassType(core::Symbols::untyped()), scope(scope), names(names){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
 };
 
 TYPE(UnresolvedAppliedType) final : public ClassType {
@@ -904,7 +903,7 @@ public:
         : ClassType(core::Symbols::untyped()), klass(klass), targs(std::move(targs)){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
-    void hash(const GlobalState &gs, Hasher &hasher) const;
+    u4 hash(const GlobalState &gs) const;
 };
 
 } // namespace sorbet::core
