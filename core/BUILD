@@ -15,7 +15,6 @@ cc_library(
         "Names_gen.h",
         "Names_gen.cc",
     ],
-    copts = ["-Wno-implicit-fallthrough"],
     hdrs = [
         "GlobalSubstitution.h",
         "core.h",
