@@ -1,128 +1,116 @@
-#include "core/Hashing.h"
+#include "core/hashing/hashing.h"
 #include "core/SymbolRef.h"
 #include "core/Types.h"
 
 using namespace std;
 
 namespace sorbet::core {
-u4 ClassType::hash(const GlobalState &gs) const {
-    u4 value = static_cast<u4>(TypePtr::Tag::ClassType);
-    return mix(value, this->symbol.id());
+void ClassType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::ClassType));
+    hasher.mixUint(this->symbol.id());
 }
 
-u4 UnresolvedClassType::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::UnresolvedClassType);
-    result = mix(result, this->scope.rawId());
+void UnresolvedClassType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::UnresolvedClassType));
+    hasher.mixUint(this->scope.rawId());
     for (auto name : this->names) {
-        result = mix(result, _hash(name.shortName(gs)));
+        hasher.mixString(name.shortName(gs));
     }
-    return result;
 }
 
-u4 UnresolvedAppliedType::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::UnresolvedAppliedType);
-    result = mix(result, this->klass.rawId());
+void UnresolvedAppliedType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::UnresolvedAppliedType));
+    hasher.mixUint(this->klass.rawId());
     for (auto &targ : targs) {
-        result = mix(result, targ.hash(gs));
+        targ.hash(gs, hasher);
     }
-    return result;
 }
 
-u4 LiteralType::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::LiteralType);
+void LiteralType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::LiteralType));
     auto underlying = this->underlying(gs);
     ClassOrModuleRef undSymbol = cast_type_nonnull<ClassType>(underlying).symbol;
-    result = mix(result, undSymbol.id());
+    hasher.mixUint(undSymbol.id());
 
-    u8 rawValue;
     switch (literalKind) {
         case LiteralType::LiteralTypeKind::String:
         case LiteralType::LiteralTypeKind::Symbol:
-            return mix(result, _hash(asName(gs).shortName(gs)));
+            return hasher.mixString(asName(gs).shortName(gs));
         case LiteralType::LiteralTypeKind::Float:
-            rawValue = absl::bit_cast<u8>(asFloat());
-            break;
+            return hasher.mixU8(absl::bit_cast<u8>(asFloat()));
         case LiteralType::LiteralTypeKind::Integer:
-            rawValue = absl::bit_cast<u8>(asInteger());
-            break;
+            return hasher.mixU8(absl::bit_cast<u8>(asInteger()));
     }
-
-    u4 topBits = static_cast<u4>(rawValue >> 32);
-    u4 bottomBits = static_cast<u4>(rawValue & 0xFFFFFFFF);
-    result = mix(result, topBits);
-    result = mix(result, bottomBits);
-    return result;
 }
 
-u4 TupleType::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::TupleType);
+void TupleType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::TupleType));
     for (auto &el : this->elems) {
-        result = mix(result, el.hash(gs));
+        el.hash(gs, hasher);
     }
-    return result;
 }
 
-u4 ShapeType::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::ShapeType);
+void ShapeType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::ShapeType));
     for (auto &key : this->keys) {
-        result = mix(result, key.hash(gs));
+        key.hash(gs, hasher);
     }
-    return result;
 }
 
-u4 AliasType::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::AliasType);
-    return mix(result, this->symbol.rawId());
+void AliasType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::AliasType));
+    hasher.mixUint(this->symbol.rawId());
 }
 
-u4 AndType::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::AndType);
-    result = mix(result, this->left.hash(gs));
-    return mix(result, this->right.hash(gs));
+void AndType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::AndType));
+    this->left.hash(gs, hasher);
+    this->right.hash(gs, hasher);
 }
 
-u4 OrType::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::OrType);
-    result = mix(result, this->left.hash(gs));
-    return mix(result, this->right.hash(gs));
+void OrType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::OrType));
+    this->left.hash(gs, hasher);
+    this->right.hash(gs, hasher);
 }
 
-u4 TypeVar::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::TypeVar);
-    return mix(result, sym.rawId());
+void TypeVar::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::TypeVar));
+    hasher.mixUint(sym.rawId());
 }
 
-u4 AppliedType::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::AppliedType);
-    result = mix(result, this->klass.id());
+void AppliedType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::AppliedType));
+    hasher.mixUint(this->klass.id());
     for (auto &arg : targs) {
-        result = mix(result, arg.hash(gs));
+        arg.hash(gs, hasher);
     }
-    return result;
 }
 
-u4 LambdaParam::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::LambdaParam);
-    result = mix(result, this->definition.rawId());
-    result = mix(result, this->upperBound.hash(gs));
+void LambdaParam::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::LambdaParam));
+    hasher.mixUint(this->definition.rawId());
+    this->upperBound.hash(gs, hasher);
     // Lowerbound might not be set.
-    result = mix(result, this->lowerBound == nullptr ? 0 : this->lowerBound.hash(gs));
-    return result;
+    if (this->lowerBound != nullptr) {
+        this->lowerBound.hash(gs, hasher);
+    } else {
+        hasher.mixUint(0);
+    }
 }
 
-u4 SelfTypeParam::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::SelfTypeParam);
-    result = mix(result, this->definition.rawId());
-    return result;
+void SelfTypeParam::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::SelfTypeParam));
+    hasher.mixUint(this->definition.rawId());
 }
 
-u4 SelfType::hash(const GlobalState &gs) const {
-    return static_cast<u4>(TypePtr::Tag::SelfType);
+void SelfType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::SelfType));
 }
 
-u4 MetaType::hash(const GlobalState &gs) const {
-    u4 result = static_cast<u4>(TypePtr::Tag::MetaType);
-    return mix(result, this->wrapped.hash(gs));
+void MetaType::hash(const GlobalState &gs, Hasher &hasher) const {
+    hasher.mixUint(static_cast<u4>(TypePtr::Tag::MetaType));
+    this->wrapped.hash(gs, hasher);
 }
 
 } // namespace sorbet::core

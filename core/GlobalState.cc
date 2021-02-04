@@ -3,13 +3,13 @@
 #include "common/Timer.h"
 #include "common/sort.h"
 #include "core/Error.h"
-#include "core/Hashing.h"
 #include "core/NameHash.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
 #include "core/Types.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
+#include "core/hashing/hashing.h"
 #include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include <utility>
@@ -31,23 +31,31 @@ namespace sorbet::core {
 namespace {
 // Hash functions used to determine position in namesByHash.
 
-inline unsigned int hashMixUnique(UniqueNameKind unk, unsigned int num, unsigned int rawId) {
-    return mix(mix(num, static_cast<u4>(unk)), rawId) * HASH_MULT2 + static_cast<u4>(NameKind::UNIQUE);
+inline unsigned int hashUnique(UniqueNameKind unk, unsigned int num, unsigned int rawId) {
+    Hasher hasher;
+    hasher.mixUint(static_cast<u4>(unk));
+    hasher.mixUint(num);
+    hasher.mixUint(rawId);
+    hasher.mixUint(static_cast<u4>(NameKind::UNIQUE));
+    return hasher.digest();
 }
 
-inline unsigned int hashMixConstant(unsigned int id) {
-    return id * HASH_MULT2 + static_cast<u4>(NameKind::CONSTANT);
+inline unsigned int hashConstant(unsigned int id) {
+    Hasher hasher;
+    hasher.mixUint(id);
+    hasher.mixUint(static_cast<u4>(NameKind::CONSTANT));
+    return hasher.digest();
 }
 
 inline unsigned int hashNameRef(const GlobalState &gs, NameRef nref) {
     switch (nref.kind()) {
         case NameKind::UTF8:
-            return _hash(nref.shortName(gs));
+            return Hasher::hashString(nref.shortName(gs));
         case NameKind::CONSTANT:
-            return hashMixConstant(nref.dataCnst(gs)->original.rawId());
+            return hashConstant(nref.dataCnst(gs)->original.rawId());
         case NameKind::UNIQUE: {
             auto data = nref.dataUnique(gs);
-            return hashMixUnique(data->uniqueNameKind, data->num, data->original.rawId());
+            return hashUnique(data->uniqueNameKind, data->num, data->original.rawId());
         }
     }
 }
@@ -1273,7 +1281,7 @@ string_view GlobalState::enterString(string_view nm) {
 }
 
 NameRef GlobalState::lookupNameUTF8(string_view nm) const {
-    const auto hs = _hash(nm);
+    const auto hs = Hasher::hashString(nm);
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1298,7 +1306,7 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
 }
 
 NameRef GlobalState::enterNameUTF8(string_view nm) {
-    const auto hs = _hash(nm);
+    const auto hs = Hasher::hashString(nm);
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1351,7 +1359,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-existing name");
     ENFORCE(original.isValidConstantName(*this), "making a constant name over wrong name kind");
 
-    const auto hs = hashMixConstant(original.rawId());
+    const auto hs = hashConstant(original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1411,7 +1419,7 @@ NameRef GlobalState::lookupNameConstant(NameRef original) const {
     }
     ENFORCE(original.isValidConstantName(*this), "looking up a constant name over wrong name kind");
 
-    const auto hs = hashMixConstant(original.rawId());
+    const auto hs = hashConstant(original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1479,7 +1487,7 @@ void GlobalState::expandNames(u4 utf8NameSize, u4 constantNameSize, u4 uniqueNam
 
 NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) const {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = hashMixUnique(uniqueNameKind, num, original.rawId());
+    const auto hs = hashUnique(uniqueNameKind, num, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -1505,7 +1513,7 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u4 num) {
     ENFORCE(num > 0, "num == 0, name overflow");
-    const auto hs = hashMixUnique(uniqueNameKind, num, original.rawId());
+    const auto hs = hashUnique(uniqueNameKind, num, original.rawId());
     unsigned int hashTableSize = namesByHash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -2031,29 +2039,20 @@ unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState>
     return what;
 }
 
-u4 patchHash(u4 hash) {
-    if (hash == GlobalStateHash::HASH_STATE_NOT_COMPUTED) {
-        hash = GlobalStateHash::HASH_STATE_NOT_COMPUTED_COLLISION_AVOID;
-    } else if (hash == GlobalStateHash::HASH_STATE_INVALID) {
-        hash = GlobalStateHash::HASH_STATE_INVALID_COLLISION_AVOID;
-    }
-    return hash;
-}
-
 unique_ptr<GlobalStateHash> GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
-    u4 hierarchyHash = 0;
-    UnorderedMap<NameHash, u4> methodHashes;
+    UnorderedMap<NameHash, Hasher> methodHashes;
     int counter = 0;
+    Hasher hierarchyHasher;
 
     for (const auto *symbolType : {&this->classAndModules, &this->fields, &this->typeArguments, &this->typeMembers}) {
         counter = 0;
         for (const auto &sym : *symbolType) {
             if (!sym.ignoreInHashing(*this)) {
-                hierarchyHash = mix(hierarchyHash, sym.hash(*this));
+                sym.hash(*this, hierarchyHasher);
                 counter++;
                 if (DEBUG_HASHING_TAIL && counter > symbolType->size() - 15) {
-                    errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
+                    // errorQueue->logger.info("Hashing symbols: {}, {}", hierarchyHash, sym.name.show(*this));
                 }
             }
         }
@@ -2062,24 +2061,25 @@ unique_ptr<GlobalStateHash> GlobalState::hash() const {
     counter = 0;
     for (const auto &sym : this->methods) {
         if (!sym.ignoreInHashing(*this)) {
-            auto &target = methodHashes[NameHash(*this, sym.name)];
-            target = mix(target, sym.hash(*this));
-            hierarchyHash = mix(hierarchyHash, sym.methodShapeHash(*this));
+            auto &methodHasher = methodHashes[NameHash(*this, sym.name)];
+            sym.hash(*this, methodHasher);
+            sym.methodShapeHash(*this, hierarchyHasher);
             counter++;
             if (DEBUG_HASHING_TAIL && counter > this->methods.size() - 15) {
-                errorQueue->logger.info("Hashing method symbols: {}, {}", hierarchyHash, sym.name.show(*this));
+                // errorQueue->logger.info("Hashing method symbols: {}, {}", hierarchyHash, sym.name.show(*this));
             }
         }
     }
 
     unique_ptr<GlobalStateHash> result = make_unique<GlobalStateHash>();
-    for (const auto &e : methodHashes) {
-        result->methodHashes.emplace_back(e.first, patchHash(e.second));
+    result->methodHashes.reserve(methodHashes.size());
+    for (auto &e : methodHashes) {
+        result->methodHashes.emplace_back(e.first, e.second.digest());
     }
     // Sort the hashes. Semantically important for quickly diffing hashes.
     fast_sort(result->methodHashes);
 
-    result->hierarchyHash = patchHash(hierarchyHash);
+    result->hierarchyHash = hierarchyHasher.digest();
     return result;
 }
 

@@ -1,20 +1,16 @@
 cc_library(
-    name = "ast",
+    name = "hashing",
     srcs = glob(
         [
             "*.cc",
-            "*.h",
         ],
         exclude = [
-            "*_test.cc",
-
             # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
-            "flycheck_*",
+            "**/flycheck_*",
         ],
     ),
     hdrs = [
-        "ArgParsing.h",
-        "ast.h",
+        "hashing.h",
     ],
     copts = ["-Wno-implicit-fallthrough"],
     linkstatic = select({
@@ -23,8 +19,6 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//common",
-        "//core",
-        "//core/hashing",
+        "@xxhash",
     ],
 )

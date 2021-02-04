@@ -1,7 +1,7 @@
 #include "ast/ArgParsing.h"
 #include "common/typecase.h"
 #include "core/Context.h"
-#include "core/Hashing.h"
+#include "core/hashing/hashing.h"
 
 using namespace std;
 
@@ -73,11 +73,11 @@ vector<ParsedArg> ArgParsing::parseArgs(const ast::MethodDef::ARGS_store &args) 
 std::vector<u4> ArgParsing::hashArgs(core::Context ctx, const std::vector<ParsedArg> &args) {
     std::vector<u4> result;
     result.reserve(args.size());
+    core::Hasher hasher;
     for (const auto &e : args) {
-        u4 arg = 0;
         u1 flags = 0;
         if (e.flags.isKeyword) {
-            arg = core::mix(arg, core::_hash(e.local._name.shortName(ctx)));
+            hasher.mixString(e.local._name.shortName(ctx));
             flags += 1;
         }
         if (e.flags.isRepeated) {
@@ -93,7 +93,10 @@ std::vector<u4> ArgParsing::hashArgs(core::Context ctx, const std::vector<Parsed
             flags += 16;
         }
 
-        result.push_back(core::mix(arg, flags));
+        hasher.mixUint(flags);
+
+        result.push_back(hasher.digest());
+        hasher.reset();
     }
     return result;
 }

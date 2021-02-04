@@ -6,6 +6,7 @@
 #include "core/Names.h"
 #include "core/SymbolRef.h"
 #include "core/Types.h"
+#include "core/hashing/hashing.h"
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -113,8 +114,8 @@ public:
     const InlinedVector<Loc, 2> &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
 
-    u4 hash(const GlobalState &gs) const;
-    u4 methodShapeHash(const GlobalState &gs) const;
+    void hash(const GlobalState &gs, Hasher &hasher) const;
+    void methodShapeHash(const GlobalState &gs, Hasher &hasher) const;
     std::vector<u4> methodArgumentHash(const GlobalState &gs) const;
 
     std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
