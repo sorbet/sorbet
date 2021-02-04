@@ -191,6 +191,7 @@ NameDef names[] = {
     {"merchant"},
     {"foreign"},
     {"ifunset"},
+    {"raiseOnNilWrite", "raise_on_nil_write"},
     {"withoutAccessors", "without_accessors"},
     {"instanceVariableGet", "instance_variable_get"},
     {"instanceVariableSet", "instance_variable_set"},
