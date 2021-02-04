@@ -25,6 +25,15 @@ bool isTNilable(ast::ExpressionPtr &expr) {
     return nilable != nullptr && nilable->fun == core::Names::nilable() && isT(nilable->recv);
 }
 
+ast::ExpressionPtr &getUnderlyingType(ast::ExpressionPtr &expr) {
+    auto *nilable = ast::cast_tree<ast::Send>(expr);
+    if (nilable->numPosArgs >= 1) {
+        return nilable->args[0];
+    } else {
+        return expr;
+    }
+}
+
 bool isTStruct(ast::ExpressionPtr &expr) {
     auto *struct_ = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     return struct_ != nullptr && struct_->cnst == core::Names::Constants::Struct() && isT(struct_->scope);
@@ -96,6 +105,7 @@ struct PropContext {
 struct PropInfo {
     core::LocOffsets loc;
     bool isImmutable = false;
+    bool raiseOnNilWrite = false;
     bool hasWithoutAccessors = false;
     core::NameRef name;
     core::LocOffsets nameLoc;
@@ -209,6 +219,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
         auto *rules = ast::cast_tree<ast::Hash>(rulesTree);
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::immutable())) {
             ret.isImmutable = true;
+        }
+
+        if (ASTUtil::hasHashValue(ctx, *rules, core::Names::raiseOnNilWrite())) {
+            ret.raiseOnNilWrite = true;
         }
 
         if (ASTUtil::hasHashValue(ctx, *rules, core::Names::withoutAccessors())) {
@@ -337,7 +351,13 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
     // Compute the setter
     if (!ret.isImmutable) {
-        auto setType = ASTUtil::dupType(ret.type);
+        ast::ExpressionPtr setType;
+        // When we have raise_on_nil_write, the setType should be the non-nilable underlying type
+        if (ret.raiseOnNilWrite && isTNilable(ret.type)) {
+            setType = ASTUtil::dupType(getUnderlyingType(ret.type));
+        } else {
+            setType = ASTUtil::dupType(ret.type);
+        }
         ast::Send::ARGS_store sigArgs;
         sigArgs.emplace_back(ast::MK::Symbol(nameLoc, core::Names::arg0()));
         sigArgs.emplace_back(ASTUtil::dupType(setType));
