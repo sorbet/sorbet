@@ -8,7 +8,6 @@ namespace sorbet::core {
 static constexpr unsigned int HASH_MULT = 65599; // sdbm
 static constexpr unsigned int HASH_MULT2 = 31;   // for names
 
-// TODO: Replace with streaming variant of XXHash.
 inline unsigned int mix(unsigned int acc, unsigned int nw) {
     return nw + (acc << 6) + (acc << 16) - acc; // HASH_MULT in faster version
 }
