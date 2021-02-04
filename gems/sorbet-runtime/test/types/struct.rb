@@ -54,4 +54,28 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       m.foo = nil
     end
   end
+
+  # Failing - missing required prop
+  it "raises a TypeError omitting raise_on_nil_write prop on initialization" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.nilable(String), raise_on_nil_write: true
+    end
+    klass::new
+  end
+
+  # Failing - cannot write nil, needs String
+  it "raises a TypeError explicitly setting nil on raise_on_nil_write prop on initialization" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.nilable(String), raise_on_nil_write: true
+    end
+    klass::new(foo: nil)
+  end
+
+  it "allows explicit nil default for raise_on_nil_write prop" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.nilable(String), raise_on_nil_write: true, default: nil
+    end
+    m = klass.new
+    assert(m.foo.nil?)
+  end
 end
