@@ -49,7 +49,7 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
     klass = Class.new(T::Struct) do
       prop :foo, T.nilable(String), raise_on_nil_write: true
     end
-    m = klass::new(foo: "baz")
+    m = klass.new(foo: "baz")
     assert_raises(TypeError) do
       m.foo = nil
     end
@@ -60,7 +60,7 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
     klass = Class.new(T::Struct) do
       prop :foo, T.nilable(String), raise_on_nil_write: true
     end
-    klass::new
+    klass.new
   end
 
   # Failing - cannot write nil, needs String
@@ -68,7 +68,7 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
     klass = Class.new(T::Struct) do
       prop :foo, T.nilable(String), raise_on_nil_write: true
     end
-    klass::new(foo: nil)
+    klass.new(foo: nil)
   end
 
   it "allows explicit nil default for raise_on_nil_write prop" do
