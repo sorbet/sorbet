@@ -1,0 +1,37 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class <emptyTree>::<C Thing><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C String>))
+    end
+
+    def foo<<todo method>>(&<blk>)
+      begin
+        arg2 = <self>.instance_variable_get(:@foo)
+        <self>.class().decorator().prop_get_logic(<self>, :foo, arg2)
+      end
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def foo=<<todo method>>(arg0, &<blk>)
+      begin
+        if ::T::NonForcingConstants.non_forcing_is_a?(<self>, "::Chalk::ODM::Document")
+          ::Chalk::ODM::DocumentDecoratorHelper.soft_freeze_logic(<self>, :foo)
+        else
+          <emptyTree>
+        end
+        <self>.instance_variable_set(:@foo, arg0)
+      end
+    end
+
+    <self>.include(<emptyTree>::<C T>::<C Props>)
+
+    <self>.prop(:foo, <emptyTree>::<C T>.nilable(<emptyTree>::<C String>), :raise_on_nil_write, true, :without_accessors, true)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo=, :normal)
+  end
+end
