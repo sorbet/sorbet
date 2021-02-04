@@ -865,6 +865,9 @@ struct DispatchResult {
                    Combinator secondaryKind)
         : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
           secondaryKind(secondaryKind){};
+
+    // Combine two dispatch results, preferring the left as the `main`.
+    static DispatchResult merge(TypePtr &&type, Combinator kind, DispatchResult &&left, DispatchResult &&right);
 };
 
 TYPE_INLINED(BlamedUntyped) final : public ClassType {
