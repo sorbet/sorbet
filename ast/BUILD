@@ -16,6 +16,7 @@ cc_library(
         "ArgParsing.h",
         "ast.h",
     ],
+    copts = ["-Wno-implicit-fallthrough"],
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
