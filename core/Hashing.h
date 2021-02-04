@@ -13,7 +13,8 @@ inline unsigned int mix(unsigned int acc, unsigned int nw) {
 }
 
 inline unsigned int _hash(std::string_view utf8) {
-    return XXH64(utf8.data(), utf8.size(), /* seed */ 0);
+    // Take the lower 32-bits of the 64-bit hash. The 64-bit hash is faster than the 32-bit hash on 64-bit platforms.
+    return static_cast<u4>(XXH64(utf8.data(), utf8.size(), /* seed */ 0));
 }
 } // namespace sorbet::core
 #endif // SORBET_HASHING_H
