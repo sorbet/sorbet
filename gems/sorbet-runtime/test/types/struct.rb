@@ -44,4 +44,14 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       end
     end
   end
+
+  it "raises a TypeError setting nil on raise_on_nil_write prop" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.nilable(String), raise_on_nil_write: true
+    end
+    m = klass::new(foo: "baz")
+    assert_raises(TypeError) do
+      m.foo = nil
+    end
+  end
 end
