@@ -56,7 +56,7 @@ template <> BasePath<string> &BasePath<string>::combine_right(const string_view 
     return *this;
 }
 
-template <> const string_view BasePath<string>::string() {
+template <> const string BasePath<string>::string() {
     return internal_path;
 }
 
@@ -94,7 +94,7 @@ template <> BasePath<filesystem::path> &BasePath<filesystem::path>::combine_righ
     return *this;
 }
 
-template <> const string_view BasePath<filesystem::path>::string() {
+template <> const string BasePath<filesystem::path>::string() {
     return internal_path.string();
 }
 

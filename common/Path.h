@@ -58,7 +58,7 @@ public:
     /**
      * Returns the string representation of the path
      */
-    const std::string_view string() {
+    const std::string string() {
         return "";
     }
 
