@@ -93,12 +93,10 @@ DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &
         leftRet = left.dispatchCall(gs, args.withThisRef(left));
         rightRet = right.dispatchCall(gs, args.withThisRef(right));
     }
-    DispatchResult ret{Types::all(gs, leftRet.returnType, rightRet.returnType), move(leftRet.main),
-                       make_unique<DispatchResult>(move(rightRet)),
 
-                       DispatchResult::Combinator::AND};
-
-    return ret;
+    auto resultType = Types::all(gs, leftRet.returnType, rightRet.returnType);
+    return DispatchResult::merge(std::move(resultType), DispatchResult::Combinator::AND, std::move(leftRet),
+                                 std::move(rightRet));
 }
 
 TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name) const {
