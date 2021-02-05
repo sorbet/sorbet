@@ -46,8 +46,9 @@ DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &a
     categoryCounterInc("dispatch_call", "ortype");
     auto leftRet = left.dispatchCall(gs, args.withSelfRef(left));
     auto rightRet = right.dispatchCall(gs, args.withSelfRef(right));
-    return DispatchResult::merge(Types::any(gs, leftRet.returnType, rightRet.returnType),
-                                 DispatchResult::Combinator::OR, std::move(leftRet), std::move(rightRet));
+    auto resultType = Types::any(gs, leftRet.returnType, rightRet.returnType);
+    return DispatchResult::merge(std::move(resultType), DispatchResult::Combinator::OR, std::move(leftRet),
+                                 std::move(rightRet));
 }
 
 TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
