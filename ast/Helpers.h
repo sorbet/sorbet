@@ -220,34 +220,35 @@ public:
     }
 
     static ExpressionPtr Method(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
-                                MethodDef::ARGS_store args, ExpressionPtr rhs) {
+                                MethodDef::ARGS_store args, ExpressionPtr rhs,
+                                MethodDef::Flags flags = MethodDef::Flags()) {
         if (args.empty() || (!isa_tree<ast::Local>(args.back()) && !isa_tree<ast::BlockArg>(args.back()))) {
             auto blkLoc = core::LocOffsets::none();
             args.emplace_back(make_expression<ast::BlockArg>(blkLoc, MK::Local(blkLoc, core::Names::blkArg())));
         }
-        MethodDef::Flags flags;
         return make_expression<MethodDef>(loc, declLoc, core::Symbols::todoMethod(), name, std::move(args),
                                           std::move(rhs), flags);
     }
 
     static ExpressionPtr SyntheticMethod(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
-                                         MethodDef::ARGS_store args, ExpressionPtr rhs) {
-        auto mdef = Method(loc, declLoc, name, std::move(args), std::move(rhs));
-        cast_tree<MethodDef>(mdef)->flags.isRewriterSynthesized = true;
-        return mdef;
+                                         MethodDef::ARGS_store args, ExpressionPtr rhs,
+                                         MethodDef::Flags flags = MethodDef::Flags()) {
+        flags.isRewriterSynthesized = true;
+        return Method(loc, declLoc, name, std::move(args), std::move(rhs), flags);
     }
 
     static ExpressionPtr SyntheticMethod0(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
-                                          ExpressionPtr rhs) {
+                                          ExpressionPtr rhs, MethodDef::Flags flags = MethodDef::Flags()) {
         MethodDef::ARGS_store args;
-        return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
+        return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs), flags);
     }
 
     static ExpressionPtr SyntheticMethod1(core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
-                                          ExpressionPtr arg0, ExpressionPtr rhs) {
+                                          ExpressionPtr arg0, ExpressionPtr rhs,
+                                          MethodDef::Flags flags = MethodDef::Flags()) {
         MethodDef::ARGS_store args;
         args.emplace_back(std::move(arg0));
-        return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
+        return SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs), flags);
     }
 
     static ExpressionPtr ClassOrModule(core::LocOffsets loc, core::LocOffsets declLoc, ExpressionPtr name,

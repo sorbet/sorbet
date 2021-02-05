@@ -283,10 +283,11 @@ vector<ast::ExpressionPtr> AttrReader::run(core::MutableContext ctx, ast::Send *
                 }
             }
 
-            auto reader = ast::MK::SyntheticMethod0(loc, loc, name, ast::MK::Instance(argLoc, varName));
+            ast::MethodDef::Flags flags;
             if (sigIsUnchecked(ctx, sig)) {
-                ast::cast_tree_nonnull<ast::MethodDef>(reader).flags.isAttrReader = true;
+                flags.isAttrReader = true;
             }
+            auto reader = ast::MK::SyntheticMethod0(loc, loc, name, ast::MK::Instance(argLoc, varName), flags);
             stats.emplace_back(std::move(reader));
         }
     }
