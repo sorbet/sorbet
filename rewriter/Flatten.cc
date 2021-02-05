@@ -369,10 +369,10 @@ public:
         auto keepName = methodDef.flags.isSelfMethod ? core::Names::keepSelfDef() : core::Names::keepDef();
 
         auto kind = methodDef.flags.isAttrReader ? core::Names::attrReader() : core::Names::normal();
-        auto unimplemented = methodDef.flags.isUnimplemented;
+        auto discardable = methodDef.flags.discardDef;
         methods.addExpr(*md, move(tree));
 
-        if (unimplemented) {
+        if (discardable) {
             return ast::MK::EmptyTree();
         } else {
             return ast::MK::Send3(loc, ast::MK::Constant(loc, core::Symbols::Sorbet_Private_Static()), keepName,

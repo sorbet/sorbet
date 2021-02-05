@@ -410,7 +410,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         auto fkMethodDef =
             ast::MK::SyntheticMethod1(loc, loc, fkMethod, std::move(arg), ast::MK::RaiseUnimplemented(loc));
-        ast::cast_tree_nonnull<ast::MethodDef>(fkMethodDef).flags.isUnimplemented = true;
+        ast::cast_tree_nonnull<ast::MethodDef>(fkMethodDef).flags.discardDef = true;
         nodes.emplace_back(std::move(fkMethodDef));
 
         // sig {params(opts: T.untyped).returns($foreign)}
@@ -426,7 +426,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
         auto fkMethodDefBang =
             ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2), ast::MK::RaiseUnimplemented(loc));
-        ast::cast_tree_nonnull<ast::MethodDef>(fkMethodDefBang).flags.isUnimplemented = true;
+        ast::cast_tree_nonnull<ast::MethodDef>(fkMethodDefBang).flags.discardDef = true;
         nodes.emplace_back(std::move(fkMethodDefBang));
     }
 
