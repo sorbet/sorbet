@@ -21,8 +21,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :call, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :call, :normal)
   end
 
   <emptyTree>::<C T>.assert_type!(<emptyTree>::<C MyCommand>.call(7), <emptyTree>::<C String>)
@@ -45,8 +43,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :call, :normal)
-
-    ::Sorbet::Private::Static.keep_self_def(<self>, :call, :normal)
   end
 
   <emptyTree>::<C T>.assert_type!(<emptyTree>::<C OtherCommand>.call("8"), <emptyTree>::<C Integer>)
