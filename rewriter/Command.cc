@@ -81,7 +81,9 @@ void Command::run(core::MutableContext ctx, ast::ClassDef *klass) {
 
     auto selfCall =
         ast::MK::SyntheticMethod(call->loc, call->loc, call->name, std::move(newArgs), ast::MK::UntypedNil(call->loc));
-    ast::cast_tree<ast::MethodDef>(selfCall)->flags.isSelfMethod = true;
+    auto &mdef = ast::cast_tree_nonnull<ast::MethodDef>(selfCall);
+    mdef.flags.isSelfMethod = true;
+    mdef.flags.isUnimplemented = true;
 
     klass->rhs.insert(klass->rhs.begin() + i + 1, sig->deepCopy());
     klass->rhs.insert(klass->rhs.begin() + i + 2, std::move(selfCall));
