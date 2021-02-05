@@ -783,4 +783,24 @@ DispatchArgs DispatchArgs::withErrorsSuppressed() const {
     return DispatchArgs{name, locs, numPosArgs, args, selfType, fullType, thisType, block, originForUninitialized,
                         true};
 }
+
+DispatchResult DispatchResult::merge(TypePtr &&type, DispatchResult::Combinator kind, DispatchResult &&left,
+                                     DispatchResult &&right) {
+    DispatchResult res;
+
+    res.returnType = std::move(type);
+    res.main = std::move(left.main);
+    res.secondary = std::move(left.secondary);
+    res.secondaryKind = kind;
+
+    auto *it = &res;
+    while (it->secondary != nullptr) {
+        it = it->secondary.get();
+    }
+
+    it->secondary = make_unique<DispatchResult>(std::move(right));
+
+    return res;
+}
+
 } // namespace sorbet::core
