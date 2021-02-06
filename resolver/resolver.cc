@@ -884,7 +884,7 @@ vector<ast::ParsedFile> ResolveConstantsWalk::resolveConstants(core::GlobalState
     vector<TypeAliasResolutionItem> todoTypeAliases;
     vector<ClassMethodsResolutionItem> todoClassMethods;
     task.run(
-        [&](ast::ParsedFile &&job, ResolveConstantsTaskState &state) -> void {
+        [&igs](ast::ParsedFile &&job, ResolveConstantsTaskState &state) -> void {
             core::Context ictx(igs, core::Symbols::root(), job.file);
             job.tree = ast::TreeMap::apply(ictx, state.walk, std::move(job.tree));
             state.trees.emplace_back(move(job));
@@ -2119,7 +2119,7 @@ vector<ast::ParsedFile> ResolveTypeMembersAndFieldsWalk::run(core::GlobalState &
 
     const core::GlobalState &igs = gs;
     task.run(
-        [&](ast::ParsedFile &&job, ResolveTypeMembersAndFieldsWalkState &state) -> void {
+        [&igs](ast::ParsedFile &&job, ResolveTypeMembersAndFieldsWalkState &state) -> void {
             core::Context ctx(igs, core::Symbols::root(), job.file);
             job.tree = ast::TreeMap::apply(ctx, state.walk, std::move(job.tree));
             state.trees.emplace_back(move(job));
@@ -2814,52 +2814,42 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     return result;
 }
 
+struct ResolveSignaturesWalkState {
+    ResolveSignaturesWalk walk;
+    ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
+};
+
 ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                   WorkerPool &workers) {
     Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
-    auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-    auto outputq = make_shared<BlockingBoundedQueue<ResolveSignaturesWalk::ResolveSignaturesWalkResult>>(trees.size());
+
+    ConcurrentTask<ast::ParsedFile, ResolveSignaturesWalkState> task(
+        "resolveSignaturesWalk", "resolveSignaturesWalkWorker", trees.size(), gs.tracer(), workers);
 
     for (auto &tree : trees) {
-        inputq->push(move(tree), 1);
+        task.enqueue(move(tree));
     }
 
-    workers.multiplexJob("resolveSignaturesWalk", [&gs, inputq, outputq]() -> void {
-        ResolveSignaturesWalk walk;
-        ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
-        ast::ParsedFile job;
-        for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
-            if (result.gotItem()) {
-                core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));
-                if (!walk.signatureJobs.empty() || !walk.multiSignatureJobs.empty()) {
-                    output.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
-                        job.file, move(walk.signatureJobs), move(walk.multiSignatureJobs)});
-                }
-                output.trees.emplace_back(move(job));
-            }
-        }
-        if (!output.trees.empty()) {
-            auto count = output.trees.size();
-            outputq->push(move(output), count);
-        }
-    });
+    const core::GlobalState &igs = gs;
 
     vector<ResolveSignaturesWalk::ResolveFileSignatures> combinedFileJobs;
     vector<ast::ParsedFile> combinedTrees;
-    {
-        ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
-        for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
-                combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadResult.trees.begin()),
-                                     make_move_iterator(threadResult.trees.end()));
-                combinedFileJobs.insert(combinedFileJobs.end(), make_move_iterator(threadResult.fileSigs.begin()),
-                                        make_move_iterator(threadResult.fileSigs.end()));
+    task.run(
+        [&igs](ast::ParsedFile &&job, ResolveSignaturesWalkState &threadState) -> void {
+            core::Context ctx(igs, core::Symbols::root(), job.file);
+            job.tree = ast::ShallowMap::apply(ctx, threadState.walk, std::move(job.tree));
+            if (!threadState.walk.signatureJobs.empty() || !threadState.walk.multiSignatureJobs.empty()) {
+                threadState.output.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
+                    job.file, move(threadState.walk.signatureJobs), move(threadState.walk.multiSignatureJobs)});
             }
-        }
-    }
+            threadState.output.trees.emplace_back(move(job));
+        },
+        [&](ResolveSignaturesWalkState &&threadState) -> void {
+            combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadState.output.trees.begin()),
+                                 make_move_iterator(threadState.output.trees.end()));
+            combinedFileJobs.insert(combinedFileJobs.end(), make_move_iterator(threadState.output.fileSigs.begin()),
+                                    make_move_iterator(threadState.output.fileSigs.end()));
+        });
 
     // We need to define sigs in a stable order since, when there are conflicting sigs in multiple RBI files, the last
     // sig 'wins'.
