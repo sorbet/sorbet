@@ -429,8 +429,7 @@ VALUE sorbet_arrayDup(VALUE array) {
 }
 
 SORBET_INLINE
-VALUE sorbet_arrayPop(VALUE array)
-{
+VALUE sorbet_arrayPop(VALUE array) {
     return rb_ary_pop(array);
 }
 
