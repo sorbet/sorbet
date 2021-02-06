@@ -31,13 +31,11 @@ while getopts ":hdi:" opt; do
 
     d)
       debug=1
-      shift 1
       ;;
 
     i)
       explicit_llvmir=1
       llvmir="${OPTARG}"
-      shift 1
       ;;
 
     *)
@@ -45,6 +43,8 @@ while getopts ":hdi:" opt; do
       ;;
   esac
 done
+
+shift $(($OPTIND - 1))
 
 orig_llvmir=$llvmir
 rb_files=( "$@" )

@@ -32,7 +32,6 @@ while getopts 'hdi:' opt; do
 
     i)
       llvmir=$OPTARG
-      shift 1
       ;;
 
     *)
@@ -40,6 +39,8 @@ while getopts 'hdi:' opt; do
       ;;
   esac
 done
+
+shift $(($OPTIND - 1))
 
 if [ 1 -gt "$#" ]; then
   echo "Usage: test/run_compiled.sh [-d] <main.rb> [<additional_n.rb> ...]"
