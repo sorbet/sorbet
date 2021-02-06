@@ -353,35 +353,93 @@ public:
         ENFORCE(lit.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         auto methodName = lit.asName(cs).shortName(cs);
 
-        auto splatArgArray = send->args[2].variable;
-
-        // TODO(aprocter): We don't support kwargs yet. Much of what follows below is borrowed from pushSendArgs, but
-        // supporting kwargs here isn't going to make much sense until we do a bit of refactoring there (which may also
-        // reduce code duplication here).
-        auto kwArgHashType = send->args[3].type;
-        if (!kwArgHashType.derivesFrom(mcctx.cs, core::Symbols::NilClass())) {
-            cs.failCompilation(core::Loc(irctx.cfg.file, send->receiverLoc),
-                               "mixing keyword args with splatted args is not supported yet");
-        }
-
-        // Push receiver and splatted arg array.
         auto &builder = builderCast(mcctx.build);
-        Payload::pushRubyStack(cs, builder,
-                               Payload::varGet(mcctx.cs, recv, mcctx.build, mcctx.irctx, mcctx.rubyBlockId));
-        auto splatArgArrayVal = Payload::varGet(mcctx.cs, splatArgArray, mcctx.build, mcctx.irctx, mcctx.rubyBlockId);
+
+        // Push receiver.
+        Payload::pushRubyStack(cs, builder, Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId));
+
+        // For the VM send there will be two cases:
+        //
+        // 1. We do not have keyword args (args[3] is nil). Then we can just dup args[2] and use VM_CALL_ARGS_SPLAT.
+        //
+        // 2. We do have keyword args (args[3] is not nil). Then we'll need to construct an array of this form:
+        //
+        //      [posarg0, posarg1, ..., posargn, kwhash]
+        //
+        //    where args[2] = [posarg0, posarg1, ..., posargsn], and use VM_CALL_ARGS_SPLAT | VM_CALL_KW_SPLAT.
+        //
+        //    There are two subcases:
+        //
+        //    2a. All keywords were inline (args[3] has even length, and its contents will be of the form
+        //        [sym,val,sym,val,...,sym,val]). Then we can just construct kwhash by build_hash'ing args[3].
+        //    2b. Not all keywords were inline (args[3] has odd length, and its contents will be of the form)
+        //        [sym,val,sym,val,...,sym,val,kwhash1]). Then we dup args[3], pop kwhash1 from it, construct
+        //        kwhash0 from what's remaining, and update kwhash0 with kwhash1 to obtain kwhash.
+        //
+        //        Note that for now, the desugarer does not produce (2b) cases where the array is not simply [kwhash1].
+        //        Thus we can't really test this case, so we throw an error, even though the code that is there does
+        //        attempt to do the right thing.
+        //
+        // TODO(perf): We can probably save quite a bit of intermediate dupping, popping, etc., by cleverer addressing
+        // of the array contents.
+        auto splatArgsVar = send->args[2].variable;
+        auto *splatArgs = Payload::varGet(mcctx.cs, splatArgsVar, mcctx.build, irctx, mcctx.rubyBlockId);
+
+        auto kwArgsVar = send->args[3].variable;
+        auto kwArgsType = send->args[3].type;
 
         // TODO(perf) we can avoid duplicating the array here if we know that it was created specifically for this
         // splat.
-        Payload::pushRubyStack(cs, builder,
-                               builder.CreateCall(cs.getFunction("sorbet_arrayDup"), {splatArgArrayVal}, "argsplat"));
+        llvm::Value *splatArray = builder.CreateCall(cs.getFunction("sorbet_arrayDup"), {splatArgs}, "splatArray");
 
-        // Call the receiver with `VM_CALL_ARGS_SPLAT` set.
-        auto flag = Payload::VM_CALL_ARGS_SPLAT;
-        int argc = 1;
-        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flag, argc, {});
+        struct VMFlag flag;
+
+        if (kwArgsType.derivesFrom(mcctx.cs, core::Symbols::NilClass())) {
+            flag = Payload::VM_CALL_ARGS_SPLAT;
+        } else if (auto *ptt = core::cast_type<core::TupleType>(kwArgsType)) {
+            flag = Payload::VM_CALL_ARGS_AND_KW_SPLAT;
+
+            auto *kwArgArray = Payload::varGet(mcctx.cs, kwArgsVar, mcctx.build, irctx, mcctx.rubyBlockId);
+
+            llvm::Value *kwHash;
+
+            if (ptt->elems.size() & 0x1) {
+                auto *kwHash1 = builder.CreateCall(cs.getFunction("sorbet_arrayPop"), {kwArgArray}, "kwHash1");
+                if (ptt->elems.size() > 1) {
+                    auto *size = llvm::ConstantInt::get(cs, llvm::APInt(64, ptt->elems.size() - 1, true));
+                    auto *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
+                    kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"), {size, innerPtr}, "kwHash");
+                    builder.CreateCall(cs.getFunction("sorbet_hashUpdate"), {kwHash, kwHash1});
+
+                    // Failing compilation because as of this writing, this case is not produced by the desugarer, so
+                    // the above code is untested. In theory, once the case is implemented in the desugarer, it should
+                    // be okay to remove this.
+                    cs.failCompilation(core::Loc(irctx.cfg.file, send->receiverLoc),
+                                       "internal error: arg 3 to call-with-splat has odd length > 1");
+                } else {
+                    kwHash = builder.CreateCall(cs.getFunction("sorbet_hashDup"), {kwHash1}, "kwHash");
+                }
+            } else {
+                auto *size = llvm::ConstantInt::get(cs, llvm::APInt(64, ptt->elems.size(), true));
+                auto *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
+                kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"), {size, innerPtr}, "kwHash");
+            }
+
+            builder.CreateCall(cs.getFunction("sorbet_arrayPush"), {splatArray, kwHash});
+        } else {
+            // This should not be possible (desugarer will only pass nil or a tuple).
+            cs.failCompilation(core::Loc(irctx.cfg.file, send->receiverLoc),
+                               "internal error: arg 3 to call-with-splat has neither nil nor tuple type");
+        }
+
+        // Push the splat array.
+        Payload::pushRubyStack(cs, builder, splatArray);
+
+        // Call the receiver.
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flag, 1, {});
 
         if (mcctx.blk != nullptr) {
-            auto *closure = mcctx.irctx.localsOffset[mcctx.rubyBlockId];
+            auto *closure = irctx.localsOffset[mcctx.rubyBlockId];
             return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, mcctx.blk, closure);
         } else {
             auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.build);

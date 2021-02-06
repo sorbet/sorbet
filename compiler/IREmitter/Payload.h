@@ -96,6 +96,7 @@ public:
     static const VMFlag VM_CALL_ARGS_SPLAT;
     static const VMFlag VM_CALL_KWARG;
     static const VMFlag VM_CALL_KW_SPLAT;
+    static const VMFlag VM_CALL_ARGS_AND_KW_SPLAT;
 };
 } // namespace sorbet::compiler
 #endif

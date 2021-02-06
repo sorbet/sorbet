@@ -428,6 +428,12 @@ VALUE sorbet_arrayDup(VALUE array) {
     return rb_ary_dup(array);
 }
 
+SORBET_INLINE
+VALUE sorbet_arrayPop(VALUE array)
+{
+    return rb_ary_pop(array);
+}
+
 // ****
 // ****                       Operations on Hashes
 // ****
@@ -1043,6 +1049,10 @@ unsigned int sorbet_vmCallArgsSplat() {
 
 unsigned int sorbet_vmCallKwSplat() {
     return VM_CALL_KW_SPLAT;
+}
+
+unsigned int sorbet_vmCallArgsAndKwSplat() {
+    return VM_CALL_ARGS_SPLAT | VM_CALL_KW_SPLAT;
 }
 
 // static struct rb_kwarg_call_data test_cd = {0};
