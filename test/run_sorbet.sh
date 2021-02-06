@@ -44,7 +44,7 @@ while getopts ":hdi:" opt; do
   esac
 done
 
-shift $(($OPTIND - 1))
+shift $((OPTIND - 1))
 
 orig_llvmir=$llvmir
 rb_files=( "$@" )
