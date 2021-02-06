@@ -87,6 +87,11 @@ public:
     int sizeEstimate() const {
         return _queue.size_approx();
     }
+
+    // Used for ENFORCEs.
+    bool hasAllInput() {
+        return elementsLeftToPush.load() == 0;
+    }
 };
 
 template <class Elem>
