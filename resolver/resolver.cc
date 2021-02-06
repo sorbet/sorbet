@@ -2274,11 +2274,6 @@ public:
         vector<ResolveMultiSignatureJob> multiSigs;
     };
 
-    struct ResolveSignaturesWalkResult {
-        vector<ResolveFileSignatures> fileSigs;
-        vector<ast::ParsedFile> trees;
-    };
-
     vector<ResolveSignatureJob> signatureJobs;
     vector<ResolveMultiSignatureJob> multiSignatureJobs;
 
@@ -2816,7 +2811,8 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
 
 struct ResolveSignaturesWalkState {
     ResolveSignaturesWalk walk;
-    ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
+    vector<ResolveSignaturesWalk::ResolveFileSignatures> fileSigs;
+    vector<ast::ParsedFile> trees;
 };
 
 ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees,
@@ -2839,16 +2835,16 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
             core::Context ctx(igs, core::Symbols::root(), job.file);
             job.tree = ast::ShallowMap::apply(ctx, threadState.walk, std::move(job.tree));
             if (!threadState.walk.signatureJobs.empty() || !threadState.walk.multiSignatureJobs.empty()) {
-                threadState.output.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
+                threadState.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
                     job.file, move(threadState.walk.signatureJobs), move(threadState.walk.multiSignatureJobs)});
             }
-            threadState.output.trees.emplace_back(move(job));
+            threadState.trees.emplace_back(move(job));
         },
         [&](ResolveSignaturesWalkState &&threadState) -> void {
-            combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadState.output.trees.begin()),
-                                 make_move_iterator(threadState.output.trees.end()));
-            combinedFileJobs.insert(combinedFileJobs.end(), make_move_iterator(threadState.output.fileSigs.begin()),
-                                    make_move_iterator(threadState.output.fileSigs.end()));
+            combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadState.trees.begin()),
+                                 make_move_iterator(threadState.trees.end()));
+            combinedFileJobs.insert(combinedFileJobs.end(), make_move_iterator(threadState.fileSigs.begin()),
+                                    make_move_iterator(threadState.fileSigs.end()));
         });
 
     // We need to define sigs in a stable order since, when there are conflicting sigs in multiple RBI files, the last
