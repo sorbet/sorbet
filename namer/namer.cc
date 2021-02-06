@@ -7,6 +7,7 @@
 #include "class_flatten/class_flatten.h"
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
+#include "common/concurrency/ConcurrentTask.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/sort.h"
 #include "core/Context.h"
@@ -1835,48 +1836,36 @@ private:
     UnorderedMap<core::ClassOrModuleRef, core::Loc> classBehaviorLocs;
 };
 
+struct FindSymbolWorkerState {
+    SymbolFinder finder;
+    vector<SymbolFinderResult> output;
+};
+
 vector<SymbolFinderResult> findSymbols(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                        WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.findSymbols");
-    auto resultq = make_shared<BlockingBoundedQueue<vector<SymbolFinderResult>>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+    ConcurrentTask<ast::ParsedFile, FindSymbolWorkerState> task("findSymbols", "naming.findSymbolsWorker", trees.size(),
+                                                                gs.tracer(), workers);
     vector<SymbolFinderResult> allFoundDefinitions;
     allFoundDefinitions.reserve(trees.size());
     for (auto &tree : trees) {
-        fileq->push(move(tree), 1);
+        task.enqueue(move(tree));
     }
-
-    workers.multiplexJob("findSymbols", [&gs, fileq, resultq]() {
-        Timer timeit(gs.tracer(), "naming.findSymbolsWorker");
-        SymbolFinder finder;
-        vector<SymbolFinderResult> output;
-        ast::ParsedFile job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-            if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.findSymbolsOne", {{"file", (string)job.file.data(gs).path()}});
-                core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::ShallowMap::apply(ctx, finder, std::move(job.tree));
-                SymbolFinderResult jobOutput{move(job), finder.getAndClearFoundDefinitions()};
-                output.emplace_back(move(jobOutput));
-            }
-        }
-        if (!output.empty()) {
-            resultq->push(move(output), output.size());
-        }
-    });
     trees.clear();
 
-    {
-        vector<SymbolFinderResult> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
-                allFoundDefinitions.insert(allFoundDefinitions.end(), make_move_iterator(threadResult.begin()),
-                                           make_move_iterator(threadResult.end()));
-            }
-        }
-    }
+    const core::GlobalState &igs = gs;
+    task.run(
+        [&igs](ast::ParsedFile &&job, FindSymbolWorkerState &state) -> void {
+            core::Context ctx(igs, core::Symbols::root(), job.file);
+            job.tree = ast::ShallowMap::apply(ctx, state.finder, std::move(job.tree));
+            SymbolFinderResult jobOutput{move(job), state.finder.getAndClearFoundDefinitions()};
+            state.output.emplace_back(move(jobOutput));
+        },
+        [&](FindSymbolWorkerState &&threadState) -> void {
+            allFoundDefinitions.insert(allFoundDefinitions.end(), make_move_iterator(threadState.output.begin()),
+                                       make_move_iterator(threadState.output.end()));
+        });
+
     fast_sort(allFoundDefinitions,
               [](const auto &lhs, const auto &rhs) -> bool { return lhs.tree.file < rhs.tree.file; });
 
