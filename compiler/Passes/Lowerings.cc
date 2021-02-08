@@ -50,6 +50,7 @@ const vector<pair<string, string>> knownSymbolMapping = {
     {"Struct", "rb_cStruct"},
     {"Symbol", "rb_cSymbol"},
     {"StandardError", "rb_eStandardError"},
+    {"Thread", "rb_cThread"},
     {"NameError", "rb_eNameError"},
     {"NoMethodError", "rb_eNoMethodError"},
 };
