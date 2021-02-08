@@ -1892,45 +1892,33 @@ ast::ParsedFilesOrCancelled defineSymbols(core::GlobalState &gs, vector<SymbolFi
     return output;
 }
 
+struct SymbolizeTreesState {
+    TreeSymbolizer inserter;
+    vector<ast::ParsedFile> trees;
+};
+
 vector<ast::ParsedFile> symbolizeTrees(const core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                        WorkerPool &workers) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(trees.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+    ConcurrentTask<ast::ParsedFile, SymbolizeTreesState> task("symbolizeTrees", "naming.symbolizeTreesWorker",
+                                                              trees.size(), gs.tracer(), workers);
     for (auto &tree : trees) {
-        fileq->push(move(tree), 1);
+        task.enqueue(move(tree));
     }
-
-    workers.multiplexJob("symbolizeTrees", [&gs, fileq, resultq]() {
-        Timer timeit(gs.tracer(), "naming.symbolizeTreesWorker");
-        TreeSymbolizer inserter;
-        vector<ast::ParsedFile> output;
-        ast::ParsedFile job;
-        for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-            if (result.gotItem()) {
-                Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", (string)job.file.data(gs).path()}});
-                core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::ShallowMap::apply(ctx, inserter, std::move(job.tree));
-                output.emplace_back(move(job));
-            }
-        }
-        if (!output.empty()) {
-            resultq->push(move(output), output.size());
-        }
-    });
     trees.clear();
 
-    {
-        vector<ast::ParsedFile> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
-                trees.insert(trees.end(), make_move_iterator(threadResult.begin()),
-                             make_move_iterator(threadResult.end()));
-            }
-        }
-    }
+    const core::GlobalState &igs = gs;
+    task.run(
+        [&igs](ast::ParsedFile &&job, SymbolizeTreesState &state) -> void {
+            core::Context ctx(igs, core::Symbols::root(), job.file);
+            job.tree = ast::ShallowMap::apply(ctx, state.inserter, std::move(job.tree));
+            state.trees.emplace_back(move(job));
+        },
+        [&](SymbolizeTreesState &&threadState) -> void {
+            trees.insert(trees.end(), make_move_iterator(threadState.trees.begin()),
+                         make_move_iterator(threadState.trees.end()));
+        });
+
     fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool { return lhs.file.id() < rhs.file.id(); });
     return trees;
 }
