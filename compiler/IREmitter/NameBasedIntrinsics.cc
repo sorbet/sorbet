@@ -406,7 +406,7 @@ public:
             if (ptt->elems.size() & 0x1) {
                 auto *kwHash1 = builder.CreateCall(cs.getFunction("sorbet_arrayPop"), {kwArgArray}, "kwHash1");
                 if (ptt->elems.size() > 1) {
-                    auto *size = llvm::ConstantInt::get(cs, llvm::APInt(64, ptt->elems.size() - 1, true));
+                    auto *size = llvm::ConstantInt::get(cs, llvm::APInt(32, ptt->elems.size() - 1, true));
                     auto *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
                     kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"), {size, innerPtr}, "kwHash");
                     builder.CreateCall(cs.getFunction("sorbet_hashUpdate"), {kwHash, kwHash1});
@@ -420,7 +420,7 @@ public:
                     kwHash = builder.CreateCall(cs.getFunction("sorbet_hashDup"), {kwHash1}, "kwHash");
                 }
             } else {
-                auto *size = llvm::ConstantInt::get(cs, llvm::APInt(64, ptt->elems.size(), true));
+                auto *size = llvm::ConstantInt::get(cs, llvm::APInt(32, ptt->elems.size(), true));
                 auto *innerPtr = builder.CreateCall(cs.getFunction("sorbet_rubyArrayInnerPtr"), {kwArgArray});
                 kwHash = builder.CreateCall(cs.getFunction("sorbet_hashBuild"), {size, innerPtr}, "kwHash");
             }
