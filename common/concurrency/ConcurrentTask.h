@@ -42,7 +42,9 @@ public:
 
         // Note: We must copy `barrier` pointer into the lambda, as `delete barrier` races with the coordinator thread
         // destroying the stack frame.
-        workers.multiplexJob(metricName.str, [&, barrier = workerBarrier]() {
+        workers.multiplexJob(metricName.str, [&tracer = this->tracer, &workerMetricName = this->workerMetricName,
+                                              inputq = this->inputq, outputq, processTask, counters,
+                                              &workers = this->workers, barrier = workerBarrier]() {
             {
                 Timer timeit(tracer, workerMetricName);
                 I input;
@@ -64,7 +66,8 @@ public:
             }
 
             // Prevent deadlock with an empty workerpool, where all logic runs on one thread.
-            // After this LOC, it is no longer safe to use `this` or refer to any variables in the `run` stack frame.
+            // After this LOC, it is no longer safe to use `this` or refer to any variables in the `run` stack
+            // frame.
             if (workers.size() > 0 && barrier->Block()) {
                 delete barrier;
             }
