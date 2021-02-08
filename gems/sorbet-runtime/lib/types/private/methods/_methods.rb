@@ -34,7 +34,7 @@ module T::Private::Methods
 
     if T::Private::DeclState.current.active_declaration
       T::Private::DeclState.current.reset!
-      raise "You called sig twice without declaring a method inbetween"
+      raise "You called sig twice without declaring a method in between"
     end
 
     if !arg.nil? && arg != :final
