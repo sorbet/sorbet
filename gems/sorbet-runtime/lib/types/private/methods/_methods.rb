@@ -474,6 +474,12 @@ module T::Private::Methods
       return
     end
 
+    # See https://github.com/sorbet/sorbet/pull/3964 for an explanation of why this
+    # check (which theoretically should not be needed) is actually needed.
+    if !mod.is_a?(Module)
+      return
+    end
+
     if mod.singleton_class?
       mod.include(SingletonMethodHooks)
     else
