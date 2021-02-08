@@ -112,10 +112,32 @@ module T::Private::Methods
             ancestor.private_method_defined?(method_name) ||
             ancestor.protected_method_defined?(method_name)) &&
            final_method?(method_owner_and_name_to_key(ancestor, method_name))
-          raise(
-            "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
-            (target == ancestor ? "redefined" : "overridden in #{target}")
-          )
+          definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
+          is_redefined = target == ancestor
+          caller_loc = caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/}) }
+          extra_info = "\n"
+          if caller_loc
+            extra_info = (is_redefined ? "Redefined" : "Overridden") + " here: #{caller_loc.path}:#{caller_loc.lineno}\n"
+          end
+
+          error_message = "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
+                          (is_redefined ? "redefined" : "overridden in #{target}")
+          pretty_message = "#{error_message}\n" \
+                           "Made final here: #{definition_file}:#{definition_line}\n" \
+                           "#{extra_info}"
+
+          begin
+            raise pretty_message
+          rescue => e
+            # sig_validation_error_handler raises by default; on the off chance that
+            # it doesn't raise, we need to ensure that the rest of signature building
+            # sees a consistent state.  This sig failed to validate, so we should get
+            # rid of it.  If we don't do this, errors of the form "You called sig
+            # twice without declaring a method in between" will non-deterministically
+            # crop up in tests.
+            T::Private::DeclState.current.reset!
+            T::Configuration.sig_validation_error_handler(e, {})
+          end
         end
       end
     end
@@ -152,6 +174,9 @@ module T::Private::Methods
     end
     _check_final_ancestors(mod, mod.ancestors, [method_name])
 
+    # We need to fetch the active declaration again, as _check_final_ancestors
+    # may have reset it (see the comment in that method for details).
+    current_declaration = T::Private::DeclState.current.active_declaration
     if current_declaration.nil?
       return
     end
@@ -446,6 +471,12 @@ module T::Private::Methods
       # where we need to install the hooks are special.
       mod.extend(SingletonMethodHooks) # def self.foo; end (at top level)
       Object.extend(MethodHooks)       # def foo; end      (at top level)
+      return
+    end
+
+    # See https://github.com/sorbet/sorbet/pull/3964 for an explanation of why this
+    # check (which theoretically should not be needed) is actually needed.
+    if !mod.is_a?(Module)
       return
     end
 
