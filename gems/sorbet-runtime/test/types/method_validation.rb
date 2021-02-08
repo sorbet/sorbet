@@ -85,7 +85,7 @@ module Opus::Types::Test
           @mod.sig {returns(Symbol)}
         end
         assert_equal(
-          "You called sig twice without declaring a method inbetween",
+          "You called sig twice without declaring a method in between",
           err.message
         )
       end
