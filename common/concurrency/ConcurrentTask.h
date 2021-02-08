@@ -53,6 +53,7 @@ public:
                 }
             }
             // Prevent deadlock with an empty workerpool, where all logic runs on one thread.
+            // After this LOC, it is no longer safe to use `this` or refer to any variables in the `run` stack frame.
             if (workers.size() > 0 && barrier->Block()) {
                 delete barrier;
             }

@@ -1,7 +1,7 @@
 #include "hashing/hashing.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
-#include "common/concurrency/ConcurrentQueue.h"
+#include "common/concurrency/ConcurrentTask.h"
 #include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
 #include "core/NameHash.h"
@@ -73,50 +73,28 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
 void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spdlog::logger &logger,
                                 WorkerPool &workers) {
     Timer timeit(logger, "computeFileHashes");
-    auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(files.size());
+    ConcurrentTask<size_t, vector<pair<size_t, unique_ptr<const core::FileHash>>>> task(
+        "lspStateHash", "computeFileHashesWorker", files.size(), logger, workers);
     for (size_t i = 0; i < files.size(); i++) {
         auto copy = i;
-        fileq->push(move(copy), 1);
+        task.enqueue(move(copy));
     }
 
     logger.debug("Computing state hashes for {} files", files.size());
 
-    auto resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<size_t, unique_ptr<const core::FileHash>>>>>(files.size());
-    workers.multiplexJob("lspStateHash", [fileq, resultq, &files, &logger]() {
-        vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
-        int processedByThread = 0;
-        size_t job;
-        {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    processedByThread++;
-
-                    if (!files[job] || files[job]->getFileHash() != nullptr) {
-                        continue;
-                    }
-
-                    threadResult.emplace_back(job, computeFileHashForFile(files[job], logger));
-                }
+    task.run(
+        [&files, &logger](size_t &&job, vector<pair<size_t, unique_ptr<const core::FileHash>>> &threadState) -> void {
+            if (!files[job] || files[job]->getFileHash() != nullptr) {
+                return;
             }
-        }
 
-        if (processedByThread > 0) {
-            resultq->push(move(threadResult), processedByThread);
-        }
-    });
-
-    {
-        vector<pair<size_t, unique_ptr<const core::FileHash>>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
-            if (result.gotItem()) {
-                for (auto &a : threadResult) {
-                    files[a.first]->setFileHash(move(a.second));
-                }
+            threadState.emplace_back(job, computeFileHashForFile(files[job], logger));
+        },
+        [&](vector<pair<size_t, unique_ptr<const core::FileHash>>> &&threadState) -> void {
+            for (auto &a : threadState) {
+                files[a.first]->setFileHash(move(a.second));
             }
-        }
-    }
+        });
 }
 
 vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::GlobalState> &gs,
@@ -128,63 +106,37 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     ENFORCE_NO_TIMER(asts.size() == files.size());
 
     // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.
-    auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(asts.size());
+    ConcurrentTask<size_t, vector<pair<core::FileRef, unique_ptr<const core::FileHash>>>> task(
+        "lspStateHash", "computeFileHashesWorker", asts.size(), gs->tracer(), workers);
     for (size_t i = 0; i < asts.size(); i++) {
         auto copy = i;
-        fileq->push(move(copy), 1);
+        task.enqueue(move(copy));
     }
 
     logger.debug("Computing state hashes for {} files", asts.size());
 
     const core::GlobalState &sharedGs = *gs;
-    auto resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<core::FileRef, unique_ptr<const core::FileHash>>>>>(asts.size());
     Timer timeit(logger, "computeFileHashes");
-    workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger]() {
-        unique_ptr<Timer> timeit;
-        vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
-        int processedByThread = 0;
-        size_t job;
-        {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    if (timeit == nullptr) {
-                        timeit = make_unique<Timer>(logger, "computeFileHashesWorker");
-                    }
-                    processedByThread++;
+    task.run(
+        [&sharedGs, &asts,
+         &logger](size_t &&job, vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> &threadState) -> void {
+            const auto &ast = asts[job];
 
-                    const auto &ast = asts[job];
-
-                    if (!ast.file.exists() || ast.file.data(sharedGs).getFileHash() != nullptr) {
-                        continue;
-                    }
-
-                    unique_ptr<core::GlobalState> lgs;
-                    auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs);
-                    auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
-
-                    threadResult.emplace_back(ast.file,
-                                              computeFileHashForAST(lgs, move(usageHash), move(rewrittenAST)));
-                }
+            if (!ast.file.exists() || ast.file.data(sharedGs).getFileHash() != nullptr) {
+                return;
             }
-        }
 
-        if (processedByThread > 0) {
-            resultq->push(move(threadResult), processedByThread);
-        }
-    });
+            unique_ptr<core::GlobalState> lgs;
+            auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs);
+            auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
 
-    {
-        vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
-            if (result.gotItem()) {
-                for (auto &a : threadResult) {
-                    a.first.data(*gs).setFileHash(move(a.second));
-                }
+            threadState.emplace_back(ast.file, computeFileHashForAST(lgs, move(usageHash), move(rewrittenAST)));
+        },
+        [&](vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> &&threadState) -> void {
+            for (auto &a : threadState) {
+                a.first.data(*gs).setFileHash(move(a.second));
             }
-        }
-    }
+        });
 
     return asts;
 }
