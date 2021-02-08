@@ -129,6 +129,12 @@ module T::Private::Methods
           begin
             raise pretty_message
           rescue => e
+            # sig_validation_error_handler raises by default; on the off chance that
+            # it doesn't raise, we need to ensure that the rest of signature building
+            # sees a consistent state.  This sig failed to validate, so we should get
+            # rid of it.  If we don't do this, errors of the form "You called sig
+            # twice without declaring a method in between" will non-deterministically
+            # crop up in tests.
             T::Private::DeclState.current.reset!
             T::Configuration.sig_validation_error_handler(e, {})
           end
@@ -168,6 +174,9 @@ module T::Private::Methods
     end
     _check_final_ancestors(mod, mod.ancestors, [method_name])
 
+    # We need to fetch the active declaration again, as _check_final_ancestors
+    # may have reset it (see the comment in that method for details).
+    current_declaration = T::Private::DeclState.current.active_declaration
     if current_declaration.nil?
       return
     end
