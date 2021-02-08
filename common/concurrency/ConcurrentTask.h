@@ -3,11 +3,12 @@
 
 #include "absl/synchronization/barrier.h"
 #include "common/ConstExprStr.h"
+#include "common/Counters.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/concurrency/WorkerPool.h"
 
 namespace sorbet {
-template <typename I, typename WorkerState> class ConcurrentTask {
+template <typename I, typename WorkerState, bool CollectCounters = false> class ConcurrentTask {
     std::shared_ptr<ConcurrentBoundedQueue<I>> inputq;
     ConstExprStr metricName;
     ConstExprStr workerMetricName;
@@ -30,6 +31,11 @@ public:
         Timer timeit(tracer, metricName);
 
         auto outputq = std::make_shared<BlockingBoundedQueue<WorkerState>>(size);
+        std::shared_ptr<BlockingBoundedQueue<CounterState>> counters;
+        if (CollectCounters) {
+            // If workers is empty, the main thread will run the job.
+            counters = std::make_shared<BlockingBoundedQueue<CounterState>>(std::max(workers.size(), 1));
+        }
 
         // Note: Cannot be stack allocated; see docs for absl::Barrier. The +1 is for the control thread.
         auto workerBarrier = new absl::Barrier(workers.size() + 1);
@@ -51,7 +57,12 @@ public:
                 if (count > 0) {
                     outputq->push(std::move(state), count);
                 }
+
+                if (CollectCounters) {
+                    counters->push(getAndClearThreadCounters(), 1);
+                }
             }
+
             // Prevent deadlock with an empty workerpool, where all logic runs on one thread.
             // After this LOC, it is no longer safe to use `this` or refer to any variables in the `run` stack frame.
             if (workers.size() > 0 && barrier->Block()) {
@@ -65,6 +76,17 @@ public:
                  !result.done(); result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), tracer)) {
                 if (result.gotItem()) {
                     combineOutput(std::move(threadResult));
+                }
+            }
+
+            if (CollectCounters) {
+                CounterState threadCounters;
+                for (auto result = counters->wait_pop_timed(threadCounters, WorkerPool::BLOCK_INTERVAL(), tracer);
+                     !result.done();
+                     result = counters->wait_pop_timed(threadCounters, WorkerPool::BLOCK_INTERVAL(), tracer)) {
+                    if (result.gotItem()) {
+                        counterConsume(std::move(threadCounters));
+                    }
                 }
             }
         }

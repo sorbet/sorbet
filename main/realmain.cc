@@ -5,6 +5,7 @@
 #include "core/proto/proto.h" // has to be included first as it violates our poisons
 // intentional comment to stop from reformatting
 #include "absl/debugging/symbolize.h"
+#include "common/concurrency/ConcurrentTask.h"
 #include "common/statsd/statsd.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
@@ -192,8 +193,7 @@ struct AutogenResult {
         vector<string> classlist;
         optional<autogen::Subclasses::Map> subclasses;
     };
-    CounterState counters;
-    vector<pair<int, Serialized>> prints;
+    vector<pair<size_t, Serialized>> prints;
     unique_ptr<autogen::DefTree> defTree = make_unique<autogen::DefTree>();
 };
 
@@ -212,77 +212,61 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
     }
 
-    auto resultq = make_shared<BlockingBoundedQueue<AutogenResult>>(indexed.size());
-    auto fileq = make_shared<ConcurrentBoundedQueue<int>>(indexed.size());
-    for (int i = 0; i < indexed.size(); ++i) {
-        fileq->push(move(i), 1);
+    ConcurrentTask<size_t, AutogenResult, /* collect counters */ true> task("runAutogen", "runAutogenWorker",
+                                                                            indexed.size(), gs.tracer(), workers);
+    for (size_t i = 0; i < indexed.size(); ++i) {
+        task.enqueue(move(i));
     }
 
-    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, fileq, resultq]() {
-        AutogenResult out;
-        int n = 0;
-        {
-            Timer timeit(logger, "autogenWorker");
-            int idx = 0;
-
-            for (auto result = fileq->try_pop(idx); !result.done(); result = fileq->try_pop(idx)) {
-                ++n;
-                auto &tree = indexed[idx];
-                if (tree.file.data(gs).isRBI() || tree.file.data(gs).isPackage()) {
-                    continue;
-                }
-
-                core::Context ctx(gs, core::Symbols::root(), tree.file);
-                auto pf = autogen::Autogen::generate(ctx, move(tree));
-                tree = move(pf.tree);
-
-                AutogenResult::Serialized serialized;
-                if (opts.print.Autogen.enabled) {
-                    Timer timeit(logger, "autogenToString");
-                    serialized.strval = pf.toString(ctx);
-                }
-                if (opts.print.AutogenMsgPack.enabled) {
-                    Timer timeit(logger, "autogenToMsgpack");
-                    serialized.msgpack = pf.toMsgpack(ctx, opts.autogenVersion);
-                }
-                if (opts.print.AutogenClasslist.enabled) {
-                    Timer timeit(logger, "autogenClasslist");
-                    serialized.classlist = pf.listAllClasses(ctx);
-                }
-                if (opts.print.AutogenSubclasses.enabled) {
-                    Timer timeit(logger, "autogenSubclasses");
-                    serialized.subclasses =
-                        autogen::Subclasses::listAllSubclasses(ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
-                                                               opts.autogenSubclassesRelativeIgnorePatterns);
-                }
-                if (opts.print.AutogenAutoloader.enabled) {
-                    Timer timeit(logger, "autogenNamedDefs");
-                    autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, out.defTree, pf);
-                }
-
-                out.prints.emplace_back(make_pair(idx, serialized));
-            }
-        }
-
-        out.counters = getAndClearThreadCounters();
-        resultq->push(move(out), n);
-    });
-
+    const core::GlobalState &sharedGs = gs;
+    vector<pair<size_t, AutogenResult::Serialized>> merged;
     autogen::DefTree root;
-    AutogenResult out;
-    vector<pair<int, AutogenResult::Serialized>> merged;
-    for (auto res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger); !res.done();
-         res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger)) {
-        if (!res.gotItem()) {
-            continue;
-        }
-        counterConsume(move(out.counters));
-        merged.insert(merged.end(), make_move_iterator(out.prints.begin()), make_move_iterator(out.prints.end()));
-        if (opts.print.AutogenAutoloader.enabled) {
-            Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
-            root = autogen::DefTreeBuilder::merge(gs, move(root), move(*out.defTree));
-        }
-    }
+    task.run(
+        [&sharedGs, &indexed, &opts, &autoloaderCfg](size_t &&job, AutogenResult &threadState) -> void {
+            auto &tree = indexed[job];
+            if (tree.file.data(sharedGs).isRBI() || tree.file.data(sharedGs).isPackage()) {
+                return;
+            }
+
+            core::Context ctx(sharedGs, core::Symbols::root(), tree.file);
+            auto pf = autogen::Autogen::generate(ctx, move(tree));
+            tree = move(pf.tree);
+
+            AutogenResult::Serialized serialized;
+            if (opts.print.Autogen.enabled) {
+                Timer timeit(logger, "autogenToString");
+                serialized.strval = pf.toString(ctx);
+            }
+            if (opts.print.AutogenMsgPack.enabled) {
+                Timer timeit(logger, "autogenToMsgpack");
+                serialized.msgpack = pf.toMsgpack(ctx, opts.autogenVersion);
+            }
+            if (opts.print.AutogenClasslist.enabled) {
+                Timer timeit(logger, "autogenClasslist");
+                serialized.classlist = pf.listAllClasses(ctx);
+            }
+            if (opts.print.AutogenSubclasses.enabled) {
+                Timer timeit(logger, "autogenSubclasses");
+                serialized.subclasses =
+                    autogen::Subclasses::listAllSubclasses(ctx, pf, opts.autogenSubclassesAbsoluteIgnorePatterns,
+                                                           opts.autogenSubclassesRelativeIgnorePatterns);
+            }
+            if (opts.print.AutogenAutoloader.enabled) {
+                Timer timeit(logger, "autogenNamedDefs");
+                autogen::DefTreeBuilder::addParsedFileDefinitions(ctx, autoloaderCfg, threadState.defTree, pf);
+            }
+
+            threadState.prints.emplace_back(make_pair(job, serialized));
+        },
+        [&merged, &root, &opts, &sharedGs](AutogenResult &&threadState) -> void {
+            merged.insert(merged.end(), make_move_iterator(threadState.prints.begin()),
+                          make_move_iterator(threadState.prints.end()));
+            if (opts.print.AutogenAutoloader.enabled) {
+                Timer timeit(logger, "autogenAutoloaderDefTreeMerge");
+                root = autogen::DefTreeBuilder::merge(sharedGs, move(root), move(*threadState.defTree));
+            }
+        });
+
     fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
 
     for (auto &elem : merged) {
