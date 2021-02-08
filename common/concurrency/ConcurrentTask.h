@@ -96,8 +96,8 @@ public:
 
         // Wait for all workers to complete before exiting. Prevents the scenario where this function completes before
         // all worker threads, which causes a SEGFAULT as the thread tries to access deallocated objects.
-        // That scenario is possible if one thread isn't scheduled to run until after all other threads have finished
-        // processing work.
+        // That scenario was previously possible if one thread wasn't scheduled to run until after all other threads
+        // had finished processing all available work.
         if (workerBarrier->Block()) {
             delete workerBarrier;
         }
