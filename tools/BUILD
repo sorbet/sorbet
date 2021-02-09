@@ -108,6 +108,7 @@ compilation_database(
         "//ast:ast",
         "//core:core",
         "//main/pipeline/semantic_extension:interface",
+        "//core/hashing:hashing",
         "//common/concurrency:concurrency",
         "//common:common",
         "//third_party/progressbar:progressbar",

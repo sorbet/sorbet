@@ -1,8 +1,8 @@
 #include "core/NameHash.h"
 #include "common/sort.h"
 #include "core/GlobalState.h"
-#include "core/Hashing.h"
 #include "core/Names.h"
+#include "core/hashing/hashing.h"
 
 using namespace std;
 namespace sorbet::core {

@@ -1,7 +1,7 @@
 #include "ast/ArgParsing.h"
 #include "common/typecase.h"
 #include "core/Context.h"
-#include "core/Hashing.h"
+#include "core/hashing/hashing.h"
 
 using namespace std;
 

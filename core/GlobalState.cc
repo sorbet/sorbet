@@ -3,13 +3,13 @@
 #include "common/Timer.h"
 #include "common/sort.h"
 #include "core/Error.h"
-#include "core/Hashing.h"
 #include "core/NameHash.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
 #include "core/Types.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
+#include "core/hashing/hashing.h"
 #include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include <utility>
@@ -2127,4 +2127,5 @@ MethodRef GlobalState::lookupStaticInitForFile(Loc loc) const {
 spdlog::logger &GlobalState::tracer() const {
     return errorQueue->tracer;
 }
+
 } // namespace sorbet::core
