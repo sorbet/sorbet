@@ -778,11 +778,11 @@ std::shared_ptr<FileDefAssertion> FileDefAssertion::make(std::string_view filena
                                                          int assertionLine, std::string_view assertionContents,
                                                          std::string_view assertionType) {
     vector<string_view> split = absl::StrSplit(assertionContents, ' ');
-    CHECK_EQ(split.size(), 3);
     {
         INFO(fmt::format("Invalid file-def assertion; multiple words found:\n{}\nFile definition assertions should be "
                          "of the form:\n# [^*] file-def: file-path line column",
                          assertionContents));
+        CHECK_EQ(split.size(), 3);
     }
     auto file_path = split[0];
     auto line = stoi(string(split[1]));
@@ -792,14 +792,14 @@ std::shared_ptr<FileDefAssertion> FileDefAssertion::make(std::string_view filena
 }
 
 std::unique_ptr<Location> FileDefAssertion::getDefinitionLocation(const LSPConfiguration &config) const {
-    auto targetPath = make_path(filename).replace_filename(targetFilename);
+    auto targetPath = make_path(filename).replaceFilename(targetFilename);
     auto targetUri = filePathToUri(config, targetPath.string());
     auto targetRange = RangeAssertion::makeRange(targetLine, targetColumn, targetColumn + 1);
     return make_unique<Location>(targetUri, targetRange->copy());
 }
 
 string FileDefAssertion::toString() const {
-    return fmt::format("file: {}:{}+{}", targetFilename, targetLine, targetColumn);
+    return fmt::format("file: {} {} {}", targetFilename, targetLine, targetColumn);
 }
 
 void reportMissingError(const string &filename, const ErrorAssertion &assertion, string_view sourceLine,

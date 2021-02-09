@@ -249,29 +249,29 @@ TEST_SUITE("SimplePath") {
         CHECK_EQ("baz/foo.txt", sorbet::BasePath<std::string>("baz/foo.txt").string());
     }
 
-    TEST_CASE("replace_filename") {
-        CHECK_EQ("foo/bar/baz.txt", SimplePath("foo/bar/foo.rb").replace_filename("baz.txt").string());
-        CHECK_EQ("foo.txt", SimplePath("bar.rb").replace_filename("foo.txt").string());
-        CHECK_EQ("foo/bar/baz.txt", SimplePath("foo/bar/").replace_filename("baz.txt").string());
+    TEST_CASE("replaceFilename") {
+        CHECK_EQ("foo/bar/baz.txt", SimplePath("foo/bar/foo.rb").replaceFilename("baz.txt").string());
+        CHECK_EQ("foo.txt", SimplePath("bar.rb").replaceFilename("foo.txt").string());
+        CHECK_EQ("foo/bar/baz.txt", SimplePath("foo/bar/").replaceFilename("baz.txt").string());
     }
 
-    TEST_CASE("replace_extension") {
-        CHECK_EQ("foo.txt", SimplePath("foo.rb").replace_extension(".txt").string());
-        CHECK_EQ("foo.txt", SimplePath("foo").replace_extension(".txt").string());
-        CHECK_EQ("baz/foo.txt", SimplePath("baz/foo.rb").replace_extension(".txt").string());
-        CHECK_EQ("baz/foo.txt", SimplePath("baz/foo").replace_extension(".txt").string());
+    TEST_CASE("replaceExtension") {
+        CHECK_EQ("foo.txt", SimplePath("foo.rb").replaceExtension(".txt").string());
+        CHECK_EQ("foo.txt", SimplePath("foo").replaceExtension(".txt").string());
+        CHECK_EQ("baz/foo.txt", SimplePath("baz/foo.rb").replaceExtension(".txt").string());
+        CHECK_EQ("baz/foo.txt", SimplePath("baz/foo").replaceExtension(".txt").string());
     }
 
-    TEST_CASE("lexically_normal") {
+    TEST_CASE("lexicallyNormal") {
         // TODO
     }
 
-    TEST_CASE("combine_left") {
-        CHECK_EQ("baz/foo.txt", SimplePath("foo.txt").combine_left("baz").string());
+    TEST_CASE("combineLeft") {
+        CHECK_EQ("baz/foo.txt", SimplePath("foo.txt").combineLeft("baz").string());
     }
 
-    TEST_CASE("combine_right") {
-        CHECK_EQ("baz/foo.txt", SimplePath("baz").combine_right("foo.txt").string());
+    TEST_CASE("combineRight") {
+        CHECK_EQ("baz/foo.txt", SimplePath("baz").combineRight("foo.txt").string());
     }
 }
 

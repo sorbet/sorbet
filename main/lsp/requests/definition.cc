@@ -32,11 +32,11 @@ DefinitionTask::findRequireRelativeLoc(const core::GlobalState &gs,
         auto literalValue = core::cast_type_nonnull<core::LiteralType>(literal->retType.type).asName(gs).shortName(gs);
         auto srcFilePath = make_path(literal->termLoc.file().data(gs).path());
         auto destRelativeFilePath =
-            srcFilePath.replace_filename(literalValue).replace_extension(".rb").lexically_normal();
+            srcFilePath.replaceFilename(literalValue).replaceExtension(".rb").lexicallyNormal();
         // FileRefs are stored in GlobalState taking into account the rootPath thus
         // format our destination path accordingly if it exists
         auto destLocalPath =
-            !config.rootPath.empty() ? destRelativeFilePath.combine_left(config.rootPath) : destRelativeFilePath;
+            !config.rootPath.empty() ? destRelativeFilePath.combineLeft(config.rootPath) : destRelativeFilePath;
         auto destFileRef = gs.findFileByPath(destLocalPath.string());
         if (destFileRef.exists()) {
             return core::Loc(destFileRef, 0, 0);

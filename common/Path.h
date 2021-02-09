@@ -27,32 +27,32 @@ public:
      * Replace the filename portion of the path or append it.
      * Returns self
      */
-    BasePath<TInternalPath> &replace_filename(const std::string_view filename) {
+    BasePath<TInternalPath> &replaceFilename(const std::string_view filename) {
         return *this;
     }
     /**
      * Replace the filename extension in the path, if there was no extension append it.
      * Returns self
      */
-    BasePath<TInternalPath> &replace_extension(const std::string_view extension) {
+    BasePath<TInternalPath> &replaceExtension(const std::string_view extension) {
         return *this;
     }
     /**
      * Replace the filename portion of the path. Returns self
      */
-    BasePath<TInternalPath> &lexically_normal() {
+    BasePath<TInternalPath> &lexicallyNormal() {
         return *this;
     }
     /**
      * Replace the filename portion of the path. Returns self
      */
-    BasePath<TInternalPath> &combine_left(const std::string_view path) {
+    BasePath<TInternalPath> &combineLeft(const std::string_view path) {
         return *this;
     }
     /**
      * Replace the filename portion of the path. Returns self
      */
-    BasePath<TInternalPath> &combine_right(const std::string_view path) {
+    BasePath<TInternalPath> &combineRight(const std::string_view path) {
         return *this;
     }
     /**
