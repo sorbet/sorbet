@@ -48,7 +48,6 @@
     "Experimental Features": [
       "tuples",
       "shapes",
-      "metaprogramming-plugins"
     ]
   },
   "talks": {
