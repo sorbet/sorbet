@@ -183,9 +183,9 @@ Usage:
                                 symbol-table-full-proto,
                                 symbol-table-full-messagepack, file-table-json, file-table-proto,
                                 file-table-messagepack, missing-constants,
-                                plugin-generated-code, autogen, autogen-msgpack,
-                                autogen-classlist, autogen-autoloader,
-                                autogen-subclasses, package-tree]
+                                autogen, autogen-msgpack, autogen-classlist,
+                                autogen-autoloader, autogen-subclasses,
+                                package-tree]
       --autogen-subclasses-parent string
                                 Parent classes for which generate a list of
                                 subclasses. This option must be used in
@@ -234,9 +234,6 @@ Usage:
       --cache-dir dir           Use the specified folder to cache data
                                 (default: "")
       --suppress-non-critical   Exit 0 unless there was a critical error
-      --dsl-plugins filepath.yaml
-                                YAML config that configures external DSL
-                                plugins (default: "")
       --counter counter         Print internal counter
       --statsd-host host        StatsD sever hostname (default: "")
       --counters                Print all internal counters
