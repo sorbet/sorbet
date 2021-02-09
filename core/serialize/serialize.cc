@@ -50,7 +50,7 @@ public:
     static u4 unpickleGSUUID(UnPickler &p);
     static LocOffsets unpickleLocOffsets(UnPickler &p);
     static Loc unpickleLoc(UnPickler &p);
-    static ast::ExpressionPtr unpickleExpr(UnPickler &p, const GlobalState &, FileRef file);
+    static ast::ExpressionPtr unpickleExpr(UnPickler &p, const GlobalState &);
     static NameRef unpickleNameRef(UnPickler &p, const GlobalState &);
     static NameRef unpickleNameRef(UnPickler &p, GlobalState &);
     static unique_ptr<const FileHash> unpickleFileHash(UnPickler &p);
@@ -893,11 +893,11 @@ vector<u1> Serializer::storeFile(const core::File &file, ast::ParsedFile &tree) 
     return p.result(FILE_COMPRESSION_DEGREE);
 }
 
-CachedFile Serializer::loadFile(const core::GlobalState &gs, core::FileRef fref, const u1 *const data) {
+CachedFile Serializer::loadFile(const core::GlobalState &gs, const u1 *const data) {
     UnPickler p(data, gs.tracer());
     auto file = SerializerImpl::unpickleFile(p);
     file->cached = true;
-    auto tree = SerializerImpl::unpickleExpr(p, gs, fref);
+    auto tree = SerializerImpl::unpickleExpr(p, gs);
     return CachedFile{move(file), move(tree)};
 }
 
@@ -1193,7 +1193,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
     }
 }
 
-ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs, FileRef file) {
+ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const GlobalState &gs) {
     auto kind = p.getU4();
     if (kind == 0) {
         return nullptr;
@@ -1210,25 +1210,25 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             memcpy(&flags, &flagsU1, sizeof(flags));
             auto numPosArgs = static_cast<u2>(p.getU4());
             auto argsSize = p.getU4();
-            auto recv = unpickleExpr(p, gs, file);
-            auto blkt = unpickleExpr(p, gs, file);
+            auto recv = unpickleExpr(p, gs);
+            auto blkt = unpickleExpr(p, gs);
             ast::ExpressionPtr blk;
             if (blkt) {
                 blk.reset(static_cast<ast::Block *>(blkt.release()));
             }
             ast::Send::ARGS_store store(argsSize);
             for (auto &expr : store) {
-                expr = unpickleExpr(p, gs, file);
+                expr = unpickleExpr(p, gs);
             }
             return ast::MK::Send(loc, std::move(recv), fun, numPosArgs, std::move(store), flags, std::move(blk));
         }
         case ast::Tag::Block: {
             auto loc = unpickleLocOffsets(p);
             auto argsSize = p.getU4();
-            auto body = unpickleExpr(p, gs, file);
+            auto body = unpickleExpr(p, gs);
             ast::MethodDef::ARGS_store args(argsSize);
             for (auto &arg : args) {
-                arg = unpickleExpr(p, gs, file);
+                arg = unpickleExpr(p, gs);
             }
             return ast::MK::Block(loc, std::move(body), std::move(args));
         }
@@ -1239,26 +1239,26 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         }
         case ast::Tag::While: {
             auto loc = unpickleLocOffsets(p);
-            auto cond = unpickleExpr(p, gs, file);
-            auto body = unpickleExpr(p, gs, file);
+            auto cond = unpickleExpr(p, gs);
+            auto body = unpickleExpr(p, gs);
             return ast::MK::While(loc, std::move(cond), std::move(body));
         }
         case ast::Tag::Return: {
             auto loc = unpickleLocOffsets(p);
-            auto expr = unpickleExpr(p, gs, file);
+            auto expr = unpickleExpr(p, gs);
             return ast::MK::Return(loc, std::move(expr));
         }
         case ast::Tag::If: {
             auto loc = unpickleLocOffsets(p);
-            auto cond = unpickleExpr(p, gs, file);
-            auto thenp = unpickleExpr(p, gs, file);
-            auto elsep = unpickleExpr(p, gs, file);
+            auto cond = unpickleExpr(p, gs);
+            auto thenp = unpickleExpr(p, gs);
+            auto elsep = unpickleExpr(p, gs);
             return ast::MK::If(loc, std::move(cond), std::move(thenp), std::move(elsep));
         }
         case ast::Tag::UnresolvedConstantLit: {
             auto loc = unpickleLocOffsets(p);
             NameRef cnst = unpickleNameRef(p, gs);
-            auto scope = unpickleExpr(p, gs, file);
+            auto scope = unpickleExpr(p, gs);
             return ast::MK::UnresolvedConstant(loc, std::move(scope), cnst);
         }
         case ast::Tag::Local: {
@@ -1270,28 +1270,28 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         }
         case ast::Tag::Assign: {
             auto loc = unpickleLocOffsets(p);
-            auto lhs = unpickleExpr(p, gs, file);
-            auto rhs = unpickleExpr(p, gs, file);
+            auto lhs = unpickleExpr(p, gs);
+            auto rhs = unpickleExpr(p, gs);
             return ast::MK::Assign(loc, std::move(lhs), std::move(rhs));
         }
         case ast::Tag::InsSeq: {
             auto loc = unpickleLocOffsets(p);
             auto insSize = p.getU4();
-            auto expr = unpickleExpr(p, gs, file);
+            auto expr = unpickleExpr(p, gs);
             ast::InsSeq::STATS_store stats(insSize);
             for (auto &stat : stats) {
-                stat = unpickleExpr(p, gs, file);
+                stat = unpickleExpr(p, gs);
             }
             return ast::MK::InsSeq(loc, std::move(stats), std::move(expr));
         }
         case ast::Tag::Next: {
             auto loc = unpickleLocOffsets(p);
-            auto expr = unpickleExpr(p, gs, file);
+            auto expr = unpickleExpr(p, gs);
             return ast::MK::Next(loc, std::move(expr));
         }
         case ast::Tag::Break: {
             auto loc = unpickleLocOffsets(p);
-            auto expr = unpickleExpr(p, gs, file);
+            auto expr = unpickleExpr(p, gs);
             return ast::MK::Break(loc, std::move(expr));
         }
         case ast::Tag::Retry: {
@@ -1304,10 +1304,10 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             ast::Hash::ENTRY_store keys(sz);
             ast::Hash::ENTRY_store values(sz);
             for (auto &value : values) {
-                value = unpickleExpr(p, gs, file);
+                value = unpickleExpr(p, gs);
             }
             for (auto &key : keys) {
-                key = unpickleExpr(p, gs, file);
+                key = unpickleExpr(p, gs);
             }
             return ast::MK::Hash(loc, std::move(keys), std::move(values));
         }
@@ -1316,7 +1316,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto sz = p.getU4();
             ast::Array::ENTRY_store elems(sz);
             for (auto &elem : elems) {
-                elem = unpickleExpr(p, gs, file);
+                elem = unpickleExpr(p, gs);
             }
             return ast::MK::Array(loc, std::move(elems));
         }
@@ -1324,7 +1324,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto loc = unpickleLocOffsets(p);
             NameRef kind = NameRef::fromRaw(gs, p.getU4());
             auto type = unpickleType(p, &gs);
-            auto arg = unpickleExpr(p, gs, file);
+            auto arg = unpickleExpr(p, gs);
             return ast::make_expression<ast::Cast>(loc, std::move(type), std::move(arg), kind);
         }
         case ast::Tag::EmptyTree:
@@ -1338,18 +1338,18 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto ancestorsSize = p.getU4();
             auto singletonAncestorsSize = p.getU4();
             auto rhsSize = p.getU4();
-            auto name = unpickleExpr(p, gs, file);
+            auto name = unpickleExpr(p, gs);
             ast::ClassDef::ANCESTORS_store ancestors(ancestorsSize);
             for (auto &anc : ancestors) {
-                anc = unpickleExpr(p, gs, file);
+                anc = unpickleExpr(p, gs);
             }
             ast::ClassDef::ANCESTORS_store singletonAncestors(singletonAncestorsSize);
             for (auto &sanc : singletonAncestors) {
-                sanc = unpickleExpr(p, gs, file);
+                sanc = unpickleExpr(p, gs);
             }
             ast::ClassDef::RHS_store rhs(rhsSize);
             for (auto &r : rhs) {
-                r = unpickleExpr(p, gs, file);
+                r = unpickleExpr(p, gs);
             }
             auto ret = ast::MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
                                               (ast::ClassDef::Kind)kind);
@@ -1371,10 +1371,10 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             NameRef name = unpickleNameRef(p, gs);
             auto symbol = MethodRef::fromRaw(p.getU4());
             auto argsSize = p.getU4();
-            auto rhs = unpickleExpr(p, gs, file);
+            auto rhs = unpickleExpr(p, gs);
             ast::MethodDef::ARGS_store args(argsSize);
             for (auto &arg : args) {
-                arg = unpickleExpr(p, gs, file);
+                arg = unpickleExpr(p, gs);
             }
             auto ret = ast::MK::SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
 
@@ -1388,12 +1388,12 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         case ast::Tag::Rescue: {
             auto loc = unpickleLocOffsets(p);
             auto rescueCasesSize = p.getU4();
-            auto ensure = unpickleExpr(p, gs, file);
-            auto else_ = unpickleExpr(p, gs, file);
-            auto body_ = unpickleExpr(p, gs, file);
+            auto ensure = unpickleExpr(p, gs);
+            auto else_ = unpickleExpr(p, gs);
+            auto body_ = unpickleExpr(p, gs);
             ast::Rescue::RESCUE_CASE_store cases(rescueCasesSize);
             for (auto &case_ : cases) {
-                auto t = unpickleExpr(p, gs, file);
+                auto t = unpickleExpr(p, gs);
                 case_.reset(static_cast<ast::RescueCase *>(t.release()));
             }
             return ast::make_expression<ast::Rescue>(loc, std::move(body_), std::move(cases), std::move(else_),
@@ -1402,38 +1402,38 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         case ast::Tag::RescueCase: {
             auto loc = unpickleLocOffsets(p);
             auto exceptionsSize = p.getU4();
-            auto var = unpickleExpr(p, gs, file);
-            auto body = unpickleExpr(p, gs, file);
+            auto var = unpickleExpr(p, gs);
+            auto body = unpickleExpr(p, gs);
             ast::RescueCase::EXCEPTION_store exceptions(exceptionsSize);
             for (auto &ex : exceptions) {
-                ex = unpickleExpr(p, gs, file);
+                ex = unpickleExpr(p, gs);
             }
             return ast::make_expression<ast::RescueCase>(loc, std::move(exceptions), std::move(var), std::move(body));
         }
         case ast::Tag::RestArg: {
             auto loc = unpickleLocOffsets(p);
-            auto ref = unpickleExpr(p, gs, file);
+            auto ref = unpickleExpr(p, gs);
             return ast::make_expression<ast::RestArg>(loc, std::move(ref));
         }
         case ast::Tag::KeywordArg: {
             auto loc = unpickleLocOffsets(p);
-            auto ref = unpickleExpr(p, gs, file);
+            auto ref = unpickleExpr(p, gs);
             return ast::make_expression<ast::KeywordArg>(loc, std::move(ref));
         }
         case ast::Tag::ShadowArg: {
             auto loc = unpickleLocOffsets(p);
-            auto ref = unpickleExpr(p, gs, file);
+            auto ref = unpickleExpr(p, gs);
             return ast::make_expression<ast::ShadowArg>(loc, std::move(ref));
         }
         case ast::Tag::BlockArg: {
             auto loc = unpickleLocOffsets(p);
-            auto ref = unpickleExpr(p, gs, file);
+            auto ref = unpickleExpr(p, gs);
             return ast::make_expression<ast::BlockArg>(loc, std::move(ref));
         }
         case ast::Tag::OptionalArg: {
             auto loc = unpickleLocOffsets(p);
-            auto ref = unpickleExpr(p, gs, file);
-            auto default_ = unpickleExpr(p, gs, file);
+            auto ref = unpickleExpr(p, gs);
+            auto default_ = unpickleExpr(p, gs);
             return ast::MK::OptionalArg(loc, std::move(ref), std::move(default_));
         }
         case ast::Tag::ZSuperArgs: {
@@ -1449,7 +1449,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         case ast::Tag::ConstantLit: {
             auto loc = unpickleLocOffsets(p);
             auto sym = SymbolRef::fromRaw(p.getU4());
-            auto orig = unpickleExpr(p, gs, file);
+            auto orig = unpickleExpr(p, gs);
             return ast::make_expression<ast::ConstantLit>(loc, sym, std::move(orig));
         }
     }

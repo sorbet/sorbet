@@ -95,7 +95,7 @@ unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs
         auto maybeCached = kvstore->read(fileHashKey);
         if (maybeCached) {
             prodCounterInc("types.input.files.kvstore.hit");
-            auto cachedTree = core::serialize::Serializer::loadFile(gs, fref, maybeCached);
+            auto cachedTree = core::serialize::Serializer::loadFile(gs, maybeCached);
             return make_unique<core::serialize::CachedFile>(move(cachedTree));
         } else {
             prodCounterInc("types.input.files.kvstore.miss");
