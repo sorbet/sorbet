@@ -33,8 +33,8 @@ public:
 
     static u4 loadGlobalStateUUID(const GlobalState &gs, const u1 *const data);
 
-    // Loads the given file and its AST. Overwrites file references in the AST with the given file ref.
-    static CachedFile loadFile(const GlobalState &gs, core::FileRef fref, const u1 *const data);
+    // Loads the given file and its AST.
+    static CachedFile loadFile(const GlobalState &gs, const u1 *const data);
 };
 }; // namespace sorbet::core::serialize
 
