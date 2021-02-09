@@ -1,4 +1,4 @@
-#include "core/Hashing.h"
+#include "core/hashing/hashing.h"
 #include "core/SymbolRef.h"
 #include "core/Types.h"
 

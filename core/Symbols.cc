@@ -7,10 +7,10 @@
 #include "common/sort.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
-#include "core/Hashing.h"
 #include "core/Names.h"
 #include "core/Types.h"
 #include "core/errors/internal.h"
+#include "core/hashing/hashing.h"
 #include <string>
 
 template class std::vector<sorbet::core::TypeAndOrigins>;

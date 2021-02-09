@@ -1,8 +1,8 @@
 #include "core/TypePtr.h"
 #include "common/has_member.h"
-#include "core/Hashing.h"
 #include "core/Symbols.h"
 #include "core/Types.h"
+#include "core/hashing/hashing.h"
 
 using namespace std;
 
