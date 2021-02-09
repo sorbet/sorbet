@@ -70,7 +70,6 @@ compilation_database(
         "//main/pipeline:pipeline",
         "//rewriter:rewriter",
         "//resolver:resolver",
-        "//plugin:plugin",
         "//payload/text:text",
         "//payload/binary:binary",
         "//packager:packager",
