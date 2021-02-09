@@ -63,7 +63,6 @@ const vector<PrintOptions> print_options({
     {"file-table-proto", &Printers::FileTableProto, true},
     {"file-table-messagepack", &Printers::FileTableMessagePack, true, false},
     {"missing-constants", &Printers::MissingConstants, true},
-    {"plugin-generated-code", &Printers::PluginGeneratedCode, true},
     {"autogen", &Printers::Autogen, true},
     {"autogen-msgpack", &Printers::AutogenMsgPack, true},
     {"autogen-classlist", &Printers::AutogenClasslist, true},
@@ -128,7 +127,6 @@ vector<reference_wrapper<PrinterConfig>> Printers::printers() {
         FileTableProto,
         FileTableMessagePack,
         MissingConstants,
-        PluginGeneratedCode,
         Autogen,
         AutogenMsgPack,
         AutogenClasslist,
@@ -223,73 +221,6 @@ UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileNam
         throw EarlyReturnWithCode(1);
     }
     return result;
-}
-
-static vector<string> extractExtraSubprocessOptions(const YAML::Node &config, const string &filePath,
-                                                    shared_ptr<spdlog::logger> logger) {
-    auto extraArgNode = config["ruby_extra_args"];
-    vector<string> extraArgs;
-    if (!extraArgNode) {
-        return extraArgs;
-    }
-    if (extraArgNode.IsSequence()) {
-        for (const auto &arg : extraArgNode) {
-            if (arg.IsScalar()) {
-                extraArgs.emplace_back(arg.as<string>());
-            } else {
-                logger->error("{}: An element of `ruby_extra_args` is not a string", filePath);
-                throw EarlyReturnWithCode(1);
-            }
-        }
-        return extraArgs;
-    } else {
-        logger->error("{}: `ruby_extra_args` must be an array of strings", filePath);
-        throw EarlyReturnWithCode(1);
-    }
-}
-
-struct DslConfiguration {
-    UnorderedMap<string, string> triggers;
-    vector<string> rubyExtraArgs;
-};
-
-DslConfiguration extractDslPlugins(string filePath, shared_ptr<spdlog::logger> logger) {
-    bool good = true;
-    YAML::Node config;
-    try {
-        config = YAML::LoadFile(filePath);
-    } catch (YAML::BadFile) {
-        logger->error("Failed to open DSL specification file \"{}\"", filePath);
-        throw EarlyReturnWithCode(1);
-    }
-    if (!config.IsMap()) {
-        logger->error("{}: Cannot parse DSL plugin format. Map is expected at top level", filePath);
-        throw EarlyReturnWithCode(1);
-    }
-    UnorderedMap<string, string> triggers;
-    if (auto triggersNode = config["triggers"]; triggersNode.IsMap()) {
-        for (const auto &child : triggersNode) {
-            auto key = child.first.as<string>();
-            if (child.second.Type() == YAML::NodeType::Scalar) {
-                auto value = child.second.as<string>();
-                auto [_, inserted] = triggers.emplace(move(key), move(value));
-                if (!inserted) {
-                    logger->error("{}: Duplicate plugin trigger \"{}\"", filePath, key);
-                    good = false;
-                }
-            } else {
-                logger->error("{}: Plugin trigger \"{}\" must map to a command that is a string", filePath, key);
-                good = false;
-            }
-        }
-    } else {
-        logger->error("{}: Required key `triggers` must be a map", filePath);
-        good = false;
-    }
-    if (!good) {
-        throw EarlyReturnWithCode(1);
-    }
-    return {triggers, extractExtraSubprocessOptions(config, filePath, logger)};
 }
 
 cxxopts::Options
@@ -485,8 +416,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
                                cxxopts::value<string>()->default_value(empty.cacheDir), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
-    options.add_options("dev")("dsl-plugins", "YAML config that configures external DSL plugins",
-                               cxxopts::value<string>()->default_value(""), "filepath.yaml");
 
     int defaultThreads = thread::hardware_concurrency();
     if (defaultThreads == 0) {
@@ -965,11 +894,6 @@ void readOptions(Options &opts,
         opts.supressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
         if (!raw["typed-override"].as<string>().empty()) {
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
-        }
-        if (!raw["dsl-plugins"].as<string>().empty()) {
-            auto dslConfig = extractDslPlugins(raw["dsl-plugins"].as<string>(), logger);
-            opts.dslPluginTriggers = std::move(dslConfig.triggers);
-            opts.dslRubyExtraArgs = std::move(dslConfig.rubyExtraArgs);
         }
 
         for (auto &provider : semanticExtensionProviders) {

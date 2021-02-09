@@ -471,11 +471,6 @@ int realmain(int argc, char *argv[]) {
         gs->suppressErrorClass(code);
     }
     gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
-    for (auto &plugin : opts.dslPluginTriggers) {
-        core::UnfreezeNameTable nameTableAccess(*gs);
-        gs->addDslPlugin(plugin.first, plugin.second);
-    }
-    gs->dslRubyExtraArgs = opts.dslRubyExtraArgs;
     if (!opts.stripeMode) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.
         if (opts.isolateErrorCode.empty()) {

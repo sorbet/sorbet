@@ -249,11 +249,6 @@ public:
 
     std::optional<std::string> suggestUnsafe;
 
-    std::vector<std::string> dslRubyExtraArgs;
-    void addDslPlugin(std::string_view method, std::string_view command);
-    std::optional<std::string_view> findDslPlugin(NameRef method) const;
-    bool hasAnyDslPlugin() const;
-
     std::vector<std::unique_ptr<pipeline::semantic_extension::SemanticExtension>> semanticExtensions;
 
 private:
@@ -284,7 +279,6 @@ private:
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
-    UnorderedMap<NameRef, std::string> dslPlugins;
     bool wasModified_ = false;
 
     bool freezeSymbolTable();
