@@ -193,16 +193,22 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
             if (!opts.skipRewriterPasses) {
                 tree = runRewriter(lgs, file, move(tree));
             }
+            if (print.RewriterTree.enabled) {
+                print.RewriterTree.fmt("{}\n", tree.toStringWithTabs(lgs, 0));
+            }
+            if (print.RewriterTreeRaw.enabled) {
+                print.RewriterTreeRaw.fmt("{}\n", tree.showRaw(lgs));
+            }
             tree = runLocalVars(lgs, ast::ParsedFile{move(tree), file}).tree;
             if (opts.stopAfterPhase == options::Phase::LOCAL_VARS) {
                 return emptyParsedFile(file);
             }
         }
-        if (print.RewriterTree.enabled) {
-            print.RewriterTree.fmt("{}\n", tree.toStringWithTabs(lgs, 0));
+        if (print.IndexTree.enabled) {
+            print.IndexTree.fmt("{}\n", tree.toStringWithTabs(lgs, 0));
         }
-        if (print.RewriterTreeRaw.enabled) {
-            print.RewriterTreeRaw.fmt("{}\n", tree.showRaw(lgs));
+        if (print.IndexTreeRaw.enabled) {
+            print.IndexTreeRaw.fmt("{}\n", tree.showRaw(lgs));
         }
         if (opts.stopAfterPhase == options::Phase::REWRITER) {
             return emptyParsedFile(file);
