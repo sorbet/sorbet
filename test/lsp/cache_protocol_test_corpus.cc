@@ -1,6 +1,5 @@
 #include "doctest.h"
 // has to go first as it violates our requirements
-#include "ProtocolTest.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
 #include "common/FileOps.h"
@@ -15,6 +14,7 @@
 #include "spdlog/sinks/null_sink.h"
 #include "test/helpers/CounterStateDatabase.h"
 #include "test/helpers/lsp.h"
+#include "test/lsp/ProtocolTest.h"
 #include <sys/wait.h>
 
 namespace sorbet::test::lsp {
@@ -93,7 +93,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         // If caching fails, gs gets modified during payload creation.
         CHECK_FALSE(gs->wasModified());
 
-        auto cachedFile = core::serialize::Serializer::loadFile(*gs, core::FileRef{10}, contents);
+        auto cachedFile = core::serialize::Serializer::loadFile(*gs, contents);
         CHECK(cachedFile.file->cached);
         CHECK_EQ(cachedFile.file->path(), filePath);
         CHECK_EQ(cachedFile.file->source(), fileContents);
@@ -141,7 +141,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
-        auto cachedFile = core::serialize::Serializer::loadFile(*gs, core::FileRef{10}, updatedFileData);
+        auto cachedFile = core::serialize::Serializer::loadFile(*gs, updatedFileData);
         CHECK(cachedFile.file->cached);
         CHECK_EQ(cachedFile.file->path(), filePath);
         CHECK_EQ(cachedFile.file->source(), updatedFileContents);
@@ -191,7 +191,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         // If caching fails, gs gets modified during payload creation.
         CHECK_FALSE(gs->wasModified());
 
-        auto cachedFile = core::serialize::Serializer::loadFile(*gs, core::FileRef{10}, contents);
+        auto cachedFile = core::serialize::Serializer::loadFile(*gs, contents);
         CHECK(cachedFile.file->cached);
         CHECK_EQ(cachedFile.file->path(), filePath);
         CHECK_EQ(cachedFile.file->source(), fileContents);
