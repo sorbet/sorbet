@@ -784,11 +784,20 @@ DispatchArgs DispatchArgs::withErrorsSuppressed() const {
                         true};
 }
 
-DispatchResult DispatchResult::merge(TypePtr &&type, DispatchResult::Combinator kind, DispatchResult &&left,
+DispatchResult DispatchResult::merge(const GlobalState &gs, DispatchResult::Combinator kind, DispatchResult &&left,
                                      DispatchResult &&right) {
     DispatchResult res;
 
-    res.returnType = std::move(type);
+    switch (kind) {
+        case DispatchResult::Combinator::OR:
+            res.returnType = Types::any(gs, left.returnType, right.returnType);
+            break;
+
+        case DispatchResult::Combinator::AND:
+            res.returnType = Types::all(gs, left.returnType, right.returnType);
+            break;
+    }
+
     res.main = std::move(left.main);
     res.secondary = std::move(left.secondary);
     res.secondaryKind = kind;

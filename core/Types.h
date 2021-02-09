@@ -867,7 +867,7 @@ struct DispatchResult {
           secondaryKind(secondaryKind){};
 
     // Combine two dispatch results, preferring the left as the `main`.
-    static DispatchResult merge(TypePtr &&type, Combinator kind, DispatchResult &&left, DispatchResult &&right);
+    static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);
 };
 
 TYPE_INLINED(BlamedUntyped) final : public ClassType {

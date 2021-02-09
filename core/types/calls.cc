@@ -46,8 +46,7 @@ DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &a
     categoryCounterInc("dispatch_call", "ortype");
     auto leftRet = left.dispatchCall(gs, args.withSelfRef(left));
     auto rightRet = right.dispatchCall(gs, args.withSelfRef(right));
-    return DispatchResult::merge(Types::any(gs, leftRet.returnType, rightRet.returnType),
-                                 DispatchResult::Combinator::OR, std::move(leftRet), std::move(rightRet));
+    return DispatchResult::merge(gs, DispatchResult::Combinator::OR, std::move(leftRet), std::move(rightRet));
 }
 
 TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
@@ -92,12 +91,9 @@ DispatchResult AndType::dispatchCall(const GlobalState &gs, const DispatchArgs &
         leftRet = left.dispatchCall(gs, args.withThisRef(left));
         rightRet = right.dispatchCall(gs, args.withThisRef(right));
     }
-    DispatchResult ret{Types::all(gs, leftRet.returnType, rightRet.returnType), move(leftRet.main),
-                       make_unique<DispatchResult>(move(rightRet)),
 
-                       DispatchResult::Combinator::AND};
-
-    return ret;
+    auto resultType = Types::all(gs, leftRet.returnType, rightRet.returnType);
+    return DispatchResult::merge(gs, DispatchResult::Combinator::AND, std::move(leftRet), std::move(rightRet));
 }
 
 TypePtr AndType::getCallArguments(const GlobalState &gs, NameRef name) const {
