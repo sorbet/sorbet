@@ -1815,8 +1815,6 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->suppressedErrorClasses = this->suppressedErrorClasses;
     result->onlyErrorClasses = this->onlyErrorClasses;
     result->suggestUnsafe = this->suggestUnsafe;
-    result->dslPlugins = this->dslPlugins;
-    result->dslRubyExtraArgs = this->dslRubyExtraArgs;
     result->utf8Names.reserve(this->utf8Names.capacity());
     result->constantNames.reserve(this->constantNames.capacity());
     result->uniqueNames.reserve(this->uniqueNames.capacity());
@@ -1922,28 +1920,6 @@ void GlobalState::suppressErrorClass(int code) {
 void GlobalState::onlyShowErrorClass(int code) {
     ENFORCE(suppressedErrorClasses.empty());
     onlyErrorClasses.insert(code);
-}
-
-void GlobalState::addDslPlugin(string_view method, string_view command) {
-    auto ref = enterNameUTF8(method);
-    auto [it, inserted] = dslPlugins.try_emplace(ref, command);
-    if (!inserted) {
-        if (auto e = beginError(Loc::none(), errors::Internal::InternalError)) {
-            e.setHeader("Duplicate plugin trigger \"{}\". Previous definition: \"{}\"", method, it->second);
-        }
-    }
-}
-
-optional<string_view> GlobalState::findDslPlugin(NameRef method) const {
-    const auto it = dslPlugins.find(method);
-    if (it != dslPlugins.end()) {
-        return it->second;
-    }
-    return nullopt;
-}
-
-bool GlobalState::hasAnyDslPlugin() const {
-    return !dslPlugins.empty();
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {

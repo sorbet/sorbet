@@ -16,22 +16,6 @@ main/sorbet --silence-dev-message -e 'class Foo; end' --metrics-file=baz/metrics
 
 echo ------------------------------
 
-# Sorbet produce correct file counters with plugins
-main/sorbet --silence-dev-message \
-            --dsl-plugins test/cli/metrics-file/sorbet/triggers.yml \
-            --metrics-file=metrics4.json \
-            test/cli/metrics-file/test.rb 2>&1
-
-grep -A1 "\"ruby_typer.unknown..types.input.files\"" metrics4.json
-grep -A1 "\"ruby_typer.unknown..types.input.files.sigil.false\"" metrics4.json
-grep -A1 "\"ruby_typer.unknown..types.input.files.sigil.true\"" metrics4.json
-grep -A1 "\"ruby_typer.unknown..types.input.modules.total\"" metrics4.json
-grep -A1 "\"ruby_typer.unknown..types.input.classes.total\"" metrics4.json
-grep -A1 "\"ruby_typer.unknown..types.input.singleton_classes.total\"" metrics4.json
-grep -A1 "\"ruby_typer.unknown..types.input.methods.total\"" metrics4.json
-
-echo ------------------------------
-
 # Sorbet will not count errors that are created but end up being
 # ignored by other branches, e.g. when a type error is found in one
 # branch of a T.all but ends up being made irrelevant by the other

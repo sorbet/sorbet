@@ -73,7 +73,6 @@ struct Printers {
     PrinterConfig FileTableProto;
     PrinterConfig FileTableMessagePack;
     PrinterConfig MissingConstants;
-    PrinterConfig PluginGeneratedCode;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
     PrinterConfig AutogenClasslist;
@@ -154,8 +153,6 @@ struct Options {
     std::string typedSource = "";
     std::string cacheDir = "";
     UnorderedMap<std::string, core::StrictLevel> strictnessOverrides;
-    UnorderedMap<std::string, std::string> dslPluginTriggers;
-    std::vector<std::string> dslRubyExtraArgs;
     std::string storeState = "";
     bool enableCounters = false;
     std::string errorUrlBase = "https://srb.help/";

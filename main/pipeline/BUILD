@@ -34,7 +34,6 @@ cc_library(
         "//parser",
         "//payload/binary",
         "//payload/text",
-        "//plugin",
         "//resolver",
         "//rewriter",
     ],
