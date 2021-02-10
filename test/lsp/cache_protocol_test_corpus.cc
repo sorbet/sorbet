@@ -80,10 +80,10 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         lspWrapper = nullptr;
 
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(*opts);
-        CHECK_EQ(kvstore->read(updatedKey), nullptr);
+        CHECK_EQ(kvstore->read(updatedKey).data, nullptr);
 
         auto contents = kvstore->read(key);
-        REQUIRE_NE(contents, nullptr);
+        REQUIRE_NE(contents.data, nullptr);
 
         auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
         auto logger = std::make_shared<spdlog::logger>("null", sink);
@@ -93,7 +93,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         // If caching fails, gs gets modified during payload creation.
         CHECK_FALSE(gs->wasModified());
 
-        auto cachedFile = core::serialize::Serializer::loadFile(*gs, contents);
+        auto cachedFile = core::serialize::Serializer::loadFile(*gs, contents.data);
         CHECK(cachedFile.file->cached);
         CHECK_EQ(cachedFile.file->path(), filePath);
         CHECK_EQ(cachedFile.file->source(), fileContents);
@@ -134,14 +134,14 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         lspWrapper = nullptr;
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(*opts);
         auto updatedFileData = kvstore->read(updatedKey);
-        REQUIRE_NE(updatedFileData, nullptr);
+        REQUIRE_NE(updatedFileData.data, nullptr);
 
         auto sink = std::make_shared<spdlog::sinks::null_sink_mt>();
         auto logger = std::make_shared<spdlog::logger>("null", sink);
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
-        auto cachedFile = core::serialize::Serializer::loadFile(*gs, updatedFileData);
+        auto cachedFile = core::serialize::Serializer::loadFile(*gs, updatedFileData.data);
         CHECK(cachedFile.file->cached);
         CHECK_EQ(cachedFile.file->path(), filePath);
         CHECK_EQ(cachedFile.file->source(), updatedFileContents);
@@ -183,7 +183,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
 
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(*opts);
         auto contents = kvstore->read(key);
-        REQUIRE_NE(contents, nullptr);
+        REQUIRE_NE(contents.data, nullptr);
 
         auto gs = make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*nullLogger, *nullLogger)));
         payload::createInitialGlobalState(gs, *opts, kvstore);
@@ -191,7 +191,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         // If caching fails, gs gets modified during payload creation.
         CHECK_FALSE(gs->wasModified());
 
-        auto cachedFile = core::serialize::Serializer::loadFile(*gs, contents);
+        auto cachedFile = core::serialize::Serializer::loadFile(*gs, contents.data);
         CHECK(cachedFile.file->cached);
         CHECK_EQ(cachedFile.file->path(), filePath);
         CHECK_EQ(cachedFile.file->source(), fileContents);

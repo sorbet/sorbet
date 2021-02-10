@@ -127,7 +127,7 @@ OwnedKeyValueStore::OwnedKeyValueStore(unique_ptr<KeyValueStore> kvstore)
     // Writer thread may have changed; reset the primary transaction.
     refreshMainTransaction();
     {
-        if (read(OLD_VERSION_KEY)) { // remove databases that use old(non-string) versioning scheme.
+        if (read(OLD_VERSION_KEY).data != nullptr) { // remove databases that use old(non-string) versioning scheme.
             clear();
         }
         auto dbVersion = readString(VERSION_KEY);
@@ -183,7 +183,7 @@ OwnedKeyValueStore::~OwnedKeyValueStore() {
     abort();
 }
 
-void OwnedKeyValueStore::write(string_view key, const vector<u1> &value) {
+void OwnedKeyValueStore::writeInternal(std::string_view key, void *value, size_t len) {
     if (writerId != this_thread::get_id()) {
         throw_mdb_error("KeyValueStore can only write from thread that created it"sv, 0);
     }
@@ -192,8 +192,8 @@ void OwnedKeyValueStore::write(string_view key, const vector<u1> &value) {
     MDB_val dv;
     kv.mv_size = key.size();
     kv.mv_data = (void *)key.data();
-    dv.mv_size = value.size();
-    dv.mv_data = (void *)value.data();
+    dv.mv_size = len;
+    dv.mv_data = value;
 
     int rc = mdb_put(txnState->txn, txnState->dbi, &kv, &dv, 0);
     if (rc != 0) {
@@ -201,7 +201,11 @@ void OwnedKeyValueStore::write(string_view key, const vector<u1> &value) {
     }
 }
 
-u1 *OwnedKeyValueStore::read(string_view key) const {
+void OwnedKeyValueStore::write(string_view key, const vector<u1> &value) {
+    writeInternal(key, (void *)value.data(), value.size());
+}
+
+KeyValueStoreValue OwnedKeyValueStore::read(string_view key) const {
     MDB_txn *txn = nullptr;
     int rc = 0;
     {
@@ -230,11 +234,11 @@ u1 *OwnedKeyValueStore::read(string_view key) const {
     rc = mdb_get(txn, txnState->dbi, &kv, &data);
     if (rc != 0) {
         if (rc == MDB_NOTFOUND) {
-            return nullptr;
+            return {nullptr, 0};
         }
         throw_mdb_error("failed read from the database"sv, rc);
     }
-    return (u1 *)data.mv_data;
+    return {static_cast<u1 *>(data.mv_data), data.mv_size};
 }
 
 void OwnedKeyValueStore::clear() {
@@ -258,21 +262,15 @@ fail:
 
 string_view OwnedKeyValueStore::readString(string_view key) const {
     auto rawData = read(key);
-    if (!rawData) {
+    if (rawData.data == nullptr) {
         return string_view();
     }
-    size_t sz;
-    memcpy(&sz, rawData, sizeof(sz));
-    string_view result(((const char *)rawData) + sizeof(sz), sz);
+    string_view result((const char *)rawData.data, rawData.len);
     return result;
 }
 
 void OwnedKeyValueStore::writeString(string_view key, string_view value) {
-    vector<u1> rawData(value.size() + sizeof(size_t));
-    size_t sz = value.size();
-    memcpy(rawData.data(), &sz, sizeof(sz));
-    memcpy(rawData.data() + sizeof(sz), value.data(), sz);
-    write(key, move(rawData));
+    writeInternal(key, (void *)value.data(), value.size());
 }
 
 void OwnedKeyValueStore::refreshMainTransaction() {
