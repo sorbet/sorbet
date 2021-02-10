@@ -17,9 +17,9 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
-        if (maybeGsBytes) {
+        if (maybeGsBytes.data != nullptr) {
             Timer timeit(gs->tracer(), "read_global_state.kvstore");
-            core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes);
+            core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes.data);
             for (unsigned int i = 1; i < gs->filesUsed(); i++) {
                 core::FileRef fref(i);
                 if (fref.dataAllowingUnsafe(*gs).sourceType == core::File::Type::Normal) {
@@ -88,7 +88,7 @@ bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const u1 *mayb
 } // namespace
 
 bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    return kvstoreUnchangedSinceGsCreation(gs, kvstore->read(GLOBAL_STATE_KEY));
+    return kvstoreUnchangedSinceGsCreation(gs, kvstore->read(GLOBAL_STATE_KEY).data);
 }
 
 bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
@@ -97,7 +97,7 @@ bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
         // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
         // into the databaase.
-        if (kvstoreUnchangedSinceGsCreation(gs, maybeGsBytes)) {
+        if (kvstoreUnchangedSinceGsCreation(gs, maybeGsBytes.data)) {
             Timer timeit(gs.tracer(), "write_global_state.kvstore");
             // Generate a new UUID, since this GS has changed since it was read.
             gs.kvstoreUuid = Random::uniformU4();

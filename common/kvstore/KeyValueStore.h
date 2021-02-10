@@ -7,6 +7,11 @@ namespace sorbet {
 
 class OwnedKeyValueStore;
 
+struct KeyValueStoreValue {
+    u1 *data;
+    size_t len;
+};
+
 /**
  * A database with single writer and multiple readers. Must be owned by a particular thread (via `OwnedKeyValueStore`)
  * before it can be used.
@@ -60,6 +65,7 @@ class OwnedKeyValueStore final {
     const std::unique_ptr<TxnState> txnState;
     mutable absl::Mutex readers_mtx;
 
+    void writeInternal(std::string_view key, void *value, size_t len);
     void clear();
     void refreshMainTransaction();
     int commit();
@@ -70,7 +76,7 @@ public:
     ~OwnedKeyValueStore();
 
     /** returns nullptr if not found*/
-    u1 *read(std::string_view key) const;
+    KeyValueStoreValue read(std::string_view key) const;
     std::string_view readString(std::string_view key) const;
     void writeString(std::string_view key, std::string_view value);
     /** can only be called from owning thread */
