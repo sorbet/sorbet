@@ -78,59 +78,62 @@ public:
     }
 };
 
-FileKeys fileKeys(const core::File &file) {
+namespace {
+string keyBase(const core::File &file) {
     auto path = file.path();
     auto hashBytes = sorbet::crypto_hashing::hash64(file.source());
-    auto base =
-        absl::StrCat(path, "//", absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)}));
+    return absl::StrCat(path, "//", absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)}));
+}
+} // namespace
 
-    return {absl::StrCat(base, "//file"), absl::StrCat(base, "//tree")};
+string treeKey(const core::File &file) {
+    return absl::StrCat(keyBase(file), "//tree");
 }
 
-struct CachedFile {
-    shared_ptr<core::File> file;
-    ast::ExpressionPtr tree;
-};
+string fileKey(const core::File &file) {
+    return absl::StrCat(keyBase(file), "//file");
+}
 
-unique_ptr<CachedFile> fetchFileAndTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
-                                                 const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+shared_ptr<core::File> fetchFileFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
+                                          const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore && fref.id() < gs.filesUsed()) {
-        auto fileHashKey = fileKeys(file);
-        auto maybeCachedFile = kvstore->read(fileHashKey.file);
-        auto maybeCachedAST = kvstore->read(fileHashKey.tree);
-        if (maybeCachedFile && maybeCachedAST) {
-            prodCounterInc("types.input.files.kvstore.hit");
-            auto rv = make_unique<CachedFile>();
-            rv->file = core::serialize::Serializer::loadFile(gs, maybeCachedFile);
-            rv->tree = core::serialize::Serializer::loadAST(gs, maybeCachedAST);
-            return rv;
+        auto fileHashKey = fileKey(file);
+        auto maybeCachedFile = kvstore->read(fileHashKey);
+        if (maybeCachedFile) {
+            prodCounterInc("types.input.files.kvstore.file.hit");
+            return core::serialize::Serializer::loadFile(gs, maybeCachedFile);
         } else {
-            prodCounterInc("types.input.files.kvstore.miss");
+            prodCounterInc("types.input.files.kvstore.file.miss");
         }
     }
     return nullptr;
 }
 
-struct CachedFileCompressedAST {
-    shared_ptr<core::File> file;
-    unique_ptr<vector<u1>> compressedTree;
-};
-
-unique_ptr<CachedFileCompressedAST>
-fetchFileAndCompressedTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
-                                    const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
+                                      const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore && fref.id() < gs.filesUsed()) {
-        auto fileHashKey = fileKeys(file);
-        auto maybeCachedFile = kvstore->read(fileHashKey.file);
-        auto maybeCachedAST = kvstore->read(fileHashKey.tree);
-        if (maybeCachedFile && maybeCachedAST) {
-            prodCounterInc("types.input.files.kvstore.hit");
-            auto rv = make_unique<CachedFileCompressedAST>();
-            rv->file = core::serialize::Serializer::loadFile(gs, maybeCachedFile);
-            rv->compressedTree = core::serialize::Serializer::copyCompressedDataIntoVector(maybeCachedAST);
-            return rv;
+        auto treeHashKey = treeKey(file);
+        auto maybeCachedAST = kvstore->read(treeHashKey);
+        if (maybeCachedAST) {
+            prodCounterInc("types.input.files.kvstore.tree.hit");
+            return core::serialize::Serializer::loadAST(gs, maybeCachedAST);
         } else {
-            prodCounterInc("types.input.files.kvstore.miss");
+            prodCounterInc("types.input.files.kvstore.tree.miss");
+        }
+    }
+    return nullptr;
+}
+
+vector<u1> fetchCompressedTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
+                                        const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    if (kvstore && fref.id() < gs.filesUsed()) {
+        auto treeHashKey = treeKey(file);
+        auto maybeCachedAST = kvstore->read(treeHashKey);
+        if (maybeCachedAST) {
+            prodCounterInc("types.input.files.kvstore.tree.hit");
+            return core::serialize::Serializer::loadAST(gs, maybeCachedAST);
+        } else {
+            prodCounterInc("types.input.files.kvstore.tree.miss");
         }
     }
     return nullptr;

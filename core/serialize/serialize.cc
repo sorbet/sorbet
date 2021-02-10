@@ -908,18 +908,6 @@ ast::ExpressionPtr Serializer::loadAST(const GlobalState &gs, const u1 *const da
     return SerializerImpl::unpickleExpr(p, gs);
 }
 
-unique_ptr<vector<u1>> copyCompressedDataIntoVector(const u1 *const data) {
-    int compressedSize;
-    memcpy(&compressedSize, data, SIZE_BYTES);
-
-    // Data contains two sizes (uncompressed + compressed) followed by compressed data.
-    auto totalSize = compressedSize + 2 * SIZE_BYTES;
-
-    auto ret = make_unique<vector<u1>>(totalSize);
-    memcpy(ret->data(), data, totalSize);
-    return ret;
-}
-
 void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
     if (what == nullptr) {
         p.putU4(0);

@@ -28,8 +28,6 @@ public:
     static std::shared_ptr<core::File> loadFile(const GlobalState &gs, const u1 *const data);
 
     static ast::ExpressionPtr loadAST(const GlobalState &gs, const u1 *const data);
-
-    static std::unique_ptr<std::vector<u1>> copyCompressedDataIntoVector(const u1 *const data);
 };
 }; // namespace sorbet::core::serialize
 
