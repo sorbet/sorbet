@@ -14,6 +14,16 @@ T.assert_type!(Float('123.0'), Float)
 T.assert_type!(Integer('123', exception: true), Integer)
 T.assert_type!(Rational('1/1', 2, exception: true), Rational)
 
+# rand
+T.assert_type!(Kernel.rand, Float)
+T.assert_type!(Kernel.rand(nil), Float)
+T.assert_type!(Kernel.rand(1), Integer)
+T.assert_type!(Kernel.rand(1.0), Float)
+T.assert_type!(Kernel.rand(1..1), Integer)
+T.assert_type!(Kernel.rand(1.0..1.0), Float)
+T.assert_type!(Kernel.rand(36**8), Numeric)
+T.assert_type!(Kernel.rand((36**8..36**9)), Numeric)
+
 # make sure we don't regress and mark `loop` as returning `nil`
 x = loop {break 1}
 T.assert_type!(x, Integer)
