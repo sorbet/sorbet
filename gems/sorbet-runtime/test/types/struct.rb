@@ -29,6 +29,16 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
     end
   end
 
+  it "allows disabling tests in tests" do
+    c = Class.new(T::Struct) do
+      checked(:tests)
+      prop :arr, T::Array[String]
+      const :other, T::Array[Integer]
+    end
+    c = c.new(arr: ["foo, bar"], other: ["foo", "bar"]) # doesn't throw
+    c.arr = [1, 2] # doesn't throw
+  end
+
   it "errors when using string typed props" do
     assert_raises(TypeError) do
       Class.new(T::Struct) do

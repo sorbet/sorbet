@@ -27,11 +27,15 @@ class T::Props::Decorator
       T::Props::Plugin::Private.apply_decorator_methods(mod, self)
     end
     @props = T.let(EMPTY_PROPS, T::Hash[Symbol, Rules])
+    @check_level = T.let(:always, Symbol)
   end
 
   # checked(:never) - O(prop accesses)
   sig {returns(T::Hash[Symbol, Rules]).checked(:never)}
   attr_reader :props
+
+  sig {returns(Symbol).checked(:never)}
+  attr_reader :check_level
 
   sig {returns(T::Array[Symbol])}
   def all_props; props.keys; end
@@ -272,6 +276,23 @@ class T::Props::Decorator
     end
   end
 
+  sig do
+    params(
+      level: Symbol,
+    )
+    .void
+    .checked(:never)
+  end
+  def set_check_level(level)
+    if !@props.empty?
+      raise ArgumentError.new("Call `checked` before defining any props/consts on your struct!")
+    end
+    if !T::Private::RuntimeLevels::LEVELS.include?(level)
+      raise ArgumentError.new("Invalid `checked` level '#{level}'. Use one of: #{T::Private::RuntimeLevels::LEVELS}.")
+    end
+    @check_level = level
+  end
+
   # checked(:never) - Rules hash is expensive to check
   sig do
     params(
@@ -345,7 +366,7 @@ class T::Props::Decorator
       end
     end
 
-    rules[:setter_proc] = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules).freeze
+    rules[:setter_proc] = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules, @check_level).freeze
 
     add_prop_definition(name, rules)
 

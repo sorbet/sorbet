@@ -119,6 +119,11 @@ module T::Props
       decorator.validate_prop_value(prop, val)
     end
 
+    # Allows allows configuring the runtime type checking behavior of the struct.
+    def checked(level)
+      decorator.set_check_level(level)
+    end
+
     # Needs to be documented
     def plugin(mod)
       decorator.plugin(mod)
