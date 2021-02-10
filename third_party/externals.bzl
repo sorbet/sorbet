@@ -65,11 +65,10 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
-        name = "lmdb",
-        urls = _github_public_urls("DarkDimius/lmdb/archive/75766ec2b663b360be8eea9730a7adc0d252ce7e.zip"),
-        sha256 = "bd120470d62c6f3433f80bb9841f09f158924081eb0c3236da6e8d1a0976eccc",
-        build_file = "@com_stripe_ruby_typer//third_party:lmdb.BUILD",
-        strip_prefix = "lmdb-75766ec2b663b360be8eea9730a7adc0d252ce7e",
+        name = "libmdbx",
+        urls = _github_public_urls("erthink/libmdbx/releases/download/v0.9.3/libmdbx-amalgamated-0_9_3.zip"),
+        sha256 = "f8249209d31f61750c470f042ecb24e5465424a801221473a0eca49b6af69f66",
+        build_file = "@com_stripe_ruby_typer//third_party:libmdbx.BUILD",
     )
 
     http_archive(
