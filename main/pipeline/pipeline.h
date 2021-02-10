@@ -12,6 +12,13 @@ class PreemptionTaskManager;
 }
 
 namespace sorbet::realmain::pipeline {
+
+struct IndexResult {
+    std::unique_ptr<core::GlobalState> gs;
+    std::vector<ast::ParsedFile> trees;
+    std::vector<ast::CompressedParsedFile> compressedTrees;
+};
+
 ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file);
 
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files);
@@ -19,13 +26,6 @@ std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, 
 std::vector<ast::ParsedFile> index(std::unique_ptr<core::GlobalState> &gs, std::vector<core::FileRef> files,
                                    const options::Options &opts, WorkerPool &workers,
                                    const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
-
-// Index the given files and compress them. Used in LSP mode to reduce memory consumption as we keep all ASTs in memory.
-// Also reduces startup time when the cache is in-use as we can grab compressed ASTs from the cache.
-std::vector<ast::CompressedParsedFile> indexAndCompress(std::unique_ptr<core::GlobalState> &gs,
-                                                        std::vector<core::FileRef> files, const options::Options &opts,
-                                                        WorkerPool &workers,
-                                                        const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
 std::vector<ast::ParsedFile> package(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
                                      const options::Options &opts, WorkerPool &workers);

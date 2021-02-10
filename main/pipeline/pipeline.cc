@@ -445,14 +445,6 @@ void readFileWithStrictnessOverrides(unique_ptr<core::GlobalState> &gs, core::Fi
     incrementStrictLevelCounter(level);
 }
 
-struct IndexResult {
-    unique_ptr<core::GlobalState> gs;
-    vector<ast::ParsedFile> trees;
-    // Note: Compressed trees were fetched from kvstore, and don't need to have their namerefs rewritten because they
-    // were created w/ the base gs.
-    vector<ast::CompressedParsedFile> compressedTrees;
-};
-
 struct IndexThreadResultPack {
     CounterState counters;
     IndexResult res;
@@ -460,44 +452,87 @@ struct IndexThreadResultPack {
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
                               shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                              const unique_ptr<const OwnedKeyValueStore> &kvstore, bool compressAllTrees) {
+                              const unique_ptr<const OwnedKeyValueStore> &kvstore, bool compressAllTrees,
+                              WorkerPool &workers) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
-    Timer timeit(cgs->tracer(), "mergeIndexResults");
-    IndexThreadResultPack threadResult;
     IndexResult ret;
-    for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer()); !result.done();
-         result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer())) {
-        if (result.gotItem()) {
-            counterConsume(move(threadResult.counters));
-            if (ret.gs == nullptr) {
-                ret.gs = move(threadResult.res.gs);
-                ENFORCE(ret.trees.empty());
-                ret.trees = move(threadResult.res.trees);
-                ret.compressedTrees = move(threadResult.res.compressedTrees);
-            } else {
-                core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
-                {
-                    Timer timeit(cgs->tracer(), "substituteTrees");
-                    for (auto &tree : threadResult.res.trees) {
-                        auto file = tree.file;
-                        if (!file.data(*ret.gs).cached) {
-                            core::MutableContext ctx(*ret.gs, core::Symbols::root(), file);
-                            tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
+    {
+        Timer timeit(cgs->tracer(), "mergeIndexResults");
+        IndexThreadResultPack threadResult;
+        for (auto result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer());
+             !result.done();
+             result = input->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer())) {
+            if (result.gotItem()) {
+                counterConsume(move(threadResult.counters));
+                if (ret.gs == nullptr) {
+                    ret.gs = move(threadResult.res.gs);
+                    ENFORCE(ret.trees.empty());
+                    ret.trees = move(threadResult.res.trees);
+                    ret.compressedTrees = move(threadResult.res.compressedTrees);
+                } else {
+                    core::GlobalSubstitution substitution(*threadResult.res.gs, *ret.gs, cgs.get());
+                    {
+                        Timer timeit(cgs->tracer(), "substituteTrees");
+                        for (auto &tree : threadResult.res.trees) {
+                            auto file = tree.file;
+                            if (!file.data(*ret.gs).cached) {
+                                core::MutableContext ctx(*ret.gs, core::Symbols::root(), file);
+                                tree.tree = ast::Substitute::run(ctx, substitution, move(tree.tree));
+                            }
                         }
                     }
+                    ret.trees.insert(ret.trees.end(), make_move_iterator(threadResult.res.trees.begin()),
+                                     make_move_iterator(threadResult.res.trees.end()));
+                    ret.compressedTrees.insert(ret.compressedTrees.end(),
+                                               make_move_iterator(threadResult.res.compressedTrees.begin()),
+                                               make_move_iterator(threadResult.res.compressedTrees.end()));
                 }
-                ret.trees.insert(ret.trees.end(), make_move_iterator(threadResult.res.trees.begin()),
-                                 make_move_iterator(threadResult.res.trees.end()));
-                ret.compressedTrees.insert(ret.compressedTrees.end(),
-                                           make_move_iterator(threadResult.res.compressedTrees.begin()),
-                                           make_move_iterator(threadResult.res.compressedTrees.end()));
+                progress.reportProgress(input->doneEstimate());
             }
-            progress.reportProgress(input->doneEstimate());
         }
     }
 
     if (compressAllTrees && !ret.trees.empty()) {
+        Timer timeit(cgs->tracer(), "compressIndexResults");
         // Compress trees!
+        auto resultq = make_shared<BlockingBoundedQueue<vector<ast::CompressedParsedFile>>>(ret.trees.size());
+        auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(ret.trees.size());
+        for (auto &tree : ret.trees) {
+            fileq->push(move(tree), 1);
+        }
+        ret.trees.clear();
+
+        workers.multiplexJob("compressFiles", [cgs, fileq, resultq]() {
+            Timer timeit(cgs->tracer(), "compressFilesWorker");
+            vector<ast::CompressedParsedFile> compressedFiles;
+            size_t compressedFileCount = 0;
+
+            {
+                ast::ParsedFile job;
+                for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    if (result.gotItem()) {
+                        compressedFileCount++;
+                        auto file = job.file;
+                        compressedFiles.emplace_back(ast::CompressedParsedFile{
+                            make_unique<vector<u1>>(core::serialize::Serializer::storeAST(move(job))), file});
+                    }
+                }
+            }
+
+            if (!compressedFiles.empty()) {
+                resultq->push(move(compressedFiles), compressedFileCount);
+            }
+        });
+
+        vector<ast::CompressedParsedFile> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer());
+             !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer())) {
+            if (result.gotItem()) {
+                ret.compressedTrees.insert(ret.compressedTrees.end(), make_move_iterator(threadResult.begin()),
+                                           make_move_iterator(threadResult.end()));
+            }
+        }
     }
 
     return ret;
@@ -550,7 +585,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         }
     });
 
-    return mergeIndexResults(baseGs, opts, resultq, kvstore, compressAllTrees);
+    return mergeIndexResults(baseGs, opts, resultq, kvstore, compressAllTrees, workers);
 }
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
@@ -579,7 +614,7 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         }
         ENFORCE(files.size() == ret.size());
     } else {
-        auto pass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore);
+        auto pass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore, /* compressAllTrees */ false);
         gs = move(pass.gs);
         ret = move(pass.trees);
         ENFORCE_NO_TIMER(pass.compressedTrees.empty());
@@ -615,12 +650,14 @@ vector<ast::CompressedParsedFile> indexAndCompress(unique_ptr<core::GlobalState>
         }
         ENFORCE(files.size() == ret.size());
     } else {
-        auto pass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore /* compressAllTrees */ true);
+        auto pass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore, /* compressAllTrees */ true);
         gs = move(pass.gs);
-        ret = move(pass.trees);
+        ENFORCE_NO_TIMER(pass.trees.empty());
+        ret = move(pass.compressedTrees);
     }
 
-    fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
+    fast_sort(ret,
+              [](ast::CompressedParsedFile const &a, ast::CompressedParsedFile const &b) { return a.file < b.file; });
     return ret;
 }
 

@@ -192,4 +192,11 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
     return asts;
 }
 
+static std::vector<ast::CompressedParsedFile>
+indexCompressAndComputeFileHashes(std::unique_ptr<core::GlobalState> &gs, const realmain::options::Options &opts,
+                                  spdlog::logger &logger, std::vector<core::FileRef> &files, WorkerPool &workers,
+                                  const std::unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    // nooo.
+}
+
 } // namespace sorbet::hashing
