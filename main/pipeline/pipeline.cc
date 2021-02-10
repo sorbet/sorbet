@@ -78,25 +78,32 @@ public:
     }
 };
 
-string fileKey(const core::File &file) {
+FileKeys fileKeys(const core::File &file) {
     auto path = file.path();
-    string key(path.begin(), path.end());
-    key += "//";
     auto hashBytes = sorbet::crypto_hashing::hash64(file.source());
-    key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
-    return key;
+    auto base =
+        absl::StrCat(path, "//", absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)}));
+
+    return {absl::StrCat(base, "//file"), absl::StrCat(base, "//tree")};
 }
 
-unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs, core::FileRef fref,
-                                                           const core::File &file,
-                                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+struct CachedFile {
+    shared_ptr<core::File> file;
+    ast::ExpressionPtr tree;
+};
+
+unique_ptr<CachedFile> fetchFileAndTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
+                                                 const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore && fref.id() < gs.filesUsed()) {
-        string fileHashKey = fileKey(file);
-        auto maybeCached = kvstore->read(fileHashKey);
-        if (maybeCached.data != nullptr) {
+        auto fileHashKey = fileKeys(file);
+        auto maybeCachedFile = kvstore->read(fileHashKey.file);
+        auto maybeCachedAST = kvstore->read(fileHashKey.tree);
+        if (maybeCachedFile && maybeCachedAST) {
             prodCounterInc("types.input.files.kvstore.hit");
-            auto cachedTree = core::serialize::Serializer::loadFile(gs, maybeCached.data);
-            return make_unique<core::serialize::CachedFile>(move(cachedTree));
+            auto rv = make_unique<CachedFile>();
+            rv->file = core::serialize::Serializer::loadFile(gs, maybeCachedFile);
+            rv->tree = core::serialize::Serializer::loadAST(gs, maybeCachedAST);
+            return rv;
         } else {
             prodCounterInc("types.input.files.kvstore.miss");
         }
@@ -104,11 +111,27 @@ unique_ptr<core::serialize::CachedFile> fetchFileFromCache(core::GlobalState &gs
     return nullptr;
 }
 
-ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
-                                      const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    auto cachedFile = fetchFileFromCache(gs, fref, file, kvstore);
-    if (cachedFile) {
-        return move(cachedFile->tree);
+struct CachedFileCompressedAST {
+    shared_ptr<core::File> file;
+    unique_ptr<vector<u1>> compressedTree;
+};
+
+unique_ptr<CachedFileCompressedAST>
+fetchFileAndCompressedTreeFromCache(core::GlobalState &gs, core::FileRef fref, const core::File &file,
+                                    const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    if (kvstore && fref.id() < gs.filesUsed()) {
+        auto fileHashKey = fileKeys(file);
+        auto maybeCachedFile = kvstore->read(fileHashKey.file);
+        auto maybeCachedAST = kvstore->read(fileHashKey.tree);
+        if (maybeCachedFile && maybeCachedAST) {
+            prodCounterInc("types.input.files.kvstore.hit");
+            auto rv = make_unique<CachedFileCompressedAST>();
+            rv->file = core::serialize::Serializer::loadFile(gs, maybeCachedFile);
+            rv->compressedTree = core::serialize::Serializer::copyCompressedDataIntoVector(maybeCachedAST);
+            return rv;
+        } else {
+            prodCounterInc("types.input.files.kvstore.miss");
+        }
     }
     return nullptr;
 }
@@ -396,7 +419,7 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(unique_ptr<core::GlobalState>
         core::UnfreezeFileTable unfreezeFiles(*gs);
         auto fileObj =
             make_shared<core::File>(string(fileName.begin(), fileName.end()), move(src), core::File::Type::Normal);
-        if (auto maybeCached = fetchFileFromCache(*gs, file, *fileObj, kvstore)) {
+        if (auto maybeCached = fetchFileAndTreeFromCache(*gs, file, *fileObj, kvstore)) {
             fileObj = move(maybeCached->file);
             ast = move(maybeCached->tree);
         }
@@ -1086,7 +1109,9 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
 
                     auto &file = job->file.data(gs);
                     if (!file.cached && !file.hasParseErrors) {
-                        threadResult.emplace_back(fileKey(file), core::serialize::Serializer::storeFile(file, *job));
+                        auto keys = fileKeys(file);
+                        threadResult.emplace_back(keys.file, core::serialize::Serializer::storeFile(file));
+                        threadResult.emplace_back(keys.tree, core::serialize::Serializer::storeAST(*job));
                         // Stream out compressed files so that writes happen in parallel with processing.
                         if (processedByThread > 100) {
                             resultq->push(move(threadResult), processedByThread);

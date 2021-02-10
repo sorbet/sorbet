@@ -884,19 +884,40 @@ u4 Serializer::loadGlobalStateUUID(const GlobalState &gs, const u1 *const data) 
     return SerializerImpl::unpickleGSUUID(p);
 }
 
-vector<u1> Serializer::storeFile(const core::File &file, ast::ParsedFile &tree) {
+vector<u1> Serializer::storeFile(const core::File &file) {
     Pickler p;
     SerializerImpl::pickle(p, file);
+    return p.result(FILE_COMPRESSION_DEGREE);
+}
+
+vector<u1> Serializer::storeAST(const ast::ParsedFile &tree) {
+    Pickler p;
     SerializerImpl::pickle(p, tree.tree);
     return p.result();
 }
 
-CachedFile Serializer::loadFile(const core::GlobalState &gs, const u1 *const data) {
+shared_ptr<core::File> Serializer::loadFile(const core::GlobalState &gs, const u1 *const data) {
     UnPickler p(data, gs.tracer());
     auto file = SerializerImpl::unpickleFile(p);
     file->cached = true;
-    auto tree = SerializerImpl::unpickleExpr(p, gs);
-    return CachedFile{move(file), move(tree)};
+    return file;
+}
+
+ast::ExpressionPtr Serializer::loadAST(const GlobalState &gs, const u1 *const data) {
+    UnPickler p(data, gs.tracer());
+    return SerializerImpl::unpickleExpr(p, gs);
+}
+
+unique_ptr<vector<u1>> copyCompressedDataIntoVector(const u1 *const data) {
+    int compressedSize;
+    memcpy(&compressedSize, data, SIZE_BYTES);
+
+    // Data contains two sizes (uncompressed + compressed) followed by compressed data.
+    auto totalSize = compressedSize + 2 * SIZE_BYTES;
+
+    auto ret = make_unique<vector<u1>>(totalSize);
+    memcpy(ret->data(), data, totalSize);
+    return ret;
 }
 
 void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
