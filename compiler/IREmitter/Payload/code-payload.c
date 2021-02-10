@@ -261,6 +261,22 @@ VALUE sorbet_getMethodBlockAsProc() {
 }
 
 SORBET_INLINE
+_Bool sorbet_block_isa_proc() {
+    /* If we get here, we know that we're checking the block handler for proc-ness.
+     *
+     * If we don't have a block handler, then we know that the block handler cannot
+     * be a proc.  If we do have a block handler, pretty much all the different
+     * kinds of block handlers can be procs (i.e. rb_block_proc always returns a
+     * proc-like thing: https://github.com/ruby/ruby/blob/7332b3f367ce61089bf571fa1c458fde06a11eab/proc.c#L743-L808).
+     *
+     * Since we're only checking for proc-ness and not arity (or even "can this thing be called?"
+     * in the case of a symbol-as-proc), the only thing we can do is make sure that
+     * we have a block handler.
+     */
+    return rb_block_given_p();
+}
+
+SORBET_INLINE
 VALUE sorbet_defineTopLevelModule(const char *name) {
     return rb_define_module(name);
 }

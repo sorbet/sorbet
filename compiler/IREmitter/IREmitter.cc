@@ -602,7 +602,11 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         auto local = irctx.rubyBlockArgs[0][i->argId];
                         auto var = Payload::varGet(cs, local, builder, irctx, 0);
                         if (auto &expectedType = argInfo.type) {
-                            IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "sig");
+                            if (argInfo.flags.isBlock) {
+                                IREmitterHelpers::emitTypeTestForBlock(cs, builder, var, expectedType, "sig");
+                            } else {
+                                IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "sig");
+                            }
                         }
                     },
                     [&](cfg::LoadYieldParams *i) {

@@ -933,15 +933,17 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build,
     builder.CreateRet(retVal);
 }
 
-void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *value,
-                                    const core::TypePtr &expectedType, std::string_view description) {
+namespace {
+void buildTypeTestPassFailBlocks(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *value,
+                                 llvm::Value *testResult, const core::TypePtr &expectedType,
+                                 std::string_view description) {
     auto &builder = static_cast<llvm::IRBuilder<> &>(build);
-    auto passedTypeTest = Payload::typeTest(cs, builder, value, expectedType);
+
     auto successBlock = llvm::BasicBlock::Create(cs, "typeTestSuccess", builder.GetInsertBlock()->getParent());
 
     auto failBlock = llvm::BasicBlock::Create(cs, "typeTestFail", builder.GetInsertBlock()->getParent());
 
-    auto expected = Payload::setExpectedBool(cs, builder, passedTypeTest, true);
+    auto expected = Payload::setExpectedBool(cs, builder, testResult, true);
     builder.CreateCondBr(expected, successBlock, failBlock);
     builder.SetInsertPoint(failBlock);
     // this will throw exception
@@ -949,6 +951,25 @@ void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &buil
                                                                Payload::toCString(cs, expectedType.show(cs), builder)});
     builder.CreateUnreachable();
     builder.SetInsertPoint(successBlock);
+}
+} // namespace
+
+void IREmitterHelpers::emitTypeTest(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *value,
+                                    const core::TypePtr &expectedType, std::string_view description) {
+    auto *typeTest = Payload::typeTest(cs, build, value, expectedType);
+    buildTypeTestPassFailBlocks(cs, build, value, typeTest, expectedType, description);
+}
+
+void IREmitterHelpers::emitTypeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *value,
+                                            const core::TypePtr &expectedType, std::string_view description) {
+    // Checking for blocks is special.  We don't want to materialize the block (`value`)
+    // unless we absolutely have to, so we check the type of blocks by poking at the
+    // RubyVM.  (We obviously have materialized the block at this point since we have
+    // `value` to inspect, but we have an LLVM optimization pass that will delete the
+    // materialization if the result of the materialization is unused.  So we don't
+    // want to add any more uses than we have to.)
+    auto *typeTest = Payload::typeTestForBlock(cs, build, value, expectedType);
+    buildTypeTestPassFailBlocks(cs, build, value, typeTest, expectedType, description);
 }
 
 llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilderBase &build, const core::TypePtr &lit) {

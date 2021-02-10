@@ -59,6 +59,8 @@ public:
     static llvm::Value *toCString(CompilerState &cs, std::string_view str, llvm::IRBuilderBase &builder);
     static llvm::Value *typeTest(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                  const core::TypePtr &type);
+    static llvm::Value *typeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
+                                         const core::TypePtr &type);
     static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1);
     static std::pair<llvm::Value *, llvm::Value *> setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder,
                                                                      const IREmitterContext &irctx,
