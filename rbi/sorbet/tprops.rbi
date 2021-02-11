@@ -90,6 +90,10 @@ end
 module T::Props::Plugin
   extend T::Helpers
   include T::Props
+  mixes_in_class_methods(T::Props::Plugin::ClassMethods)
+end
+
+module T::Props::Plugin::ClassMethods
 end
 
 module T::Props::Utils
