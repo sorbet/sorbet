@@ -880,7 +880,7 @@ VALUE sorbet_bang(VALUE recv, ID fun, int argc, const VALUE *const restrict argv
             return Qfalse;
         } else {
             // slow path - dispatch via the VM
-            return rb_funcallv(recv, rb_intern("!"), argc, argv);
+            return rb_funcallv(recv, fun, argc, argv);
         }
     } else {
         return Qtrue;
