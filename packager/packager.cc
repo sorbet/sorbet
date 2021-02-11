@@ -5,7 +5,7 @@
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 #include "common/FileOps.h"
-#include "common/concurrency/ConcurrentQueue.h"
+#include "common/concurrency/ConcurrentTask.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/sort.h"
 #include "core/Unfreeze.h"
@@ -671,57 +671,37 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
     // Step 3: Find files within each package and rewrite each.
     {
         Timer timeit(gs.tracer(), "packager.rewritePackagedFiles");
+        ConcurrentTask<ast::ParsedFile, vector<ast::ParsedFile>> task(
+            "rewritePackagedFiles", "rewritePackagedFilesWorker", files.size(), gs.tracer(), workers);
 
-        auto resultq = make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(files.size());
-        auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(files.size());
         for (auto &file : files) {
-            fileq->push(move(file), 1);
+            task.enqueue(move(file));
         }
-
-        const PackageDB &constPkgDB = packageDB;
-
-        workers.multiplexJob("rewritePackagedFiles", [&gs, constPkgDB, fileq, resultq]() {
-            Timer timeit(gs.tracer(), "packager.rewritePackagedFilesWorker");
-            vector<ast::ParsedFile> results;
-            u4 filesProcessed = 0;
-            ast::ParsedFile job;
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    filesProcessed++;
-                    if (job.file.data(gs).sourceType == core::File::Type::Normal) {
-                        core::Context ctx(gs, core::Symbols::root(), job.file);
-                        if (auto pkg = constPkgDB.getPackageForContext(ctx)) {
-                            job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName);
-                        } else {
-                            // Don't transform, but raise an error on the first line.
-                            if (auto e =
-                                    ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
-                                e.setHeader("File `{}` does not belong to a package; add a `__package.rb` file to one "
-                                            "of its parent directories",
-                                            ctx.file.data(gs).path());
-                            }
-                        }
-                    }
-                    results.emplace_back(move(job));
-                }
-            }
-            if (filesProcessed > 0) {
-                resultq->push(move(results), filesProcessed);
-            }
-        });
         files.clear();
 
-        {
-            vector<ast::ParsedFile> threadResult;
-            for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-                if (result.gotItem()) {
-                    files.insert(files.end(), make_move_iterator(threadResult.begin()),
-                                 make_move_iterator(threadResult.end()));
+        const core::GlobalState &sharedGs = gs;
+        const PackageDB &constPkgDB = packageDB;
+        task.run(
+            [&sharedGs, &constPkgDB](ast::ParsedFile &&job, vector<ast::ParsedFile> &threadState) -> void {
+                if (job.file.data(sharedGs).sourceType == core::File::Type::Normal) {
+                    core::Context ctx(sharedGs, core::Symbols::root(), job.file);
+                    if (auto pkg = constPkgDB.getPackageForContext(ctx)) {
+                        job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName);
+                    } else {
+                        // Don't transform, but raise an error on the first line.
+                        if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::UnpackagedFile)) {
+                            e.setHeader("File `{}` does not belong to a package; add a `__package.rb` file to one "
+                                        "of its parent directories",
+                                        ctx.file.data(sharedGs).path());
+                        }
+                    }
                 }
-            }
-        }
+                threadState.emplace_back(move(job));
+            },
+            [&](vector<ast::ParsedFile> &&threadState) -> void {
+                files.insert(files.end(), make_move_iterator(threadState.begin()),
+                             make_move_iterator(threadState.end()));
+            });
     }
 
     fast_sort(files, [](const auto &a, const auto &b) -> bool { return a.file < b.file; });

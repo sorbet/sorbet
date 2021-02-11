@@ -3,6 +3,7 @@
 #include "ast/Trees.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/concurrency/ConcurrentTask.h"
 #include "common/sort.h"
 #include "core/Error.h"
 #include "core/Names.h"
@@ -95,7 +96,6 @@ namespace {
 class ResolveConstantsWalk {
     friend class ResolveSanityCheckWalk;
 
-private:
     struct Nesting {
         const shared_ptr<Nesting> parent;
         const core::SymbolRef scope;
@@ -841,15 +841,6 @@ public:
         return depth;
     }
 
-    struct ResolveWalkResult {
-        vector<ResolutionItem> todo_;
-        vector<AncestorResolutionItem> todoAncestors_;
-        vector<ClassAliasResolutionItem> todoClassAliases_;
-        vector<TypeAliasResolutionItem> todoTypeAliases_;
-        vector<ClassMethodsResolutionItem> todoClassMethods_;
-        vector<ast::ParsedFile> trees;
-    };
-
     static bool locCompare(core::Loc lhs, core::Loc rhs) {
         if (lhs.file() < rhs.file()) {
             return true;
@@ -867,225 +858,206 @@ public:
     }
 
     static vector<ast::ParsedFile> resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
-                                                    WorkerPool &workers) {
-        Timer timeit(gs.tracer(), "resolver.resolve_constants");
-        const core::GlobalState &igs = gs;
-        auto resultq = make_shared<BlockingBoundedQueue<ResolveWalkResult>>(trees.size());
-        auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-        for (auto &tree : trees) {
-            fileq->push(move(tree), 1);
-        }
-
-        workers.multiplexJob("resolveConstantsWalk", [&igs, fileq, resultq]() {
-            Timer timeit(igs.tracer(), "ResolveConstantsWorker");
-            ResolveConstantsWalk constants;
-            vector<ast::ParsedFile> partiallyResolvedTrees;
-            ast::ParsedFile job;
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    core::Context ictx(igs, core::Symbols::root(), job.file);
-                    job.tree = ast::TreeMap::apply(ictx, constants, std::move(job.tree));
-                    partiallyResolvedTrees.emplace_back(move(job));
-                }
-            }
-            if (!partiallyResolvedTrees.empty()) {
-                ResolveWalkResult result{move(constants.todo_),
-                                         move(constants.todoAncestors_),
-                                         move(constants.todoClassAliases_),
-                                         move(constants.todoTypeAliases_),
-                                         move(constants.todoClassMethods_),
-                                         move(partiallyResolvedTrees)};
-                auto computedTreesCount = result.trees.size();
-                resultq->push(move(result), computedTreesCount);
-            }
-        });
-        trees.clear();
-        vector<ResolutionItem> todo;
-        vector<AncestorResolutionItem> todoAncestors;
-        vector<ClassAliasResolutionItem> todoClassAliases;
-        vector<TypeAliasResolutionItem> todoTypeAliases;
-        vector<ClassMethodsResolutionItem> todoClassMethods;
-
-        {
-            ResolveWalkResult threadResult;
-            for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-                if (result.gotItem()) {
-                    todo.insert(todo.end(), make_move_iterator(threadResult.todo_.begin()),
-                                make_move_iterator(threadResult.todo_.end()));
-                    todoAncestors.insert(todoAncestors.end(), make_move_iterator(threadResult.todoAncestors_.begin()),
-                                         make_move_iterator(threadResult.todoAncestors_.end()));
-                    todoClassAliases.insert(todoClassAliases.end(),
-                                            make_move_iterator(threadResult.todoClassAliases_.begin()),
-                                            make_move_iterator(threadResult.todoClassAliases_.end()));
-                    todoTypeAliases.insert(todoTypeAliases.end(),
-                                           make_move_iterator(threadResult.todoTypeAliases_.begin()),
-                                           make_move_iterator(threadResult.todoTypeAliases_.end()));
-                    todoClassMethods.insert(todoClassMethods.end(),
-                                            make_move_iterator(threadResult.todoClassMethods_.begin()),
-                                            make_move_iterator(threadResult.todoClassMethods_.end()));
-                    trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
-                                 make_move_iterator(threadResult.trees.end()));
-                }
-            }
-        }
-
-        fast_sort(todo, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.out->loc), core::Loc(rhs.file, rhs.out->loc));
-        });
-        fast_sort(todoAncestors, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.ancestor->loc), core::Loc(rhs.file, rhs.ancestor->loc));
-        });
-        fast_sort(todoClassAliases, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.rhs->loc), core::Loc(rhs.file, rhs.rhs->loc));
-        });
-        fast_sort(todoTypeAliases, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, (*lhs.rhs).loc()), core::Loc(rhs.file, (*rhs.rhs).loc()));
-        });
-        fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
-        });
-        fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool {
-            return locCompare(core::Loc(lhs.file, lhs.tree.loc()), core::Loc(rhs.file, rhs.tree.loc()));
-        });
-
-        Timer timeit1(gs.tracer(), "resolver.resolve_constants.fixed_point");
-
-        bool progress = true;
-        bool first = true; // we need to run at least once to force class aliases and type aliases
-
-        while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
-            first = false;
-            counterInc("resolve.constants.retries");
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
-                // This is an optimization. The order should not matter semantically
-                // We try to resolve most ancestors second because this makes us much more likely to resolve everything
-                // else.
-                int origSize = todoAncestors.size();
-                auto it =
-                    remove_if(todoAncestors.begin(), todoAncestors.end(), [&gs](AncestorResolutionItem &job) -> bool {
-                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                        auto resolved = resolveAncestorJob(ctx, job, false);
-                        if (resolved) {
-                            tryRegisterSealedSubclass(ctx, job);
-                        }
-                        return resolved;
-                    });
-                todoAncestors.erase(it, todoAncestors.end());
-                progress = (origSize != todoAncestors.size());
-                categoryCounterAdd("resolve.constants.ancestor", "retry", origSize - todoAncestors.size());
-            }
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
-                int origSize = todo.size();
-                auto it = remove_if(todo.begin(), todo.end(), [&gs](ResolutionItem &job) -> bool {
-                    core::Context ictx(gs, core::Symbols::root(), job.file);
-                    return resolveJob(ictx, job);
-                });
-                todo.erase(it, todo.end());
-                progress = progress || (origSize != todo.size());
-                categoryCounterAdd("resolve.constants.nonancestor", "retry", origSize - todo.size());
-            }
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
-                // This is an optimization. The order should not matter semantically
-                // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
-                // every item in todoClassAliases implicitly depends on an item in item in todo
-                // there would be no point in running the todoClassAliases step before todo
-
-                int origSize = todoClassAliases.size();
-                auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(),
-                                    [&gs](ClassAliasResolutionItem &it) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), it.file);
-                                        return resolveClassAliasJob(ctx, it);
-                                    });
-                todoClassAliases.erase(it, todoClassAliases.end());
-                progress = progress || (origSize != todoClassAliases.size());
-                categoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoClassAliases.size());
-            }
-            {
-                Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
-                int origSize = todoTypeAliases.size();
-                auto it = remove_if(todoTypeAliases.begin(), todoTypeAliases.end(),
-                                    [&gs](TypeAliasResolutionItem &it) -> bool {
-                                        core::MutableContext ctx(gs, core::Symbols::root(), it.file);
-                                        return resolveTypeAliasJob(ctx, it);
-                                    });
-                todoTypeAliases.erase(it, todoTypeAliases.end());
-                progress = progress || (origSize != todoTypeAliases.size());
-                categoryCounterAdd("resolve.constants.typealiases", "retry", origSize - todoTypeAliases.size());
-            }
-        }
-
-        {
-            Timer timeit(gs.tracer(), "resolver.mixes_in_class_methods");
-            for (auto &todo : todoClassMethods) {
-                resolveClassMethodsJob(gs, todo);
-            }
-            todoClassMethods.clear();
-        }
-
-        // We can no longer resolve new constants. All the code below reports errors
-
-        categoryCounterAdd("resolve.constants.nonancestor", "failure", todo.size());
-        categoryCounterAdd("resolve.constants.ancestor", "failure", todoAncestors.size());
-
-        /*
-         * Sort errors so we choose a deterministic error to report for each
-         * missing constant:
-         *
-         * - Visit the strictest files first. If we were to report an error in
-         *     an untyped file it would get suppressed, even if the same error
-         *     also appeared in a typed file.
-         *
-         * - Break ties within strictness levels by file ID. We populate file
-         *     IDs in the order we are given files on the command-line, so this
-         *     means users see the error on the first file they provided.
-         *
-         * - Within a file, report the first occurrence.
-         */
-        fast_sort(todo, [&gs](const auto &lhs, const auto &rhs) -> bool {
-            if (core::Loc(lhs.file, lhs.out->loc) == core::Loc(rhs.file, rhs.out->loc)) {
-                return constantDepth(lhs.out) < constantDepth(rhs.out);
-            }
-            return compareLocs(gs, core::Loc(lhs.file, lhs.out->loc), core::Loc(rhs.file, rhs.out->loc));
-        });
-
-        fast_sort(todoAncestors, [&gs](const auto &lhs, const auto &rhs) -> bool {
-            if (core::Loc(lhs.file, lhs.ancestor->loc) == core::Loc(rhs.file, rhs.ancestor->loc)) {
-                return constantDepth(lhs.ancestor) < constantDepth(rhs.ancestor);
-            }
-            return compareLocs(gs, core::Loc(lhs.file, lhs.ancestor->loc), core::Loc(rhs.file, rhs.ancestor->loc));
-        });
-
-        // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
-
-        {
-            Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");
-            int i = -1;
-            for (auto &job : todo) {
-                i++;
-                // Only give suggestions for the first 10, because fuzzy suggestions are expensive.
-                auto suggestDidYouMean = i < 10;
-                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                constantResolutionFailed(ctx, job, suggestDidYouMean);
-            }
-
-            for (auto &job : todoAncestors) {
-                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                auto resolved = resolveAncestorJob(ctx, job, true);
-                if (!resolved) {
-                    resolved = resolveAncestorJob(ctx, job, true);
-                    ENFORCE(resolved);
-                }
-            }
-        }
-
-        return trees;
-    }
+                                                    WorkerPool &workers);
 };
+
+struct ResolveConstantsTaskState {
+    ResolveConstantsWalk walk;
+    vector<ast::ParsedFile> trees;
+};
+
+vector<ast::ParsedFile> ResolveConstantsWalk::resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
+                                                               WorkerPool &workers) {
+    Timer timeit(gs.tracer(), "resolver.resolve_constants");
+    ConcurrentTask<ast::ParsedFile, ResolveConstantsTaskState> task("resolveConstantsWalk", "ResolveConstantsWorker",
+                                                                    trees.size(), gs.tracer(), workers);
+    for (auto &tree : trees) {
+        task.enqueue(move(tree));
+    }
+    trees.clear();
+
+    // Ensure that worker threads only use const access to GlobalState.
+    const core::GlobalState &igs = gs;
+    vector<ResolutionItem> todo;
+    vector<AncestorResolutionItem> todoAncestors;
+    vector<ClassAliasResolutionItem> todoClassAliases;
+    vector<TypeAliasResolutionItem> todoTypeAliases;
+    vector<ClassMethodsResolutionItem> todoClassMethods;
+    task.run(
+        [&igs](ast::ParsedFile &&job, ResolveConstantsTaskState &state) -> void {
+            core::Context ictx(igs, core::Symbols::root(), job.file);
+            job.tree = ast::TreeMap::apply(ictx, state.walk, std::move(job.tree));
+            state.trees.emplace_back(move(job));
+        },
+        [&](ResolveConstantsTaskState &&threadOutput) -> void {
+            auto &threadResult = threadOutput.walk;
+            todo.insert(todo.end(), make_move_iterator(threadResult.todo_.begin()),
+                        make_move_iterator(threadResult.todo_.end()));
+            todoAncestors.insert(todoAncestors.end(), make_move_iterator(threadResult.todoAncestors_.begin()),
+                                 make_move_iterator(threadResult.todoAncestors_.end()));
+            todoClassAliases.insert(todoClassAliases.end(), make_move_iterator(threadResult.todoClassAliases_.begin()),
+                                    make_move_iterator(threadResult.todoClassAliases_.end()));
+            todoTypeAliases.insert(todoTypeAliases.end(), make_move_iterator(threadResult.todoTypeAliases_.begin()),
+                                   make_move_iterator(threadResult.todoTypeAliases_.end()));
+            todoClassMethods.insert(todoClassMethods.end(), make_move_iterator(threadResult.todoClassMethods_.begin()),
+                                    make_move_iterator(threadResult.todoClassMethods_.end()));
+            trees.insert(trees.end(), make_move_iterator(threadOutput.trees.begin()),
+                         make_move_iterator(threadOutput.trees.end()));
+        });
+
+    fast_sort(todo, [](const auto &lhs, const auto &rhs) -> bool {
+        return locCompare(core::Loc(lhs.file, lhs.out->loc), core::Loc(rhs.file, rhs.out->loc));
+    });
+    fast_sort(todoAncestors, [](const auto &lhs, const auto &rhs) -> bool {
+        return locCompare(core::Loc(lhs.file, lhs.ancestor->loc), core::Loc(rhs.file, rhs.ancestor->loc));
+    });
+    fast_sort(todoClassAliases, [](const auto &lhs, const auto &rhs) -> bool {
+        return locCompare(core::Loc(lhs.file, lhs.rhs->loc), core::Loc(rhs.file, rhs.rhs->loc));
+    });
+    fast_sort(todoTypeAliases, [](const auto &lhs, const auto &rhs) -> bool {
+        return locCompare(core::Loc(lhs.file, (*lhs.rhs).loc()), core::Loc(rhs.file, (*rhs.rhs).loc()));
+    });
+    fast_sort(todoClassMethods, [](const auto &lhs, const auto &rhs) -> bool {
+        return locCompare(core::Loc(lhs.file, lhs.send->loc), core::Loc(rhs.file, rhs.send->loc));
+    });
+    fast_sort(trees, [](const auto &lhs, const auto &rhs) -> bool {
+        return locCompare(core::Loc(lhs.file, lhs.tree.loc()), core::Loc(rhs.file, rhs.tree.loc()));
+    });
+
+    Timer timeit1(gs.tracer(), "resolver.resolve_constants.fixed_point");
+
+    bool progress = true;
+    bool first = true; // we need to run at least once to force class aliases and type aliases
+
+    while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
+        first = false;
+        counterInc("resolve.constants.retries");
+        {
+            Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.ancestors");
+            // This is an optimization. The order should not matter semantically
+            // We try to resolve most ancestors second because this makes us much more likely to resolve everything
+            // else.
+            int origSize = todoAncestors.size();
+            auto it = remove_if(todoAncestors.begin(), todoAncestors.end(), [&gs](AncestorResolutionItem &job) -> bool {
+                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                auto resolved = resolveAncestorJob(ctx, job, false);
+                if (resolved) {
+                    tryRegisterSealedSubclass(ctx, job);
+                }
+                return resolved;
+            });
+            todoAncestors.erase(it, todoAncestors.end());
+            progress = (origSize != todoAncestors.size());
+            categoryCounterAdd("resolve.constants.ancestor", "retry", origSize - todoAncestors.size());
+        }
+        {
+            Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
+            int origSize = todo.size();
+            auto it = remove_if(todo.begin(), todo.end(), [&gs](ResolutionItem &job) -> bool {
+                core::Context ictx(gs, core::Symbols::root(), job.file);
+                return resolveJob(ictx, job);
+            });
+            todo.erase(it, todo.end());
+            progress = progress || (origSize != todo.size());
+            categoryCounterAdd("resolve.constants.nonancestor", "retry", origSize - todo.size());
+        }
+        {
+            Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.class_aliases");
+            // This is an optimization. The order should not matter semantically
+            // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
+            // every item in todoClassAliases implicitly depends on an item in item in todo
+            // there would be no point in running the todoClassAliases step before todo
+
+            int origSize = todoClassAliases.size();
+            auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(),
+                                [&gs](ClassAliasResolutionItem &it) -> bool {
+                                    core::MutableContext ctx(gs, core::Symbols::root(), it.file);
+                                    return resolveClassAliasJob(ctx, it);
+                                });
+            todoClassAliases.erase(it, todoClassAliases.end());
+            progress = progress || (origSize != todoClassAliases.size());
+            categoryCounterAdd("resolve.constants.aliases", "retry", origSize - todoClassAliases.size());
+        }
+        {
+            Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
+            int origSize = todoTypeAliases.size();
+            auto it =
+                remove_if(todoTypeAliases.begin(), todoTypeAliases.end(), [&gs](TypeAliasResolutionItem &it) -> bool {
+                    core::MutableContext ctx(gs, core::Symbols::root(), it.file);
+                    return resolveTypeAliasJob(ctx, it);
+                });
+            todoTypeAliases.erase(it, todoTypeAliases.end());
+            progress = progress || (origSize != todoTypeAliases.size());
+            categoryCounterAdd("resolve.constants.typealiases", "retry", origSize - todoTypeAliases.size());
+        }
+    }
+
+    {
+        Timer timeit(gs.tracer(), "resolver.mixes_in_class_methods");
+        for (auto &todo : todoClassMethods) {
+            resolveClassMethodsJob(gs, todo);
+        }
+        todoClassMethods.clear();
+    }
+
+    // We can no longer resolve new constants. All the code below reports errors
+
+    categoryCounterAdd("resolve.constants.nonancestor", "failure", todo.size());
+    categoryCounterAdd("resolve.constants.ancestor", "failure", todoAncestors.size());
+
+    /*
+     * Sort errors so we choose a deterministic error to report for each
+     * missing constant:
+     *
+     * - Visit the strictest files first. If we were to report an error in
+     *     an untyped file it would get suppressed, even if the same error
+     *     also appeared in a typed file.
+     *
+     * - Break ties within strictness levels by file ID. We populate file
+     *     IDs in the order we are given files on the command-line, so this
+     *     means users see the error on the first file they provided.
+     *
+     * - Within a file, report the first occurrence.
+     */
+    fast_sort(todo, [&gs](const auto &lhs, const auto &rhs) -> bool {
+        if (core::Loc(lhs.file, lhs.out->loc) == core::Loc(rhs.file, rhs.out->loc)) {
+            return constantDepth(lhs.out) < constantDepth(rhs.out);
+        }
+        return compareLocs(gs, core::Loc(lhs.file, lhs.out->loc), core::Loc(rhs.file, rhs.out->loc));
+    });
+
+    fast_sort(todoAncestors, [&gs](const auto &lhs, const auto &rhs) -> bool {
+        if (core::Loc(lhs.file, lhs.ancestor->loc) == core::Loc(rhs.file, rhs.ancestor->loc)) {
+            return constantDepth(lhs.ancestor) < constantDepth(rhs.ancestor);
+        }
+        return compareLocs(gs, core::Loc(lhs.file, lhs.ancestor->loc), core::Loc(rhs.file, rhs.ancestor->loc));
+    });
+
+    // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
+
+    {
+        Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");
+        int i = -1;
+        for (auto &job : todo) {
+            i++;
+            // Only give suggestions for the first 10, because fuzzy suggestions are expensive.
+            auto suggestDidYouMean = i < 10;
+            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+            constantResolutionFailed(ctx, job, suggestDidYouMean);
+        }
+
+        for (auto &job : todoAncestors) {
+            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+            auto resolved = resolveAncestorJob(ctx, job, true);
+            if (!resolved) {
+                resolved = resolveAncestorJob(ctx, job, true);
+                ENFORCE(resolved);
+            }
+        }
+    }
+
+    return trees;
+}
 
 class ResolveTypeMembersAndFieldsWalk {
     // A type_member, type_template, or T.type_alias that needs to have types
@@ -1146,18 +1118,6 @@ class ResolveTypeMembersAndFieldsWalk {
         core::LocOffsets toNameLoc;
         core::NameRef toName;
         core::NameRef fromName;
-    };
-
-    struct ResolveTypeMembersAndFieldsResult {
-        vector<ast::ParsedFile> files;
-        vector<ResolveAssignItem> todoAssigns;
-        vector<ResolveAttachedClassItem> todoAttachedClassItems;
-        vector<core::SymbolRef> todoUntypedResultTypes;
-        vector<ResolveCastItem> todoResolveCastItems;
-        vector<ResolveFieldItem> todoResolveFieldItems;
-        vector<ResolveStaticFieldItem> todoResolveStaticFieldItems;
-        vector<ResolveSimpleStaticFieldItem> todoResolveSimpleStaticFieldItems;
-        vector<ResolveMethodAliasItem> todoMethodAliasItems;
     };
 
     vector<ResolveAssignItem> todoAssigns_;
@@ -2126,181 +2086,164 @@ public:
         return tree;
     }
 
-    static vector<ast::ParsedFile> run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers) {
-        Timer timeit(gs.tracer(), "resolver.type_params");
+    static vector<ast::ParsedFile> run(core::GlobalState &gs, vector<ast::ParsedFile> trees, WorkerPool &workers);
+};
 
-        auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-        auto outputq = make_shared<BlockingBoundedQueue<ResolveTypeMembersAndFieldsResult>>(trees.size());
-        for (auto &tree : trees) {
-            inputq->push(move(tree), 1);
-        }
-        trees.clear();
+struct ResolveTypeMembersAndFieldsWalkState {
+    ResolveTypeMembersAndFieldsWalk walk;
+    vector<ast::ParsedFile> trees;
+};
 
-        workers.multiplexJob("resolveTypeParamsWalk", [&gs, inputq, outputq]() -> void {
-            Timer timeit(gs.tracer(), "resolveTypeParamsWalkWorker");
-            ResolveTypeMembersAndFieldsWalk walk;
-            ResolveTypeMembersAndFieldsResult output;
-            ast::ParsedFile job;
-            for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
-                if (result.gotItem()) {
-                    core::Context ctx(gs, core::Symbols::root(), job.file);
-                    job.tree = ast::TreeMap::apply(ctx, walk, std::move(job.tree));
-                    output.files.emplace_back(move(job));
-                }
-            }
-            if (!output.files.empty()) {
-                output.todoAssigns = move(walk.todoAssigns_);
-                output.todoAttachedClassItems = move(walk.todoAttachedClassItems_);
-                output.todoUntypedResultTypes = move(walk.todoUntypedResultTypes_);
-                output.todoResolveCastItems = move(walk.todoResolveCastItems_);
-                output.todoResolveFieldItems = move(walk.todoResolveFieldItems_);
-                output.todoResolveStaticFieldItems = move(walk.todoResolveStaticFieldItems_);
-                output.todoResolveSimpleStaticFieldItems = move(walk.todoResolveSimpleStaticFieldItems_);
-                output.todoMethodAliasItems = move(walk.todoMethodAliasItems_);
-                auto count = output.files.size();
-                outputq->push(move(output), count);
-            }
+vector<ast::ParsedFile> ResolveTypeMembersAndFieldsWalk::run(core::GlobalState &gs, vector<ast::ParsedFile> trees,
+                                                             WorkerPool &workers) {
+    Timer timeit(gs.tracer(), "resolver.type_params");
+
+    ConcurrentTask<ast::ParsedFile, ResolveTypeMembersAndFieldsWalkState> task(
+        "resolveTypeParamsWalk", "resolveTypeParamsWalkWorker", trees.size(), gs.tracer(), workers);
+    for (auto &tree : trees) {
+        task.enqueue(move(tree));
+    }
+    trees.clear();
+
+    vector<ast::ParsedFile> combinedFiles;
+    // The following items are not flattened; it'd be expensive to do so on large projects (they contain every
+    // field/method alias/etc for the entire workspace!)
+    vector<vector<ResolveAssignItem>> combinedTodoAssigns;
+    vector<vector<ResolveAttachedClassItem>> combinedTodoAttachedClassItems;
+    vector<vector<core::SymbolRef>> combinedTodoUntypedResultTypes;
+    vector<vector<ResolveCastItem>> combinedTodoResolveCastItems;
+    vector<vector<ResolveFieldItem>> combinedTodoResolveFieldItems;
+    vector<vector<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
+    vector<vector<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
+    vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
+
+    const core::GlobalState &igs = gs;
+    task.run(
+        [&igs](ast::ParsedFile &&job, ResolveTypeMembersAndFieldsWalkState &state) -> void {
+            core::Context ctx(igs, core::Symbols::root(), job.file);
+            job.tree = ast::TreeMap::apply(ctx, state.walk, std::move(job.tree));
+            state.trees.emplace_back(move(job));
+        },
+        [&](ResolveTypeMembersAndFieldsWalkState &&threadState) -> void {
+            auto &threadResult = threadState.walk;
+            combinedFiles.insert(combinedFiles.end(), make_move_iterator(threadState.trees.begin()),
+                                 make_move_iterator(threadState.trees.end()));
+            combinedTodoAssigns.emplace_back(move(threadResult.todoAssigns_));
+            combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems_));
+            combinedTodoUntypedResultTypes.emplace_back(move(threadResult.todoUntypedResultTypes_));
+            combinedTodoResolveCastItems.emplace_back(move(threadResult.todoResolveCastItems_));
+            combinedTodoResolveFieldItems.emplace_back(move(threadResult.todoResolveFieldItems_));
+            combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems_));
+            combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems_));
+            combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems_));
+            combinedTodoResolveStaticFieldItems.emplace_back(move(threadResult.todoResolveStaticFieldItems_));
+            combinedTodoResolveSimpleStaticFieldItems.emplace_back(
+                move(threadResult.todoResolveSimpleStaticFieldItems_));
+            combinedTodoMethodAliasItems.emplace_back(move(threadResult.todoMethodAliasItems_));
         });
 
-        vector<ast::ParsedFile> combinedFiles;
-        // The following items are not flattened; it'd be expensive to do so on large projects (they contain every
-        // field/method alias/etc for the entire workspace!)
-        vector<vector<ResolveAssignItem>> combinedTodoAssigns;
-        vector<vector<ResolveAttachedClassItem>> combinedTodoAttachedClassItems;
-        vector<vector<core::SymbolRef>> combinedTodoUntypedResultTypes;
-        vector<vector<ResolveCastItem>> combinedTodoResolveCastItems;
-        vector<vector<ResolveFieldItem>> combinedTodoResolveFieldItems;
-        vector<vector<ResolveStaticFieldItem>> combinedTodoResolveStaticFieldItems;
-        vector<vector<ResolveSimpleStaticFieldItem>> combinedTodoResolveSimpleStaticFieldItems;
-        vector<vector<ResolveMethodAliasItem>> combinedTodoMethodAliasItems;
+    // Put files into a consistent order for subsequent passes.
+    fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
 
-        {
-            ResolveTypeMembersAndFieldsResult threadResult;
-            for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-                 !result.done();
-                 result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-                if (result.gotItem()) {
-                    combinedFiles.insert(combinedFiles.end(), make_move_iterator(threadResult.files.begin()),
-                                         make_move_iterator(threadResult.files.end()));
-                    combinedTodoAssigns.emplace_back(move(threadResult.todoAssigns));
-                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
-                    combinedTodoUntypedResultTypes.emplace_back(move(threadResult.todoUntypedResultTypes));
-                    combinedTodoResolveCastItems.emplace_back(move(threadResult.todoResolveCastItems));
-                    combinedTodoResolveFieldItems.emplace_back(move(threadResult.todoResolveFieldItems));
-                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
-                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
-                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
-                    combinedTodoResolveStaticFieldItems.emplace_back(move(threadResult.todoResolveStaticFieldItems));
-                    combinedTodoResolveSimpleStaticFieldItems.emplace_back(
-                        move(threadResult.todoResolveSimpleStaticFieldItems));
-                    combinedTodoMethodAliasItems.emplace_back(move(threadResult.todoMethodAliasItems));
-                }
-            }
+    for (auto &threadTodo : combinedTodoUntypedResultTypes) {
+        for (auto sym : threadTodo) {
+            sym.data(gs)->resultType = core::Types::untypedUntracked();
         }
-
-        // Put files into a consistent order for subsequent passes.
-        fast_sort(combinedFiles, [](auto &a, auto &b) -> bool { return a.file.id() < b.file.id(); });
-
-        for (auto &threadTodo : combinedTodoUntypedResultTypes) {
-            for (auto sym : threadTodo) {
-                sym.data(gs)->resultType = core::Types::untypedUntracked();
-            }
-        }
-
-        vector<bool> resolvedAttachedClasses(gs.classAndModulesUsed());
-        for (auto &threadTodo : combinedTodoAttachedClassItems) {
-            for (auto &job : threadTodo) {
-                core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
-            }
-        }
-
-        // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
-        // (which is a static field). This is stronger than we need (we really only need the enum types)
-        // but there's no particular reason to delay here.
-        for (auto &threadTodo : combinedTodoResolveSimpleStaticFieldItems) {
-            for (auto &job : threadTodo) {
-                job.sym.data(gs)->resultType = job.resultType;
-            }
-        }
-
-        // loop over any out-of-order type_member/type_alias references
-        bool progress = true;
-        while (progress && !combinedTodoAssigns.empty()) {
-            progress = false;
-            auto it = std::remove_if(
-                combinedTodoAssigns.begin(), combinedTodoAssigns.end(), [&](vector<ResolveAssignItem> &threadTodos) {
-                    auto origSize = threadTodos.size();
-                    auto threadTodoIt =
-                        std::remove_if(threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
-                            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                            return resolveJob(ctx, job, resolvedAttachedClasses);
-                        });
-                    threadTodos.erase(threadTodoIt, threadTodos.end());
-                    progress = progress || threadTodos.size() != origSize;
-                    return threadTodos.empty();
-                });
-            combinedTodoAssigns.erase(it, combinedTodoAssigns.end());
-        }
-
-        // If there was a step with no progress, there's a cycle in the
-        // type member/alias declarations. This is handled by reporting an error
-        // at `typed: false`, and marking all of the involved type
-        // members/aliases as T.untyped.
-        if (!combinedTodoAssigns.empty()) {
-            for (auto &threadTodos : combinedTodoAssigns) {
-                for (auto &job : threadTodos) {
-                    auto data = job.lhs.data(gs);
-
-                    if (data->isTypeMember()) {
-                        data->resultType = core::make_type<core::LambdaParam>(job.lhs, core::Types::untypedUntracked(),
-                                                                              core::Types::untypedUntracked());
-                    } else {
-                        data->resultType = core::Types::untypedUntracked();
-                    }
-
-                    if (auto e = gs.beginError(data->loc(), core::errors::Resolver::TypeMemberCycle)) {
-                        auto flavor = data->isTypeAlias() ? "alias" : "member";
-                        e.setHeader("Type {} `{}` is involved in a cycle", flavor, data->show(gs));
-                    }
-                }
-            }
-        }
-
-        // Compute the resultType of all classes.
-        computeExternalTypes(gs);
-
-        // Resolve the remaining casts and fields.
-        for (auto &threadTodos : combinedTodoResolveCastItems) {
-            for (auto &job : threadTodos) {
-                core::Context ctx(gs, job.owner, job.file);
-                resolveCastItem(ctx, job);
-            }
-        }
-        for (auto &threadTodos : combinedTodoResolveFieldItems) {
-            for (auto &job : threadTodos) {
-                core::MutableContext ctx(gs, job.owner, job.file);
-                resolveField(ctx, job);
-            }
-        }
-        for (auto &threadTodos : combinedTodoResolveStaticFieldItems) {
-            for (auto &job : threadTodos) {
-                core::Context ctx(gs, job.sym, job.file);
-                if (auto resultType = resolveStaticField(ctx, job)) {
-                    job.sym.data(gs)->resultType = resultType;
-                }
-            }
-        }
-        for (auto &threadTodos : combinedTodoMethodAliasItems) {
-            for (auto &job : threadTodos) {
-                core::MutableContext ctx(gs, job.owner, job.file);
-                resolveMethodAlias(ctx, job);
-            }
-        }
-
-        return combinedFiles;
     }
-};
+
+    vector<bool> resolvedAttachedClasses(gs.classAndModulesUsed());
+    for (auto &threadTodo : combinedTodoAttachedClassItems) {
+        for (auto &job : threadTodo) {
+            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+            resolveAttachedClass(ctx, job.klass, resolvedAttachedClasses);
+        }
+    }
+
+    // Resolve simple field declarations. Required so that `type_alias` can refer to an enum value type
+    // (which is a static field). This is stronger than we need (we really only need the enum types)
+    // but there's no particular reason to delay here.
+    for (auto &threadTodo : combinedTodoResolveSimpleStaticFieldItems) {
+        for (auto &job : threadTodo) {
+            job.sym.data(gs)->resultType = job.resultType;
+        }
+    }
+
+    // loop over any out-of-order type_member/type_alias references
+    bool progress = true;
+    while (progress && !combinedTodoAssigns.empty()) {
+        progress = false;
+        auto it = std::remove_if(
+            combinedTodoAssigns.begin(), combinedTodoAssigns.end(), [&](vector<ResolveAssignItem> &threadTodos) {
+                auto origSize = threadTodos.size();
+                auto threadTodoIt =
+                    std::remove_if(threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
+                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                        return resolveJob(ctx, job, resolvedAttachedClasses);
+                    });
+                threadTodos.erase(threadTodoIt, threadTodos.end());
+                progress = progress || threadTodos.size() != origSize;
+                return threadTodos.empty();
+            });
+        combinedTodoAssigns.erase(it, combinedTodoAssigns.end());
+    }
+
+    // If there was a step with no progress, there's a cycle in the
+    // type member/alias declarations. This is handled by reporting an error
+    // at `typed: false`, and marking all of the involved type
+    // members/aliases as T.untyped.
+    if (!combinedTodoAssigns.empty()) {
+        for (auto &threadTodos : combinedTodoAssigns) {
+            for (auto &job : threadTodos) {
+                auto data = job.lhs.data(gs);
+
+                if (data->isTypeMember()) {
+                    data->resultType = core::make_type<core::LambdaParam>(job.lhs, core::Types::untypedUntracked(),
+                                                                          core::Types::untypedUntracked());
+                } else {
+                    data->resultType = core::Types::untypedUntracked();
+                }
+
+                if (auto e = gs.beginError(data->loc(), core::errors::Resolver::TypeMemberCycle)) {
+                    auto flavor = data->isTypeAlias() ? "alias" : "member";
+                    e.setHeader("Type {} `{}` is involved in a cycle", flavor, data->show(gs));
+                }
+            }
+        }
+    }
+
+    // Compute the resultType of all classes.
+    computeExternalTypes(gs);
+
+    // Resolve the remaining casts and fields.
+    for (auto &threadTodos : combinedTodoResolveCastItems) {
+        for (auto &job : threadTodos) {
+            core::Context ctx(gs, job.owner, job.file);
+            resolveCastItem(ctx, job);
+        }
+    }
+    for (auto &threadTodos : combinedTodoResolveFieldItems) {
+        for (auto &job : threadTodos) {
+            core::MutableContext ctx(gs, job.owner, job.file);
+            resolveField(ctx, job);
+        }
+    }
+    for (auto &threadTodos : combinedTodoResolveStaticFieldItems) {
+        for (auto &job : threadTodos) {
+            core::Context ctx(gs, job.sym, job.file);
+            if (auto resultType = resolveStaticField(ctx, job)) {
+                job.sym.data(gs)->resultType = resultType;
+            }
+        }
+    }
+    for (auto &threadTodos : combinedTodoMethodAliasItems) {
+        for (auto &job : threadTodos) {
+            core::MutableContext ctx(gs, job.owner, job.file);
+            resolveMethodAlias(ctx, job);
+        }
+    }
+
+    return combinedFiles;
+}
 
 class ResolveSignaturesWalk {
 public:
@@ -2329,11 +2272,6 @@ public:
         core::FileRef file;
         vector<ResolveSignatureJob> sigs;
         vector<ResolveMultiSignatureJob> multiSigs;
-    };
-
-    struct ResolveSignaturesWalkResult {
-        vector<ResolveFileSignatures> fileSigs;
-        vector<ast::ParsedFile> trees;
     };
 
     vector<ResolveSignatureJob> signatureJobs;
@@ -2871,52 +2809,43 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     return result;
 }
 
+struct ResolveSignaturesWalkState {
+    ResolveSignaturesWalk walk;
+    vector<ResolveSignaturesWalk::ResolveFileSignatures> fileSigs;
+    vector<ast::ParsedFile> trees;
+};
+
 ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                   WorkerPool &workers) {
     Timer timeit(gs.tracer(), "resolver.sigs_vars_and_flatten");
-    auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
-    auto outputq = make_shared<BlockingBoundedQueue<ResolveSignaturesWalk::ResolveSignaturesWalkResult>>(trees.size());
+
+    ConcurrentTask<ast::ParsedFile, ResolveSignaturesWalkState> task(
+        "resolveSignaturesWalk", "resolveSignaturesWalkWorker", trees.size(), gs.tracer(), workers);
 
     for (auto &tree : trees) {
-        inputq->push(move(tree), 1);
+        task.enqueue(move(tree));
     }
 
-    workers.multiplexJob("resolveSignaturesWalk", [&gs, inputq, outputq]() -> void {
-        ResolveSignaturesWalk walk;
-        ResolveSignaturesWalk::ResolveSignaturesWalkResult output;
-        ast::ParsedFile job;
-        for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
-            if (result.gotItem()) {
-                core::Context ctx(gs, core::Symbols::root(), job.file);
-                job.tree = ast::ShallowMap::apply(ctx, walk, std::move(job.tree));
-                if (!walk.signatureJobs.empty() || !walk.multiSignatureJobs.empty()) {
-                    output.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
-                        job.file, move(walk.signatureJobs), move(walk.multiSignatureJobs)});
-                }
-                output.trees.emplace_back(move(job));
-            }
-        }
-        if (!output.trees.empty()) {
-            auto count = output.trees.size();
-            outputq->push(move(output), count);
-        }
-    });
+    const core::GlobalState &igs = gs;
 
     vector<ResolveSignaturesWalk::ResolveFileSignatures> combinedFileJobs;
     vector<ast::ParsedFile> combinedTrees;
-    {
-        ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
-        for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
-             !result.done();
-             result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
-            if (result.gotItem()) {
-                combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadResult.trees.begin()),
-                                     make_move_iterator(threadResult.trees.end()));
-                combinedFileJobs.insert(combinedFileJobs.end(), make_move_iterator(threadResult.fileSigs.begin()),
-                                        make_move_iterator(threadResult.fileSigs.end()));
+    task.run(
+        [&igs](ast::ParsedFile &&job, ResolveSignaturesWalkState &threadState) -> void {
+            core::Context ctx(igs, core::Symbols::root(), job.file);
+            job.tree = ast::ShallowMap::apply(ctx, threadState.walk, std::move(job.tree));
+            if (!threadState.walk.signatureJobs.empty() || !threadState.walk.multiSignatureJobs.empty()) {
+                threadState.fileSigs.emplace_back(ResolveSignaturesWalk::ResolveFileSignatures{
+                    job.file, move(threadState.walk.signatureJobs), move(threadState.walk.multiSignatureJobs)});
             }
-        }
-    }
+            threadState.trees.emplace_back(move(job));
+        },
+        [&](ResolveSignaturesWalkState &&threadState) -> void {
+            combinedTrees.insert(combinedTrees.end(), make_move_iterator(threadState.trees.begin()),
+                                 make_move_iterator(threadState.trees.end()));
+            combinedFileJobs.insert(combinedFileJobs.end(), make_move_iterator(threadState.fileSigs.begin()),
+                                    make_move_iterator(threadState.fileSigs.end()));
+        });
 
     // We need to define sigs in a stable order since, when there are conflicting sigs in multiple RBI files, the last
     // sig 'wins'.
