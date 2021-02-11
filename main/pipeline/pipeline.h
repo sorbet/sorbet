@@ -23,6 +23,16 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
 
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files);
 
+/**
+ * This routine is optimized for the editor/LSP use case, which keeps trees compressed in-memory:
+ * - If an AST is in the cache, appends the tree to IndexResult.compressedTrees.
+ * - Otherwise, it indexes the file and stores the raw AST into trees.
+ * In the common case, ~all ASTs are in the cache so this function ends up doing a bunch of memcpys.
+ */
+IndexResult indexWithNoDecompression(std::unique_ptr<core::GlobalState> gs, std::vector<core::FileRef> &files,
+                                     const options::Options &opts, WorkerPool &workers,
+                                     const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
+
 std::vector<ast::ParsedFile> index(std::unique_ptr<core::GlobalState> &gs, std::vector<core::FileRef> files,
                                    const options::Options &opts, WorkerPool &workers,
                                    const std::unique_ptr<const OwnedKeyValueStore> &kvstore);

@@ -452,8 +452,7 @@ struct IndexThreadResultPack {
 
 IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const options::Options &opts,
                               shared_ptr<BlockingBoundedQueue<IndexThreadResultPack>> input,
-                              const unique_ptr<const OwnedKeyValueStore> &kvstore, bool compressAllTrees,
-                              WorkerPool &workers) {
+                              const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     ProgressIndicator progress(opts.showProgress, "Indexing", input->bound);
     IndexResult ret;
     {
@@ -492,55 +491,12 @@ IndexResult mergeIndexResults(const shared_ptr<core::GlobalState> cgs, const opt
         }
     }
 
-    if (compressAllTrees && !ret.trees.empty()) {
-        Timer timeit(cgs->tracer(), "compressIndexResults");
-        // Compress trees!
-        auto resultq = make_shared<BlockingBoundedQueue<vector<ast::CompressedParsedFile>>>(ret.trees.size());
-        auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(ret.trees.size());
-        for (auto &tree : ret.trees) {
-            fileq->push(move(tree), 1);
-        }
-        ret.trees.clear();
-
-        workers.multiplexJob("compressFiles", [cgs, fileq, resultq]() {
-            Timer timeit(cgs->tracer(), "compressFilesWorker");
-            vector<ast::CompressedParsedFile> compressedFiles;
-            size_t compressedFileCount = 0;
-
-            {
-                ast::ParsedFile job;
-                for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                    if (result.gotItem()) {
-                        compressedFileCount++;
-                        auto file = job.file;
-                        compressedFiles.emplace_back(ast::CompressedParsedFile{
-                            make_unique<vector<u1>>(core::serialize::Serializer::storeAST(move(job))), file});
-                    }
-                }
-            }
-
-            if (!compressedFiles.empty()) {
-                resultq->push(move(compressedFiles), compressedFileCount);
-            }
-        });
-
-        vector<ast::CompressedParsedFile> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer());
-             !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), cgs->tracer())) {
-            if (result.gotItem()) {
-                ret.compressedTrees.insert(ret.compressedTrees.end(), make_move_iterator(threadResult.begin()),
-                                           make_move_iterator(threadResult.end()));
-            }
-        }
-    }
-
     return ret;
 }
 
 IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vector<core::FileRef> &files,
                                const options::Options &opts, WorkerPool &workers,
-                               const unique_ptr<const OwnedKeyValueStore> &kvstore, bool compressAllTrees) {
+                               const unique_ptr<const OwnedKeyValueStore> &kvstore, bool decompressAllTrees) {
     Timer timeit(baseGs->tracer(), "indexSuppliedFiles");
     auto resultq = make_shared<BlockingBoundedQueue<IndexThreadResultPack>>(files.size());
     auto fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(files.size());
@@ -548,7 +504,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         fileq->push(move(file), 1);
     }
 
-    workers.multiplexJob("indexSuppliedFiles", [baseGs, &opts, fileq, resultq, &kvstore, compressAllTrees]() {
+    workers.multiplexJob("indexSuppliedFiles", [baseGs, &opts, fileq, resultq, &kvstore, decompressAllTrees]() {
         Timer timeit(baseGs->tracer(), "indexSuppliedFilesWorker");
         unique_ptr<core::GlobalState> localGs = baseGs->deepCopy();
         IndexThreadResultPack threadResult;
@@ -559,7 +515,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
                 if (result.gotItem()) {
                     core::FileRef file = job;
                     readFileWithStrictnessOverrides(localGs, file, opts, kvstore);
-                    if (compressAllTrees) {
+                    if (!decompressAllTrees) {
                         if (auto tree = fetchCompressedTreeFromCache(*localGs, file, kvstore)) {
                             threadResult.res.compressedTrees.emplace_back(ast::CompressedParsedFile{move(tree), file});
                             continue;
@@ -569,8 +525,7 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
                         continue;
                     }
 
-                    // Tree not in cache; needs to be indexed.
-                    // N.B.: If `compressAllTrees` is `true`, then this tree will be compressed in `mergeIndexResults`.
+                    // Tree not in cache; needs to be parsed+indexed.
                     auto parsedFile = indexOne(opts, *localGs, file);
                     threadResult.res.trees.emplace_back(move(parsedFile));
                 }
@@ -585,7 +540,13 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
         }
     });
 
-    return mergeIndexResults(baseGs, opts, resultq, kvstore, compressAllTrees, workers);
+    return mergeIndexResults(baseGs, opts, resultq, kvstore);
+}
+
+IndexResult indexWithNoDecompression(std::unique_ptr<core::GlobalState> gs, std::vector<core::FileRef> &files,
+                                     const options::Options &opts, WorkerPool &workers,
+                                     const std::unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    return indexSuppliedFiles(move(gs), files, opts, workers, kvstore, /* decompressAllTrees */ false);
 }
 
 vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
@@ -614,50 +575,13 @@ vector<ast::ParsedFile> index(unique_ptr<core::GlobalState> &gs, vector<core::Fi
         }
         ENFORCE(files.size() == ret.size());
     } else {
-        auto pass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore, /* compressAllTrees */ false);
+        auto pass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore, /* decompressAllTrees */ true);
         gs = move(pass.gs);
         ret = move(pass.trees);
         ENFORCE_NO_TIMER(pass.compressedTrees.empty());
     }
 
     fast_sort(ret, [](ast::ParsedFile const &a, ast::ParsedFile const &b) { return a.file < b.file; });
-    return ret;
-}
-
-vector<ast::CompressedParsedFile> indexAndCompress(unique_ptr<core::GlobalState> &gs, vector<core::FileRef> files,
-                                                   const options::Options &opts, WorkerPool &workers,
-                                                   const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    Timer timeit(gs->tracer(), "index");
-    vector<ast::CompressedParsedFile> ret;
-
-    if (opts.stopAfterPhase == options::Phase::INIT) {
-        return ret;
-    }
-
-    gs->sanityCheck();
-
-    if (files.size() < 3) {
-        // Run singlethreaded if only using 2 files
-        for (auto file : files) {
-            readFileWithStrictnessOverrides(gs, file, opts, kvstore);
-            if (auto tree = fetchCompressedTreeFromCache(*gs, file, kvstore)) {
-                ret.emplace_back(ast::CompressedParsedFile{move(tree), file});
-            } else {
-                auto parsedFile = indexOne(opts, *gs, file);
-                auto compressedTree = make_unique<vector<u1>>(core::serialize::Serializer::storeAST(parsedFile));
-                ret.emplace_back(ast::CompressedParsedFile{move(compressedTree), file});
-            }
-        }
-        ENFORCE(files.size() == ret.size());
-    } else {
-        auto pass = indexSuppliedFiles(move(gs), files, opts, workers, kvstore, /* compressAllTrees */ true);
-        gs = move(pass.gs);
-        ENFORCE_NO_TIMER(pass.trees.empty());
-        ret = move(pass.compressedTrees);
-    }
-
-    fast_sort(ret,
-              [](ast::CompressedParsedFile const &a, ast::CompressedParsedFile const &b) { return a.file < b.file; });
     return ret;
 }
 

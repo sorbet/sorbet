@@ -162,7 +162,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     initialGS->errorQueue = make_shared<core::ErrorQueue>(savedErrorQueue->logger, savedErrorQueue->tracer,
                                                           make_shared<core::NullFlusher>());
 
-    vector<ast::CompressedParsedFile> indexed;
+    vector<ast::ParsedFile> indexed;
     Timer timeit(config->logger, "initial_index");
     ShowOperation op(*config, ShowOperation::Kind::Indexing);
     vector<core::FileRef> inputFiles;
