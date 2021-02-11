@@ -9,6 +9,7 @@
 #include "core/Unfreeze.h"
 #include "core/lsp/PreemptionTaskManager.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "core/serialize/serialize.h"
 #include "main/lsp/DefLocSaver.h"
 #include "main/lsp/ErrorFlusherLSP.h"
 #include "main/lsp/ErrorReporter.h"
@@ -247,8 +248,9 @@ vector<core::FileRef> LSPTypechecker::runFastPath(LSPFileUpdates &updates, Worke
     for (auto &f : subset) {
         // TODO(jvilk): We don't need to re-index files that didn't change.
         auto t = pipeline::indexOne(config->opts, *gs, f);
-        updatedIndexed.emplace_back(ast::ParsedFile{t.tree.deepCopy(), t.file});
-        updates.updatedFinalGSFileIndexes.push_back(move(t));
+        updates.updatedFinalGSFileIndexes.emplace_back(
+            ast::CompressedParsedFile{make_unique<vector<u1>>(core::serialize::Serializer::storeAST(t)), t.file});
+        updatedIndexed.emplace_back(move(t));
     }
 
     ENFORCE(gs->lspQuery.isEmpty());
@@ -284,10 +286,9 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
         fileq->push(move(copy), 1);
     }
 
-    const auto &epochManager = *gs->epochManager;
     shared_ptr<BlockingBoundedQueue<vector<ast::ParsedFile>>> resultq =
         make_shared<BlockingBoundedQueue<vector<ast::ParsedFile>>>(indexed.size());
-    workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &epochManager]() {
+    workers.multiplexJob("copyParsedFiles", [fileq, resultq, &indexed = this->indexed, &ignore, &gs = this->gs]() {
         vector<ast::ParsedFile> threadResult;
         int processedByThread = 0;
         int job;
@@ -296,13 +297,12 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
                 if (result.gotItem()) {
                     processedByThread++;
 
-                    // Stop if typechecking was canceled.
-                    if (!epochManager.wasTypecheckingCanceled()) {
-                        const auto &tree = indexed[job];
-                        // Note: indexed entries for payload files don't have any contents.
-                        if (tree.tree && !ignore.contains(tree.file.id())) {
-                            threadResult.emplace_back(ast::ParsedFile{tree.tree.deepCopy(), tree.file});
-                        }
+                    // TODO: Stop if typechecking was canceled.
+                    const auto &tree = indexed[job];
+                    // Note: indexed entries for payload files don't have any contents.
+                    if (tree.tree && !ignore.contains(tree.file.id())) {
+                        threadResult.emplace_back(
+                            ast::ParsedFile{core::serialize::Serializer::loadAST(*gs, tree.tree->data()), tree.file});
                     }
                 }
             }
@@ -319,12 +319,12 @@ bool LSPTypechecker::copyIndexed(WorkerPool &workers, const UnorderedSet<int> &i
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
             if (result.gotItem()) {
                 for (auto &copy : threadResult) {
-                    out.push_back(move(copy));
+                    out.emplace_back(move(copy));
                 }
             }
         }
     }
-    return !epochManager.wasTypecheckingCanceled();
+    return !gs->epochManager->wasTypecheckingCanceled();
 }
 
 bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bool cancelable) {
@@ -360,11 +360,13 @@ bool LSPTypechecker::runSlowPath(LSPFileUpdates updates, WorkerPool &workers, bo
                 auto pair = updateFile(move(finalGS), file, config->opts);
                 finalGS = move(pair.first);
                 auto &ast = pair.second;
+                ast::CompressedParsedFile compressed{nullptr, ast.file};
                 if (ast.tree) {
-                    indexedCopies.emplace_back(ast::ParsedFile{ast.tree.deepCopy(), ast.file});
+                    compressed.tree = make_unique<vector<u1>>(core::serialize::Serializer::storeAST(ast));
                     updatedFiles.insert(ast.file.id());
+                    indexedCopies.emplace_back(move(ast));
                 }
-                updates.updatedFinalGSFileIndexes.push_back(move(ast));
+                updates.updatedFinalGSFileIndexes.push_back(move(compressed));
             }
         }
 
@@ -553,7 +555,7 @@ LSPFileUpdates LSPTypechecker::getNoopUpdate(std::vector<core::FileRef> frefs) c
         ENFORCE(fref.id() < indexed.size());
         auto &index = indexed[fref.id()];
         // Note: `index.tree` can be null if the file is a stdlib file.
-        noop.updatedFileIndexes.push_back({(index.tree ? index.tree.deepCopy() : nullptr), index.file});
+        noop.updatedFileIndexes.push_back({(index.tree ? make_unique<vector<u1>>(*index.tree) : nullptr), index.file});
         noop.updatedFiles.push_back(gs->getFiles()[fref.id()]);
     }
     return noop;
@@ -568,14 +570,22 @@ std::vector<std::unique_ptr<core::Error>> LSPTypechecker::retypecheck(vector<cor
     return errorCollector->drainErrors();
 }
 
-const ast::ParsedFile &LSPTypechecker::getIndexed(core::FileRef fref) const {
+ast::ParsedFile LSPTypechecker::getIndexed(core::FileRef fref) const {
     const auto id = fref.id();
     auto treeFinalGS = indexedFinalGS.find(id);
+    const ast::CompressedParsedFile *compressed = nullptr;
     if (treeFinalGS != indexedFinalGS.end()) {
-        return treeFinalGS->second;
+        compressed = &treeFinalGS->second;
+    } else {
+        ENFORCE(id < indexed.size());
+        compressed = &indexed[id];
     }
-    ENFORCE(id < indexed.size());
-    return indexed[id];
+
+    if (!compressed->tree) {
+        return ast::ParsedFile{nullptr, compressed->file};
+    }
+
+    return ast::ParsedFile{core::serialize::Serializer::loadAST(*gs, compressed->tree->data()), compressed->file};
 }
 
 vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> &frefs) const {
@@ -589,9 +599,9 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
             continue;
         }
 
-        auto &indexed = getIndexed(fref);
+        auto indexed = getIndexed(fref);
         if (indexed.tree) {
-            updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+            updatedIndexed.emplace_back(move(indexed));
         }
     }
 
@@ -600,8 +610,7 @@ vector<ast::ParsedFile> LSPTypechecker::getResolved(const vector<core::FileRef> 
         for (u4 i = 1; i < gs->filesUsed(); i++) {
             core::FileRef fref(i);
             if (fref.data(*gs).sourceType == core::File::Type::Package) {
-                auto &indexed = getIndexed(fref);
-                updatedIndexed.emplace_back(ast::ParsedFile{indexed.tree.deepCopy(), indexed.file});
+                updatedIndexed.emplace_back(getIndexed(fref));
             }
         }
     }
@@ -642,7 +651,7 @@ LSPQueryResult LSPTypecheckerDelegate::query(const core::lsp::Query &q,
     return typechecker.query(q, filesForQuery, workers);
 }
 
-const ast::ParsedFile &LSPTypecheckerDelegate::getIndexed(core::FileRef fref) const {
+ast::ParsedFile LSPTypecheckerDelegate::getIndexed(core::FileRef fref) const {
     return typechecker.getIndexed(fref);
 }
 

@@ -281,9 +281,9 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
 }
 
 vector<ast::CompressedParsedFile>
-indexCompressAndComputeFileHashes(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &opts,
-                                  spdlog::logger &logger, vector<core::FileRef> &files, WorkerPool &workers,
-                                  const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+Hashing::indexCompressAndComputeFileHashes(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &opts,
+                                           spdlog::logger &logger, vector<core::FileRef> &files, WorkerPool &workers,
+                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     auto result = realmain::pipeline::indexWithNoDecompression(move(gs), files, opts, workers, kvstore);
 
     ENFORCE_NO_TIMER(result.compressedTrees.size() + result.trees.size() == files.size());

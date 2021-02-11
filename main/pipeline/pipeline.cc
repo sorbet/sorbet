@@ -546,6 +546,9 @@ IndexResult indexSuppliedFiles(const shared_ptr<core::GlobalState> &baseGs, vect
 IndexResult indexWithNoDecompression(std::unique_ptr<core::GlobalState> gs, std::vector<core::FileRef> &files,
                                      const options::Options &opts, WorkerPool &workers,
                                      const std::unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    if (files.empty()) {
+        return IndexResult{move(gs), {}, {}};
+    }
     return indexSuppliedFiles(move(gs), files, opts, workers, kvstore, /* decompressAllTrees */ false);
 }
 
@@ -1096,7 +1099,15 @@ ast::ParsedFilesOrCancelled typecheck(unique_ptr<core::GlobalState> &gs, vector<
     }
 }
 
+namespace {
+struct CacheTreeJob {
+    bool compressed;
+    size_t index;
+};
+} // namespace
+
 bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector<ast::ParsedFile> &parsedFiles,
+                        vector<ast::CompressedParsedFile> &compressedParsedFiles,
                         const unique_ptr<OwnedKeyValueStore> &kvstore) {
     if (kvstore == nullptr) {
         return false;
@@ -1105,17 +1116,19 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     Timer timeit(gs.tracer(), "pipeline::cacheTreesAndFiles");
 
     // Compress files in parallel.
-    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile *>>(parsedFiles.size());
-    for (auto &parsedFile : parsedFiles) {
-        auto ptr = &parsedFile;
-        fileq->push(move(ptr), 1);
+    auto fileq = make_shared<ConcurrentBoundedQueue<CacheTreeJob>>(parsedFiles.size() + compressedParsedFiles.size());
+    for (size_t i = 0; i < parsedFiles.size(); i++) {
+        fileq->push(CacheTreeJob{false, i}, 1);
+    }
+    for (size_t i = 0; i < compressedParsedFiles.size(); i++) {
+        fileq->push(CacheTreeJob{true, i}, 1);
     }
 
     auto resultq = make_shared<BlockingBoundedQueue<vector<pair<string, vector<u1>>>>>(parsedFiles.size());
-    workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &gs]() {
+    workers.multiplexJob("compressTreesAndFiles", [fileq, resultq, &parsedFiles, &compressedParsedFiles, &gs]() {
         vector<pair<string, vector<u1>>> threadResult;
         int processedByThread = 0;
-        ast::ParsedFile *job = nullptr;
+        CacheTreeJob job;
         unique_ptr<Timer> timeit;
         {
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
@@ -1125,15 +1138,24 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
                         timeit = make_unique<Timer>(gs.tracer(), "cacheTreesAndFilesWorker");
                     }
 
-                    if (!job->file.exists()) {
+                    core::FileRef fref;
+                    if (job.compressed) {
+                        fref = compressedParsedFiles[job.index].file;
+                    } else {
+                        fref = parsedFiles[job.index].file;
+                    }
+
+                    if (!fref.exists()) {
                         continue;
                     }
 
-                    auto &file = job->file.data(gs);
+                    auto &file = fref.data(gs);
                     if (!file.cached && !file.hasParseErrors) {
                         threadResult.emplace_back(fileKey(file), core::serialize::Serializer::storeFile(file));
-                        threadResult.emplace_back(treeKey(file), core::serialize::Serializer::storeAST(*job));
-                        // Stream out compressed files so that writes happen in parallel with processing.
+                        if (!job.compressed) {
+                            auto &ast = parsedFiles[job.index];
+                            threadResult.emplace_back(treeKey(file), core::serialize::Serializer::storeAST(ast));
+                        }
                         if (processedByThread > 100) {
                             resultq->push(move(threadResult), processedByThread);
                             processedByThread = 0;
@@ -1151,6 +1173,11 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
     bool written = false;
     {
         vector<pair<string, vector<u1>>> threadResult;
+        // Before processing work from workers, we can write the compressed ASTs.
+        for (auto &compressed : compressedParsedFiles) {
+            kvstore->write(treeKey(compressed.file.data(gs)), *compressed.tree);
+        }
+
         for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {

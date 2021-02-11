@@ -15,9 +15,9 @@ class UndoState final {
     // Stores the pre-slow-path global state.
     std::unique_ptr<core::GlobalState> evictedGs;
     // Stores index trees containing data stored in `gs` that have been evicted during the slow path operation.
-    UnorderedMap<int, ast::ParsedFile> evictedIndexed;
+    UnorderedMap<int, ast::CompressedParsedFile> evictedIndexed;
     // Stores the index trees stored in `gs` that were evicted because the slow path operation replaced `gs`.
-    UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS;
+    UnorderedMap<int, ast::CompressedParsedFile> evictedIndexedFinalGS;
     // Stores the list of files that had errors before the slow path began.
     std::vector<core::FileRef> evictedFilesThatHaveErrors;
 
@@ -25,19 +25,19 @@ public:
     // Epoch of the running slow path
     const u4 epoch;
 
-    UndoState(std::unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-              u4 epoch);
+    UndoState(std::unique_ptr<core::GlobalState> evictedGs,
+              UnorderedMap<int, ast::CompressedParsedFile> evictedIndexedFinalGS, u4 epoch);
 
     /**
      * Records that the given items were evicted from LSPTypechecker following a typecheck run.
      */
-    void recordEvictedState(ast::ParsedFile evictedIndexTree);
+    void recordEvictedState(ast::CompressedParsedFile evictedIndexTree);
 
     /**
      * Undoes the slow path changes represented by this class.
      */
-    void restore(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> &indexed,
-                 UnorderedMap<int, ast::ParsedFile> &indexedFinalGS);
+    void restore(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::CompressedParsedFile> &indexed,
+                 UnorderedMap<int, ast::CompressedParsedFile> &indexedFinalGS);
 };
 
 } // namespace sorbet::realmain::lsp

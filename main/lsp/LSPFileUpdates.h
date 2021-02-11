@@ -19,7 +19,7 @@ public:
     u4 committedEditCount = 0;
 
     std::vector<std::shared_ptr<core::File>> updatedFiles;
-    std::vector<ast::ParsedFile> updatedFileIndexes;
+    std::vector<ast::CompressedParsedFile> updatedFileIndexes;
 
     bool canTakeFastPath = false;
     // Indicates that this update contains a new file. Is a hack for determining if combining two updates can take the
@@ -28,7 +28,7 @@ public:
     // If true, this update caused a slow path to be canceled.
     bool canceledSlowPath = false;
     // Updated on typechecking thread. Contains indexes processed with typechecking global state.
-    std::vector<ast::ParsedFile> updatedFinalGSFileIndexes;
+    std::vector<ast::CompressedParsedFile> updatedFinalGSFileIndexes;
     // (Optional) Updated global state object to use to typecheck this update.
     std::optional<std::unique_ptr<core::GlobalState>> updatedGS;
     // (Used in tests) Ensures that a slow path typecheck on these updates waits until it gets cancelled.

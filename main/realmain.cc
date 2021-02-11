@@ -546,7 +546,9 @@ int realmain(int argc, char *argv[]) {
                 gs->errorQueue->flushAllErrors(*gs);
             }
         }
-        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed);
+        vector<ast::CompressedParsedFile> compressed;
+        cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(kvstore)), opts, *gs, *workers, indexed,
+                                             compressed);
 
         if (gs->runningUnderAutogen) {
 #ifdef SORBET_REALMAIN_MIN

@@ -38,9 +38,9 @@ class LSPTypechecker final {
      * instance, actively consume and replace GlobalState. */
     mutable std::unique_ptr<core::GlobalState> gs;
     /** Trees that have been indexed (with initialGS) and can be reused between different runs */
-    std::vector<ast::ParsedFile> indexed;
+    std::vector<ast::CompressedParsedFile> indexed;
     /** Trees that have been indexed (with finalGS) and can be reused between different runs */
-    UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
+    UnorderedMap<int, ast::CompressedParsedFile> indexedFinalGS;
     /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
      * LSPTypechecker to its pre-slow-path state. Can be null, which indicates that no slow path is currently running */
     std::unique_ptr<UndoState> cancellationUndoState;
@@ -106,7 +106,7 @@ public:
     /**
      * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
      */
-    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
+    ast::ParsedFile getIndexed(core::FileRef fref) const;
 
     /**
      * Returns the parsed files for the given files, including resolver.
@@ -167,7 +167,7 @@ public:
     /**
      * Returns the parsed file for the given file, up to the index passes (does not include resolver passes).
      */
-    const ast::ParsedFile &getIndexed(core::FileRef fref) const;
+    ast::ParsedFile getIndexed(core::FileRef fref) const;
 
     /**
      * Returns the parsed files for the given files, including resolver.
