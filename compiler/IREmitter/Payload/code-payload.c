@@ -1037,6 +1037,10 @@ static VALUE sorbet_iterMethod(VALUE obj) {
     rb_execution_context_t *ec = GET_EC();
     VALUE bh = ec->passed_block_handler;
 
+    // It's important that we clear out the passed block handler state in the execution context:
+    // https://github.com/ruby/ruby/blob/ruby_2_7/vm.c#L203-L210
+    ec->passed_block_handler = VM_BLOCK_HANDLER_NONE;
+
     return sorbet_callFuncWithCache(cache, bh);
 }
 
