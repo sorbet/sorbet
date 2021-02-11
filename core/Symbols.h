@@ -251,12 +251,15 @@ public:
     }
 
     Variance variance() const {
-        if (isInvariant())
+        if (isInvariant()) {
             return Variance::Invariant;
-        if (isCovariant())
+        }
+        if (isCovariant()) {
             return Variance::CoVariant;
-        if (isContravariant())
+        }
+        if (isContravariant()) {
             return Variance::ContraVariant;
+        }
         Exception::raise("Should not happen");
     }
 
@@ -289,10 +292,12 @@ public:
 
     inline bool isClassOrModuleModule() const {
         ENFORCE_NO_TIMER(isClassOrModule());
-        if (flags & Symbol::Flags::CLASS_OR_MODULE_MODULE)
+        if (flags & Symbol::Flags::CLASS_OR_MODULE_MODULE) {
             return true;
-        if (flags & Symbol::Flags::CLASS_OR_MODULE_CLASS)
+        }
+        if (flags & Symbol::Flags::CLASS_OR_MODULE_CLASS) {
             return false;
+        }
         Exception::raise("Should never happen");
     }
 

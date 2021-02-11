@@ -188,10 +188,11 @@ ExpressionPtr mergeStrings(DesugarContext dctx, core::LocOffsets loc,
             loc,
             dctx.ctx.state.enterNameUTF8(fmt::format(
                 "{}", fmt::map_join(stringsAccumulated.begin(), stringsAccumulated.end(), "", [&](const auto &expr) {
-                    if (isa_tree<EmptyTree>(expr))
+                    if (isa_tree<EmptyTree>(expr)) {
                         return ""sv;
-                    else
+                    } else {
                         return cast_tree<Literal>(expr)->asString(dctx.ctx).shortName(dctx.ctx);
+                    }
                 }))));
     }
 }
