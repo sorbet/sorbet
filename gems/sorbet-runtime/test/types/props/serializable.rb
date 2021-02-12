@@ -298,10 +298,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(ex.message, "Can't set Opus::Types::Test::Props::SerializableTest::NilFieldStruct.bar to nil (instance of NilClass) - need a String")
     end
 
-    it 'forbids nil in constructor' do
-      assert_raises(ArgumentError) do
-        NilFieldStruct.new
-      end
+    it 'allows implicit nil in constructor' do
+      NilFieldStruct.new
+    end
+
+    it 'forbids explicit nil in constructor' do
       assert_raises(TypeError) do
         NilFieldStruct.new(foo: nil, bar: nil)
       end
