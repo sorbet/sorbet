@@ -9,8 +9,7 @@
 #include "core/NameHash.h"
 #include "core/Symbols.h"
 #include "core/serialize/pickler.h"
-#include "lib/lizard_compress.h"
-#include "lib/lizard_decompress.h"
+#include "lib/lz4.h"
 
 template class std::vector<sorbet::u4>;
 
@@ -73,15 +72,15 @@ vector<u1> Pickler::result(int compressionDegree) {
         data.emplace_back(zeroCounter);
         zeroCounter = 0;
     }
-    const size_t maxDstSize = Lizard_compressBound(data.size());
+    const size_t maxDstSize = LZ4_compressBound(data.size());
     vector<u1> compressedData;
     compressedData.resize(2048 + maxDstSize); // give extra room for compression
                                               // Lizard_compressBound returns size of data if compression
                                               // succeeds. It seems to be written for big inputs
                                               // and returns too small sizes for small inputs,
                                               // where compressed size is bigger than original size
-    int resultCode = Lizard_compress((const char *)data.data(), (char *)(compressedData.data() + SIZE_BYTES * 2),
-                                     data.size(), (compressedData.size() - SIZE_BYTES * 2), compressionDegree);
+    int resultCode = LZ4_compress_default((const char *)data.data(), (char *)(compressedData.data() + SIZE_BYTES * 2),
+                                          data.size(), (compressedData.size() - SIZE_BYTES * 2));
     if (resultCode == 0) {
         // did not compress!
         Exception::raise("incompressible pickler?");
@@ -105,8 +104,8 @@ UnPickler::UnPickler(const u1 *const compressed, spdlog::logger &tracer) : pos(0
 
     data.resize(uncompressedSize);
 
-    int resultCode = Lizard_decompress_safe((const char *)(compressed + 2 * SIZE_BYTES), (char *)this->data.data(),
-                                            compressedSize, uncompressedSize);
+    int resultCode = LZ4_decompress_safe((const char *)(compressed + 2 * SIZE_BYTES), (char *)this->data.data(),
+                                         compressedSize, uncompressedSize);
     if (resultCode != uncompressedSize) {
         Exception::raise("incomplete decompression");
     }

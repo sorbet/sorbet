@@ -81,11 +81,11 @@ def register_sorbet_dependencies():
     )
 
     http_archive(
-        name = "lizard",
-        urls = _github_public_urls("sorbet/lizard/archive/3ea5729b2a337999772cb86998f202a718dd46fb.zip"),
-        sha256 = "f9f0f75264c160b7b19db936730282d28ef061bf7473cb339694b39ac2eb472e",
-        build_file = "@com_stripe_ruby_typer//third_party:lizard.BUILD",
-        strip_prefix = "lizard-3ea5729b2a337999772cb86998f202a718dd46fb",
+        name = "lz4",
+        urls = _github_public_urls("lz4/lz4/archive/v1.9.3.zip"),
+        sha256 = "4ec935d99aa4950eadfefbd49c9fad863185ac24c32001162c44a683ef61b580",
+        build_file = "@com_stripe_ruby_typer//third_party:lz4.BUILD",
+        strip_prefix = "lz4-1.9.3",
     )
 
     http_archive(
