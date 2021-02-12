@@ -69,10 +69,6 @@ void Pickler::putStr(string_view s) {
 constexpr size_t SIZE_BYTES = sizeof(int) / sizeof(u1);
 
 vector<u1> Pickler::result(int compressionDegree) {
-    if (zeroCounter != 0) {
-        data.emplace_back(zeroCounter);
-        zeroCounter = 0;
-    }
     const size_t maxDstSize = Lizard_compressBound(data.size());
     vector<u1> compressedData;
     compressedData.resize(2048 + maxDstSize); // give extra room for compression
@@ -121,112 +117,52 @@ string_view UnPickler::getStr() {
 }
 
 void Pickler::putU1(u1 u) {
-    if (zeroCounter != 0) {
-        data.emplace_back(zeroCounter);
-        zeroCounter = 0;
-    }
     data.emplace_back(u);
 }
 
 u1 UnPickler::getU1() {
-    ENFORCE(zeroCounter == 0);
     auto res = data[pos++];
     return res;
 }
 
 void Pickler::putU4(u4 u) {
-    if (u == 0) {
-        if (zeroCounter != 0) {
-            if (zeroCounter == UCHAR_MAX) {
-                data.emplace_back(UCHAR_MAX);
-                zeroCounter = 0;
-                putU4(u);
-                return;
-            }
-            zeroCounter++;
-            return;
-        } else {
-            data.emplace_back(0);
-            zeroCounter = 1;
-        }
-    } else {
-        if (zeroCounter != 0) {
-            data.emplace_back(zeroCounter);
-            zeroCounter = 0;
-        }
-        while (u > 127) {
-            data.emplace_back(128 | (u & 127));
-            u = u >> 7;
-        }
-        data.emplace_back(u & 127);
-    }
+    data.emplace_back(u);
+    data.emplace_back(u >> 8);
+    data.emplace_back(u >> 16);
+    data.emplace_back(u >> 24);
 }
 
 u4 UnPickler::getU4() {
-    if (zeroCounter != 0) {
-        zeroCounter--;
-        return 0;
-    }
-    u1 r = data[pos++];
-    if (r == 0) {
-        zeroCounter = data[pos++];
-        zeroCounter--;
-        return r;
-    } else {
-        u4 res = r & 127;
-        u4 vle = r;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
+    u4 num1 = data[pos++];
+    u4 num2 = data[pos++];
+    u4 num3 = data[pos++];
+    u4 num4 = data[pos++];
 
-        vle = data[pos++];
-        res |= (vle & 127) << 7;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-        vle = data[pos++];
-        res |= (vle & 127) << 14;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-        vle = data[pos++];
-        res |= (vle & 127) << 21;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-        vle = data[pos++];
-        res |= (vle & 127) << 28;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-    done:
-        return res;
-    }
+    return num1 | (num2 << 8) | (num3 << 16) | (num4 << 24);
 }
 
 void Pickler::putS8(const int64_t i) {
     auto u = absl::bit_cast<u8>(i);
-    while (u > 127) {
-        putU1((u & 127) | 128);
-        u = u >> 7;
-    }
-    putU1(u & 127);
+    data.emplace_back(u);
+    data.emplace_back(u >> 8);
+    data.emplace_back(u >> 16);
+    data.emplace_back(u >> 24);
+    data.emplace_back(u >> 32);
+    data.emplace_back(u >> 40);
+    data.emplace_back(u >> 48);
+    data.emplace_back(u >> 56);
 }
 
 int64_t UnPickler::getS8() {
-    u8 res = 0;
-    u8 vle = 128;
-    int i = 0;
-    while (vle & 128) {
-        vle = getU1();
-        res |= (vle & 127) << (i * 7);
-        i++;
-    }
-    return absl::bit_cast<int64_t>(res);
+    u8 num1 = data[pos++];
+    u8 num2 = data[pos++];
+    u8 num3 = data[pos++];
+    u8 num4 = data[pos++];
+    u8 num5 = data[pos++];
+    u8 num6 = data[pos++];
+    u8 num7 = data[pos++];
+    u8 num8 = data[pos++];
+    return num1 | (num2 << 8) | (num3 << 16) | (num4 << 24) | (num5 << 32) | (num6 << 40) | (num7 << 48) | (num8 << 56);
 }
 
 void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
