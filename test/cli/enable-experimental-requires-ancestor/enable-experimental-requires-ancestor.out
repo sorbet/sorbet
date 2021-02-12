@@ -1,0 +1,9 @@
+No errors! Great job.
+--------------------------------------------------------------------------
+test/cli/enable-experimental-requires-ancestor/enable-experimental-requires-ancestor.rb:9: `Bar` must include `Kernel` (required by `Foo`) https://srb.help/5064
+     9 |class Bar < BasicObject
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    test/cli/enable-experimental-requires-ancestor/enable-experimental-requires-ancestor.rb:6: required by `Foo` here
+     6 |  requires_ancestor Kernel
+                            ^^^^^^
+Errors: 1

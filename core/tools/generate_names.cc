@@ -281,6 +281,11 @@ NameDef names[] = {
     {"singleton", "<singleton class>"},
     {"attached", "<attached class>"},
 
+    // Requires ancestor
+    {"requiredAncestors", "<required-ancestor>"},
+    {"requiredAncestorsLin", "<required-ancestor-lin>"},
+    {"requiresAncestor", "requires_ancestor"},
+
     // This behaves like the above two names, in the sense that we use a member
     // on a class to lookup an associated symbol with some extra info.
     {"sealedSubclasses", "sealed_subclasses"},

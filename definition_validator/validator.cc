@@ -501,6 +501,99 @@ void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::C
     validateSealedAncestorHelper(ctx, singleton, classDef, klass, "extended");
 }
 
+void validateUselessRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+    auto data = sym.data(ctx);
+
+    for (auto req : data->requiredAncestors(ctx)) {
+        if (data->derivesFrom(ctx, req.symbol)) {
+            if (auto e = ctx.state.beginError(req.loc, core::errors::Resolver::UselessRequiredAncestor)) {
+                e.setHeader("`{}` is already {} by `{}`", req.symbol.data(ctx)->show(ctx),
+                            req.symbol.data(ctx)->isClassOrModuleModule() ? "included" : "inherited", data->show(ctx));
+            }
+        }
+    }
+}
+
+void validateUnsatisfiedRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+    auto data = sym.data(ctx);
+    if (data->isClassOrModuleModule() || data->isClassOrModuleAbstract()) {
+        return;
+    }
+    for (auto req : data->requiredAncestorsTransitive(ctx)) {
+        if (sym != req.symbol && !data->derivesFrom(ctx, req.symbol)) {
+            if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiedRequiredAncestor)) {
+                e.setHeader("`{}` must {} `{}` (required by `{}`)", data->show(ctx),
+                            req.symbol.data(ctx)->isClassOrModuleModule() ? "include" : "inherit",
+                            req.symbol.data(ctx)->show(ctx), req.origin.data(ctx)->show(ctx));
+                e.addErrorLine(req.loc, "required by `{}` here", req.origin.data(ctx)->show(ctx));
+            }
+        }
+    }
+}
+
+void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+    auto data = sym.data(ctx);
+
+    vector<core::Symbol::RequiredAncestor> requiredClasses;
+    for (auto ancst : data->requiredAncestorsTransitive(ctx)) {
+        if (ancst.symbol.data(ctx)->isClassOrModuleClass()) {
+            requiredClasses.emplace_back(ancst);
+        }
+
+        if (ancst.symbol.data(ctx)->typeArity(ctx) > 0) {
+            if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
+                e.setHeader("`{}` can't require generic ancestor `{}` (unsupported)", data->show(ctx),
+                            ancst.symbol.data(ctx)->show(ctx));
+                e.addErrorLine(ancst.loc, "`{}` is required by `{}` here", ancst.symbol.data(ctx)->show(ctx),
+                               ancst.origin.data(ctx)->show(ctx));
+            }
+        }
+    }
+
+    if (data->isClassOrModuleAbstract()) {
+        for (auto ancst : requiredClasses) {
+            if (!sym.data(ctx)->derivesFrom(ctx, ancst.symbol) &&
+                !ancst.symbol.data(ctx)->derivesFrom(ctx, sym.asClassOrModuleRef())) {
+                if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
+                    e.setHeader("`{}` requires unrelated class `{}` making it impossible to inherit", data->show(ctx),
+                                ancst.symbol.data(ctx)->show(ctx));
+                    e.addErrorLine(ancst.loc, "`{}` is required by `{}` here", ancst.symbol.data(ctx)->show(ctx),
+                                   ancst.origin.data(ctx)->show(ctx));
+                }
+            }
+        }
+    }
+
+    if (requiredClasses.size() <= 1) {
+        return;
+    }
+
+    for (int i = 0; i < requiredClasses.size() - 1; i++) {
+        auto ra1 = requiredClasses[i];
+        for (int j = i + 1; j < requiredClasses.size(); j++) {
+            auto ra2 = requiredClasses[j];
+            if (!ra1.symbol.data(ctx)->derivesFrom(ctx, ra2.symbol) &&
+                !ra2.symbol.data(ctx)->derivesFrom(ctx, ra1.symbol)) {
+                if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
+                    e.setHeader("`{}` requires unrelated classes `{}` and `{}` making it impossible to {}",
+                                data->show(ctx), ra1.symbol.data(ctx)->show(ctx), ra2.symbol.data(ctx)->show(ctx),
+                                data->isClassOrModuleModule() ? "include" : "inherit");
+                    e.addErrorLine(ra1.loc, "`{}` is required by `{}` here", ra1.symbol.data(ctx)->show(ctx),
+                                   ra1.origin.data(ctx)->show(ctx));
+                    e.addErrorLine(ra2.loc, "`{}` is required by `{}` here", ra2.symbol.data(ctx)->show(ctx),
+                                   ra2.origin.data(ctx)->show(ctx));
+                }
+            }
+        }
+    }
+}
+
+void validateRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+    validateUselessRequiredAncestors(ctx, sym);
+    validateUnsatisfiedRequiredAncestors(ctx, sym);
+    validateUnsatisfiableRequiredAncestors(ctx, sym);
+}
+
 class ValidateWalk {
 private:
     UnorderedMap<core::ClassOrModuleRef, vector<core::MethodRef>> abstractCache;
@@ -598,10 +691,18 @@ public:
             // Only validateAbstract for this class if we haven't already (we already have if this
             // is a `class << self` ClassDef)
             validateAbstract(ctx, sym);
+
+            if (ctx.state.requiresAncestorEnabled) {
+                validateRequiredAncestors(ctx, sym);
+            }
         }
         validateAbstract(ctx, singleton);
         validateFinal(ctx, sym, classDef);
         validateSealed(ctx, sym, classDef);
+
+        if (ctx.state.requiresAncestorEnabled) {
+            validateRequiredAncestors(ctx, singleton);
+        }
         return tree;
     }
 

@@ -36,4 +36,21 @@ module T::Helpers
   def mixes_in_class_methods(mod, *mods)
     Private::Mixins.declare_mixes_in_class_methods(self, [mod].concat(mods))
   end
+
+  # Specify an inclusion or inheritance requirement for `self`.
+  #
+  # Example:
+  #
+  #   module MyHelper
+  #     extend T::Helpers
+  #
+  #     requires_ancestor Kernel
+  #   end
+  #
+  #   class MyClass < BasicObject # error: `MyClass` must include `Kernel` (required by `MyHelper`)
+  #     include MyHelper
+  #   end
+  #
+  # TODO: implement the checks in sorbet-runtime.
+  def requires_ancestor(mod, *mods); end
 end

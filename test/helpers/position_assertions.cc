@@ -38,6 +38,7 @@ const UnorderedMap<
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
+        {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"exhaustive-apply-code-action", BooleanPropertyAssertion::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},

@@ -1175,6 +1175,145 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
     return result;
 }
 
+// Record a required ancestor for this class of module
+//
+// Each RequiredAncestor is stored into a magic method referenced by `prop` where:
+// * RequiredAncestor.symbol goes into the return type tuple
+// * RequiredAncestor.origin goes into the first argument type tuple
+// * RequiredAncestor.loc goes into the symbol loc
+// All fields for the same RequiredAncestor are stored at the same index.
+void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAncestor &ancestor, NameRef prop) {
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
+
+    // We store the required ancestors into a fake property called `<required-ancestors>`
+    auto ancestors = this->findMember(gs, prop);
+    if (!ancestors.exists()) {
+        ancestors = gs.enterMethodSymbol(ancestor.loc, this->ref(gs).asClassOrModuleRef(), prop);
+        ancestors.data(gs)->locs_.clear(); // Remove the original location
+
+        // Create the return type tuple to store RequiredAncestor.symbol
+        vector<TypePtr> tsymbols;
+        ancestors.data(gs)->resultType = make_type<TupleType>(move(tsymbols));
+
+        // Create the first argument typed as a tuple to store RequiredAncestor.origin
+        auto &arg = gs.enterMethodArgumentSymbol(core::Loc::none(), ancestors.asMethodRef(), core::Names::arg());
+        vector<TypePtr> torigins;
+        arg.type = make_type<TupleType>(move(torigins));
+    }
+
+    // Do not require the same ancestor twice
+    auto &elems = (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems;
+    bool alreadyRecorded = absl::c_any_of(elems, [ancestor](auto elem) {
+        ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
+        return cast_type_nonnull<ClassType>(elem).symbol == ancestor.symbol;
+    });
+    if (alreadyRecorded) {
+        return;
+    }
+
+    // Store the RequiredAncestor.symbol
+    auto tSymbol = core::make_type<ClassType>(ancestor.symbol);
+    (cast_type<TupleType>(ancestors.data(gs)->resultType))->elems.emplace_back(tSymbol);
+
+    // Store the RequiredAncestor.origin
+    auto tOrigin = core::make_type<ClassType>(ancestor.origin);
+    (cast_type<TupleType>(ancestors.data(gs)->arguments()[0].type))->elems.emplace_back(tOrigin);
+
+    // Store the RequiredAncestor.loc
+    ancestors.data(gs)->locs_.emplace_back(ancestor.loc);
+}
+
+// Locally required ancestors by this class or module
+vector<Symbol::RequiredAncestor> Symbol::readRequiredAncestorsInternal(const GlobalState &gs, NameRef prop) const {
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
+
+    vector<RequiredAncestor> res;
+
+    auto ancestors = this->findMember(gs, prop);
+    if (!ancestors.exists()) {
+        // No ancestor was recorded for this class or module
+        return res;
+    }
+
+    auto data = ancestors.data(gs);
+    auto tSymbols = cast_type<TupleType>(data->resultType);
+    auto tOrigins = cast_type<TupleType>(data->arguments()[0].type);
+    auto index = 0;
+    for (auto elem : tSymbols->elems) {
+        ENFORCE(isa_type<ClassType>(elem), "Something in requiredAncestors that's not a ClassType");
+        ENFORCE(isa_type<ClassType>(tOrigins->elems[index]), "Bad origin in requiredAncestors");
+        ENFORCE(index < data->locs().size(), "Missing loc in requiredAncestors");
+        auto &origin = cast_type_nonnull<ClassType>(tOrigins->elems[index]).symbol;
+        auto &symbol = cast_type_nonnull<ClassType>(elem).symbol;
+        auto &loc = data->locs()[index];
+        res.emplace_back(origin, symbol, loc);
+        index++;
+    }
+
+    return res;
+}
+
+// Record a required ancestor for this class of module
+void Symbol::recordRequiredAncestor(GlobalState &gs, ClassOrModuleRef ancestor, Loc loc) {
+    RequiredAncestor req = {this->ref(gs).asClassOrModuleRef(), ancestor, loc};
+    recordRequiredAncestorInternal(gs, req, Names::requiredAncestors());
+}
+
+// Locally required ancestors by this class or module
+vector<Symbol::RequiredAncestor> Symbol::requiredAncestors(const GlobalState &gs) const {
+    return readRequiredAncestorsInternal(gs, Names::requiredAncestors());
+}
+
+// All required ancestors by this class or module
+std::vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitiveInternal(GlobalState &gs,
+                                                                                  std::vector<ClassOrModuleRef> &seen) {
+    if (absl::c_find(seen, this->ref(gs).asClassOrModuleRef()) != seen.end()) {
+        return requiredAncestors(gs); // Break recursive loops if we already visited this ancestor
+    }
+    seen.emplace_back(this->ref(gs).asClassOrModuleRef());
+
+    for (auto ancst : requiredAncestors(gs)) {
+        recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
+        for (auto sancst : ancst.symbol.data(gs)->requiredAncestorsTransitiveInternal(gs, seen)) {
+            if (sancst.symbol != this->ref(gs).asClassOrModuleRef()) {
+                recordRequiredAncestorInternal(gs, sancst, Names::requiredAncestorsLin());
+            }
+        }
+    }
+
+    auto parent = superClass();
+    if (parent.exists()) {
+        for (auto ancst : parent.data(gs)->requiredAncestorsTransitiveInternal(gs, seen)) {
+            if (ancst.symbol != this->ref(gs).asClassOrModuleRef()) {
+                recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
+            }
+        }
+    }
+
+    for (auto mixin : mixins()) {
+        for (auto ancst : mixin.data(gs)->requiredAncestors(gs)) {
+            if (ancst.symbol != this->ref(gs).asClassOrModuleRef()) {
+                recordRequiredAncestorInternal(gs, ancst, Names::requiredAncestorsLin());
+            }
+        }
+    }
+
+    return requiredAncestorsTransitive(gs);
+}
+
+// All required ancestors by this class or module
+vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitive(const GlobalState &gs) const {
+    ENFORCE(gs.requiresAncestorEnabled);
+    return readRequiredAncestorsInternal(gs, Names::requiredAncestorsLin());
+}
+
+void Symbol::computeRequiredAncestorLinearization(GlobalState &gs) {
+    ENFORCE(gs.requiresAncestorEnabled);
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
+    std::vector<ClassOrModuleRef> seen;
+    requiredAncestorsTransitiveInternal(gs, seen);
+}
+
 SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, SymbolRef def) const {
     if (isa_type<AliasType>(resultType)) {
         auto alias = cast_type_nonnull<AliasType>(resultType);

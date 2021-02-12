@@ -587,6 +587,27 @@ public:
     const InlinedVector<Loc, 2> &sealedLocs(const GlobalState &gs) const;
     TypePtr sealedSubclassesToUnion(const GlobalState &ctx) const;
 
+    // Record a required ancestor for this class of module
+    void recordRequiredAncestor(GlobalState &gs, ClassOrModuleRef ancestor, Loc loc);
+
+    // Associate a required ancestor with the loc it's required at
+    struct RequiredAncestor {
+        ClassOrModuleRef origin; // The class or module that required `symbol`
+        ClassOrModuleRef symbol; // The symbol required
+        Loc loc;                 // The location it was required at
+
+        RequiredAncestor(ClassOrModuleRef origin, ClassOrModuleRef symbol, Loc loc)
+            : origin(origin), symbol(symbol), loc(loc) {}
+    };
+
+    void computeRequiredAncestorLinearization(GlobalState &gs);
+
+    // Locally required ancestors by this class or module
+    std::vector<RequiredAncestor> requiredAncestors(const GlobalState &gs) const;
+
+    // All required ancestors by this class or module
+    std::vector<RequiredAncestor> requiredAncestorsTransitive(const GlobalState &gs) const;
+
     // if dealiasing fails here, then we return Untyped instead
     SymbolRef dealias(const GlobalState &gs, int depthLimit = 42) const {
         return dealiasWithDefault(gs, depthLimit, Symbols::untyped());
@@ -697,6 +718,15 @@ private:
      */
     InlinedVector<SymbolRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
+
+    // Record a required ancestor for this class of module in a magic property
+    void recordRequiredAncestorInternal(GlobalState &gs, RequiredAncestor &ancestor, NameRef prop);
+
+    // Read required ancestors for this class of module from a magic property
+    std::vector<RequiredAncestor> readRequiredAncestorsInternal(const GlobalState &gs, NameRef prop) const;
+
+    std::vector<RequiredAncestor> requiredAncestorsTransitiveInternal(GlobalState &gs,
+                                                                      std::vector<ClassOrModuleRef> &seen);
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                            int maxDepth = 100) const;

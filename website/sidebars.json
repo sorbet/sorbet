@@ -47,7 +47,8 @@
     ],
     "Experimental Features": [
       "tuples",
-      "shapes"
+      "shapes",
+      "requires-ancestor"
     ]
   },
   "talks": {

@@ -517,6 +517,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
     SymbolRef mayBeOverloaded = symbol.data(gs)->findMemberTransitive(gs, args.name);
 
+    if (!mayBeOverloaded.exists() && gs.requiresAncestorEnabled) {
+        // Before raising any error, we look if the method exists in all required ancestors by this symbol
+        auto ancestors = symbol.data(gs)->requiredAncestorsTransitive(gs);
+        for (auto ancst : ancestors) {
+            mayBeOverloaded = ancst.symbol.data(gs)->findMemberTransitive(gs, args.name);
+            if (mayBeOverloaded.exists()) {
+                break;
+            }
+        }
+    }
+
     if (!mayBeOverloaded.exists()) {
         if (args.name == Names::initialize()) {
             // Special-case initialize(). We should define this on
@@ -559,7 +570,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // suggest adding `extend T::Helpers`.
                 if (args.name == core::Names::declareInterface() || args.name == core::Names::declareAbstract() ||
                     args.name == core::Names::declareFinal() || args.name == core::Names::declareSealed() ||
-                    args.name == core::Names::mixesInClassMethods()) {
+                    args.name == core::Names::mixesInClassMethods() ||
+                    (args.name == core::Names::requiresAncestor() && gs.requiresAncestorEnabled)) {
                     auto attachedClass = symbol.data(gs)->attachedClass(gs);
                     if (auto suggestion =
                             maybeSuggestExtendTHelpers(gs, attachedClass, core::Loc(args.locs.file, args.locs.call))) {

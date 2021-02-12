@@ -1795,6 +1795,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->runningUnderAutogen = this->runningUnderAutogen;
     result->censorForSnapshotTests = this->censorForSnapshotTests;
     result->sleepInSlowPath = this->sleepInSlowPath;
+    result->requiresAncestorEnabled = this->requiresAncestorEnabled;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;

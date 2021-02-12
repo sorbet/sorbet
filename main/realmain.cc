@@ -442,6 +442,8 @@ int realmain(int argc, char *argv[]) {
     gs->semanticExtensions = move(extensions);
     vector<ast::ParsedFile> indexed;
 
+    gs->requiresAncestorEnabled = opts.requiresAncestorEnabled;
+
     logger->trace("building initial global state");
     unique_ptr<const OwnedKeyValueStore> kvstore = cache::maybeCreateKeyValueStore(opts);
     payload::createInitialGlobalState(gs, opts, kvstore);
@@ -512,7 +514,7 @@ int realmain(int argc, char *argv[]) {
 
         if (!opts.storeState.empty()) {
             // Compute file hashes for payload files (which aren't part of inputFiles) for LSP
-            hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers);
+            hashing::Hashing::computeFileHashes(gs->getFiles(), *logger, *workers, opts);
         }
 
         { inputFiles = pipeline::reserveFiles(gs, opts.inputFileNames); }

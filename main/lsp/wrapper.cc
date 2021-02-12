@@ -23,6 +23,8 @@ void setRequiredLSPOptions(core::GlobalState &gs, options::Options &options) {
         gs.suppressErrorClass(sorbet::core::errors::Namer::MultipleBehaviorDefs.code);
     }
 
+    gs.requiresAncestorEnabled = options.requiresAncestorEnabled;
+
     // Ensure LSP is enabled.
     options.runLSP = true;
 }
