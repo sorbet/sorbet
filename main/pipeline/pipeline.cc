@@ -1071,10 +1071,14 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
         vector<pair<string, vector<u1>>> threadResult;
         int processedByThread = 0;
         ast::ParsedFile *job = nullptr;
+        unique_ptr<Timer> timeit;
         {
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                 if (result.gotItem()) {
                     processedByThread++;
+                    if (timeit == nullptr) {
+                        timeit = make_unique<Timer>(gs.tracer(), "cacheTreesAndFilesWorker");
+                    }
 
                     if (!job->file.exists()) {
                         continue;
@@ -1083,6 +1087,11 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
                     auto &file = job->file.data(gs);
                     if (!file.cached && !file.hasParseErrors) {
                         threadResult.emplace_back(fileKey(file), core::serialize::Serializer::storeFile(file, *job));
+                        // Stream out compressed files so that writes happen in parallel with processing.
+                        if (processedByThread > 100) {
+                            resultq->push(move(threadResult), processedByThread);
+                            processedByThread = 0;
+                        }
                     }
                 }
             }
