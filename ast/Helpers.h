@@ -175,8 +175,7 @@ public:
     }
 
     static ExpressionPtr Splat(core::LocOffsets loc, ExpressionPtr arg) {
-        auto to_a = Send0(loc, std::move(arg), core::Names::toA());
-        return Send1(loc, Constant(loc, core::Symbols::Magic()), core::Names::splat(), std::move(to_a));
+        return Send1(loc, Constant(loc, core::Symbols::Magic()), core::Names::splat(), std::move(arg));
     }
 
     static ExpressionPtr CallWithSplat(core::LocOffsets loc, ExpressionPtr recv, core::NameRef name,
