@@ -699,6 +699,20 @@ void GlobalState::initEmpty() {
         arg.flags.isBlock = true;
     }
 
+    // Synthesize <Magic>.<check-match-array>(pattern: T.untyped, splatArray: T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::checkMatchArray());
+    {
+        auto &arg0 = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg0.type = Types::untyped(*this, method);
+        auto &arg1 = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
+        arg1.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::untyped(*this, method);
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
     // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
     method = enterMethodSymbol(Loc::none(), Symbols::DeclBuilderForProcsSingleton(), Names::params());
     {

@@ -42,7 +42,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       b = <emptyTree>::<C Splatable>.new().to_a()
       begin
         <assignTemp>$2 = 1
-        if ::<Magic>.<splat>(<emptyTree>::<C Integer>.to_a()).===(<assignTemp>$2)
+        if ::<Magic>.<check-match-array>(<assignTemp>$2, ::<Magic>.<splat>(<emptyTree>::<C Integer>))
           <emptyTree>
         else
           <emptyTree>

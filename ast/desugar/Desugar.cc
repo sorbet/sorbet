@@ -1886,14 +1886,28 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     ENFORCE(when != nullptr, "case without a when?");
                     ExpressionPtr cond;
                     for (auto &cnode : when->patterns) {
-                        auto ctree = node2TreeImpl(dctx, std::move(cnode));
                         ExpressionPtr test;
-                        if (temp.exists()) {
+                        if (parser::isa_node<parser::Splat>(cnode.get())) {
+                            ENFORCE(temp.exists(), "splats need something to test against");
+                            auto recv = MK::Constant(loc, core::Symbols::Magic());
                             auto local = MK::Local(cloc, temp);
-                            auto patternloc = ctree.loc();
-                            test = MK::Send1(patternloc, std::move(ctree), core::Names::tripleEq(), std::move(local));
+                            // TODO(froydnj): use the splat's var directly so we can elide the
+                            // coercion to an array where possible.
+                            auto splat = node2TreeImpl(dctx, std::move(cnode));
+                            auto patternloc = splat.loc();
+                            test = MK::Send2(patternloc, std::move(recv), core::Names::checkMatchArray(),
+                                             std::move(local), std::move(splat));
                         } else {
-                            test = std::move(ctree);
+                            ExpressionPtr ctree;
+                            ctree = node2TreeImpl(dctx, std::move(cnode));
+                            if (temp.exists()) {
+                                auto local = MK::Local(cloc, temp);
+                                auto patternloc = ctree.loc();
+                                test =
+                                    MK::Send1(patternloc, std::move(ctree), core::Names::tripleEq(), std::move(local));
+                            } else {
+                                test = std::move(ctree);
+                            }
                         }
                         if (cond == nullptr) {
                             cond = std::move(test);
