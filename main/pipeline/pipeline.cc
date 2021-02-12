@@ -1083,6 +1083,11 @@ bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, vector
                     auto &file = job->file.data(gs);
                     if (!file.cached && !file.hasParseErrors) {
                         threadResult.emplace_back(fileKey(file), core::serialize::Serializer::storeFile(file, *job));
+                        // Stream out compressed files so that writes happen in parallel with processing.
+                        if (processedByThread > 100) {
+                            resultq->push(move(threadResult), processedByThread);
+                            processedByThread = 0;
+                        }
                     }
                 }
             }
