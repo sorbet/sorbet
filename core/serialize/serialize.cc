@@ -769,18 +769,20 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
 }
 
 void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
-    p.putU4(a.name.rawId());
-    p.putU4(a.rebind.rawId());
-    pickle(p, a.loc);
+    p.putU4Group(a.name.rawId(), a.rebind.rawId(), a.loc.storage.offsets.beginLoc,
+                 a.loc.storage.offsets.endLoc);
+    p.putU4(a.loc.file().id());
     p.putU1(a.flags.toU1());
     pickle(p, a.type);
 }
 
 ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
     ArgInfo result;
-    result.name = NameRef::fromRaw(*gs, p.getU4());
-    result.rebind = core::SymbolRef::fromRaw(p.getU4());
-    result.loc = unpickleLoc(p);
+    u4 nameId, symId, locBegin, locEnd;
+    p.getU4Group(&nameId, &symId, &locBegin, &locEnd);
+    result.name = NameRef::fromRaw(*gs, nameId);
+    result.rebind = core::SymbolRef::fromRaw(symId);
+    result.loc = Loc(FileRef(p.getU4()), LocOffsets{locBegin, locEnd});
     {
         u1 flags = p.getU1();
         result.flags.setFromU1(flags);
@@ -1162,14 +1164,11 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
         case ast::Tag::Send: {
             auto &s = ast::cast_tree_nonnull<ast::Send>(what);
             pickle(p, s.loc);
-            p.putU4(s.fun.rawId());
             u1 flags;
             static_assert(sizeof(flags) == sizeof(s.flags));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &s.flags, sizeof(flags));
-            p.putU1(flags);
-            p.putU4(s.numPosArgs);
-            p.putU4(s.args.size());
+            p.putU4Group(s.fun.rawId(), flags, s.numPosArgs, s.args.size());
             pickle(p, s.recv);
             pickle(p, s.block);
             for (auto &arg : s.args) {
@@ -1447,14 +1446,15 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
     switch (static_cast<ast::Tag>(kind)) {
         case ast::Tag::Send: {
             auto loc = unpickleLocOffsets(p);
-            NameRef fun = unpickleNameRef(p, gs);
-            auto flagsU1 = p.getU1();
+            u4 rawName, flagsU4, numPosArgsU4, argsSize;
+            p.getU4Group(&rawName, &flagsU4, &numPosArgsU4, &argsSize);
+            NameRef fun = NameRef::fromRawUnchecked(rawName);
+            u1 flagsU1 = static_cast<u1>(flagsU4);
             ast::Send::Flags flags;
             static_assert(sizeof(flags) == sizeof(flagsU1));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &flagsU1, sizeof(flags));
-            auto numPosArgs = static_cast<u2>(p.getU4());
-            auto argsSize = p.getU4();
+            auto numPosArgs = static_cast<u2>(numPosArgsU4);
             auto recv = unpickleExpr(p, gs);
             auto blkt = unpickleExpr(p, gs);
             ast::ExpressionPtr blk;
