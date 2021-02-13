@@ -13,6 +13,8 @@
 #include "lib/lizard_decompress.h"
 
 #include <array>
+#include <type_traits>
+#include <tuple>
 
 #include <nmmintrin.h>
 
@@ -402,43 +404,102 @@ int64_t UnPickler::getS8() {
     return absl::bit_cast<int64_t>(res);
 }
 
+template<typename T>
+struct n_args;
+
+template <typename R, typename Arg0>
+struct n_args<R(Arg0)> {
+    static constexpr const size_t n = 1;
+};
+
+template <typename R, typename Arg0, typename Arg1>
+struct n_args<R(Arg0, Arg1)> {
+    static constexpr const size_t n = 2;
+};
+
 namespace {
+template <typename Container, typename Transform>
+void serializeGroupwise(Pickler &p, const Container &c, Transform&& toU4) {
+    using ElementType = typename Container::value_type;
+    using Result = std::result_of_t<Transform(const ElementType&)>;
+
+    if constexpr (std::tuple_size<Result>::value == 1) {
+        auto b = c.begin(), e = c.end();
+        for ( ; std::distance(b, e) >= 4; b += 4) {
+            auto [a] = toU4(*(b + 0));
+            auto [bx] = toU4(*(b + 1));
+            auto [c] = toU4(*(b + 2));
+            auto [d] = toU4(*(b + 3));
+            p.putU4Group(a, bx, c, d);
+        }
+        while (b != e) {
+            auto [x] = toU4(*b);
+            p.putU4(x);
+            ++b;
+        }
+    } else if constexpr (std::tuple_size<Result>::value == 2) {
+        auto b = c.begin(), e = c.end();
+        for ( ; std::distance(b, e) >= 2; b += 2) {
+            auto [a, bx] = toU4(*(b + 0));
+            auto [c, d] = toU4(*(b + 1));
+            p.putU4Group(a, bx, c, d);
+        }
+        while (b != e) {
+            auto [a, bx] = toU4(*b);
+            p.putU4(a);
+            p.putU4(bx);
+            ++b;
+        }
+    }
+}
+
+template <typename Transform>
+void unserializeGroupwise(UnPickler &p, const size_t numElements, Transform&& fromU4) {
+    constexpr size_t nargs = n_args<get_signature<Transform>>::n;
+
+    if constexpr (nargs == 1) {
+        auto i = 0;
+        for ( ; (numElements - i) >= 4; i += 4) {
+            u4 a, b, c, d;
+            p.getU4Group(&a, &b, &c, &d);
+            fromU4(a);
+            fromU4(b);
+            fromU4(c);
+            fromU4(d);
+        }
+        while (i != numElements) {
+            fromU4(p.getU4());
+            ++i;
+        }
+    } else if constexpr (nargs == 2) {
+        auto i = 0;
+        for ( ; (numElements - i) >= 2; i += 2) {
+            u4 a, b, c, d;
+            p.getU4Group(&a, &b, &c, &d);
+            fromU4(a, b);
+            fromU4(c, d);
+        }
+        while (i != numElements) {
+            u4 a = p.getU4();
+            u4 b = p.getU4();
+            fromU4(a, b);
+            ++i;
+        }
+    }
+}
+
 void serializeNameHash(Pickler &p, const std::vector<core::NameHash> &v) {
     p.putU4(v.size());
-    auto b = v.begin(), e = v.end();
-    for ( ; std::distance(b, e) >= 4; b += 4) {
-        p.putU4Group((b + 0)->_hashValue,
-                     (b + 1)->_hashValue,
-                     (b + 2)->_hashValue,
-                     (b + 3)->_hashValue);
-    }
-    while (std::distance(b, e) != 0) {
-        p.putU4(b->_hashValue);
-        ++b;
-    }
+    serializeGroupwise(p, v, [](const auto& name) -> std::tuple<u4> { return name._hashValue; });
 }
 void unserializeNameHash(UnPickler &p, std::vector<core::NameHash> &v) {
     auto size = p.getU4();
     v.reserve(size);
-    int it = 0;
-    for ( ; (it + 4) < size; it += 4) {
-        u4 a, b, c, d;
-        p.getU4Group(&a, &b, &c, &d);
+    unserializeGroupwise(p, size, [&v](u4 x) {
         NameHash key;
-        key._hashValue = a;
+        key._hashValue = x;
         v.emplace_back(key);
-        key._hashValue = b;
-        v.emplace_back(key);
-        key._hashValue = c;
-        v.emplace_back(key);
-        key._hashValue = d;
-        v.emplace_back(key);
-    }
-    for ( ; it < size; it++) {
-        NameHash key;
-        key._hashValue = p.getU4();
-        v.emplace_back(key);
-    }
+        });
 }
 }
 
@@ -758,15 +819,7 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     }
     fast_sort(membersSorted, [](auto const &lhs, auto const &rhs) -> bool { return lhs.first < rhs.first; });
 
-    auto b = membersSorted.begin(), e = membersSorted.end();
-    for ( ; std::distance(b, e) >= 2; b += 2) {
-        p.putU4Group((b + 0)->first, (b + 0)->second,
-                     (b + 1)->first, (b + 1)->second);
-    }
-    if (b != e) {
-        p.putU4(b->first);
-        p.putU4(b->second);
-    }
+    serializeGroupwise(p, membersSorted, [](const auto &m) -> std::tuple<u4, u4> { return {m.first, m.second}; });
 
     pickle(p, what.resultType);
     p.putU4(what.locs().size());
@@ -805,11 +858,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     }
     int membersSize = p.getU4();
     result.members().reserve(membersSize);
-    int it = 0;
-    for (; (it + 2) < membersSize; it += 2) {
-        u4 a, b, c, d;
-        p.getU4Group(&a, &b, &c, &d);
-        {
+    unserializeGroupwise(p, membersSize, [&](u4 a, u4 b) {
             auto name = NameRef::fromRaw(*gs, a);
             auto sym = SymbolRef::fromRaw(b);
             if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
@@ -818,30 +867,8 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
                 ENFORCE(sym.exists());
             }
             result.members()[name] = sym;
-        }
-        {
-            auto name = NameRef::fromRaw(*gs, c);
-            auto sym = SymbolRef::fromRaw(d);
-            if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
-                result.name != core::Names::noMethod()) {
-                ENFORCE(name.exists());
-                ENFORCE(sym.exists());
-            }
-            result.members()[name] = sym;
-        }
-    }
-    if (it != membersSize) {
-        {
-            auto name = NameRef::fromRaw(*gs, p.getU4());
-            auto sym = SymbolRef::fromRaw(p.getU4());
-            if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
-                result.name != core::Names::noMethod()) {
-                ENFORCE(name.exists());
-                ENFORCE(sym.exists());
-            }
-            result.members()[name] = sym;
-        }
-    }
+        });
+
     result.resultType = unpickleType(p, gs);
     auto locCount = p.getU4();
     for (int i = 0; i < locCount; i++) {
