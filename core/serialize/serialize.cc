@@ -511,10 +511,9 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     p.putU1(1);
     p.putU4(fh->definitions.hierarchyHash);
     p.putU4(fh->definitions.methodHashes.size());
-    for (const auto &[key, value] : fh->definitions.methodHashes) {
-        p.putU4(key._hashValue);
-        p.putU4(value);
-    }
+    serializeGroupwise(p, fh->definitions.methodHashes, [](const auto &p) -> std::tuple<u4, u4> {
+            return {p.first._hashValue, p.second};
+        });
     serializeNameHash(p, fh->usages.symbols);
     serializeNameHash(p, fh->usages.sends);
 }
@@ -529,11 +528,11 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
     ret.definitions.hierarchyHash = p.getU4();
     auto methodHashSize = p.getU4();
     ret.definitions.methodHashes.reserve(methodHashSize);
-    for (int it = 0; it < methodHashSize; it++) {
+    unserializeGroupwise(p, methodHashSize, [&ret](u4 keyhash, u4 value) {
         NameHash key;
-        key._hashValue = p.getU4();
-        ret.definitions.methodHashes.emplace_back(key, p.getU4());
-    }
+        key._hashValue = keyhash;
+        ret.definitions.methodHashes.emplace_back(key, value);
+        });
     unserializeNameHash(p, ret.usages.symbols);
     unserializeNameHash(p, ret.usages.sends);
     return make_unique<const FileHash>(move(ret));
