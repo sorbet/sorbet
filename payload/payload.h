@@ -7,16 +7,10 @@
 
 namespace sorbet::payload {
 
+constexpr std::string_view GLOBAL_STATE_KEY = "GlobalState";
+
 void createInitialGlobalState(std::unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
                               const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
-
-/** Returns 'true' if the given GlobalState was originally created from the current contents of kvstore (e.g., kvstore
- * has not since been modified). */
-bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const std::unique_ptr<OwnedKeyValueStore> &kvstore);
-
-/** Writes the GlobalState to kvstore, but only if it was modified. Returns 'true' if a write happens. */
-bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
-                       const std::unique_ptr<OwnedKeyValueStore> &kvstore);
 
 } // namespace sorbet::payload
 #endif // RUBY_TYPER_PAYLOAD_H

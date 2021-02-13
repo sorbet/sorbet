@@ -1,5 +1,4 @@
 #include "payload/payload.h"
-#include "common/Random.h"
 #include "common/Timer.h"
 #include "core/serialize/serialize.h"
 #include "payload/binary/binary.h"
@@ -8,11 +7,6 @@
 using namespace std;
 
 namespace sorbet::payload {
-
-namespace {
-constexpr string_view GLOBAL_STATE_KEY = "GlobalState"sv;
-}
-
 void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &options,
                               const unique_ptr<const OwnedKeyValueStore> &kvstore) {
     if (kvstore) {
@@ -76,35 +70,5 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const realmain:
         "Payload defined `{}` type arguments, which is greater than the expected maximum of `{}`. Consider updating "
         "`PAYLOAD_MAX_TYPE_ARGUMENT_COUNT` in `GlobalState`.",
         gs->typeArgumentsUsed(), core::GlobalState::PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
-}
-
-namespace {
-bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const u1 *maybeGsBytes) {
-    const bool storedUidMatches =
-        maybeGsBytes && gs.kvstoreUuid == core::serialize::Serializer::loadGlobalStateUUID(gs, maybeGsBytes);
-    const bool noPreviouslyStoredUuid = !maybeGsBytes && gs.kvstoreUuid == 0;
-    return storedUidMatches || noPreviouslyStoredUuid;
-}
-} // namespace
-
-bool kvstoreUnchangedSinceGsCreation(const core::GlobalState &gs, const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    return kvstoreUnchangedSinceGsCreation(gs, kvstore->read(GLOBAL_STATE_KEY).data);
-}
-
-bool retainGlobalState(core::GlobalState &gs, const realmain::options::Options &options,
-                       const unique_ptr<OwnedKeyValueStore> &kvstore) {
-    if (kvstore && gs.wasModified() && !gs.hadCriticalError()) {
-        auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
-        // Verify that no other GlobalState was written to kvstore between when we read GlobalState and wrote it
-        // into the databaase.
-        if (kvstoreUnchangedSinceGsCreation(gs, maybeGsBytes.data)) {
-            Timer timeit(gs.tracer(), "write_global_state.kvstore");
-            // Generate a new UUID, since this GS has changed since it was read.
-            gs.kvstoreUuid = Random::uniformU4();
-            kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(gs));
-            return true;
-        }
-    }
-    return false;
 }
 } // namespace sorbet::payload
