@@ -940,10 +940,7 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     }
 
     result.putU4(gs.namesByHash.size());
-    for (const auto &s : gs.namesByHash) {
-        result.putU4(s.first);
-        result.putU4(s.second);
-    }
+    serializeGroupwise(result, gs.namesByHash, [](const auto &s) -> std::tuple<int, int> { return {s.first, s.second}; });
     return result;
 }
 
@@ -1063,11 +1060,9 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         Timer timeit(result.tracer(), "readNameTable");
         int namesByHashSize = p.getU4();
         namesByHash.reserve(namesByHashSize);
-        for (int i = 0; i < namesByHashSize; i++) {
-            auto hash = p.getU4();
-            auto value = p.getU4();
+        unserializeGroupwise(p, namesByHashSize, [&namesByHash](u4 hash, u4 value) {
             namesByHash.emplace_back(make_pair(hash, value));
-        }
+            });
     }
 
     UnorderedMap<string, FileRef> fileRefByPath;
