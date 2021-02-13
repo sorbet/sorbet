@@ -908,9 +908,7 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
         pickle(result, n);
     }
     result.putU4(gs.constantNames.size());
-    for (const auto &n : gs.constantNames) {
-        pickle(result, n);
-    }
+    serializeGroupwise(result, gs.constantNames, [](const ConstantName &c) -> std::tuple<int> { return c.original.rawId(); });
     result.putU4(gs.uniqueNames.size());
     for (const auto &n : gs.uniqueNames) {
         pickle(result, n);
@@ -1011,9 +1009,9 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         namesSize = p.getU4();
         ENFORCE(namesSize > 0);
         constantNames.reserve(nextPowerOfTwo(namesSize));
-        for (int i = 0; i < namesSize; i++) {
-            constantNames.emplace_back(unpickleConstantName(p, result));
-        }
+        unserializeGroupwise(p, namesSize, [&result, &constantNames](u4 id) {
+                constantNames.emplace_back(ConstantName{NameRef::fromRaw(result, id)});
+            });
         namesSize = p.getU4();
         ENFORCE(namesSize > 0);
         uniqueNames.reserve(nextPowerOfTwo(namesSize));
