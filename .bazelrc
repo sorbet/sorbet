@@ -33,6 +33,7 @@ build --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
 # Developer laptops run skylake, devboxes run skylake-avx512
 # however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor)
 build --copt=-march=sandybridge
+build --host_copt=-march=sandybridge
 
 build --copt=-fno-omit-frame-pointer
 

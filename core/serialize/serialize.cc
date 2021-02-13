@@ -12,6 +12,10 @@
 #include "lib/lizard_compress.h"
 #include "lib/lizard_decompress.h"
 
+#include <array>
+
+#include <nmmintrin.h>
+
 template class std::vector<sorbet::u4>;
 
 using namespace std;
@@ -111,6 +115,174 @@ UnPickler::UnPickler(const u1 *const compressed, spdlog::logger &tracer) : pos(0
         Exception::raise("incomplete decompression");
     }
 }
+
+namespace {
+template <typename MakeItem, std::size_t... Index>
+constexpr auto make_array_with_(
+    MakeItem const& make, std::index_sequence<Index...>) {
+  return std::array<decltype(make(0)), sizeof...(Index)>{{make(Index)...}};
+}
+
+template <std::size_t Size, typename MakeItem>
+constexpr auto make_array_with(MakeItem const& make) {
+  return make_array_with_(make, std::make_index_sequence<Size>{});
+}
+
+struct group_varint_table_base_make_item {
+  constexpr std::size_t get_d(std::size_t index, std::size_t j) const {
+    return 1u + ((index >> (2 * j)) & 3u);
+  }
+  constexpr std::size_t get_offset(std::size_t index, std::size_t j) const {
+    // clang-format off
+    return
+        (j > 0 ? get_d(index, 0) : 0) +
+        (j > 1 ? get_d(index, 1) : 0) +
+        (j > 2 ? get_d(index, 2) : 0) +
+        (j > 3 ? get_d(index, 3) : 0) +
+        0;
+    // clang-format on
+  }
+};
+
+struct group_varint_table_length_make_item : group_varint_table_base_make_item {
+  constexpr std::uint8_t operator()(std::size_t index) const {
+    return 1u + get_offset(index, 4);
+  }
+};
+
+//  Reference: http://www.stepanovpapers.com/CIKM_2011.pdf
+//
+//  From 17 encoded bytes, we may use between 5 and 17 bytes to encode 4
+//  integers.  The first byte is a key that indicates how many bytes each of
+//  the 4 integers takes:
+//
+//  bit 0..1: length-1 of first integer
+//  bit 2..3: length-1 of second integer
+//  bit 4..5: length-1 of third integer
+//  bit 6..7: length-1 of fourth integer
+//
+//  The value of the first byte is used as the index in a table which returns
+//  a mask value for the SSSE3 PSHUFB instruction, which takes an XMM register
+//  (16 bytes) and shuffles bytes from it into a destination XMM register
+//  (optionally setting some of them to 0)
+//
+//  For example, if the key has value 4, that means that the first integer
+//  uses 1 byte, the second uses 2 bytes, the third and fourth use 1 byte each,
+//  so we set the mask value so that
+//
+//  r[0] = a[0]
+//  r[1] = 0
+//  r[2] = 0
+//  r[3] = 0
+//
+//  r[4] = a[1]
+//  r[5] = a[2]
+//  r[6] = 0
+//  r[7] = 0
+//
+//  r[8] = a[3]
+//  r[9] = 0
+//  r[10] = 0
+//  r[11] = 0
+//
+//  r[12] = a[4]
+//  r[13] = 0
+//  r[14] = 0
+//  r[15] = 0
+
+struct group_varint_table_sse_mask_make_item
+    : group_varint_table_base_make_item {
+  constexpr auto partial_item(
+      std::size_t d, std::size_t offset, std::size_t k) const {
+    // if k < d, the j'th integer uses d bytes, consume them
+    // set remaining bytes in result to 0
+    // 0xff: set corresponding byte in result to 0
+    return std::uint32_t((k < d ? offset + k : std::size_t(0xff)) << (8 * k));
+  }
+
+  constexpr auto item_impl(std::size_t d, std::size_t offset) const {
+    // clang-format off
+    return
+        partial_item(d, offset, 0) |
+        partial_item(d, offset, 1) |
+        partial_item(d, offset, 2) |
+        partial_item(d, offset, 3) |
+        0;
+    // clang-format on
+  }
+
+  constexpr auto item(std::size_t index, std::size_t j) const {
+    return item_impl(get_d(index, j), get_offset(index, j));
+  }
+
+  constexpr auto operator()(std::size_t index) const {
+    return std::array<std::uint32_t, 4>{{
+        item(index, 0),
+        item(index, 1),
+        item(index, 2),
+        item(index, 3),
+    }};
+  }
+};
+
+alignas(16) constexpr
+    std::array<std::array<std::uint32_t, 4>, 256> groupVarintSSEMasks =
+        make_array_with<256>(group_varint_table_sse_mask_make_item{});
+
+constexpr std::array<std::uint8_t, 256> groupVarintLengths =
+    make_array_with<256>(group_varint_table_length_make_item{});
+
+static void storeUnaligned(void *p, uint32_t x) {
+    memcpy(p, &x, sizeof(x));
+}
+
+  static uint8_t key(uint32_t x) {
+    // __builtin_clz is undefined for the x==0 case
+    return uint8_t(3 - (__builtin_clz(x | 1) / 8));
+  }
+#if 0
+  static size_t b0key(size_t x) { return x & 3; }
+  static size_t b1key(size_t x) { return (x >> 2) & 3; }
+  static size_t b2key(size_t x) { return (x >> 4) & 3; }
+  static size_t b3key(size_t x) { return (x >> 6) & 3; }
+#endif
+
+}
+
+void UnPickler::getU4Group(uint32_t* a, uint32_t* b, uint32_t* c, uint32_t* d) {
+    uint8_t key = data[pos++];
+    __m128i val = _mm_loadu_si128((const __m128i*)(&data[pos]));
+    __m128i mask =
+        _mm_load_si128((const __m128i*)groupVarintSSEMasks[key].data());
+    __m128i r = _mm_shuffle_epi8(val, mask);
+
+    // Extracting 32 bits at a time out of an XMM register is a SSE4 feature
+    *a = uint32_t(_mm_extract_epi32(r, 0));
+    *b = uint32_t(_mm_extract_epi32(r, 1));
+    *c = uint32_t(_mm_extract_epi32(r, 2));
+    *d = uint32_t(_mm_extract_epi32(r, 3));
+
+    pos += groupVarintLengths[key];
+}
+
+void Pickler::putU4Group(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
+    uint8_t b0key = key(a);
+    uint8_t b1key = key(b);
+    uint8_t b2key = key(c);
+    uint8_t b3key = key(d);
+    data.emplace_back((b3key << 6) | (b2key << 4) | (b1key << 2) | b0key);
+    size_t start = data.size();
+    data.resize(data.size() + 16);
+    storeUnaligned(&data[start], a);
+    start += b0key + 1;
+    storeUnaligned(&data[start], b);
+    start += b1key + 1;
+    storeUnaligned(&data[start], c);
+    start += b2key + 1;
+    storeUnaligned(&data[start], d);
+    start += b3key + 1;
+    data.resize(start);
+  }
 
 string_view UnPickler::getStr() {
     int sz = getU4();

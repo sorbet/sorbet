@@ -13,6 +13,9 @@ public:
     void putU1(const u1 u);
     void putS8(const int64_t i);
     void putStr(std::string_view s);
+
+    void putU4Group(u4, u4, u4, u4);
+
     std::vector<u1> result(int compressionDegree);
     Pickler() = default;
 };
@@ -27,6 +30,9 @@ public:
     u1 getU1();
     int64_t getS8();
     std::string_view getStr();
+
+    void getU4Group(u4*, u4*, u4*, u4*);
+
     explicit UnPickler(const u1 *const compressed, spdlog::logger &tracer);
 };
 
