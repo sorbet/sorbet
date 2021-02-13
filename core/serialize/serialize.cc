@@ -758,9 +758,14 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     }
     fast_sort(membersSorted, [](auto const &lhs, auto const &rhs) -> bool { return lhs.first < rhs.first; });
 
-    for (const auto &member : membersSorted) {
-        p.putU4(member.first);
-        p.putU4(member.second);
+    auto b = membersSorted.begin(), e = membersSorted.end();
+    for ( ; std::distance(b, e) >= 2; b += 2) {
+        p.putU4Group((b + 0)->first, (b + 0)->second,
+                     (b + 1)->first, (b + 1)->second);
+    }
+    if (b != e) {
+        p.putU4(b->first);
+        p.putU4(b->second);
     }
 
     pickle(p, what.resultType);
@@ -800,15 +805,42 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     }
     int membersSize = p.getU4();
     result.members().reserve(membersSize);
-    for (int i = 0; i < membersSize; i++) {
-        auto name = NameRef::fromRaw(*gs, p.getU4());
-        auto sym = SymbolRef::fromRaw(p.getU4());
-        if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
-            result.name != core::Names::noMethod()) {
-            ENFORCE(name.exists());
-            ENFORCE(sym.exists());
+    int it = 0;
+    for (; (it + 2) < membersSize; it += 2) {
+        u4 a, b, c, d;
+        p.getU4Group(&a, &b, &c, &d);
+        {
+            auto name = NameRef::fromRaw(*gs, a);
+            auto sym = SymbolRef::fromRaw(b);
+            if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
+                result.name != core::Names::noMethod()) {
+                ENFORCE(name.exists());
+                ENFORCE(sym.exists());
+            }
+            result.members()[name] = sym;
         }
-        result.members()[name] = sym;
+        {
+            auto name = NameRef::fromRaw(*gs, c);
+            auto sym = SymbolRef::fromRaw(d);
+            if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
+                result.name != core::Names::noMethod()) {
+                ENFORCE(name.exists());
+                ENFORCE(sym.exists());
+            }
+            result.members()[name] = sym;
+        }
+    }
+    if (it != membersSize) {
+        {
+            auto name = NameRef::fromRaw(*gs, p.getU4());
+            auto sym = SymbolRef::fromRaw(p.getU4());
+            if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
+                result.name != core::Names::noMethod()) {
+                ENFORCE(name.exists());
+                ENFORCE(sym.exists());
+            }
+            result.members()[name] = sym;
+        }
     }
     result.resultType = unpickleType(p, gs);
     auto locCount = p.getU4();
