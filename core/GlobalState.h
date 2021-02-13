@@ -49,9 +49,18 @@ class GlobalState final {
     friend class UnfreezeFileTable;
     friend struct NameRefDebugCheck;
 
+    // Private constructor that allows a specific globalStateId. Used in `makeEmptyGlobalStateForHashing` to avoid
+    // contention on the global state ID atomic.
+    GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager,
+                int globalStateId);
+
 public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager);
+
+    // Creates an empty global state for hashing. Bypasses important sanity checks that are used for other types of
+    // global states.
+    static std::unique_ptr<GlobalState> makeEmptyGlobalStateForHashing(spdlog::logger &logger);
 
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload. Enforced in payload.cc.

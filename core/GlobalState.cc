@@ -6,6 +6,7 @@
 #include "core/NameHash.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
+#include "core/NullFlusher.h"
 #include "core/Types.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
@@ -80,8 +81,12 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
     : GlobalState(move(errorQueue), make_shared<lsp::TypecheckEpochManager>()) {}
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager)
-    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(std::move(errorQueue)),
-      lspQuery(lsp::Query::noQuery()), epochManager(move(epochManager)) {
+    : GlobalState(move(errorQueue), move(epochManager), globalStateIdCounter.fetch_add(1)) {}
+
+GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager,
+                         int globalStateId)
+    : globalStateId(globalStateId), errorQueue(std::move(errorQueue)), lspQuery(lsp::Query::noQuery()),
+      epochManager(move(epochManager)) {
     // Reserve memory in internal vectors for the contents of payload.
     utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
     constantNames.reserve(PAYLOAD_MAX_CONSTANT_NAME_COUNT);
@@ -96,6 +101,16 @@ GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::Type
         2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
     namesByHash.resize(namesByHashSize);
     ENFORCE((namesByHashSize & (namesByHashSize - 1)) == 0, "namesByHashSize is not a power of 2");
+}
+
+unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logger &logger) {
+    // Note: Private constructor.
+    unique_ptr<GlobalState> rv(
+        new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
+                        make_shared<lsp::TypecheckEpochManager>(), 999));
+    rv->initEmpty();
+    rv->silenceErrors = true;
+    return rv;
 }
 
 void GlobalState::initEmpty() {

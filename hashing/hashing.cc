@@ -5,7 +5,6 @@
 #include "core/ErrorQueue.h"
 #include "core/GlobalSubstitution.h"
 #include "core/NameHash.h"
-#include "core/NullFlusher.h"
 #include "core/Unfreeze.h"
 #include "main/pipeline/pipeline.h"
 
@@ -44,10 +43,7 @@ unique_ptr<core::FileHash> computeFileHashForAST(unique_ptr<core::GlobalState> &
 core::FileRef makeEmptyGlobalStateForFile(spdlog::logger &logger, shared_ptr<core::File> forWhat,
                                           unique_ptr<core::GlobalState> &lgs,
                                           const realmain::options::Options &hashingOpts) {
-    lgs = make_unique<core::GlobalState>(
-        (make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>())));
-    lgs->initEmpty();
-    lgs->silenceErrors = true;
+    lgs = core::GlobalState::makeEmptyGlobalStateForHashing(logger);
     lgs->requiresAncestorEnabled = hashingOpts.requiresAncestorEnabled;
     {
         core::UnfreezeFileTable fileTableAccess(*lgs);
