@@ -3,6 +3,8 @@
 
 #include <memory>
 
+class Joinable;
+
 namespace spdlog {
 class logger;
 }
@@ -31,10 +33,11 @@ std::unique_ptr<OwnedKeyValueStore> maybeCreateKeyValueStore(const options::Opti
 std::unique_ptr<OwnedKeyValueStore> ownIfUnchanged(const core::GlobalState &gs, std::unique_ptr<KeyValueStore> kvstore);
 
 // If kvstore is not null, caches global state and the given files to disk if they have changed. Can silently fail to
-// cache. Asynchronously commits the kvstore to disk.
-void maybeCacheGlobalStateAndFiles(std::unique_ptr<KeyValueStore> kvstore, std::shared_ptr<spdlog::logger> tracer,
-                                   const options::Options &opts, core::GlobalState &gs, WorkerPool &workers,
-                                   std::vector<ast::ParsedFile> &indexed);
+// cache. Asynchronously commits the kvstore to disk. Returns a Joinable for the thread performing the work.
+std::unique_ptr<Joinable> maybeCacheGlobalStateAndFiles(std::unique_ptr<KeyValueStore> kvstore,
+                                                        std::shared_ptr<spdlog::logger> tracer,
+                                                        const options::Options &opts, core::GlobalState &gs,
+                                                        WorkerPool &workers, std::vector<ast::ParsedFile> &indexed);
 } // namespace sorbet::realmain::cache
 
 #endif

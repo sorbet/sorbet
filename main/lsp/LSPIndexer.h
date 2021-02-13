@@ -39,6 +39,9 @@ class LSPIndexer final {
     UnorderedMap<core::FileRef, std::shared_ptr<core::File>> evictedFiles;
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
+    /** Joinable for the thread that is writing to the cache. Storing it here ensures that we can write the cache
+     * asynchronously. */
+    std::unique_ptr<Joinable> cacheThread;
 
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
 
