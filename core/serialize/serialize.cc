@@ -250,7 +250,7 @@ static void storeUnaligned(void *p, uint32_t x) {
 }
 
 void UnPickler::getU4Group(uint32_t* a, uint32_t* b, uint32_t* c, uint32_t* d) {
-    uint8_t key = data[pos++];
+    uint8_t key = getU1();
     __m128i val = _mm_loadu_si128((const __m128i*)(&data[pos]));
     __m128i mask =
         _mm_load_si128((const __m128i*)groupVarintSSEMasks[key].data());
@@ -262,7 +262,7 @@ void UnPickler::getU4Group(uint32_t* a, uint32_t* b, uint32_t* c, uint32_t* d) {
     *c = uint32_t(_mm_extract_epi32(r, 2));
     *d = uint32_t(_mm_extract_epi32(r, 3));
 
-    pos += groupVarintLengths[key];
+    pos += (groupVarintLengths[key] - 1);
 }
 
 void Pickler::putU4Group(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
@@ -270,9 +270,10 @@ void Pickler::putU4Group(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
     uint8_t b1key = key(b);
     uint8_t b2key = key(c);
     uint8_t b3key = key(d);
-    data.emplace_back((b3key << 6) | (b2key << 4) | (b1key << 2) | b0key);
+    uint8_t key = (b3key << 6) | (b2key << 4) | (b1key << 2) | b0key;
+    putU1(key);
     size_t start = data.size();
-    data.resize(data.size() + 16);
+    data.resize(start + 16);
     storeUnaligned(&data[start], a);
     start += b0key + 1;
     storeUnaligned(&data[start], b);
@@ -707,10 +708,10 @@ ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
 }
 
 void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
-    p.putU4(what.owner.rawId());
-    p.putU4(what.name.rawId());
-    p.putU4(what.superClassOrRebind.rawId());
-    p.putU4(what.flags);
+    p.putU4Group(what.owner.rawId(),
+                 what.name.rawId(),
+                 what.superClassOrRebind.rawId(),
+                 what.flags);
     if (!what.isMethod()) {
         p.putU4(what.mixins_.size());
         for (ClassOrModuleRef s : what.mixins_) {
@@ -749,10 +750,12 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
 
 Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     Symbol result;
-    result.owner = SymbolRef::fromRaw(p.getU4());
-    result.name = NameRef::fromRaw(*gs, p.getU4());
-    result.superClassOrRebind = SymbolRef::fromRaw(p.getU4());
-    result.flags = p.getU4();
+    u4 owner, name, superClass, flags;
+    p.getU4Group(&owner, &name, &superClass, &flags);
+    result.owner = SymbolRef::fromRaw(owner);
+    result.name = NameRef::fromRaw(*gs, name);
+    result.superClassOrRebind = SymbolRef::fromRaw(superClass);
+    result.flags = flags;
     if (!result.isMethod()) {
         int mixinsSize = p.getU4();
         result.mixins_.reserve(mixinsSize);
