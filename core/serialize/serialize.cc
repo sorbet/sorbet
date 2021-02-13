@@ -402,6 +402,46 @@ int64_t UnPickler::getS8() {
     return absl::bit_cast<int64_t>(res);
 }
 
+namespace {
+void serializeNameHash(Pickler &p, const std::vector<core::NameHash> &v) {
+    p.putU4(v.size());
+    auto b = v.begin(), e = v.end();
+    for ( ; std::distance(b, e) >= 4; b += 4) {
+        p.putU4Group((b + 0)->_hashValue,
+                     (b + 1)->_hashValue,
+                     (b + 2)->_hashValue,
+                     (b + 3)->_hashValue);
+    }
+    while (std::distance(b, e) != 0) {
+        p.putU4(b->_hashValue);
+        ++b;
+    }
+}
+void unserializeNameHash(UnPickler &p, std::vector<core::NameHash> &v) {
+    auto size = p.getU4();
+    v.reserve(size);
+    int it = 0;
+    for ( ; (it + 4) < size; it += 4) {
+        u4 a, b, c, d;
+        p.getU4Group(&a, &b, &c, &d);
+        NameHash key;
+        key._hashValue = a;
+        v.emplace_back(key);
+        key._hashValue = b;
+        v.emplace_back(key);
+        key._hashValue = c;
+        v.emplace_back(key);
+        key._hashValue = d;
+        v.emplace_back(key);
+    }
+    for ( ; it < size; it++) {
+        NameHash key;
+        key._hashValue = p.getU4();
+        v.emplace_back(key);
+    }
+}
+}
+
 void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     if (fh == nullptr) {
         p.putU1(0);
@@ -414,14 +454,8 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
         p.putU4(key._hashValue);
         p.putU4(value);
     }
-    p.putU4(fh->usages.symbols.size());
-    for (const auto &e : fh->usages.symbols) {
-        p.putU4(e._hashValue);
-    }
-    p.putU4(fh->usages.sends.size());
-    for (const auto &e : fh->usages.sends) {
-        p.putU4(e._hashValue);
-    }
+    serializeNameHash(p, fh->usages.symbols);
+    serializeNameHash(p, fh->usages.sends);
 }
 
 unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
@@ -439,20 +473,8 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
         key._hashValue = p.getU4();
         ret.definitions.methodHashes.emplace_back(key, p.getU4());
     }
-    auto constantsSize = p.getU4();
-    ret.usages.symbols.reserve(constantsSize);
-    for (int it = 0; it < constantsSize; it++) {
-        NameHash key;
-        key._hashValue = p.getU4();
-        ret.usages.symbols.emplace_back(key);
-    }
-    auto sendsSize = p.getU4();
-    ret.usages.sends.reserve(sendsSize);
-    for (int it = 0; it < sendsSize; it++) {
-        NameHash key;
-        key._hashValue = p.getU4();
-        ret.usages.sends.emplace_back(key);
-    }
+    unserializeNameHash(p, ret.usages.symbols);
+    unserializeNameHash(p, ret.usages.sends);
     return make_unique<const FileHash>(move(ret));
 }
 
