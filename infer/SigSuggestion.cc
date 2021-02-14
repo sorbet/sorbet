@@ -11,14 +11,14 @@ namespace sorbet::infer {
 
 namespace {
 
-bool extendsTSig(core::Context ctx, core::SymbolRef enclosingClass) {
+bool extendsTSig(core::Context ctx, core::ClassOrModuleRef enclosingClass) {
     ENFORCE(enclosingClass.exists());
     auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
     ENFORCE(enclosingSingletonClass.exists());
     return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
 }
 
-optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::SymbolRef methodSymbol) {
+optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::MethodRef methodSymbol) {
     auto method = methodSymbol.data(ctx);
 
     auto enclosingClass = method->enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
@@ -140,7 +140,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
     }
 }
 
-UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol,
+UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx, core::MethodRef methodSymbol,
                                                               unique_ptr<cfg::CFG> &cfg) {
     // What variables by the end of basic block could plausibly contain what arguments.
     vector<UnorderedMap<cfg::LocalRef, InlinedVector<core::NameRef, 1>>> localsStoringArguments;
@@ -273,7 +273,7 @@ core::MethodRef closestOverridenMethod(core::Context ctx, core::ClassOrModuleRef
     }
 }
 
-bool childNeedsOverride(core::Context ctx, core::SymbolRef childSymbol, core::SymbolRef parentSymbol) {
+bool childNeedsOverride(core::Context ctx, core::MethodRef childSymbol, core::MethodRef parentSymbol) {
     return
         // We're overriding a method...
         parentSymbol.exists() &&
@@ -298,7 +298,7 @@ bool childNeedsOverride(core::Context ctx, core::SymbolRef childSymbol, core::Sy
 optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Context ctx, unique_ptr<cfg::CFG> &cfg,
                                                                      const core::TypePtr &methodReturnType,
                                                                      core::TypeConstraint &constr) {
-    core::SymbolRef methodSymbol = cfg->symbol;
+    core::MethodRef methodSymbol = cfg->symbol;
 
     bool guessedSomethingUseful = false;
 

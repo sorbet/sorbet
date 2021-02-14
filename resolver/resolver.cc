@@ -392,7 +392,7 @@ private:
 
     static bool resolveTypeAliasJob(core::MutableContext ctx, TypeAliasResolutionItem &job) {
         core::SymbolRef enclosingTypeMember;
-        core::SymbolRef enclosingClass = job.lhs.data(ctx)->enclosingClass(ctx);
+        core::ClassOrModuleRef enclosingClass = job.lhs.data(ctx)->enclosingClass(ctx);
         while (enclosingClass != core::Symbols::root()) {
             auto typeMembers = enclosingClass.data(ctx)->typeMembers();
             if (!typeMembers.empty()) {

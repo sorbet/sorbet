@@ -1,5 +1,4 @@
 #include "core/hashing/hashing.h"
-#include "core/SymbolRef.h"
 #include "core/Types.h"
 
 using namespace std;

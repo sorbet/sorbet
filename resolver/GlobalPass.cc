@@ -14,14 +14,14 @@ using namespace std;
 namespace sorbet::resolver {
 
 namespace {
-core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, core::SymbolRef klass,
+core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, core::ClassOrModuleRef klass,
                           const vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
     ENFORCE(tparam.isTypeMember());
     if (tparam.data(gs)->owner == klass) {
         return tparam;
     } else {
         core::SymbolRef cursor;
-        if (tparam.data(gs)->owner.data(gs)->derivesFrom(gs, klass.asClassOrModuleRef())) {
+        if (tparam.data(gs)->owner.data(gs)->derivesFrom(gs, klass)) {
             cursor = tparam.data(gs)->owner;
         } else if (klass.data(gs)->derivesFrom(gs, tparam.data(gs)->owner.asClassOrModuleRef())) {
             cursor = klass;
@@ -182,8 +182,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     int methodCount = 0;
     int classCount = 0;
     int moduleCount = 0;
-    for (int i = 1; i < gs.methodsUsed(); ++i) {
-        auto ref = core::SymbolRef(&gs, core::SymbolRef::Kind::Method, i);
+    for (size_t i = 1; i < gs.methodsUsed(); ++i) {
+        auto ref = core::MethodRef(gs, i);
         ENFORCE(ref.data(gs)->isMethod());
         auto loc = ref.data(gs)->loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
@@ -368,11 +368,10 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
     // that resolves types and we don't want to introduce additional passes if
     // we don't have to. It would be a tractable refactor to merge it
     // `ResolveConstantsWalk` if it becomes necessary to process earlier.
-    for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-        auto sym = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
-        ENFORCE(sym.isClassOrModule());
+    for (u4 i = 1; i < gs.classAndModulesUsed(); ++i) {
+        auto sym = core::ClassOrModuleRef(gs, i);
 
-        core::SymbolRef singleton;
+        core::ClassOrModuleRef singleton;
         for (auto ancst : sym.data(gs)->mixins()) {
             ENFORCE(ancst.data(gs)->isClassOrModule());
             // Reading the fake property created in resolver#resolveClassMethodsJob(){}

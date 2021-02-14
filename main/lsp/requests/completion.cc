@@ -83,7 +83,8 @@ const RubyKeyword rubyKeywords[] = {
     {"yield", "Starts execution of the block sent to the current method."},
 };
 
-vector<core::SymbolRef> ancestorsImpl(const core::GlobalState &gs, core::SymbolRef sym, vector<core::SymbolRef> &&acc) {
+vector<core::ClassOrModuleRef> ancestorsImpl(const core::GlobalState &gs, core::ClassOrModuleRef sym,
+                                             vector<core::ClassOrModuleRef> &&acc) {
     // The implementation here is similar to Symbols::derivesFrom.
     ENFORCE(sym.data(gs)->isClassOrModuleLinearizationComputed());
     acc.emplace_back(sym);
@@ -101,14 +102,14 @@ vector<core::SymbolRef> ancestorsImpl(const core::GlobalState &gs, core::SymbolR
 
 // Basically the same as Module#ancestors from Ruby--but don't depend on it being exactly equal.
 // For us, it's just something that's vaguely ordered from "most specific" to "least specific" ancestor.
-vector<core::SymbolRef> ancestors(const core::GlobalState &gs, core::SymbolRef receiver) {
-    return ancestorsImpl(gs, receiver, vector<core::SymbolRef>{});
+vector<core::ClassOrModuleRef> ancestors(const core::GlobalState &gs, core::ClassOrModuleRef receiver) {
+    return ancestorsImpl(gs, receiver, vector<core::ClassOrModuleRef>{});
 }
 
 struct SimilarMethod final {
     int depth;
-    core::SymbolRef receiver;
-    core::SymbolRef method;
+    core::ClassOrModuleRef receiver;
+    core::MethodRef method;
 
     // Populated later
     core::TypePtr receiverType = nullptr;
@@ -123,14 +124,15 @@ using SimilarMethodsByName = UnorderedMap<core::NameRef, vector<SimilarMethod>>;
 
 // First of pair is "found at this depth in the ancestor hierarchy"
 // Second of pair is method symbol found at that depth, with name similar to prefix.
-SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::SymbolRef receiver, string_view prefix) {
+SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::ClassOrModuleRef receiver,
+                                            string_view prefix) {
     auto result = SimilarMethodsByName{};
 
     int depth = -1;
     for (auto ancestor : ancestors(gs, receiver)) {
         depth++;
         for (auto [memberName, memberSymbol] : ancestor.data(gs)->members()) {
-            if (!memberSymbol.data(gs)->isMethod()) {
+            if (!memberSymbol.isMethod()) {
                 continue;
             }
             if (hasAngleBrackets(memberName.shortName(gs))) {
@@ -140,7 +142,7 @@ SimilarMethodsByName similarMethodsForClass(const core::GlobalState &gs, core::S
 
             if (hasSimilarName(gs, memberName, prefix)) {
                 // Creates the the list if it does not exist
-                result[memberName].emplace_back(SimilarMethod{depth, receiver, memberSymbol});
+                result[memberName].emplace_back(SimilarMethod{depth, receiver, memberSymbol.asMethodRef()});
             }
         }
     }
@@ -485,7 +487,7 @@ vector<core::LocalVariable> localsForMethod(const core::GlobalState &gs, LSPType
     return result;
 }
 
-core::SymbolRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
+core::MethodRef firstMethodAfterQuery(LSPTypecheckerDelegate &typechecker, const core::Loc queryLoc) {
     const auto &gs = typechecker.state();
     auto files = vector<core::FileRef>{queryLoc.file()};
     auto resolved = typechecker.getResolved(files);
@@ -547,7 +549,7 @@ unique_ptr<CompletionItem> trySuggestSig(LSPTypecheckerDelegate &typechecker,
         return nullptr;
     }
 
-    core::SymbolRef receiverSym;
+    core::ClassOrModuleRef receiverSym;
     if (core::isa_type<core::ClassType>(receiverType)) {
         auto classType = core::cast_type_nonnull<core::ClassType>(receiverType);
         receiverSym = classType.symbol;
@@ -654,12 +656,11 @@ CompletionTask::CompletionTask(const LSPConfiguration &config, MessageId id, uni
 
 unique_ptr<CompletionItem>
 CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, core::DispatchResult &dispatchResult,
-                                           core::SymbolRef maybeAlias, const core::TypePtr &receiverType,
+                                           core::MethodRef maybeAlias, const core::TypePtr &receiverType,
                                            const core::TypeConstraint *constraint, core::Loc queryLoc,
                                            string_view prefix, size_t sortIdx, u2 totalArgs) const {
     const auto &gs = typechecker.state();
     ENFORCE(maybeAlias.exists());
-    ENFORCE(maybeAlias.data(gs)->isMethod());
     auto clientConfig = config.getClientConfig();
     auto supportsSnippets = clientConfig.clientCompletionItemSnippetSupport;
     auto markupKind = clientConfig.clientCompletionItemMarkupKind;
@@ -746,7 +747,7 @@ void CompletionTask::findSimilarConstants(const core::GlobalState &gs, const cor
     }
 
     int i = -1;
-    for (auto ancestor : ancestors(gs, resp.scopes[0])) {
+    for (auto ancestor : ancestors(gs, resp.scopes[0].asClassOrModuleRef())) {
         i++;
 
         if (i == 0) {
@@ -810,7 +811,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                     return left.depth < right.depth;
                 }
 
-                return left.method.rawId() < right.method.rawId();
+                return left.method.id() < right.method.id();
             });
         }
 
@@ -856,7 +857,7 @@ unique_ptr<ResponseMessage> CompletionTask::runRequest(LSPTypecheckerDelegate &t
                 return leftShortName < rightShortName;
             }
 
-            return left.method.rawId() < right.method.rawId();
+            return left.method.id() < right.method.id();
         });
 
         // TODO(jez) Do something smarter here than "all keywords then all locals then all methods"

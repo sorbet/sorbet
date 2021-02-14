@@ -169,7 +169,7 @@ core::Loc smallestLocWithin(core::Loc callLoc, const core::TypeAndOrigins &argTp
 }
 
 unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
-                               ClassOrModuleRef inClass, SymbolRef method, const TypeAndOrigins &argTpe,
+                               ClassOrModuleRef inClass, MethodRef method, const TypeAndOrigins &argTpe,
                                const ArgInfo &argSym, const TypePtr &selfType, const vector<TypePtr> &targs, Loc loc,
                                Loc originForUninitialized, bool mayBeSetter = false) {
     TypePtr expectedType =
@@ -213,7 +213,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
     return nullptr;
 }
 
-unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc, SymbolRef method,
+unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc, MethodRef method,
                              const ArgInfo &arg) {
     if (auto e = gs.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
         e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.name.show(gs),
@@ -224,7 +224,7 @@ unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc
 }
 }; // namespace
 
-int getArity(const GlobalState &gs, SymbolRef method) {
+int getArity(const GlobalState &gs, MethodRef method) {
     ENFORCE(!method.data(gs)->arguments().empty(), "Every method should have at least a block arg.");
     ENFORCE(method.data(gs)->arguments().back().flags.isBlock, "Last arg should be the block arg.");
 
@@ -309,7 +309,7 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
 
     { // keep only candidates that have a block iff we are passing one
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
-            SymbolRef candidate = *it;
+            MethodRef candidate = *it;
             const auto &args = candidate.data(gs)->arguments();
             ENFORCE(!args.empty(), "Should at least have a block argument.");
             auto mentionsBlockArg = !args.back().isSyntheticBlockArgument();
@@ -325,11 +325,11 @@ MethodRef guessOverload(const GlobalState &gs, ClassOrModuleRef inClass, MethodR
         struct Comp {
             const GlobalState &gs;
 
-            bool operator()(SymbolRef s, int i) const {
+            bool operator()(MethodRef s, int i) const {
                 return getArity(gs, s) < i;
             }
 
-            bool operator()(int i, SymbolRef s) const {
+            bool operator()(int i, MethodRef s) const {
                 return i < getArity(gs, s);
             }
 
@@ -389,7 +389,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
     }
 
     if (auto *appType = cast_type<AppliedType>(tp)) {
-        SymbolRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
+        ClassOrModuleRef attachedClass = appType->klass.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
             if (auto e = gs.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
@@ -423,7 +423,7 @@ TypePtr unwrapType(const GlobalState &gs, Loc loc, const TypePtr &tp) {
     return tp;
 }
 
-string prettyArity(const GlobalState &gs, SymbolRef method) {
+string prettyArity(const GlobalState &gs, MethodRef method) {
     int required = 0, optional = 0;
     bool repeated = false;
     for (const auto &arg : method.data(gs)->arguments()) {
@@ -446,7 +446,7 @@ string prettyArity(const GlobalState &gs, SymbolRef method) {
     }
 }
 
-bool extendsTHelpers(const GlobalState &gs, core::SymbolRef enclosingClass) {
+bool extendsTHelpers(const GlobalState &gs, core::ClassOrModuleRef enclosingClass) {
     ENFORCE(enclosingClass.exists());
     auto enclosingSingletonClass = enclosingClass.data(gs)->lookupSingletonClass(gs);
     ENFORCE(enclosingSingletonClass.exists());
@@ -456,8 +456,8 @@ bool extendsTHelpers(const GlobalState &gs, core::SymbolRef enclosingClass) {
 /**
  * Make an autocorrection for adding `extend T::Helpers`, when needed.
  */
-optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalState &gs, core::SymbolRef enclosingClass,
-                                                                 const Loc &call) {
+optional<core::AutocorrectSuggestion>
+maybeSuggestExtendTHelpers(const GlobalState &gs, core::ClassOrModuleRef enclosingClass, const Loc &call) {
     if (extendsTHelpers(gs, enclosingClass)) {
         // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;
@@ -918,7 +918,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = cast_type_nonnull<LiteralType>(*it);
                         auto underlying = key.underlying(gs);
-                        SymbolRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
+                        ClassOrModuleRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
                         if (klass != Symbols::Symbol()) {
                             continue;
                         }
@@ -975,7 +975,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             for (auto &keyType : hash->keys) {
                 auto key = cast_type_nonnull<LiteralType>(keyType);
                 auto underlying = key.underlying(gs);
-                SymbolRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
+                ClassOrModuleRef klass = cast_type_nonnull<ClassType>(underlying).symbol;
                 if (klass == Symbols::Symbol() && consumed.find(key.asName(gs)) != consumed.end()) {
                     continue;
                 }
@@ -1204,8 +1204,8 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
 
 namespace {
 
-SymbolRef unwrapSymbol(const GlobalState &gs, const TypePtr &type) {
-    SymbolRef result;
+ClassOrModuleRef unwrapSymbol(const GlobalState &gs, const TypePtr &type) {
+    ClassOrModuleRef result;
     TypePtr typePtr = type;
     while (!result.exists()) {
         typecase(
@@ -1342,7 +1342,7 @@ public:
 class Object_class : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        SymbolRef self = unwrapSymbol(gs, args.thisType);
+        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType);
         auto singleton = self.data(gs)->lookupSingletonClass(gs);
         if (singleton.exists()) {
             res.returnType = singleton.data(gs)->externalType();
@@ -1355,7 +1355,7 @@ public:
 class Class_new : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        SymbolRef self = unwrapSymbol(gs, args.thisType);
+        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType);
 
         auto attachedClass = self.data(gs)->attachedClass(gs);
         if (!attachedClass.exists()) {
@@ -1401,7 +1401,7 @@ public:
     // Unfortunately, this means that some errors are double reported (once by resolver, and then
     // again by infer).
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        SymbolRef self = unwrapSymbol(gs, args.thisType);
+        ClassOrModuleRef self = unwrapSymbol(gs, args.thisType);
         auto attachedClass = self.data(gs)->attachedClass(gs);
 
         if (!attachedClass.exists()) {
@@ -2148,7 +2148,7 @@ public:
         }
 
         auto selfTy = *args.args[0];
-        SymbolRef self = unwrapSymbol(gs, selfTy.type);
+        ClassOrModuleRef self = unwrapSymbol(gs, selfTy.type);
 
         u2 numPosArgs = args.numPosArgs - 1;
 
@@ -2748,7 +2748,7 @@ public:
         }
         auto rc = Types::getRepresentedClass(gs, args.thisType);
         // in most cases, thisType is T.class_of(rc). see test/testdata/class_not_class_of.rb for an edge case.
-        if (rc == core::Symbols::noSymbol()) {
+        if (rc == core::Symbols::noClassOrModule()) {
             res.returnType = Types::Boolean();
             return;
         }

@@ -8,14 +8,14 @@ namespace sorbet::realmain::lsp {
 class NextMethodFinder {
     const core::Loc queryLoc;
 
-    core::SymbolRef result_;
+    core::MethodRef result_;
 
 public:
-    NextMethodFinder(core::Loc queryLoc) : queryLoc(queryLoc), result_(core::Symbols::noSymbol()) {}
+    NextMethodFinder(core::Loc queryLoc) : queryLoc(queryLoc), result_(core::Symbols::noMethod()) {}
 
     ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr methodDef);
 
-    const core::SymbolRef result() const;
+    const core::MethodRef result() const;
 };
 }; // namespace sorbet::realmain::lsp
 

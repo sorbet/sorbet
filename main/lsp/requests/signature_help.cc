@@ -6,7 +6,7 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
+void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
                           vector<unique_ptr<SignatureInformation>> &sigs, const core::lsp::SendResponse &resp,
                           int activeParameter) {
     // signature helps only exist for methods.
