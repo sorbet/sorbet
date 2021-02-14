@@ -501,6 +501,19 @@ void unserializeNameHash(UnPickler &p, std::vector<core::NameHash> &v) {
         v.emplace_back(key);
         });
 }
+
+void serializeLocAndU4(Pickler &p, Loc loc, u4 value) {
+    p.putU4Group(loc.storage.offsets.beginLoc,
+                 loc.storage.offsets.endLoc,
+                 a.loc.file().id(),
+                 value);
+}
+
+std::tuple<Loc, u4> unserializeLocAndU4(UnPickler &p) {
+    u4 begin, end, fileId, value;
+    p.getU4Group(&begin, &end, &fileId, &value);
+    return {Loc(FileRef(fileId), LocOffsets(begin, end)), value};
+}
 }
 
 void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
@@ -1179,8 +1192,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::Block: {
             auto &a = ast::cast_tree_nonnull<ast::Block>(what);
-            pickle(p, a.loc);
-            p.putU4(a.args.size());
+            serializeLocAndU4(p, a.loc, a.args.size());
             pickle(p, a.body);
             for (auto &arg : a.args) {
                 pickle(p, arg);
@@ -1468,8 +1480,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::MK::Send(loc, std::move(recv), fun, numPosArgs, std::move(store), flags, std::move(blk));
         }
         case ast::Tag::Block: {
-            auto loc = unpickleLocOffsets(p);
-            auto argsSize = p.getU4();
+            auto [loc, argsSize] = unserializeLocAndU4(p);
             auto body = unpickleExpr(p, gs);
             ast::MethodDef::ARGS_store args(argsSize);
             for (auto &arg : args) {
