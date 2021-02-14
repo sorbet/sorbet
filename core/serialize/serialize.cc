@@ -1362,8 +1362,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::Rescue: {
             auto &a = ast::cast_tree_nonnull<ast::Rescue>(what);
-            pickle(p, a.loc);
-            p.putU4(a.rescueCases.size());
+            serializeLocAndU4(p, a.loc, a.rescueCases.size());
             pickle(p, a.ensure);
             pickle(p, a.else_);
             pickle(p, a.body);
@@ -1655,8 +1654,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
                                                      std::move(ensure));
         }
         case ast::Tag::RescueCase: {
-            auto loc = unpickleLocOffsets(p);
-            auto exceptionsSize = p.getU4();
+            auto [loc, exceptionsSize] = unserializeLocAndU4(p);
             auto var = unpickleExpr(p, gs);
             auto body = unpickleExpr(p, gs);
             ast::RescueCase::EXCEPTION_store exceptions(exceptionsSize);
