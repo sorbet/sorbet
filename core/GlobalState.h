@@ -113,7 +113,7 @@ public:
             return sym.asMethodRef();
         }
     }
-    MethodRef lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const std::vector<u4> &methodHash) const;
+    MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, const std::vector<u4> &methodHash) const;
     SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
     }

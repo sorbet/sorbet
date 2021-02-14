@@ -19,8 +19,8 @@ struct AccessorInfo {
     core::NameRef type;
     FieldAccessorType accessorType = FieldAccessorType::None;
     core::SymbolRef fieldSymbol;
-    core::SymbolRef readerSymbol;
-    core::SymbolRef writerSymbol;
+    core::MethodRef readerSymbol;
+    core::MethodRef writerSymbol;
 };
 
 /**

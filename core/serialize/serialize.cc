@@ -513,7 +513,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
 
 void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
     p.putU4(a.name.rawId());
-    p.putU4(a.rebind.rawId());
+    p.putU4(a.rebind.id());
     pickle(p, a.loc);
     p.putU1(a.flags.toU1());
     pickle(p, a.type);
@@ -522,7 +522,7 @@ void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
 ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
     ArgInfo result;
     result.name = NameRef::fromRaw(*gs, p.getU4());
-    result.rebind = core::SymbolRef::fromRaw(p.getU4());
+    result.rebind = core::ClassOrModuleRef::fromRaw(p.getU4());
     result.loc = unpickleLoc(p);
     {
         u1 flags = p.getU1();

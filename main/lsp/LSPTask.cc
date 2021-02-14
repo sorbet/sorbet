@@ -385,13 +385,13 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
         if (!symbol.data(gs)->isMethod()) {
             return info;
         }
-        info.writerSymbol = symbol;
+        info.writerSymbol = symbol.asMethodRef();
         baseName = string_view(symbolName).substr(0, symbolName.length() - 1);
     } else {
         if (!symbol.data(gs)->isMethod()) {
             return info;
         }
-        info.readerSymbol = symbol;
+        info.readerSymbol = symbol.asMethodRef();
         baseName = symbolName;
     }
 

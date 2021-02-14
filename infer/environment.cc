@@ -479,7 +479,7 @@ namespace {
 // This is not the case for most other equality tests. e.g., x != 0 does not imply ¬ x : Integer.
 //
 // This powers (among other things) exhaustiveness checking for T::Enum.
-bool isSingleton(core::Context ctx, core::SymbolRef sym) {
+bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
     // Singletons that are built into the Ruby VM
     if (sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() || sym == core::Symbols::TrueClass()) {
         return true;
@@ -563,7 +563,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
         auto &whoKnows = getKnowledge(local);
         auto &klassType = send->args[0].type;
-        core::SymbolRef klass = core::Types::getRepresentedClass(ctx, klassType);
+        core::ClassOrModuleRef klass = core::Types::getRepresentedClass(ctx, klassType);
         if (klass.exists()) {
             auto ty = klass.data(ctx)->externalType();
             if (!ty.isUntyped()) {
@@ -618,7 +618,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         const auto &recvType = send->recv.type;
 
         // `when` against class literal
-        core::SymbolRef representedClass = core::Types::getRepresentedClass(ctx, recvType);
+        core::ClassOrModuleRef representedClass = core::Types::getRepresentedClass(ctx, recvType);
         if (representedClass.exists()) {
             auto representedType = representedClass.data(ctx)->externalType();
             if (!representedType.isUntyped()) {

@@ -904,7 +904,7 @@ class SymbolDefiner {
         }
     }
 
-    bool paramsMatch(core::MutableContext ctx, core::SymbolRef method, const vector<ast::ParsedArg> &parsedArgs) {
+    bool paramsMatch(core::MutableContext ctx, core::MethodRef method, const vector<ast::ParsedArg> &parsedArgs) {
         auto sym = method.data(ctx)->dealias(ctx);
         if (sym.data(ctx)->arguments().size() != parsedArgs.size()) {
             return false;
@@ -1041,7 +1041,7 @@ class SymbolDefiner {
                 // if the symbol does exist, then we're running in incremental mode, and we need to compare it to
                 // the previously defined equivalent to re-report any errors
                 auto replacedSym = ctx.state.findRenamedSymbol(owner, matchingSym);
-                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym, parsedArgs) &&
+                if (replacedSym.exists() && !paramsMatch(ctx, replacedSym.asMethodRef(), parsedArgs) &&
                     !isIntrinsic(replacedSym.data(ctx))) {
                     paramMismatchErrors(ctx.withOwner(replacedSym), declLoc, parsedArgs);
                 }

@@ -11,7 +11,7 @@ class LocalVarFinder {
 
     // We go through the effort of keeping track of a method stack so as to not rely on trees having been
     // flattened at this point. (LSP code should try to make minimal assumptions to be robust to changes.)
-    std::vector<core::SymbolRef> methodStack;
+    std::vector<core::MethodRef> methodStack;
 
     std::vector<core::LocalVariable> result_;
 

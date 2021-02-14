@@ -644,7 +644,7 @@ private:
     const int prohibitedLinesStart;
     const int prohibitedLinesEnd;
 
-    bool isWhiteListed(core::Context ctx, core::SymbolRef sym) {
+    bool isAllowListed(core::Context ctx, core::SymbolRef sym) {
         return sym.data(ctx)->name == core::Names::staticInit() ||
                sym.data(ctx)->name == core::Names::Constants::Root() ||
                sym.data(ctx)->name == core::Names::unresolvedAncestors();
@@ -657,7 +657,7 @@ private:
     }
 
     void checkSym(core::Context ctx, core::SymbolRef sym) {
-        if (isWhiteListed(ctx, sym)) {
+        if (isAllowListed(ctx, sym)) {
             return;
         }
         checkLoc(ctx, sym.data(ctx)->loc());

@@ -22,7 +22,7 @@ struct Signature {
     bool syntheticBlk;
 } left, right;
 
-Signature decomposeSignature(const core::GlobalState &gs, core::SymbolRef method) {
+Signature decomposeSignature(const core::GlobalState &gs, core::MethodRef method) {
     Signature sig;
     for (auto &arg : method.data(gs)->arguments()) {
         if (arg.flags.isBlock) {
@@ -58,7 +58,7 @@ bool checkSubtype(const core::Context ctx, const core::TypePtr &sub, const core:
     return core::Types::isSubType(ctx, sub, super);
 }
 
-string supermethodKind(const core::Context ctx, core::SymbolRef method) {
+string supermethodKind(const core::Context ctx, core::MethodRef method) {
     auto methodData = method.data(ctx);
     ENFORCE(methodData->isAbstract() || methodData->isOverridable() || methodData->hasSig());
     if (methodData->isAbstract()) {
@@ -70,7 +70,7 @@ string supermethodKind(const core::Context ctx, core::SymbolRef method) {
     }
 }
 
-string implementationOf(const core::Context ctx, core::SymbolRef method) {
+string implementationOf(const core::Context ctx, core::MethodRef method) {
     auto methodData = method.data(ctx);
     ENFORCE(methodData->isAbstract() || methodData->isOverridable() || methodData->hasSig());
     if (methodData->isAbstract()) {
@@ -85,9 +85,9 @@ string implementationOf(const core::Context ctx, core::SymbolRef method) {
 // This walks two positional argument lists to ensure that they're compatibly typed (i.e. that every argument in the
 // implementing method is either the same or a supertype of the abstract or overridable definition)
 void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &superArgs,
-                     core::SymbolRef superMethod,
+                     core::MethodRef superMethod,
                      absl::InlinedVector<reference_wrapper<const core::ArgInfo>, 4> &methodArgs,
-                     core::SymbolRef method) {
+                     core::MethodRef method) {
     auto idx = 0;
     auto maxLen = min(superArgs.size(), methodArgs.size());
 
@@ -110,7 +110,7 @@ void matchPositional(const core::Context ctx, absl::InlinedVector<reference_wrap
 }
 
 // Ensure that two argument lists are compatible in shape and type
-void validateCompatibleOverride(const core::Context ctx, core::SymbolRef superMethod, core::SymbolRef method) {
+void validateCompatibleOverride(const core::Context ctx, core::MethodRef superMethod, core::MethodRef method) {
     if (method.data(ctx)->isOverloaded()) {
         // Don't try to check overloaded methods; It's not immediately clear how
         // to match overloads against their superclass definitions. Since we
@@ -355,7 +355,7 @@ void validateOverriding(const core::Context ctx, core::MethodRef method) {
 }
 
 core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef &classDef,
-                                const core::SymbolRef ancestor) {
+                                const core::ClassOrModuleRef ancestor) {
     for (const auto &anc : classDef.ancestors) {
         const auto ancConst = ast::cast_tree<ast::ConstantLit>(anc);
         if (ancConst != nullptr && ancConst->symbol.data(gs)->dealias(gs) == ancestor) {
@@ -372,8 +372,8 @@ core::LocOffsets getAncestorLoc(const core::GlobalState &gs, const ast::ClassDef
     return classDef.loc;
 }
 
-void validateFinalAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef,
-                                 const core::SymbolRef errMsgClass, const string_view verb) {
+void validateFinalAncestorHelper(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef,
+                                 const core::ClassOrModuleRef errMsgClass, const string_view verb) {
     for (const auto &mixin : klass.data(ctx)->mixins()) {
         if (!mixin.data(ctx)->isClassOrModuleFinal()) {
             continue;
@@ -386,8 +386,8 @@ void validateFinalAncestorHelper(core::Context ctx, const core::SymbolRef klass,
     }
 }
 
-void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRef klass,
-                               const core::SymbolRef errMsgClass) {
+void validateFinalMethodHelper(const core::GlobalState &gs, const core::ClassOrModuleRef klass,
+                               const core::ClassOrModuleRef errMsgClass) {
     if (!klass.data(gs)->isClassOrModuleFinal()) {
         return;
     }
@@ -410,7 +410,7 @@ void validateFinalMethodHelper(const core::GlobalState &gs, const core::SymbolRe
     }
 }
 
-void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef) {
+void validateFinal(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
     if (superClass.exists() && superClass.data(ctx)->isClassOrModuleFinal()) {
         if (auto e = ctx.beginError(getAncestorLoc(ctx, classDef, superClass), core::errors::Resolver::FinalAncestor)) {
@@ -430,7 +430,7 @@ void validateFinal(core::Context ctx, const core::SymbolRef klass, const ast::Cl
 // Sealed violations in RBI files too frequently come from generated RBI files, and usually if
 // people are using sealed!, they're trying to make the source available to Sorbet anyways.
 // Regardless, the runtime will still ultimately check violations in untyped code.
-core::FileRef bestNonRBIFile(core::Context ctx, const core::SymbolRef klass) {
+core::FileRef bestNonRBIFile(core::Context ctx, const core::ClassOrModuleRef klass) {
     core::FileRef bestFile;
     for (const auto &cur : klass.data(ctx)->locs()) {
         auto curFile = cur.file();
@@ -457,8 +457,8 @@ core::FileRef bestNonRBIFile(core::Context ctx, const core::SymbolRef klass) {
     return bestFile;
 }
 
-void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef,
-                                  const core::SymbolRef errMsgClass, const string_view verb) {
+void validateSealedAncestorHelper(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef,
+                                  const core::ClassOrModuleRef errMsgClass, const string_view verb) {
     for (const auto &mixin : klass.data(ctx)->mixins()) {
         if (!mixin.data(ctx)->isClassOrModuleSealed()) {
             continue;
@@ -480,7 +480,7 @@ void validateSealedAncestorHelper(core::Context ctx, const core::SymbolRef klass
     }
 }
 
-void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::ClassDef &classDef) {
+void validateSealed(core::Context ctx, const core::ClassOrModuleRef klass, const ast::ClassDef &classDef) {
     const auto superClass = klass.data(ctx)->superClass();
     if (superClass.exists() && superClass.data(ctx)->isClassOrModuleSealed()) {
         auto file = bestNonRBIFile(ctx, klass);
@@ -501,7 +501,7 @@ void validateSealed(core::Context ctx, const core::SymbolRef klass, const ast::C
     validateSealedAncestorHelper(ctx, singleton, classDef, klass, "extended");
 }
 
-void validateUselessRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+void validateUselessRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef sym) {
     auto data = sym.data(ctx);
 
     for (auto req : data->requiredAncestors(ctx)) {
@@ -514,7 +514,7 @@ void validateUselessRequiredAncestors(core::Context ctx, const core::SymbolRef s
     }
 }
 
-void validateUnsatisfiedRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+void validateUnsatisfiedRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef sym) {
     auto data = sym.data(ctx);
     if (data->isClassOrModuleModule() || data->isClassOrModuleAbstract()) {
         return;
@@ -531,7 +531,7 @@ void validateUnsatisfiedRequiredAncestors(core::Context ctx, const core::SymbolR
     }
 }
 
-void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef sym) {
     auto data = sym.data(ctx);
 
     vector<core::Symbol::RequiredAncestor> requiredClasses;
@@ -552,8 +552,7 @@ void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::Symbo
 
     if (data->isClassOrModuleAbstract()) {
         for (auto ancst : requiredClasses) {
-            if (!sym.data(ctx)->derivesFrom(ctx, ancst.symbol) &&
-                !ancst.symbol.data(ctx)->derivesFrom(ctx, sym.asClassOrModuleRef())) {
+            if (!sym.data(ctx)->derivesFrom(ctx, ancst.symbol) && !ancst.symbol.data(ctx)->derivesFrom(ctx, sym)) {
                 if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
                     e.setHeader("`{}` requires unrelated class `{}` making it impossible to inherit", data->show(ctx),
                                 ancst.symbol.data(ctx)->show(ctx));
@@ -588,7 +587,7 @@ void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::Symbo
     }
 }
 
-void validateRequiredAncestors(core::Context ctx, const core::SymbolRef sym) {
+void validateRequiredAncestors(core::Context ctx, const core::ClassOrModuleRef sym) {
     validateUselessRequiredAncestors(ctx, sym);
     validateUnsatisfiedRequiredAncestors(ctx, sym);
     validateUnsatisfiableRequiredAncestors(ctx, sym);
@@ -635,7 +634,7 @@ private:
 
     // if/when we get final classes, we can just mark subclasses of `T::Struct` as final and essentially subsume the
     // logic here.
-    void validateTStructNotGrandparent(const core::GlobalState &gs, core::SymbolRef sym) {
+    void validateTStructNotGrandparent(const core::GlobalState &gs, core::ClassOrModuleRef sym) {
         auto parent = sym.data(gs)->superClass();
         if (!parent.exists()) {
             return;
