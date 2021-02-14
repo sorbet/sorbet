@@ -1256,8 +1256,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::InsSeq: {
             auto &a = ast::cast_tree_nonnull<ast::InsSeq>(what);
-            pickle(p, a.loc);
-            p.putU4(a.stats.size());
+            serializeLocAndU4(p, a.loc, a.stats.size());
             pickle(p, a.expr);
             for (auto &st : a.stats) {
                 pickle(p, st);
@@ -1525,8 +1524,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::MK::Assign(loc, std::move(lhs), std::move(rhs));
         }
         case ast::Tag::InsSeq: {
-            auto loc = unpickleLocOffsets(p);
-            auto insSize = p.getU4();
+            auto [loc, insSize] = unserializeLocAndU4(p);
             auto expr = unpickleExpr(p, gs);
             ast::InsSeq::STATS_store stats(insSize);
             for (auto &stat : stats) {
