@@ -1287,9 +1287,8 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::Hash: {
             auto &h = ast::cast_tree_nonnull<ast::Hash>(what);
-            pickle(p, h.loc);
             ENFORCE(h.values.size() == h.keys.size());
-            p.putU4(h.values.size());
+            serializeLocAndU4(h.loc, h.values.size());
             for (auto &v : h.values) {
                 pickle(p, v);
             }
@@ -1551,8 +1550,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::make_expression<ast::Retry>(loc);
         }
         case ast::Tag::Hash: {
-            auto loc = unpickleLocOffsets(p);
-            auto sz = p.getU4();
+            auto [loc, sz] = unserializeLocAndU4(p);
             ast::Hash::ENTRY_store keys(sz);
             ast::Hash::ENTRY_store values(sz);
             for (auto &value : values) {
