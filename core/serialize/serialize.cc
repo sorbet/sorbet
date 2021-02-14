@@ -1240,9 +1240,8 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::Local: {
             auto &a = ast::cast_tree_nonnull<ast::Local>(what);
-            pickle(p, a.loc);
+            serializeLocAndU4(p, a.loc, a.localVariable.unique());
             p.putU4(a.localVariable._name.rawId());
-            p.putU4(a.localVariable.unique);
             break;
         }
 
@@ -1511,9 +1510,8 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::MK::UnresolvedConstant(loc, std::move(scope), cnst);
         }
         case ast::Tag::Local: {
-            auto loc = unpickleLocOffsets(p);
+            auto [loc, unique] = unserializeLocAndU4(p);
             NameRef nm = unpickleNameRef(p, gs);
-            auto unique = p.getU4();
             LocalVariable lv(nm, unique);
             return ast::make_expression<ast::Local>(loc, lv);
         }
