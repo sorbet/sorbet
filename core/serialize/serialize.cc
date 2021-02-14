@@ -1233,8 +1233,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::UnresolvedConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(what);
-            pickle(p, a.loc);
-            p.putU4(a.cnst.rawId());
+            serializeLocAndU4(a.loc, a.cnst.rawId());
             pickle(p, a.scope);
             break;
         }
@@ -1512,8 +1511,8 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::MK::If(loc, std::move(cond), std::move(thenp), std::move(elsep));
         }
         case ast::Tag::UnresolvedConstantLit: {
-            auto loc = unpickleLocOffsets(p);
-            NameRef cnst = unpickleNameRef(p, gs);
+            auto [loc, rawCnst] = unserializeLocAndU4(p);
+            NameRef cnst = NameRef::fromRaw(gs, rawCnst);
             auto scope = unpickleExpr(p, gs);
             return ast::MK::UnresolvedConstant(loc, std::move(scope), cnst);
         }
