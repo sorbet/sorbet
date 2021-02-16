@@ -887,7 +887,7 @@ u4 Serializer::loadGlobalStateUUID(const GlobalState &gs, const u1 *const data) 
 vector<u1> Serializer::storeFile(const core::File &file) {
     Pickler p;
     SerializerImpl::pickle(p, file);
-    return p.result(FILE_COMPRESSION_DEGREE);
+    return p.result();
 }
 
 vector<u1> Serializer::storeAST(const ast::ParsedFile &tree) {
