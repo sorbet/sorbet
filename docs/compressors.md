@@ -5,7 +5,7 @@ Note that we care a lot about decompression speed, followed by size. We care a b
 
 The numbers below are measured on the GlobalState of Sorbet for the stdlib.
 
-lz4 provides great decompression (~4GB/s) while compressing to around 1/3rd of the size and with ~500M/s compression speed.
+Vanilla lz4 (bolded in the table below) with the default compression setting provides great decompression (~4GB/s) while compressing to around 1/3rd of the size and with ~500M/s compression speed.
 
 | Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
 | ---------------         | -----------| -----------| ----------- | ----- | -------- |
@@ -13,7 +13,7 @@ lz4 provides great decompression (~4GB/s) while compressing to around 1/3rd of t
 | lzsse8fast 2019-04-18   |   30112 us |    2065 us |     2301226 | 37.05 | uncompressed-gs-rle|
 | lzsse4fast 2019-04-18   |   29646 us |    2189 us |     2306934 | 37.14 | uncompressed-gs-rle|
 | lz4fast 1.9.3 -3        |   11855 us |    2196 us |     2696408 | 43.41 | uncompressed-gs-rle|
-| lz4 1.9.3               |   13133 us |    2233 us |     2506875 | 40.36 | uncompressed-gs-rle|
+| **lz4 1.9.3**           |**13133 us**| **2233 us**| **2506875** |**40.36**|**uncompressed-gs-rle**|
 | lizard 1.0 -14          |   82862 us |    2568 us |     2105097 | 33.89 | uncompressed-gs-rle|
 | lizard 1.0 -13          |   76738 us |    2584 us |     2133780 | 34.35 | uncompressed-gs-rle|
 | lizard 1.0 -12          |   48377 us |    2604 us |     2185818 | 35.19 | uncompressed-gs-rle|
