@@ -3,7 +3,7 @@ Decision to use it was made via the following benchmark (run with https://github
 
 Note that we care a lot about decompression speed, followed by size. We care a bit about compression speed, but not as much.
 
-The numbers below are measured on the GlobalState of Sorbet for the stdlib.
+The numbers below are measured on the GlobalState of Sorbet for the stdlib (created at commit 5753872590c7d982f5e12f7f967d4d2702c1b6fb by modifying serialize to disable compression).
 
 Vanilla lz4 (bolded in the table below) with the default compression setting provides great decompression (~4GB/s) while compressing to around 1/3rd of the size and with ~500M/s compression speed.
 
