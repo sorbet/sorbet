@@ -17,8 +17,6 @@ using namespace std;
 
 namespace sorbet::core::serialize {
 const u4 Serializer::VERSION;
-const u1 Serializer::GLOBAL_STATE_COMPRESSION_DEGREE;
-const u1 Serializer::FILE_COMPRESSION_DEGREE;
 
 // These helper methods are declared in a class inside of an anonymous namespace
 // or inline so that `GlobalState` can forward-declare and `friend` the entire
@@ -66,8 +64,9 @@ void Pickler::putStr(string_view s) {
 }
 
 constexpr size_t SIZE_BYTES = sizeof(int) / sizeof(u1);
+constexpr int LZ4_COMPRESSION_SETTING = 1;
 
-vector<u1> Pickler::result(int compressionDegree) {
+vector<u1> Pickler::result() {
     if (zeroCounter != 0) {
         data.emplace_back(zeroCounter);
         zeroCounter = 0;
@@ -79,8 +78,8 @@ vector<u1> Pickler::result(int compressionDegree) {
                                               // succeeds. It seems to be written for big inputs
                                               // and returns too small sizes for small inputs,
                                               // where compressed size is bigger than original size
-    int resultCode = LZ4_compress_default((const char *)data.data(), (char *)(compressedData.data() + SIZE_BYTES * 2),
-                                          data.size(), (compressedData.size() - SIZE_BYTES * 2));
+    int resultCode = LZ4_compress_fast((const char *)data.data(), (char *)(compressedData.data() + SIZE_BYTES * 2),
+                                       data.size(), (compressedData.size() - SIZE_BYTES * 2), LZ4_COMPRESSION_SETTING);
     if (resultCode == 0) {
         // did not compress!
         Exception::raise("incompressible pickler?");
@@ -863,13 +862,13 @@ LocOffsets SerializerImpl::unpickleLocOffsets(UnPickler &p) {
 
 vector<u1> Serializer::store(GlobalState &gs) {
     Pickler p = SerializerImpl::pickle(gs);
-    return p.result(GLOBAL_STATE_COMPRESSION_DEGREE);
+    return p.result();
 }
 
 std::vector<u1> Serializer::storePayloadAndNameTable(GlobalState &gs) {
     Timer timeit(gs.tracer(), "Serializer::storePayloadAndNameTable");
     Pickler p = SerializerImpl::pickle(gs, true);
-    return p.result(GLOBAL_STATE_COMPRESSION_DEGREE);
+    return p.result();
 }
 
 void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
@@ -889,7 +888,7 @@ vector<u1> Serializer::storeFile(const core::File &file, ast::ParsedFile &tree) 
     Pickler p;
     SerializerImpl::pickle(p, file);
     SerializerImpl::pickle(p, tree.tree);
-    return p.result(FILE_COMPRESSION_DEGREE);
+    return p.result();
 }
 
 CachedFile Serializer::loadFile(const core::GlobalState &gs, const u1 *const data) {
