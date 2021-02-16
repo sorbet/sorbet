@@ -12,6 +12,12 @@
 #include "lib/lizard_compress.h"
 #include "lib/lizard_decompress.h"
 
+#include <array>
+#include <type_traits>
+#include <tuple>
+
+#include <nmmintrin.h>
+
 template class std::vector<sorbet::u4>;
 
 using namespace std;
@@ -111,6 +117,175 @@ UnPickler::UnPickler(const u1 *const compressed, spdlog::logger &tracer) : pos(0
         Exception::raise("incomplete decompression");
     }
 }
+
+namespace {
+template <typename MakeItem, std::size_t... Index>
+constexpr auto make_array_with_(
+    MakeItem const& make, std::index_sequence<Index...>) {
+  return std::array<decltype(make(0)), sizeof...(Index)>{{make(Index)...}};
+}
+
+template <std::size_t Size, typename MakeItem>
+constexpr auto make_array_with(MakeItem const& make) {
+  return make_array_with_(make, std::make_index_sequence<Size>{});
+}
+
+struct group_varint_table_base_make_item {
+  constexpr std::size_t get_d(std::size_t index, std::size_t j) const {
+    return 1u + ((index >> (2 * j)) & 3u);
+  }
+  constexpr std::size_t get_offset(std::size_t index, std::size_t j) const {
+    // clang-format off
+    return
+        (j > 0 ? get_d(index, 0) : 0) +
+        (j > 1 ? get_d(index, 1) : 0) +
+        (j > 2 ? get_d(index, 2) : 0) +
+        (j > 3 ? get_d(index, 3) : 0) +
+        0;
+    // clang-format on
+  }
+};
+
+struct group_varint_table_length_make_item : group_varint_table_base_make_item {
+  constexpr std::uint8_t operator()(std::size_t index) const {
+    return 1u + get_offset(index, 4);
+  }
+};
+
+//  Reference: http://www.stepanovpapers.com/CIKM_2011.pdf
+//
+//  From 17 encoded bytes, we may use between 5 and 17 bytes to encode 4
+//  integers.  The first byte is a key that indicates how many bytes each of
+//  the 4 integers takes:
+//
+//  bit 0..1: length-1 of first integer
+//  bit 2..3: length-1 of second integer
+//  bit 4..5: length-1 of third integer
+//  bit 6..7: length-1 of fourth integer
+//
+//  The value of the first byte is used as the index in a table which returns
+//  a mask value for the SSSE3 PSHUFB instruction, which takes an XMM register
+//  (16 bytes) and shuffles bytes from it into a destination XMM register
+//  (optionally setting some of them to 0)
+//
+//  For example, if the key has value 4, that means that the first integer
+//  uses 1 byte, the second uses 2 bytes, the third and fourth use 1 byte each,
+//  so we set the mask value so that
+//
+//  r[0] = a[0]
+//  r[1] = 0
+//  r[2] = 0
+//  r[3] = 0
+//
+//  r[4] = a[1]
+//  r[5] = a[2]
+//  r[6] = 0
+//  r[7] = 0
+//
+//  r[8] = a[3]
+//  r[9] = 0
+//  r[10] = 0
+//  r[11] = 0
+//
+//  r[12] = a[4]
+//  r[13] = 0
+//  r[14] = 0
+//  r[15] = 0
+
+struct group_varint_table_sse_mask_make_item
+    : group_varint_table_base_make_item {
+  constexpr auto partial_item(
+      std::size_t d, std::size_t offset, std::size_t k) const {
+    // if k < d, the j'th integer uses d bytes, consume them
+    // set remaining bytes in result to 0
+    // 0xff: set corresponding byte in result to 0
+    return std::uint32_t((k < d ? offset + k : std::size_t(0xff)) << (8 * k));
+  }
+
+  constexpr auto item_impl(std::size_t d, std::size_t offset) const {
+    // clang-format off
+    return
+        partial_item(d, offset, 0) |
+        partial_item(d, offset, 1) |
+        partial_item(d, offset, 2) |
+        partial_item(d, offset, 3) |
+        0;
+    // clang-format on
+  }
+
+  constexpr auto item(std::size_t index, std::size_t j) const {
+    return item_impl(get_d(index, j), get_offset(index, j));
+  }
+
+  constexpr auto operator()(std::size_t index) const {
+    return std::array<std::uint32_t, 4>{{
+        item(index, 0),
+        item(index, 1),
+        item(index, 2),
+        item(index, 3),
+    }};
+  }
+};
+
+alignas(16) constexpr
+    std::array<std::array<std::uint32_t, 4>, 256> groupVarintSSEMasks =
+        make_array_with<256>(group_varint_table_sse_mask_make_item{});
+
+constexpr std::array<std::uint8_t, 256> groupVarintLengths =
+    make_array_with<256>(group_varint_table_length_make_item{});
+
+static void storeUnaligned(void *p, uint32_t x) {
+    memcpy(p, &x, sizeof(x));
+}
+
+  static uint8_t key(uint32_t x) {
+    // __builtin_clz is undefined for the x==0 case
+    return uint8_t(3 - (__builtin_clz(x | 1) / 8));
+  }
+#if 0
+  static size_t b0key(size_t x) { return x & 3; }
+  static size_t b1key(size_t x) { return (x >> 2) & 3; }
+  static size_t b2key(size_t x) { return (x >> 4) & 3; }
+  static size_t b3key(size_t x) { return (x >> 6) & 3; }
+#endif
+
+}
+
+void UnPickler::getU4Group(uint32_t* a, uint32_t* b, uint32_t* c, uint32_t* d) {
+    uint8_t key = getU1();
+    __m128i val = _mm_loadu_si128((const __m128i*)(&data[pos]));
+    __m128i mask =
+        _mm_load_si128((const __m128i*)groupVarintSSEMasks[key].data());
+    __m128i r = _mm_shuffle_epi8(val, mask);
+
+    // Extracting 32 bits at a time out of an XMM register is a SSE4 feature
+    *a = uint32_t(_mm_extract_epi32(r, 0));
+    *b = uint32_t(_mm_extract_epi32(r, 1));
+    *c = uint32_t(_mm_extract_epi32(r, 2));
+    *d = uint32_t(_mm_extract_epi32(r, 3));
+
+    pos += (groupVarintLengths[key] - 1);
+}
+
+void Pickler::putU4Group(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
+    uint8_t b0key = key(a);
+    uint8_t b1key = key(b);
+    uint8_t b2key = key(c);
+    uint8_t b3key = key(d);
+    uint8_t key = (b3key << 6) | (b2key << 4) | (b1key << 2) | b0key;
+    putU1(key);
+    size_t start = data.size();
+    data.resize(start + 16);
+    storeUnaligned(&data[start], a);
+    start += b0key + 1;
+    storeUnaligned(&data[start], b);
+    start += b1key + 1;
+    storeUnaligned(&data[start], c);
+    start += b2key + 1;
+    storeUnaligned(&data[start], d);
+    start += b3key + 1;
+    data.resize(start);
+  }
 
 string_view UnPickler::getStr() {
     int sz = getU4();
@@ -229,6 +404,118 @@ int64_t UnPickler::getS8() {
     return absl::bit_cast<int64_t>(res);
 }
 
+template<typename T>
+struct n_args;
+
+template <typename R, typename Arg0>
+struct n_args<R(Arg0)> {
+    static constexpr const size_t n = 1;
+};
+
+template <typename R, typename Arg0, typename Arg1>
+struct n_args<R(Arg0, Arg1)> {
+    static constexpr const size_t n = 2;
+};
+
+namespace {
+template <typename Container, typename Transform>
+void serializeGroupwise(Pickler &p, const Container &c, Transform&& toU4) {
+    using ElementType = typename Container::value_type;
+    using Result = std::result_of_t<Transform(const ElementType&)>;
+
+    if constexpr (std::tuple_size<Result>::value == 1) {
+        auto b = c.begin(), e = c.end();
+        for ( ; std::distance(b, e) >= 4; b += 4) {
+            auto [a] = toU4(*(b + 0));
+            auto [bx] = toU4(*(b + 1));
+            auto [c] = toU4(*(b + 2));
+            auto [d] = toU4(*(b + 3));
+            p.putU4Group(a, bx, c, d);
+        }
+        while (b != e) {
+            auto [x] = toU4(*b);
+            p.putU4(x);
+            ++b;
+        }
+    } else if constexpr (std::tuple_size<Result>::value == 2) {
+        auto b = c.begin(), e = c.end();
+        for ( ; std::distance(b, e) >= 2; b += 2) {
+            auto [a, bx] = toU4(*(b + 0));
+            auto [c, d] = toU4(*(b + 1));
+            p.putU4Group(a, bx, c, d);
+        }
+        while (b != e) {
+            auto [a, bx] = toU4(*b);
+            p.putU4(a);
+            p.putU4(bx);
+            ++b;
+        }
+    }
+}
+
+template <typename Transform>
+void unserializeGroupwise(UnPickler &p, const size_t numElements, Transform&& fromU4) {
+    constexpr size_t nargs = n_args<get_signature<Transform>>::n;
+
+    if constexpr (nargs == 1) {
+        auto i = 0;
+        for ( ; (numElements - i) >= 4; i += 4) {
+            u4 a, b, c, d;
+            p.getU4Group(&a, &b, &c, &d);
+            fromU4(a);
+            fromU4(b);
+            fromU4(c);
+            fromU4(d);
+        }
+        while (i != numElements) {
+            fromU4(p.getU4());
+            ++i;
+        }
+    } else if constexpr (nargs == 2) {
+        auto i = 0;
+        for ( ; (numElements - i) >= 2; i += 2) {
+            u4 a, b, c, d;
+            p.getU4Group(&a, &b, &c, &d);
+            fromU4(a, b);
+            fromU4(c, d);
+        }
+        while (i != numElements) {
+            u4 a = p.getU4();
+            u4 b = p.getU4();
+            fromU4(a, b);
+            ++i;
+        }
+    }
+}
+
+void serializeNameHash(Pickler &p, const std::vector<core::NameHash> &v) {
+    p.putU4(v.size());
+    serializeGroupwise(p, v, [](const auto& name) -> std::tuple<u4> { return name._hashValue; });
+}
+void unserializeNameHash(UnPickler &p, std::vector<core::NameHash> &v) {
+    auto size = p.getU4();
+    v.reserve(size);
+    unserializeGroupwise(p, size, [&v](u4 x) {
+        NameHash key;
+        key._hashValue = x;
+        v.emplace_back(key);
+        });
+}
+
+void serializeLocAndU4(Pickler &p, Loc loc, u4 value) {
+    p.putU4Group(loc.storage.offsets.beginLoc,
+                 loc.storage.offsets.endLoc,
+                 a.loc.file().id(),
+                 value);
+}
+
+std::tuple<Loc, u4> unserializeLocAndU4(UnPickler &p) {
+    u4 begin, end, fileId, value;
+    p.getU4Group(&begin, &end, &fileId, &value);
+    return {Loc(FileRef(fileId), LocOffsets(begin, end)), value};
+}
+}
+
 void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     if (fh == nullptr) {
         p.putU1(0);
@@ -237,18 +524,11 @@ void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
     p.putU1(1);
     p.putU4(fh->definitions.hierarchyHash);
     p.putU4(fh->definitions.methodHashes.size());
-    for (const auto &[key, value] : fh->definitions.methodHashes) {
-        p.putU4(key._hashValue);
-        p.putU4(value);
-    }
-    p.putU4(fh->usages.symbols.size());
-    for (const auto &e : fh->usages.symbols) {
-        p.putU4(e._hashValue);
-    }
-    p.putU4(fh->usages.sends.size());
-    for (const auto &e : fh->usages.sends) {
-        p.putU4(e._hashValue);
-    }
+    serializeGroupwise(p, fh->definitions.methodHashes, [](const auto &p) -> std::tuple<u4, u4> {
+            return {p.first._hashValue, p.second};
+        });
+    serializeNameHash(p, fh->usages.symbols);
+    serializeNameHash(p, fh->usages.sends);
 }
 
 unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
@@ -261,25 +541,13 @@ unique_ptr<const FileHash> SerializerImpl::unpickleFileHash(UnPickler &p) {
     ret.definitions.hierarchyHash = p.getU4();
     auto methodHashSize = p.getU4();
     ret.definitions.methodHashes.reserve(methodHashSize);
-    for (int it = 0; it < methodHashSize; it++) {
+    unserializeGroupwise(p, methodHashSize, [&ret](u4 keyhash, u4 value) {
         NameHash key;
-        key._hashValue = p.getU4();
-        ret.definitions.methodHashes.emplace_back(key, p.getU4());
-    }
-    auto constantsSize = p.getU4();
-    ret.usages.symbols.reserve(constantsSize);
-    for (int it = 0; it < constantsSize; it++) {
-        NameHash key;
-        key._hashValue = p.getU4();
-        ret.usages.symbols.emplace_back(key);
-    }
-    auto sendsSize = p.getU4();
-    ret.usages.sends.reserve(sendsSize);
-    for (int it = 0; it < sendsSize; it++) {
-        NameHash key;
-        key._hashValue = p.getU4();
-        ret.usages.sends.emplace_back(key);
-    }
+        key._hashValue = keyhash;
+        ret.definitions.methodHashes.emplace_back(key, value);
+        });
+    unserializeNameHash(p, ret.usages.symbols);
+    unserializeNameHash(p, ret.usages.sends);
     return make_unique<const FileHash>(move(ret));
 }
 
@@ -514,18 +782,20 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
 }
 
 void SerializerImpl::pickle(Pickler &p, const ArgInfo &a) {
-    p.putU4(a.name.rawId());
-    p.putU4(a.rebind.rawId());
-    pickle(p, a.loc);
+    p.putU4Group(a.name.rawId(), a.rebind.rawId(), a.loc.storage.offsets.beginLoc,
+                 a.loc.storage.offsets.endLoc);
+    p.putU4(a.loc.file().id());
     p.putU1(a.flags.toU1());
     pickle(p, a.type);
 }
 
 ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
     ArgInfo result;
-    result.name = NameRef::fromRaw(*gs, p.getU4());
-    result.rebind = core::SymbolRef::fromRaw(p.getU4());
-    result.loc = unpickleLoc(p);
+    u4 nameId, symId, locBegin, locEnd;
+    p.getU4Group(&nameId, &symId, &locBegin, &locEnd);
+    result.name = NameRef::fromRaw(*gs, nameId);
+    result.rebind = core::SymbolRef::fromRaw(symId);
+    result.loc = Loc(FileRef(p.getU4()), LocOffsets{locBegin, locEnd});
     {
         u1 flags = p.getU1();
         result.flags.setFromU1(flags);
@@ -535,10 +805,10 @@ ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
 }
 
 void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
-    p.putU4(what.owner.rawId());
-    p.putU4(what.name.rawId());
-    p.putU4(what.superClassOrRebind.rawId());
-    p.putU4(what.flags);
+    p.putU4Group(what.owner.rawId(),
+                 what.name.rawId(),
+                 what.superClassOrRebind.rawId(),
+                 what.flags);
     if (!what.isMethod()) {
         p.putU4(what.mixins_.size());
         for (ClassOrModuleRef s : what.mixins_) {
@@ -563,10 +833,7 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     }
     fast_sort(membersSorted, [](auto const &lhs, auto const &rhs) -> bool { return lhs.first < rhs.first; });
 
-    for (const auto &member : membersSorted) {
-        p.putU4(member.first);
-        p.putU4(member.second);
-    }
+    serializeGroupwise(p, membersSorted, [](const auto &m) -> std::tuple<u4, u4> { return {m.first, m.second}; });
 
     pickle(p, what.resultType);
     p.putU4(what.locs().size());
@@ -577,10 +844,12 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
 
 Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     Symbol result;
-    result.owner = SymbolRef::fromRaw(p.getU4());
-    result.name = NameRef::fromRaw(*gs, p.getU4());
-    result.superClassOrRebind = SymbolRef::fromRaw(p.getU4());
-    result.flags = p.getU4();
+    u4 owner, name, superClass, flags;
+    p.getU4Group(&owner, &name, &superClass, &flags);
+    result.owner = SymbolRef::fromRaw(owner);
+    result.name = NameRef::fromRaw(*gs, name);
+    result.superClassOrRebind = SymbolRef::fromRaw(superClass);
+    result.flags = flags;
     if (!result.isMethod()) {
         int mixinsSize = p.getU4();
         result.mixins_.reserve(mixinsSize);
@@ -603,16 +872,17 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     }
     int membersSize = p.getU4();
     result.members().reserve(membersSize);
-    for (int i = 0; i < membersSize; i++) {
-        auto name = NameRef::fromRaw(*gs, p.getU4());
-        auto sym = SymbolRef::fromRaw(p.getU4());
-        if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
-            result.name != core::Names::noMethod()) {
-            ENFORCE(name.exists());
-            ENFORCE(sym.exists());
-        }
-        result.members()[name] = sym;
-    }
+    unserializeGroupwise(p, membersSize, [&](u4 a, u4 b) {
+            auto name = NameRef::fromRaw(*gs, a);
+            auto sym = SymbolRef::fromRaw(b);
+            if (result.name != core::Names::Constants::Root() && result.name != core::Names::Constants::NoSymbol() &&
+                result.name != core::Names::noMethod()) {
+                ENFORCE(name.exists());
+                ENFORCE(sym.exists());
+            }
+            result.members()[name] = sym;
+        });
+
     result.resultType = unpickleType(p, gs);
     auto locCount = p.getU4();
     for (int i = 0; i < locCount; i++) {
@@ -652,9 +922,7 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
         pickle(result, n);
     }
     result.putU4(gs.constantNames.size());
-    for (const auto &n : gs.constantNames) {
-        pickle(result, n);
-    }
+    serializeGroupwise(result, gs.constantNames, [](const ConstantName &c) -> std::tuple<int> { return c.original.rawId(); });
     result.putU4(gs.uniqueNames.size());
     for (const auto &n : gs.uniqueNames) {
         pickle(result, n);
@@ -755,9 +1023,9 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         namesSize = p.getU4();
         ENFORCE(namesSize > 0);
         constantNames.reserve(nextPowerOfTwo(namesSize));
-        for (int i = 0; i < namesSize; i++) {
-            constantNames.emplace_back(unpickleConstantName(p, result));
-        }
+        unserializeGroupwise(p, namesSize, [&result, &constantNames](u4 id) {
+                constantNames.emplace_back(ConstantName{NameRef::fromRaw(result, id)});
+            });
         namesSize = p.getU4();
         ENFORCE(namesSize > 0);
         uniqueNames.reserve(nextPowerOfTwo(namesSize));
@@ -914,14 +1182,11 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
         case ast::Tag::Send: {
             auto &s = ast::cast_tree_nonnull<ast::Send>(what);
             pickle(p, s.loc);
-            p.putU4(s.fun.rawId());
             u1 flags;
             static_assert(sizeof(flags) == sizeof(s.flags));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &s.flags, sizeof(flags));
-            p.putU1(flags);
-            p.putU4(s.numPosArgs);
-            p.putU4(s.args.size());
+            p.putU4Group(s.fun.rawId(), flags, s.numPosArgs, s.args.size());
             pickle(p, s.recv);
             pickle(p, s.block);
             for (auto &arg : s.args) {
@@ -932,8 +1197,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::Block: {
             auto &a = ast::cast_tree_nonnull<ast::Block>(what);
-            pickle(p, a.loc);
-            p.putU4(a.args.size());
+            serializeLocAndU4(p, a.loc, a.args.size());
             pickle(p, a.body);
             for (auto &arg : a.args) {
                 pickle(p, arg);
@@ -974,17 +1238,15 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::UnresolvedConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(what);
-            pickle(p, a.loc);
-            p.putU4(a.cnst.rawId());
+            serializeLocAndU4(a.loc, a.cnst.rawId());
             pickle(p, a.scope);
             break;
         }
 
         case ast::Tag::Local: {
             auto &a = ast::cast_tree_nonnull<ast::Local>(what);
-            pickle(p, a.loc);
+            serializeLocAndU4(p, a.loc, a.localVariable.unique());
             p.putU4(a.localVariable._name.rawId());
-            p.putU4(a.localVariable.unique);
             break;
         }
 
@@ -998,8 +1260,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::InsSeq: {
             auto &a = ast::cast_tree_nonnull<ast::InsSeq>(what);
-            pickle(p, a.loc);
-            p.putU4(a.stats.size());
+            serializeLocAndU4(p, a.loc, a.stats.size());
             pickle(p, a.expr);
             for (auto &st : a.stats) {
                 pickle(p, st);
@@ -1029,9 +1290,8 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::Hash: {
             auto &h = ast::cast_tree_nonnull<ast::Hash>(what);
-            pickle(p, h.loc);
             ENFORCE(h.values.size() == h.keys.size());
-            p.putU4(h.values.size());
+            serializeLocAndU4(h.loc, h.values.size());
             for (auto &v : h.values) {
                 pickle(p, v);
             }
@@ -1043,8 +1303,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::Array: {
             auto &a = ast::cast_tree_nonnull<ast::Array>(what);
-            pickle(p, a.loc);
-            p.putU4(a.elems.size());
+            serializeLocAndU4(p, a.loc, a.elems.size());
             for (auto &e : a.elems) {
                 pickle(p, e);
             }
@@ -1053,8 +1312,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::Cast: {
             auto &c = ast::cast_tree_nonnull<ast::Cast>(what);
-            pickle(p, c.loc);
-            p.putU4(c.cast.rawId());
+            serializeLocAndU4(p, c.loc, c.cast.rawId());
             pickle(p, c.type);
             pickle(p, c.arg);
             break;
@@ -1094,10 +1352,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
             static_assert(sizeof(flags) == sizeof(c.flags));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &c.flags, sizeof(flags));
-            p.putU1(flags);
-            p.putU4(c.name.rawId());
-            p.putU4(c.symbol.id());
-            p.putU4(c.args.size());
+            p.putU4Group(flags, c.name.rawId(), c.symbol.id(), c.args.size());
             pickle(p, c.rhs);
             for (auto &a : c.args) {
                 pickle(p, a);
@@ -1107,8 +1362,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::Rescue: {
             auto &a = ast::cast_tree_nonnull<ast::Rescue>(what);
-            pickle(p, a.loc);
-            p.putU4(a.rescueCases.size());
+            serializeLocAndU4(p, a.loc, a.rescueCases.size());
             pickle(p, a.ensure);
             pickle(p, a.else_);
             pickle(p, a.body);
@@ -1181,8 +1435,7 @@ void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
 
         case ast::Tag::ConstantLit: {
             auto &a = ast::cast_tree_nonnull<ast::ConstantLit>(what);
-            pickle(p, a.loc);
-            p.putU4(a.symbol.rawId());
+            serializeLocAndU4(p, a.loc, a.symbol.rawId());
             pickle(p, a.original);
             break;
         }
@@ -1202,14 +1455,15 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
     switch (static_cast<ast::Tag>(kind)) {
         case ast::Tag::Send: {
             auto loc = unpickleLocOffsets(p);
-            NameRef fun = unpickleNameRef(p, gs);
-            auto flagsU1 = p.getU1();
+            u4 rawName, flagsU4, numPosArgsU4, argsSize;
+            p.getU4Group(&rawName, &flagsU4, &numPosArgsU4, &argsSize);
+            NameRef fun = NameRef::fromRawUnchecked(rawName);
+            u1 flagsU1 = static_cast<u1>(flagsU4);
             ast::Send::Flags flags;
             static_assert(sizeof(flags) == sizeof(flagsU1));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &flagsU1, sizeof(flags));
-            auto numPosArgs = static_cast<u2>(p.getU4());
-            auto argsSize = p.getU4();
+            auto numPosArgs = static_cast<u2>(numPosArgsU4);
             auto recv = unpickleExpr(p, gs);
             auto blkt = unpickleExpr(p, gs);
             ast::ExpressionPtr blk;
@@ -1223,8 +1477,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::MK::Send(loc, std::move(recv), fun, numPosArgs, std::move(store), flags, std::move(blk));
         }
         case ast::Tag::Block: {
-            auto loc = unpickleLocOffsets(p);
-            auto argsSize = p.getU4();
+            auto [loc, argsSize] = unserializeLocAndU4(p);
             auto body = unpickleExpr(p, gs);
             ast::MethodDef::ARGS_store args(argsSize);
             for (auto &arg : args) {
@@ -1256,15 +1509,14 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::MK::If(loc, std::move(cond), std::move(thenp), std::move(elsep));
         }
         case ast::Tag::UnresolvedConstantLit: {
-            auto loc = unpickleLocOffsets(p);
-            NameRef cnst = unpickleNameRef(p, gs);
+            auto [loc, rawCnst] = unserializeLocAndU4(p);
+            NameRef cnst = NameRef::fromRaw(gs, rawCnst);
             auto scope = unpickleExpr(p, gs);
             return ast::MK::UnresolvedConstant(loc, std::move(scope), cnst);
         }
         case ast::Tag::Local: {
-            auto loc = unpickleLocOffsets(p);
+            auto [loc, unique] = unserializeLocAndU4(p);
             NameRef nm = unpickleNameRef(p, gs);
-            auto unique = p.getU4();
             LocalVariable lv(nm, unique);
             return ast::make_expression<ast::Local>(loc, lv);
         }
@@ -1275,8 +1527,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::MK::Assign(loc, std::move(lhs), std::move(rhs));
         }
         case ast::Tag::InsSeq: {
-            auto loc = unpickleLocOffsets(p);
-            auto insSize = p.getU4();
+            auto [loc, insSize] = unserializeLocAndU4(p);
             auto expr = unpickleExpr(p, gs);
             ast::InsSeq::STATS_store stats(insSize);
             for (auto &stat : stats) {
@@ -1299,8 +1550,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::make_expression<ast::Retry>(loc);
         }
         case ast::Tag::Hash: {
-            auto loc = unpickleLocOffsets(p);
-            auto sz = p.getU4();
+            auto [loc, sz] = unserializeLocAndU4(p);
             ast::Hash::ENTRY_store keys(sz);
             ast::Hash::ENTRY_store values(sz);
             for (auto &value : values) {
@@ -1312,8 +1562,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::MK::Hash(loc, std::move(keys), std::move(values));
         }
         case ast::Tag::Array: {
-            auto loc = unpickleLocOffsets(p);
-            auto sz = p.getU4();
+            auto [loc, sz] = unserializeLocAndU4(p);
             ast::Array::ENTRY_store elems(sz);
             for (auto &elem : elems) {
                 elem = unpickleExpr(p, gs);
@@ -1321,8 +1570,8 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::MK::Array(loc, std::move(elems));
         }
         case ast::Tag::Cast: {
-            auto loc = unpickleLocOffsets(p);
-            NameRef kind = NameRef::fromRaw(gs, p.getU4());
+            auto [loc, rawId] = unserializeLocAndU4(p);
+            NameRef kind = NameRef::fromRaw(gs, rawId);
             auto type = unpickleType(p, &gs);
             auto arg = unpickleExpr(p, gs);
             return ast::make_expression<ast::Cast>(loc, std::move(type), std::move(arg), kind);
@@ -1363,14 +1612,15 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
         case ast::Tag::MethodDef: {
             auto loc = unpickleLocOffsets(p);
             auto declLoc = unpickleLocOffsets(p);
-            auto flagsU1 = p.getU1();
+            u4 flagsU4, nameId, symId, argsSize;
+            p.getU4Group(&flagsU4, &nameId, &symId, &argsSize);
+            auto flagsU1 = static_cast<u1>(flagsU4);
             ast::MethodDef::Flags flags;
             static_assert(sizeof(flags) == sizeof(flagsU1));
             // Can replace this with std::bit_cast in C++20
             memcpy(&flags, &flagsU1, sizeof(flags));
-            NameRef name = unpickleNameRef(p, gs);
-            auto symbol = MethodRef::fromRaw(p.getU4());
-            auto argsSize = p.getU4();
+            NameRef name = NameRef::fromRawUnchecked(nameId);
+            auto symbol = MethodRef::fromRaw(symId);
             auto rhs = unpickleExpr(p, gs);
             ast::MethodDef::ARGS_store args(argsSize);
             for (auto &arg : args) {
@@ -1400,8 +1650,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
                                                      std::move(ensure));
         }
         case ast::Tag::RescueCase: {
-            auto loc = unpickleLocOffsets(p);
-            auto exceptionsSize = p.getU4();
+            auto [loc, exceptionsSize] = unserializeLocAndU4(p);
             auto var = unpickleExpr(p, gs);
             auto body = unpickleExpr(p, gs);
             ast::RescueCase::EXCEPTION_store exceptions(exceptionsSize);
@@ -1447,8 +1696,8 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             return ast::make_expression<ast::UnresolvedIdent>(loc, kind, name);
         }
         case ast::Tag::ConstantLit: {
-            auto loc = unpickleLocOffsets(p);
-            auto sym = SymbolRef::fromRaw(p.getU4());
+            auto [loc, rawId] = unserializeLocAndU4(p);
+            auto sym = SymbolRef::fromRaw(rawId);
             auto orig = unpickleExpr(p, gs);
             return ast::make_expression<ast::ConstantLit>(loc, sym, std::move(orig));
         }

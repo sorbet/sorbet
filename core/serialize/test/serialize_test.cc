@@ -23,6 +23,24 @@ TEST_CASE("U4") { // NOLINT
     CHECK_EQ(u.getU4(), 4294967295);
 }
 
+TEST_CASE("U4GROUP") {
+    Pickler p;
+    p.putU4Group(257, 1, 76349, 17983207);
+    p.putU1(2);
+    p.putU4Group(257, 17983207, 1, 76349);
+    UnPickler u(p.result(Serializer::GLOBAL_STATE_COMPRESSION_DEGREE).data(), *logger);
+    u4 a, b, c, d;
+    u.getU4Group(&a, &b, &c, &d);
+    CHECK_EQ(a, 257);
+    CHECK_EQ(b, 1);
+    CHECK_EQ(c, 76349);
+    CHECK_EQ(d, 17983207);
+    CHECK_EQ(u.getU1(), 2);
+    u.getU4Group(&a, &b, &c, &d);
+    CHECK_EQ(a, 257);
+    CHECK_EQ(b, 17983207);
+    CHECK_EQ(c, 1);
+}
 TEST_CASE("U4U1") { // NOLINT
     Pickler p;
     p.putU4(0);
