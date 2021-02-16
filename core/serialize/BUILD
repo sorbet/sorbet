@@ -14,7 +14,7 @@ cc_library(
         "//ast",
         "//core",
         "@com_google_absl//absl/types:span",
-        "@lizard",
+        "@lz4",
     ],
 )
 

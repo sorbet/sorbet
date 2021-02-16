@@ -17,7 +17,7 @@ TEST_CASE("U4") { // NOLINT
     p.putU4(0);
     p.putU4(1);
     p.putU4(4294967295);
-    UnPickler u(p.result(Serializer::GLOBAL_STATE_COMPRESSION_DEGREE).data(), *logger);
+    UnPickler u(p.result().data(), *logger);
     CHECK_EQ(u.getU4(), 0);
     CHECK_EQ(u.getU4(), 1);
     CHECK_EQ(u.getU4(), 4294967295);
@@ -34,7 +34,7 @@ TEST_CASE("U4U1") { // NOLINT
     p.putU4(1);
     p.putU1(0);
     p.putU4(4294967295);
-    UnPickler u(p.result(Serializer::GLOBAL_STATE_COMPRESSION_DEGREE).data(), *logger);
+    UnPickler u(p.result().data(), *logger);
     CHECK_EQ(u.getU4(), 0);
     CHECK_EQ(u.getU4(), 0);
     CHECK_EQ(u.getStr(), "aaaaa");
@@ -52,7 +52,7 @@ TEST_CASE("U8") { // NOLINT
     p.putS8(1);
     p.putS8(-1);
     p.putS8(9223372036854775807);
-    UnPickler u(p.result(Serializer::GLOBAL_STATE_COMPRESSION_DEGREE).data(), *logger);
+    UnPickler u(p.result().data(), *logger);
     CHECK_EQ(u.getS8(), 0);
     CHECK_EQ(u.getS8(), 1);
     CHECK_EQ(u.getS8(), -1);
@@ -68,7 +68,7 @@ TEST_CASE("Strings") { // NOLINT
     p.putStr("Z");
     p.putStr("НЯ");
     p.putStr("\0\0\0\t\n\f\rНЯЯЯЯЯ");
-    UnPickler u(p.result(Serializer::GLOBAL_STATE_COMPRESSION_DEGREE).data(), *logger);
+    UnPickler u(p.result().data(), *logger);
     CHECK_EQ(u.getStr(), "");
     CHECK_EQ(u.getStr(), "a");
     CHECK_EQ(u.getStr(), "aaaaa");
