@@ -1,4 +1,4 @@
-Sorbet internally uses the LZ4 compressor to compress internal datastructures, with compression level 10.
+Sorbet internally uses the LZ4 compressor to compress internal datastructures, with default compression level 1.
 Decision to use it was made via the following benchmark (run with https://github.com/inikep/lzbench on Stripe's developer machines).
 
 Note that we care a lot about decompression speed, followed by size. We care a bit about compression speed, but not as much.
