@@ -2673,8 +2673,7 @@ public:
         for (auto arg : args.args) {
             auto argTyp = arg->type;
             if (auto *ap = cast_type<AppliedType>(argTyp)) {
-                ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()) ||
-                        ap->klass == Symbols::Enumerable() ||
+                ENFORCE(ap->klass == Symbols::Enumerable() ||
                         ap->klass.data(gs)->derivesFrom(gs, Symbols::Enumerable()));
                 ENFORCE(!ap->targs.empty());
                 unwrappedElems.emplace_back(Types::any(gs, ap->targs.front(), Types::nilClass()));
