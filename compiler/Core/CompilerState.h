@@ -64,13 +64,13 @@ public:
     // the function is not found
     llvm::Function *getFunction(llvm::StringRef) const;
 
-    // Add an error to GlobalState, and then throw to abort compilation.
-    // Use only when compilation CANNOT continue.
-    // (Emitting any old GlobalState error will still cause Sorbet to exit non-zero.)
-    void failCompilation(const core::Loc &loc, ConstExprStr msg) const;
-
     CompilerState withFunctionEntry(llvm::BasicBlock *functionEntry);
 };
+
+// Add an error to GlobalState, and then throw to abort compilation.
+// Use only when compilation CANNOT continue.
+// (Emitting any old GlobalState error will still cause Sorbet to exit non-zero.)
+void failCompilation(const core::GlobalState &gs, const core::Loc &loc, ConstExprStr msg);
 
 } // namespace sorbet::compiler
 

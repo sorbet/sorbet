@@ -229,8 +229,34 @@ public:
         if (!shouldCompile(gs, f)) {
             return;
         }
+
+        if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
+            if (f.data(gs).source().find("frozen_string_literal: true"sv) == string_view::npos) {
+                compiler::failCompilation(gs, core::Loc(f, 0, 0),
+                                          "Compiled files need to have '# frozen_string_literal: true'");
+            }
+        } else {
+            compiler::failCompilation(gs, core::Loc(f, 0, 0),
+                                      "Compiled files must be at least '# typed: true' or above");
+        }
+
         auto threadState = getTypecheckThreadState();
         llvm::LLVMContext &lctx = threadState->lctx;
+
+        unique_ptr<llvm::Module> module = move(threadState->combinedModule);
+        unique_ptr<llvm::DIBuilder> debug = move(threadState->debugInfo);
+        llvm::DICompileUnit *compileUnit = threadState->compileUnit;
+        threadState->compileUnit = nullptr;
+
+        // It is possible, though unusual, to never have typecheck() called.
+        if (!module) {
+            ENFORCE(!threadState->file.exists());
+            return;
+        }
+        if (threadState->aborted) {
+            threadState->file = core::FileRef();
+            return;
+        }
 
         {
             llvm::IRBuilder<> builder(lctx);
@@ -245,20 +271,7 @@ public:
             builder.CreateRetVoid();
         }
 
-        unique_ptr<llvm::Module> module = move(threadState->combinedModule);
-        unique_ptr<llvm::DIBuilder> debug = move(threadState->debugInfo);
-        llvm::DICompileUnit *compileUnit = threadState->compileUnit;
-        threadState->compileUnit = nullptr;
         threadState->globalConstructorsEntry = nullptr;
-
-        if (!module) {
-            ENFORCE(!threadState->file.exists());
-            return;
-        }
-        if (threadState->aborted) {
-            threadState->file = core::FileRef();
-            return;
-        }
 
         ENFORCE(threadState->file.exists());
         ENFORCE(f == threadState->file);
@@ -270,14 +283,9 @@ public:
         debug->finalize();
 
         compiler::CompilerState cs(gs, lctx, module.get(), debug.get(), compileUnit, f, nullptr, nullptr, nullptr);
-        if (f.data(gs).minErrorLevel() >= core::StrictLevel::True) {
-            if (f.data(gs).source().find("frozen_string_literal: true"sv) == string_view::npos) {
-                cs.failCompilation(core::Loc(f, 0, 0), "Compiled files need to have '# frozen_string_literal: true'");
-            }
-            string fileName = objectFileName(gs, f);
-            ensureOutputDir(irOutputDir.value(), fileName);
-            compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
-        }
+        string fileName = objectFileName(gs, f);
+        ensureOutputDir(irOutputDir.value(), fileName);
+        compiler::ObjectFileEmitter::run(gs.tracer(), lctx, move(module), irOutputDir.value(), fileName);
     };
 
     virtual void finishTypecheck(const core::GlobalState &gs) const override {}

@@ -319,8 +319,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                     }
                     const auto a = irctx.rubyBlockArgs[rubyBlockId][i];
                     if (!a.data(cfg)._name.exists()) {
-                        cs.failCompilation(core::Loc(cfg.file, md.declLoc),
-                                           "this method has a block argument construct that's not supported");
+                        failCompilation(cs, core::Loc(cfg.file, md.declLoc),
+                                        "this method has a block argument construct that's not supported");
                     }
 
                     // mark the arg as present
@@ -555,8 +555,8 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                             case FunctionType::Block:
                                 // NOTE: this doesn't catch all block-return cases:
                                 // https://github.com/stripe/sorbet_llvm/issues/94
-                                cs.failCompilation(core::Loc(cs.file, bind.loc),
-                                                   "returns through multiple stacks not implemented");
+                                failCompilation(cs, core::Loc(cs.file, bind.loc),
+                                                "returns through multiple stacks not implemented");
                                 break;
 
                             case FunctionType::ExceptionBegin:

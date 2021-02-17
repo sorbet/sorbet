@@ -29,14 +29,6 @@ llvm::StructType *CompilerState::getValueType() {
     return llvm::StructType::create(lctx, intType, "RV");
 };
 
-void CompilerState::failCompilation(const core::Loc &loc, ConstExprStr msg) const {
-    if (auto e = gs.beginError(loc, core::errors::Compiler::Unanalyzable)) {
-        e.setHeader(msg);
-    }
-
-    throw AbortCompilation(msg.str);
-}
-
 void CompilerState::trace(string_view msg) const {
     gs.trace(msg);
 }
@@ -108,6 +100,14 @@ void CompilerState::runCheapOptimizations(llvm::Function *func) {
     pmbuilder.VerifyInput = debug_mode;
     pmbuilder.populateFunctionPassManager(pm);
     pm.run(*func);
+}
+
+void failCompilation(const core::GlobalState &gs, const core::Loc &loc, ConstExprStr msg) {
+    if (auto e = gs.beginError(loc, core::errors::Compiler::Unanalyzable)) {
+        e.setHeader(msg);
+    }
+
+    throw AbortCompilation(msg.str);
 }
 
 } // namespace sorbet::compiler
