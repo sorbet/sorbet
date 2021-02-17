@@ -107,7 +107,7 @@ unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logg
     // Note: Private constructor.
     unique_ptr<GlobalState> rv(
         new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
-                        make_shared<lsp::TypecheckEpochManager>(), 999));
+                        make_shared<lsp::TypecheckEpochManager>(), -1));
     rv->initEmpty();
     rv->silenceErrors = true;
     return rv;
