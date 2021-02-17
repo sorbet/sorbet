@@ -103,9 +103,9 @@ module T::Private::Methods
     target_ancestors.each do |ancestor|
       source_method_names.each do |method_name|
         # the usage of method_owner_and_name_to_key(ancestor, method_name) instead of
-        # method_to_key(ancestor.instance_method(method_name)) is not (just) an optimization, but also required for
-        # correctness, since ancestor.method_defined?(method_name) may return true even if method_name is not defined
-        # directly on ancestor but instead an ancestor of ancestor.
+        # method_to_key(ancestor.instance_method(method_name)) is an optimization.
+        # If we were not limiting the defined? checks to ancestor only, it would be
+        # required for correctness.
         if (ancestor.method_defined?(method_name, false) ||
             ancestor.private_method_defined?(method_name, false) ||
             ancestor.protected_method_defined?(method_name, false)) &&
