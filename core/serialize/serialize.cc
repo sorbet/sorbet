@@ -1209,11 +1209,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto numPosArgs = static_cast<u2>(p.getU4());
             auto argsSize = p.getU4();
             auto recv = unpickleExpr(p, gs);
-            auto blkt = unpickleExpr(p, gs);
-            ast::ExpressionPtr blk;
-            if (blkt) {
-                blk.reset(static_cast<ast::Block *>(blkt.release()));
-            }
+            ast::ExpressionPtr blk = unpickleExpr(p, gs);
             ast::Send::ARGS_store store(argsSize);
             for (auto &expr : store) {
                 expr = unpickleExpr(p, gs);
@@ -1352,9 +1348,9 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto ret = ast::MK::ClassOrModule(loc, declLoc, std::move(name), std::move(ancestors), std::move(rhs),
                                               (ast::ClassDef::Kind)kind);
             {
-                auto klass = ast::cast_tree<ast::ClassDef>(ret);
-                klass->singletonAncestors = std::move(singletonAncestors);
-                klass->symbol = symbol;
+                auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(ret);
+                klass.singletonAncestors = std::move(singletonAncestors);
+                klass.symbol = symbol;
             }
             return ret;
         }
@@ -1377,9 +1373,9 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto ret = ast::MK::SyntheticMethod(loc, declLoc, name, std::move(args), std::move(rhs));
 
             {
-                auto *method = ast::cast_tree<ast::MethodDef>(ret);
-                method->flags = flags;
-                method->symbol = symbol;
+                auto &method = ast::cast_tree_nonnull<ast::MethodDef>(ret);
+                method.flags = flags;
+                method.symbol = symbol;
             }
             return ret;
         }
@@ -1391,8 +1387,7 @@ ast::ExpressionPtr SerializerImpl::unpickleExpr(serialize::UnPickler &p, const G
             auto body_ = unpickleExpr(p, gs);
             ast::Rescue::RESCUE_CASE_store cases(rescueCasesSize);
             for (auto &case_ : cases) {
-                auto t = unpickleExpr(p, gs);
-                case_.reset(static_cast<ast::RescueCase *>(t.release()));
+                case_ = unpickleExpr(p, gs);
             }
             return ast::make_expression<ast::Rescue>(loc, std::move(body_), std::move(cases), std::move(else_),
                                                      std::move(ensure));
