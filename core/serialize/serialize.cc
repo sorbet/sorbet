@@ -67,10 +67,6 @@ constexpr size_t SIZE_BYTES = sizeof(int) / sizeof(u1);
 constexpr int LZ4_COMPRESSION_SETTING = 1;
 
 vector<u1> Pickler::result() {
-    if (zeroCounter != 0) {
-        data.emplace_back(zeroCounter);
-        zeroCounter = 0;
-    }
     const size_t maxDstSize = LZ4_compressBound(data.size());
     vector<u1> compressedData;
     compressedData.resize(2048 + maxDstSize); // give extra room for compression
@@ -119,112 +115,77 @@ string_view UnPickler::getStr() {
 }
 
 void Pickler::putU1(u1 u) {
-    if (zeroCounter != 0) {
-        data.emplace_back(zeroCounter);
-        zeroCounter = 0;
-    }
     data.emplace_back(u);
 }
 
 u1 UnPickler::getU1() {
-    ENFORCE(zeroCounter == 0);
     auto res = data[pos++];
     return res;
 }
 
 void Pickler::putU4(u4 u) {
-    if (u == 0) {
-        if (zeroCounter != 0) {
-            if (zeroCounter == UCHAR_MAX) {
-                data.emplace_back(UCHAR_MAX);
-                zeroCounter = 0;
-                putU4(u);
-                return;
-            }
-            zeroCounter++;
-            return;
-        } else {
-            data.emplace_back(0);
-            zeroCounter = 1;
-        }
-    } else {
-        if (zeroCounter != 0) {
-            data.emplace_back(zeroCounter);
-            zeroCounter = 0;
-        }
-        while (u > 127) {
-            data.emplace_back(128 | (u & 127));
-            u = u >> 7;
-        }
-        data.emplace_back(u & 127);
+    // PrefixVarint
+    // Count the number of contiguous zero bits starting from the LSB.
+    // NOTE: It is undefined behavior if x is 0, so we | with 1.
+    unsigned bits = 32 - __builtin_clz(u | 1);
+    unsigned bytes = 1 + (bits - 1) / 7;
+
+    // Expand temporarily into a 64-bit number so we can stash byte count into it (which may put us up to 37 bites long)
+    u8 uBig = u;
+    uBig = ((uBig << 1) + 1) << (bytes - 1);
+
+    const auto dataSize = data.size();
+    data.resize(dataSize + bytes);
+
+    switch (bytes) {
+        case 5:
+            data[dataSize + 4] = uBig >> 32;
+            FMT_FALLTHROUGH;
+        case 4:
+            data[dataSize + 3] = uBig >> 24;
+            FMT_FALLTHROUGH;
+        case 3:
+            data[dataSize + 2] = uBig >> 16;
+            FMT_FALLTHROUGH;
+        case 2:
+            data[dataSize + 1] = uBig >> 8;
+            FMT_FALLTHROUGH;
+        case 1:
+            data[dataSize] = uBig;
+            break;
     }
 }
 
 u4 UnPickler::getU4() {
-    if (zeroCounter != 0) {
-        zeroCounter--;
-        return 0;
+    u4 byte1 = data[pos];
+    // PrefixVarint
+    // Count the number of contiguous _trailing_ zeroes.
+    // NOTE: It is undefined behavior if x is 0, so we | with 0x10 which has a 1 in the 5th bit.
+    unsigned bytes = 1 + __builtin_ctz(byte1 | 0x10);
+
+    u8 rawData = byte1;
+    // NOTE: Clang unrolls this loop because it knows the __builtin_ctz call above must return a number <=4 since we OR
+    // with 0x10!
+    for (u4 i = 1; i < bytes; i++) {
+        rawData |= static_cast<u8>(data[pos + i]) << (i * 8);
     }
-    u1 r = data[pos++];
-    if (r == 0) {
-        zeroCounter = data[pos++];
-        zeroCounter--;
-        return r;
-    } else {
-        u4 res = r & 127;
-        u4 vle = r;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-        vle = data[pos++];
-        res |= (vle & 127) << 7;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-        vle = data[pos++];
-        res |= (vle & 127) << 14;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-        vle = data[pos++];
-        res |= (vle & 127) << 21;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-        vle = data[pos++];
-        res |= (vle & 127) << 28;
-        if ((vle & 128) == 0) {
-            goto done;
-        }
-
-    done:
-        return res;
-    }
+    pos += bytes;
+    rawData >>= bytes;
+    return static_cast<u4>(rawData);
 }
 
-void Pickler::putS8(const int64_t i) {
-    auto u = absl::bit_cast<u8>(i);
-    while (u > 127) {
-        putU1((u & 127) | 128);
-        u = u >> 7;
-    }
-    putU1(u & 127);
+void Pickler::putS8(const int64_t u) {
+    // TODO: We can have native support for S8 packing if we want.
+    uint64_t v = absl::bit_cast<uint64_t>(u);
+    putU4(v);
+    putU4(v >> 32);
 }
 
 int64_t UnPickler::getS8() {
-    u8 res = 0;
-    u8 vle = 128;
-    int i = 0;
-    while (vle & 128) {
-        vle = getU1();
-        res |= (vle & 127) << (i * 7);
-        i++;
-    }
-    return absl::bit_cast<int64_t>(res);
+    uint64_t byte1 = getU4();
+    uint64_t byte2 = getU4();
+    byte1 |= byte2 << 32;
+    return absl::bit_cast<int64_t>(byte1);
 }
 
 void SerializerImpl::pickle(Pickler &p, shared_ptr<const FileHash> fh) {
