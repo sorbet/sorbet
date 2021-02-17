@@ -100,17 +100,15 @@ module T::Private::Methods
     if !module_with_final?(target)
       return
     end
-    # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
-    # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
-    target_ancestors.reverse_each do |ancestor|
+    target_ancestors.each do |ancestor|
       source_method_names.each do |method_name|
         # the usage of method_owner_and_name_to_key(ancestor, method_name) instead of
         # method_to_key(ancestor.instance_method(method_name)) is not (just) an optimization, but also required for
         # correctness, since ancestor.method_defined?(method_name) may return true even if method_name is not defined
         # directly on ancestor but instead an ancestor of ancestor.
-        if (ancestor.method_defined?(method_name) ||
-            ancestor.private_method_defined?(method_name) ||
-            ancestor.protected_method_defined?(method_name)) &&
+        if (ancestor.method_defined?(method_name, false) ||
+            ancestor.private_method_defined?(method_name, false) ||
+            ancestor.protected_method_defined?(method_name, false)) &&
            final_method?(method_owner_and_name_to_key(ancestor, method_name))
           definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
           is_redefined = target == ancestor
