@@ -70,7 +70,7 @@ public:
 // Add an error to GlobalState, and then throw to abort compilation.
 // Use only when compilation CANNOT continue.
 // (Emitting any old GlobalState error will still cause Sorbet to exit non-zero.)
-void failCompilation(const core::GlobalState &gs, const core::Loc &loc, ConstExprStr msg);
+[[noreturn]] void failCompilation(const core::GlobalState &gs, const core::Loc &loc, ConstExprStr msg);
 
 } // namespace sorbet::compiler
 
