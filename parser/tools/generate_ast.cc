@@ -305,7 +305,7 @@ NodeDef nodes[] = {
     {
         "Hash",
         "hash",
-        vector<FieldDef>({{"kwargs", FieldType::Bool}, {"pairs", FieldType::NodeVec}}),
+        vector<FieldDef>({{"inline_", FieldType::Bool}, {"pairs", FieldType::NodeVec}}),
     },
     // Pattern matching hash pattern: `in {x: y}`
     {
