@@ -2175,6 +2175,30 @@ public:
     }
 } Magic_selfNew;
 
+class Magic_splat : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (args.args.size() != 1) {
+            return;
+        }
+
+        auto &arg = args.args[0];
+        if (auto *tuple = cast_type<TupleType>(arg->type)) {
+            res.returnType = arg->type;
+            return;
+        }
+
+        if (auto *ap = cast_type<AppliedType>(arg->type)) {
+            if (ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array())) {
+                res.returnType = arg->type;
+                return;
+            }
+        }
+
+        res.returnType = Types::untypedUntracked();
+    };
+} Magic_splat;
+
 class DeclBuilderForProcs_void : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -2793,6 +2817,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::splat(), &Magic_splat},
 
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::void_(), &DeclBuilderForProcs_void},
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::returns(),
