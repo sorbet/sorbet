@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def foo<<todo method>>(&<blk>)
       begin
         a = [1, 2]
-        ::<Magic>.<call-with-splat>(<self>, :super, a.to_a(), nil)
+        ::<Magic>.<call-with-splat>(<self>, :super, ::<Magic>.<splat>(a), nil)
       end
     end
   end
@@ -33,13 +33,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   def foo<<todo method>>(&<blk>)
     begin
       a = [1]
-      a.to_a().concat([2])
-      [1].concat(a.to_a())
-      [1].concat(a.to_a()).concat([2])
-      ::<Magic>.<call-with-splat>(<self>, :bar, a.to_a(), nil)
-      ::<Magic>.<call-with-splat>(<self>, :bar, <emptyTree>::<C Splatable>.new().to_a(), nil)
+      ::<Magic>.<splat>(a).concat([2])
+      [1].concat(::<Magic>.<splat>(a))
+      [1].concat(::<Magic>.<splat>(a)).concat([2])
+      ::<Magic>.<call-with-splat>(<self>, :bar, ::<Magic>.<splat>(a), nil)
+      ::<Magic>.<call-with-splat>(<self>, :bar, ::<Magic>.<splat>(<emptyTree>::<C Splatable>.new()), nil)
       <emptyTree>::<C Child>.new().foo()
-      b = <emptyTree>::<C Splatable>.new().to_a()
+      b = ::<Magic>.<splat>(<emptyTree>::<C Splatable>.new())
       begin
         <assignTemp>$2 = 1
         if ::<Magic>.<check-match-array>(<assignTemp>$2, ::<Magic>.<splat>(<emptyTree>::<C Integer>))
@@ -49,10 +49,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         end
       end
       <self>.raise("a")
-    rescue <emptyTree>::<C Rescueable>.new().to_a() => <rescueTemp>$3
+    rescue ::<Magic>.<splat>(<emptyTree>::<C Rescueable>.new()) => <rescueTemp>$3
       <emptyTree>
       <self>.raise("a")
-    rescue [<emptyTree>::<C Array>].concat(<emptyTree>::<C Rescueable>.new().to_a()).concat([<emptyTree>::<C Float>]) => <rescueTemp>$4
+    rescue [<emptyTree>::<C Array>].concat(::<Magic>.<splat>(<emptyTree>::<C Rescueable>.new())).concat([<emptyTree>::<C Float>]) => <rescueTemp>$4
       <emptyTree>
     end
   end

@@ -1476,10 +1476,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 for (auto &stat : array->elts) {
                     if (auto splat = parser::cast_node<parser::Splat>(stat.get())) {
                         // Desguar
-                        //   [a, **x, remaining}
+                        //   [a, *x, remaining}
                         // into
-                        //   a.concat(x.to_a).concat(remaining)
-                        auto var = MK::Send0(loc, node2TreeImpl(dctx, std::move(splat->var)), core::Names::toA());
+                        //   a.concat(<splat>(x)).concat(remaining)
+                        auto var = MK::Splat(loc, node2TreeImpl(dctx, std::move(splat->var)));
                         if (elems.empty()) {
                             if (lastMerge != nullptr) {
                                 lastMerge = MK::Send1(loc, std::move(lastMerge), core::Names::concat(), std::move(var));
