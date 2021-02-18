@@ -111,7 +111,7 @@ class SymbolRef final {
     // Stores the symbol's Kind and Index. Kind occupies the upper bits.
     u4 _id;
     u4 unsafeTableIndex() const {
-        return _id & ID_MASK;
+        return _id >> KIND_BITS;
     }
 
 public:
@@ -127,10 +127,11 @@ public:
     // Kind takes up this many bits in _id.
     static constexpr u4 KIND_BITS = 3;
     static constexpr u4 ID_BITS = 32 - KIND_BITS;
-    static constexpr u4 ID_MASK = (1 << ID_BITS) - 1;
+    static constexpr u4 KIND_MASK = (1 << KIND_BITS) - 1;
+    static constexpr u4 MAX_ID = (1 << ID_BITS) - 1;
 
     Kind kind() const {
-        return static_cast<Kind>(_id >> ID_BITS);
+        return static_cast<Kind>(_id & KIND_MASK);
     }
 
     u4 rawId() const {
