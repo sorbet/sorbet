@@ -15,15 +15,15 @@ using namespace std;
 namespace sorbet::core {
 
 NameRef::NameRef(const GlobalState &gs, NameKind kind, u4 id)
-    : DebugOnlyCheck(gs, kind, id), _id{(id & ID_MASK) | (static_cast<u4>(kind) << ID_BITS)} {
+    : DebugOnlyCheck(gs, kind, id), _id{(id << KIND_BITS) | static_cast<u4>(kind)} {
     // If this fails, the symbol table is too big :(
-    ENFORCE_NO_TIMER(id <= ID_MASK);
+    ENFORCE_NO_TIMER(id <= MAX_ID);
 }
 
 NameRef::NameRef(const GlobalState &gs, NameRef ref)
     : DebugOnlyCheck(gs, ref.kind(), ref.unsafeTableIndex()), _id(ref.rawId()) {
     // If this fails, the symbol table is too big :(
-    ENFORCE_NO_TIMER(this->unsafeTableIndex() <= ID_MASK);
+    ENFORCE_NO_TIMER(this->unsafeTableIndex() <= MAX_ID);
 }
 
 string NameRef::showRaw(const GlobalState &gs) const {
