@@ -108,7 +108,7 @@ class SymbolRef final {
     friend class GlobalState;
     friend class Symbol;
 
-    // Stores the symbol's Kind and Index. Kind occupies the upper bits.
+    // Stores the symbol's Kind and Index. Kind occupies the lower bits.
     u4 _id;
     u4 unsafeTableIndex() const {
         return _id >> KIND_BITS;
