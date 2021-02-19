@@ -321,7 +321,7 @@ Begin {
       body = NULL
     }
     Hash {
-      kwargs = false
+      inline_ = false
       pairs = [
         Kwsplat {
           expr = LVar {
@@ -430,7 +430,7 @@ Begin {
       body = NULL
     }
     Hash {
-      kwargs = false
+      inline_ = false
       pairs = [
         Pair {
           key = LVar {
