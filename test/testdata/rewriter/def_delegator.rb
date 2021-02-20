@@ -57,7 +57,7 @@ class IgnoredUsages
   def_delegator :foo, kwarg1: :thing, kwarg2: local
   #                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `Symbol` but found `{kwarg1: Symbol(:thing), kwarg2: Integer(0)}` for argument `method`
   def_delegator :foo, local => :thing
-  #                   ^^^^^^^^^^^^^^^ error: Expected `Symbol` but found `{}` for argument `method`
+  #                   ^^^^^^^^^^^^^^^ error: Expected `Symbol` but found `{Integer(0) => Symbol(:thing)}` for argument `method`
   def_delegator 234, :foo
   #             ^^^ error: Expected `T.any(Symbol, String)` but found `Integer(234)` for argument `accessor`
   def_delegator :thing => :foo # error: Not enough arguments provided for method `Forwardable#def_delegator
