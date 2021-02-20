@@ -493,6 +493,31 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalSta
         {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Helpers\n", prefix)}}};
 }
 
+// Ensure that a ShapeType used as a keyword args splat in a send has only symbol keys present.
+const ShapeType *isKwargsHash(const GlobalState &gs, const TypePtr &ty) {
+    auto *hash = cast_type<ShapeType>(ty);
+    if (hash == nullptr) {
+        return nullptr;
+    }
+
+    if (!absl::c_all_of(hash->keys, [&gs](const auto &key) {
+            if (!isa_type<LiteralType>(key)) {
+                return false;
+            }
+
+            auto klass = cast_type_nonnull<LiteralType>(key).underlying(gs);
+            if (!isa_type<ClassType>(klass)) {
+                return false;
+            }
+
+            return cast_type_nonnull<ClassType>(klass).symbol == Symbols::Symbol();
+        })) {
+        return nullptr;
+    }
+
+    return hash;
+}
+
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -800,7 +825,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
 
             if (hasKwargs) {
-                if (auto *hash = cast_type<ShapeType>(kwSplatType)) {
+                if (auto *hash = isKwargsHash(gs, kwSplatType)) {
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
                     kwargs = make_type<ShapeType>(move(keys), move(values));
