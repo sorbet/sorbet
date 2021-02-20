@@ -93,7 +93,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         // If caching fails, gs gets modified during payload creation.
         CHECK_FALSE(gs->wasModified());
 
-        auto cachedFile = core::serialize::Serializer::loadFile(*gs, contents.data);
+        auto tree = core::serialize::Serializer::loadTree(*gs, contents.data);
         CHECK(cachedFile.file->cached);
         CHECK_EQ(cachedFile.file->path(), filePath);
         CHECK_EQ(cachedFile.file->source(), fileContents);

@@ -4,11 +4,6 @@
 #include "core/core.h"
 
 namespace sorbet::core::serialize {
-struct CachedFile {
-    std::shared_ptr<core::File> file;
-    ast::ExpressionPtr tree;
-};
-
 class Serializer {
 public:
     static const u4 VERSION = 6;
@@ -22,15 +17,23 @@ public:
     // individual cached files, which can be loaded independently.
     static std::vector<u1> storePayloadAndNameTable(GlobalState &gs);
 
-    // Serializes a file and its AST.
-    static std::vector<u1> storeFile(const core::File &file, ast::ParsedFile &tree);
+    // Serializes an AST and file hash.
+    static std::vector<u1> storeTree(const core::File &file, const ast::ParsedFile &tree);
 
     static void loadGlobalState(GlobalState &gs, const u1 *const data);
 
     static u4 loadGlobalStateUUID(const GlobalState &gs, const u1 *const data);
 
-    // Loads the given file and its AST.
-    static CachedFile loadFile(const GlobalState &gs, const u1 *const data);
+    // Loads the AST and file hash for the given file. Mutates file to indicate that it is cached and to store the
+    // cached file hash.
+    // This routine is used for the on-disk key-value cache. The on-disk cache stores these trees at a key that contains
+    // the file path along with a hash of the contents of the file. It is possible, but exceedingly unlikely, that the
+    // user updates a file to contain new contents but that happens to hash to the same value. If this happens, and the
+    // new file is smaller than the old file, Sorbet could encounter memory errors pretty printing `loc`s in error
+    // messages as they will point to invalid offsets in the file's text.
+    // To prevent that memory error entirely, we stash the file source's text into the `data` blob. If `loadTree`
+    // encounters a file with smaller-than-expected source text, it returns `nullptr`.
+    static ast::ExpressionPtr loadTree(const GlobalState &gs, core::File &file, const u1 *const data);
 };
 }; // namespace sorbet::core::serialize
 

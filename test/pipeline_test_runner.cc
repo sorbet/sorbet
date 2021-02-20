@@ -101,9 +101,9 @@ UnorderedSet<string> knownExpectations = {"parse-tree",
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
-    auto saved = core::serialize::Serializer::storeFile(savedFile, expr);
-    auto restored = core::serialize::Serializer::loadFile(gs, saved.data());
-    return {move(restored.tree), expr.file};
+    auto saved = core::serialize::Serializer::storeTree(savedFile, expr);
+    auto restored = core::serialize::Serializer::loadTree(gs, savedFile, saved.data());
+    return {move(restored), expr.file};
 }
 
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
