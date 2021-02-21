@@ -32,7 +32,7 @@ public:
     // new file is smaller than the old file, Sorbet could encounter memory errors pretty printing `loc`s in error
     // messages as they will point to invalid offsets in the file's text.
     // To prevent that memory error entirely, we stash the file source's text into the `data` blob. If `loadTree`
-    // encounters a file with smaller-than-expected source text, it returns `nullptr`.
+    // encounters a file with a different sized source text, it returns `nullptr`.
     static ast::ExpressionPtr loadTree(const GlobalState &gs, core::File &file, const u1 *const data);
 };
 }; // namespace sorbet::core::serialize

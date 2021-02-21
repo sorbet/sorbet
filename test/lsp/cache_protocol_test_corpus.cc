@@ -93,11 +93,15 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         // If caching fails, gs gets modified during payload creation.
         CHECK_FALSE(gs->wasModified());
 
-        auto tree = core::serialize::Serializer::loadTree(*gs, contents.data);
-        CHECK(cachedFile.file->cached);
-        CHECK_EQ(cachedFile.file->path(), filePath);
-        CHECK_EQ(cachedFile.file->source(), fileContents);
-        CHECK_NE(cachedFile.file->getFileHash(), nullptr);
+        core::File file{string(filePath), string(fileContents), core::File::Type::Normal};
+        auto tree = core::serialize::Serializer::loadTree(*gs, file, contents.data);
+        CHECK(file.cached);
+        CHECK_NE(file.getFileHash(), nullptr);
+        CHECK_NE(tree, nullptr);
+
+        // Loading should fail if file is too small
+        core::File smallFile{"", "", core::File::Type::Normal};
+        CHECK_EQ(core::serialize::Serializer::loadTree(*gs, smallFile, contents.data), nullptr);
     }
 
     // LSP should read from the cache when files on disk match. There should be no cache misses this time since disk
@@ -141,11 +145,11 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
         payload::createInitialGlobalState(gs, *opts, kvstore);
 
-        auto cachedFile = core::serialize::Serializer::loadFile(*gs, updatedFileData.data);
-        CHECK(cachedFile.file->cached);
-        CHECK_EQ(cachedFile.file->path(), filePath);
-        CHECK_EQ(cachedFile.file->source(), updatedFileContents);
-        CHECK_NE(cachedFile.file->getFileHash(), nullptr);
+        core::File file{string(filePath), string(updatedFileContents), core::File::Type::Normal};
+        auto cachedFile = core::serialize::Serializer::loadTree(*gs, file, updatedFileData.data);
+        CHECK(file.cached);
+        CHECK_NE(file.getFileHash(), nullptr);
+        CHECK_NE(cachedFile, nullptr);
     }
 }
 
@@ -191,11 +195,11 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         // If caching fails, gs gets modified during payload creation.
         CHECK_FALSE(gs->wasModified());
 
-        auto cachedFile = core::serialize::Serializer::loadFile(*gs, contents.data);
-        CHECK(cachedFile.file->cached);
-        CHECK_EQ(cachedFile.file->path(), filePath);
-        CHECK_EQ(cachedFile.file->source(), fileContents);
-        CHECK_NE(cachedFile.file->getFileHash(), nullptr);
+        core::File file{string(filePath), string(fileContents), core::File::Type::Normal};
+        auto tree = core::serialize::Serializer::loadTree(*gs, file, contents.data);
+        CHECK(file.cached);
+        CHECK_NE(file.getFileHash(), nullptr);
+        CHECK_NE(tree, nullptr);
     }
 
     // LSP should read from disk when the cache gets updated by a different process mid-process.

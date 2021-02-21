@@ -896,13 +896,14 @@ vector<u1> Serializer::storeTree(const core::File &file, const ast::ParsedFile &
 ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File &file, const u1 *const data) {
     UnPickler p(data, gs.tracer());
     u4 fileSrcLen = p.getU4();
-    if (file.source().size() < fileSrcLen) {
+    if (file.source().size() != fileSrcLen) {
         // See comment in `serialize.h` above `loadTree`.
-        // File is smaller than expected; bail.
+        // File does not have expected size; bail.
         return nullptr;
     }
-    file.cached = true;
     file.setFileHash(SerializerImpl::unpickleFileHash(p));
+    // cached must be set _after_ setting the file hash, as setFileHash unsets the cached flag
+    file.cached = true;
     return SerializerImpl::unpickleExpr(p, gs);
 }
 
