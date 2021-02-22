@@ -452,7 +452,8 @@ public:
 } CallWithSplat;
 
 static const vector<CallCMethod> knownCMethods{
-    {"<expand-splat>", "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<expand-splat>", "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<splat>", "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {"defined?", "sorbet_definedIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {"<build-keyword-args>", "sorbet_buildHashIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {"<build-array>", "sorbet_buildArrayIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},

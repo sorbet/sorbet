@@ -85,7 +85,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
 @"rubyStrFrozen_<top (required)>" = internal unnamed_addr global i64 0, align 8
-@"str_test/testdata/compiler/splat.rb" = private unnamed_addr constant [32 x i8] c"test/testdata/compiler/splat.rb\00", align 1
+@"str_test/testdata/compiler/splat_assign.rb" = private unnamed_addr constant [39 x i8] c"test/testdata/compiler/splat_assign.rb\00", align 1
 @"<static-init-locals-storage>" = internal global [0 x i64] zeroinitializer
 @"str_<build-array>" = private unnamed_addr constant [14 x i8] c"<build-array>\00", align 1
 @"rubyIdPrecomputed_<expand-splat>" = internal unnamed_addr global i64 0, align 8
@@ -117,7 +117,7 @@ declare i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache*, i64) local_u
 
 declare void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct*, %struct.rb_control_frame_struct*, %struct.rb_iseq_struct*) local_unnamed_addr #0
 
-declare i64 @sorbet_splatIntrinsic(i64, i64, i32, i64*, i64 (i64, i64, i32, i64*, i64)*, i64) local_unnamed_addr #0
+declare i64 @sorbet_expandSplatIntrinsic(i64, i64, i32, i64*, i64 (i64, i64, i32, i64*, i64)*, i64) local_unnamed_addr #0
 
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #0
 
@@ -149,7 +149,7 @@ define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #2 {
 }
 
 ; Function Attrs: sspreq
-define void @Init_splat() local_unnamed_addr #3 {
+define void @Init_splat_assign() local_unnamed_addr #3 {
 entry:
   %callArgs.i = alloca [8 x i64], align 16
   %realpath = tail call i64 @sorbet_readRealpath()
@@ -165,7 +165,7 @@ entry:
   %5 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #6
   tail call void @rb_gc_register_mark_object(i64 %5) #6
   store i64 %5, i64* @"rubyStrFrozen_<top (required)>", align 8
-  %6 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @"str_test/testdata/compiler/splat.rb", i64 0, i64 0), i64 31) #6
+  %6 = tail call i64 @rb_fstring_new(i8* getelementptr inbounds ([39 x i8], [39 x i8]* @"str_test/testdata/compiler/splat_assign.rb", i64 0, i64 0), i64 38) #6
   tail call void @rb_gc_register_mark_object(i64 %6) #6
   %"rubyId_<top (required)>.i.i" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
   %"rubyStr_<top (required)>.i.i" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
@@ -237,7 +237,7 @@ entry:
   %32 = bitcast i64* %callArgs1Addr.i to <2 x i64>*, !dbg !8
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %32, align 8, !dbg !8
   %"rubyId_<expand-splat>.i" = load i64, i64* @"rubyIdPrecomputed_<expand-splat>", align 8, !dbg !8
-  %rawSendResult116.i = call i64 @sorbet_splatIntrinsic(i64 8, i64 %"rubyId_<expand-splat>.i", i32 3, i64* nonnull %callArgs0Addr.i, i64 (i64, i64, i32, i64*, i64)* null, i64 0) #6, !dbg !8
+  %rawSendResult116.i = call i64 @sorbet_expandSplatIntrinsic(i64 8, i64 %"rubyId_<expand-splat>.i", i32 3, i64* nonnull %callArgs0Addr.i, i64 (i64, i64, i32, i64*, i64)* null, i64 0) #6, !dbg !8
   %33 = and i64 %rawSendResult116.i, 7, !dbg !8
   %34 = icmp ne i64 %33, 0, !dbg !8
   %35 = and i64 %rawSendResult116.i, -9, !dbg !8
@@ -282,7 +282,7 @@ afterSend142.i:                                   ; preds = %86, %"alternativeCa
   store i64 %54, i64* %callArgs0Addr.i, align 16, !dbg !14
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %32, align 8, !dbg !14
   %"rubyId_<expand-splat>194.i" = load i64, i64* @"rubyIdPrecomputed_<expand-splat>", align 8, !dbg !14
-  %rawSendResult195.i = call i64 @sorbet_splatIntrinsic(i64 8, i64 %"rubyId_<expand-splat>194.i", i32 3, i64* nonnull %callArgs0Addr.i, i64 (i64, i64, i32, i64*, i64)* null, i64 0) #6, !dbg !14
+  %rawSendResult195.i = call i64 @sorbet_expandSplatIntrinsic(i64 8, i64 %"rubyId_<expand-splat>194.i", i32 3, i64* nonnull %callArgs0Addr.i, i64 (i64, i64, i32, i64*, i64)* null, i64 0) #6, !dbg !14
   %55 = and i64 %rawSendResult195.i, 7, !dbg !14
   %56 = icmp ne i64 %55, 0, !dbg !14
   %57 = and i64 %rawSendResult195.i, -9, !dbg !14
@@ -370,7 +370,7 @@ afterSend227.i:                                   ; preds = %132, %"alternativeC
   store i64 %100, i64* %callArgs0Addr.i, align 16, !dbg !16
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %32, align 8, !dbg !16
   %"rubyId_<expand-splat>274.i" = load i64, i64* @"rubyIdPrecomputed_<expand-splat>", align 8, !dbg !16
-  %rawSendResult275.i = call i64 @sorbet_splatIntrinsic(i64 8, i64 %"rubyId_<expand-splat>274.i", i32 3, i64* nonnull %callArgs0Addr.i, i64 (i64, i64, i32, i64*, i64)* null, i64 0) #6, !dbg !16
+  %rawSendResult275.i = call i64 @sorbet_expandSplatIntrinsic(i64 8, i64 %"rubyId_<expand-splat>274.i", i32 3, i64* nonnull %callArgs0Addr.i, i64 (i64, i64, i32, i64*, i64)* null, i64 0) #6, !dbg !16
   %101 = and i64 %rawSendResult275.i, 7, !dbg !16
   %102 = icmp ne i64 %101, 0, !dbg !16
   %103 = and i64 %rawSendResult275.i, -9, !dbg !16
@@ -520,7 +520,7 @@ attributes #6 = { nounwind }
 
 !0 = !{i32 2, !"Debug Info Version", i32 3}
 !1 = distinct !DICompileUnit(language: DW_LANG_C, file: !2, producer: "Sorbet LLVM", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, enums: !3)
-!2 = !DIFile(filename: "test/testdata/compiler/splat.rb", directory: ".")
+!2 = !DIFile(filename: "test/testdata/compiler/splat_assign.rb", directory: ".")
 !3 = !{}
 !4 = !{!5, !5, i64 0}
 !5 = !{!"long", !6, i64 0}

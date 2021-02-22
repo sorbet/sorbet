@@ -125,3 +125,8 @@ VALUE sorbet_getPassedBlockHandler() {
 void sorbet_vm_env_write_slowpath(const VALUE *ep, int index, VALUE v) {
     return vm_env_write_slowpath(ep, index, v);
 }
+
+VALUE sorbet_vm_splatIntrinsic(VALUE thing) {
+    const VALUE dont_duplicate_input_arrays = Qfalse;
+    return vm_splat_array(dont_duplicate_input_arrays, thing);
+}

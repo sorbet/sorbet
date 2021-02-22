@@ -219,8 +219,8 @@ const VALUE sorbet_readRealpath() {
 // ****                       Name Based Intrinsics
 // ****
 
-VALUE sorbet_splatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                            VALUE closure) {
+VALUE sorbet_expandSplatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                  VALUE closure) {
     if (UNLIKELY(argc != 3)) {
         sorbet_raiseArity(argc, 3, 3);
     }
