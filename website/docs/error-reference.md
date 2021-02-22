@@ -339,6 +339,17 @@ end
 
 For how to fix, see [Type Annotations](type-annotations.md).
 
+If your intent was not to declare the type of the instance variable but was
+instead just to assign to it, you can assign to an intermediate variable to
+avoid this error:
+
+```ruby
+class A
+  x = T.cast(10, Integer)
+  @@x = x
+end
+```
+
 ## 5014
 
 Given code like this:
