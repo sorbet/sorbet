@@ -339,6 +339,17 @@ end
 
 For how to fix, see [Type Annotations](type-annotations.md).
 
+To instead use `T.cast` as a runtime-only type check (that is, neither as a
+statically-checked assertion nor as an instance variable declaration), assign
+the cast result to an intermediate variable:
+
+```ruby
+class A
+  x = T.cast(10, Integer)
+  @@x = x
+end
+```
+
 ## 5014
 
 Given code like this:
