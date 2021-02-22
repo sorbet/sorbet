@@ -510,11 +510,11 @@ void GlobalState::initEmpty() {
         arg.flags.isBlock = true;
     }
 
-    // Synthesize <Magic>.<splat>(a: Array) => Untyped
+    // Synthesize <Magic>.<splat>(a: T.untyped) => Untyped
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::splat());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::arrayOfUntyped();
+        arg.type = Types::untyped(*this, method);
     }
     method.data(*this)->resultType = Types::untyped(*this, method);
 

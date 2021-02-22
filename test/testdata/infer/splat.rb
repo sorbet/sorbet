@@ -13,6 +13,8 @@ T.assert_type!(f(1, *[2, 3]), Integer)
 
 T.reveal_type(f(*T.unsafe(nil))) # error: type: `T.untyped`
 
+args = [*(1..3), 5, 6]
+
 sig {params(x: Integer, blk: T.proc.params(x: Integer).returns(Integer)).returns(Integer)}
 def yields(x, &blk)
   blk.call(x)
