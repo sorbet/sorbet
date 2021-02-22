@@ -339,9 +339,9 @@ end
 
 For how to fix, see [Type Annotations](type-annotations.md).
 
-If your intent was not to declare the type of the instance variable but to check
-the type of the value being assigned to it, you can assign to an intermediate
-variable to avoid this error:
+To instead use `T.cast` as a runtime-only type check (that is, neither as a
+statically-checked assertion nor as an instance variable declaration), assign
+the cast result to an intermediate variable:
 
 ```ruby
 class A
