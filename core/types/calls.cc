@@ -2195,7 +2195,24 @@ public:
             }
         }
 
-        res.returnType = Types::untypedUntracked();
+        InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
+        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, argLocs};
+        InlinedVector<const TypeAndOrigins *, 2> innerArgs;
+
+        DispatchArgs dispatch{core::Names::toA(), locs,      0,
+                              innerArgs,          arg->type, {arg->type, args.fullType.origins},
+                              arg->type,          nullptr,   args.originForUninitialized};
+        auto dispatched = arg->type.dispatchCall(gs, dispatch);
+
+        // The VM handles the case of an error when dispatching to_a, so the only
+        // thing we need to ask is "did the call error?".
+        if (!dispatched.main.errors.empty()) {
+            // In case of an error, the splat is converted to an array with a single
+            // element; be conservative in what we declare the element type to be.
+            res.returnType = Types::arrayOfUntyped();
+        } else {
+            res.returnType = dispatched.returnType;
+        }
     };
 } Magic_splat;
 
