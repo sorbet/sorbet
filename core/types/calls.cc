@@ -827,7 +827,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
 
             if (hasKwargs) {
-                if (auto *hash = isKwargsHash(gs, kwSplatType)) {
+                if (auto *hash = fromKwargsHash(gs, kwSplatType)) {
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
                     kwargs = make_type<ShapeType>(move(keys), move(values));
