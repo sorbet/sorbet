@@ -494,7 +494,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalSta
 }
 
 // Ensure that a ShapeType used as a keyword args splat in a send has only symbol keys present.
-const ShapeType *isKwargsHash(const GlobalState &gs, const TypePtr &ty) {
+const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
     auto *hash = cast_type<ShapeType>(ty);
     if (hash == nullptr) {
         return nullptr;
