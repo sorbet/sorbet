@@ -884,19 +884,27 @@ u4 Serializer::loadGlobalStateUUID(const GlobalState &gs, const u1 *const data) 
     return SerializerImpl::unpickleGSUUID(p);
 }
 
-vector<u1> Serializer::storeFile(const core::File &file, ast::ParsedFile &tree) {
+vector<u1> Serializer::storeTree(const core::File &file, const ast::ParsedFile &tree) {
     Pickler p;
-    SerializerImpl::pickle(p, file);
+    // See comment in `serialize.h` above `loadTree`.
+    p.putU4(file.source().size());
+    SerializerImpl::pickle(p, file.getFileHash());
     SerializerImpl::pickle(p, tree.tree);
     return p.result();
 }
 
-CachedFile Serializer::loadFile(const core::GlobalState &gs, const u1 *const data) {
+ast::ExpressionPtr Serializer::loadTree(const core::GlobalState &gs, core::File &file, const u1 *const data) {
     UnPickler p(data, gs.tracer());
-    auto file = SerializerImpl::unpickleFile(p);
-    file->cached = true;
-    auto tree = SerializerImpl::unpickleExpr(p, gs);
-    return CachedFile{move(file), move(tree)};
+    u4 fileSrcLen = p.getU4();
+    if (file.source().size() != fileSrcLen) {
+        // See comment in `serialize.h` above `loadTree`.
+        // File does not have expected size; bail.
+        return nullptr;
+    }
+    file.setFileHash(SerializerImpl::unpickleFileHash(p));
+    // cached must be set _after_ setting the file hash, as setFileHash unsets the cached flag
+    file.cached = true;
+    return SerializerImpl::unpickleExpr(p, gs);
 }
 
 void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {
