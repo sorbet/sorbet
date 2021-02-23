@@ -130,3 +130,8 @@ VALUE sorbet_vm_splatIntrinsic(VALUE thing) {
     const VALUE dont_duplicate_input_arrays = Qfalse;
     return vm_splat_array(dont_duplicate_input_arrays, thing);
 }
+
+VALUE sorbet_vm_check_match_array(rb_execution_context_t *ec, VALUE target, VALUE pattern) {
+    int flag = VM_CHECKMATCH_ARRAY | VM_CHECKMATCH_TYPE_CASE;
+    return vm_check_match(ec, target, pattern, flag);
+}

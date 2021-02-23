@@ -462,6 +462,7 @@ static const vector<CallCMethod> knownCMethods{
     {"<self-new>", "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {"<block-break>", "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {"!", "sorbet_bang", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<check-match-array>", "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
