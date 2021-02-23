@@ -47,8 +47,8 @@ cc_binary(
     }),
     visibility = ["//tools:__pkg__"],
     deps = [
-        "@cxxopts",
         "//common",
+        "@cxxopts",
     ],
 )
 
