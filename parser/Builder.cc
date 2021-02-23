@@ -8,6 +8,7 @@
 #include "ruby_parser/builder.hh"
 #include "ruby_parser/diagnostic.hh"
 
+#include "absl/algorithm/container.h"
 #include <algorithm>
 #include <regex>
 #include <typeinfo>
@@ -291,9 +292,22 @@ public:
         }
     }
 
+    static bool isKeywordHashElement(sorbet::parser::Node *nd) {
+        if (parser::isa_node<Kwsplat>(nd)) {
+            return true;
+        }
+
+        if (auto *pair = parser::cast_node<Pair>(nd)) {
+            return parser::isa_node<Symbol>(pair->key.get());
+        }
+
+        return false;
+    }
+
     unique_ptr<Node> associate(const token *begin, sorbet::parser::NodeVec pairs, const token *end) {
         ENFORCE((begin == nullptr && end == nullptr) || (begin != nullptr && end != nullptr));
-        auto isKwargs = begin == nullptr && end == nullptr;
+        auto isKwargs = begin == nullptr && end == nullptr &&
+                        absl::c_all_of(pairs, [](const auto &nd) { return isKeywordHashElement(nd.get()); });
         return make_unique<Hash>(collectionLoc(begin, pairs, end), isKwargs, std::move(pairs));
     }
 

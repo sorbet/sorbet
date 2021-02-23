@@ -144,7 +144,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.def_delegator(:foo, :kwarg1, :thing, :kwarg2, local)
 
-    <self>.def_delegator(:foo, local, :thing)
+    <self>.def_delegator(:foo, {local => :thing})
 
     <self>.def_delegator(234, :foo)
 

@@ -493,6 +493,31 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(const GlobalSta
         {core::AutocorrectSuggestion::Edit{nextLineLoc.value(), fmt::format("{}extend T::Helpers\n", prefix)}}};
 }
 
+// Ensure that a ShapeType used as a keyword args splat in a send has only symbol keys present.
+const ShapeType *fromKwargsHash(const GlobalState &gs, const TypePtr &ty) {
+    auto *hash = cast_type<ShapeType>(ty);
+    if (hash == nullptr) {
+        return nullptr;
+    }
+
+    if (!absl::c_all_of(hash->keys, [&gs](const auto &key) {
+            if (!isa_type<LiteralType>(key)) {
+                return false;
+            }
+
+            auto klass = cast_type_nonnull<LiteralType>(key).underlying(gs);
+            if (!isa_type<ClassType>(klass)) {
+                return false;
+            }
+
+            return cast_type_nonnull<ClassType>(klass).symbol == Symbols::Symbol();
+        })) {
+        return nullptr;
+    }
+
+    return hash;
+}
+
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -795,12 +820,14 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         }
 
         // merge in the keyword splat argument if it's present
+        bool kwSplatIsHash = false;
+        TypePtr kwSplatType;
         if (hasKwsplat) {
             auto &kwSplatArg = *(aend - 1);
-            auto kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
+            kwSplatType = Types::approximate(gs, kwSplatArg->type, *constr);
 
             if (hasKwargs) {
-                if (auto *hash = cast_type<ShapeType>(kwSplatType)) {
+                if (auto *hash = fromKwargsHash(gs, kwSplatType)) {
                     absl::c_copy(hash->keys, back_inserter(keys));
                     absl::c_copy(hash->values, back_inserter(values));
                     kwargs = make_type<ShapeType>(move(keys), move(values));
@@ -811,15 +838,12 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         --aend;
                         kwargs = Types::untypedUntracked();
                     } else if (kwSplatType.derivesFrom(gs, Symbols::Hash())) {
+                        // This will be an error if the kwsplat hash ends up being used to supply keyword arguments,
+                        // however it may also be consumed as a positional arg. Defer raising an error until we're
+                        // certain that it would be used as a keyword args hash below.
+                        kwSplatIsHash = true;
+
                         --aend;
-                        if (auto e =
-                                gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
-                            e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
-                                        "arguments");
-                            auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
-                            e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
-                            result.main.errors.emplace_back(e.build());
-                        }
                         kwargs = Types::untypedUntracked();
                     }
                 }
@@ -840,31 +864,39 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
         // Detect the case where not all positional arguments were supplied, causing the keyword args to be consumed as
         // a positional hash.
-        if (kwargs != nullptr && pit != pend && !pit->flags.isBlock) {
-            if (!hasKwargs || (!pit->flags.isRepeated && !pit->flags.isKeyword && !pit->flags.isDefault)) {
-                // TODO(trevor) if `hasKwargs` is true at this point but not keyword args were provided, we could add an
-                // autocorrect to turn this into `**kwargs`
+        if (kwargs != nullptr && pit != pend && !pit->flags.isBlock &&
+            (!hasKwargs || (!pit->flags.isRepeated && !pit->flags.isKeyword && !pit->flags.isDefault))) {
+            // TODO(trevor) if `hasKwargs` is true at this point but not keyword args were provided, we could add an
+            // autocorrect to turn this into `**kwargs`
 
-                // If there are positional arguments left to be filled, but there were keyword arguments present,
-                // consume the keyword args hash as though it was a positional arg.
-                if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
-                                          core::Loc(args.locs.file, args.locs.receiver), symbol, method,
-                                          TypeAndOrigins{kwargs, {kwargsLoc}}, *pit, args.selfType, targs, kwargsLoc,
-                                          args.originForUninitialized, args.args.size() == 1)) {
-                    result.main.errors.emplace_back(std::move(e));
-                }
+            // If there are positional arguments left to be filled, but there were keyword arguments present,
+            // consume the keyword args hash as though it was a positional arg.
+            if (auto e = matchArgType(gs, *constr, core::Loc(args.locs.file, args.locs.call),
+                                      core::Loc(args.locs.file, args.locs.receiver), symbol, method,
+                                      TypeAndOrigins{kwargs, {kwargsLoc}}, *pit, args.selfType, targs, kwargsLoc,
+                                      args.originForUninitialized, args.args.size() == 1)) {
+                result.main.errors.emplace_back(std::move(e));
+            }
 
-                if (!pit->flags.isRepeated) {
-                    pit++;
-                }
+            if (!pit->flags.isRepeated) {
+                pit++;
+            }
 
-                // Clear out the kwargs hash so that no keyword argument processing is triggered below, and also mark
-                // the keyword args as consumed when this method does not accept keyword arguments.
-                kwargs = nullptr;
-                posArgs++;
-                if (!hasKwargs) {
-                    ait += numKwargs;
-                }
+            // Clear out the kwargs hash so that no keyword argument processing is triggered below, and also mark
+            // the keyword args as consumed when this method does not accept keyword arguments.
+            kwargs = nullptr;
+            posArgs++;
+            if (!hasKwargs) {
+                ait += numKwargs;
+            }
+        } else if (kwSplatIsHash) {
+            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), errors::Infer::UntypedSplat)) {
+                e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword "
+                            "arguments");
+                auto &kwSplatArg = *aend;
+                auto kwSplatTPO = TypeAndOrigins{kwSplatType, kwSplatArg->origins};
+                e.addErrorSection(kwSplatTPO.explainGot(gs, args.originForUninitialized));
+                result.main.errors.emplace_back(e.build());
             }
         }
     }
@@ -1113,7 +1145,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         component.sendTp = resultType;
     }
     return result;
-}
+} // namespace sorbet::core
 
 DispatchResult ClassType::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
     categoryCounterInc("dispatch_call", "classtype");

@@ -169,7 +169,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.delegate(:foo, :to, :thing, :prefix, local)
 
-    <self>.delegate(:foo, local, :thing)
+    <self>.delegate(:foo, {local => :thing})
 
     <self>.delegate(234, :to, :good)
 
