@@ -227,6 +227,11 @@ struct ParsedFile {
     core::FileRef file;
 };
 
+struct CompressedParsedFile {
+    std::unique_ptr<std::vector<u1>> tree;
+    core::FileRef file;
+};
+
 /**
  * Stores a vector of `ParsedFile`s. May be empty if pass was canceled or encountered an error.
  * TODO: Modify to store reason if we ever have multiple reasons for a pass to stop. Currently, it's only empty if the

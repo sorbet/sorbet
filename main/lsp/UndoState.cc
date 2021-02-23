@@ -8,11 +8,11 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs, UnorderedMap<int, ast::ParsedFile> evictedIndexedFinalGS,
-                     u4 epoch)
+UndoState::UndoState(unique_ptr<core::GlobalState> evictedGs,
+                     UnorderedMap<int, ast::CompressedParsedFile> evictedIndexedFinalGS, u4 epoch)
     : evictedGs(move(evictedGs)), evictedIndexedFinalGS(std::move(evictedIndexedFinalGS)), epoch(epoch) {}
 
-void UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree) {
+void UndoState::recordEvictedState(ast::CompressedParsedFile evictedIndexTree) {
     const auto id = evictedIndexTree.file.id();
     // The first time a file gets evicted, it's an index tree from the old global state.
     // Subsequent times it is evicting old index trees from the new global state, and we don't care.
@@ -22,8 +22,8 @@ void UndoState::recordEvictedState(ast::ParsedFile evictedIndexTree) {
     }
 }
 
-void UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::ParsedFile> &indexed,
-                        UnorderedMap<int, ast::ParsedFile> &indexedFinalGS) {
+void UndoState::restore(unique_ptr<core::GlobalState> &gs, vector<ast::CompressedParsedFile> &indexed,
+                        UnorderedMap<int, ast::CompressedParsedFile> &indexedFinalGS) {
     // Replace evicted index trees.
     for (auto &entry : evictedIndexed) {
         indexed[entry.first] = move(entry.second);

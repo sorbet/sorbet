@@ -12,10 +12,26 @@ class PreemptionTaskManager;
 }
 
 namespace sorbet::realmain::pipeline {
-ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                         ast::ExpressionPtr cachedTree = nullptr);
+
+struct IndexResult {
+    std::unique_ptr<core::GlobalState> gs;
+    std::vector<ast::ParsedFile> trees;
+    std::vector<ast::CompressedParsedFile> compressedTrees;
+};
+
+ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file);
 
 std::vector<core::FileRef> reserveFiles(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &files);
+
+/**
+ * This routine is optimized for the editor/LSP use case, which keeps trees compressed in-memory:
+ * - If an AST is in the cache, appends the tree to IndexResult.compressedTrees.
+ * - Otherwise, it indexes the file and stores the raw AST into trees.
+ * In the common case, ~all ASTs are in the cache so this function ends up doing a bunch of memcpys.
+ */
+IndexResult indexWithNoDecompression(std::unique_ptr<core::GlobalState> gs, std::vector<core::FileRef> &files,
+                                     const options::Options &opts, WorkerPool &workers,
+                                     const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 
 std::vector<ast::ParsedFile> index(std::unique_ptr<core::GlobalState> &gs, std::vector<core::FileRef> files,
                                    const options::Options &opts, WorkerPool &workers,
@@ -47,10 +63,12 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
 
 // Caches any uncached trees and files. Returns true if it modifies kvstore.
 bool cacheTreesAndFiles(const core::GlobalState &gs, WorkerPool &workers, std::vector<ast::ParsedFile> &parsedFiles,
+                        std::vector<ast::CompressedParsedFile> &compressedParsedFiles,
                         const std::unique_ptr<OwnedKeyValueStore> &kvstore);
 
 // Exported for tests only.
 std::string fileKey(const core::File &file);
+std::string treeKey(const core::File &file);
 
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H

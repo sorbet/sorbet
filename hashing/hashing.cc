@@ -6,6 +6,7 @@
 #include "core/GlobalSubstitution.h"
 #include "core/NameHash.h"
 #include "core/Unfreeze.h"
+#include "core/serialize/serialize.h"
 #include "main/pipeline/pipeline.h"
 
 using namespace std;
@@ -67,6 +68,149 @@ unique_ptr<core::FileHash> computeFileHashForFile(shared_ptr<core::File> forWhat
     ast.tree = ast::Substitute::run(ctx, subst, move(ast.tree));
     return computeFileHashForAST(lgs, subst.getAllNames(), move(ast));
 }
+
+struct FileHashJob {
+    bool compressed;
+    size_t index;
+};
+
+void computeFileHashesFromIndexResult(realmain::pipeline::IndexResult &indexResult, spdlog::logger &logger,
+                                      WorkerPool &workers, const unique_ptr<const OwnedKeyValueStore> &kvstore,
+                                      const realmain::options::Options &hashingOpts) {
+    // Rewrite ASTs to an empty GlobalState and use them for hashing.
+    auto fileq =
+        make_shared<ConcurrentBoundedQueue<FileHashJob>>(indexResult.trees.size() + indexResult.compressedTrees.size());
+    for (size_t i = 0; i < indexResult.trees.size(); i++) {
+        fileq->push(FileHashJob{false, i}, 1);
+    }
+    for (size_t i = 0; i < indexResult.compressedTrees.size(); i++) {
+        fileq->push(FileHashJob{true, i}, 1);
+    }
+
+    logger.debug("Computing state hashes for {} files", indexResult.trees.size() + indexResult.compressedTrees.size());
+
+    const core::GlobalState &sharedGs = *indexResult.gs;
+    const vector<ast::ParsedFile> &trees = indexResult.trees;
+    const vector<ast::CompressedParsedFile> &compressedTrees = indexResult.compressedTrees;
+    auto resultq = make_shared<BlockingBoundedQueue<vector<pair<core::FileRef, unique_ptr<const core::FileHash>>>>>(
+        indexResult.trees.size() + indexResult.compressedTrees.size());
+    Timer timeit(logger, "computeFileHashes");
+    workers.multiplexJob("lspStateHash", [fileq, resultq, &trees, &compressedTrees, &sharedGs, &logger,
+                                          &hashingOpts]() {
+        unique_ptr<Timer> timeit;
+        vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
+        int processedByThread = 0;
+        FileHashJob job;
+        {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    if (timeit == nullptr) {
+                        timeit = make_unique<Timer>(logger, "computeFileHashesWorker");
+                    }
+                    processedByThread++;
+
+                    ast::ParsedFile temp;
+                    const ast::ParsedFile *ast;
+                    if (job.compressed) {
+                        const auto &compressed = compressedTrees[job.index];
+                        if (!compressed.file.exists() || compressed.file.data(sharedGs).getFileHash() != nullptr) {
+                            continue;
+                        }
+
+                        // Decompress and hash. This is expected to be an uncommon case, as 1) all compressedFiles
+                        // are cached and 2) LSP caches files, ASTs, _and_ their hashes. However, if a user runs Sorbet
+                        // on the CLI, it will cache files and ASTs but no hashes, so we need to handle this case.
+                        temp = ast::ParsedFile{core::serialize::Serializer::loadAST(sharedGs, compressed.tree->data()),
+                                               compressed.file};
+                        ast = &temp;
+                    } else {
+                        ast = &trees[job.index];
+
+                        if (!ast->file.exists() || ast->file.data(sharedGs).getFileHash() != nullptr) {
+                            continue;
+                        }
+                    }
+
+                    unique_ptr<core::GlobalState> lgs;
+                    auto newFref =
+                        makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast->file.id()], lgs, hashingOpts);
+                    auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, *ast);
+
+                    threadResult.emplace_back(ast->file,
+                                              computeFileHashForAST(lgs, move(usageHash), move(rewrittenAST)));
+                }
+            }
+        }
+
+        if (processedByThread > 0) {
+            resultq->push(move(threadResult), processedByThread);
+        }
+    });
+
+    {
+        vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+            if (result.gotItem()) {
+                for (auto &a : threadResult) {
+                    a.first.data(*indexResult.gs).setFileHash(move(a.second));
+                }
+            }
+        }
+    }
+}
+
+vector<ast::CompressedParsedFile> compressTrees(spdlog::logger &logger, vector<ast::ParsedFile> trees,
+                                                WorkerPool &workers) {
+    Timer timeit(logger, "Hashing::compressTrees");
+    // Compress files in parallel.
+    auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
+    vector<ast::CompressedParsedFile> output;
+    output.reserve(trees.size());
+    for (auto &tree : trees) {
+        fileq->push(move(tree), 1);
+    }
+
+    auto resultq = make_shared<BlockingBoundedQueue<vector<ast::CompressedParsedFile>>>(trees.size());
+    trees.clear();
+    workers.multiplexJob("compressTreesAndFiles", [fileq, resultq]() {
+        vector<ast::CompressedParsedFile> threadResult;
+        int processedByThread = 0;
+        ast::ParsedFile job;
+        {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    processedByThread++;
+
+                    if (!job.file.exists()) {
+                        continue;
+                    }
+
+                    threadResult.emplace_back(ast::CompressedParsedFile{
+                        make_unique<vector<u1>>(core::serialize::Serializer::storeAST(job)), job.file});
+                }
+            }
+        }
+
+        if (processedByThread > 0) {
+            resultq->push(move(threadResult), processedByThread);
+        }
+    });
+
+    {
+        vector<ast::CompressedParsedFile> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
+             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
+            if (result.gotItem()) {
+                for (auto &compressed : threadResult) {
+                    output.emplace_back(move(compressed));
+                }
+            }
+        }
+    }
+    return output;
+}
+
 }; // namespace
 
 void Hashing::computeFileHashes(const vector<shared_ptr<core::File>> &files, spdlog::logger &logger,
@@ -123,69 +267,33 @@ vector<ast::ParsedFile> Hashing::indexAndComputeFileHashes(unique_ptr<core::Glob
                                                            spdlog::logger &logger, vector<core::FileRef> &files,
                                                            WorkerPool &workers,
                                                            const unique_ptr<const OwnedKeyValueStore> &kvstore) {
-    auto asts = realmain::pipeline::index(gs, files, opts, workers, kvstore);
-    ENFORCE_NO_TIMER(asts.size() == files.size());
+    realmain::pipeline::IndexResult result{nullptr, {}, {}};
+    result.trees = realmain::pipeline::index(gs, files, opts, workers, kvstore);
+    ENFORCE_NO_TIMER(result.trees.size() == files.size());
+    result.gs = move(gs);
+    computeFileHashesFromIndexResult(result, logger, workers, kvstore, opts);
+    gs = move(result.gs);
+    return move(result.trees);
+}
 
-    // Below, we rewrite ASTs to an empty GlobalState and use them for hashing.
-    auto fileq = make_shared<ConcurrentBoundedQueue<size_t>>(asts.size());
-    for (size_t i = 0; i < asts.size(); i++) {
-        auto copy = i;
-        fileq->push(move(copy), 1);
+vector<ast::CompressedParsedFile>
+Hashing::indexCompressAndComputeFileHashes(unique_ptr<core::GlobalState> &gs, const realmain::options::Options &opts,
+                                           spdlog::logger &logger, vector<core::FileRef> &files, WorkerPool &workers,
+                                           const unique_ptr<const OwnedKeyValueStore> &kvstore) {
+    auto result = realmain::pipeline::indexWithNoDecompression(move(gs), files, opts, workers, kvstore);
+
+    ENFORCE_NO_TIMER(result.compressedTrees.size() + result.trees.size() == files.size());
+    computeFileHashesFromIndexResult(result, logger, workers, kvstore, opts);
+    gs = move(result.gs);
+
+    if (!result.trees.empty()) {
+        auto compressed = compressTrees(logger, move(result.trees), workers);
+        result.compressedTrees.reserve(result.compressedTrees.size() + compressed.size());
+        result.compressedTrees.insert(result.compressedTrees.end(), make_move_iterator(compressed.begin()),
+                                      make_move_iterator(compressed.end()));
     }
 
-    logger.debug("Computing state hashes for {} files", asts.size());
-
-    const core::GlobalState &sharedGs = *gs;
-    auto resultq =
-        make_shared<BlockingBoundedQueue<vector<pair<core::FileRef, unique_ptr<const core::FileHash>>>>>(asts.size());
-    Timer timeit(logger, "computeFileHashes");
-    workers.multiplexJob("lspStateHash", [fileq, resultq, &asts, &sharedGs, &logger, &opts]() {
-        unique_ptr<Timer> timeit;
-        vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
-        int processedByThread = 0;
-        size_t job;
-        {
-            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                if (result.gotItem()) {
-                    if (timeit == nullptr) {
-                        timeit = make_unique<Timer>(logger, "computeFileHashesWorker");
-                    }
-                    processedByThread++;
-
-                    const auto &ast = asts[job];
-
-                    if (!ast.file.exists() || ast.file.data(sharedGs).getFileHash() != nullptr) {
-                        continue;
-                    }
-
-                    unique_ptr<core::GlobalState> lgs;
-                    auto newFref = makeEmptyGlobalStateForFile(logger, sharedGs.getFiles()[ast.file.id()], lgs, opts);
-                    auto [rewrittenAST, usageHash] = rewriteAST(sharedGs, *lgs, newFref, ast);
-
-                    threadResult.emplace_back(ast.file,
-                                              computeFileHashForAST(lgs, move(usageHash), move(rewrittenAST)));
-                }
-            }
-        }
-
-        if (processedByThread > 0) {
-            resultq->push(move(threadResult), processedByThread);
-        }
-    });
-
-    {
-        vector<pair<core::FileRef, unique_ptr<const core::FileHash>>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger); !result.done();
-             result = resultq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), logger)) {
-            if (result.gotItem()) {
-                for (auto &a : threadResult) {
-                    a.first.data(*gs).setFileHash(move(a.second));
-                }
-            }
-        }
-    }
-
-    return asts;
+    return move(result.compressedTrees);
 }
 
 } // namespace sorbet::hashing

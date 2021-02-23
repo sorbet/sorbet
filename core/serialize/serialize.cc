@@ -884,19 +884,28 @@ u4 Serializer::loadGlobalStateUUID(const GlobalState &gs, const u1 *const data) 
     return SerializerImpl::unpickleGSUUID(p);
 }
 
-vector<u1> Serializer::storeFile(const core::File &file, ast::ParsedFile &tree) {
+vector<u1> Serializer::storeFile(const core::File &file) {
     Pickler p;
     SerializerImpl::pickle(p, file);
+    return p.result();
+}
+
+vector<u1> Serializer::storeAST(const ast::ParsedFile &tree) {
+    Pickler p;
     SerializerImpl::pickle(p, tree.tree);
     return p.result();
 }
 
-CachedFile Serializer::loadFile(const core::GlobalState &gs, const u1 *const data) {
+shared_ptr<core::File> Serializer::loadFile(const core::GlobalState &gs, const u1 *const data) {
     UnPickler p(data, gs.tracer());
     auto file = SerializerImpl::unpickleFile(p);
     file->cached = true;
-    auto tree = SerializerImpl::unpickleExpr(p, gs);
-    return CachedFile{move(file), move(tree)};
+    return file;
+}
+
+ast::ExpressionPtr Serializer::loadAST(const GlobalState &gs, const u1 *const data) {
+    UnPickler p(data, gs.tracer());
+    return SerializerImpl::unpickleExpr(p, gs);
 }
 
 void SerializerImpl::pickle(Pickler &p, const ast::ExpressionPtr &what) {

@@ -162,7 +162,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     initialGS->errorQueue = make_shared<core::ErrorQueue>(savedErrorQueue->logger, savedErrorQueue->tracer,
                                                           make_shared<core::NullFlusher>());
 
-    vector<ast::ParsedFile> indexed;
+    vector<ast::CompressedParsedFile> indexed;
     Timer timeit(config->logger, "initial_index");
     ShowOperation op(*config, ShowOperation::Kind::Indexing);
     vector<core::FileRef> inputFiles;
@@ -172,8 +172,8 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
         inputFiles = pipeline::reserveFiles(initialGS, config->opts.inputFileNames);
         indexed.resize(initialGS->filesUsed());
 
-        auto asts = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger, inputFiles,
-                                                                workers, ownedKvstore);
+        auto asts = hashing::Hashing::indexCompressAndComputeFileHashes(initialGS, config->opts, *config->logger,
+                                                                        inputFiles, workers, ownedKvstore);
         // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so vector
         // index != FileRef ID. Fix that by slotting them into `indexed`.
         for (auto &ast : asts) {
@@ -183,8 +183,9 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
         }
     }
 
+    vector<ast::ParsedFile> uncompressed;
     cache::maybeCacheGlobalStateAndFiles(OwnedKeyValueStore::abort(move(ownedKvstore)), config->opts, *initialGS,
-                                         workers, indexed);
+                                         workers, uncompressed, indexed);
 
     ENFORCE_NO_TIMER(indexed.size() == initialGS->filesUsed());
 
@@ -249,8 +250,8 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
         // which one it will be.
         initialGS->errorQueue = make_shared<core::ErrorQueue>(
             initialGS->errorQueue->logger, initialGS->errorQueue->tracer, make_shared<core::NullFlusher>());
-        auto trees = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger, frefs,
-                                                                 *emptyWorkers, kvstore);
+        auto trees = hashing::Hashing::indexCompressAndComputeFileHashes(initialGS, config->opts, *config->logger,
+                                                                         frefs, *emptyWorkers, kvstore);
         update.updatedFileIndexes.resize(trees.size());
         for (auto &ast : trees) {
             const int i = fileToPos[ast.file];

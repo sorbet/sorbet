@@ -11,7 +11,8 @@ class OwnedKeyValueStore;
 
 namespace sorbet::ast {
 struct ParsedFile;
-}
+struct CompressedParsedFile;
+} // namespace sorbet::ast
 
 namespace sorbet::realmain::options {
 struct Options;
@@ -52,6 +53,14 @@ public:
     indexAndComputeFileHashes(std::unique_ptr<core::GlobalState> &gs, const realmain::options::Options &opts,
                               spdlog::logger &logger, std::vector<core::FileRef> &files, WorkerPool &workers,
                               const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
+
+    /**
+     * Same as indexAndComputeFileHashes, but it returns compressed files.
+     */
+    static std::vector<ast::CompressedParsedFile>
+    indexCompressAndComputeFileHashes(std::unique_ptr<core::GlobalState> &gs, const realmain::options::Options &opts,
+                                      spdlog::logger &logger, std::vector<core::FileRef> &files, WorkerPool &workers,
+                                      const std::unique_ptr<const OwnedKeyValueStore> &kvstore);
 };
 } // namespace sorbet::hashing
 
