@@ -597,15 +597,6 @@ public:
     }
 };
 
-bool isInlininableKwargPair(parser::Node *node) {
-    auto *pair = parser::cast_node<parser::Pair>(node);
-    if (pair == nullptr) {
-        return false;
-    }
-
-    return parser::isa_node<parser::Symbol>(pair->key.get());
-}
-
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
     try {
         if (what.get() == nullptr) {
@@ -640,16 +631,21 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     if (!send->args.empty()) {
                         // Deconstruct the kwargs hash in the last argument if it's present.
                         if (auto *hash = parser::cast_node<parser::Hash>(send->args.back().get())) {
-                            if (hash->inline_) {
+                            if (hash->kwargs) {
                                 // hold a reference to the node, and remove it from the back of the send list
                                 auto node = std::move(send->args.back());
                                 send->args.pop_back();
 
                                 parser::NodeVec elts;
 
-                                // skip inlining the kwargs if there are any non-key/value pairs present
-                                if (!absl::c_all_of(hash->pairs,
-                                                    [](auto &node) { return isInlininableKwargPair(node.get()); })) {
+                                // skip inlining the kwargs if there are any kwsplat nodes present
+                                if (absl::c_any_of(hash->pairs, [](auto &node) {
+                                        // the parser guarantees that if we see a kwargs hash it only contains pair or
+                                        // kwsplat nodes
+                                        ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) ||
+                                                parser::isa_node<parser::Pair>(node.get()));
+                                        return parser::isa_node<parser::Kwsplat>(node.get());
+                                    })) {
                                     elts.emplace_back(std::move(node));
                                 } else {
                                     // inline the hash into the send args
@@ -766,12 +762,17 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     if (numPosArgs > 0) {
                         // Deconstruct the kwargs hash in the last argument if it's present.
                         if (auto *hash = parser::cast_node<parser::Hash>(send->args.back().get())) {
-                            if (hash->inline_) {
+                            if (hash->kwargs) {
                                 numPosArgs--;
 
                                 // skip inlining the kwargs if there are any non-key/value pairs present
-                                if (absl::c_all_of(hash->pairs,
-                                                   [](auto &arg) { return isInlininableKwargPair(arg.get()); })) {
+                                if (!absl::c_any_of(hash->pairs, [](auto &node) {
+                                        // the parser guarantees that if we see a kwargs hash it only contains pair or
+                                        // kwsplat nodes
+                                        ENFORCE(parser::isa_node<parser::Kwsplat>(node.get()) ||
+                                                parser::isa_node<parser::Pair>(node.get()));
+                                        return parser::isa_node<parser::Kwsplat>(node.get());
+                                    })) {
                                     // hold a reference to the node, and remove it from the back fo the send list
                                     auto node = std::move(send->args.back());
                                     send->args.pop_back();

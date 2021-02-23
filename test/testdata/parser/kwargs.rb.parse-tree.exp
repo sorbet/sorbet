@@ -5,7 +5,7 @@ Begin {
       method = <U foo>
       args = [
         Hash {
-          inline_ = true
+          kwargs = true
           pairs = [
             Pair {
               key = Symbol {
@@ -24,7 +24,7 @@ Begin {
       method = <U foo>
       args = [
         Hash {
-          inline_ = false
+          kwargs = false
           pairs = [
             Pair {
               key = Symbol {
@@ -43,11 +43,11 @@ Begin {
       method = <U foo>
       args = [
         Hash {
-          inline_ = true
+          kwargs = true
           pairs = [
             Kwsplat {
               expr = Hash {
-                inline_ = false
+                kwargs = false
                 pairs = [
                   Pair {
                     key = Symbol {
@@ -69,7 +69,7 @@ Begin {
       method = <U foo>
       args = [
         Hash {
-          inline_ = true
+          kwargs = true
           pairs = [
             Kwsplat {
               expr = Send {
