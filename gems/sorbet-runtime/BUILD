@@ -35,3 +35,23 @@ sh_test(
         "//main:sorbet",
     ],
 )
+
+cc_binary(
+    name = "generate_call_validation",
+    srcs = [
+        "tools/generate_call_validation.cc",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "@cxxopts",
+        "//common",
+    ],
+)
+
+load(":tools/call_validation.bzl", "call_validation_rb_files")
+
+call_validation_rb_files()
