@@ -2187,6 +2187,33 @@ public:
     }
 } Magic_selfNew;
 
+class Magic_splat : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        ENFORCE(args.args.size() == 1);
+
+        auto &arg = args.args[0];
+        InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
+        CallLocs locs{args.locs.file, args.locs.call, args.locs.call, argLocs};
+        InlinedVector<const TypeAndOrigins *, 2> innerArgs;
+
+        DispatchArgs dispatch{core::Names::toA(), locs,      0,
+                              innerArgs,          arg->type, {arg->type, args.fullType.origins},
+                              arg->type,          nullptr,   args.originForUninitialized};
+        auto dispatched = arg->type.dispatchCall(gs, dispatch);
+
+        // The VM handles the case of an error when dispatching to_a, so the only
+        // thing we need to ask is "did the call error?".
+        if (!dispatched.main.errors.empty()) {
+            // In case of an error, the splat is converted to an array with a single
+            // element; be conservative in what we declare the element type to be.
+            res.returnType = Types::arrayOfUntyped();
+        } else {
+            res.returnType = dispatched.returnType;
+        }
+    };
+} Magic_splat;
+
 class DeclBuilderForProcs_void : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -2806,6 +2833,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::callWithSplatAndBlock(), &Magic_callWithSplatAndBlock},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::suggestType(), &Magic_suggestUntypedConstantType},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::selfNew(), &Magic_selfNew},
+    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::splat(), &Magic_splat},
 
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::void_(), &DeclBuilderForProcs_void},
     {Symbols::DeclBuilderForProcsSingleton(), Intrinsic::Kind::Instance, Names::returns(),

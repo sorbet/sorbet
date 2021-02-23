@@ -327,6 +327,7 @@ NameDef names[] = {
     {"splat", "<splat>"},
     {"expandSplat", "<expand-splat>"},
     {"suggestType", "<suggest-type>"},
+    {"checkMatchArray", "<check-match-array>"},
     {"arg0"},
     {"arg1"},
     {"arg2"},

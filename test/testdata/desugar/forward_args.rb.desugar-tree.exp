@@ -9,7 +9,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo2<<todo method>>(*args, *kwargs:, &block)
-      ::<Magic>.<call-with-splat-and-block>(<emptyTree>::<C T>.unsafe(<self>), :bar, args.to_a().concat([kwargs.to_hash()]), nil, block)
+      ::<Magic>.<call-with-splat-and-block>(<emptyTree>::<C T>.unsafe(<self>), :bar, ::<Magic>.<splat>(args).concat([kwargs.to_hash()]), nil, block)
     end
   end
 

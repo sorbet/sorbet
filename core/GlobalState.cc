@@ -525,11 +525,11 @@ void GlobalState::initEmpty() {
         arg.flags.isBlock = true;
     }
 
-    // Synthesize <Magic>.<splat>(a: Array) => Untyped
+    // Synthesize <Magic>.<splat>(a: T.untyped) => Untyped
     method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::splat());
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-        arg.type = Types::arrayOfUntyped();
+        arg.type = Types::untyped(*this, method);
     }
     method.data(*this)->resultType = Types::untyped(*this, method);
 
@@ -709,6 +709,20 @@ void GlobalState::initEmpty() {
         arg.type = Types::untyped(*this, method);
     }
     method.data(*this)->resultType = Types::void_();
+    {
+        auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
+        arg.flags.isBlock = true;
+    }
+
+    // Synthesize <Magic>.<check-match-array>(pattern: T.untyped, splatArray: T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::MagicSingleton(), Names::checkMatchArray());
+    {
+        auto &arg0 = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg0.type = Types::untyped(*this, method);
+        auto &arg1 = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
+        arg1.type = Types::untyped(*this, method);
+    }
+    method.data(*this)->resultType = Types::untyped(*this, method);
     {
         auto &arg = enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;

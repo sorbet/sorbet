@@ -1476,10 +1476,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 for (auto &stat : array->elts) {
                     if (auto splat = parser::cast_node<parser::Splat>(stat.get())) {
                         // Desguar
-                        //   [a, **x, remaining}
+                        //   [a, *x, remaining}
                         // into
-                        //   a.concat(x.to_a).concat(remaining)
-                        auto var = MK::Send0(loc, node2TreeImpl(dctx, std::move(splat->var)), core::Names::toA());
+                        //   a.concat(<splat>(x)).concat(remaining)
+                        auto var = MK::Splat(loc, node2TreeImpl(dctx, std::move(splat->var)));
                         if (elems.empty()) {
                             if (lastMerge != nullptr) {
                                 lastMerge = MK::Send1(loc, std::move(lastMerge), core::Names::concat(), std::move(var));
@@ -1886,14 +1886,27 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     ENFORCE(when != nullptr, "case without a when?");
                     ExpressionPtr cond;
                     for (auto &cnode : when->patterns) {
-                        auto ctree = node2TreeImpl(dctx, std::move(cnode));
                         ExpressionPtr test;
-                        if (temp.exists()) {
+                        if (parser::isa_node<parser::Splat>(cnode.get())) {
+                            ENFORCE(temp.exists(), "splats need something to test against");
+                            auto recv = MK::Constant(loc, core::Symbols::Magic());
                             auto local = MK::Local(cloc, temp);
-                            auto patternloc = ctree.loc();
-                            test = MK::Send1(patternloc, std::move(ctree), core::Names::tripleEq(), std::move(local));
+                            // TODO(froydnj): use the splat's var directly so we can elide the
+                            // coercion to an array where possible.
+                            auto splat = node2TreeImpl(dctx, std::move(cnode));
+                            auto patternloc = splat.loc();
+                            test = MK::Send2(patternloc, std::move(recv), core::Names::checkMatchArray(),
+                                             std::move(local), std::move(splat));
                         } else {
-                            test = std::move(ctree);
+                            auto ctree = node2TreeImpl(dctx, std::move(cnode));
+                            if (temp.exists()) {
+                                auto local = MK::Local(cloc, temp);
+                                auto patternloc = ctree.loc();
+                                test =
+                                    MK::Send1(patternloc, std::move(ctree), core::Names::tripleEq(), std::move(local));
+                            } else {
+                                test = std::move(ctree);
+                            }
                         }
                         if (cond == nullptr) {
                             cond = std::move(test);
