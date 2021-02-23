@@ -47,110 +47,6 @@ module T::Private::Methods::CallValidation
     mod.instance_method(method_sig.method_name)
   end
 
-  def self.validate_call(instance, original_method, method_sig, args, blk)
-    # This method is called for every `sig`. It's critical to keep it fast and
-    # reduce number of allocations that happen here.
-
-    T::Profile.typecheck_sample_attempts -= 1
-    should_sample = T::Profile.typecheck_sample_attempts == 0
-    if should_sample
-      T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-      T::Profile.typecheck_samples += 1
-      t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    end
-
-    if method_sig.bind
-      message = method_sig.bind.error_message_for_obj(instance)
-      if message
-        CallValidation.report_error(
-          method_sig,
-          message,
-          'Bind',
-          nil,
-          method_sig.bind,
-          instance
-        )
-      end
-    end
-
-    # NOTE: We don't bother validating for missing or extra kwargs;
-    # the method call itself will take care of that.
-    method_sig.each_args_value_type(args) do |name, arg, type|
-      message = type.error_message_for_obj(arg)
-      if message
-        CallValidation.report_error(
-          method_sig,
-          message,
-          'Parameter',
-          name,
-          type,
-          arg,
-          caller_offset: 2
-        )
-      end
-    end
-
-    if method_sig.block_type
-      message = method_sig.block_type.error_message_for_obj(blk)
-      if message
-        CallValidation.report_error(
-          method_sig,
-          message,
-          'Block parameter',
-          method_sig.block_name,
-          method_sig.block_type,
-          blk
-        )
-      end
-    end
-
-    if should_sample
-      T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-    end
-
-    # The following line breaks are intentional to show nice pry message
-
-
-
-
-
-
-
-
-
-
-    # PRY note:
-    # this code is sig validation code.
-    # Please issue `finish` to step out of it
-
-    return_value = original_method.bind(instance).call(*args, &blk)
-    if should_sample
-      t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    end
-
-    # The only type that is allowed to change the return value is `.void`.
-    # It ignores what you returned and changes it to be a private singleton.
-    if method_sig.return_type.is_a?(T::Private::Types::Void)
-      T::Private::Types::Void::VOID
-    else
-      message = method_sig.return_type.error_message_for_obj(return_value)
-      if message
-        CallValidation.report_error(
-          method_sig,
-          message,
-          'Return value',
-          nil,
-          method_sig.return_type,
-          return_value,
-        )
-      end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-      return_value
-    end
-  end
-
   @is_allowed_to_have_fast_path = true
   def self.is_allowed_to_have_fast_path
     @is_allowed_to_have_fast_path
@@ -179,15 +75,6 @@ module T::Private::Methods::CallValidation
       end
     end
     mod.send(original_visibility, method_sig.method_name)
-  end
-
-  def self.create_validator_slow(mod, original_method, method_sig)
-    mod.send(:define_method, method_sig.method_name) do |*args, &blk|
-      CallValidation.validate_call(self, original_method, method_sig, args, blk)
-    end
-    if mod.respond_to?(:ruby2_keywords, true)
-      mod.send(:ruby2_keywords, method_sig.method_name)
-    end
   end
 
   def self.create_validator_method_fast(mod, original_method, method_sig)
@@ -1111,6 +998,119 @@ module T::Private::Methods::CallValidation
 
       original_method.bind(self).call(arg0, arg1, arg2, arg3, &blk)
       T::Private::Types::Void::VOID
+    end
+  end
+
+  def self.create_validator_slow(mod, original_method, method_sig)
+    mod.send(:define_method, method_sig.method_name) do |*args, &blk|
+      CallValidation.validate_call(self, original_method, method_sig, args, blk)
+    end
+    if mod.respond_to?(:ruby2_keywords, true)
+      mod.send(:ruby2_keywords, method_sig.method_name)
+    end
+  end
+
+  def self.validate_call(instance, original_method, method_sig, args, blk)
+    # This method is called for every `sig`. It's critical to keep it fast and
+    # reduce number of allocations that happen here.
+
+    T::Profile.typecheck_sample_attempts -= 1
+    should_sample = T::Profile.typecheck_sample_attempts == 0
+    if should_sample
+      T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
+      T::Profile.typecheck_samples += 1
+      t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    end
+
+    if method_sig.bind
+      message = method_sig.bind.error_message_for_obj(instance)
+      if message
+        CallValidation.report_error(
+          method_sig,
+          message,
+          'Bind',
+          nil,
+          method_sig.bind,
+          instance
+        )
+      end
+    end
+
+    # NOTE: We don't bother validating for missing or extra kwargs;
+    # the method call itself will take care of that.
+    method_sig.each_args_value_type(args) do |name, arg, type|
+      message = type.error_message_for_obj(arg)
+      if message
+        CallValidation.report_error(
+          method_sig,
+          message,
+          'Parameter',
+          name,
+          type,
+          arg,
+          caller_offset: 2
+        )
+      end
+    end
+
+    if method_sig.block_type
+      message = method_sig.block_type.error_message_for_obj(blk)
+      if message
+        CallValidation.report_error(
+          method_sig,
+          message,
+          'Block parameter',
+          method_sig.block_name,
+          method_sig.block_type,
+          blk
+        )
+      end
+    end
+
+    if should_sample
+      T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+    end
+
+    # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+    # PRY note:
+    # this code is sig validation code.
+    # Please issue `finish` to step out of it
+
+    return_value = original_method.bind(instance).call(*args, &blk)
+    if should_sample
+      t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    end
+
+    # The only type that is allowed to change the return value is `.void`.
+    # It ignores what you returned and changes it to be a private singleton.
+    if method_sig.return_type.is_a?(T::Private::Types::Void)
+      T::Private::Types::Void::VOID
+    else
+      message = method_sig.return_type.error_message_for_obj(return_value)
+      if message
+        CallValidation.report_error(
+          method_sig,
+          message,
+          'Return value',
+          nil,
+          method_sig.return_type,
+          return_value,
+        )
+      end
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+      return_value
     end
   end
 
