@@ -1898,8 +1898,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                             test = MK::Send2(patternloc, std::move(recv), core::Names::checkMatchArray(),
                                              std::move(local), std::move(splat));
                         } else {
-                            ExpressionPtr ctree;
-                            ctree = node2TreeImpl(dctx, std::move(cnode));
+                            auto ctree = node2TreeImpl(dctx, std::move(cnode));
                             if (temp.exists()) {
                                 auto local = MK::Local(cloc, temp);
                                 auto patternloc = ctree.loc();
