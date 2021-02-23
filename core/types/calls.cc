@@ -2178,23 +2178,9 @@ public:
 class Magic_splat : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        if (args.args.size() != 1) {
-            return;
-        }
+        ENFORCE(args.args.size() == 1);
 
         auto &arg = args.args[0];
-        if (auto *tuple = cast_type<TupleType>(arg->type)) {
-            res.returnType = arg->type;
-            return;
-        }
-
-        if (auto *ap = cast_type<AppliedType>(arg->type)) {
-            if (ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array())) {
-                res.returnType = arg->type;
-                return;
-            }
-        }
-
         InlinedVector<LocOffsets, 2> argLocs{args.locs.receiver};
         CallLocs locs{args.locs.file, args.locs.call, args.locs.call, argLocs};
         InlinedVector<const TypeAndOrigins *, 2> innerArgs;
