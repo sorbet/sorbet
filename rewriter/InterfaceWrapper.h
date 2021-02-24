@@ -5,9 +5,9 @@
 namespace sorbet::rewriter {
 
 /**
- * This class desugars `wrap_interface` into a simple cast:
+ * This class desugars `wrap_instance` into a simple cast:
  *
- *    SomeClass.wrap_interface(obj)
+ *    SomeClass.wrap_instance(obj)
  *
  * =>
  *
