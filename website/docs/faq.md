@@ -265,7 +265,7 @@ used to run a given project. You will have to rely on (runtime) test suites to
 verify that a project does not use new standard library APIs on an old Ruby
 version.
 
-Specifically, `sorbet-static` is known to support Ruby 2.4, Ruby 2.6, Ruby 2.6,
+Specifically, `sorbet-static` is known to support Ruby 2.4, Ruby 2.5, Ruby 2.6,
 and Ruby 2.7 to a minimum level (i.e., it can at least parse syntax introduced
 in those versions). Some language features are typed more strictly than others
 (generally, language features in newer Ruby versions have looser type support).
