@@ -2,16 +2,24 @@
 # typed: strict
 
 module T::NonForcingConstants
+  T::Sig::WithoutRuntime.sig {returns(T::Boolean)}
+  private_class_method def self.stripe_packages_enabled?
+    const_defined?('StripePackages') && const_get('StripePackages').enabled?
+  end
+
   # NOTE: This method is documented on the RBI in Sorbet's payload, so that it
   # shows up in the hover/completion documentation via LSP.
   T::Sig::WithoutRuntime.sig {params(val: BasicObject, klass: String, package: T.nilable(String)).returns(T::Boolean)}
   def self.non_forcing_is_a?(val, klass, package: nil)
-    # TODO(gdritter): once we have a runtime implementation of
-    # packages, we'll need to actually handle the `package` argument
-    # here.
     method_name = "T::NonForcingConstants.non_forcing_is_a?"
     if klass.empty?
       raise ArgumentError.new("The string given to `#{method_name}` must not be empty")
+    end
+
+    # TODO(gdritter): this might not be want we want in a multipackage
+    # world; revisit this implementation we move on from the monopackage
+    if stripe_packages_enabled?
+      klass = "PkgRegistry::#{package}::#{klass}"
     end
 
     current_klass = T.let(nil, T.nilable(Module))

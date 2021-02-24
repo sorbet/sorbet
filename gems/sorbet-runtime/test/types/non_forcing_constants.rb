@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 require_relative '../test_helper'
 
+# this is a fake PkgRegistry which we can use to test the packaged
+# form later on
+module PkgRegistry
+  module SomePackage
+    class Thing; end
+  end
+end
+
 class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
   class MyClass
   end
@@ -101,6 +109,24 @@ class Opus::Types::Test::NonForcingConstantsTest < Critic::Unit::UnitTest
 
       it "when exists and is_a?" do
         res = T::NonForcingConstants.non_forcing_is_a?(0, 'Integer', package: "SomePackage")
+        assert_equal(true, res)
+      end
+
+      it "when exists and is_a? of something not in the package" do
+        T::NonForcingConstants.expects(:stripe_packages_enabled?).returns(true)
+
+        # 0 is an Integer, but we're trying to find out if it's a
+        # `PkgRegistry::SomePackage::Integer` here, so this should be
+        # false
+        res = T::NonForcingConstants.non_forcing_is_a?(0, 'Integer', package: "SomePackage")
+        assert_equal(false, res)
+      end
+
+      it "when exists and is_a? of something that IS in the package" do
+        T::NonForcingConstants.expects(:stripe_packages_enabled?).returns(true)
+
+        # This relies on the PkgRegistry we've set up elsewhere
+        res = T::NonForcingConstants.non_forcing_is_a?(PkgRegistry::SomePackage::Thing.new, 'Thing', package: "SomePackage")
         assert_equal(true, res)
       end
     end
