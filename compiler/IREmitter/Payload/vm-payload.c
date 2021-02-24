@@ -219,21 +219,37 @@ const VALUE sorbet_readRealpath() {
 // ****                       Name Based Intrinsics
 // ****
 
-VALUE sorbet_expandSplatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                  VALUE closure) {
-    if (UNLIKELY(argc != 3)) {
-        sorbet_raiseArity(argc, 3, 3);
+VALUE sorbet_vm_expandSplatIntrinsic(VALUE thing, VALUE before, VALUE after) {
+    const VALUE obj = thing;
+    const VALUE *elems;
+    long len;
+    bool have_array = RB_TYPE_P(thing, T_ARRAY);
+    /* Compare vm_insnhelper.c:vm_expandarray.  We do things a little differently
+     * because we don't use the Ruby stack as scratch space and we're making an
+     * array nominally big enough to contain all the elements we need for a
+     * destructuring assignment.  vm_expandarray is potentially called multiple
+     * times in such situations.
+     */
+    if (!have_array && NIL_P(thing = rb_check_array_type(thing))) {
+        thing = obj;
+        elems = &thing;
+        len = 1;
+    } else {
+        elems = RARRAY_CONST_PTR_TRANSIENT(thing);
+        len = RARRAY_LEN(thing);
     }
-    VALUE arr = argv[0];
-    long len = RARRAY_LEN(arr);
-    int size = FIX2LONG(argv[1]) + FIX2LONG(argv[2]);
-    int missing = size - len;
-    if (missing > 0) {
-        VALUE newArr = rb_ary_dup(arr);
-        for (int i = 0; i < missing; i++) {
-            rb_ary_push(newArr, RUBY_Qnil);
-        }
-        return newArr;
+
+    long needed = FIX2LONG(before) + FIX2LONG(after);
+    long missing = needed - len;
+    if (missing <= 0) {
+        return have_array ? thing : rb_ary_new4(len, elems);
+    }
+
+    RB_GC_GUARD(thing);
+
+    VALUE arr = rb_ary_new4(len, elems);
+    for (long i = 0; i < missing; i++) {
+        rb_ary_push(arr, RUBY_Qnil);
     }
     return arr;
 }
