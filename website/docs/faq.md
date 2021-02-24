@@ -277,8 +277,8 @@ The `sorbet-static` gem is only tested on macOS 10.14 (Mojave) and Ubuntu 18
 far forward as macOS 11.0 Big Sur, and on most Linux distributions where
 `glibc`, `git` and `bash` are present. We do not test nor publish prebuilt
 binaries for macOS on Apple Silicon. We have reports that it doesn't work, but
-no one on the Sorbet team has access to Apple Silicon-based macOS machines, and
-thus have been unable to diagnose and any problems. If you are interested in
+no one on the Sorbet team has access to Apple Silicon-based macOS machines, so
+we have been unable to diagnose any problems. If you are interested in
 working on this, feel free to reach out in the #internals channel on our
 [Sorbet Slack](/slack). There is currently no Windows support.
 
