@@ -159,11 +159,11 @@ declare i64 @rb_ary_new_from_values(i64, i64*) local_unnamed_addr #1
 
 declare i64 @rb_hash_new() local_unnamed_addr #1
 
+declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #1
+
 declare i64 @rb_hash_dup(i64) local_unnamed_addr #1
 
 declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #1
-
-declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #1
 
 ; Function Attrs: noreturn
 declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #0

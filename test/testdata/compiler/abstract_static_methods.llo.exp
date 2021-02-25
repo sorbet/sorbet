@@ -184,9 +184,9 @@ declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #1
 
 declare i64 @rb_id2sym(i64) local_unnamed_addr #1
 
-declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #1
-
 declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #1
+
+declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #1
 
 ; Function Attrs: noreturn
 declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #0

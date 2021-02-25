@@ -474,6 +474,13 @@ VALUE sorbet_hashBuild(int argc, const VALUE *argv) {
 }
 
 SORBET_INLINE
+VALUE sorbet_literalHashBuild(int argc, const VALUE *argv) {
+    VALUE ret = sorbet_hashBuild(argc, argv);
+    rb_gc_register_mark_object(ret);
+    return ret;
+}
+
+SORBET_INLINE
 VALUE sorbet_hashDup(VALUE hash) {
     return rb_hash_dup(hash);
 }

@@ -120,13 +120,13 @@ declare i64 @rb_hash_new_with_size(i64) local_unnamed_addr #0
 
 declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #0
 
+declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #0
+
 declare i64 @rb_hash_dup(i64) local_unnamed_addr #0
 
 declare i64 @rb_funcallv_with_cc(%struct.rb_call_data*, i64, i64, i32, i64*) local_unnamed_addr #0
 
 declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #0
-
-declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #0
 
 ; Function Attrs: noreturn
 declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #1
@@ -175,6 +175,7 @@ entry:
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %argArray.i.i, align 16
   %9 = tail call i64 @rb_hash_new_with_size(i64 1) #6
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %hashArgs0Addr.i.i, i64 %9) #6
+  call void @rb_gc_register_mark_object(i64 %9) #6
   store i64 %9, i64* @ruby_hashLiteral1, align 8
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %8)
   %rubyId_unsafe.i = load i64, i64* @rubyIdPrecomputed_unsafe, align 8, !dbg !8

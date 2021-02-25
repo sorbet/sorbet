@@ -141,11 +141,11 @@ declare i64 @rb_hash_new_with_size(i64) local_unnamed_addr #0
 
 declare void @rb_hash_bulk_insert(i64, i64*, i64) local_unnamed_addr #0
 
+declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #0
+
 declare i64 @rb_hash_dup(i64) local_unnamed_addr #0
 
 declare i64 @rb_fstring_new(i8*, i64) local_unnamed_addr #0
-
-declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #0
 
 ; Function Attrs: noreturn
 declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #1
@@ -253,6 +253,7 @@ entry:
   store i64 %rubyStr_magic.i.i, i64* %hashArgs13Addr.i.i, align 8
   %16 = tail call i64 @rb_hash_new_with_size(i64 7) #6
   call void @rb_hash_bulk_insert(i64 14, i64* nonnull %hashArgs0Addr.i.i, i64 %16) #6
+  call void @rb_gc_register_mark_object(i64 %16) #6
   store i64 %16, i64* @ruby_hashLiteral1, align 8
   call void @llvm.lifetime.end.p0i8(i64 112, i8* nonnull %15)
   %17 = call i64 @rb_fstring_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_one, i64 0, i64 0), i64 3) #6
@@ -265,6 +266,7 @@ entry:
   store i64 %17, i64* %hashArgs1Addr.i3.i, align 8
   %19 = call i64 @rb_hash_new_with_size(i64 1) #6
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %hashArgs0Addr.i2.i, i64 %19) #6
+  call void @rb_gc_register_mark_object(i64 %19) #6
   store i64 %19, i64* @ruby_hashLiteral2, align 8
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %18)
   %20 = call i64 @rb_fstring_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_two, i64 0, i64 0), i64 3) #6
@@ -274,6 +276,7 @@ entry:
   store i64 %20, i64* %hashArgs1Addr.i3.i, align 8
   %21 = call i64 @rb_hash_new_with_size(i64 1) #6
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %hashArgs0Addr.i2.i, i64 %21) #6
+  call void @rb_gc_register_mark_object(i64 %21) #6
   store i64 %21, i64* @ruby_hashLiteral3, align 8
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %18)
   %22 = call i64 @rb_fstring_new(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_true, i64 0, i64 0), i64 4) #6
@@ -283,6 +286,7 @@ entry:
   store i64 %22, i64* %hashArgs1Addr.i3.i, align 8
   %23 = call i64 @rb_hash_new_with_size(i64 1) #6
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %hashArgs0Addr.i2.i, i64 %23) #6
+  call void @rb_gc_register_mark_object(i64 %23) #6
   store i64 %23, i64* @ruby_hashLiteral4, align 8
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %18)
   %24 = call i64 @rb_fstring_new(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_false, i64 0, i64 0), i64 5) #6
@@ -292,6 +296,7 @@ entry:
   store i64 %24, i64* %hashArgs1Addr.i3.i, align 8
   %25 = call i64 @rb_hash_new_with_size(i64 1) #6
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %hashArgs0Addr.i2.i, i64 %25) #6
+  call void @rb_gc_register_mark_object(i64 %25) #6
   store i64 %25, i64* @ruby_hashLiteral5, align 8
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %18)
   %26 = call i64 @rb_fstring_new(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_nil, i64 0, i64 0), i64 3) #6
@@ -301,6 +306,7 @@ entry:
   store i64 %26, i64* %hashArgs1Addr.i3.i, align 8
   %27 = call i64 @rb_hash_new_with_size(i64 1) #6
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %hashArgs0Addr.i2.i, i64 %27) #6
+  call void @rb_gc_register_mark_object(i64 %27) #6
   store i64 %27, i64* @ruby_hashLiteral6, align 8
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %18)
   %28 = call i64 @rb_fstring_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_symbol, i64 0, i64 0), i64 6) #6
@@ -314,6 +320,7 @@ entry:
   store i64 %rubyStr_symbol.i.i, i64* %hashArgs1Addr.i3.i, align 8
   %29 = call i64 @rb_hash_new_with_size(i64 1) #6
   call void @rb_hash_bulk_insert(i64 2, i64* nonnull %hashArgs0Addr.i2.i, i64 %29) #6
+  call void @rb_gc_register_mark_object(i64 %29) #6
   store i64 %29, i64* @ruby_hashLiteral7, align 8
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %18)
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !8

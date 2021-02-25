@@ -308,7 +308,7 @@ public:
                 llvm::Value *argIndices[] = {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, 0, true)),
                                              llvm::ConstantInt::get(mcctx.cs, llvm::APInt(64, 0, true))};
                 auto hashValue = globalInitBuilder.CreateCall(
-                    mcctx.cs.getFunction("sorbet_hashBuild"),
+                    mcctx.cs.getFunction("sorbet_literalHashBuild"),
                     {llvm::ConstantInt::get(mcctx.cs, llvm::APInt(32, mcctx.send->args.size(), true)),
                      globalInitBuilder.CreateGEP(argArray, argIndices)},
                     "builtHash");
