@@ -8,9 +8,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     module <emptyTree>::<C ClassMethods><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.void()
+      end
+
       def a_class_method<<todo method>>(&<blk>)
         <emptyTree>
       end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :a_class_method, :normal)
     end
@@ -38,6 +44,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     module <emptyTree>::<C ClassMethods><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.void()
+      end
+
       def a_class_method<<todo method>>(&<blk>)
         <emptyTree>
       end
@@ -45,6 +55,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       def another_class_method<<todo method>>(&<blk>)
         <emptyTree>
       end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :a_class_method, :normal)
 
@@ -80,11 +92,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>
       end
 
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.void()
+      end
+
       def a_class_method_2<<todo method>>(&<blk>)
         <emptyTree>
       end
 
       ::Sorbet::Private::Static.keep_def(<self>, :a_class_method, :normal)
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :a_class_method_2, :normal)
     end
