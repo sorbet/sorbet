@@ -151,7 +151,8 @@ module GC
   # the heap to make sure everything moves, updates all references, then
   # performs a full GC. If any object contains a reference to a T_MOVED object,
   # that object should be pushed on the mark stack, and will make a SEGV.
-  def self.verify_compaction_references; end
+  sig {params(toward: T.nilable(Symbol), double_heap: T::Boolean).void}
+  def self.verify_compaction_references(toward: nil, double_heap: false); end
 
   # Verify internal consistency.
   #
