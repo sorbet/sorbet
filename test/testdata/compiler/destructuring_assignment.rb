@@ -4,9 +4,7 @@
 
 extend T::Sig
 
-def destructuring_from(description, &blk)
-  obj = yield
-
+def destructuring_from(description, obj)
   puts "assignments from #{description}\n"
   puts "regular variables"
   first, _ = obj
@@ -33,25 +31,15 @@ def destructuring_from(description, &blk)
   p a, b, c, d, e, f
 end
 
-destructuring_from('nil') do
-  nil
-end
+destructuring_from('nil', nil)
 
-destructuring_from('integer') do
-  17
-end
+destructuring_from('integer', 17)
 
-destructuring_from('empty array') do
-  [].freeze
-end
+destructuring_from('empty array', [].freeze)
 
-destructuring_from('small array') do
-  [9, 7].freeze
-end
+destructuring_from('small array', [9, 7].freeze)
 
-destructuring_from('large array') do
-  [:ok, "6", 15, 3.8, "twenty", 45, :sixty].freeze
-end
+destructuring_from('large array', [:ok, "6", 15, 3.8, "twenty", 45, :sixty].freeze)
 
 class ImplementsToAry
   def to_ary
@@ -59,6 +47,4 @@ class ImplementsToAry
   end
 end
 
-destructuring_from('obj implementing to_ary') do
-  ImplementsToAry.new
-end
+destructuring_from('obj implementing to_ary', ImplementsToAry.new)
