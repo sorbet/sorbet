@@ -254,9 +254,7 @@ bundle exec srb rbi suggest-typed
 
 The `sorbet-runtime` gem is currently only tested on Ruby 2.5 and Ruby 2.6, and
 we believe it to work on Ruby 2.7. It is known to not support Ruby 2.4. Feel
-free to report issues for any current or future Ruby version.
-
-Feel free to report runtime issues for any current or future Ruby version.
+free to report runtime issues for any current or future Ruby version.
 
 The `sorbet-static` gem is known to support Ruby 2.4, Ruby 2.5, Ruby 2.6, and
 Ruby 2.7 to a minimum level (i.e., it can at least parse syntax introduced in
