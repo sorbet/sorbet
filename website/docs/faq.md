@@ -258,39 +258,37 @@ free to report issues for any current or future Ruby version.
 
 Feel free to report runtime issues for any current or future Ruby version.
 
-The `sorbet-static` gem aims to support a superset of all Ruby versions. In
-particular, the standard library [RBI files](rbi.md) might reflect classes,
-methods, or APIs that are only availble in a version of Ruby newer than the one
-used to run a given project. You will have to rely on (runtime) test suites to
-verify that a project does not use new standard library APIs on an old Ruby
-version.
-
-Specifically, `sorbet-static` is known to support Ruby 2.4, Ruby 2.5, Ruby 2.6,
-and Ruby 2.7 to a minimum level (i.e., it can at least parse syntax introduced
-in those versions). Some language features are typed more strictly than others
+The `sorbet-static` gem is known to support Ruby 2.4, Ruby 2.5, Ruby 2.6, and
+Ruby 2.7 to a minimum level (i.e., it can at least parse syntax introduced in
+those versions). Some language features are typed more strictly than others
 (generally, language features in newer Ruby versions have looser type support).
 This is not by design, just by convenience. Feel free to open feature requests
 that various (new or old) language features be typed more strictly.
 
-The `sorbet-static` gem is only tested on macOS 10.14 (Mojave) and Ubuntu 18
-(Bionic Beaver). We expect it to work as far back as macOS 10.10 (Yosemite), as
-far forward as macOS 11.0 Big Sur, and on most Linux distributions where
-`glibc`, `git` and `bash` are present. We do not test nor publish prebuilt
-binaries for macOS on Apple Silicon. We have reports that it doesn't work, but
-no one on the Sorbet team has access to Apple Silicon-based macOS machines, so
-we have been unable to diagnose any problems. If you are interested in
-working on this, feel free to reach out in the #internals channel on our
-[Sorbet Slack](/slack). There is currently no Windows support.
+Sorbet bundles [RBI files](rbi.md) for the standard library. In Ruby the
+standard library changes with the Ruby version being used, but Sorbet only ships
+one set of RBI definitions for the standard library. In particular, Sorbet's RBI
+files for the standard library might reflect classes, methods, or APIs that are
+only available in a version of Ruby newer than the one used to run a given
+project. You will have to rely on (runtime) test suites to verify that your
+project does not use new standard library APIs with an old Ruby version.
 
-The `sorbet-static` gem includes platform-specific, precompiled binaries. On
-Linux, these binaries link against `glibc`. If you are running on a platform
-like `alpine` which uses the `musl` libc implementation, you will need to
-install some support libraries:
+The `sorbet-static` gem is only tested on macOS 10.14 (Mojave) and Ubuntu 18
+(Bionic Beaver). There is currently no Windows support. We expect
+`sorbet-static` to work as far back as macOS 10.10 (Yosemite), as far forward as
+macOS 11.0 Big Sur, and on most Linux distributions using `glibc`.
+
+We do not test nor publish prebuilt binaries for macOS on Apple Silicon. We have
+reports that it doesn't work, but no one on the Sorbet team has access to Apple
+Silicon-based macOS machines, so we have been unable to diagnose nor fix any
+problems. If you are interested in working on this, feel free to reach out in
+the #internals channel on our [Sorbet Slack](/slack).
 
 The `sorbet` gem has runtime dependencies on `git` and `bash`.
 
 Combined, these points mean that if you are using one of the official minimal
-Ruby Docker images, some extra dependencies are required:
+Ruby Docker images (which are based on Apline Linux), you will need to install
+some support libraries:
 
 ```Dockerfile
 FROM ruby:2.6-alpine
