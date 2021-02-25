@@ -14,5 +14,6 @@ end
 # See the note in the other test file. Forces the memory for the
 # keywordArgsSingleton to be reclaimed. There is no longer a reference to it.
 GC.start
+T.unsafe(GC).verify_compaction_references(double_heap: true, toward: :empty)
 
 Main.main
