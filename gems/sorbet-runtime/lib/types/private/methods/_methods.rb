@@ -107,8 +107,7 @@ module T::Private::Methods
         # If we were not limiting the defined? checks to ancestor only, it would be
         # required for correctness.
         if (ancestor.method_defined?(method_name, false) ||
-            ancestor.private_method_defined?(method_name, false) ||
-            ancestor.protected_method_defined?(method_name, false)) &&
+            ancestor.private_method_defined?(method_name, false)) &&
            final_method?(method_owner_and_name_to_key(ancestor, method_name))
           definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
           is_redefined = target == ancestor
