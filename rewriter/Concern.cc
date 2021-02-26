@@ -82,14 +82,29 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
                     // ClassMethods module already exists. Let's add the block as one of its members
                     auto *block = ast::cast_tree<ast::Block>(send->block);
                     auto *classDef = ast::cast_tree<ast::ClassDef>(classMethodsNode);
-                    classDef->rhs.emplace_back(std::move(block->body));
+
+                    if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
+                        for (auto &stat : insSeq->stats) {
+                            classDef->rhs.emplace_back(std::move(stat));
+                        }
+                        classDef->rhs.emplace_back(std::move(insSeq->expr));
+                    } else {
+                        classDef->rhs.emplace_back(std::move(block->body));
+                    }
                 } else {
                     // We don't have a ClassMethods module yet. Let's create it and add the send definition to its
                     // members
                     auto loc = send->loc;
                     ast::ClassDef::RHS_store rhs;
                     auto *block = ast::cast_tree<ast::Block>(send->block);
-                    rhs.emplace_back(std::move(block->body));
+                    if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
+                        for (auto &stat : insSeq->stats) {
+                            rhs.emplace_back(std::move(stat));
+                        }
+                        rhs.emplace_back(std::move(insSeq->expr));
+                    } else {
+                        rhs.emplace_back(std::move(block->body));
+                    }
                     auto name =
                         ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::ClassMethods());
                     classMethodsNode = ast::MK::Module(loc, loc, std::move(name), {}, std::move(rhs));

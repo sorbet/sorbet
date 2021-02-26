@@ -7,6 +7,9 @@ end
 module Foo
   extend ActiveSupport::Concern
   class_methods do
+    extend T::Sig
+
+    sig { void }
     def a_class_method
     end
   end
@@ -27,6 +30,9 @@ A.new.a_class_method # error: Method `a_class_method` does not exist on `A`
 module Bar
   extend ActiveSupport::Concern
   module ClassMethods
+    extend T::Sig
+
+    sig { void }
     def a_class_method
     end
 
@@ -56,6 +62,9 @@ module Baz
   end
 
   class_methods do
+    extend T::Sig
+
+    sig { void }
     def a_class_method_2
     end
   end
