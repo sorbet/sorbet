@@ -65,6 +65,39 @@ VALUE sorbet_rb_cObject() {
     return rb_cObject;
 }
 
+static VALUE sorbet_constants;
+
+// Register a value with the `sorbet_constants` array, and return the index that it occupies in that array. This
+// indirection enables us to register one address with the garbage collector as a GC root, rather than one address per
+// global constant we plan to hold. The downside here is the indirection through a ruby array, however the benefit is
+// that we don't grow the linked list in the garbage collector that defines additional gc roots.
+long sorbet_globalConstRegister(VALUE val) {
+    if (UNLIKELY(sorbet_constants == 0)) {
+        sorbet_constants = rb_ary_new();
+        rb_gc_register_address(&sorbet_constants);
+    }
+
+    // NOTE: this is a big assumption about not running in a threaded context
+    long idx = RARRAY_LEN(sorbet_constants);
+    rb_ary_push(sorbet_constants, val);
+
+    return idx;
+}
+
+static VALUE sorbet_globalConstFetch(long idx) {
+    if (UNLIKELY(idx >= RARRAY_LEN(sorbet_constants))) {
+        rb_raise(rb_eIndexError, "%ld is out of bounds for the sorbet_constants array (%ld)\n", idx,
+                 RARRAY_LEN(sorbet_constants));
+    }
+    return RARRAY_AREF(sorbet_constants, idx);
+}
+
+// Lookup a hash literal in the global constants array, and duplicate it.
+VALUE sorbet_globalConstDupHash(long idx) {
+    VALUE hash = sorbet_globalConstFetch(idx);
+    return rb_hash_dup(hash);
+}
+
 // ****
 // ****                       Calls
 // ****

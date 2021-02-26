@@ -323,10 +323,10 @@ public:
             }));
         builder.restoreIP(oldInsertPoint);
 
-        auto global = builder.CreateLoad(
+        auto *index = builder.CreateLoad(
             llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
             "hashLiteral");
-        auto copy = builder.CreateCall(mcctx.cs.getFunction("sorbet_hashDup"), {global}, "duplicatedHash");
+        auto *copy = builder.CreateCall(mcctx.cs.getFunction("sorbet_globalConstDupHash"), {index}, "duplicatedHash");
         return copy;
     }
 

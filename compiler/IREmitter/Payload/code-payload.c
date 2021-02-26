@@ -99,6 +99,9 @@ SORBET_ALIVE(VALUE, sorbet_rb_int_ge_slowpath, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
 
+SORBET_ALIVE(long, sorbet_globalConstRegister, (VALUE val));
+SORBET_ALIVE(VALUE, sorbet_globalConstDupHash, (long index));
+
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.
 
@@ -474,10 +477,10 @@ VALUE sorbet_hashBuild(int argc, const VALUE *argv) {
 }
 
 SORBET_INLINE
-VALUE sorbet_literalHashBuild(int argc, const VALUE *argv) {
+long sorbet_literalHashBuild(int argc, const VALUE *argv) {
     VALUE ret = sorbet_hashBuild(argc, argv);
-    rb_gc_register_mark_object(ret);
-    return ret;
+    long index = sorbet_globalConstRegister(ret);
+    return index;
 }
 
 SORBET_INLINE
