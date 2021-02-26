@@ -102,12 +102,30 @@ module T::Private::Methods
     end
     target_ancestors.each do |ancestor|
       source_method_names.each do |method_name|
+        # method_defined?(method_name) is a bad idea here, because that will search
+        # through all ancestors of `ancestor`, which likely includes some/many/all of
+        # the modules in target_ancestors.  But we are already checking all of
+        # target_ancestors, so doing that would be quadratic.
+        #
+        # You might think that we could use method_defined?(method_name, false) to
+        # only search ancestor's methods.  Unfortunately, as of Ruby 2.7, limiting
+        # the search to the immediate class *still* searches all of the ancestors of
+        # the class, but adds a check at the end of the search to verify that the
+        # place where the method is defined is equal to the class we started out with.
+        # So, still quadratic.
+        #
+        # Testing indicates that instance_methods(false).include?(method_name), while
+        # still exhibiting poor asymptotic behavior, is faster than the method_defined?
+        # check.  Since final method checking on large codebases may involve searching
+        # large ancestor chains many times, we will take any performance improvements
+        # we can find.
+        #
         # the usage of method_owner_and_name_to_key(ancestor, method_name) instead of
         # method_to_key(ancestor.instance_method(method_name)) is an optimization.
         # If we were not limiting the defined? checks to ancestor only, it would be
         # required for correctness.
-        if (ancestor.method_defined?(method_name, false) ||
-            ancestor.private_method_defined?(method_name, false)) &&
+        if (ancestor.instance_methods(false).include?(method_name) ||
+            ancestor.private_instance_methods(false).include?(method_name)) &&
            final_method?(method_owner_and_name_to_key(ancestor, method_name))
           definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
           is_redefined = target == ancestor
