@@ -2569,8 +2569,30 @@ class Shape_to_hash : public IntrinsicMethod {
 } Shape_to_hash;
 
 class Array_flatten : public IntrinsicMethod {
+    // If the element type supports the #to_ary method, then Ruby will implicitly call it when flattening. So here we
+    // dispatch #to_ary and recurse further down the result if it succeeds, otherwise we just return the type.
+    static TypePtr typeToAry(const GlobalState &gs, const DispatchArgs &args, const TypePtr &type, const int newDepth) {
+        NameRef toAry = core::Names::toAry();
+
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+        InlinedVector<LocOffsets, 2> sendArgLocs;
+        CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, sendArgLocs};
+
+        DispatchArgs innerArgs{toAry,    sendLocs, 0,
+                               sendArgs, type,     {type, args.fullType.origins},
+                               type,     nullptr,  args.originForUninitialized};
+
+        auto dispatched = type.dispatchCall(gs, innerArgs);
+        if (dispatched.main.errors.empty()) {
+            return recursivelyFlattenArrays(gs, args, move(dispatched.returnType), newDepth);
+        }
+
+        return type;
+    }
+
     // Flattens a (nested) array all way down to its (inner) element type, stopping if we hit the depth limit first.
-    static TypePtr recursivelyFlattenArrays(const GlobalState &gs, const TypePtr &type, const int64_t depth) {
+    static TypePtr recursivelyFlattenArrays(const GlobalState &gs, const DispatchArgs &args, const TypePtr &type,
+                                            const int64_t depth) {
         ENFORCE(type != nullptr);
 
         if (depth == 0) {
@@ -2585,20 +2607,23 @@ class Array_flatten : public IntrinsicMethod {
             // This only shows up because t->elementType(gs) for tuples returns an OrType of all its elements.
             // So to properly handle nested tuples, we have to descend into the OrType's.
             [&](const OrType &o) {
-                result = Types::any(gs, recursivelyFlattenArrays(gs, o.left, newDepth),
-                                    recursivelyFlattenArrays(gs, o.right, newDepth));
+                result = Types::any(gs, recursivelyFlattenArrays(gs, args, o.left, newDepth),
+                                    recursivelyFlattenArrays(gs, args, o.right, newDepth));
             },
+
+            [&](const ClassType &c) { result = typeToAry(gs, args, type, newDepth); },
 
             [&](const AppliedType &a) {
-                if (a.klass != Symbols::Array()) {
-                    result = type;
+                if (a.klass == Symbols::Array()) {
+                    ENFORCE(a.targs.size() == 1);
+                    result = recursivelyFlattenArrays(gs, args, a.targs.front(), newDepth);
                     return;
                 }
-                ENFORCE(a.targs.size() == 1);
-                result = recursivelyFlattenArrays(gs, a.targs.front(), newDepth);
+
+                result = typeToAry(gs, args, type, newDepth);
             },
 
-            [&](const TupleType &t) { result = recursivelyFlattenArrays(gs, t.elementType(gs), newDepth); },
+            [&](const TupleType &t) { result = recursivelyFlattenArrays(gs, args, t.elementType(gs), newDepth); },
 
             [&](const TypePtr &t) { result = std::move(type); });
         return result;
@@ -2650,7 +2675,7 @@ public:
             return;
         }
 
-        res.returnType = Types::arrayOf(gs, recursivelyFlattenArrays(gs, element, depth));
+        res.returnType = Types::arrayOf(gs, recursivelyFlattenArrays(gs, args, element, depth));
     }
 } Array_flatten;
 
