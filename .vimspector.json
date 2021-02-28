@@ -1,0 +1,26 @@
+{
+  "configurations": {
+    "Run Sorbet on specified Ruby file": {
+      "adapter": "vscode-cpptools",
+      "configuration": {
+        "type":    "cppdbg",
+        "request": "launch",
+        "program": "${workspaceRoot}/bazel-bin/main/sorbet",
+        "args": [
+          "--color=false",
+          "${ruby_file}"
+        ],
+        "cwd": "${workspaceRoot}",
+        "environment": [
+          // {"name": "LLDB_DEBUGSERVER_PATH", "value": "/usr/bin/lldb-server-11"}
+        ],
+        "externalConsole": false,
+        "stopAtEntry": false,
+        "MIMode": "lldb",
+        "logging": {
+          "engineLogging": true
+        }
+      }
+    }
+  }
+}
