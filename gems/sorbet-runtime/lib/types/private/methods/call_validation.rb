@@ -223,3 +223,9 @@ module T::Private::Methods::CallValidation
     end
   end
 end
+
+if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
+  require_relative './call_validation_2_7'
+else
+  require_relative './call_validation_2_6'
+end
