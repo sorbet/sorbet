@@ -98,7 +98,7 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind) {
     fmt::print("\n");
 }
 
-void generateCreateValidatorFast(ValidatorKind kind, size_t arity) {
+void generateCreateValidatorFast(const Options &options, ValidatorKind kind, size_t arity) {
     const char *returnTypeArg;
     switch (kind) {
         case ValidatorKind::Method:
@@ -171,7 +171,12 @@ void generateCreateValidatorFast(ValidatorKind kind, size_t arity) {
             returnValueVar = "";
             break;
     }
-    fmt::print("      {}original_method.bind(self).call(", returnValueVar);
+    fmt::print("      {}original_method", returnValueVar);
+    if (options.bindCall) {
+        fmt::print(".bind_call(self, ");
+    } else {
+        fmt::print(".bind(self).call(");
+    }
     for (size_t i = 0; i < arity; i++) {
         fmt::print("arg{}, ", i);
     }
@@ -227,12 +232,12 @@ int generateCallValidation(const Options &options) {
 
     generateCreateValidatorFastDispatcher(ValidatorKind::Method);
     for (size_t i = 0; i <= MAX_ARITY; i++) {
-        generateCreateValidatorFast(ValidatorKind::Method, i);
+        generateCreateValidatorFast(options, ValidatorKind::Method, i);
     }
 
     generateCreateValidatorFastDispatcher(ValidatorKind::Procedure);
     for (size_t i = 0; i <= MAX_ARITY; i++) {
-        generateCreateValidatorFast(ValidatorKind::Procedure, i);
+        generateCreateValidatorFast(options, ValidatorKind::Procedure, i);
     }
 
     fmt::print("end\n");
