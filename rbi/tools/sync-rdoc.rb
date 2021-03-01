@@ -590,7 +590,7 @@ class SyncRDoc
 
     if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.7')
       puts "Warning! Detected RUBY_VERSION=#{RUBY_VERSION}."
-      puts "This script uses the currenet Ruby version to parse documentation from."
+      puts "This script uses the current Ruby version to parse documentation from."
       puts "If you're seeing a large diff, it might be because all existing docstrings were generated using Ruby 2.7."
     end
 
