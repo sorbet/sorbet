@@ -2572,6 +2572,11 @@ class Array_flatten : public IntrinsicMethod {
     // If the element type supports the #to_ary method, then Ruby will implicitly call it when flattening. So here we
     // dispatch #to_ary and recurse further down the result if it succeeds, otherwise we just return the type.
     static TypePtr typeToAry(const GlobalState &gs, const DispatchArgs &args, const TypePtr &type, const int newDepth) {
+
+        if (type.isUntyped()) {
+            return type;
+        }
+
         NameRef toAry = core::Names::toAry();
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
