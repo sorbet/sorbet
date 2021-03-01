@@ -182,7 +182,7 @@ module Opus::Types::Test
         @mod.foo("foo", 1)
         allocated = GC.stat(:total_allocated_objects) - before
 
-        expected_allocations = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7') ? 1 : 2
+        expected_allocations = T::Configuration::AT_LEAST_RUBY_2_7 ? 1 : 2
         assert_equal(expected_allocations, allocated) # dmitry: for some reason, when run locally this numeber is 0, in CI it's 2. IDK why.
       end
     end

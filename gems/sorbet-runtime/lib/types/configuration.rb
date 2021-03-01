@@ -2,6 +2,9 @@
 # frozen_string_literal: true
 
 module T::Configuration
+  # Cache this comparisonn to avoid two allocations all over the place.
+  AT_LEAST_RUBY_2_7 = Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
+
   # Announces to Sorbet that we are currently in a test environment, so it
   # should treat any sigs which are marked `.checked(:tests)` as if they were
   # just a normal sig.
@@ -395,7 +398,12 @@ module T::Configuration
   MODULE_NAME = Module.instance_method(:name)
   private_constant :MODULE_NAME
 
-  @default_module_name_mangler = ->(type) {MODULE_NAME.bind(type).call}
+  if T::Configuration::AT_LEAST_RUBY_2_7
+    @default_module_name_mangler = ->(type) {MODULE_NAME.bind_call(type)}
+  else
+    @default_module_name_mangler = ->(type) {MODULE_NAME.bind(type).call}
+  end
+
   @module_name_mangler = nil
 
   def self.module_name_mangler

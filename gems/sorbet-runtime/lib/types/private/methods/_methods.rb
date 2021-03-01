@@ -217,6 +217,8 @@ module T::Private::Methods
       # make sure to keep changes in sync.
       elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
         CallValidation.validate_call(self, original_method, method_sig, args, blk)
+      elsif T::Configuration::AT_LEAST_RUBY_2_7
+        original_method.bind_call(self, *args, &blk)
       else
         original_method.bind(self).call(*args, &blk)
       end
@@ -423,17 +425,32 @@ module T::Private::Methods
       @old_hooks.each(&:restore)
       @old_hooks = nil
     else
-      old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
-        old_included.bind(self).call(arg)
-        ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
-      end
-      old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
-        old_extended.bind(self).call(arg)
-        ::T::Private::Methods._hook_impl(arg, arg.singleton_class.ancestors, self)
-      end
-      old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited) do |arg|
-        old_inherited.bind(self).call(arg)
-        ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+      if T::Configuration::AT_LEAST_RUBY_2_7
+        old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
+          old_included.bind_call(self, arg)
+          ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+        end
+        old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
+          old_extended.bind_call(self, arg)
+          ::T::Private::Methods._hook_impl(arg, arg.singleton_class.ancestors, self)
+        end
+        old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited) do |arg|
+          old_inherited.bind_call(self, arg)
+          ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+        end
+      else
+        old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
+          old_included.bind(self).call(arg)
+          ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+        end
+        old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
+          old_extended.bind(self).call(arg)
+          ::T::Private::Methods._hook_impl(arg, arg.singleton_class.ancestors, self)
+        end
+        old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited) do |arg|
+          old_inherited.bind(self).call(arg)
+          ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+        end
       end
       @old_hooks = [old_included, old_extended, old_inherited]
     end

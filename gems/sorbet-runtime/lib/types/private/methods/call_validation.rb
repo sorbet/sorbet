@@ -162,7 +162,7 @@ module T::Private::Methods::CallValidation
     # this code is sig validation code.
     # Please issue `finish` to step out of it
 
-    return_value = original_method.bind(instance).call(*args, &blk)
+    return_value = T::Configuration::AT_LEAST_RUBY_2_7 ? original_method.bind_call(instance, *args, &blk) : original_method.bind(instance).call(*args, &blk)
     if should_sample
       t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     end
@@ -224,7 +224,7 @@ module T::Private::Methods::CallValidation
   end
 end
 
-if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7')
+if T::Configuration::AT_LEAST_RUBY_2_7
   require_relative './call_validation_2_7'
 else
   require_relative './call_validation_2_6'
