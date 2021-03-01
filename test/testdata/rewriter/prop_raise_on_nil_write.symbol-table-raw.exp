@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/prop_raise_on_nil_write.rb start=2:1 end=6:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/prop_raise_on_nil_write.rb start=2:1 end=16:14}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/prop_raise_on_nil_write.rb start=??? end=???}
   class <C <U Thing>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop_raise_on_nil_write.rb start=2:1 end=2:12}
     method <C <U Thing>><U bar> (<blk>) -> NilClass | String @ Loc {file=test/testdata/rewriter/prop_raise_on_nil_write.rb start=5:3 end=5:63}

@@ -66,4 +66,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :bar=, :normal)
   end
+
+  obj = <emptyTree>::<C Thing>.new()
+
+  obj.bar=(nil)
+
+  obj.foo=("a string")
+
+  obj.foo=(nil)
 end
