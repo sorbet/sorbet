@@ -108,10 +108,7 @@ module T::Private::Methods
         # method_to_key(ancestor.instance_method(method_name)) is not (just) an optimization, but also required for
         # correctness, since ancestor.method_defined?(method_name) may return true even if method_name is not defined
         # directly on ancestor but instead an ancestor of ancestor.
-        if (ancestor.method_defined?(method_name) ||
-            ancestor.private_method_defined?(method_name) ||
-            ancestor.protected_method_defined?(method_name)) &&
-           final_method?(method_owner_and_name_to_key(ancestor, method_name))
+        if final_method?(method_owner_and_name_to_key(ancestor, method_name))
           definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
           is_redefined = target == ancestor
           caller_loc = caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/}) }
