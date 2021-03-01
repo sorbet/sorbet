@@ -79,4 +79,30 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
     m = klass.new
     assert(m.foo.nil?)
   end
+
+  it "does not allow setting nil with T.any(NilClass, U) with raise_on_nil_write props" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.any(NilClass, String), raise_on_nil_write: true
+    end
+    m = klass.new
+    assert_raises(TypeError) do
+      m.foo = nil
+    end
+  end
+
+  it "allows setting non-nil values with T.any(NilClass, U) with raise_on_nil_write props" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.any(NilClass, String), raise_on_nil_write: true
+    end
+    m = klass.new
+    m.foo = 'foo'
+  end
+
+  it "allows setting nil values with T.nilable(NilClass) with raise_on_nil_write props, which is fine maybe?" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.nilable(NilClass), raise_on_nil_write: true
+    end
+    m = klass.new
+    m.foo = nil
+  end
 end
