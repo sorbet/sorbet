@@ -30,7 +30,6 @@ NameDef names[] = {
     {"orOr", "||"},
     {"toS", "to_s"},
     {"toA", "to_a"},
-    {"toAry", "to_ary"},
     {"toH", "to_h"},
     {"toHash", "to_hash"},
     {"toProc", "to_proc"},
