@@ -3,22 +3,22 @@
 # Threads are the Ruby implementation for a concurrent programming model.
 #
 # Programs that require multiple threads of execution are a perfect candidate
-# for Ruby's [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) class.
+# for Ruby's [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) class.
 #
 # For example, we can create a new thread separate from the main thread's
 # execution using
-# [`::new`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-new).
+# [`::new`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-new).
 #
 # ```ruby
-# thr = Thread.new { puts "Whats the big deal" }
+# thr = Thread.new { puts "What's the big deal" }
 # ```
 #
 # Then we are able to pause the execution of the main thread and allow our new
 # thread to finish, using
-# [`join`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-join):
+# [`join`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-join):
 #
 # ```ruby
-# thr.join #=> "Whats the big deal"
+# thr.join #=> "What's the big deal"
 # ```
 #
 # If we don't call `thr.join` before the main thread terminates, then all other
@@ -29,7 +29,7 @@
 #
 # ```ruby
 # threads = []
-# threads << Thread.new { puts "Whats the big deal" }
+# threads << Thread.new { puts "What's the big deal" }
 # threads << Thread.new { 3.times { puts "Threads are fun!" } }
 # ```
 #
@@ -39,51 +39,59 @@
 # threads.each { |thr| thr.join }
 # ```
 #
-# ### [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) initialization
+# To retrieve the last value of a thread, use
+# [`value`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-value)
+#
+# ```ruby
+# thr = Thread.new { sleep 1; "Useful value" }
+# thr.value #=> "Useful value"
+# ```
+#
+# ### [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) initialization
 #
 # In order to create new threads, Ruby provides
-# [`::new`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-new),
-# [`::start`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-start),
-# and [`::fork`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-fork).
+# [`::new`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-new),
+# [`::start`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-start),
+# and [`::fork`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-fork).
 # A block must be provided with each of these methods, otherwise a
-# [`ThreadError`](https://docs.ruby-lang.org/en/2.6.0/ThreadError.html) will be
+# [`ThreadError`](https://docs.ruby-lang.org/en/2.7.0/ThreadError.html) will be
 # raised.
 #
 # When subclassing the
-# [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) class, the
+# [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) class, the
 # `initialize` method of your subclass will be ignored by
-# [`::start`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-start)
-# and [`::fork`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-fork).
+# [`::start`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-start)
+# and [`::fork`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-fork).
 # Otherwise, be sure to call super in your `initialize` method.
 #
-# ### [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) termination
+# ### [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) termination
 #
 # For terminating threads, Ruby provides a variety of ways to do this.
 #
 # The class method
-# [`::kill`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-kill), is
+# [`::kill`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-kill), is
 # meant to exit a given thread:
 #
-# ```
-# thr = Thread.new { ... }
+# ```ruby
+# thr = Thread.new { sleep }
 # Thread.kill(thr) # sends exit() to thr
 # ```
 #
 # Alternatively, you can use the instance method
-# [`exit`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-exit), or
+# [`exit`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-exit), or
 # any of its aliases
-# [`kill`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-kill) or
-# [`terminate`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-terminate).
+# [`kill`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-kill) or
+# [`terminate`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-terminate).
 #
 # ```ruby
 # thr.exit
 # ```
 #
-# ### [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) status
+# ### [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) status
 #
 # Ruby provides a few instance methods for querying the state of a given thread.
 # To get a string with the current thread's state use
-# [`status`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-status)
+# [`status`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-status)
 #
 # ```ruby
 # thr = Thread.new { sleep }
@@ -93,12 +101,12 @@
 # ```
 #
 # You can also use
-# [`alive?`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-alive-3F)
+# [`alive?`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-alive-3F)
 # to tell if the thread is running or sleeping, and
-# [`stop?`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-stop-3F) if
+# [`stop?`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-stop-3F) if
 # the thread is dead or sleeping.
 #
-# ### [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) variables and scope
+# ### [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) variables and scope
 #
 # Since threads are created with blocks, the same rules apply to other Ruby
 # blocks for variable scope. Any local variables created within this block are
@@ -107,9 +115,9 @@
 # #### Fiber-local vs. Thread-local
 #
 # Each fiber has its own bucket for
-# [`Thread#[]`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D)
+# [`Thread#[]`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D)
 # storage. When you set a new fiber-local it is only accessible within this
-# [`Fiber`](https://docs.ruby-lang.org/en/2.6.0/Fiber.html). To illustrate:
+# [`Fiber`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html). To illustrate:
 #
 # ```ruby
 # Thread.new {
@@ -121,13 +129,13 @@
 # ```
 #
 # This example uses
-# [`[]`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D) for
+# [`[]`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D) for
 # getting and
-# [`[]=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D-3D) for
+# [`[]=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D-3D) for
 # setting fiber-locals, you can also use
-# [`keys`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-keys) to
+# [`keys`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-keys) to
 # list the fiber-locals for a given thread and
-# [`key?`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-key-3F) to
+# [`key?`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-key-3F) to
 # check if a fiber-local exists.
 #
 # When it comes to thread-locals, they are accessible within the entire scope of
@@ -149,37 +157,45 @@
 # changed to `2` by the end of the thread.
 #
 # This example makes use of
-# [`thread_variable_set`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variable_set)
+# [`thread_variable_set`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variable_set)
 # to create new thread-locals, and
-# [`thread_variable_get`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variable_get)
+# [`thread_variable_get`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variable_get)
 # to reference them.
 #
 # There is also
-# [`thread_variables`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variables)
+# [`thread_variables`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variables)
 # to list all thread-locals, and
-# [`thread_variable?`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variable-3F)
+# [`thread_variable?`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variable-3F)
 # to check if a given thread-local exists.
 #
-# ### [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) handling
+# ### [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) handling
 #
-# Any thread can raise an exception using the
-# [`raise`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-raise)
-# instance method, which operates similarly to
-# [`Kernel#raise`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-raise).
+# When an unhandled exception is raised inside a thread, it will terminate. By
+# default, this exception will not propagate to other threads. The exception is
+# stored and when another thread calls
+# [`value`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-value) or
+# [`join`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-join), the
+# exception will be re-raised in that thread.
 #
-# However, it's important to note that an exception that occurs in any thread
-# except the main thread depends on
-# [`abort_on_exception`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-abort_on_exception).
-# This option is `false` by default, meaning that any unhandled exception will
-# cause the thread to terminate silently when waited on by either
-# [`join`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-join) or
-# [`value`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-value). You
-# can change this default by either
-# [`abort_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-abort_on_exception-3D)
-# `true` or setting $DEBUG to `true`.
+# ```ruby
+# t = Thread.new{ raise 'something went wrong' }
+# t.value #=> RuntimeError: something went wrong
+# ```
+#
+# An exception can be raised from outside the thread using the
+# [`Thread#raise`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-raise)
+# instance method, which takes the same parameters as
+# [`Kernel#raise`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-raise).
+#
+# Setting
+# [`Thread.abort_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-abort_on_exception)
+# = true,
+# [`Thread#abort_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-abort_on_exception)
+# = true, or $DEBUG = true will cause a subsequent unhandled exception raised in
+# a thread to be automatically re-raised in the main thread.
 #
 # With the addition of the class method
-# [`::handle_interrupt`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-handle_interrupt),
+# [`::handle_interrupt`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-handle_interrupt),
 # you can now handle exceptions asynchronously with threads.
 #
 # ### Scheduling
@@ -187,19 +203,19 @@
 # Ruby provides a few ways to support scheduling threads in your program.
 #
 # The first way is by using the class method
-# [`::stop`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-stop), to
+# [`::stop`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-stop), to
 # put the current running thread to sleep and schedule the execution of another
 # thread.
 #
 # Once a thread is asleep, you can use the instance method
-# [`wakeup`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-wakeup) to
+# [`wakeup`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-wakeup) to
 # mark your thread as eligible for scheduling.
 #
 # You can also try
-# [`::pass`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-pass),
+# [`::pass`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-pass),
 # which attempts to pass execution to another thread but is dependent on the OS
 # whether a running thread will switch or not. The same goes for
-# [`priority`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-priority),
+# [`priority`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-priority),
 # which lets you hint to the thread scheduler which threads you want to take
 # precedence when passing execution. This method is also dependent on the OS and
 # may be ignored on some platforms.
@@ -218,7 +234,7 @@ class Thread < Object
 
   # Attribute Reference---Returns the value of a fiber-local variable (current
   # thread's root fiber if not explicitly inside a
-  # [`Fiber`](https://docs.ruby-lang.org/en/2.6.0/Fiber.html)), using either a
+  # [`Fiber`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html)), using either a
   # symbol or a string name. If the specified variable does not exist, returns
   # `nil`.
   #
@@ -241,9 +257,9 @@ class Thread < Object
   # #<Thread:0x00000002a54130 dead>: C
   # ```
   #
-  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D)
+  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D)
   # and
-  # [`Thread#[]=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D-3D)
+  # [`Thread#[]=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D-3D)
   # are not thread-local but fiber-local. This confusion did not exist in Ruby
   # 1.8 because fibers are only available since Ruby 1.9. Ruby 1.9 chooses that
   # the methods behaves fiber-local to save following idiom for dynamic scope.
@@ -279,9 +295,9 @@ class Thread < Object
   # ```
   #
   # For thread-local variables, please see
-  # [`thread_variable_get`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variable_get)
+  # [`thread_variable_get`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variable_get)
   # and
-  # [`thread_variable_set`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variable_set).
+  # [`thread_variable_set`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variable_set).
   sig {params(key: T.any(String, Symbol)).returns(T.untyped)}
   def [](key); end
 
@@ -289,12 +305,12 @@ class Thread < Object
   # using either a symbol or a string.
   #
   # See also
-  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D).
+  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D).
   #
   # For thread-local variables, please see
-  # [`thread_variable_set`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variable_set)
+  # [`thread_variable_set`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variable_set)
   # and
-  # [`thread_variable_get`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variable_get).
+  # [`thread_variable_get`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variable_get).
   sig {params(key: T.any(String, Symbol), value: T.untyped).returns(T.untyped)}
   def []=(key, value); end
 
@@ -308,19 +324,15 @@ class Thread < Object
   # ```
   #
   # See also
-  # [`stop?`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-stop-3F)
+  # [`stop?`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-stop-3F)
   # and
-  # [`status`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-status).
+  # [`status`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-status).
   sig {returns(T::Boolean)}
   def alive?; end
 
-  # Terminates `thr` and schedules another thread to be run.
-  #
-  # If this thread is already marked to be killed,
-  # [`exit`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-exit)
-  # returns the [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html).
-  #
-  # If this is the main thread, or the last thread, exits the process.
+  # Terminates `thr` and schedules another thread to be run, returning the
+  # terminated [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html). If
+  # this is the main thread, or the last thread, exits the process.
   sig {returns(T.nilable(Thread))}
   def kill; end
 
@@ -330,10 +342,10 @@ class Thread < Object
   # The default is `false`.
   #
   # See also
-  # [`abort_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-abort_on_exception-3D).
+  # [`abort_on_exception=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-abort_on_exception-3D).
   #
   # There is also a class level method to set this for all threads, see
-  # [`::abort_on_exception`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-abort_on_exception).
+  # [`::abort_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-abort_on_exception).
   sig {returns(T::Boolean)}
   def abort_on_exception; end
 
@@ -341,19 +353,19 @@ class Thread < Object
   # exception will be re-raised in the main thread.
   #
   # See also
-  # [`abort_on_exception`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-abort_on_exception).
+  # [`abort_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-abort_on_exception).
   #
   # There is also a class level method to set this for all threads, see
-  # [`::abort_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-abort_on_exception-3D).
+  # [`::abort_on_exception=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-abort_on_exception-3D).
   sig {params(abort_on_exception: T::Boolean).returns(T.untyped)}
   def abort_on_exception=(abort_on_exception); end
 
   # Adds *proc* as a handler for tracing.
   #
   # See
-  # [`Thread#set_trace_func`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-set_trace_func)
+  # [`Thread#set_trace_func`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-set_trace_func)
   # and
-  # [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-set_trace_func).
+  # [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-set_trace_func).
   sig {params(proc: T.untyped).returns(T.untyped)}
   def add_trace_func(proc); end
 
@@ -365,38 +377,34 @@ class Thread < Object
   # backtrace location objects.
   #
   # See
-  # [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.6.0/Thread/Backtrace/Location.html)
+  # [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.7.0/Thread/Backtrace/Location.html)
   # for more information.
   #
   # This method behaves similarly to
-  # [`Kernel#caller_locations`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-caller_locations)
+  # [`Kernel#caller_locations`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-caller_locations)
   # except it applies to a specific thread.
   sig {params(args: T.untyped).returns(T.nilable(T::Array[T.untyped]))}
   def backtrace_locations(*args); end
 
-  # Terminates `thr` and schedules another thread to be run.
-  #
-  # If this thread is already marked to be killed,
-  # [`exit`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-exit)
-  # returns the [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html).
-  #
-  # If this is the main thread, or the last thread, exits the process.
+  # Terminates `thr` and schedules another thread to be run, returning the
+  # terminated [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html). If
+  # this is the main thread, or the last thread, exits the process.
   sig {returns(T.nilable(Thread))}
   def exit; end
 
   # Returns a fiber-local for the given key. If the key can't be found, there
-  # are several options: With no other arguments, it will raise a `KeyError`
-  # exception; if *default* is given, then that will be returned; if the
-  # optional code block is specified, then that will be run and its result
-  # returned. See
-  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D)
+  # are several options: With no other arguments, it will raise a
+  # [`KeyError`](https://docs.ruby-lang.org/en/2.7.0/KeyError.html) exception;
+  # if *default* is given, then that will be returned; if the optional code
+  # block is specified, then that will be run and its result returned. See
+  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D)
   # and
-  # [`Hash#fetch`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-fetch).
+  # [`Hash#fetch`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-fetch).
   sig {params(sym: T.untyped).returns(T.untyped)}
   def fetch(*sym); end
 
   # Returns the
-  # [`ThreadGroup`](https://docs.ruby-lang.org/en/2.6.0/ThreadGroup.html) which
+  # [`ThreadGroup`](https://docs.ruby-lang.org/en/2.7.0/ThreadGroup.html) which
   # contains the given thread, or returns `nil` if `thr` is not a member of any
   # group.
   #
@@ -420,7 +428,7 @@ class Thread < Object
   # Any threads not joined will be killed when the main program exits.
   #
   # If `thr` had previously raised an exception and the
-  # [`::abort_on_exception`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-abort_on_exception)
+  # [`::abort_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-abort_on_exception)
   # or $DEBUG flags are not set, (so the exception has not yet been processed),
   # it will be processed at this time.
   #
@@ -492,7 +500,7 @@ class Thread < Object
   # If `error` is given, then check only for `error` type deferred events.
   #
   # See
-  # [`::pending_interrupt?`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-pending_interrupt-3F)
+  # [`::pending_interrupt?`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-pending_interrupt-3F)
   # for more information.
   sig {params(args: T.untyped).returns(T::Boolean)}
   def pending_interrupt?(*args); end
@@ -538,7 +546,7 @@ class Thread < Object
 
   # Raises an exception from the given thread. The caller does not have to be
   # `thr`. See
-  # [`Kernel#raise`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-raise)
+  # [`Kernel#raise`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-raise)
   # for more information.
   #
   # ```ruby
@@ -561,28 +569,28 @@ class Thread < Object
   # this `thr`.
   #
   # The default value when creating a
-  # [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) is the value of
+  # [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) is the value of
   # the global flag
-  # [`Thread.report_on_exception`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-report_on_exception).
+  # [`Thread.report_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-report_on_exception).
   #
   # See also
-  # [`report_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-report_on_exception-3D).
+  # [`report_on_exception=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-report_on_exception-3D).
   #
   # There is also a class level method to set this for all new threads, see
-  # [`::report_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-report_on_exception-3D).
+  # [`::report_on_exception=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-report_on_exception-3D).
   sig {returns(T::Boolean)}
   def report_on_exception; end
 
   # When set to `true`, a message is printed on $stderr if an exception kills
   # this `thr`. See
-  # [`::report_on_exception`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-report_on_exception)
+  # [`::report_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-report_on_exception)
   # for details.
   #
   # See also
-  # [`report_on_exception`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-report_on_exception).
+  # [`report_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-report_on_exception).
   #
   # There is also a class level method to set this for all new threads, see
-  # [`::report_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-report_on_exception-3D).
+  # [`::report_on_exception=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-report_on_exception-3D).
   sig {params(report_on_exception: T::Boolean).returns(T.untyped)}
   def report_on_exception=(report_on_exception); end
 
@@ -605,7 +613,7 @@ class Thread < Object
   # ```
   #
   # See also the instance method
-  # [`wakeup`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-wakeup).
+  # [`wakeup`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-wakeup).
   sig {returns(Thread)}
   def run; end
 
@@ -620,7 +628,7 @@ class Thread < Object
   # if the parameter is `nil`.
   #
   # See
-  # [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-set_trace_func).
+  # [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-set_trace_func).
   def set_trace_func(_); end
 
   # Returns the status of `thr`.
@@ -651,9 +659,9 @@ class Thread < Object
   # ```
   #
   # See also the instance methods
-  # [`alive?`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-alive-3F)
+  # [`alive?`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-alive-3F)
   # and
-  # [`stop?`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-stop-3F)
+  # [`stop?`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-stop-3F)
   sig {returns(T.nilable(T.any(String, T::Boolean)))}
   def status; end
 
@@ -667,19 +675,15 @@ class Thread < Object
   # ```
   #
   # See also
-  # [`alive?`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-alive-3F)
+  # [`alive?`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-alive-3F)
   # and
-  # [`status`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-status).
+  # [`status`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-status).
   sig {returns(T::Boolean)}
   def stop?; end
 
-  # Terminates `thr` and schedules another thread to be run.
-  #
-  # If this thread is already marked to be killed,
-  # [`exit`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-exit)
-  # returns the [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html).
-  #
-  # If this is the main thread, or the last thread, exits the process.
+  # Terminates `thr` and schedules another thread to be run, returning the
+  # terminated [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html). If
+  # this is the main thread, or the last thread, exits the process.
   sig {returns(T.nilable(Thread))}
   def terminate; end
 
@@ -694,9 +698,9 @@ class Thread < Object
   # ```
   #
   # Note that these are not fiber local variables. Please see
-  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D)
+  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D)
   # and
-  # [`Thread#thread_variable_get`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variable_get)
+  # [`Thread#thread_variable_get`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variable_get)
   # for more details.
   sig {params(key: T.any(String, Symbol)).returns(T::Boolean)}
   def thread_variable?(key); end
@@ -704,11 +708,11 @@ class Thread < Object
   # Returns the value of a thread local variable that has been set. Note that
   # these are different than fiber local values. For fiber local values, please
   # see
-  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D)
+  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D)
   # and
-  # [`Thread#[]=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D-3D).
+  # [`Thread#[]=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D-3D).
   #
-  # [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) local values are
+  # [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) local values are
   # carried along with threads, and do not respect fibers. For example:
   #
   # ```ruby
@@ -733,9 +737,9 @@ class Thread < Object
 
   # Sets a thread local with `key` to `value`. Note that these are local to
   # threads, and not to fibers. Please see
-  # [`Thread#thread_variable_get`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variable_get)
+  # [`Thread#thread_variable_get`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variable_get)
   # and
-  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D)
+  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D)
   # for more information.
   sig {params(key: T.untyped, value: T.untyped).returns(T.untyped)}
   def thread_variable_set(key, value); end
@@ -752,15 +756,15 @@ class Thread < Object
   # ```
   #
   # Note that these are not fiber local variables. Please see
-  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-5B-5D)
+  # [`Thread#[]`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-5B-5D)
   # and
-  # [`Thread#thread_variable_get`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-thread_variable_get)
+  # [`Thread#thread_variable_get`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-thread_variable_get)
   # for more details.
   sig {returns(T::Array[Symbol])}
   def thread_variables; end
 
   # Waits for `thr` to complete, using
-  # [`join`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-join), and
+  # [`join`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-join), and
   # returns its value or raises the exception which terminated the thread.
   #
   # ```ruby
@@ -777,7 +781,7 @@ class Thread < Object
   # blocked on I/O.
   #
   # **Note:** This does not invoke the scheduler, see
-  # [`run`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-run) for
+  # [`run`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-run) for
   # more information.
   #
   # ```ruby
@@ -800,11 +804,11 @@ class Thread < Object
   # Can also be specified by the global $DEBUG flag or command line option `-d`.
   #
   # See also
-  # [`::abort_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-abort_on_exception-3D).
+  # [`::abort_on_exception=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-abort_on_exception-3D).
   #
   # There is also an instance level method to set this for a specific thread,
   # see
-  # [`abort_on_exception`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-abort_on_exception).
+  # [`abort_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-abort_on_exception).
   sig {returns(T.untyped)}
   def self.abort_on_exception; end
 
@@ -832,19 +836,19 @@ class Thread < Object
   # ```
   #
   # See also
-  # [`::abort_on_exception`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-abort_on_exception).
+  # [`::abort_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-abort_on_exception).
   #
   # There is also an instance level method to set this for a specific thread,
   # see
-  # [`abort_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-abort_on_exception-3D).
+  # [`abort_on_exception=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-abort_on_exception-3D).
   sig {params(abort_on_exception: T.untyped).returns(T.untyped)}
   def self.abort_on_exception=(abort_on_exception); end
 
   # Wraps the block in a single, VM-global
-  # [`Mutex.synchronize`](https://docs.ruby-lang.org/en/2.6.0/Mutex.html#method-i-synchronize),
+  # [`Mutex.synchronize`](https://docs.ruby-lang.org/en/2.7.0/Mutex.html#method-i-synchronize),
   # returning the value of the block. A thread executing inside the exclusive
   # section will only block other threads which also use the
-  # [`Thread.exclusive`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-exclusive)
+  # [`Thread.exclusive`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-exclusive)
   # mechanism.
   sig {params(block: T.untyped).returns(T.untyped)}
   def self.exclusive(&block); end
@@ -853,17 +857,17 @@ class Thread < Object
   # run.
   #
   # If this thread is already marked to be killed,
-  # [`::exit`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-exit)
-  # returns the [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html).
+  # [`::exit`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-exit)
+  # returns the [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html).
   #
   # If this is the main thread, or the last  thread, exit the process.
   sig {returns(T.untyped)}
   def self.exit; end
 
   # Basically the same as
-  # [`::new`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-new).
+  # [`::new`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-new).
   # However, if class
-  # [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) is subclassed,
+  # [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) is subclassed,
   # then calling `start` in that subclass will not invoke the subclass's
   # `initialize` method.
   sig {params(args: T.untyped).returns(T.untyped)}
@@ -872,8 +876,8 @@ class Thread < Object
   # Changes asynchronous interrupt timing.
   #
   # *interrupt* means asynchronous event and corresponding procedure by
-  # [`Thread#raise`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-raise),
-  # [`Thread#kill`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-kill),
+  # [`Thread#raise`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-raise),
+  # [`Thread#kill`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-kill),
   # signal trap (not supported yet) and main thread termination (if main thread
   # terminates, then all other thread will be killed).
   #
@@ -901,23 +905,23 @@ class Thread < Object
   # Asynchronous interrupts are difficult to use.
   #
   # If you need to communicate between threads, please consider to use another
-  # way such as [`Queue`](https://docs.ruby-lang.org/en/2.6.0/Queue.html).
+  # way such as [`Queue`](https://docs.ruby-lang.org/en/2.7.0/Queue.html).
   #
   # Or use them with deep understanding about this method.
   #
   # ### Usage
   #
   # In this example, we can guard from
-  # [`Thread#raise`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-raise)
+  # [`Thread#raise`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-raise)
   # exceptions.
   #
   # Using the `:never` TimingSymbol the
-  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html)
+  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html)
   # exception will always be ignored in the first block of the main thread. In
   # the second
-  # [`::handle_interrupt`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-handle_interrupt)
+  # [`::handle_interrupt`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-handle_interrupt)
   # block we can purposefully handle
-  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html)
+  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html)
   # exceptions.
   #
   # ```ruby
@@ -939,19 +943,19 @@ class Thread < Object
   # ```
   #
   # While we are ignoring the
-  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html)
+  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html)
   # exception, it's safe to write our resource allocation code. Then, the ensure
   # block is where we can safely deallocate your resources.
   #
-  # #### Guarding from [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html)
+  # #### Guarding from [`Timeout::Error`](https://docs.ruby-lang.org/en/2.7.0/Timeout/Error.html)
   #
   # In the next example, we will guard from the
-  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html)
+  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.7.0/Timeout/Error.html)
   # exception. This will help prevent from leaking resources when
-  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html)
+  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.7.0/Timeout/Error.html)
   # exceptions occur during normal ensure clause. For this example we use the
   # help of the standard library
-  # [`Timeout`](https://docs.ruby-lang.org/en/2.6.0/Timeout.html), from
+  # [`Timeout`](https://docs.ruby-lang.org/en/2.7.0/Timeout.html), from
   # lib/timeout.rb
   #
   # ```ruby
@@ -969,16 +973,16 @@ class Thread < Object
   # ```
   #
   # In the first part of the `timeout` block, we can rely on
-  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html)
+  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.7.0/Timeout/Error.html)
   # being ignored. Then in the `Timeout::Error => :on_blocking` block, any
   # operation that will block the calling thread is susceptible to a
-  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html)
+  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.7.0/Timeout/Error.html)
   # exception being raised.
   #
   # #### Stack control settings
   #
   # It's possible to stack multiple levels of
-  # [`::handle_interrupt`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-handle_interrupt)
+  # [`::handle_interrupt`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-handle_interrupt)
   # blocks in order to control more than one ExceptionClass and TimingSymbol at
   # a time.
   #
@@ -1004,7 +1008,7 @@ class Thread < Object
   def self.handle_interrupt(hash); end
 
   # Causes the given `thread` to exit, see also
-  # [`Thread::exit`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-exit).
+  # [`Thread::exit`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-exit).
   #
   # ```ruby
   # count = 0
@@ -1018,7 +1022,7 @@ class Thread < Object
   def self.kill(thread); end
 
   # Returns an array of
-  # [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) objects for all
+  # [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) objects for all
   # threads that are either runnable or stopped.
   #
   # ```ruby
@@ -1047,7 +1051,7 @@ class Thread < Object
   # Returns whether or not the asynchronous queue is empty.
   #
   # Since
-  # [`Thread::handle_interrupt`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-handle_interrupt)
+  # [`Thread::handle_interrupt`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-handle_interrupt)
   # can be used to defer asynchronous events, this method can be used to
   # determine if there are any deferred events.
   #
@@ -1133,27 +1137,27 @@ class Thread < Object
   #     exception so it does not happen anymore.
   # *   If the exception is intended, it might be better to rescue it closer to
   #     where it is raised rather then let it kill the
-  #     [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html).
+  #     [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html).
   # *   If it is guaranteed the
-  #     [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) will be
+  #     [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) will be
   #     joined with
-  #     [`Thread#join`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-join)
+  #     [`Thread#join`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-join)
   #     or
-  #     [`Thread#value`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-value),
+  #     [`Thread#value`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-value),
   #     then it is safe to disable this report with
   #     `Thread.current.report_on_exception = false` when starting the
-  #     [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html). However,
+  #     [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html). However,
   #     this might handle the exception much later, or not at all if the
-  #     [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) is never
+  #     [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) is never
   #     joined due to the parent thread being blocked, etc.
   #
   #
   # See also
-  # [`::report_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-report_on_exception-3D).
+  # [`::report_on_exception=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-report_on_exception-3D).
   #
   # There is also an instance level method to set this for a specific thread,
   # see
-  # [`report_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-report_on_exception-3D).
+  # [`report_on_exception=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-report_on_exception-3D).
   sig {returns(T.untyped)}
   def self.report_on_exception; end
 
@@ -1182,18 +1186,18 @@ class Thread < Object
   # ```
   #
   # See also
-  # [`::report_on_exception`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-report_on_exception).
+  # [`::report_on_exception`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-report_on_exception).
   #
   # There is also an instance level method to set this for a specific thread,
   # see
-  # [`report_on_exception=`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-i-report_on_exception-3D).
+  # [`report_on_exception=`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-report_on_exception-3D).
   sig {params(report_on_exception: T.untyped).returns(T.untyped)}
   def self.report_on_exception=(report_on_exception); end
 
   # Basically the same as
-  # [`::new`](https://docs.ruby-lang.org/en/2.6.0/Thread.html#method-c-new).
+  # [`::new`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-new).
   # However, if class
-  # [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) is subclassed,
+  # [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) is subclassed,
   # then calling `start` in that subclass will not invoke the subclass's
   # `initialize` method.
   sig {params(args: T.untyped).returns(T.untyped)}
@@ -1218,7 +1222,7 @@ class Thread::Backtrace < Object
 end
 
 # An object representation of a stack frame, initialized by
-# [`Kernel#caller_locations`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-caller_locations).
+# [`Kernel#caller_locations`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-caller_locations).
 #
 # For example:
 #
@@ -1274,7 +1278,7 @@ class Thread::Backtrace::Location
   # Returns the full file path of this frame.
   #
   # Same as
-  # [`path`](https://docs.ruby-lang.org/en/2.6.0/Thread/Backtrace/Location.html#method-i-path),
+  # [`path`](https://docs.ruby-lang.org/en/2.7.0/Thread/Backtrace/Location.html#method-i-path),
   # but includes the absolute path.
   sig {returns(T.nilable(String))}
   def absolute_path(); end
@@ -1282,7 +1286,7 @@ class Thread::Backtrace::Location
   # Returns the base label of this frame.
   #
   # Usually same as
-  # [`label`](https://docs.ruby-lang.org/en/2.6.0/Thread/Backtrace/Location.html#method-i-label),
+  # [`label`](https://docs.ruby-lang.org/en/2.7.0/Thread/Backtrace/Location.html#method-i-label),
   # without decoration.
   sig {returns(T.nilable(String))}
   def base_label(); end
@@ -1321,7 +1325,7 @@ class Thread::Backtrace::Location
   # Returns the line number of this frame.
   #
   # For example, using `caller_locations.rb` from
-  # [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.6.0/Thread/Backtrace/Location.html)
+  # [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.7.0/Thread/Backtrace/Location.html)
   #
   # ```ruby
   # loc = c(0..1).first
@@ -1333,7 +1337,7 @@ class Thread::Backtrace::Location
   # Returns the file name of this frame.
   #
   # For example, using `caller_locations.rb` from
-  # [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.6.0/Thread/Backtrace/Location.html)
+  # [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.7.0/Thread/Backtrace/Location.html)
   #
   # ```ruby
   # loc = c(0..1).first
@@ -1343,9 +1347,9 @@ class Thread::Backtrace::Location
   def path(); end
 end
 
-# [`ConditionVariable`](https://docs.ruby-lang.org/en/2.6.0/ConditionVariable.html)
+# [`ConditionVariable`](https://docs.ruby-lang.org/en/2.7.0/ConditionVariable.html)
 # objects augment class
-# [`Mutex`](https://docs.ruby-lang.org/en/2.6.0/Mutex.html). Using condition
+# [`Mutex`](https://docs.ruby-lang.org/en/2.7.0/Mutex.html). Using condition
 # variables, it is possible to suspend while in the middle of a critical section
 # until a resource becomes available.
 #
@@ -1390,7 +1394,7 @@ class Thread::ConditionVariable < Object
   def wait(*_); end
 end
 
-# [`Mutex`](https://docs.ruby-lang.org/en/2.6.0/Mutex.html) implements a simple
+# [`Mutex`](https://docs.ruby-lang.org/en/2.7.0/Mutex.html) implements a simple
 # semaphore that can be used to coordinate access to shared data from multiple
 # concurrent threads.
 #
@@ -1441,10 +1445,10 @@ class Thread::Mutex < Object
   def unlock; end
 end
 
-# The [`Queue`](https://docs.ruby-lang.org/en/2.6.0/Queue.html) class implements
+# The [`Queue`](https://docs.ruby-lang.org/en/2.7.0/Queue.html) class implements
 # multi-producer, multi-consumer queues. It is especially useful in threaded
 # programming when information must be exchanged safely between multiple
-# threads. The [`Queue`](https://docs.ruby-lang.org/en/2.6.0/Queue.html) class
+# threads. The [`Queue`](https://docs.ruby-lang.org/en/2.7.0/Queue.html) class
 # implements all the required locking semantics.
 #
 # The class implements FIFO type of queue. In a FIFO queue, the first tasks
@@ -1475,7 +1479,7 @@ end
 # ```
 class Thread::Queue < Object
   # Alias for:
-  # [`push`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-push)
+  # [`push`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-push)
   sig {params(obj: T.untyped).returns(T.untyped)}
   def <<(obj); end
 
@@ -1499,9 +1503,9 @@ class Thread::Queue < Object
   #     return nil. deq(true) will raise a `ThreadError`.
   #
   #
-  # [`ClosedQueueError`](https://docs.ruby-lang.org/en/2.6.0/ClosedQueueError.html)
+  # [`ClosedQueueError`](https://docs.ruby-lang.org/en/2.7.0/ClosedQueueError.html)
   # is inherited from
-  # [`StopIteration`](https://docs.ruby-lang.org/en/2.6.0/StopIteration.html),
+  # [`StopIteration`](https://docs.ruby-lang.org/en/2.7.0/StopIteration.html),
   # so that you can break loop block.
   #
   # ```
@@ -1523,7 +1527,7 @@ class Thread::Queue < Object
   def closed?; end
 
   # Alias for:
-  # [`pop`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-pop)
+  # [`pop`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-pop)
   sig {params(args: T.untyped).returns(T.untyped)}
   def deq(*args); end
 
@@ -1532,14 +1536,14 @@ class Thread::Queue < Object
   def empty?; end
 
   # Alias for:
-  # [`push`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-push)
+  # [`push`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-push)
   sig {params(obj: T.untyped).returns(T.untyped)}
   def enq(obj); end
 
   # Returns the length of the queue.
   #
   # Also aliased as:
-  # [`size`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-size)
+  # [`size`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-size)
   sig {returns(Integer)}
   def length; end
 
@@ -1557,26 +1561,26 @@ class Thread::Queue < Object
   # `ThreadError` is raised.
   #
   # Also aliased as:
-  # [`deq`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-deq),
-  # [`shift`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-shift)
+  # [`deq`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-deq),
+  # [`shift`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-shift)
   sig {params(args: T.untyped).returns(T.untyped)}
   def pop(*args); end
 
   # Pushes the given `object` to the queue.
   #
   # Also aliased as:
-  # [`enq`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-enq),
-  # [`<<`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-3C-3C)
+  # [`enq`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-enq),
+  # [`<<`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-3C-3C)
   sig {params(obj: T.untyped).returns(T.untyped)}
   def push(obj); end
 
   # Alias for:
-  # [`pop`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-pop)
+  # [`pop`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-pop)
   sig {params(args: T.untyped).returns(T.untyped)}
   def shift(*args); end
 
   # Alias for:
-  # [`length`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-length)
+  # [`length`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-length)
   sig {returns(Integer)}
   def size; end
 end
@@ -1584,17 +1588,17 @@ end
 # This class represents queues of specified size capacity. The push operation
 # may be blocked if the capacity is full.
 #
-# See [`Queue`](https://docs.ruby-lang.org/en/2.6.0/Queue.html) for an example
-# of how a [`SizedQueue`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html)
+# See [`Queue`](https://docs.ruby-lang.org/en/2.7.0/Queue.html) for an example
+# of how a [`SizedQueue`](https://docs.ruby-lang.org/en/2.7.0/SizedQueue.html)
 # works.
 class Thread::SizedQueue < Thread::Queue
   # Alias for:
-  # [`push`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-push)
+  # [`push`](https://docs.ruby-lang.org/en/2.7.0/SizedQueue.html#method-i-push)
   sig {params(args: T.untyped).returns(T.untyped)}
   def <<(*args); end
 
   # Alias for:
-  # [`push`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-push)
+  # [`push`](https://docs.ruby-lang.org/en/2.7.0/SizedQueue.html#method-i-push)
   sig {params(args: T.untyped).returns(T.untyped)}
   def enq(*args); end
 
@@ -1616,15 +1620,15 @@ class Thread::SizedQueue < Thread::Queue
   # suspended, and `ThreadError` is raised.
   #
   # Also aliased as:
-  # [`enq`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-enq),
-  # [`<<`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-3C-3C)
+  # [`enq`](https://docs.ruby-lang.org/en/2.7.0/SizedQueue.html#method-i-enq),
+  # [`<<`](https://docs.ruby-lang.org/en/2.7.0/SizedQueue.html#method-i-3C-3C)
   sig {params(args: T.untyped).returns(T.untyped)}
   def push(*args); end
 end
 
-# [`ConditionVariable`](https://docs.ruby-lang.org/en/2.6.0/ConditionVariable.html)
+# [`ConditionVariable`](https://docs.ruby-lang.org/en/2.7.0/ConditionVariable.html)
 # objects augment class
-# [`Mutex`](https://docs.ruby-lang.org/en/2.6.0/Mutex.html). Using condition
+# [`Mutex`](https://docs.ruby-lang.org/en/2.7.0/Mutex.html). Using condition
 # variables, it is possible to suspend while in the middle of a critical section
 # until a resource becomes available.
 #
@@ -1650,7 +1654,7 @@ end
 # }
 # ```
 ConditionVariable = Thread::ConditionVariable
-# [`Mutex`](https://docs.ruby-lang.org/en/2.6.0/Mutex.html) implements a simple
+# [`Mutex`](https://docs.ruby-lang.org/en/2.7.0/Mutex.html) implements a simple
 # semaphore that can be used to coordinate access to shared data from multiple
 # concurrent threads.
 #
@@ -1672,10 +1676,10 @@ ConditionVariable = Thread::ConditionVariable
 # }
 # ```
 Mutex = Thread::Mutex
-# The [`Queue`](https://docs.ruby-lang.org/en/2.6.0/Queue.html) class implements
+# The [`Queue`](https://docs.ruby-lang.org/en/2.7.0/Queue.html) class implements
 # multi-producer, multi-consumer queues. It is especially useful in threaded
 # programming when information must be exchanged safely between multiple
-# threads. The [`Queue`](https://docs.ruby-lang.org/en/2.6.0/Queue.html) class
+# threads. The [`Queue`](https://docs.ruby-lang.org/en/2.7.0/Queue.html) class
 # implements all the required locking semantics.
 #
 # The class implements FIFO type of queue. In a FIFO queue, the first tasks
@@ -1708,7 +1712,7 @@ Queue = Thread::Queue
 # This class represents queues of specified size capacity. The push operation
 # may be blocked if the capacity is full.
 #
-# See [`Queue`](https://docs.ruby-lang.org/en/2.6.0/Queue.html) for an example
-# of how a [`SizedQueue`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html)
+# See [`Queue`](https://docs.ruby-lang.org/en/2.7.0/Queue.html) for an example
+# of how a [`SizedQueue`](https://docs.ruby-lang.org/en/2.7.0/SizedQueue.html)
 # works.
 SizedQueue = Thread::SizedQueue

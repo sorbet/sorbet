@@ -2,13 +2,13 @@
 
 # ## Description
 #
-# The [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html) class provides
+# The [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html) class provides
 # a simple but sophisticated logging utility that you can use to output
 # messages.
 #
 # The messages have associated levels, such as `INFO` or `ERROR` that indicate
 # their importance. You can then give the
-# [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html) a level, and only
+# [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html) a level, and only
 # messages at that level or higher will be printed.
 #
 # The levels are:
@@ -28,15 +28,15 @@
 #
 #
 # For instance, in a production system, you may have your
-# [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html) set to `INFO` or
+# [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html) set to `INFO` or
 # even `WARN`. When you are developing the system, however, you probably want to
 # know about the program's internal state, and would set the
-# [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html) to `DEBUG`.
+# [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html) to `DEBUG`.
 #
-# **Note**: [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html) does not
+# **Note**: [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html) does not
 # escape or sanitize any messages passed to it. Developers should be aware of
 # when potentially malicious data (user-input) is passed to
-# [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html), and manually
+# [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html), and manually
 # escape the untrusted data:
 #
 # ```ruby
@@ -45,7 +45,7 @@
 # ```
 #
 # You can use
-# [`formatter=`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#attribute-i-formatter)
+# [`formatter=`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#attribute-i-formatter)
 # for escaping all data.
 #
 # ```ruby
@@ -58,7 +58,7 @@
 #
 # ### Example
 #
-# This creates a [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html)
+# This creates a [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html)
 # that outputs to the standard output stream, with a level of `WARN`:
 #
 # ```ruby
@@ -92,7 +92,7 @@
 # ### Features
 #
 # There are several interesting features that
-# [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html) provides, like
+# [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html) provides, like
 # auto-rolling of log files, setting the format of log messages, and specifying
 # a program name in conjunction with the message. The next section shows you how
 # to achieve these things.
@@ -214,8 +214,8 @@
 # # DEBUG < INFO < WARN < ERROR < FATAL < UNKNOWN
 # ```
 #
-# 3.  [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html) or
-#     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) (case
+# 3.  [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) or
+#     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) (case
 #     insensitive)
 #
 # ```ruby
@@ -252,7 +252,7 @@
 # ```
 #
 # You may change the date and time format via
-# [`datetime_format=`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-datetime_format-3D).
+# [`datetime_format=`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-datetime_format-3D).
 #
 # ```ruby
 # logger.datetime_format = '%Y-%m-%d %H:%M:%S'
@@ -266,7 +266,7 @@
 # ```
 #
 # Or, you may change the overall format via the
-# [`formatter=`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#attribute-i-formatter)
+# [`formatter=`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#attribute-i-formatter)
 # method.
 #
 # ```ruby
@@ -304,7 +304,7 @@ class Logger
   sig { returns(Integer) }
   def level; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) logging severity
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) logging severity
   # threshold.
   #
   # `severity`
@@ -312,7 +312,7 @@ class Logger
   #
   #
   # Also aliased as:
-  # [`sev_threshold=`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-sev_threshold-3D)
+  # [`sev_threshold=`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-sev_threshold-3D)
   sig { params(severity: T.untyped).void }
   def level=(severity); end
 
@@ -325,11 +325,11 @@ class Logger
   def progname=(progname); end
 
   # Returns the date format being used. See
-  # [`datetime_format=`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-datetime_format-3D)
+  # [`datetime_format=`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-datetime_format-3D)
   sig { returns(T.nilable(String)) }
   def datetime_format; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) date-time format.
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) date-time format.
   #
   # `datetime_format`
   # :   A string suitable for passing to `strftime`.
@@ -351,19 +351,19 @@ class Logger
   # `severity`
   # :   The Severity of the log message.
   # `time`
-  # :   A [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) instance
+  # :   A [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) instance
   #     representing when the message was logged.
   # `progname`
   # :   The
-  #     [`progname`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#attribute-i-progname)
+  #     [`progname`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#attribute-i-progname)
   #     configured, or passed to the logger method.
   # `msg`
   # :   The *Object* the user passed to the log message; not necessarily a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
   #
   # The block should return an
-  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) that can be
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) that can be
   # written to the logging device via `write`. The default formatter is used
   # when no formatter is set.
   sig { returns(T.nilable(FormatterProcType)) }
@@ -375,19 +375,19 @@ class Logger
   # `severity`
   # :   The Severity of the log message.
   # `time`
-  # :   A [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) instance
+  # :   A [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) instance
   #     representing when the message was logged.
   # `progname`
   # :   The
-  #     [`progname`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#attribute-i-progname)
+  #     [`progname`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#attribute-i-progname)
   #     configured, or passed to the logger method.
   # `msg`
   # :   The *Object* the user passed to the log message; not necessarily a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
   #
   # The block should return an
-  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) that can be
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) that can be
   # written to the logging device via `write`. The default formatter is used
   # when no formatter is set.
   sig { params(formatter: T.nilable(FormatterProcType)).void }
@@ -398,7 +398,7 @@ class Logger
   def sev_threshold; end
 
   # Alias for:
-  # [`level=`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-level-3D)
+  # [`level=`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-level-3D)
   sig { params(severity: T.untyped).void }
   def sev_threshold=(severity); end
 
@@ -453,11 +453,12 @@ class Logger
   # ### Args
   #
   # `logdev`
-  # :   The log device. This is a filename (String) or
-  #     [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object (typically
+  # :   The log device. This is a filename
+  #     ([`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)) or
+  #     [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object (typically
   #     `STDOUT`, `STDERR`, or an open file). reopen the same filename if it is
   #     `nil`, do nothing for
-  #     [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html). Default is `nil`.
+  #     [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html). Default is `nil`.
   #
   #
   # ### Description
@@ -470,12 +471,12 @@ class Logger
   #
   # `severity`
   # :   Severity. Constants are defined in
-  #     [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html) namespace:
+  #     [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html) namespace:
   #     `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`, or `UNKNOWN`.
   # `message`
   # :   The log message. A
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or
-  #     [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html).
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or
+  #     [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html).
   # `progname`
   # :   Program name string. Can be omitted. Treated as a message if no
   #     `message` and `block` are given.
@@ -492,17 +493,17 @@ class Logger
   #
   # Log a message if the given severity is high enough. This is the generic
   # logging method. Users will be more inclined to use
-  # [`debug`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-debug),
-  # [`info`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-info),
-  # [`warn`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-warn),
-  # [`error`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-error),
+  # [`debug`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-debug),
+  # [`info`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-info),
+  # [`warn`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-warn),
+  # [`error`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-error),
   # and
-  # [`fatal`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-fatal).
+  # [`fatal`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-fatal).
   #
   # **Message format**: `message` can be any object, but it has to be converted
-  # to a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) in order to
+  # to a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) in order to
   # log it. Generally, `inspect` is used if the given object is not a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). A special case
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). A special case
   # is an `Exception` object, which will be printed in detail, including
   # message, class, and backtrace. See msg2str for the implementation if
   # required.
@@ -515,7 +516,7 @@ class Logger
   #
   #
   # Also aliased as:
-  # [`log`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-log)
+  # [`log`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-log)
   sig do
     params(
       severity: T.nilable(Integer),
@@ -527,7 +528,7 @@ class Logger
   def add(severity, message = nil, progname = nil, &blk); end
 
   # Alias for:
-  # [`add`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-add)
+  # [`add`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-add)
   sig do
     params(
       severity: T.nilable(Integer),
@@ -545,7 +546,7 @@ class Logger
 
   # Log a `DEBUG` message.
   #
-  # See [`info`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-info)
+  # See [`info`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-info)
   # for more information.
   sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def debug(progname = nil, &block); end
@@ -554,12 +555,12 @@ class Logger
   #
   # `message`
   # :   The message to log; does not need to be a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   # `progname`
   # :   In the block form, this is the
-  #     [`progname`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#attribute-i-progname)
+  #     [`progname`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#attribute-i-progname)
   #     to use in the log message. The default can be set with
-  #     [`progname=`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#attribute-i-progname).
+  #     [`progname=`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#attribute-i-progname).
   # `block`
   # :   Evaluates to the message to log. This is not evaluated unless the
   #     logger's level is sufficient to log the message. This allows you to
@@ -579,32 +580,32 @@ class Logger
   #
   # You'll probably stick to the second form above, unless you want to provide a
   # program name (which you can do with
-  # [`progname=`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#attribute-i-progname)
+  # [`progname=`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#attribute-i-progname)
   # as well).
   #
   # ### Return
   #
-  # See [`add`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-add).
+  # See [`add`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-add).
   sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def info(progname = nil, &block); end
 
   # Log a `WARN` message.
   #
-  # See [`info`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-info)
+  # See [`info`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-info)
   # for more information.
   sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def warn(progname = nil, &block); end
 
   # Log an `ERROR` message.
   #
-  # See [`info`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-info)
+  # See [`info`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-info)
   # for more information.
   sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def error(progname = nil, &block); end
 
   # Log a `FATAL` message.
   #
-  # See [`info`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-info)
+  # See [`info`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-info)
   # for more information.
   sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def fatal(progname = nil, &block); end
@@ -612,7 +613,7 @@ class Logger
   # Log an `UNKNOWN` message. This will be printed no matter what the logger's
   # level is.
   #
-  # See [`info`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-info)
+  # See [`info`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-info)
   # for more information.
   sig { params(progname: T.untyped, block: T.nilable(T.proc.returns(T.untyped))).void }
   def unknown(progname = nil, &block); end

@@ -689,9 +689,9 @@ class Net::DNS::Resolver::UdpTimeout < Net::DNS::Resolver::DnsTimeout
 end
 
 # This class implements the
-# [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) Transfer Protocol. If
+# [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) Transfer Protocol. If
 # you have used a command-line
-# [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html) program, and are
+# [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html) program, and are
 # familiar with the commands, you will be able to use this class easily. Some
 # extra features are included to take advantage of Ruby's style and strengths.
 #
@@ -726,16 +726,16 @@ end
 # ## Major Methods
 #
 # The following are the methods most likely to be useful to users:
-# *   [`FTP.open`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-c-open)
-# *   [`getbinaryfile`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-getbinaryfile)
-# *   [`gettextfile`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-gettextfile)
-# *   [`putbinaryfile`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-putbinaryfile)
-# *   [`puttextfile`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-puttextfile)
-# *   [`chdir`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-chdir)
-# *   [`nlst`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-nlst)
-# *   [`size`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-size)
-# *   [`rename`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-rename)
-# *   [`delete`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-delete)
+# *   [`FTP.open`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-c-open)
+# *   [`getbinaryfile`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-getbinaryfile)
+# *   [`gettextfile`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-gettextfile)
+# *   [`putbinaryfile`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-putbinaryfile)
+# *   [`puttextfile`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-puttextfile)
+# *   [`chdir`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-chdir)
+# *   [`nlst`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-nlst)
+# *   [`size`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-size)
+# *   [`rename`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-rename)
+# *   [`delete`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-delete)
 class Net::FTP < Net::Protocol
   include ::OpenSSL::SSL
   include ::OpenSSL
@@ -756,7 +756,7 @@ class Net::FTP < Net::Protocol
   # Sends the ACCT command.
   #
   # This is a less common
-  # [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html) command, to send
+  # [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html) command, to send
   # account information if the destination host requires it.
   def acct(account); end
 
@@ -772,13 +772,13 @@ class Net::FTP < Net::Protocol
 
   # Closes the connection. Further operations are impossible until you open a
   # new connection with
-  # [`connect`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-connect).
+  # [`connect`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-connect).
   def close(); end
 
   # Returns `true` iff the connection is closed.
   def closed?(); end
 
-  # Establishes an [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html)
+  # Establishes an [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html)
   # connection to host, optionally overriding the default port. If the
   # environment variable `SOCKS_SERVER` is set, sets up the connection through a
   # SOCKS proxy. Raises an exception (typically `Errno::ECONNREFUSED`) if the
@@ -797,14 +797,14 @@ class Net::FTP < Net::Protocol
   def delete(filename); end
 
   # Alias for:
-  # [`list`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-list)
+  # [`list`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-list)
   def dir(*args, &block); end
 
   # Retrieves `remotefile` in whatever mode the session is set (text or binary).
   # See
-  # [`gettextfile`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-gettextfile)
+  # [`gettextfile`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-gettextfile)
   # and
-  # [`getbinaryfile`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-getbinaryfile).
+  # [`getbinaryfile`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-getbinaryfile).
   def get(remotefile, localfile=T.unsafe(nil), blocksize=T.unsafe(nil), &block); end
 
   # Retrieves `remotefile` in binary mode, storing the result in `localfile`. If
@@ -813,7 +813,7 @@ class Net::FTP < Net::Protocol
   def getbinaryfile(remotefile, localfile=T.unsafe(nil), blocksize=T.unsafe(nil), &block); end
 
   # Alias for:
-  # [`pwd`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-pwd)
+  # [`pwd`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-pwd)
   def getdir(); end
 
   # Retrieves `remotefile` in ASCII (text) mode, storing the result in
@@ -839,27 +839,27 @@ class Net::FTP < Net::Protocol
   # `ls -l`). If a block is given, it iterates through the listing.
   #
   # Also aliased as:
-  # [`ls`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-ls),
-  # [`dir`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-dir)
+  # [`ls`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-ls),
+  # [`dir`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-dir)
   def list(*args, &block); end
 
   # Logs in to the remote host. The session must have been previously connected.
   # If `user` is the string "anonymous" and the `password` is `nil`,
   # "anonymous@" is used as a password. If the `acct` parameter is not `nil`, an
-  # [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html) ACCT command is
+  # [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html) ACCT command is
   # sent following the successful login. Raises an exception on error (typically
   # `Net::FTPPermError`).
   def login(user=T.unsafe(nil), passwd=T.unsafe(nil), acct=T.unsafe(nil)); end
 
   # Alias for:
-  # [`list`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-list)
+  # [`list`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-list)
   def ls(*args, &block); end
 
   # Returns the raw last modification time of the (remote) file in the format
   # "YYYYMMDDhhmmss" (MDTM command).
   #
   # Use `mtime` if you want a parsed
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) instance.
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) instance.
   def mdtm(filename); end
 
   # Creates a remote directory.
@@ -890,17 +890,17 @@ class Net::FTP < Net::Protocol
 
   # Number of seconds to wait for the connection to open. Any number may be
   # used, including Floats for fractional seconds. If the
-  # [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html) object cannot open
+  # [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html) object cannot open
   # a connection in this many seconds, it raises a
-  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
+  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html)
   # exception. The default value is `nil`.
   def open_timeout(); end
 
   # Number of seconds to wait for the connection to open. Any number may be
   # used, including Floats for fractional seconds. If the
-  # [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html) object cannot open
+  # [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html) object cannot open
   # a connection in this many seconds, it raises a
-  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
+  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html)
   # exception. The default value is `nil`.
   def open_timeout=(open_timeout); end
 
@@ -912,9 +912,9 @@ class Net::FTP < Net::Protocol
 
   # Transfers `localfile` to the server in whatever mode the session is set
   # (text or binary). See
-  # [`puttextfile`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-puttextfile)
+  # [`puttextfile`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-puttextfile)
   # and
-  # [`putbinaryfile`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-putbinaryfile).
+  # [`putbinaryfile`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-putbinaryfile).
   def put(localfile, remotefile=T.unsafe(nil), blocksize=T.unsafe(nil), &block); end
 
   # Transfers `localfile` to the server in binary mode, storing the result in
@@ -930,22 +930,22 @@ class Net::FTP < Net::Protocol
   # Returns the current remote directory.
   #
   # Also aliased as:
-  # [`getdir`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#method-i-getdir)
+  # [`getdir`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#method-i-getdir)
   def pwd(); end
 
-  # Exits the [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html) session.
+  # Exits the [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html) session.
   def quit(); end
 
   # Number of seconds to wait for one block to be read (via one read(2) call).
   # Any number may be used, including Floats for fractional seconds. If the
-  # [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html) object cannot read
+  # [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html) object cannot read
   # data in this many seconds, it raises a
-  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html)
+  # [`Timeout::Error`](https://docs.ruby-lang.org/en/2.7.0/Timeout/Error.html)
   # exception. The default value is 60 seconds.
   def read_timeout(); end
 
   # Setter for the
-  # [`read_timeout`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html#attribute-i-read_timeout)
+  # [`read_timeout`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html#attribute-i-read_timeout)
   # attribute.
   def read_timeout=(sec); end
 
@@ -982,8 +982,8 @@ class Net::FTP < Net::Protocol
   # Sends a command and returns the response.
   def sendcmd(cmd); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the socket used to
-  # connect to the [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html)
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the socket used to
+  # connect to the [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html)
   # server.
   #
   # May raise FTPReplyError if `get_greeting` is false.
@@ -997,28 +997,27 @@ class Net::FTP < Net::Protocol
 
   # Number of seconds to wait for the TLS handshake. Any number may be used,
   # including Floats for fractional seconds. If the
-  # [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html) object cannot
+  # [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html) object cannot
   # complete the TLS handshake in this many seconds, it raises a
-  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
+  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html)
   # exception. The default value is `nil`. If `ssl_handshake_timeout` is `nil`,
   # `open_timeout` is used instead.
   def ssl_handshake_timeout(); end
 
   # Number of seconds to wait for the TLS handshake. Any number may be used,
   # including Floats for fractional seconds. If the
-  # [`FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html) object cannot
+  # [`FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html) object cannot
   # complete the TLS handshake in this many seconds, it raises a
-  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
+  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html)
   # exception. The default value is `nil`. If `ssl_handshake_timeout` is `nil`,
   # `open_timeout` is used instead.
   def ssl_handshake_timeout=(ssl_handshake_timeout); end
 
-  # Returns the status (STAT command). pathname - when stat is invoked with
-  # pathname as a parameter it acts like
+  # Returns the status (STAT command).
   #
-  # ```
-  # list but alot faster and over the same tcp session.
-  # ```
+  # pathname
+  # :   when stat is invoked with pathname as a parameter it acts like list but
+  #     a lot faster and over the same tcp session.
   def status(pathname=T.unsafe(nil)); end
 
   # Puts the connection into binary (image) mode, issues the given server-side
@@ -1083,7 +1082,7 @@ class Net::FTP::BufferedSocket < Net::BufferedIO
   def shutdown(*args); end
 end
 
-# [`MLSxEntry`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP/MLSxEntry.html)
+# [`MLSxEntry`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP/MLSxEntry.html)
 # represents an entry in responses of MLST/MLSD. Each entry has the facts (e.g.,
 # size, last modification time, etc.) and the pathname.
 class Net::FTP::MLSxEntry
@@ -1182,30 +1181,30 @@ end
 class Net::FTPTempError < Net::FTPError
 end
 
-# ## An [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) client API for Ruby.
+# ## An [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) client API for Ruby.
 #
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) provides a
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) provides a
 # rich library which can be used to build
-# [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) user-agents. For
-# more details about [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html)
+# [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) user-agents. For
+# more details about [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html)
 # see [RFC2616](http://www.ietf.org/rfc/rfc2616.txt).
 #
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) is designed
-# to work closely with [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html).
-# [`URI::HTTP#host`](https://docs.ruby-lang.org/en/2.6.0/URI/Generic.html#attribute-i-host),
-# [`URI::HTTP#port`](https://docs.ruby-lang.org/en/2.6.0/URI/Generic.html#attribute-i-port)
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) is designed
+# to work closely with [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html).
+# [`URI::HTTP#host`](https://docs.ruby-lang.org/en/2.7.0/URI/Generic.html#attribute-i-host),
+# [`URI::HTTP#port`](https://docs.ruby-lang.org/en/2.7.0/URI/Generic.html#attribute-i-port)
 # and
-# [`URI::HTTP#request_uri`](https://docs.ruby-lang.org/en/2.6.0/URI/HTTP.html#method-i-request_uri)
+# [`URI::HTTP#request_uri`](https://docs.ruby-lang.org/en/2.7.0/URI/HTTP.html#method-i-request_uri)
 # are designed to work with
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html).
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html).
 #
 # If you are only performing a few GET requests you should try
-# [`OpenURI`](https://docs.ruby-lang.org/en/2.6.0/OpenURI.html).
+# [`OpenURI`](https://docs.ruby-lang.org/en/2.7.0/OpenURI.html).
 #
 # ## Simple Examples
 #
 # All examples assume you have loaded
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) with:
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) with:
 #
 # ```ruby
 # require 'net/http'
@@ -1213,10 +1212,10 @@ end
 #
 # This will also require 'uri' so you don't need to require it separately.
 #
-# The [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) methods
+# The [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) methods
 # in the following section do not persist connections. They are not recommended
 # if you are performing many
-# [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) requests.
+# [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) requests.
 #
 # ### GET
 #
@@ -1224,7 +1223,7 @@ end
 # Net::HTTP.get('example.com', '/index.html') # => String
 # ```
 #
-# ### GET by [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
+# ### GET by [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html)
 #
 # ```ruby
 # uri = URI('http://example.com/index.html?count=10')
@@ -1258,10 +1257,10 @@ end
 # puts res.body
 # ```
 #
-# ## How to use [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html)
+# ## How to use [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html)
 #
 # The following example code can be used as the basis of an
-# [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) user-agent which
+# [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) user-agent which
 # can perform a variety of request types using persistent connections.
 #
 # ```ruby
@@ -1274,35 +1273,35 @@ end
 # end
 # ```
 #
-# [`Net::HTTP::start`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-c-start)
+# [`Net::HTTP::start`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-c-start)
 # immediately creates a connection to an
-# [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) server which is
+# [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) server which is
 # kept open for the duration of the block. The connection will remain open for
 # multiple requests in the block if the server indicates it supports persistent
 # connections.
 #
 # If you wish to re-use a connection across multiple
-# [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) requests without
+# [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) requests without
 # automatically closing it you can use
-# [`::new`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-c-new) and
+# [`::new`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-c-new) and
 # then call
-# [`start`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-start)
+# [`start`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-start)
 # and
-# [`finish`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-finish)
+# [`finish`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-finish)
 # manually.
 #
 # The request types
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) supports are
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) supports are
 # listed below in the section "HTTP Request Classes".
 #
-# For all the [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html)
+# For all the [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html)
 # request objects and shortcut request methods you may supply either a
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) for the request
-# path or a [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) from which
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) will extract
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) for the request
+# path or a [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) from which
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) will extract
 # the request path.
 #
-# ### Response [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html)
+# ### Response [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html)
 #
 # ```ruby
 # uri = URI('http://example.com/index.html')
@@ -1326,15 +1325,15 @@ end
 # ### Following Redirection
 #
 # Each
-# [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
+# [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
 # object belongs to a class for its response code.
 #
 # For example, all 2XX responses are instances of a
-# [`Net::HTTPSuccess`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPSuccess.html)
+# [`Net::HTTPSuccess`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPSuccess.html)
 # subclass, a 3XX response is an instance of a
-# [`Net::HTTPRedirection`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPRedirection.html)
+# [`Net::HTTPRedirection`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPRedirection.html)
 # subclass and a 200 response is an instance of the
-# [`Net::HTTPOK`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPOK.html) class.
+# [`Net::HTTPOK`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPOK.html) class.
 # For details of response classes, see the section "HTTP Response Classes"
 # below.
 #
@@ -1365,7 +1364,7 @@ end
 # ### POST
 #
 # A POST can be made using the
-# [`Net::HTTP::Post`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Post.html)
+# [`Net::HTTP::Post`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Post.html)
 # request class. This example creates a URL encoded POST body:
 #
 # ```ruby
@@ -1386,7 +1385,7 @@ end
 # ```
 #
 # To send multipart/form-data use
-# [`Net::HTTPHeader#set_form`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-set_form):
+# [`Net::HTTPHeader#set_form`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-set_form):
 #
 # ```ruby
 # req = Net::HTTP::Post.new(uri)
@@ -1394,7 +1393,8 @@ end
 # ```
 #
 # Other requests that can contain a body such as PUT can be created in the same
-# way using the corresponding request class (Net::HTTP::Put).
+# way using the corresponding request class
+# ([`Net::HTTP::Put`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Put.html)).
 #
 # ### Setting Headers
 #
@@ -1438,10 +1438,10 @@ end
 #
 # ### Streaming Response Bodies
 #
-# By default [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html)
+# By default [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html)
 # reads an entire response into memory. If you are handling large files or wish
 # to implement a progress bar you can instead stream the body directly to an
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
 #
 # ```ruby
 # uri = URI('http://example.com/large_file')
@@ -1462,8 +1462,8 @@ end
 # ### HTTPS
 #
 # HTTPS is enabled for an
-# [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) connection by
-# [`Net::HTTP#use_ssl=`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-use_ssl-3D).
+# [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) connection by
+# [`Net::HTTP#use_ssl=`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-use_ssl-3D).
 #
 # ```ruby
 # uri = URI('https://secure.example.com/some_path?query=string')
@@ -1475,11 +1475,11 @@ end
 # ```
 #
 # Or if you simply want to make a GET request, you may pass in an
-# [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) object that has an HTTPS
-# URL. [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html)
+# [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) object that has an HTTPS
+# URL. [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html)
 # automatically turns on TLS verification if the
-# [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) object has a 'https'
-# [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) scheme.
+# [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) object has a 'https'
+# [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) scheme.
 #
 # ```ruby
 # uri = URI('https://example.com/')
@@ -1491,7 +1491,7 @@ end
 #
 # ### Proxies
 #
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) will
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) will
 # automatically create a proxy from the `http_proxy` environment variable if it
 # is present. To disable use of `http_proxy`, pass `nil` for the proxy address.
 #
@@ -1507,53 +1507,53 @@ end
 # ```
 #
 # See
-# [`Net::HTTP.new`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-c-new)
+# [`Net::HTTP.new`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-c-new)
 # for further details and examples such as proxies that require a username and
 # password.
 #
 # ### Compression
 #
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) automatically
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) automatically
 # adds Accept-Encoding for compression of response bodies and automatically
 # decompresses gzip and deflate responses unless a
-# [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) header was sent.
+# [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html) header was sent.
 #
 # Compression can be disabled through the Accept-Encoding: identity header.
 #
-# ## [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) Request Classes
+# ## [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) Request Classes
 #
-# Here is the [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html)
+# Here is the [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html)
 # request class hierarchy.
 #
-# *   [`Net::HTTPRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPRequest.html)
-#     *   [`Net::HTTP::Get`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Get.html)
-#     *   [`Net::HTTP::Head`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Head.html)
-#     *   [`Net::HTTP::Post`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Post.html)
-#     *   [`Net::HTTP::Patch`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Patch.html)
-#     *   [`Net::HTTP::Put`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Put.html)
-#     *   [`Net::HTTP::Proppatch`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Proppatch.html)
-#     *   [`Net::HTTP::Lock`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Lock.html)
-#     *   [`Net::HTTP::Unlock`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Unlock.html)
-#     *   [`Net::HTTP::Options`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Options.html)
-#     *   [`Net::HTTP::Propfind`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Propfind.html)
-#     *   [`Net::HTTP::Delete`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Delete.html)
-#     *   [`Net::HTTP::Move`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Move.html)
-#     *   [`Net::HTTP::Copy`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Copy.html)
-#     *   [`Net::HTTP::Mkcol`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Mkcol.html)
-#     *   [`Net::HTTP::Trace`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Trace.html)
+# *   [`Net::HTTPRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPRequest.html)
+#     *   [`Net::HTTP::Get`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Get.html)
+#     *   [`Net::HTTP::Head`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Head.html)
+#     *   [`Net::HTTP::Post`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Post.html)
+#     *   [`Net::HTTP::Patch`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Patch.html)
+#     *   [`Net::HTTP::Put`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Put.html)
+#     *   [`Net::HTTP::Proppatch`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Proppatch.html)
+#     *   [`Net::HTTP::Lock`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Lock.html)
+#     *   [`Net::HTTP::Unlock`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Unlock.html)
+#     *   [`Net::HTTP::Options`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Options.html)
+#     *   [`Net::HTTP::Propfind`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Propfind.html)
+#     *   [`Net::HTTP::Delete`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Delete.html)
+#     *   [`Net::HTTP::Move`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Move.html)
+#     *   [`Net::HTTP::Copy`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Copy.html)
+#     *   [`Net::HTTP::Mkcol`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Mkcol.html)
+#     *   [`Net::HTTP::Trace`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Trace.html)
 #
 #
 #
-# ## [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) Response Classes
+# ## [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) Response Classes
 #
-# Here is [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) response
+# Here is [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) response
 # class hierarchy. All classes are defined in
-# [`Net`](https://docs.ruby-lang.org/en/2.6.0/Net.html) module and are
+# [`Net`](https://docs.ruby-lang.org/en/2.7.0/Net.html) module and are
 # subclasses of
-# [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html).
+# [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html).
 #
 # HTTPUnknownResponse
-# :   For unhandled [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html)
+# :   For unhandled [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html)
 #     extensions
 # HTTPInformation
 # :   1xx
@@ -1615,7 +1615,7 @@ end
 # :   406
 # HTTPProxyAuthenticationRequired
 # :   407
-# [`HTTPRequestTimeOut`](https://docs.ruby-lang.org/en/2.6.0/HTTPRequestTimeOut.html)
+# [`HTTPRequestTimeOut`](https://docs.ruby-lang.org/en/2.7.0/HTTPRequestTimeOut.html)
 # :   408
 # HTTPConflict
 # :   409
@@ -1625,13 +1625,13 @@ end
 # :   411
 # HTTPPreconditionFailed
 # :   412
-# [`HTTPRequestEntityTooLarge`](https://docs.ruby-lang.org/en/2.6.0/HTTPRequestEntityTooLarge.html)
+# [`HTTPRequestEntityTooLarge`](https://docs.ruby-lang.org/en/2.7.0/HTTPRequestEntityTooLarge.html)
 # :   413
-# [`HTTPRequestURITooLong`](https://docs.ruby-lang.org/en/2.6.0/HTTPRequestURITooLong.html)
+# [`HTTPRequestURITooLong`](https://docs.ruby-lang.org/en/2.7.0/HTTPRequestURITooLong.html)
 # :   414
 # HTTPUnsupportedMediaType
 # :   415
-# [`HTTPRequestedRangeNotSatisfiable`](https://docs.ruby-lang.org/en/2.6.0/HTTPRequestedRangeNotSatisfiable.html)
+# [`HTTPRequestedRangeNotSatisfiable`](https://docs.ruby-lang.org/en/2.7.0/HTTPRequestedRangeNotSatisfiable.html)
 # :   416
 # HTTPExpectationFailed
 # :   417
@@ -1661,7 +1661,7 @@ end
 # :   502
 # HTTPServiceUnavailable
 # :   503
-# [`HTTPGatewayTimeOut`](https://docs.ruby-lang.org/en/2.6.0/HTTPGatewayTimeOut.html)
+# [`HTTPGatewayTimeOut`](https://docs.ruby-lang.org/en/2.7.0/HTTPGatewayTimeOut.html)
 # :   504
 # HTTPVersionNotSupported
 # :   505
@@ -1672,7 +1672,7 @@ end
 #
 #
 # There is also the
-# [`Net::HTTPBadResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPBadResponse.html)
+# [`Net::HTTPBadResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPBadResponse.html)
 # exception which is raised when there is a protocol error.
 class Net::HTTP < Net::Protocol
   HAVE_ZLIB = ::T.unsafe(nil)
@@ -1683,7 +1683,7 @@ class Net::HTTP < Net::Protocol
   SSL_IVNAMES = ::T.unsafe(nil)
 
   # Alias for:
-  # [`started?`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-started-3F)
+  # [`started?`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-started-3F)
   def active?(); end
 
   # The DNS host name or IP address to connect to.
@@ -1708,15 +1708,15 @@ class Net::HTTP < Net::Protocol
   def ca_path=(ca_path); end
 
   # Sets an
-  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html)
+  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html)
   # object as client certificate. (This method is appeared in Michal Rokos's
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) extension).
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) extension).
   def cert(); end
 
   # Sets an
-  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/X509/Certificate.html)
+  # [`OpenSSL::X509::Certificate`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/X509/Certificate.html)
   # object as client certificate. (This method is appeared in Michal Rokos's
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) extension).
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) extension).
   def cert=(cert); end
 
   # Sets the X509::Store to verify peer certificate.
@@ -1726,11 +1726,11 @@ class Net::HTTP < Net::Protocol
   def cert_store=(cert_store); end
 
   # Sets the available ciphers. See
-  # [`OpenSSL::SSL::SSLContext#ciphers=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-ciphers-3D)
+  # [`OpenSSL::SSL::SSLContext#ciphers=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-ciphers-3D)
   def ciphers(); end
 
   # Sets the available ciphers. See
-  # [`OpenSSL::SSL::SSLContext#ciphers=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-ciphers-3D)
+  # [`OpenSSL::SSL::SSLContext#ciphers=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-ciphers-3D)
   def ciphers=(ciphers); end
 
   def close_on_empty_response(); end
@@ -1738,13 +1738,13 @@ class Net::HTTP < Net::Protocol
   def close_on_empty_response=(close_on_empty_response); end
 
   # Seconds to wait for 100 Continue response. If the
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) object does not
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) object does not
   # receive a response in this many seconds it sends the request body. The
   # default value is `nil`.
   def continue_timeout(); end
 
   # Setter for the
-  # [`continue_timeout`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-continue_timeout)
+  # [`continue_timeout`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-continue_timeout)
   # attribute.
   def continue_timeout=(sec); end
 
@@ -1756,19 +1756,19 @@ class Net::HTTP < Net::Protocol
   # object.
   def delete(path, initheader=T.unsafe(nil)); end
 
-  # Finishes the [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html)
+  # Finishes the [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html)
   # session and closes the TCP connection. Raises
-  # [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html) if the session
+  # [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html) if the session
   # has not been started.
   def finish(); end
 
   # Retrieves data from `path` on the connected-to host which may be an absolute
-  # path [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or a
-  # [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) to extract the path
+  # path [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or a
+  # [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) to extract the path
   # from.
   #
   # `initheader` must be a
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) like { 'Accept' =>
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) like { 'Accept' =>
   # '**/**', ... }, and it defaults to an empty hash. If `initheader` doesn't
   # have the key 'accept-encoding', then a value of
   # "gzip;q=1.0,deflate;q=0.6,identity;q=0.3" is used, so that gzip compression
@@ -1780,7 +1780,7 @@ class Net::HTTP < Net::Protocol
   # confusion. Otherwise it leaves the body as it found it.
   #
   # This method returns a
-  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
+  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
   # object.
   #
   # If called with a block, yields each fragment of the entity body in turn as a
@@ -1804,15 +1804,15 @@ class Net::HTTP < Net::Protocol
   def get(path, initheader=T.unsafe(nil), dest=T.unsafe(nil), &block); end
 
   # Alias for:
-  # [`request_get`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-request_get)
+  # [`request_get`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-request_get)
   def get2(path, initheader=T.unsafe(nil), &block); end
 
   # Gets only the header from `path` on the connected-to host. `header` is a
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) like { 'Accept' =>
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) like { 'Accept' =>
   # '**/**', ... }.
   #
   # This method returns a
-  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
+  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
   # object.
   #
   # This method never raises an exception.
@@ -1827,7 +1827,7 @@ class Net::HTTP < Net::Protocol
   def head(path, initheader=T.unsafe(nil)); end
 
   # Alias for:
-  # [`request_head`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-request_head)
+  # [`request_head`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-request_head)
   def head2(path, initheader=T.unsafe(nil), &block); end
 
   def initialize(address, port=T.unsafe(nil)); end
@@ -1836,34 +1836,34 @@ class Net::HTTP < Net::Protocol
 
   # Seconds to reuse the connection of the previous request. If the idle time is
   # less than this Keep-Alive
-  # [`Timeout`](https://docs.ruby-lang.org/en/2.6.0/Timeout.html),
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) reuses the
+  # [`Timeout`](https://docs.ruby-lang.org/en/2.7.0/Timeout.html),
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) reuses the
   # TCP/IP socket used by the previous communication. The default value is 2
   # seconds.
   def keep_alive_timeout(); end
 
   # Seconds to reuse the connection of the previous request. If the idle time is
   # less than this Keep-Alive
-  # [`Timeout`](https://docs.ruby-lang.org/en/2.6.0/Timeout.html),
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) reuses the
+  # [`Timeout`](https://docs.ruby-lang.org/en/2.7.0/Timeout.html),
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) reuses the
   # TCP/IP socket used by the previous communication. The default value is 2
   # seconds.
   def keep_alive_timeout=(keep_alive_timeout); end
 
   # Sets an
-  # [`OpenSSL::PKey::RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html)
+  # [`OpenSSL::PKey::RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html)
   # or
-  # [`OpenSSL::PKey::DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html)
+  # [`OpenSSL::PKey::DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html)
   # object. (This method is appeared in Michal Rokos's
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) extension.)
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) extension.)
   def key(); end
 
   # Sets an
-  # [`OpenSSL::PKey::RSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/RSA.html)
+  # [`OpenSSL::PKey::RSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/RSA.html)
   # or
-  # [`OpenSSL::PKey::DSA`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/PKey/DSA.html)
+  # [`OpenSSL::PKey::DSA`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/PKey/DSA.html)
   # object. (This method is appeared in Michal Rokos's
-  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) extension.)
+  # [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) extension.)
   def key=(key); end
 
   # The local host used to establish the connection.
@@ -1892,17 +1892,17 @@ class Net::HTTP < Net::Protocol
 
   # Number of seconds to wait for the connection to open. Any number may be
   # used, including Floats for fractional seconds. If the
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) object cannot
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) object cannot
   # open a connection in this many seconds, it raises a
-  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
+  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html)
   # exception. The default value is 60 seconds.
   def open_timeout(); end
 
   # Number of seconds to wait for the connection to open. Any number may be
   # used, including Floats for fractional seconds. If the
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) object cannot
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) object cannot
   # open a connection in this many seconds, it raises a
-  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
+  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html)
   # exception. The default value is 60 seconds.
   def open_timeout=(open_timeout); end
 
@@ -1921,12 +1921,12 @@ class Net::HTTP < Net::Protocol
   def port(); end
 
   # Posts `data` (must be a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)) to `path`.
-  # `header` must be a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)) to `path`.
+  # `header` must be a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
   # like { 'Accept' => '**/**', ... }.
   #
   # This method returns a
-  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
+  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
   # object.
   #
   # If called with a block, yields each fragment of the entity body in turn as a
@@ -1954,7 +1954,7 @@ class Net::HTTP < Net::Protocol
   def post(path, data, initheader=T.unsafe(nil), dest=T.unsafe(nil), &block); end
 
   # Alias for:
-  # [`request_post`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-request_post)
+  # [`request_post`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-request_post)
   def post2(path, data, initheader=T.unsafe(nil), &block); end
 
   # Sends a PROPFIND request to the `path` and gets a response, as an
@@ -1992,11 +1992,11 @@ class Net::HTTP < Net::Protocol
   def proxy_user=(proxy_user); end
 
   # Alias for:
-  # [`proxy_address`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-proxy_address)
+  # [`proxy_address`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-proxy_address)
   def proxyaddr(); end
 
   # Alias for:
-  # [`proxy_port`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-proxy_port)
+  # [`proxy_port`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-proxy_port)
   def proxyport(); end
 
   def put(path, data, initheader=T.unsafe(nil)); end
@@ -2005,28 +2005,28 @@ class Net::HTTP < Net::Protocol
 
   # Number of seconds to wait for one block to be read (via one read(2) call).
   # Any number may be used, including Floats for fractional seconds. If the
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) object cannot
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) object cannot
   # read data in this many seconds, it raises a
-  # [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/ReadTimeout.html)
+  # [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/ReadTimeout.html)
   # exception. The default value is 60 seconds.
   def read_timeout(); end
 
   # Setter for the
-  # [`read_timeout`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-read_timeout)
+  # [`read_timeout`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-read_timeout)
   # attribute.
   def read_timeout=(sec); end
 
   # Sends an HTTPRequest object `req` to the
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) server.
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) server.
   #
   # If `req` is a
-  # [`Net::HTTP::Post`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Post.html)
-  # or [`Net::HTTP::Put`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Put.html)
+  # [`Net::HTTP::Post`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Post.html)
+  # or [`Net::HTTP::Put`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Put.html)
   # request containing data, the data is also sent. Providing data for a
-  # [`Net::HTTP::Head`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Head.html)
-  # or [`Net::HTTP::Get`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Get.html)
+  # [`Net::HTTP::Head`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Head.html)
+  # or [`Net::HTTP::Get`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Get.html)
   # request results in an
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html).
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html).
   #
   # Returns an HTTPResponse object.
   #
@@ -2038,7 +2038,7 @@ class Net::HTTP < Net::Protocol
   def request(req, body=T.unsafe(nil), &block); end
 
   # Sends a GET request to the `path`. Returns the response as a
-  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
+  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
   # object.
   #
   # When called with a block, passes an HTTPResponse object to the block. The
@@ -2066,11 +2066,11 @@ class Net::HTTP < Net::Protocol
   #
   #
   # Also aliased as:
-  # [`get2`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-get2)
+  # [`get2`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-get2)
   def request_get(path, initheader=T.unsafe(nil), &block); end
 
   # Sends a HEAD request to the `path` and returns the response as a
-  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
+  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
   # object.
   #
   # Returns the response.
@@ -2084,13 +2084,13 @@ class Net::HTTP < Net::Protocol
   #
   #
   # Also aliased as:
-  # [`head2`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-head2)
+  # [`head2`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-head2)
   def request_head(path, initheader=T.unsafe(nil), &block); end
 
   # Sends a POST request to the `path`.
   #
   # Returns the response as a
-  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
+  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
   # object.
   #
   # When called with a block, the block is passed an HTTPResponse object. The
@@ -2119,17 +2119,17 @@ class Net::HTTP < Net::Protocol
   #
   #
   # Also aliased as:
-  # [`post2`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-post2)
+  # [`post2`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-post2)
   def request_post(path, data, initheader=T.unsafe(nil), &block); end
 
   def request_put(path, data, initheader=T.unsafe(nil), &block); end
 
-  # Sends an [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) request
-  # to the [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) server.
+  # Sends an [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) request
+  # to the [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) server.
   # Also sends a DATA string if `data` is given.
   #
   # Returns a
-  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
+  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
   # object.
   #
   # This method never raises Net::\* exceptions.
@@ -2159,20 +2159,20 @@ class Net::HTTP < Net::Protocol
   def ssl_timeout=(ssl_timeout); end
 
   # Sets the SSL version. See
-  # [`OpenSSL::SSL::SSLContext#ssl_version=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-ssl_version-3D)
+  # [`OpenSSL::SSL::SSLContext#ssl_version=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-ssl_version-3D)
   def ssl_version(); end
 
   # Sets the SSL version. See
-  # [`OpenSSL::SSL::SSLContext#ssl_version=`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html#method-i-ssl_version-3D)
+  # [`OpenSSL::SSL::SSLContext#ssl_version=`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html#method-i-ssl_version-3D)
   def ssl_version=(ssl_version); end
 
   # Opens a TCP connection and
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) session.
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) session.
   #
   # When this method is called with a block, it passes the
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) object to
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) object to
   # the block, and closes the TCP connection and
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) session after
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) session after
   # the block has been executed.
   #
   # When called with a block, it returns the return value of the block;
@@ -2180,11 +2180,11 @@ class Net::HTTP < Net::Protocol
   def start(); end
 
   # Returns true if the
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) session has been
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) session has been
   # started.
   #
   # Also aliased as:
-  # [`active?`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-i-active-3F)
+  # [`active?`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-i-active-3F)
   def started?(); end
 
   # Sends a TRACE request to the `path` and gets a response, as an HTTPResponse
@@ -2199,12 +2199,12 @@ class Net::HTTP < Net::Protocol
 
   # Turn on/off SSL. This flag must be set before starting session. If you
   # change use\_ssl value after session started, a
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) object
-  # raises [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html).
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) object
+  # raises [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html).
   def use_ssl=(flag); end
 
   # Returns true if SSL/TLS is being used with
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html).
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html).
   def use_ssl?(); end
 
   # Sets the verify callback for the server certification verification.
@@ -2231,25 +2231,25 @@ class Net::HTTP < Net::Protocol
   # OpenSSL::SSL::VERIFY\_NONE or OpenSSL::SSL::VERIFY\_PEER are acceptable.
   def verify_mode=(verify_mode); end
 
-  # Creates an [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) proxy
+  # Creates an [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) proxy
   # class which behaves like
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html), but
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html), but
   # performs all access via the specified proxy.
   #
   # This class is obsolete. You may pass these same parameters directly to
-  # [`Net::HTTP.new`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-c-new).
+  # [`Net::HTTP.new`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-c-new).
   # See
-  # [`Net::HTTP.new`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-c-new)
+  # [`Net::HTTP.new`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-c-new)
   # for details of the arguments.
   def self.Proxy(p_addr=T.unsafe(nil), p_port=T.unsafe(nil), p_user=T.unsafe(nil), p_pass=T.unsafe(nil)); end
 
   # The default port to use for
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) requests;
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) requests;
   # defaults to 80.
   def self.default_port(); end
 
   # Sends a GET request to the target and returns the
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) response as a
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) response as a
   # string. The target can either be specified as (`uri`), or as (`host`,
   # `path`, `port` = 80); so:
   #
@@ -2279,8 +2279,8 @@ class Net::HTTP < Net::Protocol
   def self.get_print(uri_or_host, path=T.unsafe(nil), port=T.unsafe(nil)); end
 
   # Sends a GET request to the target and returns the
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) response as a
-  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) response as a
+  # [`Net::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
   # object. The target can either be specified as (`uri`), or as (`host`,
   # `path`, `port` = 80); so:
   #
@@ -2298,7 +2298,7 @@ class Net::HTTP < Net::Protocol
   def self.get_response(uri_or_host, path=T.unsafe(nil), port=T.unsafe(nil), &block); end
 
   # The default port to use for
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) requests;
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) requests;
   # defaults to 80.
   def self.http_default_port(); end
 
@@ -2308,22 +2308,22 @@ class Net::HTTP < Net::Protocol
   def self.is_version_1_1?(); end
 
   # Alias for:
-  # [`version_1_2?`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-c-version_1_2-3F)
+  # [`version_1_2?`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-c-version_1_2-3F)
   def self.is_version_1_2?(); end
 
   # Creates a new
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) object for
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) object for
   # the specified server address, without opening the TCP connection or
-  # initializing the [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html)
+  # initializing the [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html)
   # session. The `address` should be a DNS hostname or IP address.
   def self.new(address, port=T.unsafe(nil), p_addr=T.unsafe(nil), p_port=T.unsafe(nil), p_user=T.unsafe(nil), p_pass=T.unsafe(nil)); end
 
   # Alias for:
-  # [`new`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-c-new)
+  # [`new`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-c-new)
   def self.newobj(*_); end
 
   # Posts data to the specified
-  # [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) object.
+  # [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) object.
   #
   # Example:
   #
@@ -2338,11 +2338,11 @@ class Net::HTTP < Net::Protocol
   def self.post(url, data, header=T.unsafe(nil)); end
 
   # Posts HTML form data to the specified
-  # [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) object. The form data
+  # [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) object. The form data
   # must be provided as a
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) mapping from
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) to
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). Example:
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) mapping from
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) to
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). Example:
   #
   # ```ruby
   # { "cmd" => "search", "q" => "ruby", "max" => "50" }
@@ -2364,7 +2364,7 @@ class Net::HTTP < Net::Protocol
   def self.post_form(url, params); end
 
   # Address of proxy host. If
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) does not
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) does not
   # use a proxy, nil.
   def self.proxy_address(); end
 
@@ -2372,26 +2372,26 @@ class Net::HTTP < Net::Protocol
   def self.proxy_class?(); end
 
   # User password for accessing proxy. If
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) does not
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) does not
   # use a proxy, nil.
   def self.proxy_pass(); end
 
   # Port number of proxy host. If
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) does not
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) does not
   # use a proxy, nil.
   def self.proxy_port(); end
 
   # User name for accessing proxy. If
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) does not
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) does not
   # use a proxy, nil.
   def self.proxy_user(); end
 
   def self.socket_type(); end
 
   # Creates a new
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) object,
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) object,
   # then additionally opens the TCP connection and
-  # [`HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) session.
+  # [`HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) session.
   #
   # Arguments are the following:
   # *address*
@@ -2410,33 +2410,33 @@ class Net::HTTP < Net::Protocol
   # :   optional hash
   #
   #
-  # *opt* sets following values by its accessor. The keys are
-  # [`ca_file`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-ca_file),
-  # [`ca_path`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-ca_path),
+  # *opt* sets following values by its accessor. The keys are ipaddr,
+  # [`ca_file`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-ca_file),
+  # [`ca_path`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-ca_path),
   # cert,
-  # [`cert_store`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-cert_store),
+  # [`cert_store`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-cert_store),
   # ciphers,
-  # [`close_on_empty_response`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-close_on_empty_response),
+  # [`close_on_empty_response`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-close_on_empty_response),
   # key,
-  # [`open_timeout`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-open_timeout),
-  # [`read_timeout`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-read_timeout),
-  # [`write_timeout`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-write_timeout),
-  # [`ssl_timeout`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-ssl_timeout),
-  # [`ssl_version`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-ssl_version),
+  # [`open_timeout`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-open_timeout),
+  # [`read_timeout`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-read_timeout),
+  # [`write_timeout`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-write_timeout),
+  # [`ssl_timeout`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-ssl_timeout),
+  # [`ssl_version`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-ssl_version),
   # use\_ssl,
-  # [`verify_callback`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-verify_callback),
-  # [`verify_depth`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-verify_depth)
+  # [`verify_callback`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-verify_callback),
+  # [`verify_depth`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-verify_depth)
   # and verify\_mode. If you set :use\_ssl as true, you can use https and
   # default value of
-  # [`verify_mode`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#attribute-i-verify_mode)
+  # [`verify_mode`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#attribute-i-verify_mode)
   # is set as OpenSSL::SSL::VERIFY\_PEER.
   #
   # If the optional block is given, the newly created
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) object is
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) object is
   # passed to it and closed when the block finishes. In this case, the return
   # value of this method is the return value of the block. If no block is given,
   # the return value of this method is the newly created
-  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) object
+  # [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) object
   # itself, and the caller is responsible for closing it upon completion using
   # the finish() method.
   def self.start(address, *arg, &block); end
@@ -2450,12 +2450,12 @@ class Net::HTTP < Net::Protocol
   # Returns true if net/http is in version 1.2 mode. Defaults to true.
   #
   # Also aliased as:
-  # [`is_version_1_2?`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html#method-c-is_version_1_2-3F)
+  # [`is_version_1_2?`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html#method-c-is_version_1_2-3F)
   def self.version_1_2?(); end
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods.
 class Net::HTTP::Copy < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2465,9 +2465,9 @@ class Net::HTTP::Copy < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods. See
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) for usage
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) for usage
 # examples.
 class Net::HTTP::Delete < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2493,9 +2493,9 @@ class Net::HTTP::DigestAuth::Error < RuntimeError
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods. See
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) for usage
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) for usage
 # examples.
 class Net::HTTP::Get < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2504,9 +2504,9 @@ class Net::HTTP::Get < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods. See
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) for usage
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) for usage
 # examples.
 class Net::HTTP::Head < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2515,7 +2515,7 @@ class Net::HTTP::Head < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods.
 class Net::HTTP::Lock < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2524,7 +2524,7 @@ class Net::HTTP::Lock < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods.
 class Net::HTTP::Mkcol < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2533,7 +2533,7 @@ class Net::HTTP::Mkcol < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods.
 class Net::HTTP::Move < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2542,7 +2542,7 @@ class Net::HTTP::Move < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods.
 class Net::HTTP::Options < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2551,7 +2551,7 @@ class Net::HTTP::Options < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods.
 class Net::HTTP::Patch < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2560,9 +2560,9 @@ class Net::HTTP::Patch < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods. See
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) for usage
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) for usage
 # examples.
 class Net::HTTP::Post < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2571,7 +2571,7 @@ class Net::HTTP::Post < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods.
 class Net::HTTP::Propfind < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2580,7 +2580,7 @@ class Net::HTTP::Propfind < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods.
 class Net::HTTP::Proppatch < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2592,9 +2592,9 @@ module Net::HTTP::ProxyDelta
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods. See
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) for usage
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) for usage
 # examples.
 class Net::HTTP::Put < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2604,7 +2604,7 @@ class Net::HTTP::Put < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods.
 class Net::HTTP::Trace < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2613,7 +2613,7 @@ class Net::HTTP::Trace < Net::HTTPRequest
 end
 
 # See
-# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
+# [`Net::HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
 # for attributes and methods.
 class Net::HTTP::Unlock < Net::HTTPRequest
   METHOD = ::T.unsafe(nil)
@@ -2657,9 +2657,9 @@ class Net::HTTPError < Net::ProtocolError
   include ::Net::HTTPExceptions
 end
 
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html) exception
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html) exception
 # class. You cannot use
-# [`Net::HTTPExceptions`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPExceptions.html)
+# [`Net::HTTPExceptions`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPExceptions.html)
 # directly; instead, you must use its subclasses.
 module Net::HTTPExceptions
   def data(); end
@@ -2695,11 +2695,15 @@ end
 
 Net::HTTPGatewayTimeOut = Net::HTTPGatewayTimeout
 
-# [`HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPGenericRequest.html)
-# is the parent of the HTTPRequest class. Do not use this directly; use a
-# subclass of HTTPRequest.
+# [`HTTPGenericRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPGenericRequest.html)
+# is the parent of the
+# [`Net::HTTPRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPRequest.html)
+# class. Do not use this directly; use a subclass of
+# [`Net::HTTPRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPRequest.html).
 #
-# Mixes in the HTTPHeader module to provide easier access to HTTP headers.
+# Mixes in the
+# [`Net::HTTPHeader`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html)
+# module to provide easier access to HTTP headers.
 class Net::HTTPGenericRequest
   include ::Net::HTTPHeader
   def []=(key, val); end
@@ -2751,12 +2755,12 @@ class Net::HTTPGone < Net::HTTPClientError
   HAS_BODY = ::T.unsafe(nil)
 end
 
-# The [`HTTPHeader`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html)
+# The [`HTTPHeader`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html)
 # module defines methods for reading and writing HTTP headers.
 #
 # It is used as a mixin by other classes, to provide hash-like access to HTTP
 # header values. Unlike raw hash access,
-# [`HTTPHeader`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html)
+# [`HTTPHeader`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html)
 # provides access via case-insensitive keys. It also provides methods for
 # accessing commonly-used HTTP header values in more convenient formats.
 module Net::HTTPHeader
@@ -2770,11 +2774,11 @@ module Net::HTTPHeader
   # Ruby 1.8.3
   # :   Adds a value to a named header field, instead of replacing its value.
   #     Second argument `val` must be a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). See also
-  #     [`[]=`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-5B-5D-3D),
-  #     [`[]`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-5B-5D)
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). See also
+  #     [`[]=`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-5B-5D-3D),
+  #     [`[]`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-5B-5D)
   #     and
-  #     [`get_fields`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-get_fields).
+  #     [`get_fields`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-get_fields).
   #
   # ```ruby
   # request.add_field 'X-My-Header', 'a'
@@ -2789,31 +2793,31 @@ module Net::HTTPHeader
   # ```
   def add_field(key, val); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the Authorization:
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the Authorization:
   # header for "Basic" authorization.
   def basic_auth(account, password); end
 
   # Alias for:
-  # [`each_capitalized`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-each_capitalized)
+  # [`each_capitalized`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-each_capitalized)
   def canonical_each(); end
 
   # Returns "true" if the "transfer-encoding" header is present and set to
-  # "chunked". This is an HTTP/1.1 feature, allowing the the content to be sent
-  # in "chunks" without at the outset stating the entire content length.
+  # "chunked". This is an HTTP/1.1 feature, allowing the content to be sent in
+  # "chunks" without at the outset stating the entire content length.
   def chunked?(); end
 
   def connection_close?(); end
 
   def connection_keep_alive?(); end
 
-  # Returns an [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html)
+  # Returns an [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html)
   # object which represents the HTTP Content-Length: header field, or `nil` if
   # that field was not provided.
   def content_length(); end
 
   def content_length=(len); end
 
-  # Returns a [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) object
+  # Returns a [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html) object
   # which represents the value of the Content-Range: header field. For a partial
   # entity body, this indicates where this fragment fits inside the full entity
   # body, as range of byte offsets.
@@ -2824,18 +2828,18 @@ module Net::HTTPHeader
   def content_type(); end
 
   # Alias for:
-  # [`set_content_type`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-set_content_type)
+  # [`set_content_type`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-set_content_type)
   def content_type=(type, params=T.unsafe(nil)); end
 
   # Removes a header field, specified by case-insensitive key.
   def delete(key); end
 
   # Alias for:
-  # [`each_header`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-each_header)
+  # [`each_header`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-each_header)
   def each(); end
 
   # As for
-  # [`each_header`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-each_header),
+  # [`each_header`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-each_header),
   # except the keys are provided in capitalized form.
   #
   # Note that header names are capitalized systematically; capitalization may
@@ -2844,7 +2848,7 @@ module Net::HTTPHeader
   # Returns an enumerator if no block is given.
   #
   # Also aliased as:
-  # [`canonical_each`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-canonical_each)
+  # [`canonical_each`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-canonical_each)
   def each_capitalized(); end
 
   # Iterates through the header names in the header, passing capitalized header
@@ -2869,11 +2873,11 @@ module Net::HTTPHeader
   #
   #
   # Also aliased as:
-  # [`each`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-each)
+  # [`each`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-each)
   def each_header(); end
 
   # Alias for:
-  # [`each_name`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-each_name)
+  # [`each_name`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-each_name)
   def each_key(&block); end
 
   # Iterates through the header names in the header, passing each header name to
@@ -2882,7 +2886,7 @@ module Net::HTTPHeader
   # Returns an enumerator if no block is given.
   #
   # Also aliased as:
-  # [`each_key`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-each_key)
+  # [`each_key`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-each_key)
   def each_name(&block); end
 
   # Iterates through header values, passing each value to the code block.
@@ -2892,20 +2896,20 @@ module Net::HTTPHeader
 
   # Returns the header field corresponding to the case-insensitive key. Returns
   # the default value `args`, or the result of the block, or raises an
-  # [`IndexError`](https://docs.ruby-lang.org/en/2.6.0/IndexError.html) if
+  # [`IndexError`](https://docs.ruby-lang.org/en/2.7.0/IndexError.html) if
   # there's no header field named `key` See
-  # [`Hash#fetch`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-fetch)
+  # [`Hash#fetch`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-fetch)
   def fetch(key, *args, &block); end
 
   # Alias for:
-  # [`set_form_data`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-set_form_data)
+  # [`set_form_data`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-set_form_data)
   def form_data=(params, sep=T.unsafe(nil)); end
 
   # Ruby 1.8.3
   # :   Returns an array of header field strings corresponding to the
   #     case-insensitive `key`. This method allows you to get duplicated header
   #     fields without any processing. See also
-  #     [`[]`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-5B-5D).
+  #     [`[]`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-5B-5D).
   #
   # ```
   # p response.get_fields('Set-Cookie')
@@ -2927,17 +2931,17 @@ module Net::HTTPHeader
   # Content-Type: header field does not exist.
   def main_type(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) Proxy-Authorization:
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) Proxy-Authorization:
   # header for "Basic" authorization.
   def proxy_basic_auth(account, password); end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
-  # [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) objects which
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
+  # [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html) objects which
   # represent the Range: HTTP header field, or `nil` if there is no such header.
   def range(); end
 
   # Alias for:
-  # [`set_range`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-set_range)
+  # [`set_range`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-set_range)
   def range=(r, e=T.unsafe(nil)); end
 
   # The length of the range represented in Content-Range: header.
@@ -2945,17 +2949,17 @@ module Net::HTTPHeader
 
   # Sets the content type in an HTTP header. The `type` should be a full HTTP
   # content type, e.g. "text/html". The `params` are an optional
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of parameters to add
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of parameters to add
   # after the content type, e.g. {'charset' => 'iso-8859-1'}
   #
   # Also aliased as:
-  # [`content_type=`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-content_type-3D)
+  # [`content_type=`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-content_type-3D)
   def set_content_type(type, params=T.unsafe(nil)); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) an HTML form data set.
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) an HTML form data set.
   # `params` is the form data set; it is an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Arrays or a
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) +enctype is the type
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Arrays or a
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) +enctype is the type
   # to encode the form data set. It is application/x-www-form-urlencoded or
   # multipart/form-data. `formopt` is an optional hash to specify the detail.
   #
@@ -2971,14 +2975,14 @@ module Net::HTTPHeader
   # :   the name of the field
   # `value`
   # :   the value of the field, it should be a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or a
-  #     [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html)
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or a
+  #     [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html)
   # `opt`
   # :   an optional hash to specify additional information
   #
   #
   # Each item is a file field or a normal field. If `value` is a
-  # [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) object or the `opt`
+  # [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) object or the `opt`
   # have a filename key, the item is treated as a file field.
   #
   # If Transfer-Encoding is set as chunked, this send the request in chunked
@@ -2994,10 +2998,10 @@ module Net::HTTPHeader
   # See also RFC 2388, RFC 2616, HTML 4.01, and HTML5
   def set_form(params, enctype=T.unsafe(nil), formopt=T.unsafe(nil)); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) header fields and a
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) header fields and a
   # body from HTML form data. `params` should be an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Arrays or a
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) containing HTML form
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Arrays or a
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) containing HTML form
   # data. Optional argument `sep` means data record separator.
   #
   # Values are URL encoded as necessary and the content-type is set to
@@ -3013,11 +3017,11 @@ module Net::HTTPHeader
   #
   #
   # Also aliased as:
-  # [`form_data=`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-form_data-3D)
+  # [`form_data=`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-form_data-3D)
   def set_form_data(params, sep=T.unsafe(nil)); end
 
   # Sets the HTTP Range: header. Accepts either a
-  # [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) object as a single
+  # [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html) object as a single
   # argument, or a beginning index and a length from that index. Example:
   #
   # ```ruby
@@ -3027,7 +3031,7 @@ module Net::HTTPHeader
   #
   #
   # Also aliased as:
-  # [`range=`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-range-3D)
+  # [`range=`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-range-3D)
   def set_range(r, e=T.unsafe(nil)); end
 
   def size(); end
@@ -3037,7 +3041,7 @@ module Net::HTTPHeader
   # "Content-Type: text").
   def sub_type(); end
 
-  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) consisting
+  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) consisting
   # of header names and array of values. e.g. {"cache-control" => ["private"],
   #
   # ```
@@ -3047,9 +3051,9 @@ module Net::HTTPHeader
   def to_hash(); end
 
   # Any parameters specified for the content type, returned as a
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html). For example, a
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html). For example, a
   # header of Content-Type: text/html; charset=EUC-JP would result in
-  # [`type_params`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPHeader.html#method-i-type_params)
+  # [`type_params`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPHeader.html#method-i-type_params)
   # returning {'charset' => 'EUC-JP'}
   def type_params(); end
 end
@@ -3162,9 +3166,9 @@ end
 # HTTP request class. This class wraps together the request header and the
 # request path. You cannot use this class directly. Instead, you should use one
 # of its subclasses:
-# [`Net::HTTP::Get`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Get.html),
-# [`Net::HTTP::Post`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Post.html),
-# [`Net::HTTP::Head`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP/Head.html).
+# [`Net::HTTP::Get`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Get.html),
+# [`Net::HTTP::Post`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Post.html),
+# [`Net::HTTP::Head`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP/Head.html).
 class Net::HTTPRequest < Net::HTTPGenericRequest
   def initialize(path, initheader=T.unsafe(nil)); end
 end
@@ -3204,13 +3208,19 @@ end
 # values both via hash-like methods and via individual readers.
 #
 # Note that each possible HTTP response code defines its own
-# [`HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
-# subclass. These are listed below.
-#
-# All classes are defined under the
-# [`Net`](https://docs.ruby-lang.org/en/2.6.0/Net.html) module. Indentation
+# [`HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
+# subclass. All classes are defined under the
+# [`Net`](https://docs.ruby-lang.org/en/2.7.0/Net.html) module. Indentation
 # indicates inheritance. For a list of the classes see
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html).
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html).
+#
+# Correspondence `HTTP code => class` is stored in
+# [`CODE_TO_OBJ`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html#CODE_TO_OBJ)
+# constant:
+#
+# ```ruby
+# Net::HTTPResponse::CODE_TO_OBJ['404'] #=> Net::HTTPNotFound
+# ```
 class Net::HTTPResponse
   include ::Net::HTTPHeader
   CODE_CLASS_TO_OBJ = ::T.unsafe(nil)
@@ -3234,7 +3244,7 @@ class Net::HTTPResponse
   #
   #
   # Also aliased as:
-  # [`entity`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html#method-i-entity)
+  # [`entity`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html#method-i-entity)
   def body(); end
 
   # Because it may be necessary to modify the body, Eg, decompression this
@@ -3248,16 +3258,16 @@ class Net::HTTPResponse
 
   def code_type(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) to true automatically
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) to true automatically
   # when the request did not contain an Accept-Encoding header from the user.
   def decode_content(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) to true automatically
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) to true automatically
   # when the request did not contain an Accept-Encoding header from the user.
   def decode_content=(decode_content); end
 
   # Alias for:
-  # [`body`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html#method-i-body)
+  # [`body`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html#method-i-body)
   def entity(); end
 
   def error!(); end
@@ -3284,8 +3294,14 @@ class Net::HTTPResponse
   # If a block is given, the body is passed to the block, and the body is
   # provided in fragments, as it is read in from the socket.
   #
+  # If `dest` argument is given, response is read into that variable, with
+  # `dest#<<` method (it could be
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html), or any other object
+  # responding to `<<`).
+  #
   # Calling this method a second or subsequent time for the same
-  # [`HTTPResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTPResponse.html)
+  # [`HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTPResponse.html)
   # object will return the value already read.
   #
   # ```ruby
@@ -3313,15 +3329,15 @@ class Net::HTTPResponse
 
   def response(); end
 
-  # The [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) used to fetch this
-  # response. The response [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
-  # is only available if a [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
+  # The [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) used to fetch this
+  # response. The response [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html)
+  # is only available if a [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html)
   # was used to create the request.
   def uri(); end
 
-  # The [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) used to fetch this
-  # response. The response [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
-  # is only available if a [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)
+  # The [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) used to fetch this
+  # response. The response [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html)
+  # is only available if a [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html)
   # was used to create the request.
   def uri=(uri); end
 
@@ -3363,6 +3379,7 @@ end
 class Net::HTTPServerException < Net::ProtoServerError
   include ::Net::HTTPExceptions
 end
+# for compatibility
 Net::HTTPClientException = Net::HTTPServerException
 
 class Net::HTTPServiceUnavailable < Net::HTTPServerError
@@ -3420,17 +3437,18 @@ class Net::HTTPVersionNotSupported < Net::HTTPServerError
   HAS_BODY = ::T.unsafe(nil)
 end
 
-# [`Net::IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) implements
-# Internet Message Access Protocol (IMAP) client functionality. The protocol is
-# described in [IMAP].
+# [`Net::IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) implements
+# Internet Message Access Protocol
+# ([`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html)) client
+# functionality. The protocol is described in [IMAP].
 #
-# ## [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) Overview
+# ## [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) Overview
 #
-# An [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) client connects
+# An [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) client connects
 # to a server, and then authenticates itself using either
-# [`authenticate()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-authenticate)
+# [`authenticate()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-authenticate)
 # or
-# [`login()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-login).
+# [`login()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-login).
 # Having authenticated itself, there is a range of commands available to it.
 # Most work with mailboxes, which may be arranged in an hierarchical namespace,
 # and each of which contains zero or more messages. How this is implemented on
@@ -3439,9 +3457,9 @@ end
 #
 # To work on the messages within a mailbox, the client must first select that
 # mailbox, using either
-# [`select()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-select)
+# [`select()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-select)
 # or (for read-only access)
-# [`examine()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-examine).
+# [`examine()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-examine).
 # Once the client has successfully selected a mailbox, they enter *selected*
 # state, and that mailbox becomes the *current* mailbox, on which mail-item
 # related commands implicitly operate.
@@ -3459,7 +3477,7 @@ end
 # are required to be assigned in ascending (but not necessarily sequential)
 # order within a mailbox; this means that if a non-IMAP client rearranges the
 # order of mailitems within a mailbox, the UIDs have to be reassigned. An
-# [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) client thus cannot
+# [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) client thus cannot
 # rearrange message orders.
 #
 # ## Examples of Usage
@@ -3492,9 +3510,9 @@ end
 # imap.expunge
 # ```
 #
-# ## [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html) Safety
+# ## [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) Safety
 #
-# [`Net::IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) supports
+# [`Net::IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) supports
 # concurrent threads. For example,
 #
 # ```ruby
@@ -3511,7 +3529,7 @@ end
 #
 # ## Errors
 #
-# An [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) server can send
+# An [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) server can send
 # three different types of responses to indicate failure:
 #
 # NO
@@ -3521,7 +3539,7 @@ end
 #
 # BAD
 # :   the request from the client does not follow the server's understanding of
-#     the [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) protocol.
+#     the [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) protocol.
 #     This includes attempting commands from the wrong client state; for
 #     instance, attempting to perform a SEARCH command without having SELECTed a
 #     current mailbox. It can also signal an internal server failure (such as a
@@ -3537,30 +3555,30 @@ end
 #
 #
 # These three error response are represented by the errors
-# [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html),
-# [`Net::IMAP::BadResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BadResponseError.html),
+# [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html),
+# [`Net::IMAP::BadResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BadResponseError.html),
 # and
-# [`Net::IMAP::ByeResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/ByeResponseError.html),
+# [`Net::IMAP::ByeResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/ByeResponseError.html),
 # all of which are subclasses of
-# [`Net::IMAP::ResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/ResponseError.html).
+# [`Net::IMAP::ResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/ResponseError.html).
 # Essentially, all methods that involve sending a request to the server can
 # generate one of these errors. Only the most pertinent instances have been
 # documented below.
 #
-# Because the [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) class
+# Because the [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) class
 # uses Sockets for communication, its methods are also susceptible to the
 # various errors that can occur when working with sockets. These are generally
-# represented as [`Errno`](https://docs.ruby-lang.org/en/2.6.0/Errno.html)
+# represented as [`Errno`](https://docs.ruby-lang.org/en/2.7.0/Errno.html)
 # errors. For instance, any method that involves sending a request to the server
 # and/or receiving a response from it could raise an Errno::EPIPE error if the
 # network connection unexpectedly goes down. See the socket(7), ip(7), tcp(7),
 # socket(2), connect(2), and associated man pages.
 #
 # Finally, a
-# [`Net::IMAP::DataFormatError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/DataFormatError.html)
+# [`Net::IMAP::DataFormatError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/DataFormatError.html)
 # is thrown if low-level data is found to be in an incorrect format (for
 # instance, when converting between UTF-8 and UTF-16), and
-# [`Net::IMAP::ResponseParseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/ResponseParseError.html)
+# [`Net::IMAP::ResponseParseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/ResponseParseError.html)
 # is thrown if a server response is non-parseable.
 #
 # ## References
@@ -3590,7 +3608,7 @@ end
 # :   Myers, J., "IMAP4 QUOTA extension", RFC 2087, January 1997.
 #
 # [RFC-2086]
-# :   Myers, J., "IMAP4 [`ACL`](https://docs.ruby-lang.org/en/2.6.0/ACL.html)
+# :   Myers, J., "IMAP4 [`ACL`](https://docs.ruby-lang.org/en/2.7.0/ACL.html)
 #     extension", RFC 2086, January 1997.
 #
 # [RFC-2195]
@@ -3671,7 +3689,7 @@ class Net::IMAP < Net::Protocol
   # ```
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if the mailbox does not exist (it is not created automatically),
   # or if the flags, date\_time, or message arguments contain errors.
   def append(mailbox, message, flags=T.unsafe(nil), date_time=T.unsafe(nil)); end
@@ -3679,7 +3697,7 @@ class Net::IMAP < Net::Protocol
   # Sends an AUTHENTICATE command to authenticate the client. The `auth_type`
   # parameter is a string that represents the authentication mechanism to be
   # used. Currently
-  # [`Net::IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) supports
+  # [`Net::IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) supports
   # the authentication mechanisms:
   #
   # ```
@@ -3693,7 +3711,7 @@ class Net::IMAP < Net::Protocol
   # For both of these mechanisms, there should be two `args`: username and
   # (cleartext) password. A server may not support one or the other of these
   # mechanisms; check
-  # [`capability()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-capability)
+  # [`capability()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-capability)
   # for a capability of the form "AUTH=LOGIN" or "AUTH=CRAM-MD5".
   #
   # Authentication is done using the appropriate authenticator object: see
@@ -3706,7 +3724,7 @@ class Net::IMAP < Net::Protocol
   # ```
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if authentication fails.
   def authenticate(auth_type, *args); end
 
@@ -3715,7 +3733,7 @@ class Net::IMAP < Net::Protocol
   # possible capabilities.
   #
   # Note that the
-  # [`Net::IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) class does
+  # [`Net::IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) class does
   # not modify its behaviour according to the capabilities of the server; it is
   # up to the user of the class to ensure that a certain capability is supported
   # by a server before using it.
@@ -3739,21 +3757,21 @@ class Net::IMAP < Net::Protocol
 
   # Sends a COPY command to copy the specified message(s) to the end of the
   # specified destination `mailbox`. The `set` parameter is a number, an array
-  # of numbers, or a [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html)
+  # of numbers, or a [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html)
   # object. The number is a message sequence number.
   def copy(set, mailbox); end
 
   # Sends a CREATE command to create a new `mailbox`.
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if a mailbox with that name cannot be created.
   def create(mailbox); end
 
   # Sends a DELETE command to remove the `mailbox`.
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if a mailbox with that name cannot be deleted, either because it
   # does not exist or because the client does not have permission to delete it.
   def delete(mailbox); end
@@ -3766,11 +3784,11 @@ class Net::IMAP < Net::Protocol
 
   # Sends a EXAMINE command to select a `mailbox` so that messages in the
   # `mailbox` can be accessed. Behaves the same as
-  # [`select()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-select),
+  # [`select()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-select),
   # except that the selected `mailbox` is identified as read-only.
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if the mailbox does not exist or is for some reason
   # non-examinable.
   def examine(mailbox); end
@@ -3786,17 +3804,17 @@ class Net::IMAP < Net::Protocol
   # of those. The number is a message sequence number, where -1 represents a
   # '\*' for use in range notation like 100..-1 being interpreted as '100:\*'.
   # Beware that the `exclude_end?` property of a
-  # [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) object is ignored,
+  # [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html) object is ignored,
   # and the contents of a range are independent of the order of the range
   # endpoints as per the protocol specification, so 1...5, 5..1 and 5...1 are
   # all equivalent to 1..5.
   #
   # `attr` is a list of attributes to fetch; see the documentation for
-  # [`Net::IMAP::FetchData`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#FetchData)
+  # [`Net::IMAP::FetchData`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#FetchData)
   # for a list of valid attributes.
   #
   # The return value is an array of
-  # [`Net::IMAP::FetchData`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#FetchData)
+  # [`Net::IMAP::FetchData`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#FetchData)
   # or nil (instead of an empty array) if there is no matching message.
   #
   # For example:
@@ -3822,13 +3840,13 @@ class Net::IMAP < Net::Protocol
 
   # Send the GETACL command along with a specified `mailbox`. If this mailbox
   # exists, an array containing objects of
-  # [`Net::IMAP::MailboxACLItem`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#MailboxACLItem)
+  # [`Net::IMAP::MailboxACLItem`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxACLItem)
   # will be returned.
   def getacl(mailbox); end
 
   # Sends the GETQUOTA command along with specified `mailbox`. If this mailbox
   # exists, then an array containing a
-  # [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#MailboxQuota)
+  # [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuota)
   # object is returned. This command is generally only available to server
   # admin.
   def getquota(mailbox); end
@@ -3836,9 +3854,9 @@ class Net::IMAP < Net::Protocol
   # Sends the GETQUOTAROOT command along with the specified `mailbox`. This
   # command is generally available to both admin and user. If this mailbox
   # exists, it returns an array containing objects of type
-  # [`Net::IMAP::MailboxQuotaRoot`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#MailboxQuotaRoot)
+  # [`Net::IMAP::MailboxQuotaRoot`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuotaRoot)
   # and
-  # [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#MailboxQuota).
+  # [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuota).
   def getquotaroot(mailbox); end
 
   # Returns an initial greeting response from the server.
@@ -3848,7 +3866,7 @@ class Net::IMAP < Net::Protocol
   # messages. Yields responses from the server during the IDLE.
   #
   # Use
-  # [`idle_done()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-idle_done)
+  # [`idle_done()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-idle_done)
   # to leave IDLE.
   #
   # If `timeout` is given, this method returns after `timeout` seconds passed.
@@ -3896,13 +3914,13 @@ class Net::IMAP < Net::Protocol
 
   # Sends a LOGIN command to identify the client and carries the plaintext
   # `password` authenticating this `user`. Note that, unlike calling
-  # [`authenticate()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-authenticate)
+  # [`authenticate()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-authenticate)
   # with an `auth_type` of "LOGIN",
-  # [`login()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-login)
+  # [`login()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-login)
   # does **not** use the login authenticator.
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if authentication fails.
   def login(user, password); end
 
@@ -3913,15 +3931,15 @@ class Net::IMAP < Net::Protocol
   # Sends a LSUB command, and returns a subset of names from the set of names
   # that the user has declared as being "active" or "subscribed."  `refname` and
   # `mailbox` are interpreted as for
-  # [`list()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-list).
+  # [`list()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-list).
   # The return value is an array of `Net::IMAP::MailboxList`.
   def lsub(refname, mailbox); end
 
   # Sends a MOVE command to move the specified message(s) to the end of the
   # specified destination `mailbox`. The `set` parameter is a number, an array
-  # of numbers, or a [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html)
+  # of numbers, or a [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html)
   # object. The number is a message sequence number. The
-  # [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) MOVE extension
+  # [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) MOVE extension
   # is described in [RFC-6851].
   def move(set, mailbox); end
 
@@ -3934,7 +3952,7 @@ class Net::IMAP < Net::Protocol
   # Sends a RENAME command to change the name of the `mailbox` to `newname`.
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if a mailbox with the name `mailbox` cannot be renamed to
   # `newname` for whatever reason; for instance, because `mailbox` does not
   # exist, or because there is already a mailbox with the name `newname`.
@@ -4015,11 +4033,11 @@ class Net::IMAP < Net::Protocol
   # that mailbox from @[responses]("EXISTS")[-1], and the number of recent
   # messages from @[responses]("RECENT")[-1]. Note that these values can change
   # if new messages arrive during a session; see
-  # [`add_response_handler()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-add_response_handler)
+  # [`add_response_handler()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-add_response_handler)
   # for a way of detecting this event.
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if the mailbox does not exist or is for some reason
   # non-selectable.
   def select(mailbox); end
@@ -4027,15 +4045,15 @@ class Net::IMAP < Net::Protocol
   # Sends the SETACL command along with `mailbox`, `user` and the `rights` that
   # user is to have on that mailbox. If `rights` is nil, then that user will be
   # stripped of any rights to that mailbox. The
-  # [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html)
-  # [`ACL`](https://docs.ruby-lang.org/en/2.6.0/ACL.html) commands are described
+  # [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html)
+  # [`ACL`](https://docs.ruby-lang.org/en/2.7.0/ACL.html) commands are described
   # in [RFC-2086].
   def setacl(mailbox, user, rights); end
 
   # Sends a SETQUOTA command along with the specified `mailbox` and `quota`. If
   # `quota` is nil, then `quota` will be unset for that mailbox. Typically one
   # needs to be logged in as a server admin for this to work. The
-  # [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) quota commands
+  # [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) quota commands
   # are described in [RFC-2087].
   def setquota(mailbox, quota); end
 
@@ -4073,21 +4091,21 @@ class Net::IMAP < Net::Protocol
   # ```
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if status values for `mailbox` cannot be returned; for instance,
   # because it does not exist.
   def status(mailbox, attr); end
 
   # Sends a STORE command to alter data associated with messages in the mailbox,
   # in particular their flags. The `set` parameter is a number, an array of
-  # numbers, or a [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html)
+  # numbers, or a [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html)
   # object. Each number is a message sequence number. `attr` is the name of a
   # data item to store: 'FLAGS' will replace the message's flag list with the
   # provided one, '+FLAGS' will add the provided flags, and '-FLAGS' will remove
   # them. `flags` is a list of flags.
   #
   # The return value is an array of
-  # [`Net::IMAP::FetchData`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#FetchData).
+  # [`Net::IMAP::FetchData`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#FetchData).
   # For example:
   #
   # ```ruby
@@ -4100,18 +4118,18 @@ class Net::IMAP < Net::Protocol
 
   # Sends a SUBSCRIBE command to add the specified `mailbox` name to the
   # server's set of "active" or "subscribed" mailboxes as returned by
-  # [`lsub()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-lsub).
+  # [`lsub()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-lsub).
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if `mailbox` cannot be subscribed to; for instance, because it
   # does not exist.
   def subscribe(mailbox); end
 
   # Similar to
-  # [`search()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-search),
+  # [`search()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-search),
   # but returns message sequence numbers in threaded format, as a
-  # [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#ThreadMember)
+  # [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ThreadMember)
   # tree. The supported algorithms are:
   #
   # ORDEREDSUBJECT
@@ -4122,44 +4140,44 @@ class Net::IMAP < Net::Protocol
   #
   #
   # Unlike
-  # [`search()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-search),
+  # [`search()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-search),
   # `charset` is a required argument. US-ASCII and UTF-8 are sample values.
   #
   # See [SORT-THREAD-EXT] for more details.
   def thread(algorithm, search_keys, charset); end
 
   # Similar to
-  # [`copy()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-copy),
+  # [`copy()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-copy),
   # but `set` contains unique identifiers.
   def uid_copy(set, mailbox); end
 
   # Similar to
-  # [`fetch()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-fetch),
+  # [`fetch()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-fetch),
   # but `set` contains unique identifiers.
   def uid_fetch(set, attr); end
 
   # Similar to
-  # [`move()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-move),
+  # [`move()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-move),
   # but `set` contains unique identifiers.
   def uid_move(set, mailbox); end
 
   # Similar to
-  # [`search()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-search),
+  # [`search()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-search),
   # but returns unique identifiers.
   def uid_search(keys, charset=T.unsafe(nil)); end
 
   # Similar to
-  # [`sort()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-sort),
+  # [`sort()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-sort),
   # but returns an array of unique identifiers.
   def uid_sort(sort_keys, search_keys, charset); end
 
   # Similar to
-  # [`store()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-store),
+  # [`store()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-store),
   # but `set` contains unique identifiers.
   def uid_store(set, attr, flags); end
 
   # Similar to
-  # [`thread()`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-thread),
+  # [`thread()`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-thread),
   # but returns unique identifiers instead of message sequence numbers.
   def uid_thread(algorithm, search_keys, charset); end
 
@@ -4167,7 +4185,7 @@ class Net::IMAP < Net::Protocol
   # server's set of "active" or "subscribed" mailboxes.
   #
   # A
-  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/NoResponseError.html)
+  # [`Net::IMAP::NoResponseError`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/NoResponseError.html)
   # is raised if `mailbox` cannot be unsubscribed from; for instance, because
   # the client is not currently subscribed to it.
   def unsubscribe(mailbox); end
@@ -4201,14 +4219,14 @@ class Net::IMAP < Net::Protocol
   def xlist(refname, mailbox); end
 
   # Adds an authenticator for
-  # [`Net::IMAP#authenticate`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-authenticate).
+  # [`Net::IMAP#authenticate`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-authenticate).
   # `auth_type` is the type of authentication this authenticator supports (for
   # instance, "LOGIN"). The `authenticator` is an object which defines a
   # process() method to handle authentication with the server. See
-  # [`Net::IMAP::LoginAuthenticator`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/LoginAuthenticator.html),
-  # [`Net::IMAP::CramMD5Authenticator`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/CramMD5Authenticator.html),
+  # [`Net::IMAP::LoginAuthenticator`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/LoginAuthenticator.html),
+  # [`Net::IMAP::CramMD5Authenticator`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/CramMD5Authenticator.html),
   # and
-  # [`Net::IMAP::DigestMD5Authenticator`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/DigestMD5Authenticator.html)
+  # [`Net::IMAP::DigestMD5Authenticator`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/DigestMD5Authenticator.html)
   # for examples.
   #
   # If `auth_type` refers to an existing authenticator, it will be replaced by
@@ -4224,39 +4242,39 @@ class Net::IMAP < Net::Protocol
   # Decode a string from modified UTF-7 format to UTF-8.
   #
   # UTF-7 is a 7-bit encoding of Unicode [UTF7].
-  # [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) uses a slightly
+  # [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) uses a slightly
   # modified version of this to encode mailbox names containing non-ASCII
   # characters; see [IMAP] section 5.1.3.
   #
-  # [`Net::IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) does *not*
+  # [`Net::IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) does *not*
   # automatically encode and decode mailbox names to and from UTF-7.
   def self.decode_utf7(s); end
 
   # Alias for:
-  # [`default_port`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-c-default_port)
+  # [`default_port`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-c-default_port)
   def self.default_imap_port(); end
 
   # Alias for:
-  # [`default_tls_port`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-c-default_tls_port)
+  # [`default_tls_port`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-c-default_tls_port)
   def self.default_imaps_port(); end
 
   # The default port for
-  # [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) connections,
+  # [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) connections,
   # port 143
   #
   # Also aliased as:
-  # [`default_imap_port`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-c-default_imap_port)
+  # [`default_imap_port`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-c-default_imap_port)
   def self.default_port(); end
 
   # Alias for:
-  # [`default_tls_port`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-c-default_tls_port)
+  # [`default_tls_port`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-c-default_tls_port)
   def self.default_ssl_port(); end
 
   # The default port for IMAPS connections, port 993
   #
   # Also aliased as:
-  # [`default_imaps_port`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-c-default_imaps_port),
-  # [`default_ssl_port`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-c-default_ssl_port)
+  # [`default_imaps_port`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-c-default_imaps_port),
+  # [`default_ssl_port`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-c-default_ssl_port)
   def self.default_tls_port(); end
 
   # Encode a string from UTF-8 format to modified UTF-7.
@@ -4275,7 +4293,7 @@ class Net::IMAP < Net::Protocol
   def self.max_flag_count=(count); end
 end
 
-# [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#Address)
+# [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
 # represents electronic mail addresses.
 #
 # #### Fields:
@@ -4327,14 +4345,14 @@ class Net::IMAP::Atom
   def validate(); end
 end
 
-# Error raised upon a "BAD" response from the server, indicating that the client
-# command violated the
-# [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html) protocol, or an
+# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised upon a "BAD"
+# response from the server, indicating that the client command violated the
+# [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html) protocol, or an
 # internal server failure has occurred.
 class Net::IMAP::BadResponseError < Net::IMAP::ResponseError
 end
 
-# [`Net::IMAP::BodyTypeAttachment`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeAttachment.html)
+# [`Net::IMAP::BodyTypeAttachment`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeAttachment.html)
 # represents attachment body structures of messages.
 #
 # #### Fields:
@@ -4366,7 +4384,7 @@ class Net::IMAP::BodyTypeAttachment
   def subtype=(_); end
 end
 
-# [`Net::IMAP::BodyTypeBasic`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeBasic.html)
+# [`Net::IMAP::BodyTypeBasic`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeBasic.html)
 # represents basic body structures of messages.
 #
 # #### Fields:
@@ -4493,7 +4511,7 @@ class Net::IMAP::BodyTypeExtension
   def subtype=(_); end
 end
 
-# [`Net::IMAP::BodyTypeMessage`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeMessage.html)
+# [`Net::IMAP::BodyTypeMessage`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMessage.html)
 # represents MESSAGE/RFC822 body structures of messages.
 #
 # #### Fields:
@@ -4506,9 +4524,9 @@ end
 #
 #
 # And
-# [`Net::IMAP::BodyTypeMessage`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeMessage.html)
+# [`Net::IMAP::BodyTypeMessage`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMessage.html)
 # has all methods of
-# [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeText.html).
+# [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeText.html).
 class Net::IMAP::BodyTypeMessage
   def body(); end
 
@@ -4573,7 +4591,7 @@ class Net::IMAP::BodyTypeMessage
   def subtype=(_); end
 end
 
-# [`Net::IMAP::BodyTypeMultipart`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeMultipart.html)
+# [`Net::IMAP::BodyTypeMultipart`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMultipart.html)
 # represents multipart body structures of messages.
 #
 # #### Fields:
@@ -4639,7 +4657,7 @@ class Net::IMAP::BodyTypeMultipart
   def subtype=(_); end
 end
 
-# [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeText.html)
+# [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeText.html)
 # represents TEXT body structures of messages.
 #
 # #### Fields:
@@ -4649,9 +4667,9 @@ end
 #
 #
 # And
-# [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeText.html)
+# [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeText.html)
 # has all fields of
-# [`Net::IMAP::BodyTypeBasic`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeBasic.html).
+# [`Net::IMAP::BodyTypeBasic`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeBasic.html).
 class Net::IMAP::BodyTypeText
   def content_id(); end
 
@@ -4708,12 +4726,13 @@ class Net::IMAP::BodyTypeText
   def subtype=(_); end
 end
 
-# Error raised upon a "BYE" response from the server, indicating that the client
-# is not being allowed to login, or has been timed out due to inactivity.
+# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised upon a "BYE"
+# response from the server, indicating that the client is not being allowed to
+# login, or has been timed out due to inactivity.
 class Net::IMAP::ByeResponseError < Net::IMAP::ResponseError
 end
 
-# [`Net::IMAP::ContentDisposition`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#ContentDisposition)
+# [`Net::IMAP::ContentDisposition`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ContentDisposition)
 # represents Content-Disposition fields.
 #
 # #### Fields:
@@ -4742,7 +4761,7 @@ class Net::IMAP::ContentDisposition < Struct
   def self.new(*_); end
 end
 
-# [`Net::IMAP::ContinuationRequest`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#ContinuationRequest)
+# [`Net::IMAP::ContinuationRequest`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ContinuationRequest)
 # represents command continuation requests.
 #
 # The command continuation request response is indicated by a "+" token instead
@@ -4757,7 +4776,8 @@ end
 # #### Fields:
 #
 # data
-# :   Returns the data (Net::IMAP::ResponseText).
+# :   Returns the data
+#     ([`Net::IMAP::ResponseText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ResponseText)).
 #
 # raw\_data
 # :   Returns the raw data string.
@@ -4786,7 +4806,8 @@ class Net::IMAP::CramMD5Authenticator
   def process(challenge); end
 end
 
-# Error raised when data is in the incorrect format.
+# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised when data is
+# in the incorrect format.
 class Net::IMAP::DataFormatError < Net::IMAP::Error
 end
 
@@ -4800,7 +4821,7 @@ class Net::IMAP::DigestMD5Authenticator
   def process(challenge); end
 end
 
-# [`Net::IMAP::Envelope`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#Envelope)
+# [`Net::IMAP::Envelope`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Envelope)
 # represents envelope structures of messages.
 #
 # #### Fields:
@@ -4813,32 +4834,32 @@ end
 #
 # from
 # :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#Address)
+#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
 #     that represents the from.
 #
 # sender
 # :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#Address)
+#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
 #     that represents the sender.
 #
 # reply\_to
 # :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#Address)
+#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
 #     that represents the reply-to.
 #
 # to
 # :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#Address)
+#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
 #     that represents the to.
 #
 # cc
 # :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#Address)
+#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
 #     that represents the cc.
 #
 # bcc
 # :   Returns an array of
-#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#Address)
+#     [`Net::IMAP::Address`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Address)
 #     that represents the bcc.
 #
 # in\_reply\_to
@@ -4896,12 +4917,12 @@ class Net::IMAP::Envelope < Struct
   def self.new(*_); end
 end
 
-# Superclass of [`IMAP`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html)
+# Superclass of [`IMAP`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html)
 # errors.
 class Net::IMAP::Error < StandardError
 end
 
-# [`Net::IMAP::FetchData`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#FetchData)
+# [`Net::IMAP::FetchData`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#FetchData)
 # represents the contents of the FETCH response.
 #
 # #### Fields:
@@ -4922,18 +4943,18 @@ end
 #     BODYSTRUCTURE
 # :       An object that describes the [MIME-IMB] body structure of a message.
 #         See
-#         [`Net::IMAP::BodyTypeBasic`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeBasic.html),
-#         [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeText.html),
-#         [`Net::IMAP::BodyTypeMessage`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeMessage.html),
-#         [`Net::IMAP::BodyTypeMultipart`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP/BodyTypeMultipart.html).
+#         [`Net::IMAP::BodyTypeBasic`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeBasic.html),
+#         [`Net::IMAP::BodyTypeText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeText.html),
+#         [`Net::IMAP::BodyTypeMessage`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMessage.html),
+#         [`Net::IMAP::BodyTypeMultipart`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP/BodyTypeMultipart.html).
 #     ENVELOPE
 # :       A
-#         [`Net::IMAP::Envelope`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#Envelope)
+#         [`Net::IMAP::Envelope`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#Envelope)
 #         object that describes the envelope structure of a message.
 #     FLAGS
 # :       A array of flag symbols that are set for this message. Flag symbols
 #         are capitalized by
-#         [`String#capitalize`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-capitalize).
+#         [`String#capitalize`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-capitalize).
 #     INTERNALDATE
 # :       A string representing the internal date of the message.
 #     RFC822
@@ -4964,7 +4985,8 @@ class Net::IMAP::FetchData < Struct
   def self.new(*_); end
 end
 
-# Error raised when too many flags are interned to symbols.
+# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised when too many
+# flags are interned to symbols.
 class Net::IMAP::FlagCountError < Net::IMAP::Error
 end
 
@@ -4986,7 +5008,7 @@ class Net::IMAP::LoginAuthenticator
   def process(data); end
 end
 
-# [`Net::IMAP::MailboxACLItem`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#MailboxACLItem)
+# [`Net::IMAP::MailboxACLItem`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxACLItem)
 # represents the response from GETACL.
 #
 # ```
@@ -5027,7 +5049,7 @@ class Net::IMAP::MailboxACLItem < Struct
   def self.new(*_); end
 end
 
-# [`Net::IMAP::MailboxList`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#MailboxList)
+# [`Net::IMAP::MailboxList`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxList)
 # represents contents of the LIST response.
 #
 # ```
@@ -5041,7 +5063,7 @@ end
 # attr
 # :   Returns the name attributes. Each name attribute is a symbol capitalized
 #     by
-#     [`String#capitalize`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-capitalize),
+#     [`String#capitalize`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-capitalize),
 #     such as :Noselect (not :NoSelect).
 #
 # delim
@@ -5071,7 +5093,7 @@ class Net::IMAP::MailboxList < Struct
   def self.new(*_); end
 end
 
-# [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#MailboxQuota)
+# [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuota)
 # represents contents of GETQUOTA response. This object can also be a response
 # to GETQUOTAROOT. In the syntax specification below, the delimiter used with
 # the "#" construct is a single space (SPACE).
@@ -5116,9 +5138,9 @@ class Net::IMAP::MailboxQuota < Struct
   def self.new(*_); end
 end
 
-# [`Net::IMAP::MailboxQuotaRoot`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#MailboxQuotaRoot)
+# [`Net::IMAP::MailboxQuotaRoot`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuotaRoot)
 # represents part of the GETQUOTAROOT response. (GETQUOTAROOT can also return
-# [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#MailboxQuota).)
+# [`Net::IMAP::MailboxQuota`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#MailboxQuota).)
 #
 # ```
 # quotaroot_response ::= "QUOTAROOT" SPACE astring *(SPACE astring)
@@ -5157,8 +5179,9 @@ class Net::IMAP::MessageSet
   def validate(); end
 end
 
-# Error raised upon a "NO" response from the server, indicating that the client
-# command could not be completed successfully.
+# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised upon a "NO"
+# response from the server, indicating that the client command could not be
+# completed successfully.
 class Net::IMAP::NoResponseError < Net::IMAP::ResponseError
 end
 
@@ -5200,7 +5223,7 @@ class Net::IMAP::RawData
   def validate(); end
 end
 
-# [`Net::IMAP::ResponseCode`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#ResponseCode)
+# [`Net::IMAP::ResponseCode`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ResponseCode)
 # represents response codes.
 #
 # ```
@@ -5248,7 +5271,8 @@ class Net::IMAP::ResponseError < Net::IMAP::Error
   def response=(response); end
 end
 
-# Error raised when a response from the server is non-parseable.
+# [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) raised when a
+# response from the server is non-parseable.
 class Net::IMAP::ResponseParseError < Net::IMAP::Error
 end
 
@@ -5308,7 +5332,7 @@ class Net::IMAP::ResponseParser::Token < Struct
   def self.new(*_); end
 end
 
-# [`Net::IMAP::ResponseText`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#ResponseText)
+# [`Net::IMAP::ResponseText`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ResponseText)
 # represents texts of responses. The text may be prefixed by the response code.
 #
 # ```
@@ -5341,7 +5365,7 @@ class Net::IMAP::ResponseText < Struct
   def self.new(*_); end
 end
 
-# [`Net::IMAP::StatusData`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#StatusData)
+# [`Net::IMAP::StatusData`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#StatusData)
 # represents the contents of the STATUS response.
 #
 # #### Fields:
@@ -5370,7 +5394,7 @@ class Net::IMAP::StatusData < Struct
   def self.new(*_); end
 end
 
-# [`Net::IMAP::TaggedResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#TaggedResponse)
+# [`Net::IMAP::TaggedResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#TaggedResponse)
 # represents tagged responses.
 #
 # The server completion result response indicates the success or failure of the
@@ -5424,9 +5448,9 @@ class Net::IMAP::TaggedResponse < Struct
   def self.new(*_); end
 end
 
-# [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#ThreadMember)
+# [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ThreadMember)
 # represents a thread-node returned by
-# [`Net::IMAP#thread`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#method-i-thread).
+# [`Net::IMAP#thread`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#method-i-thread).
 #
 # #### Fields:
 #
@@ -5435,7 +5459,7 @@ end
 #
 # children
 # :   An array of
-#     [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#ThreadMember)
+#     [`Net::IMAP::ThreadMember`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#ThreadMember)
 #     objects for mail items that are children of this in the thread.
 class Net::IMAP::ThreadMember < Struct
   Elem = type_member(fixed: T.untyped)
@@ -5455,10 +5479,10 @@ class Net::IMAP::ThreadMember < Struct
   def self.new(*_); end
 end
 
-# [`Net::IMAP::UntaggedResponse`](https://docs.ruby-lang.org/en/2.6.0/Net/IMAP.html#UntaggedResponse)
+# [`Net::IMAP::UntaggedResponse`](https://docs.ruby-lang.org/en/2.7.0/Net/IMAP.html#UntaggedResponse)
 # represents untagged responses.
 #
-# [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html) transmitted by the
+# [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html) transmitted by the
 # server to the client and status responses that do not indicate command
 # completion are prefixed with the token "\*", and are called untagged
 # responses.
@@ -5975,9 +5999,9 @@ end
 module Net::NetPrivate
 end
 
-# [`OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html), a
+# [`OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html), a
 # subclass of
-# [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html), is
+# [`Timeout::Error`](https://docs.ruby-lang.org/en/2.7.0/Timeout/Error.html), is
 # raised if a connection cannot be created within the open\_timeout.
 class Net::OpenTimeout < Timeout::Error
 end
@@ -6018,9 +6042,9 @@ class Net::ReadAdapter
   def inspect(); end
 end
 
-# [`ReadTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/ReadTimeout.html), a
+# [`ReadTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/ReadTimeout.html), a
 # subclass of
-# [`Timeout::Error`](https://docs.ruby-lang.org/en/2.6.0/Timeout/Error.html), is
+# [`Timeout::Error`](https://docs.ruby-lang.org/en/2.7.0/Timeout/Error.html), is
 # raised if a chunk of the response cannot be read within the read\_timeout.
 class Net::ReadTimeout < Timeout::Error
 end
@@ -6028,9 +6052,9 @@ end
 # ## What is This Library?
 #
 # This library provides functionality to send internet mail via
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html), the Simple Mail
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html), the Simple Mail
 # Transfer Protocol. For details of
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) itself, see
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) itself, see
 # [RFC2821] (http://www.ietf.org/rfc/rfc2821.txt).
 #
 # ## What is This Library NOT?
@@ -6048,13 +6072,13 @@ end
 # ### Sending Messages
 #
 # You must open a connection to an
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) server before
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) server before
 # sending messages. The first argument is the address of your
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) server, and the
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) server, and the
 # second argument is the port number. Using
-# [`SMTP.start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-c-start)
+# [`SMTP.start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-c-start)
 # with a block is the simplest way to do this. This way, the
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) connection is
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) connection is
 # closed automatically after the block is executed.
 #
 # ```ruby
@@ -6065,7 +6089,7 @@ end
 # ```
 #
 # Replace 'your.smtp.server' with your
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) server. Normally
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) server. Normally
 # your system manager or internet provider supplies a server for you.
 #
 # Then you can send messages.
@@ -6091,9 +6115,9 @@ end
 #
 # ### Closing the Session
 #
-# You MUST close the [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html)
+# You MUST close the [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html)
 # session after sending messages, by calling the
-# [`finish`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-finish)
+# [`finish`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-finish)
 # method:
 #
 # ```ruby
@@ -6104,8 +6128,8 @@ end
 # ```
 #
 # You can also use the block form of
-# [`SMTP.start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-c-start)/SMTP#start.
-# This closes the [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html)
+# [`SMTP.start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-c-start)/SMTP#start.
+# This closes the [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html)
 # session automatically:
 #
 # ```ruby
@@ -6120,12 +6144,12 @@ end
 # ### HELO domain
 #
 # In almost all situations, you must provide a third argument to
-# [`SMTP.start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-c-start)/SMTP#start.
+# [`SMTP.start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-c-start)/SMTP#start.
 # This is the domain name which you are on (the host to send mail from). It is
 # called the "HELO domain". The
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) server will judge
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) server will judge
 # whether it should send or reject the
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) session by
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) session by
 # inspecting the HELO domain.
 #
 # ```
@@ -6133,14 +6157,14 @@ end
 #                 'mail.from.domain') { |smtp| ... }
 # ```
 #
-# ### [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) Authentication
+# ### [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) Authentication
 #
-# The [`Net::SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) class
-# supports three authentication schemes; PLAIN, LOGIN and CRAM MD5. (SMTP
-# Authentication: [RFC2554]) To use
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) authentication,
-# pass extra arguments to
-# [`SMTP.start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-c-start)/SMTP#start.
+# The [`Net::SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) class
+# supports three authentication schemes; PLAIN, LOGIN and CRAM MD5.
+# ([`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) Authentication:
+# [RFC2554]) To use [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html)
+# authentication, pass extra arguments to
+# [`SMTP.start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-c-start)/SMTP#start.
 #
 # ```ruby
 # # PLAIN
@@ -6163,7 +6187,7 @@ class Net::SMTP < Net::Protocol
   Revision = ::T.unsafe(nil)
 
   # The address of the
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) server to
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) server to
   # connect to.
   def address(); end
 
@@ -6177,23 +6201,23 @@ class Net::SMTP < Net::Protocol
 
   # Returns supported authentication methods on this server. You cannot get
   # valid value before opening
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) session.
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) session.
   def capable_auth_types(); end
 
   # true if server advertises AUTH CRAM-MD5. You cannot get valid value before
-  # opening [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) session.
+  # opening [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) session.
   def capable_cram_md5_auth?(); end
 
   # true if server advertises AUTH LOGIN. You cannot get valid value before
-  # opening [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) session.
+  # opening [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) session.
   def capable_login_auth?(); end
 
   # true if server advertises AUTH PLAIN. You cannot get valid value before
-  # opening [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) session.
+  # opening [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) session.
   def capable_plain_auth?(); end
 
   # true if server advertises STARTTLS. You cannot get valid value before
-  # opening [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) session.
+  # opening [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) session.
   def capable_starttls?(); end
 
   # This method sends a message. If `msgstr` is given, sends it as a message. If
@@ -6224,9 +6248,9 @@ class Net::SMTP < Net::Protocol
   # WARNING: This method causes serious security holes. Use this method for only
   # debugging.
   #
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) an output stream for
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) an output stream for
   # debug logging. You must call this before
-  # [`start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-start).
+  # [`start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-start).
   #
   # ```
   # # example
@@ -6239,11 +6263,11 @@ class Net::SMTP < Net::Protocol
   #
   #
   # Also aliased as:
-  # [`set_debug_output`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-set_debug_output)
+  # [`set_debug_output`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-set_debug_output)
   def debug_output=(arg); end
 
   # Alias for:
-  # [`disable_tls`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-disable_tls)
+  # [`disable_tls`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-disable_tls)
   def disable_ssl(); end
 
   # Disables SMTP/TLS (STARTTLS) for this object. Must be called before the
@@ -6254,76 +6278,76 @@ class Net::SMTP < Net::Protocol
   # established to have any effect.
   #
   # Also aliased as:
-  # [`disable_ssl`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-disable_ssl)
+  # [`disable_ssl`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-disable_ssl)
   def disable_tls(); end
 
   def ehlo(domain); end
 
   # Alias for:
-  # [`enable_tls`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-enable_tls)
+  # [`enable_tls`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-enable_tls)
   def enable_ssl(context=T.unsafe(nil)); end
 
   # Enables SMTP/TLS (STARTTLS) for this object. `context` is a
-  # [`OpenSSL::SSL::SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html)
+  # [`OpenSSL::SSL::SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html)
   # object.
   def enable_starttls(context=T.unsafe(nil)); end
 
   # Enables SMTP/TLS (STARTTLS) for this object if server accepts. `context` is
   # a
-  # [`OpenSSL::SSL::SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html)
+  # [`OpenSSL::SSL::SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html)
   # object.
   def enable_starttls_auto(context=T.unsafe(nil)); end
 
   # Enables SMTP/TLS (SMTPS:
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) over direct TLS
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) over direct TLS
   # connection) for this object. Must be called before the connection is
   # established to have any effect. `context` is a
-  # [`OpenSSL::SSL::SSLContext`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLContext.html)
+  # [`OpenSSL::SSL::SSLContext`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLContext.html)
   # object.
   #
   # Also aliased as:
-  # [`enable_ssl`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-enable_ssl)
+  # [`enable_ssl`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-enable_ssl)
   def enable_tls(context=T.unsafe(nil)); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) whether to use ESMTP
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) whether to use ESMTP
   # or not. This should be done before calling
-  # [`start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-start).
+  # [`start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-start).
   # Note that if
-  # [`start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-start)
+  # [`start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-start)
   # is called in ESMTP mode, and the connection fails due to a ProtocolError,
-  # the [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) object will
+  # the [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) object will
   # automatically switch to plain
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) mode and retry
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) mode and retry
   # (but not vice versa).
   def esmtp(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) whether to use ESMTP
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) whether to use ESMTP
   # or not. This should be done before calling
-  # [`start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-start).
+  # [`start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-start).
   # Note that if
-  # [`start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-start)
+  # [`start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-start)
   # is called in ESMTP mode, and the connection fails due to a ProtocolError,
-  # the [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) object will
+  # the [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) object will
   # automatically switch to plain
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) mode and retry
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) mode and retry
   # (but not vice versa).
   def esmtp=(esmtp); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) whether to use ESMTP
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) whether to use ESMTP
   # or not. This should be done before calling
-  # [`start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-start).
+  # [`start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-start).
   # Note that if
-  # [`start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-start)
+  # [`start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-start)
   # is called in ESMTP mode, and the connection fails due to a ProtocolError,
-  # the [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) object will
+  # the [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) object will
   # automatically switch to plain
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) mode and retry
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) mode and retry
   # (but not vice versa).
   def esmtp?(); end
 
-  # Finishes the [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html)
+  # Finishes the [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html)
   # session and closes TCP connection. Raises
-  # [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html) if not
+  # [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html) if not
   # started.
   def finish(); end
 
@@ -6356,11 +6380,11 @@ class Net::SMTP < Net::Protocol
   #
   # ### Parameters
   #
-  # `from_addr` is a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # `from_addr` is a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # representing the source mail address.
   #
-  # `to_addr` is a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
-  # or Strings or [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # `to_addr` is a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
+  # or Strings or [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # Strings, representing the destination mail address or addresses.
   #
   # ### Example
@@ -6381,32 +6405,32 @@ class Net::SMTP < Net::Protocol
   #
   # This method may raise:
   #
-  # *   [`Net::SMTPServerBusy`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPServerBusy.html)
-  # *   [`Net::SMTPSyntaxError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPSyntaxError.html)
-  # *   [`Net::SMTPFatalError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPFatalError.html)
-  # *   [`Net::SMTPUnknownError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPUnknownError.html)
-  # *   [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/ReadTimeout.html)
-  # *   [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html)
+  # *   [`Net::SMTPServerBusy`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPServerBusy.html)
+  # *   [`Net::SMTPSyntaxError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPSyntaxError.html)
+  # *   [`Net::SMTPFatalError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPFatalError.html)
+  # *   [`Net::SMTPUnknownError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPUnknownError.html)
+  # *   [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/ReadTimeout.html)
+  # *   [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html)
   #
   #
   # Also aliased as:
-  # [`ready`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-ready)
+  # [`ready`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-ready)
   def open_message_stream(from_addr, *to_addrs, &block); end
 
   # Seconds to wait while attempting to open a connection. If the connection
   # cannot be opened within this time, a
-  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
+  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html)
   # is raised. The default value is 30 seconds.
   def open_timeout(); end
 
   # Seconds to wait while attempting to open a connection. If the connection
   # cannot be opened within this time, a
-  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
+  # [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html)
   # is raised. The default value is 30 seconds.
   def open_timeout=(open_timeout); end
 
   # The port number of the
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) server to
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) server to
   # connect to.
   def port(); end
 
@@ -6418,23 +6442,23 @@ class Net::SMTP < Net::Protocol
 
   # Seconds to wait while reading one block (by one read(2) call). If the
   # read(2) call does not complete within this time, a
-  # [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/ReadTimeout.html)
+  # [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/ReadTimeout.html)
   # is raised. The default value is 60 seconds.
   def read_timeout(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the number of seconds
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the number of seconds
   # to wait until timing-out a read(2) call.
   def read_timeout=(sec); end
 
   # Alias for:
-  # [`open_message_stream`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-open_message_stream)
+  # [`open_message_stream`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-open_message_stream)
   def ready(from_addr, *to_addrs, &block); end
 
   # Aborts the current mail transaction
   def rset(); end
 
   # Alias for:
-  # [`send_message`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-send_message)
+  # [`send_message`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-send_message)
   def send_mail(msgstr, from_addr, *to_addrs); end
 
   # Sends `msgstr` as a message. Single CR ("r") and LF ("n") found in the
@@ -6442,11 +6466,11 @@ class Net::SMTP < Net::Protocol
   # message with this method. `msgstr` should include both the message headers
   # and body.
   #
-  # `from_addr` is a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # `from_addr` is a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # representing the source mail address.
   #
-  # `to_addr` is a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
-  # or Strings or [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # `to_addr` is a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
+  # or Strings or [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # Strings, representing the destination mail address or addresses.
   #
   # ### Example
@@ -6463,33 +6487,33 @@ class Net::SMTP < Net::Protocol
   #
   # This method may raise:
   #
-  # *   [`Net::SMTPServerBusy`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPServerBusy.html)
-  # *   [`Net::SMTPSyntaxError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPSyntaxError.html)
-  # *   [`Net::SMTPFatalError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPFatalError.html)
-  # *   [`Net::SMTPUnknownError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPUnknownError.html)
-  # *   [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/ReadTimeout.html)
-  # *   [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html)
+  # *   [`Net::SMTPServerBusy`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPServerBusy.html)
+  # *   [`Net::SMTPSyntaxError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPSyntaxError.html)
+  # *   [`Net::SMTPFatalError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPFatalError.html)
+  # *   [`Net::SMTPUnknownError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPUnknownError.html)
+  # *   [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/ReadTimeout.html)
+  # *   [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html)
   #
   #
   # Also aliased as:
-  # [`send_mail`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-send_mail),
-  # [`sendmail`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-sendmail)
+  # [`send_mail`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-send_mail),
+  # [`sendmail`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-sendmail)
   def send_message(msgstr, from_addr, *to_addrs); end
 
   # Alias for:
-  # [`send_message`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-send_message)
+  # [`send_message`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-send_message)
   def sendmail(msgstr, from_addr, *to_addrs); end
 
   # Alias for:
-  # [`debug_output=`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-debug_output-3D)
+  # [`debug_output=`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-debug_output-3D)
   def set_debug_output(arg); end
 
   # Alias for:
-  # [`tls?`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-tls-3F)
+  # [`tls?`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-tls-3F)
   def ssl?(); end
 
   # Opens a TCP connection and starts the
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) session.
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) session.
   #
   # ### Parameters
   #
@@ -6497,16 +6521,16 @@ class Net::SMTP < Net::Protocol
   # discussion in the overview notes.
   #
   # If both of `user` and `secret` are given,
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) authentication
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) authentication
   # will be attempted using the AUTH command. `authtype` specifies the type of
   # authentication to attempt; it must be one of :login, :plain, and :cram\_md5.
-  # See the notes on [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html)
+  # See the notes on [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html)
   # Authentication in the overview.
   #
   # ### Block Usage
   #
   # When this methods is called with a block, the newly-started
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) object is
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) object is
   # yielded to the block, and automatically closed after the block call
   # finishes. Otherwise, it is the caller's responsibility to close the session
   # when finished.
@@ -6514,7 +6538,7 @@ class Net::SMTP < Net::Protocol
   # ### Example
   #
   # This is very similar to the class method
-  # [`SMTP.start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-c-start).
+  # [`SMTP.start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-c-start).
   #
   # ```ruby
   # require 'net/smtp'
@@ -6525,29 +6549,32 @@ class Net::SMTP < Net::Protocol
   # ```
   #
   # The primary use of this method (as opposed to
-  # [`SMTP.start`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-c-start))
-  # is probably to set debugging (#set\_debug\_output) or ESMTP (#esmtp=), which
-  # must be done before the session is started.
+  # [`SMTP.start`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-c-start))
+  # is probably to set debugging
+  # ([`set_debug_output`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-set_debug_output))
+  # or ESMTP
+  # ([`esmtp=`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#attribute-i-esmtp)),
+  # which must be done before the session is started.
   #
   # ### Errors
   #
   # If session has already been started, an
-  # [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html) will be
+  # [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html) will be
   # raised.
   #
   # This method may raise:
   #
-  # *   [`Net::SMTPAuthenticationError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPAuthenticationError.html)
-  # *   [`Net::SMTPServerBusy`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPServerBusy.html)
-  # *   [`Net::SMTPSyntaxError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPSyntaxError.html)
-  # *   [`Net::SMTPFatalError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPFatalError.html)
-  # *   [`Net::SMTPUnknownError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPUnknownError.html)
-  # *   [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
-  # *   [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/ReadTimeout.html)
-  # *   [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html)
+  # *   [`Net::SMTPAuthenticationError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPAuthenticationError.html)
+  # *   [`Net::SMTPServerBusy`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPServerBusy.html)
+  # *   [`Net::SMTPSyntaxError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPSyntaxError.html)
+  # *   [`Net::SMTPFatalError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPFatalError.html)
+  # *   [`Net::SMTPUnknownError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPUnknownError.html)
+  # *   [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html)
+  # *   [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/ReadTimeout.html)
+  # *   [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html)
   def start(helo=T.unsafe(nil), user=T.unsafe(nil), secret=T.unsafe(nil), authtype=T.unsafe(nil)); end
 
-  # `true` if the [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html)
+  # `true` if the [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html)
   # session has been started.
   def started?(); end
 
@@ -6567,17 +6594,17 @@ class Net::SMTP < Net::Protocol
   # true if this object uses SMTP/TLS (SMTPS).
   #
   # Also aliased as:
-  # [`ssl?`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-i-ssl-3F)
+  # [`ssl?`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-i-ssl-3F)
   def tls?(); end
 
-  # The default [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) port
+  # The default [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) port
   # number, 25.
   def self.default_port(); end
 
   def self.default_ssl_context(); end
 
   # Alias for:
-  # [`default_tls_port`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-c-default_tls_port)
+  # [`default_tls_port`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-c-default_tls_port)
   def self.default_ssl_port(); end
 
   # The default mail submission port number, 587.
@@ -6586,11 +6613,11 @@ class Net::SMTP < Net::Protocol
   # The default SMTPS port number, 465.
   #
   # Also aliased as:
-  # [`default_ssl_port`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html#method-c-default_ssl_port)
+  # [`default_ssl_port`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html#method-c-default_ssl_port)
   def self.default_tls_port(); end
 
   # Creates a new
-  # [`Net::SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) object and
+  # [`Net::SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) object and
   # connects to the server.
   #
   # This method is equivalent to:
@@ -6610,10 +6637,10 @@ class Net::SMTP < Net::Protocol
   # ### Block Usage
   #
   # If called with a block, the newly-opened
-  # [`Net::SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) object is
+  # [`Net::SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) object is
   # yielded to the block, and automatically closed when the block finishes. If
   # called without a block, the newly-opened
-  # [`Net::SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) object is
+  # [`Net::SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) object is
   # returned to the caller, and it is the caller's responsibility to close it
   # when finished.
   #
@@ -6627,34 +6654,34 @@ class Net::SMTP < Net::Protocol
   # overview comments); it defaults to 'localhost'.
   #
   # The remaining arguments are used for
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) authentication,
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) authentication,
   # if required or desired. `user` is the account name; `secret` is your
   # password or other authentication token; and `authtype` is the authentication
   # type, one of :plain, :login, or :cram\_md5. See the discussion of
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) Authentication
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) Authentication
   # in the overview notes.
   #
   # ### Errors
   #
   # This method may raise:
   #
-  # *   [`Net::SMTPAuthenticationError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPAuthenticationError.html)
-  # *   [`Net::SMTPServerBusy`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPServerBusy.html)
-  # *   [`Net::SMTPSyntaxError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPSyntaxError.html)
-  # *   [`Net::SMTPFatalError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPFatalError.html)
-  # *   [`Net::SMTPUnknownError`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTPUnknownError.html)
-  # *   [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/OpenTimeout.html)
-  # *   [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.6.0/Net/ReadTimeout.html)
-  # *   [`IOError`](https://docs.ruby-lang.org/en/2.6.0/IOError.html)
+  # *   [`Net::SMTPAuthenticationError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPAuthenticationError.html)
+  # *   [`Net::SMTPServerBusy`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPServerBusy.html)
+  # *   [`Net::SMTPSyntaxError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPSyntaxError.html)
+  # *   [`Net::SMTPFatalError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPFatalError.html)
+  # *   [`Net::SMTPUnknownError`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTPUnknownError.html)
+  # *   [`Net::OpenTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/OpenTimeout.html)
+  # *   [`Net::ReadTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/ReadTimeout.html)
+  # *   [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html)
   def self.start(address, port=T.unsafe(nil), helo=T.unsafe(nil), user=T.unsafe(nil), secret=T.unsafe(nil), authtype=T.unsafe(nil), &block); end
 end
 
 # This class represents a response received by the
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) server. Instances
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) server. Instances
 # of this class are created by the
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) class; they should
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) class; they should
 # not be directly created by the user. For more information on
-# [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) responses, view
+# [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) responses, view
 # [Section 4.2 of RFC 5321](http://tools.ietf.org/html/rfc5321#section-4.2)
 class Net::SMTP::Response
   # Returns a hash of the human readable reply text in the response if it is
@@ -6681,14 +6708,14 @@ class Net::SMTP::Response
   def message(); end
 
   # The three digit reply code of the
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) response
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) response
   def status(); end
 
   # Takes the first digit of the reply code to determine the status type
   def status_type_char(); end
 
   # The human readable reply text of the
-  # [`SMTP`](https://docs.ruby-lang.org/en/2.6.0/Net/SMTP.html) response
+  # [`SMTP`](https://docs.ruby-lang.org/en/2.7.0/Net/SMTP.html) response
   def string(); end
 
   # Determines whether the response received was a Positive Completion reply
@@ -6705,7 +6732,7 @@ class Net::SMTPAuthenticationError < Net::ProtoAuthError
   include ::Net::SMTPError
 end
 
-# [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) mixed in to all
+# [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html) mixed in to all
 # SMTP error classes
 module Net::SMTPError
 end
@@ -6715,7 +6742,7 @@ class Net::SMTPFatalError < Net::ProtoFatalError
   include ::Net::SMTPError
 end
 
-# Represents SMTP error code 420 or 450, a temporary error.
+# Represents SMTP error code 4xx, a temporary error.
 class Net::SMTPServerBusy < Net::ProtoServerError
   include ::Net::SMTPError
 end
@@ -6744,7 +6771,7 @@ class Net::WriteAdapter
   def inspect(); end
 
   # Alias for:
-  # [`write`](https://docs.ruby-lang.org/en/2.6.0/Net/WriteAdapter.html#method-i-write)
+  # [`write`](https://docs.ruby-lang.org/en/2.7.0/Net/WriteAdapter.html#method-i-write)
   def print(str); end
 
   def printf(*args); end
@@ -6752,10 +6779,13 @@ class Net::WriteAdapter
   def puts(str=T.unsafe(nil)); end
 
   # Also aliased as:
-  # [`print`](https://docs.ruby-lang.org/en/2.6.0/Net/WriteAdapter.html#method-i-print)
+  # [`print`](https://docs.ruby-lang.org/en/2.7.0/Net/WriteAdapter.html#method-i-print)
   def write(str); end
 end
 
-# WriteTimeout, a subclass of Timeout::Error, is raised if a chunk of the
-# response cannot be written within the write_timeout. Not raised on Windows.
+# [`WriteTimeout`](https://docs.ruby-lang.org/en/2.7.0/Net/WriteTimeout.html), a
+# subclass of
+# [`Timeout::Error`](https://docs.ruby-lang.org/en/2.7.0/Timeout/Error.html), is
+# raised if a chunk of the response cannot be written within the write\_timeout.
+# Not raised on Windows.
 class Net::WriteTimeout < ::Timeout::Error; end

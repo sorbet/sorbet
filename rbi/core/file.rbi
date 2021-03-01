@@ -1,11 +1,13 @@
 # typed: __STDLIB_INTERNAL
 
-# A `File` is an abstraction of any file object accessible by the program and is
-# closely associated with class `IO`. `File` includes the methods of module
-# `FileTest` as class methods, allowing you to write (for example)
-# `File.exist?("foo")`.
+# A [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) is an abstraction of
+# any file object accessible by the program and is closely associated with class
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
+# [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) includes the methods
+# of module [`FileTest`](https://docs.ruby-lang.org/en/2.7.0/FileTest.html) as
+# class methods, allowing you to write (for example) `File.exist?("foo")`.
 #
-# In the description of [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html)
+# In the description of [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html)
 # methods, *permission bits* are a platform-specific set of bits that indicate
 # permissions of a file. On Unix-based systems, permissions are viewed as a set
 # of three octets, for the owner, the group, and the rest of the world. For each
@@ -26,7 +28,7 @@
 # read-only, which is reported as `0444`.
 #
 # Various constants for the methods in
-# [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) can be found in
+# [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) can be found in
 # File::Constants.
 class File < IO
   # platform specific alternative separator
@@ -96,9 +98,9 @@ class File < IO
   def self.absolute_path(file, dir=T.unsafe(nil)); end
 
   # Returns the last access time for the named file as a
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object.
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) object.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   #
   # ```ruby
@@ -114,10 +116,13 @@ class File < IO
 
   # Returns the last component of the filename given in *file\_name* (after
   # first stripping trailing separators), which can be formed using both
-  # `File::SEPARATOR` and `File::ALT_SEPARATOR` as the separator when
-  # `File::ALT_SEPARATOR` is not `nil`. If *suffix* is given and present at the
-  # end of *file\_name*, it is removed. If *suffix* is ".\*", any extension will
-  # be removed.
+  # [`File::SEPARATOR`](https://docs.ruby-lang.org/en/2.7.0/File.html#SEPARATOR)
+  # and
+  # [`File::ALT_SEPARATOR`](https://docs.ruby-lang.org/en/2.7.0/File.html#ALT_SEPARATOR)
+  # as the separator when
+  # [`File::ALT_SEPARATOR`](https://docs.ruby-lang.org/en/2.7.0/File.html#ALT_SEPARATOR)
+  # is not `nil`. If *suffix* is given and present at the end of *file\_name*,
+  # it is removed. If *suffix* is ".\*", any extension will be removed.
   #
   # ```ruby
   # File.basename("/home/gumby/work/ruby.rb")          #=> "ruby.rb"
@@ -177,7 +182,7 @@ class File < IO
 
   # Returns `true` if the named file is a block device.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -189,7 +194,7 @@ class File < IO
 
   # Returns `true` if the named file is a character device.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -238,7 +243,7 @@ class File < IO
   # Returns the change time for the named file (the time at which directory
   # information about the file was changed, not the file itself).
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   #
   # Note that on Windows (NTFS), returns creation time (birth time).
@@ -258,9 +263,10 @@ class File < IO
   # Raises an exception on any error. Since the underlying implementation relies
   # on the `unlink(2)` system call, the type of exception raised depends on its
   # error type (see https://linux.die.net/man/2/unlink) and has the form of e.g.
-  # `Errno::ENOENT`.
+  # Errno::ENOENT.
   #
-  # See also `Dir::rmdir`.
+  # See also
+  # [`Dir::rmdir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-rmdir).
   sig do
     params(
         files: T.any(String, Pathname),
@@ -272,7 +278,7 @@ class File < IO
   # Returns `true` if the named file is a directory, or a symlink that points at
   # a directory, and `false` otherwise.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   #
   # ```ruby
@@ -288,8 +294,13 @@ class File < IO
 
   # Returns all components of the filename given in *file\_name* except the last
   # one (after first stripping trailing separators). The filename can be formed
-  # using both `File::SEPARATOR` and `File::ALT_SEPARATOR` as the separator when
-  # `File::ALT_SEPARATOR` is not `nil`.
+  # using both
+  # [`File::SEPARATOR`](https://docs.ruby-lang.org/en/2.7.0/File.html#SEPARATOR)
+  # and
+  # [`File::ALT_SEPARATOR`](https://docs.ruby-lang.org/en/2.7.0/File.html#ALT_SEPARATOR)
+  # as the separator when
+  # [`File::ALT_SEPARATOR`](https://docs.ruby-lang.org/en/2.7.0/File.html#ALT_SEPARATOR)
+  # is not `nil`.
   #
   # ```ruby
   # File.dirname("/home/gumby/work/ruby.rb")   #=> "/home/gumby/work"
@@ -304,12 +315,19 @@ class File < IO
 
   # Returns `true` if the named file exists and has a zero size.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   def self.empty?(_); end
 
   # Returns `true` if the named file is executable by the effective user and
   # group id of this process. See eaccess(3).
+  #
+  # Windows does not support execute permissions separately from read
+  # permissions. On Windows, a file is only considered executable if it ends in
+  # .bat, .cmd, .com, or .exe.
+  #
+  # Note that some OS-level security features may cause this to return true even
+  # though the file is not executable by the effective user/group.
   sig do
     params(
         file: T.any(String, Pathname),
@@ -320,6 +338,13 @@ class File < IO
 
   # Returns `true` if the named file is executable by the real user and group id
   # of this process. See access(3).
+  #
+  # Windows does not support execute permissions separately from read
+  # permissions. On Windows, a file is only considered executable if it ends in
+  # .bat, .cmd, .com, or .exe.
+  #
+  # Note that some OS-level security features may cause this to return true even
+  # though the file is not executable by the real user/group.
   sig do
     params(
         file: T.any(String, Pathname),
@@ -330,7 +355,7 @@ class File < IO
 
   # Return `true` if the named file exists.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   #
   # "file exists" means that stat() or fstat() system call is successful.
@@ -387,11 +412,14 @@ class File < IO
   # An empty string will also be returned when the period is the last character
   # in `path`.
   #
+  # On Windows, trailing dots are truncated.
+  #
   # ```ruby
   # File.extname("test.rb")         #=> ".rb"
   # File.extname("a/b/d/test.rb")   #=> ".rb"
   # File.extname(".a/b/d/test.rb")  #=> ".rb"
-  # File.extname("foo.")            #=> ""
+  # File.extname("foo.")            #=> "" on Windows
+  # File.extname("foo.")            #=> "." on non-Windows
   # File.extname("test")            #=> ""
   # File.extname(".profile")        #=> ""
   # File.extname(".profile.sh")     #=> ".sh"
@@ -406,7 +434,7 @@ class File < IO
 
   # Returns `true` if the named `file` exists and is a regular file.
   #
-  # `file` can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object.
+  # `file` can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
   #
   # If the `file` argument is a symbolic link, it will resolve the symbolic link
   # and use the file referenced by the link.
@@ -448,7 +476,7 @@ class File < IO
   #
   # `[set]`
   # :   Matches any one character in `set`. Behaves exactly like character sets
-  #     in [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html),
+  #     in [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html),
   #     including set negation (`[^a-z]`).
   #
   # ` \ `
@@ -457,13 +485,13 @@ class File < IO
   # `{a,b}`
   # :   Matches pattern a and pattern b if File::FNM\_EXTGLOB flag is enabled.
   #     Behaves like a
-  #     [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) union
+  #     [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) union
   #     (`(?:a|b)`).
   #
   #
   # `flags` is a bitwise OR of the `FNM_XXX` constants. The same glob pattern
   # and flags are used by
-  # [`Dir::glob`](https://docs.ruby-lang.org/en/2.6.0/Dir.html#method-c-glob).
+  # [`Dir::glob`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-glob).
   #
   # Examples:
   #
@@ -483,6 +511,7 @@ class File < IO
   #
   # File.fnmatch('cat', 'CAT')                     #=> false # case sensitive
   # File.fnmatch('cat', 'CAT', File::FNM_CASEFOLD) #=> true  # case insensitive
+  # File.fnmatch('cat', 'CAT', File::FNM_SYSCASE)  #=> true or false # depends on the system default
   #
   # File.fnmatch('?',   '/', File::FNM_PATHNAME)  #=> false # wildcard doesn't match '/' on FNM_PATHNAME
   # File.fnmatch('*',   '/', File::FNM_PATHNAME)  #=> false # ditto
@@ -547,7 +576,7 @@ class File < IO
   # Returns `true` if the named file exists and the effective group id of the
   # calling process is the owner of the file. Returns `false` on Windows.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -560,7 +589,7 @@ class File < IO
   # Returns `true` if the named files are identical.
   #
   # *file\_1* and *file\_2* can be an
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object.
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
   #
   # ```ruby
   # open("a", "w") {}
@@ -595,9 +624,11 @@ class File < IO
   end
   def self.join(*arg0); end
 
-  # Equivalent to `File::chmod`, but does not follow symbolic links (so it will
-  # change the permissions associated with the link, not the file referenced by
-  # the link). Often not available.
+  # Equivalent to
+  # [`File::chmod`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-chmod),
+  # but does not follow symbolic links (so it will change the permissions
+  # associated with the link, not the file referenced by the link). Often not
+  # available.
   sig do
     params(
         mode: Integer,
@@ -607,9 +638,11 @@ class File < IO
   end
   def self.lchmod(mode, *files); end
 
-  # Equivalent to `File::chown`, but does not follow symbolic links (so it will
-  # change the owner associated with the link, not the file referenced by the
-  # link). Often not available. Returns number of files in the argument list.
+  # Equivalent to
+  # [`File::chown`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-chown),
+  # but does not follow symbolic links (so it will change the owner associated
+  # with the link, not the file referenced by the link). Often not available.
+  # Returns number of files in the argument list.
   sig do
     params(
         owner: T.nilable(Integer),
@@ -622,7 +655,8 @@ class File < IO
 
   # Creates a new name for an existing file using a hard link. Will not
   # overwrite *new\_name* if it already exists (raising a subclass of
-  # `SystemCallError`). Not available on all platforms.
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)).
+  # Not available on all platforms.
   #
   # ```ruby
   # File.link("testfile", ".testfile")   #=> 0
@@ -637,8 +671,10 @@ class File < IO
   end
   def self.link(old, new); end
 
-  # Same as `File::stat`, but does not follow the last symbolic link. Instead,
-  # reports on the link itself.
+  # Same as
+  # [`File::stat`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-stat),
+  # but does not follow the last symbolic link. Instead, reports on the link
+  # itself.
   #
   # ```ruby
   # File.symlink("testfile", "link2test")   #=> 0
@@ -657,7 +693,7 @@ class File < IO
   # Sets the access and modification times of each named file to the first two
   # arguments. If a file is a symlink, this method acts upon the link itself as
   # opposed to its referent; for the inverse behavior, see
-  # [`File.utime`](https://docs.ruby-lang.org/en/2.6.0/File.html#method-c-utime).
+  # [`File.utime`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-utime).
   # Returns the number of file names in the argument list.
   def self.lutime(*_); end
 
@@ -667,9 +703,9 @@ class File < IO
   def self.mkfifo(*_); end
 
   # Returns the modification time for the named file as a
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object.
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) object.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   #
   # ```ruby
@@ -683,20 +719,23 @@ class File < IO
   end
   def self.mtime(file); end
 
-  # With no associated block, `File.open` is a synonym for
-  # [`::new`](https://ruby-doc.org/core-2.1.4/File.html#method-c-new).
-  # If the optional code block is given, it will be passed the opened `file` as
-  # an argument and the [`File`](https://ruby-doc.org/core-2.1.4/File.html)
-  # object will automatically be closed when the block terminates.
-  # The value of the block will be returned from `File.open`.
+  # With no associated block,
+  # [`File.open`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-open)
+  # is a synonym for
+  # [`File.new`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-new). If
+  # the optional code block is given, it will be passed the opened `file` as an
+  # argument and the [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html)
+  # object will automatically be closed when the block terminates. The value of
+  # the block will be returned from
+  # [`File.open`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-open).
   #
   # If a file is being created, its initial permissions may be set using the
-  # `perm` parameter.
-  # See [`::new`](https://ruby-doc.org/core-2.1.4/File.html#method-c-new) for
+  # `perm` parameter. See
+  # [`File.new`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-new) for
   # further discussion.
   #
-  # See [`IO::new`](https://ruby-doc.org/core-2.6.5/IO.html#method-c-new) for a
-  # description of the `mode` and `opt` parameters.
+  # See [`IO.new`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-new) for
+  # a description of the `mode` and `opt` parameters.
   sig do
     params(
       filename: T.any(String, Pathname),
@@ -719,7 +758,7 @@ class File < IO
   # Returns `true` if the named file exists and the effective used id of the
   # calling process is the owner of the file.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -745,7 +784,7 @@ class File < IO
 
   # Returns `true` if the named file is a pipe.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -757,6 +796,9 @@ class File < IO
 
   # Returns `true` if the named file is readable by the effective user and group
   # id of this process. See eaccess(3).
+  #
+  # Note that some OS-level security features may cause this to return true even
+  # though the file is not readable by the effective user/group.
   sig do
     params(
         file: T.any(String, Pathname),
@@ -767,6 +809,9 @@ class File < IO
 
   # Returns `true` if the named file is readable by the real user and group id
   # of this process. See access(3).
+  #
+  # Note that some OS-level security features may cause this to return true even
+  # though the file is not readable by the real user/group.
   sig do
     params(
         file: T.any(String, Pathname),
@@ -822,8 +867,9 @@ class File < IO
   end
   def self.realpath(pathname, dir=T.unsafe(nil)); end
 
-  # Renames the given file to the new name. Raises a `SystemCallError` if the
-  # file cannot be renamed.
+  # Renames the given file to the new name. Raises a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
+  # if the file cannot be renamed.
   #
   # ```ruby
   # File.rename("afile", "afile.bak")   #=> 0
@@ -839,7 +885,7 @@ class File < IO
 
   # Returns `true` if the named file has the setgid bit set.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -851,7 +897,7 @@ class File < IO
 
   # Returns `true` if the named file has the setuid bit set.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -863,7 +909,7 @@ class File < IO
 
   # Returns the size of `file_name`.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -876,7 +922,7 @@ class File < IO
   # Returns `nil` if `file_name` doesn't exist or has zero size, the size of the
   # file otherwise.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -888,7 +934,7 @@ class File < IO
 
   # Returns `true` if the named file is a socket.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -899,7 +945,10 @@ class File < IO
   def self.socket?(file); end
 
   # Splits the given string into a directory and a file component and returns
-  # them in a two-element array. See also `File::dirname` and `File::basename`.
+  # them in a two-element array. See also
+  # [`File::dirname`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-dirname)
+  # and
+  # [`File::basename`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-basename).
   #
   # ```ruby
   # File.split("/home/gumby/.profile")   #=> ["/home/gumby", ".profile"]
@@ -912,7 +961,9 @@ class File < IO
   end
   def self.split(file); end
 
-  # Returns a `File::Stat` object for the named file (see `File::Stat`).
+  # Returns a [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html)
+  # object for the named file (see
+  # [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html)).
   #
   # ```ruby
   # File.stat("testfile").mtime   #=> Tue Apr 08 12:58:04 CDT 2003
@@ -927,7 +978,7 @@ class File < IO
 
   # Returns `true` if the named file has the sticky bit set.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -938,7 +989,7 @@ class File < IO
   def self.sticky?(file); end
 
   # Creates a symbolic link called *new\_name* for the existing file
-  # *old\_name*. Raises a `NotImplemented` exception on platforms that do not
+  # *old\_name*. Raises a NotImplemented exception on platforms that do not
   # support symbolic links.
   #
   # ```ruby
@@ -1001,7 +1052,7 @@ class File < IO
   # Sets the access and modification times of each named file to the first two
   # arguments. If a file is a symlink, this method acts upon its referent rather
   # than the link itself; for the inverse behavior see
-  # [`File.lutime`](https://docs.ruby-lang.org/en/2.6.0/File.html#method-c-lutime).
+  # [`File.lutime`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-lutime).
   # Returns the number of file names in the argument list.
   sig do
     params(
@@ -1017,7 +1068,7 @@ class File < IO
   # file permission bits of *file\_name*. Returns `nil` otherwise. The meaning
   # of the bits is platform dependent; on Unix systems, see `stat(2)`.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   #
   # ```ruby
@@ -1037,7 +1088,7 @@ class File < IO
   # file permission bits of *file\_name*. Returns `nil` otherwise. The meaning
   # of the bits is platform dependent; on Unix systems, see `stat(2)`.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   #
   # ```ruby
@@ -1055,6 +1106,9 @@ class File < IO
 
   # Returns `true` if the named file is writable by the effective user and group
   # id of this process. See eaccess(3).
+  #
+  # Note that some OS-level security features may cause this to return true even
+  # though the file is not writable by the effective user/group.
   sig do
     params(
         file: T.any(String, Pathname),
@@ -1064,7 +1118,10 @@ class File < IO
   def self.writable?(file); end
 
   # Returns `true` if the named file is writable by the real user and group id
-  # of this process. See access(3)
+  # of this process. See access(3).
+  #
+  # Note that some OS-level security features may cause this to return true even
+  # though the file is not writable by the real user/group.
   sig do
     params(
         file: T.any(String, Pathname),
@@ -1075,7 +1132,7 @@ class File < IO
 
   # Returns `true` if the named file exists and has a zero size.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   sig do
     params(
@@ -1085,8 +1142,9 @@ class File < IO
   end
   def self.zero?(file); end
 
-  # Returns the last access time (a `Time` object) for *file*, or epoch if
-  # *file* has not been accessed.
+  # Returns the last access time (a
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) object) for *file*,
+  # or epoch if *file* has not been accessed.
   #
   # ```ruby
   # File.new("testfile").atime   #=> Wed Dec 31 18:00:00 CST 1969
@@ -1101,13 +1159,13 @@ class File < IO
   # ```
   #
   # If the platform doesn't have birthtime, raises
-  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html).
+  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.7.0/NotImplementedError.html).
   sig {returns(Time)}
   def birthtime(); end
 
   # Changes permission bits on *file* to the bit pattern represented by
   # *mode\_int*. Actual effects are platform dependent; on Unix systems, see
-  # `chmod(2)` for details. Follows symbolic links. Also see `File#lchmod`.
+  # `chmod(2)` for details. Follows symbolic links. Also see File#lchmod.
   #
   # ```ruby
   # f = File.new("out", "w");
@@ -1125,7 +1183,7 @@ class File < IO
   # id's. Only a process with superuser privileges may change the owner of a
   # file. The current owner of a file may change the file's group to any group
   # to which the owner belongs. A `nil` or -1 owner or group id is ignored.
-  # Follows symbolic links. See also `File#lchown`.
+  # Follows symbolic links. See also File#lchown.
   #
   # ```ruby
   # File.new("testfile").chown(502, 1000)
@@ -1151,12 +1209,12 @@ class File < IO
   def ctime(); end
 
   # Locks or unlocks a file according to *locking\_constant* (a logical *or* of
-  # the values in the table below). Returns `false` if `File::LOCK_NB` is
+  # the values in the table below). Returns `false` if File::LOCK\_NB is
   # specified and the operation would otherwise have blocked. Not available on
   # all platforms.
   #
   # Locking constants (in class
-  # [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html)):
+  # [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html)):
   #
   # ```
   # LOCK_EX   | Exclusive lock. Only one process may hold an
@@ -1210,8 +1268,9 @@ class File < IO
   end
   def initialize(file, mode=T.unsafe(nil), perm=T.unsafe(nil), opt=T.unsafe(nil)); end
 
-  # Same as `IO#stat`, but does not follow the last symbolic link. Instead,
-  # reports on the link itself.
+  # Same as
+  # [`IO#stat`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-stat), but
+  # does not follow the last symbolic link. Instead, reports on the link itself.
   #
   # ```ruby
   # File.symlink("testfile", "link2test")   #=> 0
@@ -1237,8 +1296,9 @@ class File < IO
   # The pathname may not point to the file corresponding to *file*. For
   # instance, the pathname becomes void when the file has been moved or deleted.
   #
-  # This method raises `IOError` for a *file* created using
-  # `File::Constants::TMPFILE` because they don't have a pathname.
+  # This method raises
+  # [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html) for a *file*
+  # created using File::Constants::TMPFILE because they don't have a pathname.
   #
   # ```ruby
   # File.new("testfile").path               #=> "testfile"
@@ -1303,7 +1363,7 @@ class File < IO
   #
   # `[set]`
   # :   Matches any one character in `set`. Behaves exactly like character sets
-  #     in [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html),
+  #     in [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html),
   #     including set negation (`[^a-z]`).
   #
   # ` \ `
@@ -1312,13 +1372,13 @@ class File < IO
   # `{a,b}`
   # :   Matches pattern a and pattern b if File::FNM\_EXTGLOB flag is enabled.
   #     Behaves like a
-  #     [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) union
+  #     [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) union
   #     (`(?:a|b)`).
   #
   #
   # `flags` is a bitwise OR of the `FNM_XXX` constants. The same glob pattern
   # and flags are used by
-  # [`Dir::glob`](https://docs.ruby-lang.org/en/2.6.0/Dir.html#method-c-glob).
+  # [`Dir::glob`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-glob).
   #
   # Examples:
   #
@@ -1338,6 +1398,7 @@ class File < IO
   #
   # File.fnmatch('cat', 'CAT')                     #=> false # case sensitive
   # File.fnmatch('cat', 'CAT', File::FNM_CASEFOLD) #=> true  # case insensitive
+  # File.fnmatch('cat', 'CAT', File::FNM_SYSCASE)  #=> true or false # depends on the system default
   #
   # File.fnmatch('?',   '/', File::FNM_PATHNAME)  #=> false # wildcard doesn't match '/' on FNM_PATHNAME
   # File.fnmatch('*',   '/', File::FNM_PATHNAME)  #=> false # ditto
@@ -1386,9 +1447,10 @@ class File < IO
   # Raises an exception on any error. Since the underlying implementation relies
   # on the `unlink(2)` system call, the type of exception raised depends on its
   # error type (see https://linux.die.net/man/2/unlink) and has the form of e.g.
-  # `Errno::ENOENT`.
+  # Errno::ENOENT.
   #
-  # See also `Dir::rmdir`.
+  # See also
+  # [`Dir::rmdir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-rmdir).
   sig do
     params(
         files: String,
@@ -1403,8 +1465,9 @@ class File < IO
   # The pathname may not point to the file corresponding to *file*. For
   # instance, the pathname becomes void when the file has been moved or deleted.
   #
-  # This method raises `IOError` for a *file* created using
-  # `File::Constants::TMPFILE` because they don't have a pathname.
+  # This method raises
+  # [`IOError`](https://docs.ruby-lang.org/en/2.7.0/IOError.html) for a *file*
+  # created using File::Constants::TMPFILE because they don't have a pathname.
   #
   # ```ruby
   # File.new("testfile").path               #=> "testfile"
@@ -1447,20 +1510,31 @@ module File::Constants
   WRONLY = T.let(T.unsafe(nil), Integer)
 end
 
-# Objects of class `File::Stat` encapsulate common status information for `File`
-# objects. The information is recorded at the moment the `File::Stat` object is
+# Objects of class
+# [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html) encapsulate
+# common status information for
+# [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) objects. The
+# information is recorded at the moment the
+# [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html) object is
 # created; changes made to the file after that point will not be reflected.
-# `File::Stat` objects are returned by `IO#stat`, `File::stat`, `File#lstat`,
-# and `File::lstat`. Many of these methods return platform-specific values, and
-# not all values are meaningful on all systems. See also `Kernel#test`.
+# [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html) objects are
+# returned by
+# [`IO#stat`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-stat),
+# [`File::stat`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-stat),
+# [`File#lstat`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-i-lstat),
+# and
+# [`File::lstat`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-lstat).
+# Many of these methods return platform-specific values, and not all values are
+# meaningful on all systems. See also
+# [`Kernel#test`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-test).
 class File::Stat < Object
   include Comparable
 
-  # Compares [`File::Stat`](https://docs.ruby-lang.org/en/2.6.0/File/Stat.html)
+  # Compares [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html)
   # objects by comparing their respective modification times.
   #
   # `nil` is returned if `other_stat` is not a
-  # [`File::Stat`](https://docs.ruby-lang.org/en/2.6.0/File/Stat.html) object
+  # [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html) object
   #
   # ```ruby
   # f1 = File.new("f1", "w")
@@ -1476,7 +1550,8 @@ class File::Stat < Object
   end
   def <=>(other); end
 
-  # Returns the last access time for this file as an object of class `Time`.
+  # Returns the last access time for this file as an object of class
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html).
   #
   # ```ruby
   # File.stat("testfile").atime   #=> Wed Dec 31 18:00:00 CST 1969
@@ -1487,7 +1562,7 @@ class File::Stat < Object
   # Returns the birth time for *stat*.
   #
   # If the platform doesn't have birthtime, raises
-  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html).
+  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.7.0/NotImplementedError.html).
   #
   # ```ruby
   # File.write("testfile", "foo")
@@ -1582,7 +1657,7 @@ class File::Stat < Object
   # Returns `true` if the named file is a directory, or a symlink that points at
   # a directory, and `false` otherwise.
   #
-  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # *file\_name* can be an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object.
   #
   # ```ruby
@@ -1822,9 +1897,12 @@ class File::Stat < Object
   def sticky?(); end
 
   # Returns `true` if *stat* is a symbolic link, `false` if it isn't or if the
-  # operating system doesn't support this feature. As `File::stat` automatically
-  # follows symbolic links, `symlink?` will always be `false` for an object
-  # returned by `File::stat`.
+  # operating system doesn't support this feature. As
+  # [`File::stat`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-stat)
+  # automatically follows symbolic links,
+  # [`symlink?`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html#method-i-symlink-3F)
+  # will always be `false` for an object returned by
+  # [`File::stat`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-stat).
   #
   # ```ruby
   # File.symlink("testfile", "alink")   #=> 0

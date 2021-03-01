@@ -1,7 +1,7 @@
 # typed: __STDLIB_INTERNAL
-# [`StringScanner`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html)
+# [`StringScanner`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html)
 # provides for lexical scanning operations on a
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). Here is an
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). Here is an
 # example of its usage:
 #
 # ```ruby
@@ -40,16 +40,16 @@
 # ```
 #
 # When you
-# [`scan`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan)
+# [`scan`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan)
 # for a pattern (a regular expression), the match must occur at the character
 # after the scan pointer. If you use
-# [`scan_until`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan_until),
+# [`scan_until`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan_until),
 # then the match can occur anywhere after the scan pointer. In both cases, the
 # scan pointer moves *just beyond* the last character of the match, ready to
 # scan again from the next character onwards. This is demonstrated by the
 # example above.
 #
-# ## [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) Categories
+# ## [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) Categories
 #
 # There are other methods besides the plain scanners. You can look ahead in the
 # string without actually scanning. You can access the most recent match. You
@@ -58,67 +58,71 @@
 #
 # ### Advancing the Scan Pointer
 #
-# *   [`getch`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-getch)
-# *   [`get_byte`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-get_byte)
-# *   [`scan`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan)
-# *   [`scan_until`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan_until)
-# *   [`skip`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-skip)
-# *   [`skip_until`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-skip_until)
+# *   [`getch`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-getch)
+# *   [`get_byte`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-get_byte)
+# *   [`scan`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan)
+# *   [`scan_until`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan_until)
+# *   [`skip`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-skip)
+# *   [`skip_until`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-skip_until)
 #
 #
 # ### Looking Ahead
 #
-# *   [`check`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-check)
-# *   [`check_until`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-check_until)
-# *   [`exist?`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-exist-3F)
-# *   [`match?`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-match-3F)
-# *   [`peek`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-peek)
+# *   [`check`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-check)
+# *   [`check_until`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-check_until)
+# *   [`exist?`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-exist-3F)
+# *   [`match?`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-match-3F)
+# *   [`peek`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-peek)
 #
 #
 # ### Finding Where we Are
 #
-# *   [`beginning_of_line?`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-beginning_of_line-3F)
-#     (#bol?)
-# *   [`eos?`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-eos-3F)
-# *   [`rest?`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-rest-3F)
-# *   [`rest_size`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-rest_size)
-# *   [`pos`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-pos)
+# *   [`beginning_of_line?`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-beginning_of_line-3F)
+#     (bol?)
+# *   [`eos?`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-eos-3F)
+# *   [`rest?`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-rest-3F)
+# *   [`rest_size`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-rest_size)
+# *   [`pos`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-pos)
 #
 #
 # ### Setting Where we Are
 #
-# *   [`reset`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-reset)
-# *   [`terminate`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-terminate)
-# *   [`pos=`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-pos-3D)
+# *   [`reset`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-reset)
+# *   [`terminate`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-terminate)
+# *   [`pos=`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-pos-3D)
 #
 #
-# ### Match [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html)
+# ### Match [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html)
 #
-# *   [`matched`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-matched)
-# *   [`matched?`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-matched-3F)
-# *   [`matched_size`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-matched_size)
+# *   [`matched`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-matched)
+# *   [`matched?`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-matched-3F)
+# *   [`matched_size`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-matched_size)
 #
 #
 # :
-# *   [`pre_match`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-pre_match)
-# *   [`post_match`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-post_match)
+# *   [`pre_match`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-pre_match)
+# *   [`post_match`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-post_match)
 #
 #
 # ### Miscellaneous
 #
 # *   <<
-# *   [`concat`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-concat)
-# *   [`string`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-string)
-# *   [`string=`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-string-3D)
-# *   [`unscan`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-unscan)
+# *   [`concat`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-concat)
+# *   [`string`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-string)
+# *   [`string=`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-string-3D)
+# *   [`unscan`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-unscan)
 #
 #
 # There are aliases to several of the methods.
 class StringScanner < Object
   # Creates a new
-  # [`StringScanner`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html)
-  # object to scan over the given `string`. `dup` argument is obsolete and not
-  # used now.
+  # [`StringScanner`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html)
+  # object to scan over the given `string`.
+  #
+  # If `fixed_anchor` is `true`, `\A` always matches the beginning of the
+  # string. Otherwise, `\A` always matches the current position.
+  #
+  # `dup` argument is obsolete and not used now.
   sig do
     params(
         arg0: String,
@@ -208,7 +212,7 @@ class StringScanner < Object
   def charpos; end
 
   # This returns the value that
-  # [`scan`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan)
+  # [`scan`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan)
   # would return, without advancing the scan pointer. The match register is
   # affected, though.
   #
@@ -222,12 +226,12 @@ class StringScanner < Object
   # ```
   #
   # Mnemonic: it "checks" to see whether a
-  # [`scan`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan)
+  # [`scan`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan)
   # will return a value.
   def check(_); end
 
   # This returns the value that
-  # [`scan_until`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan_until)
+  # [`scan_until`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan_until)
   # would return, without advancing the scan pointer. The match register is
   # affected, though.
   #
@@ -239,14 +243,14 @@ class StringScanner < Object
   # ```
   #
   # Mnemonic: it "checks" to see whether a
-  # [`scan_until`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan_until)
+  # [`scan_until`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan_until)
   # will return a value.
   def check_until(_); end
 
   # Equivalent to
-  # [`terminate`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-terminate).
+  # [`terminate`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-terminate).
   # This method is obsolete; use
-  # [`terminate`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-terminate)
+  # [`terminate`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-terminate)
   # instead.
   def clear; end
 
@@ -263,15 +267,15 @@ class StringScanner < Object
   def concat(_); end
 
   # Equivalent to
-  # [`eos?`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-eos-3F).
+  # [`eos?`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-eos-3F).
   # This method is obsolete, use
-  # [`eos?`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-eos-3F)
+  # [`eos?`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-eos-3F)
   # instead.
   def empty?; end
 
   # Looks *ahead* to see if the `pattern` exists *anywhere* in the string,
   # without advancing the scan pointer. This predicates whether a
-  # [`scan_until`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan_until)
+  # [`scan_until`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan_until)
   # will return a value.
   #
   # ```ruby
@@ -285,7 +289,7 @@ class StringScanner < Object
 
   # Scans one byte and returns it. This method is not multibyte character
   # sensitive. See also:
-  # [`getch`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-getch).
+  # [`getch`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-getch).
   #
   # ```ruby
   # s = StringScanner.new('ab')
@@ -302,9 +306,9 @@ class StringScanner < Object
   def get_byte; end
 
   # Equivalent to
-  # [`get_byte`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-get_byte).
+  # [`get_byte`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-get_byte).
   # This method is obsolete; use
-  # [`get_byte`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-get_byte)
+  # [`get_byte`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-get_byte)
   # instead.
   def getbyte; end
 
@@ -339,14 +343,14 @@ class StringScanner < Object
   def getch(); end
 
   # Returns a string that represents the
-  # [`StringScanner`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html)
+  # [`StringScanner`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html)
   # object, showing:
   # *   the current position
   # *   the size of the string
   # *   the characters surrounding the scan pointer
   #
   #     s =
-  #     [`StringScanner.new`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-c-new)("Fri
+  #     [`StringScanner.new`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-c-new)("Fri
   #     Dec 12 1975 14:39") s.inspect            # -> '#<StringScanner 0/21 @
   #     "Fri D...">' s.scan\_until /12/    # -> "Fri Dec 12" s.inspect
   #     # -> '#<StringScanner 10/21 "...ec 12" @ " 1975...">'
@@ -359,6 +363,7 @@ class StringScanner < Object
   # s = StringScanner.new('test string')
   # p s.match?(/\w+/)   # -> 4
   # p s.match?(/\w+/)   # -> 4
+  # p s.match?("test")  # -> 4
   # p s.match?(/\s+/)   # -> nil
   # ```
   def match?(_); end
@@ -384,7 +389,7 @@ class StringScanner < Object
   def matched?; end
 
   # Returns the size of the most recent match (see
-  # [`matched`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-matched)),
+  # [`matched`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-matched)),
   # or `nil` if there was no recent match.
   #
   # ```ruby
@@ -407,9 +412,9 @@ class StringScanner < Object
   def peek(_); end
 
   # Equivalent to
-  # [`peek`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-peek).
+  # [`peek`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-peek).
   # This method is obsolete; use
-  # [`peek`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-peek)
+  # [`peek`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-peek)
   # instead.
   def peep(_); end
 
@@ -429,8 +434,7 @@ class StringScanner < Object
   # ```
   def pointer; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the byte position of
-  # the scan pointer.
+  # Sets the byte position of the scan pointer.
   #
   # ```ruby
   # s = StringScanner.new('test string')
@@ -455,8 +459,7 @@ class StringScanner < Object
   # ```
   def pos; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the byte position of
-  # the scan pointer.
+  # Sets the byte position of the scan pointer.
   #
   # ```ruby
   # s = StringScanner.new('test string')
@@ -497,9 +500,9 @@ class StringScanner < Object
   def rest; end
 
   # Returns true iff there is more data in the string. See
-  # [`eos?`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-eos-3F).
+  # [`eos?`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-eos-3F).
   # This method is obsolete; use
-  # [`eos?`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-eos-3F)
+  # [`eos?`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-eos-3F)
   # instead.
   #
   # ```ruby
@@ -513,7 +516,7 @@ class StringScanner < Object
   def rest_size; end
 
   # `s.restsize` is equivalent to `s.rest_size`. This method is obsolete; use
-  # [`rest_size`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-rest_size)
+  # [`rest_size`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-rest_size)
   # instead.
   def restsize; end
 
@@ -573,7 +576,7 @@ class StringScanner < Object
   # length of the match is returned. Otherwise, `nil` is returned.
   #
   # It's similar to
-  # [`scan`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan),
+  # [`scan`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan),
   # but without returning the matched string.
   #
   # ```ruby
@@ -581,7 +584,8 @@ class StringScanner < Object
   # p s.skip(/\w+/)   # -> 4
   # p s.skip(/\w+/)   # -> nil
   # p s.skip(/\s+/)   # -> 1
-  # p s.skip(/\w+/)   # -> 6
+  # p s.skip("st")    # -> 2
+  # p s.skip(/\w+/)   # -> 4
   # p s.skip(/./)     # -> nil
   # ```
   def skip(_); end
@@ -594,7 +598,7 @@ class StringScanner < Object
   # was unsuccessful.
   #
   # It's similar to
-  # [`scan_until`](https://docs.ruby-lang.org/en/2.6.0/StringScanner.html#method-i-scan_until),
+  # [`scan_until`](https://docs.ruby-lang.org/en/2.7.0/StringScanner.html#method-i-scan_until),
   # but without returning the intervening string.
   #
   # ```ruby
@@ -611,13 +615,11 @@ class StringScanner < Object
   # `str`.
   def string=(_); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the scan pointer to
-  # the end of the string and clear matching data.
+  # Sets the scan pointer to the end of the string and clear matching data.
   def terminate; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the scan pointer to
-  # the previous position. Only one previous position is remembered, and it
-  # changes with each scanning operation.
+  # Sets the scan pointer to the previous position. Only one previous position
+  # is remembered, and it changes with each scanning operation.
   #
   # ```ruby
   # s = StringScanner.new('test string')

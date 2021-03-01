@@ -1,29 +1,29 @@
 # typed: __STDLIB_INTERNAL
 
-# [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) is the default
+# [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) is the default
 # root of all Ruby objects.
-# [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) inherits from
-# [`BasicObject`](https://docs.ruby-lang.org/en/2.6.0/BasicObject.html) which
+# [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) inherits from
+# [`BasicObject`](https://docs.ruby-lang.org/en/2.7.0/BasicObject.html) which
 # allows creating alternate object hierarchies. Methods on
-# [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) are available to
+# [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) are available to
 # all classes unless explicitly overridden.
 #
-# [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) mixes in the
-# [`Kernel`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html) module, making the
+# [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) mixes in the
+# [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html) module, making the
 # built-in kernel functions globally accessible. Although the instance methods
-# of [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) are defined by
-# the [`Kernel`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html) module, we
+# of [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) are defined by
+# the [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html) module, we
 # have chosen to document them here for clarity.
 #
 # When referencing constants in classes inheriting from
-# [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) you do not need to
+# [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) you do not need to
 # use the full namespace. For example, referencing `File` inside `YourClass`
 # will find the top-level
-# [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) class.
+# [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) class.
 #
 # In the descriptions of Object's methods, the parameter *symbol* refers to a
 # symbol, which is either a quoted string or a
-# [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html) (such as `:name`).
+# [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) (such as `:name`).
 class Object < BasicObject
   include Kernel
 
@@ -34,6 +34,11 @@ class Object < BasicObject
   #
   # Note: that some objects of builtin classes are reused for optimization. This
   # is the case for immediate values and frozen string literals.
+  #
+  # [`BasicObject`](https://docs.ruby-lang.org/en/2.7.0/BasicObject.html)
+  # implements +\_\_id\_\_+,
+  # [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html) implements
+  # `object_id`.
   #
   # Immediate values are not passed by reference but are passed by value: `nil`,
   # `true`, `false`, Fixnums, Symbols, and some Floats.
@@ -54,15 +59,15 @@ class Object < BasicObject
   # "my string".yield_self {|s| s.upcase }   #=> "MY STRING"
   # ```
   #
-  # Good usage for `yield_self` is value piping in method chains:
+  # Good usage for `then` is value piping in method chains:
   #
   # ```ruby
   # require 'open-uri'
   # require 'json'
   #
   # construct_url(arguments).
-  #   yield_self {|url| open(url).read }.
-  #   yield_self {|response| JSON.parse(response) }
+  #   then {|url| open(url).read }.
+  #   then {|response| JSON.parse(response) }
   # ```
   #
   # When called without block, the method returns `Enumerator`, which can be
@@ -70,9 +75,9 @@ class Object < BasicObject
   #
   # ```ruby
   # # meets condition, no-op
-  # 1.yield_self.detect(&:odd?)            # => 1
+  # 1.then.detect(&:odd?)            # => 1
   # # does not meet condition, drop value
-  # 2.yield_self.detect(&:odd?)            # => nil
+  # 2.then.detect(&:odd?)            # => nil
   # ```
   sig do
     type_parameters(:X)
@@ -90,15 +95,15 @@ class Object < BasicObject
   # "my string".yield_self {|s| s.upcase }   #=> "MY STRING"
   # ```
   #
-  # Good usage for `yield_self` is value piping in method chains:
+  # Good usage for `then` is value piping in method chains:
   #
   # ```ruby
   # require 'open-uri'
   # require 'json'
   #
   # construct_url(arguments).
-  #   yield_self {|url| open(url).read }.
-  #   yield_self {|response| JSON.parse(response) }
+  #   then {|url| open(url).read }.
+  #   then {|response| JSON.parse(response) }
   # ```
   #
   # When called without block, the method returns `Enumerator`, which can be
@@ -106,9 +111,9 @@ class Object < BasicObject
   #
   # ```ruby
   # # meets condition, no-op
-  # 1.yield_self.detect(&:odd?)            # => 1
+  # 1.then.detect(&:odd?)            # => 1
   # # does not meet condition, drop value
-  # 2.yield_self.detect(&:odd?)            # => nil
+  # 2.then.detect(&:odd?)            # => nil
   # ```
   sig do
     type_parameters(:X)

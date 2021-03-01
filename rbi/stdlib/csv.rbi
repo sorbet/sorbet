@@ -1,9 +1,9 @@
 # typed: __STDLIB_INTERNAL
 
 # This class provides a complete interface to
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) files and data. It
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) files and data. It
 # offers tools to enable you to read and write to and from Strings or
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) objects, as needed.
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects, as needed.
 #
 # The most generic interface of the library is:
 #
@@ -26,15 +26,15 @@
 # There are several specialized class methods for one-statement reading or
 # writing, described in the Specialized Methods section.
 #
-# If a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) is passed
-# into [`::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new), it
+# If a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) is passed
+# into [`::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new), it
 # is internally wrapped into a
-# [`StringIO`](https://docs.ruby-lang.org/en/2.6.0/StringIO.html) object.
+# [`StringIO`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html) object.
 #
 # `options` can be used for specifying the particular
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) flavor (column
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) flavor (column
 # separators, row separators, value quoting and so on), and for data conversion,
-# see [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html) Conversion section
+# see [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html) Conversion section
 # for the description of the latter.
 #
 # ## Specialized Methods
@@ -89,16 +89,16 @@
 # CSV($stdin)     { |csv_in|  csv_in.each { |row| p row } }  # from $stdin
 # ```
 #
-# ## [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html) Conversion
+# ## [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html) Conversion
 #
-# ### [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) with headers
+# ### [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) with headers
 #
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) allows to specify column
-# names of [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) file, whether
-# they are in data, or provided separately. If headers specified, reading
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) allows to specify column
+# names of [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) file, whether
+# they are in data, or provided separately. If headers are specified, reading
 # methods return an instance of
-# [`CSV::Table`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html), consisting
-# of [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html).
+# [`CSV::Table`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html), consisting
+# of [`CSV::Row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html).
 #
 # ```ruby
 # # Headers are part of data
@@ -114,16 +114,16 @@
 # data.first.to_h #=> {"Name"=>"Bob", "Department"=>"Engineering", "Salary"=>"1000"}
 #
 # # Headers provided by developer
-# data = CSV.parse('Bob,Engeneering,1000', headers: %i[name department salary])
+# data = CSV.parse('Bob,Engineering,1000', headers: %i[name department salary])
 # data.first      #=> #<CSV::Row name:"Bob" department:"Engineering" salary:"1000">
 # ```
 #
 # ### Typed data reading
 #
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) allows to provide a set
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) allows to provide a set
 # of data *converters* e.g. transformations to try on input data. Converter
 # could be a symbol from
-# [`CSV::Converters`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#Converters)
+# [`CSV::Converters`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#Converters)
 # constant's keys, or lambda.
 #
 # ```ruby
@@ -140,68 +140,68 @@
 # #=> [["Bob", 2018-03-01 00:00:00 +0200, "100"]]
 # ```
 #
-# ## [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) and Character Encodings (M17n or Multilingualization)
+# ## [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) and Character Encodings (M17n or Multilingualization)
 #
-# This new [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) parser is m17n
+# This new [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) parser is m17n
 # savvy. The parser works in the
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) of the
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) or
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) object being read
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) of the
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) or
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) object being read
 # from or written to. Your data is never transcoded (unless you ask Ruby to
 # transcode it for you) and will literally be parsed in the
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) it is in. Thus
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will return Arrays or
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) it is in. Thus
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) will return Arrays or
 # Rows of Strings in the
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) of your data.
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) of your data.
 # This is accomplished by transcoding the parser itself into your
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html).
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html).
 #
 # Some transcoding must take place, of course, to accomplish this multiencoding
 # support. For example, `:col_sep`, `:row_sep`, and `:quote_char` must be
 # transcoded to match your data. Hopefully this makes the entire process feel
 # transparent, since CSV's defaults should just magically work for your data.
 # However, you can set these values manually in the target
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) to avoid the
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) to avoid the
 # translation.
 #
 # It's also important to note that while all of CSV's core parser is now
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) agnostic, some
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) agnostic, some
 # features are not. For example, the built-in converters will try to transcode
 # data to UTF-8 before making conversions. Again, you can provide custom
 # converters that are aware of your Encodings to avoid this translation. It's
 # just too hard for me to support native conversions in all of Ruby's Encodings.
 #
-# Anyway, the practical side of this is simple:  make sure
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) and
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) objects passed
-# into [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) have the proper
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) set and
+# Anyway, the practical side of this is simple: make sure
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) and
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) objects passed
+# into [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) have the proper
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) set and
 # everything should just work.
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) methods that allow you
-# to open [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) objects
-# (CSV::foreach(),
-# [`CSV::open()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-open),
-# [`CSV::read()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-read),
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) methods that allow you
+# to open [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects
+# ([`CSV::foreach()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-foreach),
+# [`CSV::open()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-open),
+# [`CSV::read()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-read),
 # and
-# [`CSV::readlines()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-readlines))
+# [`CSV::readlines()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-readlines))
 # do allow you to specify the
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html).
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html).
 #
 # One minor exception comes when generating
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) into a
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) with an
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) that is not
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) into a
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) with an
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) that is not
 # ASCII compatible. There's no existing data for
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) to use to prepare itself
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) to use to prepare itself
 # and thus you will probably need to manually specify the desired
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) for most of
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) for most of
 # those cases. It will try to guess using the fields in a row of output though,
 # when using
-# [`CSV::generate_line()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-generate_line)
+# [`CSV::generate_line()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-generate_line)
 # or Array#to\_csv().
 #
 # I try to point out any other
-# [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) issues in the
+# [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) issues in the
 # documentation of methods as they come up.
 #
 # This has been tested to the best of my ability with all non-"dummy" Encodings
@@ -249,23 +249,23 @@ class CSV < Object
   VERSION = T.let(T.unsafe(nil), String)
 
   # This method is intended as the primary interface for reading
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) files. You pass a
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) files. You pass a
   # `path` and any `options` you wish to set for the read. Each row of file will
   # be passed to the provided `block` in turn.
   #
   # The `options` parameter can be anything
-  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new)
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new)
   # understands. This method also understands an additional `:encoding`
   # parameter that you can use to specify the
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) of the data
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) of the data
   # in the file to be read. You must provide this unless your data is in
-  # [`Encoding::default_external()`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_external).
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will use this to
+  # [`Encoding::default_external()`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_external).
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) will use this to
   # determine how to parse the data. You may provide a second
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) to have the
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) to have the
   # data transcoded as it is read. For example, `encoding: "UTF-32BE:UTF-8"`
   # would read UTF-32BE data from the file but transcode it to UTF-8 before
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) parses it.
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) parses it.
   sig do
     params(
         path: T.any(String, ::Sorbet::Private::Static::IOLike),
@@ -472,16 +472,16 @@ class CSV < Object
   def initialize(io=T.unsafe(nil), options=T.unsafe(nil)); end
 
   # This method can be used to easily parse
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) out of a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). You may either
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) out of a
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). You may either
   # provide a `block` which will be called with each row of the
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) in turn, or just
-  # use the returned [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) in turn, or just
+  # use the returned [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # of Arrays (when no `block` is given).
   #
   # You pass your `str` to read from, and an optional `options` containing
   # anything
-  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new)
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new)
   # understands.
   sig do
     params(
@@ -505,13 +505,13 @@ class CSV < Object
   def self.parse(str, options=T.unsafe(nil), &blk); end
 
   # This method is a shortcut for converting a single line of a
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) into an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html). Note that if
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html)
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) into an
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html). Note that if
   # `line` contains multiple rows, anything beyond the first row is ignored.
   #
   # The `options` parameter can be anything
-  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new)
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new)
   # understands.
   sig do
     params(
@@ -523,35 +523,35 @@ class CSV < Object
   def self.parse_line(str, options=T.unsafe(nil)); end
 
   # Slurps the remaining rows and returns an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Arrays.
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Arrays.
   #
   # The data source must be open for reading.
   #
   # Also aliased as:
-  # [`readlines`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-readlines)
+  # [`readlines`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-readlines)
   sig {returns(T::Array[T::Array[T.nilable(String)]])}
   def read; end
 
   # Alias for:
-  # [`shift`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-shift)
+  # [`shift`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-shift)
   sig {returns(T.nilable(T::Array[T.nilable(String)]))}
   def readline; end
 
-  # Use to slurp a [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) file
-  # into an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Arrays.
+  # Use to slurp a [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) file
+  # into an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Arrays.
   # Pass the `path` to the file and any `options`
-  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new)
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new)
   # understands. This method also understands an additional `:encoding`
   # parameter that you can use to specify the
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) of the data
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) of the data
   # in the file to be read. You must provide this unless your data is in
-  # [`Encoding::default_external()`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_external).
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will use this to
+  # [`Encoding::default_external()`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_external).
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) will use this to
   # determine how to parse the data. You may provide a second
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) to have the
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) to have the
   # data transcoded as it is read. For example, `encoding: "UTF-32BE:UTF-8"`
   # would read UTF-32BE data from the file but transcode it to UTF-8 before
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) parses it.
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) parses it.
   sig do
     params(
         path: String,
@@ -562,85 +562,90 @@ class CSV < Object
   def self.read(path, options=T.unsafe(nil)); end
 
   # The primary write method for wrapped Strings and IOs, `row` (an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) or
-  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html)) is converted
-  # to [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) and appended to the
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) or
+  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html)) is converted
+  # to [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) and appended to the
   # data source. When a
-  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) is passed,
+  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html) is passed,
   # only the row's fields() are appended to the output.
   #
   # The data source must be open for writing.
   #
   # Also aliased as:
-  # [`add_row`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-add_row),
-  # [`puts`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-puts)
+  # [`add_row`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-add_row),
+  # [`puts`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-puts)
   sig { params(row: T.any(T::Array[T.untyped], CSV::Row)).void }
   def <<(row); end
 
   # Alias for:
-  # [`<<`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-3C-3C)
+  # [`<<`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-3C-3C)
   sig { params(row: T.any(T::Array[T.untyped], CSV::Row)).void }
   def add_row(row); end
 
   # This method wraps a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) you provide, or
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) you provide, or
   # an empty default
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), in a
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) object which is passed
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), in a
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) object which is passed
   # to the provided block. You can use the block to append
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) rows to the
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) and when the
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) rows to the
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) and when the
   # block exits, the final
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) will be
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) will be
   # returned.
   #
   # Note that a passed
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) **is** modified
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) **is** modified
   # by this method. Call dup() before passing if you need a new
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
   # The `options` parameter can be anything
-  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new)
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new)
   # understands. This method understands an additional `:encoding` parameter
   # when not passed a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) to set the base
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) for the
-  # output. [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) needs this
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) to set the base
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) for the
+  # output. [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) needs this
   # hint if you plan to output non-ASCII compatible data.
   sig { params(str: String, options: T.untyped, blk: T.proc.params(csv: CSV).void).returns(String) }
   def self.generate(str = "", **options, &blk); end
 
-  # This method is a shortcut for converting a single row ([`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html))
-  # into a [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  # This method is a shortcut for converting a single row
+  # ([`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)) into a
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html)
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
-  # The `options` parameter can be anything [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) understands.
-  # This method understands an additional `:encoding` parameter to set the base
-  # Encoding for the output.  This method will try to guess your Encoding from
-  # the first non-`nil` field in `row`, if possible, but you may need to use
-  # this parameter as a backup plan.
+  # The `options` parameter can be anything
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new)
+  # understands. This method understands an additional `:encoding` parameter to
+  # set the base [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
+  # for the output. This method will try to guess your
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) from the
+  # first non-`nil` field in `row`, if possible, but you may need to use this
+  # parameter as a backup plan.
   #
-  # The `:row_sep` `option` defaults to `$INPUT_RECORD_SEPARATOR`
-  # (`$/`) when calling this method.
+  # The `:row_sep` `option` defaults to `$INPUT_RECORD_SEPARATOR` (`$/`) when
+  # calling this method.
   sig { params(row: T::Array[T.nilable(String)], options: T.untyped).returns(String) }
   def self.generate_line(row, **options); end
 
   # This method is a convenience for building Unix-like filters for
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) data. Each row is
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) data. Each row is
   # yielded to the provided block which can alter it as needed. After the block
   # returns, the row is appended to `output` altered or not.
   #
   # The `input` and `output` arguments can be anything
-  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new)
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new)
   # accepts (generally
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) objects). If not given,
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects). If not given,
   # they default to `ARGF` and `$stdout`.
   #
   # The `options` parameter is also filtered down to
-  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new)
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new)
   # after some clever key parsing. Any key beginning with `:in_` or `:input_`
   # will have that leading identifier stripped and will only be used in the
-  # `options` [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) for the
+  # `options` [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) for the
   # `input` object. Keys starting with `:out_` or `:output_` affect only
   # `output`. All other keys are assigned to both objects.
   #
@@ -648,57 +653,57 @@ class CSV < Object
   def self.filter(input = _, output = _, **options); end
 
   # This method will return a
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) instance, just like
-  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new),
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) instance, just like
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new),
   # but the instance will be cached and returned for all future calls to this
   # method for the same `data` object (tested by
-  # [`Object#object_id()`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-object_id))
+  # [`Object#object_id()`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-object_id))
   # with the same `options`.
   #
   # If a block is given, the instance is passed to the block and the return
   # value becomes the return value of the block.
   def self.instance(data = _, **options); end
 
-  # This method opens an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # This method opens an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object, and wraps that with
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html). This is intended as
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html). This is intended as
   # the primary interface for writing a
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) file.
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) file.
   #
   # You must pass a `filename` and may optionally add a `mode` for Ruby's
   # open(). You may also pass an optional
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) containing any
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) containing any
   # `options`
-  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new)
+  # [`CSV::new()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new)
   # understands as the final argument.
   #
   # This method works like Ruby's open() call, in that it will pass a
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) object to a provided
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) object to a provided
   # block and close it when the block terminates, or it will return the
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) object when no block
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) object when no block
   # is provided. (**Note**: This is different from the Ruby 1.8
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) library which passed
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) library which passed
   # rows to the block. Use
-  # [`CSV::foreach()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-foreach)
+  # [`CSV::foreach()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-foreach)
   # for that behavior.)
   #
   # You must provide a `mode` with an embedded
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) designator
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) designator
   # unless your data is in
-  # [`Encoding::default_external()`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html#method-c-default_external).
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will check the
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) of the
-  # underlying [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object (set
-  # by the `mode` you pass) to determine how to parse the data.  You may provide
-  # a second [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) to
+  # [`Encoding::default_external()`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html#method-c-default_external).
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) will check the
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) of the
+  # underlying [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object (set
+  # by the `mode` you pass) to determine how to parse the data. You may provide
+  # a second [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) to
   # have the data transcoded as it is read just as you can with a normal call to
-  # [`IO::open()`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-open).
+  # [`IO::open()`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-open).
   # For example, `"rb:UTF-32BE:UTF-8"` would read UTF-32BE data from the file
   # but transcode it to UTF-8 before
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) parses it.
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) parses it.
   #
-  # An opened [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) object will
-  # delegate to many [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) methods
+  # An opened [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) object will
+  # delegate to many [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) methods
   # for convenience. You may call:
   #
   # *   binmode()
@@ -728,14 +733,14 @@ class CSV < Object
   # *   sync()
   # *   sync=()
   # *   tell()
-  # *   [`to_i`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-to_i)()
-  # *   [`to_io`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-to_io)()
+  # *   [`to_i`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-to_i)()
+  # *   [`to_io`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-to_io)()
   # *   truncate()
   # *   tty?()
   def self.open(filename, mode = _, **options); end
 
   # Alias for
-  # [`CSV::read()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-read).
+  # [`CSV::read()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-read).
   def self.readlines(*args); end
 
   # A shortcut for:
@@ -752,25 +757,25 @@ class CSV < Object
   def binmode?(*args, &block); end
 
   # The encoded `:col_sep` used in parsing and writing. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def col_sep; end
 
   # You can use this method to install a
-  # [`CSV::Converters`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#Converters)
+  # [`CSV::Converters`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#Converters)
   # built-in, or provide a block that handles a custom conversion.
   #
   # If you provide a block that takes one argument, it will be passed the field
   # and is expected to return the converted value or the field itself. If your
   # block takes two arguments, it will also be passed a
-  # [`CSV::FieldInfo`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#FieldInfo)
-  # [`Struct`](https://docs.ruby-lang.org/en/2.6.0/Struct.html), containing
+  # [`CSV::FieldInfo`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#FieldInfo)
+  # [`Struct`](https://docs.ruby-lang.org/en/2.7.0/Struct.html), containing
   # details about the field. Again, the block should return a converted field or
   # the field itself.
   def convert(name = _, &converter); end
 
   # Returns the current list of converters in effect. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details. Built-in converters will be returned by name, while others will be
   # returned as is.
   def converters; end
@@ -778,46 +783,46 @@ class CSV < Object
   # Yields each row of the data source in turn.
   #
   # Support for
-  # [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html).
+  # [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html).
   #
   # The data source must be open for reading.
   def each; end
 
-  # The [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) is parsing or writing
+  # The [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) is parsing or writing
   # in. This will be the
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) you receive
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) you receive
   # parsed data in and/or the
-  # [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html) data will be
+  # [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html) data will be
   # written in.
   def encoding; end
 
   # Alias for:
-  # [`eof?`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-eof-3F)
+  # [`eof?`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-eof-3F)
   def eof(*args, &block); end
 
   # Also aliased as:
-  # [`eof`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-eof)
+  # [`eof`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-eof)
   def eof?(*args, &block); end
 
   # The limit for field size, if any. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def field_size_limit; end
 
   def flock(*args, &block); end
 
   # Returns `true` if all output fields are quoted. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def force_quotes?; end
 
   # Alias for:
-  # [`shift`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-shift)
+  # [`shift`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-shift)
   def gets; end
 
   # Identical to
-  # [`CSV#convert()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-convert),
+  # [`CSV#convert()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-convert),
   # but for header rows.
   #
   # Note that this method must be called before header rows are read to have any
@@ -825,7 +830,7 @@ class CSV < Object
   def header_convert(name = _, &converter); end
 
   # Returns the current list of converters in effect for headers. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details. Built-in converters will be returned by name, while others will be
   # returned as is.
   def header_converters; end
@@ -835,19 +840,19 @@ class CSV < Object
 
   # Returns `nil` if headers will not be used, `true` if they will but have not
   # yet been read, or the actual headers after they have been read. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def headers; end
 
   # Returns a simplified description of the key
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) attributes in an ASCII
-  # compatible [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) attributes in an ASCII
+  # compatible [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   def inspect; end
 
   def ioctl(*args, &block); end
 
   # Returns `true` if illegal input is handled. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def liberal_parsing?; end
 
@@ -861,54 +866,54 @@ class CSV < Object
   def path(*args, &block); end
 
   # Alias for:
-  # [`<<`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-3C-3C)
+  # [`<<`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-3C-3C)
   def puts(row); end
 
   # The encoded `:quote_char` used in parsing and writing. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def quote_char; end
 
   # Alias for:
-  # [`read`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-read)
+  # [`read`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-read)
   def readlines; end
 
   # Returns `true` if headers will be returned as a row of results. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def return_headers?; end
 
-  # Rewinds the underlying [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # Rewinds the underlying [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object and resets CSV's lineno() counter.
   def rewind; end
 
   # The encoded `:row_sep` used in parsing and writing. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def row_sep; end
 
   # The primary read method for wrapped Strings and IOs, a single row is pulled
   # from the data source, parsed and returned as an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of fields (if
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of fields (if
   # header rows are not used) or a
-  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) (when header
+  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html) (when header
   # rows are used).
   #
   # The data source must be open for reading.
   #
   # Also aliased as:
-  # [`gets`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-gets),
-  # [`readline`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-readline)
+  # [`gets`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-gets),
+  # [`readline`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-readline)
   def shift; end
 
   # Returns `true` blank lines are skipped by the parser. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def skip_blanks?; end
 
   # The regex marking a line as a comment. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
-  # details
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
+  # details.
   def skip_lines; end
 
   def stat(*args, &block); end
@@ -918,25 +923,25 @@ class CSV < Object
   def to_io(*args, &block); end
 
   # Returns `true` if unconverted\_fields() to parsed results. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def unconverted_fields?; end
 
   # Returns `true` if headers are written in output. See
-  # [`CSV::new`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-new) for
+  # [`CSV::new`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-new) for
   # details.
   def write_headers?; end
 end
 
-# A [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) is part
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) and part
-# [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html). It retains an order
+# A [`CSV::Row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html) is part
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) and part
+# [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html). It retains an order
 # for the fields and allows duplicates just as an
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) would, but also
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) would, but also
 # allows you to access fields by name just as you could if they were in a
-# [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
+# [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
 #
-# All rows returned by [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
+# All rows returned by [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html)
 # will be constructed from this class, if header row processing is activated.
 class CSV::Row < Object
   include Enumerable
@@ -968,9 +973,9 @@ class CSV::Row < Object
   sig { params(headers: T::Array[BasicObject], fields: T::Array[BasicObject], header_row: T::Boolean).void }
   def initialize(headers, fields, header_row); end
 
-  # If a two-element [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # If a two-element [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # is provided, it is assumed to be a header and field and the pair is
-  # appended. A [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) works
+  # appended. A [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) works
   # the same way with the key being the header and the value being the field.
   # Anything else is assumed to be a lone field which is appended with a `nil`
   # header.
@@ -983,20 +988,20 @@ class CSV::Row < Object
   def ==(other); end
 
   # Alias for:
-  # [`field`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-field)
+  # [`field`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-field)
   def [](header_or_index, minimum_index = _); end
 
   # Looks up the field by the semantics described in
-  # [`CSV::Row.field()`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-field)
+  # [`CSV::Row.field()`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-field)
   # and assigns the `value`.
   #
   # Assigning past the end of the row with an index will set all pairs between
   # to `[nil, nil]`. Assigning to an unused header appends the new pair.
   def []=(*args); end
 
-  # Used to remove a pair from the row by `header` or `index`. The pair is
-  # located as described in
-  # [`CSV::Row.field()`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-field).
+  # Removes a pair from the row by `header` or `index`. The pair is located as
+  # described in
+  # [`CSV::Row.field()`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-field).
   # The deleted pair is returned, or `nil` if a pair could not be found.
   def delete(header_or_index, minimum_index = _); end
 
@@ -1007,32 +1012,32 @@ class CSV::Row < Object
   # This method returns the row for chaining.
   #
   # If no block is given, an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned.
   def delete_if(&block); end
 
   # Yields each pair of the row as header and field tuples (much like iterating
-  # over a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)). This method
+  # over a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)). This method
   # returns the row for chaining.
   #
   # If no block is given, an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned.
   #
   # Support for
-  # [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html).
+  # [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html).
   #
   # Also aliased as:
-  # [`each_pair`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-each_pair)
+  # [`each_pair`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-each_pair)
   def each(&block); end
 
   # This method will fetch the field value by `header`. It has the same behavior
   # as
-  # [`Hash#fetch`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-fetch):
+  # [`Hash#fetch`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-fetch):
   # if there is a field with the given `header`, its value is returned.
   # Otherwise, if a block is given, it is yielded the `header` and its result is
   # returned; if a `default` is given as the second argument, it is returned;
-  # otherwise a [`KeyError`](https://docs.ruby-lang.org/en/2.6.0/KeyError.html)
+  # otherwise a [`KeyError`](https://docs.ruby-lang.org/en/2.7.0/KeyError.html)
   # is raised.
   def fetch(header, *varargs); end
 
@@ -1044,7 +1049,7 @@ class CSV::Row < Object
   # resorting to hard-coding exact indices.
   #
   # Also aliased as:
-  # [`[]`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-5B-5D)
+  # [`[]`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-5B-5D)
   def field(header_or_index, minimum_index = _); end
 
   # Returns `true` if `data` matches a field in this row, and `false` otherwise.
@@ -1056,25 +1061,25 @@ class CSV::Row < Object
   # This method accepts any number of arguments which can be headers, indices,
   # Ranges of either, or two-element Arrays containing a header and offset. Each
   # argument will be replaced with a field lookup as described in
-  # [`CSV::Row.field()`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-field).
+  # [`CSV::Row.field()`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-field).
   #
   # If called with no arguments, all fields are returned.
   #
   # Also aliased as:
-  # [`values_at`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-values_at)
+  # [`values_at`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-values_at)
   def fields(*headers_and_or_indices); end
 
   # Returns `true` if there is a field with the given `header`.
   #
   # Also aliased as:
-  # [`include?`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-include-3F),
-  # [`key?`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-key-3F),
-  # [`member?`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-member-3F),
-  # [`header?`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-header-3F)
+  # [`include?`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-include-3F),
+  # [`key?`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-key-3F),
+  # [`member?`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-member-3F),
+  # [`header?`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-header-3F)
   def has_key?(header); end
 
   # Alias for:
-  # [`has_key?`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-has_key-3F)
+  # [`has_key?`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-has_key-3F)
   def header?(name); end
 
   # Returns `true` if this is a header row.
@@ -1084,24 +1089,24 @@ class CSV::Row < Object
   def headers; end
 
   # Alias for:
-  # [`has_key?`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-has_key-3F)
+  # [`has_key?`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-has_key-3F)
   def include?(name); end
 
   # This method will return the index of a field with the provided `header`. The
   # `offset` can be used to locate duplicate header names, as described in
-  # [`CSV::Row.field()`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-field).
+  # [`CSV::Row.field()`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-field).
   def index(header, minimum_index = _); end
 
   # A summary of fields, by header, in an ASCII compatible
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   def inspect; end
 
   # Alias for:
-  # [`has_key?`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-has_key-3F)
+  # [`has_key?`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-has_key-3F)
   def key?(header); end
 
   # Alias for:
-  # [`has_key?`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-has_key-3F)
+  # [`has_key?`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-has_key-3F)
   def member?(header); end
 
   # A shortcut for appending multiple fields. Equivalent to:
@@ -1116,8 +1121,8 @@ class CSV::Row < Object
   # Internal data format used to compare equality.
   def row; end
 
-  # Returns the row as a [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). Headers are not
+  # Returns the row as a [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html)
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). Headers are not
   # used. Equivalent to:
   #
   # ```ruby
@@ -1126,37 +1131,37 @@ class CSV::Row < Object
   #
   #
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-to_s)
   def to_csv(**options); end
 
   # Collapses the row into a simple
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html). Be warned that this
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html). Be warned that this
   # discards field order and clobbers duplicate fields.
   #
   # Also aliased as:
-  # [`to_hash`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-to_hash)
+  # [`to_hash`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-to_hash)
   def to_h; end
 
   # Alias for:
-  # [`to_h`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-to_h)
+  # [`to_h`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-to_h)
   def to_hash; end
 
   # Alias for:
-  # [`to_csv`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-to_csv)
+  # [`to_csv`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-to_csv)
   def to_s(**options); end
 
   # Alias for:
-  # [`fields`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html#method-i-fields)
+  # [`fields`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html#method-i-fields)
   def values_at(*headers_and_or_indices); end
 end
 
-# A [`FieldInfo`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#FieldInfo)
-# [`Struct`](https://docs.ruby-lang.org/en/2.6.0/Struct.html) contains details
+# A [`FieldInfo`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#FieldInfo)
+# [`Struct`](https://docs.ruby-lang.org/en/2.7.0/Struct.html) contains details
 # about a field's position in the data source it was read from.
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) will pass this
-# [`Struct`](https://docs.ruby-lang.org/en/2.6.0/Struct.html) to some blocks
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) will pass this
+# [`Struct`](https://docs.ruby-lang.org/en/2.7.0/Struct.html) to some blocks
 # that make decisions based on field structure. See
-# [`CSV.convert_fields()`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-i-convert_fields)
+# [`CSV.convert_fields()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-convert_fields)
 # for an example.
 #
 # **`index`**
@@ -1171,18 +1176,18 @@ class CSV::FieldInfo < Struct
 end
 
 # The error thrown when the parser encounters illegal
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) formatting.
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) formatting.
 class CSV::MalformedCSVError < RuntimeError
 end
 
-# A [`CSV::Table`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html) is a
+# A [`CSV::Table`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html) is a
 # two-dimensional data structure for representing
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html) documents. Tables allow
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) documents. Tables allow
 # you to work with the data by row or column, manipulate the data, and even
 # convert the results back to
-# [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html), if needed.
+# [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html), if needed.
 #
-# All tables returned by [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
+# All tables returned by [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html)
 # will be constructed from this class, if header row processing is activated.
 class CSV::Table < Object
   include Enumerable
@@ -1190,22 +1195,22 @@ class CSV::Table < Object
   extend T::Generic
   Elem = type_member(:out, fixed: T.any(CSV::Row, T::Array[T.nilable(T.untyped)]))
 
-  # Construct a new
-  # [`CSV::Table`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html) from
+  # Constructs a new
+  # [`CSV::Table`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html) from
   # `array_of_rows`, which are expected to be
-  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) objects. All
+  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html) objects. All
   # rows are assumed to have the same headers.
   #
   # The optional `headers` parameter can be set to
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of headers. If
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of headers. If
   # headers aren't set, headers are fetched from
-  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) objects.
+  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html) objects.
   # Otherwise, headers() method will return headers being set in headers
   # argument.
   #
-  # A [`CSV::Table`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html) object
+  # A [`CSV::Table`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html) object
   # supports the following
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) methods through
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) methods through
   # delegation:
   #
   # *   empty?()
@@ -1215,11 +1220,11 @@ class CSV::Table < Object
   def self.new(array_of_rows, headers: nil); end
 
   # Adds a new row to the bottom end of this table. You can provide an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), which will be
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html), which will be
   # converted to a
-  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html) (inheriting
+  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html) (inheriting
   # the table's headers()), or a
-  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html).
+  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html).
   #
   # This method returns the table for chaining.
   sig do
@@ -1236,13 +1241,13 @@ class CSV::Table < Object
   # In the default mixed mode, this method returns rows for index access and
   # columns for header access. You can force the index association by first
   # calling
-  # [`by_col`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-by_col)!()
+  # [`by_col`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-by_col)!()
   # or
-  # [`by_row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-by_row)!().
+  # [`by_row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-by_row)!().
   #
   # Columns are returned as an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of values.
-  # Altering that [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) has
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of values.
+  # Altering that [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) has
   # no effect on the table.
   sig { params(index_or_header: Integer).returns(T.nilable(Elem)) }
   sig { params(index_or_header: T::Range[Integer]).returns(T::Array[Elem]) }
@@ -1252,20 +1257,20 @@ class CSV::Table < Object
   # In the default mixed mode, this method assigns rows for index access and
   # columns for header access. You can force the index association by first
   # calling
-  # [`by_col`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-by_col)!()
+  # [`by_col`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-by_col)!()
   # or
-  # [`by_row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-by_row)!().
+  # [`by_row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-by_row)!().
   #
   # Rows may be set to an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of values (which
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of values (which
   # will inherit the table's headers()) or a
-  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Row.html).
+  # [`CSV::Row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Row.html).
   #
   # Columns may be set to a single value, which is copied to each row of the
-  # column, or an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # column, or an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # values. Arrays of values are assigned to rows top to bottom in row major
   # order. Excess values are ignored and if the
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) does not have a
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) does not have a
   # value for each row the extra rows will receive a `nil`.
   #
   # Assigning to an existing column or row clobbers the data. Assigning to new
@@ -1329,9 +1334,9 @@ class CSV::Table < Object
   # Removes and returns the indicated columns or rows. In the default mixed mode
   # indices refer to rows and everything else is assumed to be a column headers.
   # Use
-  # [`by_col`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-by_col)!()
+  # [`by_col`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-by_col)!()
   # or
-  # [`by_row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-by_row)!()
+  # [`by_row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-by_row)!()
   # to force the lookup.
   sig do
     params(
@@ -1343,18 +1348,21 @@ class CSV::Table < Object
   # Removes any column or row for which the block returns `true`. In the default
   # mixed mode or row mode, iteration is the standard row major walking of rows.
   # In column mode, iteration will `yield` two element tuples containing the
-  # column name and an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # column name and an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # of values for that column.
   #
   # This method returns the table for chaining.
   #
   # If no block is given, an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned.
   sig { params(blk: T.proc.params(arg0: T.untyped).returns(T.untyped)).returns(T.self_type) }
   sig { returns(T::Enumerator[T.untyped]) }
   def delete_if(&blk); end
 
+  # Extracts the nested value specified by the sequence of `index` or `header`
+  # objects by calling dig at each step, returning nil if any intermediate step
+  # is nil.
   sig { params(index_or_header: BasicObject).returns(Elem) }
   sig { params(index_or_header: BasicObject, index_or_headers: BasicObject).returns(T.nilable(T.untyped)) }
   def dig(index_or_header, *index_or_headers); end
@@ -1362,13 +1370,13 @@ class CSV::Table < Object
   # In the default mixed mode or row mode, iteration is the standard row major
   # walking of rows. In column mode, iteration will `yield` two element tuples
   # containing the column name and an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of values for that
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of values for that
   # column.
   #
   # This method returns the table for chaining.
   #
   # If no block is given, an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned.
   sig { params(block: T.proc.params(arg0: T.untyped).void).returns(T.self_type) }
   sig { returns(T::Enumerator[T.untyped]) }
@@ -1376,14 +1384,14 @@ class CSV::Table < Object
 
   # Returns the headers for the first row of this table (assumed to match all
   # other rows). The headers
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) passed to
-  # [`CSV::Table.new`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-c-new)
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) passed to
+  # [`CSV::Table.new`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-c-new)
   # is returned for empty tables.
   sig { returns(T::Array[T.untyped]) }
   def headers; end
 
   # Shows the mode and size of this table in a US-ASCII
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   sig { returns(String) }
   def inspect; end
 
@@ -1406,40 +1414,40 @@ class CSV::Table < Object
   def push(*rows); end
 
   # Returns the table as an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of Arrays. Headers
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of Arrays. Headers
   # will be the first row, then all of the field rows will follow.
   sig { returns(T::Array[T::Array[T.nilable(T.untyped)]]) }
   def to_a; end
 
   # Returns the table as a complete
-  # [`CSV`](https://docs.ruby-lang.org/en/2.6.0/CSV.html)
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). Headers will be
+  # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html)
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). Headers will be
   # listed first, then all of the field rows.
   #
   # This method assumes you want the
-  # [`Table.headers()`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-headers),
+  # [`Table.headers()`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-headers),
   # unless you explicitly pass `:write_headers => false`.
   #
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-to_s)
   sig { params(write_headers: T::Boolean, options: T.untyped).returns(String) }
   def to_csv(write_headers: true, **options); end
 
   # Alias for:
-  # [`to_csv`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-to_csv)
+  # [`to_csv`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-to_csv)
   sig { params(write_headers: T::Boolean, options: T.untyped).returns(String) }
   def to_s(write_headers: true, **options); end
 
   # The mixed mode default is to treat a list of indices as row access,
   # returning the rows indicated. Anything else is considered columnar access.
   # For columnar access, the return set has an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) for each row with
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) for each row with
   # the values indicated by the headers in each
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html). You can force
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html). You can force
   # column or row mode using
-  # [`by_col`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-by_col)!()
+  # [`by_col`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-by_col)!()
   # or
-  # [`by_row`](https://docs.ruby-lang.org/en/2.6.0/CSV/Table.html#method-i-by_row)!().
+  # [`by_row`](https://docs.ruby-lang.org/en/2.7.0/CSV/Table.html#method-i-by_row)!().
   #
   # You cannot mix column and row access.
   sig do
@@ -1451,7 +1459,7 @@ class CSV::Table < Object
 end
 
 # Passes `args` to
-# [`CSV::instance`](https://docs.ruby-lang.org/en/2.6.0/CSV.html#method-c-instance).
+# [`CSV::instance`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-instance).
 #
 # ```ruby
 # CSV("CSV,data").read

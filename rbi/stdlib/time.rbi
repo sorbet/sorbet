@@ -1,14 +1,14 @@
 # typed: __STDLIB_INTERNAL
 
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) is an abstraction of
-# dates and times. [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) is
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) is an abstraction of
+# dates and times. [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) is
 # stored internally as the number of seconds with fraction since the *Epoch*,
 # January 1, 1970 00:00 UTC. Also see the library module
-# [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html). The
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) class treats GMT
-# (Greenwich Mean [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)) and
+# [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html). The
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) class treats GMT
+# (Greenwich Mean [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)) and
 # UTC (Coordinated Universal
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)) as equivalent. GMT is
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)) as equivalent. GMT is
 # the older way of referring to these baseline times but persists in the names
 # of calls on POSIX systems.
 #
@@ -16,29 +16,29 @@
 # each other -- times that are apparently equal when displayed may be different
 # when compared.
 #
-# Since Ruby 1.9.2, [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)
+# Since Ruby 1.9.2, [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)
 # implementation uses a signed 63 bit integer, Bignum or
-# [`Rational`](https://docs.ruby-lang.org/en/2.6.0/Rational.html). The integer
+# [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html). The integer
 # is a number of nanoseconds since the *Epoch* which can represent 1823-11-12 to
 # 2116-02-20. When Bignum or
-# [`Rational`](https://docs.ruby-lang.org/en/2.6.0/Rational.html) is used
+# [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html) is used
 # (before 1823, after 2116, under nanosecond),
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) works slower as when
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) works slower as when
 # integer is used.
 #
 # # Examples
 #
 # All of these examples were done using the EST timezone which is GMT-5.
 #
-# ## Creating a new [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) instance
+# ## Creating a new [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) instance
 #
 # You can create a new instance of
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) with
-# [`Time::new`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-new).
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) with
+# [`Time::new`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-new).
 # This will use the current system time.
-# [`Time::now`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-now) is
+# [`Time::now`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-now) is
 # an alias for this. You can also pass parts of the time to
-# [`Time::new`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-new) such
+# [`Time::new`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-new) such
 # as year, month, minute, etc. When you want to construct a time this way you
 # must pass at least a year. If you pass the year with nothing else time will
 # default to January 1 of that year at 00:00:00 with the current system
@@ -64,14 +64,14 @@
 # ```
 #
 # You can also use
-# [`Time::gm`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-gm),
-# [`Time::local`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-local)
-# and [`Time::utc`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-utc)
+# [`Time::gm`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-gm),
+# [`Time::local`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-local)
+# and [`Time::utc`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-utc)
 # to infer GMT, local and UTC timezones instead of using the current system
 # setting.
 #
 # You can also create a new time using
-# [`Time::at`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-at) which
+# [`Time::at`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-at) which
 # takes the number of seconds (or fraction of seconds) since the [Unix
 # Epoch](http://en.wikipedia.org/wiki/Unix_time).
 #
@@ -79,10 +79,10 @@
 # Time.at(628232400) #=> 1989-11-28 00:00:00 -0500
 # ```
 #
-# ## Working with an instance of [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)
+# ## Working with an instance of [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)
 #
 # Once you have an instance of
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) there is a multitude
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) there is a multitude
 # of things you can do with it. Below are some examples. For all of the
 # following examples, we will work on the assumption that you have done the
 # following:
@@ -138,57 +138,60 @@
 # ## Timezone argument
 #
 # A timezone argument must have `local_to_utc` and `utc_to_local` methods, and
-# may have `name` and `abbr` methods.
+# may have `name`, `abbr`, and `dst?` methods.
 #
 # The `local_to_utc` method should convert a Time-like object from the timezone
 # to UTC, and `utc_to_local` is the opposite. The result also should be a
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) or Time-like object
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) or Time-like object
 # (not necessary to be the same class). The
-# [`zone`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-zone) of the
+# [`zone`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-zone) of the
 # result is just ignored. Time-like argument to these methods is similar to a
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object in UTC without
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) object in UTC without
 # sub-second; it has attribute readers for the parts, e.g.
-# [`year`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-year),
-# [`month`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-month), and
+# [`year`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-year),
+# [`month`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-month), and
 # so on, and epoch time readers,
-# [`to_i`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-to_i). The
+# [`to_i`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-to_i). The
 # sub-second attributes are fixed as 0, and
-# [`utc_offset`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-utc_offset),
-# [`zone`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-zone),
-# [`isdst`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-isdst), and
+# [`utc_offset`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-utc_offset),
+# [`zone`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-zone),
+# [`isdst`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-isdst), and
 # their aliases are same as a
-# [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object in UTC. Also
-# [`to_time`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-to_time),
-# [`+`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-2B), and
-# [`-`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-2D) methods are
+# [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) object in UTC. Also
+# [`to_time`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-to_time),
+# [`+`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-2B), and
+# [`-`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-2D) methods are
 # defined.
 #
 # The `name` method is used for marshaling. If this method is not defined on a
-# timezone object, [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html)
+# timezone object, [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html)
 # objects using that timezone object can not be dumped by
-# [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html).
+# [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html).
 #
 # The `abbr` method is used by '%Z' in
-# [`strftime`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-strftime).
+# [`strftime`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-strftime).
+#
+# The `dst?` method is called with a `Time` value and should return whether the
+# `Time` value is in daylight savings time in the zone.
 #
 # ### Auto conversion to Timezone
 #
 # At loading marshaled data, a timezone name will be converted to a timezone
 # object by `find_timezone` class method, if the method is defined.
 #
-# Similary, that class method will be called when a timezone argument does not
+# Similarly, that class method will be called when a timezone argument does not
 # have the necessary methods mentioned above.
 class Time
   # Parses `date` as an HTTP-date defined by RFC 2616 and converts it to a
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object.
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) object.
   #
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html) is
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html) is
   # raised if `date` is not compliant with RFC 2616 or if the
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) class cannot
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) class cannot
   # represent specified date.
   #
   # See
-  # [`httpdate`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-httpdate)
+  # [`httpdate`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-httpdate)
   # for more information on this format.
   #
   # ```ruby
@@ -208,7 +211,7 @@ class Time
   def self.httpdate(date); end
 
   # Alias for:
-  # [`xmlschema`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-xmlschema)
+  # [`xmlschema`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-xmlschema)
   sig do
     params(
         date: String,
@@ -218,7 +221,7 @@ class Time
   def self.iso8601(date); end
 
   # Takes a string representation of a
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) and attempts to
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) and attempts to
   # parse it using a heuristic.
   #
   # ```ruby
@@ -238,12 +241,12 @@ class Time
   #
   # We can change the date used to infer our missing elements by passing a
   # second object that responds to
-  # [`mon`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-mon),
-  # [`day`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-day) and
-  # [`year`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-year), such
-  # as [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html),
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) or
-  # [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html). We can also
+  # [`mon`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-mon),
+  # [`day`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-day) and
+  # [`year`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-year), such
+  # as [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html),
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) or
+  # [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html). We can also
   # use our own object.
   #
   # ```ruby
@@ -319,10 +322,10 @@ class Time
   # not match any of them, it is ignored and the given time is regarded as a
   # local time.
   #
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html) is
-  # raised if [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html).\_parse
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html) is
+  # raised if [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html).\_parse
   # cannot extract information from `date` or if the
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) class cannot
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) class cannot
   # represent specified date.
   #
   # This method can be used as a fail-safe for other parsing methods as:
@@ -334,7 +337,7 @@ class Time
   # ```
   #
   # A failure of
-  # [`Time.parse`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-parse)
+  # [`Time.parse`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-parse)
   # should be checked, though.
   #
   # You must require 'time' to use this method.
@@ -348,16 +351,16 @@ class Time
   def self.parse(date, now=T.unsafe(nil)); end
 
   # Parses `date` as date-time defined by RFC 2822 and converts it to a
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object. The format
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) object. The format
   # is identical to the date format defined by RFC 822 and updated by RFC 1123.
   #
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html) is
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html) is
   # raised if `date` is not compliant with RFC 2822 or if the
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) class cannot
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) class cannot
   # represent specified date.
   #
   # See
-  # [`rfc2822`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-rfc2822)
+  # [`rfc2822`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-rfc2822)
   # for more information on this format.
   #
   # ```ruby
@@ -370,7 +373,7 @@ class Time
   # You must require 'time' to use this method.
   #
   # Also aliased as:
-  # [`rfc822`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-rfc822)
+  # [`rfc822`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-rfc822)
   sig do
     params(
         date: String,
@@ -380,7 +383,7 @@ class Time
   def self.rfc2822(date); end
 
   # Alias for:
-  # [`rfc2822`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-rfc2822)
+  # [`rfc2822`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-rfc2822)
   sig do
     params(
         date: String,
@@ -417,11 +420,16 @@ class Time
   # %d
   # :   Day of the month (01..31)
   # %D
-  # :   [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) (%m/%d/%y)
+  # :   [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html) (%m/%d/%y)
   # %e
   # :   Day of the month, blank-padded ( 1..31)
   # %F
   # :   Equivalent to %Y-%m-%d (the ISO 8601 date format)
+  # %g
+  # :   The last two digits of the commercial year
+  # %G
+  # :   The week-based year according to ISO-8601 (week 1 starts on Monday and
+  #     includes January 4)
   # %h
   # :   Equivalent to %b
   # %H
@@ -448,8 +456,6 @@ class Time
   # :   Meridian indicator ("AM" or "PM")
   # %P
   # :   Meridian indicator ("am" or "pm")
-  # %Q
-  # :   Number of milliseconds since 1970-01-01 00:00:00 UTC.
   # %r
   # :   time, 12-hour (same as %I:%M:%S %p)
   # %R
@@ -485,10 +491,10 @@ class Time
   # %Y
   # :   Year which may include century, if provided
   # %z
-  # :   [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) zone as  hour
+  # :   [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) zone as  hour
   #     offset from UTC (e.g. +0900)
   # %Z
-  # :   [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) zone name
+  # :   [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) zone name
   # %%
   # :   Literal "%" character
   # %+
@@ -513,17 +519,17 @@ class Time
   def self.strptime(date, format, now=T.unsafe(nil)); end
 
   # Parses `date` as a dateTime defined by the
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) Schema and converts it
-  # to a [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) object. The
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) Schema and converts it
+  # to a [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) object. The
   # format is a restricted version of the format defined by ISO 8601.
   #
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html) is
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html) is
   # raised if `date` is not compliant with the format or if the
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) class cannot
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) class cannot
   # represent specified date.
   #
   # See
-  # [`xmlschema`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-xmlschema)
+  # [`xmlschema`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-xmlschema)
   # for more information on this format.
   #
   # ```ruby
@@ -536,7 +542,7 @@ class Time
   # You must require 'time' to use this method.
   #
   # Also aliased as:
-  # [`iso8601`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-iso8601)
+  # [`iso8601`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-iso8601)
   sig do
     params(
         date: String,
@@ -547,7 +553,7 @@ class Time
 
   # Return the number of seconds the specified time zone differs from UTC.
   #
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) time zones
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) time zones
   # that include minutes, such as `-10:00` or `+1330` will work, as will simpler
   # hour-only time zones like `-10` or `+13`.
   #
@@ -555,7 +561,7 @@ class Time
   #
   # If the time zone does not match any of the above, `zone_offset` will check
   # if the local time zone (both with and without potential Daylight Saving
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) changes being in
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) changes being in
   # effect) matches `zone`. Specifying a value for `year` will change the year
   # used to find the local time zone.
   #
@@ -597,7 +603,7 @@ class Time
   def httpdate(); end
 
   # Alias for:
-  # [`xmlschema`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-xmlschema)
+  # [`xmlschema`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-xmlschema)
   sig do
     params(
         fraction_digits: T.any(Integer, String),
@@ -626,17 +632,17 @@ class Time
   # You must require 'time' to use this method.
   #
   # Also aliased as:
-  # [`rfc822`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-rfc822)
+  # [`rfc822`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-rfc822)
   sig {returns(String)}
   def rfc2822(); end
 
   # Alias for:
-  # [`rfc2822`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-rfc2822)
+  # [`rfc2822`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-rfc2822)
   sig {returns(String)}
   def rfc822(); end
 
   # Returns a string which represents the time as a dateTime defined by
-  # [`XML`](https://docs.ruby-lang.org/en/2.6.0/XML.html) Schema:
+  # [`XML`](https://docs.ruby-lang.org/en/2.7.0/XML.html) Schema:
   #
   # ```
   # CCYY-MM-DDThh:mm:ssTZD
@@ -660,7 +666,7 @@ class Time
   # You must require 'time' to use this method.
   #
   # Also aliased as:
-  # [`iso8601`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-i-iso8601)
+  # [`iso8601`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-i-iso8601)
   sig do
     params(
         fraction_digits: T.any(Integer, String),
@@ -673,12 +679,12 @@ class Time
   sig {returns(Time)}
   def to_time(); end
 
-  # Returns a [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html) object
+  # Returns a [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html) object
   # which denotes self.
   sig {returns(Date)}
   def to_date(); end
 
-  # Returns a [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html)
+  # Returns a [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html)
   # object which denotes self.
   sig {returns(DateTime)}
   def to_datetime(); end

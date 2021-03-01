@@ -3,14 +3,14 @@
 # The syslog package provides a Ruby interface to the POSIX system logging
 # facility.
 #
-# [`Syslog`](https://docs.ruby-lang.org/en/2.6.0/Syslog.html) messages are
+# [`Syslog`](https://docs.ruby-lang.org/en/2.7.0/Syslog.html) messages are
 # typically passed to a central logging daemon. The daemon may filter them;
 # route them into different files (usually found under /var/log); place them in
 # SQL databases; forward them to centralized logging servers via TCP or UDP; or
 # even alert the system administrator via email, pager or text message.
 #
 # Unlike application-level logging via
-# [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html) or Log4r, syslog
+# [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html) or Log4r, syslog
 # is designed to allow secure tamper-proof logging.
 #
 # The syslog protocol is standardized in RFC 5424.
@@ -55,7 +55,7 @@ module Syslog
   # LOG\_ERR
   # :   An error occurred
   # LOG\_WARNING
-  # :   [`Warning`](https://docs.ruby-lang.org/en/2.6.0/Warning.html) of a
+  # :   [`Warning`](https://docs.ruby-lang.org/en/2.7.0/Warning.html) of a
   #     possible problem
   # LOG\_NOTICE
   # :   A normal but significant condition occurred
@@ -73,10 +73,6 @@ module Syslog
   # Syslog.log(Syslog::LOG_ALERT, "Out of memory")
   # Syslog.alert("Out of memory")
   # ```
-  #
-  # Format strings are as for printf/sprintf, except that in addition %m is
-  # replaced with the error message string that would be returned by
-  # strerror(errno).
   def self.log(*_); end
 
   # Returns the log priority mask in effect. The mask is not reset by opening or
@@ -103,13 +99,13 @@ module Syslog
   # Open the syslog facility. Raises a runtime exception if it is already open.
   #
   # Can be called with or without a code block. If called with a block, the
-  # [`Syslog`](https://docs.ruby-lang.org/en/2.6.0/Syslog.html) object created
+  # [`Syslog`](https://docs.ruby-lang.org/en/2.7.0/Syslog.html) object created
   # is passed to the block.
   #
   # If the syslog is already open, raises a
-  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html).
+  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html).
   #
-  # `ident` is a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # `ident` is a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   # which identifies the calling program.
   #
   # `options` is the logical OR of any of the following:
@@ -173,7 +169,7 @@ module Syslog
   # :   Usenet news system.
   #
   # LOG\_NTP
-  # :   Network [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) Protocol
+  # :   Network [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) Protocol
   #     server.
   #
   # LOG\_SECURITY
@@ -231,24 +227,24 @@ end
 module Syslog::Level
 end
 
-# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html) is
-# a [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html)
+# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html) is
+# a [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html)
 # work-alike that logs via syslog instead of to a file. You can use
-# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html) to
+# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html) to
 # aggregate logs between multiple machines.
 #
 # By default,
-# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html)
+# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html)
 # uses the program name 'ruby', but this can be changed via the first argument
 # to
-# [`Syslog::Logger.new`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-c-new).
+# [`Syslog::Logger.new`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-c-new).
 #
 # NOTE! You can only set the
-# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html)
+# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html)
 # program name when you initialize
-# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html) for
+# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html) for
 # the first time. This is a limitation of the way
-# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html)
+# [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html)
 # uses syslog (and in some ways, a limitation of the way syslog(3) works).
 # Attempts to change Syslog::Logger's program name after the first
 # initialization will be ignored.
@@ -287,25 +283,25 @@ end
 # If you wish to have logs automatically roll over and archive, see the
 # newsyslog.conf(5) and newsyslog(8) man pages.
 class Syslog::Logger
-  # Maps [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html)
+  # Maps [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html)
   # warning types to syslog(3) warning types.
   #
   # Messages from Ruby applications are not considered as critical as messages
   # from other system daemons using syslog(3), so most messages are reduced by
   # one level. For example, a fatal message for Ruby's
-  # [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html) is
+  # [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html) is
   # considered an error for syslog(3).
   LEVEL_MAP = T.let(T.unsafe(nil), T::Hash[Integer, Integer])
 
   # The version of
-  # [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html)
+  # [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html)
   # you are using.
   VERSION = T.let(T.unsafe(nil), String)
 
   # Fills in variables for
-  # [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Logger.html) compatibility.
+  # [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Logger.html) compatibility.
   # If this is the first instance of
-  # [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html),
+  # [`Syslog::Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html),
   # `program_name` may be set to change the logged program name. The `facility`
   # may be set to specify the facility level which will be used.
   #
@@ -313,7 +309,7 @@ class Syslog::Logger
   def self.new(program_name = _, facility = _); end
 
   # Almost duplicates
-  # [`Logger#add`](https://docs.ruby-lang.org/en/2.6.0/Logger.html#method-i-add).
+  # [`Logger#add`](https://docs.ruby-lang.org/en/2.7.0/Logger.html#method-i-add).
   # `progname` is ignored.
   def add(severity, message = _, progname = _, &block); end
 
@@ -343,17 +339,17 @@ class Syslog::Logger
   # `severity`
   # :   The Severity of the log message.
   # `time`
-  # :   A [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) instance
+  # :   A [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) instance
   #     representing when the message was logged.
   # `progname`
   # :   The progname configured, or passed to the logger method.
   # `msg`
   # :   The *Object* the user passed to the log message; not necessarily a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
   #
   # The block should return an
-  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) that can be
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) that can be
   # written to the logging device via `write`. The default formatter is used
   # when no formatter is set.
   def formatter; end
@@ -364,17 +360,17 @@ class Syslog::Logger
   # `severity`
   # :   The Severity of the log message.
   # `time`
-  # :   A [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) instance
+  # :   A [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) instance
   #     representing when the message was logged.
   # `progname`
   # :   The progname configured, or passed to the logger method.
   # `msg`
   # :   The *Object* the user passed to the log message; not necessarily a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
   #
   # The block should return an
-  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) that can be
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) that can be
   # written to the logging device via `write`. The default formatter is used
   # when no formatter is set.
   def formatter=(_); end
@@ -384,12 +380,12 @@ class Syslog::Logger
   def info(message = _, &block); end
 
   # Log level for
-  # [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html)
+  # [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html)
   # compatibility.
   def level; end
 
   # Log level for
-  # [`Logger`](https://docs.ruby-lang.org/en/2.6.0/Syslog/Logger.html)
+  # [`Logger`](https://docs.ruby-lang.org/en/2.7.0/Syslog/Logger.html)
   # compatibility.
   def level=(_); end
 
@@ -405,17 +401,16 @@ class Syslog::Logger
   def self.make_methods(meth); end
 
   # Returns the internal
-  # [`Syslog`](https://docs.ruby-lang.org/en/2.6.0/Syslog.html) object that is
+  # [`Syslog`](https://docs.ruby-lang.org/en/2.7.0/Syslog.html) object that is
   # initialized when the first instance is created.
   def self.syslog; end
 
   # Specifies the internal
-  # [`Syslog`](https://docs.ruby-lang.org/en/2.6.0/Syslog.html) object to be
+  # [`Syslog`](https://docs.ruby-lang.org/en/2.7.0/Syslog.html) object to be
   # used.
   def self.syslog=(syslog); end
 end
 
-# Default formatter for log messages.
 # Default formatter for log messages.
 class Syslog::Logger::Formatter
   def call(severity, time, progname, msg); end

@@ -1,19 +1,31 @@
 # typed: __STDLIB_INTERNAL
 
-# Some versions of the
-# [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) 1.1 RC series
-# introduced corrupted lockfiles. There were two major problems:
+# [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) provides a
+# consistent environment for Ruby projects by tracking and installing the exact
+# gems and versions that are needed.
 #
-# *   multiple copies of the same GIT section appeared in the lockfile
-# *   when this happened, those sections got multiple copies of gems in those
-#     sections.
+# Since Ruby 2.6, [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html)
+# is a part of Ruby's standard library.
 #
+# Bunder is used by creating *gemfiles* listing all the project dependencies and
+# (optionally) their versions and then using
 #
-# As a result, [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) 1.1
-# contains code that fixes the earlier corruption. We will remove this fix-up
-# code in [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) 1.2.
-# Ruby 1.9.3 and old RubyGems don't play nice with frozen version strings
-# rubocop:disable MutableConstant
+# ```ruby
+# require 'bundler/setup'
+# ```
+#
+# or
+# [`Bundler.setup`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html#method-c-setup)
+# to setup environment where only specified gems and their specified versions
+# could be used.
+#
+# See [Bundler website](https://bundler.io/docs.html) for extensive
+# documentation on gemfiles creation and
+# [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) usage.
+#
+# As a standard library inside project,
+# [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) could be used
+# for introspection of loaded and required modules.
 module Bundler
   FREEBSD = ::T.let(nil, T.untyped)
   NULL = ::T.let(nil, T.untyped)
@@ -46,11 +58,11 @@ module Bundler
   sig {returns(T.untyped)}
   def self.bundler_major_version(); end
 
-  # @deprecated Use `original\_env` instead @return [Hash] Environment with all
-  # bundler-related variables removed
+  # @deprecated Use `unbundled\_env` instead
   sig {returns(T.untyped)}
   def self.clean_env(); end
 
+  # @deprecated Use `unbundled\_exec` instead
   sig do
     params(
       args: T.untyped,
@@ -59,6 +71,7 @@ module Bundler
   end
   def self.clean_exec(*args); end
 
+  # @deprecated Use `unbundled\_system` instead
   sig do
     params(
       args: T.untyped,
@@ -92,10 +105,8 @@ module Bundler
   def self.default_lockfile(); end
 
   # Returns an instance of
-  # [`Bundler::Definition`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Definition.html)
-  # for given
-  # [Gemfile](https://docs.ruby-lang.org/en/2.6.0/2_6_0/bundler/templates/Gemfile.html)
-  # and lockfile
+  # [`Bundler::Definition`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Definition.html)
+  # for given Gemfile and lockfile
   #
   # @param unlock [Hash, Boolean, nil] Gems that have been requested
   #
@@ -175,7 +186,7 @@ module Bundler
   def self.mkdir_p(path, options=T.unsafe(nil)); end
 
   # @return [Hash] Environment present before
-  # [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) was activated
+  # [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) was activated
   sig {returns(T.untyped)}
   def self.original_env(); end
 
@@ -187,6 +198,31 @@ module Bundler
   end
   def self.read_file(file); end
 
+  # Setups [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html)
+  # environment (see
+  # [`Bundler.setup`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html#method-c-setup))
+  # if it is not already set, and loads all gems from groups specified. Unlike
+  # [`::setup`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html#method-c-setup),
+  # can be called multiple times with different groups (if they were allowed by
+  # setup).
+  #
+  # Assuming Gemfile
+  #
+  # ```ruby
+  # gem 'first_gem', '= 1.0'
+  # group :test do
+  #   gem 'second_gem', '= 1.0'
+  # end
+  # ```
+  #
+  # The code will work as follows:
+  #
+  # ```ruby
+  # Bundler.setup # allow all groups
+  # Bundler.require(:default) # requires only first_gem
+  # # ...later
+  # Bundler.require(:test)   # requires second_gem
+  # ```
   sig do
     params(
       groups: T.untyped,
@@ -230,6 +266,40 @@ module Bundler
   sig {returns(T.untyped)}
   def self.settings(); end
 
+  # Turns on the [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html)
+  # runtime. After `Bundler.setup` call, all `load` or `require` of the gems
+  # would be allowed only if they are part of the Gemfile or Ruby's standard
+  # library. If the versions specified in Gemfile, only those versions would be
+  # loaded.
+  #
+  # Assuming Gemfile
+  #
+  # ```ruby
+  # gem 'first_gem', '= 1.0'
+  # group :test do
+  #   gem 'second_gem', '= 1.0'
+  # end
+  # ```
+  #
+  # The code using
+  # [`Bundler.setup`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html#method-c-setup)
+  # works as follows:
+  #
+  # ```ruby
+  # require 'third_gem' # allowed, required from global gems
+  # require 'first_gem' # allowed, loads the last installed version
+  # Bundler.setup
+  # require 'fourth_gem' # fails with LoadError
+  # require 'second_gem' # loads exactly version 1.0
+  # ```
+  #
+  # `Bundler.setup` can be called only once, all subsequent calls are no-op.
+  #
+  # If *groups* list is provided, only gems from specified groups would be
+  # allowed (gems specified outside groups belong to special `:default` group).
+  #
+  # To require all gems from Gemfile (or only some groups), see
+  # [`Bundler.require`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html#method-c-require).
   sig do
     params(
       groups: T.untyped,
@@ -305,9 +375,12 @@ module Bundler
   end
   def self.which(executable); end
 
+  # @deprecated Use `with\_unbundled\_env` instead
   sig {returns(T.untyped)}
   def self.with_clean_env(); end
 
+  # Run block with environment present before
+  # [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) was activated
   sig {returns(T.untyped)}
   def self.with_original_env(); end
 end
@@ -318,7 +391,7 @@ class Bundler::APIResponseMismatchError < Bundler::BundlerError
 end
 
 # Represents metadata from when the
-# [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) gem was built.
+# [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) gem was built.
 module Bundler::BuildMetadata
   # A string representing the date the bundler gem was built.
   sig {returns(T.untyped)}
@@ -329,7 +402,7 @@ module Bundler::BuildMetadata
   def self.git_commit_sha(); end
 
   # Whether this is an official release build of
-  # [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html).
+  # [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html).
   sig {returns(T.untyped)}
   def self.release?(); end
 
@@ -925,10 +998,9 @@ class Bundler::Definition
   sig {returns(T.untyped)}
   def requires(); end
 
-  # Resolve all the dependencies specified in
-  # [Gemfile](https://docs.ruby-lang.org/en/2.6.0/2_6_0/bundler/templates/Gemfile.html).
-  # It ensures that dependencies that have been already resolved via locked file
-  # and are fresh are reused when resolving dependencies
+  # Resolve all the dependencies specified in Gemfile. It ensures that
+  # dependencies that have been already resolved via locked file and are fresh
+  # are reused when resolving dependencies
   #
   # @return [SpecSet] resolved dependencies
   sig {returns(T.untyped)}
@@ -982,12 +1054,11 @@ class Bundler::Definition
   def validate_runtime!(); end
 
   # Given a gemfile and lockfile creates a
-  # [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) definition
+  # [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) definition
   #
-  # @param gemfile [Pathname] Path to
-  # [Gemfile](https://docs.ruby-lang.org/en/2.6.0/2_6_0/bundler/templates/Gemfile.html)
-  # @param lockfile [Pathname,nil] Path to Gemfile.lock @param unlock [Hash,
-  # Boolean, nil] Gems that have been requested
+  # @param gemfile [Pathname] Path to Gemfile @param lockfile [Pathname,nil]
+  # Path to Gemfile.lock @param unlock [Hash, Boolean, nil] Gems that have been
+  # requested
   #
   # ```ruby
   # to be updated or true if all gems should be updated
@@ -1007,7 +1078,7 @@ end
 
 class Bundler::DepProxy
   # Also aliased as:
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/DepProxy.html#method-i-eql-3F)
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/DepProxy.html#method-i-eql-3F)
   sig do
     params(
       other: T.untyped,
@@ -1023,7 +1094,7 @@ class Bundler::DepProxy
   def dep(); end
 
   # Alias for:
-  # [`==`](https://docs.ruby-lang.org/en/2.6.0/Bundler/DepProxy.html#method-i-3D-3D)
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Bundler/DepProxy.html#method-i-3D-3D)
   sig do
     params(
       other: T.untyped,
@@ -1236,7 +1307,7 @@ class Bundler::Dsl
   def path(path, options=T.unsafe(nil), &blk); end
 
   # Alias for:
-  # [`platforms`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Dsl.html#method-i-platforms)
+  # [`platforms`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Dsl.html#method-i-platforms)
   sig do
     params(
       platforms: T.untyped,
@@ -1246,7 +1317,7 @@ class Bundler::Dsl
   def platform(*platforms); end
 
   # Also aliased as:
-  # [`platform`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Dsl.html#method-i-platform)
+  # [`platform`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Dsl.html#method-i-platform)
   sig do
     params(
       platforms: T.untyped,
@@ -1624,59 +1695,75 @@ end
 # This program is free software. You can distribute/modify this program under
 # the same terms of ruby.
 #
-# ## module [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html)
+# ## module [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html)
 #
 # Namespace for several file utility methods for copying, moving, removing, etc.
 #
-# ### [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) Functions
+# ### [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html) Functions
 #
 # ```ruby
 # require 'bundler/vendor/fileutils/lib/fileutils'
 #
-# Bundler::FileUtils.cd(dir, options)
-# Bundler::FileUtils.cd(dir, options) {|dir| block }
+# Bundler::FileUtils.cd(dir, **options)
+# Bundler::FileUtils.cd(dir, **options) {|dir| block }
 # Bundler::FileUtils.pwd()
-# Bundler::FileUtils.mkdir(dir, options)
-# Bundler::FileUtils.mkdir(list, options)
-# Bundler::FileUtils.mkdir_p(dir, options)
-# Bundler::FileUtils.mkdir_p(list, options)
-# Bundler::FileUtils.rmdir(dir, options)
-# Bundler::FileUtils.rmdir(list, options)
-# Bundler::FileUtils.ln(target, link, options)
-# Bundler::FileUtils.ln(targets, dir, options)
-# Bundler::FileUtils.ln_s(target, link, options)
-# Bundler::FileUtils.ln_s(targets, dir, options)
-# Bundler::FileUtils.ln_sf(target, link, options)
-# Bundler::FileUtils.cp(src, dest, options)
-# Bundler::FileUtils.cp(list, dir, options)
-# Bundler::FileUtils.cp_r(src, dest, options)
-# Bundler::FileUtils.cp_r(list, dir, options)
-# Bundler::FileUtils.mv(src, dest, options)
-# Bundler::FileUtils.mv(list, dir, options)
-# Bundler::FileUtils.rm(list, options)
-# Bundler::FileUtils.rm_r(list, options)
-# Bundler::FileUtils.rm_rf(list, options)
-# Bundler::FileUtils.install(src, dest, options)
-# Bundler::FileUtils.chmod(mode, list, options)
-# Bundler::FileUtils.chmod_R(mode, list, options)
-# Bundler::FileUtils.chown(user, group, list, options)
-# Bundler::FileUtils.chown_R(user, group, list, options)
-# Bundler::FileUtils.touch(list, options)
+# Bundler::FileUtils.mkdir(dir, **options)
+# Bundler::FileUtils.mkdir(list, **options)
+# Bundler::FileUtils.mkdir_p(dir, **options)
+# Bundler::FileUtils.mkdir_p(list, **options)
+# Bundler::FileUtils.rmdir(dir, **options)
+# Bundler::FileUtils.rmdir(list, **options)
+# Bundler::FileUtils.ln(target, link, **options)
+# Bundler::FileUtils.ln(targets, dir, **options)
+# Bundler::FileUtils.ln_s(target, link, **options)
+# Bundler::FileUtils.ln_s(targets, dir, **options)
+# Bundler::FileUtils.ln_sf(target, link, **options)
+# Bundler::FileUtils.cp(src, dest, **options)
+# Bundler::FileUtils.cp(list, dir, **options)
+# Bundler::FileUtils.cp_r(src, dest, **options)
+# Bundler::FileUtils.cp_r(list, dir, **options)
+# Bundler::FileUtils.mv(src, dest, **options)
+# Bundler::FileUtils.mv(list, dir, **options)
+# Bundler::FileUtils.rm(list, **options)
+# Bundler::FileUtils.rm_r(list, **options)
+# Bundler::FileUtils.rm_rf(list, **options)
+# Bundler::FileUtils.install(src, dest, **options)
+# Bundler::FileUtils.chmod(mode, list, **options)
+# Bundler::FileUtils.chmod_R(mode, list, **options)
+# Bundler::FileUtils.chown(user, group, list, **options)
+# Bundler::FileUtils.chown_R(user, group, list, **options)
+# Bundler::FileUtils.touch(list, **options)
 # ```
 #
-# The `options` parameter is a hash of options, taken from the list `:force`,
-# `:noop`, `:preserve`, and `:verbose`. `:noop` means that no changes are made.
-# The other three are obvious. Each method documents the options that it
-# honours.
+# Possible `options` are:
+#
+# `:force`
+# :   forced operation (rewrite files if exist, remove directories if not empty,
+#     etc.);
+# `:verbose`
+# :   print command to be run, in bash syntax, before performing it;
+# `:preserve`
+# :   preserve object's group, user and modification time on copying;
+# `:noop`
+# :   no changes are made (usable in combination with `:verbose` which will
+#     print the command to run)
+#
+#
+# Each method documents the options that it honours. See also
+# [`::commands`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-commands),
+# [`::options`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-options)
+# and
+# [`::options_of`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-options_of)
+# methods to introspect which command have which options.
 #
 # All methods that have the concept of a "source" file or directory can take
 # either one file or a list of files in that argument. See the method
 # documentation for examples.
 #
-# There are some 'low level' methods, which do not accept any option:
+# There are some 'low level' methods, which do not accept keyword arguments:
 #
 # ```ruby
-# Bundler::FileUtils.copy_entry(src, dest, preserve = false, dereference = false)
+# Bundler::FileUtils.copy_entry(src, dest, preserve = false, dereference_root = false, remove_destination = false)
 # Bundler::FileUtils.copy_file(src, dest, preserve = false, dereference = true)
 # Bundler::FileUtils.copy_stream(srcstream, deststream)
 # Bundler::FileUtils.remove_entry(path, force = false)
@@ -1687,29 +1774,29 @@ end
 # Bundler::FileUtils.uptodate?(file, cmp_list)
 # ```
 #
-# ## module [`Bundler::FileUtils::Verbose`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils/Verbose.html)
+# ## module [`Bundler::FileUtils::Verbose`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils/Verbose.html)
 #
 # This module has all methods of
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html)
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html)
 # module, but it outputs messages before acting. This equates to passing the
 # `:verbose` flag to methods in
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html).
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html).
 #
-# ## module [`Bundler::FileUtils::NoWrite`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils/NoWrite.html)
+# ## module [`Bundler::FileUtils::NoWrite`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils/NoWrite.html)
 #
 # This module has all methods of
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html)
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html)
 # module, but never changes files/directories.  This equates to passing the
 # `:noop` flag to methods in
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html).
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html).
 #
-# ## module [`Bundler::FileUtils::DryRun`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils/DryRun.html)
+# ## module [`Bundler::FileUtils::DryRun`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils/DryRun.html)
 #
 # This module has all methods of
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html)
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html)
 # module, but never changes files/directories.  This equates to passing the
 # `:noop` and `:verbose` flags to methods in
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html).
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html).
 module Bundler::FileUtils
   include ::Bundler::FileUtils::StreamUtils_
   extend ::Bundler::FileUtils::StreamUtils_
@@ -1719,20 +1806,22 @@ module Bundler::FileUtils
 
   # Changes the current directory to the directory `dir`.
   #
-  # If this method is called with block, resumes to the old working directory
-  # after the block execution finished.
+  # If this method is called with block, resumes to the previous working
+  # directory after the block execution has finished.
   #
   # ```ruby
-  # Bundler::FileUtils.cd('/', :verbose => true)   # chdir and report it
+  # Bundler::FileUtils.cd('/')  # change directory
   #
-  # Bundler::FileUtils.cd('/') do  # chdir
+  # Bundler::FileUtils.cd('/', verbose: true)   # change directory and report it
+  #
+  # Bundler::FileUtils.cd('/') do  # change directory
   #   # ...               # do something
   # end                   # return to original directory
   # ```
   #
   #
   # Also aliased as:
-  # [`chdir`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-chdir)
+  # [`chdir`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-chdir)
   sig do
     params(
       dir: T.untyped,
@@ -1744,7 +1833,7 @@ module Bundler::FileUtils
   def self.cd(dir, verbose: T.unsafe(nil), &block); end
 
   # Alias for:
-  # [`cd`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-cd)
+  # [`cd`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-cd)
   sig do
     params(
       dir: T.untyped,
@@ -1765,7 +1854,7 @@ module Bundler::FileUtils
   # ```ruby
   # Bundler::FileUtils.chmod 0755, 'somecommand'
   # Bundler::FileUtils.chmod 0644, %w(my.rb your.rb his.rb her.rb)
-  # Bundler::FileUtils.chmod 0755, '/usr/bin/ruby', :verbose => true
+  # Bundler::FileUtils.chmod 0755, '/usr/bin/ruby', verbose: true
   # ```
   #
   # Symbolic mode is
@@ -1773,7 +1862,7 @@ module Bundler::FileUtils
   # ```ruby
   # Bundler::FileUtils.chmod "u=wrx,go=rx", 'somecommand'
   # Bundler::FileUtils.chmod "u=wr,go=rr", %w(my.rb your.rb his.rb her.rb)
-  # Bundler::FileUtils.chmod "u=wrx,go=rx", '/usr/bin/ruby', :verbose => true
+  # Bundler::FileUtils.chmod "u=wrx,go=rx", '/usr/bin/ruby', verbose: true
   # ```
   #
   # "a"
@@ -1835,12 +1924,12 @@ module Bundler::FileUtils
 
   # Changes owner and group on the named files (in `list`) to the user `user`
   # and the group `group`. `user` and `group` may be an ID (Integer/String) or a
-  # name (String). If `user` or `group` is nil, this method does not change the
-  # attribute.
+  # name ([`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)). If
+  # `user` or `group` is nil, this method does not change the attribute.
   #
   # ```ruby
   # Bundler::FileUtils.chown 'root', 'staff', '/usr/local/bin/ruby'
-  # Bundler::FileUtils.chown nil, 'bin', Dir.glob('/usr/bin/*'), :verbose => true
+  # Bundler::FileUtils.chown nil, 'bin', Dir.glob('/usr/bin/*'), verbose: true
   # ```
   sig do
     params(
@@ -1856,12 +1945,13 @@ module Bundler::FileUtils
 
   # Changes owner and group on the named files (in `list`) to the user `user`
   # and the group `group` recursively. `user` and `group` may be an ID
-  # (Integer/String) or a name (String). If `user` or `group` is nil, this
-  # method does not change the attribute.
+  # (Integer/String) or a name
+  # ([`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)). If `user` or
+  # `group` is nil, this method does not change the attribute.
   #
   # ```ruby
   # Bundler::FileUtils.chown_R 'www', 'www', '/var/www/htdocs'
-  # Bundler::FileUtils.chown_R 'cvs', 'cvs', '/var/cvs', :verbose => true
+  # Bundler::FileUtils.chown_R 'cvs', 'cvs', '/var/cvs', verbose: true
   # ```
   sig do
     params(
@@ -1877,7 +1967,7 @@ module Bundler::FileUtils
   def self.chown_R(user, group, list, noop: T.unsafe(nil), verbose: T.unsafe(nil), force: T.unsafe(nil)); end
 
   # Alias for:
-  # [`compare_file`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-compare_file)
+  # [`compare_file`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-compare_file)
   sig do
     params(
       a: T.untyped,
@@ -1887,8 +1977,8 @@ module Bundler::FileUtils
   end
   def self.cmp(a, b); end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
-  # method names which have the option `opt`.
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
+  # methods names which have the option `opt`.
   #
   # ```ruby
   # p Bundler::FileUtils.collect_method(:preserve) #=> ["cp", "cp_r", "copy", "install"]
@@ -1901,8 +1991,8 @@ module Bundler::FileUtils
   end
   def self.collect_method(opt); end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
-  # method names which have any options.
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
+  # names of high-level methods that accept any keyword arguments.
   #
   # ```ruby
   # p Bundler::FileUtils.commands  #=> ["chmod", "cp", "cp_r", "install", ...]
@@ -1919,8 +2009,8 @@ module Bundler::FileUtils
   #
   #
   # Also aliased as:
-  # [`identical?`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-identical-3F),
-  # [`cmp`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-cmp)
+  # [`identical?`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-identical-3F),
+  # [`cmp`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-cmp)
   sig do
     params(
       a: T.untyped,
@@ -1941,7 +2031,7 @@ module Bundler::FileUtils
   def self.compare_stream(a, b); end
 
   # Alias for:
-  # [`cp`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-cp)
+  # [`cp`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-cp)
   sig do
     params(
       src: T.untyped,
@@ -2013,13 +2103,13 @@ module Bundler::FileUtils
   # ```ruby
   # Bundler::FileUtils.cp 'eval.c', 'eval.c.org'
   # Bundler::FileUtils.cp %w(cgi.rb complex.rb date.rb), '/usr/lib/ruby/1.6'
-  # Bundler::FileUtils.cp %w(cgi.rb complex.rb date.rb), '/usr/lib/ruby/1.6', :verbose => true
+  # Bundler::FileUtils.cp %w(cgi.rb complex.rb date.rb), '/usr/lib/ruby/1.6', verbose: true
   # Bundler::FileUtils.cp 'symlink', 'dest'   # copy content, "dest" is not a symlink
   # ```
   #
   #
   # Also aliased as:
-  # [`copy`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-copy)
+  # [`copy`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-copy)
   sig do
     params(
       src: T.untyped,
@@ -2037,14 +2127,19 @@ module Bundler::FileUtils
   #
   # `src` can be a list of files.
   #
+  # If `dereference_root` is true, this method dereference tree root.
+  #
+  # If `remove_destination` is true, this method removes each destination file
+  # before copy.
+  #
   # ```ruby
   # # Installing Ruby library "mylib" under the site_ruby
-  # Bundler::FileUtils.rm_r site_ruby + '/mylib', :force
+  # Bundler::FileUtils.rm_r site_ruby + '/mylib', force: true
   # Bundler::FileUtils.cp_r 'lib/', site_ruby + '/mylib'
   #
   # # Examples of copying several files to target directory.
   # Bundler::FileUtils.cp_r %w(mail.rb field.rb debug/), site_ruby + '/tmail'
-  # Bundler::FileUtils.cp_r Dir.glob('*.rb'), '/home/foo/lib/ruby', :noop => true, :verbose => true
+  # Bundler::FileUtils.cp_r Dir.glob('*.rb'), '/home/foo/lib/ruby', noop: true, verbose: true
   #
   # # If you want to copy all contents of a directory instead of the
   # # directory itself, c.f. src/x -> dest/x, src/y -> dest/y,
@@ -2067,7 +2162,7 @@ module Bundler::FileUtils
   def self.cp_r(src, dest, preserve: T.unsafe(nil), noop: T.unsafe(nil), verbose: T.unsafe(nil), dereference_root: T.unsafe(nil), remove_destination: T.unsafe(nil)); end
 
   # Alias for:
-  # [`pwd`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-pwd)
+  # [`pwd`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-pwd)
   sig {returns(T.untyped)}
   def self.getwd(); end
 
@@ -2088,7 +2183,7 @@ module Bundler::FileUtils
   def self.have_option?(mid, opt); end
 
   # Alias for:
-  # [`compare_file`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-compare_file)
+  # [`compare_file`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-compare_file)
   sig do
     params(
       a: T.untyped,
@@ -2103,8 +2198,8 @@ module Bundler::FileUtils
   # removes destination before copy.
   #
   # ```ruby
-  # Bundler::FileUtils.install 'ruby', '/usr/local/bin/ruby', :mode => 0755, :verbose => true
-  # Bundler::FileUtils.install 'lib.rb', '/usr/local/lib/ruby/site_ruby', :verbose => true
+  # Bundler::FileUtils.install 'ruby', '/usr/local/bin/ruby', mode: 0755, verbose: true
+  # Bundler::FileUtils.install 'lib.rb', '/usr/local/lib/ruby/site_ruby', verbose: true
   # ```
   sig do
     params(
@@ -2122,7 +2217,7 @@ module Bundler::FileUtils
   def self.install(src, dest, mode: T.unsafe(nil), owner: T.unsafe(nil), group: T.unsafe(nil), preserve: T.unsafe(nil), noop: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
   # Alias for:
-  # [`ln`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-ln)
+  # [`ln`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-ln)
   sig do
     params(
       src: T.untyped,
@@ -2136,7 +2231,7 @@ module Bundler::FileUtils
   def self.link(src, dest, force: T.unsafe(nil), noop: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
   # In the first form, creates a hard link `link` which points to `target`. If
-  # `link` already exists, raises Errno::EEXIST. But if the :force option is
+  # `link` already exists, raises Errno::EEXIST. But if the `force` option is
   # set, overwrites `link`.
   #
   # ```ruby
@@ -2155,7 +2250,7 @@ module Bundler::FileUtils
   #
   #
   # Also aliased as:
-  # [`link`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-link)
+  # [`link`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-link)
   sig do
     params(
       src: T.untyped,
@@ -2169,7 +2264,7 @@ module Bundler::FileUtils
   def self.ln(src, dest, force: T.unsafe(nil), noop: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
   # In the first form, creates a symbolic link `link` which points to `target`.
-  # If `link` already exists, raises Errno::EEXIST. But if the :force option is
+  # If `link` already exists, raises Errno::EEXIST. But if the `force` option is
   # set, overwrites `link`.
   #
   # ```ruby
@@ -2188,7 +2283,7 @@ module Bundler::FileUtils
   #
   #
   # Also aliased as:
-  # [`symlink`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-symlink)
+  # [`symlink`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-symlink)
   sig do
     params(
       src: T.untyped,
@@ -2218,7 +2313,7 @@ module Bundler::FileUtils
   def self.ln_sf(src, dest, noop: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
   # Alias for:
-  # [`mkdir_p`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-mkdir_p)
+  # [`mkdir_p`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-mkdir_p)
   sig do
     params(
       list: T.untyped,
@@ -2234,9 +2329,9 @@ module Bundler::FileUtils
   #
   # ```ruby
   # Bundler::FileUtils.mkdir 'test'
-  # Bundler::FileUtils.mkdir %w( tmp data )
-  # Bundler::FileUtils.mkdir 'notexist', :noop => true  # Does not really create.
-  # Bundler::FileUtils.mkdir 'tmp', :mode => 0700
+  # Bundler::FileUtils.mkdir %w(tmp data)
+  # Bundler::FileUtils.mkdir 'notexist', noop: true  # Does not really create.
+  # Bundler::FileUtils.mkdir 'tmp', mode: 0700
   # ```
   sig do
     params(
@@ -2255,7 +2350,7 @@ module Bundler::FileUtils
   # Bundler::FileUtils.mkdir_p '/usr/local/lib/ruby'
   # ```
   #
-  # causes to make following directories, if it does not exist.
+  # causes to make following directories, if they do not exist.
   #
   # *   /usr
   # *   /usr/local
@@ -2266,8 +2361,8 @@ module Bundler::FileUtils
   # You can pass several directories at a time in a list.
   #
   # Also aliased as:
-  # [`mkpath`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-mkpath),
-  # [`makedirs`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-makedirs)
+  # [`mkpath`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-mkpath),
+  # [`makedirs`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-makedirs)
   sig do
     params(
       list: T.untyped,
@@ -2280,7 +2375,7 @@ module Bundler::FileUtils
   def self.mkdir_p(list, mode: T.unsafe(nil), noop: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
   # Alias for:
-  # [`mkdir_p`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-mkdir_p)
+  # [`mkdir_p`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-mkdir_p)
   sig do
     params(
       list: T.untyped,
@@ -2293,7 +2388,7 @@ module Bundler::FileUtils
   def self.mkpath(list, mode: T.unsafe(nil), noop: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
   # Alias for:
-  # [`mv`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-mv)
+  # [`mv`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-mv)
   sig do
     params(
       src: T.untyped,
@@ -2312,15 +2407,15 @@ module Bundler::FileUtils
   #
   # ```ruby
   # Bundler::FileUtils.mv 'badname.rb', 'goodname.rb'
-  # Bundler::FileUtils.mv 'stuff.rb', '/notexist/lib/ruby', :force => true  # no error
+  # Bundler::FileUtils.mv 'stuff.rb', '/notexist/lib/ruby', force: true  # no error
   #
   # Bundler::FileUtils.mv %w(junk.txt dust.txt), '/home/foo/.trash/'
-  # Bundler::FileUtils.mv Dir.glob('test*.rb'), 'test', :noop => true, :verbose => true
+  # Bundler::FileUtils.mv Dir.glob('test*.rb'), 'test', noop: true, verbose: true
   # ```
   #
   #
   # Also aliased as:
-  # [`move`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-move)
+  # [`move`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-move)
   sig do
     params(
       src: T.untyped,
@@ -2334,7 +2429,7 @@ module Bundler::FileUtils
   end
   def self.mv(src, dest, force: T.unsafe(nil), noop: T.unsafe(nil), verbose: T.unsafe(nil), secure: T.unsafe(nil)); end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # option names.
   #
   # ```ruby
@@ -2343,7 +2438,7 @@ module Bundler::FileUtils
   sig {returns(T.untyped)}
   def self.options(); end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # option names of the method `mid`.
   #
   # ```ruby
@@ -2368,12 +2463,12 @@ module Bundler::FileUtils
   # Returns the name of the current directory.
   #
   # Also aliased as:
-  # [`getwd`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-getwd)
+  # [`getwd`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-getwd)
   sig {returns(T.untyped)}
   def self.pwd(); end
 
   # Alias for:
-  # [`rm`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm)
+  # [`rm`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-rm)
   sig do
     params(
       list: T.untyped,
@@ -2386,7 +2481,7 @@ module Bundler::FileUtils
   def self.remove(list, force: T.unsafe(nil), noop: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
   # Removes a directory `dir` and its contents recursively. This method ignores
-  # [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html) if
+  # [`StandardError`](https://docs.ruby-lang.org/en/2.7.0/StandardError.html) if
   # `force` is true.
   sig do
     params(
@@ -2401,8 +2496,7 @@ module Bundler::FileUtils
   # file, a directory, or something. If `path` is a directory, remove it
   # recursively.
   #
-  # See also
-  # [`remove_entry_secure`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-remove_entry_secure).
+  # See also remove\_entry\_secure.
   sig do
     params(
       path: T.untyped,
@@ -2415,9 +2509,8 @@ module Bundler::FileUtils
   # This method removes a file system entry `path`. `path` shall be a regular
   # file, a directory, or something. If `path` is a directory, remove it
   # recursively. This method is required to avoid TOCTTOU
-  # (time-of-check-to-time-of-use) local security vulnerability of
-  # [`rm_r`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm_r).
-  # [`rm_r`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm_r)
+  # (time-of-check-to-time-of-use) local security vulnerability of rm\_r.
+  # [`rm_r`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-rm_r)
   # causes security hole when:
   #
   # *   Parent directory is world writable (including /tmp).
@@ -2440,8 +2533,8 @@ module Bundler::FileUtils
   #
   # For details of this security vulnerability, see Perl's case:
   #
-  # *   http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2005-0448
-  # *   http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2004-0452
+  # *   https://cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2005-0448
+  # *   https://cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2004-0452
   #
   #
   # For fileutils.rb, this vulnerability is reported in [ruby-dev:26100].
@@ -2455,7 +2548,7 @@ module Bundler::FileUtils
   def self.remove_entry_secure(path, force=T.unsafe(nil)); end
 
   # Removes a file `path`. This method ignores
-  # [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html) if
+  # [`StandardError`](https://docs.ruby-lang.org/en/2.7.0/StandardError.html) if
   # `force` is true.
   sig do
     params(
@@ -2472,12 +2565,12 @@ module Bundler::FileUtils
   # ```ruby
   # Bundler::FileUtils.rm %w( junk.txt dust.txt )
   # Bundler::FileUtils.rm Dir.glob('*.so')
-  # Bundler::FileUtils.rm 'NotExistFile', :force => true   # never raises exception
+  # Bundler::FileUtils.rm 'NotExistFile', force: true   # never raises exception
   # ```
   #
   #
   # Also aliased as:
-  # [`remove`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-remove)
+  # [`remove`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-remove)
   sig do
     params(
       list: T.untyped,
@@ -2492,12 +2585,12 @@ module Bundler::FileUtils
   # Equivalent to
   #
   # ```ruby
-  # Bundler::FileUtils.rm(list, :force => true)
+  # Bundler::FileUtils.rm(list, force: true)
   # ```
   #
   #
   # Also aliased as:
-  # [`safe_unlink`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-safe_unlink)
+  # [`safe_unlink`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-safe_unlink)
   sig do
     params(
       list: T.untyped,
@@ -2510,12 +2603,12 @@ module Bundler::FileUtils
 
   # remove files `list[0]` `list[1]`... If `list[n]` is a directory, removes its
   # all contents recursively. This method ignores
-  # [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html)
+  # [`StandardError`](https://docs.ruby-lang.org/en/2.7.0/StandardError.html)
   # when :force option is set.
   #
   # ```ruby
   # Bundler::FileUtils.rm_r Dir.glob('/tmp/*')
-  # Bundler::FileUtils.rm_r 'some_dir', :force => true
+  # Bundler::FileUtils.rm_r 'some_dir', force: true
   # ```
   #
   # WARNING: This method causes local vulnerability if one of parent directories
@@ -2523,13 +2616,12 @@ module Bundler::FileUtils
   # permission is 1777), and the current process has strong privilege such as
   # Unix super user (root), and the system has symbolic link. For secure
   # removing, read the documentation of
-  # [`remove_entry_secure`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-remove_entry_secure)
-  # carefully, and set :secure option to true. Default is :secure=>false.
+  # [`remove_entry_secure`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-remove_entry_secure)
+  # carefully, and set :secure option to true. Default is `secure: false`.
   #
   # NOTE: This method calls
-  # [`remove_entry_secure`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-remove_entry_secure)
-  # if :secure option is set. See also
-  # [`remove_entry_secure`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-remove_entry_secure).
+  # [`remove_entry_secure`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-remove_entry_secure)
+  # if :secure option is set. See also remove\_entry\_secure.
   sig do
     params(
       list: T.untyped,
@@ -2545,15 +2637,15 @@ module Bundler::FileUtils
   # Equivalent to
   #
   # ```ruby
-  # Bundler::FileUtils.rm_r(list, :force => true)
+  # Bundler::FileUtils.rm_r(list, force: true)
   # ```
   #
   # WARNING: This method causes local vulnerability. Read the documentation of
-  # [`rm_r`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm_r)
+  # [`rm_r`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-rm_r)
   # first.
   #
   # Also aliased as:
-  # [`rmtree`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-rmtree)
+  # [`rmtree`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-rmtree)
   sig do
     params(
       list: T.untyped,
@@ -2571,7 +2663,7 @@ module Bundler::FileUtils
   # Bundler::FileUtils.rmdir 'somedir'
   # Bundler::FileUtils.rmdir %w(somedir anydir otherdir)
   # # Does not really remove directory; outputs message.
-  # Bundler::FileUtils.rmdir 'somedir', :verbose => true, :noop => true
+  # Bundler::FileUtils.rmdir 'somedir', verbose: true, noop: true
   # ```
   sig do
     params(
@@ -2585,7 +2677,7 @@ module Bundler::FileUtils
   def self.rmdir(list, parents: T.unsafe(nil), noop: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
   # Alias for:
-  # [`rm_rf`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm_rf)
+  # [`rm_rf`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-rm_rf)
   sig do
     params(
       list: T.untyped,
@@ -2598,7 +2690,7 @@ module Bundler::FileUtils
   def self.rmtree(list, noop: T.unsafe(nil), verbose: T.unsafe(nil), secure: T.unsafe(nil)); end
 
   # Alias for:
-  # [`rm_f`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-rm_f)
+  # [`rm_f`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-rm_f)
   sig do
     params(
       list: T.untyped,
@@ -2610,7 +2702,7 @@ module Bundler::FileUtils
   def self.safe_unlink(list, noop: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
   # Alias for:
-  # [`ln_s`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-i-ln_s)
+  # [`ln_s`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-i-ln_s)
   sig do
     params(
       src: T.untyped,
@@ -2660,10 +2752,10 @@ module Bundler::FileUtils
 end
 
 # This module has all methods of
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html)
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html)
 # module, but never changes files/directories, with printing message before
 # acting. This equates to passing the `:noop` and `:verbose` flag to methods in
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html).
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html).
 module Bundler::FileUtils::DryRun
   include ::Bundler::FileUtils::LowMethods
   include ::Bundler::FileUtils
@@ -3202,10 +3294,10 @@ module Bundler::FileUtils::LowMethods
 end
 
 # This module has all methods of
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html)
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html)
 # module, but never changes files/directories.  This equates to passing the
 # `:noop` flag to methods in
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html).
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html).
 module Bundler::FileUtils::NoWrite
   include ::Bundler::FileUtils::LowMethods
   include ::Bundler::FileUtils
@@ -3599,10 +3691,10 @@ module Bundler::FileUtils::StreamUtils_
 end
 
 # This module has all methods of
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html)
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html)
 # module, but it outputs messages before acting. This equates to passing the
 # `:verbose` flag to methods in
-# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.6.0/Bundler/FileUtils.html).
+# [`Bundler::FileUtils`](https://docs.ruby-lang.org/en/2.7.0/Bundler/FileUtils.html).
 module Bundler::FileUtils::Verbose
   include ::Bundler::FileUtils
   include ::Bundler::FileUtils::StreamUtils_
@@ -4208,6 +4300,7 @@ class Bundler::HTTPError < Bundler::BundlerError
   def status_code(); end
 end
 
+# Handles all the fetching with the rubygems server
 class Bundler::Fetcher; end
 
 # This error is raised if HTTP authentication is required, but not provided.
@@ -4219,7 +4312,7 @@ class Bundler::Fetcher::BadAuthenticationError < Bundler::HTTPError
 end
 
 # This is the error raised if
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) fails the cert
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) fails the cert
 # verification
 class Bundler::Fetcher::CertificateFailureError < Bundler::HTTPError
 end
@@ -4233,7 +4326,7 @@ class Bundler::Fetcher::NetworkDownError < Bundler::HTTPError
 end
 
 # This is the error raised when a source is HTTPS and
-# [`OpenSSL`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL.html) didn't load
+# [`OpenSSL`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL.html) didn't load
 class Bundler::Fetcher::SSLError < Bundler::HTTPError
 end
 
@@ -4255,7 +4348,7 @@ class Bundler::Index
   def <<(spec); end
 
   # Whether all the specs in self are in other TODO: rename to
-  # [`include?`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-include-3F)
+  # [`include?`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-include-3F)
   sig do
     params(
       other: T.untyped,
@@ -4265,7 +4358,7 @@ class Bundler::Index
   def ==(other); end
 
   # Alias for:
-  # [`search`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Index.html#method-i-search)
+  # [`search`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Index.html#method-i-search)
   sig do
     params(
       query: T.untyped,
@@ -4328,7 +4421,7 @@ class Bundler::Index
   # about, returning all of the results.
   #
   # Also aliased as:
-  # [`[]`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Index.html#method-i-5B-5D)
+  # [`[]`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Index.html#method-i-5B-5D)
   sig do
     params(
       query: T.untyped,
@@ -4698,11 +4791,11 @@ module Bundler::MatchPlatform
   def self.platforms_match?(gemspec_platform, local_platform); end
 end
 
-# [`Bundler::Molinillo`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo.html)
+# [`Bundler::Molinillo`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo.html)
 # is a generic dependency resolution algorithm.
 module Bundler::Molinillo
   # The version of
-  # [`Bundler::Molinillo`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo.html).
+  # [`Bundler::Molinillo`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo.html).
   VERSION = ::T.let(nil, T.untyped)
 
 end
@@ -4716,7 +4809,7 @@ end
 # existing {DependencyGraph::Vertex}
 # ```
 class Bundler::Molinillo::CircularDependencyError < Bundler::Molinillo::ResolverError
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html)<Object>
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html)<Object>
   # :   the dependencies responsible for causing the error
   sig {returns(T.untyped)}
   def dependencies(); end
@@ -4746,7 +4839,7 @@ end
 module Bundler::Molinillo::Delegates
 end
 
-# [`Delegates`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/Delegates.html)
+# [`Delegates`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/Delegates.html)
 # all {Bundler::Molinillo::ResolutionState} methods to a `#state` property.
 module Bundler::Molinillo::Delegates::ResolutionState
   # (see Bundler::Molinillo::ResolutionState#activated)
@@ -4782,12 +4875,12 @@ module Bundler::Molinillo::Delegates::ResolutionState
   def unused_unwind_options(); end
 end
 
-# [`Delegates`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/Delegates.html)
+# [`Delegates`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/Delegates.html)
 # all {Bundler::Molinillo::SpecificationProvider} methods to a
 # `#specification\_provider` property.
 module Bundler::Molinillo::Delegates::SpecificationProvider
   # (see
-  # [`Bundler::Molinillo::SpecificationProvider#allow_missing?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/SpecificationProvider.html#method-i-allow_missing-3F))
+  # [`Bundler::Molinillo::SpecificationProvider#allow_missing?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/SpecificationProvider.html#method-i-allow_missing-3F))
   sig do
     params(
       dependency: T.untyped,
@@ -4797,7 +4890,7 @@ module Bundler::Molinillo::Delegates::SpecificationProvider
   def allow_missing?(dependency); end
 
   # (see
-  # [`Bundler::Molinillo::SpecificationProvider#dependencies_for`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/SpecificationProvider.html#method-i-dependencies_for))
+  # [`Bundler::Molinillo::SpecificationProvider#dependencies_for`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/SpecificationProvider.html#method-i-dependencies_for))
   sig do
     params(
       specification: T.untyped,
@@ -4807,7 +4900,7 @@ module Bundler::Molinillo::Delegates::SpecificationProvider
   def dependencies_for(specification); end
 
   # (see
-  # [`Bundler::Molinillo::SpecificationProvider#name_for`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/SpecificationProvider.html#method-i-name_for))
+  # [`Bundler::Molinillo::SpecificationProvider#name_for`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/SpecificationProvider.html#method-i-name_for))
   sig do
     params(
       dependency: T.untyped,
@@ -4817,17 +4910,17 @@ module Bundler::Molinillo::Delegates::SpecificationProvider
   def name_for(dependency); end
 
   # (see
-  # [`Bundler::Molinillo::SpecificationProvider#name_for_explicit_dependency_source`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/SpecificationProvider.html#method-i-name_for_explicit_dependency_source))
+  # [`Bundler::Molinillo::SpecificationProvider#name_for_explicit_dependency_source`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/SpecificationProvider.html#method-i-name_for_explicit_dependency_source))
   sig {returns(T.untyped)}
   def name_for_explicit_dependency_source(); end
 
   # (see
-  # [`Bundler::Molinillo::SpecificationProvider#name_for_locking_dependency_source`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/SpecificationProvider.html#method-i-name_for_locking_dependency_source))
+  # [`Bundler::Molinillo::SpecificationProvider#name_for_locking_dependency_source`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/SpecificationProvider.html#method-i-name_for_locking_dependency_source))
   sig {returns(T.untyped)}
   def name_for_locking_dependency_source(); end
 
   # (see
-  # [`Bundler::Molinillo::SpecificationProvider#requirement_satisfied_by?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/SpecificationProvider.html#method-i-requirement_satisfied_by-3F))
+  # [`Bundler::Molinillo::SpecificationProvider#requirement_satisfied_by?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/SpecificationProvider.html#method-i-requirement_satisfied_by-3F))
   sig do
     params(
       requirement: T.untyped,
@@ -4839,7 +4932,7 @@ module Bundler::Molinillo::Delegates::SpecificationProvider
   def requirement_satisfied_by?(requirement, activated, spec); end
 
   # (see
-  # [`Bundler::Molinillo::SpecificationProvider#search_for`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/SpecificationProvider.html#method-i-search_for))
+  # [`Bundler::Molinillo::SpecificationProvider#search_for`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/SpecificationProvider.html#method-i-search_for))
   sig do
     params(
       dependency: T.untyped,
@@ -4849,7 +4942,7 @@ module Bundler::Molinillo::Delegates::SpecificationProvider
   def search_for(dependency); end
 
   # (see
-  # [`Bundler::Molinillo::SpecificationProvider#sort_dependencies`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/SpecificationProvider.html#method-i-sort_dependencies))
+  # [`Bundler::Molinillo::SpecificationProvider#sort_dependencies`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/SpecificationProvider.html#method-i-sort_dependencies))
   sig do
     params(
       dependencies: T.untyped,
@@ -4947,7 +5040,7 @@ class Bundler::Molinillo::DependencyGraph
   # graph's vertices.
   #
   # Also aliased as:
-  # [`tsort_each_node`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph.html#method-i-tsort_each_node)
+  # [`tsort_each_node`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph.html#method-i-tsort_each_node)
   sig do
     params(
       blk: T.untyped,
@@ -5031,7 +5124,7 @@ class Bundler::Molinillo::DependencyGraph
   # @!visibility private
   #
   # Alias for:
-  # [`each`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph.html#method-i-each)
+  # [`each`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph.html#method-i-each)
   sig {returns(T.untyped)}
   def tsort_each_node(); end
 
@@ -5123,9 +5216,7 @@ class Bundler::Molinillo::DependencyGraph::Action
 end
 
 # @!visibility private (see
-# [`DependencyGraph#add_edge_no_circular`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph.html#method-i-add_edge_no_circular))
-# @!visibility private (see
-# [`DependencyGraph#add_edge_no_circular`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph.html#method-i-add_edge_no_circular))
+# [`DependencyGraph#add_edge_no_circular`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph.html#method-i-add_edge_no_circular))
 class Bundler::Molinillo::DependencyGraph::AddEdgeNoCircular < Bundler::Molinillo::DependencyGraph::Action
   # @return [String] the name of the destination of the edge
   sig {returns(T.untyped)}
@@ -5223,7 +5314,7 @@ class Bundler::Molinillo::DependencyGraph::AddVertex < Bundler::Molinillo::Depen
 end
 
 # @!visibility private (see
-# [`DependencyGraph#delete_edge`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph.html#method-i-delete_edge))
+# [`DependencyGraph#delete_edge`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph.html#method-i-delete_edge))
 class Bundler::Molinillo::DependencyGraph::DeleteEdge < Bundler::Molinillo::DependencyGraph::Action
   # @return [String] the name of the destination of the edge
   sig {returns(T.untyped)}
@@ -5281,7 +5372,7 @@ class Bundler::Molinillo::DependencyGraph::DeleteEdge < Bundler::Molinillo::Depe
 end
 
 # @!visibility private @see
-# [`DependencyGraph#detach_vertex_named`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph.html#method-i-detach_vertex_named)
+# [`DependencyGraph#detach_vertex_named`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph.html#method-i-detach_vertex_named)
 class Bundler::Molinillo::DependencyGraph::DetachVertexNamed < Bundler::Molinillo::DependencyGraph::Action
   # (see Action#down)
   sig do
@@ -5411,7 +5502,7 @@ class Bundler::Molinillo::DependencyGraph::Log
   # {include:DependencyGraph#delete\_edge} @param [Graph] graph the graph to
   # perform the action on @param [String] origin\_name @param [String]
   # destination\_name @param [Object] requirement @return (see
-  # [`DependencyGraph#delete_edge`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph.html#method-i-delete_edge))
+  # [`DependencyGraph#delete_edge`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph.html#method-i-delete_edge))
   sig do
     params(
       graph: T.untyped,
@@ -5530,7 +5621,7 @@ class Bundler::Molinillo::DependencyGraph::SetPayload < Bundler::Molinillo::Depe
 end
 
 # @!visibility private @see
-# [`DependencyGraph#tag`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph.html#method-i-tag)
+# [`DependencyGraph#tag`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph.html#method-i-tag)
 class Bundler::Molinillo::DependencyGraph::Tag < Bundler::Molinillo::DependencyGraph::Action
   # (see Action#down)
   sig do
@@ -5577,7 +5668,7 @@ class Bundler::Molinillo::DependencyGraph::Vertex
   #
   #
   # Also aliased as:
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-eql-3F)
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-eql-3F)
   sig do
     params(
       other: T.untyped,
@@ -5602,7 +5693,7 @@ class Bundler::Molinillo::DependencyGraph::Vertex
   # graph? @return true iff there is a path following edges within this {#graph}
   #
   # Also aliased as:
-  # [`is_reachable_from?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-is_reachable_from-3F)
+  # [`is_reachable_from?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-is_reachable_from-3F)
   sig do
     params(
       other: T.untyped,
@@ -5612,7 +5703,7 @@ class Bundler::Molinillo::DependencyGraph::Vertex
   def ancestor?(other); end
 
   # Alias for:
-  # [`path_to?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-path_to-3F)
+  # [`path_to?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-path_to-3F)
   sig do
     params(
       other: T.untyped,
@@ -5622,7 +5713,7 @@ class Bundler::Molinillo::DependencyGraph::Vertex
   def descendent?(other); end
 
   # Alias for:
-  # [`==`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-3D-3D)
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-3D-3D)
   sig do
     params(
       other: T.untyped,
@@ -5678,7 +5769,7 @@ class Bundler::Molinillo::DependencyGraph::Vertex
   def inspect(); end
 
   # Alias for:
-  # [`ancestor?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-ancestor-3F)
+  # [`ancestor?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-ancestor-3F)
   sig do
     params(
       other: T.untyped,
@@ -5725,7 +5816,7 @@ class Bundler::Molinillo::DependencyGraph::Vertex
   # graph? @return true iff there is a path following edges within this {#graph}
   #
   # Also aliased as:
-  # [`descendent?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-descendent-3F)
+  # [`descendent?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/DependencyGraph/Vertex.html#method-i-descendent-3F)
   sig do
     params(
       other: T.untyped,
@@ -5755,7 +5846,7 @@ class Bundler::Molinillo::DependencyGraph::Vertex
   sig {returns(T.untyped)}
   def predecessors(); end
 
-  # @return [Array<Vertex>] the vertices of {#graph} where `self` is a
+  # @return [Set<Vertex>] the vertices of {#graph} where `self` is a
   #
   # ```
   # {#descendent?}
@@ -5763,7 +5854,7 @@ class Bundler::Molinillo::DependencyGraph::Vertex
   sig {returns(T.untyped)}
   def recursive_predecessors(); end
 
-  # @return [Array<Vertex>] the vertices of {#graph} where `self` is an
+  # @return [Set<Vertex>] the vertices of {#graph} where `self` is an
   #
   # ```
   # {#ancestor?}
@@ -6290,7 +6381,7 @@ class Bundler::Molinillo::Resolver::Resolution::PossibilitySet < Struct
   end
   def possibilities=(_); end
 
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) representation
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) representation
   # of the possibility set, for debugging
   sig {returns(T.untyped)}
   def to_s(); end
@@ -6321,7 +6412,7 @@ class Bundler::Molinillo::Resolver::Resolution::UnwindDetails < Struct
   Elem = type_member(fixed: T.untyped)
 
   # We compare
-  # [`UnwindDetails`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo/Resolver/Resolution/UnwindDetails.html)
+  # [`UnwindDetails`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo/Resolver/Resolution/UnwindDetails.html)
   # when choosing which state to unwind to. If two options have the same
   # state\_index we prefer the one most removed from a requirement that caused
   # the conflict. Both options would unwind to the same state, but a
@@ -6469,7 +6560,7 @@ end
 # and flexibility.
 #
 # This module contains the methods that users of
-# [`Bundler::Molinillo`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Molinillo.html)
+# [`Bundler::Molinillo`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Molinillo.html)
 # must to implement, using knowledge of their own model classes.
 module Bundler::Molinillo::SpecificationProvider
   # Returns whether this dependency, which has no possible matching
@@ -6606,7 +6697,7 @@ module Bundler::Molinillo::SpecificationProvider
   # ```
   #
   # @param [{String =>
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)<Conflict>}]
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)<Conflict>}]
   # conflicts @return [Array<Object>] a sorted copy of `dependencies`.
   sig do
     params(
@@ -6780,16 +6871,16 @@ end
 # plugins to use.
 #
 # For plugins to be independent of the
-# [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) internals they
+# [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) internals they
 # shall limit their interactions to methods of this class only. This will save
 # them from breaking when some internal change.
 #
 # Currently we are delegating the methods defined in
-# [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) class to itself.
+# [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) class to itself.
 # So, this class acts as a buffer.
 #
 # If there is some change in the
-# [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) class that is
+# [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) class that is
 # incompatible to its previous behavior or if otherwise desired, we can
 # reimplement(or implement) the method to preserve compatibility.
 #
@@ -6806,12 +6897,9 @@ end
 #
 # This class is supposed to be wrapper over the existing gem installation infra
 # but currently it itself handles everything as the Source's subclasses (e.g.
-# Source::RubyGems) are heavily dependent on the
-# [Gemfile](https://docs.ruby-lang.org/en/2.6.0/2_6_0/bundler/templates/Gemfile.html).
-# SourceList object to be used while parsing the
-# [Gemfile](https://docs.ruby-lang.org/en/2.6.0/2_6_0/bundler/templates/Gemfile.html),
-# setting the approptiate options to be used with Source classes for plugin
-# installation
+# Source::RubyGems) are heavily dependent on the Gemfile.
+# SourceList object to be used while parsing the Gemfile, setting the
+# approptiate options to be used with Source classes for plugin installation
 module Bundler::Plugin
   PLUGIN_FILE_NAME = ::T.let(nil, T.untyped)
 
@@ -7012,9 +7100,7 @@ class Bundler::Plugin::API
   def self.source(source, cls=T.unsafe(nil)); end
 end
 
-# Dsl to parse the
-# [Gemfile](https://docs.ruby-lang.org/en/2.6.0/2_6_0/bundler/templates/Gemfile.html)
-# looking for plugins to install
+# Dsl to parse the Gemfile looking for plugins to install
 class Bundler::Plugin::DSL < Bundler::Dsl
   sig do
     params(
@@ -7082,7 +7168,7 @@ class Bundler::Plugin::Index
   #
   # @param [String] name of the plugin to be registered @param [String] path
   # where the plugin is installed @param [Array<String>]
-  # [`load_paths`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Plugin/Index.html#method-i-load_paths)
+  # [`load_paths`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Plugin/Index.html#method-i-load_paths)
   # for the plugin @param [Array<String>] commands that are handled by the
   # plugin @param [Array<String>] sources that are handled by the plugin
   def register_plugin(name, path, load_paths, commands, sources, hooks); end
@@ -7123,12 +7209,12 @@ class Bundler::RemoteSpecification
   include ::Bundler::MatchPlatform
   include ::Bundler::GemHelpers
   # Compare this specification against another object. Using
-  # [`sort_obj`](https://docs.ruby-lang.org/en/2.6.0/Bundler/RemoteSpecification.html#method-i-sort_obj)
+  # [`sort_obj`](https://docs.ruby-lang.org/en/2.7.0/Bundler/RemoteSpecification.html#method-i-sort_obj)
   # is compatible with
-  # [`Gem::Specification`](https://docs.ruby-lang.org/en/2.6.0/Gem/Specification.html)
-  # and other [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) or
+  # [`Gem::Specification`](https://docs.ruby-lang.org/en/2.7.0/Gem/Specification.html)
+  # and other [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) or
   # RubyGems objects. Otherwise, use the default
-  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) comparison.
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) comparison.
   sig do
     params(
       other: T.untyped,
@@ -7211,7 +7297,7 @@ class Bundler::RemoteSpecification
   # with RubyGems' own specifications.
   #
   # @see #<=> @see
-  # [`Gem::Specification#sort_obj`](https://docs.ruby-lang.org/en/2.6.0/Gem/Specification.html#method-i-sort_obj)
+  # [`Gem::Specification#sort_obj`](https://docs.ruby-lang.org/en/2.7.0/Gem/Specification.html#method-i-sort_obj)
   #
   # @return [Array] an object you can use to compare and sort this
   #
@@ -7597,10 +7683,10 @@ class Bundler::RubyVersion
   def versions_string(versions); end
 
   # Returns a
-  # [`RubyVersion`](https://docs.ruby-lang.org/en/2.6.0/Bundler/RubyVersion.html)
+  # [`RubyVersion`](https://docs.ruby-lang.org/en/2.7.0/Bundler/RubyVersion.html)
   # from the given string. @param [String] the version string to match. @return
   # [RubyVersion,Nil] The version if the string is a valid
-  # [`RubyVersion`](https://docs.ruby-lang.org/en/2.6.0/Bundler/RubyVersion.html)
+  # [`RubyVersion`](https://docs.ruby-lang.org/en/2.7.0/Bundler/RubyVersion.html)
   #
   # ```
   # description, and nil otherwise.
@@ -7867,7 +7953,7 @@ class Bundler::RubygemsIntegration
 
   # Used to make bin stubs that are not created by bundler work under bundler.
   # The new
-  # [`Gem.bin_path`](https://docs.ruby-lang.org/en/2.6.0/Gem.html#method-c-bin_path)
+  # [`Gem.bin_path`](https://docs.ruby-lang.org/en/2.7.0/Gem.html#method-c-bin_path)
   # only considers gems in `specs`
   sig do
     params(
@@ -8447,10 +8533,8 @@ class Bundler::Settings
   def mirror_for(uri); end
 
   # for legacy reasons, in
-  # [`Bundler`](https://docs.ruby-lang.org/en/2.6.0/Bundler.html) 1, the ruby
-  # scope isnt appended when the setting comes from
-  # [`ENV`](https://docs.ruby-lang.org/en/2.6.0/ENV.html) or the global config,
-  # nor do we respect :disable\_shared\_gems
+  # [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) 2, we do not
+  # respect :disable\_shared\_gems
   sig {returns(T.untyped)}
   def path(); end
 
@@ -8852,7 +8936,7 @@ end
 
 class Bundler::Source::Git < Bundler::Source::Path
   # Alias for:
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Git.html#method-i-eql-3F)
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Git.html#method-i-eql-3F)
   sig do
     params(
       other: T.untyped,
@@ -8886,7 +8970,7 @@ class Bundler::Source::Git < Bundler::Source::Path
   def cache_path(); end
 
   # Also aliased as:
-  # [`==`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Git.html#method-i-3D-3D)
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Git.html#method-i-3D-3D)
   sig do
     params(
       other: T.untyped,
@@ -8922,7 +9006,7 @@ class Bundler::Source::Git < Bundler::Source::Path
   # repository. When using local git repos, this is set to the local repo.
   #
   # Also aliased as:
-  # [`path`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Git.html#method-i-path)
+  # [`path`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Git.html#method-i-path)
   sig {returns(T.untyped)}
   def install_path(); end
 
@@ -8944,7 +9028,7 @@ class Bundler::Source::Git < Bundler::Source::Path
   def options(); end
 
   # Alias for:
-  # [`install_path`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Git.html#method-i-install_path)
+  # [`install_path`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Git.html#method-i-install_path)
   sig {returns(T.untyped)}
   def path(); end
 
@@ -9014,9 +9098,9 @@ class Bundler::Source::Git::GitNotInstalledError < Bundler::GitError
 end
 
 # The
-# [`GitProxy`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Git/GitProxy.html)
+# [`GitProxy`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Git/GitProxy.html)
 # is responsible to interact with git repositories. All actions required by the
-# [`Git`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Git.html) source is
+# [`Git`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Git.html) source is
 # encapsulated in this object.
 class Bundler::Source::Git::GitProxy
   sig {returns(T.untyped)}
@@ -9118,7 +9202,7 @@ end
 
 class Bundler::Source::Metadata < Bundler::Source
   # Also aliased as:
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Metadata.html#method-i-eql-3F)
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Metadata.html#method-i-eql-3F)
   sig do
     params(
       other: T.untyped,
@@ -9131,7 +9215,7 @@ class Bundler::Source::Metadata < Bundler::Source
   def cached!(); end
 
   # Alias for:
-  # [`==`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Metadata.html#method-i-3D-3D)
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Metadata.html#method-i-3D-3D)
   sig do
     params(
       other: T.untyped,
@@ -9177,7 +9261,7 @@ class Bundler::Source::Path < Bundler::Source
   DEFAULT_GLOB = ::T.let(nil, T.untyped)
 
   # Alias for:
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Path.html#method-i-eql-3F)
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Path.html#method-i-eql-3F)
   sig do
     params(
       other: T.untyped,
@@ -9202,7 +9286,7 @@ class Bundler::Source::Path < Bundler::Source
   def cached!(); end
 
   # Also aliased as:
-  # [`==`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Path.html#method-i-3D-3D)
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Path.html#method-i-3D-3D)
   sig do
     params(
       other: T.untyped,
@@ -9307,7 +9391,7 @@ class Bundler::Source::Rubygems < Bundler::Source
   API_REQUEST_SIZE = ::T.let(nil, T.untyped)
 
   # Alias for:
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Rubygems.html#method-i-eql-3F)
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Rubygems.html#method-i-eql-3F)
   sig do
     params(
       other: T.untyped,
@@ -9403,7 +9487,7 @@ class Bundler::Source::Rubygems < Bundler::Source
   def double_check_for(unmet_dependency_names); end
 
   # Also aliased as:
-  # [`==`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Rubygems.html#method-i-3D-3D)
+  # [`==`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Rubygems.html#method-i-3D-3D)
   sig do
     params(
       other: T.untyped,
@@ -9490,7 +9574,7 @@ class Bundler::Source::Rubygems < Bundler::Source
   def loaded_from(spec); end
 
   # Alias for:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Rubygems.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Rubygems.html#method-i-to_s)
   sig {returns(T.untyped)}
   def name(); end
 
@@ -9560,7 +9644,7 @@ class Bundler::Source::Rubygems < Bundler::Source
   def to_lock(); end
 
   # Also aliased as:
-  # [`name`](https://docs.ruby-lang.org/en/2.6.0/Bundler/Source/Rubygems.html#method-i-name)
+  # [`name`](https://docs.ruby-lang.org/en/2.7.0/Bundler/Source/Rubygems.html#method-i-name)
   sig {returns(T.untyped)}
   def to_s(); end
 

@@ -318,14 +318,14 @@ class ERB
   def encoding(); end
 
   # The optional *filename* argument passed to
-  # [`Kernel#eval`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-eval)
-  # when the [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) code is run
+  # [`Kernel#eval`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-eval)
+  # when the [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) code is run
   sig {returns(::T.untyped)}
   def filename(); end
 
   # The optional *filename* argument passed to
-  # [`Kernel#eval`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-eval)
-  # when the [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) code is run
+  # [`Kernel#eval`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-eval)
+  # when the [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) code is run
   sig do
     params(
       filename: ::T.untyped,
@@ -346,14 +346,14 @@ class ERB
   def initialize(str, safe_level=T.unsafe(nil), trim_mode=T.unsafe(nil), eoutvar=T.unsafe(nil)); end
 
   # The optional *lineno* argument passed to
-  # [`Kernel#eval`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-eval)
-  # when the [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) code is run
+  # [`Kernel#eval`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-eval)
+  # when the [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) code is run
   sig {returns(::T.untyped)}
   def lineno(); end
 
   # The optional *lineno* argument passed to
-  # [`Kernel#eval`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-eval)
-  # when the [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) code is run
+  # [`Kernel#eval`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-eval)
+  # when the [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) code is run
   sig do
     params(
       lineno: ::T.untyped,
@@ -362,6 +362,25 @@ class ERB
   end
   def lineno=(lineno); end
 
+  # Sets optional filename and line number that will be used in
+  # [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) code evaluation and
+  # error reporting. See also
+  # [`filename=`](https://docs.ruby-lang.org/en/2.7.0/ERB.html#attribute-i-filename)
+  # and
+  # [`lineno=`](https://docs.ruby-lang.org/en/2.7.0/ERB.html#attribute-i-lineno)
+  #
+  # ```ruby
+  # erb = ERB.new('<%= some_x %>')
+  # erb.render
+  # # undefined local variable or method `some_x'
+  # #   from (erb):1
+  #
+  # erb.location = ['file.erb', 3]
+  # # All subsequent error reporting would use new location
+  # erb.render
+  # # undefined local variable or method `some_x'
+  # #   from file.erb:4
+  # ```
   sig do
     params(
       location: ::T.untyped,
@@ -371,7 +390,7 @@ class ERB
   def location=(location); end
 
   # Creates a new compiler for
-  # [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html). See ERB::Compiler.new
+  # [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html). See ERB::Compiler.new
   # for details
   sig do
     params(
@@ -381,12 +400,12 @@ class ERB
   end
   def make_compiler(trim_mode); end
 
-  # Executes the generated [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html)
+  # Executes the generated [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html)
   # code to produce a completed template, returning the results of that code.
-  # (See [`ERB::new`](https://docs.ruby-lang.org/en/2.6.0/ERB.html#method-c-new)
+  # (See [`ERB::new`](https://docs.ruby-lang.org/en/2.7.0/ERB.html#method-c-new)
   # for details on how this process can be affected by *safe\_level*.)
   #
-  # *b* accepts a [`Binding`](https://docs.ruby-lang.org/en/2.6.0/Binding.html)
+  # *b* accepts a [`Binding`](https://docs.ruby-lang.org/en/2.7.0/Binding.html)
   # object which is used to set the context of code evaluation.
   sig do
     params(
@@ -397,11 +416,11 @@ class ERB
   def result(b=T.unsafe(nil)); end
 
   # Render a template on a new toplevel binding with local variables specified
-  # by a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) object.
+  # by a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) object.
   def result_with_hash(hash); end
 
   # Generate results and print them. (see
-  # [`ERB#result`](https://docs.ruby-lang.org/en/2.6.0/ERB.html#method-i-result))
+  # [`ERB#result`](https://docs.ruby-lang.org/en/2.7.0/ERB.html#method-i-result))
   sig do
     params(
       b: ::T.untyped,
@@ -411,10 +430,10 @@ class ERB
   def run(b=T.unsafe(nil)); end
 
   # Can be used to set *eoutvar* as described in
-  # [`ERB::new`](https://docs.ruby-lang.org/en/2.6.0/ERB.html#method-c-new).
+  # [`ERB::new`](https://docs.ruby-lang.org/en/2.7.0/ERB.html#method-c-new).
   # It's probably easier to just use the constructor though, since calling this
   # method requires the setup of an
-  # [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) *compiler* object.
+  # [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) *compiler* object.
   sig do
     params(
       compiler: ::T.untyped,
@@ -425,7 +444,7 @@ class ERB
   def set_eoutvar(compiler, eoutvar=T.unsafe(nil)); end
 
   # The Ruby code generated by
-  # [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html)
+  # [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html)
   sig {returns(::T.untyped)}
   def src(); end
 
@@ -809,7 +828,7 @@ end
 # ```
 module ERB::DefMethod
   # define *methodname* as instance method of current module, using
-  # [`ERB`](https://docs.ruby-lang.org/en/2.6.0/ERB.html) object or eRuby file
+  # [`ERB`](https://docs.ruby-lang.org/en/2.7.0/ERB.html) object or eRuby file
   sig do
     params(
       methodname: ::T.untyped,
@@ -823,7 +842,7 @@ end
 # A utility module for conversion routines, often handy in HTML generation.
 module ERB::Util
   # Alias for:
-  # [`html_escape`](https://docs.ruby-lang.org/en/2.6.0/ERB/Util.html#method-i-html_escape)
+  # [`html_escape`](https://docs.ruby-lang.org/en/2.7.0/ERB/Util.html#method-i-html_escape)
   def h(s); end
 
   # A utility method for escaping HTML tag characters in *s*.
@@ -843,11 +862,11 @@ module ERB::Util
   #
   #
   # Also aliased as:
-  # [`h`](https://docs.ruby-lang.org/en/2.6.0/ERB/Util.html#method-i-h)
+  # [`h`](https://docs.ruby-lang.org/en/2.7.0/ERB/Util.html#method-i-h)
   def html_escape(s); end
 
   # Alias for:
-  # [`html_escape`](https://docs.ruby-lang.org/en/2.6.0/ERB/Util.html#method-i-html_escape)
+  # [`html_escape`](https://docs.ruby-lang.org/en/2.7.0/ERB/Util.html#method-i-html_escape)
   sig do
     params(
       s: ::T.untyped,
@@ -873,7 +892,7 @@ module ERB::Util
   #
   #
   # Also aliased as:
-  # [`h`](https://docs.ruby-lang.org/en/2.6.0/ERB/Util.html#method-c-h)
+  # [`h`](https://docs.ruby-lang.org/en/2.7.0/ERB/Util.html#method-c-h)
   sig do
     params(
       s: ::T.untyped,
@@ -883,7 +902,7 @@ module ERB::Util
   def self.html_escape(s); end
 
   # Alias for:
-  # [`url_encode`](https://docs.ruby-lang.org/en/2.6.0/ERB/Util.html#method-i-url_encode)
+  # [`url_encode`](https://docs.ruby-lang.org/en/2.7.0/ERB/Util.html#method-i-url_encode)
   sig do
     params(
       s: ::T.untyped,
@@ -893,7 +912,7 @@ module ERB::Util
   def self.u(s); end
 
   # A utility method for encoding the
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) *s* as a URL.
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) *s* as a URL.
   #
   # ```ruby
   # require "erb"
@@ -910,7 +929,7 @@ module ERB::Util
   #
   #
   # Also aliased as:
-  # [`u`](https://docs.ruby-lang.org/en/2.6.0/ERB/Util.html#method-c-u)
+  # [`u`](https://docs.ruby-lang.org/en/2.7.0/ERB/Util.html#method-c-u)
   sig do
     params(
       s: ::T.untyped,

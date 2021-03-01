@@ -1,18 +1,18 @@
 # typed: __STDLIB_INTERNAL
 
 # Ruby supports two forms of objectified methods.
-# [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html)
-# [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) is used to
+# [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html)
+# [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) is used to
 # represent methods that are associated with a particular object: these method
 # objects are bound to that object. Bound method objects for an object can be
 # created using
-# [`Object#method`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-method).
+# [`Object#method`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-method).
 #
 # Ruby also supports unbound methods; methods objects that are not associated
 # with a particular object. These can be created either by calling
-# [`Module#instance_method`](https://docs.ruby-lang.org/en/2.6.0/Module.html#method-i-instance_method)
+# [`Module#instance_method`](https://docs.ruby-lang.org/en/2.7.0/Module.html#method-i-instance_method)
 # or by calling unbind on a bound method object. The result of both of these is
-# an [`UnboundMethod`](https://docs.ruby-lang.org/en/2.6.0/UnboundMethod.html)
+# an [`UnboundMethod`](https://docs.ruby-lang.org/en/2.7.0/UnboundMethod.html)
 # object.
 #
 # Unbound methods can only be called after they are bound to an object. That
@@ -156,7 +156,7 @@ class UnboundMethod
   # Returns a hash value corresponding to the method object.
   #
   # See also
-  # [`Object#hash`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-hash).
+  # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
   def hash; end
 
   # Returns a human-readable description of the underlying method.
@@ -196,7 +196,7 @@ class UnboundMethod
   def name; end
 
   # Returns the class or module that defines the method. See also
-  # [`Method#receiver`](https://docs.ruby-lang.org/en/2.6.0/Method.html#method-i-receiver).
+  # [`Method#receiver`](https://docs.ruby-lang.org/en/2.7.0/Method.html#method-i-receiver).
   #
   # ```ruby
   # (1..3).method(:map).owner #=> Enumerable
@@ -238,7 +238,7 @@ class UnboundMethod
   sig {returns(T.nilable([String, Integer]))}
   def source_location; end
 
-  # Returns a [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) of
+  # Returns a [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) of
   # superclass which would be called when super is used or nil if there is no
   # method on superclass.
   sig {returns(T.nilable(UnboundMethod))}

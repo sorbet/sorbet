@@ -2,58 +2,60 @@
 
 # ## Overview
 #
-# The Common Gateway Interface (CGI) is a simple protocol for passing an HTTP
-# request from a web server to a standalone program, and returning the output to
-# the web browser. Basically, a
-# [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) program is called with
+# The Common Gateway Interface
+# ([`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)) is a simple protocol
+# for passing an HTTP request from a web server to a standalone program, and
+# returning the output to the web browser. Basically, a
+# [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) program is called with
 # the parameters of the request passed in either in the environment (GET) or via
 # $stdin (POST), and everything it prints to $stdout is returned to the client.
 #
-# This file holds the [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html)
+# This file holds the [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
 # class. This class provides functionality for retrieving HTTP request
 # parameters, managing cookies, and generating HTML output.
 #
 # The file
-# [`CGI::Session`](https://docs.ruby-lang.org/en/2.6.0/CGI/Session.html)
+# [`CGI::Session`](https://docs.ruby-lang.org/en/2.7.0/CGI/Session.html)
 # provides session management functionality; see that class for more details.
 #
 # See http://www.w3.org/CGI/ for more information on the
-# [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) protocol.
+# [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) protocol.
 #
 # ## Introduction
 #
-# [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) is a large class,
+# [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) is a large class,
 # providing several categories of methods, many of which are mixed in from other
 # modules. Some of the documentation is in this class, some in the modules
-# [`CGI::QueryExtension`](https://docs.ruby-lang.org/en/2.6.0/CGI/QueryExtension.html)
+# [`CGI::QueryExtension`](https://docs.ruby-lang.org/en/2.7.0/CGI/QueryExtension.html)
 # and
-# [`CGI::HtmlExtension`](https://docs.ruby-lang.org/en/2.6.0/CGI/HtmlExtension.html).
-# See [`CGI::Cookie`](https://docs.ruby-lang.org/en/2.6.0/CGI/Cookie.html) for
-# specific information on handling cookies, and cgi/session.rb (CGI::Session)
-# for information on sessions.
+# [`CGI::HtmlExtension`](https://docs.ruby-lang.org/en/2.7.0/CGI/HtmlExtension.html).
+# See [`CGI::Cookie`](https://docs.ruby-lang.org/en/2.7.0/CGI/Cookie.html) for
+# specific information on handling cookies, and cgi/session.rb
+# ([`CGI::Session`](https://docs.ruby-lang.org/en/2.7.0/CGI/Session.html)) for
+# information on sessions.
 #
-# For queries, [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) provides
+# For queries, [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) provides
 # methods to get at environmental variables, parameters, cookies, and multipart
 # request data. For responses,
-# [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) provides methods for
+# [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) provides methods for
 # writing output and generating HTML.
 #
 # Read on for more details. Examples are provided at the bottom.
 #
 # ## Queries
 #
-# The [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) class dynamically
+# The [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) class dynamically
 # mixes in parameter and cookie-parsing functionality,  environmental variable
 # access, and support for parsing multipart requests (including uploaded files)
 # from the
-# [`CGI::QueryExtension`](https://docs.ruby-lang.org/en/2.6.0/CGI/QueryExtension.html)
+# [`CGI::QueryExtension`](https://docs.ruby-lang.org/en/2.7.0/CGI/QueryExtension.html)
 # module.
 #
 # ### Environmental Variables
 #
-# The standard [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html)
+# The standard [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
 # environmental variables are available as read-only attributes of a
-# [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) object. The following is
+# [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) object. The following is
 # a list of these variables:
 #
 # ```ruby
@@ -77,11 +79,11 @@
 #
 # The method params() returns a hash of all parameters in the request as
 # name/value-list pairs, where the value-list is an
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of one or more
-# values. The [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) object
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of one or more
+# values. The [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) object
 # itself also behaves as a hash of parameter names to values, but only returns a
 # single value (as a
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)) for each
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)) for each
 # parameter name.
 #
 # For instance, suppose the request contains the parameter "favourite\_colours"
@@ -101,7 +103,7 @@
 #
 # HTTP Cookies are automatically parsed from the request. They are available
 # from the cookies() accessor, which returns a hash from cookie name to
-# [`CGI::Cookie`](https://docs.ruby-lang.org/en/2.6.0/CGI/Cookie.html) object.
+# [`CGI::Cookie`](https://docs.ruby-lang.org/en/2.7.0/CGI/Cookie.html) object.
 #
 # ### Multipart requests
 #
@@ -109,9 +111,9 @@
 # then it may contain uploaded files. These are stored by the QueryExtension
 # module in the parameters of the request. The parameter name is the name
 # attribute of the file input field, as usual. However, the value is not a
-# string, but an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object,
+# string, but an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object,
 # either an IOString for small files, or a
-# [`Tempfile`](https://docs.ruby-lang.org/en/2.6.0/Tempfile.html) for larger
+# [`Tempfile`](https://docs.ruby-lang.org/en/2.7.0/Tempfile.html) for larger
 # ones. This object also has the additional singleton methods:
 #
 # local\_path()
@@ -124,38 +126,38 @@
 #
 # ## Responses
 #
-# The [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) class provides
+# The [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) class provides
 # methods for sending header and content output to the HTTP client, and mixes in
 # methods for programmatic HTML generation from
-# [`CGI::HtmlExtension`](https://docs.ruby-lang.org/en/2.6.0/CGI/HtmlExtension.html)
+# [`CGI::HtmlExtension`](https://docs.ruby-lang.org/en/2.7.0/CGI/HtmlExtension.html)
 # and CGI::TagMaker modules. The precise version of HTML to use for HTML
 # generation is specified at object creation time.
 #
 # ### Writing output
 #
 # The simplest way to send output to the HTTP client is using the
-# [`out()`](https://docs.ruby-lang.org/en/2.6.0/CGI.html#method-i-out) method.
+# [`out()`](https://docs.ruby-lang.org/en/2.7.0/CGI.html#method-i-out) method.
 # This takes the HTTP headers as a hash parameter, and the body content via a
 # block. The headers can be generated as a string using the
-# [`http_header()`](https://docs.ruby-lang.org/en/2.6.0/CGI.html#method-i-http_header)
+# [`http_header()`](https://docs.ruby-lang.org/en/2.7.0/CGI.html#method-i-http_header)
 # method. The output stream can be written directly to using the
-# [`print()`](https://docs.ruby-lang.org/en/2.6.0/CGI.html#method-i-print)
+# [`print()`](https://docs.ruby-lang.org/en/2.7.0/CGI.html#method-i-print)
 # method.
 #
 # ### Generating HTML
 #
 # Each HTML element has a corresponding method for generating that element as a
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). The name of this
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). The name of this
 # method is the same as that of the element, all lowercase. The attributes of
 # the element are passed in as a hash, and the body as a no-argument block that
-# evaluates to a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+# evaluates to a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
 # The HTML generation module knows which elements are always empty, and silently
 # drops any passed-in body. It also knows which elements require matching
 # closing tags and which don't. However, it does not know what attributes are
 # legal for which elements.
 #
 # There are also some additional HTML generation methods mixed in from the
-# [`CGI::HtmlExtension`](https://docs.ruby-lang.org/en/2.6.0/CGI/HtmlExtension.html)
+# [`CGI::HtmlExtension`](https://docs.ruby-lang.org/en/2.7.0/CGI/HtmlExtension.html)
 # module. These include individual methods for the different types of form
 # inputs, and methods for elements that commonly take particular attributes
 # where the attributes can be directly specified as arguments, rather than via a
@@ -184,7 +186,7 @@
 # ```
 #
 # CAUTION! [cgi]('field_name') returned an
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) with the old
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) with the old
 # cgi.rb(included in Ruby 1.6)
 #
 # ### Get form values as hash
@@ -236,8 +238,8 @@
 # value.content_type          # <== content_type of value
 # ```
 #
-# and value has [`StringIO`](https://docs.ruby-lang.org/en/2.6.0/StringIO.html)
-# or [`Tempfile`](https://docs.ruby-lang.org/en/2.6.0/Tempfile.html) class
+# and value has [`StringIO`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html)
+# or [`Tempfile`](https://docs.ruby-lang.org/en/2.7.0/Tempfile.html) class
 # methods.
 #
 # ### Get cookie values
@@ -289,7 +291,7 @@
 #         end
 #       end +
 #       cgi.pre do
-#         CGI::escapeHTML(
+#         CGI.escapeHTML(
 #           "params: #{cgi.params.inspect}\n" +
 #           "cookies: #{cgi.cookies.inspect}\n" +
 #           ENV.collect do |key, value|
@@ -328,14 +330,14 @@ class CGI
   include ::CGI::Util
   extend ::CGI::Escape
   extend ::CGI::Util
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) for carriage
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) for carriage
   # return
   CR = ::T.let(nil, ::T.untyped)
   # Standard internet newline sequence
   EOL = ::T.let(nil, ::T.untyped)
   # HTTP status codes.
   HTTP_STATUS = ::T.let(nil, ::T.untyped)
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) for linefeed
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) for linefeed
   LF = ::T.let(nil, ::T.untyped)
   # Maximum number of request parameters when multipart
   MAX_MULTIPART_COUNT = ::T.let(nil, ::T.untyped)
@@ -346,25 +348,25 @@ class CGI
   REVISION = ::T.let(nil, ::T.untyped)
 
   # Return the accept character set for this
-  # [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) instance.
+  # [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) instance.
   sig {returns(::T.untyped)}
   def accept_charset(); end
 
   # This method is an alias for
-  # [`http_header`](https://docs.ruby-lang.org/en/2.6.0/CGI.html#method-i-http_header),
+  # [`http_header`](https://docs.ruby-lang.org/en/2.7.0/CGI.html#method-i-http_header),
   # when HTML5 tag maker is inactive.
   #
   # NOTE: use
-  # [`http_header`](https://docs.ruby-lang.org/en/2.6.0/CGI.html#method-i-http_header)
+  # [`http_header`](https://docs.ruby-lang.org/en/2.7.0/CGI.html#method-i-http_header)
   # to create HTTP header blocks, this alias is only provided for backwards
   # compatibility.
   #
   # Using
-  # [`header`](https://docs.ruby-lang.org/en/2.6.0/CGI.html#method-i-header)
+  # [`header`](https://docs.ruby-lang.org/en/2.7.0/CGI.html#method-i-header)
   # with the HTML5 tag maker will create a <header> element.
   #
   # Alias for:
-  # [`http_header`](https://docs.ruby-lang.org/en/2.6.0/CGI.html#method-i-http_header)
+  # [`http_header`](https://docs.ruby-lang.org/en/2.7.0/CGI.html#method-i-http_header)
   sig do
     params(
       options: ::T.untyped,
@@ -380,7 +382,7 @@ class CGI
   # `content_type_string`
   # :   If this form is used, this string is the `Content-Type`
   # `headers_hash`
-  # :   A [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of header
+  # :   A [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of header
   #     values. The following header keys are recognized:
   #
   #     type
@@ -393,7 +395,7 @@ class CGI
   #         not explicitly set.
   #     status
   # :       The HTTP status code as a
-  #         [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html),
+  #         [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html),
   #         returned as the Status header. The values are:
   #
   #         OK
@@ -417,7 +419,7 @@ class CGI
   #         NOT\_FOUND
   # :           404 Not Found
   #         METHOD\_NOT\_ALLOWED
-  # :           405 [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html)
+  # :           405 [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html)
   #             Not Allowed
   #         NOT\_ACCEPTABLE
   # :           406 Not Acceptable
@@ -426,9 +428,10 @@ class CGI
   #         PRECONDITION\_FAILED
   # :           412 Precondition Failed
   #         SERVER\_ERROR
-  # :           500 Internal Server Error
+  # :           500 Internal Server
+  #             [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html)
   #         NOT\_IMPLEMENTED
-  # :           501 [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html)
+  # :           501 [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html)
   #             Not Implemented
   #         BAD\_GATEWAY
   # :           502 Bad Gateway
@@ -453,8 +456,8 @@ class CGI
   #     cookie
   # :       A cookie or cookies, returned as one or more Set-Cookie headers. The
   #         value can be the literal string of the cookie; a
-  #         [`CGI::Cookie`](https://docs.ruby-lang.org/en/2.6.0/CGI/Cookie.html)
-  #         object; an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  #         [`CGI::Cookie`](https://docs.ruby-lang.org/en/2.7.0/CGI/Cookie.html)
+  #         object; an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   #         of literal cookie strings or Cookie objects; or a hash all of whose
   #         values are literal cookie strings or Cookie objects.
   #
@@ -493,7 +496,7 @@ class CGI
   # This method does not perform charset conversion.
   #
   # Also aliased as:
-  # [`header`](https://docs.ruby-lang.org/en/2.6.0/CGI.html#method-i-header)
+  # [`header`](https://docs.ruby-lang.org/en/2.7.0/CGI.html#method-i-header)
   sig do
     params(
       options: ::T.untyped,
@@ -519,15 +522,15 @@ class CGI
   # `content_type_string`
   # :   If a string is passed, it is assumed to be the content type.
   # `headers_hash`
-  # :   This is a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) of
+  # :   This is a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) of
   #     headers, similar to that used by
-  #     [`http_header`](https://docs.ruby-lang.org/en/2.6.0/CGI.html#method-i-http_header).
+  #     [`http_header`](https://docs.ruby-lang.org/en/2.7.0/CGI.html#method-i-http_header).
   # `block`
   # :   A block is required and should evaluate to the body of the response.
   #
   #
   # `Content-Length` is automatically calculated from the size of the
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) returned by the
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) returned by the
   # content block.
   #
   # If `ENV['REQUEST_METHOD'] == "HEAD"`, then only the header is output (the
@@ -602,12 +605,12 @@ class CGI
   def print(*options); end
 
   # Return the accept character set for all new
-  # [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) instances.
+  # [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) instances.
   sig {returns(::T.untyped)}
   def self.accept_charset(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the accept character
-  # set for all new [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html)
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the accept character
+  # set for all new [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
   # instances.
   sig do
     params(
@@ -620,7 +623,7 @@ class CGI
   # Parse an HTTP query string into a hash of key=>value pairs.
   #
   # ```ruby
-  # params = CGI::parse("query_string")
+  # params = CGI.parse("query_string")
   #   # {"name1" => ["value1", "value2", ...],
   #   #  "name2" => ["value1", "value2", ...], ... }
   # ```
@@ -633,11 +636,11 @@ class CGI
   def self.parse(query); end
 end
 
-# [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) representing an HTTP
+# [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) representing an HTTP
 # cookie.
 #
 # In addition to its specific fields and methods, a
-# [`Cookie`](https://docs.ruby-lang.org/en/2.6.0/CGI/Cookie.html) instance is a
+# [`Cookie`](https://docs.ruby-lang.org/en/2.7.0/CGI/Cookie.html) instance is a
 # delegator to the array of its values.
 #
 # See RFC 2965.
@@ -690,12 +693,12 @@ class CGI::Cookie < Array
   end
   def domain=(domain); end
 
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) at which this cookie
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) at which this cookie
   # expires, as a `Time`
   sig {returns(::T.untyped)}
   def expires(); end
 
-  # [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) at which this cookie
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) at which this cookie
   # expires, as a `Time`
   sig do
     params(
@@ -709,8 +712,8 @@ class CGI::Cookie < Array
   sig {returns(::T.untyped)}
   def httponly(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) whether the
-  # [`Cookie`](https://docs.ruby-lang.org/en/2.6.0/CGI/Cookie.html) is a
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) whether the
+  # [`Cookie`](https://docs.ruby-lang.org/en/2.7.0/CGI/Cookie.html) is a
   # httponly cookie or not.
   #
   # `val` must be a boolean.
@@ -765,8 +768,8 @@ class CGI::Cookie < Array
   sig {returns(::T.untyped)}
   def secure(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) whether the
-  # [`Cookie`](https://docs.ruby-lang.org/en/2.6.0/CGI/Cookie.html) is a secure
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) whether the
+  # [`Cookie`](https://docs.ruby-lang.org/en/2.7.0/CGI/Cookie.html) is a secure
   # cookie or not.
   #
   # `val` must be a boolean.
@@ -778,7 +781,7 @@ class CGI::Cookie < Array
   end
   def secure=(val); end
 
-  # Convert the [`Cookie`](https://docs.ruby-lang.org/en/2.6.0/CGI/Cookie.html)
+  # Convert the [`Cookie`](https://docs.ruby-lang.org/en/2.7.0/CGI/Cookie.html)
   # to its string representation.
   sig {returns(::T.untyped)}
   def to_s(); end
@@ -813,9 +816,9 @@ end
 
 # Mixin module that provides the following:
 #
-# 1.  Access to the [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html)
+# 1.  Access to the [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html)
 #     environment variables as methods. See documentation to the
-#     [`CGI`](https://docs.ruby-lang.org/en/2.6.0/CGI.html) class for a list of
+#     [`CGI`](https://docs.ruby-lang.org/en/2.7.0/CGI.html) class for a list of
 #     these variables. The methods are exposed by removing the leading `HTTP_`
 #     (if it exists) and downcasing the name. For example, `auth_type` will
 #     return the environment variable `AUTH_TYPE`, and `accept` will return the
@@ -824,18 +827,18 @@ end
 # 2.  Access to cookies, including the cookies attribute.
 #
 # 3.  Access to parameters, including the params attribute, and overloading
-#     [`[]`](https://docs.ruby-lang.org/en/2.6.0/CGI/QueryExtension.html#method-i-5B-5D)
+#     [`[]`](https://docs.ruby-lang.org/en/2.7.0/CGI/QueryExtension.html#method-i-5B-5D)
 #     to perform parameter value lookup by key.
 #
 # 4.  The
-#     [`initialize_query`](https://docs.ruby-lang.org/en/2.6.0/CGI/QueryExtension.html#method-i-initialize_query)
+#     [`initialize_query`](https://docs.ruby-lang.org/en/2.7.0/CGI/QueryExtension.html#method-i-initialize_query)
 #     method, for initializing the above mechanisms, handling multipart forms,
 #     and allowing the class to be used in "offline" mode.
 module CGI::QueryExtension
   # Get the value for the parameter with a given key.
   #
   # If the parameter has multiple values, only the first will be retrieved; use
-  # [`params`](https://docs.ruby-lang.org/en/2.6.0/CGI/QueryExtension.html#attribute-i-params)
+  # [`params`](https://docs.ruby-lang.org/en/2.7.0/CGI/QueryExtension.html#attribute-i-params)
   # to get the array of values.
   sig do
     params(
@@ -903,8 +906,8 @@ module CGI::QueryExtension
   # Returns true if a given query string parameter exists.
   #
   # Also aliased as:
-  # [`key?`](https://docs.ruby-lang.org/en/2.6.0/CGI/QueryExtension.html#method-i-key-3F),
-  # [`include?`](https://docs.ruby-lang.org/en/2.6.0/CGI/QueryExtension.html#method-i-include-3F)
+  # [`key?`](https://docs.ruby-lang.org/en/2.7.0/CGI/QueryExtension.html#method-i-key-3F),
+  # [`include?`](https://docs.ruby-lang.org/en/2.7.0/CGI/QueryExtension.html#method-i-include-3F)
   sig do
     params(
       args: ::T.untyped,
@@ -917,7 +920,7 @@ module CGI::QueryExtension
   def host(); end
 
   # Alias for:
-  # [`has_key?`](https://docs.ruby-lang.org/en/2.6.0/CGI/QueryExtension.html#method-i-has_key-3F)
+  # [`has_key?`](https://docs.ruby-lang.org/en/2.7.0/CGI/QueryExtension.html#method-i-has_key-3F)
   sig do
     params(
       args: ::T.untyped,
@@ -927,7 +930,7 @@ module CGI::QueryExtension
   def include?(*args); end
 
   # Alias for:
-  # [`has_key?`](https://docs.ruby-lang.org/en/2.6.0/CGI/QueryExtension.html#method-i-has_key-3F)
+  # [`has_key?`](https://docs.ruby-lang.org/en/2.7.0/CGI/QueryExtension.html#method-i-has_key-3F)
   sig do
     params(
       args: ::T.untyped,
@@ -937,7 +940,7 @@ module CGI::QueryExtension
   def key?(*args); end
 
   # Return all query parameter names as an array of
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   sig do
     params(
       args: ::T.untyped,
@@ -954,11 +957,11 @@ module CGI::QueryExtension
   def negotiate(); end
 
   # Get the parameters as a hash of name=>values pairs, where values is an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
   sig {returns(::T.untyped)}
   def params(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) all the parameters.
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) all the parameters.
   sig do
     params(
       hash: ::T.untyped,
@@ -1039,7 +1042,7 @@ module CGI::Util
   # URL-encode a string.
   #
   # ```ruby
-  # url_encoded_string = CGI::escape("'Stop!' said Fred")
+  # url_encoded_string = CGI.escape("'Stop!' said Fred")
   #    # => "%27Stop%21%27+said+Fred"
   # ```
   sig do
@@ -1059,16 +1062,16 @@ module CGI::Util
   # values).
   #
   # ```ruby
-  # print CGI::escapeElement('<BR><A HREF="url"></A>', "A", "IMG")
+  # print CGI.escapeElement('<BR><A HREF="url"></A>', "A", "IMG")
   #   # "<BR>&lt;A HREF=&quot;url&quot;&gt;&lt;/A&gt"
   #
-  # print CGI::escapeElement('<BR><A HREF="url"></A>', ["A", "IMG"])
+  # print CGI.escapeElement('<BR><A HREF="url"></A>', ["A", "IMG"])
   #   # "<BR>&lt;A HREF=&quot;url&quot;&gt;&lt;/A&gt"
   # ```
   #
   #
   # Also aliased as:
-  # [`escape_element`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-escape_element)
+  # [`escape_element`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escape_element)
   sig do
     params(
       string: ::T.untyped,
@@ -1081,14 +1084,14 @@ module CGI::Util
   # Escape special characters in HTML, namely '&"<>
   #
   # ```ruby
-  # CGI::escapeHTML('Usage: foo "bar" <baz>')
+  # CGI.escapeHTML('Usage: foo "bar" <baz>')
   #    # => "Usage: foo &quot;bar&quot; &lt;baz&gt;"
   # ```
   #
   #
   # Also aliased as:
-  # [`escape_html`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-escape_html),
-  # [`h`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-h)
+  # [`escape_html`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escape_html),
+  # [`h`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-h)
   sig do
     params(
       _: ::T.untyped,
@@ -1097,10 +1100,11 @@ module CGI::Util
   end
   def escapeHTML(_); end
 
-  # Synonym for CGI::escapeElement(str)
+  # Synonym for
+  # [`CGI.escapeElement(str)`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeElement)
   #
   # Alias for:
-  # [`escapeElement`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-escapeElement)
+  # [`escapeElement`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeElement)
   sig do
     params(
       string: ::T.untyped,
@@ -1110,10 +1114,11 @@ module CGI::Util
   end
   def escape_element(string, *elements); end
 
-  # Synonym for CGI::escapeHTML(str)
+  # Synonym for
+  # [`CGI.escapeHTML(str)`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeHTML)
   #
   # Alias for:
-  # [`escapeHTML`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-escapeHTML)
+  # [`escapeHTML`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeHTML)
   sig do
     params(
       _: ::T.untyped,
@@ -1123,7 +1128,7 @@ module CGI::Util
   def escape_html(_); end
 
   # Alias for:
-  # [`escapeHTML`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-escapeHTML)
+  # [`escapeHTML`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeHTML)
   sig do
     params(
       _: ::T.untyped,
@@ -1138,13 +1143,13 @@ module CGI::Util
   # use; it defaults to two spaces.
   #
   # ```ruby
-  # print CGI::pretty("<HTML><BODY></BODY></HTML>")
+  # print CGI.pretty("<HTML><BODY></BODY></HTML>")
   #   # <HTML>
   #   #   <BODY>
   #   #   </BODY>
   #   # </HTML>
   #
-  # print CGI::pretty("<HTML><BODY></BODY></HTML>", "\t")
+  # print CGI.pretty("<HTML><BODY></BODY></HTML>", "\t")
   #   # <HTML>
   #   #         <BODY>
   #   #         </BODY>
@@ -1160,11 +1165,11 @@ module CGI::Util
   def pretty(string, shift=T.unsafe(nil)); end
 
   # Format a `Time` object as a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) using the format
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) using the format
   # specified by RFC 1123.
   #
   # ```ruby
-  # CGI::rfc1123_date(Time.now)
+  # CGI.rfc1123_date(Time.now)
   #   # Sat, 01 Jan 2000 00:00:00 GMT
   # ```
   sig do
@@ -1178,7 +1183,7 @@ module CGI::Util
   # URL-decode a string with encoding(optional).
   #
   # ```ruby
-  # string = CGI::unescape("%27Stop%21%27+said+Fred")
+  # string = CGI.unescape("%27Stop%21%27+said+Fred")
   #    # => "'Stop!' said Fred"
   # ```
   sig do
@@ -1189,21 +1194,22 @@ module CGI::Util
   end
   def unescape(*_); end
 
-  # Undo escaping such as that done by CGI::escapeElement()
+  # Undo escaping such as that done by
+  # [`CGI.escapeElement()`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-escapeElement)
   #
   # ```ruby
-  # print CGI::unescapeElement(
-  #         CGI::escapeHTML('<BR><A HREF="url"></A>'), "A", "IMG")
+  # print CGI.unescapeElement(
+  #         CGI.escapeHTML('<BR><A HREF="url"></A>'), "A", "IMG")
   #   # "&lt;BR&gt;<A HREF="url"></A>"
   #
-  # print CGI::unescapeElement(
-  #         CGI::escapeHTML('<BR><A HREF="url"></A>'), ["A", "IMG"])
+  # print CGI.unescapeElement(
+  #         CGI.escapeHTML('<BR><A HREF="url"></A>'), ["A", "IMG"])
   #   # "&lt;BR&gt;<A HREF="url"></A>"
   # ```
   #
   #
   # Also aliased as:
-  # [`unescape_element`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-unescape_element)
+  # [`unescape_element`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescape_element)
   sig do
     params(
       string: ::T.untyped,
@@ -1216,13 +1222,13 @@ module CGI::Util
   # Unescape a string that has been HTML-escaped
   #
   # ```ruby
-  # CGI::unescapeHTML("Usage: foo &quot;bar&quot; &lt;baz&gt;")
+  # CGI.unescapeHTML("Usage: foo &quot;bar&quot; &lt;baz&gt;")
   #    # => "Usage: foo \"bar\" <baz>"
   # ```
   #
   #
   # Also aliased as:
-  # [`unescape_html`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-unescape_html)
+  # [`unescape_html`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescape_html)
   sig do
     params(
       _: ::T.untyped,
@@ -1231,10 +1237,11 @@ module CGI::Util
   end
   def unescapeHTML(_); end
 
-  # Synonym for CGI::unescapeElement(str)
+  # Synonym for
+  # [`CGI.unescapeElement(str)`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescapeElement)
   #
   # Alias for:
-  # [`unescapeElement`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-unescapeElement)
+  # [`unescapeElement`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescapeElement)
   sig do
     params(
       string: ::T.untyped,
@@ -1244,10 +1251,11 @@ module CGI::Util
   end
   def unescape_element(string, *elements); end
 
-  # Synonym for CGI::unescapeHTML(str)
+  # Synonym for
+  # [`CGI.unescapeHTML(str)`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescapeHTML)
   #
   # Alias for:
-  # [`unescapeHTML`](https://docs.ruby-lang.org/en/2.6.0/CGI/Util.html#method-i-unescapeHTML)
+  # [`unescapeHTML`](https://docs.ruby-lang.org/en/2.7.0/CGI/Util.html#method-i-unescapeHTML)
   sig do
     params(
       _: ::T.untyped,
@@ -1291,7 +1299,7 @@ module CGI::Escape
   def unescapeHTML(_); end
 end
 
-# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) raised when
+# [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) raised when
 # there is an invalid encoding detected
 class CGI::InvalidEncoding < Exception
 end

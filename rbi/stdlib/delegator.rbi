@@ -2,7 +2,7 @@
 
 # This library provides three different ways to delegate method calls to an
 # object. The easiest to use is
-# [`SimpleDelegator`](https://docs.ruby-lang.org/en/2.6.0/SimpleDelegator.html).
+# [`SimpleDelegator`](https://docs.ruby-lang.org/en/2.7.0/SimpleDelegator.html).
 # Pass an object to the constructor and all methods supported by the object will
 # be delegated. This object can be changed later.
 #
@@ -12,9 +12,9 @@
 #
 # Finally, if you need full control over the delegation scheme, you can inherit
 # from the abstract class
-# [`Delegator`](https://docs.ruby-lang.org/en/2.6.0/Delegator.html) and
+# [`Delegator`](https://docs.ruby-lang.org/en/2.7.0/Delegator.html) and
 # customize as needed. (If you find yourself needing this control, have a look
-# at [`Forwardable`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html) which
+# at [`Forwardable`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html) which
 # is also in the standard library. It may suit your needs better.)
 #
 # SimpleDelegator's implementation serves as a nice example of the use of
@@ -35,7 +35,7 @@
 #
 # ## Notes
 #
-# Be advised, [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) will not
+# Be advised, [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) will not
 # detect delegated methods.
 class Delegator < BasicObject
   # Pass in the *obj* to delegate method calls to. All methods supported by
@@ -63,7 +63,7 @@ class Delegator < BasicObject
   # Returns true if two objects are considered of equal value.
   def eql?(obj); end
 
-  # Freeze both the object returned by \_*getobj*_ and self.
+  # :method: freeze Freeze both the object returned by \_*getobj*_ and self.
   def freeze; end
 
   # Serialization support for the object returned by \_*getobj*_.
@@ -107,7 +107,7 @@ class Delegator < BasicObject
 end
 
 # A concrete implementation of
-# [`Delegator`](https://docs.ruby-lang.org/en/2.6.0/Delegator.html), this class
+# [`Delegator`](https://docs.ruby-lang.org/en/2.7.0/Delegator.html), this class
 # provides the means to delegate all supported method calls to the object passed
 # into the constructor and even to change the object being delegated to at a
 # later time with #\_\_setobj\_\_.
@@ -131,9 +131,9 @@ end
 # ```
 #
 # A
-# [`SimpleDelegator`](https://docs.ruby-lang.org/en/2.6.0/SimpleDelegator.html)
+# [`SimpleDelegator`](https://docs.ruby-lang.org/en/2.7.0/SimpleDelegator.html)
 # instance can take advantage of the fact that
-# [`SimpleDelegator`](https://docs.ruby-lang.org/en/2.6.0/SimpleDelegator.html)
+# [`SimpleDelegator`](https://docs.ruby-lang.org/en/2.7.0/SimpleDelegator.html)
 # is a subclass of `Delegator` to call `super` to have methods called on the
 # object being delegated to.
 #

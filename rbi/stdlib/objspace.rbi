@@ -1,7 +1,7 @@
 # typed: __STDLIB_INTERNAL
 
 # The objspace library extends the
-# [`ObjectSpace`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace.html) module
+# [`ObjectSpace`](https://docs.ruby-lang.org/en/2.7.0/ObjectSpace.html) module
 # and adds several methods to get internal statistic information about
 # object/memory management.
 #
@@ -10,11 +10,11 @@
 # Generally, you \*SHOULD NOT\* use this library if you do not know about the
 # MRI implementation. Mainly, this library is for (memory) profiler developers
 # and MRI developers who need to know about MRI memory usage.
-# The [`ObjectSpace`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace.html)
+# The [`ObjectSpace`](https://docs.ruby-lang.org/en/2.7.0/ObjectSpace.html)
 # module contains a number of routines that interact with the garbage collection
 # facility and allow you to traverse all living objects with an iterator.
 #
-# [`ObjectSpace`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace.html) also
+# [`ObjectSpace`](https://docs.ruby-lang.org/en/2.7.0/ObjectSpace.html) also
 # provides support for object finalizers, procs that will be called when a
 # specific object is about to be destroyed by garbage collection.
 #
@@ -89,8 +89,9 @@ module ObjectSpace
   # process. If *module* is specified, calls the block for only those classes or
   # modules that match (or are a subclass of) *module*. Returns the number of
   # objects found. Immediate objects (`Fixnum`s, `Symbol`s `true`, `false`, and
-  # `nil`) are never returned. In the example below, `each_object` returns both
-  # the numbers we defined and several constants defined in the `Math` module.
+  # `nil`) are never returned. In the example below, each\_object returns both
+  # the numbers we defined and several constants defined in the
+  # [`Math`](https://docs.ruby-lang.org/en/2.7.0/Math.html) module.
   #
   # If no block is given, an enumerator is returned instead.
   #
@@ -145,9 +146,9 @@ module ObjectSpace
   # Stop tracing object allocations.
   #
   # Note that if
-  # [`::trace_object_allocations_start`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace.html#method-c-trace_object_allocations_start)
+  # [`::trace_object_allocations_start`](https://docs.ruby-lang.org/en/2.7.0/ObjectSpace.html#method-c-trace_object_allocations_start)
   # is called n-times, then tracing will stop after calling
-  # [`::trace_object_allocations_stop`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace.html#method-c-trace_object_allocations_stop)
+  # [`::trace_object_allocations_stop`](https://docs.ruby-lang.org/en/2.7.0/ObjectSpace.html#method-c-trace_object_allocations_stop)
   # n-times.
   def self.trace_object_allocations_stop; end
 
@@ -156,12 +157,12 @@ module ObjectSpace
 end
 
 # An
-# [`ObjectSpace::WeakMap`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace/WeakMap.html)
+# [`ObjectSpace::WeakMap`](https://docs.ruby-lang.org/en/2.7.0/ObjectSpace/WeakMap.html)
 # object holds references to any objects, but those objects can get garbage
 # collected.
 #
 # This class is mostly used internally by
-# [`WeakRef`](https://docs.ruby-lang.org/en/2.6.0/WeakRef.html), please use
+# [`WeakRef`](https://docs.ruby-lang.org/en/2.7.0/WeakRef.html), please use
 # `lib/weakref.rb` for the public interface.
 class ObjectSpace::WeakMap < Object
   include Enumerable

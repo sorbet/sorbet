@@ -15,11 +15,11 @@
 #
 #
 # An observer subscribes to updates using
-# [`Observable#add_observer`](https://docs.ruby-lang.org/en/2.6.0/Observable.html#method-i-add_observer),
+# [`Observable#add_observer`](https://docs.ruby-lang.org/en/2.7.0/Observable.html#method-i-add_observer),
 # which also specifies the method called via
-# [`notify_observers`](https://docs.ruby-lang.org/en/2.6.0/Observable.html#method-i-notify_observers).
+# [`notify_observers`](https://docs.ruby-lang.org/en/2.7.0/Observable.html#method-i-notify_observers).
 # The default method for
-# [`notify_observers`](https://docs.ruby-lang.org/en/2.6.0/Observable.html#method-i-notify_observers)
+# [`notify_observers`](https://docs.ruby-lang.org/en/2.7.0/Observable.html#method-i-notify_observers)
 # is update.
 #
 # ### Example
@@ -120,31 +120,31 @@ module Observable
   # `observer`
   # :   the object that will be notified of changes.
   # `func`
-  # :   [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html) naming the
+  # :   [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) naming the
   #     method that will be called when this
-  #     [`Observable`](https://docs.ruby-lang.org/en/2.6.0/Observable.html) has
+  #     [`Observable`](https://docs.ruby-lang.org/en/2.7.0/Observable.html) has
   #     changes.
   #
   #     This method must return true for `observer.respond_to?` and will receive
   #     `*arg` when
-  #     [`notify_observers`](https://docs.ruby-lang.org/en/2.6.0/Observable.html#method-i-notify_observers)
+  #     [`notify_observers`](https://docs.ruby-lang.org/en/2.7.0/Observable.html#method-i-notify_observers)
   #     is called, where `*arg` is the value passed to
-  #     [`notify_observers`](https://docs.ruby-lang.org/en/2.6.0/Observable.html#method-i-notify_observers)
+  #     [`notify_observers`](https://docs.ruby-lang.org/en/2.7.0/Observable.html#method-i-notify_observers)
   #     by this
-  #     [`Observable`](https://docs.ruby-lang.org/en/2.6.0/Observable.html)
+  #     [`Observable`](https://docs.ruby-lang.org/en/2.7.0/Observable.html)
   def add_observer(observer, func = _); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the changed state of
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the changed state of
   # this object. Notifications will be sent only if the changed `state` is
   # `true`.
   #
   # `state`
   # :   Boolean indicating the changed state of this
-  #     [`Observable`](https://docs.ruby-lang.org/en/2.6.0/Observable.html).
+  #     [`Observable`](https://docs.ruby-lang.org/en/2.7.0/Observable.html).
   def changed(state = _); end
 
   # Returns true if this object's state has been changed since the last
-  # [`notify_observers`](https://docs.ruby-lang.org/en/2.6.0/Observable.html#method-i-notify_observers)
+  # [`notify_observers`](https://docs.ruby-lang.org/en/2.7.0/Observable.html#method-i-notify_observers)
   # call.
   def changed?; end
 
@@ -156,7 +156,7 @@ module Observable
   #
   # `observer`
   # :   An observer of this
-  #     [`Observable`](https://docs.ruby-lang.org/en/2.6.0/Observable.html)
+  #     [`Observable`](https://docs.ruby-lang.org/en/2.7.0/Observable.html)
   def delete_observer(observer); end
 
   # Remove all observers associated with this object.
@@ -166,7 +166,7 @@ module Observable
   # `true`.
   #
   # This will invoke the method named in
-  # [`add_observer`](https://docs.ruby-lang.org/en/2.6.0/Observable.html#method-i-add_observer),
+  # [`add_observer`](https://docs.ruby-lang.org/en/2.7.0/Observable.html#method-i-add_observer),
   # passing `*arg`. The changed state is then set to `false`.
   #
   # `*arg`

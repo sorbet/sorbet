@@ -1,7 +1,7 @@
 # typed: __STDLIB_INTERNAL
 
 # Raised when the arguments are wrong and there isn't a more specific
-# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) class.
+# [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) class.
 #
 # Ex: passing the wrong number of arguments
 #
@@ -30,21 +30,21 @@ class ArgumentError < StandardError
 end
 
 # The exception class which will be raised when pushing into a closed
-# [`Queue`](https://docs.ruby-lang.org/en/2.6.0/Queue.html). See
-# [`Queue#close`](https://docs.ruby-lang.org/en/2.6.0/Queue.html#method-i-close)
+# [`Queue`](https://docs.ruby-lang.org/en/2.7.0/Queue.html). See
+# [`Queue#close`](https://docs.ruby-lang.org/en/2.7.0/Queue.html#method-i-close)
 # and
-# [`SizedQueue#close`](https://docs.ruby-lang.org/en/2.6.0/SizedQueue.html#method-i-close).
+# [`SizedQueue#close`](https://docs.ruby-lang.org/en/2.7.0/SizedQueue.html#method-i-close).
 class ClosedQueueError < StopIteration
 end
 
-# [`EncodingError`](https://docs.ruby-lang.org/en/2.6.0/EncodingError.html) is
+# [`EncodingError`](https://docs.ruby-lang.org/en/2.7.0/EncodingError.html) is
 # the base class for encoding errors.
 class EncodingError < StandardError
 end
 
-# Raised by some [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) operations
+# Raised by some [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) operations
 # when reaching the end of file. Many
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) methods exist in two
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) methods exist in two
 # forms,
 #
 # one that returns `nil` when the end of file is reached, the other raises
@@ -76,7 +76,7 @@ end
 # [1, 2, 3].freeze << 4
 # ```
 #
-# raises the exception
+# *raises the exception:*
 #
 # ```
 # FrozenError: can't modify frozen Array
@@ -122,7 +122,7 @@ end
 class Interrupt < SignalException
 end
 
-# Raised when an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) operation
+# Raised when an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) operation
 # fails.
 #
 # ```ruby
@@ -133,7 +133,7 @@ end
 #   #=> IOError: closed stream
 # ```
 #
-# Note that some [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) failures
+# Note that some [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) failures
 # raise `SystemCallError`s and these are not subclasses of IOError:
 #
 # ```ruby
@@ -144,7 +144,7 @@ class IOError < StandardError
 end
 
 # Raised when the specified key is not found. It is a subclass of
-# [`IndexError`](https://docs.ruby-lang.org/en/2.6.0/IndexError.html).
+# [`IndexError`](https://docs.ruby-lang.org/en/2.7.0/IndexError.html).
 #
 # ```ruby
 # h = {"foo" => :bar}
@@ -153,11 +153,11 @@ end
 # ```
 class KeyError < IndexError
   # Return the key caused this
-  # [`KeyError`](https://docs.ruby-lang.org/en/2.6.0/KeyError.html) exception.
+  # [`KeyError`](https://docs.ruby-lang.org/en/2.7.0/KeyError.html) exception.
   def key; end
 
   # Return the receiver associated with this
-  # [`KeyError`](https://docs.ruby-lang.org/en/2.6.0/KeyError.html) exception.
+  # [`KeyError`](https://docs.ruby-lang.org/en/2.7.0/KeyError.html) exception.
   def receiver; end
 end
 
@@ -243,24 +243,31 @@ end
 # ```
 class NameError < StandardError
   # Construct a new
-  # [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html) exception.
+  # [`NameError`](https://docs.ruby-lang.org/en/2.7.0/NameError.html) exception.
   # If given the *name* parameter may subsequently be examined using the
-  # `NameError#name` method.
+  # [`NameError#name`](https://docs.ruby-lang.org/en/2.7.0/NameError.html#method-i-name)
+  # method. *receiver* parameter allows to pass object in context of which the
+  # error happened. Example:
+  #
+  # ```ruby
+  # [1, 2, 3].method(:rject) # NameError with name "rject" and receiver: Array
+  # [1, 2, 3].singleton_method(:rject) # NameError with name "rject" and receiver: [1, 2, 3]
+  # ```
   def self.new(*_); end
 
   # Return a list of the local variable names defined where this
-  # [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html) exception
+  # [`NameError`](https://docs.ruby-lang.org/en/2.7.0/NameError.html) exception
   # was raised.
   #
   # Internal use only.
   def local_variables; end
 
   # Return the name associated with this
-  # [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html) exception.
+  # [`NameError`](https://docs.ruby-lang.org/en/2.7.0/NameError.html) exception.
   def name; end
 
   # Return the receiver associated with this
-  # [`NameError`](https://docs.ruby-lang.org/en/2.6.0/NameError.html) exception.
+  # [`NameError`](https://docs.ruby-lang.org/en/2.7.0/NameError.html) exception.
   def receiver; end
 end
 
@@ -282,10 +289,15 @@ end
 # ```
 class NoMethodError < NameError
   # Construct a
-  # [`NoMethodError`](https://docs.ruby-lang.org/en/2.6.0/NoMethodError.html)
+  # [`NoMethodError`](https://docs.ruby-lang.org/en/2.7.0/NoMethodError.html)
   # exception for a method of the given name called with the given arguments.
   # The name may be accessed using the `#name` method on the resulting object,
   # and the arguments using the `#args` method.
+  #
+  # If *private* argument were passed, it designates method was attempted to
+  # call in private context, and can be accessed with `#private_call?` method.
+  #
+  # *receiver* argument stores an object whose method was called.
   def self.new(*_); end
 
   # Return the arguments passed in as the third parameter to the constructor.
@@ -334,10 +346,10 @@ class RegexpError < StandardError
 end
 
 # A generic error class raised when an invalid operation is attempted.
-# [`Kernel#raise`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-raise)
+# [`Kernel#raise`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-raise)
 # will raise a
-# [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html) if no
-# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) class is
+# [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html) if no
+# [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) class is
 # specified.
 #
 # ```ruby
@@ -352,7 +364,7 @@ end
 class RuntimeError < StandardError
 end
 
-# [`ScriptError`](https://docs.ruby-lang.org/en/2.6.0/ScriptError.html) is the
+# [`ScriptError`](https://docs.ruby-lang.org/en/2.7.0/ScriptError.html) is the
 # superclass for errors raised when a script can not be executed because of a
 # `LoadError`, `NotImplementedError` or a `SyntaxError`. Note these type of
 # `ScriptErrors` are not `StandardError` and will not be rescued unless it is
@@ -360,23 +372,7 @@ end
 class ScriptError < Exception
 end
 
-# Raised when attempting a potential unsafe operation, typically when the $SAFE
-# level is raised above 0.
-#
-# ```ruby
-# foo = "bar"
-# proc = Proc.new do
-#   $SAFE = 3
-#   foo.untaint
-# end
-# proc.call
-# ```
-#
-# *raises the exception:*
-#
-# ```
-# SecurityError: Insecure: Insecure operation `untaint' at level 3
-# ```
+# No longer used by internal code.
 class SecurityError < Exception
 end
 
@@ -398,7 +394,7 @@ end
 # ```
 class SignalException < Exception
   # Construct a new
-  # [`SignalException`](https://docs.ruby-lang.org/en/2.6.0/SignalException.html)
+  # [`SignalException`](https://docs.ruby-lang.org/en/2.7.0/SignalException.html)
   # object. `sig_name` should be a known signal name.
   def self.new(*_); end
 
@@ -409,9 +405,9 @@ class SignalException < Exception
 end
 
 # The most standard error types are subclasses of
-# [`StandardError`](https://docs.ruby-lang.org/en/2.6.0/StandardError.html). A
+# [`StandardError`](https://docs.ruby-lang.org/en/2.7.0/StandardError.html). A
 # rescue clause without an explicit
-# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) class will
+# [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) class will
 # rescue all StandardErrors (and only those).
 #
 # ```ruby
@@ -436,9 +432,9 @@ class StandardError < Exception
 end
 
 # Raised to stop the iteration, in particular by
-# [`Enumerator#next`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html#method-i-next).
+# [`Enumerator#next`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html#method-i-next).
 # It is rescued by
-# [`Kernel#loop`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-loop).
+# [`Kernel#loop`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-loop).
 #
 # ```ruby
 # loop do
@@ -496,13 +492,13 @@ end
 class SyntaxError < ScriptError
 end
 
-# [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+# [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
 # is the base class for all low-level platform-dependent errors.
 #
 # The errors available on the current platform are subclasses of
-# [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+# [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
 # and are defined in the
-# [`Errno`](https://docs.ruby-lang.org/en/2.6.0/Errno.html) module.
+# [`Errno`](https://docs.ruby-lang.org/en/2.7.0/Errno.html) module.
 #
 # ```ruby
 # File.open("does/not/exist")
@@ -515,9 +511,12 @@ end
 # ```
 class SystemCallError < StandardError
   # If *errno* corresponds to a known system error code, constructs the
-  # appropriate `Errno` class for that error, otherwise constructs a generic
-  # `SystemCallError` object. The error number is subsequently available via the
-  # `errno` method.
+  # appropriate [`Errno`](https://docs.ruby-lang.org/en/2.7.0/Errno.html) class
+  # for that error, otherwise constructs a generic
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
+  # object. The error number is subsequently available via the
+  # [`errno`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html#method-i-errno)
+  # method.
   def self.new(*_); end
 
   # Return this SystemCallError's error number.
@@ -603,7 +602,7 @@ end
 # ```
 class UncaughtThrowError < ArgumentError
   # Document-class:
-  # [`UncaughtThrowError`](https://docs.ruby-lang.org/en/2.6.0/UncaughtThrowError.html)
+  # [`UncaughtThrowError`](https://docs.ruby-lang.org/en/2.7.0/UncaughtThrowError.html)
   #
   # Raised when `throw` is called with a *tag* which does not have corresponding
   # `catch` block.

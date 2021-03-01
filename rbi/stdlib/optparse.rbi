@@ -1,12 +1,12 @@
 # typed: __STDLIB_INTERNAL
-# ## [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html)
+# ## [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html)
 #
 # ### Introduction
 #
-# [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) is a
+# [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) is a
 # class for command-line option analysis. It is much more advanced, yet also
 # easier to use, than
-# [`GetoptLong`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html), and is a
+# [`GetoptLong`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html), and is a
 # more Ruby-oriented solution.
 #
 # ### Features
@@ -21,7 +21,7 @@
 #
 #
 # All of these features are demonstrated in the examples below. See
-# [`make_switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-make_switch)
+# [`make_switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-make_switch)
 # for full documentation.
 #
 # ### Minimal example
@@ -44,7 +44,7 @@
 #
 # ### Generating Help
 #
-# [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) can be
+# [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) can be
 # used to automatically generate help for the commands you write:
 #
 # ```ruby
@@ -110,53 +110,53 @@
 #
 # ### Type Coercion
 #
-# [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html)
+# [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html)
 # supports the ability to coerce command line arguments into objects for us.
 #
-# [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) comes
+# [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) comes
 # with a few ready-to-use kinds of  type coercion. They are:
 #
-# *   [`Date`](https://docs.ruby-lang.org/en/2.6.0/Date.html)  -- Anything
+# *   [`Date`](https://docs.ruby-lang.org/en/2.7.0/Date.html)  -- Anything
 #     accepted by `Date.parse`
-# *   [`DateTime`](https://docs.ruby-lang.org/en/2.6.0/DateTime.html) --
+# *   [`DateTime`](https://docs.ruby-lang.org/en/2.7.0/DateTime.html) --
 #     Anything accepted by `DateTime.parse`
-# *   [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) -- Anything
+# *   [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) -- Anything
 #     accepted by `Time.httpdate` or `Time.parse`
-# *   [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html)  -- Anything
+# *   [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html)  -- Anything
 #     accepted by `URI.parse`
-# *   [`Shellwords`](https://docs.ruby-lang.org/en/2.6.0/Shellwords.html) --
+# *   [`Shellwords`](https://docs.ruby-lang.org/en/2.7.0/Shellwords.html) --
 #     Anything accepted by `Shellwords.shellwords`
-# *   [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) -- Any
+# *   [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) -- Any
 #     non-empty string
-# *   [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) -- Any
+# *   [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) -- Any
 #     integer. Will convert octal. (e.g. 124, -3, 040)
-# *   [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) -- Any float.
+# *   [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) -- Any float.
 #     (e.g. 10, 3.14, -100E+13)
-# *   [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) -- Any
+# *   [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) -- Any
 #     integer, float, or rational (1, 3.4, 1/3)
-# *   [`DecimalInteger`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#DecimalInteger)
+# *   [`DecimalInteger`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#DecimalInteger)
 #     -- Like `Integer`, but no octal format.
-# *   [`OctalInteger`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#OctalInteger)
+# *   [`OctalInteger`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#OctalInteger)
 #     -- Like `Integer`, but no decimal format.
-# *   [`DecimalNumeric`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#DecimalNumeric)
+# *   [`DecimalNumeric`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#DecimalNumeric)
 #     -- Decimal integer or float.
-# *   [`TrueClass`](https://docs.ruby-lang.org/en/2.6.0/TrueClass.html) --
+# *   [`TrueClass`](https://docs.ruby-lang.org/en/2.7.0/TrueClass.html) --
 #     Accepts '+, yes, true, -, no, false' and defaults as `true`
-# *   [`FalseClass`](https://docs.ruby-lang.org/en/2.6.0/FalseClass.html) --
+# *   [`FalseClass`](https://docs.ruby-lang.org/en/2.7.0/FalseClass.html) --
 #     Same as `TrueClass`, but defaults to `false`
-# *   [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) -- Strings
+# *   [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) -- Strings
 #     separated by ',' (e.g. 1,2,3)
-# *   [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) -- Regular
+# *   [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) -- Regular
 #     expressions. Also includes options.
 #
 #
-# We can also add our own coercions, which we will cover soon.
+# We can also add our own coercions, which we will cover below.
 #
 # #### Using Built-in Conversions
 #
 # As an example, the built-in `Time` conversion is used. The other built-in
 # conversions behave in the same way.
-# [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) will
+# [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) will
 # attempt to parse the argument as a `Time`. If it succeeds, that time will be
 # passed to the handler block. Otherwise, an exception will be raised.
 #
@@ -184,7 +184,7 @@
 # #### Creating Custom Conversions
 #
 # The `accept` method on
-# [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) may be
+# [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) may be
 # used to create converters. It specifies which conversion block to call
 # whenever a class is specified. The example below uses it to fetch a `User`
 # object before the `on` handler receives it.
@@ -225,10 +225,10 @@
 # optparse-test.rb:15:in `block in find_user': No User Found for id 3 (RuntimeError)
 # ```
 #
-# ### Store options to a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+# ### Store options to a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
 #
 # The `into` option of `order`, `parse` and so on methods stores command line
-# options into a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
+# options into a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
 #
 # ```ruby
 # require 'optparse'
@@ -406,7 +406,7 @@
 # pp ARGV
 # ```
 #
-# ### [`Shell`](https://docs.ruby-lang.org/en/2.6.0/Shell.html) Completion
+# ### Shell Completion
 #
 # For modern shells (e.g. bash, zsh, etc.), you can use shell completion for
 # command line options.
@@ -419,11 +419,11 @@ class OptionParser
   ArgumentStyle = T.let(nil, T.untyped)
   COMPSYS_HEADER = T.let(nil, T.untyped)
   # Decimal integer format, to be converted to
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html).
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html).
   DecimalInteger = T.let(nil, T.untyped)
   # Decimal integer/float number format, to be converted to
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) for integer
-  # format, [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) for float
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) for integer
+  # format, [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) for float
   # format.
   DecimalNumeric = T.let(nil, T.untyped)
   DefaultList = T.let(nil, T.untyped)
@@ -431,7 +431,7 @@ class OptionParser
   NoArgument = T.let(nil, T.untyped)
   OPTIONAL_ARGUMENT = T.let(nil, T.untyped)
   # Ruby/C like octal/hexadecimal/binary integer format, to be converted to
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html).
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html).
   OctalInteger = T.let(nil, T.untyped)
   Officious = T.let(nil, T.untyped)
   OptionalArgument = T.let(nil, T.untyped)
@@ -444,11 +444,11 @@ class OptionParser
 
   # Initializes a new instance and evaluates the optional block in context of
   # the instance. Arguments `args` are passed to
-  # [`new`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-new),
+  # [`new`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-new),
   # see there for description of parameters.
   #
   # This method is **deprecated**, its behavior corresponds to the older
-  # [`new`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-new)
+  # [`new`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-new)
   # method.
   sig {params(args: T.untyped, block: T.untyped).returns(T.untyped)}
   def self.with(*args, &block); end
@@ -482,7 +482,7 @@ class OptionParser
   #
   # `t`
   # :   Argument class specifier, any object including
-  #     [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html).
+  #     [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html).
   # `pat`
   # :   Pattern for argument, defaults to `t` if it responds to match.
   #
@@ -494,7 +494,7 @@ class OptionParser
   def accept(*args, &blk); end
 
   # See
-  # [`accept`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-accept).
+  # [`accept`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-accept).
   sig {params(args: T.untyped, blk: T.untyped).returns(T.untyped)}
   def self.accept(*args, &blk); end
 
@@ -502,7 +502,7 @@ class OptionParser
   #
   # `t`
   # :   Argument class specifier, any object including
-  #     [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html).
+  #     [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html).
   #
   #
   # ```ruby
@@ -512,7 +512,7 @@ class OptionParser
   def reject(*args, &blk); end
 
   # See
-  # [`reject`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-reject).
+  # [`reject`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-reject).
   sig {params(args: T.untyped, blk: T.untyped).returns(T.untyped)}
   def self.reject(*args, &blk); end
 
@@ -535,35 +535,35 @@ class OptionParser
   def set_program_name(value); end
 
   # Width for option list portion of summary. Must be
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html).
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html).
   sig {returns(T.untyped)}
   def summary_width(); end
 
   # Width for option list portion of summary. Must be
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html).
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html).
   sig {params(value: T.untyped).returns(T.untyped)}
   def summary_width=(value); end
 
   # Width for option list portion of summary. Must be
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html).
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html).
   sig {params(value: T.untyped).returns(T.untyped)}
   def set_summary_width(value); end
 
   # Indentation for summary. Must be
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) (or have +
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) method).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) (or have +
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) method).
   sig {returns(T.untyped)}
   def summary_indent(); end
 
   # Indentation for summary. Must be
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) (or have +
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) method).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) (or have +
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) method).
   sig {params(value: T.untyped).returns(T.untyped)}
   def summary_indent=(value); end
 
   # Indentation for summary. Must be
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) (or have +
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) method).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) (or have +
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) method).
   sig {params(value: T.untyped).returns(T.untyped)}
   def set_summary_indent(value); end
 
@@ -601,7 +601,7 @@ class OptionParser
   def release(); end
 
   # Returns version string from
-  # [`program_name`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#attribute-i-program_name),
+  # [`program_name`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#attribute-i-program_name),
   # version and release.
   sig {returns(T.untyped)}
   def ver(); end
@@ -613,16 +613,16 @@ class OptionParser
   def abort(mesg = $!); end
 
   # Subject of
-  # [`on`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-on) /
-  # [`on_head`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-on_head),
-  # [`accept`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-accept)
+  # [`on`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-on) /
+  # [`on_head`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-on_head),
+  # [`accept`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-accept)
   # /
-  # [`reject`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-reject)
+  # [`reject`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-reject)
   sig {returns(T.untyped)}
   def top(); end
 
   # Subject of
-  # [`on_tail`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-on_tail).
+  # [`on_tail`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-on_tail).
   sig {returns(T.untyped)}
   def base(); end
 
@@ -659,7 +659,7 @@ class OptionParser
   # Returns option summary string.
   #
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-to_s)
   sig {returns(T.untyped)}
   def help(); end
 
@@ -668,7 +668,7 @@ class OptionParser
   def to_a(); end
 
   # Checks if an argument is given twice, in which case an
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html) is
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html) is
   # raised. Called from OptionParser#switch only.
   #
   # `obj`
@@ -676,18 +676,18 @@ class OptionParser
   # `prv`
   # :   Previously specified argument.
   # `msg`
-  # :   [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html)
+  # :   [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html)
   #     message.
   sig {params(obj: T.untyped, prv: T.untyped, msg: T.untyped).returns(T.untyped)}
   def notwice(obj, prv, msg); end
 
   # Creates an
-  # [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html)
+  # [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
   # from the parameters. The parsed argument value is passed to the given block,
   # where it can be processed.
   #
   # See at the beginning of
-  # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html) for
+  # [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html) for
   # some full examples.
   #
   # `opts` can include the following elements:
@@ -701,14 +701,14 @@ class OptionParser
   #
   # Argument pattern:
   # :   Acceptable option argument format, must be pre-defined with
-  #     [`OptionParser.accept`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-c-accept)
+  #     [`OptionParser.accept`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-c-accept)
   #     or
-  #     [`OptionParser#accept`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-accept),
-  #     or [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html). This can
+  #     [`OptionParser#accept`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-accept),
+  #     or [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html). This can
   #     appear once or assigned as
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) if not
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) if not
   #     present, otherwise causes an
-  #     [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html).
+  #     [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html).
   #     Examples:
   #
   # ```
@@ -716,8 +716,8 @@ class OptionParser
   # ```
   #
   # Possible argument values:
-  # :   [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) or
-  #     [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+  # :   [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) or
+  #     [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
   #
   # ```ruby
   # [:text, :binary, :auto]
@@ -775,56 +775,56 @@ class OptionParser
   #
   # Handler:
   # :   Handler for the parsed argument value. Either give a block or pass a
-  #     [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) or
-  #     [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) as an
+  #     [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html) or
+  #     [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) as an
   #     argument.
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def make_switch(opts, block = nil); end
 
   # Also aliased as:
-  # [`def_option`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-def_option)
+  # [`def_option`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-def_option)
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def define(*opts, &block); end
 
   # Alias for:
-  # [`define`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-define)
+  # [`define`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-define)
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def def_option(*opts, &block); end
 
   # Add option switch and handler. See
-  # [`make_switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-make_switch)
+  # [`make_switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-make_switch)
   # for an explanation of parameters.
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def on(*opts, &block); end
 
   # Also aliased as:
-  # [`def_head_option`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-def_head_option)
+  # [`def_head_option`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-def_head_option)
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def define_head(*opts, &block); end
 
   # Alias for:
-  # [`define_head`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-define_head)
+  # [`define_head`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-define_head)
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def def_head_option(*opts, &block); end
 
   # Add option switch like with
-  # [`on`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-on),
+  # [`on`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-on),
   # but at head of summary.
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def on_head(*opts, &block); end
 
   # Also aliased as:
-  # [`def_tail_option`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-def_tail_option)
+  # [`def_tail_option`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-def_tail_option)
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def define_tail(*opts, &block); end
 
   # Alias for:
-  # [`define_tail`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-define_tail)
+  # [`define_tail`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-define_tail)
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def def_tail_option(*opts, &block); end
 
   # Add option switch like with
-  # [`on`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-on),
+  # [`on`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-on),
   # but at tail of summary.
   sig {params(opts: T.untyped, block: T.untyped).returns(T.untyped)}
   def on_tail(*opts, &block); end
@@ -834,14 +834,18 @@ class OptionParser
   def separator(string); end
 
   # Parses command line arguments `argv` in order. When a block is given, each
-  # non-option argument is yielded.
+  # non-option argument is yielded. When optional `into` keyword argument is
+  # provided, the parsed option values are stored there via `[]=` method (so it
+  # can be [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html), or
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html), or
+  # other similar object).
   #
   # Returns the rest of `argv` left unparsed.
   sig {params(argv: T.untyped, into: T.untyped, nonopt: T.untyped).returns(T.untyped)}
   def order(*argv, into: nil, &nonopt); end
 
   # Same as
-  # [`order`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-order),
+  # [`order`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-order),
   # but removes switches destructively. Non-option arguments remain in `argv`.
   sig {params(argv: T.untyped, into: T.untyped, nonopt: T.untyped).returns(T.untyped)}
   def order!(argv = default_argv, into: nil, &nonopt); end
@@ -850,23 +854,32 @@ class OptionParser
   def parse_in_order(argv = default_argv, setter = nil, &nonopt); end
 
   # Parses command line arguments `argv` in permutation mode and returns list of
-  # non-option arguments.
+  # non-option arguments. When optional `into` keyword argument is provided, the
+  # parsed option values are stored there via `[]=` method (so it can be
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html), or
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html), or
+  # other similar object).
   sig {params(argv: T.untyped, into: T.untyped).returns(T.untyped)}
   def permute(*argv, into: nil); end
 
   # Same as
-  # [`permute`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-permute),
+  # [`permute`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-permute),
   # but removes switches destructively. Non-option arguments remain in `argv`.
   sig {params(argv: T.untyped, into: T.untyped).returns(T.untyped)}
   def permute!(argv = default_argv, into: nil); end
 
   # Parses command line arguments `argv` in order when environment variable
-  # POSIXLY\_CORRECT is set, and in permutation mode otherwise.
+  # POSIXLY\_CORRECT is set, and in permutation mode otherwise. When optional
+  # `into` keyword argument is provided, the parsed option values are stored
+  # there via `[]=` method (so it can be
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html), or
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html), or
+  # other similar object).
   sig {params(argv: T.untyped, into: T.untyped).returns(T.untyped)}
   def parse(*argv, into: nil); end
 
   # Same as
-  # [`parse`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-parse),
+  # [`parse`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-parse),
   # but removes switches destructively. Non-option arguments remain in `argv`.
   sig {params(argv: T.untyped, into: T.untyped).returns(T.untyped)}
   def parse!(argv = default_argv, into: nil); end
@@ -885,7 +898,7 @@ class OptionParser
   def getopts(*args); end
 
   # See
-  # [`getopts`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-getopts).
+  # [`getopts`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-getopts).
   sig {params(args: T.untyped).returns(T.untyped)}
   def self.getopts(*args); end
 
@@ -899,7 +912,7 @@ class OptionParser
 
   # Completes shortened long style option switch and returns pair of canonical
   # switch and switch descriptor
-  # [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html).
+  # [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html).
   #
   # `typ`
   # :   Searching table.
@@ -926,7 +939,8 @@ class OptionParser
   # not present. Returns whether successfully loaded.
   #
   # `filename` defaults to basename of the program without suffix in a directory
-  # ~/.options.
+  # ~/.options, then the basename with '.options' suffix under XDG and Haiku
+  # standard places.
   sig {params(filename: T.untyped).returns(T.untyped)}
   def load(filename = nil); end
 
@@ -984,7 +998,7 @@ class OptionParser
   # Individual switch class. Not important to the user.
   #
   # Defined within
-  # [`Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html) are
+  # [`Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html) are
   # several Switch-derived classes: NoArgument, RequiredArgument, etc.
   class Switch
     sig {returns(T.untyped)}
@@ -1009,7 +1023,7 @@ class OptionParser
     def block(); end
 
     # Guesses argument style from `arg`. Returns corresponding
-    # [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html)
+    # [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
     # class (OptionalArgument, etc.).
     sig {params(arg: T.untyped).returns(T.untyped)}
     def self.guess(arg); end
@@ -1084,7 +1098,7 @@ class OptionParser
     sig {params(sdone: T.untyped, ldone: T.untyped).returns(T.untyped)}
     def compsys(sdone, ldone); end
 
-    # [`Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html)
+    # [`Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
     # that takes no arguments.
     class NoArgument < OptionParser::Switch
       # Raises an exception if any arguments given.
@@ -1165,7 +1179,7 @@ class OptionParser
       def compsys(sdone, ldone); end
     end
 
-    # [`Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html)
+    # [`Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
     # that takes an argument.
     class RequiredArgument < OptionParser::Switch
       # Raises an exception if argument is not present.
@@ -1246,7 +1260,7 @@ class OptionParser
       def compsys(sdone, ldone); end
     end
 
-    # [`Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html)
+    # [`Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
     # that can omit argument.
     class OptionalArgument < OptionParser::Switch
       # Parses argument if given, or uses default value.
@@ -1327,7 +1341,7 @@ class OptionParser
       def compsys(sdone, ldone); end
     end
 
-    # [`Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html)
+    # [`Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
     # that takes an argument, which does not begin with '-'.
     class PlacedArgument < OptionParser::Switch
       # Returns nil if argument is not present or begins with '-'.
@@ -1410,7 +1424,7 @@ class OptionParser
   end
 
   # Simple option list providing mapping from short and/or long option string to
-  # [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html)
+  # [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
   # and mapping from acceptable argument to matching pattern and converter pair.
   # Also provides summary feature.
   class List
@@ -1426,7 +1440,7 @@ class OptionParser
     sig {returns(T.untyped)}
     def long(); end
 
-    # [`List`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/List.html) of
+    # [`List`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/List.html) of
     # all switches and summary string.
     sig {returns(T.untyped)}
     def list(); end
@@ -1435,19 +1449,19 @@ class OptionParser
     def initialize(); end
 
     # See
-    # [`OptionParser.accept`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-c-accept).
+    # [`OptionParser.accept`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-c-accept).
     sig {params(t: T.untyped, pat: T.untyped, block: T.untyped).returns(T.untyped)}
     def accept(t, pat = /.*/m, &block); end
 
     # See
-    # [`OptionParser.reject`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-c-reject).
+    # [`OptionParser.reject`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-c-reject).
     sig {params(t: T.untyped).returns(T.untyped)}
     def reject(t); end
 
     # Adds `sw` according to `sopts`, `lopts` and `nlopts`.
     #
     # `sw`
-    # :   [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html)
+    # :   [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
     #     instance to be added.
     # `sopts`
     # :   Short style option list.
@@ -1470,16 +1484,16 @@ class OptionParser
     # negated long options. Arguments are:
     #
     # `switch`
-    # :   [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html)
+    # :   [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
     #     instance to be inserted.
     # `short_opts`
-    # :   [`List`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/List.html)
+    # :   [`List`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/List.html)
     #     of short style options.
     # `long_opts`
-    # :   [`List`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/List.html)
+    # :   [`List`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/List.html)
     #     of long style options.
     # `nolong_opts`
-    # :   [`List`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/List.html)
+    # :   [`List`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/List.html)
     #     of long style options with "no-" prefix.
     #
     #
@@ -1493,16 +1507,16 @@ class OptionParser
     # negated long options. Arguments are:
     #
     # `switch`
-    # :   [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Switch.html)
+    # :   [`OptionParser::Switch`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Switch.html)
     #     instance to be inserted.
     # `short_opts`
-    # :   [`List`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/List.html)
+    # :   [`List`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/List.html)
     #     of short style options.
     # `long_opts`
-    # :   [`List`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/List.html)
+    # :   [`List`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/List.html)
     #     of long style options.
     # `nolong_opts`
-    # :   [`List`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/List.html)
+    # :   [`List`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/List.html)
     #     of long style options with "no-" prefix.
     #
     #
@@ -1549,9 +1563,9 @@ class OptionParser
     def compsys(*args, &block); end
   end
 
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) with completion
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) with completion
   # search feature. See
-  # [`OptionParser::Completion`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Completion.html).
+  # [`OptionParser::Completion`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Completion.html).
   class CompletingHash < Hash
     include OptionParser::Completion
     K = type_member(fixed: T.untyped)
@@ -1573,9 +1587,9 @@ class OptionParser
   end
 
   # Base class of exceptions from
-  # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html).
+  # [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html).
   class ParseError < RuntimeError
-    # [`Reason`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/ParseError.html#Reason)
+    # [`Reason`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/ParseError.html#Reason)
     # which caused the error.
     Reason = T.let(nil, T.untyped)
 
@@ -1610,7 +1624,7 @@ class OptionParser
     # Default stringizing method to emit standard error message.
     #
     # Also aliased as:
-    # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/ParseError.html#method-i-to_s)
+    # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/ParseError.html#method-i-to_s)
     sig {returns(T.untyped)}
     def message(); end
   end
@@ -1648,25 +1662,25 @@ class OptionParser
   # Extends command line arguments array (ARGV) to parse itself.
   module Arguable
     # Sets
-    # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html)
+    # [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html)
     # object, when `opt` is `false` or `nil`, methods
-    # [`OptionParser::Arguable#options`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Arguable.html#method-i-options)
+    # [`OptionParser::Arguable#options`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Arguable.html#method-i-options)
     # and
-    # [`OptionParser::Arguable#options=`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/Arguable.html#method-i-options-3D)
+    # [`OptionParser::Arguable#options=`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/Arguable.html#method-i-options-3D)
     # are undefined. Thus, there is no ways to access the
-    # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html)
+    # [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html)
     # object via the receiver object.
     sig {params(opt: T.untyped).returns(T.untyped)}
     def options=(opt); end
 
     # Actual
-    # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html)
+    # [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html)
     # object, automatically created if nonexistent.
     #
     # If called with a block, yields the
-    # [`OptionParser`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html)
+    # [`OptionParser`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html)
     # object and returns the result of the block. If an
-    # [`OptionParser::ParseError`](https://docs.ruby-lang.org/en/2.6.0/OptionParser/ParseError.html)
+    # [`OptionParser::ParseError`](https://docs.ruby-lang.org/en/2.7.0/OptionParser/ParseError.html)
     # exception occurs in the block, it is rescued, a error message printed to
     # STDERR and `nil` returned.
     sig {returns(T.untyped)}
@@ -1688,7 +1702,7 @@ class OptionParser
     def parse!(); end
 
     # Substitution of getopts is possible as follows. Also see
-    # [`OptionParser#getopts`](https://docs.ruby-lang.org/en/2.6.0/OptionParser.html#method-i-getopts).
+    # [`OptionParser#getopts`](https://docs.ruby-lang.org/en/2.7.0/OptionParser.html#method-i-getopts).
     #
     # ```ruby
     # def getopts(*args)

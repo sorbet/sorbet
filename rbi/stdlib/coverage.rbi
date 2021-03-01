@@ -1,6 +1,6 @@
 # typed: __STDLIB_INTERNAL
 
-# [`Coverage`](https://docs.ruby-lang.org/en/2.6.0/Coverage.html) provides
+# [`Coverage`](https://docs.ruby-lang.org/en/2.7.0/Coverage.html) provides
 # coverage measurement feature for Ruby. This feature is experimental, so these
 # APIs may be changed in future.
 #
@@ -8,9 +8,9 @@
 #
 # 1.  require "coverage"
 # 2.  do
-#     [`Coverage.start`](https://docs.ruby-lang.org/en/2.6.0/Coverage.html#method-c-start)
+#     [`Coverage.start`](https://docs.ruby-lang.org/en/2.7.0/Coverage.html#method-c-start)
 # 3.  require or load Ruby source file
-# 4.  [`Coverage.result`](https://docs.ruby-lang.org/en/2.6.0/Coverage.html#method-c-result)
+# 4.  [`Coverage.result`](https://docs.ruby-lang.org/en/2.7.0/Coverage.html#method-c-result)
 #     will return a hash that contains filename as key and coverage array as
 #     value. A coverage array gives, for each line, the number of line execution
 #     by the interpreter. A `nil` value means coverage is disabled for this line
@@ -67,9 +67,9 @@ module Coverage
   def self.result(stop: T.unsafe(nil), clear: T.unsafe(nil)); end
 
   # Returns true if coverage stats are currently being collected (after
-  # [`Coverage.start`](https://docs.ruby-lang.org/en/2.6.0/Coverage.html#method-c-start)
+  # [`Coverage.start`](https://docs.ruby-lang.org/en/2.7.0/Coverage.html#method-c-start)
   # call, but before
-  # [`Coverage.result`](https://docs.ruby-lang.org/en/2.6.0/Coverage.html#method-c-result)
+  # [`Coverage.result`](https://docs.ruby-lang.org/en/2.7.0/Coverage.html#method-c-result)
   # call)
   sig {returns(T::Boolean)}
   def self.running?(); end

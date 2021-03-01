@@ -11,14 +11,14 @@
 # key-value pairs. Gdbm allows the user to store, retrieve, and delete data by
 # key. It furthermore allows a non-sorted traversal of all key-value pairs. A
 # gdbm database thus provides the same functionality as a hash. As with objects
-# of the [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) class, elements
+# of the [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) class, elements
 # can be accessed with `[]`. Furthermore,
-# [`GDBM`](https://docs.ruby-lang.org/en/2.6.0/GDBM.html) mixes in the
-# [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html) module,
+# [`GDBM`](https://docs.ruby-lang.org/en/2.7.0/GDBM.html) mixes in the
+# [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html) module,
 # thus providing convenient methods such as
-# [`find`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-find),
-# [`collect`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-collect),
-# [`map`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-map),
+# [`find`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-find),
+# [`collect`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-collect),
+# [`map`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-map),
 # etc.
 #
 # A process is allowed to open several different databases at the same time. A
@@ -71,7 +71,7 @@ class GDBM
   Elem = type_member(:out)
 
   # flag for new and
-  # [`open`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-open).
+  # [`open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open).
   # this flag is obsolete for gdbm >= 1.8
   FAST = T.let(T.unsafe(nil), Integer)
 
@@ -79,14 +79,14 @@ class GDBM
   NEWDB = T.let(T.unsafe(nil), Integer)
 
   # flag for new and
-  # [`open`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-open)
+  # [`open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open)
   NOLOCK = T.let(T.unsafe(nil), Integer)
 
   # open database as a reader
   READER = T.let(T.unsafe(nil), Integer)
 
   # flag for new and
-  # [`open`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-open).
+  # [`open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open).
   # only for gdbm >= 1.8
   SYNC = T.let(T.unsafe(nil), Integer)
 
@@ -151,7 +151,7 @@ class GDBM
   #
   # This option is obsolete for gdbm >= 1.8 since fast mode is turned on by
   # default. See also:
-  # [`syncmode=`](https://docs.ruby-lang.org/en/2.6.0/GDBM.html#method-i-syncmode-3D)
+  # [`syncmode=`](https://docs.ruby-lang.org/en/2.7.0/GDBM.html#method-i-syncmode-3D)
   def fastmode=(_); end
 
   # Retrieves the *value* corresponding to *key*. If there is no value
@@ -196,7 +196,7 @@ class GDBM
 
   # Returns a hash copy of *gdbm* where all key-value pairs from *gdbm* for
   # which *block* evaluates to true are removed. See also:
-  # [`delete_if`](https://docs.ruby-lang.org/en/2.6.0/GDBM.html#method-i-delete_if)
+  # [`delete_if`](https://docs.ruby-lang.org/en/2.7.0/GDBM.html#method-i-delete_if)
   def reject; end
 
   # Deletes every key-value pair from *gdbm* for which *block* evaluates to
@@ -210,7 +210,7 @@ class GDBM
 
   # Replaces the content of *gdbm* with the key-value pairs of *other*. *other*
   # must have an
-  # [`each_pair`](https://docs.ruby-lang.org/en/2.6.0/GDBM.html#method-i-each_pair)
+  # [`each_pair`](https://docs.ruby-lang.org/en/2.7.0/GDBM.html#method-i-each_pair)
   # method.
   def replace(_); end
 
@@ -238,12 +238,12 @@ class GDBM
   # Turns the database's synchronization mode on or off. If the synchronization
   # mode is turned on, the database's in-memory state will be synchronized to
   # disk after every database modification operation. If the synchronization
-  # mode is turned off, [`GDBM`](https://docs.ruby-lang.org/en/2.6.0/GDBM.html)
+  # mode is turned off, [`GDBM`](https://docs.ruby-lang.org/en/2.7.0/GDBM.html)
   # does not wait for writes to be flushed to the disk before continuing.
   #
   # This option is only available for gdbm >= 1.8 where syncmode is turned off
   # by default. See also:
-  # [`fastmode=`](https://docs.ruby-lang.org/en/2.6.0/GDBM.html#method-i-fastmode-3D)
+  # [`fastmode=`](https://docs.ruby-lang.org/en/2.7.0/GDBM.html#method-i-fastmode-3D)
   def syncmode=(_); end
 
   # Returns an array of all key-value pairs contained in the database.
@@ -254,7 +254,7 @@ class GDBM
 
   # Adds the key-value pairs of *other* to *gdbm*, overwriting entries with
   # duplicate keys with those from *other*. *other* must have an
-  # [`each_pair`](https://docs.ruby-lang.org/en/2.6.0/GDBM.html#method-i-each_pair)
+  # [`each_pair`](https://docs.ruby-lang.org/en/2.7.0/GDBM.html#method-i-each_pair)
   # method.
   def update(_); end
 
@@ -269,9 +269,9 @@ class GDBM
   def values_at(*_); end
 
   # If called without a block, this is synonymous to
-  # [`GDBM::new`](https://docs.ruby-lang.org/en/2.6.0/GDBM.html#method-c-new).
+  # [`GDBM::new`](https://docs.ruby-lang.org/en/2.7.0/GDBM.html#method-c-new).
   # If a block is given, the new
-  # [`GDBM`](https://docs.ruby-lang.org/en/2.6.0/GDBM.html) instance will be
+  # [`GDBM`](https://docs.ruby-lang.org/en/2.7.0/GDBM.html) instance will be
   # passed to the block as a parameter, and the corresponding database file will
   # be closed after the execution of the block code has been finished.
   #

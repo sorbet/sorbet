@@ -1,55 +1,79 @@
 # typed: __STDLIB_INTERNAL
 
-# [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) to handle
-# processes.
+# The module contains several groups of functionality for handling OS processes:
+#
+# *   Low-level property introspection and management of the current process,
+#     like
+#     [`Process.argv0`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-argv0),
+#     [`Process.pid`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-pid);
+# *   Low-level introspection of other processes, like
+#     [`Process.getpgid`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-getpgid),
+#     [`Process.getpriority`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-getpriority);
+# *   Management of the current process:
+#     [`Process.abort`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-abort),
+#     [`Process.exit`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-exit),
+#     [`Process.daemon`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-daemon),
+#     etc. (for convenience, most of those are also available as global
+#     functions and module functions of
+#     [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html));
+# *   Creation and management of child processes:
+#     [`Process.fork`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-fork),
+#     [`Process.spawn`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-spawn),
+#     and related methods;
+# *   Management of low-level system clock:
+#     [`Process.times`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-times)
+#     and
+#     [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime),
+#     which could be important for proper benchmarking and other elapsed time
+#     measurement tasks.
 module Process
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_BOOTTIME = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_BOOTTIME_ALARM = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_MONOTONIC = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_MONOTONIC_COARSE = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_MONOTONIC_RAW = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_MONOTONIC_RAW_APPROX = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_PROCESS_CPUTIME_ID = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_REALTIME = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_REALTIME_ALARM = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_REALTIME_COARSE = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_THREAD_CPUTIME_ID = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_UPTIME_RAW = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`Process.clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   CLOCK_UPTIME_RAW_APPROX = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.setpriority`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setpriority)
+  # [`Process.setpriority`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-setpriority)
   PRIO_PGRP = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.setpriority`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setpriority)
+  # [`Process.setpriority`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-setpriority)
   PRIO_PROCESS = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.setpriority`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setpriority)
+  # [`Process.setpriority`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-setpriority)
   PRIO_USER = T.let(T.unsafe(nil), Integer)
   # Maximum size of the process's virtual memory (address space) in bytes.
   #
@@ -118,19 +142,19 @@ module Process
   # see the system getrlimit(2) manual for details.
   RLIMIT_STACK = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setrlimit)
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-setrlimit)
   RLIM_INFINITY = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setrlimit)
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-setrlimit)
   RLIM_SAVED_CUR = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setrlimit)
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-setrlimit)
   RLIM_SAVED_MAX = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.wait`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-wait)
+  # [`Process.wait`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-wait)
   WNOHANG = T.let(T.unsafe(nil), Integer)
   # see
-  # [`Process.wait`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-wait)
+  # [`Process.wait`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-wait)
   WUNTRACED = T.let(T.unsafe(nil), Integer)
 
   # Returns the name of the script being executed. The value is not affected by
@@ -142,7 +166,7 @@ module Process
   def self.argv0(); end
 
   # Returns the time resolution returned by POSIX
-  # [`clock_getres`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_getres)()
+  # [`clock_getres`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_getres)()
   # function.
   #
   # `clock_id` specifies a kind of clock. See the document of
@@ -150,8 +174,8 @@ module Process
   #
   # `clock_id` can be a symbol as `Process.clock_gettime`. However the result
   # may not be accurate. For example,
-  # +Process.clock\_getres(:GETTIMEOFDAY\_BASED\_CLOCK\_REALTIME)+ returns
-  # 1.0e-06 which means 1 microsecond, but actual resolution can be more coarse.
+  # `Process.clock_getres(:GETTIMEOFDAY_BASED_CLOCK_REALTIME)` returns 1.0e-06
+  # which means 1 microsecond, but actual resolution can be more coarse.
   #
   # If the given `clock_id` is not supported, Errno::EINVAL is raised.
   #
@@ -165,10 +189,10 @@ module Process
   # `:hertz` can be used to obtain the exact value of the clock ticks per second
   # for times() function and CLOCKS\_PER\_SEC for clock() function.
   #
-  # +Process.clock\_getres(:TIMES\_BASED\_CLOCK\_PROCESS\_CPUTIME\_ID, :hertz)+
+  # `Process.clock_getres(:TIMES_BASED_CLOCK_PROCESS_CPUTIME_ID, :hertz)`
   # returns the clock ticks per second.
   #
-  # +Process.clock\_getres(:CLOCK\_BASED\_CLOCK\_PROCESS\_CPUTIME\_ID, :hertz)+
+  # `Process.clock_getres(:CLOCK_BASED_CLOCK_PROCESS_CPUTIME_ID, :hertz)`
   # returns CLOCKS\_PER\_SEC.
   #
   # ```ruby
@@ -185,7 +209,7 @@ module Process
   def self.clock_getres(clock_id, unit=T.unsafe(nil)); end
 
   # Returns a time returned by POSIX
-  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)()
+  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)()
   # function.
   #
   # ```ruby
@@ -195,81 +219,83 @@ module Process
   #
   # `clock_id` specifies a kind of clock. It is specified as a constant which
   # begins with `Process::CLOCK_` such as
-  # [`Process::CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME)
+  # [`Process::CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME)
   # and
-  # [`Process::CLOCK_MONOTONIC`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC).
+  # [`Process::CLOCK_MONOTONIC`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_MONOTONIC).
   #
   # The supported constants depends on OS and version. Ruby provides following
   # types of `clock_id` if available.
   #
-  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME)
+  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME)
   # :   SUSv2 to 4, Linux 2.5.63, FreeBSD 3.0, NetBSD 2.0, OpenBSD 2.1, macOS
   #     10.12
-  # [`CLOCK_MONOTONIC`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC)
+  # [`CLOCK_MONOTONIC`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_MONOTONIC)
   # :   SUSv3 to 4, Linux 2.5.63, FreeBSD 3.0, NetBSD 2.0, OpenBSD 3.4, macOS
   #     10.12
-  # [`CLOCK_PROCESS_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_PROCESS_CPUTIME_ID)
-  # :   SUSv3 to 4, Linux 2.5.63, OpenBSD 5.4, macOS 10.12
-  # [`CLOCK_THREAD_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_THREAD_CPUTIME_ID)
+  # [`CLOCK_PROCESS_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_PROCESS_CPUTIME_ID)
+  # :   SUSv3 to 4, Linux 2.5.63, FreeBSD 9.3, OpenBSD 5.4, macOS 10.12
+  # [`CLOCK_THREAD_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_THREAD_CPUTIME_ID)
   # :   SUSv3 to 4, Linux 2.5.63, FreeBSD 7.1, OpenBSD 5.4, macOS 10.12
-  # [`CLOCK_VIRTUAL`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_VIRTUAL)
+  # [`CLOCK_VIRTUAL`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_VIRTUAL)
   # :   FreeBSD 3.0, OpenBSD 2.1
-  # [`CLOCK_PROF`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_PROF)
+  # [`CLOCK_PROF`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_PROF)
   # :   FreeBSD 3.0, OpenBSD 2.1
-  # [`CLOCK_REALTIME_FAST`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME_FAST)
+  # [`CLOCK_REALTIME_FAST`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME_FAST)
   # :   FreeBSD 8.1
-  # [`CLOCK_REALTIME_PRECISE`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME_PRECISE)
+  # [`CLOCK_REALTIME_PRECISE`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME_PRECISE)
   # :   FreeBSD 8.1
-  # [`CLOCK_REALTIME_COARSE`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME_COARSE)
+  # [`CLOCK_REALTIME_COARSE`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME_COARSE)
   # :   Linux 2.6.32
-  # [`CLOCK_REALTIME_ALARM`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME_ALARM)
+  # [`CLOCK_REALTIME_ALARM`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME_ALARM)
   # :   Linux 3.0
-  # [`CLOCK_MONOTONIC_FAST`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC_FAST)
+  # [`CLOCK_MONOTONIC_FAST`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_MONOTONIC_FAST)
   # :   FreeBSD 8.1
-  # [`CLOCK_MONOTONIC_PRECISE`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC_PRECISE)
+  # [`CLOCK_MONOTONIC_PRECISE`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_MONOTONIC_PRECISE)
   # :   FreeBSD 8.1
-  # [`CLOCK_MONOTONIC_COARSE`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC_COARSE)
+  # [`CLOCK_MONOTONIC_COARSE`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_MONOTONIC_COARSE)
   # :   Linux 2.6.32
-  # [`CLOCK_MONOTONIC_RAW`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC_RAW)
+  # [`CLOCK_MONOTONIC_RAW`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_MONOTONIC_RAW)
   # :   Linux 2.6.28, macOS 10.12
-  # [`CLOCK_MONOTONIC_RAW_APPROX`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC_RAW_APPROX)
+  # [`CLOCK_MONOTONIC_RAW_APPROX`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_MONOTONIC_RAW_APPROX)
   # :   macOS 10.12
-  # [`CLOCK_BOOTTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_BOOTTIME)
+  # [`CLOCK_BOOTTIME`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_BOOTTIME)
   # :   Linux 2.6.39
-  # [`CLOCK_BOOTTIME_ALARM`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_BOOTTIME_ALARM)
+  # [`CLOCK_BOOTTIME_ALARM`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_BOOTTIME_ALARM)
   # :   Linux 3.0
-  # [`CLOCK_UPTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_UPTIME)
+  # [`CLOCK_UPTIME`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_UPTIME)
   # :   FreeBSD 7.0, OpenBSD 5.5
-  # [`CLOCK_UPTIME_FAST`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_UPTIME_FAST)
+  # [`CLOCK_UPTIME_FAST`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_UPTIME_FAST)
   # :   FreeBSD 8.1
-  # [`CLOCK_UPTIME_RAW`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_UPTIME_RAW)
+  # [`CLOCK_UPTIME_RAW`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_UPTIME_RAW)
   # :   macOS 10.12
-  # [`CLOCK_UPTIME_RAW_APPROX`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_UPTIME_RAW_APPROX)
+  # [`CLOCK_UPTIME_RAW_APPROX`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_UPTIME_RAW_APPROX)
   # :   macOS 10.12
-  # [`CLOCK_UPTIME_PRECISE`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_UPTIME_PRECISE)
+  # [`CLOCK_UPTIME_PRECISE`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_UPTIME_PRECISE)
   # :   FreeBSD 8.1
-  # [`CLOCK_SECOND`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_SECOND)
+  # [`CLOCK_SECOND`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_SECOND)
   # :   FreeBSD 8.1
+  # [`CLOCK_TAI`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_TAI)
+  # :   Linux 3.10
   #
   #
   # Note that SUS stands for Single Unix Specification. SUS contains POSIX and
-  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)
+  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)
   # is defined in the POSIX part. SUS defines
-  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME)
+  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME)
   # mandatory but
-  # [`CLOCK_MONOTONIC`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_MONOTONIC),
-  # [`CLOCK_PROCESS_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_PROCESS_CPUTIME_ID)
+  # [`CLOCK_MONOTONIC`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_MONOTONIC),
+  # [`CLOCK_PROCESS_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_PROCESS_CPUTIME_ID)
   # and
-  # [`CLOCK_THREAD_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_THREAD_CPUTIME_ID)
+  # [`CLOCK_THREAD_CPUTIME_ID`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_THREAD_CPUTIME_ID)
   # are optional.
   #
   # Also, several symbols are accepted as `clock_id`. There are emulations for
-  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)().
+  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)().
   #
   # For example,
-  # [`Process::CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME)
+  # [`Process::CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME)
   # is defined as `:GETTIMEOFDAY_BASED_CLOCK_REALTIME` when
-  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)()
+  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)()
   # is not available.
   #
   # Emulations for `CLOCK_REALTIME`:
@@ -291,7 +317,7 @@ module Process
   #     example, GNU/Linux returns a value based on jiffies and it is monotonic.
   #     However, 4.4BSD uses gettimeofday() and it is not monotonic. (FreeBSD
   #     uses
-  #     [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)(CLOCK\_MONOTONIC)
+  #     [`clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)([`CLOCK_MONOTONIC`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_MONOTONIC))
   #     instead, though.) The resolution is the clock tick. "getconf CLK\_TCK"
   #     command shows the clock ticks per second. (The clock ticks per second is
   #     defined by HZ macro in older systems.) If it is 100 and clock\_t is 32
@@ -342,11 +368,11 @@ module Process
   #
   #
   # The underlying function,
-  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-clock_gettime)(),
+  # [`clock_gettime`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-clock_gettime)(),
   # returns a number of nanoseconds.
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) object (IEEE 754
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) object (IEEE 754
   # double) is not enough to represent the return value for
-  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME).
+  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME).
   # If the exact nanoseconds value is required, use `:nanoseconds` as the
   # `unit`.
   #
@@ -354,13 +380,13 @@ module Process
   # time, process start up time, the Epoch, etc.
   #
   # The origin in
-  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME)
+  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME)
   # is defined as the Epoch (1970-01-01 00:00:00 UTC). But some systems count
   # leap seconds and others doesn't. So the result can be interpreted
   # differently across systems.
-  # [`Time.now`](https://docs.ruby-lang.org/en/2.6.0/Time.html#method-c-now) is
+  # [`Time.now`](https://docs.ruby-lang.org/en/2.7.0/Time.html#method-c-now) is
   # recommended over
-  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.6.0/Process.html#CLOCK_REALTIME).
+  # [`CLOCK_REALTIME`](https://docs.ruby-lang.org/en/2.7.0/Process.html#CLOCK_REALTIME).
   sig do
     params(
         clock_id: T.any(Symbol, Integer),
@@ -388,16 +414,19 @@ module Process
   # Some operating systems retain the status of terminated child processes until
   # the parent collects that status (normally using some variant of `wait()`).
   # If the parent never collects this status, the child stays around as a
-  # *zombie* process. `Process::detach` prevents this by setting up a separate
-  # Ruby thread whose sole job is to reap the status of the process *pid* when
-  # it terminates. Use `detach` only when you do not intend to explicitly wait
-  # for the child to terminate.
+  # *zombie* process.
+  # [`Process::detach`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-detach)
+  # prevents this by setting up a separate Ruby thread whose sole job is to reap
+  # the status of the process *pid* when it terminates. Use detach only when you
+  # do not intend to explicitly wait for the child to terminate.
   #
   # The waiting thread returns the exit status of the detached process when it
-  # terminates, so you can use `Thread#join` to know the result. If specified
-  # *pid* is not a valid child process ID, the thread returns `nil` immediately.
+  # terminates, so you can use
+  # [`Thread#join`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-join)
+  # to know the result. If specified *pid* is not a valid child process ID, the
+  # thread returns `nil` immediately.
   #
-  # The waiting thread has `pid` method which returns the pid.
+  # The waiting thread has pid method which returns the pid.
   #
   # In this first example, we don't reap the first child process, so it appears
   # as a zombie in the process status display.
@@ -416,8 +445,9 @@ module Process
   # 27389 Z
   # ```
   #
-  # In the next example, `Process::detach` is used to reap the child
-  # automatically.
+  # In the next example,
+  # [`Process::detach`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-detach)
+  # is used to reap the child automatically.
   #
   # ```ruby
   # p1 = fork { sleep 0.1 }
@@ -503,8 +533,8 @@ module Process
   #
   # Note that this behavior is observable by pid obtained (return value of
   # spawn() and
-  # [`IO#pid`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-pid) for
-  # [`IO.popen`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-popen)) is
+  # [`IO#pid`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pid) for
+  # [`IO.popen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-popen)) is
   # the pid of the invoked command, not shell.
   #
   # In the second form (`exec("command1", "arg1", ...)`), the first is taken as
@@ -521,17 +551,17 @@ module Process
   # program (including open file descriptors).
   #
   # This behavior is modified by the given `env` and `options` parameters. See
-  # [`::spawn`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-spawn)
+  # [`::spawn`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-spawn)
   # for details.
   #
-  # If the command fails to execute (typically `Errno::ENOENT` when it was not
+  # If the command fails to execute (typically Errno::ENOENT when it was not
   # found) a
-  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
   # exception is raised.
   #
   # This method modifies process attributes according to given `options` before
   # `exec(2)` system call. See
-  # [`::spawn`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-spawn)
+  # [`::spawn`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-spawn)
   # for more details about the given `options`.
   #
   # The modified attributes may be retained when `exec(2)` system call fails.
@@ -539,9 +569,9 @@ module Process
   # For example, hard resource limits are not restorable.
   #
   # Consider to create a child process using
-  # [`::spawn`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-spawn)
+  # [`::spawn`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-spawn)
   # or
-  # [`Kernel#system`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-system)
+  # [`Kernel#system`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-system)
   # if this is not acceptable.
   #
   # ```ruby
@@ -578,11 +608,14 @@ module Process
   def self.getpgrp(); end
 
   # Gets the scheduling priority for specified process, process group, or user.
-  # *kind* indicates the kind of entity to find: one of `Process::PRIO_PGRP`,
-  # `Process::PRIO_USER`, or `Process::PRIO_PROCESS`. *integer* is an id
-  # indicating the particular process, process group, or user (an id of 0 means
-  # *current*). Lower priorities are more favorable for scheduling. Not
-  # available on all platforms.
+  # *kind* indicates the kind of entity to find: one of
+  # [`Process::PRIO_PGRP`](https://docs.ruby-lang.org/en/2.7.0/Process.html#PRIO_PGRP),
+  # [`Process::PRIO_USER`](https://docs.ruby-lang.org/en/2.7.0/Process.html#PRIO_USER),
+  # or
+  # [`Process::PRIO_PROCESS`](https://docs.ruby-lang.org/en/2.7.0/Process.html#PRIO_PROCESS).
+  # *integer* is an id indicating the particular process, process group, or user
+  # (an id of 0 means *current*). Lower priorities are more favorable for
+  # scheduling. Not available on all platforms.
   #
   # ```ruby
   # Process.getpriority(Process::PRIO_USER, 0)      #=> 19
@@ -602,13 +635,18 @@ module Process
   #
   # *resource* indicates the kind of resource to limit. It is specified as a
   # symbol such as `:CORE`, a string such as `"CORE"` or a constant such as
-  # `Process::RLIMIT_CORE`. See
-  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setrlimit)
+  # [`Process::RLIMIT_CORE`](https://docs.ruby-lang.org/en/2.7.0/Process.html#RLIMIT_CORE).
+  # See
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-setrlimit)
   # for details.
   #
-  # *cur\_limit* and *max\_limit* may be `Process::RLIM_INFINITY`,
-  # `Process::RLIM_SAVED_MAX` or `Process::RLIM_SAVED_CUR`. See
-  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-setrlimit)
+  # *cur\_limit* and *max\_limit* may be
+  # [`Process::RLIM_INFINITY`](https://docs.ruby-lang.org/en/2.7.0/Process.html#RLIM_INFINITY),
+  # [`Process::RLIM_SAVED_MAX`](https://docs.ruby-lang.org/en/2.7.0/Process.html#RLIM_SAVED_MAX)
+  # or
+  # [`Process::RLIM_SAVED_CUR`](https://docs.ruby-lang.org/en/2.7.0/Process.html#RLIM_SAVED_CUR).
+  # See
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-setrlimit)
   # and the system getrlimit(2) manual for details.
   sig do
     params(
@@ -651,8 +689,8 @@ module Process
   end
   def self.gid=(arg0); end
 
-  # Get an `Array` of the group IDs in the supplemental group access list for
-  # this process.
+  # Get an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of the
+  # group IDs in the supplemental group access list for this process.
   #
   # ```ruby
   # Process.groups   #=> [27, 6, 10, 11]
@@ -675,8 +713,9 @@ module Process
   sig {returns(T::Array[Integer])}
   def self.groups(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the supplemental group
-  # access list to the given `Array` of group IDs.
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the supplemental group
+  # access list to the given
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of group IDs.
   #
   # ```ruby
   # Process.groups   #=> [0, 1, 2, 3, 4, 6, 10, 11, 20, 26, 27]
@@ -694,8 +733,9 @@ module Process
   # Initializes the supplemental group access list by reading the system group
   # database and using all groups of which the given user is a member. The group
   # with the specified *gid* is also added to the list. Returns the resulting
-  # `Array` of the gids of all the groups in the supplementary group access
-  # list. Not available on all platforms.
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of the gids of all
+  # the groups in the supplementary group access list. Not available on all
+  # platforms.
   #
   # ```ruby
   # Process.groups   #=> [0, 1, 2, 3, 4, 6, 10, 11, 20, 26, 27]
@@ -712,12 +752,14 @@ module Process
   def self.initgroups(username, gid); end
 
   # Sends the given signal to the specified process id(s) if *pid* is positive.
-  # If *pid* is zero *signal* is sent to all processes whose group ID is equal
-  # to the group ID of the process. *signal* may be an integer signal number or
-  # a POSIX signal name (either with or without a `SIG` prefix). If *signal* is
-  # negative (or starts with a minus sign), kills process groups instead of
-  # processes. Not all signals are available on all platforms. The keys and
-  # values of `Signal.list` are known signal names and numbers, respectively.
+  # If *pid* is zero, *signal* is sent to all processes whose group ID is equal
+  # to the group ID of the process. If *pid* is negative, results are dependent
+  # on the operating system. *signal* may be an integer signal number or a POSIX
+  # signal name (either with or without a `SIG` prefix). If *signal* is negative
+  # (or starts with a minus sign), kills process groups instead of processes.
+  # Not all signals are available on all platforms. The keys and values of
+  # [`Signal.list`](https://docs.ruby-lang.org/en/2.7.0/Signal.html#method-c-list)
+  # are known signal names and numbers, respectively.
   #
   # ```ruby
   # pid = fork do
@@ -735,13 +777,19 @@ module Process
   # Ouch!
   # ```
   #
-  # If *signal* is an integer but wrong for signal, `Errno::EINVAL` or
-  # `RangeError` will be raised. Otherwise unless *signal* is a `String` or a
-  # `Symbol`, and a known signal name, `ArgumentError` will be raised.
+  # If *signal* is an integer but wrong for signal, Errno::EINVAL or
+  # [`RangeError`](https://docs.ruby-lang.org/en/2.7.0/RangeError.html) will be
+  # raised. Otherwise unless *signal* is a
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or a
+  # [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html), and a known
+  # signal name,
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html)
+  # will be raised.
   #
-  # Also, `Errno::ESRCH` or `RangeError` for invalid *pid*, `Errno::EPERM` when
-  # failed because of no privilege, will be raised. In these cases, signals may
-  # have been sent to preceding processes.
+  # Also, Errno::ESRCH or
+  # [`RangeError`](https://docs.ruby-lang.org/en/2.7.0/RangeError.html) for
+  # invalid *pid*, Errno::EPERM when failed because of no privilege, will be
+  # raised. In these cases, signals may have been sent to preceding processes.
   sig do
     params(
         signal: T.any(Integer, Symbol, String),
@@ -824,7 +872,8 @@ module Process
   # Equivalent to `setpgid(0,0)`. Not available on all platforms.
   def self.setpgrp; end
 
-  # See `Process#getpriority`.
+  # See
+  # [`Process.getpriority`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-getpriority).
   #
   # ```ruby
   # Process.setpriority(Process::PRIO_USER, 0, 19)      #=> 0
@@ -845,7 +894,7 @@ module Process
   # Sets the process title that appears on the ps(1) command. Not necessarily
   # effective on all platforms. No exception will be raised regardless of the
   # result, nor will
-  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html)
+  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.7.0/NotImplementedError.html)
   # be raised even if the platform does not support the feature.
   #
   # Calling this method does not affect the value of $0.
@@ -871,8 +920,9 @@ module Process
   #
   # *resource* indicates the kind of resource to limit. It should be a symbol
   # such as `:CORE`, a string such as `"CORE"` or a constant such as
-  # `Process::RLIMIT_CORE`. The available resources are OS dependent. Ruby may
-  # support following resources.
+  # [`Process::RLIMIT_CORE`](https://docs.ruby-lang.org/en/2.7.0/Process.html#RLIMIT_CORE).
+  # The available resources are OS dependent. Ruby may support following
+  # resources.
   #
   # AS
   # :   total available memory (bytes) (SUSv3, NetBSD, FreeBSD, OpenBSD but
@@ -895,7 +945,7 @@ module Process
   # :   file descriptors (number) (SUSv3)
   # NPROC
   # :   number of processes for the user (number) (4.4BSD, GNU/Linux)
-  # [`RSS`](https://docs.ruby-lang.org/en/2.6.0/RSS.html)
+  # [`RSS`](https://docs.ruby-lang.org/en/2.7.0/RSS.html)
   # :   resident memory size (bytes) (4.2BSD, GNU/Linux)
   # RTPRIO
   # :   ceiling on the process's real-time priority (number) (GNU/Linux)
@@ -910,10 +960,12 @@ module Process
   #
   #
   # *cur\_limit* and *max\_limit* may be `:INFINITY`, `"INFINITY"` or
-  # `Process::RLIM_INFINITY`, which means that the resource is not limited. They
-  # may be `Process::RLIM_SAVED_MAX`, `Process::RLIM_SAVED_CUR` and
-  # corresponding symbols and strings too. See system setrlimit(2) manual for
-  # details.
+  # [`Process::RLIM_INFINITY`](https://docs.ruby-lang.org/en/2.7.0/Process.html#RLIM_INFINITY),
+  # which means that the resource is not limited. They may be
+  # [`Process::RLIM_SAVED_MAX`](https://docs.ruby-lang.org/en/2.7.0/Process.html#RLIM_SAVED_MAX),
+  # [`Process::RLIM_SAVED_CUR`](https://docs.ruby-lang.org/en/2.7.0/Process.html#RLIM_SAVED_CUR)
+  # and corresponding symbols and strings too. See system setrlimit(2) manual
+  # for details.
   #
   # The following example raises the soft limit of core size to the hard limit
   # to try to make core dump possible.
@@ -941,7 +993,301 @@ module Process
   def self.setsid(); end
 
   # spawn executes specified command and return its pid.
-  # spawn([env,] command... [,options]) → pid
+  #
+  # ```ruby
+  # pid = spawn("tar xf ruby-2.0.0-p195.tar.bz2")
+  # Process.wait pid
+  #
+  # pid = spawn(RbConfig.ruby, "-eputs'Hello, world!'")
+  # Process.wait pid
+  # ```
+  #
+  # This method is similar to
+  # [`Kernel#system`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-system)
+  # but it doesn't wait for the command to finish.
+  #
+  # The parent process should use
+  # [`Process.wait`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-wait)
+  # to collect the termination status of its child or use
+  # [`Process.detach`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-detach)
+  # to register disinterest in their status; otherwise, the operating system may
+  # accumulate zombie processes.
+  #
+  # spawn has bunch of options to specify process attributes:
+  #
+  # ```
+  # env: hash
+  #   name => val : set the environment variable
+  #   name => nil : unset the environment variable
+  #
+  #   the keys and the values except for +nil+ must be strings.
+  # command...:
+  #   commandline                 : command line string which is passed to the standard shell
+  #   cmdname, arg1, ...          : command name and one or more arguments (This form does not use the shell. See below for caveats.)
+  #   [cmdname, argv0], arg1, ... : command name, argv[0] and zero or more arguments (no shell)
+  # options: hash
+  #   clearing environment variables:
+  #     :unsetenv_others => true   : clear environment variables except specified by env
+  #     :unsetenv_others => false  : don't clear (default)
+  #   process group:
+  #     :pgroup => true or 0 : make a new process group
+  #     :pgroup => pgid      : join the specified process group
+  #     :pgroup => nil       : don't change the process group (default)
+  #   create new process group: Windows only
+  #     :new_pgroup => true  : the new process is the root process of a new process group
+  #     :new_pgroup => false : don't create a new process group (default)
+  #   resource limit: resourcename is core, cpu, data, etc.  See Process.setrlimit.
+  #     :rlimit_resourcename => limit
+  #     :rlimit_resourcename => [cur_limit, max_limit]
+  #   umask:
+  #     :umask => int
+  #   redirection:
+  #     key:
+  #       FD              : single file descriptor in child process
+  #       [FD, FD, ...]   : multiple file descriptor in child process
+  #     value:
+  #       FD                        : redirect to the file descriptor in parent process
+  #       string                    : redirect to file with open(string, "r" or "w")
+  #       [string]                  : redirect to file with open(string, File::RDONLY)
+  #       [string, open_mode]       : redirect to file with open(string, open_mode, 0644)
+  #       [string, open_mode, perm] : redirect to file with open(string, open_mode, perm)
+  #       [:child, FD]              : redirect to the redirected file descriptor
+  #       :close                    : close the file descriptor in child process
+  #     FD is one of follows
+  #       :in     : the file descriptor 0 which is the standard input
+  #       :out    : the file descriptor 1 which is the standard output
+  #       :err    : the file descriptor 2 which is the standard error
+  #       integer : the file descriptor of specified the integer
+  #       io      : the file descriptor specified as io.fileno
+  #   file descriptor inheritance: close non-redirected non-standard fds (3, 4, 5, ...) or not
+  #     :close_others => false  : inherit
+  #   current directory:
+  #     :chdir => str
+  # ```
+  #
+  # The `cmdname, arg1, ...` form does not use the shell. However, on different
+  # OSes, different things are provided as built-in commands. An example of this
+  # is +'echo'+, which is a built-in on Windows, but is a normal program on
+  # Linux and Mac OS X. This means that `Process.spawn 'echo', '%Path%'` will
+  # display the contents of the `%Path%` environment variable on Windows, but
+  # `Process.spawn 'echo', '$PATH'` prints the literal `$PATH`.
+  #
+  # If a hash is given as `env`, the environment is updated by `env` before
+  # `exec(2)` in the child process. If a pair in `env` has nil as the value, the
+  # variable is deleted.
+  #
+  # ```ruby
+  # # set FOO as BAR and unset BAZ.
+  # pid = spawn({"FOO"=>"BAR", "BAZ"=>nil}, command)
+  # ```
+  #
+  # If a hash is given as `options`, it specifies process group, create new
+  # process group, resource limit, current directory, umask and redirects for
+  # the child process. Also, it can be specified to clear environment variables.
+  #
+  # The `:unsetenv_others` key in `options` specifies to clear environment
+  # variables, other than specified by `env`.
+  #
+  # ```ruby
+  # pid = spawn(command, :unsetenv_others=>true) # no environment variable
+  # pid = spawn({"FOO"=>"BAR"}, command, :unsetenv_others=>true) # FOO only
+  # ```
+  #
+  # The `:pgroup` key in `options` specifies a process group. The corresponding
+  # value should be true, zero, a positive integer, or nil. true and zero cause
+  # the process to be a process leader of a new process group. A non-zero
+  # positive integer causes the process to join the provided process group. The
+  # default value, nil, causes the process to remain in the same process group.
+  #
+  # ```ruby
+  # pid = spawn(command, :pgroup=>true) # process leader
+  # pid = spawn(command, :pgroup=>10) # belongs to the process group 10
+  # ```
+  #
+  # The `:new_pgroup` key in `options` specifies to pass
+  # `CREATE_NEW_PROCESS_GROUP` flag to `CreateProcessW()` that is Windows API.
+  # This option is only for Windows. true means the new process is the root
+  # process of the new process group. The new process has CTRL+C disabled. This
+  # flag is necessary for `Process.kill(:SIGINT, pid)` on the subprocess.
+  # :new\_pgroup is false by default.
+  #
+  # ```ruby
+  # pid = spawn(command, :new_pgroup=>true)  # new process group
+  # pid = spawn(command, :new_pgroup=>false) # same process group
+  # ```
+  #
+  # The `:rlimit_`*foo* key specifies a resource limit. *foo* should be one of
+  # resource types such as `core`. The corresponding value should be an integer
+  # or an array which have one or two integers: same as cur\_limit and
+  # max\_limit arguments for
+  # [`Process.setrlimit`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-setrlimit).
+  #
+  # ```ruby
+  # cur, max = Process.getrlimit(:CORE)
+  # pid = spawn(command, :rlimit_core=>[0,max]) # disable core temporary.
+  # pid = spawn(command, :rlimit_core=>max) # enable core dump
+  # pid = spawn(command, :rlimit_core=>0) # never dump core.
+  # ```
+  #
+  # The `:umask` key in `options` specifies the umask.
+  #
+  # ```ruby
+  # pid = spawn(command, :umask=>077)
+  # ```
+  #
+  # The :in, :out, :err, an integer, an
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) and an array key
+  # specifies a redirection. The redirection maps a file descriptor in the child
+  # process.
+  #
+  # For example, stderr can be merged into stdout as follows:
+  #
+  # ```ruby
+  # pid = spawn(command, :err=>:out)
+  # pid = spawn(command, 2=>1)
+  # pid = spawn(command, STDERR=>:out)
+  # pid = spawn(command, STDERR=>STDOUT)
+  # ```
+  #
+  # The hash keys specifies a file descriptor in the child process started by
+  # spawn. :err, 2 and STDERR specifies the standard error stream (stderr).
+  #
+  # The hash values specifies a file descriptor in the parent process which
+  # invokes spawn. :out, 1 and STDOUT specifies the standard output stream
+  # (stdout).
+  #
+  # In the above example, the standard output in the child process is not
+  # specified. So it is inherited from the parent process.
+  #
+  # The standard input stream (stdin) can be specified by :in, 0 and STDIN.
+  #
+  # A filename can be specified as a hash value.
+  #
+  # ```ruby
+  # pid = spawn(command, :in=>"/dev/null") # read mode
+  # pid = spawn(command, :out=>"/dev/null") # write mode
+  # pid = spawn(command, :err=>"log") # write mode
+  # pid = spawn(command, [:out, :err]=>"/dev/null") # write mode
+  # pid = spawn(command, 3=>"/dev/null") # read mode
+  # ```
+  #
+  # For stdout and stderr (and combination of them), it is opened in write mode.
+  # Otherwise read mode is used.
+  #
+  # For specifying flags and permission of file creation explicitly, an array is
+  # used instead.
+  #
+  # ```ruby
+  # pid = spawn(command, :in=>["file"]) # read mode is assumed
+  # pid = spawn(command, :in=>["file", "r"])
+  # pid = spawn(command, :out=>["log", "w"]) # 0644 assumed
+  # pid = spawn(command, :out=>["log", "w", 0600])
+  # pid = spawn(command, :out=>["log", File::WRONLY|File::EXCL|File::CREAT, 0600])
+  # ```
+  #
+  # The array specifies a filename, flags and permission. The flags can be a
+  # string or an integer. If the flags is omitted or nil, File::RDONLY is
+  # assumed. The permission should be an integer. If the permission is omitted
+  # or nil, 0644 is assumed.
+  #
+  # If an array of IOs and integers are specified as a hash key, all the
+  # elements are redirected.
+  #
+  # ```ruby
+  # # stdout and stderr is redirected to log file.
+  # # The file "log" is opened just once.
+  # pid = spawn(command, [:out, :err]=>["log", "w"])
+  # ```
+  #
+  # Another way to merge multiple file descriptors is [:child, fd]. [:child, fd]
+  # means the file descriptor in the child process. This is different from fd.
+  # For example, :err=>:out means redirecting child stderr to parent stdout. But
+  # :err=>[:child, :out] means redirecting child stderr to child stdout. They
+  # differ if stdout is redirected in the child process as follows.
+  #
+  # ```ruby
+  # # stdout and stderr is redirected to log file.
+  # # The file "log" is opened just once.
+  # pid = spawn(command, :out=>["log", "w"], :err=>[:child, :out])
+  # ```
+  #
+  # [:child, :out] can be used to merge stderr into stdout in
+  # [`IO.popen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-popen). In
+  # this case,
+  # [`IO.popen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-popen)
+  # redirects stdout to a pipe in the child process and [:child, :out] refers
+  # the redirected stdout.
+  #
+  # ```ruby
+  # io = IO.popen(["sh", "-c", "echo out; echo err >&2", :err=>[:child, :out]])
+  # p io.read #=> "out\nerr\n"
+  # ```
+  #
+  # The `:chdir` key in `options` specifies the current directory.
+  #
+  # ```ruby
+  # pid = spawn(command, :chdir=>"/var/tmp")
+  # ```
+  #
+  # spawn closes all non-standard unspecified descriptors by default. The
+  # "standard" descriptors are 0, 1 and 2. This behavior is specified by
+  # :close\_others option. :close\_others doesn't affect the standard
+  # descriptors which are closed only if :close is specified explicitly.
+  #
+  # ```ruby
+  # pid = spawn(command, :close_others=>true)  # close 3,4,5,... (default)
+  # pid = spawn(command, :close_others=>false) # don't close 3,4,5,...
+  # ```
+  #
+  # :close\_others is false by default for spawn and
+  # [`IO.popen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-popen).
+  #
+  # Note that fds which close-on-exec flag is already set are closed regardless
+  # of :close\_others option.
+  #
+  # So [`IO.pipe`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-pipe)
+  # and spawn can be used as
+  # [`IO.popen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-popen).
+  #
+  # ```ruby
+  # # similar to r = IO.popen(command)
+  # r, w = IO.pipe
+  # pid = spawn(command, :out=>w)   # r, w is closed in the child process.
+  # w.close
+  # ```
+  #
+  # :close is specified as a hash value to close a fd individually.
+  #
+  # ```ruby
+  # f = open(foo)
+  # system(command, f=>:close)        # don't inherit f.
+  # ```
+  #
+  # If a file descriptor need to be inherited, io=>io can be used.
+  #
+  # ```ruby
+  # # valgrind has --log-fd option for log destination.
+  # # log_w=>log_w indicates log_w.fileno inherits to child process.
+  # log_r, log_w = IO.pipe
+  # pid = spawn("valgrind", "--log-fd=#{log_w.fileno}", "echo", "a", log_w=>log_w)
+  # log_w.close
+  # p log_r.read
+  # ```
+  #
+  # It is also possible to exchange file descriptors.
+  #
+  # ```ruby
+  # pid = spawn(command, :out=>:err, :err=>:out)
+  # ```
+  #
+  # The hash keys specify file descriptors in the child process. The hash values
+  # specifies file descriptors in the parent process. So the above specifies
+  # exchanging stdout and stderr. Internally, `spawn` uses an extra file
+  # descriptor to resolve such cyclic file descriptor mapping.
+  #
+  # See
+  # [`Kernel.exec`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-exec)
+  # for the standard shell.
   sig do
     params(
       args: T.any(
@@ -952,7 +1298,7 @@ module Process
   end
   def self.spawn(*args); end
 
-  # Returns a `Tms` structure (see `Process::Tms`) that contains user and system
+  # Returns a `Tms` structure (see Process::Tms) that contains user and system
   # CPU times for this process, and also for children processes.
   #
   # ```ruby
@@ -980,8 +1326,10 @@ module Process
   def self.uid=(user); end
 
   # Waits for a child process to exit, returns its process id, and sets `$?` to
-  # a `Process::Status` object containing information on that process. Which
-  # child it waits on depends on the value of *pid*:
+  # a
+  # [`Process::Status`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html)
+  # object containing information on that process. Which child it waits on
+  # depends on the value of *pid*:
   #
   # > 0
   # :   Waits for the child whose process ID equals *pid*.
@@ -999,13 +1347,15 @@ module Process
   #
   #
   # The *flags* argument may be a logical or of the flag values
-  # `Process::WNOHANG` (do not block if no child available) or
-  # `Process::WUNTRACED` (return stopped children that haven't been reported).
-  # Not all flags are available on all platforms, but a flag value of zero will
-  # work on all platforms.
+  # [`Process::WNOHANG`](https://docs.ruby-lang.org/en/2.7.0/Process.html#WNOHANG)
+  # (do not block if no child available) or
+  # [`Process::WUNTRACED`](https://docs.ruby-lang.org/en/2.7.0/Process.html#WUNTRACED)
+  # (return stopped children that haven't been reported). Not all flags are
+  # available on all platforms, but a flag value of zero will work on all
+  # platforms.
   #
   # Calling this method raises a
-  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
   # if there are no child processes. Not available on all platforms.
   #
   # ```ruby
@@ -1031,10 +1381,12 @@ module Process
   def self.wait(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
   # Waits for a child process to exit (see
-  # [`Process::waitpid`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-waitpid)
+  # [`Process::waitpid`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-waitpid)
   # for exact semantics) and returns an array containing the process id and the
-  # exit status (a `Process::Status` object) of that child. Raises a
-  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # exit status (a
+  # [`Process::Status`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html)
+  # object) of that child. Raises a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
   # if there are no child processes.
   #
   # ```ruby
@@ -1053,7 +1405,9 @@ module Process
   def self.wait2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
   # Waits for all children, returning an array of *pid*/*status* pairs (where
-  # *status* is a `Process::Status` object).
+  # *status* is a
+  # [`Process::Status`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html)
+  # object).
   #
   # ```ruby
   # fork { sleep 0.2; exit 2 }   #=> 27432
@@ -1073,8 +1427,10 @@ module Process
   def self.waitall(); end
 
   # Waits for a child process to exit, returns its process id, and sets `$?` to
-  # a `Process::Status` object containing information on that process. Which
-  # child it waits on depends on the value of *pid*:
+  # a
+  # [`Process::Status`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html)
+  # object containing information on that process. Which child it waits on
+  # depends on the value of *pid*:
   #
   # > 0
   # :   Waits for the child whose process ID equals *pid*.
@@ -1092,13 +1448,15 @@ module Process
   #
   #
   # The *flags* argument may be a logical or of the flag values
-  # `Process::WNOHANG` (do not block if no child available) or
-  # `Process::WUNTRACED` (return stopped children that haven't been reported).
-  # Not all flags are available on all platforms, but a flag value of zero will
-  # work on all platforms.
+  # [`Process::WNOHANG`](https://docs.ruby-lang.org/en/2.7.0/Process.html#WNOHANG)
+  # (do not block if no child available) or
+  # [`Process::WUNTRACED`](https://docs.ruby-lang.org/en/2.7.0/Process.html#WUNTRACED)
+  # (return stopped children that haven't been reported). Not all flags are
+  # available on all platforms, but a flag value of zero will work on all
+  # platforms.
   #
   # Calling this method raises a
-  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
   # if there are no child processes. Not available on all platforms.
   #
   # ```ruby
@@ -1124,10 +1482,12 @@ module Process
   def self.waitpid(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
   # Waits for a child process to exit (see
-  # [`Process::waitpid`](https://docs.ruby-lang.org/en/2.6.0/Process.html#method-c-waitpid)
+  # [`Process::waitpid`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-waitpid)
   # for exact semantics) and returns an array containing the process id and the
-  # exit status (a `Process::Status` object) of that child. Raises a
-  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # exit status (a
+  # [`Process::Status`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html)
+  # object) of that child. Raises a
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
   # if there are no child processes.
   #
   # ```ruby
@@ -1146,9 +1506,10 @@ module Process
   def self.waitpid2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 end
 
-# The `Process::GID` module contains a collection of module functions which can
-# be used to portably get, set, and switch the current process's real,
-# effective, and saved group IDs.
+# The [`Process::GID`](https://docs.ruby-lang.org/en/2.7.0/Process/GID.html)
+# module contains a collection of module functions which can be used to portably
+# get, set, and switch the current process's real, effective, and saved group
+# IDs.
 module Process::GID
   # Change the current process's real and effective group ID to that specified
   # by *group*. Returns the new group ID. Not available on all platforms.
@@ -1190,7 +1551,7 @@ module Process::GID
   end
   def self.from_name(name); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the effective group
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the effective group
   # ID, and if possible, the saved group ID of the process to the given *group*.
   # Returns the new effective group ID. Not available on all platforms.
   #
@@ -1257,9 +1618,11 @@ module Process::GID
   def self.eid=(group); end
 end
 
-# `Process::Status` encapsulates the information on the status of a running or
-# terminated system process. The built-in variable `$?` is either `nil` or a
-# `Process::Status` object.
+# [`Process::Status`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html)
+# encapsulates the information on the status of a running or terminated system
+# process. The built-in variable `$?` is either `nil` or a
+# [`Process::Status`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html)
+# object.
 #
 # ```ruby
 # fork { exit 99 }   #=> 26557
@@ -1277,9 +1640,10 @@ end
 # bits possibly contain additional information (for example the program's return
 # code in the case of exited processes). Pre Ruby 1.8, these bits were exposed
 # directly to the Ruby program. Ruby now encapsulates these in a
-# `Process::Status` object. To maximize compatibility, however, these objects
-# retain a bit-oriented interface. In the descriptions that follow, when we talk
-# about the integer value of *stat*, we're referring to this 16 bit value.
+# [`Process::Status`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html)
+# object. To maximize compatibility, however, these objects retain a
+# bit-oriented interface. In the descriptions that follow, when we talk about
+# the integer value of *stat*, we're referring to this 16 bit value.
 class Process::Status < Object
   # Logical AND of the bits in *stat* with *num*.
   #
@@ -1333,7 +1697,9 @@ class Process::Status < Object
   def exited?(); end
 
   # Returns the least significant eight bits of the return code of *stat*. Only
-  # available if `exited?` is `true`.
+  # available if
+  # [`exited?`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html#method-i-exited-3F)
+  # is `true`.
   #
   # ```ruby
   # fork { }           #=> 26572
@@ -1373,7 +1739,7 @@ class Process::Status < Object
   def signaled?(); end
 
   # Returns `true` if this process is stopped. This is only returned if the
-  # corresponding `wait` call had the `WUNTRACED` flag set.
+  # corresponding wait call had the Process::WUNTRACED flag set.
   sig {returns(T::Boolean)}
   def stopped?(); end
 
@@ -1383,7 +1749,8 @@ class Process::Status < Object
   def stopsig(); end
 
   # Returns `true` if *stat* is successful, `false` if not. Returns `nil` if
-  # `exited?` is not `true`.
+  # [`exited?`](https://docs.ruby-lang.org/en/2.7.0/Process/Status.html#method-i-exited-3F)
+  # is not `true`.
   sig {returns(T::Boolean)}
   def success?(); end
 
@@ -1392,8 +1759,9 @@ class Process::Status < Object
   sig {returns(T.nilable(Integer))}
   def termsig(); end
 
-  # Returns the bits in *stat* as a `Integer`. Poking around in these bits is
-  # platform dependent.
+  # Returns the bits in *stat* as a
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html). Poking around
+  # in these bits is platform dependent.
   #
   # ```ruby
   # fork { exit 0xab }         #=> 26566
@@ -1413,10 +1781,14 @@ class Process::Status < Object
   def to_s(); end
 end
 
-# The `Process::Sys` module contains UID and GID functions which provide direct
-# bindings to the system calls of the same names instead of the more-portable
-# versions of the same functionality found in the `Process`, `Process::UID`, and
-# `Process::GID` modules.
+# The [`Process::Sys`](https://docs.ruby-lang.org/en/2.7.0/Process/Sys.html)
+# module contains UID and GID functions which provide direct bindings to the
+# system calls of the same names instead of the more-portable versions of the
+# same functionality found in the
+# [`Process`](https://docs.ruby-lang.org/en/2.7.0/Process.html),
+# [`Process::UID`](https://docs.ruby-lang.org/en/2.7.0/Process/UID.html), and
+# [`Process::GID`](https://docs.ruby-lang.org/en/2.7.0/Process/GID.html)
+# modules.
 module Process::Sys
   # Returns the effective group ID for this process. Not available on all
   # platforms.
@@ -1457,7 +1829,7 @@ module Process::Sys
   sig {returns(T::Boolean)}
   def self.issetugid(); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the effective group ID
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the effective group ID
   # of the calling process to *group*. Not available on all platforms.
   sig do
     params(
@@ -1467,7 +1839,7 @@ module Process::Sys
   end
   def self.setegid(group); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the effective user ID
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the effective user ID
   # of the calling process to *user*. Not available on all platforms.
   sig do
     params(
@@ -1477,7 +1849,7 @@ module Process::Sys
   end
   def self.seteuid(user); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the group ID of the
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the group ID of the
   # current process to *group*. Not available on all platforms.
   sig do
     params(
@@ -1537,7 +1909,7 @@ module Process::Sys
   end
   def self.setreuid(rid, eid); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the real group ID of
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the real group ID of
   # the calling process to *group*. Not available on all platforms.
   sig do
     params(
@@ -1547,7 +1919,7 @@ module Process::Sys
   end
   def self.setrgid(group); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the real user ID of
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the real user ID of
   # the calling process to *user*. Not available on all platforms.
   sig do
     params(
@@ -1557,7 +1929,7 @@ module Process::Sys
   end
   def self.setruid(user); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the user ID of the
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the user ID of the
   # current process to *user*. Not available on all platforms.
   sig do
     params(
@@ -1568,9 +1940,10 @@ module Process::Sys
   def self.setuid(user); end
 end
 
-# The `Process::UID` module contains a collection of module functions which can
-# be used to portably get, set, and switch the current process's real,
-# effective, and saved user IDs.
+# The [`Process::UID`](https://docs.ruby-lang.org/en/2.7.0/Process/UID.html)
+# module contains a collection of module functions which can be used to portably
+# get, set, and switch the current process's real, effective, and saved user
+# IDs.
 module Process::UID
   # Change the current process's real and effective user ID to that specified by
   # *user*. Returns the new user ID. Not available on all platforms.
@@ -1611,7 +1984,7 @@ module Process::UID
   end
   def self.from_name(name); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the effective user ID,
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the effective user ID,
   # and if possible, the saved user ID of the process to the given *user*.
   # Returns the new effective user ID. Not available on all platforms.
   #

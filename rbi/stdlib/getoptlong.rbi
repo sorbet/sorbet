@@ -1,12 +1,12 @@
 # typed: __STDLIB_INTERNAL
 
-# The [`GetoptLong`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html) class
+# The [`GetoptLong`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html) class
 # allows you to parse command line options similarly to the GNU getopt\_long() C
 # library call. Note, however, that
-# [`GetoptLong`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html) is a pure
+# [`GetoptLong`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html) is a pure
 # Ruby implementation.
 #
-# [`GetoptLong`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html) allows for
+# [`GetoptLong`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html) allows for
 # POSIX-style options like `--file` as well as single letter options like `-f`
 #
 # The empty option `--` (two minus symbols) is used to end option processing.
@@ -98,16 +98,16 @@ class GetoptLong
   #
   # The option name is always converted to the first (preferred) name given in
   # the original options to
-  # [`GetoptLong.new`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html#method-c-new).
+  # [`GetoptLong.new`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html#method-c-new).
   #
   # Also aliased as:
-  # [`each_option`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html#method-i-each_option)
+  # [`each_option`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html#method-i-each_option)
   def each; end
 
   # 'each\_option' is an alias of 'each'.
   #
   # Alias for:
-  # [`each`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html#method-i-each)
+  # [`each`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html#method-i-each)
   def each_option; end
 
   # Examine whether an option processing is failed.
@@ -121,37 +121,37 @@ class GetoptLong
   def error_message; end
 
   # Get next option name and its argument, as an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of two elements.
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of two elements.
   #
   # The option name is always converted to the first (preferred) name given in
   # the original options to
-  # [`GetoptLong.new`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html#method-c-new).
+  # [`GetoptLong.new`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html#method-c-new).
   #
   # Example: ['--option', 'value']
   #
   # Returns nil if the processing is complete (as determined by
-  # [`STATUS_TERMINATED`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html#STATUS_TERMINATED)).
+  # [`STATUS_TERMINATED`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html#STATUS_TERMINATED)).
   #
   # Also aliased as:
-  # [`get_option`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html#method-i-get_option)
+  # [`get_option`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html#method-i-get_option)
   def get; end
 
   # 'get\_option' is an alias of 'get'.
   #
   # Alias for:
-  # [`get`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html#method-i-get)
+  # [`get`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html#method-i-get)
   def get_option; end
 
   # Return ordering.
   def ordering; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the handling of the
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the handling of the
   # ordering of options and arguments. A
-  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html) is
+  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html) is
   # raised if option processing has already started.
   #
   # The supplied value must be a member of
-  # [`GetoptLong::ORDERINGS`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html#ORDERINGS).
+  # [`GetoptLong::ORDERINGS`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html#ORDERINGS).
   # It alters the processing of options as follows:
   #
   # **REQUIRE\_ORDER** :
@@ -206,12 +206,12 @@ class GetoptLong
   # Set/Unset 'quiet' mode.
   def quiet?; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) options. Takes the
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) options. Takes the
   # same argument as
-  # [`GetoptLong.new`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong.html#method-c-new).
+  # [`GetoptLong.new`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong.html#method-c-new).
   #
   # Raises a
-  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html) if
+  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html) if
   # option processing has already started.
   def set_options(*arguments); end
 
@@ -223,14 +223,14 @@ class GetoptLong
 
   protected
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) an error (a protected
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) an error (a protected
   # method).
   def set_error(type, message); end
 end
 
 class GetoptLong::AmbiguousOption < ::GetoptLong::Error; end
 
-# [`Error`](https://docs.ruby-lang.org/en/2.6.0/GetoptLong/Error.html) types.
+# [`Error`](https://docs.ruby-lang.org/en/2.7.0/GetoptLong/Error.html) types.
 class GetoptLong::Error < ::StandardError; end
 
 class GetoptLong::InvalidOption < ::GetoptLong::Error; end

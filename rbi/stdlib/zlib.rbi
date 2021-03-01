@@ -1,7 +1,7 @@
 # typed: __STDLIB_INTERNAL
 
 # This module provides access to the [zlib library](http://zlib.net).
-# [`Zlib`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html) is designed to be a
+# [`Zlib`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html) is designed to be a
 # portable, free, general-purpose, legally unencumbered -- that is, not covered
 # by any patents -- lossless data-compression library for use on virtually any
 # computer hardware and operating system.
@@ -14,7 +14,7 @@
 #
 # The library also supports reading and writing files in gzip (.gz) format with
 # an interface similar to that of
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html). The gzip format is
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html). The gzip format is
 # described in RFC 1952 which is also a wrapper around a deflate stream.
 #
 # The zlib format was designed to be compact and fast for use in memory and on
@@ -47,30 +47,30 @@
 # #=> Uncompressed data is: The Project Gutenberg EBook of Don Quixote...
 # ```
 #
-# ## [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) tree
+# ## [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) tree
 #
-# *   [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html)
-# *   [`Zlib::Inflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Inflate.html)
-# *   [`Zlib::ZStream`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html)
-# *   [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html)
-#     *   [`Zlib::StreamEnd`](https://docs.ruby-lang.org/en/2.6.0/Zlib/StreamEnd.html)
-#     *   [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.6.0/Zlib/NeedDict.html)
-#     *   [`Zlib::DataError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/DataError.html)
-#     *   [`Zlib::StreamError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/StreamError.html)
-#     *   [`Zlib::MemError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/MemError.html)
-#     *   [`Zlib::BufError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/BufError.html)
-#     *   [`Zlib::VersionError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/VersionError.html)
+# *   [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html)
+# *   [`Zlib::Inflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Inflate.html)
+# *   [`Zlib::ZStream`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html)
+# *   [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html)
+#     *   [`Zlib::StreamEnd`](https://docs.ruby-lang.org/en/2.7.0/Zlib/StreamEnd.html)
+#     *   [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.7.0/Zlib/NeedDict.html)
+#     *   [`Zlib::DataError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/DataError.html)
+#     *   [`Zlib::StreamError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/StreamError.html)
+#     *   [`Zlib::MemError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/MemError.html)
+#     *   [`Zlib::BufError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/BufError.html)
+#     *   [`Zlib::VersionError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/VersionError.html)
 #
 #
 #
 # (if you have GZIP\_SUPPORT)
-# *   [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
-# *   [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html)
-# *   [`Zlib::GzipFile`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html)
-# *   [`Zlib::GzipFile::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile/Error.html)
-#     *   [`Zlib::GzipFile::LengthError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile/LengthError.html)
-#     *   [`Zlib::GzipFile::CRCError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile/CRCError.html)
-#     *   [`Zlib::GzipFile::NoFooter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile/NoFooter.html)
+# *   [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
+# *   [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
+# *   [`Zlib::GzipFile`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html)
+# *   [`Zlib::GzipFile::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile/Error.html)
+#     *   [`Zlib::GzipFile::LengthError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile/LengthError.html)
+#     *   [`Zlib::GzipFile::CRCError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile/CRCError.html)
+#     *   [`Zlib::GzipFile::NoFooter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile/NoFooter.html)
 module Zlib
   # Represents text data as guessed by deflate.
   #
@@ -78,7 +78,7 @@ module Zlib
   # zlib 1.2.2.  New applications should not use this constant.
   #
   # See
-  # [`Zlib::Deflate#data_type`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-data_type).
+  # [`Zlib::Deflate#data_type`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-data_type).
   ASCII = T.let(T.unsafe(nil), Integer)
 
   # Slowest compression level, but with the best space savings.
@@ -90,7 +90,7 @@ module Zlib
   # Represents binary data as guessed by deflate.
   #
   # See
-  # [`Zlib::Deflate#data_type`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-data_type).
+  # [`Zlib::Deflate#data_type`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-data_type).
   BINARY = T.let(T.unsafe(nil), Integer)
 
   # Default compression level which is a good trade-off between space and time
@@ -103,12 +103,12 @@ module Zlib
   DEF_MEM_LEVEL = T.let(T.unsafe(nil), Integer)
 
   # Deflate strategy for data produced by a filter (or predictor). The effect of
-  # [`FILTERED`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#FILTERED) is to
+  # [`FILTERED`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#FILTERED) is to
   # force more Huffman codes and less string matching; it is somewhat
   # intermediate between
-  # [`DEFAULT_STRATEGY`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#DEFAULT_STRATEGY)
+  # [`DEFAULT_STRATEGY`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#DEFAULT_STRATEGY)
   # and
-  # [`HUFFMAN_ONLY`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#HUFFMAN_ONLY).
+  # [`HUFFMAN_ONLY`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#HUFFMAN_ONLY).
   # Filtered data consists mostly of small values with a somewhat random
   # distribution.
   FILTERED = T.let(T.unsafe(nil), Integer)
@@ -121,13 +121,13 @@ module Zlib
   FIXED = T.let(T.unsafe(nil), Integer)
 
   # Flushes all output as with
-  # [`SYNC_FLUSH`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#SYNC_FLUSH),
+  # [`SYNC_FLUSH`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#SYNC_FLUSH),
   # and the compression state is reset so that decompression can restart from
   # this point if previous compressed data has been damaged or if random access
   # is desired. Like
-  # [`SYNC_FLUSH`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#SYNC_FLUSH),
+  # [`SYNC_FLUSH`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#SYNC_FLUSH),
   # using
-  # [`FULL_FLUSH`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#FULL_FLUSH) too
+  # [`FULL_FLUSH`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#FULL_FLUSH) too
   # often can seriously degrade compression.
   FULL_FLUSH = T.let(T.unsafe(nil), Integer)
 
@@ -139,7 +139,7 @@ module Zlib
 
   # The maximum size of the zlib history buffer. Note that zlib allows larger
   # values to enable different inflate modes. See
-  # [`Zlib::Inflate.new`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Inflate.html#method-c-new)
+  # [`Zlib::Inflate.new`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Inflate.html#method-c-new)
   # for details.
   MAX_WBITS = T.let(T.unsafe(nil), Integer)
 
@@ -147,7 +147,7 @@ module Zlib
   # pre-compressed data to a deflate stream.
   NO_COMPRESSION = T.let(T.unsafe(nil), Integer)
 
-  # [`NO_FLUSH`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#NO_FLUSH) is the
+  # [`NO_FLUSH`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#NO_FLUSH) is the
   # default flush method and allows deflate to decide how much data to
   # accumulate before producing output in order to maximize compression.
   NO_FLUSH = T.let(T.unsafe(nil), Integer)
@@ -201,11 +201,11 @@ module Zlib
   OS_ZSYSTEM = T.let(T.unsafe(nil), Integer)
 
   # Deflate compression strategy designed to be almost as fast as
-  # [`HUFFMAN_ONLY`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#HUFFMAN_ONLY),
+  # [`HUFFMAN_ONLY`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#HUFFMAN_ONLY),
   # but give better compression for PNG image data.
   RLE = T.let(T.unsafe(nil), Integer)
 
-  # The [`SYNC_FLUSH`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#SYNC_FLUSH)
+  # The [`SYNC_FLUSH`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#SYNC_FLUSH)
   # method flushes all pending output to the output buffer and the output is
   # aligned on a byte boundary. Flushing may degrade compression so it should be
   # used only when necessary, such as at a request or response boundary for a
@@ -215,13 +215,13 @@ module Zlib
   # Represents text data as guessed by deflate.
   #
   # See
-  # [`Zlib::Deflate#data_type`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-data_type).
+  # [`Zlib::Deflate#data_type`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-data_type).
   TEXT = T.let(T.unsafe(nil), Integer)
 
   # Represents an unknown data type as guessed by deflate.
   #
   # See
-  # [`Zlib::Deflate#data_type`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-data_type).
+  # [`Zlib::Deflate#data_type`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-data_type).
   UNKNOWN = T.let(T.unsafe(nil), Integer)
 
   # The Ruby/zlib version string.
@@ -266,10 +266,10 @@ module Zlib
   def self.crc_table; end
 
   # Compresses the given `string`. Valid values of level are
-  # [`Zlib::NO_COMPRESSION`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#NO_COMPRESSION),
-  # [`Zlib::BEST_SPEED`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#BEST_SPEED),
-  # [`Zlib::BEST_COMPRESSION`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#BEST_COMPRESSION),
-  # [`Zlib::DEFAULT_COMPRESSION`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#DEFAULT_COMPRESSION),
+  # [`Zlib::NO_COMPRESSION`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#NO_COMPRESSION),
+  # [`Zlib::BEST_SPEED`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#BEST_SPEED),
+  # [`Zlib::BEST_COMPRESSION`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#BEST_COMPRESSION),
+  # [`Zlib::DEFAULT_COMPRESSION`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#DEFAULT_COMPRESSION),
   # or an integer from 0 to 9.
   #
   # This method is almost equivalent to the following code:
@@ -284,7 +284,7 @@ module Zlib
   # ```
   #
   # See also
-  # [`Zlib.inflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#method-c-inflate)
+  # [`Zlib.inflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#method-c-inflate)
   def self.deflate(*_); end
 
   # Decode the given gzipped `string`.
@@ -302,14 +302,14 @@ module Zlib
   # ```
   #
   # See also
-  # [`Zlib.gzip`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#method-c-gzip)
+  # [`Zlib.gzip`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#method-c-gzip)
   def self.gunzip(_); end
 
   # Gzip the given `string`. Valid values of level are
-  # [`Zlib::NO_COMPRESSION`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#NO_COMPRESSION),
-  # [`Zlib::BEST_SPEED`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#BEST_SPEED),
-  # [`Zlib::BEST_COMPRESSION`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#BEST_COMPRESSION),
-  # [`Zlib::DEFAULT_COMPRESSION`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#DEFAULT_COMPRESSION)
+  # [`Zlib::NO_COMPRESSION`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#NO_COMPRESSION),
+  # [`Zlib::BEST_SPEED`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#BEST_SPEED),
+  # [`Zlib::BEST_COMPRESSION`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#BEST_COMPRESSION),
+  # [`Zlib::DEFAULT_COMPRESSION`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#DEFAULT_COMPRESSION)
   # (default), or an integer from 0 to 9.
   #
   # This method is almost equivalent to the following code:
@@ -326,11 +326,11 @@ module Zlib
   # ```
   #
   # See also
-  # [`Zlib.gunzip`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#method-c-gunzip)
+  # [`Zlib.gunzip`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#method-c-gunzip)
   def self.gzip(*_); end
 
   # Decompresses `string`. Raises a
-  # [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.6.0/Zlib/NeedDict.html)
+  # [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.7.0/Zlib/NeedDict.html)
   # exception if a preset dictionary is needed for decompression.
   #
   # This method is almost equivalent to the following code:
@@ -346,7 +346,7 @@ module Zlib
   # ```
   #
   # See also
-  # [`Zlib.deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#method-c-deflate)
+  # [`Zlib.deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#method-c-deflate)
   def self.inflate(_); end
 
   # Returns the string which represents the version of zlib library.
@@ -354,22 +354,22 @@ module Zlib
 end
 
 # Subclass of
-# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html) when zlib
+# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html) when zlib
 # returns a Z\_BUF\_ERROR.
 #
 # Usually if no progress is possible.
 class Zlib::BufError < ::Zlib::Error; end
 
 # Subclass of
-# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html) when zlib
+# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html) when zlib
 # returns a Z\_DATA\_ERROR.
 #
 # Usually if a stream was prematurely freed.
 class Zlib::DataError < ::Zlib::Error; end
 
-# [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html) is
+# [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html) is
 # the class for compressing data. See
-# [`Zlib::ZStream`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html) for
+# [`Zlib::ZStream`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html) for
 # more information.
 class Zlib::Deflate < ::Zlib::ZStream
   # Creates a new deflate stream for compression. If a given argument is nil,
@@ -453,9 +453,9 @@ class Zlib::Deflate < ::Zlib::ZStream
   def self.new(*_); end
 
   # Inputs `string` into the deflate stream just like
-  # [`Zlib::Deflate#deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html#method-i-deflate),
+  # [`Zlib::Deflate#deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html#method-i-deflate),
   # but returns the
-  # [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html)
+  # [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html)
   # object itself. The output from the stream is preserved in output buffer.
   def <<(_); end
 
@@ -463,7 +463,7 @@ class Zlib::Deflate < ::Zlib::ZStream
   # stream. On calling this method, both the input and the output buffers of the
   # stream are flushed. If `string` is nil, this method finishes the stream,
   # just like
-  # [`Zlib::ZStream#finish`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-finish).
+  # [`Zlib::ZStream#finish`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-finish).
   #
   # If a block is given consecutive deflated chunks from the `string` are
   # yielded to the block and `nil` is returned.
@@ -490,7 +490,7 @@ class Zlib::Deflate < ::Zlib::ZStream
   # flushed.
   #
   # See
-  # [`Zlib::Deflate#deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html#method-i-deflate)
+  # [`Zlib::Deflate#deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html#method-i-deflate)
   # for detail on the `flush` constants NO\_FLUSH, SYNC\_FLUSH, FULL\_FLUSH and
   # FINISH.
   def flush(*_); end
@@ -500,15 +500,15 @@ class Zlib::Deflate < ::Zlib::ZStream
   # unprocessed data is flushed before changing the params.
   #
   # See
-  # [`Zlib::Deflate.new`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html#method-c-new)
+  # [`Zlib::Deflate.new`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html#method-c-new)
   # for a description of `level` and `strategy`.
   def params(_, _); end
 
   # Sets the preset dictionary and returns `string`. This method is available
   # just only after
-  # [`Zlib::Deflate.new`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html#method-c-new)
+  # [`Zlib::Deflate.new`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html#method-c-new)
   # or
-  # [`Zlib::ZStream#reset`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-reset)
+  # [`Zlib::ZStream#reset`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-reset)
   # method was called. See zlib.h for details.
   #
   # Can raise errors of Z\_STREAM\_ERROR if a parameter is invalid (such as NULL
@@ -532,79 +532,85 @@ class Zlib::Deflate < ::Zlib::ZStream
   # ```
   #
   # See also
-  # [`Zlib.inflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#method-c-inflate)
+  # [`Zlib.inflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#method-c-inflate)
   def self.deflate(*_); end
 end
 
 # The superclass for all exceptions raised by Ruby/zlib.
 #
 # The following exceptions are defined as subclasses of
-# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html). These
+# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html). These
 # exceptions are raised when zlib library functions return with an error status.
 #
-# *   [`Zlib::StreamEnd`](https://docs.ruby-lang.org/en/2.6.0/Zlib/StreamEnd.html)
-# *   [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.6.0/Zlib/NeedDict.html)
-# *   [`Zlib::DataError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/DataError.html)
-# *   [`Zlib::StreamError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/StreamError.html)
-# *   [`Zlib::MemError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/MemError.html)
-# *   [`Zlib::BufError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/BufError.html)
-# *   [`Zlib::VersionError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/VersionError.html)
+# *   [`Zlib::StreamEnd`](https://docs.ruby-lang.org/en/2.7.0/Zlib/StreamEnd.html)
+# *   [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.7.0/Zlib/NeedDict.html)
+# *   [`Zlib::DataError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/DataError.html)
+# *   [`Zlib::StreamError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/StreamError.html)
+# *   [`Zlib::MemError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/MemError.html)
+# *   [`Zlib::BufError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/BufError.html)
+# *   [`Zlib::VersionError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/VersionError.html)
 class Zlib::Error < ::StandardError; end
 
-# [`Zlib::GzipFile`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html) is
+# [`Zlib::GzipFile`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html) is
 # an abstract class for handling a gzip formatted compressed file. The
 # operations are defined in the subclasses,
-# [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+# [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
 # for reading, and
-# [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html)
+# [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
 # for writing.
 #
 # GzipReader should be used by associating an
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html), or IO-like, object.
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html), or IO-like, object.
 #
-# ## [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) Catalogue
+# ## [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) Catalogue
 #
-# *   [`::wrap`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-c-wrap)
-# *   [`::open`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-c-open)
-#     (Zlib::GzipReader::open and
-#     [`Zlib::GzipWriter::open`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html#method-c-open))
-# *   [`close`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-close)
-# *   [`closed?`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-closed-3F)
-# *   [`comment`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-comment)
-# *   comment= (Zlib::GzipWriter#comment=)
-# *   [`crc`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-crc)
-# *   eof? (Zlib::GzipReader#eof?)
-# *   [`finish`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-finish)
-# *   [`level`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-level)
-# *   lineno (Zlib::GzipReader#lineno)
-# *   lineno= (Zlib::GzipReader#lineno=)
-# *   [`mtime`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-mtime)
-# *   mtime= (Zlib::GzipWriter#mtime=)
-# *   [`orig_name`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-orig_name)
-# *   [`orig_name`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-orig_name)
-#     (Zlib::GzipWriter#orig\_name=)
-# *   [`os_code`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-os_code)
+# *   [`::wrap`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-c-wrap)
+# *   [`::open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-c-open)
+#     ([`Zlib::GzipReader::open`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-c-open)
+#     and
+#     [`Zlib::GzipWriter::open`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html#method-c-open))
+# *   [`close`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-close)
+# *   [`closed?`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-closed-3F)
+# *   [`comment`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-comment)
+# *   comment=
+#     ([`Zlib::GzipWriter#comment=`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html#method-i-comment-3D))
+# *   [`crc`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-crc)
+# *   eof?
+#     ([`Zlib::GzipReader#eof?`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-eof-3F))
+# *   [`finish`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-finish)
+# *   [`level`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-level)
+# *   lineno
+#     ([`Zlib::GzipReader#lineno`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-lineno))
+# *   lineno=
+#     ([`Zlib::GzipReader#lineno=`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-lineno-3D))
+# *   [`mtime`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-mtime)
+# *   mtime=
+#     ([`Zlib::GzipWriter#mtime=`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html#method-i-mtime-3D))
+# *   [`orig_name`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-orig_name)
+# *   [`orig_name`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-orig_name)
+#     ([`Zlib::GzipWriter#orig_name=`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html#method-i-orig_name-3D))
+# *   [`os_code`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-os_code)
 # *   path (when the underlying
-#     [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) supports path)
-# *   [`sync`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-sync)
-# *   [`sync=`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-sync-3D)
-# *   [`to_io`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-to_io)
+#     [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) supports path)
+# *   [`sync`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-sync)
+# *   [`sync=`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-sync-3D)
+# *   [`to_io`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-to_io)
 #
 #
 # (due to internal structure, documentation may appear under
-# [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+# [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
 # or
-# [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html))
+# [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html))
 class Zlib::GzipFile
   # Closes the
-  # [`GzipFile`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html) object.
+  # [`GzipFile`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html) object.
   # This method calls close method of the associated
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object. Returns the
-  # associated [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object.
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object. Returns the
+  # associated [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
   def close; end
 
   # Same as
-  # [`IO#closed?`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-closed-3F)
+  # [`IO#closed?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-closed-3F)
   def closed?; end
 
   # Returns comments recorded in the gzip file header, or nil if the comments is
@@ -615,12 +621,12 @@ class Zlib::GzipFile
   def crc; end
 
   # Closes the
-  # [`GzipFile`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html) object.
+  # [`GzipFile`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html) object.
   # Unlike
-  # [`Zlib::GzipFile#close`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-close),
+  # [`Zlib::GzipFile#close`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-close),
   # this method never calls the close method of the associated
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object. Returns the
-  # associated [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object.
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object. Returns the
+  # associated [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
   def finish; end
 
   # Returns compression level.
@@ -637,28 +643,28 @@ class Zlib::GzipFile
   def os_code; end
 
   # Same as
-  # [`IO#sync`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-sync)
+  # [`IO#sync`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-sync)
   def sync; end
 
-  # Same as [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html). If flag is
-  # `true`, the associated [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html). If flag is
+  # `true`, the associated [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object must respond to the `flush` method. While `sync` mode is `true`, the
   # compression ratio decreases sharply.
   def sync=(_); end
 
-  # Same as [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   def to_io; end
 
   # Creates a GzipReader or GzipWriter associated with `io`, passing in any
   # necessary extra options, and executes the block with the newly created
   # object just like
-  # [`File.open`](https://docs.ruby-lang.org/en/2.6.0/File.html#method-c-open).
+  # [`File.open`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-open).
   #
-  # The [`GzipFile`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html)
+  # The [`GzipFile`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html)
   # object will be closed automatically after executing the block. If you want
-  # to keep the associated [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # to keep the associated [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object open, you may call
-  # [`Zlib::GzipFile#finish`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-finish)
+  # [`Zlib::GzipFile#finish`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-finish)
   # method in the block.
   def self.wrap(*_); end
 end
@@ -672,9 +678,8 @@ class Zlib::GzipFile::Error < ::Zlib::Error
   # input gzipped string
   def input; end
 
-  # Constructs a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) of
-  # the [`GzipFile`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html)
-  # [`Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile/Error.html)
+  # Constructs a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) of
+  # the GzipFile [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html)
   def inspect; end
 end
 
@@ -685,10 +690,10 @@ class Zlib::GzipFile::LengthError < ::Zlib::GzipFile::Error; end
 # Raised when gzip file footer is not found.
 class Zlib::GzipFile::NoFooter < ::Zlib::GzipFile::Error; end
 
-# [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+# [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
 # is the class for reading a gzipped file.
-# [`GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
-# should be used as an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html), or
+# [`GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
+# should be used as an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html), or
 # -IO-like, object.
 #
 # ```ruby
@@ -703,46 +708,46 @@ class Zlib::GzipFile::NoFooter < ::Zlib::GzipFile::Error; end
 # end
 # ```
 #
-# ## [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) Catalogue
+# ## [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) Catalogue
 #
 # The following methods in
-# [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+# [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
 # are just like their counterparts in
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html), but they raise
-# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html) or
-# [`Zlib::GzipFile::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile/Error.html)
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html), but they raise
+# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html) or
+# [`Zlib::GzipFile::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile/Error.html)
 # exception if an error was found in the gzip file.
-# *   [`each`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-each)
-# *   [`each_line`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-each_line)
-# *   [`each_byte`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-each_byte)
-# *   [`gets`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-gets)
-# *   [`getc`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-getc)
-# *   [`lineno`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-lineno)
-# *   [`lineno=`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-lineno-3D)
-# *   [`read`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-read)
-# *   [`readchar`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-readchar)
-# *   [`readline`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-readline)
-# *   [`readlines`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-readlines)
-# *   [`ungetc`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-ungetc)
+# *   [`each`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-each)
+# *   [`each_line`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-each_line)
+# *   [`each_byte`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-each_byte)
+# *   [`gets`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-gets)
+# *   [`getc`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-getc)
+# *   [`lineno`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-lineno)
+# *   [`lineno=`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-lineno-3D)
+# *   [`read`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-read)
+# *   [`readchar`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-readchar)
+# *   [`readline`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-readline)
+# *   [`readlines`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-readlines)
+# *   [`ungetc`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-ungetc)
 #
 #
 # Be careful of the footer of the gzip file. A gzip file has the checksum of
 # pre-compressed data in its footer.
-# [`GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+# [`GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
 # checks all uncompressed data against that checksum at the following cases, and
 # if it fails, raises `Zlib::GzipFile::NoFooter`, `Zlib::GzipFile::CRCError`, or
 # `Zlib::GzipFile::LengthError` exception.
 #
 # *   When an reading request is received beyond the end of file (the end of
 #     compressed data). That is, when
-#     [`Zlib::GzipReader#read`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-read),
-#     [`Zlib::GzipReader#gets`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-gets),
+#     [`Zlib::GzipReader#read`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-read),
+#     [`Zlib::GzipReader#gets`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-gets),
 #     or some other methods for reading returns nil.
 # *   When
-#     [`Zlib::GzipFile#close`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-close)
+#     [`Zlib::GzipFile#close`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-close)
 #     method is called after the object reaches the end of file.
 # *   When
-#     [`Zlib::GzipReader#unused`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-i-unused)
+#     [`Zlib::GzipReader#unused`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-i-unused)
 #     method is called after the object reaches the end of file.
 #
 #
@@ -753,19 +758,19 @@ class Zlib::GzipReader < ::Zlib::GzipFile
   Elem = type_member(:out)
 
   # Creates a
-  # [`GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # object associated with `io`. The
-  # [`GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # object reads gzipped data from `io`, and parses/decompresses it. The `io`
   # must have a `read` method that behaves same as the
-  # [`IO#read`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-read).
+  # [`IO#read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-read).
   #
   # The `options` hash may be used to set the encoding of the data.
   # `:external_encoding`, `:internal_encoding` and `:encoding` may be set as in
-  # [`IO::new`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-new).
+  # [`IO::new`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-new).
   #
   # If the gzip file header is incorrect, raises an
-  # [`Zlib::GzipFile::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile/Error.html)
+  # [`Zlib::GzipFile::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile/Error.html)
   # exception.
   def self.new(*_); end
 
@@ -773,22 +778,22 @@ class Zlib::GzipReader < ::Zlib::GzipFile
   def bytes; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def each(*_); end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def each_byte; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def each_char; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def each_line(*_); end
 
@@ -799,22 +804,22 @@ class Zlib::GzipReader < ::Zlib::GzipFile
   def eof?; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def external_encoding; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def getbyte; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def getc; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def gets(*_); end
 
@@ -831,40 +836,40 @@ class Zlib::GzipReader < ::Zlib::GzipFile
   def pos; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def read(*_); end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def readbyte; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def readchar; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def readline(*_); end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def readlines(*_); end
 
   # Reads at most *maxlen* bytes from the gziped stream but it blocks only if
   # *gzipreader* has no data immediately available. If the optional *outbuf*
   # argument is present, it must reference a
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), which will
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), which will
   # receive the data. It raises `EOFError` on end of file.
   def readpartial(*_); end
 
   # Resets the position of the file pointer to the point created the
-  # [`GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
-  # object. The associated [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # [`GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
+  # object. The associated [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object needs to respond to the `seek` method.
   def rewind; end
 
@@ -872,12 +877,12 @@ class Zlib::GzipReader < ::Zlib::GzipFile
   def tell; end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def ungetbyte(_); end
 
   # See
-  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`Zlib::GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # documentation for a description.
   def ungetc(_); end
 
@@ -886,18 +891,18 @@ class Zlib::GzipReader < ::Zlib::GzipFile
   def unused; end
 
   # Opens a file specified by `filename` as a gzipped file, and returns a
-  # [`GzipReader`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html)
+  # [`GzipReader`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html)
   # object associated with that file. Further details of this method are in
-  # [`Zlib::GzipReader.new`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipReader.html#method-c-new)
+  # [`Zlib::GzipReader.new`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-c-new)
   # and ZLib::GzipFile.wrap.
   def self.open(*_); end
 end
 
-# [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html)
+# [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
 # is a class for writing gzipped files.
-# [`GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html)
+# [`GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
 # should be used with an instance of
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html), or IO-like, object.
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html), or IO-like, object.
 #
 # Following two example generate the same result.
 #
@@ -925,44 +930,44 @@ end
 # ```
 #
 # NOTE: Due to the limitation of Ruby's finalizer, you must explicitly close
-# [`GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html)
+# [`GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
 # objects by
-# [`Zlib::GzipWriter#close`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-i-close)
+# [`Zlib::GzipWriter#close`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-close)
 # etc. Otherwise,
-# [`GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html) will
+# [`GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html) will
 # be not able to write the gzip footer and will generate a broken gzip file.
 class Zlib::GzipWriter < ::Zlib::GzipFile
   # Creates a
-  # [`GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html)
+  # [`GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
   # object associated with `io`. `level` and `strategy` should be the same as
   # the arguments of
-  # [`Zlib::Deflate.new`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html#method-c-new).
-  # The [`GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html)
+  # [`Zlib::Deflate.new`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html#method-c-new).
+  # The [`GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
   # object writes gzipped data to `io`. `io` must respond to the `write` method
   # that behaves the same as
-  # [`IO#write`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-write).
+  # [`IO#write`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-write).
   #
   # The `options` hash may be used to set the encoding of the data.
   # `:external_encoding`, `:internal_encoding` and `:encoding` may be set as in
-  # [`IO::new`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-new).
+  # [`IO::new`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-new).
   def self.new(*_); end
 
-  # Same as [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   def <<(_); end
 
   # Specify the comment (`str`) in the gzip header.
   def comment=(_); end
 
   # Flushes all the internal buffers of the
-  # [`GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html)
+  # [`GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
   # object. The meaning of `flush` is same as in
-  # [`Zlib::Deflate#deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html#method-i-deflate).
+  # [`Zlib::Deflate#deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html#method-i-deflate).
   # `Zlib::SYNC_FLUSH` is used if `flush` is omitted. It is no use giving flush
   # `Zlib::NO_FLUSH`.
   def flush(*_); end
 
   # Specify the modification time (`mtime`) in the gzip header. Using an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html).
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html).
   #
   # Setting the mtime in the gzip header does not effect the mtime of the file
   # generated. Different utilities that expand the gzipped files may use the
@@ -982,37 +987,37 @@ class Zlib::GzipWriter < ::Zlib::GzipFile
   # Total number of input bytes read so far.
   def pos; end
 
-  # Same as [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   def print(*_); end
 
-  # Same as [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   def printf(*_); end
 
-  # Same as [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   def putc(_); end
 
-  # Same as [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   def puts(*_); end
 
   # Total number of input bytes read so far.
   def tell; end
 
-  # Same as [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   def write(*_); end
 
   # Opens a file specified by `filename` for writing gzip compressed data, and
   # returns a
-  # [`GzipWriter`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html)
+  # [`GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
   # object associated with that file. Further details of this method are found
   # in
-  # [`Zlib::GzipWriter.new`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipWriter.html#method-c-new)
+  # [`Zlib::GzipWriter.new`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html#method-c-new)
   # and
-  # [`Zlib::GzipFile.wrap`](https://docs.ruby-lang.org/en/2.6.0/Zlib/GzipFile.html#method-c-wrap).
+  # [`Zlib::GzipFile.wrap`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-c-wrap).
   def self.open(*_); end
 end
 
 # Zlib:Inflate is the class for decompressing compressed data. Unlike
-# [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html), an
+# [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html), an
 # instance of this class is not able to duplicate (clone, dup) itself.
 class Zlib::Inflate < ::Zlib::ZStream
   # Creates a new inflate stream for decompression. `window_bits` sets the size
@@ -1030,7 +1035,7 @@ class Zlib::Inflate < ::Zlib::ZStream
   # Greater than 15
   # :   Add 32 to window\_bits to enable zlib and gzip decoding with automatic
   #     header detection, or add 16 to decode only the gzip format (a
-  #     [`Zlib::DataError`](https://docs.ruby-lang.org/en/2.6.0/Zlib/DataError.html)
+  #     [`Zlib::DataError`](https://docs.ruby-lang.org/en/2.7.0/Zlib/DataError.html)
   #     will be raised for a non-gzip stream).
   #
   # (-8..-15)
@@ -1058,7 +1063,7 @@ class Zlib::Inflate < ::Zlib::ZStream
   # ```
   def self.new(*_); end
 
-  # Same as [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # Same as [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   def <<(_); end
 
   # Provide the inflate stream with a dictionary that may be required in the
@@ -1071,16 +1076,16 @@ class Zlib::Inflate < ::Zlib::ZStream
   # the stream. Calling this method, both the input and the output buffer of the
   # stream are flushed. If string is `nil`, this method finishes the stream,
   # just like
-  # [`Zlib::ZStream#finish`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-finish).
+  # [`Zlib::ZStream#finish`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-finish).
   #
   # If a block is given consecutive inflated chunks from the `deflate_string`
   # are yielded to the block and `nil` is returned.
   #
   # Raises a
-  # [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.6.0/Zlib/NeedDict.html)
+  # [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.7.0/Zlib/NeedDict.html)
   # exception if a preset dictionary is needed to decompress.
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the dictionary by
-  # [`Zlib::Inflate#set_dictionary`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Inflate.html#method-i-set_dictionary)
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the dictionary by
+  # [`Zlib::Inflate#set_dictionary`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Inflate.html#method-i-set_dictionary)
   # and then call this method again with an empty string to flush the stream:
   #
   # ```ruby
@@ -1102,12 +1107,12 @@ class Zlib::Inflate < ::Zlib::ZStream
   # ```
   #
   # See also
-  # [`Zlib::Inflate.new`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Inflate.html#method-c-new)
+  # [`Zlib::Inflate.new`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Inflate.html#method-c-new)
   def inflate(_); end
 
   # Sets the preset dictionary and returns `string`. This method is available
   # just only after a
-  # [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.6.0/Zlib/NeedDict.html)
+  # [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.7.0/Zlib/NeedDict.html)
   # exception was raised. See zlib.h for details.
   def set_dictionary(_); end
 
@@ -1127,7 +1132,7 @@ class Zlib::Inflate < ::Zlib::ZStream
   def sync_point?; end
 
   # Decompresses `string`. Raises a
-  # [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.6.0/Zlib/NeedDict.html)
+  # [`Zlib::NeedDict`](https://docs.ruby-lang.org/en/2.7.0/Zlib/NeedDict.html)
   # exception if a preset dictionary is needed for decompression.
   #
   # This method is almost equivalent to the following code:
@@ -1143,74 +1148,74 @@ class Zlib::Inflate < ::Zlib::ZStream
   # ```
   #
   # See also
-  # [`Zlib.deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib.html#method-c-deflate)
+  # [`Zlib.deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib.html#method-c-deflate)
   def self.inflate(_); end
 end
 
 # Subclass of
-# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html)
+# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html)
 #
 # When zlib returns a Z\_MEM\_ERROR, usually if there was not enough memory.
 class Zlib::MemError < ::Zlib::Error; end
 
 # Subclass of
-# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html)
+# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html)
 #
 # When zlib returns a Z\_NEED\_DICT if a preset dictionary is needed at this
 # point.
 #
 # Used by
-# [`Zlib::Inflate.inflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Inflate.html#method-c-inflate)
+# [`Zlib::Inflate.inflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Inflate.html#method-c-inflate)
 # and `Zlib.inflate`
 class Zlib::NeedDict < ::Zlib::Error; end
 
 # Subclass of
-# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html)
+# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html)
 #
 # When zlib returns a Z\_STREAM\_END is return if the end of the compressed data
 # has been reached and all uncompressed out put has been produced.
 class Zlib::StreamEnd < ::Zlib::Error; end
 
 # Subclass of
-# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html)
+# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html)
 #
 # When zlib returns a Z\_STREAM\_ERROR, usually if the stream state was
 # inconsistent.
 class Zlib::StreamError < ::Zlib::Error; end
 
 # Subclass of
-# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html)
+# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html)
 #
 # When zlib returns a Z\_VERSION\_ERROR, usually if the zlib library version is
 # incompatible with the version assumed by the caller.
 class Zlib::VersionError < ::Zlib::Error; end
 
-# [`Zlib::ZStream`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html) is
+# [`Zlib::ZStream`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html) is
 # the abstract class for the stream which handles the compressed data. The
 # operations are defined in the subclasses:
-# [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html) for
+# [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html) for
 # compression, and
-# [`Zlib::Inflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Inflate.html) for
+# [`Zlib::Inflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Inflate.html) for
 # decompression.
 #
 # An instance of
-# [`Zlib::ZStream`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html) has
+# [`Zlib::ZStream`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html) has
 # one stream (struct zstream in the source) and two variable-length buffers
 # which associated to the input (next\_in) of the stream and the output
 # (next\_out) of the stream. In this document, "input buffer" means the buffer
 # for input, and "output buffer" means the buffer for output.
 #
-# [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html) input into an instance
-# of [`Zlib::ZStream`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html)
+# [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html) input into an instance
+# of [`Zlib::ZStream`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html)
 # are temporally stored into the end of input buffer, and then data in input
 # buffer are processed from the beginning of the buffer until no more output
 # from the stream is produced (i.e. until
-# [`avail_out`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-avail_out)
+# [`avail_out`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-avail_out)
 # > 0 after processing). During processing, output buffer is allocated and
 # expanded automatically to hold all output data.
 #
 # Some particular instance methods consume the data in output buffer and return
-# them as a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+# them as a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
 #
 # Here is an ascii art for describing above:
 #
@@ -1230,29 +1235,29 @@ class Zlib::VersionError < ::Zlib::Error; end
 #
 # If an error occurs during processing input buffer, an exception which is a
 # subclass of
-# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Error.html) is
+# [`Zlib::Error`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Error.html) is
 # raised. At that time, both input and output buffer keep their conditions at
 # the time when the error occurs.
 #
-# ## [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) Catalogue
+# ## [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) Catalogue
 #
 # Many of the methods in this class are fairly low-level and unlikely to be of
 # interest to users. In fact, users are unlikely to use this class directly;
 # rather they will be interested in
-# [`Zlib::Inflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Inflate.html) and
-# [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.6.0/Zlib/Deflate.html).
+# [`Zlib::Inflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Inflate.html) and
+# [`Zlib::Deflate`](https://docs.ruby-lang.org/en/2.7.0/Zlib/Deflate.html).
 #
 # The higher level methods are listed below.
 #
-# *   [`total_in`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-total_in)
-# *   [`total_out`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-total_out)
-# *   [`data_type`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-data_type)
-# *   [`adler`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-adler)
-# *   [`reset`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-reset)
-# *   [`finish`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-finish)
-# *   [`finished?`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-finished-3F)
-# *   [`close`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-close)
-# *   [`closed?`](https://docs.ruby-lang.org/en/2.6.0/Zlib/ZStream.html#method-i-closed-3F)
+# *   [`total_in`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-total_in)
+# *   [`total_out`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-total_out)
+# *   [`data_type`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-data_type)
+# *   [`adler`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-adler)
+# *   [`reset`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-reset)
+# *   [`finish`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-finish)
+# *   [`finished?`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-finished-3F)
+# *   [`close`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-close)
+# *   [`closed?`](https://docs.ruby-lang.org/en/2.7.0/Zlib/ZStream.html#method-i-closed-3F)
 class Zlib::ZStream
   # Returns the adler-32 checksum.
   def adler; end

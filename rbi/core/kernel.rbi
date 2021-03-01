@@ -1,25 +1,27 @@
 # typed: __STDLIB_INTERNAL
 
 # RubyGems adds the
-# [`gem`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-gem) method
+# [`gem`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-gem) method
 # to allow activation of specific gem versions and overrides the
-# [`require`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-require)
-# method on [`Kernel`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html) to make
+# [`require`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-require)
+# method on [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html) to make
 # gems appear as if they live on the `$LOAD_PATH`. See the documentation of
 # these methods for further detail.
-# The [`Kernel`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html) module is
-# included by class [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html),
+# The [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html) module is
+# included by class [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html),
 # so its methods are available in every Ruby object.
 #
-# The [`Kernel`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html) instance
+# The [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html) instance
 # methods are documented in class
-# [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html) while the module
+# [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html) while the module
 # methods are documented here. These methods are called without a receiver and
 # thus can be called in functional form:
 #
 # ```ruby
 # sprintf "%.1f", 1.234 #=> "1.2"
 # ```
+#
+# fronzen-string-literal: true
 module Kernel
   RUBYGEMS_ACTIVATION_MONITOR = T.let(T.unsafe(nil), Monitor)
 
@@ -119,7 +121,7 @@ module Kernel
   # objects.
   #
   # See
-  # [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.6.0/Thread/Backtrace/Location.html)
+  # [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/2.7.0/Thread/Backtrace/Location.html)
   # for more information.
   #
   # The optional *start* parameter determines the number of initial stack
@@ -242,9 +244,10 @@ module Kernel
   def define_singleton_method(symbol, method=T.unsafe(nil), &blk); end
 
   # Evaluates the Ruby expression(s) in *string*. If *binding* is given, which
-  # must be a `Binding` object, the evaluation is performed in its context. If
-  # the optional *filename* and *lineno* parameters are present, they will be
-  # used when reporting syntax errors.
+  # must be a [`Binding`](https://docs.ruby-lang.org/en/2.7.0/Binding.html)
+  # object, the evaluation is performed in its context. If the optional
+  # *filename* and *lineno* parameters are present, they will be used when
+  # reporting syntax errors.
   #
   # ```ruby
   # def get_binding(str)
@@ -405,10 +408,14 @@ module Kernel
   # subprocess, and the subprocess terminates with a status of zero. Otherwise,
   # the `fork` call returns twice, once in the parent, returning the process ID
   # of the child, and once in the child, returning *nil*. The child process can
-  # exit using `Kernel.exit!` to avoid running any `at_exit` functions. The
-  # parent process should use `Process.wait` to collect the termination statuses
-  # of its children or use `Process.detach` to register disinterest in their
-  # status; otherwise, the operating system may accumulate zombie processes.
+  # exit using
+  # [`Kernel.exit!`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-exit-21)
+  # to avoid running any `at_exit` functions. The parent process should use
+  # [`Process.wait`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-wait)
+  # to collect the termination statuses of its children or use
+  # [`Process.detach`](https://docs.ruby-lang.org/en/2.7.0/Process.html#method-c-detach)
+  # to register disinterest in their status; otherwise, the operating system may
+  # accumulate zombie processes.
   #
   # The thread calling fork is the only thread in the created child process.
   # fork doesn't copy other threads.
@@ -661,16 +668,16 @@ module Kernel
   def untrusted?(); end
 
   # Returns `arg` as an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
   #
   # First tries to call `to_ary` on `arg`, then `to_a`. If `arg` does not
   # respond to `to_ary` or `to_a`, returns an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of length 1
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of length 1
   # containing `arg`.
   #
   # If `to_ary` or `to_a` returns something other than an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), raises a
-  # `TypeError`.
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html), raises a
+  # [`TypeError`](https://docs.ruby-lang.org/en/2.7.0/TypeError.html).
   #
   # ```ruby
   # Array(["a", "b"])  #=> ["a", "b"]
@@ -689,22 +696,22 @@ module Kernel
   def Array(x); end
 
   # Create a new
-  # [`BigDecimal`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html) object.
+  # [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html) object.
   #
   # initial
   # :   The initial value, as an
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html), a
-  #     [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html), a
-  #     [`Rational`](https://docs.ruby-lang.org/en/2.6.0/Rational.html), a
-  #     [`BigDecimal`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html), or
-  #     a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), a
+  #     [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html), a
+  #     [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html), a
+  #     [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html), or
+  #     a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
-  #     If it is a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html),
+  #     If it is a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html),
   #     spaces are ignored and unrecognized characters terminate the value.
   #
   # digits
   # :   The number of significant digits, as an
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html). If
+  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html). If
   #     omitted or 0, the number of significant digits is determined from the
   #     initial value.
   #
@@ -718,28 +725,28 @@ module Kernel
   #
   # #### Exceptions
   #
-  # [`TypeError`](https://docs.ruby-lang.org/en/2.6.0/TypeError.html)
+  # [`TypeError`](https://docs.ruby-lang.org/en/2.7.0/TypeError.html)
   # :   If the `initial` type is neither
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html),
-  #     [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html),
-  #     [`Rational`](https://docs.ruby-lang.org/en/2.6.0/Rational.html), nor
-  #     [`BigDecimal`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html),
+  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html),
+  #     [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html),
+  #     [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html), nor
+  #     [`BigDecimal`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html),
   #     this exception is raised.
   #
-  # [`TypeError`](https://docs.ruby-lang.org/en/2.6.0/TypeError.html)
+  # [`TypeError`](https://docs.ruby-lang.org/en/2.7.0/TypeError.html)
   # :   If the `digits` is not an
-  #     [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html), this
+  #     [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), this
   #     exception is raised.
   #
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html)
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html)
   # :   If `initial` is a
-  #     [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html), and the
+  #     [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html), and the
   #     `digits` is larger than Float::DIG + 1, this exception is raised.
   #
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html)
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html)
   # :   If the `initial` is a
-  #     [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) or
-  #     [`Rational`](https://docs.ruby-lang.org/en/2.6.0/Rational.html), and the
+  #     [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) or
+  #     [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html), and the
   #     `digits` value is omitted, this exception is raised.
   sig do
     params(
@@ -790,7 +797,7 @@ module Kernel
   # ```
   #
   # See
-  # [`String#to_c`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-to_c).
+  # [`String#to_c`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-to_c).
   sig do
     params(
         x: T.any(Numeric, String),
@@ -806,10 +813,15 @@ module Kernel
   ### see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   # Returns *arg* converted to a float.
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) types are
-  # converted directly, and with exception to string and nil the rest are
-  # converted using *arg*.to\_f. Converting a `string` with invalid characters
-  # will result in a `ArgumentError`. Converting `nil` generates a `TypeError`.
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) types are
+  # converted directly, and with exception to
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) and `nil` the
+  # rest are converted using *arg*`.to_f`. Converting a
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) with invalid
+  # characters will result in a
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html).
+  # Converting `nil` generates a
+  # [`TypeError`](https://docs.ruby-lang.org/en/2.7.0/TypeError.html).
   # Exceptions can be suppressed by passing `exception: false`.
   #
   # ```ruby
@@ -832,8 +844,10 @@ module Kernel
   ### 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
   ### see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
-  # Converts *arg* to a `Hash` by calling *arg*`.to_hash`. Returns an empty
-  # `Hash` when *arg* is `nil` or `[]`.
+  # Converts *arg* to a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
+  # by calling *arg*`.to_hash`. Returns an empty
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) when *arg* is `nil`
+  # or `[]`.
   #
   # ```ruby
   # Hash([])          #=> {}
@@ -849,21 +863,23 @@ module Kernel
   end
   def Hash(x); end
 
-  # Converts *arg* to an `Integer`.
-  # [`Numeric`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html) types are
+  # Converts *arg* to an
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html).
+  # [`Numeric`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html) types are
   # converted directly (with floating point numbers being truncated). *base* (0,
   # or between 2 and 36) is a base for integer string representation. If *arg*
-  # is a `String`, when *base* is omitted or equals zero, radix indicators (`0`,
-  # `0b`, and `0x`) are honored. In any case, strings should be strictly
-  # conformed to numeric representation. This behavior is different from that of
-  # `String#to_i`. Non string values will be converted by first trying `to_int`,
-  # then `to_i`.
+  # is a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), when
+  # *base* is omitted or equals zero, radix indicators (`0`, `0b`, and `0x`) are
+  # honored. In any case, strings should be strictly conformed to numeric
+  # representation. This behavior is different from that of
+  # [`String#to_i`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-to_i).
+  # Non string values will be converted by first trying `to_int`, then `to_i`.
   #
   # Passing `nil` raises a
-  # [`TypeError`](https://docs.ruby-lang.org/en/2.6.0/TypeError.html), while
-  # passing a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) that
+  # [`TypeError`](https://docs.ruby-lang.org/en/2.7.0/TypeError.html), while
+  # passing a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) that
   # does not conform with numeric representation raises an
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html).
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html).
   # This behavior can be altered by passing `exception: false`, in this case a
   # not convertible value will return `nil`.
   #
@@ -893,7 +909,7 @@ module Kernel
   ### see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
   # Returns `x/y` or `arg` as a
-  # [`Rational`](https://docs.ruby-lang.org/en/2.6.0/Rational.html).
+  # [`Rational`](https://docs.ruby-lang.org/en/2.7.0/Rational.html).
   #
   # ```ruby
   # Rational(2, 3)   #=> (2/3)
@@ -928,7 +944,7 @@ module Kernel
   # ```
   #
   # See also
-  # [`String#to_r`](https://docs.ruby-lang.org/en/2.6.0/String.html#method-i-to_r).
+  # [`String#to_r`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-to_r).
   sig do
     params(
         x: T.any(Numeric, String, Object),
@@ -943,7 +959,8 @@ module Kernel
   ### 1) usage of the exception kwarg is uncommon, and 2) Sorbet doesn't allow us to overload sigs if methods have kwargs
   ### see this PR for discussion/context: https://github.com/sorbet/sorbet/pull/1144
 
-  # Returns *arg* as a `String`.
+  # Returns *arg* as a
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
   # First tries to call its `to_str` method, then its `to_s` method.
   #
@@ -961,7 +978,7 @@ module Kernel
   def String(x); end
 
   # Returns the called name of the current method as a
-  # [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html). If called
+  # [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html). If called
   # outside of a method, it returns `nil`.
   sig {returns(T.nilable(Symbol))}
   def __callee__(); end
@@ -974,7 +991,7 @@ module Kernel
   def __dir__(); end
 
   # Returns the name at the definition of the current method as a
-  # [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html). If called
+  # [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html). If called
   # outside of a method, it returns `nil`.
   sig {returns(T.nilable(Symbol))}
   def __method__(); end
@@ -1033,8 +1050,10 @@ module Kernel
   end
   def at_exit(&blk); end
 
-  # Registers *filename* to be loaded (using `Kernel::require`) the first time
-  # that *module* (which may be a `String` or a symbol) is accessed.
+  # Registers *filename* to be loaded (using Kernel::require) the first time
+  # that *module* (which may be a
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or a symbol) is
+  # accessed.
   #
   # ```ruby
   # autoload(:MyModule, "/usr/local/lib/modules/my_module.rb")
@@ -1095,7 +1114,8 @@ module Kernel
   sig {returns(T::Boolean)}
   def block_given?(); end
 
-  # Initiates the termination of the Ruby script by raising the `SystemExit`
+  # Initiates the termination of the Ruby script by raising the
+  # [`SystemExit`](https://docs.ruby-lang.org/en/2.7.0/SystemExit.html)
   # exception. This exception may be caught. The optional parameter is used to
   # return a status code to the invoking environment. `true` and `FALSE` of
   # *status* means success and failure respectively. The interpretation of other
@@ -1120,7 +1140,7 @@ module Kernel
   #
   # Just prior to termination, Ruby executes any `at_exit` functions (see
   # Kernel::at\_exit) and runs any object finalizers (see
-  # [`ObjectSpace::define_finalizer`](https://docs.ruby-lang.org/en/2.6.0/ObjectSpace.html#method-c-define_finalizer)).
+  # [`ObjectSpace::define_finalizer`](https://docs.ruby-lang.org/en/2.7.0/ObjectSpace.html#method-c-define_finalizer)).
   #
   # ```ruby
   # at_exit { puts "at_exit function" }
@@ -1157,23 +1177,28 @@ module Kernel
   end
   def exit!(status); end
 
-  # With no arguments, raises the exception in `$!` or raises a `RuntimeError`
-  # if `$!` is `nil`. With a single `String` argument, raises a `RuntimeError`
-  # with the string as a message. Otherwise, the first parameter should be the
-  # name of an `Exception` class (or an object that returns an `Exception`
-  # object when sent an `exception` message). The optional second parameter sets
-  # the message associated with the exception, and the third parameter is an
-  # array of callback information. Exceptions are caught by the `rescue` clause
-  # of `begin...end` blocks.
+  # With no arguments, raises the exception in `$!` or raises a
+  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html) if
+  # `$!` is `nil`. With a single `String` argument, raises a `RuntimeError` with
+  # the string as a message. Otherwise, the first parameter should be an
+  # `Exception` class (or another object that returns an `Exception` object when
+  # sent an `exception` message). The optional second parameter sets the message
+  # associated with the exception (accessible via
+  # [`Exception#message`](https://docs.ruby-lang.org/en/2.7.0/Exception.html#method-i-message)),
+  # and the third parameter is an array of callback information (accessible via
+  # [`Exception#backtrace`](https://docs.ruby-lang.org/en/2.7.0/Exception.html#method-i-backtrace)).
+  # The `cause` of the generated exception (accessible via
+  # [`Exception#cause`](https://docs.ruby-lang.org/en/2.7.0/Exception.html#method-i-cause))
+  # is automatically set to the "current" exception (`$!`), if any. An
+  # alternative value, either an `Exception` object or `nil`, can be specified
+  # via the `:cause` argument.
+  #
+  # Exceptions are caught by the `rescue` clause of `begin...end` blocks.
   #
   # ```ruby
   # raise "Failed to create socket"
   # raise ArgumentError, "No parameters", caller
   # ```
-  #
-  # The `cause` of the generated exception is automatically set to the "current"
-  # exception (`$!`) if any. An alternative value, either an `Exception` object
-  # or `nil`, can be specified via the `:cause` argument.
   sig {returns(T.noreturn)}
   sig do
     params(
@@ -1546,7 +1571,7 @@ module Kernel
   # end
   # ```
   #
-  # [`StopIteration`](https://docs.ruby-lang.org/en/2.6.0/StopIteration.html)
+  # [`StopIteration`](https://docs.ruby-lang.org/en/2.7.0/StopIteration.html)
   # raised in the block breaks the loop. In this case, loop returns the "result"
   # value stored in the exception.
   #
@@ -1565,7 +1590,7 @@ module Kernel
   sig {returns(T::Enumerator[T.untyped])}
   def loop(&blk); end
 
-  # Creates an [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object
+  # Creates an [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object
   # connected to the given stream, file, or subprocess.
   #
   # If `path` does not start with a pipe character (`|`), treat it as the name
@@ -1577,23 +1602,23 @@ module Kernel
   # "fmode:ext\_enc:int\_enc".
   #
   # See the documentation of
-  # [`IO.new`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-new) for
+  # [`IO.new`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-new) for
   # full documentation of the `mode` string directives.
   #
   # If a file is being created, its initial permissions may be set using the
   # `perm` parameter. See
-  # [`File.new`](https://docs.ruby-lang.org/en/2.6.0/File.html#method-c-new) and
+  # [`File.new`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-new) and
   # the open(2) and chmod(2) man pages for a description of permissions.
   #
   # If a block is specified, it will be invoked with the
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object as a parameter,
-  # and the [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) will be
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object as a parameter,
+  # and the [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) will be
   # automatically closed when the block terminates. The call returns the value
   # of the block.
   #
   # If `path` starts with a pipe character (`"|"`), a subprocess is created,
   # connected to the caller by a pair of pipes. The returned
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object may be used to
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object may be used to
   # write to the standard input and read from the standard output of this
   # subprocess.
   #
@@ -1606,7 +1631,7 @@ module Kernel
   # twice --- once in the parent and once in the child.
   #
   # The block parameter will be an
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object in the parent and
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object in the parent and
   # `nil` in the child. The parent's `IO` object will be connected to the
   # child's $stdin and $stdout. The subprocess will be terminated at the end of
   # the block.
@@ -1660,7 +1685,7 @@ module Kernel
   # ```
   #
   # Open a subprocess using a block to receive the
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object:
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object:
   #
   # ```ruby
   # open "|-" do |f|
@@ -1682,8 +1707,8 @@ module Kernel
   #
   #
   # Also aliased as:
-  # [`open_uri_original_open`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-open_uri_original_open),
-  # [`open_uri_original_open`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-open_uri_original_open)
+  # [`open_uri_original_open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open_uri_original_open),
+  # [`open_uri_original_open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open_uri_original_open)
   sig do
     params(
       path: String,
@@ -1746,7 +1771,8 @@ module Kernel
   end
   def printf(arg0=T.unsafe(nil), arg1=T.unsafe(nil), *arg2); end
 
-  # Equivalent to `Proc.new`.
+  # Equivalent to
+  # [`Proc.new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new).
   sig do
     params(
         blk: BasicObject,
@@ -1755,9 +1781,10 @@ module Kernel
   end
   def proc(&blk); end
 
-  # Equivalent to `Proc.new`, except the resulting
-  # [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) objects check the
-  # number of parameters passed when called.
+  # Equivalent to
+  # [`Proc.new`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-c-new),
+  # except the resulting [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html)
+  # objects check the number of parameters passed when called.
   sig do
     params(
         blk: BasicObject,
@@ -1773,7 +1800,7 @@ module Kernel
   # ```
   #
   # Refer to the documentation for
-  # [`IO#putc`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-putc) for
+  # [`IO#putc`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-putc) for
   # important information regarding multi-byte characters.
   sig do
     params(
@@ -1830,12 +1857,12 @@ module Kernel
   end
   def p(*arg0); end
 
-  # Outputs `obj` to `out` in pretty printed format of `width` columns in width.
+  # prints arguments in pretty form.
   #
-  # If `out` is omitted, `$>` is assumed. If `width` is omitted, 79 is assumed.
+  # pp returns argument(s).
   #
-  # [`PP.pp`](https://docs.ruby-lang.org/en/2.6.0/PP.html#method-c-pp) returns
-  # `out`.
+  # Also aliased as:
+  # [`pp`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-pp)
   def pp(obj, out = nil, width = nil); end
 
   # If called without an argument, or if `max.to_i.abs == 0`, rand returns a
@@ -1853,7 +1880,7 @@ module Kernel
   # rand(100)   #=> 12
   # ```
   #
-  # When `max` is a [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html),
+  # When `max` is a [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html),
   # `rand` returns a random number where range.member?(number) == true.
   #
   # Negative or floating point values for `max` are allowed, but may give
@@ -1865,12 +1892,12 @@ module Kernel
   # rand(1.9)  # equivalent to rand(1), which is always 0
   # ```
   #
-  # [`Kernel.srand`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-srand)
+  # [`Kernel.srand`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-srand)
   # may be used to ensure that sequences of random numbers are reproducible
   # between different runs of a program.
   #
   # See also
-  # [`Random.rand`](https://docs.ruby-lang.org/en/2.6.0/Random.html#method-c-rand).
+  # [`Random.rand`](https://docs.ruby-lang.org/en/2.7.0/Random.html#method-c-rand).
   sig {returns(Float)}
   sig do
     params(
@@ -1892,7 +1919,7 @@ module Kernel
   end
   def rand(arg0=T.unsafe(nil)); end
 
-  # Equivalent to `Kernel::gets`, except `readline` raises `EOFError` at end of
+  # Equivalent to Kernel::gets, except `readline` raises `EOFError` at end of
   # file.
   sig do
     params(
@@ -1970,7 +1997,7 @@ module Kernel
 
   # Ruby tries to load the library named *string* relative to the requiring
   # file's path. If the file's path cannot be determined a
-  # [`LoadError`](https://docs.ruby-lang.org/en/2.6.0/LoadError.html) is raised.
+  # [`LoadError`](https://docs.ruby-lang.org/en/2.7.0/LoadError.html) is raised.
   # If a file is loaded `true` is returned and false otherwise.
   sig do
     params(
@@ -1980,28 +2007,44 @@ module Kernel
   end
   def require_relative(feature); end
 
-  # Calls select(2) system call. It monitors given arrays of `IO` objects, waits
-  # until one or more of `IO` objects are ready for reading, are ready for
-  # writing, and have pending exceptions respectively, and returns an array that
-  # contains arrays of those [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
-  # objects. It will return `nil` if optional *timeout* value is given and no
-  # `IO` object is ready in *timeout* seconds.
+  # Calls select(2) system call. It monitors given arrays of
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects, waits until one
+  # or more of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects are
+  # ready for reading, are ready for writing, and have pending exceptions
+  # respectively, and returns an array that contains arrays of those
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects. It will return
+  # `nil` if optional *timeout* value is given and no
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object is ready in
+  # *timeout* seconds.
   #
-  # `IO.select` peeks the buffer of `IO` objects for testing readability. If the
-  # `IO` buffer is not empty, `IO.select` immediately notifies readability. This
-  # "peek" only happens for `IO` objects. It does not happen for IO-like objects
-  # such as
-  # [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.6.0/OpenSSL/SSL/SSLSocket.html).
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # peeks the buffer of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
+  # objects for testing readability. If the
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) buffer is not empty,
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # immediately notifies readability. This "peek" only happens for
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects. It does not
+  # happen for IO-like objects such as
+  # [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html).
   #
-  # The best way to use `IO.select` is invoking it after nonblocking methods
-  # such as `read_nonblock`, `write_nonblock`, etc. The methods raise an
-  # exception which is extended by `IO::WaitReadable` or `IO::WaitWritable`. The
-  # modules notify how the caller should wait with `IO.select`. If
-  # `IO::WaitReadable` is raised, the caller should wait for reading. If
-  # `IO::WaitWritable` is raised, the caller should wait for writing.
+  # The best way to use
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # is invoking it after nonblocking methods such as read\_nonblock,
+  # write\_nonblock, etc. The methods raise an exception which is extended by
+  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitReadable.html)
+  # or
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitWritable.html).
+  # The modules notify how the caller should wait with
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select).
+  # If
+  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitReadable.html)
+  # is raised, the caller should wait for reading. If
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitWritable.html)
+  # is raised, the caller should wait for writing.
   #
-  # So, blocking read (`readpartial`) can be emulated using `read_nonblock` and
-  # `IO.select` as follows:
+  # So, blocking read (readpartial) can be emulated using read\_nonblock and
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # as follows:
   #
   # ```ruby
   # begin
@@ -2015,54 +2058,84 @@ module Kernel
   # end
   # ```
   #
-  # Especially, the combination of nonblocking methods and `IO.select` is
-  # preferred for `IO` like objects such as `OpenSSL::SSL::SSLSocket`. It has
-  # `to_io` method to return underlying `IO` object. `IO.select` calls `to_io`
-  # to obtain the file descriptor to wait.
+  # Especially, the combination of nonblocking methods and
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # is preferred for [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) like
+  # objects such as
+  # [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html).
+  # It has to\_io method to return underlying
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # calls to\_io to obtain the file descriptor to wait.
   #
-  # This means that readability notified by `IO.select` doesn't mean readability
-  # from `OpenSSL::SSL::SSLSocket` object.
+  # This means that readability notified by
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # doesn't mean readability from
+  # [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html)
+  # object.
   #
-  # The most likely situation is that `OpenSSL::SSL::SSLSocket` buffers some
-  # data. `IO.select` doesn't see the buffer. So `IO.select` can block when
-  # `OpenSSL::SSL::SSLSocket#readpartial` doesn't block.
+  # The most likely situation is that
+  # [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html)
+  # buffers some data.
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # doesn't see the buffer. So
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # can block when
+  # [`OpenSSL::SSL::SSLSocket#readpartial`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-readpartial)
+  # doesn't block.
   #
   # However, several more complicated situations exist.
   #
   # SSL is a protocol which is sequence of records. The record consists of
   # multiple bytes. So, the remote side of SSL sends a partial record,
-  # `IO.select` notifies readability but `OpenSSL::SSL::SSLSocket` cannot
-  # decrypt a byte and `OpenSSL::SSL::SSLSocket#readpartial` will block.
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # notifies readability but
+  # [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html)
+  # cannot decrypt a byte and
+  # [`OpenSSL::SSL::SSLSocket#readpartial`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-readpartial)
+  # will block.
   #
   # Also, the remote side can request SSL renegotiation which forces the local
   # SSL engine to write some data. This means
-  # `OpenSSL::SSL::SSLSocket#readpartial` may invoke `write` system call and it
-  # can block. In such a situation, `OpenSSL::SSL::SSLSocket#read_nonblock`
+  # [`OpenSSL::SSL::SSLSocket#readpartial`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-readpartial)
+  # may invoke write system call and it can block. In such a situation,
+  # [`OpenSSL::SSL::SSLSocket#read_nonblock`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/Buffering.html#method-i-read_nonblock)
   # raises
-  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitWritable.html)
+  # [`IO::WaitWritable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitWritable.html)
   # instead of blocking. So, the caller should wait for ready for writability as
   # above example.
   #
-  # The combination of nonblocking methods and `IO.select` is also useful for
-  # streams such as tty, pipe socket socket when multiple processes read from a
-  # stream.
+  # The combination of nonblocking methods and
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # is also useful for streams such as tty, pipe socket socket when multiple
+  # processes read from a stream.
   #
   # Finally, Linux kernel developers don't guarantee that readability of
   # select(2) means readability of following read(2) even for a single process.
   # See select(2) manual on GNU/Linux system.
   #
-  # Invoking `IO.select` before `IO#readpartial` works well as usual. However it
-  # is not the best way to use `IO.select`.
+  # Invoking
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # before
+  # [`IO#readpartial`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-readpartial)
+  # works well as usual. However it is not the best way to use
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select).
   #
   # The writability notified by select(2) doesn't show how many bytes are
-  # writable. `IO#write` method blocks until given whole string is written. So,
-  # `IO#write(two or more bytes)` can block after writability is notified by
-  # `IO.select`. `IO#write_nonblock` is required to avoid the blocking.
+  # writable.
+  # [`IO#write`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-write)
+  # method blocks until given whole string is written. So, `IO#write(two or more
+  # bytes)` can block after writability is notified by
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select).
+  # [`IO#write_nonblock`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-write_nonblock)
+  # is required to avoid the blocking.
   #
-  # Blocking write (`write`) can be emulated using `write_nonblock` and
-  # `IO.select` as follows:
-  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.6.0/IO/WaitReadable.html)
-  # should also be rescued for SSL renegotiation in `OpenSSL::SSL::SSLSocket`.
+  # Blocking write (write) can be emulated using write\_nonblock and
+  # [`IO.select`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-select)
+  # as follows:
+  # [`IO::WaitReadable`](https://docs.ruby-lang.org/en/2.7.0/IO/WaitReadable.html)
+  # should also be rescued for SSL renegotiation in
+  # [`OpenSSL::SSL::SSLSocket`](https://docs.ruby-lang.org/en/2.7.0/OpenSSL/SSL/SSLSocket.html).
   #
   # ```ruby
   # while 0 < string.bytesize
@@ -2081,11 +2154,14 @@ module Kernel
   #
   # ### Parameters
   # read\_array
-  # :   an array of `IO` objects that wait until ready for read
+  # :   an array of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects
+  #     that wait until ready for read
   # write\_array
-  # :   an array of `IO` objects that wait until ready for write
+  # :   an array of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects
+  #     that wait until ready for write
   # error\_array
-  # :   an array of `IO` objects that wait for exceptions
+  # :   an array of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects
+  #     that wait for exceptions
   # timeout
   # :   a numeric value in second
   #
@@ -2137,8 +2213,9 @@ module Kernel
   # Suspends the current thread for *duration* seconds (which may be any number,
   # including a `Float` with fractional seconds). Returns the actual number of
   # seconds slept (rounded), which may be less than that asked for if another
-  # thread calls `Thread#run`. Called without an argument, sleep() will sleep
-  # forever.
+  # thread calls
+  # [`Thread#run`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-i-run).
+  # Called without an argument, sleep() will sleep forever.
   #
   # ```ruby
   # Time.new    #=> 2008-03-08 19:56:19 +0900
@@ -2435,7 +2512,7 @@ module Kernel
 
   # Calls the operating system function identified by *num* and returns the
   # result of the function or raises
-  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
   # if it failed.
   #
   # Arguments for the function can follow *num*. They must be either `String`
@@ -2458,11 +2535,12 @@ module Kernel
   #
   # Calling `syscall` on a platform which does not have any way to an arbitrary
   # system function just fails with
-  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html).
+  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.7.0/NotImplementedError.html).
   #
   # **Note:** `syscall` is essentially unsafe and unportable. Feel free to shoot
-  # your foot. The DL (Fiddle) library is preferred for safer and a bit more
-  # portable programming.
+  # your foot. The DL
+  # ([`Fiddle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html)) library is
+  # preferred for safer and a bit more portable programming.
   sig do
     params(
         num: Integer,
@@ -2475,7 +2553,7 @@ module Kernel
   # Uses the character `cmd` to perform various tests on `file1` (first table
   # below) or on `file1` and `file2` (second table).
   #
-  # [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) tests on a single
+  # [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) tests on a single
   # file:
   #
   # ```
@@ -2542,7 +2620,7 @@ module Kernel
   # Transfers control to the end of the active `catch` block waiting for *tag*.
   # Raises `UncaughtThrowError` if there is no `catch` block for the *tag*. The
   # optional second parameter supplies a return value for the `catch` block,
-  # which otherwise defaults to `nil`. For examples, see `Kernel::catch`.
+  # which otherwise defaults to `nil`. For examples, see Kernel::catch.
   sig do
     params(
         tag: Object,
@@ -2596,7 +2674,9 @@ module Kernel
   # If warnings have been disabled (for example with the `-W0` flag), does
   # nothing. Otherwise, converts each of the messages to strings, appends a
   # newline character to the string if the string does not end in a newline, and
-  # calls `Warning.warn` with the string.
+  # calls
+  # [`Warning.warn`](https://docs.ruby-lang.org/en/2.7.0/Warning.html#method-i-warn)
+  # with the string.
   #
   # ```
   #   warn("warning 1", "warning 2")
@@ -2635,23 +2715,28 @@ module Kernel
   end
   def warn(*msg); end
 
-  # With no arguments, raises the exception in `$!` or raises a `RuntimeError`
-  # if `$!` is `nil`. With a single `String` argument, raises a `RuntimeError`
-  # with the string as a message. Otherwise, the first parameter should be the
-  # name of an `Exception` class (or an object that returns an `Exception`
-  # object when sent an `exception` message). The optional second parameter sets
-  # the message associated with the exception, and the third parameter is an
-  # array of callback information. Exceptions are caught by the `rescue` clause
-  # of `begin...end` blocks.
+  # With no arguments, raises the exception in `$!` or raises a
+  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html) if
+  # `$!` is `nil`. With a single `String` argument, raises a `RuntimeError` with
+  # the string as a message. Otherwise, the first parameter should be an
+  # `Exception` class (or another object that returns an `Exception` object when
+  # sent an `exception` message). The optional second parameter sets the message
+  # associated with the exception (accessible via
+  # [`Exception#message`](https://docs.ruby-lang.org/en/2.7.0/Exception.html#method-i-message)),
+  # and the third parameter is an array of callback information (accessible via
+  # [`Exception#backtrace`](https://docs.ruby-lang.org/en/2.7.0/Exception.html#method-i-backtrace)).
+  # The `cause` of the generated exception (accessible via
+  # [`Exception#cause`](https://docs.ruby-lang.org/en/2.7.0/Exception.html#method-i-cause))
+  # is automatically set to the "current" exception (`$!`), if any. An
+  # alternative value, either an `Exception` object or `nil`, can be specified
+  # via the `:cause` argument.
+  #
+  # Exceptions are caught by the `rescue` clause of `begin...end` blocks.
   #
   # ```ruby
   # raise "Failed to create socket"
   # raise ArgumentError, "No parameters", caller
   # ```
-  #
-  # The `cause` of the generated exception is automatically set to the "current"
-  # exception (`$!`) if any. An alternative value, either an `Exception` object
-  # or `nil`, can be specified via the `:cause` argument.
   sig {returns(T.noreturn)}
   sig do
     params(
@@ -2707,8 +2792,8 @@ module Kernel
   #
   # Note that this behavior is observable by pid obtained (return value of
   # spawn() and
-  # [`IO#pid`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-pid) for
-  # [`IO.popen`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-c-popen)) is
+  # [`IO#pid`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-pid) for
+  # [`IO.popen`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-c-popen)) is
   # the pid of the invoked command, not shell.
   #
   # In the second form (`exec("command1", "arg1", ...)`), the first is taken as
@@ -2727,9 +2812,9 @@ module Kernel
   # This behavior is modified by the given `env` and `options` parameters. See
   # ::spawn for details.
   #
-  # If the command fails to execute (typically `Errno::ENOENT` when it was not
+  # If the command fails to execute (typically Errno::ENOENT when it was not
   # found) a
-  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.6.0/SystemCallError.html)
+  # [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html)
   # exception is raised.
   #
   # This method modifies process attributes according to given `options` before
@@ -2741,7 +2826,7 @@ module Kernel
   # For example, hard resource limits are not restorable.
   #
   # Consider to create a child process using ::spawn or
-  # [`Kernel#system`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-system)
+  # [`Kernel#system`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-system)
   # if this is not acceptable.
   #
   # ```ruby
@@ -2756,19 +2841,30 @@ module Kernel
 
   # Executes *command...* in a subshell. *command...* is one of following forms.
   #
-  # ```
-  # commandline                 : command line string which is passed to the standard shell
-  # cmdname, arg1, ...          : command name and one or more arguments (no shell)
-  # [cmdname, argv0], arg1, ... : command name, argv[0] and zero or more arguments (no shell)
-  # ```
+  # `commandline`
+  # :   command line string which is passed to the standard shell
+  # `cmdname, arg1, ...`
+  # :   command name and one or more arguments (no shell)
+  # `[cmdname, argv0], arg1, ...`
+  # :   command name, `argv[0]` and zero or more arguments (no shell)
+  #
   #
   # system returns `true` if the command gives zero exit status, `false` for non
   # zero exit status. Returns `nil` if command execution fails. An error status
-  # is available in `$?`. The arguments are processed in the same way as for
-  # `Kernel.spawn`.
+  # is available in `$?`.
   #
-  # The hash arguments, env and options, are same as `exec` and `spawn`. See
-  # `Kernel.spawn` for details.
+  # If the `exception: true` argument is passed, the method raises an exception
+  # instead of returning `false` or `nil`.
+  #
+  # The arguments are processed in the same way as for
+  # [`Kernel#spawn`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-spawn).
+  #
+  # The hash arguments, env and options, are same as
+  # [`exec`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-exec) and
+  # [`spawn`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-spawn).
+  # See
+  # [`Kernel#spawn`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-spawn)
+  # for details.
   #
   # ```ruby
   # system("echo *")
@@ -2782,7 +2878,23 @@ module Kernel
   # *
   # ```
   #
-  # See `Kernel.exec` for the standard shell.
+  # [`Error`](https://docs.ruby-lang.org/en/2.7.0/Error.html) handling:
+  #
+  # ```ruby
+  # system("cat nonexistent.txt")
+  # # => false
+  # system("catt nonexistent.txt")
+  # # => nil
+  #
+  # system("cat nonexistent.txt", exception: true)
+  # # RuntimeError (Command failed with exit 1: cat)
+  # system("catt nonexistent.txt", exception: true)
+  # # Errno::ENOENT (No such file or directory - catt)
+  # ```
+  #
+  # See
+  # [`Kernel#exec`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-exec)
+  # for the standard shell.
   sig do
     params(
       env: T.any(String, [String, String], T::Hash[String, T.nilable(String)]),
