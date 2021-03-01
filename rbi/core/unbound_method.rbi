@@ -130,6 +130,12 @@ class UnboundMethod
   sig {params(obj: BasicObject).returns(Method)}
   def bind(obj); end
 
+  # Bind *umeth* to *recv* and then invokes the method with the specified
+  # arguments. This is semantically equivalent to `umeth.bind(recv).call(args,
+  # ...)`.
+  sig {params(recv: BasicObject, args: T.untyped).returns(T.untyped)}
+  def bind_call(recv, *args); end
+
   # Returns a clone of this method.
   #
   # ```ruby
