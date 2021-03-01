@@ -13,8 +13,8 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:205: Unable to resolve constant `MyC
     test/cli/no-did-you-mean/no-did-you-mean.rb:205: Replace with `MyClass8`
      205 |p MyClass
             ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
-    68 |class Class < Module
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: Did you mean: `Class`?
+    71 |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
     test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
     11 |class MyClass9; end
@@ -38,8 +38,8 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:206: Unable to resolve constant `MyC
     test/cli/no-did-you-mean/no-did-you-mean.rb:206: Replace with `MyClass8`
      206 |p MyClass
             ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
-    68 |class Class < Module
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: Did you mean: `Class`?
+    71 |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
     test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
     11 |class MyClass9; end
@@ -63,8 +63,8 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:207: Unable to resolve constant `MyC
     test/cli/no-did-you-mean/no-did-you-mean.rb:207: Replace with `MyClass8`
      207 |p MyClass
             ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
-    68 |class Class < Module
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: Did you mean: `Class`?
+    71 |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
     test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
     11 |class MyClass9; end
@@ -88,8 +88,8 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:208: Unable to resolve constant `MyC
     test/cli/no-did-you-mean/no-did-you-mean.rb:208: Replace with `MyClass8`
      208 |p MyClass
             ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
-    68 |class Class < Module
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: Did you mean: `Class`?
+    71 |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
     test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
     11 |class MyClass9; end
@@ -113,8 +113,8 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:209: Unable to resolve constant `MyC
     test/cli/no-did-you-mean/no-did-you-mean.rb:209: Replace with `MyClass8`
      209 |p MyClass
             ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
-    68 |class Class < Module
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: Did you mean: `Class`?
+    71 |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
     test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
     11 |class MyClass9; end
@@ -138,8 +138,8 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:210: Unable to resolve constant `MyC
     test/cli/no-did-you-mean/no-did-you-mean.rb:210: Replace with `MyClass8`
      210 |p MyClass
             ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
-    68 |class Class < Module
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: Did you mean: `Class`?
+    71 |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
     test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
     11 |class MyClass9; end
@@ -163,8 +163,8 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:211: Unable to resolve constant `MyC
     test/cli/no-did-you-mean/no-did-you-mean.rb:211: Replace with `MyClass8`
      211 |p MyClass
             ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
-    68 |class Class < Module
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: Did you mean: `Class`?
+    71 |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
     test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
     11 |class MyClass9; end
@@ -188,8 +188,8 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:212: Unable to resolve constant `MyC
     test/cli/no-did-you-mean/no-did-you-mean.rb:212: Replace with `MyClass8`
      212 |p MyClass
             ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
-    68 |class Class < Module
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: Did you mean: `Class`?
+    71 |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
     test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
     11 |class MyClass9; end
@@ -213,8 +213,8 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:213: Unable to resolve constant `MyC
     test/cli/no-did-you-mean/no-did-you-mean.rb:213: Replace with `MyClass8`
      213 |p MyClass
             ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
-    68 |class Class < Module
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: Did you mean: `Class`?
+    71 |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
     test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
     11 |class MyClass9; end
@@ -238,8 +238,8 @@ test/cli/no-did-you-mean/no-did-you-mean.rb:214: Unable to resolve constant `MyC
     test/cli/no-did-you-mean/no-did-you-mean.rb:214: Replace with `MyClass8`
      214 |p MyClass
             ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L68: Did you mean: `Class`?
-    68 |class Class < Module
+    https://github.com/sorbet/sorbet/tree/master/rbi/core/class.rbi#L71: Did you mean: `Class`?
+    71 |class Class < Module
         ^^^^^^^^^^^^^^^^^^^^
     test/cli/no-did-you-mean/no-did-you-mean.rb:11: Did you mean: `MyClass9`?
     11 |class MyClass9; end
