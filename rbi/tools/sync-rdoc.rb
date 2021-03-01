@@ -147,6 +147,11 @@ class DocParser
         walk_scope(scope, &blk)
         assert_clean!
       end
+    when :SCLASS
+      # There are a handful of places in RBIs where we have to use `class <<
+      # self` because both a class and it's singleton class need to register a
+      # type_member/type_template with the name Elem
+      puts 'skipping :SCLASS node, documentation will not be generated'
     when :SCOPE, :BLOCK, :BEGIN
       assert_clean!
       node.children
