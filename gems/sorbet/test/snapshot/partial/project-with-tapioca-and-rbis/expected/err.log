@@ -19,13 +19,13 @@ lib/test.rb:3: Unable to resolve constant `Parlour` https://srb.help/5002
     lib/test.rb:3: Replace with `Psych::Parser`
      3 |FOO = Parlour # We expect `Parlour` to be undefined here since we didn't load any gem RBI
               ^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/rubygems.rbi#L2819: Did you mean: `Gem::RequestSet::Lockfile::Parser`?
-    2819 |class Gem::RequestSet::Lockfile::Parser
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/rubygems.rbi#L5017: Did you mean: `Gem::RequestSet::Lockfile::Parser`?
+    5017 |class Gem::RequestSet::Lockfile::Parser
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/json.rbi#L974: Did you mean: `JSON::Ext::Parser`?
      974 |class JSON::Ext::Parser
           ^^^^^^^^^^^^^^^^^^^^^^^
-    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/psych.rbi#L982: Did you mean: `Psych::Parser`?
-     982 |class Psych::Parser
+    https://github.com/sorbet/sorbet/tree/master/rbi/stdlib/psych.rbi#L1712: Did you mean: `Psych::Parser`?
+    1712 |class Psych::Parser
           ^^^^^^^^^^^^^^^^^^^
 Errors: 1
