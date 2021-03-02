@@ -58,9 +58,9 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind) {
     fmt::print("  def self.create_validator_{}_fast(mod, original_method, method_sig)\n", kindString);
     switch (kind) {
         case ValidatorKind::Method:
-            fmt::print("    if method_sig.return_type.is_a?(T::Private::Types::Void)\n");
-            fmt::print("      raise 'Should have used create_validator_procedure_fast'\n");
-            fmt::print("    end\n");
+            fmt::print("    if method_sig.return_type.is_a?(T::Private::Types::Void)\n"
+                       "      raise 'Should have used create_validator_procedure_fast'\n"
+                       "    end\n");
             break;
         case ValidatorKind::Procedure:
             break;
@@ -91,11 +91,11 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind) {
         }
         fmt::print(")\n");
     }
-    fmt::print("    else\n");
-    fmt::print("      raise 'should not happen'\n");
-    fmt::print("    end\n");
-    fmt::print("  end\n");
-    fmt::print("\n");
+    fmt::print("    else\n"
+               "      raise 'should not happen'\n"
+               "    end\n"
+               "  end\n"
+               "\n");
 }
 
 void generateCreateValidatorFast(const Options &options, ValidatorKind kind, size_t arity) {
@@ -121,46 +121,47 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
     }
     fmt::print("&blk|\n");
 
-    fmt::print("      # This block is called for every `sig`. It's critical to keep it fast and\n");
-    fmt::print("      # reduce number of allocations that happen here.\n");
-    fmt::print("      # This method is a manually sped-up version of more general code in `validate_call`\n");
-    fmt::print("      T::Profile.typecheck_sample_attempts -= 1\n");
-    fmt::print("      should_sample = T::Profile.typecheck_sample_attempts == 0\n");
-    fmt::print("      if should_sample\n");
-    fmt::print("        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE\n");
-    fmt::print("        T::Profile.typecheck_samples += 1\n");
-    fmt::print("        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n");
-    fmt::print("      end\n");
-    fmt::print("\n");
+    fmt::print("      # This block is called for every `sig`. It's critical to keep it fast and\n"
+               "      # reduce number of allocations that happen here.\n"
+               "      # This method is a manually sped-up version of more general code in `validate_call`\n"
+               "      T::Profile.typecheck_sample_attempts -= 1\n"
+               "      should_sample = T::Profile.typecheck_sample_attempts == 0\n"
+               "      if should_sample\n"
+               "        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE\n"
+               "        T::Profile.typecheck_samples += 1\n"
+               "        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n"
+               "      end\n"
+               "\n");
 
     for (size_t i = 0; i < arity; i++) {
-        fmt::print("      unless arg{0}.is_a?(arg{0}_type)\n", i);
-        fmt::print("        CallValidation.report_error(\n");
-        fmt::print("          method_sig,\n");
-        fmt::print("          method_sig.arg_types[{0}][1].error_message_for_obj(arg{0}),\n", i);
-        fmt::print("          'Parameter',\n");
-        fmt::print("          method_sig.arg_types[{0}][0],\n", i);
-        fmt::print("          arg{0}_type,\n", i);
-        fmt::print("          arg{0},\n", i);
-        fmt::print("          caller_offset: -1\n");
-        fmt::print("        )\n");
-        fmt::print("      end\n");
-        fmt::print("\n");
+        fmt::print("      unless arg{0}.is_a?(arg{0}_type)\n"
+                   "        CallValidation.report_error(\n"
+                   "          method_sig,\n"
+                   "          method_sig.arg_types[{0}][1].error_message_for_obj(arg{0}),\n"
+                   "          'Parameter',\n"
+                   "          method_sig.arg_types[{0}][0],\n"
+                   "          arg{0}_type,\n"
+                   "          arg{0},\n"
+                   "          caller_offset: -1\n"
+                   "        )\n"
+                   "      end\n"
+                   "\n",
+                   i);
     }
 
-    fmt::print("      if should_sample\n");
-    fmt::print("        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n");
-    fmt::print("      end\n");
-    fmt::print("\n");
+    fmt::print("      if should_sample\n"
+               "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n"
+               "      end\n"
+               "\n");
 
     fmt::print("      # The following line breaks are intentional to show nice pry message\n");
     for (size_t i = 0; i < 10; i++) {
         fmt::print("\n");
     }
-    fmt::print("      # PRY note:\n");
-    fmt::print("      # this code is sig validation code.\n");
-    fmt::print("      # Please issue `finish` to step out of it\n");
-    fmt::print("\n");
+    fmt::print("      # PRY note:\n"
+               "      # this code is sig validation code.\n"
+               "      # Please issue `finish` to step out of it\n"
+               "\n");
 
     const char *returnValueVar;
     switch (kind) {
@@ -188,47 +189,46 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
             break;
 
         case ValidatorKind::Method:
-            fmt::print("      if should_sample\n");
-            fmt::print("        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n");
-            fmt::print("      end\n");
-            fmt::print("\n");
-
-            fmt::print("      unless return_value.is_a?(return_type)\n");
-            fmt::print("        message = method_sig.return_type.error_message_for_obj(return_value)\n");
-            fmt::print("        if message\n");
-            fmt::print("          CallValidation.report_error(\n");
-            fmt::print("            method_sig,\n");
-            fmt::print("            message,\n");
-            fmt::print("            'Return value',\n");
-            fmt::print("            nil,\n");
-            fmt::print("            method_sig.return_type,\n");
-            fmt::print("            return_value,\n");
-            fmt::print("            caller_offset: -1\n");
-            fmt::print("          )\n");
-            fmt::print("        end\n");
-            fmt::print("      end\n");
-            fmt::print("      if should_sample\n");
             fmt::print(
-                "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n");
-            fmt::print("      end\n");
-            fmt::print("      return_value\n");
+                "      if should_sample\n"
+                "        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n"
+                "      end\n"
+                "\n"
+                "      unless return_value.is_a?(return_type)\n"
+                "        message = method_sig.return_type.error_message_for_obj(return_value)\n"
+                "        if message\n"
+                "          CallValidation.report_error(\n"
+                "            method_sig,\n"
+                "            message,\n"
+                "            'Return value',\n"
+                "            nil,\n"
+                "            method_sig.return_type,\n"
+                "            return_value,\n"
+                "            caller_offset: -1\n"
+                "          )\n"
+                "        end\n"
+                "      end\n"
+                "      if should_sample\n"
+                "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n"
+                "      end\n"
+                "      return_value\n");
             break;
     }
 
-    fmt::print("    end\n");
-    fmt::print("  end\n");
-    fmt::print("\n");
+    fmt::print("    end\n"
+               "  end\n"
+               "\n");
 }
 
 int generateCallValidation(const Options &options) {
-    fmt::print("# frozen_string_literal: true\n");
-    fmt::print("# typed: false\n");
-    fmt::print("\n");
-    fmt::print("# DO NOT EDIT. This file is autogenerated. To regenerate, run:\n");
-    fmt::print("#\n");
-    fmt::print("#     bazel test //gems/sorbet-runtime:update_call_validation\n");
-    fmt::print("\n");
-    fmt::print("module T::Private::Methods::CallValidation\n");
+    fmt::print("# frozen_string_literal: true\n"
+               "# typed: false\n"
+               "\n"
+               "# DO NOT EDIT. This file is autogenerated. To regenerate, run:\n"
+               "#\n"
+               "#     bazel test //gems/sorbet-runtime:update_call_validation\n"
+               "\n"
+               "module T::Private::Methods::CallValidation\n");
 
     generateCreateValidatorFastDispatcher(ValidatorKind::Method);
     for (size_t i = 0; i <= MAX_ARITY; i++) {
