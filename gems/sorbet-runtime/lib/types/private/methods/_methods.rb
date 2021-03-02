@@ -217,6 +217,8 @@ module T::Private::Methods
       # make sure to keep changes in sync.
       elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
         CallValidation.validate_call(self, original_method, method_sig, args, blk)
+      elsif T::Configuration::AT_LEAST_RUBY_2_7
+        original_method.bind_call(self, *args, &blk)
       else
         original_method.bind(self).call(*args, &blk)
       end

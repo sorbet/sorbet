@@ -150,7 +150,11 @@ module T::Types
         obj.class
       else
         # This is a specialized enumerable type, just return the class.
-        Object.instance_method(:class).bind(obj).call
+        if T::Configuration::AT_LEAST_RUBY_2_7
+          Object.instance_method(:class).bind_call(obj)
+        else
+          Object.instance_method(:class).bind(obj).call
+        end
       end
     end
 

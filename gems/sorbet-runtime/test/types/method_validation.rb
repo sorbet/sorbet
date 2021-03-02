@@ -181,7 +181,9 @@ module Opus::Types::Test
         before = GC.stat(:total_allocated_objects)
         @mod.foo("foo", 1)
         allocated = GC.stat(:total_allocated_objects) - before
-        assert_equal(2, allocated) # dmitry: for some reason, when run locally this numeber is 0, in CI it's 2. IDK why.
+
+        expected_allocations = T::Configuration::AT_LEAST_RUBY_2_7 ? 1 : 2
+        assert_equal(expected_allocations, allocated) # dmitry: for some reason, when run locally this numeber is 0, in CI it's 2. IDK why.
       end
     end
 

@@ -54,6 +54,7 @@ compilation_database(
         "//infer:infer_test",
         "//hashing:hashing-orig",
         "//main/pipeline:pipeline-orig",
+        "//gems/sorbet-runtime:generate_call_validation",
         "//experimental/rubyfmt:rubyfmt_test",
         "//emscripten:main",
         "//payload/text:empty",
