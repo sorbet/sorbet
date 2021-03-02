@@ -183,6 +183,7 @@ module T::Utils
   def self.coerce(val); end
   def self.resolve_alias(type); end
   def self.run_all_sig_blocks; end
+  def self.signature_for_method(method); end
   def self.signature_for_instance_method(mod, method_name); end
   def self.unwrap_nilable(type); end
   def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method); end
