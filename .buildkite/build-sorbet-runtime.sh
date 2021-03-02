@@ -8,12 +8,20 @@ echo "--- setup :ruby:"
 eval "$(rbenv init -)"
 
 runtime_versions=(2.6.3 2.7.2)
+
 for runtime_version in "${runtime_versions[@]}"; do
   rbenv install --skip-existing "$runtime_version"
   rbenv shell "$runtime_version"
-  rbenv exec bundle install --path vendor/bundle
+  rbenv exec bundle config set path 'vendor/bundle'
+  rbenv exec bundle install
+done
 
-  echo "+++ tests"
+for runtime_version in "${runtime_versions[@]}"; do
+  echo "+++ tests ($runtime_version)"
+  rbenv shell "$runtime_version"
+
+  rbenv exec ruby --version
+
   rbenv exec bundle exec rake test
 done
 
