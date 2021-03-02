@@ -52,6 +52,13 @@ module T::Utils
     end.uniq
   end
 
+  # Returns the signature for the `UnboundMethod`, or nil if it's not sig'd
+  #
+  # @example T::Utils.signature_for_method(x.method(:foo))
+  def self.signature_for_method(method)
+    T::Private::Methods.signature_for_method(method)
+  end
+
   # Returns the signature for the instance method on the supplied module, or nil if it's not found or not typed.
   #
   # @example T::Utils.signature_for_instance_method(MyClass, :my_method)
