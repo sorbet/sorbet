@@ -81,6 +81,7 @@ set +e
 llvmir="$llvmir" "$ruby" \
   --disable=gems \
   --disable=did_you_mean \
+  -r "rubygems" \
   -I "$sorbet_runtime_include" -rsorbet-runtime.rb \
   -I "$patch_require_include" -rpatch_require.rb \
   "$rbrunfile" > "$rbout" 2> "$rberr"

@@ -147,6 +147,7 @@ set +e
 force_compile=1 llvmir="$PWD/${build_dir}/" $ruby \
   --disable=gems \
   --disable=did_you_mean \
+  -r "rubygems" \
   -r "${root}/external/com_stripe_ruby_typer/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
   -r "${root}/test/patch_require.rb" \
   "$runfile" \

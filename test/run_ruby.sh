@@ -45,6 +45,7 @@ trap cleanup EXIT
 command=("${command[@]}" \
   "--disable=gems" \
   "--disable=did_you_mean" \
+  -r "rubygems" \
   -r "$sorbet_runtime" \
   -r "./test/patch_require.rb" \
   -e "require './$rb_file'" \

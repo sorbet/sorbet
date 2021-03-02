@@ -67,8 +67,9 @@ set_startup() {
   unset llvmir
   command=(
     "${ruby}" \
-      -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
       "--disable=gems" "--disable=did_you_mean" \
+      -r "rubygems" \
+      -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
       -e 1 \
   )
 }
@@ -77,8 +78,9 @@ set_interpreted() {
   unset llvmir
   command=(
     "${ruby}" \
-      -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
       "--disable=gems" "--disable=did_you_mean" \
+      -r "rubygems" \
+      -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
       ./target.rb \
   )
 }
@@ -87,9 +89,10 @@ set_compiled() {
   export llvmir=.
   command=( \
     "${ruby}" \
+      "--disable=gems" "--disable=did_you_mean" \
+      -r "rubygems" \
       -r "${sorbet}/gems/sorbet-runtime/lib/sorbet-runtime.rb" \
       -r "${repo_root}/test/patch_require.rb" \
-      "--disable=gems" "--disable=did_you_mean" \
       -e "\$__sorbet_ruby_realpath='target.rb'; require './target.rb.so'" \
   )
 }
