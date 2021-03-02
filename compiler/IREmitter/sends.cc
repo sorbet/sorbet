@@ -251,6 +251,8 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
     auto &send = mcctx.send;
     auto rubyBlockId = mcctx.rubyBlockId;
 
+    vector<VMFlag> flags;
+
     auto name = string(send->fun.shortName(cs));
     auto flag = Payload::VM_CALL_ARGS_SIMPLE;
     vector<string_view> keywords{};
@@ -279,15 +281,14 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
             // we'll pass in. This enforce is here so that we remember to update the behavior of this function when we
             // eventually fix that desugaring.
             ENFORCE(numKwArgs == 1);
-
-            flag = Payload::VM_CALL_KW_SPLAT;
+            flags.emplace_back(Payload::VM_CALL_KW_SPLAT);
 
             // TODO(perf) we can avoid duplicating the hash here if we know that it was created specifically for this
             // kwsplat.
             auto var = Payload::varGet(cs, send->args[argIdx].variable, builder, irctx, rubyBlockId);
             stack.emplace_back(builder.CreateCall(cs.getFunction("sorbet_hashDup"), {var}, "kwsplat"));
         } else {
-            flag = Payload::VM_CALL_KWARG;
+            flags.emplace_back(Payload::VM_CALL_KWARG);
 
             while (argIdx < kwEnd) {
                 auto kwArg = send->args[argIdx++].variable;
@@ -298,6 +299,8 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
                 stack.emplace_back(Payload::varGet(cs, send->args[argIdx++].variable, builder, irctx, rubyBlockId));
             }
         }
+    } else {
+        flags.emplace_back(Payload::VM_CALL_ARGS_SIMPLE);
     }
 
     // the receiver isn't included in the arg count
@@ -307,7 +310,7 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
         Payload::pushRubyStack(cs, builder, arg);
     }
 
-    return makeInlineCache(cs, builder, methodName, flag, argc, keywords);
+    return makeInlineCache(cs, builder, methodName, flags, argc, keywords);
 }
 
 namespace {
@@ -378,7 +381,8 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
 
 // Create a global to hold the FunctionInlineCache value, and setup its initialization in the `Init_` function.
 llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &build, string methodName,
-                                               const VMFlag &flag, int argc, const vector<string_view> &keywords) {
+                                               const vector<VMFlag> &flags, int argc,
+                                               const vector<string_view> &keywords) {
     auto &builder = builderCast(build);
 
     auto *setupFn = cs.getFunction("sorbet_setupFunctionInlineCache");
@@ -420,7 +424,7 @@ llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilde
             }
         }
 
-        auto *flagVal = flag.build(cs, build);
+        auto *flagVal = VMFlag::build(cs, build, flags);
         builder.CreateCall(setupFn, {cache, midVal, flagVal, argcVal, keywordsLenVal, keywordsVal});
 
         builder.restoreIP(restore);

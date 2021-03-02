@@ -1021,9 +1021,16 @@ llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderB
                               "sendWithBlock");
 }
 
-llvm::Value *VMFlag::build(CompilerState &cs, llvm::IRBuilderBase &build) const {
+llvm::Value *VMFlag::build(CompilerState &cs, llvm::IRBuilderBase &build, const vector<VMFlag> &flags) {
     auto &builder = builderCast(build);
-    return builder.CreateCall(cs.getFunction(fnName), {}, flagName);
+
+    llvm::Value *acc = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, false));
+    for (auto &flag : flags) {
+        auto *flagVal = builder.CreateCall(cs.getFunction(flag.fnName), {}, flag.flagName);
+        acc = builder.CreateBinOp(llvm::Instruction::Or, acc, flagVal);
+    }
+
+    return acc;
 }
 
 const VMFlag Payload::VM_CALL_ARGS_SIMPLE{"sorbet_vmCallArgsSimple", "VM_CALL_ARGS_SIMPLE"};

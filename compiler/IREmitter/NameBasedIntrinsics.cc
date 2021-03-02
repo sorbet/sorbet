@@ -394,10 +394,13 @@ public:
 
         struct VMFlag flag;
 
+        vector<VMFlag> flags;
+
         if (kwArgsType.derivesFrom(mcctx.cs, core::Symbols::NilClass())) {
-            flag = Payload::VM_CALL_ARGS_SPLAT;
+            flags.emplace_back(Payload::VM_CALL_ARGS_SPLAT);
         } else if (auto *ptt = core::cast_type<core::TupleType>(kwArgsType)) {
-            flag = Payload::VM_CALL_ARGS_AND_KW_SPLAT;
+            flags.emplace_back(Payload::VM_CALL_ARGS_SPLAT);
+            flags.emplace_back(Payload::VM_CALL_KW_SPLAT);
 
             auto *kwArgArray = Payload::varGet(mcctx.cs, kwArgsVar, mcctx.build, irctx, mcctx.rubyBlockId);
 
@@ -436,7 +439,7 @@ public:
         Payload::pushRubyStack(cs, builder, splatArray);
 
         // Call the receiver.
-        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flag, 1, {});
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
 
         if (mcctx.blk != nullptr) {
             auto *closure = irctx.localsOffset[mcctx.rubyBlockId];

@@ -103,7 +103,8 @@ public:
     static llvm::Value *emitMethodCall(MethodCallContext &mcctx);
 
     static llvm::Value *makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &build, std::string methodName,
-                                        const VMFlag &flag, int argc, const std::vector<std::string_view> &keywords);
+                                        const std::vector<VMFlag> &flags, int argc,
+                                        const std::vector<std::string_view> &keywords);
 
     static llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx);
 

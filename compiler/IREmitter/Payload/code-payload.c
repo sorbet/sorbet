@@ -1102,10 +1102,6 @@ unsigned int sorbet_vmCallKwSplat() {
     return VM_CALL_KW_SPLAT;
 }
 
-unsigned int sorbet_vmCallArgsAndKwSplat() {
-    return VM_CALL_ARGS_SPLAT | VM_CALL_KW_SPLAT;
-}
-
 // static struct rb_kwarg_call_data test_cd = {0};
 
 SORBET_INLINE

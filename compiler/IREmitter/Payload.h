@@ -18,7 +18,7 @@ struct VMFlag {
     // The name to give to the result of the sorbet function (useful when reading the llvm bitcode)
     std::string flagName;
 
-    llvm::Value *build(CompilerState &cs, llvm::IRBuilderBase &build) const;
+    static llvm::Value *build(CompilerState &cs, llvm::IRBuilderBase &build, const std::vector<VMFlag> &flags);
 };
 
 // This class serves as forwarder to payload.c, which are the c wrappers for
