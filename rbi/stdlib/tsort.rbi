@@ -1,40 +1,40 @@
 # typed: __STDLIB_INTERNAL
 
-# [`TSort`](https://docs.ruby-lang.org/en/2.6.0/TSort.html) implements
+# [`TSort`](https://docs.ruby-lang.org/en/2.7.0/TSort.html) implements
 # topological sorting using Tarjan's algorithm for strongly connected
 # components.
 #
-# [`TSort`](https://docs.ruby-lang.org/en/2.6.0/TSort.html) is designed to be
+# [`TSort`](https://docs.ruby-lang.org/en/2.7.0/TSort.html) is designed to be
 # able to be used with any object which can be interpreted as a directed graph.
 #
-# [`TSort`](https://docs.ruby-lang.org/en/2.6.0/TSort.html) requires two methods
+# [`TSort`](https://docs.ruby-lang.org/en/2.7.0/TSort.html) requires two methods
 # to interpret an object as a graph,
-# [`tsort_each_node`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-tsort_each_node)
+# [`tsort_each_node`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-tsort_each_node)
 # and tsort\_each\_child.
 #
-# *   [`tsort_each_node`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-tsort_each_node)
+# *   [`tsort_each_node`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-tsort_each_node)
 #     is used to iterate for all nodes over a graph.
-# *   [`tsort_each_child`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-tsort_each_child)
+# *   [`tsort_each_child`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-tsort_each_child)
 #     is used to iterate for child nodes of a given node.
 #
 #
 # The equality of nodes are defined by eql? and hash since
-# [`TSort`](https://docs.ruby-lang.org/en/2.6.0/TSort.html) uses
-# [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) internally.
+# [`TSort`](https://docs.ruby-lang.org/en/2.7.0/TSort.html) uses
+# [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) internally.
 #
 # ## A Simple Example
 #
 # The following example demonstrates how to mix the
-# [`TSort`](https://docs.ruby-lang.org/en/2.6.0/TSort.html) module into an
+# [`TSort`](https://docs.ruby-lang.org/en/2.7.0/TSort.html) module into an
 # existing class (in this case,
-# [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)). Here, we're treating
+# [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)). Here, we're treating
 # each key in the hash as a node in the graph, and so we simply alias the
 # required
-# [`tsort_each_node`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-tsort_each_node)
+# [`tsort_each_node`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-tsort_each_node)
 # method to Hash's each\_key method. For each key in the hash, the associated
 # value is an array of the node's child nodes. This choice in turn leads to our
 # implementation of the required
-# [`tsort_each_child`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-tsort_each_child)
+# [`tsort_each_child`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-tsort_each_child)
 # method, which fetches the array of child nodes and then iterates over that
 # array using the user-supplied block.
 #
@@ -134,7 +134,7 @@
 # *SIAM Journal on Computing*, Vol. 1, No. 2, pp. 146-160, June 1972.
 module TSort
   # The iterator version of the
-  # [`TSort.strongly_connected_components`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-c-strongly_connected_components)
+  # [`TSort.strongly_connected_components`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-c-strongly_connected_components)
   # method.
   #
   # The graph is represented by *each\_node* and *each\_child*. *each\_node*
@@ -171,7 +171,7 @@ module TSort
   #
   # #TSort.each\_strongly\_connected\_component\_from is a class method and it
   # doesn't need a class to represent a graph which includes
-  # [`TSort`](https://docs.ruby-lang.org/en/2.6.0/TSort.html).
+  # [`TSort`](https://docs.ruby-lang.org/en/2.7.0/TSort.html).
   #
   # ```ruby
   # graph = {1=>[2], 2=>[3, 4], 3=>[2], 4=>[]}
@@ -217,7 +217,7 @@ module TSort
   # yields for each child node.
   #
   # If there is a cycle,
-  # [`TSort::Cyclic`](https://docs.ruby-lang.org/en/2.6.0/TSort/Cyclic.html) is
+  # [`TSort::Cyclic`](https://docs.ruby-lang.org/en/2.7.0/TSort/Cyclic.html) is
   # raised.
   #
   # ```ruby
@@ -233,7 +233,7 @@ module TSort
   # ```
   def self.tsort(each_node, each_child); end
   # The iterator version of the
-  # [`TSort.tsort`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-c-tsort)
+  # [`TSort.tsort`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-c-tsort)
   # method.
   #
   # The graph is represented by *each\_node* and *each\_child*. *each\_node*
@@ -253,12 +253,12 @@ module TSort
   # ```
   def self.tsort_each(each_node, each_child); end
   # The iterator version of the
-  # [`strongly_connected_components`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-strongly_connected_components)
+  # [`strongly_connected_components`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-strongly_connected_components)
   # method. `obj.each_strongly_connected_component` is similar to
   # `obj.strongly_connected_components.each`, but modification of *obj* during
   # the iteration may lead to unexpected results.
   #
-  # [`each_strongly_connected_component`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-each_strongly_connected_component)
+  # [`each_strongly_connected_component`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-each_strongly_connected_component)
   # returns `nil`.
   #
   # ```ruby
@@ -290,9 +290,9 @@ module TSort
   #
   # Return value is unspecified.
   #
-  # [`each_strongly_connected_component_from`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-each_strongly_connected_component_from)
+  # [`each_strongly_connected_component_from`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-each_strongly_connected_component_from)
   # doesn't call
-  # [`tsort_each_node`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-tsort_each_node).
+  # [`tsort_each_node`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-tsort_each_node).
   #
   # ```ruby
   # class G
@@ -341,7 +341,7 @@ module TSort
   # has no parent.
   #
   # If there is a cycle,
-  # [`TSort::Cyclic`](https://docs.ruby-lang.org/en/2.6.0/TSort/Cyclic.html) is
+  # [`TSort::Cyclic`](https://docs.ruby-lang.org/en/2.7.0/TSort/Cyclic.html) is
   # raised.
   #
   # ```ruby
@@ -362,13 +362,13 @@ module TSort
   # ```
   def tsort; end
   # The iterator version of the
-  # [`tsort`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-tsort)
+  # [`tsort`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-tsort)
   # method. `obj.tsort_each` is similar to `obj.tsort.each`, but modification of
   # *obj* during the iteration may lead to unexpected results.
   #
-  # [`tsort_each`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-tsort_each)
+  # [`tsort_each`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-tsort_each)
   # returns `nil`. If there is a cycle,
-  # [`TSort::Cyclic`](https://docs.ruby-lang.org/en/2.6.0/TSort/Cyclic.html) is
+  # [`TSort::Cyclic`](https://docs.ruby-lang.org/en/2.7.0/TSort/Cyclic.html) is
   # raised.
   #
   # ```ruby
@@ -391,12 +391,12 @@ module TSort
   def tsort_each(&block); end
   # Should be implemented by a extended class.
   #
-  # [`tsort_each_child`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-tsort_each_child)
+  # [`tsort_each_child`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-tsort_each_child)
   # is used to iterate for child nodes of *node*.
   def tsort_each_child(node); end
   # Should be implemented by a extended class.
   #
-  # [`tsort_each_node`](https://docs.ruby-lang.org/en/2.6.0/TSort.html#method-i-tsort_each_node)
+  # [`tsort_each_node`](https://docs.ruby-lang.org/en/2.7.0/TSort.html#method-i-tsort_each_node)
   # is used to iterate for all nodes over a graph.
   def tsort_each_node; end
 end

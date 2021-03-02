@@ -2,89 +2,89 @@
 
 # The `Vector` class represents a mathematical vector, which is useful in its
 # own right, and also constitutes a row or column of a
-# [`Matrix`](https://docs.ruby-lang.org/en/2.6.0/Matrix.html).
+# [`Matrix`](https://docs.ruby-lang.org/en/2.7.0/Matrix.html).
 #
-# ## [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) Catalogue
+# ## [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) Catalogue
 #
 # To create a Vector:
-# *   [`Vector.[](*array)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-c-5B-5D)
-# *   [`Vector.elements`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-c-elements)(array,
+# *   [`Vector.[](*array)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-5B-5D)
+# *   [`Vector.elements`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-elements)(array,
 #     copy = true)
-# *   [`Vector.basis`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-c-basis)(size:
+# *   [`Vector.basis`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-basis)(size:
 #     n, index: k)
-# *   [`Vector.zero(n)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-c-zero)
+# *   [`Vector.zero(n)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-zero)
 #
 #
 # To access elements:
-# *   [`[](i)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-5B-5D)
+# *   [`[](i)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-5B-5D)
 #
 #
 # To set elements:
-# *   [`[]=`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-5B-5D-3D)(i,
+# *   [`[]=`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-5B-5D-3D)(i,
 #     v)
 #
 #
 # To enumerate the elements:
-# *   [`each2(v)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-each2)
-# *   [`collect2(v)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-collect2)
+# *   [`each2(v)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-each2)
+# *   [`collect2(v)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-collect2)
 #
 #
 # Properties of vectors:
-# *   [`angle_with(v)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-angle_with)
-# *   [`Vector.independent?(*vs)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-c-independent-3F)
-# *   [`independent?(*vs)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-independent-3F)
-# *   [`zero?`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-zero-3F)
+# *   [`angle_with(v)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-angle_with)
+# *   [`Vector.independent?(*vs)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-independent-3F)
+# *   [`independent?(*vs)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-independent-3F)
+# *   [`zero?`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-zero-3F)
 #
 #
-# [`Vector`](https://docs.ruby-lang.org/en/2.6.0/Vector.html) arithmetic:
-# *   [`*(x)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-2A) "is
+# [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html) arithmetic:
+# *   [`*(x)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-2A) "is
 #     matrix or number"
-# *   [`+(v)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-2B)
-# *   [`-(v)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-2D)
+# *   [`+(v)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-2B)
+# *   [`-(v)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-2D)
 # *   #/(v)
-# *   [`+`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-2B)@
-# *   [`-`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-2D)@
+# *   [`+`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-2B)@
+# *   [`-`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-2D)@
 #
 #
-# [`Vector`](https://docs.ruby-lang.org/en/2.6.0/Vector.html) functions:
-# *   [`inner_product(v)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-inner_product),
+# [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html) functions:
+# *   [`inner_product(v)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-inner_product),
 #     dot(v)
-# *   [`cross_product(v)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-cross_product),
+# *   [`cross_product(v)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-cross_product),
 #     cross(v)
-# *   [`collect`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-collect)
-# *   [`collect!`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-collect-21)
-# *   [`magnitude`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-magnitude)
-# *   [`map`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-map)
-# *   [`map!`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-map-21)
-# *   [`map2(v)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-map2)
-# *   [`norm`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-norm)
-# *   [`normalize`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-normalize)
-# *   [`r`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-r)
-# *   [`round`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-round)
-# *   [`size`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-size)
+# *   [`collect`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-collect)
+# *   [`collect!`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-collect-21)
+# *   [`magnitude`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-magnitude)
+# *   [`map`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-map)
+# *   [`map!`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-map-21)
+# *   [`map2(v)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-map2)
+# *   [`norm`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-norm)
+# *   [`normalize`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-normalize)
+# *   [`r`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-r)
+# *   [`round`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-round)
+# *   [`size`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-size)
 #
 #
 # Conversion to other data types:
-# *   [`covector`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-covector)
-# *   [`to_a`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-to_a)
-# *   [`coerce(other)`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-coerce)
+# *   [`covector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-covector)
+# *   [`to_a`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-to_a)
+# *   [`coerce(other)`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-coerce)
 #
 #
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) representations:
-# *   [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-to_s)
-# *   [`inspect`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-inspect)
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) representations:
+# *   [`to_s`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-to_s)
+# *   [`inspect`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-inspect)
 class Vector
   include ::Enumerable
 
   Elem = type_member(:out)
 
-  # [`Vector.new`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-c-new)
+  # [`Vector.new`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-new)
   # is private; use Vector[] or
-  # [`Vector.elements`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-c-elements)
+  # [`Vector.elements`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-c-elements)
   # to create.
   def self.new(array); end
 
-  # Creates a [`Vector`](https://docs.ruby-lang.org/en/2.6.0/Vector.html) from a
+  # Creates a [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html) from a
   # list of elements.
   #
   # ```
@@ -100,7 +100,7 @@ class Vector
   def self.basis(size:, index:); end
 
   # Creates a vector from an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html). The optional
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html). The optional
   # second argument specifies whether the array itself or a copy is used
   # internally.
   def self.elements(array, copy = true); end
@@ -126,17 +126,17 @@ class Vector
   # Multiplies the vector by `x`, where `x` is a number or a matrix.
   def *(x); end
 
-  # [`Vector`](https://docs.ruby-lang.org/en/2.6.0/Vector.html) addition.
+  # [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html) addition.
   def +(x); end
 
   def +@(x); end
 
-  # [`Vector`](https://docs.ruby-lang.org/en/2.6.0/Vector.html) subtraction.
+  # [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html) subtraction.
   def -(x); end
 
   def -@(x); end
 
-  # [`Vector`](https://docs.ruby-lang.org/en/2.6.0/Vector.html) division.
+  # [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html) division.
   def /(x); end
 
   # Returns `true` iff the two vectors have the same elements in the same order.
@@ -156,29 +156,29 @@ class Vector
   # mechanism is used by Ruby to handle mixed-type numeric operations: it is
   # intended to find a compatible common type between the two operands of the
   # operator. See also
-  # [`Numeric#coerce`](https://docs.ruby-lang.org/en/2.6.0/Numeric.html#method-i-coerce).
+  # [`Numeric#coerce`](https://docs.ruby-lang.org/en/2.7.0/Numeric.html#method-i-coerce).
   def coerce(other); end
 
   # Like
-  # [`Array#collect`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-collect).
+  # [`Array#collect`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-collect).
   #
   # Also aliased as:
-  # [`map`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-map)
+  # [`map`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-map)
   def collect(); end
 
   # Collects (as in
-  # [`Enumerable#collect`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-collect))
+  # [`Enumerable#collect`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-collect))
   # over the elements of this vector and `v` in conjunction.
   def collect2(v); end
 
   # Alias for:
-  # [`[]`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-5B-5D)
+  # [`[]`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-5B-5D)
   def component(i); end
 
   def convector(); end
 
   # Alias for:
-  # [`cross_product`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-cross_product)
+  # [`cross_product`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-cross_product)
   def cross(*vs); end
 
   # Returns the cross product of this vector with the others.
@@ -200,11 +200,11 @@ class Vector
   #
   #
   # Also aliased as:
-  # [`cross`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-cross)
+  # [`cross`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-cross)
   def cross_product(*vs); end
 
   # Alias for:
-  # [`inner_product`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-inner_product)
+  # [`inner_product`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-inner_product)
   def dot(v); end
 
   # Iterate over the elements of this vector
@@ -214,7 +214,7 @@ class Vector
   def each2(v); end
 
   # Alias for:
-  # [`[]`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-5B-5D)
+  # [`[]`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-5B-5D)
   def element(i); end
 
   def elements_to_f(); end
@@ -247,11 +247,11 @@ class Vector
   #
   #
   # Also aliased as:
-  # [`dot`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-dot)
+  # [`dot`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-dot)
   def inner_product(v); end
 
   # Overrides
-  # [`Object#inspect`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-inspect)
+  # [`Object#inspect`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-inspect)
   def inspect(); end
 
   # Returns the modulus (Pythagorean distance) of the vector.
@@ -262,22 +262,22 @@ class Vector
   #
   #
   # Also aliased as:
-  # [`r`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-r),
-  # [`norm`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-norm)
+  # [`r`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-r),
+  # [`norm`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-norm)
   def magnitude(); end
 
   # Alias for:
-  # [`collect`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-collect)
+  # [`collect`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-collect)
   def map(); end
 
   # Like
-  # [`Vector#collect2`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-collect2),
-  # but returns a [`Vector`](https://docs.ruby-lang.org/en/2.6.0/Vector.html)
-  # instead of an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+  # [`Vector#collect2`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-collect2),
+  # but returns a [`Vector`](https://docs.ruby-lang.org/en/2.7.0/Vector.html)
+  # instead of an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
   def map2(v); end
 
   # Alias for:
-  # [`magnitude`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-magnitude)
+  # [`magnitude`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-magnitude)
   def norm(); end
 
   # Returns a new vector with the same direction but with norm 1.
@@ -290,11 +290,11 @@ class Vector
   def normalize(); end
 
   # Alias for:
-  # [`magnitude`](https://docs.ruby-lang.org/en/2.6.0/Vector.html#method-i-magnitude)
+  # [`magnitude`](https://docs.ruby-lang.org/en/2.7.0/Vector.html#method-i-magnitude)
   def r(); end
 
   # Returns a vector with entries rounded to the given precision (see
-  # [`Float#round`](https://docs.ruby-lang.org/en/2.6.0/Float.html#method-i-round))
+  # [`Float#round`](https://docs.ruby-lang.org/en/2.7.0/Float.html#method-i-round))
   def round(ndigits = 0); end
 
   # Returns the number of elements in the vector.
@@ -307,7 +307,7 @@ class Vector
   def to_matrix(); end
 
   # Overrides
-  # [`Object#to_s`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-to_s)
+  # [`Object#to_s`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-to_s)
   def to_s(); end
 
   # Returns `true` iff all elements are zero.
@@ -325,7 +325,7 @@ class Matrix
 
   # Yields all elements of the matrix, starting with those of the first row, or
   # returns an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) if no
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) if no
   # block given. Elements can be restricted by passing an argument:
   # *   :all (default): yields all elements
   # *   :diagonal: yields only elements on the diagonal
@@ -344,14 +344,14 @@ class Matrix
   #     Matrix[ [1,2], [3,4] ].each(:strict\_lower).to\_a # => [3]
   def each(which=:all, &block); end
 
-  # [`Matrix.new`](https://docs.ruby-lang.org/en/2.6.0/Matrix.html#method-c-new)
+  # [`Matrix.new`](https://docs.ruby-lang.org/en/2.7.0/Matrix.html#method-c-new)
   # is private; use
-  # [`Matrix.rows`](https://docs.ruby-lang.org/en/2.6.0/Matrix.html#method-c-rows),
+  # [`Matrix.rows`](https://docs.ruby-lang.org/en/2.7.0/Matrix.html#method-c-rows),
   # columns, [], etc... to create.
   def self.new(rows, column_count = rows[0].size); end
 
   # Alias for:
-  # [`identity`](https://docs.ruby-lang.org/en/2.6.0/Matrix.html#method-c-identity)
+  # [`identity`](https://docs.ruby-lang.org/en/2.7.0/Matrix.html#method-c-identity)
   def self.I(n); end
 
   # Creates a matrix where each argument is a row.
@@ -448,8 +448,8 @@ class Matrix
   #
   #
   # Also aliased as:
-  # [`unit`](https://docs.ruby-lang.org/en/2.6.0/Matrix.html#method-c-unit),
-  # [`I`](https://docs.ruby-lang.org/en/2.6.0/Matrix.html#method-c-I)
+  # [`unit`](https://docs.ruby-lang.org/en/2.7.0/Matrix.html#method-c-unit),
+  # [`I`](https://docs.ruby-lang.org/en/2.7.0/Matrix.html#method-c-I)
   def self.identity(n); end
 
   # Creates a single-row matrix where the values of that row are as given in
@@ -483,7 +483,7 @@ class Matrix
   def self.scalar(n, value); end
 
   # Alias for:
-  # [`identity`](https://docs.ruby-lang.org/en/2.6.0/Matrix.html#method-c-identity)
+  # [`identity`](https://docs.ruby-lang.org/en/2.7.0/Matrix.html#method-c-identity)
   def self.unit(n); end
 
   # Create a matrix by stacking matrices vertically
@@ -528,13 +528,13 @@ class Matrix::EigenvalueDecomposition
   def self.new(a); end
 
   # Alias for:
-  # [`eigenvalue_matrix`](https://docs.ruby-lang.org/en/2.6.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvalue_matrix)
+  # [`eigenvalue_matrix`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvalue_matrix)
   def d; end
 
   # Returns the block diagonal eigenvalue matrix `D`
   #
   # Also aliased as:
-  # [`d`](https://docs.ruby-lang.org/en/2.6.0/Matrix/EigenvalueDecomposition.html#method-i-d)
+  # [`d`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-d)
   def eigenvalue_matrix; end
 
   # Returns the eigenvalues in an array
@@ -543,35 +543,35 @@ class Matrix::EigenvalueDecomposition
   # Returns the eigenvector matrix `V`
   #
   # Also aliased as:
-  # [`v`](https://docs.ruby-lang.org/en/2.6.0/Matrix/EigenvalueDecomposition.html#method-i-v)
+  # [`v`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-v)
   def eigenvector_matrix; end
 
   # Returns the inverse of the eigenvector matrix `V`
   #
   # Also aliased as:
-  # [`v_inv`](https://docs.ruby-lang.org/en/2.6.0/Matrix/EigenvalueDecomposition.html#method-i-v_inv)
+  # [`v_inv`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-v_inv)
   def eigenvector_matrix_inv; end
 
   # Returns an array of the eigenvectors
   def eigenvectors; end
 
   # Alias for:
-  # [`to_ary`](https://docs.ruby-lang.org/en/2.6.0/Matrix/EigenvalueDecomposition.html#method-i-to_ary)
+  # [`to_ary`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-to_ary)
   def to_a; end
 
   # Returns [eigenvector\_matrix,
-  # [`eigenvalue_matrix`](https://docs.ruby-lang.org/en/2.6.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvalue_matrix),
-  # [`eigenvector_matrix_inv`](https://docs.ruby-lang.org/en/2.6.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvector_matrix_inv)]
+  # [`eigenvalue_matrix`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvalue_matrix),
+  # [`eigenvector_matrix_inv`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvector_matrix_inv)]
   #
   # Also aliased as:
-  # [`to_a`](https://docs.ruby-lang.org/en/2.6.0/Matrix/EigenvalueDecomposition.html#method-i-to_a)
+  # [`to_a`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-to_a)
   def to_ary; end
 
   # Alias for:
-  # [`eigenvector_matrix`](https://docs.ruby-lang.org/en/2.6.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvector_matrix)
+  # [`eigenvector_matrix`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvector_matrix)
   def v; end
 
   # Alias for:
-  # [`eigenvector_matrix_inv`](https://docs.ruby-lang.org/en/2.6.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvector_matrix_inv)
+  # [`eigenvector_matrix_inv`](https://docs.ruby-lang.org/en/2.7.0/Matrix/EigenvalueDecomposition.html#method-i-eigenvector_matrix_inv)
   def v_inv; end
 end

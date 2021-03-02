@@ -1,29 +1,29 @@
 # typed: __STDLIB_INTERNAL
 
-# [`Random`](https://docs.ruby-lang.org/en/2.6.0/Random.html) provides an
+# [`Random`](https://docs.ruby-lang.org/en/2.7.0/Random.html) provides an
 # interface to Ruby's pseudo-random number generator, or PRNG. The PRNG produces
 # a deterministic sequence of bits which approximate true randomness. The
 # sequence may be represented by integers, floats, or binary strings.
 #
 # The generator may be initialized with either a system-generated or
 # user-supplied seed value by using
-# [`Random.srand`](https://docs.ruby-lang.org/en/2.6.0/Random.html#method-c-srand).
+# [`Random.srand`](https://docs.ruby-lang.org/en/2.7.0/Random.html#method-c-srand).
 #
 # The class method
-# [`Random.rand`](https://docs.ruby-lang.org/en/2.6.0/Random.html#method-c-rand)
+# [`Random.rand`](https://docs.ruby-lang.org/en/2.7.0/Random.html#method-c-rand)
 # provides the base functionality of
-# [`Kernel.rand`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-rand)
+# [`Kernel.rand`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-rand)
 # along with better handling of floating point values. These are both interfaces
 # to
-# [`Random::DEFAULT`](https://docs.ruby-lang.org/en/2.6.0/Random.html#DEFAULT),
+# [`Random::DEFAULT`](https://docs.ruby-lang.org/en/2.7.0/Random.html#DEFAULT),
 # the Ruby system PRNG.
 #
-# [`Random.new`](https://docs.ruby-lang.org/en/2.6.0/Random.html#method-c-new)
+# [`Random.new`](https://docs.ruby-lang.org/en/2.7.0/Random.html#method-c-new)
 # will create a new PRNG with a state independent of
-# [`Random::DEFAULT`](https://docs.ruby-lang.org/en/2.6.0/Random.html#DEFAULT),
+# [`Random::DEFAULT`](https://docs.ruby-lang.org/en/2.7.0/Random.html#DEFAULT),
 # allowing multiple generators with different seed values or sequence positions
 # to exist simultaneously.
-# [`Random`](https://docs.ruby-lang.org/en/2.6.0/Random.html) objects can be
+# [`Random`](https://docs.ruby-lang.org/en/2.7.0/Random.html) objects can be
 # marshaled, allowing sequences to be saved and resumed.
 #
 # PRNGs are currently implemented as a modified Mersenne Twister with a period
@@ -33,7 +33,7 @@ class Random < Object
   extend Random::Formatter
 
   # The default Pseudorandom number generator. Used by class methods of
-  # [`Random`](https://docs.ruby-lang.org/en/2.6.0/Random.html).
+  # [`Random`](https://docs.ruby-lang.org/en/2.7.0/Random.html).
   DEFAULT = T.let(T.unsafe(nil), Random)
 
   # Returns true if the two generators have the same internal state, otherwise
@@ -90,19 +90,19 @@ class Random < Object
   def initialize(seed=T.unsafe(nil)); end
 
   # When `max` is an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html), `rand`
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html), `rand`
   # returns a random integer greater than or equal to zero and less than `max`.
   # Unlike
-  # [`Kernel.rand`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-rand),
+  # [`Kernel.rand`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-rand),
   # when `max` is a negative integer or zero, `rand` raises an
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html).
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html).
   #
   # ```ruby
   # prng = Random.new
   # prng.rand(100)       # => 42
   # ```
   #
-  # When `max` is a [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html),
+  # When `max` is a [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html),
   # `rand` returns a random floating point number between 0.0 and `max`,
   # including 0.0 and excluding `max`.
   #
@@ -110,7 +110,7 @@ class Random < Object
   # prng.rand(1.5)       # => 1.4600282860034115
   # ```
   #
-  # When `max` is a [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html),
+  # When `max` is a [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html),
   # `rand` returns a random number where range.member?(number) == true.
   #
   # ```ruby
@@ -122,7 +122,7 @@ class Random < Object
   #
   # Both the beginning and ending values of the range must respond to subtract
   # (`-`) and add (`+`)methods, or rand will raise an
-  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html).
+  # [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html).
   sig {returns(Float)}
   sig do
     params(
@@ -154,7 +154,7 @@ class Random < Object
   def seed(); end
 
   # Returns an arbitrary seed value. This is used by
-  # [`Random.new`](https://docs.ruby-lang.org/en/2.6.0/Random.html#method-c-new)
+  # [`Random.new`](https://docs.ruby-lang.org/en/2.7.0/Random.html#method-c-new)
   # when no seed value is specified as an argument.
   #
   # ```ruby
@@ -180,7 +180,7 @@ class Random < Object
   def self.rand(max=T.unsafe(nil)); end
 
   # Seeds the system pseudo-random number generator,
-  # [`Random::DEFAULT`](https://docs.ruby-lang.org/en/2.6.0/Random.html#DEFAULT),
+  # [`Random::DEFAULT`](https://docs.ruby-lang.org/en/2.7.0/Random.html#DEFAULT),
   # with `number`. The previous seed value is returned.
   #
   # If `number` is omitted, seeds the generator using a source of entropy
@@ -210,7 +210,7 @@ class Random < Object
   # Returns a string, using platform providing features. Returned value is
   # expected to be a cryptographically secure pseudo-random number in binary
   # form. This method raises a
-  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.6.0/RuntimeError.html) if
+  # [`RuntimeError`](https://docs.ruby-lang.org/en/2.7.0/RuntimeError.html) if
   # the feature provided by platform failed to prepare the result.
   #
   # In 2017, Linux manpage random(7) writes that "no cryptographic primitive
@@ -224,7 +224,7 @@ class Random < Object
 end
 
 # Format raw random number as
-# [`Random`](https://docs.ruby-lang.org/en/2.6.0/Random.html) does
+# [`Random`](https://docs.ruby-lang.org/en/2.7.0/Random.html) does
 module Random::Formatter
   ALPHANUMERIC = T.let(T.unsafe(nil), T::Array[T.untyped])
 
@@ -306,7 +306,7 @@ module Random::Formatter
   def hex(n=nil); end
 
   # Generates formatted random number from raw random bytes. See
-  # [`Random#rand`](https://docs.ruby-lang.org/en/2.6.0/Random.html#method-i-rand).
+  # [`Random#rand`](https://docs.ruby-lang.org/en/2.7.0/Random.html#method-i-rand).
   sig {returns(Float)}
   sig do
     params(
@@ -373,7 +373,7 @@ module Random::Formatter
   def random_bytes(n=nil); end
 
   # Generates formatted random number from raw random bytes. See
-  # [`Random#rand`](https://docs.ruby-lang.org/en/2.6.0/Random.html#method-i-rand).
+  # [`Random#rand`](https://docs.ruby-lang.org/en/2.7.0/Random.html#method-i-rand).
   sig {returns(Float)}
   sig do
     params(
@@ -474,47 +474,83 @@ end
 
 # ## Secure random number generator interface.
 #
-# This library is an interface for secure random number generator which is
-# suitable for generating session key in HTTP cookies, etc.
+# This library is an interface to secure random number generators which are
+# suitable for generating session keys in HTTP cookies, etc.
 #
 # You can use this library in your application by requiring it:
 #
-# ~~~ruby
+# ```ruby
 # require 'securerandom'
-# ~~~
+# ```
 #
-# It supports following secure random number generators.
+# It supports the following secure random number generators:
 #
-# * openssl
-# * /dev/urandom
-# * Win32
+# *   openssl
+# *   /dev/urandom
+# *   Win32
+#
+#
+# [`SecureRandom`](https://docs.ruby-lang.org/en/2.7.0/SecureRandom.html) is
+# extended by the
+# [`Random::Formatter`](https://docs.ruby-lang.org/en/2.7.0/Random/Formatter.html)
+# module which defines the following methods:
+#
+# *   alphanumeric
+# *   base64
+# *   choose
+# *   [`gen_random`](https://docs.ruby-lang.org/en/2.7.0/SecureRandom.html#method-c-gen_random)
+# *   hex
+# *   rand
+# *   random\_bytes
+# *   random\_number
+# *   urlsafe\_base64
+# *   uuid
+#
+#
+# These methods are usable as class methods of
+# [`SecureRandom`](https://docs.ruby-lang.org/en/2.7.0/SecureRandom.html) such
+# as `SecureRandom.hex`.
 #
 # ### Examples
 #
-# Hexadecimal string.
+# Generate random hexadecimal strings:
 #
-# ~~~ruby
+# ```ruby
 # require 'securerandom'
 #
-# p SecureRandom.hex(10) #=> "52750b30ffbc7de3b362"
-# p SecureRandom.hex(10) #=> "92b15d6c8dc4beb5f559"
-# p SecureRandom.hex(13) #=> "39b290146bea6ce975c37cfc23"
-# ~~~
+# SecureRandom.hex(10) #=> "52750b30ffbc7de3b362"
+# SecureRandom.hex(10) #=> "92b15d6c8dc4beb5f559"
+# SecureRandom.hex(13) #=> "39b290146bea6ce975c37cfc23"
+# ```
 #
-# Base64 string.
+# Generate random base64 strings:
 #
-# ~~~ruby
-# p SecureRandom.base64(10) #=> "EcmTPZwWRAozdA=="
-# p SecureRandom.base64(10) #=> "KO1nIU+p9DKxGg=="
-# p SecureRandom.base64(12) #=> "7kJSM/MzBJI+75j8"
-# ~~~~
+# ```ruby
+# SecureRandom.base64(10) #=> "EcmTPZwWRAozdA=="
+# SecureRandom.base64(10) #=> "KO1nIU+p9DKxGg=="
+# SecureRandom.base64(12) #=> "7kJSM/MzBJI+75j8"
+# ```
 #
-# Binary string.
+# Generate random binary strings:
 #
-# ~~~ruby
-# p SecureRandom.random_bytes(10) #=> "\016\t{\370g\310pbr\301"
-# p SecureRandom.random_bytes(10) #=> "\323U\030TO\234\357\020\a\337"
-# ~~~
+# ```ruby
+# SecureRandom.random_bytes(10) #=> "\016\t{\370g\310pbr\301"
+# SecureRandom.random_bytes(10) #=> "\323U\030TO\234\357\020\a\337"
+# ```
+#
+# Generate alphanumeric strings:
+#
+# ```ruby
+# SecureRandom.alphanumeric(10) #=> "S8baxMJnPl"
+# SecureRandom.alphanumeric(10) #=> "aOxAg8BAJe"
+# ```
+#
+# Generate UUIDs:
+#
+# ```ruby
+# SecureRandom.uuid #=> "2d931510-d99f-494a-8c67-87feb05e1594"
+# SecureRandom.uuid #=> "bad85eb9-0713-4da7-8d36-07a8e4b00eab"
+# ```
 module SecureRandom
   extend Random::Formatter
 

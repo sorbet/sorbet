@@ -1,26 +1,26 @@
 # typed: __STDLIB_INTERNAL
 
-# [`OpenURI`](https://docs.ruby-lang.org/en/2.6.0/OpenURI.html) is an
+# [`OpenURI`](https://docs.ruby-lang.org/en/2.7.0/OpenURI.html) is an
 # easy-to-use wrapper for
-# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.6.0/Net/HTTP.html), Net::HTTPS
-# and [`Net::FTP`](https://docs.ruby-lang.org/en/2.6.0/Net/FTP.html).
+# [`Net::HTTP`](https://docs.ruby-lang.org/en/2.7.0/Net/HTTP.html), Net::HTTPS
+# and [`Net::FTP`](https://docs.ruby-lang.org/en/2.7.0/Net/FTP.html).
 #
 # ## Example
 #
 # It is possible to open an http, https or ftp URL as though it were a file:
 #
 # ```ruby
-# open("http://www.ruby-lang.org/") {|f|
+# URI.open("http://www.ruby-lang.org/") {|f|
 #   f.each_line {|line| p line}
 # }
 # ```
 #
 # The opened file has several getter methods for its meta-information, as
 # follows, since it is extended by
-# [`OpenURI::Meta`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/Meta.html).
+# [`OpenURI::Meta`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/Meta.html).
 #
 # ```ruby
-# open("http://www.ruby-lang.org/en") {|f|
+# URI.open("http://www.ruby-lang.org/en") {|f|
 #   f.each_line {|line| p line}
 #   p f.base_uri         # <URI::HTTP:0x40e6ef2 URL:http://www.ruby-lang.org/en/>
 #   p f.content_type     # "text/html"
@@ -33,7 +33,7 @@
 # Additional header fields can be specified by an optional hash argument.
 #
 # ```ruby
-# open("http://www.ruby-lang.org/en/",
+# URI.open("http://www.ruby-lang.org/en/",
 #   "User-Agent" => "Ruby/#{RUBY_VERSION}",
 #   "From" => "foo@bar.invalid",
 #   "Referer" => "http://www.ruby-lang.org/") {|f|
@@ -45,18 +45,17 @@
 # in effect by default. Here we disable proxy:
 #
 # ```ruby
-# open("http://www.ruby-lang.org/en/", :proxy => nil) {|f|
+# URI.open("http://www.ruby-lang.org/en/", :proxy => nil) {|f|
 #   # ...
 # }
 # ```
 #
 # See
-# [`OpenURI::OpenRead.open`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/OpenRead.html#method-i-open)
-# and
-# [`Kernel#open`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-open)
+# [`OpenURI::OpenRead.open`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/OpenRead.html#method-i-open)
+# and [`URI.open`](https://docs.ruby-lang.org/en/2.7.0/URI.html#method-c-open)
 # for more on available options.
 #
-# [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) objects can be opened in
+# [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) objects can be opened in
 # a similar way.
 #
 # ```ruby
@@ -66,9 +65,9 @@
 # }
 # ```
 #
-# [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) objects can be read
+# [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) objects can be read
 # directly. The returned string is also extended by
-# [`OpenURI::Meta`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/Meta.html).
+# [`OpenURI::Meta`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/Meta.html).
 #
 # ```ruby
 # str = uri.read
@@ -96,15 +95,15 @@ end
 
 # Mixin for holding meta-information.
 module OpenURI::Meta
-  # returns a [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) that is the
+  # returns a [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) that is the
   # base of relative URIs in the data. It may differ from the
-  # [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) supplied by a user due
+  # [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) supplied by a user due
   # to redirection.
   def base_uri; end
 
-  # returns a [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) that is the
+  # returns a [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) that is the
   # base of relative URIs in the data. It may differ from the
-  # [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) supplied by a user due
+  # [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) supplied by a user due
   # to redirection.
   def base_uri=(_); end
 
@@ -115,8 +114,7 @@ module OpenURI::Meta
   # and its result is returned. It can be used to guess charset.
   #
   # If charset parameter and block is not given, nil is returned except text
-  # type in HTTP. In that case, "iso-8859-1" is returned as defined by RFC2616
-  # 3.7.1.
+  # type. In that case, "utf-8" is returned as defined by RFC6838 4.2.1
   def charset; end
 
   # Returns a list of encodings in Content-Encoding field as an array of
@@ -129,32 +127,32 @@ module OpenURI::Meta
   # canonicalization. Content-Type parameters are stripped.
   def content_type; end
 
-  # returns a [`Time`](https://docs.ruby-lang.org/en/2.6.0/Time.html) that
+  # returns a [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) that
   # represents the Last-Modified field.
   def last_modified; end
 
-  # returns a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) that
+  # returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) that
   # represents header fields. The
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) keys are downcased
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) keys are downcased
   # for canonicalization. The
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) values are a field
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) values are a field
   # body. If there are multiple field with same field name, the field values are
   # concatenated with a comma.
   def meta; end
 
-  # returns a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) that
+  # returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) that
   # represents header fields. The
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) keys are downcased
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) keys are downcased
   # for canonicalization. The
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) value are an array
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) value are an array
   # of field values.
   def metas; end
 
-  # returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) that
+  # returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) that
   # consists of status code and message.
   def status; end
 
-  # returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) that
+  # returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) that
   # consists of status code and message.
   def status=(_); end
 end
@@ -162,30 +160,30 @@ end
 
 # Mixin for HTTP and FTP URIs.
 module OpenURI::OpenRead
-  # [`OpenURI::OpenRead#open`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/OpenRead.html#method-i-open)
+  # [`OpenURI::OpenRead#open`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/OpenRead.html#method-i-open)
   # provides 'open' for
-  # [`URI::HTTP`](https://docs.ruby-lang.org/en/2.6.0/URI/HTTP.html) and
-  # [`URI::FTP`](https://docs.ruby-lang.org/en/2.6.0/URI/FTP.html).
+  # [`URI::HTTP`](https://docs.ruby-lang.org/en/2.7.0/URI/HTTP.html) and
+  # [`URI::FTP`](https://docs.ruby-lang.org/en/2.7.0/URI/FTP.html).
   #
-  # [`OpenURI::OpenRead#open`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/OpenRead.html#method-i-open)
+  # [`OpenURI::OpenRead#open`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/OpenRead.html#method-i-open)
   # takes optional 3 arguments as:
   #
   # ```ruby
   # OpenURI::OpenRead#open([mode [, perm]] [, options]) [{|io| ... }]
   # ```
   #
-  # [`OpenURI::OpenRead#open`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/OpenRead.html#method-i-open)
+  # [`OpenURI::OpenRead#open`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/OpenRead.html#method-i-open)
   # returns an IO-like object if block is not given. Otherwise it yields the
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) object and return the
-  # value of the block. The [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html)
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object and return the
+  # value of the block. The [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html)
   # object is extended with
-  # [`OpenURI::Meta`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/Meta.html).
+  # [`OpenURI::Meta`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/Meta.html).
   #
   # `mode` and `perm` are the same as
-  # [`Kernel#open`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-open).
+  # [`Kernel#open`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-open).
   #
   # However, `mode` must be read mode because
-  # [`OpenURI::OpenRead#open`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/OpenRead.html#method-i-open)
+  # [`OpenURI::OpenRead#open`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/OpenRead.html#method-i-open)
   # doesn't support write mode (yet). Also `perm` is ignored because it is
   # meaningful only for file creation.
   #
@@ -208,12 +206,12 @@ module OpenURI::OpenRead
   # ```
   #
   #     If :proxy option is specified, the value should be
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html),
-  #     [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html), boolean or nil.
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html),
+  #     [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html), boolean or nil.
   #
-  #     When [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) or
-  #     [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) is given, it is
-  #     treated as proxy [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html).
+  #     When [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or
+  #     [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) is given, it is
+  #     treated as proxy [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html).
   #
   #     When true is given or the option itself is not specified, environment
   #     variable 'scheme\_proxy' is examined. 'scheme' is replaced by 'http',
@@ -234,22 +232,22 @@ module OpenURI::OpenRead
   # ```
   #
   #     If :proxy option is specified, the value should be an
-  #     [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) with 3
+  #     [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) with 3
   #     elements. It should contain a proxy
-  #     [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html), a proxy user name
+  #     [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html), a proxy user name
   #     and a proxy password. The proxy
-  #     [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) should be a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html), an
-  #     [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html) or nil. The proxy
+  #     [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) should be a
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html), an
+  #     [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html) or nil. The proxy
   #     user name and password should be a
-  #     [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  #     [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
   #     If nil is given for the proxy
-  #     [`URI`](https://docs.ruby-lang.org/en/2.6.0/URI.html), this option is
+  #     [`URI`](https://docs.ruby-lang.org/en/2.7.0/URI.html), this option is
   #     just ignored.
   #
   #     If :proxy and :proxy\_http\_basic\_authentication is specified,
-  #     [`ArgumentError`](https://docs.ruby-lang.org/en/2.6.0/ArgumentError.html)
+  #     [`ArgumentError`](https://docs.ruby-lang.org/en/2.7.0/ArgumentError.html)
   #     is raised.
   #
   # :http\_basic\_authentication
@@ -372,16 +370,16 @@ module OpenURI::OpenRead
   #     `:redirect` is true by default. `:redirect => false` is used to disable
   #     all HTTP redirects.
   #
-  #     [`OpenURI::HTTPRedirect`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/HTTPRedirect.html)
+  #     [`OpenURI::HTTPRedirect`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/HTTPRedirect.html)
   #     exception raised on redirection. Using `true` also means that
   #     redirections between http and ftp are permitted.
   def open(*rest, &block); end
 
-  # [`[OpenURI::OpenRead#read(](options)`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/OpenRead.html#method-i-read))
+  # [`[OpenURI::OpenRead#read(](options)`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/OpenRead.html#method-i-read))
   # reads a content referenced by self and returns the content as string. The
   # string is extended with
-  # [`OpenURI::Meta`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/Meta.html).
+  # [`OpenURI::Meta`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/Meta.html).
   # The argument `options` is same as
-  # [`OpenURI::OpenRead#open`](https://docs.ruby-lang.org/en/2.6.0/OpenURI/OpenRead.html#method-i-open).
+  # [`OpenURI::OpenRead#open`](https://docs.ruby-lang.org/en/2.7.0/OpenURI/OpenRead.html#method-i-open).
   def read(options = _); end
 end

@@ -38,7 +38,7 @@
 # ```
 #
 # The list of available signal names and their interpretation is system
-# dependent. [`Signal`](https://docs.ruby-lang.org/en/2.6.0/Signal.html)
+# dependent. [`Signal`](https://docs.ruby-lang.org/en/2.7.0/Signal.html)
 # delivery semantics may also vary between systems; in particular signal
 # delivery may not always be reliable.
 module Signal

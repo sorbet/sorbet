@@ -12,12 +12,15 @@
 # the size of the fiber stack(s).
 #
 # When a fiber is created it will not run automatically. Rather it must be
-# explicitly asked to run using the `Fiber#resume` method. The code running
-# inside the fiber can give up control by calling `Fiber.yield` in which case it
-# yields control back to caller (the caller of the `Fiber#resume`).
+# explicitly asked to run using the
+# [`Fiber#resume`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-resume)
+# method. The code running inside the fiber can give up control by calling
+# [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
+# in which case it yields control back to caller (the caller of the
+# [`Fiber#resume`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-resume)).
 #
 # Upon yielding or termination the
-# [`Fiber`](https://docs.ruby-lang.org/en/2.6.0/Fiber.html) returns the value of
+# [`Fiber`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html) returns the value of
 # the last executed expression
 #
 # For instance:
@@ -41,9 +44,13 @@
 # FiberError: dead fiber called
 # ```
 #
-# The `Fiber#resume` method accepts an arbitrary number of parameters, if it is
-# the first call to `resume` then they will be passed as block arguments.
-# Otherwise they will be the return value of the call to `Fiber.yield`
+# The
+# [`Fiber#resume`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-resume)
+# method accepts an arbitrary number of parameters, if it is the first call to
+# [`resume`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-resume)
+# then they will be passed as block arguments. Otherwise they will be the return
+# value of the call to
+# [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
 #
 # Example:
 #
@@ -53,15 +60,15 @@
 # end
 #
 # puts fiber.resume 10
-# puts fiber.resume 14
-# puts fiber.resume 18
+# puts fiber.resume 1_000_000
+# puts fiber.resume "The fiber will be dead before I can cause trouble"
 # ```
 #
 # *produces*
 #
 # ```
 # 12
-# 14
+# 1000000
 # FiberError: dead fiber called
 # ```
 class Fiber < Object
@@ -75,29 +82,41 @@ class Fiber < Object
   def alive?; end
 
   # Alias for:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Fiber.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-to_s)
   def inspect; end
 
-  # Resumes the fiber from the point at which the last `Fiber.yield` was called,
-  # or starts running it if it is the first call to `resume`. Arguments passed
-  # to resume will be the value of the `Fiber.yield` expression or will be
-  # passed as block parameters to the fiber's block if this is the first
-  # `resume`.
+  # Resumes the fiber from the point at which the last
+  # [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
+  # was called, or starts running it if it is the first call to
+  # [`resume`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-resume).
+  # Arguments passed to resume will be the value of the
+  # [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
+  # expression or will be passed as block parameters to the fiber's block if
+  # this is the first
+  # [`resume`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-resume).
   #
   # Alternatively, when resume is called it evaluates to the arguments passed to
-  # the next `Fiber.yield` statement inside the fiber's block or to the block
-  # value if it runs to completion without any `Fiber.yield`
+  # the next
+  # [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
+  # statement inside the fiber's block or to the block value if it runs to
+  # completion without any
+  # [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
   def resume(*_); end
 
   # Returns fiber information string.
   #
   # Also aliased as:
-  # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/Fiber.html#method-i-inspect)
+  # [`inspect`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-inspect)
   def to_s; end
 
   # Yields control back to the context that resumed the fiber, passing along any
   # arguments that were passed to it. The fiber will resume processing at this
-  # point when `resume` is called next. Any arguments passed to the next
-  # `resume` will be the value that this `Fiber.yield` expression evaluates to.
+  # point when
+  # [`resume`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-resume)
+  # is called next. Any arguments passed to the next
+  # [`resume`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-i-resume)
+  # will be the value that this
+  # [`Fiber.yield`](https://docs.ruby-lang.org/en/2.7.0/Fiber.html#method-c-yield)
+  # expression evaluates to.
   def self.yield(*_); end
 end

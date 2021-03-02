@@ -1,13 +1,13 @@
 # typed: __STDLIB_INTERNAL
 
-# [`SDBM`](https://docs.ruby-lang.org/en/2.6.0/SDBM.html) provides a simple
+# [`SDBM`](https://docs.ruby-lang.org/en/2.7.0/SDBM.html) provides a simple
 # file-based key-value store, which can only store
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) keys and values.
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) keys and values.
 #
 # Note that Ruby comes with the source code for
-# [`SDBM`](https://docs.ruby-lang.org/en/2.6.0/SDBM.html), while the
-# [`DBM`](https://docs.ruby-lang.org/en/2.6.0/DBM.html) and
-# [`GDBM`](https://docs.ruby-lang.org/en/2.6.0/GDBM.html) standard libraries
+# [`SDBM`](https://docs.ruby-lang.org/en/2.7.0/SDBM.html), while the
+# [`DBM`](https://docs.ruby-lang.org/en/2.7.0/DBM.html) and
+# [`GDBM`](https://docs.ruby-lang.org/en/2.7.0/GDBM.html) standard libraries
 # rely on external libraries and headers.
 #
 # ### Examples
@@ -62,7 +62,7 @@ class SDBM
   Elem = type_member(:out)
 
   # Creates a new database handle by opening the given `filename`.
-  # [`SDBM`](https://docs.ruby-lang.org/en/2.6.0/SDBM.html) actually uses two
+  # [`SDBM`](https://docs.ruby-lang.org/en/2.7.0/SDBM.html) actually uses two
   # physical files, with extensions '.dir' and '.pag'. These extensions will
   # automatically be appended to the `filename`.
   #
@@ -92,7 +92,7 @@ class SDBM
 
   # Closes the database file.
   #
-  # Raises [`SDBMError`](https://docs.ruby-lang.org/en/2.6.0/SDBMError.html) if
+  # Raises [`SDBMError`](https://docs.ruby-lang.org/en/2.7.0/SDBMError.html) if
   # the database is already closed.
   def close; end
 
@@ -114,25 +114,25 @@ class SDBM
   # Iterates over each key-value pair in the database.
   #
   # If no block is given, returns an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html).
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html).
   def each; end
 
   # Iterates over each `key` in the database.
   #
   # If no block is given, returns an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html).
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html).
   def each_key; end
 
   # Iterates over each key-value pair in the database.
   #
   # If no block is given, returns an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html).
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html).
   def each_pair; end
 
   # Iterates over each `value` in the database.
   #
   # If no block is given, returns an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html).
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html).
   def each_value; end
 
   # Returns `true` if the database is empty.
@@ -145,7 +145,7 @@ class SDBM
   # to the block.
   #
   # If no block is provided and no value is associated with the given `key`,
-  # then an [`IndexError`](https://docs.ruby-lang.org/en/2.6.0/IndexError.html)
+  # then an [`IndexError`](https://docs.ruby-lang.org/en/2.7.0/IndexError.html)
   # will be raised.
   def fetch(*_); end
 
@@ -160,7 +160,7 @@ class SDBM
 
   def index(_); end
 
-  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) in which
+  # Returns a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) in which
   # the key-value pairs have been inverted.
   #
   # Example:
@@ -184,7 +184,7 @@ class SDBM
   # Returns `true` if the database contains the given `key`.
   def key?(_); end
 
-  # Returns a new [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # Returns a new [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # containing the keys in the database.
   def keys; end
 
@@ -194,11 +194,11 @@ class SDBM
   # Returns `true` if the database contains the given `key`.
   def member?(_); end
 
-  # Creates a new [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) using
+  # Creates a new [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) using
   # the key-value pairs from the database, then calls
-  # [`Hash#reject`](https://docs.ruby-lang.org/en/2.6.0/Hash.html#method-i-reject)
+  # [`Hash#reject`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-reject)
   # with the given block, which returns a
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) with only the
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) with only the
   # key-value pairs for which the block returns `false`.
   def reject; end
 
@@ -209,11 +209,11 @@ class SDBM
   # Empties the database, then inserts the given key-value pairs.
   #
   # This method will work with any object which implements an
-  # [`each_pair`](https://docs.ruby-lang.org/en/2.6.0/SDBM.html#method-i-each_pair)
-  # method, such as a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
+  # [`each_pair`](https://docs.ruby-lang.org/en/2.7.0/SDBM.html#method-i-each_pair)
+  # method, such as a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
   def replace(_); end
 
-  # Returns a new [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # Returns a new [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # key-value pairs for which the block returns `true`.
   #
   # Example:
@@ -234,7 +234,7 @@ class SDBM
   def select; end
 
   # Removes a key-value pair from the database and returns them as an
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html). If the database
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html). If the database
   # is empty, returns `nil`.
   def shift; end
 
@@ -249,7 +249,7 @@ class SDBM
   # Returns the given `value`.
   def store(_, _); end
 
-  # Returns a new [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # Returns a new [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # containing each key-value pair in the database.
   #
   # Example:
@@ -265,30 +265,30 @@ class SDBM
   # ```
   def to_a; end
 
-  # Returns a new [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+  # Returns a new [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
   # containing each key-value pair in the database.
   def to_hash; end
 
   # Insert or update key-value pairs.
   #
   # This method will work with any object which implements an
-  # [`each_pair`](https://docs.ruby-lang.org/en/2.6.0/SDBM.html#method-i-each_pair)
-  # method, such as a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
+  # [`each_pair`](https://docs.ruby-lang.org/en/2.7.0/SDBM.html#method-i-each_pair)
+  # method, such as a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
   def update(_); end
 
   # Returns `true` if the database contains the given `value`.
   def value?(_); end
 
-  # Returns a new [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html)
+  # Returns a new [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html)
   # containing the values in the database.
   def values; end
 
-  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of
+  # Returns an [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of
   # values corresponding to the given keys.
   def values_at(*_); end
 
   # If called without a block, this is the same as
-  # [`SDBM.new`](https://docs.ruby-lang.org/en/2.6.0/SDBM.html#method-c-new).
+  # [`SDBM.new`](https://docs.ruby-lang.org/en/2.7.0/SDBM.html#method-c-new).
   #
   # If a block is given, the new database will be passed to the block and will
   # be safely closed after the block has executed.
@@ -305,6 +305,6 @@ class SDBM
   def self.open(*_); end
 end
 
-# [`Exception`](https://docs.ruby-lang.org/en/2.6.0/Exception.html) class used
+# [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html) class used
 # to return errors from the sdbm library.
 class SDBMError < ::StandardError; end

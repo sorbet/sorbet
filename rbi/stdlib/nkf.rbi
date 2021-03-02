@@ -1,6 +1,6 @@
 # typed: __STDLIB_INTERNAL
 
-# [`NKF`](https://docs.ruby-lang.org/en/2.6.0/NKF.html) - Ruby extension for
+# [`NKF`](https://docs.ruby-lang.org/en/2.7.0/NKF.html) - Ruby extension for
 # Network Kanji Filter
 #
 # ## Description
@@ -31,32 +31,32 @@
 # ### -j -s -e -w -w16 -w32
 #
 # Output code is ISO-2022-JP (7bit
-# [`JIS`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#JIS)), Shift\_JIS,
+# [`JIS`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#JIS)), Shift\_JIS,
 # EUC-JP, UTF-8N, UTF-16BE, UTF-32BE. Without this option and compile option,
 # ISO-2022-JP is assumed.
 #
 # ### -J -S -E -W -W16 -W32
 #
-# Input assumption is [`JIS`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#JIS)
+# Input assumption is [`JIS`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#JIS)
 # 7 bit, Shift\_JIS, EUC-JP, UTF-8, UTF-16, UTF-32.
 #
 # #### -J
 #
-# Assume  [`JIS`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#JIS) input. It
+# Assume  [`JIS`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#JIS) input. It
 # also accepts EUC-JP. This is the default. This flag does not exclude
 # Shift\_JIS.
 #
 # #### -S
 #
 # Assume Shift\_JIS and X0201 kana input. It also accepts
-# [`JIS`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#JIS). EUC-JP is
+# [`JIS`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#JIS). EUC-JP is
 # recognized as X0201 kana. Without **-x** flag, X0201 kana (halfwidth kana) is
 # converted into X0208.
 #
 # #### -E
 #
 # Assume EUC-JP input. It also accepts
-# [`JIS`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#JIS). Same as -J.
+# [`JIS`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#JIS). Same as -J.
 #
 # ### -t
 #
@@ -69,7 +69,7 @@
 # ### -o\_
 #
 # Output sequence to designate
-# [`ASCII`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#ASCII). (DEFAULT B)
+# [`ASCII`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#ASCII). (DEFAULT B)
 #
 # ### -r
 #
@@ -107,19 +107,19 @@
 # ### -[Z](0-3)
 #
 # Convert X0208 alphabet (Fullwidth Alphabets) to
-# [`ASCII`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#ASCII).
+# [`ASCII`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#ASCII).
 #
 # -Z -Z0
 # :   Convert X0208 alphabet to
-#     [`ASCII`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#ASCII).
+#     [`ASCII`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#ASCII).
 #
 # -Z1
 # :   Converts X0208 kankaku to single
-#     [`ASCII`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#ASCII) space.
+#     [`ASCII`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#ASCII) space.
 #
 # -Z2
 # :   Converts X0208 kankaku to double
-#     [`ASCII`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#ASCII) spaces.
+#     [`ASCII`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#ASCII) spaces.
 #
 # -Z3
 # :   Replacing Fullwidth >, <, ", & into '&gt;', '&lt;', '&quot;', '&amp;' as
@@ -131,8 +131,8 @@
 # Assume X0201 kana in MS-Kanji. With **-X** or without this option, X0201 is
 # converted into X0208 Kana. With **-x**, try to preserve X0208 kana and do not
 # convert X0201 kana to X0208. In
-# [`JIS`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#JIS) output, ESC-(-I is
-# used. In [`EUC`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#EUC) output, SSO
+# [`JIS`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#JIS) output, ESC-(-I is
+# used. In [`EUC`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#EUC) output, SSO
 # is used.
 #
 # ### -[B](0-2)
@@ -144,7 +144,7 @@
 # :   allows any char after ESC-( or ESC-$.
 #
 # -B2
-# :   forces [`ASCII`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#ASCII) after
+# :   forces [`ASCII`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#ASCII) after
 #     NL.
 #
 #
@@ -182,12 +182,12 @@
 # ### -M
 #
 # MIME encode. Header style. All
-# [`ASCII`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#ASCII) code and control
+# [`ASCII`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#ASCII) code and control
 # characters are intact. Kanji conversion is performed before encoding, so this
 # cannot be used as a picture encoder.
 #
 # -MB
-# :   MIME encode [`Base64`](https://docs.ruby-lang.org/en/2.6.0/Base64.html)
+# :   MIME encode [`Base64`](https://docs.ruby-lang.org/en/2.7.0/Base64.html)
 #     stream.
 #
 # -MQ
@@ -227,17 +227,17 @@
 #
 # ### --ic=`input codeset` --oc=`output codeset`
 #
-# [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the input or output
-# codeset. [`NKF`](https://docs.ruby-lang.org/en/2.6.0/NKF.html) supports
+# [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the input or output
+# codeset. [`NKF`](https://docs.ruby-lang.org/en/2.7.0/NKF.html) supports
 # following codesets and those codeset name are case insensitive.
 #
 # ISO-2022-JP
 # :   a.k.a. RFC1468, 7bit
-#     [`JIS`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#JIS), JUNET
+#     [`JIS`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#JIS), JUNET
 #
 # EUC-JP (eucJP-nkf)
-# :   a.k.a. AT&T [`JIS`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#JIS),
-#     Japanese [`EUC`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#EUC), UJIS
+# :   a.k.a. AT&T [`JIS`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#JIS),
+#     Japanese [`EUC`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#EUC), UJIS
 #
 # eucJP-ascii
 # :   a.k.a. x-eucjp-open-19970715-ascii
@@ -249,7 +249,7 @@
 # :   Microsoft Version of EUC-JP.
 #
 # Shift\_JIS
-# :   [`SJIS`](https://docs.ruby-lang.org/en/2.6.0/NKF.html#SJIS), MS-Kanji
+# :   [`SJIS`](https://docs.ruby-lang.org/en/2.7.0/NKF.html#SJIS), MS-Kanji
 #
 # Windows-31J
 # :   a.k.a. CP932
@@ -362,7 +362,7 @@ module NKF
   def self.guess(str); end
 
   # Convert *str* and return converted result. Conversion details are specified
-  # by *opt* as [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html).
+  # by *opt* as [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html).
   #
   # ```ruby
   # require 'nkf'

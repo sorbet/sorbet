@@ -1,11 +1,15 @@
 # typed: __STDLIB_INTERNAL
 
-# The `Enumerable` mixin provides collection classes with several traversal and
-# searching methods, and with the ability to sort. The class must provide a
-# method `each`, which yields successive members of the collection. If
-# `Enumerable#max`, `#min`, or `#sort` is used, the objects in the collection
-# must also implement a meaningful `<=>` operator, as these methods rely on an
-# ordering between members of the collection.
+# The [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html) mixin
+# provides collection classes with several traversal and searching methods, and
+# with the ability to sort. The class must provide a method each, which yields
+# successive members of the collection. If
+# [`Enumerable#max`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-max),
+# [`min`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-min), or
+# [`sort`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-sort) is
+# used, the objects in the collection must also implement a meaningful `<=>`
+# operator, as these methods rely on an ordering between members of the
+# collection.
 module Enumerable
   extend T::Generic
   Elem = type_member(:out)
@@ -25,7 +29,7 @@ module Enumerable
   # Passes each element of the collection to the given block. The method returns
   # `true` if the block never returns `false` or `nil`. If the block is not
   # given, Ruby adds an implicit block of `{ |obj| obj }` which will cause
-  # [`all?`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-all-3F)
+  # [`all?`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-all-3F)
   # to return `true` when none of the collection members are `false` or `nil`.
   #
   # If instead a pattern is supplied, the method returns whether `pattern ===
@@ -53,7 +57,7 @@ module Enumerable
   # `true` if the block ever returns a value other than `false` or `nil`. If the
   # block is not given, Ruby adds an implicit block of `{ |obj| obj }` that will
   # cause
-  # [`any?`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-any-3F)
+  # [`any?`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-any-3F)
   # to return `true` if at least one of the collection members is not `false` or
   # `nil`.
   #
@@ -177,43 +181,6 @@ module Enumerable
   # If no block is given, an enumerator to `chunk` is returned instead.
   def chunk; end
 
-  # Creates an enumerator for each chunked elements. The beginnings of chunks
-  # are defined by the block.
-  #
-  # This method split each chunk using adjacent elements, *elt\_before* and
-  # *elt\_after*, in the receiver enumerator. This method split chunks between
-  # *elt\_before* and *elt\_after* where the block returns `false`.
-  #
-  # The block is called the length of the receiver enumerator minus one.
-  #
-  # The result enumerator yields the chunked elements as an array. So `each`
-  # method can be called as follows:
-  #
-  # ```
-  # enum.chunk_while { |elt_before, elt_after| bool }.each { |ary| ... }
-  # ```
-  #
-  # Other methods of the
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) class
-  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)
-  # module, such as `to_a`, `map`, etc., are also usable.
-  #
-  # For example, one-by-one increasing subsequence can be chunked as follows:
-  #
-  # ```ruby
-  # a = [1,2,4,9,10,11,12,15,16,19,20,21]
-  # b = a.chunk_while {|i, j| i+1 == j }
-  # p b.to_a #=> [[1, 2], [4], [9, 10, 11, 12], [15, 16], [19, 20, 21]]
-  # c = b.map {|a| a.length < 3 ? a : "#{a.first}-#{a.last}" }
-  # p c #=> [[1, 2], [4], "9-12", [15, 16], "19-21"]
-  # d = c.join(",")
-  # p d #=> "1,2,4,9-12,15,16,19-21"
-  # ```
-  #
-  # Increasing (non-decreasing) subsequence can be chunked as follows:
-  #
-  # ```ruby
-  #
   # Returns a new array with the results of running *block* once for every
   # element in *enum*.
   #
@@ -249,9 +216,13 @@ module Enumerable
   end
   def collect_concat(&blk); end
 
-  # Enumerates over the items, chunking them together based on the return value of the block.
+  # Enumerates over the items, chunking them together based on the return value
+  # of the block.
+  #
   # Consecutive elements which return the same block value are chunked together.
-  # For example, consecutive even numbers and odd numbers can be chunked as follows.
+  #
+  # For example, consecutive even numbers and odd numbers can be chunked as
+  # follows.
   #
   # ```ruby
   # [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5].chunk { |n|
@@ -259,6 +230,11 @@ module Enumerable
   # }.each { |even, ary|
   #   p [even, ary]
   # }
+  # #=> [false, [3, 1]]
+  # #   [true, [4]]
+  # #   [false, [1, 5, 9]]
+  # #   [true, [2, 6]]
+  # #   [false, [5, 3, 5]]
   # ```
   #
   # This method is especially useful for sorted series of elements. The
@@ -268,8 +244,75 @@ module Enumerable
   # open("/usr/share/dict/words", "r:iso-8859-1") { |f|
   #   f.chunk { |line| line.ord }.each { |ch, lines| p [ch.chr, lines.length] }
   # }
+  # #=> ["\n", 1]
+  # #   ["A", 1327]
+  # #   ["B", 1372]
+  # #   ["C", 1507]
+  # #   ["D", 791]
+  # #   ...
   # ```
   #
+  # The following key values have special meaning:
+  # *   `nil` and `:_separator` specifies that the elements should be dropped.
+  # *   `:_alone` specifies that the element should be chunked by itself.
+  #
+  #
+  # Any other symbols that begin with an underscore will raise an error:
+  #
+  # ```ruby
+  # items.chunk { |item| :_underscore }
+  # #=> RuntimeError: symbols beginning with an underscore are reserved
+  # ```
+  #
+  # `nil` and `:_separator` can be used to ignore some elements.
+  #
+  # For example, the sequence of hyphens in svn log can be eliminated as
+  # follows:
+  #
+  # ```ruby
+  # sep = "-"*72 + "\n"
+  # IO.popen("svn log README") { |f|
+  #   f.chunk { |line|
+  #     line != sep || nil
+  #   }.each { |_, lines|
+  #     pp lines
+  #   }
+  # }
+  # #=> ["r20018 | knu | 2008-10-29 13:20:42 +0900 (Wed, 29 Oct 2008) | 2 lines\n",
+  # #    "\n",
+  # #    "* README, README.ja: Update the portability section.\n",
+  # #    "\n"]
+  # #   ["r16725 | knu | 2008-05-31 23:34:23 +0900 (Sat, 31 May 2008) | 2 lines\n",
+  # #    "\n",
+  # #    "* README, README.ja: Add a note about default C flags.\n",
+  # #    "\n"]
+  # #   ...
+  # ```
+  #
+  # Paragraphs separated by empty lines can be parsed as follows:
+  #
+  # ```ruby
+  # File.foreach("README").chunk { |line|
+  #   /\A\s*\z/ !~ line || nil
+  # }.each { |_, lines|
+  #   pp lines
+  # }
+  # ```
+  #
+  # `:_alone` can be used to force items into their own chunk. For example, you
+  # can put lines that contain a URL by themselves, and chunk the rest of the
+  # lines together, like this:
+  #
+  # ```ruby
+  # pattern = /http/
+  # open(filename) { |f|
+  #   f.chunk { |line| line =~ pattern ? :_alone : true }.each { |key, lines|
+  #     pp lines
+  #   }
+  # }
+  # ```
+  #
+  # If no block is given, an enumerator to `chunk` is returned instead.
   sig do
     type_parameters(:U)
       .params(blk: T.proc.params(elt: Elem).returns(T.type_parameter(:U)))
@@ -278,13 +321,37 @@ module Enumerable
   sig { returns(T::Enumerator[Elem]) }
   def chunk(&blk); end
 
-  # Creates an enumerator for each chunked elements. The beginnings of chunks are defined by the block.
-  # This method split each chunk using adjacent elements, _elt\_before_ and _elt\_after_, in the receiver enumerator. This method split chunks between _elt\_before_ and _elt\_after_ where the block returns `false`.
+  # Creates an enumerator for each chunked elements. The beginnings of chunks
+  # are defined by the block.
+  #
+  # This method split each chunk using adjacent elements, *elt\_before* and
+  # *elt\_after*, in the receiver enumerator. This method split chunks between
+  # *elt\_before* and *elt\_after* where the block returns `false`.
+  #
   # The block is called the length of the receiver enumerator minus one.
-  # The result enumerator yields the chunked elements as an array. So `each` method can be called as follows:
+  #
+  # The result enumerator yields the chunked elements as an array. So `each`
+  # method can be called as follows:
+  #
+  # ```
+  # enum.chunk_while { |elt_before, elt_after| bool }.each { |ary| ... }
+  # ```
+  #
+  # Other methods of the
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) class
+  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html)
+  # module, such as `to_a`, `map`, etc., are also usable.
+  #
+  # For example, one-by-one increasing subsequence can be chunked as follows:
   #
   # ```ruby
-  # enum.chunk_while { |elt_before, elt_after| bool }.each { |ary| ... }
+  # a = [1,2,4,9,10,11,12,15,16,19,20,21]
+  # b = a.chunk_while {|i, j| i+1 == j }
+  # p b.to_a #=> [[1, 2], [4], [9, 10, 11, 12], [15, 16], [19, 20, 21]]
+  # c = b.map {|a| a.length < 3 ? a : "#{a.first}-#{a.last}" }
+  # p c #=> [[1, 2], [4], "9-12", [15, 16], "19-21"]
+  # d = c.join(",")
+  # p d #=> "1,2,4,9-12,15,16,19-21"
   # ```
   #
   # Increasing (non-decreasing) subsequence can be chunked as follows:
@@ -295,7 +362,19 @@ module Enumerable
   # #=> [[0, 9], [2, 2, 3], [2, 7], [5, 9], [5]]
   # ```
   #
-  # [`Enumerable#slice_when`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-slice_when) does the same, except splitting when the block returns `true` instead of `false`.
+  # Adjacent evens and odds can be chunked as follows:
+  # ([`Enumerable#chunk`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-chunk)
+  # is another way to do it.)
+  #
+  # ```ruby
+  # a = [7, 5, 9, 2, 0, 7, 9, 4, 2, 0]
+  # p a.chunk_while {|i, j| i.even? == j.even? }.to_a
+  # #=> [[7, 5, 9], [2, 0], [7, 9], [4, 2, 0]]
+  # ```
+  #
+  # [`Enumerable#slice_when`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-slice_when)
+  # does the same, except splitting when the block returns `true` instead of
+  # `false`.
   sig {
     params(blk: T.proc.params(elt_before: Elem, elt_after: Elem).returns(T::Boolean))
     .returns(T::Enumerable[T::Array[Elem]])
@@ -332,7 +411,7 @@ module Enumerable
   # is empty, does nothing. Returns `nil` if the loop has finished without
   # getting interrupted.
   #
-  # [`Enumerable#cycle`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-cycle)
+  # [`Enumerable#cycle`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-cycle)
   # saves elements in an internal array so changes to *enum* after the first
   # pass have no effect.
   #
@@ -368,10 +447,12 @@ module Enumerable
   # (1..100).detect  #=> #<Enumerator: 1..100:detect>
   # (1..100).find    #=> #<Enumerator: 1..100:find>
   #
-  # (1..10).detect   { |i| i % 5 == 0 and i % 7 == 0 }   #=> nil
-  # (1..10).find     { |i| i % 5 == 0 and i % 7 == 0 }   #=> nil
-  # (1..100).detect  { |i| i % 5 == 0 and i % 7 == 0 }   #=> 35
-  # (1..100).find    { |i| i % 5 == 0 and i % 7 == 0 }   #=> 35
+  # (1..10).detect         { |i| i % 5 == 0 && i % 7 == 0 }   #=> nil
+  # (1..10).find           { |i| i % 5 == 0 && i % 7 == 0 }   #=> nil
+  # (1..10).detect(-> {0}) { |i| i % 5 == 0 && i % 7 == 0 }   #=> 0
+  # (1..10).find(-> {0})   { |i| i % 5 == 0 && i % 7 == 0 }   #=> 0
+  # (1..100).detect        { |i| i % 5 == 0 && i % 7 == 0 }   #=> 35
+  # (1..100).find          { |i| i % 5 == 0 && i % 7 == 0 }   #=> 35
   # ```
   sig do
     type_parameters(:U)
@@ -553,8 +634,11 @@ module Enumerable
   # Returns an array containing all elements of `enum` for which the given
   # `block` returns a true value.
   #
+  # The *find\_all* and *select* methods are aliases. There is no performance
+  # benefit to either.
+  #
   # If no block is given, an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned instead.
   #
   # ```ruby
@@ -566,7 +650,8 @@ module Enumerable
   # ```
   #
   # See also
-  # [`Enumerable#reject`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-reject).
+  # [`Enumerable#reject`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-reject),
+  # [`Enumerable#grep`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-grep).
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -576,11 +661,11 @@ module Enumerable
   sig {returns(T::Enumerator[Elem])}
   def find_all(&blk); end
 
-  # Returns a new array containing the truthy results (everything except
-  # `false` or `nil`) of running the `block+ for every element in +enum+.
+  # Returns a new array containing the truthy results (everything except `false`
+  # or `nil`) of running the `block` for every element in `enum`.
   #
   # If no block is given, an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned instead.
   #
   # ```ruby
@@ -601,9 +686,9 @@ module Enumerable
   # If neither block nor argument is given, an enumerator is returned instead.
   #
   # ```ruby
-  # (1..10).find_index  { |i| i % 5 == 0 and i % 7 == 0 }  #=> nil
-  # (1..100).find_index { |i| i % 5 == 0 and i % 7 == 0 }  #=> 34
-  # (1..100).find_index(50)                                #=> 49
+  # (1..10).find_index  { |i| i % 5 == 0 && i % 7 == 0 }  #=> nil
+  # (1..100).find_index { |i| i % 5 == 0 && i % 7 == 0 }  #=> 34
+  # (1..100).find_index(50)                               #=> 49
   # ```
   sig do
     params(
@@ -667,7 +752,7 @@ module Enumerable
   def grep(arg0, &blk); end
 
   # Inverted version of
-  # [`Enumerable#grep`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-grep).
+  # [`Enumerable#grep`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-grep).
   # Returns an array of every element in *enum* for which not `Pattern ===
   # element`.
   #
@@ -700,10 +785,10 @@ module Enumerable
   # using `==`.
   #
   # ```ruby
-  # IO.constants.include? :SEEK_SET          #=> true
-  # IO.constants.include? :SEEK_NO_FURTHER   #=> false
-  # IO.constants.member? :SEEK_SET          #=> true
-  # IO.constants.member? :SEEK_NO_FURTHER   #=> false
+  # (1..10).include? 5  #=> true
+  # (1..10).include? 15 #=> false
+  # (1..10).member? 5   #=> true
+  # (1..10).member? 15  #=> false
   # ```
   sig do
     params(
@@ -773,8 +858,9 @@ module Enumerable
   def inject(initial=T.unsafe(nil), arg0=T.unsafe(nil), &blk); end
 
   # Returns the object in *enum* with the maximum value. The first form assumes
-  # all objects implement `Comparable`; the second uses the block to return *a
-  # <=> b*.
+  # all objects implement
+  # [`Comparable`](https://docs.ruby-lang.org/en/2.7.0/Comparable.html); the
+  # second uses the block to return *a <=> b*.
   #
   # ```ruby
   # a = %w(albatross dog horse)
@@ -906,8 +992,9 @@ module Enumerable
   def max_by(arg0=T.unsafe(nil), &blk); end
 
   # Returns the object in *enum* with the minimum value. The first form assumes
-  # all objects implement `Comparable`; the second uses the block to return *a
-  # <=> b*.
+  # all objects implement
+  # [`Comparable`](https://docs.ruby-lang.org/en/2.7.0/Comparable.html); the
+  # second uses the block to return *a <=> b*.
   #
   # ```ruby
   # a = %w(albatross dog horse)
@@ -993,7 +1080,8 @@ module Enumerable
 
   # Returns a two element array which contains the minimum and the maximum value
   # in the enumerable. The first form assumes all objects implement
-  # `Comparable`; the second uses the block to return *a <=> b*.
+  # [`Comparable`](https://docs.ruby-lang.org/en/2.7.0/Comparable.html); the
+  # second uses the block to return *a <=> b*.
   #
   # ```ruby
   # a = %w(albatross dog horse)
@@ -1107,7 +1195,7 @@ module Enumerable
   # returns `false`.
   #
   # If no block is given, an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned instead.
   #
   # ```ruby
@@ -1117,7 +1205,7 @@ module Enumerable
   # ```
   #
   # See also
-  # [`Enumerable#find_all`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-find_all).
+  # [`Enumerable#find_all`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-find_all).
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -1169,8 +1257,8 @@ module Enumerable
   # ```
   #
   # Other methods of the
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) class
-  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) class
+  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html)
   # module, such as `map`, etc., are also usable.
   #
   # For example, continuation lines (lines end with backslash) can be
@@ -1204,8 +1292,8 @@ module Enumerable
   # ```
   #
   # Other methods of the
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) class
-  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) class
+  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html)
   # module, such as `to_a`, `map`, etc., are also usable.
   #
   # For example, iteration over ChangeLog entries can be implemented as follows:
@@ -1255,7 +1343,7 @@ module Enumerable
   # However local variables should be used carefully if the result enumerator is
   # enumerated twice or more. The local variables should be initialized for each
   # enumeration.
-  # [`Enumerator.new`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html#method-c-new)
+  # [`Enumerator.new`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html#method-c-new)
   # can be used to do it.
   #
   # ```ruby
@@ -1353,8 +1441,8 @@ module Enumerable
   # ```
   #
   # Other methods of the
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) class
-  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html)
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) class
+  # and [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html)
   # module, such as `to_a`, `map`, etc., are also usable.
   #
   # For example, one-by-one increasing subsequence can be chunked as follows:
@@ -1385,8 +1473,9 @@ module Enumerable
   # #=> [[0, 9], [2, 2, 3], [2, 7], [5, 9], [5]]
   # ```
   #
-  # Adjacent evens and odds can be chunked as follows: (Enumerable#chunk is
-  # another way to do it.)
+  # Adjacent evens and odds can be chunked as follows:
+  # ([`Enumerable#chunk`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-chunk)
+  # is another way to do it.)
   #
   # ```ruby
   # a = [7, 5, 9, 2, 0, 7, 9, 4, 2, 0]
@@ -1396,7 +1485,7 @@ module Enumerable
   #
   # Paragraphs (non-empty lines with trailing empty lines) can be chunked as
   # follows: (See
-  # [`Enumerable#chunk`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-chunk)
+  # [`Enumerable#chunk`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-chunk)
   # to ignore empty lines.)
   #
   # ```ruby
@@ -1405,7 +1494,7 @@ module Enumerable
   # #=> [["foo\n", "bar\n", "\n"], ["baz\n", "qux\n"]]
   # ```
   #
-  # [`Enumerable#chunk_while`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-chunk_while)
+  # [`Enumerable#chunk_while`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-chunk_while)
   # does the same, except splitting when the block returns `false` instead of
   # `true`.
   def slice_when; end
@@ -1428,7 +1517,7 @@ module Enumerable
   # ```
   #
   # See also
-  # [`Enumerable#sort_by`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-sort_by).
+  # [`Enumerable#sort_by`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-sort_by).
   # It implements a Schwartzian transform which is useful when key computation
   # or comparison is expensive.
   sig {returns(T::Array[Elem])}
@@ -1455,9 +1544,12 @@ module Enumerable
   #               #=> ["fig", "pear", "apple"]
   # ```
   #
-  # The current implementation of `sort_by` generates an array of tuples
-  # containing the original collection element and the mapped value. This makes
-  # `sort_by` fairly expensive when the keysets are simple.
+  # The current implementation of
+  # [`sort_by`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-sort_by)
+  # generates an array of tuples containing the original collection element and
+  # the mapped value. This makes
+  # [`sort_by`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-sort_by)
+  # fairly expensive when the keysets are simple.
   #
   # ```ruby
   # require 'benchmark'
@@ -1480,7 +1572,9 @@ module Enumerable
   #
   # However, consider the case where comparing the keys is a non-trivial
   # operation. The following code sorts some files on modification time using
-  # the basic `sort` method.
+  # the basic
+  # [`sort`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-sort)
+  # method.
   #
   # ```ruby
   # files = Dir["*"]
@@ -1488,9 +1582,11 @@ module Enumerable
   # sorted   #=> ["mon", "tues", "wed", "thurs"]
   # ```
   #
-  # This sort is inefficient: it generates two new `File` objects during every
-  # comparison. A slightly better technique is to use the `Kernel#test` method
-  # to generate the modification times directly.
+  # This sort is inefficient: it generates two new
+  # [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) objects during every
+  # comparison. A slightly better technique is to use the
+  # [`Kernel#test`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-test)
+  # method to generate the modification times directly.
   #
   # ```ruby
   # files = Dir["*"]
@@ -1500,12 +1596,13 @@ module Enumerable
   # sorted   #=> ["mon", "tues", "wed", "thurs"]
   # ```
   #
-  # This still generates many unnecessary `Time` objects. A more efficient
-  # technique is to cache the sort keys (modification times in this case) before
-  # the sort. Perl users often call this approach a Schwartzian transform, after
-  # Randal Schwartz. We construct a temporary array, where each element is an
-  # array containing our sort key along with the filename. We sort this array,
-  # and then extract the filename from the result.
+  # This still generates many unnecessary
+  # [`Time`](https://docs.ruby-lang.org/en/2.7.0/Time.html) objects. A more
+  # efficient technique is to cache the sort keys (modification times in this
+  # case) before the sort. Perl users often call this approach a Schwartzian
+  # transform, after Randal Schwartz. We construct a temporary array, where each
+  # element is an array containing our sort key along with the filename. We sort
+  # this array, and then extract the filename from the result.
   #
   # ```ruby
   # sorted = Dir["*"].collect { |f|
@@ -1514,11 +1611,19 @@ module Enumerable
   # sorted   #=> ["mon", "tues", "wed", "thurs"]
   # ```
   #
-  # This is exactly what `sort_by` does internally.
+  # This is exactly what
+  # [`sort_by`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-sort_by)
+  # does internally.
   #
   # ```ruby
   # sorted = Dir["*"].sort_by { |f| test(?M, f) }
   # sorted   #=> ["mon", "tues", "wed", "thurs"]
+  # ```
+  #
+  # To produce the reverse of a specific order, the following can be used:
+  #
+  # ```
+  # ary.sort_by { ... }.reverse!
   # ```
   sig do
     params(
@@ -1594,7 +1699,7 @@ module Enumerable
   # Returns a new array by removing duplicate values in `self`.
   #
   # See also
-  # [`Array#uniq`](https://docs.ruby-lang.org/en/2.6.0/Array.html#method-i-uniq).
+  # [`Array#uniq`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-uniq).
   def uniq; end
 
   # Iterates the given block for each slice of <n> elements. If no block is
@@ -1633,10 +1738,12 @@ module Enumerable
   # (1..100).detect  #=> #<Enumerator: 1..100:detect>
   # (1..100).find    #=> #<Enumerator: 1..100:find>
   #
-  # (1..10).detect   { |i| i % 5 == 0 and i % 7 == 0 }   #=> nil
-  # (1..10).find     { |i| i % 5 == 0 and i % 7 == 0 }   #=> nil
-  # (1..100).detect  { |i| i % 5 == 0 and i % 7 == 0 }   #=> 35
-  # (1..100).find    { |i| i % 5 == 0 and i % 7 == 0 }   #=> 35
+  # (1..10).detect         { |i| i % 5 == 0 && i % 7 == 0 }   #=> nil
+  # (1..10).find           { |i| i % 5 == 0 && i % 7 == 0 }   #=> nil
+  # (1..10).detect(-> {0}) { |i| i % 5 == 0 && i % 7 == 0 }   #=> 0
+  # (1..10).find(-> {0})   { |i| i % 5 == 0 && i % 7 == 0 }   #=> 0
+  # (1..100).detect        { |i| i % 5 == 0 && i % 7 == 0 }   #=> 35
+  # (1..100).find          { |i| i % 5 == 0 && i % 7 == 0 }   #=> 35
   # ```
   sig do
     params(
@@ -1707,10 +1814,10 @@ module Enumerable
   # using `==`.
   #
   # ```ruby
-  # IO.constants.include? :SEEK_SET          #=> true
-  # IO.constants.include? :SEEK_NO_FURTHER   #=> false
-  # IO.constants.member? :SEEK_SET          #=> true
-  # IO.constants.member? :SEEK_NO_FURTHER   #=> false
+  # (1..10).include? 5  #=> true
+  # (1..10).include? 15 #=> false
+  # (1..10).member? 5   #=> true
+  # (1..10).member? 15  #=> false
   # ```
   sig do
     params(
@@ -1782,8 +1889,11 @@ module Enumerable
   # Returns an array containing all elements of `enum` for which the given
   # `block` returns a true value.
   #
+  # The *find\_all* and *select* methods are aliases. There is no performance
+  # benefit to either.
+  #
   # If no block is given, an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned instead.
   #
   # ```ruby
@@ -1795,7 +1905,8 @@ module Enumerable
   # ```
   #
   # See also
-  # [`Enumerable#reject`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-reject).
+  # [`Enumerable#reject`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-reject),
+  # [`Enumerable#grep`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-grep).
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -1808,8 +1919,11 @@ module Enumerable
   # Returns an array containing all elements of `enum` for which the given
   # `block` returns a true value.
   #
+  # The *find\_all* and *select* methods are aliases. There is no performance
+  # benefit to either.
+  #
   # If no block is given, an
-  # [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html) is
+  # [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html) is
   # returned instead.
   #
   # ```ruby
@@ -1821,7 +1935,8 @@ module Enumerable
   # ```
   #
   # See also
-  # [`Enumerable#reject`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-reject).
+  # [`Enumerable#reject`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-reject),
+  # [`Enumerable#grep`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html#method-i-grep).
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
@@ -1843,15 +1958,11 @@ module Enumerable
   sig {returns(T::Array[Elem])}
   def to_a(); end
 
-  # Returns a lazy enumerator, whose methods map/collect,
-  # flat\_map/collect\_concat, select/find\_all, reject, grep,
-  # [`grep_v`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-grep_v),
-  # zip, take,
-  # [`take_while`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-take_while),
-  # drop, and
-  # [`drop_while`](https://docs.ruby-lang.org/en/2.6.0/Enumerable.html#method-i-drop_while)
-  # enumerate values only on an as-needed basis. However, if a block is given to
-  # zip, values are enumerated immediately.
+  # Returns an
+  # [`Enumerator::Lazy`](https://docs.ruby-lang.org/en/2.7.0/Enumerator/Lazy.html),
+  # which redefines most
+  # [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html) methods
+  # to postpone enumeration and enumerate values only on an as-needed basis.
   #
   # ### Example
   #
@@ -1879,13 +1990,11 @@ module Enumerable
   def lazy(); end
 
   # Takes one element from *enum* and merges corresponding elements from each
-  # *args*.
-  # This generates a sequence of *n*-element arrays, where *n* is one more than
-  # the count of arguments.
-  # The length of the resulting sequence will be `enum#size`. If the size of
-  # any argument is less than `enum#size`, `nil` values are supplied.
-  # If a block is given, it is invoked for each output array, otherwise an
-  # array of arrays is returned.
+  # *args*. This generates a sequence of *n*-element arrays, where *n* is one
+  # more than the count of arguments. The length of the resulting sequence will
+  # be `enum#size`. If the size of any argument is less than `enum#size`, `nil`
+  # values are supplied. If a block is given, it is invoked for each output
+  # array, otherwise an array of arrays is returned.
   #
   # ```ruby
   # a = [ 4, 5, 6 ]

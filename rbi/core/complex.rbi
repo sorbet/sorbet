@@ -4,11 +4,11 @@
 # unit; a+bi. Where a is real part, b is imaginary part and i is imaginary unit.
 # Real a equals complex a+0i mathematically.
 #
-# [`Complex`](https://docs.ruby-lang.org/en/2.6.0/Complex.html) object can be
+# [`Complex`](https://docs.ruby-lang.org/en/2.7.0/Complex.html) object can be
 # created as literal, and also by using Kernel#Complex,
-# [`Complex::rect`](https://docs.ruby-lang.org/en/2.6.0/Complex.html#method-c-rect),
-# [`Complex::polar`](https://docs.ruby-lang.org/en/2.6.0/Complex.html#method-c-polar)
-# or [`to_c`](https://docs.ruby-lang.org/en/2.6.0/Complex.html#method-i-to_c)
+# [`Complex::rect`](https://docs.ruby-lang.org/en/2.7.0/Complex.html#method-c-rect),
+# [`Complex::polar`](https://docs.ruby-lang.org/en/2.7.0/Complex.html#method-c-polar)
+# or [`to_c`](https://docs.ruby-lang.org/en/2.7.0/Complex.html#method-i-to_c)
 # method.
 #
 # ```ruby
@@ -527,7 +527,7 @@ class Complex < Numeric
   sig {returns(T.any(Integer, Float, Rational, BigDecimal))}
   def real(); end
 
-  # Returns false.
+  # Returns false, even if the complex number has no imaginary part.
   sig {returns(FalseClass)}
   def real?(); end
 

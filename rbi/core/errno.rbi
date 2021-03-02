@@ -1,15 +1,21 @@
 # typed: __STDLIB_INTERNAL
 
-# Ruby exception objects are subclasses of `Exception`. However, operating
-# systems typically report errors using plain integers.
-# [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html) `Errno` is created
+# Ruby exception objects are subclasses of
+# [`Exception`](https://docs.ruby-lang.org/en/2.7.0/Exception.html). However,
+# operating systems typically report errors using plain integers.
+# [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html)
+# [`Errno`](https://docs.ruby-lang.org/en/2.7.0/Errno.html) is created
 # dynamically to map these operating system errors to Ruby classes, with each
-# error number generating its own subclass of `SystemCallError`. As the subclass
-# is created in module `Errno`, its name will start `Errno::`.
+# error number generating its own subclass of
+# [`SystemCallError`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html).
+# As the subclass is created in module
+# [`Errno`](https://docs.ruby-lang.org/en/2.7.0/Errno.html), its name will start
+# `Errno::`.
 #
 # The names of the `Errno::` classes depend on the environment in which Ruby
-# runs. On a typical Unix or Windows platform, there are `Errno` classes such as
-# `Errno::EACCES`, `Errno::EAGAIN`, `Errno::EINTR`, and so on.
+# runs. On a typical Unix or Windows platform, there are
+# [`Errno`](https://docs.ruby-lang.org/en/2.7.0/Errno.html) classes such as
+# Errno::EACCES, Errno::EAGAIN, Errno::EINTR, and so on.
 #
 # The integer operating system error number corresponding to a particular error
 # is available as the class constant `Errno::`*error*`::Errno`.
@@ -21,7 +27,8 @@
 # ```
 #
 # The full list of operating system errors on your particular platform are
-# available as the constants of `Errno`.
+# available as the constants of
+# [`Errno`](https://docs.ruby-lang.org/en/2.7.0/Errno.html).
 #
 # ```ruby
 # Errno.constants   #=> :E2BIG, :EACCES, :EADDRINUSE, :EADDRNOTAVAIL, ...

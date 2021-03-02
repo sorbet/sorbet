@@ -1,7 +1,8 @@
 # typed: __STDLIB_INTERNAL
 
-# Pseudo I/O on [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
-# object.
+# Pseudo I/O on [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
+# object, with interface corresponding to
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
 #
 # Commonly used to simulate `$stdio` or `$stderr`
 #
@@ -10,9 +11,16 @@
 # ```ruby
 # require 'stringio'
 #
+# # Writing stream emulation
 # io = StringIO.new
 # io.puts "Hello World"
 # io.string #=> "Hello World\n"
+#
+# # Reading stream emulation
+# io = StringIO.new "first\nsecond\nlast\n"
+# io.getc #=> "f"
+# io.gets #=> "irst\n"
+# io.read #=> "second\nlast\n"
 # ```
 class StringIO
   include Enumerable
@@ -27,7 +35,7 @@ class StringIO
   def initialize(string="", mode="rw"); end
 
   # Equivalent to
-  # [`StringIO.new`](https://docs.ruby-lang.org/en/2.6.0/StringIO.html#method-c-new)
+  # [`StringIO.new`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html#method-c-new)
   # except that when it is called with a block, it yields with the new instance
   # and closes it, and returns the result which returned from the block.
   sig do
@@ -48,39 +56,42 @@ class StringIO
   end
   def <<(arg0); end
 
+  # Puts stream into binary mode. See
+  # [`IO#binmode`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-binmode).
   sig {returns(T.self_type)}
   def binmode(); end
 
-  # Closes strio. The **strio** is unavailable for any further data operations;
-  # an `IOError` is raised if such an attempt is made.
+  # Closes a [`StringIO`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html).
+  # The stream is unavailable for any further data operations; an `IOError` is
+  # raised if such an attempt is made.
   sig {returns(NilClass)}
   def close(); end
 
   # Closes the read end of a
-  # [`StringIO`](https://docs.ruby-lang.org/en/2.6.0/StringIO.html). Will raise
-  # an `IOError` if the **strio** is not readable.
+  # [`StringIO`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html). Will raise
+  # an `IOError` if the receiver is not readable.
   sig {returns(NilClass)}
   def close_read(); end
 
   # Closes the write end of a
-  # [`StringIO`](https://docs.ruby-lang.org/en/2.6.0/StringIO.html). Will raise
-  # an  `IOError` if the **strio** is not writeable.
+  # [`StringIO`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html). Will raise
+  # an  `IOError` if the receiver is not writeable.
   sig {returns(NilClass)}
   def close_write(); end
 
-  # Returns `true` if **strio** is completely closed, `false` otherwise.
+  # Returns `true` if the stream is completely closed, `false` otherwise.
   sig {returns(T::Boolean)}
   def closed?(); end
 
-  # Returns `true` if **strio** is not readable, `false` otherwise.
+  # Returns `true` if the stream is not readable, `false` otherwise.
   sig {returns(T::Boolean)}
   def closed_read?(); end
 
-  # Returns `true` if **strio** is not writable, `false` otherwise.
+  # Returns `true` if the stream is not writable, `false` otherwise.
   sig {returns(T::Boolean)}
   def closed_write?(); end
 
-  # See [`IO#each`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-each).
+  # See [`IO#each`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each).
   sig do
     params(
         sep: String,
@@ -99,7 +110,7 @@ class StringIO
   def each(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
   # See
-  # [`IO#each_byte`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-each_byte).
+  # [`IO#each_byte`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_byte).
   sig do
     params(
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
@@ -110,7 +121,7 @@ class StringIO
   def each_byte(&blk); end
 
   # See
-  # [`IO#each_char`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-each_char).
+  # [`IO#each_char`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_char).
   sig do
     params(
         blk: T.proc.params(arg0: String).returns(BasicObject),
@@ -121,7 +132,7 @@ class StringIO
   def each_char(&blk); end
 
   # See
-  # [`IO#each_codepoint`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-each_codepoint).
+  # [`IO#each_codepoint`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each_codepoint).
   sig do
     params(
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
@@ -131,13 +142,13 @@ class StringIO
   sig {returns(T::Enumerator[Integer])}
   def each_codepoint(&blk); end
 
-  # Returns true if **strio** is at end of file. The stringio must be opened for
-  # reading or an `IOError` will be raised.
+  # Returns true if the stream is at the end of the data (underlying string).
+  # The stream must be opened for reading or an `IOError` will be raised.
   sig {returns(T::Boolean)}
   def eof(); end
 
   # Raises
-  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html).
+  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.7.0/NotImplementedError.html).
   sig do
     params(
         integer_cmd: Integer,
@@ -148,30 +159,30 @@ class StringIO
   def fcntl(integer_cmd, arg); end
 
   # Returns `nil`. Just for compatibility to
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   sig {returns(NilClass)}
   def fileno(); end
 
-  # Returns **strio** itself. Just for compatibility to
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # Returns an object itself. Just for compatibility to
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   sig {returns(T.self_type)}
   def flush(); end
 
   # Returns 0. Just for compatibility to
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   sig {returns(T.nilable(Integer))}
   def fsync(); end
 
   # See
-  # [`IO#getbyte`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-getbyte).
+  # [`IO#getbyte`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-getbyte).
   sig {returns(T.nilable(Integer))}
   def getbyte(); end
 
-  # See [`IO#getc`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-getc).
+  # See [`IO#getc`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-getc).
   sig {returns(T.nilable(String))}
   def getc(); end
 
-  # See [`IO#gets`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-gets).
+  # See [`IO#gets`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-gets).
   sig do
     params(
         sep: String,
@@ -181,30 +192,29 @@ class StringIO
   end
   def gets(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
 
-  # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
-  # of the internal string if conversion is specified. Otherwise returns nil.
+  # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
+  # of the internal string if conversion is specified. Otherwise returns `nil`.
   sig {returns(Encoding)}
   def internal_encoding(); end
 
-  # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
-  # object that represents the encoding of the file. If strio is write mode and
-  # no encoding is specified, returns `nil`.
+  # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
+  # object that represents the encoding of the file. If the stream is write mode
+  # and no encoding is specified, returns `nil`.
   sig {returns(Encoding)}
   def external_encoding(); end
 
   # Returns `false`. Just for compatibility to
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   sig {returns(T::Boolean)}
   def isatty(); end
 
   # Returns the size of the buffer string.
   def length; end
 
-  # Returns the current line number in **strio**. The stringio must be opened
-  # for reading. `lineno` counts the number of times  `gets` is called, rather
-  # than the number of newlines  encountered. The two values will differ if
-  # `gets` is  called with a separator other than newline. See also the  `$.`
-  # variable.
+  # Returns the current line number. The stream must be opened for reading.
+  # `lineno` counts the number of times  `gets` is called, rather than the
+  # number of newlines  encountered. The two values will differ if `gets` is
+  # called with a separator other than newline. See also the  `$.` variable.
   sig {returns(Integer)}
   def lineno(); end
 
@@ -219,15 +229,15 @@ class StringIO
   def lineno=(arg0); end
 
   # Returns `nil`. Just for compatibility to
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   sig {returns(NilClass)}
   def pid(); end
 
-  # Returns the current offset (in bytes) of **strio**.
+  # Returns the current offset (in bytes).
   sig {returns(Integer)}
   def pos(); end
 
-  # Seeks to the given position (in bytes) in **strio**.
+  # Seeks to the given position (in bytes).
   sig do
     params(
         arg0: Integer,
@@ -253,7 +263,7 @@ class StringIO
   end
   def printf(format_string, *arg0); end
 
-  # See [`IO#putc`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-putc).
+  # See [`IO#putc`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-putc).
   sig do
     params(
         arg0: T.any(Numeric, String),
@@ -270,7 +280,7 @@ class StringIO
   end
   def puts(*arg0); end
 
-  # See [`IO#read`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-read).
+  # See [`IO#read`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-read).
   sig do
     params(
         length: Integer,
@@ -311,7 +321,7 @@ class StringIO
   def readline(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
 
   # See
-  # [`IO#readlines`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-readlines).
+  # [`IO#readlines`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-readlines).
   sig do
     params(
         sep: String,
@@ -336,8 +346,8 @@ class StringIO
   end
   def readpartial(maxlen, outbuf=T.unsafe(nil)); end
 
-  # Reinitializes **strio** with the given *other\_StrIO* or *string* and *mode*
-  # (see StringIO#new).
+  # Reinitializes the stream with the given *other\_StrIO* or *string* and
+  # *mode* (see StringIO#new).
   sig do
     params(
         other: StringIO,
@@ -353,13 +363,13 @@ class StringIO
   end
   def reopen(other, mode_str=T.unsafe(nil)); end
 
-  # Positions **strio** to the beginning of input, resetting `lineno` to zero.
+  # Positions the stream to the beginning of input, resetting `lineno` to zero.
   sig {returns(Integer)}
   def rewind(); end
 
   # Seeks to a given offset *amount* in the stream according to the value of
   # *whence* (see
-  # [`IO#seek`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-seek)).
+  # [`IO#seek`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-seek)).
   sig do
     params(
         amount: Integer,
@@ -370,11 +380,11 @@ class StringIO
   def seek(amount, whence=T.unsafe(nil)); end
 
   # Specify the encoding of the
-  # [`StringIO`](https://docs.ruby-lang.org/en/2.6.0/StringIO.html) as
+  # [`StringIO`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html) as
   # *ext\_enc*. Use the default external encoding if *ext\_enc* is nil. 2nd
   # argument *int\_enc* and optional hash *opt* argument are ignored; they are
   # for API compatibility to
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   sig do
     params(
         ext_or_ext_int_enc: T.any(String, Encoding),
@@ -391,14 +401,14 @@ class StringIO
   def set_encoding(ext_or_ext_int_enc=T.unsafe(nil), int_enc=T.unsafe(nil)); end
 
   # Returns underlying
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) object, the
-  # subject of [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) object, the
+  # subject of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   sig {returns(String)}
   def string(); end
 
   # Changes underlying
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) object, the
-  # subject of [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) object, the
+  # subject of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   sig {params(str: String).returns(String)}
   def string=(str); end
 
@@ -411,7 +421,7 @@ class StringIO
   def sync(); end
 
   # Returns the argument unchanged. Just for compatibility to
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   sig do
     params(
         arg0: T::Boolean,
@@ -437,21 +447,21 @@ class StringIO
   end
   def syswrite(arg0); end
 
-  # Returns the current offset (in bytes) of **strio**.
+  # Returns the current offset (in bytes).
   sig {returns(Integer)}
   def tell(); end
 
-  # Truncates the buffer string to at most *integer* bytes. The **strio** must
-  # be opened for writing.
+  # Truncates the buffer string to at most *integer* bytes. The stream must be
+  # opened for writing.
   def truncate(_); end
 
   # Returns `false`. Just for compatibility to
-  # [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html).
+  # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
   sig {returns(T::Boolean)}
   def tty?(); end
 
   # See
-  # [`IO#ungetbyte`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-ungetbyte)
+  # [`IO#ungetbyte`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-ungetbyte)
   sig do
     params(
         arg0: T.any(String, Integer),
@@ -460,9 +470,9 @@ class StringIO
   end
   def ungetbyte(arg0); end
 
-  # Pushes back one character (passed as a parameter) onto **strio** such that a
-  # subsequent buffered read will return it. There is no limitation for multiple
-  # pushbacks including pushing back behind the beginning of the buffer string.
+  # Pushes back one character (passed as a parameter) such that a subsequent
+  # buffered read will return it. There is no limitation for multiple pushbacks
+  # including pushing back behind the beginning of the buffer string.
   sig do
     params(
         arg0: String,
@@ -471,11 +481,10 @@ class StringIO
   end
   def ungetc(arg0); end
 
-  # Appends the given string to the underlying buffer string of **strio**. The
-  # stream must be opened for writing. If the argument is not a string, it will
-  # be converted to a string using `to_s`. Returns the number of bytes written.
-  # See
-  # [`IO#write`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-write).
+  # Appends the given string to the underlying buffer string. The stream must be
+  # opened for writing. If the argument is not a string, it will be converted to
+  # a string using `to_s`. Returns the number of bytes written. See
+  # [`IO#write`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-write).
   sig do
     params(
         arg0: String,
@@ -485,7 +494,7 @@ class StringIO
   def write(arg0); end
 
   # This is a deprecated alias for
-  # [`each_byte`](https://docs.ruby-lang.org/en/2.6.0/StringIO.html#method-i-each_byte).
+  # [`each_byte`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html#method-i-each_byte).
   sig do
     params(
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
@@ -495,7 +504,8 @@ class StringIO
   sig {returns(T::Enumerator[Integer])}
   def bytes(&blk); end
 
-  # This is a deprecated alias for `each_char`.
+  # This is a deprecated alias for
+  # [`each_char`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html#method-i-each_char).
   sig do
     params(
         blk: T.proc.params(arg0: String).returns(BasicObject),
@@ -505,7 +515,8 @@ class StringIO
   sig {returns(T::Enumerator[String])}
   def chars(&blk); end
 
-  # This is a deprecated alias for `each_codepoint`.
+  # This is a deprecated alias for
+  # [`each_codepoint`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html#method-i-each_codepoint).
   sig do
     params(
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
@@ -515,7 +526,7 @@ class StringIO
   sig {returns(T::Enumerator[Integer])}
   def codepoints(&blk); end
 
-  # See [`IO#each`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-each).
+  # See [`IO#each`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-each).
   sig do
     params(
         sep: String,
@@ -533,12 +544,13 @@ class StringIO
   end
   def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
-  # Returns true if **strio** is at end of file. The stringio must be opened for
-  # reading or an `IOError` will be raised.
+  # Returns true if the stream is at the end of the data (underlying string).
+  # The stream must be opened for reading or an `IOError` will be raised.
   sig {returns(T::Boolean)}
   def eof?(); end
 
-  # This is a deprecated alias for `each_line`.
+  # This is a deprecated alias for
+  # [`each_line`](https://docs.ruby-lang.org/en/2.7.0/StringIO.html#method-i-each_line).
   sig do
     params(
         sep: String,
@@ -557,8 +569,9 @@ class StringIO
   def lines(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 end
 
-# Pseudo I/O on [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
-# object.
+# Pseudo I/O on [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
+# object, with interface corresponding to
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html).
 #
 # Commonly used to simulate `$stdio` or `$stderr`
 #
@@ -567,9 +580,16 @@ end
 # ```ruby
 # require 'stringio'
 #
+# # Writing stream emulation
 # io = StringIO.new
 # io.puts "Hello World"
 # io.string #=> "Hello World\n"
+#
+# # Reading stream emulation
+# io = StringIO.new "first\nsecond\nlast\n"
+# io.getc #=> "f"
+# io.gets #=> "irst\n"
+# io.read #=> "second\nlast\n"
 # ```
 class StringIO < Data
   include Enumerable

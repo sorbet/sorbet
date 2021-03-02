@@ -1,19 +1,19 @@
 # typed: __STDLIB_INTERNAL
 
-# The [`Math`](https://docs.ruby-lang.org/en/2.6.0/Math.html) module contains
+# The [`Math`](https://docs.ruby-lang.org/en/2.7.0/Math.html) module contains
 # module functions for basic trigonometric and transcendental functions. See
-# class [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) for a list of
+# class [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) for a list of
 # constants that define Ruby's floating point accuracy.
 #
 # Domains and codomains are given only for real (not complex) numbers.
 module Math
   # Definition of the mathematical constant
-  # [`E`](https://docs.ruby-lang.org/en/2.6.0/Math.html#E) (e) as a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) number.
+  # [`E`](https://docs.ruby-lang.org/en/2.7.0/Math.html#E) for Euler's number
+  # (e) as a [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) number.
   E = T.let(T.unsafe(nil), Float)
   # Definition of the mathematical constant
-  # [`PI`](https://docs.ruby-lang.org/en/2.6.0/Math.html#PI) as a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) number.
+  # [`PI`](https://docs.ruby-lang.org/en/2.7.0/Math.html#PI) as a
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) number.
   PI = T.let(T.unsafe(nil), Float)
 
   # Computes the arc cosine of `x`. Returns 0..PI.
@@ -102,7 +102,7 @@ module Math
   def self.atan(x); end
 
   # Computes the arc tangent given `y` and `x`. Returns a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) in the range
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) in the range
   # -PI..PI. Return value is a angle in radians between the positive x-axis of
   # cartesian plane and the point given by the coordinates (`x`, `y`) on it.
   #
@@ -191,7 +191,7 @@ module Math
   def self.cbrt(x); end
 
   # Computes the cosine of `x` (expressed in radians). Returns a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) in the range
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) in the range
   # -1.0..1.0.
   #
   # Domain: (-INFINITY, INFINITY)
@@ -280,8 +280,8 @@ module Math
   def self.exp(x); end
 
   # Returns a two-element array containing the normalized fraction (a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html)) and exponent (an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html)) of `x`.
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html)) and exponent (an
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html)) of `x`.
   #
   # ```ruby
   # fraction, exponent = Math.frexp(1234)   #=> [0.6025390625, 11]
@@ -370,7 +370,7 @@ module Math
 
   # Calculates the logarithmic gamma of `x` and the sign of gamma of `x`.
   #
-  # [`Math.lgamma(x)`](https://docs.ruby-lang.org/en/2.6.0/Math.html#method-c-lgamma)
+  # [`Math.lgamma(x)`](https://docs.ruby-lang.org/en/2.7.0/Math.html#method-c-lgamma)
   # is same as
   #
   # ```ruby
@@ -378,7 +378,7 @@ module Math
   # ```
   #
   # but avoid overflow by
-  # [`Math.gamma(x)`](https://docs.ruby-lang.org/en/2.6.0/Math.html#method-c-gamma)
+  # [`Math.gamma(x)`](https://docs.ruby-lang.org/en/2.7.0/Math.html#method-c-gamma)
   # for large x.
   #
   # ```ruby
@@ -441,7 +441,7 @@ module Math
   def self.log2(x); end
 
   # Computes the sine of `x` (expressed in radians). Returns a
-  # [`Float`](https://docs.ruby-lang.org/en/2.6.0/Float.html) in the range
+  # [`Float`](https://docs.ruby-lang.org/en/2.7.0/Float.html) in the range
   # -1.0..1.0.
   #
   # Domain: (-INFINITY, INFINITY)
@@ -507,9 +507,9 @@ module Math
   # ```
   #
   # See also
-  # [`BigDecimal#sqrt`](https://docs.ruby-lang.org/en/2.6.0/BigDecimal.html#method-i-sqrt)
+  # [`BigDecimal#sqrt`](https://docs.ruby-lang.org/en/2.7.0/BigDecimal.html#method-i-sqrt)
   # and
-  # [`Integer.sqrt`](https://docs.ruby-lang.org/en/2.6.0/Integer.html#method-c-sqrt).
+  # [`Integer.sqrt`](https://docs.ruby-lang.org/en/2.7.0/Integer.html#method-c-sqrt).
   sig do
     params(
         x: T.any(Integer, Float, Rational, BigDecimal),

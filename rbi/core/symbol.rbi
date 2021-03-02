@@ -1,12 +1,14 @@
 # typed: __STDLIB_INTERNAL
 
-# `Symbol` objects represent names and some strings inside the Ruby interpreter.
-# They are generated using the `:name` and `:"string"` literals syntax, and by
-# the various `to_sym` methods. The same `Symbol` object will be created for a
-# given name or string for the duration of a program's execution, regardless of
-# the context or meaning of that name. Thus if `Fred` is a constant in one
-# context, a method in another, and a class in a third, the `Symbol` `:Fred`
-# will be the same object in all three contexts.
+# [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) objects represent
+# names inside the Ruby interpreter. They are generated using the `:name` and
+# `:"string"` literals syntax, and by the various `to_sym` methods. The same
+# [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) object will be
+# created for a given name or string for the duration of a program's execution,
+# regardless of the context or meaning of that name. Thus if `Fred` is a
+# constant in one context, a method in another, and a class in a third, the
+# [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) `:Fred` will be
+# the same object in all three contexts.
 #
 # ```ruby
 # module One
@@ -43,7 +45,7 @@ class Symbol < Object
   def self.all_symbols(); end
 
   # Compares `symbol` with `other_symbol` after calling
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html#method-i-to_s) on
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html#method-i-to_s) on
   # each of the symbols. Returns -1, 0, +1, or `nil` depending on whether
   # `symbol` is less than, equal to, or greater than `other_symbol`.
   #
@@ -105,9 +107,9 @@ class Symbol < Object
   sig {returns(Symbol)}
   def capitalize(); end
 
-  # Case-insensitive version of `Symbol#<=>`. Currently, case-insensitivity only
+  # Case-insensitive version of Symbol#<=>. Currently, case-insensitivity only
   # works on characters A-Z/a-z, not all of Unicode. This is different from
-  # [`Symbol#casecmp?`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html#method-i-casecmp-3F).
+  # [`Symbol#casecmp?`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html#method-i-casecmp-3F).
   #
   # ```ruby
   # :aBcDeF.casecmp(:abcde)     #=> 1
@@ -165,7 +167,7 @@ class Symbol < Object
   sig {returns(T::Boolean)}
   def empty?(); end
 
-  # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.6.0/Encoding.html)
+  # Returns the [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
   # object that represents the encoding of *sym*.
   sig {returns(Encoding)}
   def encoding(); end
@@ -175,7 +177,7 @@ class Symbol < Object
   # ```ruby
   # :hello.end_with?("ello")               #=> true
   #
-  # # returns true if one of the suffixes matches.
+  # # returns true if one of the +suffixes+ matches.
   # :hello.end_with?("heaven", "ello")     #=> true
   # :hello.end_with?("heaven", "paradise") #=> false
   # ```
@@ -204,8 +206,9 @@ class Symbol < Object
   sig {returns(String)}
   def inspect(); end
 
-  # In general, `to_sym` returns the `Symbol` corresponding to an object. As
-  # *sym* is already a symbol, `self` is returned in this case.
+  # In general, `to_sym` returns the
+  # [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) corresponding to
+  # an object. As *sym* is already a symbol, `self` is returned in this case.
   sig {returns(T.self_type)}
   def intern(); end
 
@@ -280,9 +283,10 @@ class Symbol < Object
   end
   def slice(idx_or_range, n=T.unsafe(nil)); end
 
-  # Returns true if `sym` starts with one of the `prefixes` given.
-  #
-  # Each of the `prefixes` should be a String or a Regexp.
+  # Returns true if `sym` starts with one of the `prefixes` given. Each of the
+  # `prefixes` should be a
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) or a
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html).
   #
   # ```ruby
   # :hello.start_with?("hell")               #=> true
@@ -309,8 +313,9 @@ class Symbol < Object
   sig {returns(String)}
   def to_s(); end
 
-  # In general, `to_sym` returns the `Symbol` corresponding to an object. As
-  # *sym* is already a symbol, `self` is returned in this case.
+  # In general, `to_sym` returns the
+  # [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) corresponding to
+  # an object. As *sym* is already a symbol, `self` is returned in this case.
   sig {returns(T.self_type)}
   def to_sym(); end
 end

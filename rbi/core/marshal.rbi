@@ -9,7 +9,7 @@
 # the same major version number and an equal or lower minor version number. If
 # Ruby's "verbose" flag is set (normally using -d, -v, -w, or --verbose) the
 # major and minor numbers must match exactly.
-# [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html) versioning is
+# [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) versioning is
 # independent of Ruby's version numbers. You can extract the version by reading
 # the first two bytes of marshaled data.
 #
@@ -22,8 +22,8 @@
 #
 # Some objects cannot be dumped: if the objects to be dumped include bindings,
 # procedure or method objects, instances of class
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html), or singleton objects, a
-# [`TypeError`](https://docs.ruby-lang.org/en/2.6.0/TypeError.html) will be
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html), or singleton objects, a
+# [`TypeError`](https://docs.ruby-lang.org/en/2.7.0/TypeError.html) will be
 # raised.
 #
 # If your class has special serialization needs (for example, if you want to
@@ -34,28 +34,28 @@
 # There are two methods of doing this, your object can define either
 # marshal\_dump and marshal\_load or \_dump and \_load. marshal\_dump will take
 # precedence over \_dump if both are defined. marshal\_dump may result in
-# smaller [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html) strings.
+# smaller [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) strings.
 #
 # ## Security considerations
 #
 # By design,
-# [`Marshal.load`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html#method-c-load)
+# [`Marshal.load`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html#method-c-load)
 # can deserialize almost any class loaded into the Ruby process. In many cases
 # this can lead to remote code execution if the
-# [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html) data is loaded
+# [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) data is loaded
 # from an untrusted source.
 #
 # As a result,
-# [`Marshal.load`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html#method-c-load)
+# [`Marshal.load`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html#method-c-load)
 # is not suitable as a general purpose serialization format and you should never
 # unmarshal user supplied input or other untrusted data.
 #
 # If you need to deserialize untrusted data, use
-# [`JSON`](https://docs.ruby-lang.org/en/2.6.0/JSON.html) or another
+# [`JSON`](https://docs.ruby-lang.org/en/2.7.0/JSON.html) or another
 # serialization format that is only able to load simple, 'primitive' types such
-# as [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html),
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html),
-# [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html), etc. Never allow user
+# as [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html),
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html),
+# [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html), etc. Never allow user
 # input to specify arbitrary types to deserialize into.
 #
 # ## marshal\_dump and marshal\_load
@@ -94,14 +94,14 @@
 # yourself.
 #
 # When dumping an object the instance method \_dump is called with an
-# [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) which indicates
+# [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) which indicates
 # the maximum depth of objects to dump (a value of -1 implies that you should
 # disable depth checking). \_dump must return a
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) containing the
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) containing the
 # information necessary to reconstitute the object.
 #
 # The class method \_load should take a
-# [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html) and use it to
+# [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) and use it to
 # return an object of the same class.
 #
 # Example:
@@ -125,9 +125,9 @@
 # ```
 #
 # Since
-# [`Marshal.dump`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html#method-c-dump)
+# [`Marshal.dump`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html#method-c-dump)
 # outputs a string you can have \_dump return a
-# [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html) string which is
+# [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) string which is
 # Marshal.loaded in \_load for complex objects.
 module Marshal
   # major version
@@ -137,7 +137,7 @@ module Marshal
 
   # Serializes obj and all descendant objects. If anIO is specified, the
   # serialized data will be written to it, otherwise the data will be returned
-  # as a [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html). If limit
+  # as a [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html). If limit
   # is specified, the traversal of subobjects will be limited to that depth. If
   # limit is negative, no checking of depth will be performed.
   #
@@ -161,24 +161,24 @@ module Marshal
   # obj.say_hello  #=> "hello\n"
   # ```
   #
-  # [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html) can't dump
+  # [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) can't dump
   # following objects:
   # *   anonymous Class/Module.
   # *   objects which are related to system (ex:
-  #     [`Dir`](https://docs.ruby-lang.org/en/2.6.0/Dir.html),
-  #     [`File::Stat`](https://docs.ruby-lang.org/en/2.6.0/File/Stat.html),
-  #     [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html),
-  #     [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html),
-  #     [`Socket`](https://docs.ruby-lang.org/en/2.6.0/Socket.html) and so on)
+  #     [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html),
+  #     [`File::Stat`](https://docs.ruby-lang.org/en/2.7.0/File/Stat.html),
+  #     [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html),
+  #     [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html),
+  #     [`Socket`](https://docs.ruby-lang.org/en/2.7.0/Socket.html) and so on)
   # *   an instance of
-  #     [`MatchData`](https://docs.ruby-lang.org/en/2.6.0/MatchData.html),
-  #     [`Data`](https://docs.ruby-lang.org/en/2.6.0/Data.html),
-  #     [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html),
-  #     [`UnboundMethod`](https://docs.ruby-lang.org/en/2.6.0/UnboundMethod.html),
-  #     [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html),
-  #     [`Thread`](https://docs.ruby-lang.org/en/2.6.0/Thread.html),
-  #     [`ThreadGroup`](https://docs.ruby-lang.org/en/2.6.0/ThreadGroup.html),
-  #     [`Continuation`](https://docs.ruby-lang.org/en/2.6.0/Continuation.html)
+  #     [`MatchData`](https://docs.ruby-lang.org/en/2.7.0/MatchData.html),
+  #     [`Data`](https://docs.ruby-lang.org/en/2.7.0/Data.html),
+  #     [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html),
+  #     [`UnboundMethod`](https://docs.ruby-lang.org/en/2.7.0/UnboundMethod.html),
+  #     [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html),
+  #     [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html),
+  #     [`ThreadGroup`](https://docs.ruby-lang.org/en/2.7.0/ThreadGroup.html),
+  #     [`Continuation`](https://docs.ruby-lang.org/en/2.7.0/Continuation.html)
   # *   objects which define singleton methods
   sig do
     params(
@@ -199,7 +199,7 @@ module Marshal
 
   # Returns the result of converting the serialized data in source into a Ruby
   # object (possibly with associated subordinate objects). source may be either
-  # an instance of [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) or an
+  # an instance of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) or an
   # object that responds to to\_str. If proc is specified, each object will be
   # passed to the proc, as the object is being deserialized.
   #
@@ -216,7 +216,7 @@ module Marshal
 
   # Returns the result of converting the serialized data in source into a Ruby
   # object (possibly with associated subordinate objects). source may be either
-  # an instance of [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) or an
+  # an instance of [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) or an
   # object that responds to to\_str. If proc is specified, each object will be
   # passed to the proc, as the object is being deserialized.
   #

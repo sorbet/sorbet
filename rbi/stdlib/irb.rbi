@@ -1,6 +1,6 @@
 # typed: __STDLIB_INTERNAL
 
-# [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) stands for "interactive
+# [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) stands for "interactive
 # Ruby" and is a tool to interactively execute Ruby expressions read from the
 # standard input.
 #
@@ -25,10 +25,8 @@
 # #=> nil
 # ```
 #
-# The [`Readline`](https://docs.ruby-lang.org/en/2.6.0/Readline.html) extension
-# module can be used with irb. Use of
-# [`Readline`](https://docs.ruby-lang.org/en/2.6.0/Readline.html) is default if
-# it's installed.
+# The singleline editor module or multiline editor module can be used with irb.
+# Use of multiline editor is default if it's installed.
 #
 # ## Command line options
 #
@@ -44,27 +42,30 @@
 #   -W[level=2]       Same as `ruby -W`
 #   --inspect         Use `inspect' for output (default except for bc mode)
 #   --noinspect       Don't use inspect for output
-#   --readline        Use Readline extension module
-#   --noreadline      Don't use Readline extension module
+#   --multiline       Use multiline editor module
+#   --nomultiline     Don't use multiline editor module
+#   --singleline      Use singleline editor module
+#   --nosingleline    Don't use singleline editor module
+#   --colorize        Use colorization
+#   --nocolorize      Don't use colorization
 #   --prompt prompt-mode
 #   --prompt-mode prompt-mode
 #                     Switch prompt mode. Pre-defined prompt modes are
 #                     `default', `simple', `xmp' and `inf-ruby'
 #   --inf-ruby-mode   Use prompt appropriate for inf-ruby-mode on emacs.
-#                     Suppresses --readline.
+#                     Suppresses --multiline and --singleline.
 #   --simple-prompt   Simple prompt mode
 #   --noprompt        No prompt mode
 #   --tracer          Display trace for each execution of commands.
 #   --back-trace-limit n
 #                     Display backtrace top n and tail n. The default
 #                     value is 16.
-#   --irb_debug n     Set internal debug level to n (not for popular use)
 #   -v, --version     Print the version of irb
 # ```
 #
 # ## Configuration
 #
-# [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) reads from `~/.irbrc`
+# [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) reads from `~/.irbrc`
 # when it's invoked.
 #
 # If `~/.irbrc` doesn't exist, `irb` will try to read in the following order:
@@ -84,21 +85,22 @@
 # IRB.conf[:IRB_RC] = nil
 # IRB.conf[:BACK_TRACE_LIMIT]=16
 # IRB.conf[:USE_LOADER] = false
-# IRB.conf[:USE_READLINE] = nil
+# IRB.conf[:USE_MULTILINE] = nil
+# IRB.conf[:USE_SINGLELINE] = nil
+# IRB.conf[:USE_COLORIZE] = true
 # IRB.conf[:USE_TRACER] = false
 # IRB.conf[:IGNORE_SIGINT] = true
 # IRB.conf[:IGNORE_EOF] = false
 # IRB.conf[:PROMPT_MODE] = :DEFAULT
 # IRB.conf[:PROMPT] = {...}
-# IRB.conf[:DEBUG_LEVEL]=0
 # ```
 #
 # ### Auto indentation
 #
-# To enable auto-indent mode in irb, add the following to your `.irbrc`:
+# To disable auto-indent mode in irb, add the following to your `.irbrc`:
 #
 # ```ruby
-# IRB.conf[:AUTO_INDENT] = true
+# IRB.conf[:AUTO_INDENT] = false
 # ```
 #
 # ### Autocompletion
@@ -111,21 +113,32 @@
 #
 # ### History
 #
-# By default, irb disables history and will not store any commands you used.
+# By default, irb will store the last 1000 commands you used in
+# `IRB.conf[:HISTORY_FILE]` (`~/.irb_history` by default).
 #
-# If you want to enable history, add the following to your `.irbrc`:
+# If you want to disable history, add the following to your `.irbrc`:
 #
 # ```ruby
-# IRB.conf[:SAVE_HISTORY] = 1000
+# IRB.conf[:SAVE_HISTORY] = nil
 # ```
 #
-# This will now store the last 1000 commands in `~/.irb_history`.
-#
 # See
-# [`IRB::Context#save_history=`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-save_history-3D)
+# [`IRB::Context#save_history=`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-save_history-3D)
 # for more information.
 #
-# ## Customizing the [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) Prompt
+# The history of *results* of commands evaluated is not stored by default, but
+# can be turned on to be stored with this `.irbrc` setting:
+#
+# ```
+# IRB.conf[:EVAL_HISTORY] = <number>
+# ```
+#
+# See
+# [`IRB::Context#eval_history=`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-eval_history-3D)
+# and History class. The history of command results is not permanently saved in
+# any file.
+#
+# ## Customizing the [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) Prompt
 #
 # In order to customize the prompt, you can change the following Hash:
 #
@@ -137,7 +150,7 @@
 #
 # ```ruby
 # IRB.conf[:PROMPT][:MY_PROMPT] = { # name of prompt mode
-#   :AUTO_INDENT => true,           # enables auto-indent mode
+#   :AUTO_INDENT => false,          # disables auto-indent mode
 #   :PROMPT_I =>  ">> ",            # simple prompt
 #   :PROMPT_S => nil,               # prompt for continuated strings
 #   :PROMPT_C => nil,               # prompt for continuated statement
@@ -172,6 +185,7 @@
 # ```ruby
 # IRB.conf[:PROMPT_MODE][:DEFAULT] = {
 #   :PROMPT_I => "%N(%m):%03n:%i> ",
+#   :PROMPT_N => "%N(%m):%03n:%i> ",
 #   :PROMPT_S => "%N(%m):%03n:%i%l ",
 #   :PROMPT_C => "%N(%m):%03n:%i* ",
 #   :RETURN => "%s\n" # used to printf
@@ -231,18 +245,17 @@
 # Because irb evaluates input immediately after it is syntactically complete,
 # the results may be slightly different than directly using Ruby.
 #
-# ## [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) Sessions
+# ## [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) Sessions
 #
-# [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) has a special feature,
+# [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) has a special feature,
 # that allows you to manage many sessions at once.
 #
-# You can create new sessions with
-# [`Irb.irb`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-irb), and
-# get a list of current sessions with the `jobs` command in the prompt.
+# You can create new sessions with Irb.irb, and get a list of current sessions
+# with the `jobs` command in the prompt.
 #
 # ### Commands
 #
-# [`JobManager`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-JobManager)
+# [`JobManager`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-JobManager)
 # provides commands to handle the current sessions:
 #
 # ```ruby
@@ -252,9 +265,9 @@
 # ```
 #
 # The `exit` command, or
-# [`::irb_exit`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-irb_exit),
+# [`::irb_exit`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-irb_exit),
 # will quit the current session and call any exit hooks with
-# [`IRB.irb_at_exit`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-irb_at_exit).
+# [`IRB.irb_at_exit`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-irb_at_exit).
 #
 # A few commands for loading files within the session are also available:
 #
@@ -263,48 +276,47 @@
 #     see IrbLoader#source\_file
 # `irb_load`
 # :   Loads the given file similarly to
-#     [`Kernel#load`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-load),
+#     [`Kernel#load`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-load),
 #     see IrbLoader#irb\_load
 # `irb_require`
 # :   Loads the given file similarly to
-#     [`Kernel#require`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-require)
+#     [`Kernel#require`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-require)
 #
 #
 # ### Configuration
 #
 # The command line options, or
-# [`IRB.conf`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf),
-# specify the default behavior of
-# [`Irb.irb`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-irb).
+# [`IRB.conf`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-conf),
+# specify the default behavior of Irb.irb.
 #
 # On the other hand, each conf in [Command line options at
-# `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Command+line+options)
+# `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Command+line+options)
 # is used to individually configure
-# [`IRB.irb`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-irb).
+# [`IRB.irb`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-irb).
 #
-# If a proc is set for
-# [`[IRB.conf](:IRB_RC)`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf),
-# its will be invoked after execution of that proc with the context of the
-# current session as its argument. Each session can be configured using this
-# mechanism.
+# If a proc is set for `IRB.conf[:IRB_RC]`, its will be invoked after execution
+# of that proc with the context of the current session as its argument. Each
+# session can be configured using this mechanism.
 #
 # ### Session variables
 #
-# There are a few variables in every
-# [`Irb`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) session that can come in
-# handy:
+# There are a few variables in every Irb session that can come in handy:
 #
 # `_`
 # :   The value command executed, as a local variable
 # `__`
-# :   The history of evaluated commands
+# :   The history of evaluated commands. Available only if
+#     `IRB.conf[:EVAL_HISTORY]` is not `nil` (which is the default). See also
+#     [`IRB::Context#eval_history=`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-eval_history-3D)
+#     and
+#     [`IRB::History`](https://docs.ruby-lang.org/en/2.7.0/IRB/History.html).
 # `__[line_no]`
 # :   Returns the evaluation value at the given line number, `line_no`. If
 #     `line_no` is a negative, the return value `line_no` many lines before the
 #     most recent return value.
 #
 #
-# ### Example using [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) Sessions
+# ### Example using [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) Sessions
 #
 # ```
 # # invoke a new session
@@ -335,7 +347,7 @@
 # # check if Foo#foo is available
 # irb(main):005:0> Foo.instance_methods #=> [:foo, ...]
 #
-# # change the active sesssion
+# # change the active session
 # irb(main):006:0> fg 2
 # # define Foo#bar in the context of Foo
 # irb.2(Foo):005:0> def bar
@@ -367,12 +379,38 @@
 # irb(main):010:0> exit
 # ```
 #
+# ```
+# save-history.rb -
+#     $Release Version: 0.9.6$
+#     $Revision$
+#     by Keiju ISHITSUKA(keiju@ruby-lang.org)
+# ```
+#
+# --
+#
+# ```
+# frame.rb -
+#     $Release Version: 0.9$
+#     $Revision$
+#     by Keiju ISHITSUKA(Nihon Rational Software Co.,Ltd)
+# ```
+#
+# --
+#
+# ```
+# output-method.rb - output methods used by irb
+#     $Release Version: 0.9.6$
+#     $Revision$
+#     by Keiju ISHITSUKA(keiju@ruby-lang.org)
+# ```
+#
+# --
 # DO NOT WRITE ANY MAGIC COMMENT HERE.
 module IRB
   # The current
-  # [`IRB::Context`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html) of
+  # [`IRB::Context`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html) of
   # the session, see
-  # [`IRB.conf`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf)
+  # [`IRB.conf`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-conf)
   #
   # ```
   # irb
@@ -384,11 +422,11 @@ module IRB
   # Displays current configuration.
   #
   # Modifying the configuration is achieved by sending a message to
-  # [`IRB.conf`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf).
+  # [`IRB.conf`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-conf).
   #
   # See [Configuration at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Configuration) for
-  # more information.
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Configuration)
+  # for more information.
   def self.conf; end
 
   def self.default_src_encoding; end
@@ -398,43 +436,40 @@ module IRB
   # Will raise an Abort exception, or the given `exception`.
   def self.irb_abort(irb, exception = _); end
 
-  # Calls each event hook of
-  # [`[IRB.conf](:AT_EXIT)`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf)
-  # when the current session quits.
+  # Calls each event hook of `IRB.conf[:TA_EXIT]` when the current session
+  # quits.
   def self.irb_at_exit; end
 
   # Quits irb
   def self.irb_exit(irb, ret); end
 
-  # Initializes [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) and
-  # creates a new
-  # [`Irb.irb`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-irb)
-  # object at the `TOPLEVEL_BINDING`
+  # Initializes [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) and
+  # creates a new Irb.irb object at the `TOPLEVEL_BINDING`
   def self.start(ap_path = _); end
 
   # Returns the current version of
-  # [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html), including release
+  # [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html), including release
   # version and last updated date.
   def self.version; end
 end
 
 # An exception raised by
-# [`IRB.irb_abort`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-irb_abort)
+# [`IRB.irb_abort`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-irb_abort)
 class IRB::Abort < ::Exception; end
 
 # A class that wraps the current state of the irb session, including the
 # configuration of
-# [`IRB.conf`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf).
+# [`IRB.conf`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-conf).
 class IRB::Context
-  # Creates a new [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) context.
+  # Creates a new [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) context.
   #
   # The optional `input_method` argument:
   #
   # `nil`
-  # :   uses stdin or
-  #     [`Readline`](https://docs.ruby-lang.org/en/2.6.0/Readline.html)
+  # :   uses stdin or Reidline or
+  #     [`Readline`](https://docs.ruby-lang.org/en/2.7.0/Readline.html)
   # `String`
-  # :   uses a [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html)
+  # :   uses a [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html)
   # `other`
   # :   uses this as InputMethod
   def self.new(irb, workspace = _, input_method = _, output_method = _); end
@@ -446,55 +481,55 @@ class IRB::Context
   def ap_name=(_); end
 
   # Can be either the default `IRB.conf[:AUTO_INDENT]`, or the mode set by
-  # [`prompt_mode=`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-prompt_mode-3D)
+  # [`prompt_mode=`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-prompt_mode-3D)
   #
-  # To enable auto-indentation in irb:
+  # To disable auto-indentation in irb:
   #
   # ```ruby
-  # IRB.conf[:AUTO_INDENT] = true
+  # IRB.conf[:AUTO_INDENT] = false
   # ```
   #
   # or
   #
   # ```ruby
-  # irb_context.auto_indent_mode = true
+  # irb_context.auto_indent_mode = false
   # ```
   #
   # or
   #
   # ```ruby
-  # IRB.CurrentContext.auto_indent_mode = true
+  # IRB.CurrentContext.auto_indent_mode = false
   # ```
   #
   # See [Configuration at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Configuration) for
-  # more information.
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Configuration)
+  # for more information.
   def auto_indent_mode; end
 
   # Can be either the default `IRB.conf[:AUTO_INDENT]`, or the mode set by
-  # [`prompt_mode=`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-prompt_mode-3D)
+  # [`prompt_mode=`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-prompt_mode-3D)
   #
-  # To enable auto-indentation in irb:
+  # To disable auto-indentation in irb:
   #
   # ```ruby
-  # IRB.conf[:AUTO_INDENT] = true
+  # IRB.conf[:AUTO_INDENT] = false
   # ```
   #
   # or
   #
   # ```ruby
-  # irb_context.auto_indent_mode = true
+  # irb_context.auto_indent_mode = false
   # ```
   #
   # or
   #
   # ```ruby
-  # IRB.CurrentContext.auto_indent_mode = true
+  # IRB.CurrentContext.auto_indent_mode = false
   # ```
   #
   # See [Configuration at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Configuration) for
-  # more information.
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Configuration)
+  # for more information.
   def auto_indent_mode=(_); end
 
   # The limit of backtrace lines displayed as top `n` and tail `n`.
@@ -504,7 +539,7 @@ class IRB::Context
   # Can also be set using the `--back-trace-limit` command line option.
   #
   # See [Command line options at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Command+line+options)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Command+line+options)
   # for more command line options.
   def back_trace_limit; end
 
@@ -515,7 +550,7 @@ class IRB::Context
   # Can also be set using the `--back-trace-limit` command line option.
   #
   # See [Command line options at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Command+line+options)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Command+line+options)
   # for more command line options.
   def back_trace_limit=(_); end
 
@@ -541,9 +576,7 @@ class IRB::Context
 
   # Whether to echo the return value to output or not.
   #
-  # Uses
-  # [`[IRB.conf](:ECHO)`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf)
-  # if available, or defaults to `true`.
+  # Uses `IRB.conf[:ECHO]` if available, or defaults to `true`.
   #
   # ```ruby
   # puts "hello"
@@ -557,9 +590,7 @@ class IRB::Context
 
   # Whether to echo the return value to output or not.
   #
-  # Uses
-  # [`[IRB.conf](:ECHO)`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf)
-  # if available, or defaults to `true`.
+  # Uses `IRB.conf[:ECHO]` if available, or defaults to `true`.
   #
   # ```ruby
   # puts "hello"
@@ -573,9 +604,7 @@ class IRB::Context
 
   # Whether to echo the return value to output or not.
   #
-  # Uses
-  # [`[IRB.conf](:ECHO)`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf)
-  # if available, or defaults to `true`.
+  # Uses `IRB.conf[:ECHO]` if available, or defaults to `true`.
   #
   # ```ruby
   # puts "hello"
@@ -587,9 +616,10 @@ class IRB::Context
   # ```
   def echo?; end
 
-  # Sets command result history limit.
+  # Sets command result history limit. Default value is set from
+  # `IRB.conf[:EVAL_HISTORY]`.
   #
-  # `no` is an [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) or
+  # `no` is an [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) or
   # `nil`.
   #
   # Returns `no` of history items if greater than 0.
@@ -597,20 +627,23 @@ class IRB::Context
   # If `no` is 0, the number of history items is unlimited.
   #
   # If `no` is `nil`, execution result history isn't used (default).
+  #
+  # History values are available via `__` variable, see
+  # [`IRB::History`](https://docs.ruby-lang.org/en/2.7.0/IRB/History.html).
   def eval_history=(*opts, &b); end
 
   # Exits the current session, see
-  # [`IRB.irb_exit`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-irb_exit)
+  # [`IRB.irb_exit`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-irb_exit)
   #
   # Also aliased as:
-  # [`__exit__`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-__exit__)
+  # [`__exit__`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-__exit__)
   def exit(ret = _); end
 
   # Whether
-  # [`io`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#attribute-i-io)
-  # uses a [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) for the
+  # [`io`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#attribute-i-io)
+  # uses a [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) for the
   # `input_method` passed when creating the current context, see
-  # [`::new`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-c-new)
+  # [`::new`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-c-new)
   def file_input?; end
 
   # Whether `^D` (`control-d`) will be ignored or not.
@@ -659,9 +692,9 @@ class IRB::Context
   def ignore_sigint?; end
 
   # Whether
-  # [`inspect_mode`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#attribute-i-inspect_mode)
+  # [`inspect_mode`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#attribute-i-inspect_mode)
   # is set or not, see
-  # [`inspect_mode=`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-inspect_mode-3D)
+  # [`inspect_mode=`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-inspect_mode-3D)
   # for more detail.
   def inspect?; end
 
@@ -679,31 +712,31 @@ class IRB::Context
   #
   #
   # See
-  # [`IRB::Inspector`](https://docs.ruby-lang.org/en/2.6.0/IRB/Inspector.html)
+  # [`IRB::Inspector`](https://docs.ruby-lang.org/en/2.7.0/IRB/Inspector.html)
   # for more information.
   #
   # Can also be set using the `--inspect` and `--noinspect` command line
   # options.
   #
   # See [Command line options at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Command+line+options)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Command+line+options)
   # for more command line options.
   def inspect_mode=(opt); end
 
   # The current input method
   #
-  # Can be either StdioInputMethod, ReadlineInputMethod, FileInputMethod or
-  # other specified when the context is created. See
-  # [`::new`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-c-new)
-  # for more information on `input_method`.
+  # Can be either StdioInputMethod, ReadlineInputMethod, ReidlineInputMethod,
+  # FileInputMethod or other specified when the context is created. See
+  # [`::new`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-c-new)
+  # for more # information on `input_method`.
   def io; end
 
   # The current input method
   #
-  # Can be either StdioInputMethod, ReadlineInputMethod, FileInputMethod or
-  # other specified when the context is created. See
-  # [`::new`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-c-new)
-  # for more information on `input_method`.
+  # Can be either StdioInputMethod, ReadlineInputMethod, ReidlineInputMethod,
+  # FileInputMethod or other specified when the context is created. See
+  # [`::new`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-c-new)
+  # for more # information on `input_method`.
   def io=(_); end
 
   # Current irb session
@@ -721,15 +754,15 @@ class IRB::Context
   def irb_name=(_); end
 
   # Can be either the
-  # [`irb_name`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#attribute-i-irb_name)
+  # [`irb_name`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#attribute-i-irb_name)
   # surrounded by parenthesis, or the `input_method` passed to
-  # [`Context.new`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-c-new)
+  # [`Context.new`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-c-new)
   def irb_path; end
 
   # Can be either the
-  # [`irb_name`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#attribute-i-irb_name)
+  # [`irb_name`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#attribute-i-irb_name)
   # surrounded by parenthesis, or the `input_method` passed to
-  # [`Context.new`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-c-new)
+  # [`Context.new`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-c-new)
   def irb_path=(_); end
 
   # The return value of the last statement evaluated.
@@ -744,33 +777,33 @@ class IRB::Context
   # The top-level workspace, see WorkSpace#main
   def main; end
 
-  # [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) prompt for continuated
+  # [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) prompt for continuated
   # statement (e.g. immediately after an `if`)
   #
   # See [Customizing the IRB Prompt at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Customizing+the+IRB+Prompt)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Customizing+the+IRB+Prompt)
   # for more information.
   def prompt_c; end
 
-  # [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) prompt for continuated
+  # [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) prompt for continuated
   # statement (e.g. immediately after an `if`)
   #
   # See [Customizing the IRB Prompt at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Customizing+the+IRB+Prompt)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Customizing+the+IRB+Prompt)
   # for more information.
   def prompt_c=(_); end
 
-  # Standard [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) prompt
+  # Standard [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) prompt
   #
   # See [Customizing the IRB Prompt at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Customizing+the+IRB+Prompt)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Customizing+the+IRB+Prompt)
   # for more information.
   def prompt_i; end
 
-  # Standard [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) prompt
+  # Standard [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) prompt
   #
   # See [Customizing the IRB Prompt at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Customizing+the+IRB+Prompt)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Customizing+the+IRB+Prompt)
   # for more information.
   def prompt_i=(_); end
 
@@ -780,41 +813,41 @@ class IRB::Context
   # Sets the `mode` of the prompt in this context.
   #
   # See [Customizing the IRB Prompt at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Customizing+the+IRB+Prompt)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Customizing+the+IRB+Prompt)
   # for more information.
   def prompt_mode=(mode); end
 
   # See [Customizing the IRB Prompt at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Customizing+the+IRB+Prompt)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Customizing+the+IRB+Prompt)
   # for more information.
   def prompt_n; end
 
   # See [Customizing the IRB Prompt at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Customizing+the+IRB+Prompt)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Customizing+the+IRB+Prompt)
   # for more information.
   def prompt_n=(_); end
 
-  # [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) prompt for continuated
+  # [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) prompt for continuated
   # strings
   #
   # See [Customizing the IRB Prompt at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Customizing+the+IRB+Prompt)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Customizing+the+IRB+Prompt)
   # for more information.
   def prompt_s; end
 
-  # [`IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html) prompt for continuated
+  # [`IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html) prompt for continuated
   # strings
   #
   # See [Customizing the IRB Prompt at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Customizing+the+IRB+Prompt)
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Customizing+the+IRB+Prompt)
   # for more information.
   def prompt_s=(_); end
 
   # Whether
-  # [`verbose?`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-verbose-3F)
+  # [`verbose?`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-verbose-3F)
   # is `true`, and `input_method` is either StdioInputMethod or
-  # ReadlineInputMethod, see
-  # [`io`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#attribute-i-io)
+  # ReidlineInputMethod or ReadlineInputMethod, see
+  # [`io`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#attribute-i-io)
   # for more information.
   def prompting?; end
 
@@ -828,22 +861,22 @@ class IRB::Context
   def rc?; end
 
   # The format of the return statement, set by
-  # [`prompt_mode=`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-prompt_mode-3D)
+  # [`prompt_mode=`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-prompt_mode-3D)
   # using the `:RETURN` of the `mode` passed to set the current
-  # [`prompt_mode`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#attribute-i-prompt_mode).
+  # [`prompt_mode`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#attribute-i-prompt_mode).
   def return_format; end
 
   # The format of the return statement, set by
-  # [`prompt_mode=`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-prompt_mode-3D)
+  # [`prompt_mode=`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-prompt_mode-3D)
   # using the `:RETURN` of the `mode` passed to set the current
-  # [`prompt_mode`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#attribute-i-prompt_mode).
+  # [`prompt_mode`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#attribute-i-prompt_mode).
   def return_format=(_); end
 
   # Sets `IRB.conf[:SAVE_HISTORY]` to the given `val` and calls
   # init\_save\_history with this context.
   #
   # Will store the number of `val` entries of history in the
-  # [`history_file`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-history_file)
+  # [`history_file`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-history_file)
   #
   # Add the following to your `.irbrc` to change the number of history entries
   # stored to 1000:
@@ -854,48 +887,35 @@ class IRB::Context
   def save_history=(*opts, &b); end
 
   # Sets the return value from the last statement evaluated in this context to
-  # [`last_value`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#attribute-i-last_value).
+  # [`last_value`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#attribute-i-last_value).
   #
   # Also aliased as:
-  # [`_set_last_value`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-_set_last_value)
+  # [`_set_last_value`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-_set_last_value)
   def set_last_value(value); end
 
   # The current thread in this context
   def thread; end
 
-  # Sets
-  # [`[IRB.conf](:USE_LOADER)`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf)
+  # Sets `IRB.conf[:USE_LOADER]`
   #
   # See
-  # [`use_loader`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-use_loader)
+  # [`use_loader`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-use_loader)
   # for more information.
   def use_loader=(*opts, &b); end
 
-  # Whether `Readline` is enabled or not.
+  # Whether singleline editor mode is enabled or not.
   #
-  # A copy of the default `IRB.conf[:USE_READLINE]`
-  #
-  # See
-  # [`use_readline=`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-use_readline-3D)
-  # for more information.
+  # A copy of the default `IRB.conf[:USE_SINGLELINE]`
   def use_readline; end
 
-  # Obsolete method.
+  # Whether singleline editor mode is enabled or not.
   #
-  # Can be set using the `--noreadline` and `--readline` command line options.
-  #
-  # See [Command line options at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Command+line+options)
-  # for more command line options.
+  # A copy of the default `IRB.conf[:USE_SINGLELINE]`
   def use_readline=(opt); end
 
-  # Whether `Readline` is enabled or not.
+  # Whether singleline editor mode is enabled or not.
   #
-  # A copy of the default `IRB.conf[:USE_READLINE]`
-  #
-  # See
-  # [`use_readline=`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-use_readline-3D)
-  # for more information.
+  # A copy of the default `IRB.conf[:USE_SINGLELINE]`
   def use_readline?; end
 
   # Sets whether or not to use the
@@ -925,7 +945,7 @@ class IRB::Context
   def workspace=(_); end
 
   # The toplevel workspace, see
-  # [`home_workspace`](https://docs.ruby-lang.org/en/2.6.0/IRB/Context.html#method-i-home_workspace)
+  # [`home_workspace`](https://docs.ruby-lang.org/en/2.7.0/IRB/Context.html#method-i-home_workspace)
   def workspace_home; end
 end
 
@@ -955,25 +975,25 @@ end
 # Installs the default irb extensions command bundle.
 module IRB::ExtendCommandBundle
   # See
-  # [`install_alias_method`](https://docs.ruby-lang.org/en/2.6.0/IRB/ExtendCommandBundle.html#method-i-install_alias_method).
+  # [`install_alias_method`](https://docs.ruby-lang.org/en/2.7.0/IRB/ExtendCommandBundle.html#method-i-install_alias_method).
   NO_OVERRIDE = T.let(T.unsafe(nil), Integer)
 
   # See
-  # [`install_alias_method`](https://docs.ruby-lang.org/en/2.6.0/IRB/ExtendCommandBundle.html#method-i-install_alias_method).
+  # [`install_alias_method`](https://docs.ruby-lang.org/en/2.7.0/IRB/ExtendCommandBundle.html#method-i-install_alias_method).
   OVERRIDE_ALL = T.let(T.unsafe(nil), Integer)
 
   # See
-  # [`install_alias_method`](https://docs.ruby-lang.org/en/2.6.0/IRB/ExtendCommandBundle.html#method-i-install_alias_method).
+  # [`install_alias_method`](https://docs.ruby-lang.org/en/2.7.0/IRB/ExtendCommandBundle.html#method-i-install_alias_method).
   OVERRIDE_PRIVATE_ONLY = T.let(T.unsafe(nil), Integer)
 
   # Installs alias methods for the default irb commands, see
-  # [`::install_extend_commands`](https://docs.ruby-lang.org/en/2.6.0/IRB/ExtendCommandBundle.html#method-c-install_extend_commands).
+  # [`::install_extend_commands`](https://docs.ruby-lang.org/en/2.7.0/IRB/ExtendCommandBundle.html#method-c-install_extend_commands).
   def install_alias_method(to, from, override = _); end
 
   # Displays current configuration.
   #
-  # Modifing the configuration is achieved by sending a message to
-  # [`IRB.conf`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-conf).
+  # Modifying the configuration is achieved by sending a message to
+  # [`IRB.conf`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-conf).
   def irb_context; end
 
   # Quits the current irb context
@@ -984,16 +1004,16 @@ module IRB::ExtendCommandBundle
   def irb_exit(ret = _); end
 
   # Loads the given file similarly to
-  # [`Kernel#load`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-load),
+  # [`Kernel#load`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-load),
   # see IrbLoader#irb\_load
   def irb_load(*opts, &b); end
 
   # Loads the given file similarly to
-  # [`Kernel#require`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-require)
+  # [`Kernel#require`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-require)
   def irb_require(*opts, &b); end
 
   # Evaluate the given `cmd_name` on the given `cmd_class`
-  # [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html).
+  # [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html).
   #
   # Will also define any given `aliases` for the method.
   #
@@ -1003,7 +1023,7 @@ module IRB::ExtendCommandBundle
 
   # Installs alias methods for the default irb commands on the given object
   # using
-  # [`install_alias_method`](https://docs.ruby-lang.org/en/2.6.0/IRB/ExtendCommandBundle.html#method-i-install_alias_method).
+  # [`install_alias_method`](https://docs.ruby-lang.org/en/2.7.0/IRB/ExtendCommandBundle.html#method-i-install_alias_method).
   def self.extend_object(obj); end
 
   # Installs the default irb commands:
@@ -1019,13 +1039,13 @@ module IRB::ExtendCommandBundle
   # `irb_pop_workspace`
   # :   Context#pop\_workspace
   # `irb_load`
-  # :   [`irb_load`](https://docs.ruby-lang.org/en/2.6.0/IRB/ExtendCommandBundle.html#method-i-irb_load)
+  # :   [`irb_load`](https://docs.ruby-lang.org/en/2.7.0/IRB/ExtendCommandBundle.html#method-i-irb_load)
   # `irb_require`
-  # :   [`irb_require`](https://docs.ruby-lang.org/en/2.6.0/IRB/ExtendCommandBundle.html#method-i-irb_require)
+  # :   [`irb_require`](https://docs.ruby-lang.org/en/2.7.0/IRB/ExtendCommandBundle.html#method-i-irb_require)
   # `irb_source`
   # :   IrbLoader#source\_file
   # `irb`
-  # :   [`IRB.irb`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#method-c-irb)
+  # :   [`IRB.irb`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#method-c-irb)
   # `irb_jobs`
   # :   JobManager
   # `irb_fg`
@@ -1034,12 +1054,12 @@ module IRB::ExtendCommandBundle
   # :   JobManager#kill
   # `irb_help`
   # :   [Command line options at
-  #     `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-Command+line+options)
+  #     `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-Command+line+options)
   def self.install_extend_commands; end
 end
 
-# Use a [`File`](https://docs.ruby-lang.org/en/2.6.0/File.html) for
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) with irb, see InputMethod
+# Use a [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html) for
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) with irb, see InputMethod
 class IRB::FileInputMethod < ::IRB::InputMethod
   # Creates a new input method object
   def self.new(file); end
@@ -1050,7 +1070,7 @@ class IRB::FileInputMethod < ::IRB::InputMethod
   # Whether the end of this input method has been reached, returns `true` if
   # there is no more data to read.
   #
-  # See [`IO#eof?`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-eof-3F)
+  # See [`IO#eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F)
   # for more information.
   def eof?; end
 
@@ -1059,7 +1079,7 @@ class IRB::FileInputMethod < ::IRB::InputMethod
 
   # Reads the next line from this input method.
   #
-  # See [`IO#gets`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-gets)
+  # See [`IO#gets`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-gets)
   # for more information.
   def gets; end
 end
@@ -1073,7 +1093,7 @@ class IRB::InputMethod
 
   # Reads the next line from this input method.
   #
-  # See [`IO#gets`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-gets)
+  # See [`IO#gets`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-gets)
   # for more information.
   def gets; end
 
@@ -1086,7 +1106,7 @@ class IRB::InputMethod
   # Whether this input method is still readable when there is no more data to
   # read.
   #
-  # See [`IO#eof`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-eof) for
+  # See [`IO#eof`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof) for
   # more information.
   def readable_after_eof?; end
 end
@@ -1096,12 +1116,12 @@ end
 # In order to create your own custom inspector there are two things you should
 # be aware of:
 #
-# [`Inspector`](https://docs.ruby-lang.org/en/2.6.0/IRB/Inspector.html) uses
-# [`inspect_value`](https://docs.ruby-lang.org/en/2.6.0/IRB/Inspector.html#method-i-inspect_value),
+# [`Inspector`](https://docs.ruby-lang.org/en/2.7.0/IRB/Inspector.html) uses
+# [`inspect_value`](https://docs.ruby-lang.org/en/2.7.0/IRB/Inspector.html#method-i-inspect_value),
 # or `inspect_proc`, for output of return values.
 #
 # This also allows for an optional
-# [`init`](https://docs.ruby-lang.org/en/2.6.0/IRB/Inspector.html#method-i-init)+,
+# [`init`](https://docs.ruby-lang.org/en/2.7.0/IRB/Inspector.html#method-i-init)+,
 # or `init_proc`, which is called when the inspector is activated.
 #
 # Knowing this, you can create a rudimentary inspector as follows:
@@ -1116,23 +1136,23 @@ class IRB::Inspector
   #
   # `:pp`
   # :   Using
-  #     [`Kernel#pretty_inspect`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-pretty_inspect)
+  #     [`Kernel#pretty_inspect`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-pretty_inspect)
   # `:yaml`
   # :   Using YAML.dump
   # `:marshal`
   # :   Using
-  #     [`Marshal.dump`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html#method-c-dump)
+  #     [`Marshal.dump`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html#method-c-dump)
   INSPECTORS = T.let(T.unsafe(nil), T::Hash[T.untyped, T.untyped])
 
   # Creates a new inspector object, using the given `inspect_proc` when output
   # return values in irb.
   def self.new(inspect_proc, init_proc = _); end
 
-  # [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) to call when the
+  # [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html) to call when the
   # inspector is activated, good for requiring dependent libraries.
   def init; end
 
-  # [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html) to call when the
+  # [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html) to call when the
   # input is evaluated and output in irb.
   def inspect_value(v); end
 
@@ -1166,8 +1186,10 @@ class IRB::Irb
   def eval_input; end
 
   # Outputs the local variables to this current session, including
-  # signal\_status and context, using
-  # [`IRB::Locale`](https://docs.ruby-lang.org/en/2.6.0/IRB/Locale.html).
+  # [`signal_status`](https://docs.ruby-lang.org/en/2.7.0/IRB/Irb.html#method-i-signal_status)
+  # and
+  # [`context`](https://docs.ruby-lang.org/en/2.7.0/IRB/Irb.html#attribute-i-context),
+  # using [`IRB::Locale`](https://docs.ruby-lang.org/en/2.7.0/IRB/Locale.html).
   def inspect; end
 
   def run(conf = _); end
@@ -1179,7 +1201,7 @@ class IRB::Irb
   def scanner=(_); end
 
   # Handler for the signal SIGINT, see
-  # [`Kernel#trap`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-trap)
+  # [`Kernel#trap`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-trap)
   # for more information.
   def signal_handle; end
 
@@ -1192,24 +1214,24 @@ class IRB::Irb
   # Evaluates the given block using the given `input_method` as the Context#io.
   #
   # Used by the irb commands `source` and `irb_load`, see [IRB Sessions at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-IRB+Sessions) for
-  # more information.
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-IRB+Sessions)
+  # for more information.
   def suspend_input_method(input_method); end
 
   # Evaluates the given block using the given `path` as the Context#irb\_path
   # and `name` as the Context#irb\_name.
   #
   # Used by the irb command `source`, see [IRB Sessions at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-IRB+Sessions) for
-  # more information.
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-IRB+Sessions)
+  # for more information.
   def suspend_name(path = _, name = _); end
 
   # Evaluates the given block using the given `workspace` as the
   # Context#workspace.
   #
   # Used by the irb command `irb_load`, see [IRB Sessions at
-  # `IRB`](https://docs.ruby-lang.org/en/2.6.0/IRB.html#label-IRB+Sessions) for
-  # more information.
+  # `IRB`](https://docs.ruby-lang.org/en/2.7.0/IRB.html#module-IRB-label-IRB+Sessions)
+  # for more information.
   def suspend_workspace(workspace); end
 end
 
@@ -1246,7 +1268,7 @@ module IRB::Notifier
   def Raise(err = _, *rest); end
 
   # Define a new
-  # [`Notifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier.html) output
+  # [`Notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier.html) output
   # source, returning a new CompositeNotifier with the given `prefix` and
   # `output_method`.
   #
@@ -1262,10 +1284,10 @@ end
 
 # An abstract class, or superclass, for CompositeNotifier and LeveledNotifier to
 # inherit. It provides several wrapper methods for the OutputMethod object used
-# by the [`Notifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier.html).
+# by the [`Notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier.html).
 class IRB::Notifier::AbstractNotifier
   # Creates a new
-  # [`Notifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier.html) object
+  # [`Notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier.html) object
   def self.new(prefix, base_notifier); end
 
   # Execute the given block if notifications are enabled.
@@ -1277,23 +1299,23 @@ class IRB::Notifier::AbstractNotifier
   def notify?; end
 
   # Same as
-  # [`ppx`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/AbstractNotifier.html#method-i-ppx),
+  # [`ppx`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/AbstractNotifier.html#method-i-ppx),
   # except it uses the
-  # [`prefix`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/AbstractNotifier.html#attribute-i-prefix)
+  # [`prefix`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/AbstractNotifier.html#attribute-i-prefix)
   # given during object initialization. See OutputMethod#ppx for more detail.
   def pp(*objs); end
 
   # Same as
-  # [`pp`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/AbstractNotifier.html#method-i-pp),
+  # [`pp`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/AbstractNotifier.html#method-i-pp),
   # except it concatenates the given `prefix` with the
-  # [`prefix`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/AbstractNotifier.html#attribute-i-prefix)
+  # [`prefix`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/AbstractNotifier.html#attribute-i-prefix)
   # given during object initialization.
   #
   # See OutputMethod#ppx for more detail.
   def ppx(prefix, *objs); end
 
   # The `prefix` for this
-  # [`Notifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier.html), which
+  # [`Notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier.html), which
   # is appended to all objects being inspected during output.
   def prefix; end
 
@@ -1310,30 +1332,31 @@ class IRB::Notifier::AbstractNotifier
   def puts(*objs); end
 end
 
+# A class that can be used to create a group of notifier objects with the intent
 # of representing a leveled notification system for irb.
 #
 # This class will allow you to generate other notifiers, and assign them the
 # appropriate level for output.
 #
-# The [`Notifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier.html) class
+# The [`Notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier.html) class
 # provides a class-method
-# [`Notifier.def_notifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier.html#method-c-def_notifier)
+# [`Notifier.def_notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier.html#method-c-def_notifier)
 # to create a new composite notifier. Using the first composite notifier object
 # you create, sibling notifiers can be initialized with
-# [`def_notifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/CompositeNotifier.html#method-i-def_notifier).
+# [`def_notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#method-i-def_notifier).
 class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   # Create a new composite notifier object with the given `prefix`, and
   # `base_notifier` to use for output.
   def self.new(prefix, base_notifier); end
 
   # Creates a new LeveledNotifier in the composite
-  # [`notifiers`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
+  # [`notifiers`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
   # group.
   #
   # The given `prefix` will be assigned to the notifier, and `level` will be
   # used as the index of the
-  # [`notifiers`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+  # [`notifiers`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
   #
   # This method returns the newly created instance.
   def def_notifier(level, prefix = _); end
@@ -1342,7 +1365,7 @@ class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   def level; end
 
   # Alias for:
-  # [`level_notifier=`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/CompositeNotifier.html#method-i-level_notifier-3D)
+  # [`level_notifier=`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#method-i-level_notifier-3D)
   def level=(value); end
 
   # Returns the leveled notifier for this object
@@ -1351,29 +1374,29 @@ class IRB::Notifier::CompositeNotifier < ::IRB::Notifier::AbstractNotifier
   # Sets the leveled notifier for this object.
   #
   # When the given `value` is an instance of AbstractNotifier,
-  # [`level_notifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/CompositeNotifier.html#attribute-i-level_notifier)
+  # [`level_notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#attribute-i-level_notifier)
   # is set to the given object.
   #
-  # When an [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) is
+  # When an [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) is
   # given,
-  # [`level_notifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/CompositeNotifier.html#attribute-i-level_notifier)
+  # [`level_notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#attribute-i-level_notifier)
   # is set to the notifier at the index `value` in the
-  # [`notifiers`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html).
+  # [`notifiers`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html).
   #
   # If no notifier exists at the index `value` in the
-  # [`notifiers`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), an
+  # [`notifiers`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html), an
   # ErrUndefinedNotifier exception is raised.
   #
   # An ErrUnrecognizedLevel exception is raised if the given `value` is not
   # found in the existing
-  # [`notifiers`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), or an instance of
+  # [`notifiers`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#attribute-i-notifiers)
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html), or an instance of
   # AbstractNotifier
   #
   # Also aliased as:
-  # [`level=`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/CompositeNotifier.html#method-i-level-3D)
+  # [`level=`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/CompositeNotifier.html#method-i-level-3D)
   def level_notifier=(value); end
 
   # List of notifiers in the group
@@ -1398,7 +1421,7 @@ class IRB::Notifier::LeveledNotifier < ::IRB::Notifier::AbstractNotifier
 
   # Compares the level of this notifier object with the given `other` notifier.
   #
-  # See the [`Comparable`](https://docs.ruby-lang.org/en/2.6.0/Comparable.html)
+  # See the [`Comparable`](https://docs.ruby-lang.org/en/2.7.0/Comparable.html)
   # module for more information.
   def <=>(other); end
 
@@ -1410,7 +1433,7 @@ class IRB::Notifier::LeveledNotifier < ::IRB::Notifier::AbstractNotifier
   def notify?; end
 end
 
-# [`NoMsgNotifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier/NoMsgNotifier.html)
+# [`NoMsgNotifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier/NoMsgNotifier.html)
 # is a LeveledNotifier that's used as the default notifier when creating a new
 # CompositeNotifier.
 #
@@ -1426,9 +1449,9 @@ class IRB::Notifier::NoMsgNotifier < ::IRB::Notifier::LeveledNotifier
 end
 
 # An abstract output class for
-# [`IO`](https://docs.ruby-lang.org/en/2.6.0/IO.html) in irb. This is mainly
+# [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) in irb. This is mainly
 # used internally by
-# [`IRB::Notifier`](https://docs.ruby-lang.org/en/2.6.0/IRB/Notifier.html). You
+# [`IRB::Notifier`](https://docs.ruby-lang.org/en/2.7.0/IRB/Notifier.html). You
 # can define your own output method to use with Irb.new, or Context.new
 class IRB::OutputMethod
   extend(::Exception2MessageMapper)
@@ -1438,11 +1461,11 @@ class IRB::OutputMethod
   def Raise(err = _, *rest); end
 
   # Returns an array of the given `format` and `opts` to be used by
-  # [`Kernel#sprintf`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-sprintf),
+  # [`Kernel#sprintf`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-sprintf),
   # if there was a successful
-  # [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) match in the
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) match in the
   # given `format` from
-  # [`printf`](https://docs.ruby-lang.org/en/2.6.0/IRB/OutputMethod.html#method-i-printf)
+  # [`printf`](https://docs.ruby-lang.org/en/2.7.0/IRB/OutputMethod.html#method-i-printf)
   #
   # ```
   # %
@@ -1455,43 +1478,43 @@ class IRB::OutputMethod
   def parse_printf_format(format, opts); end
 
   # Prints the given `objs` calling
-  # [`Object#inspect`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-inspect)
+  # [`Object#inspect`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-inspect)
   # on each.
   #
   # See
-  # [`puts`](https://docs.ruby-lang.org/en/2.6.0/IRB/OutputMethod.html#method-i-puts)
+  # [`puts`](https://docs.ruby-lang.org/en/2.7.0/IRB/OutputMethod.html#method-i-puts)
   # for more detail.
   def pp(*objs); end
 
   # Prints the given `objs` calling
-  # [`Object#inspect`](https://docs.ruby-lang.org/en/2.6.0/Object.html#method-i-inspect)
+  # [`Object#inspect`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-inspect)
   # on each and appending the given `prefix`.
   #
   # See
-  # [`puts`](https://docs.ruby-lang.org/en/2.6.0/IRB/OutputMethod.html#method-i-puts)
+  # [`puts`](https://docs.ruby-lang.org/en/2.7.0/IRB/OutputMethod.html#method-i-puts)
   # for more detail.
   def ppx(prefix, *objs); end
 
   # Open this method to implement your own output method, raises a
-  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.6.0/NotImplementedError.html)
+  # [`NotImplementedError`](https://docs.ruby-lang.org/en/2.7.0/NotImplementedError.html)
   # if you don't define
-  # [`print`](https://docs.ruby-lang.org/en/2.6.0/IRB/OutputMethod.html#method-i-print)
+  # [`print`](https://docs.ruby-lang.org/en/2.7.0/IRB/OutputMethod.html#method-i-print)
   # in your own class.
   def print(*opts); end
 
   # Extends
-  # [`IO#printf`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-printf)
+  # [`IO#printf`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-printf)
   # to format the given `opts` for
-  # [`Kernel#sprintf`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-sprintf)
+  # [`Kernel#sprintf`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-sprintf)
   # using
-  # [`parse_printf_format`](https://docs.ruby-lang.org/en/2.6.0/IRB/OutputMethod.html#method-i-parse_printf_format)
+  # [`parse_printf_format`](https://docs.ruby-lang.org/en/2.7.0/IRB/OutputMethod.html#method-i-parse_printf_format)
   def printf(format, *opts); end
 
   # Prints the given `opts`, with a newline delimiter.
   def printn(*opts); end
 
   # Calls
-  # [`print`](https://docs.ruby-lang.org/en/2.6.0/IRB/OutputMethod.html#method-i-print)
+  # [`print`](https://docs.ruby-lang.org/en/2.7.0/IRB/OutputMethod.html#method-i-print)
   # on each element in the given `objs`, followed by a newline character.
   def puts(*objs); end
 
@@ -1504,7 +1527,7 @@ class IRB::ReadlineInputMethod < ::IRB::InputMethod
   include(::Readline)
 
   # Creates a new input method object using
-  # [`Readline`](https://docs.ruby-lang.org/en/2.6.0/Readline.html)
+  # [`Readline`](https://docs.ruby-lang.org/en/2.7.0/Readline.html)
   def self.new; end
 
   # The external encoding for standard input.
@@ -1513,32 +1536,32 @@ class IRB::ReadlineInputMethod < ::IRB::InputMethod
   # Whether the end of this input method has been reached, returns `true` if
   # there is no more data to read.
   #
-  # See [`IO#eof?`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-eof-3F)
+  # See [`IO#eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F)
   # for more information.
   def eof?; end
 
   # Reads the next line from this input method.
   #
-  # See [`IO#gets`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-gets)
+  # See [`IO#gets`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-gets)
   # for more information.
   def gets; end
 
   # Returns the current line number for io.
   #
-  # [`line`](https://docs.ruby-lang.org/en/2.6.0/IRB/ReadlineInputMethod.html#method-i-line)
+  # [`line`](https://docs.ruby-lang.org/en/2.7.0/IRB/ReadlineInputMethod.html#method-i-line)
   # counts the number of times
-  # [`gets`](https://docs.ruby-lang.org/en/2.6.0/IRB/ReadlineInputMethod.html#method-i-gets)
+  # [`gets`](https://docs.ruby-lang.org/en/2.7.0/IRB/ReadlineInputMethod.html#method-i-gets)
   # is called.
   #
   # See
-  # [`IO#lineno`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-lineno)
+  # [`IO#lineno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-lineno)
   # for more information.
   def line(line_no); end
 
   # Whether this input method is still readable when there is no more data to
   # read.
   #
-  # See [`IO#eof`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-eof) for
+  # See [`IO#eof`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof) for
   # more information.
   def readable_after_eof?; end
 end
@@ -1553,41 +1576,40 @@ class IRB::StdioInputMethod < ::IRB::InputMethod
   # Whether the end of this input method has been reached, returns `true` if
   # there is no more data to read.
   #
-  # See [`IO#eof?`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-eof-3F)
+  # See [`IO#eof?`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof-3F)
   # for more information.
   def eof?; end
 
   # Reads the next line from this input method.
   #
-  # See [`IO#gets`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-gets)
+  # See [`IO#gets`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-gets)
   # for more information.
   def gets; end
 
   # Returns the current line number for io.
   #
-  # [`line`](https://docs.ruby-lang.org/en/2.6.0/IRB/StdioInputMethod.html#method-i-line)
+  # [`line`](https://docs.ruby-lang.org/en/2.7.0/IRB/StdioInputMethod.html#method-i-line)
   # counts the number of times
-  # [`gets`](https://docs.ruby-lang.org/en/2.6.0/IRB/StdioInputMethod.html#method-i-gets)
+  # [`gets`](https://docs.ruby-lang.org/en/2.7.0/IRB/StdioInputMethod.html#method-i-gets)
   # is called.
   #
   # See
-  # [`IO#lineno`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-lineno)
+  # [`IO#lineno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-lineno)
   # for more information.
   def line(line_no); end
 
   # Whether this input method is still readable when there is no more data to
   # read.
   #
-  # See [`IO#eof`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-eof) for
+  # See [`IO#eof`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-eof) for
   # more information.
   def readable_after_eof?; end
 end
 
 # A standard output printer
-# A standard output printer
 class IRB::StdioOutputMethod < ::IRB::OutputMethod
   # Prints the given `opts` to standard output, see
-  # [`IO#print`](https://docs.ruby-lang.org/en/2.6.0/IO.html#method-i-print) for
+  # [`IO#print`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-print) for
   # more information.
   def print(*opts); end
 end
@@ -1599,20 +1621,20 @@ class IRB::WorkSpace
   # TOPLEVEL\_BINDING.
   def self.new(*main); end
 
-  # The [`Binding`](https://docs.ruby-lang.org/en/2.6.0/Binding.html) of this
+  # The [`Binding`](https://docs.ruby-lang.org/en/2.7.0/Binding.html) of this
   # workspace
   def binding; end
 
   def code_around_binding; end
 
   # Evaluate the context of this workspace and use the
-  # [`Tracer`](https://docs.ruby-lang.org/en/2.6.0/Tracer.html) library to
+  # [`Tracer`](https://docs.ruby-lang.org/en/2.7.0/Tracer.html) library to
   # output the exact lines of code are being executed in chronological order.
   #
   # See `lib/tracer.rb` for more information.
   #
   # Also aliased as:
-  # [`__evaluate__`](https://docs.ruby-lang.org/en/2.6.0/IRB/WorkSpace.html#method-i-__evaluate__)
+  # [`__evaluate__`](https://docs.ruby-lang.org/en/2.7.0/IRB/WorkSpace.html#method-i-__evaluate__)
   def evaluate(context, statements, file = _, line = _); end
 
   # error message manipulator

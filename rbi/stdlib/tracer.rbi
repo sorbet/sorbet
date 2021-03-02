@@ -3,13 +3,13 @@
 # Outputs a source level execution trace of a Ruby program.
 #
 # It does this by registering an event handler with
-# [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-set_trace_func)
+# [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-set_trace_func)
 # for processing incoming events. It also provides methods for filtering
 # unwanted trace output (see
-# [`Tracer.add_filter`](https://docs.ruby-lang.org/en/2.6.0/Tracer.html#method-c-add_filter),
-# [`Tracer.on`](https://docs.ruby-lang.org/en/2.6.0/Tracer.html#method-c-on),
+# [`Tracer.add_filter`](https://docs.ruby-lang.org/en/2.7.0/Tracer.html#method-c-add_filter),
+# [`Tracer.on`](https://docs.ruby-lang.org/en/2.7.0/Tracer.html#method-c-on),
 # and
-# [`Tracer.off`](https://docs.ruby-lang.org/en/2.6.0/Tracer.html#method-c-off)).
+# [`Tracer.off`](https://docs.ruby-lang.org/en/2.7.0/Tracer.html#method-c-off)).
 #
 # ## Example
 #
@@ -48,7 +48,7 @@
 #   ---------------------------------------+ thread
 # ```
 #
-# [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html) table used for
+# [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) table used for
 # displaying incoming events:
 #
 # +}+
@@ -73,12 +73,12 @@
 #
 # by Keiju ISHITSUKA(keiju@ishitsuka.com)
 class Tracer
-  # [`Symbol`](https://docs.ruby-lang.org/en/2.6.0/Symbol.html) table used for
+  # [`Symbol`](https://docs.ruby-lang.org/en/2.7.0/Symbol.html) table used for
   # displaying trace information
   EVENT_SYMBOL = T.let(T.unsafe(nil), T::Hash[String, String])
 
   # Reference to singleton instance of
-  # [`Tracer`](https://docs.ruby-lang.org/en/2.6.0/Tracer.html)
+  # [`Tracer`](https://docs.ruby-lang.org/en/2.7.0/Tracer.html)
   Single = T.let(T.unsafe(nil), Tracer)
 
   VERSION = T.let(T.unsafe(nil), String)
@@ -86,7 +86,7 @@ class Tracer
   # Used to filter unwanted trace output
   #
   # Example which only outputs lines of code executed within the
-  # [`Kernel`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html) class:
+  # [`Kernel`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html) class:
   #
   # ```ruby
   # Tracer.add_filter do |event, file, line, id, binding, klass, *rest|
@@ -144,7 +144,7 @@ class Tracer
   # ```
   def self.on; end
 
-  # Register an event handler `p` which is called everytime a line in
+  # Register an event handler `p` which is called every time a line in
   # `file_name` is executed.
   #
   # Example:

@@ -1,12 +1,12 @@
 # typed: __STDLIB_INTERNAL
 
-# The [`Singleton`](https://docs.ruby-lang.org/en/2.6.0/Singleton.html) module
+# The [`Singleton`](https://docs.ruby-lang.org/en/2.7.0/Singleton.html) module
 # implements the
-# [`Singleton`](https://docs.ruby-lang.org/en/2.6.0/Singleton.html) pattern.
+# [`Singleton`](https://docs.ruby-lang.org/en/2.7.0/Singleton.html) pattern.
 #
 # ## Usage
 #
-# To use [`Singleton`](https://docs.ruby-lang.org/en/2.6.0/Singleton.html),
+# To use [`Singleton`](https://docs.ruby-lang.org/en/2.7.0/Singleton.html),
 # include the module in your class.
 #
 # ```ruby
@@ -53,7 +53,7 @@
 # *   Making Klass.new and Klass.allocate private.
 #
 # *   Overriding Klass.inherited(sub\_klass) and Klass.clone() to ensure that
-#     the [`Singleton`](https://docs.ruby-lang.org/en/2.6.0/Singleton.html)
+#     the [`Singleton`](https://docs.ruby-lang.org/en/2.7.0/Singleton.html)
 #     properties are kept when inherited and cloned.
 #
 # *   Providing the Klass.instance() method that returns the same object each
@@ -65,12 +65,12 @@
 #     cloning or duping.
 #
 #
-# ## [`Singleton`](https://docs.ruby-lang.org/en/2.6.0/Singleton.html) and [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html)
+# ## [`Singleton`](https://docs.ruby-lang.org/en/2.7.0/Singleton.html) and [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html)
 #
 # By default Singleton's #\_dump(depth) returns the empty string. Marshalling by
-# default will strip state information, e.g. instance variables and taint state,
-# from the instance. Classes using
-# [`Singleton`](https://docs.ruby-lang.org/en/2.6.0/Singleton.html) can provide
+# default will strip state information, e.g. instance variables from the
+# instance. Classes using
+# [`Singleton`](https://docs.ruby-lang.org/en/2.7.0/Singleton.html) can provide
 # custom \_load(str) and \_dump(depth) methods to retain some of the previous
 # state of the instance.
 #
@@ -94,7 +94,6 @@
 # a = Example.instance
 # a.keep = "keep this"
 # a.strip = "get rid of this"
-# a.taint
 #
 # stored_state = Marshal.dump(a)
 #

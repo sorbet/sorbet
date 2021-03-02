@@ -1,11 +1,11 @@
 # typed: __STDLIB_INTERNAL
 
-# The [`Forwardable`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html)
+# The [`Forwardable`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html)
 # module provides delegation of specified methods to a designated object, using
 # the methods
-# [`def_delegator`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html#method-i-def_delegator)
+# [`def_delegator`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-def_delegator)
 # and
-# [`def_delegators`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html#method-i-def_delegators).
+# [`def_delegators`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-def_delegators).
 #
 # For example, say you have a class RecordCollection which contains an array
 # `@records`. You could provide the lookup method record\_number(), which simply
@@ -46,7 +46,7 @@
 # ```
 #
 # You can even extend regular objects with
-# [`Forwardable`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html).
+# [`Forwardable`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html).
 #
 # ```ruby
 # my_hash = Hash.new
@@ -57,10 +57,11 @@
 #
 # ## Another example
 #
-# We want to rely on what has come before obviously, but with delegation we can
-# take just the methods we need and even rename them as appropriate. In many
-# cases this is preferable to inheritance, which gives us the entire old
-# interface, even if much of it isn't needed.
+# You could use
+# [`Forwardable`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html) as an
+# alternative to inheritance, when you don't want to inherit all methods from
+# the superclass. For instance, here is how you might add a range of `Array`
+# instance methods to a new class `Queue`:
 #
 # ```ruby
 # class Queue
@@ -107,34 +108,38 @@
 #
 # ## Notes
 #
-# Be advised, [`RDoc`](https://docs.ruby-lang.org/en/2.6.0/RDoc.html) will not
+# Be advised, [`RDoc`](https://docs.ruby-lang.org/en/2.7.0/RDoc.html) will not
 # detect delegated methods.
 #
 # `forwardable.rb` provides single-method delegation via the
-# [`def_delegator`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html#method-i-def_delegator)
+# [`def_delegator`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-def_delegator)
 # and
-# [`def_delegators`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html#method-i-def_delegators)
+# [`def_delegators`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-def_delegators)
 # methods. For full-class delegation via DelegateClass, see `delegate.rb`.
 module Forwardable
   FILTER_EXCEPTION = T.let(T.unsafe(nil), String)
   FORWARDABLE_VERSION = T.let(T.unsafe(nil), String)
 
   # Alias for:
-  # [`def_instance_delegator`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html#method-i-def_instance_delegator)
+  # [`def_instance_delegator`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-def_instance_delegator)
   sig { params(accessor: T.any(Symbol, String), method: Symbol, ali: Symbol).returns(Symbol) }
   def def_delegator(accessor, method, ali = method); end
 
   # Alias for:
-  # [`def_instance_delegators`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html#method-i-def_instance_delegators)
+  # [`def_instance_delegators`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-def_instance_delegators)
   sig { params(accessor: T.any(Symbol, String), methods: Symbol).returns(T::Array[Symbol]) }
   def def_delegators(accessor, *methods); end
 
   # Define `method` as delegator instance method with an optional alias name
-  # `ali`. [`Method`](https://docs.ruby-lang.org/en/2.6.0/Method.html) calls to
-  # `ali` will be delegated to `accessor.method`.
+  # `ali`. [`Method`](https://docs.ruby-lang.org/en/2.7.0/Method.html) calls to
+  # `ali` will be delegated to `accessor.method`. `accessor` should be a method
+  # name, instance variable name, or constant name. Use the full path to the
+  # constant if providing the constant name. Returns the name of the method
+  # defined.
   #
   # ```ruby
   # class MyQueue
+  #   CONST = 1
   #   extend Forwardable
   #   attr_reader :queue
   #   def initialize
@@ -142,17 +147,19 @@ module Forwardable
   #   end
   #
   #   def_delegator :@queue, :push, :mypush
+  #   def_delegator 'MyQueue::CONST', :to_i
   # end
   #
   # q = MyQueue.new
   # q.mypush 42
   # q.queue    #=> [42]
   # q.push 23  #=> NoMethodError
+  # q.to_i     #=> 1
   # ```
   #
   #
   # Also aliased as:
-  # [`def_delegator`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html#method-i-def_delegator)
+  # [`def_delegator`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-def_delegator)
   sig { params(accessor: T.any(Symbol, String), method: Symbol, ali: Symbol).returns(Symbol) }
   def def_instance_delegator(accessor, method, ali = method); end
 
@@ -169,12 +176,12 @@ module Forwardable
   #
   #
   # Also aliased as:
-  # [`def_delegators`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html#method-i-def_delegators)
+  # [`def_delegators`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-def_delegators)
   sig { params(accessor: T.any(Symbol, String), methods: Symbol).returns(T::Array[Symbol]) }
   def def_instance_delegators(accessor, *methods); end
 
   # Alias for:
-  # [`instance_delegate`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html#method-i-instance_delegate)
+  # [`instance_delegate`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-instance_delegate)
   sig do
     params(
       hash: T::Hash[T.any(Symbol, T::Array[Symbol]), Symbol]
@@ -183,11 +190,13 @@ module Forwardable
   def delegate(hash); end
 
   # Takes a hash as its argument. The key is a symbol or an array of symbols.
-  # These symbols correspond to method names. The value is the accessor to which
-  # the methods will be delegated.
+  # These symbols correspond to method names, instance variable names, or
+  # constant names (see
+  # [`def_delegator`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-def_delegator)).
+  # The value is the accessor to which the methods will be delegated.
   #
   # Also aliased as:
-  # [`delegate`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html#method-i-delegate)
+  # [`delegate`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html#method-i-delegate)
   sig do
     params(
       hash: T::Hash[T.any(Symbol, T::Array[Symbol]), Symbol]
@@ -196,7 +205,7 @@ module Forwardable
   def instance_delegate(hash); end
 end
 
-# [`SingleForwardable`](https://docs.ruby-lang.org/en/2.6.0/SingleForwardable.html)
+# [`SingleForwardable`](https://docs.ruby-lang.org/en/2.7.0/SingleForwardable.html)
 # can be used to setup delegation at the object level as well.
 #
 # ```ruby
@@ -207,10 +216,10 @@ end
 # ```
 #
 # Also,
-# [`SingleForwardable`](https://docs.ruby-lang.org/en/2.6.0/SingleForwardable.html)
+# [`SingleForwardable`](https://docs.ruby-lang.org/en/2.7.0/SingleForwardable.html)
 # can be used to set up delegation for a
-# [`Class`](https://docs.ruby-lang.org/en/2.6.0/Class.html) or
-# [`Module`](https://docs.ruby-lang.org/en/2.6.0/Module.html).
+# [`Class`](https://docs.ruby-lang.org/en/2.7.0/Class.html) or
+# [`Module`](https://docs.ruby-lang.org/en/2.7.0/Module.html).
 #
 # ```ruby
 # class Implementation
@@ -228,28 +237,29 @@ end
 # ```
 #
 # If you want to use both
-# [`Forwardable`](https://docs.ruby-lang.org/en/2.6.0/Forwardable.html) and
-# [`SingleForwardable`](https://docs.ruby-lang.org/en/2.6.0/SingleForwardable.html),
+# [`Forwardable`](https://docs.ruby-lang.org/en/2.7.0/Forwardable.html) and
+# [`SingleForwardable`](https://docs.ruby-lang.org/en/2.7.0/SingleForwardable.html),
 # you can use methods def\_instance\_delegator and
-# [`def_single_delegator`](https://docs.ruby-lang.org/en/2.6.0/SingleForwardable.html#method-i-def_single_delegator),
+# [`def_single_delegator`](https://docs.ruby-lang.org/en/2.7.0/SingleForwardable.html#method-i-def_single_delegator),
 # etc.
 module SingleForwardable
   # Alias for:
-  # [`def_single_delegator`](https://docs.ruby-lang.org/en/2.6.0/SingleForwardable.html#method-i-def_single_delegator)
+  # [`def_single_delegator`](https://docs.ruby-lang.org/en/2.7.0/SingleForwardable.html#method-i-def_single_delegator)
   sig { params(accessor: T.any(Symbol, String), method: Symbol, ali: Symbol).returns(Symbol) }
   def def_delegator(accessor, method, ali = method); end
 
   # Alias for:
-  # [`def_single_delegators`](https://docs.ruby-lang.org/en/2.6.0/SingleForwardable.html#method-i-def_single_delegators)
+  # [`def_single_delegators`](https://docs.ruby-lang.org/en/2.7.0/SingleForwardable.html#method-i-def_single_delegators)
   sig { params(accessor: T.any(Symbol, String), methods: Symbol).returns(T::Array[Symbol]) }
   def def_delegators(accessor, *methods); end
 
   # Defines a method *method* which delegates to *accessor* (i.e. it calls the
   # method of the same name in *accessor*). If *new\_name* is provided, it is
-  # used as the name for the delegate method.
+  # used as the name for the delegate method. Returns the name of the method
+  # defined.
   #
   # Also aliased as:
-  # [`def_delegator`](https://docs.ruby-lang.org/en/2.6.0/SingleForwardable.html#method-i-def_delegator)
+  # [`def_delegator`](https://docs.ruby-lang.org/en/2.7.0/SingleForwardable.html#method-i-def_delegator)
   sig { params(accessor: T.any(Symbol, String), method: Symbol, new_name: Symbol).returns(Symbol) }
   def def_single_delegator(accessor, method, new_name = method); end
 
@@ -266,12 +276,12 @@ module SingleForwardable
   #
   #
   # Also aliased as:
-  # [`def_delegators`](https://docs.ruby-lang.org/en/2.6.0/SingleForwardable.html#method-i-def_delegators)
+  # [`def_delegators`](https://docs.ruby-lang.org/en/2.7.0/SingleForwardable.html#method-i-def_delegators)
   sig { params(accessor: T.any(Symbol, String), methods: Symbol).returns(T::Array[Symbol]) }
   def def_single_delegators(accessor, *methods); end
 
   # Alias for:
-  # [`single_delegate`](https://docs.ruby-lang.org/en/2.6.0/SingleForwardable.html#method-i-single_delegate)
+  # [`single_delegate`](https://docs.ruby-lang.org/en/2.7.0/SingleForwardable.html#method-i-single_delegate)
   sig do
     params(
       hash: T::Hash[T.any(Symbol, T::Array[Symbol]), Symbol]
@@ -284,7 +294,7 @@ module SingleForwardable
   # the methods will be delegated.
   #
   # Also aliased as:
-  # [`delegate`](https://docs.ruby-lang.org/en/2.6.0/SingleForwardable.html#method-i-delegate)
+  # [`delegate`](https://docs.ruby-lang.org/en/2.7.0/SingleForwardable.html#method-i-delegate)
   sig do
     params(
       hash: T::Hash[T.any(Symbol, T::Array[Symbol]), Symbol]

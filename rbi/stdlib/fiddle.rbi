@@ -4,7 +4,7 @@
 #
 # ## Description
 #
-# [`Fiddle`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html) is an extension to
+# [`Fiddle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html) is an extension to
 # translate a foreign function interface (FFI) with ruby.
 #
 # It wraps [libffi](http://sourceware.org/libffi/), a popular C library which
@@ -14,7 +14,7 @@
 # ## Example
 #
 # Here we will use
-# [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Function.html)
+# [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Function.html)
 # to wrap [floor(3) from libm](http://linux.die.net/man/3/floor)
 #
 # ```ruby
@@ -31,220 +31,220 @@
 # puts floor.call(3.14159) #=> 3.0
 # ```
 module Fiddle
-  # [`ALIGN_CHAR`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_CHAR)
+  # [`ALIGN_CHAR`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_CHAR)
   #
   # The alignment size of a char
   ALIGN_CHAR = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_DOUBLE`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_DOUBLE)
+  # [`ALIGN_DOUBLE`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_DOUBLE)
   #
   # The alignment size of a double
   ALIGN_DOUBLE = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_FLOAT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_FLOAT)
+  # [`ALIGN_FLOAT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_FLOAT)
   #
   # The alignment size of a float
   ALIGN_FLOAT = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_INT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_INT)
+  # [`ALIGN_INT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_INT)
   #
   # The alignment size of an int
   ALIGN_INT = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_INTPTR_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_INTPTR_T)
+  # [`ALIGN_INTPTR_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_INTPTR_T)
   #
   # The alignment size of a intptr\_t
   ALIGN_INTPTR_T = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_LONG`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_LONG)
+  # [`ALIGN_LONG`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_LONG)
   #
   # The alignment size of a long
   ALIGN_LONG = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_LONG_LONG`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_LONG_LONG)
+  # [`ALIGN_LONG_LONG`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_LONG_LONG)
   #
   # The alignment size of a long long
   ALIGN_LONG_LONG = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_PTRDIFF_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_PTRDIFF_T)
+  # [`ALIGN_PTRDIFF_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_PTRDIFF_T)
   #
   # The alignment size of a ptrdiff\_t
   ALIGN_PTRDIFF_T = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_SHORT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_SHORT)
+  # [`ALIGN_SHORT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_SHORT)
   #
   # The alignment size of a short
   ALIGN_SHORT = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_SIZE_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_SIZE_T)
+  # [`ALIGN_SIZE_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_SIZE_T)
   #
   # The alignment size of a size\_t
   ALIGN_SIZE_T = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_SSIZE_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_SSIZE_T)
+  # [`ALIGN_SSIZE_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_SSIZE_T)
   #
   # The alignment size of a ssize\_t
   ALIGN_SSIZE_T = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_UINTPTR_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_UINTPTR_T)
+  # [`ALIGN_UINTPTR_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_UINTPTR_T)
   #
   # The alignment size of a uintptr\_t
   ALIGN_UINTPTR_T = T.let(T.unsafe(nil), Integer)
 
-  # [`ALIGN_VOIDP`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#ALIGN_VOIDP)
+  # [`ALIGN_VOIDP`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#ALIGN_VOIDP)
   #
   # The alignment size of a void\*
   ALIGN_VOIDP = T.let(T.unsafe(nil), Integer)
 
-  # [`BUILD_RUBY_PLATFORM`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#BUILD_RUBY_PLATFORM)
+  # [`BUILD_RUBY_PLATFORM`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#BUILD_RUBY_PLATFORM)
   #
   # Platform built against (i.e. "x86\_64-linux", etc.)
   #
   # See also RUBY\_PLATFORM
   BUILD_RUBY_PLATFORM = T.let(T.unsafe(nil), String)
 
-  # [`RUBY_FREE`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#RUBY_FREE)
+  # [`RUBY_FREE`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#RUBY_FREE)
   #
   # Address of the ruby\_xfree() function
   RUBY_FREE = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_CHAR`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_CHAR)
+  # [`SIZEOF_CHAR`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_CHAR)
   #
   # size of a char
   SIZEOF_CHAR = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_DOUBLE`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_DOUBLE)
+  # [`SIZEOF_DOUBLE`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_DOUBLE)
   #
   # size of a double
   SIZEOF_DOUBLE = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_FLOAT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_FLOAT)
+  # [`SIZEOF_FLOAT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_FLOAT)
   #
   # size of a float
   SIZEOF_FLOAT = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_INT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_INT)
+  # [`SIZEOF_INT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_INT)
   #
   # size of an int
   SIZEOF_INT = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_INTPTR_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_INTPTR_T)
+  # [`SIZEOF_INTPTR_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_INTPTR_T)
   #
   # size of a intptr\_t
   SIZEOF_INTPTR_T = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_LONG`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_LONG)
+  # [`SIZEOF_LONG`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_LONG)
   #
   # size of a long
   SIZEOF_LONG = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_LONG_LONG`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_LONG_LONG)
+  # [`SIZEOF_LONG_LONG`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_LONG_LONG)
   #
   # size of a long long
   SIZEOF_LONG_LONG = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_PTRDIFF_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_PTRDIFF_T)
+  # [`SIZEOF_PTRDIFF_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_PTRDIFF_T)
   #
   # size of a ptrdiff\_t
   SIZEOF_PTRDIFF_T = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_SHORT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_SHORT)
+  # [`SIZEOF_SHORT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_SHORT)
   #
   # size of a short
   SIZEOF_SHORT = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_SIZE_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_SIZE_T)
+  # [`SIZEOF_SIZE_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_SIZE_T)
   #
   # size of a size\_t
   SIZEOF_SIZE_T = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_SSIZE_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_SSIZE_T)
+  # [`SIZEOF_SSIZE_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_SSIZE_T)
   #
   # size of a ssize\_t
   SIZEOF_SSIZE_T = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_UINTPTR_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_UINTPTR_T)
+  # [`SIZEOF_UINTPTR_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_UINTPTR_T)
   #
   # size of a uintptr\_t
   SIZEOF_UINTPTR_T = T.let(T.unsafe(nil), Integer)
 
-  # [`SIZEOF_VOIDP`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#SIZEOF_VOIDP)
+  # [`SIZEOF_VOIDP`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#SIZEOF_VOIDP)
   #
   # size of a void\*
   SIZEOF_VOIDP = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_CHAR`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_CHAR)
+  # [`TYPE_CHAR`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_CHAR)
   #
   # C type - char
   TYPE_CHAR = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_DOUBLE`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_DOUBLE)
+  # [`TYPE_DOUBLE`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_DOUBLE)
   #
   # C type - double
   TYPE_DOUBLE = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_FLOAT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_FLOAT)
+  # [`TYPE_FLOAT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_FLOAT)
   #
   # C type - float
   TYPE_FLOAT = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_INT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_INT)
+  # [`TYPE_INT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_INT)
   #
   # C type - int
   TYPE_INT = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_INTPTR_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_INTPTR_T)
+  # [`TYPE_INTPTR_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_INTPTR_T)
   #
   # C type - intptr\_t
   TYPE_INTPTR_T = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_LONG`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_LONG)
+  # [`TYPE_LONG`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_LONG)
   #
   # C type - long
   TYPE_LONG = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_LONG_LONG`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_LONG_LONG)
+  # [`TYPE_LONG_LONG`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_LONG_LONG)
   #
   # C type - long long
   TYPE_LONG_LONG = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_PTRDIFF_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_PTRDIFF_T)
+  # [`TYPE_PTRDIFF_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_PTRDIFF_T)
   #
   # C type - ptrdiff\_t
   TYPE_PTRDIFF_T = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_SHORT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_SHORT)
+  # [`TYPE_SHORT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_SHORT)
   #
   # C type - short
   TYPE_SHORT = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_SIZE_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_SIZE_T)
+  # [`TYPE_SIZE_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_SIZE_T)
   #
   # C type - size\_t
   TYPE_SIZE_T = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_SSIZE_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_SSIZE_T)
+  # [`TYPE_SSIZE_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_SSIZE_T)
   #
   # C type - ssize\_t
   TYPE_SSIZE_T = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_UINTPTR_T`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_UINTPTR_T)
+  # [`TYPE_UINTPTR_T`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_UINTPTR_T)
   #
   # C type - uintptr\_t
   TYPE_UINTPTR_T = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_VOID`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_VOID)
+  # [`TYPE_VOID`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_VOID)
   #
   # C type - void
   TYPE_VOID = T.let(T.unsafe(nil), Integer)
 
-  # [`TYPE_VOIDP`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#TYPE_VOIDP)
+  # [`TYPE_VOIDP`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#TYPE_VOIDP)
   #
   # C type - void\*
   TYPE_VOIDP = T.let(T.unsafe(nil), Integer)
 
   # Creates a new handler that opens `library`, and returns an instance of
-  # [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html).
+  # [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html).
   #
   # If `nil` is given for the `library`, Fiddle::Handle::DEFAULT is used, which
   # is the equivalent to RTLD\_DEFAULT. See `man 3 dlopen` for more.
@@ -258,7 +258,7 @@ module Fiddle
   # functions, or ruby functions like `rb_str_new`.
   #
   # See
-  # [`Fiddle::Handle.new`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html#method-c-new)
+  # [`Fiddle::Handle.new`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html#method-c-new)
   # for more.
   def self.dlopen(library); end
 
@@ -342,26 +342,17 @@ class Fiddle::Closure
 end
 
 # Extends
-# [`Fiddle::Closure`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Closure.html)
-# to allow for building the closure in a block
-# Extends
-# [`Fiddle::Closure`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Closure.html)
-# to allow for building the closure in a block
-# Extends
-# [`Fiddle::Closure`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Closure.html)
-# to allow for building the closure in a block
-# Extends
-# [`Fiddle::Closure`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Closure.html)
+# [`Fiddle::Closure`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Closure.html)
 # to allow for building the closure in a block
 class Fiddle::Closure::BlockCaller < ::Fiddle::Closure
   def initialize(ctype, args, abi = _, &block); end
 
   # Calls the constructed
-  # [`BlockCaller`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Closure/BlockCaller.html),
+  # [`BlockCaller`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Closure/BlockCaller.html),
   # with `args`
   #
   # For an example see
-  # [`Fiddle::Closure::BlockCaller.new`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Closure/BlockCaller.html#method-c-new)
+  # [`Fiddle::Closure::BlockCaller.new`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Closure/BlockCaller.html#method-c-new)
   def call(*args); end
 end
 
@@ -404,7 +395,7 @@ end
 #    #=> true
 # ```
 class Fiddle::Function
-  # [`DEFAULT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Function.html#DEFAULT)
+  # [`DEFAULT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Function.html#DEFAULT)
   #
   # Default ABI
   DEFAULT = T.let(T.unsafe(nil), Integer)
@@ -412,16 +403,16 @@ class Fiddle::Function
   def initialize(*_); end
 
   # The ABI of the
-  # [`Function`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Function.html).
+  # [`Function`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Function.html).
   def abi; end
 
   # Calls the constructed
-  # [`Function`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Function.html), with
+  # [`Function`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Function.html), with
   # `args`. Caller must ensure the underlying function is called in a
   # thread-safe manner if running in a multi-threaded process.
   #
   # For an example see
-  # [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Function.html)
+  # [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Function.html)
   def call(*_); end
 
   # The name of this function
@@ -434,7 +425,7 @@ class Fiddle::Function
   def to_i; end
 end
 
-# The [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html)
+# The [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html)
 # is the manner to access the dynamic library
 #
 # ## Example
@@ -458,9 +449,9 @@ end
 # ```
 #
 # See
-# [`RTLD_LAZY`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html#RTLD_LAZY)
+# [`RTLD_LAZY`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html#RTLD_LAZY)
 # and
-# [`RTLD_GLOBAL`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html#RTLD_GLOBAL)
+# [`RTLD_GLOBAL`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html#RTLD_GLOBAL)
 #
 # ### Addresses to symbols
 #
@@ -476,7 +467,7 @@ end
 # => 140062278451968
 # ```
 class Fiddle::Handle
-  # [`DEFAULT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html#DEFAULT)
+  # [`DEFAULT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html#DEFAULT)
   #
   # A predefined pseudo-handle of RTLD\_DEFAULT
   #
@@ -484,7 +475,7 @@ class Fiddle::Handle
   # library search order
   DEFAULT = T.let(T.unsafe(nil), Fiddle::Handle)
 
-  # [`NEXT`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html#NEXT)
+  # [`NEXT`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html#NEXT)
   #
   # A predefined pseudo-handle of RTLD\_NEXT
   #
@@ -492,20 +483,20 @@ class Fiddle::Handle
   # the current library.
   NEXT = T.let(T.unsafe(nil), Fiddle::Handle)
 
-  # [`RTLD_GLOBAL`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html#RTLD_GLOBAL)
+  # [`RTLD_GLOBAL`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html#RTLD_GLOBAL)
   #
   # rtld
-  # [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html)
+  # [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html)
   # flag.
   #
   # The symbols defined by this library will be made available for symbol
   # resolution of subsequently loaded libraries.
   RTLD_GLOBAL = T.let(T.unsafe(nil), Integer)
 
-  # [`RTLD_LAZY`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html#RTLD_LAZY)
+  # [`RTLD_LAZY`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html#RTLD_LAZY)
   #
   # rtld
-  # [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html)
+  # [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html)
   # flag.
   #
   # Perform lazy binding. Only resolve symbols as the code that references them
@@ -514,30 +505,30 @@ class Fiddle::Handle
   # variables are always immediately bound when the library is loaded.)
   RTLD_LAZY = T.let(T.unsafe(nil), Integer)
 
-  # [`RTLD_NOW`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html#RTLD_NOW)
+  # [`RTLD_NOW`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html#RTLD_NOW)
   #
   # rtld
-  # [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Handle.html)
+  # [`Fiddle::Handle`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Handle.html)
   # flag.
   #
   # If this value is specified or the environment variable LD\_BIND\_NOW is set
   # to a nonempty string, all undefined symbols in the library are resolved
   # before
-  # [`Fiddle.dlopen`](https://docs.ruby-lang.org/en/2.6.0/Fiddle.html#method-c-dlopen)
+  # [`Fiddle.dlopen`](https://docs.ruby-lang.org/en/2.7.0/Fiddle.html#method-c-dlopen)
   # returns. If this cannot be done an error is returned.
   RTLD_NOW = T.let(T.unsafe(nil), Integer)
 
   def initialize(*_); end
 
   # Get the address as an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) for the
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) for the
   # function named `name`.
   def [](_); end
 
   # Close this handle.
   #
   # Calling close more than once will raise a
-  # [`Fiddle::DLError`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/DLError.html)
+  # [`Fiddle::DLError`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/DLError.html)
   # exception.
   def close; end
 
@@ -554,7 +545,7 @@ class Fiddle::Handle
   def enable_close; end
 
   # Get the address as an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) for the
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) for the
   # function named `name`.
   def sym(_); end
 
@@ -562,19 +553,19 @@ class Fiddle::Handle
   def to_i; end
 
   # Get the address as an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) for the
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) for the
   # function named `name`. The function is searched via dlsym on RTLD\_NEXT.
   #
   # See man(3) dlsym() for more info.
   def self.[](_); end
 
   # Get the address as an
-  # [`Integer`](https://docs.ruby-lang.org/en/2.6.0/Integer.html) for the
+  # [`Integer`](https://docs.ruby-lang.org/en/2.7.0/Integer.html) for the
   # function named `name`.
   def self.sym(_); end
 end
 
-# [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Pointer.html)
+# [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html)
 # is a class to handle C pointers
 class Fiddle::Pointer
   def initialize(*_); end
@@ -583,7 +574,7 @@ class Fiddle::Pointer
   def +(_); end
 
   # Returns a new
-  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Pointer.html)
+  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html)
   # instance that is a dereferenced pointer for this pointer.
   #
   # Analogous to the star operator in C.
@@ -593,7 +584,7 @@ class Fiddle::Pointer
   def -(_); end
 
   # Returns a new
-  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Pointer.html)
+  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html)
   # instance that is a reference pointer for this pointer.
   #
   # Analogous to the ampersand operator in C.
@@ -613,7 +604,7 @@ class Fiddle::Pointer
   # *start* of *length* will be returned.
   def [](*_); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the value at `index`
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the value at `index`
   # to `int`.
   #
   # Or, set the memory at `start` until `length` with the contents of `string`,
@@ -627,15 +618,15 @@ class Fiddle::Pointer
   # Get the free function for this pointer.
   #
   # Returns a new instance of
-  # [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Function.html).
+  # [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Function.html).
   #
   # See
-  # [`Fiddle::Function.new`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Function.html#method-c-new)
+  # [`Fiddle::Function.new`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Function.html#method-c-new)
   def free; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the free function for
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the free function for
   # this pointer to `function` in the given
-  # [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Function.html).
+  # [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Function.html).
   def free=(_); end
 
   # Returns a string formatted with an easily readable representation of the
@@ -646,14 +637,14 @@ class Fiddle::Pointer
   def null?; end
 
   # Returns a new
-  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Pointer.html)
+  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html)
   # instance that is a dereferenced pointer for this pointer.
   #
   # Analogous to the star operator in C.
   def ptr; end
 
   # Returns a new
-  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Pointer.html)
+  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html)
   # instance that is a reference pointer for this pointer.
   #
   # Analogous to the ampersand operator in C.
@@ -662,7 +653,7 @@ class Fiddle::Pointer
   # Get the size of this pointer.
   def size; end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) the size of this
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) the size of this
   # pointer to `size`
   def size=(_); end
 
@@ -680,7 +671,7 @@ class Fiddle::Pointer
   # When called with `len`, a string of `len` bytes will be returned.
   #
   # See
-  # [`to_str`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Pointer.html#method-i-to_str)
+  # [`to_str`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html#method-i-to_str)
   def to_s(*_); end
 
   # Returns the pointer contents as a string.
@@ -691,14 +682,14 @@ class Fiddle::Pointer
   # When called with `len`, a string of `len` bytes will be returned.
   #
   # See
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Pointer.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html#method-i-to_s)
   def to_str(*_); end
 
   # Cast this pointer to a ruby object.
   def to_value; end
 
   # Get the underlying pointer for ruby object `val` and return it as a
-  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Pointer.html)
+  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html)
   # object.
   def self.[](_); end
 
@@ -706,11 +697,11 @@ class Fiddle::Pointer
   # that will be called when the pointer is garbage collected.
   #
   # `freefunc` must be an address pointing to a function or an instance of
-  # [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Function.html)
+  # [`Fiddle::Function`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Function.html)
   def self.malloc(*_); end
 
   # Get the underlying pointer for ruby object `val` and return it as a
-  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.6.0/Fiddle/Pointer.html)
+  # [`Fiddle::Pointer`](https://docs.ruby-lang.org/en/2.7.0/Fiddle/Pointer.html)
   # object.
   def self.to_ptr(_); end
 end

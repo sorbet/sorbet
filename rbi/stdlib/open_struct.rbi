@@ -81,10 +81,10 @@ class OpenStruct
   InspectKey = ::T.let(nil, ::T.untyped)
 
   # Compares this object and `other` for equality. An
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) is equal
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) is equal
   # to `other` when `other` is an
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) and the
-  # two objects' [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) tables
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) and the
+  # two objects' [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) tables
   # are equal.
   #
   # ```ruby
@@ -200,10 +200,10 @@ class OpenStruct
   def each_pair(); end
 
   # Compares this object and `other` for equality. An
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) is eql?
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) is eql?
   # to `other` when `other` is an
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) and the
-  # two objects' [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html) tables
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) and the
+  # two objects' [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html) tables
   # are eql?.
   sig do
     params(
@@ -217,12 +217,13 @@ class OpenStruct
   def freeze(); end
 
   # Computes a hash code for this
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html). Two
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) objects
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html). Two
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) objects
   # with the same content will have the same hash code (and will compare using
-  # [`eql?`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html#method-i-eql-3F)).
+  # [`eql?`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html#method-i-eql-3F)).
   #
-  # See also Object#hash.
+  # See also
+  # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
   sig {returns(::T.untyped)}
   def hash(); end
 
@@ -237,17 +238,17 @@ class OpenStruct
   # Returns a string containing a detailed summary of the keys and values.
   #
   # Also aliased as:
-  # [`to_s`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html#method-i-to_s)
+  # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html#method-i-to_s)
   sig {returns(::T.untyped)}
   def inspect(); end
 
   # Provides marshalling support for use by the
-  # [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html) library.
+  # [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) library.
   sig {returns(::T.untyped)}
   def marshal_dump(); end
 
   # Provides marshalling support for use by the
-  # [`Marshal`](https://docs.ruby-lang.org/en/2.6.0/Marshal.html) library.
+  # [`Marshal`](https://docs.ruby-lang.org/en/2.7.0/Marshal.html) library.
   sig do
     params(
       x: ::T.untyped,
@@ -283,7 +284,7 @@ class OpenStruct
   def table!(); end
 
   # Converts the
-  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html) to a
+  # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) to a
   # hash with keys representing each attribute (as symbols) and their
   # corresponding values.
   #
@@ -301,7 +302,7 @@ class OpenStruct
   def to_h(); end
 
   # Alias for:
-  # [`inspect`](https://docs.ruby-lang.org/en/2.6.0/OpenStruct.html#method-i-inspect)
+  # [`inspect`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html#method-i-inspect)
   sig {returns(::T.untyped)}
   def to_s(); end
 end

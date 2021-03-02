@@ -1,14 +1,15 @@
 # typed: __STDLIB_INTERNAL
 
-# Objects of class `Dir` are directory streams representing directories in the
-# underlying file system. They provide a variety of ways to list directories and
-# their contents. See also `File`.
+# Objects of class [`Dir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html) are
+# directory streams representing directories in the underlying file system. They
+# provide a variety of ways to list directories and their contents. See also
+# [`File`](https://docs.ruby-lang.org/en/2.7.0/File.html).
 #
 # The directory used in these examples contains the two regular files
 # (`config.h` and `main.rb`), the parent directory (`..`), and the directory
 # itself (`.`).
 class Dir
-  # [`Dir.mktmpdir`](https://docs.ruby-lang.org/en/2.6.0/Dir.html#method-c-mktmpdir)
+  # [`Dir.mktmpdir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-mktmpdir)
   # creates a temporary directory.
   #
   # The directory is created with 0700 permission. Application should not change
@@ -30,7 +31,7 @@ class Dir
   # ```
   #
   # The directory is created under
-  # [`Dir.tmpdir`](https://docs.ruby-lang.org/en/2.6.0/Dir.html#method-c-tmpdir)
+  # [`Dir.tmpdir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-tmpdir)
   # or the optional second argument *tmpdir* if non-nil value is given.
   #
   # ```ruby
@@ -40,9 +41,9 @@ class Dir
   #
   # If a block is given, it is yielded with the path of the directory. The
   # directory and its contents are removed using
-  # [`FileUtils.remove_entry`](https://docs.ruby-lang.org/en/2.6.0/FileUtils.html#method-c-remove_entry)
+  # [`FileUtils.remove_entry`](https://docs.ruby-lang.org/en/2.7.0/FileUtils.html#method-c-remove_entry)
   # before
-  # [`Dir.mktmpdir`](https://docs.ruby-lang.org/en/2.6.0/Dir.html#method-c-mktmpdir)
+  # [`Dir.mktmpdir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-mktmpdir)
   # returns. The value of the block is returned.
   #
   # ```
@@ -54,7 +55,7 @@ class Dir
   #
   # If a block is not given, The path of the directory is returned. In this
   # case,
-  # [`Dir.mktmpdir`](https://docs.ruby-lang.org/en/2.6.0/Dir.html#method-c-mktmpdir)
+  # [`Dir.mktmpdir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-mktmpdir)
   # doesn't remove the directory.
   #
   # ```

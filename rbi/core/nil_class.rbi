@@ -13,7 +13,7 @@ class NilClass < Object
   def &(obj); end
 
   # Case Equality -- For class
-  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html), effectively the
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html), effectively the
   # same as calling `#==`, but typically overridden by descendants to provide
   # meaningful semantics in `case` statements.
   def ===(_); end

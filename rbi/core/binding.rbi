@@ -1,15 +1,20 @@
 # typed: __STDLIB_INTERNAL
 
-# Objects of class `Binding` encapsulate the execution context at some
-# particular place in the code and retain this context for future use. The
-# variables, methods, value of `self`, and possibly an iterator block that can
-# be accessed in this context are all retained.
-# [`Binding`](https://docs.ruby-lang.org/en/2.6.0/Binding.html) objects can be
-# created using `Kernel#binding`, and are made available to the callback of
-# `Kernel#set_trace_func`.
+# Objects of class [`Binding`](https://docs.ruby-lang.org/en/2.7.0/Binding.html)
+# encapsulate the execution context at some particular place in the code and
+# retain this context for future use. The variables, methods, value of `self`,
+# and possibly an iterator block that can be accessed in this context are all
+# retained. [`Binding`](https://docs.ruby-lang.org/en/2.7.0/Binding.html)
+# objects can be created using
+# [`Kernel#binding`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-binding),
+# and are made available to the callback of
+# [`Kernel#set_trace_func`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-set_trace_func)
+# and instances of
+# [`TracePoint`](https://docs.ruby-lang.org/en/2.7.0/TracePoint.html).
 #
 # These binding objects can be passed as the second argument of the
-# `Kernel#eval` method, establishing an environment for the evaluation.
+# [`Kernel#eval`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-eval)
+# method, establishing an environment for the evaluation.
 #
 # ```ruby
 # class Demo
@@ -31,7 +36,7 @@
 # eval("@secret")       #=> nil
 # ```
 #
-# [`Binding`](https://docs.ruby-lang.org/en/2.6.0/Binding.html) objects have no
+# [`Binding`](https://docs.ruby-lang.org/en/2.7.0/Binding.html) objects have no
 # class-specific methods.
 class Binding < Object
   # Evaluates the Ruby expression(s) in *string*, in the *binding*'s context. If
@@ -83,7 +88,7 @@ class Binding < Object
   sig {params(symbol: T.any(String, Symbol)).returns(T.untyped)}
   def local_variable_get(symbol); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) local variable named
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) local variable named
   # `symbol` as `obj`.
   #
   # ```ruby

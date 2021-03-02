@@ -4,7 +4,7 @@
 # command-line arguments or passed in via STDIN.
 #
 # The arguments passed to your script are stored in the `ARGV`
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html), one argument per
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html), one argument per
 # element. `ARGF` assumes that any arguments that aren't filenames have been
 # removed from `ARGV`. For example:
 #
@@ -21,7 +21,7 @@
 # by the contents of *file2*.
 #
 # After a file in `ARGV` has been read `ARGF` removes it from the
-# [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html). Thus, after all
+# [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html). Thus, after all
 # files have been read `ARGV` will be empty.
 #
 # You can manipulate `ARGV` yourself to control what `ARGF` operates on. If you

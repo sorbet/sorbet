@@ -1,14 +1,16 @@
 # typed: __STDLIB_INTERNAL
 
-# The [`Base64`](https://docs.ruby-lang.org/en/2.6.0/Base64.html) module
-# provides for the encoding (#encode64,
-# [`strict_encode64`](https://docs.ruby-lang.org/en/2.6.0/Base64.html#method-i-strict_encode64),
-# [`urlsafe_encode64`](https://docs.ruby-lang.org/en/2.6.0/Base64.html#method-i-urlsafe_encode64))
-# and decoding (#decode64,
-# [`strict_decode64`](https://docs.ruby-lang.org/en/2.6.0/Base64.html#method-i-strict_decode64),
-# [`urlsafe_decode64`](https://docs.ruby-lang.org/en/2.6.0/Base64.html#method-i-urlsafe_decode64))
+# The [`Base64`](https://docs.ruby-lang.org/en/2.7.0/Base64.html) module
+# provides for the encoding
+# ([`encode64`](https://docs.ruby-lang.org/en/2.7.0/Base64.html#method-i-encode64),
+# [`strict_encode64`](https://docs.ruby-lang.org/en/2.7.0/Base64.html#method-i-strict_encode64),
+# [`urlsafe_encode64`](https://docs.ruby-lang.org/en/2.7.0/Base64.html#method-i-urlsafe_encode64))
+# and decoding
+# ([`decode64`](https://docs.ruby-lang.org/en/2.7.0/Base64.html#method-i-decode64),
+# [`strict_decode64`](https://docs.ruby-lang.org/en/2.7.0/Base64.html#method-i-strict_decode64),
+# [`urlsafe_decode64`](https://docs.ruby-lang.org/en/2.7.0/Base64.html#method-i-urlsafe_decode64))
 # of binary data using a
-# [`Base64`](https://docs.ruby-lang.org/en/2.6.0/Base64.html) representation.
+# [`Base64`](https://docs.ruby-lang.org/en/2.7.0/Base64.html) representation.
 #
 # ## Example
 #

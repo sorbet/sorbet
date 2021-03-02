@@ -1,6 +1,6 @@
 # typed: __STDLIB_INTERNAL
 
-# [`IPAddr`](https://docs.ruby-lang.org/en/2.6.0/IPAddr.html) provides a set of
+# [`IPAddr`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html) provides a set of
 # methods to manipulate an IP address. Both IPv4 and IPv6 are supported.
 #
 # ## Example
@@ -34,21 +34,21 @@ class IPAddr
   # 128 bit mask for IPv6
   IN6MASK = T.let(T.unsafe(nil), Integer)
 
-  # [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) *internally*
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) *internally*
   # used for parsing IPv4 address.
   RE_IPV4ADDRLIKE = T.let(T.unsafe(nil), Regexp)
 
-  # [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) *internally*
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) *internally*
   # used for parsing IPv6 address.
   RE_IPV6ADDRLIKE_COMPRESSED = T.let(T.unsafe(nil), Regexp)
 
-  # [`Regexp`](https://docs.ruby-lang.org/en/2.6.0/Regexp.html) *internally*
+  # [`Regexp`](https://docs.ruby-lang.org/en/2.7.0/Regexp.html) *internally*
   # used for parsing IPv6 address.
   RE_IPV6ADDRLIKE_FULL = T.let(T.unsafe(nil), Regexp)
 
   # Creates a new ipaddr object either from a human readable IP address
   # representation in string, or from a packed
-  # [`in_addr`](https://docs.ruby-lang.org/en/2.6.0/IPAddr.html#method-i-in_addr)
+  # [`in_addr`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html#method-i-in_addr)
   # value followed by an address family.
   #
   # In the former case, the following are the valid formats that will be
@@ -59,15 +59,15 @@ class IPAddr
   # one explicitly by the optional second argument.
   #
   # Otherwise an IP address is generated from a packed
-  # [`in_addr`](https://docs.ruby-lang.org/en/2.6.0/IPAddr.html#method-i-in_addr)
+  # [`in_addr`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html#method-i-in_addr)
   # value and an address family.
   #
-  # The [`IPAddr`](https://docs.ruby-lang.org/en/2.6.0/IPAddr.html) class
+  # The [`IPAddr`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html) class
   # defines many methods and operators, and some of those, such as &, |,
   # include? and ==, accept a string, or a packed
-  # [`in_addr`](https://docs.ruby-lang.org/en/2.6.0/IPAddr.html#method-i-in_addr)
+  # [`in_addr`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html#method-i-in_addr)
   # value instead of an
-  # [`IPAddr`](https://docs.ruby-lang.org/en/2.6.0/IPAddr.html) object.
+  # [`IPAddr`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html) object.
   def self.new(addr = _, family = _); end
 
   # Returns a new ipaddr built by bitwise AND.
@@ -80,23 +80,23 @@ class IPAddr
   def <=>(other); end
 
   # Alias for:
-  # [`include?`](https://docs.ruby-lang.org/en/2.6.0/IPAddr.html#method-i-include-3F)
+  # [`include?`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html#method-i-include-3F)
   def ===(other); end
 
   # Returns a new ipaddr built by bitwise right-shift.
   def >>(num); end
 
   # Checks equality used by
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html).
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html).
   def eql?(other); end
 
   # Returns the address family of this IP address.
   def family; end
 
   # Returns a hash value used by
-  # [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html),
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html), and
-  # [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) classes
+  # [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html),
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html), and
+  # [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) classes
   def hash; end
 
   # Returns a network byte ordered string form of the IP address.
@@ -117,7 +117,7 @@ class IPAddr
   #
   #
   # Also aliased as:
-  # [`===`](https://docs.ruby-lang.org/en/2.6.0/IPAddr.html#method-i-3D-3D-3D)
+  # [`===`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html#method-i-3D-3D-3D)
   def include?(other); end
 
   # Returns a string containing a human-readable representation of the ipaddr.
@@ -189,7 +189,7 @@ class IPAddr
   # Returns the integer representation of the ipaddr.
   def to_i; end
 
-  # Creates a [`Range`](https://docs.ruby-lang.org/en/2.6.0/Range.html) object
+  # Creates a [`Range`](https://docs.ruby-lang.org/en/2.7.0/Range.html) object
   # for the network address.
   def to_range; end
 
@@ -207,11 +207,11 @@ class IPAddr
 
   protected
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) current netmask to
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) current netmask to
   # given mask.
   def mask!(mask); end
 
-  # [`Set`](https://docs.ruby-lang.org/en/2.6.0/Set.html) +@addr+, the internal
+  # [`Set`](https://docs.ruby-lang.org/en/2.7.0/Set.html) +@addr+, the internal
   # stored ip address, to given `addr`. The parameter `addr` is validated using
   # the first `family` member, which is `Socket::AF_INET` or `Socket::AF_INET6`.
   def set(addr, *family); end
@@ -230,9 +230,9 @@ end
 # who's family cannot be determined.
 class IPAddr::AddressFamilyError < ::IPAddr::Error; end
 
-# Generic [`IPAddr`](https://docs.ruby-lang.org/en/2.6.0/IPAddr.html) related
+# Generic [`IPAddr`](https://docs.ruby-lang.org/en/2.7.0/IPAddr.html) related
 # error. Exceptions raised in this class should inherit from
-# [`Error`](https://docs.ruby-lang.org/en/2.6.0/IPAddr/Error.html).
+# [`Error`](https://docs.ruby-lang.org/en/2.7.0/IPAddr/Error.html).
 class IPAddr::Error < ::ArgumentError; end
 
 # Raised when the provided IP address is an invalid address.

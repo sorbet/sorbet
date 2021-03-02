@@ -7,10 +7,10 @@
 # byte in the strings have single column in width. But it can be used for other
 # situations by giving suitable arguments for some methods:
 # *   newline object and space generation block for
-#     [`PrettyPrint.new`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-c-new)
+#     [`PrettyPrint.new`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-c-new)
 # *   optional width argument for
-#     [`PrettyPrint#text`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-i-text)
-# *   [`PrettyPrint#breakable`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-i-breakable)
+#     [`PrettyPrint#text`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-i-text)
+# *   [`PrettyPrint#breakable`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-i-breakable)
 #
 #
 # There are several candidate uses:
@@ -38,7 +38,7 @@
 class PrettyPrint
   # This is a convenience method which is same as follows:
   #
-  # ```
+  # ```ruby
   # begin
   #   q = PrettyPrint.new(output, maxwidth, newline, &genspace)
   #   ...
@@ -48,7 +48,7 @@ class PrettyPrint
   # ```
   def self.format(output = nil, maxwidth = nil, newline = nil, genspace = nil); end
   # This is similar to
-  # [`PrettyPrint::format`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-c-format)
+  # [`PrettyPrint::format`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-c-format)
   # but the result has no breaks.
   #
   # `maxwidth`, `newline` and `genspace` are ignored.
@@ -57,7 +57,7 @@ class PrettyPrint
   # treated as just an invocation of `text`.
   def self.singleline_format(output = nil, maxwidth = nil, newline = nil, genspace = nil); end
   # Breaks the buffer into lines that are shorter than
-  # [`maxwidth`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#attribute-i-maxwidth)
+  # [`maxwidth`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#attribute-i-maxwidth)
   def break_outmost_groups; end
   # This says "you can break a line here if necessary", and a `width`-column
   # text `sep` is inserted if a line is not broken at the point.
@@ -101,16 +101,16 @@ class PrettyPrint
   # ```
   def current_group; end
   # This is similar to
-  # [`breakable`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-i-breakable)
+  # [`breakable`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-i-breakable)
   # except the decision to break or not is determined individually.
   #
   # Two
-  # [`fill_breakable`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-i-fill_breakable)
+  # [`fill_breakable`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-i-fill_breakable)
   # under a group may cause 4 results: (break,break), (break,non-break),
   # (non-break,break), (non-break,non-break). This is different to
-  # [`breakable`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-i-breakable)
+  # [`breakable`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-i-breakable)
   # because two
-  # [`breakable`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-i-breakable)
+  # [`breakable`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-i-breakable)
   # under a group may cause 2 results: (break,break), (non-break,non-break).
   #
   # The text `sep` is inserted if a line is not broken at this point.
@@ -122,7 +122,7 @@ class PrettyPrint
   def fill_breakable(sep = nil, width = nil); end
   # outputs buffered data.
   def flush; end
-  # A lambda or [`Proc`](https://docs.ruby-lang.org/en/2.6.0/Proc.html), that
+  # A lambda or [`Proc`](https://docs.ruby-lang.org/en/2.7.0/Proc.html), that
   # takes one argument, of a Fixnum, and returns the corresponding number of
   # spaces.
   #
@@ -159,7 +159,7 @@ class PrettyPrint
   # The value that is appended to `output` to add a new line.
   #
   # This defaults to "n", and should be
-  # [`String`](https://docs.ruby-lang.org/en/2.6.0/String.html)
+  # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html)
   def newline; end
   # The output object.
   #
@@ -202,19 +202,19 @@ class PrettyPrint::GroupQueue
   def initialize(*groups); end
 end
 
-# [`PrettyPrint::SingleLine`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint/SingleLine.html)
+# [`PrettyPrint::SingleLine`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint/SingleLine.html)
 # is used by
-# [`PrettyPrint.singleline_format`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-c-singleline_format)
+# [`PrettyPrint.singleline_format`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-c-singleline_format)
 #
 # It is passed to be similar to a
-# [`PrettyPrint`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html) object
+# [`PrettyPrint`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html) object
 # itself, by responding to:
-# *   [`text`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint/SingleLine.html#method-i-text)
-# *   [`breakable`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint/SingleLine.html#method-i-breakable)
+# *   [`text`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint/SingleLine.html#method-i-text)
+# *   [`breakable`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint/SingleLine.html#method-i-breakable)
 # *   nest
-# *   [`group`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint/SingleLine.html#method-i-group)
+# *   [`group`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint/SingleLine.html#method-i-group)
 # *   flush
-# *   [`first?`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint/SingleLine.html#method-i-first-3F)
+# *   [`first?`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint/SingleLine.html#method-i-first-3F)
 #
 #
 # but instead, the output has no line breaks
@@ -245,10 +245,10 @@ end
 
 # A pretty-printer for Ruby objects.
 #
-# ## What [`PP`](https://docs.ruby-lang.org/en/2.6.0/PP.html) Does
+# ## What [`PP`](https://docs.ruby-lang.org/en/2.7.0/PP.html) Does
 #
 # Standard output by
-# [`p`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-p) returns
+# [`p`](https://docs.ruby-lang.org/en/2.7.0/Kernel.html#method-i-p) returns
 # this:
 #
 # ```ruby
@@ -295,19 +295,19 @@ end
 # method `#pretty_print(pp)` in the class.
 #
 # `#pretty_print` takes the `pp` argument, which is an instance of the
-# [`PP`](https://docs.ruby-lang.org/en/2.6.0/PP.html) class. The method uses
-# [`text`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-i-text),
-# [`breakable`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-i-breakable),
-# [`nest`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-i-nest),
-# [`group`](https://docs.ruby-lang.org/en/2.6.0/PrettyPrint.html#method-i-group)
-# and [`pp`](https://docs.ruby-lang.org/en/2.6.0/PP/PPMethods.html#method-i-pp)
+# [`PP`](https://docs.ruby-lang.org/en/2.7.0/PP.html) class. The method uses
+# [`text`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-i-text),
+# [`breakable`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-i-breakable),
+# [`nest`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-i-nest),
+# [`group`](https://docs.ruby-lang.org/en/2.7.0/PrettyPrint.html#method-i-group)
+# and [`pp`](https://docs.ruby-lang.org/en/2.7.0/PP/PPMethods.html#method-i-pp)
 # to print the object.
 #
-# ## Pretty-Print [`JSON`](https://docs.ruby-lang.org/en/2.6.0/JSON.html)
+# ## Pretty-Print [`JSON`](https://docs.ruby-lang.org/en/2.7.0/JSON.html)
 #
-# To pretty-print [`JSON`](https://docs.ruby-lang.org/en/2.6.0/JSON.html) refer
+# To pretty-print [`JSON`](https://docs.ruby-lang.org/en/2.7.0/JSON.html) refer
 # to
-# [`JSON#pretty_generate`](https://docs.ruby-lang.org/en/2.6.0/JSON.html#method-i-pretty_generate).
+# [`JSON#pretty_generate`](https://docs.ruby-lang.org/en/2.7.0/JSON.html#method-i-pretty_generate).
 #
 # ## Author
 # Tanaka Akira <akr@fsij.org>
@@ -318,7 +318,7 @@ class PP < PrettyPrint
   #
   # If `out` is omitted, `$>` is assumed. If `width` is omitted, 79 is assumed.
   #
-  # [`PP.pp`](https://docs.ruby-lang.org/en/2.6.0/PP.html#method-c-pp) returns
+  # [`PP.pp`](https://docs.ruby-lang.org/en/2.7.0/PP.html#method-c-pp) returns
   # `out`.
   def self.pp(obj, out = nil, width = nil); end
   # Returns the sharing detection flag as a boolean value. It is false by
@@ -328,10 +328,10 @@ class PP < PrettyPrint
   # default.
   def self.sharing_detection=(arg0); end
   # Outputs `obj` to `out` like
-  # [`PP.pp`](https://docs.ruby-lang.org/en/2.6.0/PP.html#method-c-pp) but with
+  # [`PP.pp`](https://docs.ruby-lang.org/en/2.7.0/PP.html#method-c-pp) but with
   # no indent and newline.
   #
-  # [`PP.singleline_pp`](https://docs.ruby-lang.org/en/2.6.0/PP.html#method-c-singleline_pp)
+  # [`PP.singleline_pp`](https://docs.ruby-lang.org/en/2.7.0/PP.html#method-c-singleline_pp)
   # returns `out`.
   def self.singleline_pp(obj, out = nil); end
 end
@@ -351,7 +351,7 @@ module PP::PPMethods
   # Yields to a block and preserves the previous set of objects being printed.
   def guard_inspect_key; end
   # A convenience method, like
-  # [`object_group`](https://docs.ruby-lang.org/en/2.6.0/PP/PPMethods.html#method-i-object_group),
+  # [`object_group`](https://docs.ruby-lang.org/en/2.7.0/PP/PPMethods.html#method-i-object_group),
   # but also reformats the Object's object\_id.
   def object_address_group(obj, &block); end
   # A convenience method which is same as follows:
@@ -368,10 +368,10 @@ module PP::PPMethods
   # Object#pretty\_print\_cycle is used when `obj` is already printed, a.k.a the
   # object reference chain has a cycle.
   def pp(obj); end
-  # A pretty print for a [`Hash`](https://docs.ruby-lang.org/en/2.6.0/Hash.html)
+  # A pretty print for a [`Hash`](https://docs.ruby-lang.org/en/2.7.0/Hash.html)
   def pp_hash(obj); end
   # A present standard failsafe for pretty printing any given
-  # [`Object`](https://docs.ruby-lang.org/en/2.6.0/Object.html)
+  # [`Object`](https://docs.ruby-lang.org/en/2.7.0/Object.html)
   def pp_object(obj); end
   # Adds the object\_id `id` to the set of objects being pretty printed, so as
   # to not repeat objects.
@@ -379,16 +379,16 @@ module PP::PPMethods
   # Adds a separated list. The list is separated by comma with breakable space,
   # by default.
   #
-  # [`seplist`](https://docs.ruby-lang.org/en/2.6.0/PP/PPMethods.html#method-i-seplist)
+  # [`seplist`](https://docs.ruby-lang.org/en/2.7.0/PP/PPMethods.html#method-i-seplist)
   # iterates the `list` using `iter_method`. It yields each object to the block
   # given for
-  # [`seplist`](https://docs.ruby-lang.org/en/2.6.0/PP/PPMethods.html#method-i-seplist).
+  # [`seplist`](https://docs.ruby-lang.org/en/2.7.0/PP/PPMethods.html#method-i-seplist).
   # The procedure `separator_proc` is called between each yields.
   #
   # If the iteration is zero times, `separator_proc` is not called at all.
   #
   # If `separator_proc` is nil or not given, +lambda {
-  # [`comma_breakable`](https://docs.ruby-lang.org/en/2.6.0/PP/PPMethods.html#method-i-comma_breakable)
+  # [`comma_breakable`](https://docs.ruby-lang.org/en/2.7.0/PP/PPMethods.html#method-i-comma_breakable)
   # }+ is used. If `iter_method` is not given, :each is used.
   #
   # For example, following 3 code fragments has similar effect.

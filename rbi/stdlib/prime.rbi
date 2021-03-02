@@ -10,7 +10,7 @@
 # end
 # ```
 #
-# [`Prime`](https://docs.ruby-lang.org/en/2.6.0/Prime.html) is Enumerable:
+# [`Prime`](https://docs.ruby-lang.org/en/2.7.0/Prime.html) is Enumerable:
 #
 # ```ruby
 # Prime.first 5 # => [2, 3, 5, 7, 11]
@@ -33,7 +33,7 @@
 # A "generator" provides an implementation of enumerating pseudo-prime numbers
 # and it remembers the position of enumeration and upper bound. Furthermore, it
 # is an external iterator of prime enumeration which is compatible with an
-# [`Enumerator`](https://docs.ruby-lang.org/en/2.6.0/Enumerator.html).
+# [`Enumerator`](https://docs.ruby-lang.org/en/2.7.0/Enumerator.html).
 #
 # `Prime`::`PseudoPrimeGenerator` is the base class for generators. There are
 # few implementations of generator.
@@ -48,7 +48,7 @@
 #     and uses much less memory than the other generators. So, it is suitable
 #     for factorizing an integer which is not large but has many prime factors.
 #     e.g. for
-#     [`Prime#prime?`](https://docs.ruby-lang.org/en/2.6.0/Prime.html#method-i-prime-3F)
+#     [`Prime#prime?`](https://docs.ruby-lang.org/en/2.7.0/Prime.html#method-i-prime-3F)
 #     .
 class Prime
   include ::Singleton
@@ -118,7 +118,7 @@ class Prime
   #
   # ## Parameters
   # `pd`
-  # :   [`Array`](https://docs.ruby-lang.org/en/2.6.0/Array.html) of pairs of
+  # :   [`Array`](https://docs.ruby-lang.org/en/2.7.0/Array.html) of pairs of
   #     integers. The each internal pair consists of a prime number -- a prime
   #     factor -- and a natural number -- an exponent.
   #
@@ -185,7 +185,7 @@ class Prime
   # n = p_1**e_1 * p_2**e_2 * .... * p_n**e_n,
   # ```
   #
-  # [`prime_division`](https://docs.ruby-lang.org/en/2.6.0/Prime.html#method-i-prime_division)(n)
+  # [`prime_division`](https://docs.ruby-lang.org/en/2.7.0/Prime.html#method-i-prime_division)(n)
   # returns:
   #
   # ```
@@ -246,13 +246,13 @@ class Prime::EratosthenesGenerator < ::Prime::PseudoPrimeGenerator
   Elem = type_member(:out)
 
   # Alias for:
-  # [`succ`](https://docs.ruby-lang.org/en/2.6.0/Prime/EratosthenesGenerator.html#method-i-succ)
+  # [`succ`](https://docs.ruby-lang.org/en/2.7.0/Prime/EratosthenesGenerator.html#method-i-succ)
   def next; end
 
   def rewind; end
 
   # Also aliased as:
-  # [`next`](https://docs.ruby-lang.org/en/2.6.0/Prime/EratosthenesGenerator.html#method-i-next)
+  # [`next`](https://docs.ruby-lang.org/en/2.7.0/Prime/EratosthenesGenerator.html#method-i-next)
   def succ; end
 
   def self.new; end
@@ -277,13 +277,13 @@ class Prime::Generator23 < ::Prime::PseudoPrimeGenerator
   Elem = type_member(:out)
 
   # Alias for:
-  # [`succ`](https://docs.ruby-lang.org/en/2.6.0/Prime/Generator23.html#method-i-succ)
+  # [`succ`](https://docs.ruby-lang.org/en/2.7.0/Prime/Generator23.html#method-i-succ)
   def next; end
 
   def rewind; end
 
   # Also aliased as:
-  # [`next`](https://docs.ruby-lang.org/en/2.6.0/Prime/Generator23.html#method-i-next)
+  # [`next`](https://docs.ruby-lang.org/en/2.7.0/Prime/Generator23.html#method-i-next)
   def succ; end
 
   def self.new; end
@@ -348,13 +348,13 @@ class Prime::TrialDivisionGenerator < ::Prime::PseudoPrimeGenerator
   Elem = type_member(:out)
 
   # Alias for:
-  # [`succ`](https://docs.ruby-lang.org/en/2.6.0/Prime/TrialDivisionGenerator.html#method-i-succ)
+  # [`succ`](https://docs.ruby-lang.org/en/2.7.0/Prime/TrialDivisionGenerator.html#method-i-succ)
   def next; end
 
   def rewind; end
 
   # Also aliased as:
-  # [`next`](https://docs.ruby-lang.org/en/2.6.0/Prime/TrialDivisionGenerator.html#method-i-next)
+  # [`next`](https://docs.ruby-lang.org/en/2.7.0/Prime/TrialDivisionGenerator.html#method-i-next)
   def succ; end
 
   def self.new; end
