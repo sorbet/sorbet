@@ -1,0 +1,12 @@
+# typed: true
+
+T.let(FOO, T.nilable(Integer)) = 10 # TODO Also fix this autocorrect
+
+a = FOO
+[].each { |i| a = nil }
+
+b = Float::INFINITY
+[].each { |i| b = nil }
+
+c = T.let(10, T.nilable(Integer))
+[].each { |i| c = nil }
