@@ -20,6 +20,7 @@ JEMALLOC_BUILD_COMMAND = """
    echo "$$path"
   }
   export PATH="/usr/local/bin:$$PATH" # find autoconf on mac
+  export PATH="/home/linuxbrew/.linuxbrew/bin:$$PATH" # find autoconf on linux using Linuxbrew
   export CC=$$(absolutize $(CC))
   export CXX=$$(absolutize $(CC))
   [ "$$(uname)" = "Linux" ] && export AR=$$(absolutize $(AR))
