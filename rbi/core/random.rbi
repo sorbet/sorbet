@@ -136,6 +136,12 @@ class Random < Object
     )
     .returns(Float)
   end
+  sig do
+    params(
+        max: T.any(Numeric, T::Range[Numeric]),
+    )
+    .returns(Numeric)
+  end
   def rand(max=T.unsafe(nil)); end
 
   # Returns the seed value used to initialize the generator. This may be used to
@@ -176,6 +182,12 @@ class Random < Object
         max: T.any(Float, T::Range[Float]),
     )
     .returns(Float)
+  end
+  sig do
+    params(
+        max: T.any(Numeric, T::Range[Numeric]),
+    )
+    .returns(Numeric)
   end
   def self.rand(max=T.unsafe(nil)); end
 

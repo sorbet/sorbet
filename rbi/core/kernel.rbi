@@ -1901,21 +1901,21 @@ module Kernel
   sig {returns(Float)}
   sig do
     params(
-        arg0: Integer,
+        arg0: T.any(Integer, T::Range[Integer]),
     )
     .returns(Integer)
   end
   sig do
     params(
-        arg0: T::Range[Integer],
-    )
-    .returns(Integer)
-  end
-  sig do
-    params(
-        arg0: T::Range[Float],
+        arg0: T.any(T.nilable(Float), T::Range[Float]),
     )
     .returns(Float)
+  end
+  sig do
+    params(
+        arg0: T.any(Numeric, T::Range[Numeric]),
+    )
+    .returns(Numeric)
   end
   def rand(arg0=T.unsafe(nil)); end
 
