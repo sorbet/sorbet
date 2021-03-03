@@ -245,9 +245,9 @@ entry:
   %19 = bitcast [0 x i64]* %locals1.i.i to i8*
   call void @llvm.lifetime.start.p0i8(i64 0, i8* nonnull %19)
   %rubyId_fib.i.i = load i64, i64* @rubyIdPrecomputed_fib, align 8
-  %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i14.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", align 8
+  %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i16.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", align 8
   %locals1.sub.i.i = getelementptr inbounds [0 x i64], [0 x i64]* %locals1.i.i, i64 0, i64 0
-  %20 = call i8* @sorbet_allocateRubyStackFrame(i64 %18, i64 %rubyId_fib.i.i, i64 %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i14.i", i64 %realpath, i8* null, i32 1, i32 7, i32 13, i64* nonnull %locals1.sub.i.i, i32 0, i32 2)
+  %20 = call i8* @sorbet_allocateRubyStackFrame(i64 %18, i64 %rubyId_fib.i.i, i64 %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i16.i", i64 %realpath, i8* null, i32 1, i32 7, i32 13, i64* nonnull %locals1.sub.i.i, i32 0, i32 2)
   store i8* %20, i8** @stackFramePrecomputed_func_HasFib.fib, align 8
   call void @llvm.lifetime.end.p0i8(i64 0, i8* nonnull %19)
   %"rubyId_<.i" = load i64, i64* @"rubyIdPrecomputed_<", align 8, !dbg !16
@@ -255,24 +255,24 @@ entry:
   %rubyId_-.i = load i64, i64* @rubyIdPrecomputed_-, align 8, !dbg !18
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_-, i64 %rubyId_-.i, i32 16, i32 1, i32 0, i64* null), !dbg !18
   %rubyId_fib3.i = load i64, i64* @rubyIdPrecomputed_fib, align 8, !dbg !19
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_fib.1, i64 %rubyId_fib3.i, i32 16, i32 1, i32 0, i64* null), !dbg !19
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_fib.1, i64 %rubyId_fib3.i, i32 20, i32 1, i32 0, i64* null), !dbg !19
   %rubyId_-5.i = load i64, i64* @rubyIdPrecomputed_-, align 8, !dbg !20
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_-.2, i64 %rubyId_-5.i, i32 16, i32 1, i32 0, i64* null), !dbg !20
   %rubyId_fib7.i = load i64, i64* @rubyIdPrecomputed_fib, align 8, !dbg !21
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_fib.3, i64 %rubyId_fib7.i, i32 16, i32 1, i32 0, i64* null), !dbg !21
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_fib.3, i64 %rubyId_fib7.i, i32 20, i32 1, i32 0, i64* null), !dbg !21
   %"rubyId_+.i" = load i64, i64* @"rubyIdPrecomputed_+", align 8, !dbg !19
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_+", i64 %"rubyId_+.i", i32 16, i32 1, i32 0, i64* null), !dbg !19
-  %"rubyId_<top (required)>.i15.i" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
-  %"rubyStr_<top (required)>.i16.i" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
-  %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i17.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", align 8
-  %21 = call i8* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>.i16.i", i64 %"rubyId_<top (required)>.i15.i", i64 %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i17.i", i64 %realpath, i8* null, i32 1, i32 1, i32 5, i64* null, i32 0, i32 4)
+  %"rubyId_<top (required)>.i17.i" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
+  %"rubyStr_<top (required)>.i18.i" = load i64, i64* @"rubyStrFrozen_<top (required)>", align 8
+  %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i19.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", align 8
+  %21 = call i8* @sorbet_allocateRubyStackFrame(i64 %"rubyStr_<top (required)>.i18.i", i64 %"rubyId_<top (required)>.i17.i", i64 %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i19.i", i64 %realpath, i8* null, i32 1, i32 1, i32 5, i64* null, i32 0, i32 4)
   store i8* %21, i8** @"stackFramePrecomputed_func_HasFib.<static-init>", align 8
   %22 = call i64 @rb_fstring_new(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @"str_block for", i64 0, i64 0), i64 9) #9
   call void @rb_gc_register_mark_object(i64 %22) #9
   %"stackFrame_func_HasFib.<static-init>.i.i" = load i8*, i8** @"stackFramePrecomputed_func_HasFib.<static-init>", align 8
   %"rubyId_block for.i.i" = load i64, i64* @"rubyIdPrecomputed_block for", align 8
-  %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i18.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", align 8
-  %23 = call i8* @sorbet_allocateRubyStackFrame(i64 %22, i64 %"rubyId_block for.i.i", i64 %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i18.i", i64 %realpath, i8* %"stackFrame_func_HasFib.<static-init>.i.i", i32 2, i32 1, i32 5, i64* null, i32 0, i32 4)
+  %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i20.i" = load i64, i64* @"rubyStrFrozen_test/testdata/ruby_benchmark/app_fib.rb", align 8
+  %23 = call i8* @sorbet_allocateRubyStackFrame(i64 %22, i64 %"rubyId_block for.i.i", i64 %"rubyStr_test/testdata/ruby_benchmark/app_fib.rb.i20.i", i64 %realpath, i8* %"stackFrame_func_HasFib.<static-init>.i.i", i32 2, i32 1, i32 5, i64* null, i32 0, i32 4)
   store i8* %23, i8** @"stackFramePrecomputed_func_HasFib.<static-init>$block_1", align 8
   %rubyId_sig.i = load i64, i64* @rubyIdPrecomputed_sig, align 8, !dbg !22
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_sig, i64 %rubyId_sig.i, i32 16, i32 2, i32 0, i64* null), !dbg !22
@@ -280,7 +280,7 @@ entry:
   %rubyId_n.i = load i64, i64* @rubyIdPrecomputed_n, align 8, !dbg !8
   %24 = call i64 @rb_id2sym(i64 %rubyId_n.i) #9, !dbg !8
   store i64 %24, i64* %keywords.i, align 8, !dbg !8
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_params, i64 %rubyId_params.i, i32 64, i32 1, i32 1, i64* nonnull %keywords.i), !dbg !8
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_params, i64 %rubyId_params.i, i32 68, i32 1, i32 1, i64* nonnull %keywords.i), !dbg !8
   %rubyId_returns.i = load i64, i64* @rubyIdPrecomputed_returns, align 8, !dbg !8
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_returns, i64 %rubyId_returns.i, i32 16, i32 1, i32 0, i64* null), !dbg !8
   %rubyId_keep_self_def.i = load i64, i64* @rubyIdPrecomputed_keep_self_def, align 8, !dbg !23

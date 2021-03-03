@@ -1037,5 +1037,5 @@ const VMFlag Payload::VM_CALL_ARGS_SIMPLE{"sorbet_vmCallArgsSimple", "VM_CALL_AR
 const VMFlag Payload::VM_CALL_ARGS_SPLAT{"sorbet_vmCallArgsSplat", "VM_CALL_ARGS_SPLAT"};
 const VMFlag Payload::VM_CALL_KWARG{"sorbet_vmCallKwarg", "VM_CALL_KWARG"};
 const VMFlag Payload::VM_CALL_KW_SPLAT{"sorbet_vmCallKwSplat", "VM_CALL_KW_SPLAT"};
-const VMFlag Payload::VM_CALL_ARGS_AND_KW_SPLAT{"sorbet_vmCallArgsAndKwSplat", "VM_CALL_ARGS_AND_KW_SPLAT"};
+const VMFlag Payload::VM_CALL_FCALL{"sorbet_vmCallFCall", "VM_CALL_FCALL"};
 } // namespace sorbet::compiler

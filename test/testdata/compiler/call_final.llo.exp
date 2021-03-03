@@ -256,7 +256,7 @@ entry:
   %rubyId_n.i = load i64, i64* @rubyIdPrecomputed_n, align 8, !dbg !8
   %23 = call i64 @rb_id2sym(i64 %rubyId_n.i) #8, !dbg !8
   store i64 %23, i64* %keywords.i, align 8, !dbg !8
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_params, i64 %rubyId_params.i, i32 64, i32 1, i32 1, i64* nonnull %keywords.i), !dbg !8
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_params, i64 %rubyId_params.i, i32 68, i32 1, i32 1, i64* nonnull %keywords.i), !dbg !8
   %rubyId_returns.i = load i64, i64* @rubyIdPrecomputed_returns, align 8, !dbg !8
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_returns, i64 %rubyId_returns.i, i32 16, i32 1, i32 0, i64* null), !dbg !8
   %rubyId_keep_self_def.i = load i64, i64* @rubyIdPrecomputed_keep_self_def, align 8, !dbg !15

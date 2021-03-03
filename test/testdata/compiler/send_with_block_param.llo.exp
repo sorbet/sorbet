@@ -185,7 +185,7 @@ entry:
   %rubyId_map.i = load i64, i64* @rubyIdPrecomputed_map, align 8, !dbg !13
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_map, i64 %rubyId_map.i, i32 16, i32 0, i32 0, i64* null), !dbg !13
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !14
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_puts, i64 %rubyId_puts.i, i32 16, i32 1, i32 0, i64* null), !dbg !14
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_puts, i64 %rubyId_puts.i, i32 20, i32 1, i32 0, i64* null), !dbg !14
   %11 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !15
   %12 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %11, i64 0, i32 18
   %13 = load i64, i64* %12, align 8, !tbaa !17

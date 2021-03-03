@@ -180,7 +180,7 @@ entry:
   store i64 %9, i64* @ruby_hashLiteral1, align 8
   call void @llvm.lifetime.end.p0i8(i64 32, i8* nonnull %7)
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !8
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_puts, i64 %rubyId_puts.i, i32 16, i32 1, i32 0, i64* null), !dbg !8
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_puts, i64 %rubyId_puts.i, i32 20, i32 1, i32 0, i64* null), !dbg !8
   %10 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !13
   %11 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %10, i64 0, i32 18
   %12 = load i64, i64* %11, align 8, !tbaa !15

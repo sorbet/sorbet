@@ -303,6 +303,10 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
         flags.emplace_back(Payload::VM_CALL_ARGS_SIMPLE);
     }
 
+    if (send->isPrivateOk) {
+        flags.emplace_back(Payload::VM_CALL_FCALL);
+    }
+
     // the receiver isn't included in the arg count
     int argc = stack.size() - 1;
 

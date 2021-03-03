@@ -73,9 +73,7 @@ void sorbet_setupFunctionInlineCache(struct FunctionInlineCache *cache, ID mid, 
 
     cd->ci_kw.ci.mid = mid;
     cd->ci_kw.ci.orig_argc = argc;
-
-    // TODO(trevor) will we need non-FCALL sends?
-    cd->ci_kw.ci.flag = VM_CALL_FCALL | flags;
+    cd->ci_kw.ci.flag = flags;
 
     if (num_kwargs > 0) {
         // The layout for struct_rb_call_info_with_kwarg has a 1-element array as the last field, so allocating

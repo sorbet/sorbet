@@ -176,7 +176,7 @@ entry:
   %"rubyId_[]3.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !8
   tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_[].2", i64 %"rubyId_[]3.i", i32 16, i32 1, i32 0, i64* null), !dbg !8
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !13
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_puts, i64 %rubyId_puts.i, i32 16, i32 1, i32 0, i64* null), !dbg !13
+  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_puts, i64 %rubyId_puts.i, i32 20, i32 1, i32 0, i64* null), !dbg !13
   %"rubyId_[]6.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !14
   tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_[].3", i64 %"rubyId_[]6.i", i32 16, i32 1, i32 0, i64* null), !dbg !14
   %"rubyId_[]8.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !14
@@ -184,15 +184,15 @@ entry:
   %"rubyId_[]10.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !14
   tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_[].5", i64 %"rubyId_[]10.i", i32 16, i32 1, i32 0, i64* null), !dbg !14
   %rubyId_puts12.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !15
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_puts.6, i64 %rubyId_puts12.i, i32 16, i32 1, i32 0, i64* null), !dbg !15
-  %"rubyId_[]14.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_[].7", i64 %"rubyId_[]14.i", i32 16, i32 1, i32 0, i64* null), !dbg !16
-  %"rubyId_[]16.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_[].8", i64 %"rubyId_[]16.i", i32 16, i32 1, i32 0, i64* null), !dbg !16
-  %"rubyId_[]18.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_[].9", i64 %"rubyId_[]18.i", i32 16, i32 1, i32 0, i64* null), !dbg !16
-  %rubyId_puts20.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !17
-  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_puts.10, i64 %rubyId_puts20.i, i32 16, i32 1, i32 0, i64* null), !dbg !17
+  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_puts.6, i64 %rubyId_puts12.i, i32 20, i32 1, i32 0, i64* null), !dbg !15
+  %"rubyId_[]15.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
+  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_[].7", i64 %"rubyId_[]15.i", i32 16, i32 1, i32 0, i64* null), !dbg !16
+  %"rubyId_[]17.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
+  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_[].8", i64 %"rubyId_[]17.i", i32 16, i32 1, i32 0, i64* null), !dbg !16
+  %"rubyId_[]19.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
+  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_[].9", i64 %"rubyId_[]19.i", i32 16, i32 1, i32 0, i64* null), !dbg !16
+  %rubyId_puts21.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !17
+  tail call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_puts.10, i64 %rubyId_puts21.i, i32 20, i32 1, i32 0, i64* null), !dbg !17
   %8 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !18
   %9 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %8, i64 0, i32 18
   %10 = load i64, i64* %9, align 8, !tbaa !20

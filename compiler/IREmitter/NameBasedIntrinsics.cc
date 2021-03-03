@@ -435,6 +435,10 @@ public:
                             "internal error: arg 3 to call-with-splat has neither nil nor tuple type");
         }
 
+        if (send->isPrivateOk) {
+            flags.emplace_back(Payload::VM_CALL_FCALL);
+        }
+
         // Push the splat array.
         Payload::pushRubyStack(cs, builder, splatArray);
 
