@@ -13,6 +13,7 @@ ruby(
         "--localstatedir=/var",
         "--disable-maintainer-mode",
         "--disable-dependency-tracking",
+        "--disable-jit-support",
     ],
     copts = [
         "-g",
