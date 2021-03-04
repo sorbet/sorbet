@@ -7840,6 +7840,209 @@ ClassDef{
         }
 
         Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = (module ::Sorbet::Private::Static)
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :opts }
+                  Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = (module ::T)
+                    }
+                    fun = <U untyped>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = (module ::T)
+                  }
+                  fun = <U nilable>
+                  block = nullptr
+                  pos_args = 1
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = UnresolvedConstantLit{
+                            scope = EmptyTree
+                            cnst = <C <U Opus>>
+                          }
+                          cnst = <C <U Account>>
+                        }
+                        cnst = <C <U Model>>
+                      }
+                      cnst = <C <U Merchant>>
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = (module ::T::Sig::WithoutRuntime)
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {rewriter}
+          name = <U merchant_><<U <todo method>>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = (module ::T)
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = (module ::Kernel)
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = (module ::Sorbet::Private::Static)
+          }
+          fun = <U sig>
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Local{
+                  localVariable = <U <self>>
+                }
+                fun = <U params>
+                block = nullptr
+                pos_args = 0
+                args = [
+                  Literal{ value = :opts }
+                  Send{
+                    recv = ConstantLit{
+                      orig = nullptr
+                      symbol = (module ::T)
+                    }
+                    fun = <U untyped>
+                    block = nullptr
+                    pos_args = 0
+                    args = [
+                    ]
+                  }
+                ]
+              }
+              fun = <U returns>
+              block = nullptr
+              pos_args = 1
+              args = [
+                UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
+                        scope = EmptyTree
+                        cnst = <C <U Opus>>
+                      }
+                      cnst = <C <U Account>>
+                    }
+                    cnst = <C <U Model>>
+                  }
+                  cnst = <C <U Merchant>>
+                }
+              ]
+            }
+          }
+          pos_args = 1
+          args = [
+            ConstantLit{
+              orig = nullptr
+              symbol = (module ::T::Sig::WithoutRuntime)
+            }
+          ]
+        }
+
+        MethodDef{
+          flags = {rewriter}
+          name = <U merchant_!><<U <todo method>>>
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U opts>
+            } } }, BlockArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = <U <blk>>
+            } }]
+          rhs = Send{
+            recv = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = (module ::T)
+              }
+              fun = <U unsafe>
+              block = nullptr
+              pos_args = 1
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = (module ::Kernel)
+                }
+              ]
+            }
+            fun = <U raise>
+            block = nullptr
+            pos_args = 1
+            args = [
+              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+            ]
+          }
+        }
+
+        Send{
           recv = Local{
             localVariable = <U <self>>
           }

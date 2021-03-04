@@ -827,6 +827,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:opts, ::T.untyped()).returns(::T.nilable(<emptyTree>::<C Opus>::<C Account>::<C Model>::<C Merchant>))
+    end
+
+    def merchant_<<todo method>>(*opts:, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:opts, ::T.untyped()).returns(<emptyTree>::<C Opus>::<C Account>::<C Model>::<C Merchant>)
+    end
+
+    def merchant_!<<todo method>>(*opts:, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
     ::Sorbet::Private::Static.keep_self_def(<self>, :merchant_prop, :normal)

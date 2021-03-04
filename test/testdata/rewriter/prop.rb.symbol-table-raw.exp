@@ -197,6 +197,12 @@ class <C <U <root>>> < <C <U Object>> ()
   class <C <U ShardingProp>> < <C <U Object>> (<C <U Props>>) @ Loc {file=test/testdata/rewriter/prop.rb start=81:1 end=81:19}
     method <C <U ShardingProp>><U merchant> (<blk>) -> String @ Loc {file=test/testdata/rewriter/prop.rb start=84:3 end=84:16}
       argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
+    method <C <U ShardingProp>><U merchant_> (opts, <blk>) -> Opus::Account::Model::Merchant | NilClass @ Loc {file=test/testdata/rewriter/prop.rb start=84:3 end=84:16}
+      argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=84:3 end=84:11}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
+    method <C <U ShardingProp>><U merchant_!> (opts, <blk>) -> Opus::Account::Model::Merchant @ Loc {file=test/testdata/rewriter/prop.rb start=84:3 end=84:16}
+      argument opts<keyword, repeated> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=84:3 end=84:11}
+      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/prop.rb start=??? end=???}
   class <S <C <U ShardingProp>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U ClassMethods>>) @ Loc {file=test/testdata/rewriter/prop.rb start=81:7 end=81:19}
     type-member(+) <S <C <U ShardingProp>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U ShardingProp>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=ShardingProp) @ Loc {file=test/testdata/rewriter/prop.rb start=81:7 end=81:19}
     method <S <C <U ShardingProp>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/prop.rb start=81:1 end=85:4}
