@@ -12,13 +12,13 @@ namespace sorbet::rewriter {
 namespace {
 
 ast::ExpressionPtr mkNilableEncryptedValue(core::MutableContext ctx, core::LocOffsets loc) {
-    auto opus = ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Names::Constants::Opus());
-    auto db = ast::MK::UnresolvedConstant(loc, move(opus), core::Names::Constants::DB());
-    auto model = ast::MK::UnresolvedConstant(loc, move(db), core::Names::Constants::Model());
-    auto mixins = ast::MK::UnresolvedConstant(loc, move(model), core::Names::Constants::Mixins());
-    auto enc = ast::MK::UnresolvedConstant(loc, move(mixins), core::Names::Constants::Encryptable());
-    auto ev = ast::MK::UnresolvedConstant(loc, move(enc), core::Names::Constants::EncryptedValue());
-    return ASTUtil::mkNilable(loc, move(ev));
+    auto parts = vector<core::NameRef>{
+        core::Names::Constants::Opus(),        core::Names::Constants::DB(),
+        core::Names::Constants::Model(),       core::Names::Constants::Mixins(),
+        core::Names::Constants::Encryptable(), core::Names::Constants::EncryptedValue(),
+    };
+
+    return ASTUtil::mkNilable(loc, ast::MK::UnresolvedConstantParts(loc, ast::MK::EmptyTree(), parts));
 }
 
 ast::ExpressionPtr mkNilableString(core::LocOffsets loc) {
