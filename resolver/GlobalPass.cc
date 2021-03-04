@@ -289,16 +289,6 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
         }
         InlinedVector<core::ClassOrModuleRef, 4> currentMixins = data->mixins();
         InlinedVector<core::ClassOrModuleRef, 4> newMixins;
-        // cout << "Mixins ofClass: " << ofClass.show(gs) << " size: " << currentMixins.size() << endl;
-        // if (currentMixins.size() == 2) {
-        //     cout << "Listing those mixins: " << currentMixins[0].show(gs) << currentMixins[1].show(gs) << endl;
-        // }
-        // if (currentMixins.size() == 1) {
-        //     cout << "Listing those mixins: " << currentMixins[0].show(gs) << endl;
-        // }
-        // if (currentMixins.size() == 0) {
-        //     cout << endl;
-        // }
         for (auto mixin : currentMixins) {
             if (mixin == data->superClass()) {
                 continue;
@@ -366,8 +356,7 @@ void Resolver::computeLinearization(core::GlobalState &gs) {
 
     // TODO: this does not support `prepend`
     for (int i = 1; i < gs.classAndModulesUsed(); ++i) {
-        const auto &ref = core::SymbolRef(&gs, core::SymbolRef::Kind::ClassOrModule, i);
-        ENFORCE(ref.data(gs)->isClassOrModule());
+        const auto &ref = core::ClassOrModuleRef(gs, i);
         auto mixins = computeClassLinearization(gs, ref).mixins;
 
         // Iterate over mixins of the class as long as they are calling `Magic.mixes_in_class_methods()`
