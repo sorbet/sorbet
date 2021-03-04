@@ -1461,8 +1461,8 @@ class TreeSymbolizer {
         const bool firstNameRecursive = false;
         auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
         core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
-        if (firstName && !existing.exists()) {
-            existing = ctx.state.lookupStaticFieldSymbol(newOwner, constLit->cnst);
+        if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
+            existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
             if (existing.exists()) {
                 existing = existing.data(ctx.state)->dealias(ctx.state);
             }
@@ -1697,11 +1697,12 @@ public:
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
-        core::SymbolRef scope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
-        if (!scope.isClassOrModule()) {
-            auto scopeName = scope.data(ctx)->name;
-            scope = ctx.state.lookupClassSymbol(scope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
+        core::SymbolRef maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
+        if (!maybeScope.isClassOrModule()) {
+            auto scopeName = maybeScope.data(ctx)->name;
+            maybeScope = ctx.state.lookupClassSymbol(maybeScope.data(ctx)->owner.asClassOrModuleRef(), scopeName);
         }
+        auto scope = maybeScope.asClassOrModuleRef();
 
         core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
         ENFORCE(cnst.exists());

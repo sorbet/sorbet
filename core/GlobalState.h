@@ -105,14 +105,14 @@ public:
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE, Symbols::noClassOrModule())
             .asClassOrModuleRef();
     }
-    MethodRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
+    MethodRef lookupMethodSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD, Symbols::noMethod()).asMethodRef();
     }
     MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, const std::vector<u4> &methodHash) const;
-    SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) const {
+    SymbolRef lookupStaticFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD, Symbols::noField());
     }
-    SymbolRef lookupFieldSymbol(SymbolRef owner, NameRef name) const {
+    SymbolRef lookupFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::FIELD, Symbols::noField());
     }
     SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;

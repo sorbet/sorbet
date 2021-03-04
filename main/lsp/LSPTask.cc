@@ -367,9 +367,10 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
     AccessorInfo info;
 
     core::SymbolRef owner = symbol.data(gs)->owner;
-    if (!owner.exists()) {
+    if (!owner.exists() || !owner.isClassOrModule()) {
         return info;
     }
+    core::ClassOrModuleRef ownerCls = owner.asClassOrModuleRef();
 
     string_view baseName;
 
@@ -403,7 +404,7 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
             // Field is not optional.
             return info;
         }
-        info.fieldSymbol = gs.lookupFieldSymbol(owner, fieldName);
+        info.fieldSymbol = gs.lookupFieldSymbol(ownerCls, fieldName);
         if (!info.fieldSymbol.exists()) {
             // field symbol does not exist, so `symbol` must not be an accessor.
             return info;
@@ -413,7 +414,7 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
     if (!info.readerSymbol.exists()) {
         auto readerName = gs.lookupNameUTF8(baseName);
         if (readerName.exists()) {
-            info.readerSymbol = gs.lookupMethodSymbol(owner, readerName);
+            info.readerSymbol = gs.lookupMethodSymbol(ownerCls, readerName);
         }
     }
 
@@ -421,7 +422,7 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
         auto writerNameStr = absl::StrCat(baseName, "=");
         auto writerName = gs.lookupNameUTF8(writerNameStr);
         if (writerName.exists()) {
-            info.writerSymbol = gs.lookupMethodSymbol(owner, writerName);
+            info.writerSymbol = gs.lookupMethodSymbol(ownerCls, writerName);
         }
     }
 
