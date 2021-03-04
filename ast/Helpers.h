@@ -202,6 +202,15 @@ public:
         return make_expression<UnresolvedConstantLit>(loc, std::move(scope), name);
     }
 
+    static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, ExpressionPtr scope,
+                                                 const std::vector<core::NameRef> &parts) {
+        auto result = std::move(scope);
+        for (const auto part : parts) {
+            result = UnresolvedConstant(loc, std::move(result), part);
+        }
+        return result;
+    }
+
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {
         return make_expression<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
     }
