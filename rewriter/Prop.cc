@@ -141,6 +141,7 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             ret.type = ast::MK::Constant(send->loc, core::Symbols::Float());
             break;
         case core::Names::merchantProp().rawId():
+            // http://go/ps/blob/2adf5ea66d0e/lib/db/sharding/shard_by_merchant/shard_by_merchant.rb#L16
             ret.isImmutable = true;
             ret.name = core::Names::merchant();
             ret.nameLoc =
