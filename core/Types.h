@@ -900,9 +900,9 @@ public:
 
 TYPE(UnresolvedAppliedType) final : public ClassType {
 public:
-    const core::SymbolRef klass;
+    const core::ClassOrModuleRef klass;
     const std::vector<TypePtr> targs;
-    UnresolvedAppliedType(SymbolRef klass, std::vector<TypePtr> targs)
+    UnresolvedAppliedType(ClassOrModuleRef klass, std::vector<TypePtr> targs)
         : ClassType(core::Symbols::untyped()), klass(klass), targs(std::move(targs)){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
