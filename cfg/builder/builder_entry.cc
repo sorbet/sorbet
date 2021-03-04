@@ -100,7 +100,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         core::SymbolRef global = kv.first;
         LocalRef local = kv.second;
         aliasesPrefix.emplace_back(local, core::LocOffsets::none(), make_unique<Alias>(global));
-        if (global.isField(ctx) || global.isStaticField(ctx)) {
+        if (global.isFieldOrStaticField()) {
             res->minLoops[local.id()] = CFG::MIN_LOOP_FIELD;
         } else {
             res->minLoops[local.id()] = CFG::MIN_LOOP_GLOBAL;
