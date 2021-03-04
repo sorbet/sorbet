@@ -96,29 +96,24 @@ public:
     ArgInfo &enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name);
 
     SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, 0);
+        return lookupSymbolWithFlags(owner, name, 0, Symbols::noSymbol());
     }
     SymbolRef lookupTypeMemberSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER);
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER, Symbols::noTypeMember());
     }
     ClassOrModuleRef lookupClassSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE).asClassOrModuleRef();
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE, Symbols::noClassOrModule())
+            .asClassOrModuleRef();
     }
     MethodRef lookupMethodSymbol(SymbolRef owner, NameRef name) const {
-        // TODO: Maybe lookupSymbolWithFlags should accept a default symbol argument?
-        auto sym = lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD);
-        if (!sym.exists()) {
-            return Symbols::noMethod();
-        } else {
-            return sym.asMethodRef();
-        }
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD, Symbols::noMethod()).asMethodRef();
     }
     MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, const std::vector<u4> &methodHash) const;
     SymbolRef lookupStaticFieldSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD);
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD, Symbols::noField());
     }
     SymbolRef lookupFieldSymbol(SymbolRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::FIELD);
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::FIELD, Symbols::noField());
     }
     SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
 
@@ -306,7 +301,7 @@ private:
 
     ClassOrModuleRef synthesizeClass(NameRef nameID, u4 superclass = Symbols::todo().id(), bool isModule = false);
 
-    SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const;
+    SymbolRef lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags, SymbolRef defaultReturnValue) const;
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
 };

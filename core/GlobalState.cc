@@ -932,8 +932,9 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRe
 }
 
 // look up a symbol whose flags match the desired flags. This might look through mangled names to discover one whose
-// flags match. If no sych symbol exists, then it will return noSymbol.
-SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const {
+// flags match. If no sych symbol exists, then it will return defaultReturnValue.
+SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags,
+                                             SymbolRef defaultReturnValue) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
@@ -954,7 +955,7 @@ SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 f
         res = ownerScope->members().find(lookupName);
         unique++;
     }
-    return Symbols::noSymbol();
+    return defaultReturnValue;
 }
 
 SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {
