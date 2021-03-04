@@ -1207,13 +1207,13 @@ class ResolveTypeMembersAndFieldsWalk {
     };
 
     struct ResolveSimpleStaticFieldItem {
-        core::SymbolRef sym;
+        core::FieldRef sym;
         core::TypePtr resultType;
     };
 
     struct ResolveStaticFieldItem {
         core::FileRef file;
-        core::SymbolRef sym;
+        core::FieldRef sym;
         ast::Assign *asgn;
     };
 
@@ -1392,7 +1392,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 return;
             }
         }
-        core::SymbolRef var;
+        core::FieldRef var;
 
         if (uid->kind == ast::UnresolvedIdent::Kind::Class) {
             var = ctx.state.enterStaticFieldSymbol(core::Loc(job.file, uid->loc), scope, uid->name);
@@ -2184,10 +2184,11 @@ public:
 
             todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, dependencies_, ctx.file});
         } else if (data->isStaticField()) {
-            ResolveStaticFieldItem job{ctx.file, sym, &asgn};
+            ResolveStaticFieldItem job{ctx.file, sym.asFieldRef(), &asgn};
             auto resultType = tryResolveStaticField(ctx, job);
             if (resultType != core::Types::todo()) {
-                todoResolveSimpleStaticFieldItems_.emplace_back(ResolveSimpleStaticFieldItem{sym, resultType});
+                todoResolveSimpleStaticFieldItems_.emplace_back(
+                    ResolveSimpleStaticFieldItem{sym.asFieldRef(), resultType});
             } else {
                 todoResolveStaticFieldItems_.emplace_back(move(job));
             }
