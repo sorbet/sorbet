@@ -115,5 +115,4 @@ class FullyQualifiedStructUsages
 
   Foo.new.a
   Bar.new.a
-  Baz.new.a
 end

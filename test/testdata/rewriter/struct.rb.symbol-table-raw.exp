@@ -1,6 +1,6 @@
 class <C <U <root>>> < <C <U Object>> ()
   class <S <C <U <root>>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> ()
-    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=2:1 end=119:4}
+    method <S <C <U <root>>> $1><N <U <static-init>> $CENSORED> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=2:1 end=118:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U AccidentallyStruct>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=37:1 end=37:25}
     class <C <U AccidentallyStruct>><C <U A>> < <C <U Struct>> () @ Loc {file=test/testdata/rewriter/struct.rb start=42:5 end=42:31}
@@ -84,7 +84,7 @@ class <C <U <root>>> < <C <U Object>> ()
         argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <S <C <U FullyQualifiedStructUsages>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> () @ Loc {file=test/testdata/rewriter/struct.rb start=111:7 end=111:33}
     type-member(+) <S <C <U FullyQualifiedStructUsages>> $1><C <U <AttachedClass>>> -> LambdaParam(<S <C <U FullyQualifiedStructUsages>> $1><C <U <AttachedClass>>>, lower=T.noreturn, upper=FullyQualifiedStructUsages) @ Loc {file=test/testdata/rewriter/struct.rb start=111:7 end=111:33}
-    method <S <C <U FullyQualifiedStructUsages>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=111:1 end=119:4}
+    method <S <C <U FullyQualifiedStructUsages>> $1><U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=111:1 end=118:4}
       argument <blk><block> @ Loc {file=test/testdata/rewriter/struct.rb start=??? end=???}
   class <C <U Main>> < <C <U Object>> () @ Loc {file=test/testdata/rewriter/struct.rb start=86:1 end=86:11}
     method <C <U Main>><U main> (<blk>) @ Loc {file=test/testdata/rewriter/struct.rb start=87:5 end=87:13}
