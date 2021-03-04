@@ -125,8 +125,8 @@ void sorbet_vm_env_write_slowpath(const VALUE *ep, int index, VALUE v) {
 }
 
 VALUE sorbet_vm_splatIntrinsic(VALUE thing) {
-    const VALUE dont_duplicate_input_arrays = Qfalse;
-    return vm_splat_array(dont_duplicate_input_arrays, thing);
+    const VALUE duplicate_input_arrays = Qtrue;
+    return vm_splat_array(duplicate_input_arrays, thing);
 }
 
 VALUE sorbet_vm_check_match_array(rb_execution_context_t *ec, VALUE target, VALUE pattern) {
