@@ -7694,6 +7694,29 @@ ClassDef{
     ClassDef{
       kind = class
       name = UnresolvedConstantLit{
+        scope = UnresolvedConstantLit{
+          scope = UnresolvedConstantLit{
+            scope = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <C <U Opus>>
+            }
+            cnst = <C <U Account>>
+          }
+          cnst = <C <U Model>>
+        }
+        cnst = <C <U Merchant>>
+      }<<C <U <todo sym>>>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = (class ::<todo sym>)
+        }]
+      rhs = [
+      ]
+    }
+
+    ClassDef{
+      kind = class
+      name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <C <U ShardingProp>>
       }<<C <U <todo sym>>>>

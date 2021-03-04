@@ -77,6 +77,7 @@ class PropHelpers2
   created_prop(immutable: true)
 end
 
+class Opus::Account::Model::Merchant; end
 class ShardingProp
   include T::Props
   def self.merchant_prop(opts={}); end
