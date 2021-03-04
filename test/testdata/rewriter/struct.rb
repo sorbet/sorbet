@@ -107,3 +107,12 @@ class Main
     end
 end
 puts Main.new.main
+
+class FullyQualifiedStructUsages
+  Foo = Struct.new(:a)
+  Bar = ::Struct.new(:a)
+  Baz = ::Foo::Struct.new
+
+  Foo.new.a
+  Bar.new.a
+end

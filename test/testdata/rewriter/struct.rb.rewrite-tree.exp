@@ -348,4 +348,64 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   <self>.puts(<emptyTree>::<C Main>.new().main())
+
+  class <emptyTree>::<C FullyQualifiedStructUsages><<C <todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<C Foo><<C <todo sym>>> < (::<root>::<C Struct>)
+      def a<<todo method>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      def a=<<todo method>>(a, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params(:a, ::BasicObject).void()
+      end
+
+      def initialize<<todo method>>(a = nil, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.keep_def(<self>, :a, :normal)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :a=, :normal)
+
+      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
+
+      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    end
+
+    class <emptyTree>::<C Bar><<C <todo sym>>> < (::<root>::<C Struct>)
+      def a<<todo method>>(&<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      def a=<<todo method>>(a, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+        <self>.params(:a, ::BasicObject).void()
+      end
+
+      def initialize<<todo method>>(a = nil, &<blk>)
+        ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      end
+
+      ::Sorbet::Private::Static.keep_def(<self>, :a, :normal)
+
+      ::Sorbet::Private::Static.keep_def(<self>, :a=, :normal)
+
+      <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
+
+      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+    end
+
+    <emptyTree>::<C Baz> = ::<root>::<C Foo>::<C Struct>.new()
+
+    <emptyTree>::<C Foo>.new().a()
+
+    <emptyTree>::<C Bar>.new().a()
+  end
 end
