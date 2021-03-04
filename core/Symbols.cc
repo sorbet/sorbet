@@ -45,6 +45,14 @@ bool MethodRef::operator!=(const MethodRef &rhs) const {
     return rhs._id != this->_id;
 }
 
+bool FieldRef::operator==(const FieldRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool FieldRef::operator!=(const FieldRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
 vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
@@ -266,6 +274,18 @@ ConstSymbolData MethodRef::data(const GlobalState &gs) const {
     return ConstSymbolData(gs.methods[_id], gs);
 }
 
+SymbolData FieldRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
+    return SymbolData(gs.fields[_id], gs);
+}
+
+ConstSymbolData FieldRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
+    return ConstSymbolData(gs.fields[_id], gs);
+}
+
 bool SymbolRef::isSynthetic() const {
     switch (this->kind()) {
         case Kind::ClassOrModule:
@@ -301,9 +321,13 @@ SymbolRef::SymbolRef(ClassOrModuleRef kls) : SymbolRef(nullptr, SymbolRef::Kind:
 
 SymbolRef::SymbolRef(MethodRef kls) : SymbolRef(nullptr, SymbolRef::Kind::Method, kls.id()) {}
 
+SymbolRef::SymbolRef(FieldRef field) : SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, field.id()) {}
+
 ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, u4 id) : _id(id) {}
 
 MethodRef::MethodRef(const GlobalState &from, u4 id) : _id(id) {}
+
+FieldRef::FieldRef(const GlobalState &from, u4 id) : _id(id) {}
 
 string SymbolRef::showRaw(const GlobalState &gs) const {
     return dataAllowingNone(gs)->showRaw(gs);

@@ -104,6 +104,36 @@ public:
 };
 CheckSize(MethodRef, 4, 4);
 
+class FieldRef final {
+    u4 _id;
+
+public:
+    FieldRef() : _id(0){};
+    FieldRef(const GlobalState &from, u4 id);
+
+    u4 id() const {
+        return _id;
+    }
+
+    bool exists() const {
+        return _id != 0;
+    }
+
+    static FieldRef fromRaw(u4 id) {
+        FieldRef ref;
+        ref._id = id;
+        return ref;
+    }
+
+    SymbolData data(GlobalState &gs) const;
+    ConstSymbolData data(const GlobalState &gs) const;
+
+    bool operator==(const FieldRef &rhs) const;
+
+    bool operator!=(const FieldRef &rhs) const;
+};
+CheckSize(FieldRef, 4, 4);
+
 class SymbolRef final {
     friend class GlobalState;
     friend class Symbol;
@@ -192,6 +222,7 @@ public:
     // method arguments. This conversion is always safe and never throws.
     SymbolRef(ClassOrModuleRef kls);
     SymbolRef(MethodRef kls);
+    SymbolRef(FieldRef kls);
     SymbolRef() : _id(0){};
 
     // From experimentation, in the common case, methods typically have 2 or fewer arguments.
@@ -221,6 +252,11 @@ public:
     MethodRef asMethodRef() const {
         ENFORCE_NO_TIMER(kind() == Kind::Method);
         return MethodRef::fromRaw(unsafeTableIndex());
+    }
+
+    FieldRef asFieldRef() const {
+        ENFORCE_NO_TIMER(kind() == Kind::FieldOrStaticField);
+        return FieldRef::fromRaw(unsafeTableIndex());
     }
 
     SymbolData data(GlobalState &gs) const;
@@ -493,8 +529,8 @@ public:
         return MethodRef();
     }
 
-    static SymbolRef noField() {
-        return SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, 0);
+    static FieldRef noField() {
+        return FieldRef::fromRaw(0);
     }
 
     static SymbolRef noTypeArgument() {
@@ -522,8 +558,8 @@ public:
         return ClassOrModuleRef::fromRaw(59);
     }
 
-    static SymbolRef Magic_undeclaredFieldStub() {
-        return SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, 1);
+    static FieldRef Magic_undeclaredFieldStub() {
+        return FieldRef::fromRaw(1);
     }
 
     static MethodRef Sorbet_Private_Static_badAliasMethodStub() {

@@ -380,7 +380,7 @@ AccessorInfo LSPTask::getAccessorInfo(const core::GlobalState &gs, core::SymbolR
         if (!symbol.isField(gs)) {
             return info;
         }
-        info.fieldSymbol = symbol;
+        info.fieldSymbol = symbol.asFieldRef();
         baseName = string_view(symbolName).substr(1);
     } else if (absl::EndsWith(symbolName, "=")) {
         if (!symbol.data(gs)->isMethod()) {

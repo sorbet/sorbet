@@ -1180,7 +1180,7 @@ MethodRef GlobalState::enterNewMethodOverload(Loc sigLoc, MethodRef original, co
     return res;
 }
 
-SymbolRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
+FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
     auto flags = Symbol::Flags::FIELD;
@@ -1191,7 +1191,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef
     if (store.exists()) {
         ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asFieldRef();
     }
 
     ENFORCE(!symbolTableFrozen);
@@ -1209,10 +1209,10 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef
     DEBUG_ONLY(categoryCounterInc("symbols", "field"));
     wasModified_ = true;
 
-    return result;
+    return result.asFieldRef();
 }
 
-SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
+FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     ENFORCE(name.exists());
 
     SymbolData ownerScope = owner.dataAllowingNone(*this);
@@ -1223,7 +1223,7 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, N
     if (store.exists()) {
         ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asFieldRef();
     }
 
     ENFORCE(!symbolTableFrozen);
@@ -1241,7 +1241,7 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, N
     DEBUG_ONLY(categoryCounterInc("symbols", "static_field"));
     wasModified_ = true;
 
-    return ret;
+    return ret.asFieldRef();
 }
 
 ArgInfo &GlobalState::enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name) {

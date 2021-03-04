@@ -1235,7 +1235,7 @@ class SymbolDefiner {
         }
     }
 
-    core::SymbolRef insertStaticField(core::MutableContext ctx, const FoundStaticField &staticField) {
+    core::FieldRef insertStaticField(core::MutableContext ctx, const FoundStaticField &staticField) {
         // forbid dynamic constant definition
         auto ownerData = ctx.owner.data(ctx);
         if (!ownerData->isClassOrModule() && !ownerData->isRewriterSynthesized()) {
@@ -1265,7 +1265,7 @@ class SymbolDefiner {
         }
         sym = ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, staticField.lhsLoc), scope, name);
 
-        if (staticField.isTypeAlias && sym.isStaticField(ctx)) {
+        if (staticField.isTypeAlias) {
             sym.data(ctx)->setTypeAlias();
         }
 
