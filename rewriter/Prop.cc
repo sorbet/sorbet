@@ -147,6 +147,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                 core::LocOffsets{send->loc.beginPos(),
                                  send->loc.endPos() - 5}; // 5 is the difference between `merchant_prop` and `merchant`
             ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
+            ret.foreign =
+                ast::MK::UnresolvedConstantParts(send->loc, ast::MK::EmptyTree(),
+                                                 {core::Names::Constants::Opus(), core::Names::Constants::Account(),
+                                                  core::Names::Constants::Model(), core::Names::Constants::Merchant()});
             break;
 
         default:
