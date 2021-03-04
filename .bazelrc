@@ -29,11 +29,6 @@ build --incompatible_strict_action_env
 # Don't depend on system compiler
 build --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
 
-
-# Developer laptops run skylake, devboxes run skylake-avx512
-# however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor)
-build --copt=-march=sandybridge
-
 build --copt=-fno-omit-frame-pointer
 
 build --copt=-fstack-protector
@@ -84,6 +79,17 @@ build:release-debug-common --config=skipslowenforce
 # harden: mark relocation sections read-only
 build:release-linux --linkopt=-Wl,-z,relro,-z,now
 build:release-linux --config=lto-linux --config=release-common
+
+# This is to turn on vector instructions where available.
+# We used to do this unconditionally, but Rosetta 2 doesn't translate all vector instructions well.
+#
+# If we ever start making universal x86-64 + aarch64 binaries for macOS, we
+# could think about re-enabling the vector instructions for x86-64.
+#
+# At Stripe: developer laptops run skylake, devboxes run skylake-avx512
+# however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor), as of 2018.
+build:release-linux           --copt=-march=sandybridge
+build:release-sanitized-linux --copt=-march=sandybridge
 
 build:release-mac --config=release-common
 
