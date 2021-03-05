@@ -162,7 +162,7 @@ class Sorbet::Private::Serialize
       end
       next if denylisted_method(method)
       next if ancestor_has_method(method, klass)
-      serialize_method(method)
+      serialize_method(method, with_sig: false)
     end
     # uniq is not required here, but added to be on the safe side
     methods += Sorbet::Private::RealStdlib.real_singleton_methods(klass, false).sort.uniq.map do |method_sym|
@@ -174,7 +174,7 @@ class Sorbet::Private::Serialize
       end
       next if denylisted_method(method)
       next if ancestor_has_method(method, Sorbet::Private::RealStdlib.real_singleton_class(klass))
-      serialize_method(method, true)
+      serialize_method(method, true, with_sig: false)
     end
     ret << methods.join("\n")
     ret << "end\n"
