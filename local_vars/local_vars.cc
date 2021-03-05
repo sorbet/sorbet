@@ -59,7 +59,7 @@ class LocalNameInserter {
             },
             [&](ast::KeywordArg &kw) {
                 named = nameArg(move(kw.expr));
-                named.expr = ast::MK::KeywordArg(arg.loc(), move(named.expr));
+                named.expr = ast::make_expression<ast::KeywordArg>(arg.loc(), move(named.expr));
                 named.flags.keyword = true;
             },
             [&](ast::OptionalArg &opt) {

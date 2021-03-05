@@ -102,7 +102,7 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         sigArgs.emplace_back(ast::MK::Constant(symLoc, core::Symbols::BasicObject()));
         auto argName = ast::MK::Local(symLoc, name);
         if (keywordInit) {
-            argName = ast::MK::KeywordArg(symLoc, move(argName));
+            argName = ast::make_expression<ast::KeywordArg>(symLoc, move(argName));
         }
         newArgs.emplace_back(ast::MK::OptionalArg(symLoc, move(argName), ast::MK::Nil(symLoc)));
 

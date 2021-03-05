@@ -98,8 +98,8 @@ public:
         return make_expression<ast::OptionalArg>(loc, std::move(inner), std::move(default_));
     }
 
-    static ExpressionPtr KeywordArg(core::LocOffsets loc, ExpressionPtr inner) {
-        return make_expression<ast::KeywordArg>(loc, std::move(inner));
+    static ExpressionPtr KeywordArg(core::LocOffsets loc, core::NameRef name) {
+        return make_expression<ast::KeywordArg>(loc, Local(loc, name));
     }
 
     static ExpressionPtr RestArg(core::LocOffsets loc, ExpressionPtr inner) {
