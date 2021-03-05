@@ -58,9 +58,9 @@ public:
 
 class FieldResponse final {
 public:
-    FieldResponse(core::SymbolRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
+    FieldResponse(core::FieldRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
         : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
-    const core::SymbolRef symbol;
+    const core::FieldRef symbol;
     const core::Loc termLoc;
     const core::NameRef name;
     const core::TypeAndOrigins retType;

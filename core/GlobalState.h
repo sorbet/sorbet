@@ -18,6 +18,7 @@ class Symbol;
 class SymbolRef;
 class ClassOrModuleRef;
 class MethodRef;
+class FieldRef;
 class GlobalSubstitution;
 class ErrorQueue;
 struct GlobalStateHash;
@@ -38,6 +39,7 @@ class GlobalState final {
     friend SymbolRef;
     friend ClassOrModuleRef;
     friend MethodRef;
+    friend FieldRef;
     friend File;
     friend FileRef;
     friend GlobalSubstitution;
@@ -91,8 +93,8 @@ public:
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     MethodRef enterNewMethodOverload(Loc loc, MethodRef original, core::NameRef originalName, u4 num,
                                      const std::vector<bool> &argsToKeep);
-    SymbolRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
-    SymbolRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    FieldRef enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    FieldRef enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     ArgInfo &enterMethodArgumentSymbol(Loc loc, MethodRef owner, NameRef name);
 
     SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
@@ -109,11 +111,11 @@ public:
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::METHOD, Symbols::noMethod()).asMethodRef();
     }
     MethodRef lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name, const std::vector<u4> &methodHash) const;
-    SymbolRef lookupStaticFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD, Symbols::noField());
+    FieldRef lookupStaticFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::STATIC_FIELD, Symbols::noField()).asFieldRef();
     }
-    SymbolRef lookupFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::FIELD, Symbols::noField());
+    FieldRef lookupFieldSymbol(ClassOrModuleRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::FIELD, Symbols::noField()).asFieldRef();
     }
     SymbolRef findRenamedSymbol(SymbolRef owner, SymbolRef name) const;
 

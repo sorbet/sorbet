@@ -67,12 +67,13 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
 
         auto sym = klass.data(ctx)->findMemberTransitive(ctx, id.name);
         const core::lsp::Query &lspQuery = ctx.state.lspQuery;
-        if (sym.exists() && (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(core::Loc(ctx.file, id.loc)))) {
+        if (sym.exists() && sym.isFieldOrStaticField() &&
+            (lspQuery.matchesSymbol(sym) || lspQuery.matchesLoc(core::Loc(ctx.file, id.loc)))) {
             core::TypeAndOrigins tp;
             tp.type = sym.data(ctx)->resultType;
             tp.origins.emplace_back(sym.data(ctx)->loc());
             core::lsp::QueryResponse::pushQueryResponse(
-                ctx, core::lsp::FieldResponse(sym, core::Loc(ctx.file, id.loc), id.name, tp));
+                ctx, core::lsp::FieldResponse(sym.asFieldRef(), core::Loc(ctx.file, id.loc), id.name, tp));
         }
     }
     return tree;
