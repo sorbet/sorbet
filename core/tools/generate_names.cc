@@ -192,6 +192,7 @@ NameDef names[] = {
     {"created"},
     {"merchant"},
     {"foreign"},
+    {"allowDirectMutation", "allow_direct_mutation"},
     {"ifunset"},
     {"withoutAccessors", "without_accessors"},
     {"instanceVariableGet", "instance_variable_get"},
