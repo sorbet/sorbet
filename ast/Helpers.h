@@ -98,8 +98,8 @@ public:
         return make_expression<ast::OptionalArg>(loc, std::move(inner), std::move(default_));
     }
 
-    static ExpressionPtr KeywordArg(core::LocOffsets loc, ExpressionPtr inner) {
-        return make_expression<ast::KeywordArg>(loc, std::move(inner));
+    static ExpressionPtr KeywordArg(core::LocOffsets loc, core::NameRef name) {
+        return make_expression<ast::KeywordArg>(loc, Local(loc, name));
     }
 
     static ExpressionPtr RestArg(core::LocOffsets loc, ExpressionPtr inner) {
@@ -200,6 +200,15 @@ public:
 
     static ExpressionPtr UnresolvedConstant(core::LocOffsets loc, ExpressionPtr scope, core::NameRef name) {
         return make_expression<UnresolvedConstantLit>(loc, std::move(scope), name);
+    }
+
+    static ExpressionPtr UnresolvedConstantParts(core::LocOffsets loc, ExpressionPtr scope,
+                                                 const std::vector<core::NameRef> &parts) {
+        auto result = std::move(scope);
+        for (const auto part : parts) {
+            result = UnresolvedConstant(loc, std::move(result), part);
+        }
+        return result;
     }
 
     static ExpressionPtr Int(core::LocOffsets loc, int64_t val) {
