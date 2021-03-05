@@ -8,27 +8,27 @@ namespace sorbet::core {
 
 class TypeConstraint {
     static TypeConstraint makeEmptyFrozenConstraint();
-    std::vector<std::pair<SymbolRef, TypePtr>> upperBounds;
-    std::vector<std::pair<SymbolRef, TypePtr>> lowerBounds;
-    std::vector<std::pair<SymbolRef, TypePtr>> solution;
+    std::vector<std::pair<TypeArgumentRef, TypePtr>> upperBounds;
+    std::vector<std::pair<TypeArgumentRef, TypePtr>> lowerBounds;
+    std::vector<std::pair<TypeArgumentRef, TypePtr>> solution;
     bool wasSolved = false;
     bool cantSolve = false;
-    TypePtr &findUpperBound(SymbolRef forWhat);
-    TypePtr &findLowerBound(SymbolRef forWhat);
-    TypePtr &findSolution(SymbolRef forWhat);
+    TypePtr &findUpperBound(TypeArgumentRef forWhat);
+    TypePtr &findLowerBound(TypeArgumentRef forWhat);
+    TypePtr &findSolution(TypeArgumentRef forWhat);
 
-    UnorderedMap<SymbolRef, std::pair<TypePtr, TypePtr>> collateBounds(const GlobalState &gs) const;
+    UnorderedMap<TypeArgumentRef, std::pair<TypePtr, TypePtr>> collateBounds(const GlobalState &gs) const;
 
 public:
     TypeConstraint() = default;
     TypeConstraint(const TypeConstraint &) = delete;
     TypeConstraint(TypeConstraint &&) = default;
     void defineDomain(const GlobalState &gs, const InlinedVector<SymbolRef, 4> &typeParams);
-    bool hasUpperBound(SymbolRef forWhat) const;
-    bool hasLowerBound(SymbolRef forWhat) const;
-    TypePtr findSolution(SymbolRef forWhat) const;
-    TypePtr findUpperBound(SymbolRef forWhat) const;
-    TypePtr findLowerBound(SymbolRef forWhat) const;
+    bool hasUpperBound(TypeArgumentRef forWhat) const;
+    bool hasLowerBound(TypeArgumentRef forWhat) const;
+    TypePtr findSolution(TypeArgumentRef forWhat) const;
+    TypePtr findUpperBound(TypeArgumentRef forWhat) const;
+    TypePtr findLowerBound(TypeArgumentRef forWhat) const;
 
     bool isEmpty() const;
     inline bool isSolved() const {
@@ -42,7 +42,7 @@ public:
     bool isAlreadyASubType(const GlobalState &gs, const TypePtr &, const TypePtr &) const;
     // returns true if was successfully solved
     bool solve(const GlobalState &gs);
-    TypePtr getInstantiation(SymbolRef) const;
+    TypePtr getInstantiation(TypeArgumentRef) const;
     std::unique_ptr<TypeConstraint> deepCopy() const;
     InlinedVector<SymbolRef, 4> getDomain() const;
     static TypeConstraint EmptyFrozenConstraint;

@@ -571,7 +571,7 @@ bool TypeVar::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) const {
     Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
 }
 
-TypeVar::TypeVar(SymbolRef sym) : sym(sym) {
+TypeVar::TypeVar(TypeArgumentRef sym) : sym(sym) {
     categoryCounterInc("types.allocated", "typevar");
 }
 
@@ -597,7 +597,7 @@ bool AppliedType::derivesFrom(const GlobalState &gs, ClassOrModuleRef klass) con
     return und.derivesFrom(gs, klass);
 }
 
-LambdaParam::LambdaParam(const SymbolRef definition, TypePtr lowerBound, TypePtr upperBound)
+LambdaParam::LambdaParam(const TypeMemberRef definition, TypePtr lowerBound, TypePtr upperBound)
     : definition(definition), lowerBound(lowerBound), upperBound(upperBound) {
     categoryCounterInc("types.allocated", "lambdatypeparam");
 }

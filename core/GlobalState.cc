@@ -260,20 +260,20 @@ void GlobalState::initEmpty() {
             Names::blkArg());
         arg.flags.isBlock = true;
     }
-    id = enterTypeArgument(
+    auto typeArgument = enterTypeArgument(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredReturnType(), 1),
         core::Variance::ContraVariant);
-    id.data(*this)->resultType = make_type<core::TypeVar>(id);
+    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
     ENFORCE(
-        id ==
+        typeArgument ==
         Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant());
-    id = enterTypeArgument(
+    typeArgument = enterTypeArgument(
         Loc::none(), Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, core::Names::Constants::InferredArgumentType(), 1),
         core::Variance::CoVariant);
-    id.data(*this)->resultType = make_type<core::TypeVar>(id);
-    ENFORCE(id ==
+    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
+    ENFORCE(typeArgument ==
             Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
     id = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
     ENFORCE(id == Symbols::T_Sig());
@@ -458,6 +458,11 @@ void GlobalState::initEmpty() {
     method = enterMethodSymbol(Loc::none(), Symbols::noClassOrModule(), Names::TodoMethod());
     enterMethodArgumentSymbol(Loc::none(), method, Names::args());
     ENFORCE(method == Symbols::todoMethod());
+
+    typeArgument =
+        enterTypeArgument(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeArgument(), Variance::CoVariant);
+    ENFORCE(typeArgument == Symbols::todoTypeArgument());
+    typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
 
     // Root members
     Symbols::root().data(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
@@ -1029,7 +1034,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     return ret;
 }
 
-SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
+TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
     u4 flags;
     ENFORCE(owner.exists() || name == Names::Constants::NoTypeMember());
     ENFORCE(name.exists());
@@ -1052,7 +1057,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef 
     if (store.exists()) {
         ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asTypeMemberRef();
     }
 
     ENFORCE(!symbolTableFrozen);
@@ -1072,11 +1077,12 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef 
     if (!absl::c_linear_search(members, result)) {
         members.emplace_back(result);
     }
-    return result;
+    return result.asTypeMemberRef();
 }
 
-SymbolRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance) {
-    ENFORCE(owner.exists() || name == Names::Constants::NoTypeArgument());
+TypeArgumentRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance) {
+    ENFORCE(owner.exists() || name == Names::Constants::NoTypeArgument() ||
+            name == Names::Constants::TodoTypeArgument());
     ENFORCE(name.exists());
     u4 flags;
     if (variance == Variance::Invariant) {
@@ -1098,7 +1104,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name,
     if (store.exists()) {
         ENFORCE((store.data(*this)->flags & flags) == flags, "existing symbol has wrong flags");
         counterInc("symbols.hit");
-        return store;
+        return store.asTypeArgumentRef();
     }
 
     ENFORCE(!symbolTableFrozen);
@@ -1115,7 +1121,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, MethodRef owner, NameRef name,
     wasModified_ = true;
 
     core::SymbolRef(owner).dataAllowingNone(*this)->typeArguments().emplace_back(result);
-    return result;
+    return result.asTypeArgumentRef();
 }
 
 MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {

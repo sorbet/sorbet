@@ -138,9 +138,6 @@ private:
             // This is where the actual variance checks are done.
             [&](const core::LambdaParam &param) {
                 auto paramData = param.definition.data(ctx);
-
-                ENFORCE(paramData->isTypeMember());
-
                 auto paramVariance = paramData->variance();
 
                 if (!hasCompatibleVariance(polarity, paramVariance)) {

@@ -391,12 +391,12 @@ private:
     }
 
     static bool resolveTypeAliasJob(core::MutableContext ctx, TypeAliasResolutionItem &job) {
-        core::SymbolRef enclosingTypeMember;
+        core::TypeMemberRef enclosingTypeMember;
         core::ClassOrModuleRef enclosingClass = job.lhs.data(ctx)->enclosingClass(ctx);
         while (enclosingClass != core::Symbols::root()) {
             auto typeMembers = enclosingClass.data(ctx)->typeMembers();
             if (!typeMembers.empty()) {
-                enclosingTypeMember = typeMembers[0];
+                enclosingTypeMember = typeMembers[0].asTypeMemberRef();
                 break;
             }
             enclosingClass = enclosingClass.data(ctx)->owner.data(ctx)->enclosingClass(ctx);
@@ -1475,7 +1475,7 @@ class ResolveTypeMembersAndFieldsWalk {
         return data->resultType;
     }
 
-    static void resolveTypeMember(core::MutableContext ctx, core::SymbolRef lhs, ast::Send *rhs,
+    static void resolveTypeMember(core::MutableContext ctx, core::TypeMemberRef lhs, ast::Send *rhs,
                                   vector<bool> &resolvedAttachedClasses) {
         auto data = lhs.data(ctx);
         auto owner = data->owner;
@@ -1656,7 +1656,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 return false;
             }
 
-            resolveTypeMember(ctx.withOwner(job.owner), job.lhs, job.rhs, resolvedAttachedClasses);
+            resolveTypeMember(ctx.withOwner(job.owner), job.lhs.asTypeMemberRef(), job.rhs, resolvedAttachedClasses);
         } else {
             resolveTypeAlias(ctx.withOwner(job.owner), job.lhs, job.rhs);
         }
@@ -2332,7 +2332,8 @@ public:
                     auto data = job.lhs.data(gs);
 
                     if (data->isTypeMember()) {
-                        data->resultType = core::make_type<core::LambdaParam>(job.lhs, core::Types::untypedUntracked(),
+                        data->resultType = core::make_type<core::LambdaParam>(job.lhs.asTypeMemberRef(),
+                                                                              core::Types::untypedUntracked(),
                                                                               core::Types::untypedUntracked());
                     } else {
                         data->resultType = core::Types::untypedUntracked();

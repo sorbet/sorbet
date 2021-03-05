@@ -88,7 +88,7 @@ u4 OrType::hash(const GlobalState &gs) const {
 
 u4 TypeVar::hash(const GlobalState &gs) const {
     u4 result = static_cast<u4>(TypePtr::Tag::TypeVar);
-    return mix(result, sym.rawId());
+    return mix(result, sym.id());
 }
 
 u4 AppliedType::hash(const GlobalState &gs) const {
@@ -102,7 +102,7 @@ u4 AppliedType::hash(const GlobalState &gs) const {
 
 u4 LambdaParam::hash(const GlobalState &gs) const {
     u4 result = static_cast<u4>(TypePtr::Tag::LambdaParam);
-    result = mix(result, this->definition.rawId());
+    result = mix(result, this->definition.id());
     result = mix(result, this->upperBound.hash(gs));
     // Lowerbound might not be set.
     result = mix(result, this->lowerBound == nullptr ? 0 : this->lowerBound.hash(gs));
