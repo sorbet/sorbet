@@ -484,7 +484,7 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
             continue;
         }
         auto loc = prop.loc;
-        args.emplace_back(ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)));
+        args.emplace_back(ast::MK::KeywordArg(loc, prop.name));
         sigArgs.emplace_back(ast::MK::Symbol(loc, prop.name));
         sigArgs.emplace_back(prop.type.deepCopy());
     }
@@ -495,8 +495,7 @@ vector<ast::ExpressionPtr> mkTypedInitialize(core::MutableContext ctx, core::Loc
             continue;
         }
         auto loc = prop.loc;
-        args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, prop.name)),
-                                               prop.default_.deepCopy()));
+        args.emplace_back(ast::MK::OptionalArg(loc, ast::MK::KeywordArg(loc, prop.name), prop.default_.deepCopy()));
         sigArgs.emplace_back(ast::MK::Symbol(loc, prop.name));
         sigArgs.emplace_back(prop.type.deepCopy());
     }
