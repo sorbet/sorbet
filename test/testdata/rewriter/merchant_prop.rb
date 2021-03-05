@@ -5,5 +5,7 @@ class MyModel
   def self.merchant_prop(opts={}); end
 
   # Opus::Account::Model::Merchant is in pay-server
-  merchant_prop # error: Unable to resolve constant `Account`
+  merchant_prop
+# ^^^^^^^^^^^^^ error: Unable to resolve constant `Account`
+# ^^^^^^^^^^^^^ error: Unable to resolve constant `Account`
 end
