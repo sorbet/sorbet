@@ -3543,16 +3543,23 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :opts }
+                  Literal{ value = :allow_direct_mutation }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U untyped>
+                    fun = <U nilable>
                     block = nullptr
-                    pos_args = 0
+                    pos_args = 1
                     args = [
+                      UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U T>>
+                        }
+                        cnst = <C <U Boolean>>
+                      }
                     ]
                   }
                 ]
@@ -3591,10 +3598,13 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_><<U <todo method>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U opts>
-            } } }, BlockArg{ expr = UnresolvedIdent{
+          args = [OptionalArg{
+              expr = KeywordArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = <U allow_direct_mutation>
+              } }
+              default_ = Literal{ value = nil }
+            }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3641,16 +3651,23 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :opts }
+                  Literal{ value = :allow_direct_mutation }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U untyped>
+                    fun = <U nilable>
                     block = nullptr
-                    pos_args = 0
+                    pos_args = 1
                     args = [
+                      UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U T>>
+                        }
+                        cnst = <C <U Boolean>>
+                      }
                     ]
                   }
                 ]
@@ -3678,10 +3695,13 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_!><<U <todo method>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U opts>
-            } } }, BlockArg{ expr = UnresolvedIdent{
+          args = [OptionalArg{
+              expr = KeywordArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = <U allow_direct_mutation>
+              } }
+              default_ = Literal{ value = nil }
+            }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -3932,16 +3952,23 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :opts }
+                  Literal{ value = :allow_direct_mutation }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U untyped>
+                    fun = <U nilable>
                     block = nullptr
-                    pos_args = 0
+                    pos_args = 1
                     args = [
+                      UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U T>>
+                        }
+                        cnst = <C <U Boolean>>
+                      }
                     ]
                   }
                 ]
@@ -3980,10 +4007,13 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_lazy_><<U <todo method>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U opts>
-            } } }, BlockArg{ expr = UnresolvedIdent{
+          args = [OptionalArg{
+              expr = KeywordArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = <U allow_direct_mutation>
+              } }
+              default_ = Literal{ value = nil }
+            }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4030,16 +4060,23 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :opts }
+                  Literal{ value = :allow_direct_mutation }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U untyped>
+                    fun = <U nilable>
                     block = nullptr
-                    pos_args = 0
+                    pos_args = 1
                     args = [
+                      UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U T>>
+                        }
+                        cnst = <C <U Boolean>>
+                      }
                     ]
                   }
                 ]
@@ -4067,10 +4104,13 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_lazy_!><<U <todo method>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U opts>
-            } } }, BlockArg{ expr = UnresolvedIdent{
+          args = [OptionalArg{
+              expr = KeywordArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = <U allow_direct_mutation>
+              } }
+              default_ = Literal{ value = nil }
+            }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4321,16 +4361,23 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :opts }
+                  Literal{ value = :allow_direct_mutation }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U untyped>
+                    fun = <U nilable>
                     block = nullptr
-                    pos_args = 0
+                    pos_args = 1
                     args = [
+                      UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U T>>
+                        }
+                        cnst = <C <U Boolean>>
+                      }
                     ]
                   }
                 ]
@@ -4369,10 +4416,13 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_proc_><<U <todo method>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U opts>
-            } } }, BlockArg{ expr = UnresolvedIdent{
+          args = [OptionalArg{
+              expr = KeywordArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = <U allow_direct_mutation>
+              } }
+              default_ = Literal{ value = nil }
+            }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4419,16 +4469,23 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :opts }
+                  Literal{ value = :allow_direct_mutation }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U untyped>
+                    fun = <U nilable>
                     block = nullptr
-                    pos_args = 0
+                    pos_args = 1
                     args = [
+                      UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U T>>
+                        }
+                        cnst = <C <U Boolean>>
+                      }
                     ]
                   }
                 ]
@@ -4456,10 +4513,13 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_proc_!><<U <todo method>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U opts>
-            } } }, BlockArg{ expr = UnresolvedIdent{
+          args = [OptionalArg{
+              expr = KeywordArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = <U allow_direct_mutation>
+              } }
+              default_ = Literal{ value = nil }
+            }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4710,16 +4770,23 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :opts }
+                  Literal{ value = :allow_direct_mutation }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U untyped>
+                    fun = <U nilable>
                     block = nullptr
-                    pos_args = 0
+                    pos_args = 1
                     args = [
+                      UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U T>>
+                        }
+                        cnst = <C <U Boolean>>
+                      }
                     ]
                   }
                 ]
@@ -4754,10 +4821,13 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_invalid_><<U <todo method>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U opts>
-            } } }, BlockArg{ expr = UnresolvedIdent{
+          args = [OptionalArg{
+              expr = KeywordArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = <U allow_direct_mutation>
+              } }
+              default_ = Literal{ value = nil }
+            }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
@@ -4804,16 +4874,23 @@ ClassDef{
                 block = nullptr
                 pos_args = 0
                 args = [
-                  Literal{ value = :opts }
+                  Literal{ value = :allow_direct_mutation }
                   Send{
                     recv = ConstantLit{
                       orig = nullptr
                       symbol = (module ::T)
                     }
-                    fun = <U untyped>
+                    fun = <U nilable>
                     block = nullptr
-                    pos_args = 0
+                    pos_args = 1
                     args = [
+                      UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <C <U T>>
+                        }
+                        cnst = <C <U Boolean>>
+                      }
                     ]
                   }
                 ]
@@ -4848,10 +4925,13 @@ ClassDef{
         MethodDef{
           flags = {rewriter}
           name = <U foreign_invalid_!><<U <todo method>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = <U opts>
-            } } }, BlockArg{ expr = UnresolvedIdent{
+          args = [OptionalArg{
+              expr = KeywordArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = <U allow_direct_mutation>
+              } }
+              default_ = Literal{ value = nil }
+            }, BlockArg{ expr = UnresolvedIdent{
               kind = Local
               name = <U <blk>>
             } }]
