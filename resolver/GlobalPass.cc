@@ -364,16 +364,27 @@ void Resolver::computeLinearization(core::GlobalState &gs) {
         // TODO: Check receiver is Magic
         core::SymbolRef singleton;
         for (auto mod : mixins) {
-            auto mixedInClassMethod = mod.data(gs)->findMember(gs, core::Names::classMethods());
-            if (!mixedInClassMethod.exists()) {
+            auto mixedInClassMethods = mod.data(gs)->findMember(gs, core::Names::mixedInClassMethods());
+            if (!mixedInClassMethods.exists()) {
                 break;
             }
             if (!singleton.exists()) {
                 singleton = ref.data(gs)->singletonClass(gs);
             }
 
-            if (!singleton.data(gs)->addMixin(gs, mixedInClassMethod)) {
-                ENFORCE(false);
+            // TODO: Move to a helper method if too similar to finalizeSymbols
+            auto resultType = mixedInClassMethods.data(gs)->resultType;
+            ENFORCE(resultType != nullptr && core::isa_type<core::TupleType>(resultType));
+            auto types = core::cast_type<core::TupleType>(resultType);
+
+            for (auto &type : types->elems) {
+                ENFORCE(core::isa_type<core::ClassType>(type));
+                auto classType = core::cast_type_nonnull<core::ClassType>(type);
+                if (!singleton.data(gs)->addMixin(gs, classType.symbol)) {
+                    // Should never happen. We check in ResolveConstantsWalk that classMethods are a module before
+                    // adding it as a member.
+                    ENFORCE(false);
+                }
             }
         }
     }

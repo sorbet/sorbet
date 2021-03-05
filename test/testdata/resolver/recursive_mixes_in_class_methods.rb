@@ -14,10 +14,13 @@ end
 module Bar
   extend T::Helpers
   include Foo
-  module ClassMethods
-    def bar; end
+  module ClassMethods1
+    def bar1; end
   end
-  mixes_in_class_methods(ClassMethods)
+  module ClassMethods2
+    def bar2; end
+  end
+  mixes_in_class_methods(ClassMethods1, ClassMethods2)
 end
 
 module Baz
@@ -36,7 +39,8 @@ class Qux
 end
 
 Qux.foo
-Qux.bar
+Qux.bar1
+Qux.bar2
 Qux.baz
 Qux.new.a
 Qux.a_class_method # error: Method `a_class_method` does not exist on `T.class_of(Qux)`
