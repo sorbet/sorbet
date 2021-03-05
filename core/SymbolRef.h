@@ -812,5 +812,25 @@ template <typename H> H AbslHashValue(H h, const SymbolRef &m) {
     return H::combine(std::move(h), m.rawId());
 }
 
+template <typename H> H AbslHashValue(H h, const ClassOrModuleRef &m) {
+    return H::combine(std::move(h), m.id());
+}
+
+template <typename H> H AbslHashValue(H h, const MethodRef &m) {
+    return H::combine(std::move(h), m.id());
+}
+
+template <typename H> H AbslHashValue(H h, const FieldRef &m) {
+    return H::combine(std::move(h), m.id());
+}
+
+template <typename H> H AbslHashValue(H h, const TypeArgumentRef &m) {
+    return H::combine(std::move(h), m.id());
+}
+
+template <typename H> H AbslHashValue(H h, const TypeMemberRef &m) {
+    return H::combine(std::move(h), m.id());
+}
+
 } // namespace sorbet::core
 #endif // RUBY_TYPER_SYMBOLREF_H
