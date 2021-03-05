@@ -42,7 +42,7 @@ public:
     };
     ArgFlags flags;
     NameRef name;
-    SymbolRef rebind;
+    ClassOrModuleRef rebind;
     Loc loc;
     TypePtr type;
 
@@ -173,7 +173,7 @@ public:
     // Given a type, return a SymbolRef for the Ruby class that has that type, or no symbol if no such class exists.
     // This is an internal method for implementing intrinsics. In the future we should make all updateKnowledge methods
     // be intrinsics so that this can become an anonymous helper function in calls.cc.
-    static core::SymbolRef getRepresentedClass(const GlobalState &gs, const core::TypePtr &ty);
+    static core::ClassOrModuleRef getRepresentedClass(const GlobalState &gs, const core::TypePtr &ty);
 };
 
 struct Intrinsic {
@@ -900,9 +900,9 @@ public:
 
 TYPE(UnresolvedAppliedType) final : public ClassType {
 public:
-    const core::SymbolRef klass;
+    const core::ClassOrModuleRef klass;
     const std::vector<TypePtr> targs;
-    UnresolvedAppliedType(SymbolRef klass, std::vector<TypePtr> targs)
+    UnresolvedAppliedType(ClassOrModuleRef klass, std::vector<TypePtr> targs)
         : ClassType(core::Symbols::untyped()), klass(klass), targs(std::move(targs)){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;

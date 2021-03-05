@@ -184,7 +184,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
             auto cdata = c.symbol.data(gs);
             if (c.symbol == core::Symbols::untyped()) {
                 result = from;
-            } else if (SymbolRef(c.symbol) == klass || c.derivesFrom(gs, klass)) {
+            } else if (c.symbol == klass || c.derivesFrom(gs, klass)) {
                 result = Types::bottom();
             } else if (c.symbol.data(gs)->isClassOrModuleClass() && klass.data(gs)->isClassOrModuleClass() &&
                        !klass.data(gs)->derivesFrom(gs, c.symbol)) {
@@ -750,18 +750,18 @@ TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &type) {
     return ret;
 }
 
-core::SymbolRef Types::getRepresentedClass(const GlobalState &gs, const TypePtr &ty) {
+core::ClassOrModuleRef Types::getRepresentedClass(const GlobalState &gs, const TypePtr &ty) {
     if (!ty.derivesFrom(gs, core::Symbols::Module())) {
-        return core::Symbols::noSymbol();
+        return core::Symbols::noClassOrModule();
     }
-    core::SymbolRef singleton;
+    core::ClassOrModuleRef singleton;
     if (isa_type<ClassType>(ty)) {
         auto s = cast_type_nonnull<ClassType>(ty);
         singleton = s.symbol;
     } else {
         auto *at = cast_type<AppliedType>(ty);
         if (at == nullptr) {
-            return core::Symbols::noSymbol();
+            return core::Symbols::noClassOrModule();
         }
 
         singleton = at->klass;

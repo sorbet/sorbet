@@ -98,7 +98,8 @@ unique_ptr<ResponseMessage> HoverTask::runRequest(LSPTypecheckerDelegate &typech
                 typeString = methodInfoString(gs, retType, *sendResp->dispatchResult, constraint);
             }
         } else if (auto defResp = resp->isDefinition()) {
-            typeString = prettyTypeForMethod(gs, defResp->symbol, nullptr, defResp->retType.type, nullptr);
+            typeString =
+                prettyTypeForMethod(gs, defResp->symbol.asMethodRef(), nullptr, defResp->retType.type, nullptr);
         } else if (auto constResp = resp->isConstant()) {
             typeString = prettyTypeForConstant(gs, constResp->symbol);
         } else {

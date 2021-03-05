@@ -1,5 +1,4 @@
 #include "core/hashing/hashing.h"
-#include "core/SymbolRef.h"
 #include "core/Types.h"
 
 using namespace std;
@@ -21,7 +20,7 @@ u4 UnresolvedClassType::hash(const GlobalState &gs) const {
 
 u4 UnresolvedAppliedType::hash(const GlobalState &gs) const {
     u4 result = static_cast<u4>(TypePtr::Tag::UnresolvedAppliedType);
-    result = mix(result, this->klass.rawId());
+    result = mix(result, this->klass.id());
     for (auto &targ : targs) {
         result = mix(result, targ.hash(gs));
     }

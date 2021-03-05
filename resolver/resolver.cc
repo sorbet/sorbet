@@ -392,7 +392,7 @@ private:
 
     static bool resolveTypeAliasJob(core::MutableContext ctx, TypeAliasResolutionItem &job) {
         core::SymbolRef enclosingTypeMember;
-        core::SymbolRef enclosingClass = job.lhs.data(ctx)->enclosingClass(ctx);
+        core::ClassOrModuleRef enclosingClass = job.lhs.data(ctx)->enclosingClass(ctx);
         while (enclosingClass != core::Symbols::root()) {
             auto typeMembers = enclosingClass.data(ctx)->typeMembers();
             if (!typeMembers.empty()) {
@@ -3036,9 +3036,9 @@ ast::ParsedFilesOrCancelled Resolver::runIncremental(core::GlobalState &gs, vect
     trees = ResolveConstantsWalk::resolveConstants(gs, std::move(trees), *workers);
     // NOTE: Linearization does not need to be recomputed as we do not mutate mixins() during incremental resolve.
     DEBUG_ONLY(for (auto i = 1; i < gs.classAndModulesUsed(); i++) {
-        core::SymbolRef sym(gs, core::SymbolRef::Kind::ClassOrModule, i);
+        core::ClassOrModuleRef sym(gs, i);
         // If class is not marked as 'linearization computed', then we added a mixin to it since the last slow path.
-        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), sym.toString(gs));
+        ENFORCE_NO_TIMER(sym.data(gs)->isClassOrModuleLinearizationComputed(), sym.data(gs)->toString(gs));
     })
     trees = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), *workers);
     auto result = resolveSigs(gs, std::move(trees), *workers);

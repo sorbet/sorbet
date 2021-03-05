@@ -56,7 +56,7 @@ ast::ExpressionPtr NextMethodFinder::preTransformMethodDef(core::Context ctx, as
     }
 }
 
-const core::SymbolRef NextMethodFinder::result() const {
+const core::MethodRef NextMethodFinder::result() const {
     return this->result_;
 }
 

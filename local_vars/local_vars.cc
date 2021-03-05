@@ -192,8 +192,8 @@ class LocalNameInserter {
         return args;
     }
 
-    core::SymbolRef methodOwner(core::MutableContext ctx) {
-        core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+    core::ClassOrModuleRef methodOwner(core::MutableContext ctx) {
+        core::ClassOrModuleRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (owner == core::Symbols::root()) {
             // Root methods end up going on object
             owner = core::Symbols::Object();

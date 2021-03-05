@@ -792,17 +792,10 @@ void GlobalState::initEmpty() {
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes
-    // Does it in two passes since the singletonClass will go in the Symbols::root() members which will invalidate the
-    // iterator
-    vector<SymbolRef> needSingletons;
-    for (auto &sym : classAndModules) {
-        auto ref = sym.ref(*this);
-        if (ref.exists()) {
-            needSingletons.emplace_back(ref);
-        }
-    }
-    for (auto sym : needSingletons) {
-        sym.data(*this)->singletonClass(*this);
+    // Collect size prior to loop since singletons will cause vector to grow.
+    size_t classAndModulesSize = classAndModules.size();
+    for (u4 i = 1; i < classAndModulesSize; i++) {
+        classAndModules[i].singletonClass(*this);
     }
 
     // This fills in all the way up to MAX_SYNTHETIC_CLASS_SYMBOLS
@@ -910,7 +903,8 @@ void GlobalState::preallocateTables(u4 classAndModulesSize, u4 methodsSize, u4 f
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-MethodRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name, const vector<u4> &methodHash) const {
+MethodRef GlobalState::lookupMethodSymbolWithHash(ClassOrModuleRef owner, NameRef name,
+                                                  const vector<u4> &methodHash) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
@@ -938,8 +932,9 @@ MethodRef GlobalState::lookupMethodSymbolWithHash(SymbolRef owner, NameRef name,
 }
 
 // look up a symbol whose flags match the desired flags. This might look through mangled names to discover one whose
-// flags match. If no sych symbol exists, then it will return noSymbol.
-SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags) const {
+// flags match. If no sych symbol exists, then it will return defaultReturnValue.
+SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 flags,
+                                             SymbolRef defaultReturnValue) const {
     ENFORCE(owner.exists(), "looking up symbol from non-existing owner");
     ENFORCE(name.exists(), "looking up symbol with non-existing name");
     auto ownerScope = owner.dataAllowingNone(*this);
@@ -960,7 +955,7 @@ SymbolRef GlobalState::lookupSymbolWithFlags(SymbolRef owner, NameRef name, u4 f
         res = ownerScope->members().find(lookupName);
         unique++;
     }
-    return Symbols::noSymbol();
+    return defaultReturnValue;
 }
 
 SymbolRef GlobalState::findRenamedSymbol(SymbolRef owner, SymbolRef sym) const {

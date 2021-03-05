@@ -13,9 +13,9 @@ struct ParsedSig {
         core::Loc loc;
         core::NameRef name;
         core::TypePtr type;
-        core::SymbolRef rebind;
+        core::ClassOrModuleRef rebind;
     };
-    core::SymbolRef bind;
+    core::ClassOrModuleRef bind;
     std::vector<ArgSpec> argTypes;
     core::TypePtr returns;
 
@@ -75,7 +75,7 @@ public:
 
     struct ResultType {
         core::TypePtr type;
-        core::SymbolRef rebind;
+        core::ClassOrModuleRef rebind;
     };
     static ResultType getResultTypeAndBind(core::Context ctx, ast::ExpressionPtr &expr, const ParsedSig &,
                                            TypeSyntaxArgs args);
