@@ -1231,8 +1231,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::Kwoptarg *arg) {
-                ExpressionPtr res =
-                    MK::OptionalArg(loc, MK::KeywordArg(loc, arg->name), node2TreeImpl(dctx, std::move(arg->default_)));
+                ExpressionPtr res = MK::OptionalArg(loc, MK::KeywordArg(arg->nameLoc, arg->name),
+                                                    node2TreeImpl(dctx, std::move(arg->default_)));
                 result = std::move(res);
             },
             [&](parser::Optarg *arg) {
