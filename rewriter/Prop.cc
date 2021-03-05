@@ -465,17 +465,17 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
             nonNilType = ASTUtil::dupType(ret.foreign);
         }
 
-        // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
-        nodes.emplace_back(
-            ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc), std::move(type)));
+        // sig {params(allow_direct_mutation: T.nilable(T::Boolean)).returns(T.nilable($foreign))}
+        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
+                                         ast::MK::Nilable(loc, ast::MK::T_Boolean(loc)), std::move(type)));
 
-        // def $fk_method(**opts)
+        // def $fk_method(allow_direct_mutation: nil)
         //  T.unsafe(nil)
         // end
 
         auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
 
-        auto arg = ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, core::Names::opts()));
+        auto arg = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
         ast::MethodDef::Flags fkFlags;
         fkFlags.discardDef = true;
         auto fkMethodDef =
@@ -483,15 +483,15 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         nodes.emplace_back(std::move(fkMethodDef));
 
         // sig {params(opts: T.untyped).returns($foreign)}
-        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
-                                         std::move(nonNilType)));
+        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
+                                         ast::MK::Nilable(loc, ast::MK::T_Boolean(loc)), std::move(nonNilType)));
 
         // def $fk_method_!(**opts)
         //  T.unsafe(nil)
         // end
 
         auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
-        auto arg2 = ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, core::Names::opts()));
+        auto arg2 = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
         ast::MethodDef::Flags fkBangFlags;
         fkBangFlags.discardDef = true;
         auto fkMethodDefBang = ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2),
