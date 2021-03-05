@@ -406,8 +406,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
         auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
 
-        auto arg =
-            ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
+        auto arg = ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, core::Names::opts()));
         ast::MethodDef::Flags fkFlags;
         fkFlags.discardDef = true;
         auto fkMethodDef =
@@ -423,8 +422,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         // end
 
         auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
-        auto arg2 =
-            ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, ast::MK::Local(nameLoc, core::Names::opts())));
+        auto arg2 = ast::MK::RestArg(nameLoc, ast::MK::KeywordArg(nameLoc, core::Names::opts()));
         ast::MethodDef::Flags fkBangFlags;
         fkBangFlags.discardDef = true;
         auto fkMethodDefBang = ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2),
