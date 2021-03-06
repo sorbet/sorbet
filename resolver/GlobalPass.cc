@@ -19,9 +19,9 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::TypeMemberRef tpara
     if (tparam.data(gs)->owner == klass) {
         return tparam;
     } else {
-        core::SymbolRef cursor;
+        core::ClassOrModuleRef cursor;
         if (tparam.data(gs)->owner.data(gs)->derivesFrom(gs, klass)) {
-            cursor = tparam.data(gs)->owner;
+            cursor = tparam.data(gs)->owner.asClassOrModuleRef();
         } else if (klass.data(gs)->derivesFrom(gs, tparam.data(gs)->owner.asClassOrModuleRef())) {
             cursor = klass;
         }
@@ -29,7 +29,7 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::TypeMemberRef tpara
             if (!cursor.exists()) {
                 return cursor;
             }
-            for (auto aliasPair : typeAliases[cursor.classOrModuleIndex()]) {
+            for (auto aliasPair : typeAliases[cursor.id()]) {
                 if (aliasPair.first == tparam) {
                     return dealiasAt(gs, aliasPair.second, klass, typeAliases);
                 }
