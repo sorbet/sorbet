@@ -1462,12 +1462,12 @@ class Array < Object
   sig {returns(T::Enumerator[Elem])}
   def index(arg0=T.unsafe(nil), &blk); end
 
-  sig {returns(Object)}
+  sig {void}
   sig do
     params(
         arg0: Integer,
     )
-    .returns(Object)
+    .void
   end
   sig do
     params(
@@ -1482,7 +1482,14 @@ class Array < Object
     )
     .void
   end
-  def initialize(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
+  sig do
+    params(
+      arg0: Integer,
+      blk: T.proc.params(index: Integer).void,
+    )
+    .void
+  end
+  def initialize(arg0=T.unsafe(nil), arg1=T.unsafe(nil), &blk); end
 
   # Inserts the given values before the element with the given `index`.
   #
