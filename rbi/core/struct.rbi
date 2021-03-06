@@ -39,10 +39,11 @@ class Struct < Object
         arg0: T.any(Symbol, String),
         arg1: T.any(Symbol, String),
         keyword_init: T::Boolean,
+        blk: T.nilable(Proc),
     )
     .void
   end
-  def initialize(arg0, *arg1, keyword_init: false); end
+  def initialize(arg0, *arg1, keyword_init: false, &blk); end
 
   # Equality---Returns `true` if `other` has the same struct subclass and has
   # equal member values (according to Object#==).
