@@ -29,7 +29,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 
         auto selfClaz = md.symbol.data(ctx)->rebind();
         if (!selfClaz.exists()) {
-            selfClaz = md.symbol.data(ctx)->enclosingClass(ctx);
+            selfClaz = md.symbol.enclosingClass(ctx);
         }
         synthesizeExpr(
             entry, LocalRef::selfVariable(), core::LocOffsets::none(),

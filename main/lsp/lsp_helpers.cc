@@ -252,8 +252,8 @@ core::TypePtr getResultType(const core::GlobalState &gs, const core::TypePtr &ty
     }
     if (auto *applied = core::cast_type<core::AppliedType>(receiver)) {
         /* instantiate generic classes */
-        resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.data(gs)->enclosingClass(gs),
-                                                       applied->klass, applied->targs);
+        resultType = core::Types::resultTypeAsSeenFrom(gs, resultType, inWhat.enclosingClass(gs), applied->klass,
+                                                       applied->targs);
     }
     if (!resultType) {
         resultType = core::Types::untypedUntracked();

@@ -58,7 +58,7 @@ LocalRef unresolvedIdent2Local(CFGContext cctx, const ast::UnresolvedIdent &id) 
 
     switch (id.kind) {
         case ast::UnresolvedIdent::Kind::Class:
-            klass = cctx.ctx.owner.data(cctx.ctx)->enclosingClass(cctx.ctx);
+            klass = cctx.ctx.owner.enclosingClass(cctx.ctx);
             while (klass.data(cctx.ctx)->attachedClass(cctx.ctx).exists()) {
                 klass = klass.data(cctx.ctx)->attachedClass(cctx.ctx);
             }

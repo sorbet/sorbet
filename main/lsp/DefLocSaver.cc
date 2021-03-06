@@ -59,7 +59,7 @@ ast::ExpressionPtr DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, 
             klass = ctx.owner.data(ctx)->owner.asClassOrModuleRef();
         } else {
             // Class var.
-            klass = ctx.owner.data(ctx)->enclosingClass(ctx);
+            klass = ctx.owner.enclosingClass(ctx);
             while (klass.data(ctx)->attachedClass(ctx).exists()) {
                 klass = klass.data(ctx)->attachedClass(ctx);
             }

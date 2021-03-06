@@ -97,6 +97,7 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
 
     bool operator==(const MethodRef &rhs) const;
 
@@ -340,6 +341,7 @@ public:
 
     bool operator!=(const SymbolRef &rhs) const;
 
+    ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
     std::string showRaw(const GlobalState &gs) const;
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;

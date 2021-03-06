@@ -682,8 +682,6 @@ public:
     Symbol deepCopy(const GlobalState &to, bool keepGsId = false) const;
     void sanityCheck(const GlobalState &gs) const;
 
-    ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
-
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
     // why raw pointers are safe.
     const IntrinsicMethod *intrinsic = nullptr;
