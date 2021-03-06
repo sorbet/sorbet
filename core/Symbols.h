@@ -624,11 +624,11 @@ public:
     bool ignoreInHashing(const GlobalState &gs) const;
 
     SymbolRef owner;
-    SymbolRef superClassOrRebind; // method arguments store rebind here
+    ClassOrModuleRef superClassOrRebind; // method arguments store rebind here
 
     inline ClassOrModuleRef superClass() const {
         ENFORCE_NO_TIMER(isClassOrModule());
-        return superClassOrRebind.asClassOrModuleRef();
+        return superClassOrRebind;
     }
 
     inline void setSuperClass(ClassOrModuleRef claz) {
@@ -636,12 +636,12 @@ public:
         superClassOrRebind = claz;
     }
 
-    inline void setReBind(SymbolRef rebind) {
+    inline void setReBind(ClassOrModuleRef rebind) {
         ENFORCE(isMethod());
         superClassOrRebind = rebind;
     }
 
-    SymbolRef rebind() const {
+    ClassOrModuleRef rebind() const {
         ENFORCE_NO_TIMER(isMethod());
         return superClassOrRebind;
     }

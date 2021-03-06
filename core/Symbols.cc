@@ -1550,7 +1550,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
     result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
-    result = mix(result, this->superClassOrRebind._id);
+    result = mix(result, this->superClassOrRebind.id());
     // argumentsOrMixins, typeParams, typeAliases
     if (!members().empty()) {
         // Rather than use membersStableOrderSlow, which is... slow..., use an order dictated by symbol ref ID.
@@ -1596,7 +1596,7 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     u4 result = _hash(name.shortName(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
-    result = mix(result, this->superClassOrRebind._id);
+    result = mix(result, this->superClassOrRebind.id());
     result = mix(result, this->hasSig());
     for (auto &arg : this->methodArgumentHash(gs)) {
         result = mix(result, arg);
