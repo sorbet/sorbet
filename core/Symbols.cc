@@ -757,23 +757,25 @@ string Symbol::showFullName(const GlobalState &gs) const {
     return fmt::format("{}{}{}", owner, separator, this->name.show(gs));
 }
 
-bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
-    if (ref(gs).isSynthetic()) {
+namespace {
+bool isHiddenFromPrinting(const GlobalState &gs, const Symbol &symbol) {
+    if (symbol.ref(gs).isSynthetic()) {
         return true;
     }
-    if (locs_.empty()) {
+    if (symbol.locs().empty()) {
         return true;
     }
-    for (auto loc : locs_) {
+    for (auto loc : symbol.locs()) {
         if (loc.file().data(gs).sourceType == File::Type::Payload) {
             return true;
         }
     }
     return false;
 }
+} // namespace
 
 bool Symbol::isPrintable(const GlobalState &gs) const {
-    if (!this->isHiddenFromPrinting(gs)) {
+    if (!isHiddenFromPrinting(gs, *this)) {
         return true;
     }
 

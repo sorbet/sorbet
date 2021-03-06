@@ -690,9 +690,6 @@ private:
     friend class serialize::SerializerImpl;
     friend class GlobalState;
 
-    // Not printed when showing symbol table
-    bool isHiddenFromPrinting(const GlobalState &gs) const;
-
     std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
                                     bool showRaw = false) const;
 
