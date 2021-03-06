@@ -1072,6 +1072,17 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         const auto &bspec = data->arguments().back();
         ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg: {}", data->show(gs));
 
+        // Only report "does not expect a block" error if the method is defined in a `typed: strict`
+        // file, which would force the "uses `yield` but does not mention a block parameter" error,
+        // so we can use the heuristic about isSyntheticBlockArgument.
+        if (data->loc().file().data(gs).strictLevel >= core::StrictLevel::Strict && bspec.isSyntheticBlockArgument()) {
+            // TODO(jez) Do we have a loc for the block itself, not the entire call?
+            if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call), core::errors::Infer::TakesNoBlock)) {
+                e.setHeader("Method `{}` does not take a block", data->show(gs));
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", data->show(gs));
+            }
+        }
+
         TypePtr blockType =
             Types::resultTypeAsSeenFrom(gs, bspec.type, data->owner.asClassOrModuleRef(), symbol, targs);
         if (!blockType) {
