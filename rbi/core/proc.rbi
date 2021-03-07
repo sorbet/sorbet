@@ -459,7 +459,7 @@ class Proc < Object
   sig do
     params(
         arg0: BasicObject,
-        blk: T.nilable(Proc),
+        blk: T.untyped,
     )
     .returns(T.untyped)
   end

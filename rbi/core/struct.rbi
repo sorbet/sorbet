@@ -39,7 +39,7 @@ class Struct < Object
         arg0: T.any(Symbol, String),
         arg1: T.any(Symbol, String),
         keyword_init: T::Boolean,
-        blk: T.nilable(Proc),
+        blk: T.untyped,
     )
     .void
   end
