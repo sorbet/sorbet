@@ -555,7 +555,7 @@ module Kernel
     params(
         arg0: T.any(Symbol, String),
         args: BasicObject,
-        blk: T.nilable(Proc)
+        blk: T.untyped
     )
     .returns(T.untyped)
   end
