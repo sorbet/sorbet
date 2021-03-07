@@ -2662,7 +2662,7 @@ class Array < Object
   # b = [["student","sam"], ["student","george"], ["teacher","matz"]]
   # b.uniq {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   # ```
-  sig {params(blk: T.nilable(T.proc(arg0: Elem).returns(BasicObject))).returns(T::Array[Elem])}
+  sig {params(blk: T.nilable(T.proc.params(arg0: Elem).returns(BasicObject))).returns(T::Array[Elem])}
   def uniq(&blk); end
 
   # Removes duplicate elements from `self`.
@@ -2689,7 +2689,7 @@ class Array < Object
   # c = [["student","sam"], ["student","george"], ["teacher","matz"]]
   # c.uniq! {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   # ```
-  sig {params(blk: T.nilable(T.proc(arg0: Elem).returns(BasicObject))).returns(T::Array[Elem])}
+  sig {params(blk: T.nilable(T.proc.params(arg0: Elem).returns(BasicObject))).returns(T::Array[Elem])}
   def uniq!(&blk); end
 
   # Prepends objects to the front of `self`, moving other elements upwards. See
