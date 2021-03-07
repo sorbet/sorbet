@@ -844,14 +844,14 @@ module Enumerable
   end
   sig do
     params(
-        initial: Elem,
-        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Elem),
+        initial: T.untyped,
+        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(T.untyped),
     )
     .returns(Elem)
   end
   sig do
     params(
-        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Elem),
+        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(Elem),
     )
     .returns(T.nilable(Elem))
   end
@@ -1873,14 +1873,14 @@ module Enumerable
   end
   sig do
     params(
-        initial: Elem,
-        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Elem),
+        initial: T.untyped,
+        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(Elem),
     )
     .returns(Elem)
   end
   sig do
     params(
-        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Elem),
+        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(Elem),
     )
     .returns(T.nilable(Elem))
   end
