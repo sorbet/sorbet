@@ -2690,7 +2690,7 @@ class Array < Object
   # c.uniq! {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   # ```
   sig {params(blk: T.nilable(T.proc(arg0: Elem).returns(BasicObject))).returns(T::Array[Elem])}
-  def uniq!(); end
+  def uniq!(&blk); end
 
   # Prepends objects to the front of `self`, moving other elements upwards. See
   # also
