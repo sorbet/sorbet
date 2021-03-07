@@ -191,7 +191,7 @@ class Resolv::DNS
     params(
       address: T.any(String, Resolv::IPv4, Resolv::IPv6),
       block: T.proc.params(name: Resolv::DNS::Name).void)
-    .void 
+    .void
   end
   def each_name(address, &block); end
 
@@ -209,7 +209,7 @@ class Resolv::DNS
   end
   def each_resource(name, typeclass, &block); end
 
-  def fetch_resource(name, typeclass); end
+  def fetch_resource(name, typeclass, &blk); end
 
   # Gets the IP address of `name` from the
   # [`DNS`](https://docs.ruby-lang.org/en/2.7.0/Resolv/DNS.html) resolver.
@@ -223,7 +223,7 @@ class Resolv::DNS
   sig do
     params(name: T.any(String, Resolv::DNS::Name))
     .returns(T.any(Resolv::IPv4, Resolv::IPv6))
-  end 
+  end
   def getaddress(name); end
 
   # Gets all IP addresses for `name` from the

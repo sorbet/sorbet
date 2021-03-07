@@ -3239,10 +3239,11 @@ class Socket < BasicSocket
       local_host: ::T.untyped,
       local_port: ::T.untyped,
       connect_timeout: ::T.untyped,
+      blk: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.tcp(host, port, local_host=T.unsafe(nil), local_port=T.unsafe(nil), connect_timeout: T.unsafe(nil)); end
+  def self.tcp(host, port, local_host=T.unsafe(nil), local_port=T.unsafe(nil), connect_timeout: T.unsafe(nil), &blk); end
 
   # creates a TCP/IP server on *port* and calls the block for each connection
   # accepted. The block is called with a socket and a client\_address as an
@@ -3459,10 +3460,11 @@ class Socket < BasicSocket
   sig do
     params(
       path: ::T.untyped,
+      blk: ::T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.unix(path); end
+  def self.unix(path, &blk); end
 
   # creates a UNIX socket server on *path*. It calls the block for each socket
   # accepted.
@@ -3521,10 +3523,11 @@ class Socket < BasicSocket
   sig do
     params(
       path: ::T.untyped,
+      blk: T.untyped,
     )
     .returns(::T.untyped)
   end
-  def self.unix_server_socket(path); end
+  def self.unix_server_socket(path, &blk); end
 
   # Unpacks *sockaddr* into port and ip\_address.
   #

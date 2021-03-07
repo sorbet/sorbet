@@ -555,10 +555,11 @@ module Kernel
     params(
         arg0: T.any(Symbol, String),
         args: BasicObject,
+        blk: T.nilable(Proc)
     )
     .returns(T.untyped)
   end
-  def public_send(arg0, *args); end
+  def public_send(arg0, *args, &blk); end
 
   sig do
     params(

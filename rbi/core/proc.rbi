@@ -361,7 +361,7 @@ class Proc < Object
   # proc = proc_from { "hello" }
   # proc.call   #=> "hello"
   # ```
-  def self.new(*_); end
+  def self.new(*_, &blk); end
 
   # Invokes the block with `obj` as the proc's parameter like
   # [`Proc#call`](https://docs.ruby-lang.org/en/2.7.0/Proc.html#method-i-call).
@@ -459,10 +459,11 @@ class Proc < Object
   sig do
     params(
         arg0: BasicObject,
+        blk: T.nilable(Proc),
     )
     .returns(T.untyped)
   end
-  def call(*arg0); end
+  def call(*arg0, &blk); end
 
   # Invokes the block, setting the block's parameters to the values in *params*
   # using something close to method calling semantics. Returns the value of the

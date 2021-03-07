@@ -1395,10 +1395,11 @@ class String < Object
     params(
         separator: String,
         chomp: T::Boolean,
+        blk: T.untyped,
     )
     .returns(T::Array[String])
   end
-  def lines(separator = $/, chomp: false); end
+  def lines(separator = $/, chomp: false, &blk); end
 
   # If *integer* is greater than the length of *str*, returns a new
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) of length
@@ -1487,6 +1488,7 @@ class String < Object
   sig do
     params(
         arg0: T.any(Regexp, String),
+        blk: T.untyped,
     )
     .returns(T.nilable(MatchData))
   end
@@ -1494,10 +1496,11 @@ class String < Object
     params(
         arg0: T.any(Regexp, String),
         arg1: Integer,
+        blk: T.untyped,
     )
     .returns(T.nilable(MatchData))
   end
-  def match(arg0, arg1=T.unsafe(nil)); end
+  def match(arg0, arg1=T.unsafe(nil), &blk); end
 
   # Converts *pattern* to a `Regexp` (if it isn't already one), then returns a
   # `true` or `false` indicates whether the regexp is matched *str* or not
@@ -1936,16 +1939,18 @@ class String < Object
     params(
         arg0: T.any(Regexp, String),
         arg1: Integer,
+        blk: T.untyped,
     )
     .returns(T::Array[String])
   end
   sig do
     params(
         arg0: Integer,
+        blk: T.untyped,
     )
     .returns(T::Array[String])
   end
-  def split(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
+  def split(arg0=T.unsafe(nil), arg1=T.unsafe(nil), &blk); end
 
   # Builds a set of characters from the *other\_str* parameter(s) using the
   # procedure described for

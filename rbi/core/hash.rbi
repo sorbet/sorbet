@@ -1395,7 +1395,7 @@ class Hash < Object
   # [`Hash#update`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-update)
   # is an alias for
   # [`Hash#merge!`](https://docs.ruby-lang.org/en/2.7.0/Hash.html#method-i-merge-21).
-  def update(*_); end
+  def update(*_, &blk); end
 
   # Returns `true` if the given value is present for some key in *hsh*.
   #

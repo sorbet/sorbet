@@ -569,7 +569,7 @@ module Enumerable
   # [1, 2]
   # nil
   # ```
-  def each_entry(*_); end
+  def each_entry(*_, &blk); end
 
   # Calls *block* with two arguments, the item and its index, for each item in
   # *enum*. Given arguments are passed through to each().
@@ -1693,14 +1693,14 @@ module Enumerable
   # (1..5).to_h {|x| [x, x ** 2]}
   #   #=> {1=>1, 2=>4, 3=>9, 4=>16, 5=>25}
   # ```
-  sig {returns(T::Hash[T.untyped, T.untyped])}
-  def to_h(); end
+  sig {params(blk: T.nilable(T.proc.params(arg0: Elem).returns([T.untyped, T.untyped]))).returns(T::Hash[T.untyped, T.untyped])}
+  def to_h(&blk); end
 
   # Returns a new array by removing duplicate values in `self`.
   #
   # See also
   # [`Array#uniq`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-uniq).
-  def uniq; end
+  def uniq(&blk); end
 
   # Iterates the given block for each slice of <n> elements. If no block is
   # given, returns an enumerator.

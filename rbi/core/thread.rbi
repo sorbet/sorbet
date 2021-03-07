@@ -1200,8 +1200,8 @@ class Thread < Object
   # [`Thread`](https://docs.ruby-lang.org/en/2.7.0/Thread.html) is subclassed,
   # then calling `start` in that subclass will not invoke the subclass's
   # `initialize` method.
-  sig {params(args: T.untyped).returns(T.untyped)}
-  def self.start(*args); end
+  sig {params(args: T.untyped, blk: T.untyped).returns(T.untyped)}
+  def self.start(*args, &blk); end
 
   # Stops execution of the current thread, putting it into a "sleep" state, and
   # schedules execution of another thread.
@@ -1431,8 +1431,8 @@ class Thread::Mutex < Object
 
   # Obtains a lock, runs the block, and releases the lock when the block
   # completes. See the example under `Mutex`.
-  sig {returns(T.untyped)}
-  def synchronize; end
+  sig {params(blk: T.proc.void).returns(T.untyped)}
+  def synchronize(&blk); end
 
   # Attempts to obtain the lock and returns immediately. Returns `true` if the
   # lock was granted.

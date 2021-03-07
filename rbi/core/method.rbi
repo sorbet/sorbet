@@ -45,8 +45,8 @@ class Method < Object
   # m.call(3)    #=> 15
   # m.call(20)   #=> 32
   # ```
-  sig {params(args: T.untyped).returns(T.untyped)}
-  def call(*args);end
+  sig {params(args: T.untyped, blk: T.untyped).returns(T.untyped)}
+  def call(*args, &blk);end
 
   # Returns a proc that is the composition of this method and the given *g*. The
   # returned proc takes a variable number of arguments, calls *g* with them then

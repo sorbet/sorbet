@@ -2022,10 +2022,11 @@ class IO < Object
   sig do
     params(
         args: T.untyped,
+        blk: T.untyped,
     )
     .returns(T.untyped)
   end
-  def self.popen(*args); end
+  def self.popen(*args, &blk); end
 
   # Opens the file, optionally seeks to the given `offset`, then returns
   # `length` bytes (defaulting to the rest of the file).

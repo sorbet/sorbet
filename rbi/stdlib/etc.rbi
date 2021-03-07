@@ -400,9 +400,10 @@ module Etc
   # }
   # ```
   sig do
-    returns(T.nilable(Etc::Group))
+    params(blk: T.nilable(T.proc.params(arg0: Etc::Group).void))
+    .returns(T.nilable(Etc::Group))
   end
-  def self.group; end
+  def self.group(&blk); end
 
   # Returns the number of online processors.
   #
