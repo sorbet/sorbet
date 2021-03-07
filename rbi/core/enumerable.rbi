@@ -847,13 +847,13 @@ module Enumerable
         initial: T.untyped,
         blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(T.untyped),
     )
-    .returns(Elem)
+    .returns(T.untyped)
   end
   sig do
     params(
-        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(Elem),
+        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(T.untyped),
     )
-    .returns(T.nilable(Elem))
+    .returns(T.untyped)
   end
   def inject(initial=T.unsafe(nil), arg0=T.unsafe(nil), &blk); end
 
@@ -1874,15 +1874,15 @@ module Enumerable
   sig do
     params(
         initial: T.untyped,
-        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(Elem),
+        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(T.untyped),
     )
-    .returns(Elem)
+    .returns(T.untyped)
   end
   sig do
     params(
-        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(Elem),
+        blk: T.proc.params(arg0: T.untyped, arg1: Elem).returns(T.untyped),
     )
-    .returns(T.nilable(Elem))
+    .returns(T.untyped)
   end
   def reduce(initial=T.unsafe(nil), arg0=T.unsafe(nil), &blk); end
 
