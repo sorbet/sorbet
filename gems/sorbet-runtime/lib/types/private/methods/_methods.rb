@@ -103,6 +103,7 @@ module T::Private::Methods
     # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
     # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
     target_ancestors.reverse_each do |ancestor|
+      next if !module_with_final?(ancestor)
       source_method_names.each do |method_name|
         # the usage of method_owner_and_name_to_key(ancestor, method_name) instead of
         # method_to_key(ancestor.instance_method(method_name)) is not (just) an optimization, but also required for
