@@ -610,23 +610,24 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     ErrorSection("Got " + args.fullType.type.show(gs) + " originating from:", explanations));
             }
             auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
-            if (gs.suggestUnsafe.has_value()) {
-                e.replaceWith(fmt::format("Wrap in `{}`", *gs.suggestUnsafe), receiverLoc, "{}({})", *gs.suggestUnsafe,
-                              receiverLoc.source(gs));
-            } else if (args.fullType.type != args.thisType && symbol == Symbols::NilClass()) {
-                // TODO(jez) Support --suggest-unsafe mode
-                if (receiverLoc.exists() && receiverLoc.beginPos() == receiverLoc.endPos()) {
+            if (receiverLoc.exists() && (gs.suggestUnsafe.has_value() ||
+                                         (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
+                auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
+                if (receiverLoc.beginPos() == receiverLoc.endPos()) {
                     auto shortName = args.name.shortName(gs);
-                    auto blockPassLoc = receiverLoc.adjust(gs, /* "(&" */ -2, /* ":foo)" */ 1 + shortName.size() + 1);
+                    auto beginAdjust = -2;                     // (&
+                    auto endAdjust = 1 + shortName.size() + 1; // :foo)
+                    auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
                     if (blockPassLoc.exists()) {
                         auto blockPassSource = blockPassLoc.source(gs);
                         if (blockPassSource == fmt::format("(&:{})", shortName)) {
-                            e.replaceWith("Expand to block with `T.must`", blockPassLoc, " {{|x| T.must(x).{}}}",
-                                          shortName);
+                            e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
+                                          " {{|x| {}(x).{}}}", wrapInFn, shortName);
                         }
                     }
-                } else if (receiverLoc.exists()) {
-                    e.replaceWith("Wrap in `T.must`", receiverLoc, "T.must({})", receiverLoc.source(gs));
+                } else {
+                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
+                                  receiverLoc.source(gs));
                 }
             } else {
                 if (symbol.data(gs)->isClassOrModuleModule()) {
