@@ -33,7 +33,7 @@ Documentation improvements are very welcome. The source of [sorbet.org](https://
 # Submitting a PR
 * Create small PRs that are narrowly focused on addressing a single concern. We often receive PRs that are trying to fix several things at a time, but if only one fix is considered acceptable, nothing gets merged and both author's & review's time is wasted. Create more PRs to address different concerns and everyone will be happy.
 * Bug fixes should include regression tests -- in the same commit as the fix. If testing isn't feasible, the commit message should explain why.
-* New features and enhancements must be motivated by adding common usage as tests.
+* New features and enhancements must be motivated by adding common usage as tests. Please reach out to the team on the `#internals` channel of the [sorbet-slack](https://sorbet.org/slack) before starting on new features.
 * Follow the Boy Scout Rule: "Always leave the code behind in a better state than you found it"
 * We will **not** merge any PR that is not passing tests.
 * Your PR description should have details on what the PR does. If it fixes an existing issue it should end with "Fixes #XXX".
