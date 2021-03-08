@@ -540,7 +540,7 @@ TypePtr Types::resultTypeAsSeenFrom(const GlobalState &gs, const TypePtr &what, 
 
     ENFORCE(inWhat == fromWhat || inWhat.data(gs)->derivesFrom(gs, fromWhat) ||
                 fromWhat.data(gs)->derivesFrom(gs, inWhat),
-            "\n{}\nis unrelated to\n\n{}", fromWhat.data(gs)->toString(gs), inWhat.data(gs)->toString(gs));
+            "\n{}\nis unrelated to\n\n{}", fromWhat.toString(gs), inWhat.toString(gs));
 
     auto currentAlignment = alignBaseTypeArgs(gs, originalOwner, targs, inWhat);
 

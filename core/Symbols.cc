@@ -377,12 +377,6 @@ TypeMemberRef::TypeMemberRef(const GlobalState &from, u4 id) : _id(id) {}
 
 TypeArgumentRef::TypeArgumentRef(const GlobalState &from, u4 id) : _id(id) {}
 
-string SymbolRef::showRaw(const GlobalState &gs) const {
-    return dataAllowingNone(gs)->showRaw(gs);
-}
-string SymbolRef::toString(const GlobalState &gs) const {
-    return dataAllowingNone(gs)->toString(gs);
-}
 string SymbolRef::show(const GlobalState &gs) const {
     return dataAllowingNone(gs)->show(gs);
 }
@@ -772,6 +766,47 @@ bool isHiddenFromPrinting(const GlobalState &gs, const Symbol &symbol) {
     }
     return false;
 }
+
+void printLocs(const GlobalState &gs, fmt::memory_buffer &buf, const InlinedVector<Loc, 2> &locs, bool showRaw) {
+    if (!locs.empty()) {
+        fmt::format_to(buf, " @ ");
+        if (locs.size() > 1) {
+            fmt::format_to(buf, "(");
+        }
+        fmt::format_to(buf, "{}", fmt::map_join(locs, ", ", [&](auto loc) {
+                           return showRaw ? loc.showRaw(gs) : loc.filePosToString(gs);
+                       }));
+        if (locs.size() > 1) {
+            fmt::format_to(buf, ")");
+        }
+    }
+}
+
+string_view getVariance(ConstSymbolData &sym) {
+    if (sym->isCovariant()) {
+        return "(+)"sv;
+    } else if (sym->isContravariant()) {
+        return "(-)"sv;
+    } else if (sym->isInvariant()) {
+        return "(=)"sv;
+    } else {
+        Exception::raise("type without variance");
+    }
+}
+
+void printResultType(const GlobalState &gs, fmt::memory_buffer &buf, const TypePtr &resultType, int tabs,
+                     bool showRaw) {
+    if (resultType) {
+        string printed;
+        if (showRaw) {
+            printed = absl::StrReplaceAll(resultType.toStringWithTabs(gs, tabs), {{"\n", " "}});
+        } else {
+            printed = resultType.show(gs);
+        }
+        fmt::format_to(buf, " -> {}", printed);
+    }
+}
+
 } // namespace
 
 bool Symbol::isPrintable(const GlobalState &gs) const {
@@ -820,134 +855,51 @@ string_view Symbol::showKind(const GlobalState &gs) const {
     return type;
 }
 
-string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
     fmt::memory_buffer buf;
 
     printTabs(buf, tabs);
 
-    string_view type = this->showKind(gs);
+    auto sym = data(gs);
 
-    string_view variance = ""sv;
+    fmt::format_to(buf, "{} {}", sym->isClassOrModuleModule() ? "module" : "class",
+                   showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
 
-    if (this->isTypeArgument() || this->isTypeMember()) {
-        if (this->isCovariant()) {
-            variance = "(+)"sv;
-        } else if (this->isContravariant()) {
-            variance = "(-)"sv;
-        } else if (this->isInvariant()) {
-            variance = "(=)"sv;
-        } else {
-            Exception::raise("type without variance");
-        }
+    auto typeMembers = sym->typeMembers();
+    auto it =
+        remove_if(typeMembers.begin(), typeMembers.end(), [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
+    typeMembers.erase(it, typeMembers.end());
+    if (!typeMembers.empty()) {
+        fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
+                           auto name = symb.data(gs)->name;
+                           return showRaw ? name.showRaw(gs) : name.show(gs);
+                       }));
     }
 
-    fmt::format_to(buf, "{}{} {}", type, variance, showRaw ? this->toStringFullName(gs) : this->showFullName(gs));
+    if (sym->superClass().exists()) {
+        auto superClass = sym->superClass().data(gs);
+        fmt::format_to(buf, " < {}", showRaw ? superClass->toStringFullName(gs) : superClass->showFullName(gs));
+    }
 
-    if (this->isClassOrModule() || this->isMethod()) {
-        if (this->isMethod()) {
-            auto methodFlags = InlinedVector<string, 3>{};
+    fmt::format_to(buf, " ({})", fmt::map_join(sym->mixins(), ", ", [&](auto symb) {
+                       auto name = symb.data(gs)->name;
+                       return showRaw ? name.showRaw(gs) : name.show(gs);
+                   }));
 
-            if (this->isMethodPrivate()) {
-                methodFlags.emplace_back("private");
-            } else if (this->isMethodProtected()) {
-                methodFlags.emplace_back("protected");
-            }
-
-            if (this->isAbstract()) {
-                methodFlags.emplace_back("abstract");
-            }
-            if (this->isOverridable()) {
-                methodFlags.emplace_back("overridable");
-            }
-            if (this->isOverride()) {
-                methodFlags.emplace_back("override");
-            }
-            if (this->isIncompatibleOverride()) {
-                methodFlags.emplace_back("allow_incompatible");
-            }
-            if (this->isFinalMethod()) {
-                methodFlags.emplace_back("final");
-            }
-
-            if (!methodFlags.empty()) {
-                fmt::format_to(buf, " : {}", fmt::map_join(methodFlags, "|", [](const auto &flag) { return flag; }));
-            }
-        }
-
-        auto typeMembers = this->isClassOrModule() ? this->typeMembers() : this->typeArguments();
-        auto it = remove_if(typeMembers.begin(), typeMembers.end(),
-                            [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
-        typeMembers.erase(it, typeMembers.end());
-        if (!typeMembers.empty()) {
-            fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
-                               auto name = symb.data(gs)->name;
-                               return showRaw ? name.showRaw(gs) : name.show(gs);
-                           }));
-        }
-
-        if (this->isClassOrModule() && this->superClass().exists()) {
-            auto superClass = this->superClass().data(gs);
-            fmt::format_to(buf, " < {}", showRaw ? superClass->toStringFullName(gs) : superClass->showFullName(gs));
-        }
-
-        if (this->isClassOrModule()) {
-            fmt::format_to(buf, " ({})", fmt::map_join(this->mixins(), ", ", [&](auto symb) {
-                               auto name = symb.data(gs)->name;
-                               return showRaw ? name.showRaw(gs) : name.show(gs);
-                           }));
-
-        } else {
-            fmt::format_to(buf, " ({})", fmt::map_join(this->arguments(), ", ", [&](const auto &symb) {
-                               return symb.argumentName(gs);
-                           }));
-        }
-
-        if (this->isClassOrModule() && this->isClassOrModulePrivate()) {
-            fmt::format_to(buf, " : private");
-        }
-    } else if (this->isStaticField() && this->isStaticFieldPrivate()) {
+    if (sym->isClassOrModulePrivate()) {
         fmt::format_to(buf, " : private");
     }
-    if (this->resultType && !isClassOrModule()) {
-        string resultType;
-        if (showRaw) {
-            resultType = absl::StrReplaceAll(this->resultType.toStringWithTabs(gs, tabs), {{"\n", " "}});
-        } else {
-            resultType = this->resultType.show(gs);
-        }
-        fmt::format_to(buf, " -> {}", resultType);
-    }
-    if (!locs_.empty()) {
-        // root should have no locs. We used to have special handling here to hide locs on root
-        // when censorForSnapshotTests was passed, but it's not needed anymore.
-        ENFORCE(ref(gs) != core::Symbols::root());
+    // root should have no locs. We used to have special handling here to hide locs on root
+    // when censorForSnapshotTests was passed, but it's not needed anymore.
+    ENFORCE(!(*this == core::Symbols::root() && !sym->locs().empty()));
 
-        fmt::format_to(buf, " @ ");
-        if (locs_.size() > 1) {
-            fmt::format_to(buf, "(");
-        }
-        fmt::format_to(buf, "{}", fmt::map_join(locs_, ", ", [&](auto loc) {
-                           return showRaw ? loc.showRaw(gs) : loc.filePosToString(gs);
-                       }));
-        if (locs_.size() > 1) {
-            fmt::format_to(buf, ")");
-        }
-    }
-
-    if (this->isMethod()) {
-        if (this->rebind().exists()) {
-            fmt::format_to(buf, " rebindTo {}",
-                           showRaw ? this->rebind().data(gs)->toStringFullName(gs)
-                                   : this->rebind().data(gs)->showFullName(gs));
-        }
-    }
+    printLocs(gs, buf, sym->locs(), showRaw);
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
-
     fmt::format_to(buf, "\n");
-    for (auto pair : membersStableOrderSlow(gs)) {
+    for (auto pair : sym->membersStableOrderSlow(gs)) {
         if (!pair.second.exists()) {
-            ENFORCE(ref(gs) == core::Symbols::root());
+            ENFORCE(*this == core::Symbols::root());
             continue;
         }
 
@@ -960,20 +912,190 @@ string Symbol::toStringWithOptions(const GlobalState &gs, int tabs, bool showFul
             continue;
         }
 
-        auto str = pair.second.data(gs)->toStringWithOptions(gs, tabs + 1, showFull, showRaw);
+        auto str = pair.second.toStringWithOptions(gs, tabs + 1, showFull, showRaw);
         ENFORCE(!str.empty());
         fmt::format_to(buf, "{}", move(str));
     }
-    if (isMethod()) {
-        for (auto &arg : arguments()) {
-            auto str = arg.toString(gs);
-            ENFORCE(!str.empty());
-            printTabs(buf, tabs + 1);
-            fmt::format_to(buf, "{}\n", move(str));
+
+    return to_string(buf);
+}
+
+string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    auto sym = data(gs);
+
+    fmt::format_to(buf, "method {}", showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
+
+    auto methodFlags = InlinedVector<string, 3>{};
+
+    if (sym->isMethodPrivate()) {
+        methodFlags.emplace_back("private");
+    } else if (sym->isMethodProtected()) {
+        methodFlags.emplace_back("protected");
+    }
+
+    if (sym->isAbstract()) {
+        methodFlags.emplace_back("abstract");
+    }
+    if (sym->isOverridable()) {
+        methodFlags.emplace_back("overridable");
+    }
+    if (sym->isOverride()) {
+        methodFlags.emplace_back("override");
+    }
+    if (sym->isIncompatibleOverride()) {
+        methodFlags.emplace_back("allow_incompatible");
+    }
+    if (sym->isFinalMethod()) {
+        methodFlags.emplace_back("final");
+    }
+
+    if (!methodFlags.empty()) {
+        fmt::format_to(buf, " : {}", fmt::map_join(methodFlags, "|", [](const auto &flag) { return flag; }));
+    }
+
+    auto typeMembers = sym->typeArguments();
+    auto it =
+        remove_if(typeMembers.begin(), typeMembers.end(), [&gs](auto &sym) -> bool { return sym.data(gs)->isFixed(); });
+    typeMembers.erase(it, typeMembers.end());
+    if (!typeMembers.empty()) {
+        fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
+                           auto name = symb.data(gs)->name;
+                           return showRaw ? name.showRaw(gs) : name.show(gs);
+                       }));
+    }
+    fmt::format_to(buf, " ({})",
+                   fmt::map_join(sym->arguments(), ", ", [&](const auto &symb) { return symb.argumentName(gs); }));
+
+    printResultType(gs, buf, sym->resultType, tabs, showRaw);
+    printLocs(gs, buf, sym->locs(), showRaw);
+
+    if (sym->rebind().exists()) {
+        fmt::format_to(buf, " rebindTo {}",
+                       showRaw ? sym->rebind().data(gs)->toStringFullName(gs)
+                               : sym->rebind().data(gs)->showFullName(gs));
+    }
+
+    ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
+
+    fmt::format_to(buf, "\n");
+    for (auto pair : sym->membersStableOrderSlow(gs)) {
+        ENFORCE_NO_TIMER(pair.second.exists());
+        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
+            pair.first == Names::mixedInClassMethods()) {
+            continue;
         }
+
+        if (!showFull && !pair.second.data(gs)->isPrintable(gs)) {
+            continue;
+        }
+
+        auto str = pair.second.toStringWithOptions(gs, tabs + 1, showFull, showRaw);
+        ENFORCE(!str.empty());
+        fmt::format_to(buf, "{}", move(str));
+    }
+
+    for (auto &arg : sym->arguments()) {
+        auto str = arg.toString(gs);
+        ENFORCE(!str.empty());
+        printTabs(buf, tabs + 1);
+        fmt::format_to(buf, "{}\n", move(str));
     }
 
     return to_string(buf);
+}
+
+string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    auto sym = data(gs);
+
+    string_view type;
+    if (sym->isStaticField()) {
+        if (sym->isTypeAlias()) {
+            type = "static-field-type-alias"sv;
+        } else {
+            type = "static-field"sv;
+        }
+    } else {
+        type = "field"sv;
+    }
+
+    string_view access;
+    if (sym->isStaticField() && sym->isStaticFieldPrivate()) {
+        access = " : private"sv;
+    }
+
+    fmt::format_to(buf, "{} {}{}", type, showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs), access);
+
+    printResultType(gs, buf, sym->resultType, tabs, showRaw);
+    printLocs(gs, buf, sym->locs(), showRaw);
+
+    ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
+
+    fmt::format_to(buf, "\n");
+
+    return to_string(buf);
+}
+
+string TypeMemberRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    auto sym = data(gs);
+
+    fmt::format_to(buf, "type-member{} {}", getVariance(sym),
+                   showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
+
+    printResultType(gs, buf, sym->resultType, tabs, showRaw);
+    printLocs(gs, buf, sym->locs(), showRaw);
+
+    ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
+    fmt::format_to(buf, "\n");
+    ENFORCE_NO_TIMER(sym->members().empty());
+
+    return to_string(buf);
+}
+
+string TypeArgumentRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    fmt::memory_buffer buf;
+
+    printTabs(buf, tabs);
+
+    auto sym = data(gs);
+
+    fmt::format_to(buf, "type-argument{} {}", getVariance(sym),
+                   showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
+
+    printResultType(gs, buf, sym->resultType, tabs, showRaw);
+    printLocs(gs, buf, sym->locs(), showRaw);
+
+    ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
+    fmt::format_to(buf, "\n");
+    ENFORCE_NO_TIMER(sym->members().empty());
+
+    return to_string(buf);
+}
+
+string SymbolRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+        case SymbolRef::Kind::Method:
+            return asMethodRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+        case SymbolRef::Kind::FieldOrStaticField:
+            return asFieldRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+        case SymbolRef::Kind::TypeArgument:
+            return asTypeArgumentRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+        case SymbolRef::Kind::TypeMember:
+            return asTypeMemberRef().toStringWithOptions(gs, tabs, showFull, showRaw);
+    }
 }
 
 string ArgInfo::show(const GlobalState &gs) const {

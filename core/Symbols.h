@@ -555,16 +555,6 @@ public:
     // Returns true if the symbol or any of its children are not in the symbol table. False otherwise.
     bool isPrintable(const GlobalState &gs) const;
 
-    std::string showRaw(const GlobalState &gs) const {
-        bool showFull = false;
-        bool showRaw = true;
-        return toStringWithOptions(gs, 0, showFull, showRaw);
-    }
-    std::string toString(const GlobalState &gs) const {
-        bool showFull = false;
-        bool showRaw = false;
-        return toStringWithOptions(gs, 0, showFull, showRaw);
-    }
     std::string toJSON(const GlobalState &gs, int tabs = 0) const;
     // Renders the full name of this Symbol in a form suitable for user display.
     std::string show(const GlobalState &gs) const;
@@ -689,9 +679,6 @@ public:
 private:
     friend class serialize::SerializerImpl;
     friend class GlobalState;
-
-    std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
-                                    bool showRaw = false) const;
 
     FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan = -1) const;
     std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,

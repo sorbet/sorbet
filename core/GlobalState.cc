@@ -1695,7 +1695,7 @@ unsigned int GlobalState::symbolsUsedTotal() const {
 }
 
 string GlobalState::toStringWithOptions(bool showFull, bool showRaw) const {
-    return Symbols::root().data(*this)->toStringWithOptions(*this, 0, showFull, showRaw);
+    return Symbols::root().toStringWithOptions(*this, 0, showFull, showRaw);
 }
 
 void GlobalState::sanityCheck() const {
@@ -2108,7 +2108,7 @@ MethodRef GlobalState::staticInitForClass(ClassOrModuleRef klass, Loc loc) {
 MethodRef GlobalState::lookupStaticInitForClass(ClassOrModuleRef klass) const {
     auto classData = klass.data(*this);
     auto ref = classData->lookupSingletonClass(*this).data(*this)->findMember(*this, core::Names::staticInit());
-    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.data(*this)->toString(*this));
+    ENFORCE(ref.exists(), "looking up non-existent <static-init> for {}", klass.toString(*this));
     return ref.asMethodRef();
 }
 
