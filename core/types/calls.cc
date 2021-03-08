@@ -1288,7 +1288,12 @@ public:
         auto ret = Types::approximateSubtract(gs, args.args[0]->type, Types::nilClass());
         if (ret == args.args[0]->type) {
             if (auto e = gs.beginError(loc, errors::Infer::InvalidCast)) {
-                e.setHeader("`{}` called on `{}`, which is never `{}`", "T.must", args.args[0]->type.show(gs), "nil");
+                if (args.args[0]->type.isUntyped()) {
+                    e.setHeader("`{}` called on `{}`, which is redundant", "T.must", args.args[0]->type.show(gs));
+                } else {
+                    e.setHeader("`{}` called on `{}`, which is never `{}`", "T.must", args.args[0]->type.show(gs),
+                                "nil");
+                }
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
                 const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
                 e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs));
