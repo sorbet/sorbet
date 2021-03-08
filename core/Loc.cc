@@ -291,6 +291,35 @@ bool Loc::operator!=(const Loc &rhs) const {
     return !(rhs == *this);
 }
 
+Loc Loc::adjust(const GlobalState &gs, int32_t beginAdjust, int32_t endAdjust) const {
+    if (!this->exists()) {
+        return Loc::none(this->file());
+    }
+
+    // Upcast these to signed, 64-bit ints, so we don't have to worry about underflow / overflow.
+    int64_t begin = this->beginPos();
+    int64_t end = this->endPos();
+
+    uint64_t fileLength = this->file().data(gs).source().size();
+
+    if (begin + beginAdjust < 0) {
+        return Loc::none(this->file());
+    }
+
+    if (begin + beginAdjust > end + endAdjust) {
+        return Loc::none(this->file());
+    }
+
+    if (end + endAdjust > fileLength) {
+        return Loc::none(this->file());
+    }
+
+    u4 newBegin = begin + beginAdjust;
+    u4 newEnd = end + endAdjust;
+
+    return Loc{this->file(), newBegin, newEnd};
+}
+
 pair<Loc, u4> Loc::findStartOfLine(const GlobalState &gs) const {
     auto startDetail = this->position(gs).first;
     auto maybeLineStart = Loc::pos2Offset(this->file().data(gs), {startDetail.line, 1});

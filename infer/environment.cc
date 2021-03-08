@@ -1283,6 +1283,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Please use `{}` to cast to `{}`", "T.unsafe", "T.untyped");
 
+                            // TODO(jez) Use Loc::adjust here
                             auto prefix = "T.cast(";
                             auto suffix = ", T.untyped)";
                             u4 beginPos = bind.loc.beginPos() + char_traits<char>::length(prefix);

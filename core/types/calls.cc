@@ -638,6 +638,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                         bool addedAutocorrect = false;
                         if (possibleSymbol.isClassOrModule()) {
+                            // TODO(jez) Use Loc::adjust here?
                             const auto replacement = possibleSymbol.data(gs)->name.show(gs);
                             const auto loc = core::Loc(args.locs.file, args.locs.call);
                             const auto toReplace = args.name.toString(gs);
@@ -1290,8 +1291,10 @@ public:
             if (auto e = gs.beginError(loc, errors::Infer::InvalidCast)) {
                 e.setHeader("`{}` called on `{}`, which is never `{}`", "T.must", args.args[0]->type.show(gs), "nil");
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
-                const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
-                e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs));
+                const auto locWithoutTMust = loc.adjust(gs, 7, -1);
+                if (loc.exists() && locWithoutTMust.exists()) {
+                    e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs));
+                }
             }
         }
         res.returnType = move(ret);
@@ -2425,6 +2428,7 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
         return nullopt;
     }
 
+    // TODO(jez) Use Loc::adjust here
     u4 valueBegin = origin.beginPos() + keyStart + keySymbol.size() + char_traits<char>::length(" ");
     u4 valueEnd = valueBegin + char_traits<char>::length(valueStr);
     if (valueEnd <= origin.file().data(gs).source().size()) {
