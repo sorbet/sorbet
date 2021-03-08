@@ -104,7 +104,7 @@ module T::Private::Methods
       return
     end
     source_method_names.filter! do |method_name|
-      self.was_ever_final?(method_name)
+      was_ever_final?(method_name)
     end
     if source_method_names.empty?
       return
