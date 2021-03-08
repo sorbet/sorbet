@@ -614,7 +614,20 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.replaceWith(fmt::format("Wrap in `{}`", *gs.suggestUnsafe), receiverLoc, "{}({})", *gs.suggestUnsafe,
                               receiverLoc.source(gs));
             } else if (args.fullType.type != args.thisType && symbol == Symbols::NilClass()) {
-                e.replaceWith("Wrap in `T.must`", receiverLoc, "T.must({})", receiverLoc.source(gs));
+                // TODO(jez) Support --suggest-unsafe mode
+                if (receiverLoc.exists() && receiverLoc.beginPos() == receiverLoc.endPos()) {
+                    auto shortName = args.name.shortName(gs);
+                    auto blockPassLoc = receiverLoc.adjust(gs, /* "(&" */ -2, /* ":foo)" */ 1 + shortName.size() + 1);
+                    if (blockPassLoc.exists()) {
+                        auto blockPassSource = blockPassLoc.source(gs);
+                        if (blockPassSource == fmt::format("(&:{})", shortName)) {
+                            e.replaceWith("Expand to block with `T.must`", blockPassLoc, " {{|x| T.must(x).{}}}",
+                                          shortName);
+                        }
+                    }
+                } else if (receiverLoc.exists()) {
+                    e.replaceWith("Wrap in `T.must`", receiverLoc, "T.must({})", receiverLoc.source(gs));
+                }
             } else {
                 if (symbol.data(gs)->isClassOrModuleModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMemberTransitive(gs, args.name);
