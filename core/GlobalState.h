@@ -19,6 +19,8 @@ class SymbolRef;
 class ClassOrModuleRef;
 class MethodRef;
 class FieldRef;
+class TypeArgumentRef;
+class TypeMemberRef;
 class GlobalSubstitution;
 class ErrorQueue;
 struct GlobalStateHash;
@@ -39,6 +41,8 @@ class GlobalState final {
     friend SymbolRef;
     friend ClassOrModuleRef;
     friend MethodRef;
+    friend TypeMemberRef;
+    friend TypeArgumentRef;
     friend FieldRef;
     friend File;
     friend FileRef;
@@ -88,8 +92,8 @@ public:
     ~GlobalState() = default;
 
     ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
-    SymbolRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
-    SymbolRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
+    TypeMemberRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
+    TypeArgumentRef enterTypeArgument(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     MethodRef enterNewMethodOverload(Loc loc, MethodRef original, core::NameRef originalName, u4 num,
                                      const std::vector<bool> &argsToKeep);
@@ -100,8 +104,9 @@ public:
     SymbolRef lookupSymbol(SymbolRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, 0, Symbols::noSymbol());
     }
-    SymbolRef lookupTypeMemberSymbol(ClassOrModuleRef owner, NameRef name) const {
-        return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER, Symbols::noTypeMember());
+    TypeMemberRef lookupTypeMemberSymbol(ClassOrModuleRef owner, NameRef name) const {
+        return lookupSymbolWithFlags(owner, name, Symbol::Flags::TYPE_MEMBER, Symbols::noTypeMember())
+            .asTypeMemberRef();
     }
     ClassOrModuleRef lookupClassSymbol(ClassOrModuleRef owner, NameRef name) const {
         return lookupSymbolWithFlags(owner, name, Symbol::Flags::CLASS_OR_MODULE, Symbols::noClassOrModule())

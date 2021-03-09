@@ -401,7 +401,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
             auto &lp = cast_type_nonnull<LambdaParam>(what);
             pickle(p, lp.lowerBound);
             pickle(p, lp.upperBound);
-            p.putU4(lp.definition.rawId());
+            p.putU4(lp.definition.id());
             break;
         }
         case TypePtr::Tag::AppliedType: {
@@ -415,7 +415,7 @@ void SerializerImpl::pickle(Pickler &p, const TypePtr &what) {
         }
         case TypePtr::Tag::TypeVar: {
             auto &tp = cast_type_nonnull<TypeVar>(what);
-            p.putU4(tp.sym.rawId());
+            p.putU4(tp.sym.id());
             break;
         }
         case TypePtr::Tag::SelfType: {
@@ -487,7 +487,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
         case TypePtr::Tag::LambdaParam: {
             auto lower = unpickleType(p, gs);
             auto upper = unpickleType(p, gs);
-            return make_type<LambdaParam>(SymbolRef::fromRaw(p.getU4()), lower, upper);
+            return make_type<LambdaParam>(TypeMemberRef::fromRaw(p.getU4()), lower, upper);
         }
         case TypePtr::Tag::AppliedType: {
             auto klass = ClassOrModuleRef::fromRaw(p.getU4());
@@ -499,7 +499,7 @@ TypePtr SerializerImpl::unpickleType(UnPickler &p, const GlobalState *gs) {
             return make_type<AppliedType>(klass, move(targs));
         }
         case TypePtr::Tag::TypeVar: {
-            auto sym = SymbolRef::fromRaw(p.getU4());
+            auto sym = TypeArgumentRef::fromRaw(p.getU4());
             return make_type<TypeVar>(sym);
         }
         case TypePtr::Tag::SelfType: {

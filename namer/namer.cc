@@ -1304,7 +1304,7 @@ class SymbolDefiner {
             }
         }
 
-        core::SymbolRef sym;
+        core::TypeMemberRef sym;
         auto existingTypeMember = ctx.state.lookupTypeMemberSymbol(onSymbol, typeMember.name);
         if (existingTypeMember.exists()) {
             // if we already have a type member but it was constructed in a different file from the one we're
@@ -1359,7 +1359,7 @@ class SymbolDefiner {
                 }
                 auto alias =
                     ctx.state.enterStaticFieldSymbol(core::Loc(ctx.file, typeMember.asgnLoc), context, typeMember.name);
-                alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
+                alias.data(ctx)->resultType = core::make_type<core::AliasType>(core::SymbolRef(sym));
             }
         }
 

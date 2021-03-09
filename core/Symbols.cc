@@ -53,6 +53,22 @@ bool FieldRef::operator!=(const FieldRef &rhs) const {
     return rhs._id != this->_id;
 }
 
+bool TypeMemberRef::operator==(const TypeMemberRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool TypeMemberRef::operator!=(const TypeMemberRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
+bool TypeArgumentRef::operator==(const TypeArgumentRef &rhs) const {
+    return rhs._id == this->_id;
+}
+
+bool TypeArgumentRef::operator!=(const TypeArgumentRef &rhs) const {
+    return rhs._id != this->_id;
+}
+
 vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClassOrModule()); // should be removed when we have generic methods
     vector<TypePtr> targs;
@@ -286,6 +302,30 @@ ConstSymbolData FieldRef::data(const GlobalState &gs) const {
     return ConstSymbolData(gs.fields[_id], gs);
 }
 
+SymbolData TypeMemberRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.typeMembersUsed());
+    return SymbolData(gs.typeMembers[_id], gs);
+}
+
+ConstSymbolData TypeMemberRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.typeMembersUsed());
+    return ConstSymbolData(gs.typeMembers[_id], gs);
+}
+
+SymbolData TypeArgumentRef::data(GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
+    return SymbolData(gs.typeArguments[_id], gs);
+}
+
+ConstSymbolData TypeArgumentRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    ENFORCE_NO_TIMER(_id < gs.typeArgumentsUsed());
+    return ConstSymbolData(gs.typeArguments[_id], gs);
+}
+
 bool SymbolRef::isSynthetic() const {
     switch (this->kind()) {
         case Kind::ClassOrModule:
@@ -323,11 +363,19 @@ SymbolRef::SymbolRef(MethodRef kls) : SymbolRef(nullptr, SymbolRef::Kind::Method
 
 SymbolRef::SymbolRef(FieldRef field) : SymbolRef(nullptr, SymbolRef::Kind::FieldOrStaticField, field.id()) {}
 
+SymbolRef::SymbolRef(TypeMemberRef typeMember) : SymbolRef(nullptr, SymbolRef::Kind::TypeMember, typeMember.id()) {}
+
+SymbolRef::SymbolRef(TypeArgumentRef typeArg) : SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, typeArg.id()) {}
+
 ClassOrModuleRef::ClassOrModuleRef(const GlobalState &from, u4 id) : _id(id) {}
 
 MethodRef::MethodRef(const GlobalState &from, u4 id) : _id(id) {}
 
 FieldRef::FieldRef(const GlobalState &from, u4 id) : _id(id) {}
+
+TypeMemberRef::TypeMemberRef(const GlobalState &from, u4 id) : _id(id) {}
+
+TypeArgumentRef::TypeArgumentRef(const GlobalState &from, u4 id) : _id(id) {}
 
 string SymbolRef::showRaw(const GlobalState &gs) const {
     return dataAllowingNone(gs)->showRaw(gs);

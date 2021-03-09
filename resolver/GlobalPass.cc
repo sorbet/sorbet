@@ -14,9 +14,8 @@ using namespace std;
 namespace sorbet::resolver {
 
 namespace {
-core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, core::ClassOrModuleRef klass,
-                          const vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
-    ENFORCE(tparam.isTypeMember());
+core::SymbolRef dealiasAt(const core::GlobalState &gs, core::TypeMemberRef tparam, core::ClassOrModuleRef klass,
+                          const vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> &typeAliases) {
     if (tparam.data(gs)->owner == klass) {
         return tparam;
     } else {
@@ -40,9 +39,9 @@ core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, c
     }
 }
 
-bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::SymbolRef parentTypeMember,
+bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, core::TypeMemberRef parentTypeMember,
                        core::ClassOrModuleRef sym,
-                       vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
+                       vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> &typeAliases) {
     core::NameRef name = parentTypeMember.data(gs)->name;
     core::SymbolRef my = sym.data(gs)->findMember(gs, name);
     if (!my.exists()) {
@@ -56,39 +55,41 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
                         parent.data(gs)->show(gs), sym.data(gs)->show(gs));
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
         }
-        my = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
-        my.data(gs)->setFixed();
+        auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
+        typeMember.data(gs)->setFixed();
         auto untyped = core::Types::untyped(gs, sym);
-        my.data(gs)->resultType = core::make_type<core::LambdaParam>(my, untyped, untyped);
+        typeMember.data(gs)->resultType = core::make_type<core::LambdaParam>(typeMember, untyped, untyped);
         return false;
     }
-    const auto &data = my.data(gs);
-    if (!data->isTypeMember() && !data->isTypeArgument()) {
-        if (auto e = gs.beginError(data->loc(), core::errors::Resolver::NotATypeVariable)) {
+    if (!my.isTypeMember()) {
+        if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::NotATypeVariable)) {
             e.setHeader("Type variable `{}` needs to be declared as `= type_member(SOMETHING)`", name.show(gs));
         }
         auto synthesizedName = gs.freshNameUnique(core::UniqueNameKind::TypeVarName, name, 1);
-        my = gs.enterTypeMember(sym.data(gs)->loc(), sym, synthesizedName, core::Variance::Invariant);
-        my.data(gs)->setFixed();
+        auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, synthesizedName, core::Variance::Invariant);
+        typeMember.data(gs)->setFixed();
         auto untyped = core::Types::untyped(gs, sym);
-        my.data(gs)->resultType = core::make_type<core::LambdaParam>(my, untyped, untyped);
+        typeMember.data(gs)->resultType = core::make_type<core::LambdaParam>(typeMember, untyped, untyped);
         return false;
     }
-    auto myVariance = data->variance();
+
+    auto myTypeMember = my.asTypeMemberRef();
+    auto myVariance = myTypeMember.data(gs)->variance();
     auto parentVariance = parentTypeMember.data(gs)->variance();
     if (!sym.data(gs)->derivesFrom(gs, core::Symbols::Class()) && myVariance != parentVariance &&
         myVariance != core::Variance::Invariant) {
-        if (auto e = gs.beginError(data->loc(), core::errors::Resolver::ParentVarianceMismatch)) {
+        if (auto e = gs.beginError(myTypeMember.data(gs)->loc(), core::errors::Resolver::ParentVarianceMismatch)) {
             e.setHeader("Type variance mismatch with parent `{}`", parent.data(gs)->show(gs));
         }
         return true;
     }
-    typeAliases[sym.id()].emplace_back(parentTypeMember, my);
+    typeAliases[sym.id()].emplace_back(parentTypeMember, myTypeMember);
     return true;
 } // namespace
 
 void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
-                        vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases, vector<bool> &resolved) {
+                        vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> &typeAliases,
+                        vector<bool> &resolved) {
     if (resolved[sym.id()]) {
         return;
     }
@@ -101,14 +102,14 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
         auto tps = parent.data(gs)->typeMembers();
         bool foundAll = true;
         for (core::SymbolRef tp : tps) {
-            bool foundThis = resolveTypeMember(gs, parent, tp, sym, typeAliases);
+            bool foundThis = resolveTypeMember(gs, parent, tp.asTypeMemberRef(), sym, typeAliases);
             foundAll = foundAll && foundThis;
         }
         if (foundAll) {
             int i = 0;
             // check that type params are in the same order.
             for (core::SymbolRef tp : tps) {
-                core::SymbolRef my = dealiasAt(gs, tp, sym, typeAliases);
+                core::SymbolRef my = dealiasAt(gs, tp.asTypeMemberRef(), sym, typeAliases);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
                 if (sym.data(gs)->typeMembers()[i] != my) {
                     if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::TypeMembersInWrongOrder)) {
@@ -132,7 +133,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
         resolveTypeMembers(gs, mixin, typeAliases, resolved);
         auto typeMembers = mixin.data(gs)->typeMembers();
         for (core::SymbolRef tp : typeMembers) {
-            resolveTypeMember(gs, mixin, tp, sym, typeAliases);
+            resolveTypeMember(gs, mixin, tp.asTypeMemberRef(), sym, typeAliases);
         }
     }
 
@@ -401,7 +402,7 @@ void Resolver::finalizeSymbols(core::GlobalState &gs) {
 
     computeLinearization(gs);
 
-    vector<vector<pair<core::SymbolRef, core::SymbolRef>>> typeAliases;
+    vector<vector<pair<core::TypeMemberRef, core::TypeMemberRef>>> typeAliases;
     typeAliases.resize(gs.classAndModulesUsed());
     vector<bool> resolved;
     resolved.resize(gs.classAndModulesUsed());

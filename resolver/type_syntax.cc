@@ -168,7 +168,7 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                                                 name.show(ctx));
                                 }
                             }
-                            typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todo());
+                            typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todoTypeArgument());
                             typeArgSpec.loc = core::Loc(ctx.file, arg.loc());
                         } else {
                             if (auto e = ctx.beginError(arg.loc(), core::errors::Resolver::InvalidMethodSignature)) {

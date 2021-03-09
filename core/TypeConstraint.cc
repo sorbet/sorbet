@@ -137,7 +137,7 @@ bool TypeConstraint::isAlreadyASubType(const GlobalState &gs, const TypePtr &t1,
     }
 }
 
-TypePtr TypeConstraint::getInstantiation(SymbolRef sym) const {
+TypePtr TypeConstraint::getInstantiation(TypeArgumentRef sym) const {
     ENFORCE(wasSolved);
     return findSolution(sym);
 }
@@ -157,7 +157,7 @@ TypeConstraint TypeConstraint::makeEmptyFrozenConstraint() {
 
 TypeConstraint TypeConstraint::EmptyFrozenConstraint(makeEmptyFrozenConstraint());
 
-bool TypeConstraint::hasUpperBound(SymbolRef forWhat) const {
+bool TypeConstraint::hasUpperBound(TypeArgumentRef forWhat) const {
     for (auto &entry : this->upperBounds) {
         if (entry.first == forWhat) {
             return true;
@@ -166,7 +166,7 @@ bool TypeConstraint::hasUpperBound(SymbolRef forWhat) const {
     return false;
 }
 
-bool TypeConstraint::hasLowerBound(SymbolRef forWhat) const {
+bool TypeConstraint::hasLowerBound(TypeArgumentRef forWhat) const {
     for (auto &entry : this->lowerBounds) {
         if (entry.first == forWhat) {
             return true;
@@ -175,7 +175,7 @@ bool TypeConstraint::hasLowerBound(SymbolRef forWhat) const {
     return false;
 }
 
-TypePtr &TypeConstraint::findUpperBound(SymbolRef forWhat) {
+TypePtr &TypeConstraint::findUpperBound(TypeArgumentRef forWhat) {
     for (auto &entry : this->upperBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -186,7 +186,7 @@ TypePtr &TypeConstraint::findUpperBound(SymbolRef forWhat) {
     return inserted.second;
 }
 
-TypePtr &TypeConstraint::findLowerBound(SymbolRef forWhat) {
+TypePtr &TypeConstraint::findLowerBound(TypeArgumentRef forWhat) {
     for (auto &entry : this->lowerBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -197,7 +197,7 @@ TypePtr &TypeConstraint::findLowerBound(SymbolRef forWhat) {
     return inserted.second;
 }
 
-TypePtr &TypeConstraint::findSolution(SymbolRef forWhat) {
+TypePtr &TypeConstraint::findSolution(TypeArgumentRef forWhat) {
     for (auto &entry : this->solution) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -208,7 +208,7 @@ TypePtr &TypeConstraint::findSolution(SymbolRef forWhat) {
     return inserted.second;
 }
 
-TypePtr TypeConstraint::findUpperBound(SymbolRef forWhat) const {
+TypePtr TypeConstraint::findUpperBound(TypeArgumentRef forWhat) const {
     for (auto &entry : this->upperBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -217,7 +217,7 @@ TypePtr TypeConstraint::findUpperBound(SymbolRef forWhat) const {
     Exception::raise("should never happen");
 }
 
-TypePtr TypeConstraint::findLowerBound(SymbolRef forWhat) const {
+TypePtr TypeConstraint::findLowerBound(TypeArgumentRef forWhat) const {
     for (auto &entry : this->lowerBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -226,7 +226,7 @@ TypePtr TypeConstraint::findLowerBound(SymbolRef forWhat) const {
     Exception::raise("should never happen");
 }
 
-TypePtr TypeConstraint::findSolution(SymbolRef forWhat) const {
+TypePtr TypeConstraint::findSolution(TypeArgumentRef forWhat) const {
     for (auto &entry : this->solution) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -244,17 +244,17 @@ InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
     return ret;
 }
 
-UnorderedMap<SymbolRef, std::pair<TypePtr, TypePtr>> TypeConstraint::collateBounds(const GlobalState &gs) const {
-    auto collated = UnorderedMap<SymbolRef, pair<TypePtr, TypePtr>>{};
+UnorderedMap<TypeArgumentRef, std::pair<TypePtr, TypePtr>> TypeConstraint::collateBounds(const GlobalState &gs) const {
+    auto collated = UnorderedMap<TypeArgumentRef, pair<TypePtr, TypePtr>>{};
 
     for (const auto &[sym, lowerBound] : this->lowerBounds) {
         auto &[lowerRef, _upperRef] = collated[sym];
-        ENFORCE(lowerRef == nullptr, "{} in lowerBounds twice?", sym.show(gs));
+        ENFORCE(lowerRef == nullptr, "{} in lowerBounds twice?", sym.data(gs)->show(gs));
         lowerRef = lowerBound;
     }
     for (const auto &[sym, upperBound] : this->upperBounds) {
         auto &[_lowerRef, upperRef] = collated[sym];
-        ENFORCE(upperRef == nullptr, "{} in upperBounds twice?", sym.show(gs));
+        ENFORCE(upperRef == nullptr, "{} in upperBounds twice?", sym.data(gs)->show(gs));
         upperRef = upperBound;
     }
 
@@ -277,7 +277,7 @@ string TypeConstraint::toString(const core::GlobalState &gs) const {
     fmt::format_to(buf, "solution: [{}]\n",
                    fmt::map_join(
                        this->solution.begin(), this->solution.end(), ", ", [&gs](auto pair) -> auto {
-                           return fmt::format("{}: {}", pair.first.show(gs), pair.second.show(gs));
+                           return fmt::format("{}: {}", pair.first.data(gs)->show(gs), pair.second.show(gs));
                        }));
     return to_string(buf);
 }

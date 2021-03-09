@@ -363,14 +363,14 @@ template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
  */
 TYPE(LambdaParam) final {
 public:
-    SymbolRef definition;
+    TypeMemberRef definition;
 
     // The type bounds provided in the definition of the type_member or
     // type_template.
     TypePtr lowerBound;
     TypePtr upperBound;
 
-    LambdaParam(SymbolRef definition, TypePtr lower, TypePtr upper);
+    LambdaParam(TypeMemberRef definition, TypePtr lower, TypePtr upper);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     u4 hash(const GlobalState &gs) const;
@@ -553,8 +553,8 @@ template <> inline LiteralType cast_type_nonnull<LiteralType>(const TypePtr &wha
  */
 TYPE(TypeVar) final {
 public:
-    SymbolRef sym;
-    TypeVar(SymbolRef sym);
+    TypeArgumentRef sym;
+    TypeVar(TypeArgumentRef sym);
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     u4 hash(const GlobalState &gs) const;

@@ -134,6 +134,66 @@ public:
 };
 CheckSize(FieldRef, 4, 4);
 
+class TypeMemberRef final {
+    u4 _id;
+
+public:
+    TypeMemberRef() : _id(0){};
+    TypeMemberRef(const GlobalState &from, u4 id);
+
+    u4 id() const {
+        return _id;
+    }
+
+    bool exists() const {
+        return _id != 0;
+    }
+
+    static TypeMemberRef fromRaw(u4 id) {
+        TypeMemberRef ref;
+        ref._id = id;
+        return ref;
+    }
+
+    SymbolData data(GlobalState &gs) const;
+    ConstSymbolData data(const GlobalState &gs) const;
+
+    bool operator==(const TypeMemberRef &rhs) const;
+
+    bool operator!=(const TypeMemberRef &rhs) const;
+};
+CheckSize(TypeMemberRef, 4, 4);
+
+class TypeArgumentRef final {
+    u4 _id;
+
+public:
+    TypeArgumentRef() : _id(0){};
+    TypeArgumentRef(const GlobalState &from, u4 id);
+
+    u4 id() const {
+        return _id;
+    }
+
+    bool exists() const {
+        return _id != 0;
+    }
+
+    static TypeArgumentRef fromRaw(u4 id) {
+        TypeArgumentRef ref;
+        ref._id = id;
+        return ref;
+    }
+
+    SymbolData data(GlobalState &gs) const;
+    ConstSymbolData data(const GlobalState &gs) const;
+
+    bool operator==(const TypeArgumentRef &rhs) const;
+
+    bool operator!=(const TypeArgumentRef &rhs) const;
+};
+CheckSize(TypeArgumentRef, 4, 4);
+
 class SymbolRef final {
     friend class GlobalState;
     friend class Symbol;
@@ -223,6 +283,8 @@ public:
     SymbolRef(ClassOrModuleRef kls);
     SymbolRef(MethodRef kls);
     SymbolRef(FieldRef kls);
+    SymbolRef(TypeMemberRef kls);
+    SymbolRef(TypeArgumentRef kls);
     SymbolRef() : _id(0){};
 
     // From experimentation, in the common case, methods typically have 2 or fewer arguments.
@@ -257,6 +319,16 @@ public:
     FieldRef asFieldRef() const {
         ENFORCE_NO_TIMER(kind() == Kind::FieldOrStaticField);
         return FieldRef::fromRaw(unsafeTableIndex());
+    }
+
+    TypeMemberRef asTypeMemberRef() const {
+        ENFORCE_NO_TIMER(kind() == Kind::TypeMember);
+        return TypeMemberRef::fromRaw(unsafeTableIndex());
+    }
+
+    TypeArgumentRef asTypeArgumentRef() const {
+        ENFORCE_NO_TIMER(kind() == Kind::TypeArgument);
+        return TypeArgumentRef::fromRaw(unsafeTableIndex());
     }
 
     SymbolData data(GlobalState &gs) const;
@@ -533,25 +605,30 @@ public:
         return FieldRef::fromRaw(0);
     }
 
-    static SymbolRef noTypeArgument() {
-        return SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, 0);
+    static TypeArgumentRef noTypeArgument() {
+        return TypeArgumentRef::fromRaw(0);
     }
 
-    static SymbolRef noTypeMember() {
-        return SymbolRef(nullptr, SymbolRef::Kind::TypeMember, 0);
+    static TypeMemberRef noTypeMember() {
+        return TypeMemberRef::fromRaw(0);
     }
 
     static MethodRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder() {
         return MethodRef::fromRaw(1);
     }
 
-    static SymbolRef
+    static TypeArgumentRef
     Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
-        return SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, 1);
+        return TypeArgumentRef::fromRaw(1);
     }
 
-    static SymbolRef Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
-        return SymbolRef(nullptr, SymbolRef::Kind::TypeArgument, 2);
+    static TypeArgumentRef
+    Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
+        return TypeArgumentRef::fromRaw(2);
+    }
+
+    static TypeArgumentRef todoTypeArgument() {
+        return TypeArgumentRef::fromRaw(3);
     }
 
     static ClassOrModuleRef T_Sig() {
@@ -727,12 +804,32 @@ public:
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 200;
     static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 36;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
-    static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 3;
+    static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
     static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 97;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {
     return H::combine(std::move(h), m.rawId());
+}
+
+template <typename H> H AbslHashValue(H h, const ClassOrModuleRef &m) {
+    return H::combine(std::move(h), m.id());
+}
+
+template <typename H> H AbslHashValue(H h, const MethodRef &m) {
+    return H::combine(std::move(h), m.id());
+}
+
+template <typename H> H AbslHashValue(H h, const FieldRef &m) {
+    return H::combine(std::move(h), m.id());
+}
+
+template <typename H> H AbslHashValue(H h, const TypeArgumentRef &m) {
+    return H::combine(std::move(h), m.id());
+}
+
+template <typename H> H AbslHashValue(H h, const TypeMemberRef &m) {
+    return H::combine(std::move(h), m.id());
 }
 
 } // namespace sorbet::core
