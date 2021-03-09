@@ -140,6 +140,10 @@ void Concern::run(core::MutableContext ctx, ast::ClassDef *klass) {
         auto sendForMixes = ast::MK::Send2(klass->loc, std::move(magic), core::Names::mixesInClassMethods(),
                                            ast::MK::Self(klass->loc), std::move(classMethods));
         stats.emplace_back(std::move(sendForMixes));
+
+        // Specify this can utilize recursive mixes_in_class_methods
+        auto mdef = ast::MK::Method(klass->loc, klass->loc, core::Names::recursiveMicm(), {}, ast::MK::EmptyTree());
+        stats.emplace_back(std::move(mdef));
     }
 
     klass->rhs.clear();

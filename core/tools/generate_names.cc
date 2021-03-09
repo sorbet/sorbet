@@ -296,6 +296,7 @@ NameDef names[] = {
     {"mixesInClassMethods", "mixes_in_class_methods"},
     {"ClassMethods", "ClassMethods", true},
     {"classMethods", "class_methods"},
+    {"recursiveMicm", "<recursive_micm>"},
 
     {"blockTemp", "<block>"},
     {"blockRetrunType", "<block-return-type>"},
