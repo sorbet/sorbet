@@ -25,7 +25,19 @@ suggest_t_must.rb:6: Expected `String` but found `T.nilable(String)` for argumen
     suggest_t_must.rb:6: Replaced with `T.must(foo)`
      6 |"hi" + foo
                ^^^
-Errors: 2
+
+suggest_t_must.rb:8: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+     8 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^^^^^^
+  Got T.nilable(Integer) originating from:
+    suggest_t_must.rb:8:
+     8 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^
+  Autocorrect: Done
+    suggest_t_must.rb:8: Replaced with ` {|x| T.must(x).even?}`
+     8 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                            ^^^^^^^^^
+Errors: 3
 
 --------------------------------------------------------------------------
 
@@ -35,3 +47,5 @@ foo = T.let(nil, T.nilable(String))
 T.must(foo)[0]
 
 "hi" + T.must(foo)
+
+T::Array[T.nilable(Integer)].new.map {|x| T.must(x).even?}

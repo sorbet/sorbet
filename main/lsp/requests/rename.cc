@@ -278,6 +278,7 @@ private:
             }
             return "";
         }
+        // TODO(jez) Use Loc::adjust here?
         string::size_type methodNameOffset = methodNameLoc->beginPos() - sendResp->termLoc.beginPos();
         auto newsrc = replaceAt(source, methodNameOffset);
         return newsrc;

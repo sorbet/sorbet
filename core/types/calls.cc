@@ -610,11 +610,25 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     ErrorSection("Got " + args.fullType.type.show(gs) + " originating from:", explanations));
             }
             auto receiverLoc = core::Loc{args.locs.file, args.locs.receiver};
-            if (gs.suggestUnsafe.has_value()) {
-                e.replaceWith(fmt::format("Wrap in `{}`", *gs.suggestUnsafe), receiverLoc, "{}({})", *gs.suggestUnsafe,
-                              receiverLoc.source(gs));
-            } else if (args.fullType.type != args.thisType && symbol == Symbols::NilClass()) {
-                e.replaceWith("Wrap in `T.must`", receiverLoc, "T.must({})", receiverLoc.source(gs));
+            if (receiverLoc.exists() && (gs.suggestUnsafe.has_value() ||
+                                         (args.fullType.type != args.thisType && symbol == Symbols::NilClass()))) {
+                auto wrapInFn = gs.suggestUnsafe.value_or("T.must");
+                if (receiverLoc.beginPos() == receiverLoc.endPos()) {
+                    auto shortName = args.name.shortName(gs);
+                    auto beginAdjust = -2;                     // (&
+                    auto endAdjust = 1 + shortName.size() + 1; // :foo)
+                    auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
+                    if (blockPassLoc.exists()) {
+                        auto blockPassSource = blockPassLoc.source(gs);
+                        if (blockPassSource == fmt::format("(&:{})", shortName)) {
+                            e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
+                                          " {{|x| {}(x).{}}}", wrapInFn, shortName);
+                        }
+                    }
+                } else {
+                    e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
+                                  receiverLoc.source(gs));
+                }
             } else {
                 if (symbol.data(gs)->isClassOrModuleModule()) {
                     auto objMeth = core::Symbols::Object().data(gs)->findMemberTransitive(gs, args.name);
@@ -638,6 +652,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                         bool addedAutocorrect = false;
                         if (possibleSymbol.isClassOrModule()) {
+                            // TODO(jez) Use Loc::adjust here?
                             const auto replacement = possibleSymbol.data(gs)->name.show(gs);
                             const auto loc = core::Loc(args.locs.file, args.locs.call);
                             const auto toReplace = args.name.toString(gs);
@@ -1295,8 +1310,10 @@ public:
                                 "nil");
                 }
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
-                const auto locWithoutTMust = Loc{loc.file(), loc.beginPos() + 7, loc.endPos() - 1};
-                e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs));
+                const auto locWithoutTMust = loc.adjust(gs, 7, -1);
+                if (loc.exists() && locWithoutTMust.exists()) {
+                    e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs));
+                }
             }
         }
         res.returnType = move(ret);
@@ -2430,6 +2447,7 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
         return nullopt;
     }
 
+    // TODO(jez) Use Loc::adjust here
     u4 valueBegin = origin.beginPos() + keyStart + keySymbol.size() + char_traits<char>::length(" ");
     u4 valueEnd = valueBegin + char_traits<char>::length(valueStr);
     if (valueEnd <= origin.file().data(gs).source().size()) {

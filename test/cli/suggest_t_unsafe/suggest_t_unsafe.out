@@ -53,7 +53,19 @@ suggest_t_unsafe.rb:13: Expected `String` but found `Integer(1)` for argument `a
     suggest_t_unsafe.rb:13: Replaced with `T.unsafe(1)`
     13 |"hi" + 1
                ^
-Errors: 4
+
+suggest_t_unsafe.rb:15: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    15 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^^^^^^
+  Got T.nilable(Integer) originating from:
+    suggest_t_unsafe.rb:15:
+    15 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:15: Replaced with ` {|x| T.unsafe(x).even?}`
+    15 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                            ^^^^^^^^^
+Errors: 5
 
 --------------------------------------------------------------------------
 
@@ -70,6 +82,8 @@ bar = T.let(1, T.any(Integer, String))
 T.unsafe(bar).even?
 
 "hi" + T.unsafe(1)
+
+T::Array[T.nilable(Integer)].new.map {|x| T.unsafe(x).even?}
 
 --------------------------------------------------------------------------
 
@@ -128,7 +142,19 @@ suggest_t_unsafe.rb:13: Expected `String` but found `Integer(1)` for argument `a
     suggest_t_unsafe.rb:13: Replaced with `custom_wrapper(1)`
     13 |"hi" + 1
                ^
-Errors: 4
+
+suggest_t_unsafe.rb:15: Method `even?` does not exist on `NilClass` component of `T.nilable(Integer)` https://srb.help/7003
+    15 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^^^^^^
+  Got T.nilable(Integer) originating from:
+    suggest_t_unsafe.rb:15:
+    15 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                              ^
+  Autocorrect: Done
+    suggest_t_unsafe.rb:15: Replaced with ` {|x| custom_wrapper(x).even?}`
+    15 |T::Array[T.nilable(Integer)].new.map(&:even?)
+                                            ^^^^^^^^^
+Errors: 5
 
 --------------------------------------------------------------------------
 
@@ -145,3 +171,5 @@ bar = T.let(1, T.any(Integer, String))
 custom_wrapper(bar).even?
 
 "hi" + custom_wrapper(1)
+
+T::Array[T.nilable(Integer)].new.map {|x| custom_wrapper(x).even?}

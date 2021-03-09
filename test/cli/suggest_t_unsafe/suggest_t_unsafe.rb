@@ -11,3 +11,5 @@ bar = T.let(1, T.any(Integer, String))
 bar.even?
 
 "hi" + 1
+
+T::Array[T.nilable(Integer)].new.map(&:even?)

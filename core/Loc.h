@@ -124,6 +124,21 @@ public:
     static Detail offset2Pos(const File &file, u4 off);
     static std::optional<Loc> fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
 
+    // Create a new Loc by adjusting the beginPos and endPos of this Loc, like this:
+    //
+    //     Loc{file(), beginPos() + beginAdjust, endPos() + endAdjust}
+    //
+    // but takes care to check that the resulting Loc is a valid slice of the source() buffer,
+    // taking care to avoid integer overflow / underflow.
+    //
+    // For example:
+    //
+    //     `loc.adjust(gs, -1, 0).exists() == false` if `loc.beginPos() == 0`
+    //     `loc.adjust(gs, 0, 1).exists() == false` if `loc.endPos() == loc.file().data(gs).source().size()`
+    //
+    // etc.
+    Loc adjust(const GlobalState &gs, int32_t beginAdjust, int32_t endAdjust) const;
+
     // For a given Loc, returns
     //
     // - the Loc corresponding to the first non-whitespace character on this line, and
