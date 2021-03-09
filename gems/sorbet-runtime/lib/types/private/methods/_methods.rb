@@ -11,6 +11,9 @@ module T::Private::Methods
   # - they are done possibly before any sig block has run.
   # - they are done even if the method being defined doesn't have a sig.
   @final_methods = Set.new
+  # stores method names that were declared final without regard for where.
+  # enables early rejection of names that we know can't induce final method violations.
+  @was_ever_final_names = Set.new
   # a non-singleton is a module for which at least one of the following is true:
   # - is declared final
   # - defines a method that is declared final
@@ -100,6 +103,12 @@ module T::Private::Methods
     if !module_with_final?(target)
       return
     end
+    source_method_names.filter! do |method_name|
+      was_ever_final?(method_name)
+    end
+    if source_method_names.empty?
+      return
+    end
     # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
     # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
     target_ancestors.reverse_each do |ancestor|
@@ -147,6 +156,14 @@ module T::Private::Methods
 
   private_class_method def self.final_method?(method_key)
     @final_methods.include?(method_key)
+  end
+
+  private_class_method def self.add_was_ever_final(method_name)
+    @was_ever_final_names.add(method_name)
+  end
+
+  private_class_method def self.was_ever_final?(method_name)
+    @was_ever_final_names.include?(method_name)
   end
 
   def self.add_module_with_final(mod)
@@ -230,6 +247,7 @@ module T::Private::Methods
     @sig_wrappers[key] = sig_block
     if current_declaration.final
       add_final_method(key)
+      add_was_ever_final(method_name)
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.
       add_module_with_final(hook_mod)
@@ -412,6 +430,8 @@ module T::Private::Methods
     if !module_with_final?(target) && !module_with_final?(source)
       return
     end
+    # we do not need to call add_was_ever_final here, because we have already marked
+    # any such methods when source was originally defined.
     add_module_with_final(target)
     install_hooks(target)
     _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
