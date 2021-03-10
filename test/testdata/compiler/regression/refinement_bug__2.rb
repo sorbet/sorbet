@@ -6,4 +6,8 @@ class A
   def self.foo
     blank?
   end
+
+  def test
+    blank?
+  end
 end
