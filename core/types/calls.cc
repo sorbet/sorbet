@@ -196,15 +196,15 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
-        if (gs.suggestUnsafe.has_value()) {
-            e.replaceWith(fmt::format("Wrap in `{}`", *gs.suggestUnsafe), loc, "{}({})", *gs.suggestUnsafe,
-                          loc.source(gs));
-        } else {
-            auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
-            if (!withoutNil.isBottom() &&
-                Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType, UntypedMode::AlwaysCompatible)) {
-                if (loc.exists()) {
-                    e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(gs));
+        if (loc.exists()) {
+            if (gs.suggestUnsafe.has_value()) {
+                e.replaceWith(fmt::format("Wrap in `{}`", *gs.suggestUnsafe), loc, "{}({})", *gs.suggestUnsafe,
+                              loc.source(gs).value());
+            } else {
+                auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
+                if (!withoutNil.isBottom() && Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType,
+                                                                              UntypedMode::AlwaysCompatible)) {
+                    e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(gs).value());
                 }
             }
         }
@@ -619,7 +619,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     auto endAdjust = 1 + shortName.size() + 1; // :foo)
                     auto blockPassLoc = receiverLoc.adjust(gs, beginAdjust, endAdjust);
                     if (blockPassLoc.exists()) {
-                        auto blockPassSource = blockPassLoc.source(gs);
+                        auto blockPassSource = blockPassLoc.source(gs).value();
                         if (blockPassSource == fmt::format("(&:{})", shortName)) {
                             e.replaceWith(fmt::format("Expand to block with `{}`", wrapInFn), blockPassLoc,
                                           " {{|x| {}(x).{}}}", wrapInFn, shortName);
@@ -627,7 +627,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                     }
                 } else {
                     e.replaceWith(fmt::format("Wrap in `{}`", wrapInFn), receiverLoc, "{}({})", wrapInFn,
-                                  receiverLoc.source(gs));
+                                  receiverLoc.source(gs).value());
                 }
             } else {
                 if (symbol.data(gs)->isClassOrModuleModule()) {
@@ -658,7 +658,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             const auto toReplace = args.name.toString(gs);
                             // This is a bit hacky but the loc corresponding to the send isn't available here and until
                             // it is, this verifies that the methodLoc below exists.
-                            if (absl::StartsWith(loc.source(gs), toReplace)) {
+                            if (loc.exists() && absl::StartsWith(loc.source(gs).value(), toReplace)) {
                                 const auto methodLoc =
                                     Loc{loc.file(), loc.beginPos(), (u4)(loc.beginPos() + toReplace.length())};
                                 e.replaceWith(fmt::format("Replace with `{}.new`", replacement), methodLoc, "{}.new",
@@ -669,12 +669,15 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                             const auto replacement = possibleSymbol.data(gs)->name.toString(gs);
                             const auto toReplace = args.name.toString(gs);
                             if (replacement != toReplace) {
-                                const auto loc = core::Loc(args.locs.file, args.locs.receiver);
+                                const auto recvLoc = core::Loc(args.locs.file, args.locs.receiver);
+                                const auto callLoc = core::Loc(args.locs.file, args.locs.call);
                                 // See comment above.
-                                if (absl::StartsWith(core::Loc(args.locs.file, args.locs.call).source(gs),
-                                                     fmt::format("{}.{}", loc.source(gs), toReplace))) {
-                                    const auto methodLoc =
-                                        Loc{loc.file(), loc.endPos() + 1, (u4)(loc.endPos() + 1 + toReplace.length())};
+                                // TODO(jez) Use adjust loc here?
+                                if (recvLoc.exists() && callLoc.exists() &&
+                                    absl::StartsWith(callLoc.source(gs).value(),
+                                                     fmt::format("{}.{}", recvLoc.source(gs).value(), toReplace))) {
+                                    const auto methodLoc = Loc{recvLoc.file(), recvLoc.endPos() + 1,
+                                                               (u4)(recvLoc.endPos() + 1 + toReplace.length())};
                                     e.replaceWith(fmt::format("Replace with `{}`", replacement), methodLoc, "{}",
                                                   replacement);
                                     addedAutocorrect = true;
@@ -785,8 +788,10 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 e.setHeader("Keyword argument hash without `{}` is deprecated", "**");
                 e.addErrorLine(splatLoc, "This produces a runtime warning in Ruby 2.7, "
                                          "and will be an error in Ruby 3.0");
-                e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc, "**{}",
-                              splatLoc.source(gs));
+                if (auto source = splatLoc.source(gs)) {
+                    e.replaceWith(fmt::format("Use `{}` for the keyword argument hash", "**"), splatLoc, "**{}",
+                                  source.value());
+                }
             }
         }
         hasKwsplat = true;
@@ -921,15 +926,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                        errors::Infer::MethodArgumentCountMismatch)) {
                 if (args.fullType.type != args.thisType) {
-                    e.setHeader(
-                        "Not enough arguments provided for method `{}` on `{}` component of `{}`. Expected: `{}`, got: "
-                        "`{}`",
-                        data->show(gs), args.thisType.show(gs), args.fullType.type.show(gs), prettyArity(gs, method),
-                        posArgs); // TODO: should use position and print the source tree, not the cfg one.
+                    e.setHeader("Not enough arguments provided for method `{}` on `{}` component of `{}`. "
+                                "Expected: `{}`, got: `{}`",
+                                data->show(gs), args.thisType.show(gs), args.fullType.type.show(gs),
+                                prettyArity(gs, method), posArgs);
                 } else {
                     e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`",
-                                data->show(gs), prettyArity(gs, method),
-                                posArgs); // TODO: should use position and print the source tree, not the cfg one.
+                                data->show(gs), prettyArity(gs, method), posArgs);
                 }
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", data->show(gs));
                 if (args.name == core::Names::any() &&
@@ -1312,7 +1315,7 @@ public:
                 e.addErrorSection(args.args[0]->explainGot(gs, args.originForUninitialized));
                 const auto locWithoutTMust = loc.adjust(gs, 7, -1);
                 if (loc.exists() && locWithoutTMust.exists()) {
-                    e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs));
+                    e.replaceWith("Remove `T.must`", loc, "{}", locWithoutTMust.source(gs).value());
                 }
             }
         }
@@ -1497,8 +1500,8 @@ public:
             if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
                 e.setHeader("Keyword arguments given to `{}`", attachedClass.data(gs)->show(gs));
                 // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
-                if (numKwArgs % 2 == 0) {
-                    e.replaceWith(fmt::format("Wrap with braces"), kwargsLoc, "{{{}}}", kwargsLoc.source(gs));
+                if (numKwArgs % 2 == 0 && kwargsLoc.exists()) {
+                    e.replaceWith(fmt::format("Wrap with braces"), kwargsLoc, "{{{}}}", kwargsLoc.source(gs).value());
                 }
             }
         }
@@ -2178,8 +2181,8 @@ public:
             e.setHeader("Constants must have type annotations with `{}` when specifying `{}`", "T.let",
                         "# typed: strict");
             if (!ty.isUntyped() && loc.exists()) {
-                e.replaceWith(fmt::format("Initialize as `{}`", ty.show(gs)), loc, "T.let({}, {})", loc.source(gs),
-                              ty.show(gs));
+                e.replaceWith(fmt::format("Initialize as `{}`", ty.show(gs)), loc, "T.let({}, {})",
+                              loc.source(gs).value(), ty.show(gs));
             }
         }
         res.returnType = move(ty);
@@ -2441,8 +2444,12 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
     }
 
     auto source = origin.source(gs);
+    if (!source.has_value()) {
+        return nullopt;
+    }
+
     auto keySymbol = fmt::format("{}:", key.shortName(gs));
-    auto keyStart = source.find(keySymbol);
+    auto keyStart = source->find(keySymbol);
     if (keyStart == string::npos) {
         return nullopt;
     }
@@ -2452,7 +2459,7 @@ optional<Loc> locOfValueForKey(const GlobalState &gs, const Loc origin, const Na
     u4 valueEnd = valueBegin + char_traits<char>::length(valueStr);
     if (valueEnd <= origin.file().data(gs).source().size()) {
         auto loc = Loc{origin.file(), valueBegin, valueEnd};
-        if (loc.source(gs) == valueStr) {
+        if (loc.exists() && loc.source(gs).value() == valueStr) {
             return loc;
         }
     }
@@ -2498,8 +2505,8 @@ public:
                         auto key = argLit.asName(gs);
                         auto loc = locOfValueForKey(gs, args.fullType.origins[0], key, expectedType);
 
-                        if (loc.has_value()) {
-                            e.replaceWith("Initialize with `T.let`", *loc, "T.let({}, {})", loc->source(gs),
+                        if (loc.has_value() && loc->exists()) {
+                            e.replaceWith("Initialize with `T.let`", *loc, "T.let({}, {})", loc->source(gs).value(),
                                           Types::any(gs, expectedType, actualType.type).show(gs));
                         }
                     }

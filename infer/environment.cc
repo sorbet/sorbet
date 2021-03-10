@@ -1283,7 +1283,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
                             e.setHeader("Please use `{}` to cast to `{}`", "T.unsafe", "T.untyped");
 
-                            // TODO(jez) Use Loc::adjust here
+                            // TODO(jez) Add location to cfg::Cast instruction
                             auto prefix = "T.cast(";
                             auto suffix = ", T.untyped)";
                             u4 beginPos = bind.loc.beginPos() + char_traits<char>::length(prefix);
@@ -1293,8 +1293,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                 (core::Loc{ctx.file, bind.loc.beginPos(), beginPos}.source(ctx) == prefix) &&
                                 (core::Loc{ctx.file, endPos, bind.loc.endPos()}.source(ctx) == suffix)) {
                                 const auto locWithoutTCast = core::Loc{ctx.file, beginPos, endPos};
-                                e.replaceWith("Replace with `T.unsafe`", core::Loc(ctx.file, bind.loc), "T.unsafe({})",
-                                              locWithoutTCast.source(ctx));
+                                if (locWithoutTCast.exists()) {
+                                    e.replaceWith("Replace with `T.unsafe`", core::Loc(ctx.file, bind.loc),
+                                                  "T.unsafe({})", locWithoutTCast.source(ctx).value());
+                                }
                             }
                         }
                     } else if (!ty.type.isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
@@ -1389,16 +1391,14 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
 
                                 if (cur.origins.size() == 1 && cur.origins[0].exists() &&
                                     !cur.origins[0].file().data(ctx).isPayload()) {
-                                    // NOTE(nelhage): We assume that if there is
-                                    // a single definition location, that
-                                    // corresponds to an initial
-                                    // assignment. This is not necessarily
-                                    // correct if the variable came from some
-                                    // other source (e.g. a function argument)
+                                    // NOTE(nelhage): We assume that if there is a single definition location, that
+                                    // corresponds to an initial assignment. This is not necessarily correct if the
+                                    // variable came from some other source (e.g. a function argument)
                                     auto suggest =
                                         core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
                                     e.replaceWith(fmt::format("Initialize as `{}`", suggest.show(ctx)), cur.origins[0],
-                                                  "T.let({}, {})", cur.origins[0].source(ctx), suggest.show(ctx));
+                                                  "T.let({}, {})", cur.origins[0].source(ctx).value(),
+                                                  suggest.show(ctx));
                                 } else {
                                     e.addErrorSection(core::ErrorSection("Original type from:",
                                                                          cur.origins2Explanations(ctx, ownerLoc)));

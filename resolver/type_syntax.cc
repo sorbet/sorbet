@@ -254,12 +254,13 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                             e.setHeader("`{}` must be given arguments", paramsStr);
 
                             core::Loc loc{ctx.file, send->loc};
-                            auto orig = loc.source(ctx);
-                            auto dot = orig.rfind(".");
-                            if (orig.rfind(".") == string::npos) {
-                                e.replaceWith("Remove this use of `params`", loc, "");
-                            } else {
-                                e.replaceWith("Remove this use of `params`", loc, "{}", orig.substr(0, dot));
+                            if (auto orig = loc.source(ctx)) {
+                                auto dot = orig->rfind(".");
+                                if (orig->rfind(".") == string::npos) {
+                                    e.replaceWith("Remove this use of `params`", loc, "");
+                                } else {
+                                    e.replaceWith("Remove this use of `params`", loc, "{}", orig->substr(0, dot));
+                                }
                             }
                         }
                         break;
@@ -276,10 +277,12 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                             // when the first argument is a hash, emit an autocorrect to remove the braces
                             if (send->numPosArgs == 1) {
                                 if (auto *hash = ast::cast_tree<ast::Hash>(send->args.front())) {
+                                    // TODO(jez) Use Loc::adjust here
                                     auto loc = core::Loc(ctx.file, hash->loc.beginPos(), hash->loc.endPos());
-                                    auto source = loc.source(ctx);
-                                    e.replaceWith("Remove braces from keyword args", loc, "{}",
-                                                  source.substr(1, source.size() - 2));
+                                    if (auto locSource = loc.source(ctx)) {
+                                        e.replaceWith("Remove braces from keyword args", loc, "{}",
+                                                      locSource->substr(1, locSource->size() - 2));
+                                    }
                                 }
                             }
                         }
@@ -358,11 +361,14 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                 case core::Names::implementation().rawId():
                     if (auto e = ctx.beginError(send->loc, core::errors::Resolver::ImplementationDeprecated)) {
                         e.setHeader("Use of `{}` has been replaced by `{}`", "implementation", "override");
+                        auto loc = core::Loc(ctx.file, send->loc);
                         if (send->recv.isSelfReference()) {
-                            e.replaceWith("Replace with `override`", core::Loc(ctx.file, send->loc), "override");
+                            e.replaceWith("Replace with `override`", loc, "override");
                         } else {
-                            e.replaceWith("Replace with `override`", core::Loc(ctx.file, send->loc), "{}.override",
-                                          core::Loc(ctx.file, send->recv.loc()).source(ctx));
+                            auto recvLoc = core::Loc{ctx.file, send->recv.loc()};
+                            if (auto source = recvLoc.source(ctx)) {
+                                e.replaceWith("Replace with `override`", loc, "{}.override", source.value());
+                            }
                         }
                     }
                     break;
@@ -384,8 +390,10 @@ ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend
                                 auto start = send->args[send->numPosArgs].loc();
                                 auto end = send->args.back().loc();
                                 core::Loc argsLoc(ctx.file, start.beginPos(), end.endPos());
-                                e.replaceWith("Wrap in braces to make a shape type", argsLoc, "{{{}}}",
-                                              argsLoc.source(ctx));
+                                if (argsLoc.exists()) {
+                                    e.replaceWith("Wrap in braces to make a shape type", argsLoc, "{{{}}}",
+                                                  argsLoc.source(ctx).value());
+                                }
                             }
                         }
                         break;
@@ -711,21 +719,24 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
                         // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to
                         // if we're already looking at `T::Array` instead.
                         auto typePrefix = isBuiltinGeneric ? "" : "T::";
-                        if (sym == core::Symbols::Hash() || sym == core::Symbols::T_Hash()) {
-                            // Hash is special because it has arity 3 but you're only supposed to write the first 2
-                            e.replaceWith("Add type arguments", core::Loc(ctx.file, i.loc),
-                                          "{}{}[T.untyped, T.untyped]", typePrefix,
-                                          core::Loc(ctx.file, i.loc).source(ctx));
-                        } else if (isStdlibWhitelisted || isBuiltinGeneric) {
-                            // the default provided here for builtin generic types is 1, and that might need to change
-                            // if we add other builtin generics (but ideally we should never need to do so!)
-                            auto numTypeArgs = isBuiltinGeneric ? 1 : sym.data(ctx)->typeArity(ctx);
-                            vector<string> untypeds;
-                            for (int i = 0; i < numTypeArgs; i++) {
-                                untypeds.emplace_back("T.untyped");
+
+                        auto loc = core::Loc{ctx.file, i.loc};
+                        if (auto locSource = loc.source(ctx)) {
+                            if (sym == core::Symbols::Hash() || sym == core::Symbols::T_Hash()) {
+                                // Hash is special because it has arity 3 but you're only supposed to write the first 2
+                                e.replaceWith("Add type arguments", loc, "{}{}[T.untyped, T.untyped]", typePrefix,
+                                              locSource.value());
+                            } else if (isStdlibWhitelisted || isBuiltinGeneric) {
+                                // the default provided here for builtin generic types is 1, and that might need to
+                                // change if we add other builtin generics (but ideally we should never need to do so!)
+                                auto numTypeArgs = isBuiltinGeneric ? 1 : sym.data(ctx)->typeArity(ctx);
+                                vector<string> untypeds;
+                                for (int i = 0; i < numTypeArgs; i++) {
+                                    untypeds.emplace_back("T.untyped");
+                                }
+                                e.replaceWith("Add type arguments", loc, "{}{}[{}]", typePrefix, locSource.value(),
+                                              absl::StrJoin(untypeds, ", "));
                             }
-                            e.replaceWith("Add type arguments", core::Loc(ctx.file, i.loc), "{}{}[{}]", typePrefix,
-                                          core::Loc(ctx.file, i.loc).source(ctx), absl::StrJoin(untypeds, ", "));
                         }
                     }
                 }

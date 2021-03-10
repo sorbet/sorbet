@@ -94,7 +94,8 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
         }
         core::NameRef name = sym->asSymbol(ctx);
         auto symLoc = sym->loc;
-        if (symLoc.exists() && absl::StartsWith(core::Loc(ctx.file, symLoc).source(ctx), ":")) {
+        // TODO(jez) Use Loc::adjust here
+        if (symLoc.exists() && absl::StartsWith(core::Loc(ctx.file, symLoc).source(ctx).value(), ":")) {
             symLoc = core::LocOffsets{symLoc.beginPos() + 1, symLoc.endPos()};
         }
 

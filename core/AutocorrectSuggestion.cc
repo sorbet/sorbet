@@ -53,6 +53,12 @@ UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSug
     UnorderedMap<FileRef, string> ret;
     for (auto &edit : edits) {
         core::Loc loc = edit.loc;
+        ENFORCE(loc.exists(), "Can't apply autocorrect when Loc doesn't exist");
+        if (!loc.exists()) {
+            // Recover gracefully even if ENFORCE fails.
+            continue;
+        }
+
         if (!ret.count(loc.file())) {
             ret[loc.file()] = sources[loc.file()];
         }

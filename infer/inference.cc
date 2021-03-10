@@ -207,7 +207,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
                             if (ctx.state.suggestUnsafe.has_value() && bexitLoc.exists()) {
                                 e.replaceWith(fmt::format("Wrap in `{}`", *ctx.state.suggestUnsafe), bexitLoc, "{}({})",
-                                              *ctx.state.suggestUnsafe, bexitLoc.source(ctx));
+                                              *ctx.state.suggestUnsafe, bexitLoc.source(ctx).value());
                             }
 
                             auto ty = prevEnv.getTypeAndOrigin(ctx, cond.variable);
