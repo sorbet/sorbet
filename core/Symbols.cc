@@ -1546,14 +1546,13 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
         case SymbolRef::Kind::ClassOrModule:
             return asClassOrModuleRef();
         case SymbolRef::Kind::Method:
-            // Methods can only be owned by classes or modules.
-            return asMethodRef().data(gs)->owner.asClassOrModuleRef();
+            return asMethodRef().enclosingClass(gs);
         case SymbolRef::Kind::FieldOrStaticField:
             // Fields can only be owned by classes or modules.
             return asFieldRef().data(gs)->owner.asClassOrModuleRef();
         case SymbolRef::Kind::TypeArgument:
-            // Typeargs are owned by methods, which are owned by classes or modules.
-            return asTypeArgumentRef().data(gs)->owner.asMethodRef().data(gs)->owner.asClassOrModuleRef();
+            // Typeargs are owned by methods.
+            return asTypeArgumentRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
         case SymbolRef::Kind::TypeMember:
             // TypeMembers are only owned by classes or modules.
             return asTypeMemberRef().data(gs)->owner.asClassOrModuleRef();
