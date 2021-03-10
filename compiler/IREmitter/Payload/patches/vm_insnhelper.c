@@ -176,7 +176,8 @@ again:
 
             // This is the case for refined methods in `vm_call0_body`, inlined into the implementation of
             // `vm_call_method_each_type`, as that implementation assumed that it was called from an interpreted
-            // context, and attempts to project out the cref from the method entry, which does not have a valid cref in a compiled context.
+            // context, and attempts to project out the cref from the method entry, which does not have a valid cref in
+            // a compiled context.
             // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/vm_eval.c#L173-L198
 
             if (cc->me->def->body.refined.orig_me) {
