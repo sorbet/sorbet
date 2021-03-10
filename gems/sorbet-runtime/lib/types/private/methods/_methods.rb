@@ -103,7 +103,7 @@ module T::Private::Methods
     if !module_with_final?(target)
       return
     end
-    source_method_names.filter! do |method_name|
+    source_method_names.select! do |method_name|
       was_ever_final?(method_name)
     end
     if source_method_names.empty?
