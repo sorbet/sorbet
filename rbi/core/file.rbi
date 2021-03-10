@@ -1262,11 +1262,11 @@ class File < IO
         file: T.any(String, Pathname),
         mode: T.any(String, Integer),
         perm: String,
-        opt: Integer,
+        opt: T.untyped,
     )
     .void
   end
-  def initialize(file, mode=T.unsafe(nil), perm=T.unsafe(nil), opt=T.unsafe(nil)); end
+  def initialize(file, mode=T.unsafe(nil), perm=T.unsafe(nil), **opt); end
 
   # Same as
   # [`IO#stat`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-stat), but

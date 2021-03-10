@@ -854,11 +854,11 @@ class IO < Object
     params(
         fd: Integer,
         mode: Integer,
-        opt: Integer,
+        opt: T.untyped,
     )
     .void
   end
-  def initialize(fd, mode=T.unsafe(nil), opt=T.unsafe(nil)); end
+  def initialize(fd, mode=T.unsafe(nil), **opt); end
 
   # Return a string describing this
   # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) object.
