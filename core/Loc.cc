@@ -272,10 +272,13 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
     return buf.str();
 }
 
-string Loc::source(const GlobalState &gs) const {
-    ENFORCE(exists(), "Can't take source of Loc that doesn't exist");
-    auto source = this->file().data(gs).source();
-    return string(source.substr(beginPos(), endPos() - beginPos()));
+optional<string> Loc::source(const GlobalState &gs) const {
+    if (!exists()) {
+        return nullopt;
+    } else {
+        auto source = this->file().data(gs).source();
+        return string(source.substr(beginPos(), endPos() - beginPos()));
+    }
 }
 
 bool Loc::contains(const Loc &other) const {

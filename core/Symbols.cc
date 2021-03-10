@@ -1062,8 +1062,8 @@ string ArgInfo::argumentName(const GlobalState &gs) const {
         return (string)name.shortName(gs);
     } else {
         // positional arg
-        if (loc.exists()) {
-            return loc.source(gs);
+        if (auto source = loc.source(gs)) {
+            return source.value();
         } else {
             return (string)name.shortName(gs);
         }

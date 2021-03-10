@@ -430,8 +430,10 @@ private:
             if (auto e = ctx.beginError(it.rhs->loc, core::errors::Resolver::ReassignsTypeAlias)) {
                 e.setHeader("Reassigning a type alias is not allowed");
                 e.addErrorLine(rhsData->loc(), "Originally defined here");
-                e.replaceWith("Declare as type alias", core::Loc(ctx.file, it.rhs->loc), "T.type_alias {{{}}}",
-                              core::Loc(ctx.file, it.rhs->loc).source(ctx));
+                auto rhsLoc = core::Loc{ctx.file, it.rhs->loc};
+                if (rhsLoc.exists()) {
+                    e.replaceWith("Declare as type alias", rhsLoc, "T.type_alias {{{}}}", rhsLoc.source(ctx).value());
+                }
             }
             it.lhs.data(ctx)->resultType = core::Types::untypedUntracked();
             return true;

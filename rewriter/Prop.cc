@@ -173,8 +173,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             return nullopt;
         }
         ret.name = sym->asSymbol(ctx);
-        ENFORCE(!core::Loc(ctx.file, sym->loc).source(ctx).empty() &&
-                core::Loc(ctx.file, sym->loc).source(ctx)[0] == ':');
+        ENFORCE(core::Loc(ctx.file, sym->loc).exists());
+        ENFORCE(!core::Loc(ctx.file, sym->loc).source(ctx).value().empty() &&
+                core::Loc(ctx.file, sym->loc).source(ctx).value()[0] == ':');
         ret.nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     }
 
@@ -244,8 +245,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             } else {
                 if (auto e = ctx.beginError(ret.foreign.loc(), core::errors::Rewriter::PropForeignStrict)) {
                     e.setHeader("The argument to `{}` must be a lambda", "foreign:");
-                    e.replaceWith("Convert to lambda", core::Loc(ctx.file, ret.foreign.loc()), "-> {{{}}}",
-                                  core::Loc(ctx.file, ret.foreign.loc()).source(ctx));
+                    auto foreignLoc = core::Loc{ctx.file, ret.foreign.loc()};
+                    if (auto foreignSource = foreignLoc.source(ctx)) {
+                        e.replaceWith("Convert to lambda", foreignLoc, "-> {{{}}}", foreignSource.value());
+                    }
                 }
             }
         }

@@ -244,11 +244,14 @@ public:
         }
 
         auto source = loc.source(gs);
+        if (!source.has_value()) {
+            return;
+        }
         string newsrc;
         if (auto sendResp = response->isSend()) {
-            newsrc = replaceMethodNameInSend(source, sendResp);
+            newsrc = replaceMethodNameInSend(source.value(), sendResp);
         } else if (auto defResp = response->isDefinition()) {
-            newsrc = replaceMethodNameInDef(source);
+            newsrc = replaceMethodNameInDef(source.value());
         } else {
             ENFORCE(0, "Unexpected query response type while renaming method");
             return;
@@ -330,7 +333,10 @@ public:
     void rename(unique_ptr<core::lsp::QueryResponse> &response) override {
         auto loc = response->getLoc();
         auto source = loc.source(gs);
-        vector<string> strs = absl::StrSplit(source, "::");
+        if (!source.has_value()) {
+            return;
+        }
+        vector<string> strs = absl::StrSplit(source.value(), "::");
         strs[strs.size() - 1] = string(newName);
         auto newsrc = absl::StrJoin(strs, "::");
         edits[loc] = newsrc;

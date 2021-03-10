@@ -48,7 +48,9 @@ vector<ast::ExpressionPtr> DSLBuilder::run(core::MutableContext ctx, ast::Send *
     }
     name = sym->asSymbol(ctx);
 
-    ENFORCE(!core::Loc(ctx.file, sym->loc).source(ctx).empty() && core::Loc(ctx.file, sym->loc).source(ctx)[0] == ':');
+    ENFORCE(core::Loc(ctx.file, sym->loc).exists());
+    ENFORCE(!core::Loc(ctx.file, sym->loc).source(ctx).value().empty() &&
+            core::Loc(ctx.file, sym->loc).source(ctx).value()[0] == ':');
     auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
 
     type = ASTUtil::dupType(send->args[1]);

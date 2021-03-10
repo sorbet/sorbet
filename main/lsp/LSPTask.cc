@@ -317,22 +317,25 @@ void populateFieldAccessorType(const core::GlobalState &gs, AccessorInfo &info) 
     // Check definition site of method for `prop`, `const`, etc. The loc for the method should begin with
     // `def|prop|const|...`.
     auto methodSource = method.data(gs)->loc().source(gs);
+    if (!methodSource.has_value()) {
+        return;
+    }
     // Common case: ordinary `def`. Fast reject.
-    if (absl::StartsWith(methodSource, "def")) {
+    if (absl::StartsWith(methodSource.value(), "def")) {
         info.accessorType = FieldAccessorType::None;
         return;
     }
 
     if (absl::c_any_of(accessorNames, [&methodSource, &gs](auto name) -> bool {
-            return absl::StartsWith(methodSource, name.toString(gs));
+            return absl::StartsWith(methodSource.value(), name.toString(gs));
         })) {
         info.accessorType = FieldAccessorType::Accessor;
     } else if (absl::c_any_of(writerNames, [&methodSource, &gs](auto name) -> bool {
-                   return absl::StartsWith(methodSource, name.toString(gs));
+                   return absl::StartsWith(methodSource.value(), name.toString(gs));
                })) {
         info.accessorType = FieldAccessorType::Writer;
     } else if (absl::c_any_of(readerNames, [&methodSource, &gs](auto name) -> bool {
-                   return absl::StartsWith(methodSource, name.toString(gs));
+                   return absl::StartsWith(methodSource.value(), name.toString(gs));
                })) {
         info.accessorType = FieldAccessorType::Reader;
     } else {

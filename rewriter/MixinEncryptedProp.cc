@@ -51,8 +51,9 @@ vector<ast::ExpressionPtr> MixinEncryptedProp::run(core::MutableContext ctx, ast
         return empty;
     }
     name = sym->asSymbol(ctx);
-    ENFORCE(core::Loc(ctx.file, sym->loc).source(ctx).size() > 1 &&
-            core::Loc(ctx.file, sym->loc).source(ctx)[0] == ':');
+    ENFORCE(core::Loc(ctx.file, sym->loc).exists());
+    ENFORCE(core::Loc(ctx.file, sym->loc).source(ctx).value().size() > 1 &&
+            core::Loc(ctx.file, sym->loc).source(ctx).value()[0] == ':');
     auto nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
     enc_name = name.prepend(ctx, "encrypted_");
 
