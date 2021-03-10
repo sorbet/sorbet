@@ -535,7 +535,7 @@ ArgInfo SerializerImpl::unpickleArgInfo(UnPickler &p, const GlobalState *gs) {
 void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     p.putU4(what.owner.rawId());
     p.putU4(what.name.rawId());
-    p.putU4(what.superClassOrRebind.rawId());
+    p.putU4(what.superClassOrRebind.id());
     p.putU4(what.flags);
     if (!what.isMethod()) {
         p.putU4(what.mixins_.size());
@@ -577,7 +577,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, const GlobalState *gs) {
     Symbol result;
     result.owner = SymbolRef::fromRaw(p.getU4());
     result.name = NameRef::fromRaw(*gs, p.getU4());
-    result.superClassOrRebind = SymbolRef::fromRaw(p.getU4());
+    result.superClassOrRebind = ClassOrModuleRef::fromRaw(p.getU4());
     result.flags = p.getU4();
     if (!result.isMethod()) {
         int mixinsSize = p.getU4();

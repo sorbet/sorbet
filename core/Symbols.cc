@@ -389,7 +389,7 @@ string SymbolRef::show(const GlobalState &gs) const {
 
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     auto owner = ctx.owner;
-    auto klass = owner.data(ctx)->enclosingClass(ctx);
+    auto klass = owner.enclosingClass(ctx);
     auto instantiated = Types::resultTypeAsSeenFrom(ctx, type, klass, klass, klass.data(ctx)->selfTypeArgs(ctx));
     if (instantiated == nullptr) {
         instantiated = core::Types::untyped(ctx, owner);
@@ -1536,13 +1536,27 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
 }
 
-ClassOrModuleRef Symbol::enclosingClass(const GlobalState &gs) const {
-    SymbolRef owner = ref(gs);
-    while (!owner.isClassOrModule()) {
-        ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
-        owner = owner.data(gs)->owner;
+ClassOrModuleRef MethodRef::enclosingClass(const GlobalState &gs) const {
+    // Methods can only be owned by classes or modules.
+    return data(gs)->owner.asClassOrModuleRef();
+}
+
+ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
+    switch (kind()) {
+        case SymbolRef::Kind::ClassOrModule:
+            return asClassOrModuleRef();
+        case SymbolRef::Kind::Method:
+            return asMethodRef().enclosingClass(gs);
+        case SymbolRef::Kind::FieldOrStaticField:
+            // Fields can only be owned by classes or modules.
+            return asFieldRef().data(gs)->owner.asClassOrModuleRef();
+        case SymbolRef::Kind::TypeArgument:
+            // Typeargs are owned by methods.
+            return asTypeArgumentRef().data(gs)->owner.asMethodRef().enclosingClass(gs);
+        case SymbolRef::Kind::TypeMember:
+            // TypeMembers are only owned by classes or modules.
+            return asTypeMemberRef().data(gs)->owner.asClassOrModuleRef();
     }
-    return owner.asClassOrModuleRef();
 }
 
 u4 Symbol::hash(const GlobalState &gs) const {
@@ -1550,7 +1564,7 @@ u4 Symbol::hash(const GlobalState &gs) const {
     result = mix(result, !this->resultType ? 0 : this->resultType.hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
-    result = mix(result, this->superClassOrRebind._id);
+    result = mix(result, this->superClassOrRebind.id());
     // argumentsOrMixins, typeParams, typeAliases
     if (!members().empty()) {
         // Rather than use membersStableOrderSlow, which is... slow..., use an order dictated by symbol ref ID.
@@ -1596,7 +1610,7 @@ u4 Symbol::methodShapeHash(const GlobalState &gs) const {
     u4 result = _hash(name.shortName(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);
-    result = mix(result, this->superClassOrRebind._id);
+    result = mix(result, this->superClassOrRebind.id());
     result = mix(result, this->hasSig());
     for (auto &arg : this->methodArgumentHash(gs)) {
         result = mix(result, arg);

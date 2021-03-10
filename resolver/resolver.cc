@@ -392,14 +392,14 @@ private:
 
     static bool resolveTypeAliasJob(core::MutableContext ctx, TypeAliasResolutionItem &job) {
         core::TypeMemberRef enclosingTypeMember;
-        core::ClassOrModuleRef enclosingClass = job.lhs.data(ctx)->enclosingClass(ctx);
+        core::ClassOrModuleRef enclosingClass = job.lhs.enclosingClass(ctx);
         while (enclosingClass != core::Symbols::root()) {
             auto typeMembers = enclosingClass.data(ctx)->typeMembers();
             if (!typeMembers.empty()) {
                 enclosingTypeMember = typeMembers[0].asTypeMemberRef();
                 break;
             }
-            enclosingClass = enclosingClass.data(ctx)->owner.data(ctx)->enclosingClass(ctx);
+            enclosingClass = enclosingClass.data(ctx)->owner.enclosingClass(ctx);
         }
         auto &rhs = *job.rhs;
         if (enclosingTypeMember.exists()) {
@@ -736,7 +736,7 @@ private:
             job.ancestor = cnst;
         } else if (ancestor.isSelfReference()) {
             auto loc = ancestor.loc();
-            auto enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
+            auto enclosingClass = ctx.owner.enclosingClass(ctx);
             auto nw = ast::MK::UnresolvedConstant(loc, std::move(ancestor), enclosingClass.data(ctx)->name);
             auto out = ast::make_expression<ast::ConstantLit>(loc, enclosingClass, std::move(nw));
             job.ancestor = ast::cast_tree<ast::ConstantLit>(out);
@@ -1340,7 +1340,7 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
             }
 
-            scope = ctx.owner.data(ctx)->enclosingClass(ctx);
+            scope = ctx.owner.enclosingClass(ctx);
         } else {
             // we need to check nested block counts because we want all fields to be declared on top level of either
             // class or body, rather then nested in some block
@@ -1914,7 +1914,7 @@ class ResolveTypeMembersAndFieldsWalk {
     }
 
     core::ClassOrModuleRef methodOwner(core::Context ctx) {
-        core::ClassOrModuleRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+        core::ClassOrModuleRef owner = ctx.owner.enclosingClass(ctx);
         if (owner == core::Symbols::root()) {
             // Root methods end up going on object
             owner = core::Symbols::Object();
@@ -2066,7 +2066,7 @@ public:
                     // Compute the containing class when translating the type,
                     // as there's a very good chance this has been called from a
                     // method context.
-                    item.owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+                    item.owner = ctx.owner.enclosingClass(ctx);
 
                     auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
                     auto expr = std::move(send.args[0]);
@@ -2448,7 +2448,7 @@ private:
 
                 mdef.rhs = ast::MK::EmptyTree();
             }
-            if (!mdef.symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
+            if (!mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleAbstract()) {
                 if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
                     e.setHeader("Before declaring an abstract method, you must mark your class/module "
                                 "as abstract using `abstract!` or `interface!`");
@@ -2487,7 +2487,7 @@ private:
 
             auto self = ast::MK::Self(mdef.loc);
             mdef.rhs = ast::MK::Send(mdef.loc, std::move(self), core::Names::super(), numPosArgs, std::move(args));
-        } else if (mdef.symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
+        } else if (mdef.symbol.enclosingClass(ctx).data(ctx)->isClassOrModuleInterface()) {
             if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");
             }
@@ -2694,7 +2694,7 @@ private:
         InlinedVector<ast::Send *, 1> lastSigs;
 
         // Explicitly check in the contxt of the class, not <static-init>
-        auto classCtx = ctx.withOwner(ctx.owner.data(ctx)->enclosingClass(ctx));
+        auto classCtx = ctx.withOwner(ctx.owner.enclosingClass(ctx));
 
         for (auto &stat : seq.stats) {
             processStatement(classCtx, stat, lastSigs);

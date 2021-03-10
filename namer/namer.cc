@@ -301,7 +301,7 @@ struct SymbolFinderResult {
 };
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, const ast::MethodDef::Flags &flags) {
-    auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+    auto owner = ctx.owner.enclosingClass(ctx);
     if (owner == core::Symbols::root()) {
         // Root methods end up going on object
         owner = core::Symbols::Object();
@@ -822,7 +822,7 @@ class SymbolDefiner {
     // Gets the symbol with the given name, or defines it as a class if it does not exist.
     core::SymbolRef getOrDefineSymbol(core::MutableContext ctx, core::NameRef name, core::LocOffsets loc) {
         if (name == core::Names::singleton()) {
-            return ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx);
+            return ctx.owner.enclosingClass(ctx).data(ctx)->singletonClass(ctx);
         }
 
         auto scope = ensureIsClass(ctx, ctx.owner, name, loc);
@@ -1060,7 +1060,7 @@ class SymbolDefiner {
 
     core::MethodRef insertMethod(core::MutableContext ctx, const FoundMethod &method) {
         auto symbol = defineMethod(ctx, method);
-        auto implicitlyPrivate = ctx.owner.data(ctx)->enclosingClass(ctx) == core::Symbols::root();
+        auto implicitlyPrivate = ctx.owner.enclosingClass(ctx) == core::Symbols::root();
         if (implicitlyPrivate) {
             // Methods defined at the top level default to private (on Object)
             symbol.data(ctx)->setMethodPrivate();
@@ -1074,7 +1074,7 @@ class SymbolDefiner {
     void modifyMethod(core::MutableContext ctx, const Modifier &mod) {
         ENFORCE(mod.kind == Modifier::Kind::Method);
 
-        auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+        auto owner = ctx.owner.enclosingClass(ctx);
         if (mod.name == core::Names::privateClassMethod()) {
             owner = owner.data(ctx)->singletonClass(ctx);
         }
@@ -1100,7 +1100,7 @@ class SymbolDefiner {
     void modifyConstant(core::MutableContext ctx, const Modifier &mod) {
         ENFORCE(mod.kind == Modifier::Kind::ClassOrStaticField);
 
-        auto owner = ctx.owner.data(ctx)->enclosingClass(ctx);
+        auto owner = ctx.owner.enclosingClass(ctx);
         auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
         auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
         if (constant.exists() && mod.name == core::Names::privateConstant()) {
@@ -1116,7 +1116,7 @@ class SymbolDefiner {
     }
 
     core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const FoundClass &klass) {
-        core::SymbolRef symbol = squashNames(ctx, klass.klass, ctx.owner.data(ctx)->enclosingClass(ctx));
+        core::SymbolRef symbol = squashNames(ctx, klass.klass, ctx.owner.enclosingClass(ctx));
         ENFORCE(symbol.exists());
 
         const bool isModule = klass.classKind == ast::ClassDef::Kind::Module;
@@ -1349,7 +1349,7 @@ class SymbolDefiner {
             sym.data(ctx)->resultType = core::make_type<core::LambdaParam>(sym, todo, todo);
 
             if (isTypeTemplate) {
-                auto context = ctx.owner.data(ctx)->enclosingClass(ctx);
+                auto context = ctx.owner.enclosingClass(ctx);
                 oldSym = context.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
                 if (oldSym.exists() && !(oldSym.data(ctx)->loc() == core::Loc(ctx.file, typeMember.asgnLoc) ||
                                          oldSym.data(ctx)->loc().isTombStoned(ctx))) {
@@ -1561,12 +1561,12 @@ public:
 
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Kind::Class);
-            klass.symbol = ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
+            klass.symbol = ctx.owner.enclosingClass(ctx).data(ctx)->lookupSingletonClass(ctx);
             ENFORCE(klass.symbol.exists());
         } else {
             auto symbol = klass.symbol;
             if (symbol == core::Symbols::todo()) {
-                auto squashedSymbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass.name);
+                auto squashedSymbol = squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name);
                 if (!squashedSymbol.isClassOrModule()) {
                     klass.symbol = ctx.state.lookupClassSymbol(klass.symbol.data(ctx)->owner.asClassOrModuleRef(),
                                                                klass.symbol.data(ctx)->name);

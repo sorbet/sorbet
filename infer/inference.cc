@@ -60,7 +60,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             methodReturnType = core::Types::untyped(ctx, cfg->symbol);
         }
     } else {
-        auto enclosingClass = cfg->symbol.data(ctx)->enclosingClass(ctx);
+        auto enclosingClass = cfg->symbol.enclosingClass(ctx);
         methodReturnType = core::Types::instantiate(
             ctx,
             core::Types::resultTypeAsSeenFrom(ctx, cfg->symbol.data(ctx)->resultType,

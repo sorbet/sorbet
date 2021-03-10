@@ -1061,8 +1061,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         } else if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
                                 ctx, symbol.data(ctx)->resultType, symbol.data(ctx)->owner.asClassOrModuleRef(),
-                                ctx.owner.data(ctx)->enclosingClass(ctx),
-                                ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
+                                ctx.owner.enclosingClass(ctx),
+                                ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
                         } else {
                             tp.type = data->resultType;
                         }
@@ -1252,7 +1252,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
             },
             [&](cfg::Cast *c) {
-                auto klass = ctx.owner.data(ctx)->enclosingClass(ctx);
+                auto klass = ctx.owner.enclosingClass(ctx);
                 auto castType = core::Types::instantiate(ctx, c->type, klass.data(ctx)->typeMembers(),
                                                          klass.data(ctx)->selfTypeArgs(ctx));
 

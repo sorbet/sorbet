@@ -21,7 +21,7 @@ bool extendsTSig(core::Context ctx, core::ClassOrModuleRef enclosingClass) {
 optional<core::AutocorrectSuggestion::Edit> maybeSuggestExtendTSig(core::Context ctx, core::MethodRef methodSymbol) {
     auto method = methodSymbol.data(ctx);
 
-    auto enclosingClass = method->enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
+    auto enclosingClass = methodSymbol.enclosingClass(ctx).data(ctx)->topAttachedClass(ctx);
     if (extendsTSig(ctx, enclosingClass)) {
         // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;
@@ -340,7 +340,7 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
 
     auto guessedArgumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
 
-    auto enclosingClass = methodSymbol.data(ctx)->enclosingClass(ctx);
+    auto enclosingClass = methodSymbol.enclosingClass(ctx);
     auto closestMethod = closestOverridenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
 
     fmt::memory_buffer ss;
