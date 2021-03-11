@@ -159,6 +159,7 @@ struct Options {
     bool ruby3KeywordArgs = false;
     std::set<int> isolateErrorCode;
     std::set<int> suppressErrorCode;
+    bool noErrorSections = false;
     /** Prefix to remove from all printed paths. */
     std::string pathPrefix;
 

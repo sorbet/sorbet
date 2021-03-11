@@ -472,6 +472,9 @@ int realmain(int argc, char *argv[]) {
     for (auto code : opts.suppressErrorCode) {
         gs->suppressErrorClass(code);
     }
+    if (opts.noErrorSections) {
+        gs->includeErrorSections = false;
+    }
     gs->ruby3KeywordArgs = opts.ruby3KeywordArgs;
     if (!opts.stripeMode) {
         // Definitions in multiple locations interact poorly with autoloader this error is enforced in Stripe code.

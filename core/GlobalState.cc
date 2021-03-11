@@ -1842,6 +1842,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->kvstoreUuid = this->kvstoreUuid;
     result->lspTypecheckCount = this->lspTypecheckCount;
     result->errorUrlBase = this->errorUrlBase;
+    result->includeErrorSections = this->includeErrorSections;
     result->ignoredForSuggestTypedErrorClasses = this->ignoredForSuggestTypedErrorClasses;
     result->suppressedErrorClasses = this->suppressedErrorClasses;
     result->onlyErrorClasses = this->onlyErrorClasses;
