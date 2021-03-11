@@ -99,16 +99,10 @@ module T::Private::Methods
   # when target includes a module with instance methods source_method_names, ensure there is zero intersection between
   # the final instance methods of target and source_method_names. so, for every m in source_method_names, check if there
   # is already a method defined on one of target_ancestors with the same name that is final.
+  #
+  # we assume that source_method_names has already been filtered to only include method
+  # names that were declared final at one point.
   def self._check_final_ancestors(target, target_ancestors, source_method_names)
-    if !module_with_final?(target)
-      return
-    end
-    source_method_names.select! do |method_name|
-      was_ever_final?(method_name)
-    end
-    if source_method_names.empty?
-      return
-    end
     # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
     # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
     target_ancestors.reverse_each do |ancestor|
@@ -187,7 +181,10 @@ module T::Private::Methods
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
-    _check_final_ancestors(mod, mod.ancestors, [method_name])
+    # Don't compute mod.ancestors if we don't need to bother checking final-ness.
+    if was_ever_final?(method_name) && module_with_final?(mod)
+      _check_final_ancestors(mod, mod.ancestors, [method_name])
+    end
 
     # We need to fetch the active declaration again, as _check_final_ancestors
     # may have reset it (see the comment in that method for details).
@@ -426,15 +423,30 @@ module T::Private::Methods
 
   # the module target is adding the methods from the module source to itself. we need to check that for all instance
   # methods M on source, M is not defined on any of target's ancestors.
-  def self._hook_impl(target, target_ancestors, source)
-    if !module_with_final?(target) && !module_with_final?(source)
+  def self._hook_impl(target, singleton_class, source)
+    target_was_final = module_with_final?(target)
+    if !target_was_final && !module_with_final?(source)
       return
     end
     # we do not need to call add_was_ever_final here, because we have already marked
     # any such methods when source was originally defined.
     add_module_with_final(target)
     install_hooks(target)
-    _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
+
+    if !target_was_final
+      return
+    end
+
+    methods = source.instance_methods
+    methods.select! do |method_name|
+      was_ever_final?(method_name)
+    end
+    if methods.empty?
+      return
+    end
+
+    target_ancestors = singleton_class ? target.singleton_class.ancestors : target.ancestors
+    _check_final_ancestors(target, target_ancestors - source.ancestors, methods)
   end
 
   def self.set_final_checks_on_hooks(enable)
@@ -448,15 +460,15 @@ module T::Private::Methods
     else
       old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
         old_included.bind(self).call(arg)
-        ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+        ::T::Private::Methods._hook_impl(arg, false, self)
       end
       old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
         old_extended.bind(self).call(arg)
-        ::T::Private::Methods._hook_impl(arg, arg.singleton_class.ancestors, self)
+        ::T::Private::Methods._hook_impl(arg, true, self)
       end
       old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited) do |arg|
         old_inherited.bind(self).call(arg)
-        ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+        ::T::Private::Methods._hook_impl(arg, false, self)
       end
       @old_hooks = [old_included, old_extended, old_inherited]
     end
