@@ -434,10 +434,13 @@ module T::Private::Methods
     # any such methods when source was originally defined.
     add_module_with_final(target)
     install_hooks(target)
-    if module_with_final?(target)
-      target_ancestors = singleton_class ? target.singleton_class.ancestors : target.ancestors
-      _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
+
+    if !module_with_final?(target)
+      return
     end
+
+    target_ancestors = singleton_class ? target.singleton_class.ancestors : target.ancestors
+    _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
   end
 
   def self.set_final_checks_on_hooks(enable)
