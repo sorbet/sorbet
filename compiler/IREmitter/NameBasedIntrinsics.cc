@@ -76,26 +76,28 @@ public:
         auto isModule = sym.data(cs)->superClass() == core::Symbols::Module();
         auto funcSym = cs.gs.lookupStaticInitForClass(attachedClass);
 
+        llvm::Value *module = nullptr;
+
         if (!IREmitterHelpers::isRootishSymbol(cs, sym.data(cs)->owner)) {
             auto getOwner = Payload::getRubyConstant(cs, sym.data(cs)->owner, builder);
             if (isModule) {
-                builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
+                module = builder.CreateCall(cs.getFunction("sorbet_defineNestedModule"), {getOwner, classNameCStr});
             } else {
                 auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
-                builder.CreateCall(cs.getFunction("sorbet_defineNestedClass"), {getOwner, classNameCStr, rawCall});
+                module =
+                    builder.CreateCall(cs.getFunction("sorbet_defineNestedClass"), {getOwner, classNameCStr, rawCall});
             }
         } else {
             if (isModule) {
-                builder.CreateCall(cs.getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
+                module = builder.CreateCall(cs.getFunction("sorbet_defineTopLevelModule"), {classNameCStr});
             } else {
                 auto rawCall = Payload::getRubyConstant(cs, sym.data(cs)->superClass(), builder);
-                builder.CreateCall(cs.getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
+                module = builder.CreateCall(cs.getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
             }
         }
         builder.CreateCall(IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc),
                            {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
-                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
-                            Payload::getRubyConstant(cs, sym, builder)});
+                            llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)), module});
         return Payload::rubyNil(cs, builder);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
