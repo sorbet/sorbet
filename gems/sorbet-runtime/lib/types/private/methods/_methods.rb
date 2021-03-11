@@ -426,7 +426,7 @@ module T::Private::Methods
 
   # the module target is adding the methods from the module source to itself. we need to check that for all instance
   # methods M on source, M is not defined on any of target's ancestors.
-  def self._hook_impl(target, target_ancestors, source)
+  def self._hook_impl(target, singleton_class, source)
     if !module_with_final?(target) && !module_with_final?(source)
       return
     end
@@ -435,6 +435,7 @@ module T::Private::Methods
     add_module_with_final(target)
     install_hooks(target)
     if module_with_final?(target)
+      target_ancestors = singleton_class ? target.singleton_class.ancestors : target.ancestors
       _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
     end
   end
@@ -450,15 +451,15 @@ module T::Private::Methods
     else
       old_included = T::Private::ClassUtils.replace_method(Module, :included) do |arg|
         old_included.bind(self).call(arg)
-        ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+        ::T::Private::Methods._hook_impl(arg, false, self)
       end
       old_extended = T::Private::ClassUtils.replace_method(Module, :extended) do |arg|
         old_extended.bind(self).call(arg)
-        ::T::Private::Methods._hook_impl(arg, arg.singleton_class.ancestors, self)
+        ::T::Private::Methods._hook_impl(arg, true, self)
       end
       old_inherited = T::Private::ClassUtils.replace_method(Class, :inherited) do |arg|
         old_inherited.bind(self).call(arg)
-        ::T::Private::Methods._hook_impl(arg, arg.ancestors, self)
+        ::T::Private::Methods._hook_impl(arg, false, self)
       end
       @old_hooks = [old_included, old_extended, old_inherited]
     end
