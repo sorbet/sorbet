@@ -100,9 +100,6 @@ module T::Private::Methods
   # the final instance methods of target and source_method_names. so, for every m in source_method_names, check if there
   # is already a method defined on one of target_ancestors with the same name that is final.
   def self._check_final_ancestors(target, target_ancestors, source_method_names)
-    if !module_with_final?(target)
-      return
-    end
     source_method_names.select! do |method_name|
       was_ever_final?(method_name)
     end
@@ -187,7 +184,10 @@ module T::Private::Methods
     if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
-    _check_final_ancestors(mod, mod.ancestors, [method_name])
+    # Don't compute mod.ancestors if we don't need to bother checking final-ness.
+    if module_with_final?(mod)
+      _check_final_ancestors(mod, mod.ancestors, [method_name])
+    end
 
     # We need to fetch the active declaration again, as _check_final_ancestors
     # may have reset it (see the comment in that method for details).
@@ -434,7 +434,9 @@ module T::Private::Methods
     # any such methods when source was originally defined.
     add_module_with_final(target)
     install_hooks(target)
-    _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
+    if module_with_final?(target)
+      _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
+    end
   end
 
   def self.set_final_checks_on_hooks(enable)
