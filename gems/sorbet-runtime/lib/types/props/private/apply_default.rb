@@ -57,9 +57,9 @@ module T::Props
           end
 
           ApplyComplexDefault.new(default, accessor_key, setter)
-        elsif rules.key?(:raise_on_nil_write)
-          # Apply a nil default behind the scenes for raise_on_nil_writes
-          ApplyPrimitiveDefault.new(nil, accessor_key, setter)
+        # elsif rules.key?(:raise_on_nil_write)
+        #   # Apply a nil default behind the scenes for raise_on_nil_writes
+        #   ApplyPrimitiveDefault.new(nil, accessor_key, setter)
         else
           nil
         end

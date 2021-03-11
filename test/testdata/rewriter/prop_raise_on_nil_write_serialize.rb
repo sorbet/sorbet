@@ -12,3 +12,4 @@ obj.serialize
 obj.foo = 'a string'
 
 obj.foo = nil
+       #  ^^^ error: Assigning a value to `foo` that does not match expected type `String`

@@ -54,7 +54,7 @@ module T::Props::Optional::DecoratorMethods
       rules[DEFAULT_SETTER_RULE_KEY] = default_setter
     else
       @props_without_defaults ||= {}
-      @props_without_defaults[prop] = rules.fetch(:setter_proc)
+      @props_without_defaults[prop] = rules
       @props_with_defaults&.delete(prop) # Handle potential override
     end
 

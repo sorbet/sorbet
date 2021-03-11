@@ -302,10 +302,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       NilFieldStruct.new
     end
 
-    it 'forbids explicit nil in constructor' do
-      assert_raises(TypeError) do
-        NilFieldStruct.new(foo: nil, bar: nil)
-      end
+    it 'allows explicit nil in constructor' do
+      NilFieldStruct.new(foo: nil, bar: nil)
     end
 
     it 'throws exception on nil serialize' do
@@ -753,6 +751,14 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       end
 
       it 'has meaningful validation which complains at lurky method invocation' do
+        src = ComplexStruct.decorator.send(:generate_serialize_source).to_s
+        src = src.sub(/\.transform_values\b/, '.something_suspicious')
+        assert_raises(T::Props::GeneratedCodeValidation::ValidationError) do
+          T::Props::GeneratedCodeValidation.validate_serialize(src)
+        end
+      end
+
+      it 'does the raise_on_nil_write thing correctly' do
         src = ComplexStruct.decorator.send(:generate_serialize_source).to_s
         src = src.sub(/\.transform_values\b/, '.something_suspicious')
         assert_raises(T::Props::GeneratedCodeValidation::ValidationError) do
