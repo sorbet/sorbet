@@ -99,13 +99,10 @@ module T::Private::Methods
   # when target includes a module with instance methods source_method_names, ensure there is zero intersection between
   # the final instance methods of target and source_method_names. so, for every m in source_method_names, check if there
   # is already a method defined on one of target_ancestors with the same name that is final.
+  #
+  # we assume that source_method_names has already been filtered to only include method
+  # names that were declared final at one point.
   def self._check_final_ancestors(target, target_ancestors, source_method_names)
-    source_method_names.select! do |method_name|
-      was_ever_final?(method_name)
-    end
-    if source_method_names.empty?
-      return
-    end
     # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
     # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
     target_ancestors.reverse_each do |ancestor|
@@ -440,8 +437,16 @@ module T::Private::Methods
       return
     end
 
+    methods = source.instance_methods
+    methods.select! do |method_name|
+      was_ever_final?(method_name)
+    end
+    if methods.empty?
+      return
+    end
+
     target_ancestors = singleton_class ? target.singleton_class.ancestors : target.ancestors
-    _check_final_ancestors(target, target_ancestors - source.ancestors, source.instance_methods)
+    _check_final_ancestors(target, target_ancestors - source.ancestors, methods)
   end
 
   def self.set_final_checks_on_hooks(enable)
