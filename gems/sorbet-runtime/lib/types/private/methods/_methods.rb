@@ -185,7 +185,7 @@ module T::Private::Methods
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
-    if module_with_final?(mod)
+    if was_ever_final?(method_name) && module_with_final?(mod)
       _check_final_ancestors(mod, mod.ancestors, [method_name])
     end
 
