@@ -44,4 +44,85 @@ class Opus::Types::Test::StructValidationTest < Critic::Unit::UnitTest
       end
     end
   end
+
+  it "raises a TypeError setting nil on raise_on_nil_write prop" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.nilable(String), raise_on_nil_write: true
+    end
+    m = klass.new(foo: "baz")
+    assert_raises(TypeError) do
+      m.foo = nil
+    end
+  end
+
+  it "raises an error omitting raise_on_nil_write prop on initialization" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.nilable(String), raise_on_nil_write: true
+    end
+    assert_raises(ArgumentError) do
+      klass.new
+    end
+  end
+
+  it "raises an error explicitly setting nil on raise_on_nil_write prop on initialization" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.nilable(String), raise_on_nil_write: true
+    end
+    assert_raises(TypeError) do
+      klass.new(foo: nil)
+    end
+  end
+
+  # pre-existing behavior
+  it "allows explicit nil default for raise_on_nil_write prop" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.nilable(String), raise_on_nil_write: true, default: nil
+    end
+    m = klass.new
+    assert(m.foo.nil?)
+  end
+
+  it "does not allow setting nil with T.any(NilClass, U) with raise_on_nil_write props" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.any(NilClass, String), raise_on_nil_write: true
+    end
+    m = klass.new(foo: 'foo')
+    assert_raises(TypeError) do
+      m.foo = nil
+    end
+  end
+
+  it "allows setting non-nil values with T.any(NilClass, U) with raise_on_nil_write props" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.any(NilClass, String), raise_on_nil_write: true
+    end
+    m = klass.new(foo: 'foo')
+    m.foo = 'bar'
+  end
+
+  it "raises an error implicitly setting nil with T.any(NilClass, U) on raise_on_nil_write prop on initialization" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.any(NilClass, String), raise_on_nil_write: true
+    end
+    assert_raises(ArgumentError) do
+      klass.new
+    end
+  end
+
+  it "raises an error explicitly setting nil with T.any(NilClass, U) on raise_on_nil_write prop on initialization" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.any(NilClass, String), raise_on_nil_write: true
+    end
+    assert_raises(TypeError) do
+      klass.new(foo: nil)
+    end
+  end
+
+  it "allows setting nil values with T.nilable(NilClass) with raise_on_nil_write props, which is fine maybe?" do
+    klass = Class.new(T::Struct) do
+      prop :foo, T.nilable(NilClass), raise_on_nil_write: true
+    end
+    m = klass.new
+    m.foo = nil
+  end
 end
