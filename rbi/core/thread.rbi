@@ -414,8 +414,8 @@ class Thread < Object
   sig {returns(T.nilable(ThreadGroup))}
   def group; end
 
-  sig {params(args: T.untyped).returns(Thread)}
-  def initialize(*args); end
+  sig {params(args: T.untyped, blk: T.untyped).returns(Thread)}
+  def initialize(*args, &blk); end
 
   # The calling thread will suspend execution and run this `thr`.
   #
