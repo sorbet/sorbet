@@ -460,8 +460,8 @@ class OptionParser
   sig {params(args: T.untyped).returns(T.untyped)}
   def inc(*args); end
 
-  sig {params(banner: T.untyped, width: T.untyped, indent: T.untyped).void}
-  def initialize(banner = nil, width = 32, indent = ' ' * 4); end
+  sig {params(banner: T.untyped, width: T.untyped, indent: T.untyped, blk: T.untyped).void}
+  def initialize(banner = nil, width = 32, indent = ' ' * 4, &blk); end
 
   sig {returns(T.untyped)}
   def add_officious(); end

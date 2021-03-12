@@ -1462,12 +1462,12 @@ class Array < Object
   sig {returns(T::Enumerator[Elem])}
   def index(arg0=T.unsafe(nil), &blk); end
 
-  sig {returns(Object)}
+  sig {void}
   sig do
     params(
         arg0: Integer,
     )
-    .returns(Object)
+    .void
   end
   sig do
     params(
@@ -1482,7 +1482,14 @@ class Array < Object
     )
     .void
   end
-  def initialize(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
+  sig do
+    params(
+      arg0: Integer,
+      blk: T.proc.params(index: Integer).void,
+    )
+    .void
+  end
+  def initialize(arg0=T.unsafe(nil), arg1=T.unsafe(nil), &blk); end
 
   # Inserts the given values before the element with the given `index`.
   #
@@ -1915,8 +1922,8 @@ class Array < Object
   # [1,2].product()            #=> [[1],[2]]
   # [1,2].product([])          #=> []
   # ```
-  sig {params(arg: T::Array[T.untyped]).returns(T::Array[T.untyped])}
-  def product(*arg); end
+  sig {params(arg: T::Array[T.untyped], blk: T.untyped).returns(T::Array[T.untyped])}
+  def product(*arg, &blk); end
 
   # Append --- Pushes the given object(s) on to the end of this array. This
   # expression returns the array itself, so several appends may be chained
@@ -2655,8 +2662,8 @@ class Array < Object
   # b = [["student","sam"], ["student","george"], ["teacher","matz"]]
   # b.uniq {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   # ```
-  sig {returns(T::Array[Elem])}
-  def uniq(); end
+  sig {params(blk: T.nilable(T.proc.params(arg0: Elem).returns(BasicObject))).returns(T::Array[Elem])}
+  def uniq(&blk); end
 
   # Removes duplicate elements from `self`.
   #
@@ -2682,8 +2689,8 @@ class Array < Object
   # c = [["student","sam"], ["student","george"], ["teacher","matz"]]
   # c.uniq! {|s| s.first}   # => [["student", "sam"], ["teacher", "matz"]]
   # ```
-  sig {returns(T.nilable(T::Array[Elem]))}
-  def uniq!(); end
+  sig {params(blk: T.nilable(T.proc.params(arg0: Elem).returns(BasicObject))).returns(T::Array[Elem])}
+  def uniq!(&blk); end
 
   # Prepends objects to the front of `self`, moving other elements upwards. See
   # also

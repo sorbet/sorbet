@@ -737,7 +737,7 @@ class CSV < Object
   # *   [`to_io`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-i-to_io)()
   # *   truncate()
   # *   tty?()
-  def self.open(filename, mode = _, **options); end
+  def self.open(filename, mode = _, **options, &blk); end
 
   # Alias for
   # [`CSV::read()`](https://docs.ruby-lang.org/en/2.7.0/CSV.html#method-c-read).
@@ -786,7 +786,7 @@ class CSV < Object
   # [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html).
   #
   # The data source must be open for reading.
-  def each; end
+  def each(&blk); end
 
   # The [`Encoding`](https://docs.ruby-lang.org/en/2.7.0/Encoding.html)
   # [`CSV`](https://docs.ruby-lang.org/en/2.7.0/CSV.html) is parsing or writing
@@ -1482,7 +1482,8 @@ sig do
   params(
       io: T.any(::Sorbet::Private::Static::IOLike, String),
       options: T::Hash[Symbol, T.untyped],
+      blk: T.untyped,
   )
   .returns(CSV)
 end
-def CSV(io=T.unsafe(nil), options=T.unsafe(nil)); end
+def CSV(io=T.unsafe(nil), options=T.unsafe(nil), &blk); end

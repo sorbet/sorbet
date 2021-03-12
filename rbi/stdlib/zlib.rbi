@@ -666,7 +666,7 @@ class Zlib::GzipFile
   # object open, you may call
   # [`Zlib::GzipFile#finish`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-i-finish)
   # method in the block.
-  def self.wrap(*_); end
+  def self.wrap(*_, &blk); end
 end
 
 # Raised when the CRC checksum recorded in gzip file footer is not equivalent to
@@ -895,7 +895,7 @@ class Zlib::GzipReader < ::Zlib::GzipFile
   # object associated with that file. Further details of this method are in
   # [`Zlib::GzipReader.new`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipReader.html#method-c-new)
   # and ZLib::GzipFile.wrap.
-  def self.open(*_); end
+  def self.open(*_, &blk); end
 end
 
 # [`Zlib::GzipWriter`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html)
@@ -1013,7 +1013,7 @@ class Zlib::GzipWriter < ::Zlib::GzipFile
   # [`Zlib::GzipWriter.new`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipWriter.html#method-c-new)
   # and
   # [`Zlib::GzipFile.wrap`](https://docs.ruby-lang.org/en/2.7.0/Zlib/GzipFile.html#method-c-wrap).
-  def self.open(*_); end
+  def self.open(*_, &blk); end
 end
 
 # Zlib:Inflate is the class for decompressing compressed data. Unlike

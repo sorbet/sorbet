@@ -200,8 +200,8 @@ class Date
   def initialize(year=-4712, month=1, mday=1, start=Date::ITALY); end
 
   # This method is equivalent to step(max, 1){|date| ...}.
-  sig {params(arg0: T.untyped).returns(T.untyped)}
-  def upto(arg0); end
+  sig {params(arg0: T.untyped, blk: T.untyped).returns(T.untyped)}
+  def upto(arg0, &blk); end
 
   sig do
     params(

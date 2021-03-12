@@ -16,7 +16,7 @@ module Foo
         errors = enabled_methods
           .filter_map {|(_, foo)| foo}
           .flat_map {|validation| validation.public_send(validation)} # error-with-dupes: This code is unreachable
-                                               # ^ hover: def public_send(arg0, *args); end
+                                               # ^ hover: def public_send(arg0, *args, &blk); end
         errors
       end
     end

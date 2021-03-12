@@ -114,7 +114,7 @@ class Dir < Object
   # Got config.h
   # Got main.rb
   # ```
-  def self.each_child(*_); end
+  def self.each_child(*_, &blk); end
 
   # Returns `true` if the named file is an empty directory, `false` if it is not
   # a directory or non-empty.

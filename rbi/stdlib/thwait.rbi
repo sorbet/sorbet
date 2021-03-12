@@ -78,5 +78,5 @@ class ThreadsWait
 
   # Waits until all specified threads have terminated. If a block is provided,
   # it is executed for each thread as they terminate.
-  def self.all_waits(*threads); end
+  def self.all_waits(*threads, &blk); end
 end
