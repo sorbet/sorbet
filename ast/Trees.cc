@@ -713,7 +713,7 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "orig = {}\n", this->original ? this->original.showRaw(gs, tabs + 1) : "nullptr");
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "symbol = ({} {})\n", this->symbol.dataAllowingNone(gs)->showKind(gs),
+    fmt::format_to(buf, "symbol = ({} {})\n", this->symbol.showKind(gs),
                    this->symbol.dataAllowingNone(gs)->showFullName(gs));
     if (!resolutionScopes.empty()) {
         printTabs(buf, tabs + 1);

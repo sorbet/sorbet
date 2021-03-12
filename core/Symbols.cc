@@ -296,10 +296,14 @@ SymbolData FieldRef::data(GlobalState &gs) const {
     return SymbolData(gs.fields[_id], gs);
 }
 
-ConstSymbolData FieldRef::data(const GlobalState &gs) const {
-    ENFORCE_NO_TIMER(this->exists());
+ConstSymbolData FieldRef::dataAllowingNone(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(_id < gs.fieldsUsed());
     return ConstSymbolData(gs.fields[_id], gs);
+}
+
+ConstSymbolData FieldRef::data(const GlobalState &gs) const {
+    ENFORCE_NO_TIMER(this->exists());
+    return dataAllowingNone(gs);
 }
 
 SymbolData TypeMemberRef::data(GlobalState &gs) const {
@@ -828,31 +832,51 @@ bool Symbol::isPrintable(const GlobalState &gs) const {
     return false;
 }
 
-string_view Symbol::showKind(const GlobalState &gs) const {
-    string_view type = "unknown"sv;
-    if (this->isClassOrModule()) {
-        if (this->isClassOrModuleClass()) {
-            type = "class"sv;
-        } else {
-            type = "module"sv;
-        }
-    } else if (this->isStaticField()) {
-        if (this->isTypeAlias()) {
-            type = "static-field-type-alias"sv;
-        } else {
-            type = "static-field"sv;
-        }
-    } else if (this->isField()) {
-        type = "field"sv;
-    } else if (this->isMethod()) {
-        type = "method"sv;
-    } else if (this->isTypeMember()) {
-        type = "type-member"sv;
-    } else if (this->isTypeArgument()) {
-        type = "type-argument"sv;
+string_view SymbolRef::showKind(const GlobalState &gs) const {
+    switch (this->kind()) {
+        case Kind::ClassOrModule:
+            return asClassOrModuleRef().showKind(gs);
+        case Kind::FieldOrStaticField:
+            return asFieldRef().showKind(gs);
+        case Kind::Method:
+            return asMethodRef().showKind(gs);
+        case Kind::TypeArgument:
+            return asTypeArgumentRef().showKind(gs);
+        case Kind::TypeMember:
+            return asTypeMemberRef().showKind(gs);
     }
+}
 
-    return type;
+string_view ClassOrModuleRef::showKind(const GlobalState &gs) const {
+    if (dataAllowingNone(gs)->isClassOrModuleClass()) {
+        return "class"sv;
+    } else {
+        return "module"sv;
+    }
+}
+
+string_view FieldRef::showKind(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    if (sym->isStaticField()) {
+        if (sym->isTypeAlias()) {
+            return "static-field-type-alias"sv;
+        } else {
+            return "static-field"sv;
+        }
+    }
+    return "field"sv;
+}
+
+string_view MethodRef::showKind(const GlobalState &gs) const {
+    return "method"sv;
+}
+
+string_view TypeMemberRef::showKind(const GlobalState &gs) const {
+    return "type-member"sv;
+}
+
+string_view TypeArgumentRef::showKind(const GlobalState &gs) const {
+    return "type-argument"sv;
 }
 
 string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
@@ -862,8 +886,7 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{} {}", sym->isClassOrModuleModule() ? "module" : "class",
-                   showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
+    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
 
     auto typeMembers = sym->typeMembers();
     auto it =
@@ -927,7 +950,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "method {}", showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
+    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
 
     auto methodFlags = InlinedVector<string, 3>{};
 
@@ -980,14 +1003,12 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
     }
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
-
     fmt::format_to(buf, "\n");
     for (auto pair : sym->membersStableOrderSlow(gs)) {
         ENFORCE_NO_TIMER(pair.second.exists());
-        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
-            pair.first == Names::mixedInClassMethods()) {
-            continue;
-        }
+        // These should only show up in classes.
+        ENFORCE_NO_TIMER(pair.first != Names::singleton() && pair.first != Names::attached() &&
+                         pair.first != Names::mixedInClassMethods());
 
         if (!showFull && !pair.second.data(gs)->isPrintable(gs)) {
             continue;
@@ -1015,16 +1036,7 @@ string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showF
 
     auto sym = data(gs);
 
-    string_view type;
-    if (sym->isStaticField()) {
-        if (sym->isTypeAlias()) {
-            type = "static-field-type-alias"sv;
-        } else {
-            type = "static-field"sv;
-        }
-    } else {
-        type = "field"sv;
-    }
+    string_view type = showKind(gs);
 
     string_view access;
     if (sym->isStaticField() && sym->isStaticFieldPrivate()) {
@@ -1050,7 +1062,7 @@ string TypeMemberRef::toStringWithOptions(const GlobalState &gs, int tabs, bool 
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "type-member{} {}", getVariance(sym),
+    fmt::format_to(buf, "{}{} {}", showKind(gs), getVariance(sym),
                    showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
@@ -1070,7 +1082,7 @@ string TypeArgumentRef::toStringWithOptions(const GlobalState &gs, int tabs, boo
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "type-argument{} {}", getVariance(sym),
+    fmt::format_to(buf, "{}{} {}", showKind(gs), getVariance(sym),
                    showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);

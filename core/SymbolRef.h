@@ -83,6 +83,8 @@ public:
         bool showRaw = false;
         return toStringWithOptions(gs, 0, showFull, showRaw);
     }
+
+    std::string_view showKind(const GlobalState &gs) const;
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
@@ -114,7 +116,9 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
+    std::string_view showKind(const GlobalState &gs) const;
 
     bool operator==(const MethodRef &rhs) const;
 
@@ -151,6 +155,8 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
+    std::string_view showKind(const GlobalState &gs) const;
 
     bool operator==(const FieldRef &rhs) const;
 
@@ -187,6 +193,7 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    std::string_view showKind(const GlobalState &gs) const;
 
     bool operator==(const TypeMemberRef &rhs) const;
 
@@ -223,6 +230,7 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    std::string_view showKind(const GlobalState &gs) const;
 
     bool operator==(const TypeArgumentRef &rhs) const;
 
@@ -384,6 +392,7 @@ public:
     bool operator!=(const SymbolRef &rhs) const;
 
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
+    std::string_view showKind(const GlobalState &gs) const;
 
     std::string showRaw(const GlobalState &gs) const {
         bool showFull = false;
