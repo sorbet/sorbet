@@ -59,6 +59,7 @@ public:
 class IREmitterHelpers {
 public:
     static bool isClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym);
+    static bool isFileStaticInit(const core::GlobalState &gs, core::SymbolRef sym);
     static bool isFileOrClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym);
 
     // Returns a core::Loc whose start and end positions containt the bounds of the method sym.

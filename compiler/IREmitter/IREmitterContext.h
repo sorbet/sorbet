@@ -9,8 +9,11 @@ enum class FunctionType {
     // A normal method
     Method,
 
-    // A static-init method
-    StaticInit,
+    // A file-scope static-init method
+    StaticInitFile,
+
+    // A module/class-scope static-init method
+    StaticInitModule,
 
     // Blocks used within a method
     Block,
@@ -32,7 +35,9 @@ constexpr bool functionTypePushesFrame(FunctionType ty) {
     switch (ty) {
         case FunctionType::Method:
             return false;
-        case FunctionType::StaticInit:
+        case FunctionType::StaticInitModule:
+            return false;
+        case FunctionType::StaticInitFile:
             return false;
         case FunctionType::Block:
             return false;

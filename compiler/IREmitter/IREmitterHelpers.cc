@@ -323,7 +323,8 @@ void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Func
     for (int i = 0; i <= cfg.maxRubyBlockId; i++) {
         switch (blockTypes[i]) {
             case FunctionType::Method:
-            case FunctionType::StaticInit:
+            case FunctionType::StaticInitFile:
+            case FunctionType::StaticInitModule:
                 funcs[i] = func;
                 break;
 
@@ -395,7 +396,9 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
         // while the file-level static-init gets marked as Method.
         //
         // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/load.c#L1033-L1034
-        blockTypes[0] = FunctionType::StaticInit;
+        blockTypes[0] = FunctionType::StaticInitModule;
+    } else if (IREmitterHelpers::isFileStaticInit(cs, cfg.symbol)) {
+        blockTypes[0] = FunctionType::StaticInitFile;
     } else {
         blockTypes[0] = FunctionType::Method;
     }
@@ -477,7 +480,8 @@ int getBlockLevel(vector<int> &blockParents, vector<FunctionType> &blockTypes, i
     while (true) {
         switch (blockTypes[rubyBlockId]) {
             case FunctionType::Method:
-            case FunctionType::StaticInit:
+            case FunctionType::StaticInitFile:
+            case FunctionType::StaticInitModule:
                 return level;
 
             case FunctionType::Block:
@@ -561,12 +565,14 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         llvm::Value *offsetValue = nullptr;
         switch (blockTypes[i]) {
             case FunctionType::Method:
-            case FunctionType::StaticInit:
-                if (useLocalsOffset) {
-                    offsetValue = builder.CreateLoad(IREmitterHelpers::getStaticInitLocalsOffset(cs, md.symbol));
-                } else {
-                    offsetValue = llvm::ConstantInt::get(cs, llvm::APInt(64, 0, false));
-                }
+                ENFORCE(!useLocalsOffset);
+                offsetValue = llvm::ConstantInt::get(cs, llvm::APInt(64, 0, false));
+                break;
+
+            case FunctionType::StaticInitFile:
+            case FunctionType::StaticInitModule:
+                ENFORCE(useLocalsOffset);
+                offsetValue = builder.CreateLoad(IREmitterHelpers::getStaticInitLocalsOffset(cs, md.symbol));
                 break;
 
             case FunctionType::Block:
@@ -792,15 +798,13 @@ string IREmitterHelpers::getFunctionName(CompilerState &cs, core::SymbolRef sym)
     return prefix + suffix;
 }
 
-namespace {
-bool isFileStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
+bool IREmitterHelpers::isFileStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
     auto name = sym.data(gs)->name;
     if (name.kind() != core::NameKind::UNIQUE) {
         return false;
     }
     return name.dataUnique(gs)->original == core::Names::staticInit();
 }
-} // namespace
 
 bool IREmitterHelpers::isClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
     return sym.data(gs)->name == core::Names::staticInit();
@@ -1005,7 +1009,8 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
 bool IREmitterHelpers::hasBlockArgument(CompilerState &cs, int blockId, core::SymbolRef method,
                                         const IREmitterContext &irctx) {
     auto ty = irctx.rubyBlockType[blockId];
-    if (!(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInit)) {
+    if (!(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInitFile ||
+          ty == FunctionType::StaticInitModule)) {
         return false;
     }
 

@@ -30,7 +30,8 @@ namespace {
 vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blockId, core::SymbolRef method,
                                                       const IREmitterContext &irctx) {
     auto ty = irctx.rubyBlockType[blockId];
-    ENFORCE(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInit);
+    ENFORCE(ty == FunctionType::Block || ty == FunctionType::Method || ty == FunctionType::StaticInitFile ||
+            ty == FunctionType::StaticInitModule);
 
     if (ty == FunctionType::Block) {
         auto blockLink = irctx.blockLinks[blockId];
@@ -51,7 +52,8 @@ void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitte
 
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-        case FunctionType::StaticInit:
+        case FunctionType::StaticInitFile:
+        case FunctionType::StaticInitModule:
         case FunctionType::Block:
         case FunctionType::Rescue:
         case FunctionType::Ensure: {
@@ -108,8 +110,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
         IREmitterHelpers::emitDebugLoc(cs, builder, irctx, rubyBlockId, loc);
 
         auto blockType = irctx.rubyBlockType[rubyBlockId];
-        if (blockType == FunctionType::Method || blockType == FunctionType::StaticInit ||
-            blockType == FunctionType::Block) {
+        if (blockType == FunctionType::Method || blockType == FunctionType::StaticInitFile ||
+            blockType == FunctionType::StaticInitModule || blockType == FunctionType::Block) {
             auto func = irctx.rubyBlocks2Functions[rubyBlockId];
             auto maxPositionalArgCount = 0;
             auto minPositionalArgCount = 0;
@@ -445,7 +447,8 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
 
         switch (blockType) {
             case FunctionType::Method:
-            case FunctionType::StaticInit:
+            case FunctionType::StaticInitFile:
+            case FunctionType::StaticInitModule:
             case FunctionType::Block:
             case FunctionType::ExceptionBegin:
             case FunctionType::Rescue:
@@ -546,7 +549,8 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
                         switch (irctx.rubyBlockType[bb->rubyBlockId]) {
                             case FunctionType::Method:
-                            case FunctionType::StaticInit: {
+                            case FunctionType::StaticInitFile:
+                            case FunctionType::StaticInitModule: {
                                 Payload::varSet(cs, returnValue(cfg, cs), var, builder, irctx, bb->rubyBlockId);
                                 builder.CreateBr(irctx.postProcessBlock);
                                 break;
@@ -680,7 +684,8 @@ void emitBlockExits(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &
 
         switch (irctx.rubyBlockType[rubyBlockId]) {
             case FunctionType::Method:
-            case FunctionType::StaticInit:
+            case FunctionType::StaticInitFile:
+            case FunctionType::StaticInitModule:
                 builder.CreateUnreachable();
                 break;
 

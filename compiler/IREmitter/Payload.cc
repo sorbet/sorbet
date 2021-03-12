@@ -408,7 +408,8 @@ llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &build, const IR
     auto &builder = builderCast(build);
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-        case FunctionType::StaticInit:
+        case FunctionType::StaticInitFile:
+        case FunctionType::StaticInitModule:
             return builder.CreateCall(cs.getFunction("sorbet_rubyIseqTypeMethod"), {}, "ISEQ_TYPE_METHOD");
 
         case FunctionType::Block:
@@ -440,16 +441,15 @@ std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBu
     llvm::Value *parent = nullptr;
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-        case FunctionType::StaticInit: {
-            if (IREmitterHelpers::isFileOrClassStaticInit(cs, md.symbol)) {
-                funcName = "<top (required)>";
-            } else {
-                funcName = md.symbol.data(cs)->name.shortName(cs);
-            }
-
+            funcName = md.symbol.data(cs)->name.shortName(cs);
             parent = llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(cs));
             break;
-        }
+
+        case FunctionType::StaticInitFile:
+        case FunctionType::StaticInitModule:
+            funcName = "<top (required)>";
+            parent = llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(cs));
+            break;
 
         case FunctionType::Block:
             funcName = "block for"sv;
@@ -479,21 +479,6 @@ std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBu
     }
 
     return {funcName, parent};
-}
-
-bool allocatesLocals(CompilerState &cs, const IREmitterContext &irctx, core::SymbolRef method, int rubyBlockId) {
-    switch (irctx.rubyBlockType[rubyBlockId]) {
-        case FunctionType::Method:
-        case FunctionType::StaticInit:
-            return true;
-
-        case FunctionType::Block:
-        case FunctionType::Rescue:
-        case FunctionType::Ensure:
-        case FunctionType::ExceptionBegin:
-        case FunctionType::Unused:
-            return false;
-    }
 }
 
 // Fill the locals array with interned ruby IDs.
@@ -578,15 +563,23 @@ enum class LocalsIDStorage {
 
 LocalsIDStorage classifyStorageFor(CompilerState &cs, const IREmitterContext &irctx, const ast::MethodDef &md,
                                    int rubyBlockId) {
-    if (!allocatesLocals(cs, irctx, md.symbol, rubyBlockId)) {
-        return LocalsIDStorage::Inherited;
-    }
+    switch (irctx.rubyBlockType[rubyBlockId]) {
+        case FunctionType::Method:
+            return LocalsIDStorage::Stack;
 
-    if (!IREmitterHelpers::isFileOrClassStaticInit(cs, md.symbol)) {
-        return LocalsIDStorage::Stack;
-    }
+        case FunctionType::StaticInitFile:
+        // XXX module-level static init really re-uses locals from the file-level
+        // static init, so it should be inherited.
+        case FunctionType::StaticInitModule:
+            return LocalsIDStorage::GlobalArray;
 
-    return LocalsIDStorage::GlobalArray;
+        case FunctionType::Block:
+        case FunctionType::Rescue:
+        case FunctionType::Ensure:
+        case FunctionType::ExceptionBegin:
+        case FunctionType::Unused:
+            return LocalsIDStorage::Inherited;
+    }
 }
 
 // Allocate an array to hold local variable ids before calling `sorbet_allocateRubyStackFrame`.
@@ -646,10 +639,11 @@ tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilder
 
             // Finally, we only set the locals pointer to a non-null value if this is the top-level static-init, as
             // that is the function that will be responsible for allocating the frame used by all static-init methods.
-            if (IREmitterHelpers::isClassStaticInit(cs, md.symbol)) {
+            if (irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitModule) {
                 numLocals = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true));
                 locals = llvm::ConstantPointerNull::get(idPtrType);
             } else {
+                ENFORCE(irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitFile);
                 numLocals = builder.CreateLoad(staticInitLocalsSizePtr, "numLocals");
                 locals = builder.CreateLoad(staticInitLocalsPtr, "locals");
             }
@@ -718,7 +712,8 @@ string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx,
 
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-        case FunctionType::StaticInit:
+        case FunctionType::StaticInitFile:
+        case FunctionType::StaticInitModule:
             return name;
 
         case FunctionType::Block:
@@ -775,7 +770,7 @@ std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState
     auto stackFrame = allocateRubyStackFrames(cs, builder, irctx, md, rubyBlockId);
     auto *iseqType = getIseqType(cs, builder, irctx, rubyBlockId);
     auto *isClassOrModuleStaticInit =
-        llvm::ConstantInt::get(cs, llvm::APInt(1, irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInit));
+        llvm::ConstantInt::get(cs, llvm::APInt(1, irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitModule));
     auto cfp = builder.CreateCall(cs.getFunction("sorbet_setRubyStackFrame"),
                                   {isClassOrModuleStaticInit, iseqType, stackFrame});
     auto pc = builder.CreateCall(cs.getFunction("sorbet_getPc"), {cfp});
