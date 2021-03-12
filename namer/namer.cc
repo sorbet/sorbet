@@ -838,9 +838,7 @@ class SymbolDefiner {
     void defineArg(core::MutableContext ctx, core::SymbolData &methodData, int pos, const ast::ParsedArg &parsedArg) {
         if (pos < methodData->arguments().size()) {
             // TODO: check that flags match;
-            if (parsedArg.loc.exists()) {
-                methodData->arguments()[pos].loc = core::Loc(ctx.file, parsedArg.loc);
-            }
+            methodData->arguments()[pos].loc = core::Loc(ctx.file, parsedArg.loc);
             return;
         }
 
