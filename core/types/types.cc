@@ -217,7 +217,7 @@ TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from, ClassO
         });
     SLOW_ENFORCE(Types::isSubType(gs, result, from),
                  "dropSubtypesOf({}, {}) returned {}, which is not a subtype of the input", from.toString(gs),
-                 klass.data(gs)->showFullName(gs), result.toString(gs));
+                 klass.showFullName(gs), result.toString(gs));
     return result;
 }
 

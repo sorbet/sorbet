@@ -701,7 +701,7 @@ string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
 
 string ConstantLit::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
     if (symbol.exists() && symbol != core::Symbols::StubModule()) {
-        return this->symbol.dataAllowingNone(gs)->showFullName(gs);
+        return this->symbol.showFullName(gs);
     }
     return "Unresolved: " + this->original.toStringWithTabs(gs, tabs);
 }
@@ -713,13 +713,12 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     fmt::format_to(buf, "orig = {}\n", this->original ? this->original.showRaw(gs, tabs + 1) : "nullptr");
     printTabs(buf, tabs + 1);
-    fmt::format_to(buf, "symbol = ({} {})\n", this->symbol.showKind(gs),
-                   this->symbol.dataAllowingNone(gs)->showFullName(gs));
+    fmt::format_to(buf, "symbol = ({} {})\n", this->symbol.showKind(gs), this->symbol.showFullName(gs));
     if (!resolutionScopes.empty()) {
         printTabs(buf, tabs + 1);
         fmt::format_to(buf, "resolutionScopes = [{}]\n",
                        fmt::map_join(this->resolutionScopes.begin(), this->resolutionScopes.end(), ", ",
-                                     [&](auto sym) { return sym.data(gs)->showFullName(gs); }));
+                                     [&](auto sym) { return sym.showFullName(gs); }));
     }
     printTabs(buf, tabs);
 

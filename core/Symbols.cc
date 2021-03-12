@@ -474,18 +474,18 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
     if (maxDepth == 0) {
         if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
             e.setHeader("findMemberTransitive hit a loop while resolving `{}` in `{}`. Parents are: ", name.show(gs),
-                        this->showFullName(gs));
+                        ref(gs).showFullName(gs));
         }
         int i = -1;
         for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
             i++;
             if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
-                e.setHeader("`{}`:- `{}`", i, it->data(gs)->showFullName(gs));
+                e.setHeader("`{}`:- `{}`", i, it->showFullName(gs));
             }
             int j = 0;
             for (auto it2 = it->data(gs)->mixins().rbegin(); it2 != it->data(gs)->mixins().rend(); ++it2) {
                 if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
-                    e.setHeader("`{}`:`{}` `{}`", i, j, it2->data(gs)->showFullName(gs));
+                    e.setHeader("`{}`:`{}` `{}`", i, j, it2->showFullName(gs));
                 }
                 j++;
             }
@@ -736,26 +736,10 @@ string Symbol::toStringFullName(const GlobalState &gs) const {
     return fmt::format("{}{}", owner, this->name.showRaw(gs));
 }
 
-string Symbol::showFullName(const GlobalState &gs) const {
-    if (this->owner == core::Symbols::PackageRegistry()) {
-        // Pretty print package name (only happens when `--stripe-packages` is enabled)
-        if (this->name.isPackagerName(gs)) {
-            auto nameStr = this->name.shortName(gs);
-            constexpr size_t packageSuffix = char_traits<char>::length("_Package");
-            // Foo_Bar_Package => Foo::Bar
-            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageSuffix), {{"_", "::"}});
-        }
-    }
-    bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
-    string owner = includeOwner ? this->owner.data(gs)->showFullName(gs) : "";
-
-    bool needsColonColon = this->isClassOrModule() || this->isStaticField() || this->isTypeMember();
-    string separator = needsColonColon ? "::" : "#";
-
-    return fmt::format("{}{}{}", owner, separator, this->name.show(gs));
-}
-
 namespace {
+string_view COLON_SEPARATOR = "::"sv;
+string_view HASH_SEPARATOR = "#"sv;
+
 bool isHiddenFromPrinting(const GlobalState &gs, const Symbol &symbol) {
     if (symbol.ref(gs).isSynthetic()) {
         return true;
@@ -811,7 +795,62 @@ void printResultType(const GlobalState &gs, fmt::memory_buffer &buf, const TypeP
     }
 }
 
+string showFullNameInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
+    bool includeOwner = owner.exists() && owner != Symbols::root();
+    string ownerStr = includeOwner ? owner.showFullName(gs) : "";
+    return absl::StrCat(ownerStr, separator, name.show(gs));
+}
+
 } // namespace
+
+string SymbolRef::showFullName(const GlobalState &gs) const {
+    switch (kind()) {
+        case Kind::ClassOrModule:
+            return asClassOrModuleRef().showFullName(gs);
+        case Kind::Method:
+            return asMethodRef().showFullName(gs);
+        case Kind::FieldOrStaticField:
+            return asFieldRef().showFullName(gs);
+        case Kind::TypeArgument:
+            return asTypeArgumentRef().showFullName(gs);
+        case Kind::TypeMember:
+            return asTypeMemberRef().showFullName(gs);
+    }
+}
+
+string ClassOrModuleRef::showFullName(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    if (sym->owner == core::Symbols::PackageRegistry()) {
+        // Pretty print package name (only happens when `--stripe-packages` is enabled)
+        if (sym->name.isPackagerName(gs)) {
+            auto nameStr = sym->name.shortName(gs);
+            constexpr size_t packageSuffix = char_traits<char>::length("_Package");
+            // Foo_Bar_Package => Foo::Bar
+            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageSuffix), {{"_", "::"}});
+        }
+    }
+    return showFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
+}
+
+string MethodRef::showFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return showFullNameInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
+}
+
+string FieldRef::showFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return showFullNameInternal(gs, sym->owner, sym->name, sym->isStaticField() ? COLON_SEPARATOR : HASH_SEPARATOR);
+}
+
+string TypeArgumentRef::showFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return showFullNameInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
+}
+
+string TypeMemberRef::showFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return showFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
+}
 
 bool Symbol::isPrintable(const GlobalState &gs) const {
     if (!isHiddenFromPrinting(gs, *this)) {
@@ -886,7 +925,7 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
+    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? sym->toStringFullName(gs) : showFullName(gs));
 
     auto typeMembers = sym->typeMembers();
     auto it =
@@ -901,7 +940,7 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
 
     if (sym->superClass().exists()) {
         auto superClass = sym->superClass().data(gs);
-        fmt::format_to(buf, " < {}", showRaw ? superClass->toStringFullName(gs) : superClass->showFullName(gs));
+        fmt::format_to(buf, " < {}", showRaw ? superClass->toStringFullName(gs) : sym->superClass().showFullName(gs));
     }
 
     fmt::format_to(buf, " ({})", fmt::map_join(sym->mixins(), ", ", [&](auto symb) {
@@ -950,7 +989,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
+    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? sym->toStringFullName(gs) : showFullName(gs));
 
     auto methodFlags = InlinedVector<string, 3>{};
 
@@ -998,8 +1037,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
     if (sym->rebind().exists()) {
         fmt::format_to(buf, " rebindTo {}",
-                       showRaw ? sym->rebind().data(gs)->toStringFullName(gs)
-                               : sym->rebind().data(gs)->showFullName(gs));
+                       showRaw ? sym->rebind().data(gs)->toStringFullName(gs) : sym->rebind().showFullName(gs));
     }
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
@@ -1043,7 +1081,7 @@ string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showF
         access = " : private"sv;
     }
 
-    fmt::format_to(buf, "{} {}{}", type, showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs), access);
+    fmt::format_to(buf, "{} {}{}", type, showRaw ? sym->toStringFullName(gs) : showFullName(gs), access);
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
@@ -1063,7 +1101,7 @@ string TypeMemberRef::toStringWithOptions(const GlobalState &gs, int tabs, bool 
     auto sym = data(gs);
 
     fmt::format_to(buf, "{}{} {}", showKind(gs), getVariance(sym),
-                   showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
+                   showRaw ? sym->toStringFullName(gs) : showFullName(gs));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
@@ -1083,7 +1121,7 @@ string TypeArgumentRef::toStringWithOptions(const GlobalState &gs, int tabs, boo
     auto sym = data(gs);
 
     fmt::format_to(buf, "{}{} {}", showKind(gs), getVariance(sym),
-                   showRaw ? sym->toStringFullName(gs) : sym->showFullName(gs));
+                   showRaw ? sym->toStringFullName(gs) : showFullName(gs));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
@@ -1141,7 +1179,7 @@ string ArgInfo::toString(const GlobalState &gs) const {
     fmt::format_to(buf, " @ {}", loc.showRaw(gs));
 
     if (this->rebind.exists()) {
-        fmt::format_to(buf, " rebindTo {}", this->rebind.data(gs)->showFullName(gs));
+        fmt::format_to(buf, " rebindTo {}", this->rebind.showFullName(gs));
     }
 
     return to_string(buf);
@@ -1529,7 +1567,7 @@ SymbolRef Symbol::dealiasWithDefault(const GlobalState &gs, int depthLimit, Symb
             if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
                 e.setHeader("Too many alias expansions for symbol {}, the alias is either too long or infinite. Next "
                             "expansion would have been to {}",
-                            showFullName(gs), alias.symbol.data(gs)->showFullName(gs));
+                            ref(gs).showFullName(gs), alias.symbol.showFullName(gs));
             }
             return def;
         }

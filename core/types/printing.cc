@@ -146,7 +146,7 @@ string AliasType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string AliasType::show(const GlobalState &gs) const {
-    return fmt::format("<Alias: {} >", this->symbol.data(gs)->showFullName(gs));
+    return fmt::format("<Alias: {} >", this->symbol.showFullName(gs));
 }
 
 string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
