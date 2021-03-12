@@ -555,7 +555,6 @@ public:
     // Returns true if the symbol or any of its children are not in the symbol table. False otherwise.
     bool isPrintable(const GlobalState &gs) const;
 
-    std::string toJSON(const GlobalState &gs, int tabs = 0) const;
     // Renders the full name of this Symbol in a form suitable for user display.
     std::string show(const GlobalState &gs) const;
 
