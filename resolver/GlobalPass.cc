@@ -51,8 +51,8 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
                 : core::errors::Resolver::ParentTypeNotDeclared;
 
         if (auto e = gs.beginError(sym.data(gs)->loc(), code)) {
-            e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs),
-                        parent.data(gs)->show(gs), sym.data(gs)->show(gs));
+            e.setHeader("Type `{}` declared by parent `{}` must be re-declared in `{}`", name.show(gs), parent.show(gs),
+                        sym.show(gs));
             e.addErrorLine(parentTypeMember.data(gs)->loc(), "`{}` declared in parent here", name.show(gs));
         }
         auto typeMember = gs.enterTypeMember(sym.data(gs)->loc(), sym, name, core::Variance::Invariant);
@@ -79,7 +79,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::ClassOrModuleRef parent, cor
     if (!sym.data(gs)->derivesFrom(gs, core::Symbols::Class()) && myVariance != parentVariance &&
         myVariance != core::Variance::Invariant) {
         if (auto e = gs.beginError(myTypeMember.data(gs)->loc(), core::errors::Resolver::ParentVarianceMismatch)) {
-            e.setHeader("Type variance mismatch with parent `{}`", parent.data(gs)->show(gs));
+            e.setHeader("Type variance mismatch with parent `{}`", parent.show(gs));
         }
         return true;
     }

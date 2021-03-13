@@ -191,8 +191,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
         } else {
             e.setHeader("Expected `{}` but found `{}` for argument `{}`", expectedType.show(gs), argTpe.type.show(gs),
                         argSym.argumentName(gs));
-            auto for_ =
-                ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.data(gs)->show(gs));
+            auto for_ = ErrorColors::format("argument `{}` of method `{}`", argSym.argumentName(gs), method.show(gs));
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
@@ -216,8 +215,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
 unique_ptr<Error> missingArg(const GlobalState &gs, Loc callLoc, Loc receiverLoc, MethodRef method,
                              const ArgInfo &arg) {
     if (auto e = gs.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.name.show(gs),
-                    method.data(gs)->show(gs));
+        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.name.show(gs), method.show(gs));
         return e.build();
     }
     return nullptr;
@@ -928,13 +926,13 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (args.fullType.type != args.thisType) {
                     e.setHeader("Not enough arguments provided for method `{}` on `{}` component of `{}`. "
                                 "Expected: `{}`, got: `{}`",
-                                data->show(gs), args.thisType.show(gs), args.fullType.type.show(gs),
+                                method.show(gs), args.thisType.show(gs), args.fullType.type.show(gs),
                                 prettyArity(gs, method), posArgs);
                 } else {
                     e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`",
-                                data->show(gs), prettyArity(gs, method), posArgs);
+                                method.show(gs), prettyArity(gs, method), posArgs);
                 }
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", data->show(gs));
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.show(gs));
                 if (args.name == core::Names::any() &&
                     symbol == core::Symbols::T().data(gs)->lookupSingletonClass(gs)) {
                     e.addErrorNote("If you want to allow any type as an argument, use `{}`", "T.untyped");
@@ -1034,7 +1032,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                            errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.show(gs),
-                                data->show(gs));
+                                method.show(gs));
                     result.main.errors.emplace_back(e.build());
                 }
             }
@@ -1058,7 +1056,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
             auto hashCount = (numKwargs > 0 || hasKwsplat) ? 1 : 0;
             auto numArgsGiven = args.numPosArgs + hashCount;
             if (!hasKwargs) {
-                e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data->show(gs),
+                e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", method.show(gs),
                             prettyArity(gs, method), numArgsGiven);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
             } else {
@@ -1067,7 +1065,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
 
                 // print a helpful error message
                 e.setHeader("Too many positional arguments provided for method `{}`. Expected: `{}`, got: `{}`",
-                            data->show(gs), prettyArity(gs, method), posArgs);
+                            method.show(gs), prettyArity(gs, method), posArgs);
                 e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", args.name.show(gs));
 
                 // if there's an obvious first keyword argument that the user hasn't supplied, we can mention it
@@ -1078,7 +1076,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 if (firstKeyword != data->arguments().end()) {
                     e.addErrorLine(core::Loc(args.locs.file, args.locs.call),
                                    "`{}` has optional keyword arguments. Did you mean to provide a value for `{}`?",
-                                   data->show(gs), firstKeyword->argumentName(gs));
+                                   method.show(gs), firstKeyword->argumentName(gs));
                 }
             }
             result.main.errors.emplace_back(e.build());
@@ -1086,9 +1084,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
     }
 
     if (args.block != nullptr) {
-        ENFORCE(!data->arguments().empty(), "Every symbol must at least have a block arg: {}", data->show(gs));
+        ENFORCE(!data->arguments().empty(), "Every symbol must at least have a block arg: {}", method.show(gs));
         const auto &bspec = data->arguments().back();
-        ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg: {}", data->show(gs));
+        ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg: {}", method.show(gs));
 
         // Only report "does not expect a block" error if the method is defined in a `typed: strict`
         // file or higher and has a sig, which would force the "uses `yield` but does not mention a
@@ -1102,9 +1100,9 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                 // TODO(jez) Do we have a loc for the block itself, not the entire call?
                 if (auto e =
                         gs.beginError(core::Loc(args.locs.file, args.locs.call), core::errors::Infer::TakesNoBlock)) {
-                    e.setHeader("Method `{}` does not take a block", data->show(gs));
+                    e.setHeader("Method `{}` does not take a block", method.show(gs));
                     for (const auto loc : method.data(gs)->locs()) {
-                        e.addErrorLine(loc, "`{}` defined here", data->show(gs));
+                        e.addErrorLine(loc, "`{}` defined here", method.show(gs));
                     }
                 }
             }
@@ -1153,9 +1151,8 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
         if (!constr->solve(gs)) {
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                        errors::Infer::GenericMethodConstaintUnsolved)) {
-                e.setHeader("Could not find valid instantiation of type parameters for `{}`",
-                            method.data(gs)->show(gs));
-                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.data(gs)->show(gs));
+                e.setHeader("Could not find valid instantiation of type parameters for `{}`", method.show(gs));
+                e.addErrorLine(method.data(gs)->loc(), "`{}` defined here", method.show(gs));
                 e.addErrorSection(constr->explain(gs));
                 result.main.errors.emplace_back(e.build());
             }
@@ -1264,7 +1261,7 @@ DispatchResult MetaType::dispatchCall(const GlobalState &gs, const DispatchArgs 
                     if (auto appliedType = cast_type<AppliedType>(this->wrapped)) {
                         e.addErrorNote("It looks like you're trying to pattern match on a generic, "
                                        "which doesn't work at runtime");
-                        e.replaceWith("Replace with class name", loc, "{}", appliedType->klass.data(gs)->show(gs));
+                        e.replaceWith("Replace with class name", loc, "{}", appliedType->klass.show(gs));
                     }
                 }
             }
@@ -1518,7 +1515,7 @@ public:
             core::Loc kwargsLoc{args.locs.file, begin, end};
 
             if (auto e = gs.beginError(kwargsLoc, errors::Infer::GenericArgumentKeywordArgs)) {
-                e.setHeader("Keyword arguments given to `{}`", attachedClass.data(gs)->show(gs));
+                e.setHeader("Keyword arguments given to `{}`", attachedClass.show(gs));
                 // offer an autocorrect to turn the keyword args into a hash if there is no double-splat
                 if (numKwArgs % 2 == 0 && kwargsLoc.exists()) {
                     e.replaceWith(fmt::format("Wrap with braces"), kwargsLoc, "{{{}}}", kwargsLoc.source(gs).value());
@@ -1530,7 +1527,7 @@ public:
             if (auto e = gs.beginError(core::Loc(args.locs.file, args.locs.call),
                                        errors::Infer::GenericArgumentCountMismatch)) {
                 e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
-                            attachedClass.data(gs)->show(gs), arity, args.numPosArgs);
+                            attachedClass.show(gs), arity, args.numPosArgs);
             }
         }
 
@@ -1939,7 +1936,7 @@ private:
         const auto &bspec = methodArgs.back();
         ENFORCE(bspec.flags.isBlock);
         auto for_ = ErrorColors::format("for block argument `{}` of method `{}`", bspec.argumentName(gs),
-                                        dispatchComp.method.data(gs)->show(gs));
+                                        dispatchComp.method.show(gs));
         e.addErrorSection(TypeAndOrigins::explainExpected(gs, blockType, bspec.loc, for_));
     }
 

@@ -249,12 +249,12 @@ UnorderedMap<TypeArgumentRef, std::pair<TypePtr, TypePtr>> TypeConstraint::colla
 
     for (const auto &[sym, lowerBound] : this->lowerBounds) {
         auto &[lowerRef, _upperRef] = collated[sym];
-        ENFORCE(lowerRef == nullptr, "{} in lowerBounds twice?", sym.data(gs)->show(gs));
+        ENFORCE(lowerRef == nullptr, "{} in lowerBounds twice?", sym.show(gs));
         lowerRef = lowerBound;
     }
     for (const auto &[sym, upperBound] : this->upperBounds) {
         auto &[_lowerRef, upperRef] = collated[sym];
-        ENFORCE(upperRef == nullptr, "{} in upperBounds twice?", sym.data(gs)->show(gs));
+        ENFORCE(upperRef == nullptr, "{} in upperBounds twice?", sym.show(gs));
         upperRef = upperBound;
     }
 
@@ -272,12 +272,12 @@ string TypeConstraint::toString(const core::GlobalState &gs) const {
                            const auto &[lowerBound, upperBound] = bounds;
                            auto lower = lowerBound != nullptr ? lowerBound.show(gs) : "_";
                            auto upper = upperBound != nullptr ? upperBound.show(gs) : "_";
-                           return fmt::format("{} <: {} <: {}", lower, sym.data(gs)->show(gs), upper);
+                           return fmt::format("{} <: {} <: {}", lower, sym.show(gs), upper);
                        }));
     fmt::format_to(buf, "solution: [{}]\n",
                    fmt::map_join(
                        this->solution.begin(), this->solution.end(), ", ", [&gs](auto pair) -> auto {
-                           return fmt::format("{}: {}", pair.first.data(gs)->show(gs), pair.second.show(gs));
+                           return fmt::format("{}: {}", pair.first.show(gs), pair.second.show(gs));
                        }));
     return to_string(buf);
 }

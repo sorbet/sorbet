@@ -940,14 +940,13 @@ TypeSyntax::ResultType getResultTypeAndBindWithSelfTypeParams(core::Context ctx,
             }
             if (corrected.exists()) {
                 if (auto e = ctx.beginError(s.loc, core::errors::Resolver::BadStdlibGeneric)) {
-                    e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.data(ctx)->show(ctx) + "[...]",
-                                recvi->symbol.data(ctx)->show(ctx) + "[...]", recvi->symbol.data(ctx)->show(ctx));
+                    e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.show(ctx) + "[...]",
+                                recvi->symbol.show(ctx) + "[...]", recvi->symbol.show(ctx));
                     e.addErrorNote(
                         "`{}` will raise at runtime because this generic was defined in the standard library",
-                        recvi->symbol.data(ctx)->show(ctx) + "[...]");
-                    e.replaceWith(fmt::format("Change `{}` to `{}`", recvi->symbol.data(ctx)->show(ctx),
-                                              corrected.data(ctx)->show(ctx)),
-                                  core::Loc(ctx.file, recvi->loc), "{}", corrected.data(ctx)->show(ctx));
+                        recvi->symbol.show(ctx) + "[...]");
+                    e.replaceWith(fmt::format("Change `{}` to `{}`", recvi->symbol.show(ctx), corrected.show(ctx)),
+                                  core::Loc(ctx.file, recvi->loc), "{}", corrected.show(ctx));
                 }
                 result.type = core::Types::untypedUntracked();
                 return;

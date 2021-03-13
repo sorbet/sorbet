@@ -15,7 +15,7 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::MethodRef method,
     }
     // Label is mandatory, so method name (i.e B#add) is shown for now. Might want to add markup highlighting
     // wtih respect to activeParameter here.
-    auto sig = make_unique<SignatureInformation>(method.data(gs)->show(gs));
+    auto sig = make_unique<SignatureInformation>(method.show(gs));
 
     vector<unique_ptr<ParameterInformation>> parameters;
     // Documentation is set to be a markdown element that highlights which parameter you are currently typing in.

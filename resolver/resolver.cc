@@ -262,8 +262,7 @@ private:
                  (result.isStaticField(ctx) && result.data(ctx)->isStaticFieldPrivate())) &&
                 !ctx.file.data(ctx).isRBI()) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
-                    e.setHeader("Non-private reference to private constant `{}` referenced",
-                                result.data(ctx)->show(ctx));
+                    e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
                 }
             }
             return result;
@@ -288,7 +287,7 @@ private:
                 // This is actually a use-site error, but we limit ourselves to emitting it once by checking resultType
                 auto loc = resolved.data(ctx)->loc();
                 if (auto e = ctx.state.beginError(loc, core::errors::Resolver::RecursiveTypeAlias)) {
-                    e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.data(ctx)->show(ctx));
+                    e.setHeader("Unable to resolve right hand side of type alias `{}`", resolved.show(ctx));
                     e.addErrorLine(core::Loc(ctx.file, job.out->original.loc()), "Type alias used here");
                 }
                 resolved.data(ctx)->resultType =
@@ -517,14 +516,14 @@ private:
 
         if (resolvedClass == job.klass) {
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
-                e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.data(ctx)->show(ctx));
+                e.setHeader("Circular dependency: `{}` is a parent of itself", job.klass.show(ctx));
                 e.addErrorLine(resolvedClass.data(ctx)->loc(), "Class definition");
             }
             resolvedClass = stubSymbolForAncestor(job);
         } else if (resolvedClass.data(ctx)->derivesFrom(ctx, job.klass)) {
             if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
-                            job.klass.data(ctx)->show(ctx), resolvedClass.data(ctx)->show(ctx));
+                            job.klass.show(ctx), resolvedClass.show(ctx));
                 e.addErrorLine(job.klass.data(ctx)->loc(), "One definition");
                 e.addErrorLine(resolvedClass.data(ctx)->loc(), "Other definition");
             }
@@ -542,18 +541,17 @@ private:
                 job.klass.data(ctx)->setSuperClass(resolvedClass);
             } else {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
-                    e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.data(ctx)->show(ctx),
-                                job.klass.data(ctx)->superClass().data(ctx)->show(ctx),
-                                resolvedClass.data(ctx)->show(ctx));
+                    e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
+                                job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
                 }
             }
         } else {
             if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass)) {
                 if (auto e = ctx.beginError(job.ancestor->loc, core::errors::Resolver::IncludesNonModule)) {
                     e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
-                                resolvedClass.data(ctx)->show(ctx));
+                                resolvedClass.show(ctx));
                     e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
-                                   resolvedClass.data(ctx)->show(ctx));
+                                   resolvedClass.show(ctx));
                 }
             }
         }
@@ -609,8 +607,7 @@ private:
             if (id->symbol.data(gs)->isClassOrModuleClass()) {
                 if (auto e =
                         gs.beginError(core::Loc(todo.file, id->loc), core::errors::Resolver::InvalidMixinDeclaration)) {
-                    e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
-                                id->symbol.data(gs)->show(gs));
+                    e.setHeader("`{}` is a class, not a module; Only modules may be mixins", id->symbol.show(gs));
                 }
                 encounteredError = true;
             }
@@ -1489,8 +1486,8 @@ class ResolveTypeMembersAndFieldsWalk {
                 parentType = core::cast_type<core::LambdaParam>(parentMember.data(ctx)->resultType);
                 ENFORCE(parentType != nullptr);
             } else if (auto e = ctx.beginError(rhs->loc, core::errors::Resolver::ParentTypeBoundsMismatch)) {
-                const auto parentShow = parentMember.data(ctx)->show(ctx);
-                e.setHeader("`{}` is a type member but `{}` is not a type member", data->show(ctx), parentShow);
+                const auto parentShow = parentMember.show(ctx);
+                e.setHeader("`{}` is a type member but `{}` is not a type member", lhs.show(ctx), parentShow);
                 e.addErrorLine(parentMember.data(ctx)->loc(), "`{}` definition", parentShow);
             }
         }
@@ -1687,12 +1684,11 @@ class ResolveTypeMembersAndFieldsWalk {
             if (auto e = ctx.beginError(job.loc, core::errors::Resolver::BadAliasMethod)) {
                 auto dealiased = fromMethod.data(ctx)->dealiasMethod(ctx);
                 if (fromMethod == dealiased) {
-                    e.setHeader("Redefining the existing method `{}` as a method alias",
-                                fromMethod.data(ctx)->show(ctx));
+                    e.setHeader("Redefining the existing method `{}` as a method alias", fromMethod.show(ctx));
                     e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous definition");
                 } else {
-                    e.setHeader("Redefining method alias `{}` from `{}` to `{}`", fromMethod.data(ctx)->show(ctx),
-                                dealiased.data(ctx)->show(ctx), toMethod.data(ctx)->show(ctx));
+                    e.setHeader("Redefining method alias `{}` from `{}` to `{}`", fromMethod.show(ctx),
+                                dealiased.show(ctx), toMethod.show(ctx));
                     e.addErrorLine(fromMethod.data(ctx)->loc(), "Previous alias definition");
                     e.addErrorLine(dealiased.data(ctx)->loc(), "Previous alias pointed to");
                     e.addErrorLine(toMethod.data(ctx)->loc(), "Redefining alias to");
@@ -1883,7 +1879,7 @@ class ResolveTypeMembersAndFieldsWalk {
             auto member = ctx.state.lookupNameConstant(part);
             if (!member.exists()) {
                 if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.show(ctx);
                     auto pretty = fmt::format("{}::{}", prettyCurrent, part);
                     e.setHeader("Unable to resolve constant `{}`", pretty);
                 }
@@ -1893,7 +1889,7 @@ class ResolveTypeMembersAndFieldsWalk {
             auto newCurrent = current.data(ctx)->findMember(ctx, member);
             if (!newCurrent.exists()) {
                 if (auto e = ctx.beginError(stringLoc, core::errors::Resolver::LazyResolve)) {
-                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.data(ctx)->show(ctx);
+                    auto prettyCurrent = current == core::Symbols::root() ? "" : "::" + current.show(ctx);
                     auto pretty = fmt::format("{}::{}", prettyCurrent, part);
                     e.setHeader("Unable to resolve constant `{}`", pretty);
                 }
@@ -2343,7 +2339,7 @@ public:
 
                     if (auto e = gs.beginError(data->loc(), core::errors::Resolver::TypeMemberCycle)) {
                         auto flavor = data->isTypeAlias() ? "alias" : "member";
-                        e.setHeader("Type {} `{}` is involved in a cycle", flavor, data->show(gs));
+                        e.setHeader("Type {} `{}` is involved in a cycle", flavor, job.lhs.show(gs));
                     }
                 }
             }
@@ -2557,7 +2553,7 @@ private:
                     e.setHeader("Unsupported `{}` for argument forwarding syntax", "sig");
                     e.addErrorLine(methodInfo->loc(), "Method declares argument forwarding here");
                     e.addErrorNote("Rewrite the method as `def {}(*args, **kwargs, &blk)` to use a signature",
-                                   method.data(ctx)->show(ctx));
+                                   method.show(ctx));
                 }
                 return;
             }

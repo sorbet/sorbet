@@ -18,8 +18,20 @@ template class std::vector<std::pair<sorbet::core::NameRef, sorbet::core::Symbol
 template class std::vector<const sorbet::core::Symbol *>;
 
 namespace sorbet::core {
-
 using namespace std;
+
+namespace {
+string_view COLON_SEPARATOR = "::"sv;
+string_view HASH_SEPARATOR = "#"sv;
+
+string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
+    if (!owner.exists() || owner == Symbols::root() || owner.data(gs)->name.isPackagerName(gs)) {
+        return name.show(gs);
+    }
+    ENFORCE(owner != core::Symbols::PackageRegistry());
+    return absl::StrCat(owner.show(gs), separator, name.show(gs));
+}
+} // namespace
 
 bool SymbolRef::operator==(const SymbolRef &rhs) const {
     return _id == rhs._id;
@@ -382,7 +394,79 @@ TypeMemberRef::TypeMemberRef(const GlobalState &from, u4 id) : _id(id) {}
 TypeArgumentRef::TypeArgumentRef(const GlobalState &from, u4 id) : _id(id) {}
 
 string SymbolRef::show(const GlobalState &gs) const {
-    return dataAllowingNone(gs)->show(gs);
+    switch (kind()) {
+        case Kind::ClassOrModule:
+            return asClassOrModuleRef().show(gs);
+        case Kind::Method:
+            return asMethodRef().show(gs);
+        case Kind::FieldOrStaticField:
+            return asFieldRef().show(gs);
+        case Kind::TypeArgument:
+            return asTypeArgumentRef().show(gs);
+        case Kind::TypeMember:
+            return asTypeMemberRef().show(gs);
+    }
+}
+
+string ClassOrModuleRef::show(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    if (sym->isSingletonClass(gs)) {
+        auto attached = sym->attachedClass(gs);
+        if (attached.exists()) {
+            return fmt::format("T.class_of({})", attached.show(gs));
+        }
+    }
+
+    // Make sure that we get nice error messages for things involving the proc sig builders.
+    if (sym->name == core::Names::Constants::DeclBuilderForProcs()) {
+        return "T.proc";
+    }
+
+    if (sym->owner == core::Symbols::PackageRegistry()) {
+        // Pretty print package name (only happens when `--stripe-packages` is enabled)
+        if (sym->name.isPackagerName(gs)) {
+            auto nameStr = sym->name.shortName(gs);
+            constexpr size_t packageSuffix = char_traits<char>::length("_Package");
+            // Foo_Bar_Package => Foo::Bar
+            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageSuffix), {{"_", "::"}});
+        }
+    }
+
+    if (sym->name == core::Names::Constants::AttachedClass()) {
+        auto attached = sym->owner.data(gs)->attachedClass(gs);
+        ENFORCE(attached.exists());
+        return fmt::format("T.attached_class (of {})", attached.show(gs));
+    }
+
+    return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
+}
+
+string MethodRef::show(const GlobalState &gs) const {
+    auto sym = data(gs);
+    if (sym->owner.isClassOrModule() && sym->owner.data(gs)->isSingletonClass(gs)) {
+        return absl::StrCat(sym->owner.data(gs)->attachedClass(gs).show(gs), ".", sym->name.show(gs));
+    }
+    return showInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
+}
+
+string FieldRef::show(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    return showInternal(gs, sym->owner, sym->name, sym->isStaticField() ? COLON_SEPARATOR : HASH_SEPARATOR);
+}
+
+string TypeArgumentRef::show(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return showInternal(gs, sym->owner, sym->name, HASH_SEPARATOR);
+}
+
+string TypeMemberRef::show(const GlobalState &gs) const {
+    auto sym = data(gs);
+    if (sym->name == core::Names::Constants::AttachedClass()) {
+        auto attached = sym->owner.data(gs)->attachedClass(gs);
+        ENFORCE(attached.exists());
+        return fmt::format("T.attached_class (of {})", attached.show(gs));
+    }
+    return showInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
 }
 
 TypePtr ArgInfo::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
@@ -730,9 +814,6 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
 }
 
 namespace {
-string_view COLON_SEPARATOR = "::"sv;
-string_view HASH_SEPARATOR = "#"sv;
-
 bool isHiddenFromPrinting(const GlobalState &gs, const Symbol &symbol) {
     if (symbol.ref(gs).isSynthetic()) {
         return true;
@@ -1221,52 +1302,6 @@ string ArgInfo::toString(const GlobalState &gs) const {
     return to_string(buf);
 }
 
-string Symbol::show(const GlobalState &gs) const {
-    if (isClassOrModule() && isSingletonClass(gs)) {
-        auto attached = this->attachedClass(gs);
-        if (attached.exists()) {
-            return fmt::format("T.class_of({})", attached.data(gs)->show(gs));
-        }
-    }
-
-    // Make sure that we get nice error messages for things involving the proc sig builders.
-    if (this->name == core::Names::Constants::DeclBuilderForProcs()) {
-        return "T.proc";
-    }
-
-    if (!this->owner.exists() || this->owner == Symbols::root()) {
-        return this->name.show(gs);
-    }
-
-    if (this->owner == core::Symbols::PackageRegistry()) {
-        // Pretty print package name (only happens when `--stripe-packages` is enabled)
-        if (this->name.isPackagerName(gs)) {
-            auto nameStr = this->name.shortName(gs);
-            constexpr size_t packageSuffix = char_traits<char>::length("_Package");
-            // Foo_Bar_Package => Foo::Bar
-            return absl::StrReplaceAll(nameStr.substr(0, nameStr.size() - packageSuffix), {{"_", "::"}});
-        }
-    }
-
-    if (this->owner.data(gs)->name.isPackagerName(gs)) {
-        return this->name.show(gs);
-    }
-
-    if (this->name == core::Names::Constants::AttachedClass()) {
-        auto attached = this->owner.data(gs)->attachedClass(gs);
-        ENFORCE(attached.exists());
-        return fmt::format("T.attached_class (of {})", attached.data(gs)->show(gs));
-    }
-
-    if (this->isMethod() && this->owner.isClassOrModule() && this->owner.data(gs)->isSingletonClass(gs)) {
-        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs), this->name.show(gs));
-    }
-
-    auto needsColonColon = this->isClassOrModule() || this->isStaticField() || this->isTypeMember();
-
-    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), needsColonColon ? "::" : "#", this->name.show(gs));
-}
-
 string ArgInfo::argumentName(const GlobalState &gs) const {
     if (flags.isKeyword) {
         return (string)name.shortName(gs);
@@ -1371,8 +1406,8 @@ ClassOrModuleRef Symbol::topAttachedClass(const GlobalState &gs) const {
 }
 
 void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass) {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(ctx));
-    ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", this->show(ctx));
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(ctx).show(ctx));
+    ENFORCE(subclass.exists(), "Can't record sealed subclass for {} when subclass doesn't exist", ref(ctx).show(ctx));
 
     // Avoid using a clobbered `this` pointer, as `singletonClass` can cause the symbol table to move.
     auto selfRef = this->ref(ctx);
@@ -1414,7 +1449,7 @@ void Symbol::recordSealedSubclass(MutableContext ctx, ClassOrModuleRef subclass)
 }
 
 const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(gs));
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
     auto &result = sealedSubclasses.data(gs)->locs();
     ENFORCE(result.size() > 0);
@@ -1422,7 +1457,7 @@ const InlinedVector<Loc, 2> &Symbol::sealedLocs(const GlobalState &gs) const {
 }
 
 TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
-    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", this->show(gs));
+    ENFORCE(this->isClassOrModuleSealed(), "Class is not marked sealed: {}", ref(gs).show(gs));
 
     auto sealedSubclasses = this->lookupSingletonClass(gs).data(gs)->findMember(gs, core::Names::sealedSubclasses());
 
@@ -1465,7 +1500,7 @@ TypePtr Symbol::sealedSubclassesToUnion(const GlobalState &gs) const {
 // * RequiredAncestor.loc goes into the symbol loc
 // All fields for the same RequiredAncestor are stored at the same index.
 void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAncestor &ancestor, NameRef prop) {
-    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", ref(gs).show(gs));
 
     // We store the required ancestors into a fake property called `<required-ancestors>`
     auto ancestors = this->findMember(gs, prop);
@@ -1507,7 +1542,7 @@ void Symbol::recordRequiredAncestorInternal(GlobalState &gs, Symbol::RequiredAnc
 
 // Locally required ancestors by this class or module
 vector<Symbol::RequiredAncestor> Symbol::readRequiredAncestorsInternal(const GlobalState &gs, NameRef prop) const {
-    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", ref(gs).show(gs));
 
     vector<RequiredAncestor> res;
 
@@ -1591,7 +1626,7 @@ vector<Symbol::RequiredAncestor> Symbol::requiredAncestorsTransitive(const Globa
 
 void Symbol::computeRequiredAncestorLinearization(GlobalState &gs) {
     ENFORCE(gs.requiresAncestorEnabled);
-    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", this->show(gs));
+    ENFORCE(this->isClassOrModule(), "Symbol is not a class or module: {}", ref(gs).show(gs));
     std::vector<ClassOrModuleRef> seen;
     requiredAncestorsTransitiveInternal(gs, seen);
 }
@@ -1739,9 +1774,9 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         if (isa_type<AliasType>(this->resultType)) {
             // If we have an alias method, we should never look at it's arguments;
             // we should instead look at the arguments of whatever we're aliasing.
-            ENFORCE_NO_TIMER(this->arguments().empty(), this->show(gs));
+            ENFORCE_NO_TIMER(this->arguments().empty(), ref(gs).show(gs));
         } else {
-            ENFORCE_NO_TIMER(!this->arguments().empty(), this->show(gs));
+            ENFORCE_NO_TIMER(!this->arguments().empty(), ref(gs).show(gs));
         }
     }
 }
