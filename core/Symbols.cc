@@ -729,13 +729,6 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
     return result;
 }
 
-string Symbol::toStringFullName(const GlobalState &gs) const {
-    bool includeOwner = this->owner.exists() && this->owner != Symbols::root();
-    string owner = includeOwner ? this->owner.data(gs)->toStringFullName(gs) : "";
-
-    return fmt::format("{}{}", owner, this->name.showRaw(gs));
-}
-
 namespace {
 string_view COLON_SEPARATOR = "::"sv;
 string_view HASH_SEPARATOR = "#"sv;
@@ -801,6 +794,11 @@ string showFullNameInternal(const GlobalState &gs, core::SymbolRef owner, core::
     return absl::StrCat(ownerStr, separator, name.show(gs));
 }
 
+string toStringFullNameInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name) {
+    bool includeOwner = owner.exists() && owner != Symbols::root();
+    string ownerStr = includeOwner ? owner.toStringFullName(gs) : "";
+    return absl::StrCat(ownerStr, name.showRaw(gs));
+}
 } // namespace
 
 string SymbolRef::showFullName(const GlobalState &gs) const {
@@ -850,6 +848,46 @@ string TypeArgumentRef::showFullName(const GlobalState &gs) const {
 string TypeMemberRef::showFullName(const GlobalState &gs) const {
     auto sym = data(gs);
     return showFullNameInternal(gs, sym->owner, sym->name, COLON_SEPARATOR);
+}
+
+string SymbolRef::toStringFullName(const GlobalState &gs) const {
+    switch (kind()) {
+        case Kind::ClassOrModule:
+            return asClassOrModuleRef().toStringFullName(gs);
+        case Kind::Method:
+            return asMethodRef().toStringFullName(gs);
+        case Kind::FieldOrStaticField:
+            return asFieldRef().toStringFullName(gs);
+        case Kind::TypeArgument:
+            return asTypeArgumentRef().toStringFullName(gs);
+        case Kind::TypeMember:
+            return asTypeMemberRef().toStringFullName(gs);
+    }
+}
+
+string ClassOrModuleRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = dataAllowingNone(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name);
+}
+
+string MethodRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name);
+}
+
+string FieldRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name);
+}
+
+string TypeArgumentRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name);
+}
+
+string TypeMemberRef::toStringFullName(const GlobalState &gs) const {
+    auto sym = data(gs);
+    return toStringFullNameInternal(gs, sym->owner, sym->name);
 }
 
 bool Symbol::isPrintable(const GlobalState &gs) const {
@@ -925,7 +963,7 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? sym->toStringFullName(gs) : showFullName(gs));
+    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? toStringFullName(gs) : showFullName(gs));
 
     auto typeMembers = sym->typeMembers();
     auto it =
@@ -939,8 +977,8 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
     }
 
     if (sym->superClass().exists()) {
-        auto superClass = sym->superClass().data(gs);
-        fmt::format_to(buf, " < {}", showRaw ? superClass->toStringFullName(gs) : sym->superClass().showFullName(gs));
+        auto superClass = sym->superClass();
+        fmt::format_to(buf, " < {}", showRaw ? superClass.toStringFullName(gs) : superClass.showFullName(gs));
     }
 
     fmt::format_to(buf, " ({})", fmt::map_join(sym->mixins(), ", ", [&](auto symb) {
@@ -989,7 +1027,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? sym->toStringFullName(gs) : showFullName(gs));
+    fmt::format_to(buf, "{} {}", showKind(gs), showRaw ? toStringFullName(gs) : showFullName(gs));
 
     auto methodFlags = InlinedVector<string, 3>{};
 
@@ -1037,7 +1075,7 @@ string MethodRef::toStringWithOptions(const GlobalState &gs, int tabs, bool show
 
     if (sym->rebind().exists()) {
         fmt::format_to(buf, " rebindTo {}",
-                       showRaw ? sym->rebind().data(gs)->toStringFullName(gs) : sym->rebind().showFullName(gs));
+                       showRaw ? sym->rebind().toStringFullName(gs) : sym->rebind().showFullName(gs));
     }
 
     ENFORCE(!absl::c_any_of(to_string(buf), [](char c) { return c == '\n'; }));
@@ -1081,7 +1119,7 @@ string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showF
         access = " : private"sv;
     }
 
-    fmt::format_to(buf, "{} {}{}", type, showRaw ? sym->toStringFullName(gs) : showFullName(gs), access);
+    fmt::format_to(buf, "{} {}{}", type, showRaw ? toStringFullName(gs) : showFullName(gs), access);
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
@@ -1100,8 +1138,7 @@ string TypeMemberRef::toStringWithOptions(const GlobalState &gs, int tabs, bool 
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{}{} {}", showKind(gs), getVariance(sym),
-                   showRaw ? sym->toStringFullName(gs) : showFullName(gs));
+    fmt::format_to(buf, "{}{} {}", showKind(gs), getVariance(sym), showRaw ? toStringFullName(gs) : showFullName(gs));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
@@ -1120,8 +1157,7 @@ string TypeArgumentRef::toStringWithOptions(const GlobalState &gs, int tabs, boo
 
     auto sym = data(gs);
 
-    fmt::format_to(buf, "{}{} {}", showKind(gs), getVariance(sym),
-                   showRaw ? sym->toStringFullName(gs) : showFullName(gs));
+    fmt::format_to(buf, "{}{} {}", showKind(gs), getVariance(sym), showRaw ? toStringFullName(gs) : showFullName(gs));
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);

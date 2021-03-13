@@ -85,7 +85,10 @@ public:
     }
 
     std::string_view showKind(const GlobalState &gs) const;
+    // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.
+    // "Owner::SymbolName")
     std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
@@ -121,6 +124,7 @@ public:
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
 
     bool operator==(const MethodRef &rhs) const;
 
@@ -160,6 +164,7 @@ public:
     ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
 
     bool operator==(const FieldRef &rhs) const;
 
@@ -198,6 +203,7 @@ public:
     ConstSymbolData data(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
 
     bool operator==(const TypeMemberRef &rhs) const;
 
@@ -236,6 +242,7 @@ public:
     ConstSymbolData data(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
 
     bool operator==(const TypeArgumentRef &rhs) const;
 
@@ -399,6 +406,7 @@ public:
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
     std::string_view showKind(const GlobalState &gs) const;
     std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
 
     std::string showRaw(const GlobalState &gs) const {
         bool showFull = false;
