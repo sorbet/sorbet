@@ -1,9 +1,9 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
-    def self.each<<todo method>>(&<blk>)
+    def self.each<<todo method>>(&blk)
       begin
-        <blk>.call(1, 2, 3, 4, 5)
-        <blk>.call(6, 7, 8, 9, 0)
+        blk.call(1, 2, 3, 4, 5)
+        blk.call(6, 7, 8, 9, 0)
       end
     end
   end
