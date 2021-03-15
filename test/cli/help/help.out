@@ -227,6 +227,7 @@ Usage:
       --error-black-list errorCode
                                 (DEPRECATED) Alias for --suppress-error-code.
                                 Will be removed in a later release.
+      --no-error-sections       Do not print error sections.
       --typed {false,true,strict,strong,[auto]}
                                 Force all code to specified strictness level
                                 (default: auto)

@@ -409,6 +409,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("dev")("error-black-list",
                                "(DEPRECATED) Alias for --suppress-error-code. Will be removed in a later release.",
                                cxxopts::value<vector<int>>(), "errorCode");
+    options.add_options("dev")("no-error-sections", "Do not print error sections.");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{false,true,strict,strong,[auto]}");
     options.add_options("dev")("typed-override", "Yaml config that overrides strictness levels on files",
@@ -825,6 +826,7 @@ void readOptions(Options &opts,
         opts.stripePackages = raw["stripe-packages"].as<bool>();
         extractAutoloaderConfig(raw, opts, logger);
         opts.errorUrlBase = raw["error-url-base"].as<string>();
+        opts.noErrorSections = raw["no-error-sections"].as<bool>();
         opts.ruby3KeywordArgs = raw["ruby3-keyword-args"].as<bool>();
         if (raw.count("error-white-list") > 0) {
             logger->error("`{}` is deprecated; please use `{}` instead", "--error-white-list", "--isolate-error-code");
