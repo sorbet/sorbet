@@ -55,7 +55,7 @@ payload_files = [
         "pseudo_lib",
         [
             "PayloadIntrinsics.c",
-            "code-payload.c",
+            "codegen-payload.c",
         ],
     ),
 ]
