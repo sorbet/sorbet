@@ -19,6 +19,18 @@ void sorbet_setExceptionStackFrame(rb_execution_context_t *ec, rb_control_frame_
                         num_locals, iseq->body->stack_max);
 }
 
+void sorbet_pushCfuncFrame(VALUE recv) {
+    rb_execution_context_t *ec = GET_EC();
+
+    VALUE me = Qnil; // Qnil or T_IMEMO(cref) or T_IMEMO(ment)
+    VALUE frame_type = VM_FRAME_MAGIC_CFUNC | VM_FRAME_FLAG_CFRAME | VM_ENV_FLAG_LOCAL;
+
+    // TODO(trevor) we could pass this in to supply a block
+    VALUE block_handler = VM_BLOCK_HANDLER_NONE;
+
+    vm_push_frame(ec, NULL, frame_type, recv, block_handler, (VALUE)me, 0, ec->cfp->sp, 0, 0);
+}
+
 void sorbet_popRubyStack() {
     rb_execution_context_t *ec = GET_EC();
     vm_pop_frame(ec, ec->cfp, ec->cfp->ep);

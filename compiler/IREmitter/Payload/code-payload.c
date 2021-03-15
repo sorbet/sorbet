@@ -62,6 +62,7 @@ SORBET_ALIVE(VALUE, sorbet_getConstant, (const char *path, long pathLen));
 SORBET_ALIVE(VALUE, sorbet_setConstant, (VALUE mod, const char *name, long nameLen, VALUE value));
 
 SORBET_ALIVE(const VALUE, sorbet_readRealpath, (void));
+SORBET_ALIVE(void, sorbet_pushCfuncFrame, (VALUE));
 SORBET_ALIVE(void, sorbet_popRubyStack, (void));
 
 SORBET_ALIVE(void, sorbet_vm_env_write_slowpath, (const VALUE *, int, VALUE));
@@ -1084,6 +1085,14 @@ VALUE sorbet_callFuncBlockWithCache(struct FunctionInlineCache *cache, BlockFFIT
 SORBET_INLINE
 VALUE sorbet_makeBlockHandlerProc(VALUE block) {
     return rb_funcall(block, rb_intern2("to_proc", 7), 0);
+}
+
+SORBET_INLINE
+VALUE sorbet_callFuncDirect(VALUE (*methodPtr)(int, VALUE *, VALUE), int argc, VALUE *argv, VALUE recv) {
+    sorbet_pushCfuncFrame(recv);
+    VALUE res = methodPtr(argc, argv, recv);
+    sorbet_popRubyStack();
+    return res;
 }
 
 unsigned int sorbet_vmCallKwarg() {
