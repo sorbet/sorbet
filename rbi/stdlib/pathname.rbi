@@ -249,7 +249,15 @@ class Pathname < Object
     )
     .returns(T::Array[Pathname])
   end
-  def self.glob(p1, p2=T.unsafe(nil)); end
+  sig do
+    params(
+        p1: T.any(String, Pathname),
+        p2: String,
+        blk: T.proc.params(arg0: Pathname).void,
+    )
+    .returns(NilClass)
+  end
+  def self.glob(p1, p2=T.unsafe(nil), &blk); end
 
   def initialize(p); end
 
