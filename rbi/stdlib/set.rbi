@@ -992,8 +992,8 @@ end
 #
 # for pack.c
 class Array
-  sig {returns(T::Set[T.untyped])}
-  def to_set; end
+  sig { params(blk: T.nilable(T.proc.params(arg0: T.untyped).void)).returns(T::Set[T.untyped]) }
+  def to_set(&blk); end
 end
 
 # The [`Enumerable`](https://docs.ruby-lang.org/en/2.7.0/Enumerable.html) mixin
