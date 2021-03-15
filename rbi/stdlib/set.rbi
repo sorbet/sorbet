@@ -659,5 +659,14 @@ end
 module Enumerable
   # Makes a set from the enumerable object with given arguments. Needs to
   # +require "set"+ to use this method.
+  sig do
+    type_parameters(:U)
+      .params(
+        klass: T.class_of(Set),
+        args: T.untyped,
+        block: T.nilable(T.proc.params(arg0: Elem).returns(T.type_parameter(:U)))
+    )
+      .returns(T::Set[T.type_parameter(:U)])
+  end
   def to_set(klass = _, *args, &block); end
 end
