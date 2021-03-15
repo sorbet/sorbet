@@ -56,3 +56,6 @@ T.reveal_type(['a','b','c'].bsearch {|x| x == 'a'}) # error: Revealed type: `T.n
 
 # bsearch_index
 T.reveal_type(['a','b','c'].bsearch_index {|x| x == 'a'}) # error: Revealed type: `T.nilable(Integer)`
+
+T.assert_type!([1, 2].to_set { |x| x + 1 }, T::Set[T.untyped])
+T.assert_type!([1, 2].to_set, T::Set[T.untyped])
