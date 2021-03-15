@@ -357,10 +357,11 @@ class Resolv::DNS
         String,
         { nameserver: T.any(String, T::Array[String]), search: T::Array[String], ndots: Integer },
         { nameserver_port: T::Array[[String, Integer]], search: T::Array[String], ndots: Integer }
-      )
+      ),
+      blk: T.nilable(T.proc.params(arg0: Resolv::DNS).void),
     ).returns(Resolv::DNS)
   end
-  def self.open(config_info = nil); end
+  def self.open(config_info = nil, &blk); end
 end
 
 class Resolv::DNS::Config
