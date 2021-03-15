@@ -57,7 +57,7 @@ steps:
 
   - label: ":mac: build-static-release.sh (master only)"
     command: .buildkite/build-static-release.sh
-    # branches: master
+    branches: master
     artifact_paths: _out_/**/*
     agents:
       os: mac
