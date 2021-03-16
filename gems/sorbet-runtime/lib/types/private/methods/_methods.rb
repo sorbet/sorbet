@@ -210,9 +210,9 @@ module T::Private::Methods
     # which is called only on the *first* invocation.
     # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
     # (or unwrap back to the original method).
-    new_method = nil
+    key = method_owner_and_name_to_key(mod, method_name)
     T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
-      method_sig = T::Private::Methods.maybe_run_sig_block_for_method(new_method)
+      method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
       method_sig ||= T::Private::Methods._handle_missing_method_signature(
         self,
         original_method,
@@ -239,8 +239,6 @@ module T::Private::Methods
       end
     end
 
-    new_method = mod.instance_method(method_name)
-    key = method_to_key(new_method)
     @sig_wrappers[key] = sig_block
     if current_declaration.final
       add_final_method(key)
@@ -379,7 +377,8 @@ module T::Private::Methods
     maybe_run_sig_block_for_key(method_to_key(method))
   end
 
-  private_class_method def self.maybe_run_sig_block_for_key(key)
+  # Only public so that it can be accessed in the closure for _on_method_added
+  def self.maybe_run_sig_block_for_key(key)
     run_sig_block_for_key(key) if has_sig_block_for_key(key)
   end
 
