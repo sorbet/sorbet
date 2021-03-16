@@ -14,14 +14,8 @@ module T::Private::Methods
   # stores method names that were declared final without regard for where.
   # enables early rejection of names that we know can't induce final method violations.
   @was_ever_final_names = Set.new
-  # a non-singleton is a module for which at least one of the following is true:
-  # - is declared final
-  # - defines a method that is declared final
-  # - includes an non-singleton
-  # - extends an non-singleton
-  # a singleton is the singleton_class of a non-singleton.
-  # modules_with_final is the set of singletons and non-singletons.
-  @modules_with_final = Set.new
+  # maps from modules to the set of final methods they declare
+  @modules_with_final = Hash.new { |hash, key| hash[key] = Set.new }
   # this stores the old [included, extended] hooks for Module and inherited hook for Class that we override when
   # enabling final checks for when those hooks are called. the 'hooks' here don't have anything to do with the 'hooks'
   # in installed_hooks.
@@ -106,13 +100,11 @@ module T::Private::Methods
     # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
     # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
     target_ancestors.reverse_each do |ancestor|
-      next if !module_with_final?(ancestor)
+      final_methods = @modules_with_final.fetch(ancestor, nil)
+      next unless final_methods
+      next if final_methods.empty?
       source_method_names.each do |method_name|
-        # the usage of method_owner_and_name_to_key(ancestor, method_name) instead of
-        # method_to_key(ancestor.instance_method(method_name)) is not (just) an optimization, but also required for
-        # correctness, since ancestor.method_defined?(method_name) may return true even if method_name is not defined
-        # directly on ancestor but instead an ancestor of ancestor.
-        if final_method?(method_owner_and_name_to_key(ancestor, method_name))
+        if final_methods.include?(method_name)
           definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
           is_redefined = target == ancestor
           caller_loc = caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/}) }
@@ -160,13 +152,20 @@ module T::Private::Methods
     @was_ever_final_names.include?(method_name)
   end
 
-  def self.add_module_with_final(mod)
-    @modules_with_final.add(mod)
-    @modules_with_final.add(mod.singleton_class)
+  def self.add_module_with_final_method(mod, method_name)
+    @modules_with_final[mod].add(method_name)
+    @modules_with_final[mod.singleton_class].add(method_name)
+  end
+
+  def self.add_module_with_final_with_methods(mod, set)
+    methods = @modules_with_final[mod]
+    methods |= set
+    methods = @modules_with_final[mod.singleton_class]
+    methods |= set
   end
 
   private_class_method def self.module_with_final?(mod)
-    @modules_with_final.include?(mod)
+    @modules_with_final.has_key?(mod)
   end
 
   # Only public because it needs to get called below inside the replace_method blocks below.
@@ -245,7 +244,7 @@ module T::Private::Methods
       add_was_ever_final(method_name)
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.
-      add_module_with_final(hook_mod)
+      add_module_with_final_method(hook_mod, method_name)
     end
   end
 
@@ -429,7 +428,9 @@ module T::Private::Methods
     end
     # we do not need to call add_was_ever_final here, because we have already marked
     # any such methods when source was originally defined.
-    add_module_with_final(target)
+    if (methods = @modules_with_final.fetch(source, nil))
+      add_module_with_final_with_methods(target, methods)
+    end
     install_hooks(target)
 
     if !target_was_final
