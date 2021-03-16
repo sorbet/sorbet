@@ -184,11 +184,11 @@ module T::Private::Methods
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
     if was_ever_final?(method_name) && module_with_final?(mod)
       _check_final_ancestors(mod, mod.ancestors, [method_name])
+      # We need to fetch the active declaration again, as _check_final_ancestors
+      # may have reset it (see the comment in that method for details).
+      current_declaration = T::Private::DeclState.current.active_declaration
     end
 
-    # We need to fetch the active declaration again, as _check_final_ancestors
-    # may have reset it (see the comment in that method for details).
-    current_declaration = T::Private::DeclState.current.active_declaration
     if current_declaration.nil?
       return
     end
