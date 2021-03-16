@@ -451,7 +451,7 @@ class T::Props::Decorator
       value = self.public_send(prop_name)
       handler = T::Configuration.redaction_handler
       if !handler
-        raise RuntimeError, "No redaction handler configured"
+        raise "Using `redaction:` on a prop requires specifying `T::Configuration.redaction_handler`"
       end
       handler.call(value, redaction)
     end
