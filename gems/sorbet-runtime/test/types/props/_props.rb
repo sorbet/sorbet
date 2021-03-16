@@ -185,9 +185,18 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
   end
 
   describe 'redacted props' do
+
     before do
       T::Configuration.redaction_handler = lambda do |value, redaction|
-        Chalk::Tools::RedactionUtils.redact_with_directive(value, redaction)
+        opts = Array(redaction)
+        case opts[0]
+        when :redact_digits
+          value.gsub(/\d/, '*')
+        when :truncate
+          T::Utils.string_truncate_middle(value, opts[1], 0)
+        else
+          value
+        end
       end
     end
 
