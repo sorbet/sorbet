@@ -6,11 +6,6 @@ module T::Private::Methods
   @signatures_by_method = {}
   @sig_wrappers = {}
   @sigs_that_raised = {}
-  # the info about whether a method is final is not stored in a DeclBuilder nor a Signature, but instead right here.
-  # this is because final checks are special:
-  # - they are done possibly before any sig block has run.
-  # - they are done even if the method being defined doesn't have a sig.
-  @final_methods = Set.new
   # stores method names that were declared final without regard for where.
   # enables early rejection of names that we know can't induce final method violations.
   @was_ever_final_names = Set.new
@@ -136,14 +131,6 @@ module T::Private::Methods
     end
   end
 
-  private_class_method def self.add_final_method(method_key)
-    @final_methods.add(method_key)
-  end
-
-  private_class_method def self.final_method?(method_key)
-    @final_methods.include?(method_key)
-  end
-
   private_class_method def self.add_was_ever_final(method_name)
     @was_ever_final_names.add(method_name)
   end
@@ -240,7 +227,6 @@ module T::Private::Methods
 
     @sig_wrappers[key] = sig_block
     if current_declaration.final
-      add_final_method(key)
       add_was_ever_final(method_name)
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.
