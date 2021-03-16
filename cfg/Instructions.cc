@@ -145,7 +145,7 @@ string Alias::toString(const core::GlobalState &gs, const CFG &cfg) const {
 }
 
 string Alias::showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs) const {
-    return fmt::format("Alias {{ what = {} }}", this->what.data(gs)->show(gs));
+    return fmt::format("Alias {{ what = {} }}", this->what.show(gs));
 }
 
 string Send::toString(const core::GlobalState &gs, const CFG &cfg) const {

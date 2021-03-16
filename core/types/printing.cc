@@ -27,7 +27,7 @@ string ClassType::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string ClassType::show(const GlobalState &gs) const {
-    return this->symbol.data(gs)->show(gs);
+    return this->symbol.show(gs);
 }
 
 string UnresolvedClassType::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -35,7 +35,7 @@ string UnresolvedClassType::toStringWithTabs(const GlobalState &gs, int tabs) co
 }
 
 string UnresolvedClassType::show(const GlobalState &gs) const {
-    return fmt::format("{}::{} (unresolved)", this->scope.data(gs)->show(gs),
+    return fmt::format("{}::{} (unresolved)", this->scope.show(gs),
                        fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.show(gs); }));
 }
 
@@ -44,7 +44,7 @@ string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) 
 }
 
 string UnresolvedAppliedType::show(const GlobalState &gs) const {
-    return fmt::format("{}[{}] (unresolved)", this->klass.data(gs)->show(gs),
+    return fmt::format("{}[{}] (unresolved)", this->klass.show(gs),
                        fmt::map_join(targs, ", ", [&](auto targ) { return targ.show(gs); }));
 }
 
@@ -142,11 +142,11 @@ string ShapeType::showWithMoreInfo(const GlobalState &gs) const {
 }
 
 string AliasType::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return fmt::format("AliasType {{ symbol = {} }}", this->symbol.data(gs)->toStringFullName(gs));
+    return fmt::format("AliasType {{ symbol = {} }}", this->symbol.toStringFullName(gs));
 }
 
 string AliasType::show(const GlobalState &gs) const {
-    return fmt::format("<Alias: {} >", this->symbol.data(gs)->showFullName(gs));
+    return fmt::format("<Alias: {} >", this->symbol.showFullName(gs));
 }
 
 string AndType::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -294,7 +294,7 @@ string OrType::show(const GlobalState &gs) const {
     // If str is empty at this point, all of the types present in the flattened
     // OrType are NilClass.
     if (!str.has_value()) {
-        return Symbols::NilClass().data(gs)->show(gs);
+        return Symbols::NilClass().show(gs);
     }
 
     string res;
@@ -331,8 +331,8 @@ string AppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
     auto nestedTabs = buildTabs(tabs + 1);
     auto twiceNestedTabs = buildTabs(tabs + 2);
     fmt::memory_buffer buf;
-    fmt::format_to(buf, "AppliedType {{\n{}klass = {}\n{}targs = [\n", nestedTabs,
-                   this->klass.data(gs)->toStringFullName(gs), nestedTabs);
+    fmt::format_to(buf, "AppliedType {{\n{}klass = {}\n{}targs = [\n", nestedTabs, this->klass.toStringFullName(gs),
+                   nestedTabs);
 
     int i = -1;
     for (auto &targ : this->targs) {
@@ -398,7 +398,7 @@ string AppliedType::show(const GlobalState &gs) const {
             }
             return to_string(buf);
         } else {
-            fmt::format_to(buf, "{}", this->klass.data(gs)->show(gs));
+            fmt::format_to(buf, "{}", this->klass.show(gs));
         }
     }
     auto targs = this->targs;
@@ -426,7 +426,7 @@ string AppliedType::show(const GlobalState &gs) const {
 }
 
 string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    auto defName = this->definition.data(gs)->toStringFullName(gs);
+    auto defName = this->definition.toStringFullName(gs);
     auto upperStr = this->upperBound.toString(gs);
     if (this->definition.data(gs)->isFixed()) {
         return fmt::format("LambdaParam({}, fixed={})", defName, upperStr);
@@ -437,15 +437,15 @@ string LambdaParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
 }
 
 string LambdaParam::show(const GlobalState &gs) const {
-    return this->definition.data(gs)->show(gs);
+    return this->definition.show(gs);
 }
 
 string SelfTypeParam::toStringWithTabs(const GlobalState &gs, int tabs) const {
-    return fmt::format("SelfTypeParam({})", this->definition.data(gs)->toStringFullName(gs));
+    return fmt::format("SelfTypeParam({})", this->definition.toStringFullName(gs));
 }
 
 string SelfTypeParam::show(const GlobalState &gs) const {
-    return this->definition.data(gs)->show(gs);
+    return this->definition.show(gs);
 }
 
 string SelfType::toStringWithTabs(const GlobalState &gs, int tabs) const {

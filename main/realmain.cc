@@ -637,8 +637,7 @@ int realmain(int argc, char *argv[]) {
             vector<pair<string, int>> withNames;
             long sum = 0;
             for (auto e : untypedSources) {
-                withNames.emplace_back(core::SymbolRef::fromRaw(e.first).dataAllowingNone(*gs)->showFullName(*gs),
-                                       e.second);
+                withNames.emplace_back(core::SymbolRef::fromRaw(e.first).showFullName(*gs), e.second);
                 sum += e.second;
             }
             fast_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });

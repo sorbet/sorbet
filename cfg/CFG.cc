@@ -204,7 +204,7 @@ void CFG::sanityCheck(core::Context ctx) {
 
 string CFG::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer buf;
-    string symbolName = this->symbol.data(gs)->showFullName(gs);
+    string symbolName = this->symbol.showFullName(gs);
     fmt::format_to(buf,
                    "subgraph \"cluster_{}\" {{\n"
                    "    label = \"{}\";\n"
@@ -240,7 +240,7 @@ string CFG::toString(const core::GlobalState &gs) const {
 
 string CFG::showRaw(core::Context ctx) const {
     fmt::memory_buffer buf;
-    string symbolName = this->symbol.data(ctx)->showFullName(ctx);
+    string symbolName = this->symbol.showFullName(ctx);
     fmt::format_to(buf,
                    "subgraph \"cluster_{}\" {{\n"
                    "    label = \"{}\";\n"

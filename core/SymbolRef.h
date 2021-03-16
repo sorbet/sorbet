@@ -45,6 +45,13 @@ class Symbol;
 class ClassOrModuleRef final {
     u4 _id;
 
+    friend class SymbolRef;
+    friend class GlobalState;
+
+private:
+    std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
+                                    bool showRaw = false) const;
+
 public:
     ClassOrModuleRef() : _id(0){};
     ClassOrModuleRef(const GlobalState &from, u4 id);
@@ -69,13 +76,28 @@ public:
     ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
 
     bool operator==(const ClassOrModuleRef &rhs) const;
-
     bool operator!=(const ClassOrModuleRef &rhs) const;
+
+    std::string toString(const GlobalState &gs) const {
+        bool showFull = false;
+        bool showRaw = false;
+        return toStringWithOptions(gs, 0, showFull, showRaw);
+    }
+
+    std::string_view showKind(const GlobalState &gs) const;
+    std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
+    std::string show(const GlobalState &gs) const;
 };
 CheckSize(ClassOrModuleRef, 4, 4);
 
 class MethodRef final {
     u4 _id;
+    friend class SymbolRef;
+
+private:
+    std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
+                                    bool showRaw = false) const;
 
 public:
     MethodRef() : _id(0){};
@@ -97,7 +119,12 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
+    std::string_view showKind(const GlobalState &gs) const;
+    std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
+    std::string show(const GlobalState &gs) const;
 
     bool operator==(const MethodRef &rhs) const;
 
@@ -107,6 +134,12 @@ CheckSize(MethodRef, 4, 4);
 
 class FieldRef final {
     u4 _id;
+
+    friend class SymbolRef;
+
+private:
+    std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
+                                    bool showRaw = false) const;
 
 public:
     FieldRef() : _id(0){};
@@ -128,6 +161,11 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    ConstSymbolData dataAllowingNone(const GlobalState &gs) const;
+    std::string_view showKind(const GlobalState &gs) const;
+    std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
+    std::string show(const GlobalState &gs) const;
 
     bool operator==(const FieldRef &rhs) const;
 
@@ -137,6 +175,12 @@ CheckSize(FieldRef, 4, 4);
 
 class TypeMemberRef final {
     u4 _id;
+
+    friend class SymbolRef;
+
+private:
+    std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
+                                    bool showRaw = false) const;
 
 public:
     TypeMemberRef() : _id(0){};
@@ -158,6 +202,10 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    std::string_view showKind(const GlobalState &gs) const;
+    std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
+    std::string show(const GlobalState &gs) const;
 
     bool operator==(const TypeMemberRef &rhs) const;
 
@@ -167,6 +215,12 @@ CheckSize(TypeMemberRef, 4, 4);
 
 class TypeArgumentRef final {
     u4 _id;
+
+    friend class SymbolRef;
+
+private:
+    std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
+                                    bool showRaw = false) const;
 
 public:
     TypeArgumentRef() : _id(0){};
@@ -188,6 +242,10 @@ public:
 
     SymbolData data(GlobalState &gs) const;
     ConstSymbolData data(const GlobalState &gs) const;
+    std::string_view showKind(const GlobalState &gs) const;
+    std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
+    std::string show(const GlobalState &gs) const;
 
     bool operator==(const TypeArgumentRef &rhs) const;
 
@@ -198,12 +256,19 @@ CheckSize(TypeArgumentRef, 4, 4);
 class SymbolRef final {
     friend class GlobalState;
     friend class Symbol;
+    // For toStringWithOptions.
+    friend class ClassOrModuleRef;
+    friend class MethodRef;
 
     // Stores the symbol's Kind and Index. Kind occupies the lower bits.
     u4 _id;
     u4 unsafeTableIndex() const {
         return _id >> KIND_BITS;
     }
+
+private:
+    std::string toStringWithOptions(const GlobalState &gs, int tabs = 0, bool showFull = false,
+                                    bool showRaw = false) const;
 
 public:
     // If you add Symbol Kinds, make sure KIND_BITS is kept in sync!
@@ -342,8 +407,23 @@ public:
     bool operator!=(const SymbolRef &rhs) const;
 
     ClassOrModuleRef enclosingClass(const GlobalState &gs) const;
-    std::string showRaw(const GlobalState &gs) const;
-    std::string toString(const GlobalState &gs) const;
+    std::string_view showKind(const GlobalState &gs) const;
+    // Prints the fully qualified name of the symbol in a format that is suitable for showing to the user (e.g.
+    // "Owner::SymbolName")
+    std::string showFullName(const GlobalState &gs) const;
+    std::string toStringFullName(const GlobalState &gs) const;
+
+    std::string showRaw(const GlobalState &gs) const {
+        bool showFull = false;
+        bool showRaw = true;
+        return toStringWithOptions(gs, 0, showFull, showRaw);
+    }
+    std::string toString(const GlobalState &gs) const {
+        bool showFull = false;
+        bool showRaw = false;
+        return toStringWithOptions(gs, 0, showFull, showRaw);
+    }
+    // Renders the full name of this Symbol in a form suitable for user display.
     std::string show(const GlobalState &gs) const;
 };
 CheckSize(SymbolRef, 4, 4);

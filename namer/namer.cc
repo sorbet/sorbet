@@ -775,7 +775,7 @@ class SymbolDefiner {
 
     void emitRedefinedConstantError(core::MutableContext ctx, core::Loc errorLoc, core::SymbolRef symbol,
                                     core::SymbolRef renamedSymbol) {
-        emitRedefinedConstantError(ctx, errorLoc, symbol.data(ctx)->show(ctx), renamedSymbol.data(ctx)->loc());
+        emitRedefinedConstantError(ctx, errorLoc, symbol.show(ctx), renamedSymbol.data(ctx)->loc());
     }
 
     core::ClassOrModuleRef ensureIsClass(core::MutableContext ctx, core::SymbolRef scope, core::NameRef name,
@@ -787,7 +787,7 @@ class SymbolDefiner {
             if (renamedSymbol.exists()) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
                     auto constLitName = name.show(ctx);
-                    auto scopeName = scope.data(ctx)->show(ctx);
+                    auto scopeName = scope.show(ctx);
                     e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName,
                                 scopeName, scopeName);
                     e.addErrorLine(renamedSymbol.data(ctx)->loc(), "`{}` defined here", scopeName);
@@ -805,7 +805,7 @@ class SymbolDefiner {
 
         if (auto e = ctx.state.beginError(core::Loc(ctx.file, loc), core::errors::Namer::InvalidClassOwner)) {
             auto constLitName = name.show(ctx);
-            auto newOwnerName = scope.data(ctx)->show(ctx);
+            auto newOwnerName = scope.show(ctx);
             e.setHeader("Can't nest `{}` under `{}` because `{}` is not a class or module", constLitName, newOwnerName,
                         newOwnerName);
             e.addErrorLine(scope.data(ctx)->loc(), "`{}` defined here", newOwnerName);
@@ -938,7 +938,7 @@ class SymbolDefiner {
                     // Eventually we should be more principled about how we report this.
                     e.setHeader(
                         "Method alias `{}` redefined without matching argument count. Expected: `{}`, got: `{}`",
-                        ctx.owner.data(ctx)->show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
+                        ctx.owner.show(ctx), sym.data(ctx)->arguments().size() - 1, parsedArgs.size() - 1);
                     e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous alias definition");
                     e.addErrorLine(sym.data(ctx)->loc(), "Dealiased definition");
                 } else {
@@ -1131,8 +1131,7 @@ class SymbolDefiner {
                 return klassSymbol;
             }
 
-            emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol.data(ctx)->show(ctx),
-                                       symbol.data(ctx)->loc());
+            emitRedefinedConstantError(ctx, core::Loc(ctx.file, klass.loc), symbol.show(ctx), symbol.data(ctx)->loc());
 
             auto origName = symbol.data(ctx)->name;
             ctx.state.mangleRenameSymbol(symbol, symbol.data(ctx)->name);
@@ -1146,7 +1145,7 @@ class SymbolDefiner {
             return klassSymbol;
         } else if (symbol.data(ctx)->isClassModuleSet() && isModule != symbol.data(ctx)->isClassOrModuleModule()) {
             if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
-                e.setHeader("`{}` was previously defined as a `{}`", symbol.data(ctx)->show(ctx),
+                e.setHeader("`{}` was previously defined as a `{}`", symbol.show(ctx),
                             symbol.data(ctx)->isClassOrModuleModule() ? "module" : "class");
 
                 for (auto loc : symbol.data(ctx)->locs()) {
@@ -1339,7 +1338,7 @@ class SymbolDefiner {
         } else {
             auto oldSym = onSymbol.data(ctx)->findMemberNoDealias(ctx, typeMember.name);
             if (oldSym.exists()) {
-                emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), oldSym.data(ctx)->show(ctx),
+                emitRedefinedConstantError(ctx, core::Loc(ctx.file, typeMember.nameLoc), oldSym.show(ctx),
                                            oldSym.data(ctx)->loc());
                 ctx.state.mangleRenameSymbol(oldSym, oldSym.data(ctx)->name);
             }
@@ -1639,7 +1638,7 @@ public:
                        klass.symbol.data(ctx)->owner != core::Symbols::PackageRegistry()) {
                 if (auto e = ctx.state.beginError(core::Loc(ctx.file, klass.declLoc),
                                                   core::errors::Namer::MultipleBehaviorDefs)) {
-                    e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.data(ctx)->show(ctx));
+                    e.setHeader("`{}` has behavior defined in multiple files", klass.symbol.show(ctx));
                     e.addErrorLine(prevLoc->second, "Previous definition");
                 }
             }

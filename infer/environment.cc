@@ -988,7 +988,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                                             it->main.method.data(ctx)->name.show(ctx), it->main.receiver.show(ctx));
                             }
                             e.addErrorLine(it->main.method.data(ctx)->loc(), "Defined in `{}` here",
-                                           it->main.method.data(ctx)->owner.data(ctx)->show(ctx));
+                                           it->main.method.data(ctx)->owner.show(ctx));
                         }
                     }
 
@@ -1089,9 +1089,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                     if (!main.constr->solve(ctx)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstaintUnsolved)) {
                             e.setHeader("Could not find valid instantiation of type parameters for `{}`",
-                                        main.method.data(ctx)->show(ctx));
-                            e.addErrorLine(main.method.data(ctx)->loc(), "`{}` defined here",
-                                           main.method.data(ctx)->show(ctx));
+                                        main.method.show(ctx));
+                            e.addErrorLine(main.method.data(ctx)->loc(), "`{}` defined here", main.method.show(ctx));
                             e.addErrorSection(main.constr->explain(ctx));
                         }
                         type = core::Types::untypedUntracked();

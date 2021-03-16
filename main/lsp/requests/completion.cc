@@ -408,7 +408,7 @@ unique_ptr<CompletionItem> getCompletionItemForConstant(const core::GlobalState 
         ENFORCE(false, "Unhandled kind of constant in getCompletionItemForConstant");
     }
 
-    item->detail = maybeAlias.data(gs)->show(gs);
+    item->detail = maybeAlias.show(gs);
 
     string replacementText;
     if (supportsSnippets) {
@@ -684,7 +684,7 @@ CompletionTask::getCompletionItemForMethod(LSPTypecheckerDelegate &typechecker, 
     item->sortText = fmt::format("{:06d}", sortIdx);
 
     item->kind = CompletionItemKind::Method;
-    item->detail = maybeAlias.data(gs)->show(gs);
+    item->detail = maybeAlias.show(gs);
 
     string replacementText;
     if (supportsSnippets) {

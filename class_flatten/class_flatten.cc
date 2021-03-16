@@ -97,9 +97,9 @@ public:
             replacement = ast::MK::DefineTopClassOrModule(classDef->declLoc, classDef->symbol);
         }
         ENFORCE(!sym.data(ctx)->arguments().empty(), "<static-init> method should already have a block arg symbol: {}",
-                sym.data(ctx)->show(ctx));
-        ENFORCE(sym.data(ctx)->arguments().back().flags.isBlock,
-                "Last argument symbol is not a block arg: {}" + sym.data(ctx)->show(ctx));
+                sym.show(ctx));
+        ENFORCE(sym.data(ctx)->arguments().back().flags.isBlock, "Last argument symbol is not a block arg: {}",
+                sym.show(ctx));
 
         // Synthesize a block argument for this <static-init> block. This is rather fiddly,
         // because we have to know exactly what invariants desugar and namer set up about
