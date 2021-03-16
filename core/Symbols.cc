@@ -21,8 +21,8 @@ namespace sorbet::core {
 using namespace std;
 
 namespace {
-string_view COLON_SEPARATOR = "::"sv;
-string_view HASH_SEPARATOR = "#"sv;
+constexpr string_view COLON_SEPARATOR = "::"sv;
+constexpr string_view HASH_SEPARATOR = "#"sv;
 
 string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef name, string_view separator) {
     if (!owner.exists() || owner == Symbols::root() || owner.data(gs)->name.isPackagerName(gs)) {
