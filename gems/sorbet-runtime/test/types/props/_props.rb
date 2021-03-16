@@ -172,7 +172,29 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
     prop :secret, String, redaction: [:truncate, 4], sensitivity: []
   end
 
+  describe 'redacted props with no redaction handler' do
+    it 'raises when fetching redacted values' do
+      assert_raises do
+        d = TestRedactedProps.new
+        d.str = '12345'
+
+        # this will raise an error without a redaction handler
+        d.str_redacted
+      end
+    end
+  end
+
   describe 'redacted props' do
+    before do
+      T::Configuration.redaction_handler = lambda do |value, redaction|
+        Chalk::Tools::RedactionUtils.redact_with_directive(value, redaction)
+      end
+    end
+
+    after do
+      T::Configuration.redaction_handler = nil
+    end
+
     it 'gets and sets normally' do
       d = TestRedactedProps.new
       d.class.decorator.prop_set(d, :str, '12345')

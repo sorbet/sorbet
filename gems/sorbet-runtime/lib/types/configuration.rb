@@ -433,6 +433,22 @@ module T::Configuration
     @sensitivity_and_pii_handler
   end
 
+  @redaction_handler = nil
+  # Set to a redaction handling function. This will be called when the
+  # `_redacted` version of a prop reader is used. By default this is set to
+  # `nil` and will raise an exception when the redacted version of a prop is
+  # accessed.
+  #
+  # @param [Lambda, Proc, nil] value Proc that converts a value into its
+  # redacted version according to the spec passed as the second argument.
+  def self.redaction_handler=(handler)
+    @redaction_handler = handler
+  end
+
+  def self.redaction_handler
+    @redaction_handler
+  end
+
   # Set to a function which can get the 'owner' of a class. This is
   # used in reporting deserialization errors
   #
