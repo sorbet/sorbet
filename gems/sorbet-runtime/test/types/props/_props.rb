@@ -174,7 +174,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
 
   describe 'redacted props with no redaction handler' do
     it 'raises when fetching redacted values' do
-      assert_raises do
+      assert_raises(RuntimeError) do
         d = TestRedactedProps.new
         d.str = '12345'
 
