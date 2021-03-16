@@ -9,8 +9,18 @@ module T::Private::Methods
   # stores method names that were declared final without regard for where.
   # enables early rejection of names that we know can't induce final method violations.
   @was_ever_final_names = Set.new
-  # maps from modules to the set of final methods they declare
-  @modules_with_final = Hash.new { |hash, key| hash[key] = Set.new }
+  # maps from modules to the set of final methods declared in that module.
+  # we also overload entries slightly: if the value is nil, that means that the
+  # module has final methods somewhere along its ancestor chain, but does not itself
+  # have any final methods.
+  #
+  # we need the latter information to know whether we need to check along the ancestor
+  # chain for final method violations.  we need the former information because we
+  # care about exactly where a final method is defined (e.g. including the same module
+  # twice is permitted).  we could do this with two tables, but it seems slightly
+  # cleaner with a single table.
+  # Effectively T::Hash[Module, T.nilable(Set))]
+  @modules_with_final = Hash.new { |hash, key| hash[key] = nil }
   # this stores the old [included, extended] hooks for Module and inherited hook for Class that we override when
   # enabling final checks for when those hooks are called. the 'hooks' here don't have anything to do with the 'hooks'
   # in installed_hooks.
@@ -96,8 +106,7 @@ module T::Private::Methods
     # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
     target_ancestors.reverse_each do |ancestor|
       final_methods = @modules_with_final.fetch(ancestor, nil)
-      next unless final_methods
-      next if final_methods.empty?
+      next if !final_methods
       source_method_names.each do |method_name|
         if final_methods.include?(method_name)
           definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
@@ -139,16 +148,20 @@ module T::Private::Methods
     @was_ever_final_names.include?(method_name)
   end
 
-  def self.add_module_with_final_method(mod, method_name)
-    @modules_with_final[mod].add(method_name)
-    @modules_with_final[mod.singleton_class].add(method_name)
+  def self.add_module_with_final_method(mod, method_name, is_singleton_method)
+    m = is_singleton_method ? mod.singleton_class : mod
+    methods = @modules_with_final[m]
+    if methods.nil?
+      methods = Set.new
+      @modules_with_final[m] = methods
+    end
+    methods.add(method_name)
   end
 
-  def self.add_module_with_final_with_methods(mod, set)
-    methods = @modules_with_final[mod]
-    methods |= set
-    methods = @modules_with_final[mod.singleton_class]
-    methods |= set
+  def self.note_module_deals_with_final(mod)
+    # Side-effectfully initialize the value if it's not already there
+    @modules_with_final[mod]
+    @modules_with_final[mod.singleton_class]
   end
 
   private_class_method def self.module_with_final?(mod)
@@ -230,7 +243,8 @@ module T::Private::Methods
       add_was_ever_final(method_name)
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.
-      add_module_with_final_method(hook_mod, method_name)
+      note_module_deals_with_final(hook_mod)
+      add_module_with_final_method(hook_mod, method_name, is_singleton_method)
     end
   end
 
@@ -414,9 +428,7 @@ module T::Private::Methods
     end
     # we do not need to call add_was_ever_final here, because we have already marked
     # any such methods when source was originally defined.
-    if (methods = @modules_with_final.fetch(source, nil))
-      add_module_with_final_with_methods(target, methods)
-    end
+    note_module_deals_with_final(target)
     install_hooks(target)
 
     if !target_was_final
