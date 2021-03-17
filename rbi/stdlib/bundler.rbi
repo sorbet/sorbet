@@ -376,13 +376,16 @@ module Bundler
   def self.which(executable); end
 
   # @deprecated Use `with\_unbundled\_env` instead
-  sig {returns(T.untyped)}
-  def self.with_clean_env(); end
+  sig {params(block: T.proc.returns(T.untyped)).returns(T.untyped)}
+  def self.with_clean_env(&block); end
+
+  sig {params(block: T.proc.returns(T.untyped)).returns(T.untyped)}
+  def self.with_unbundled_env(&block); end
 
   # Run block with environment present before
   # [`Bundler`](https://docs.ruby-lang.org/en/2.7.0/Bundler.html) was activated
-  sig {returns(T.untyped)}
-  def self.with_original_env(); end
+  sig {params(block: T.proc.returns(T.untyped)).returns(T.untyped)}
+  def self.with_original_env(&block); end
 end
 
 class Bundler::APIResponseMismatchError < Bundler::BundlerError
