@@ -55,12 +55,11 @@ ast::ExpressionPtr rewriteDynamicCast(core::MutableContext ctx, ast::Send *send,
         return nullptr;
     }
 
-    auto type = name == core::Names::dynamicCast()
-        ? ast::MK::Nilable(send->loc, move(send->args[1]))
-        : move(send->args[1]);
+    auto type =
+        name == core::Names::dynamicCast() ? ast::MK::Nilable(send->loc, move(send->args[1])) : move(send->args[1]);
     return ast::MK::Cast(send->loc, move(send->args[0]), move(type));
 }
-}
+} // namespace
 
 ast::ExpressionPtr InterfaceWrapper::run(core::MutableContext ctx, ast::Send *send) {
     if (ctx.state.runningUnderAutogen) {
