@@ -162,6 +162,8 @@ module T::Configuration
   def self.soft_assert_handler=(value); end
   def self.normalize_sensitivity_and_pii_handler=(handler); end
   def self.normalize_sensitivity_and_pii_handler; end
+  def self.redaction_handler=(handler); end
+  def self.redaction_handler; end
   def self.class_owner_finder=(handler); end
   def self.class_owner_finder; end
 end

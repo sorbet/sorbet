@@ -449,8 +449,11 @@ class T::Props::Decorator
 
     @class.send(:define_method, redacted_method) do
       value = self.public_send(prop_name)
-      Chalk::Tools::RedactionUtils.redact_with_directive(
-        value, redaction)
+      handler = T::Configuration.redaction_handler
+      if !handler
+        raise "Using `redaction:` on a prop requires specifying `T::Configuration.redaction_handler`"
+      end
+      handler.call(value, redaction)
     end
   end
 
