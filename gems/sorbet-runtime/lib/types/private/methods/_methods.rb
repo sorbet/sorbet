@@ -422,16 +422,14 @@ module T::Private::Methods
   # the module target is adding the methods from the module source to itself. we need to check that for all instance
   # methods M on source, M is not defined on any of target's ancestors.
   def self._hook_impl(target, singleton_class, source)
-    target_was_final = module_with_final?(target)
-    if !target_was_final && !module_with_final?(source)
-      return
-    end
     # we do not need to call add_was_ever_final here, because we have already marked
     # any such methods when source was originally defined.
-    note_module_deals_with_final(target)
-    install_hooks(target)
-
-    if !target_was_final
+    if !module_with_final?(target)
+      if !module_with_final?(source)
+        return
+      end
+      note_module_deals_with_final(target)
+      install_hooks(target)
       return
     end
 
