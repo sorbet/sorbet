@@ -55,7 +55,9 @@ ast::ExpressionPtr rewriteDynamicCast(core::MutableContext ctx, ast::Send *send,
         return nullptr;
     }
 
-    auto type = ast::MK::Nilable(send->loc, move(send->args[1]));
+    auto type = name == core::Names::dynamicCast()
+        ? ast::MK::Nilable(send->loc, move(send->args[1]))
+        : move(send->args[1]);
     return ast::MK::Cast(send->loc, move(send->args[0]), move(type));
 }
 }
@@ -69,7 +71,7 @@ ast::ExpressionPtr InterfaceWrapper::run(core::MutableContext ctx, ast::Send *se
         return rewriteWrapInstance(ctx, send);
     }
 
-    if (send->fun == core::Names::dynamicCast()) {
+    if (send->fun == core::Names::dynamicCast() || send->fun == core::Names::nonNilDynamicCast()) {
         return rewriteDynamicCast(ctx, send, send->fun);
     }
 
