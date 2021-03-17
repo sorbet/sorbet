@@ -37,7 +37,6 @@ module T::Private::Final
     mod.extend(mod.is_a?(Class) ? NoInherit : NoIncludeExtend)
     mark_as_final_module(mod)
     mark_as_final_module(mod.singleton_class)
-    T::Private::Methods.add_module_with_final(mod)
     T::Private::Methods.install_hooks(mod)
   end
 
