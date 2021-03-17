@@ -220,6 +220,24 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     assert_equal(:class, c.foo)
   end
 
+  it "allows declaring a final instance method and a non-final class method with the same name" do
+    c = Class.new do
+      extend T::Sig
+      sig(:final) {returns(Symbol)}
+      def foo
+        :instance
+      end
+
+      sig {returns(Symbol)}
+      def self.foo
+        :class
+      end
+    end
+
+    assert_equal(:instance, c.new.foo)
+    assert_equal(:class, c.foo)
+  end
+
   it "forbids toggling a final method's visibility in a child class" do
     c = Class.new do
       extend T::Sig
