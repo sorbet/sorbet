@@ -29,4 +29,8 @@ def testit
   Other.wrap_instance("hi", "there") # error: Wrong number of arguments
   o = Other
   o.wrap_instance("hi") # error: Unsupported wrap_instance() on a non-constant-literal
+
+  T::InterfaceWrapper.dynamic_cast(s) # error: Not enough arguments
+  T::InterfaceWrapper.dynamic_cast(s, s, s) # error: Too many arguments
+  x = T::InterfaceWrapper.dynamic_cast(s, Other)
 end

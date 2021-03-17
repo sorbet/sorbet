@@ -9,6 +9,9 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <emptyTree>::<C Other>.wrap_instance("hi", "there")
       o = <emptyTree>::<C Other>
       o.wrap_instance("hi")
+      <emptyTree>::<C T>::<C InterfaceWrapper>.dynamic_cast(s)
+      <emptyTree>::<C T>::<C InterfaceWrapper>.dynamic_cast(s, s, s)
+      x = ::T.cast(s, ::T.nilable(<emptyTree>::<C Other>))
     end
   end
 

@@ -11,15 +11,9 @@
 using namespace std;
 
 namespace sorbet::rewriter {
-ast::ExpressionPtr InterfaceWrapper::run(core::MutableContext ctx, ast::Send *send) {
-    if (ctx.state.runningUnderAutogen) {
-        return nullptr;
-    }
 
-    if (send->fun != core::Names::wrapInstance()) {
-        return nullptr;
-    }
-
+namespace {
+ast::ExpressionPtr rewriteWrapInstance(core::MutableContext ctx, ast::Send *send) {
     if (!ast::isa_tree<ast::UnresolvedConstantLit>(send->recv)) {
         if (auto e = ctx.beginError(send->recv.loc(), core::errors::Rewriter::BadWrapInstance)) {
             e.setHeader("Unsupported wrap_instance() on a non-constant-literal");
@@ -36,5 +30,49 @@ ast::ExpressionPtr InterfaceWrapper::run(core::MutableContext ctx, ast::Send *se
     }
 
     return ast::MK::Let(send->loc, move(send->args.front()), move(send->recv));
+}
+
+ast::ExpressionPtr rewriteDynamicCast(core::MutableContext ctx, ast::Send *send, core::NameRef name) {
+    auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv);
+    if (cnst == nullptr) {
+        return nullptr;
+    }
+    if (cnst->cnst != core::Names::Constants::InterfaceWrapper()) {
+        return nullptr;
+    }
+    auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope);
+    if (scope == nullptr) {
+        return nullptr;
+    }
+    if (scope->cnst != core::Names::Constants::T()) {
+        return nullptr;
+    }
+    if (!ast::MK::isRootScope(scope->scope)) {
+        return nullptr;
+    }
+
+    if (send->args.size() != 2) {
+        return nullptr;
+    }
+
+    auto type = ast::MK::Nilable(send->loc, move(send->args[1]));
+    return ast::MK::Cast(send->loc, move(send->args[0]), move(type));
+}
+}
+
+ast::ExpressionPtr InterfaceWrapper::run(core::MutableContext ctx, ast::Send *send) {
+    if (ctx.state.runningUnderAutogen) {
+        return nullptr;
+    }
+
+    if (send->fun == core::Names::wrapInstance()) {
+        return rewriteWrapInstance(ctx, send);
+    }
+
+    if (send->fun == core::Names::dynamicCast()) {
+        return rewriteDynamicCast(ctx, send, send->fun);
+    }
+
+    return nullptr;
 }
 } // namespace sorbet::rewriter

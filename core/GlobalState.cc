@@ -464,6 +464,16 @@ void GlobalState::initEmpty() {
     ENFORCE(typeArgument == Symbols::todoTypeArgument());
     typeArgument.data(*this)->resultType = make_type<core::TypeVar>(typeArgument);
 
+    id = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::InterfaceWrapper());
+    ENFORCE(id == Symbols::T_InterfaceWrapper());
+    method = enterMethodSymbol(Loc::none(), Symbols::T_InterfaceWrapper(), Names::dynamicCast());
+    {
+        auto &arg0 = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+        arg0.type = Types::untyped(*this, method);
+        auto &arg1 = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
+        arg1.type = Types::untyped(*this, method);
+    }
+
     // Root members
     Symbols::root().data(*this)->members()[core::Names::Constants::NoSymbol()] = Symbols::noSymbol();
     Symbols::root().data(*this)->members()[core::Names::Constants::Top()] = Symbols::top();

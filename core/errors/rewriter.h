@@ -13,5 +13,6 @@ constexpr ErrorClass TEnumConstNotEnumValue{3506, StrictLevel::False};
 constexpr ErrorClass BadTestEach{3507, StrictLevel::True};
 constexpr ErrorClass PropForeignStrict{3508, StrictLevel::False};
 constexpr ErrorClass ComputedBySymbol{3509, StrictLevel::False};
+constexpr ErrorClass BadDynamicCast{3510, StrictLevel::False};
 } // namespace sorbet::core::errors::Rewriter
 #endif

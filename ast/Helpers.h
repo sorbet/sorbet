@@ -356,6 +356,10 @@ public:
         return Send2(loc, T(loc), core::Names::let(), std::move(value), std::move(type));
     }
 
+    static ExpressionPtr Cast(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
+        return Send2(loc, T(loc), core::Names::cast(), std::move(value), std::move(type));
+    }
+
     static ExpressionPtr AssertType(core::LocOffsets loc, ExpressionPtr value, ExpressionPtr type) {
         return Send2(loc, T(loc), core::Names::assertType(), std::move(value), std::move(type));
     }
