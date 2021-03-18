@@ -112,33 +112,33 @@ module T::Private::Methods
       # are no final methods to check here, so we can move on to the next ancestor.
       next if !final_methods
       source_method_names.each do |method_name|
-        if final_methods.include?(method_name)
-          definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
-          is_redefined = target == ancestor
-          caller_loc = caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/}) }
-          extra_info = "\n"
-          if caller_loc
-            extra_info = (is_redefined ? "Redefined" : "Overridden") + " here: #{caller_loc.path}:#{caller_loc.lineno}\n"
-          end
+        next unless final_methods.include?(method_name)
 
-          error_message = "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
-                          (is_redefined ? "redefined" : "overridden in #{target}")
-          pretty_message = "#{error_message}\n" \
-                           "Made final here: #{definition_file}:#{definition_line}\n" \
-                           "#{extra_info}"
+        definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
+        is_redefined = target == ancestor
+        caller_loc = caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/}) }
+        extra_info = "\n"
+        if caller_loc
+          extra_info = (is_redefined ? "Redefined" : "Overridden") + " here: #{caller_loc.path}:#{caller_loc.lineno}\n"
+        end
 
-          begin
-            raise pretty_message
-          rescue => e
-            # sig_validation_error_handler raises by default; on the off chance that
-            # it doesn't raise, we need to ensure that the rest of signature building
-            # sees a consistent state.  This sig failed to validate, so we should get
-            # rid of it.  If we don't do this, errors of the form "You called sig
-            # twice without declaring a method in between" will non-deterministically
-            # crop up in tests.
-            T::Private::DeclState.current.reset!
-            T::Configuration.sig_validation_error_handler(e, {})
-          end
+        error_message = "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
+                        (is_redefined ? "redefined" : "overridden in #{target}")
+        pretty_message = "#{error_message}\n" \
+                         "Made final here: #{definition_file}:#{definition_line}\n" \
+                         "#{extra_info}"
+
+        begin
+          raise pretty_message
+        rescue => e
+          # sig_validation_error_handler raises by default; on the off chance that
+          # it doesn't raise, we need to ensure that the rest of signature building
+          # sees a consistent state.  This sig failed to validate, so we should get
+          # rid of it.  If we don't do this, errors of the form "You called sig
+          # twice without declaring a method in between" will non-deterministically
+          # crop up in tests.
+          T::Private::DeclState.current.reset!
+          T::Configuration.sig_validation_error_handler(e, {})
         end
       end
     end
