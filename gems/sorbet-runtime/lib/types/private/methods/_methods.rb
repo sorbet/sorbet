@@ -103,8 +103,7 @@ module T::Private::Methods
   # names that were declared final at one point.
   def self._check_final_ancestors(target, target_ancestors, source_method_names, source)
     source_ancestors = nil
-    # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
-    # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
+    # use reverse_each to check farther-up ancestors first, for better error messages.
     target_ancestors.reverse_each do |ancestor|
       final_methods = @modules_with_final.fetch(ancestor, nil)
       # In this case, either ancestor didn't have any final methods anywhere in its
