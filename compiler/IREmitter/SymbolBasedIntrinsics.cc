@@ -69,10 +69,10 @@ public:
             blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
         }
 
+        auto *offset = Payload::buildLocalsOffset(cs);
+
         auto fun = Payload::idIntern(cs, builder, send->fun.shortName(cs));
-        return builder.CreateCall(cs.getFunction(cMethod),
-                                  {recv, fun, argc, argv, blkPtr, mcctx.irctx.localsOffset[rubyBlockId]},
-                                  "rawSendResult");
+        return builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, offset}, "rawSendResult");
     };
 
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {

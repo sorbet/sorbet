@@ -549,9 +549,6 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
     vector<llvm::AllocaInst *> iseqEncodedPtrsByFunction;
 
-    bool useLocalsOffset = IREmitterHelpers::isFileOrClassStaticInit(cs, md.symbol);
-    vector<llvm::Value *> localsOffset;
-
     int i = 0;
     auto lineNumberPtrType = llvm::PointerType::getUnqual(llvm::Type::getInt64PtrTy(cs));
     auto iseqEncodedPtrType = llvm::Type::getInt64PtrTy(cs);
@@ -562,32 +559,6 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         builder.SetInsertPoint(inits);
         auto sendArgArray = builder.CreateAlloca(llvm::ArrayType::get(llvm::Type::getInt64Ty(cs), maxSendArgCount),
                                                  nullptr, "callArgs");
-        llvm::Value *offsetValue = nullptr;
-        switch (blockTypes[i]) {
-            case FunctionType::Method:
-                ENFORCE(!useLocalsOffset);
-                offsetValue = llvm::ConstantInt::get(cs, llvm::APInt(64, 0, false));
-                break;
-
-            case FunctionType::StaticInitFile:
-            case FunctionType::StaticInitModule:
-                ENFORCE(useLocalsOffset);
-                offsetValue = builder.CreateLoad(IREmitterHelpers::getStaticInitLocalsOffset(cs, md.symbol));
-                break;
-
-            case FunctionType::Block:
-                offsetValue = fun->arg_begin() + 1;
-                break;
-
-            case FunctionType::ExceptionBegin:
-            case FunctionType::Rescue:
-            case FunctionType::Ensure:
-            case FunctionType::Unused:
-                offsetValue = fun->arg_begin() + 2;
-                break;
-        }
-        ENFORCE(offsetValue != nullptr);
-        localsOffset.emplace_back(offsetValue);
         sendArgArrayByBlock.emplace_back(sendArgArray);
         auto lineNumberPtr = builder.CreateAlloca(lineNumberPtrType, nullptr, "lineCountStore");
         lineNumberPtrsByFunction.emplace_back(lineNumberPtr);
@@ -730,8 +701,6 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(basicBlockRubyBlockId),
         maxSendArgCount,
         move(sendArgArrayByBlock),
-        useLocalsOffset,
-        localsOffset,
         std::move(escapedVariableIndices),
         std::move(argPresentVariables),
         {},
@@ -821,16 +790,6 @@ core::Loc IREmitterHelpers::getMethodLineBounds(const core::GlobalState &gs, cor
     } else {
         return core::Loc(file, offsets);
     }
-}
-
-llvm::GlobalVariable *IREmitterHelpers::getStaticInitLocalsOffset(CompilerState &cs, core::SymbolRef sym) {
-    string rawName = "offset_";
-    rawName += sym.show(cs);
-    return static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, llvm::Type::getInt64Ty(cs), [&] {
-        return new llvm::GlobalVariable(*cs.module, llvm::Type::getInt64Ty(cs), false,
-                                        llvm::GlobalVariable::InternalLinkage,
-                                        llvm::ConstantInt::get(cs, llvm::APInt(64, 0, false)), rawName);
-    }));
 }
 
 namespace {

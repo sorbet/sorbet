@@ -72,8 +72,6 @@ public:
         return getMethodLineBounds(gs, sym, loc.file(), loc.offsets());
     }
 
-    static llvm::GlobalVariable *getStaticInitLocalsOffset(CompilerState &cs, core::SymbolRef sym);
-
     static std::string getFunctionName(CompilerState &cs, core::SymbolRef sym);
     static llvm::Function *lookupFunction(CompilerState &cs, core::SymbolRef sym);
     static llvm::Function *getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym);
