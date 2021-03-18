@@ -101,44 +101,64 @@ module T::Private::Methods
   #
   # we assume that source_method_names has already been filtered to only include method
   # names that were declared final at one point.
-  def self._check_final_ancestors(target, target_ancestors, source_method_names)
-    # use reverse_each to check farther-up ancestors first, for better error messages. we could avoid this if we were on
-    # the version of ruby that adds the optional argument to method_defined? that allows you to exclude ancestors.
+  def self._check_final_ancestors(target, target_ancestors, source_method_names, source)
+    source_ancestors = nil
+    # use reverse_each to check farther-up ancestors first, for better error messages.
     target_ancestors.reverse_each do |ancestor|
       final_methods = @modules_with_final.fetch(ancestor, nil)
       # In this case, either ancestor didn't have any final methods anywhere in its
       # ancestor chain, or ancestor did have final methods somewhere in its ancestor
       # chain, but no final methods defined in ancestor itself.  Either way, there
       # are no final methods to check here, so we can move on to the next ancestor.
-      next if !final_methods
+      next unless final_methods
       source_method_names.each do |method_name|
-        if final_methods.include?(method_name)
-          definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
-          is_redefined = target == ancestor
-          caller_loc = caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/}) }
-          extra_info = "\n"
-          if caller_loc
-            extra_info = (is_redefined ? "Redefined" : "Overridden") + " here: #{caller_loc.path}:#{caller_loc.lineno}\n"
-          end
+        next unless final_methods.include?(method_name)
 
-          error_message = "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
-                          (is_redefined ? "redefined" : "overridden in #{target}")
-          pretty_message = "#{error_message}\n" \
-                           "Made final here: #{definition_file}:#{definition_line}\n" \
-                           "#{extra_info}"
-
-          begin
-            raise pretty_message
-          rescue => e
-            # sig_validation_error_handler raises by default; on the off chance that
-            # it doesn't raise, we need to ensure that the rest of signature building
-            # sees a consistent state.  This sig failed to validate, so we should get
-            # rid of it.  If we don't do this, errors of the form "You called sig
-            # twice without declaring a method in between" will non-deterministically
-            # crop up in tests.
-            T::Private::DeclState.current.reset!
-            T::Configuration.sig_validation_error_handler(e, {})
+        # If we get here, we are defining a method that some ancestor declared as
+        # final.  however, we permit a final method to be defined multiple
+        # times if it is the same final method being defined each time.
+        if source
+          if !source_ancestors
+            source_ancestors = source.ancestors
+            # filter out things without actual final methods just to make sure that
+            # the below checks (which should be uncommon) go as quickly as possible.
+            source_ancestors.select! do |a|
+              @modules_with_final.fetch(a, nil)
+            end
           end
+          # final-ness means that there should be no more than one index for which
+          # the below block returns true.
+          defining_ancestor_idx = source_ancestors.index do |a|
+            @modules_with_final.fetch(a).include?(method_name)
+          end
+          next if defining_ancestor_idx && source_ancestors[defining_ancestor_idx] == ancestor
+        end
+
+        definition_file, definition_line = T::Private::Methods.signature_for_method(ancestor.instance_method(method_name)).method.source_location
+        is_redefined = target == ancestor
+        caller_loc = caller_locations&.find {|l| !l.to_s.match?(%r{sorbet-runtime[^/]*/lib/}) }
+        extra_info = "\n"
+        if caller_loc
+          extra_info = (is_redefined ? "Redefined" : "Overridden") + " here: #{caller_loc.path}:#{caller_loc.lineno}\n"
+        end
+
+        error_message = "The method `#{method_name}` on #{ancestor} was declared as final and cannot be " +
+                        (is_redefined ? "redefined" : "overridden in #{target}")
+        pretty_message = "#{error_message}\n" \
+                         "Made final here: #{definition_file}:#{definition_line}\n" \
+                         "#{extra_info}"
+
+        begin
+          raise pretty_message
+        rescue => e
+          # sig_validation_error_handler raises by default; on the off chance that
+          # it doesn't raise, we need to ensure that the rest of signature building
+          # sees a consistent state.  This sig failed to validate, so we should get
+          # rid of it.  If we don't do this, errors of the form "You called sig
+          # twice without declaring a method in between" will non-deterministically
+          # crop up in tests.
+          T::Private::DeclState.current.reset!
+          T::Configuration.sig_validation_error_handler(e, {})
         end
       end
     end
@@ -174,7 +194,7 @@ module T::Private::Methods
     end
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
     if @was_ever_final_names.include?(method_name) && @modules_with_final.include?(mod)
-      _check_final_ancestors(mod, mod.ancestors, [method_name])
+      _check_final_ancestors(mod, mod.ancestors, [method_name], nil)
       # We need to fetch the active declaration again, as _check_final_ancestors
       # may have reset it (see the comment in that method for details).
       current_declaration = T::Private::DeclState.current.active_declaration
@@ -434,7 +454,7 @@ module T::Private::Methods
     end
 
     target_ancestors = singleton_class ? target.singleton_class.ancestors : target.ancestors
-    _check_final_ancestors(target, target_ancestors - source.ancestors, methods)
+    _check_final_ancestors(target, target_ancestors, methods, source)
   end
 
   def self.set_final_checks_on_hooks(enable)
