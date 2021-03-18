@@ -168,10 +168,6 @@ module T::Private::Methods
     @modules_with_final[mod.singleton_class]
   end
 
-  private_class_method def self.module_with_final?(mod)
-    @modules_with_final.include?(mod)
-  end
-
   # Only public because it needs to get called below inside the replace_method blocks below.
   def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
     if T::Private::DeclState.current.skip_on_method_added
@@ -185,7 +181,7 @@ module T::Private::Methods
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
-    if was_ever_final?(method_name) && module_with_final?(mod)
+    if was_ever_final?(method_name) && @modules_with_final.include?(mod)
       _check_final_ancestors(mod, mod.ancestors, [method_name])
       # We need to fetch the active declaration again, as _check_final_ancestors
       # may have reset it (see the comment in that method for details).
@@ -428,8 +424,8 @@ module T::Private::Methods
   def self._hook_impl(target, singleton_class, source)
     # we do not need to call add_was_ever_final here, because we have already marked
     # any such methods when source was originally defined.
-    if !module_with_final?(target)
-      if !module_with_final?(source)
+    if !@modules_with_final.include?(target)
+      if !@modules_with_final.include?(source)
         return
       end
       note_module_deals_with_final(target)
