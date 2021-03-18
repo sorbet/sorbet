@@ -144,14 +144,6 @@ module T::Private::Methods
     end
   end
 
-  private_class_method def self.add_was_ever_final(method_name)
-    @was_ever_final_names.add(method_name)
-  end
-
-  private_class_method def self.was_ever_final?(method_name)
-    @was_ever_final_names.include?(method_name)
-  end
-
   def self.add_module_with_final_method(mod, method_name, is_singleton_method)
     m = is_singleton_method ? mod.singleton_class : mod
     methods = @modules_with_final[m]
@@ -181,7 +173,7 @@ module T::Private::Methods
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
-    if was_ever_final?(method_name) && @modules_with_final.include?(mod)
+    if @was_ever_final_names.include?(method_name) && @modules_with_final.include?(mod)
       _check_final_ancestors(mod, mod.ancestors, [method_name])
       # We need to fetch the active declaration again, as _check_final_ancestors
       # may have reset it (see the comment in that method for details).
@@ -240,7 +232,7 @@ module T::Private::Methods
 
     @sig_wrappers[key] = sig_block
     if current_declaration.final
-      add_was_ever_final(method_name)
+      @was_ever_final_names.add(method_name)
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.
       note_module_deals_with_final(hook_mod)
@@ -435,7 +427,7 @@ module T::Private::Methods
 
     methods = source.instance_methods
     methods.select! do |method_name|
-      was_ever_final?(method_name)
+      @was_ever_final_names.include?(method_name)
     end
     if methods.empty?
       return
