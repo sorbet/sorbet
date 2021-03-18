@@ -1118,7 +1118,8 @@ unsigned int sorbet_vmCallFCall() {
 // static struct rb_kwarg_call_data test_cd = {0};
 
 SORBET_INLINE
-const rb_control_frame_t *sorbet_setRubyStackFrame(int iseq_type, unsigned char *iseqchar) {
+const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isClassOrModuleStaticInit, int iseq_type,
+                                                   unsigned char *iseqchar) {
     const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
     rb_execution_context_t *ec = GET_EC();
     rb_control_frame_t *cfp = ec->cfp;
@@ -1126,7 +1127,7 @@ const rb_control_frame_t *sorbet_setRubyStackFrame(int iseq_type, unsigned char 
     // Depending on what kind of iseq we're switching to, we need to push a frame on the ruby stack.
     if (iseq_type == ISEQ_TYPE_RESCUE || iseq_type == ISEQ_TYPE_ENSURE) {
         sorbet_setExceptionStackFrame(ec, cfp, iseq);
-    } else {
+    } else if (!isClassOrModuleStaticInit) {
         cfp->iseq = iseq;
         VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
 

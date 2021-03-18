@@ -134,6 +134,20 @@ struct IREmitterContext {
     // idx: cfg::BasicBlock::rubyBlockId;
     std::vector<llvm::AllocaInst *> sendArgArrayByBlock;
 
+    // The localsOffset values are only needed in Payload::varGet/Payload::varSet when we know that we're compiling a
+    // static-init function. This boolean indicates whether or not that value needs to be used when computing the index
+    // into the locals.
+    bool useLocalsOffset;
+
+    // When static-init methods for classes or modules are run, they don't push a ruby-level function frame. As a
+    // result, they store their locals in a region of the locals for the file-level static init. This vector keeps the
+    // offsets for individual static-init methods, so that they can be used to index into the correct region of the
+    // top-level static-init method.
+    //
+    // idx: cfg::BasicBlock::rubyBlockId
+    // val: an offset into the locals of the top-level static-init, or 0 if this is not a static-init method
+    std::vector<llvm::Value *> localsOffset;
+
     // TODO(jez) document escapedVariableIndices
     UnorderedMap<cfg::LocalRef, int> escapedVariableIndices;
 

@@ -99,8 +99,6 @@ public:
     static const VMFlag VM_CALL_KWARG;
     static const VMFlag VM_CALL_KW_SPLAT;
     static const VMFlag VM_CALL_FCALL;
-
-    static llvm::Value *buildLocalsOffset(CompilerState &cs);
 };
 } // namespace sorbet::compiler
 #endif

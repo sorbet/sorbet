@@ -503,12 +503,57 @@ void fillLocals(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterCo
     }
 }
 
+// Fetches the global that points to the current static-init locals array, and the number of elements allocated.
+tuple<llvm::GlobalVariable *, llvm::GlobalVariable *, int> getStaticInitLocals(CompilerState &cs) {
+    static const bool allowInternalLinkage = true;
+    auto *staticInitLocalsName = "<static-init-locals>";
+    auto *staticInitLocalsPtr = cs.module->getGlobalVariable(staticInitLocalsName, allowInternalLinkage);
+
+    auto *staticInitLocalsSizeName = "<static-init-locals-size>";
+    auto *staticInitLocalsSizePtr = cs.module->getGlobalVariable(staticInitLocalsSizeName, allowInternalLinkage);
+
+    if (staticInitLocalsPtr != nullptr) {
+        ENFORCE(staticInitLocalsSizePtr && staticInitLocalsSizePtr->hasInitializer());
+
+        auto *init = staticInitLocalsSizePtr->getInitializer();
+        ENFORCE(llvm::isa<llvm::ConstantInt>(init));
+
+        return {staticInitLocalsPtr, staticInitLocalsSizePtr, llvm::cast<llvm::ConstantInt>(init)->getZExtValue()};
+    }
+
+    ENFORCE(staticInitLocalsSizePtr == nullptr);
+
+    // Both globals we are about to create do not change at runtime.  Only their
+    // initializers change as we translate the AST into LLVM IR.
+    static const bool isRuntimeConstant = true;
+
+    // the variable doesn't exist, so there haven't been any locals allocated for static-init.
+    {
+        auto *type = llvm::PointerType::getUnqual(llvm::Type::getInt64Ty(cs));
+        auto nullv = llvm::ConstantPointerNull::get(type);
+        staticInitLocalsPtr = new llvm::GlobalVariable(
+            *cs.module, type, isRuntimeConstant, llvm::GlobalVariable::InternalLinkage, nullv, staticInitLocalsName);
+    }
+
+    {
+        auto *type = llvm::Type::getInt32Ty(cs);
+        auto *zero = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, false));
+        staticInitLocalsSizePtr = new llvm::GlobalVariable(
+            *cs.module, type, isRuntimeConstant, llvm::GlobalVariable::InternalLinkage, zero, staticInitLocalsSizeName);
+    }
+
+    return {staticInitLocalsPtr, staticInitLocalsSizePtr, 0};
+}
+
 // A description of where local variables' IDs are held prior to calling
 // `sorbet_allocateRubyStackFrame`.
 enum class LocalsIDStorage {
-    // A normal method or static init function: we will allocate a temporar
-    //  array on the C stack.
+    // A normal method: we will allocate a temporary array on the C stack.
     Stack,
+
+    // A file- or class-level static init method: we create one large array in static
+    // storage to hold all the IDs for these methods.
+    GlobalArray,
 
     // Blocks and exception-related functions: locals are inherited from the containing
     // method, which already allocated ID storage according to one of the other enum
@@ -520,9 +565,13 @@ LocalsIDStorage classifyStorageFor(CompilerState &cs, const IREmitterContext &ir
                                    int rubyBlockId) {
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-        case FunctionType::StaticInitFile:
-        case FunctionType::StaticInitModule:
             return LocalsIDStorage::Stack;
+
+        case FunctionType::StaticInitFile:
+        // XXX module-level static init really re-uses locals from the file-level
+        // static init, so it should be inherited.
+        case FunctionType::StaticInitModule:
+            return LocalsIDStorage::GlobalArray;
 
         case FunctionType::Block:
         case FunctionType::Rescue:
@@ -555,6 +604,50 @@ tuple<llvm::Value *, llvm::Value *> getLocals(CompilerState &cs, llvm::IRBuilder
             locals = builder.CreateAlloca(idType, numLocals, "locals");
             fillLocals(cs, builder, irctx, rubyBlockId, 0, locals);
             break;
+
+        case LocalsIDStorage::GlobalArray: {
+            auto [staticInitLocalsPtr, staticInitLocalsSizePtr, baseSize] = getStaticInitLocals(cs);
+
+            // store the offset to the locals for this static-init method in a fresh global with a special name
+            auto *offsetGlobal = IREmitterHelpers::getStaticInitLocalsOffset(cs, md.symbol);
+            offsetGlobal->setInitializer(llvm::ConstantInt::get(cs, llvm::APInt(64, baseSize, false)));
+
+            // NOTE: we always allocate a new global to hold the resized array so that the initializer for the
+            // "<static-init-locals>" global is always a pointer to another global that holds an array.
+            auto escaped = irctx.escapedVariableIndices.size();
+            auto newSize = baseSize + escaped;
+            auto *arrayTy = llvm::ArrayType::get(llvm::Type::getInt64Ty(cs), newSize);
+            auto *arrayGlobal =
+                new llvm::GlobalVariable(*cs.module, arrayTy, false, llvm::GlobalVariable::InternalLinkage,
+                                         llvm::ConstantAggregateZero::get(arrayTy), "<static-init-locals-storage>");
+
+            auto *ptrTy = staticInitLocalsPtr->getType()->getElementType();
+            staticInitLocalsPtr->setInitializer(llvm::ConstantExpr::getPointerCast(arrayGlobal, ptrTy));
+
+            // update the global that keeps the number of locals allocated
+            staticInitLocalsSizePtr->setInitializer(llvm::ConstantInt::get(cs, llvm::APInt(32, newSize, false)));
+
+            {
+                // fill the locals in the context of the auxiliary static-init locals setup function
+                auto ip = builder.saveIP();
+                builder.SetInsertPoint(cs.initializeStaticInitNamesEntry);
+                auto cs1 = cs.withFunctionEntry(cs.initializeStaticInitNamesEntry);
+                fillLocals(cs1, builder, irctx, rubyBlockId, baseSize,
+                           builder.CreateLoad(staticInitLocalsPtr, "locals"));
+                builder.restoreIP(ip);
+            }
+
+            // Finally, we only set the locals pointer to a non-null value if this is the top-level static-init, as
+            // that is the function that will be responsible for allocating the frame used by all static-init methods.
+            if (irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitModule) {
+                numLocals = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true));
+                locals = llvm::ConstantPointerNull::get(idPtrType);
+            } else {
+                ENFORCE(irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitFile);
+                numLocals = builder.CreateLoad(staticInitLocalsSizePtr, "numLocals");
+                locals = builder.CreateLoad(staticInitLocalsPtr, "locals");
+            }
+        } break;
     }
 
     return {locals, numLocals};
@@ -676,7 +769,10 @@ std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState
     auto &builder = builderCast(build);
     auto stackFrame = allocateRubyStackFrames(cs, builder, irctx, md, rubyBlockId);
     auto *iseqType = getIseqType(cs, builder, irctx, rubyBlockId);
-    auto cfp = builder.CreateCall(cs.getFunction("sorbet_setRubyStackFrame"), {iseqType, stackFrame});
+    auto *isClassOrModuleStaticInit =
+        llvm::ConstantInt::get(cs, llvm::APInt(1, irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitModule));
+    auto cfp = builder.CreateCall(cs.getFunction("sorbet_setRubyStackFrame"),
+                                  {isClassOrModuleStaticInit, iseqType, stackFrame});
     auto pc = builder.CreateCall(cs.getFunction("sorbet_getPc"), {cfp});
     auto iseq_encoded = builder.CreateCall(cs.getFunction("sorbet_getIseqEncoded"), {cfp});
     return {pc, iseq_encoded};
@@ -785,8 +881,14 @@ llvm::Value *getClassVariableStoreClass(CompilerState &cs, llvm::IRBuilder<> &bu
 // closure.
 tuple<llvm::Value *, llvm::Value *> indexForLocalVariable(CompilerState &cs, const IREmitterContext &irctx,
                                                           int rubyBlockId, int escapeId) {
+    llvm::Value *offset = nullptr;
     auto *index = llvm::ConstantInt::get(cs, llvm::APInt(64, escapeId, true));
-    auto *offset = Payload::buildLocalsOffset(cs);
+
+    if (irctx.useLocalsOffset) {
+        offset = irctx.localsOffset[rubyBlockId];
+    } else {
+        offset = llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
+    }
 
     return {offset, index};
 }
@@ -931,13 +1033,4 @@ const VMFlag Payload::VM_CALL_ARGS_SPLAT{"sorbet_vmCallArgsSplat", "VM_CALL_ARGS
 const VMFlag Payload::VM_CALL_KWARG{"sorbet_vmCallKwarg", "VM_CALL_KWARG"};
 const VMFlag Payload::VM_CALL_KW_SPLAT{"sorbet_vmCallKwSplat", "VM_CALL_KW_SPLAT"};
 const VMFlag Payload::VM_CALL_FCALL{"sorbet_vmCallFCall", "VM_CALL_FCALL"};
-
-// Currently this function is an historical artifact. Prior to https://github.com/stripe/sorbet_llvm/pull/353, it was
-// used to compute an offset into a global array that was used to hold locals for all method and class static-init
-// functions. We now push stack frames for these functions to track the locals. Computing such an offset into the
-// locals may become useful for other reasons in the future, however, so we keep the offsets and this function around,
-// even though for now the offset is always zero.
-llvm::Value *Payload::buildLocalsOffset(CompilerState &cs) {
-    return llvm::ConstantInt::get(cs, llvm::APInt(64, 0, true));
-}
 } // namespace sorbet::compiler

@@ -86,7 +86,7 @@ public:
     tuple<llvm::Value *, llvm::Value *, llvm::Value *> getExceptionArgs() {
         auto *pc = builder.CreateLoad(irctx.lineNumberPtrsByFunction[rubyBlockId]);
         auto *iseq_encoded = builder.CreateLoad(irctx.iseqEncodedPtrsByFunction[rubyBlockId]);
-        auto *closure = Payload::buildLocalsOffset(cs);
+        auto *closure = irctx.localsOffset[rubyBlockId];
         return {pc, iseq_encoded, closure};
     }
 
