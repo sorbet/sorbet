@@ -165,7 +165,7 @@ module T::Private::Methods
   end
 
   private_class_method def self.module_with_final?(mod)
-    @modules_with_final.has_key?(mod)
+    @modules_with_final.include?(mod)
   end
 
   # Only public because it needs to get called below inside the replace_method blocks below.
