@@ -110,7 +110,7 @@ module T::Private::Methods
       # ancestor chain, or ancestor did have final methods somewhere in its ancestor
       # chain, but no final methods defined in ancestor itself.  Either way, there
       # are no final methods to check here, so we can move on to the next ancestor.
-      next if !final_methods
+      next unless final_methods
       source_method_names.each do |method_name|
         next unless final_methods.include?(method_name)
 
