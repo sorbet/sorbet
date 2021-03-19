@@ -12,7 +12,7 @@ method:
 # typed: true
 
 module MyHelper
-  def say_error(message):
+  def say_error(message)
     raise "InternalError: #{message}" # error: Method `raise` does not exist on `MyHelper`
   end
 end
@@ -62,7 +62,7 @@ module MyHelper
 
   requires_ancestor Kernel
 
-  def say_error(message):
+  def say_error(message)
     raise "InternalError: #{message}"
   end
 end
