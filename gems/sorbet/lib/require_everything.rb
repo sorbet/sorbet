@@ -131,7 +131,7 @@ class Sorbet::Private::RequireEverything
     #     ...
     #   ]
     # }
-    parsed = JSON.parse(output)
+    parsed = output.empty? ? {} : JSON.parse(output)
     parsed
       .fetch('files', [])
       .reject{|file| ["Ignore", "Stdlib"].include?(file["strict"])}
