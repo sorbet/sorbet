@@ -233,11 +233,11 @@ string KnowledgeFact::toString(const core::GlobalState &gs, const cfg::CFG &cfg)
 
     for (auto &el : yesTypeTests) {
         buf1.emplace_back(
-            fmt::format("    {} to be {}\n", el.first.showRaw(gs, cfg), el.second.toStringWithTabs(gs, 0)));
+            fmt::format("    {} to be {}\n", el.first.toString(gs, cfg), el.second.toStringWithTabs(gs, 0)));
     }
     for (auto &el : noTypeTests) {
         buf2.emplace_back(
-            fmt::format("    {} NOT to be {}\n", el.first.showRaw(gs, cfg), el.second.toStringWithTabs(gs, 0)));
+            fmt::format("    {} NOT to be {}\n", el.first.toString(gs, cfg), el.second.toStringWithTabs(gs, 0)));
     }
     fast_sort(buf1);
     fast_sort(buf2);
@@ -383,7 +383,8 @@ string Environment::toString(const core::GlobalState &gs, const cfg::CFG &cfg) c
         if (var.data(cfg)._name == core::Names::debugEnvironmentTemp()) {
             continue;
         }
-        fmt::format_to(buf, "{}: {}{}\n{}\n", var.showRaw(gs, cfg), state.typeAndOrigins.type.toStringWithTabs(gs, 0),
+        auto typeStr = state.typeAndOrigins.type == nullptr ? string("nullptr") : state.typeAndOrigins.type.show(gs);
+        fmt::format_to(buf, "{}: {}{}\n{}\n", var.toString(gs, cfg), typeStr,
                        state.knownTruthy ? " (and truthy)\n" : "", state.knowledge.toString(gs, cfg));
     }
     return to_string(buf);
@@ -498,6 +499,8 @@ bool isSingleton(core::Context ctx, core::ClassOrModuleRef sym) {
 
 void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::Loc loc, const cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {
+    // &&$2  = x.nil?
+    // local = fnd.nil?
     if (send->fun == core::Names::bang()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
@@ -505,11 +508,13 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         auto &whoKnows = getKnowledge(local);
         auto fnd = _vars.find(send->recv.variable);
         if (fnd != _vars.end()) {
+            // TODO(jez) What the heck are these replaceTruthy/replaceFalsy calls?
+            // Aren't they redundant with the type tests outside the `if`?
             whoKnows.replaceTruthy(local, typeTestsWithVar, fnd->second.knowledge.falsy());
             whoKnows.replaceFalsy(local, typeTestsWithVar, fnd->second.knowledge.truthy());
             fnd->second.knowledge.truthy().addYesTypeTest(fnd->first, typeTestsWithVar, local,
-                                                          core::Types::falsyTypes());
-            fnd->second.knowledge.falsy().addNoTypeTest(fnd->first, typeTestsWithVar, local, core::Types::falsyTypes());
+                                                          core::Types::falseClass());
+            fnd->second.knowledge.falsy().addNoTypeTest(fnd->first, typeTestsWithVar, local, core::Types::falseClass());
         }
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
@@ -520,6 +525,26 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             return;
         }
         auto &whoKnows = getKnowledge(local);
+        auto fnd = _vars.find(send->recv.variable);
+        if (fnd != _vars.end()) {
+            // TODO(jez) If something isn't working, you deleted half of the if branch above when copy/pasting.
+            // Ok well you tried it anyways. It's possible the next two lines are wrong/unneeded.
+            // whoKnows.replaceTruthy(local, typeTestsWithVar, fnd->second.knowledge.falsy());
+            // whoKnows.replaceFalsy(local, typeTestsWithVar, fnd->second.knowledge.truthy());
+
+            // TODO(jez) It's likely that Sorbet already has enough to piece this together, so it
+            // ends up being redundant.
+            fnd->second.knowledge.truthy().addYesTypeTest(fnd->first, typeTestsWithVar, local,
+                                                          core::Types::falseClass());
+            if (!core::Types::isSubType(ctx, core::Types::falseClass(), send->recv.type)) {
+                fnd->second.knowledge.falsy().addNoTypeTest(fnd->first, typeTestsWithVar, local,
+                                                            core::Types::falseClass());
+            }
+        }
+        // TODO(jez) nilClass() -> falsyTypes() here is actively wrong, but maybe it shows the difference in behavior
+        // Even still, you tried it once, and noted that **all** previous environments (and parent
+        // environments) were identical, but somehow the result of mergeWith yielded a different
+        // result before processing block 6.
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::nilClass());
         whoKnows.sanityCheck();
@@ -670,23 +695,24 @@ void Environment::setTypeAndOrigin(cfg::LocalRef symbol, const core::TypeAndOrig
     _vars[symbol].typeAndOrigins = typeAndOrigins;
 }
 
-const Environment &Environment::withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
-                                         const UnorderedMap<cfg::LocalRef, VariableState> &filter) {
+const Environment &Environment::withCond(core::Context ctx, const Environment &env, Environment &copy,
+                                         bool isTrueBranch, const UnorderedMap<cfg::LocalRef, VariableState> &filter) {
     ENFORCE(env.bb->bexit.cond.variable.exists());
     if (env.bb->bexit.cond.variable == cfg::LocalRef::unconditional() ||
         env.bb->bexit.cond.variable == cfg::LocalRef::blockCall()) {
         return env;
     }
     copy.cloneFrom(env);
-    copy.assumeKnowledge(ctx, isTrue, env.bb->bexit.cond.variable, core::Loc(ctx.file, env.bb->bexit.loc), filter);
+    copy.assumeKnowledge(ctx, isTrueBranch, env.bb->bexit.cond.variable, core::Loc(ctx.file, env.bb->bexit.loc),
+                         filter);
     return copy;
 }
 
-void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef cond, core::Loc loc,
+void Environment::assumeKnowledge(core::Context ctx, bool isTrueBranch, cfg::LocalRef cond, core::Loc loc,
                                   const UnorderedMap<cfg::LocalRef, VariableState> &filter) {
     const auto &thisKnowledge = getKnowledge(cond, false);
     thisKnowledge.sanityCheck();
-    if (!isTrue) {
+    if (!isTrueBranch) {
         if (getKnownTruthy(cond)) {
             isDead = true;
             return;
@@ -721,7 +747,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
         return;
     }
 
-    auto &knowledgeToChoose = isTrue ? thisKnowledge.truthy() : thisKnowledge.falsy();
+    auto &knowledgeToChoose = isTrueBranch ? thisKnowledge.truthy() : thisKnowledge.falsy();
     auto &yesTests = knowledgeToChoose->yesTypeTests;
     auto &noTests = knowledgeToChoose->noTypeTests;
 
@@ -763,7 +789,17 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
 void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                             KnowledgeFilter &knowledgeFilter) {
     this->isDead |= other.isDead;
-    for (auto &pair : _vars) {
+    // TODO(jez) This appears to have an order dependency on variables.
+    // When I sort (no matter ascending or descending), the behavior of bar.rb regresses to match foo.rb
+    vector<pair<cfg::LocalRef, VariableState>> varsSorted;
+    for (auto &[fst, snd] : _vars) {
+        varsSorted.emplace_back(fst, snd);
+    }
+    fast_sort(varsSorted, [&](const auto &var1, const auto &var2) {
+        return var1.first.toString(ctx, inWhat) < var2.first.toString(ctx, inWhat);
+    });
+    // for (auto &pair : _vars) {
+    for (auto &pair : varsSorted) {
         auto var = pair.first;
         const auto &otherTO = other.getTypeAndOrigin(ctx, var);
         auto &thisTO = pair.second.typeAndOrigins;
@@ -793,6 +829,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
                 other.getKnowledge(var, false).truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherTruthy->isDead) {
                 if (!thisKnowledge.seenTruthyOption) {
+                    // TODO(jez) This line puts the 'y to be String' under 'y: String Being truthy'
                     thisKnowledge.seenTruthyOption = true;
                     thisKnowledge.replaceTruthy(var, typeTestsWithVar, otherTruthy);
                 } else {
@@ -808,12 +845,16 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
             if (!otherFalsy->isDead) {
                 if (!thisKnowledge.seenFalsyOption) {
                     thisKnowledge.seenFalsyOption = true;
+                    // TODO(jez) This line puts the 'y to be String' under 'x: NilClass Being falsy'
                     thisKnowledge.replaceFalsy(var, typeTestsWithVar, otherFalsy);
                 } else {
                     thisKnowledge.falsy().min(ctx, *otherFalsy);
                 }
             }
         }
+    }
+    for (auto &pair : varsSorted) {
+        _vars[pair.first] = pair.second;
     }
 }
 

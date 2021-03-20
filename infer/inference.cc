@@ -87,6 +87,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             continue;
         }
         Environment &current = outEnvironments[bb->id];
+        if (bb->id == 6) {
+            fmt::print("----- current at start of iteration for bb->id=6 -----\n{}\n", current.toString(ctx, *cfg));
+        }
         current.initializeBasicBlockArgs(*bb);
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
@@ -100,7 +103,17 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 current.isDead = true;
             }
         } else {
+            // TODO(jez) The problem appears to be from this block.
+            // But as far as I can tell, the previous typed basic blocks are identical,
+            // and so are the previous environments.
+            // So what's different?
+            // Answer: The input bb->id=2 is different, because i was only comparing the bb->id=2
+            // before processing bindings, not after.
             current.isDead = (bb != cfg->entry());
+            if (bb->id == 6) {
+                fmt::print("----- current at start of merge with parents for bb->id=6 -----\n{}\n",
+                           current.toString(ctx, *cfg));
+            }
             for (cfg::BasicBlock *parent : bb->backEdges) {
                 if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
                     continue;
@@ -109,9 +122,17 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                 Environment tempEnv(methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars());
+                if (bb->id == 6) {
+                    fmt::print("----- input to bb->id=6: parent->id={} -----\n{}\n", parent->id,
+                               envAsSeenFromBranch.toString(ctx, *cfg));
+                }
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
                     current.mergeWith(ctx, envAsSeenFromBranch, *cfg.get(), bb, knowledgeFilter);
+                }
+                if (bb->id == 6) {
+                    fmt::print("----- current after merge with parent->id={} for bb->id=6 -----\n{}\n", parent->id,
+                               current.toString(ctx, *cfg));
                 }
             }
         }
@@ -219,6 +240,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             continue;
         }
 
+        fmt::print("----- before processing bindings for bb->id={} -----\n{}\n", bb->id, current.toString(ctx, *cfg));
         core::Loc madeBlockDead;
         int i = 0;
         for (cfg::Binding &bind : bb->exprs) {
@@ -270,6 +292,14 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         for (auto &pair : current.vars()) {
             pair.second.knowledge.emitKnowledgeSizeMetric();
         }
+        if (bb->id == 2) {
+            fmt::print("----- current after bb->id=2 -----\n{}\n", current.toString(ctx, *cfg));
+        }
+    }
+    fmt::print("===== {} =====\n", cfg->symbol.data(ctx)->show(ctx));
+    for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
+        const auto &bb = *it;
+        fmt::print("----- bb->id={} -----\n{}\n", bb->id, outEnvironments[bb->id].toString(ctx, *cfg));
     }
     if (startErrorCount == ctx.state.totalErrors()) {
         counterInc("infer.methods_typechecked.no_errors");

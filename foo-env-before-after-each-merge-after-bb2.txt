@@ -1,0 +1,388 @@
+----- before processing bindings for bb->id=0 -----
+
+----- before processing bindings for bb->id=3 -----
+x: String
+  Being truthy entails:
+    &&$2 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: T.nilable(String)
+
+&&$2: FalseClass
+  Being truthy entails:
+    x to be NilClass
+  Being falsy entails:
+    x NOT to be NilClass
+
+
+----- before processing bindings for bb->id=2 -----
+x: NilClass
+  Being truthy entails:
+    &&$2 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: T.nilable(String)
+
+
+----- current after bb->id=2 -----
+<ifTemp>$3: T::Boolean
+  Being truthy entails:
+    y to be NilClass
+  Being falsy entails:
+    y NOT to be NilClass
+
+x: NilClass
+  Being truthy entails:
+    &&$2 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: T.nilable(String)
+  Being truthy entails:
+    <ifTemp>$3 to be FalseClass
+  Being falsy entails:
+    <ifTemp>$3 NOT to be FalseClass
+
+
+----- current at start of iteration for bb->id=6 -----
+
+----- current at start of merge with parents for bb->id=6 -----
+dead=1
+x: nullptr
+
+y: nullptr
+
+
+----- input to bb->id=6: parent->id=2 -----
+<ifTemp>$3: FalseClass
+  Being truthy entails:
+    y to be NilClass
+  Being falsy entails:
+    y NOT to be NilClass
+
+x: NilClass
+  Being truthy entails:
+    &&$2 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: String
+  Being truthy entails:
+    <ifTemp>$3 to be FalseClass
+  Being falsy entails:
+    <ifTemp>$3 NOT to be FalseClass
+
+
+----- current after merge with parent->id=2 for bb->id=6 -----
+x: NilClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: String
+  Being truthy entails:
+    <ifTemp>$3 to be FalseClass
+
+
+----- input to bb->id=6: parent->id=3 -----
+<ifTemp>$3: FalseClass
+  Being truthy entails:
+    x to be NilClass
+    &&$2 NOT to be NilClass | FalseClass
+  Being falsy entails:
+    &&$2 to be NilClass | FalseClass
+    x NOT to be NilClass
+
+x: String
+  Being truthy entails:
+    &&$2 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: T.nilable(String)
+
+&&$2: FalseClass
+  Being truthy entails:
+    x to be NilClass
+    <ifTemp>$3 NOT to be NilClass | FalseClass
+  Being falsy entails:
+    <ifTemp>$3 to be NilClass | FalseClass
+    x NOT to be NilClass
+
+
+----- current after merge with parent->id=3 for bb->id=6 -----
+x: T.nilable(String)
+  Being truthy entails:
+    &&$2 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: T.nilable(String)
+
+
+----- before processing bindings for bb->id=6 -----
+x: T.nilable(String)
+  Being truthy entails:
+    &&$2 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: T.nilable(String)
+
+
+----- before processing bindings for bb->id=8 -----
+y: T.nilable(String)
+
+
+----- before processing bindings for bb->id=7 -----
+x: String
+  Being truthy entails:
+    &&$2 to be FalseClass
+    <statTemp>$10 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+    <statTemp>$10 NOT to be FalseClass
+
+
+----- before processing bindings for bb->id=5 -----
+
+===== Object#foo =====
+----- bb->id=0 -----
+<self>: Object
+
+x: T.nilable(String)
+  Being truthy entails:
+    &&$2 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: T.nilable(String)
+
+&&$2: T::Boolean
+  Being truthy entails:
+    x to be NilClass
+  Being falsy entails:
+    x NOT to be NilClass
+
+
+----- bb->id=3 -----
+<ifTemp>$3: FalseClass
+  Being truthy entails:
+    x to be NilClass
+    &&$2 NOT to be NilClass | FalseClass
+  Being falsy entails:
+    &&$2 to be NilClass | FalseClass
+    x NOT to be NilClass
+
+x: String
+  Being truthy entails:
+    &&$2 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: T.nilable(String)
+
+&&$2: FalseClass
+  Being truthy entails:
+    x to be NilClass
+    <ifTemp>$3 NOT to be NilClass | FalseClass
+  Being falsy entails:
+    <ifTemp>$3 to be NilClass | FalseClass
+    x NOT to be NilClass
+
+
+----- bb->id=2 -----
+<ifTemp>$3: T::Boolean
+  Being truthy entails:
+    y to be NilClass
+  Being falsy entails:
+    y NOT to be NilClass
+
+x: NilClass
+  Being truthy entails:
+    &&$2 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+
+y: T.nilable(String)
+  Being truthy entails:
+    <ifTemp>$3 to be FalseClass
+  Being falsy entails:
+    <ifTemp>$3 NOT to be FalseClass
+
+
+----- bb->id=6 -----
+<ifTemp>$9: T::Boolean
+  Being truthy entails:
+    &&$2 to be FalseClass
+    <statTemp>$10 to be NilClass | FalseClass
+    x NOT to be NilClass
+  Being falsy entails:
+    x to be NilClass
+    &&$2 NOT to be FalseClass
+    <statTemp>$10 NOT to be NilClass | FalseClass
+
+<statTemp>$10: T::Boolean
+  Being truthy entails:
+    <ifTemp>$9 to be FalseClass
+    x to be NilClass
+    &&$2 NOT to be FalseClass
+  Being falsy entails:
+    &&$2 to be FalseClass
+    <ifTemp>$9 NOT to be FalseClass
+    x NOT to be NilClass
+
+x: T.nilable(String)
+  Being truthy entails:
+    &&$2 to be FalseClass
+    <statTemp>$10 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+    <statTemp>$10 NOT to be FalseClass
+
+y: T.nilable(String)
+
+
+----- bb->id=8 -----
+dead=1
+<returnMethodTemp>$2: T.noreturn
+
+y: T.nilable(String)
+
+
+----- bb->id=7 -----
+dead=1
+<returnMethodTemp>$2: T.noreturn
+
+x: String
+  Being truthy entails:
+    &&$2 to be FalseClass
+    <statTemp>$10 to be FalseClass
+  Being falsy entails:
+    &&$2 NOT to be FalseClass
+    <statTemp>$10 NOT to be FalseClass
+
+
+----- bb->id=5 -----
+dead=1
+<returnTemp>$8: String("default")
+
+<returnMethodTemp>$2: T.noreturn
+
+
+----- bb->id=1 -----
+
+----- before processing bindings for bb->id=0 -----
+
+----- before processing bindings for bb->id=2 -----
+<self>: T.class_of(<root>)
+
+<selfRestore>$8: T.class_of(<root>)
+
+<block-pre-call-temp>$7: Sorbet::Private::Static::Void
+
+
+----- current after bb->id=2 -----
+<self>: T.class_of(<root>)
+
+<selfRestore>$8: T.class_of(<root>)
+
+<block-pre-call-temp>$7: Sorbet::Private::Static::Void
+
+
+----- before processing bindings for bb->id=5 -----
+<self>: T.class_of(<root>)
+
+<selfRestore>$8: T.class_of(<root>)
+
+<block-pre-call-temp>$7: Sorbet::Private::Static::Void
+
+
+----- before processing bindings for bb->id=3 -----
+<selfRestore>$8: T.class_of(<root>)
+
+<block-pre-call-temp>$7: Sorbet::Private::Static::Void
+
+
+===== <root>.<static-init> =====
+----- bb->id=0 -----
+<self>: T.class_of(<root>)
+
+<selfRestore>$8: T.class_of(<root>)
+
+<cfgAlias>$5: T.class_of(Sorbet::Private::Static)
+
+<block-pre-call-temp>$7: Sorbet::Private::Static::Void
+
+
+----- bb->id=2 -----
+<self>: T.class_of(<root>)
+
+<selfRestore>$8: T.class_of(<root>)
+
+<block-pre-call-temp>$7: Sorbet::Private::Static::Void
+
+
+----- bb->id=5 -----
+dead=1
+<statTemp>$12: T::Private::Methods::DeclBuilder
+
+<blockReturnTemp>$11: T::Private::Methods::DeclBuilder
+
+<blockReturnTemp>$28: T.noreturn
+
+<self>: T::Private::Methods::DeclBuilder
+
+<selfRestore>$8: T.class_of(<root>)
+
+<hashTemp>$14: Symbol(:x)
+
+<hashTemp>$15: <Type: T.nilable(String)>
+
+<hashTemp>$20: Symbol(:y)
+
+<hashTemp>$21: <Type: T.nilable(String)>
+
+<cfgAlias>$17: T.class_of(T)
+
+<cfgAlias>$19: T.class_of(String)
+
+<cfgAlias>$23: T.class_of(T)
+
+<cfgAlias>$25: T.class_of(String)
+
+<cfgAlias>$27: T.class_of(String)
+
+<block-pre-call-temp>$7: Sorbet::Private::Static::Void
+
+
+----- bb->id=3 -----
+dead=1
+<statTemp>$3: Sorbet::Private::Static::Void
+
+<statTemp>$29: T.class_of(<root>)
+
+<statTemp>$35: Symbol(:foo)
+
+<statTemp>$39: Symbol(:foo)
+
+<statTemp>$40: Symbol(:normal)
+
+<self>: T.class_of(<root>)
+
+<selfRestore>$8: T.class_of(<root>)
+
+<finalReturn>: T.noreturn
+
+<cfgAlias>$32: T.class_of(T::Sig)
+
+<cfgAlias>$34: T.class_of(T)
+
+<cfgAlias>$37: T.class_of(Sorbet::Private::Static)
+
+<block-pre-call-temp>$7: Sorbet::Private::Static::Void
+
+
+----- bb->id=1 -----
+
