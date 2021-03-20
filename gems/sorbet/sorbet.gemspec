@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.authors     = ['Stripe']
   s.email       = 'sorbet@stripe.com'
   s.files       = Dir.glob('lib/**/*')
-  s.executables = Dir.glob('bin/**/*').map {|path| path.gsub('bin/', '')}
+  s.executables = ['srb', 'srb-rbi']
   s.homepage    = 'https://sorbet.run'
   s.license     = 'Apache-2.0'
   s.metadata = {
