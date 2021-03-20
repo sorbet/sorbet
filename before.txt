@@ -11,9 +11,9 @@ y: T.nilable(String)
 
 &&$2: FalseClass
   Being truthy entails:
-    x to be NilClass
+    x to be NilClass | FalseClass
   Being falsy entails:
-    x NOT to be NilClass
+    x NOT to be NilClass | FalseClass
 
 
 ----- before processing bindings for bb->id=2 -----
@@ -29,9 +29,9 @@ y: T.nilable(String)
 ----- current after bb->id=2 -----
 <ifTemp>$3: T::Boolean
   Being truthy entails:
-    y to be NilClass
+    y to be NilClass | FalseClass
   Being falsy entails:
-    y NOT to be NilClass
+    y NOT to be NilClass | FalseClass
 
 x: NilClass
   Being truthy entails:
@@ -58,9 +58,9 @@ y: nullptr
 ----- input to bb->id=6: parent->id=2 -----
 <ifTemp>$3: FalseClass
   Being truthy entails:
-    y to be NilClass
+    y to be NilClass | FalseClass
   Being falsy entails:
-    y NOT to be NilClass
+    y NOT to be NilClass | FalseClass
 
 x: NilClass
   Being truthy entails:
@@ -78,21 +78,26 @@ y: String
 ----- current after merge with parent->id=2 for bb->id=6 -----
 x: NilClass
   Being falsy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be NilClass
+    y to be String
     &&$2 NOT to be FalseClass
 
 y: String
   Being truthy entails:
     <ifTemp>$3 to be FalseClass
+    x to be NilClass
+    y to be String
 
 
 ----- input to bb->id=6: parent->id=3 -----
 <ifTemp>$3: FalseClass
   Being truthy entails:
-    x to be NilClass
+    x to be NilClass | FalseClass
     &&$2 NOT to be NilClass | FalseClass
   Being falsy entails:
     &&$2 to be NilClass | FalseClass
-    x NOT to be NilClass
+    x NOT to be NilClass | FalseClass
 
 x: String
   Being truthy entails:
@@ -104,50 +109,94 @@ y: T.nilable(String)
 
 &&$2: FalseClass
   Being truthy entails:
-    x to be NilClass
+    x to be NilClass | FalseClass
     <ifTemp>$3 NOT to be NilClass | FalseClass
   Being falsy entails:
     <ifTemp>$3 to be NilClass | FalseClass
-    x NOT to be NilClass
+    x NOT to be NilClass | FalseClass
 
 
 ----- current after merge with parent->id=3 for bb->id=6 -----
 x: T.nilable(String)
   Being truthy entails:
     &&$2 to be FalseClass
+    <ifTemp>$3 to be FalseClass
+    x to be String
+    y to be String | NilClass
   Being falsy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be NilClass
+    y to be String
     &&$2 NOT to be FalseClass
 
 y: T.nilable(String)
+  Being truthy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be String | NilClass
+    y to be String | NilClass
+  Being falsy entails:
+    &&$2 to be FalseClass
+    <ifTemp>$3 to be FalseClass
+    x to be String
+    y to be String | NilClass
 
 
 ----- before processing bindings for bb->id=6 -----
 x: T.nilable(String)
   Being truthy entails:
     &&$2 to be FalseClass
+    <ifTemp>$3 to be FalseClass
+    x to be String
+    y to be String | NilClass
   Being falsy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be NilClass
+    y to be String
     &&$2 NOT to be FalseClass
 
 y: T.nilable(String)
+  Being truthy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be String | NilClass
+    y to be String | NilClass
+  Being falsy entails:
+    &&$2 to be FalseClass
+    <ifTemp>$3 to be FalseClass
+    x to be String
+    y to be String | NilClass
 
 
 ----- before processing bindings for bb->id=8 -----
-y: T.nilable(String)
+y: String
+  Being truthy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be String | NilClass
+    y to be String | NilClass
+  Being falsy entails:
+    &&$2 to be FalseClass
+    <ifTemp>$3 to be FalseClass
+    x to be String
+    y to be String | NilClass
 
 
 ----- before processing bindings for bb->id=7 -----
-x: String
+x: String (and truthy)
+
   Being truthy entails:
     &&$2 to be FalseClass
-    <statTemp>$10 to be FalseClass
+    <ifTemp>$3 to be FalseClass
+    x to be String
+    y to be String | NilClass
   Being falsy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be NilClass
+    y to be String
     &&$2 NOT to be FalseClass
-    <statTemp>$10 NOT to be FalseClass
 
 
 ----- before processing bindings for bb->id=5 -----
 
-===== Object#foo =====
+===== Object#bar =====
 ----- bb->id=0 -----
 <self>: Object
 
@@ -161,19 +210,19 @@ y: T.nilable(String)
 
 &&$2: T::Boolean
   Being truthy entails:
-    x to be NilClass
+    x to be NilClass | FalseClass
   Being falsy entails:
-    x NOT to be NilClass
+    x NOT to be NilClass | FalseClass
 
 
 ----- bb->id=3 -----
 <ifTemp>$3: FalseClass
   Being truthy entails:
-    x to be NilClass
+    x to be NilClass | FalseClass
     &&$2 NOT to be NilClass | FalseClass
   Being falsy entails:
     &&$2 to be NilClass | FalseClass
-    x NOT to be NilClass
+    x NOT to be NilClass | FalseClass
 
 x: String
   Being truthy entails:
@@ -185,19 +234,19 @@ y: T.nilable(String)
 
 &&$2: FalseClass
   Being truthy entails:
-    x to be NilClass
+    x to be NilClass | FalseClass
     <ifTemp>$3 NOT to be NilClass | FalseClass
   Being falsy entails:
     <ifTemp>$3 to be NilClass | FalseClass
-    x NOT to be NilClass
+    x NOT to be NilClass | FalseClass
 
 
 ----- bb->id=2 -----
 <ifTemp>$3: T::Boolean
   Being truthy entails:
-    y to be NilClass
+    y to be NilClass | FalseClass
   Being falsy entails:
-    y NOT to be NilClass
+    y NOT to be NilClass | FalseClass
 
 x: NilClass
   Being truthy entails:
@@ -213,55 +262,62 @@ y: T.nilable(String)
 
 
 ----- bb->id=6 -----
-<ifTemp>$9: T::Boolean
-  Being truthy entails:
-    &&$2 to be FalseClass
-    <statTemp>$10 to be NilClass | FalseClass
-    x NOT to be NilClass
-  Being falsy entails:
-    x to be NilClass
-    &&$2 NOT to be FalseClass
-    <statTemp>$10 NOT to be NilClass | FalseClass
-
-<statTemp>$10: T::Boolean
-  Being truthy entails:
-    <ifTemp>$9 to be FalseClass
-    x to be NilClass
-    &&$2 NOT to be FalseClass
-  Being falsy entails:
-    &&$2 to be FalseClass
-    <ifTemp>$9 NOT to be FalseClass
-    x NOT to be NilClass
-
 x: T.nilable(String)
   Being truthy entails:
     &&$2 to be FalseClass
-    <statTemp>$10 to be FalseClass
+    <ifTemp>$3 to be FalseClass
+    x to be String
+    y to be String | NilClass
   Being falsy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be NilClass
+    y to be String
     &&$2 NOT to be FalseClass
-    <statTemp>$10 NOT to be FalseClass
 
 y: T.nilable(String)
+  Being truthy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be String | NilClass
+    y to be String | NilClass
+  Being falsy entails:
+    &&$2 to be FalseClass
+    <ifTemp>$3 to be FalseClass
+    x to be String
+    y to be String | NilClass
 
 
 ----- bb->id=8 -----
 dead=1
 <returnMethodTemp>$2: T.noreturn
 
-y: T.nilable(String)
+y: String
+  Being truthy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be String | NilClass
+    y to be String | NilClass
+  Being falsy entails:
+    &&$2 to be FalseClass
+    <ifTemp>$3 to be FalseClass
+    x to be String
+    y to be String | NilClass
 
 
 ----- bb->id=7 -----
 dead=1
 <returnMethodTemp>$2: T.noreturn
 
-x: String
+x: String (and truthy)
+
   Being truthy entails:
     &&$2 to be FalseClass
-    <statTemp>$10 to be FalseClass
+    <ifTemp>$3 to be FalseClass
+    x to be String
+    y to be String | NilClass
   Being falsy entails:
+    <ifTemp>$3 to be FalseClass
+    x to be NilClass
+    y to be String
     &&$2 NOT to be FalseClass
-    <statTemp>$10 NOT to be FalseClass
 
 
 ----- bb->id=5 -----
@@ -363,9 +419,9 @@ dead=1
 
 <statTemp>$29: T.class_of(<root>)
 
-<statTemp>$35: Symbol(:foo)
+<statTemp>$35: Symbol(:bar)
 
-<statTemp>$39: Symbol(:foo)
+<statTemp>$39: Symbol(:bar)
 
 <statTemp>$40: Symbol(:normal)
 
