@@ -98,7 +98,7 @@ AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cf
     return res;
 }
 
-UnorderedMap<cfg::LocalRef, llvm::AllocaInst *>
+std::tuple<UnorderedMap<cfg::LocalRef, llvm::AllocaInst *>, UnorderedMap<int, llvm::AllocaInst *>>
 setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
                     const UnorderedMap<cfg::LocalRef, optional<int>> &variablesPrivateToBlocks,
                     const IREmitterContext &irctx) {
@@ -128,6 +128,17 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
         }
     }
 
+    // reserve self in all basic blocks.  We rely on LLVM to delete any allocas
+    // we wind up not actually needing.
+    UnorderedMap<int, llvm::AllocaInst *> selfVariables;
+    for (int i = 0; i <= cfg.maxRubyBlockId; ++i) {
+        builder.SetInsertPoint(irctx.functionInitializersByFunction[i]);
+        auto var = cfg::LocalRef::selfVariable();
+        auto nameStr = var.toString(cs, cfg);
+        selfVariables[i] =
+            builder.CreateAlloca(cs.getValueType(), nullptr, llvm::StringRef(nameStr.data(), nameStr.length()));
+    }
+
     {
         // reserve the magical return value
         builder.SetInsertPoint(irctx.functionInitializersByFunction[0]);
@@ -138,7 +149,7 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
             builder.CreateAlloca(cs.getValueType(), nullptr, llvm::StringRef(nameStr.data(), nameStr.length()));
     }
 
-    return llvmVariables;
+    return {std::move(llvmVariables), std::move(selfVariables)};
 }
 
 namespace {
@@ -159,6 +170,9 @@ public:
           usesBlockArg{false}, blkArg{cfg::LocalRef::noVariable()} {}
 
     void trackBlockUsage(cfg::BasicBlock *bb, cfg::LocalRef lv) {
+        if (lv == cfg::LocalRef::selfVariable()) {
+            return;
+        }
         usesBlockArg = usesBlockArg || lv == blkArg;
         auto fnd = privateUsages.find(lv);
         if (fnd != privateUsages.end()) {
@@ -170,15 +184,6 @@ public:
             }
         } else {
             privateUsages[lv] = bb->rubyBlockId;
-        }
-
-        // if the variable is an alias to an instance variable, <self> will get referenced because we
-        // synthesize a call to `sorbet_instanceVariableGet`
-        const auto alias = aliases.find(lv);
-        if (alias != aliases.end()) {
-            if (alias->second.kind == Alias::AliasKind::InstanceField) {
-                trackBlockUsage(bb, cfg::LocalRef::selfVariable());
-            }
         }
     }
 
@@ -704,6 +709,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         std::move(escapedVariableIndices),
         std::move(argPresentVariables),
         {},
+        {},
         postProcessBlock,
         move(blockLinks),
         move(rubyBlockArgs),
@@ -720,7 +726,9 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockScopes),
     };
 
-    approximation.llvmVariables = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);
+    auto [llvmVariables, selfVariables] = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);
+    approximation.llvmVariables = std::move(llvmVariables);
+    approximation.selfVariables = std::move(selfVariables);
 
     return approximation;
 }

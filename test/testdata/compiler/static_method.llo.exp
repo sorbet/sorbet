@@ -75,8 +75,8 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.rb_call_info_kw_arg = type { i32, [1 x i64] }
 
 @ruby_current_vm_ptr = external local_unnamed_addr global %struct.rb_vm_struct*, align 8
-@ruby_vm_global_constant_state = external local_unnamed_addr global i64, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
+@ruby_vm_global_constant_state = external local_unnamed_addr global i64, align 8
 @rb_eRuntimeError = external local_unnamed_addr global i64, align 8
 @.str.7 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @.str.8 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
@@ -255,7 +255,7 @@ entry:
   %rubyId_bar.i.i1 = load i64, i64* @rubyIdPrecomputed_bar, align 8, !dbg !49
   %rawSym.i.i = call i64 @rb_id2sym(i64 %rubyId_bar.i.i1) #6, !dbg !49
   %rubyId_normal.i.i = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !49
-  %rawSym8.i.i = call i64 @rb_id2sym(i64 %rubyId_normal.i.i) #6, !dbg !49
+  %rawSym7.i.i = call i64 @rb_id2sym(i64 %rubyId_normal.i.i) #6, !dbg !49
   %50 = load i64, i64* @guard_epoch_Foo, align 8, !dbg !49
   %51 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !49, !tbaa !50
   %needTakeSlowPath = icmp eq i64 %50, %51, !dbg !49
@@ -294,7 +294,7 @@ entry:
   %70 = getelementptr inbounds i64, i64* %68, i64 2, !dbg !13
   store i64* %70, i64** %67, align 8, !dbg !13, !tbaa !52
   store i64 %send.i, i64* %69, align 8, !dbg !13, !tbaa !4
-  %send28.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_puts, i64 0) #6, !dbg !13
+  %send27.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_puts, i64 0) #6, !dbg !13
   ret void
 }
 

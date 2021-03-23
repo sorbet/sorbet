@@ -138,6 +138,11 @@ VALUE sorbet_rubyTopSelf() {
     return GET_VM()->top_self;
 }
 
+SORBET_INLINE
+VALUE sorbet_getSelfFromFrame() {
+    return GET_EC()->cfp->self;
+}
+
 // ****
 // ****                       Implementation helpers for type tests
 // ****

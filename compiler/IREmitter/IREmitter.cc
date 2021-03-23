@@ -87,6 +87,29 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
         auto cs = base.withFunctionEntry(irctx.functionInitializersByFunction[rubyBlockId]);
 
         builder.SetInsertPoint(irctx.functionInitializersByFunction[rubyBlockId]);
+
+        switch (irctx.rubyBlockType[rubyBlockId]) {
+            case FunctionType::Method:
+            case FunctionType::StaticInitFile:
+            case FunctionType::StaticInitModule: {
+                // We could get this from the frame, as below, but it is slightly more
+                // efficient to get it from the function arguments.
+                auto selfArgRaw = irctx.rubyBlocks2Functions[rubyBlockId]->arg_begin() + 2;
+                Payload::varSet(cs, cfg::LocalRef::selfVariable(), selfArgRaw, builder, irctx, rubyBlockId);
+                break;
+            }
+            case FunctionType::Block:
+            case FunctionType::Rescue:
+            case FunctionType::Ensure:
+            case FunctionType::ExceptionBegin: {
+                auto selfArgRaw = builder.CreateCall(cs.getFunction("sorbet_getSelfFromFrame"), {}, "self");
+                Payload::varSet(cs, cfg::LocalRef::selfVariable(), selfArgRaw, builder, irctx, rubyBlockId);
+                break;
+            }
+            default:
+                break;
+        }
+
         setupStackFrame(cs, md, irctx, builder, rubyBlockId);
         auto lastLoc = core::Loc::none();
         auto startLoc = IREmitterHelpers::getMethodStart(cs, md.symbol);
@@ -305,12 +328,6 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                 auto fillRequiredArgs = llvm::BasicBlock::Create(cs, "fillRequiredArgs", func);
                 builder.CreateBr(fillRequiredArgs);
                 builder.SetInsertPoint(fillRequiredArgs);
-
-                // box `self`
-                if (!isBlock) {
-                    auto selfArgRaw = func->arg_begin() + 2;
-                    Payload::varSet(cs, cfg::LocalRef::selfVariable(), selfArgRaw, builder, irctx, rubyBlockId);
-                }
 
                 for (auto i = 0; i < maxPositionalArgCount; i++) {
                     if (i >= minPositionalArgCount) {

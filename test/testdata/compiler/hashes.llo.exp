@@ -212,7 +212,7 @@ entry:
   %rubyId_a.i = load i64, i64* @rubyIdPrecomputed_a, align 8, !dbg !43
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_a.i) #6, !dbg !43
   %rubyId_b.i = load i64, i64* @rubyIdPrecomputed_b, align 8, !dbg !44
-  %rawSym13.i = call i64 @rb_id2sym(i64 %rubyId_b.i) #6, !dbg !44
+  %rawSym12.i = call i64 @rb_id2sym(i64 %rubyId_b.i) #6, !dbg !44
   %hashLiteral.i = load i64, i64* @ruby_hashLiteral1, align 8, !dbg !45
   %duplicatedHash.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral.i) #6, !dbg !45
   %31 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !8, !tbaa !13

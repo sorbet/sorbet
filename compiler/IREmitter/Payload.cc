@@ -792,6 +792,9 @@ llvm::Value *indexForLocalVariable(CompilerState &cs, const IREmitterContext &ir
 llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &build,
                              const IREmitterContext &irctx, int rubyBlockId) {
     auto &builder = builderCast(build);
+    if (local == cfg::LocalRef::selfVariable()) {
+        return Payload::unboxRawValue(cs, builder, irctx.selfVariables.at(rubyBlockId));
+    }
     if (irctx.aliases.contains(local)) {
         // alias to a field or constant
         auto alias = irctx.aliases.at(local);
@@ -826,6 +829,9 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
 void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &build,
                      const IREmitterContext &irctx, int rubyBlockId) {
     auto &builder = builderCast(build);
+    if (local == cfg::LocalRef::selfVariable()) {
+        return Payload::boxRawValue(cs, builder, irctx.selfVariables.at(rubyBlockId), var);
+    }
     if (irctx.aliases.contains(local)) {
         // alias to a field or constant
         auto alias = irctx.aliases.at(local);

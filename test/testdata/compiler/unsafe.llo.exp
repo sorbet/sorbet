@@ -187,7 +187,7 @@ entry:
   %33 = getelementptr inbounds i64, i64* %31, i64 2, !dbg !13
   store i64* %33, i64** %30, align 8, !dbg !13, !tbaa !44
   store i64 3, i64* %32, align 8, !dbg !13, !tbaa !4
-  %send14.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_puts, i64 0) #6, !dbg !13
+  %send13.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_puts, i64 0) #6, !dbg !13
   ret void
 }
 

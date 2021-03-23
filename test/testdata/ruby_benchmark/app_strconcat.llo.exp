@@ -222,7 +222,7 @@ afterSend.i:                                      ; preds = %41, %"alternativeCa
   %"symIntrinsicRawPhi_<.i" = phi i64 [ %send.i, %"alternativeCallIntrinsic_Integer_<.i" ], [ %43, %41 ], !dbg !8
   %32 = and i64 %"symIntrinsicRawPhi_<.i", -9, !dbg !8
   %33 = icmp eq i64 %32, 0, !dbg !8
-  br i1 %33, label %"func_<root>.<static-init>$152.exit", label %afterSend74.i, !dbg !8
+  br i1 %33, label %"func_<root>.<static-init>$152.exit", label %afterSend73.i, !dbg !8
 
 "alternativeCallIntrinsic_Integer_<.i":           ; preds = %BB2.i
   %34 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !8, !tbaa !17
@@ -244,7 +244,7 @@ afterSend.i:                                      ; preds = %41, %"alternativeCa
   %43 = select i1 %42, i64 20, i64 0, !dbg !8
   br label %afterSend.i, !dbg !8
 
-afterSend74.i:                                    ; preds = %afterSend.i
+afterSend73.i:                                    ; preds = %afterSend.i
   store i64* %28, i64** %20, align 8, !tbaa !17
   %"rubyStr_ .i" = load i64, i64* @"rubyStrFrozen_ ", align 8, !dbg !41
   store i64 5, i64* %callArgs0Addr.i, align 8, !dbg !42
@@ -253,11 +253,11 @@ afterSend74.i:                                    ; preds = %afterSend.i
   store i64 %"rubyStr_ .i", i64* %callArgs3Addr.i, align 8, !dbg !42
   store i64 5, i64* %callArgs4Addr.i, align 8, !dbg !42
   %"rubyId_<string-interpolate>.i" = load i64, i64* @"rubyIdPrecomputed_<string-interpolate>", align 8, !dbg !42
-  %rawSendResult96.i = call i64 @sorbet_stringInterpolate(i64 8, i64 %"rubyId_<string-interpolate>.i", i32 5, i64* nonnull %callArgs0Addr.i, i64 (i64, i64, i32, i64*, i64)* null, i64 0) #7, !dbg !42
+  %rawSendResult95.i = call i64 @sorbet_stringInterpolate(i64 8, i64 %"rubyId_<string-interpolate>.i", i32 5, i64* nonnull %callArgs0Addr.i, i64 (i64, i64, i32, i64*, i64)* null, i64 0) #7, !dbg !42
   store i64* %29, i64** %20, align 8, !dbg !42, !tbaa !17
-  br i1 %31, label %51, label %"alternativeCallIntrinsic_Integer_+101.i", !dbg !16
+  br i1 %31, label %51, label %"alternativeCallIntrinsic_Integer_+100.i", !dbg !16
 
-"alternativeCallIntrinsic_Integer_+101.i":        ; preds = %afterSend74.i
+"alternativeCallIntrinsic_Integer_+100.i":        ; preds = %afterSend73.i
   %44 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !16, !tbaa !17
   %45 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %44, i64 0, i32 2, !dbg !16
   %46 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %45, align 8, !dbg !16, !tbaa !19
@@ -268,10 +268,10 @@ afterSend74.i:                                    ; preds = %afterSend.i
   %50 = getelementptr inbounds i64, i64* %48, i64 2, !dbg !16
   store i64* %50, i64** %47, align 8, !dbg !16, !tbaa !40
   store i64 3, i64* %49, align 8, !dbg !16, !tbaa !4
-  %send112.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @"ic_+.3", i64 0) #7, !dbg !16
+  %send111.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @"ic_+.3", i64 0) #7, !dbg !16
   br label %BB2.i.backedge, !dbg !16
 
-51:                                               ; preds = %afterSend74.i
+51:                                               ; preds = %afterSend73.i
   store i64 3, i64* %callArgs0Addr.i, align 8, !dbg !16
   %52 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0.i, i64 2) #7, !dbg !16
   %53 = extractvalue { i64, i1 } %52, 1, !dbg !16
@@ -284,8 +284,8 @@ afterSend74.i:                                    ; preds = %afterSend.i
   %58 = call i64 @rb_int2big(i64 %57) #7, !dbg !16
   br label %BB2.i.backedge, !dbg !16
 
-BB2.i.backedge:                                   ; preds = %55, %51, %"alternativeCallIntrinsic_Integer_+101.i"
-  %i.sroa.0.0.i.be = phi i64 [ %send112.i, %"alternativeCallIntrinsic_Integer_+101.i" ], [ %58, %55 ], [ %54, %51 ]
+BB2.i.backedge:                                   ; preds = %55, %51, %"alternativeCallIntrinsic_Integer_+100.i"
+  %i.sroa.0.0.i.be = phi i64 [ %send111.i, %"alternativeCallIntrinsic_Integer_+100.i" ], [ %58, %55 ], [ %54, %51 ]
   br label %BB2.i
 
 "func_<root>.<static-init>$152.exit":             ; preds = %afterSend.i

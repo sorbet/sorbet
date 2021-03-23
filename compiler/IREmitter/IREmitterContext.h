@@ -151,6 +151,12 @@ struct IREmitterContext {
     // This mapping holds the latter: locals that don't come from the closure.
     UnorderedMap<cfg::LocalRef, llvm::AllocaInst *> llvmVariables;
 
+    // `self` is retrieved at the entry point of each Ruby block and stashed here.
+    //
+    // idx: cfg::BasicBlock::rubyBlockId
+    // val: alloca for `self`
+    UnorderedMap<int, llvm::AllocaInst *> selfVariables;
+
     // Insertion point for code that runs at the end of a Ruby method (i.e., where returns go)
     // This handles return type checking, among other things.
     llvm::BasicBlock *postProcessBlock;

@@ -74,8 +74,8 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.rb_call_info_with_kwarg = type { %struct.rb_call_info, %struct.rb_call_info_kw_arg* }
 %struct.rb_call_info_kw_arg = type { i32, [1 x i64] }
 
-@ruby_vm_global_constant_state = external local_unnamed_addr global i64, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
+@ruby_vm_global_constant_state = external local_unnamed_addr global i64, align 8
 @rb_eRuntimeError = external local_unnamed_addr global i64, align 8
 @.str.7 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @.str.8 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
@@ -236,8 +236,8 @@ typeTestSuccess:                                  ; preds = %22
   %40 = getelementptr inbounds i64, i64* %39, i64 1, !dbg !41
   store i64* %40, i64** %38, align 8, !dbg !41, !tbaa !40
   store i64 %rawArg_a, i64* %39, align 8, !dbg !41, !tbaa !4
-  %send41 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_foo.1, i64 0) #9, !dbg !41
-  ret i64 %send41
+  %send40 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_foo.1, i64 0) #9, !dbg !41
+  ret i64 %send40
 
 codeRepl:                                         ; preds = %22
   tail call fastcc void @"func_Object#doubleCast.cold.1"(i64 %rawArg_a) #12, !dbg !35
@@ -355,7 +355,7 @@ entry:
   %rubyId_foo.i.i1 = load i64, i64* @rubyIdPrecomputed_foo, align 8, !dbg !50
   %rawSym.i.i = call i64 @rb_id2sym(i64 %rubyId_foo.i.i1) #9, !dbg !50
   %rubyId_normal.i.i = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !50
-  %rawSym8.i.i = call i64 @rb_id2sym(i64 %rubyId_normal.i.i) #9, !dbg !50
+  %rawSym7.i.i = call i64 @rb_id2sym(i64 %rubyId_normal.i.i) #9, !dbg !50
   %50 = load i64, i64* @guard_epoch_A, align 8, !dbg !50
   %51 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !50, !tbaa !36
   %needTakeSlowPath = icmp eq i64 %50, %51, !dbg !50
@@ -378,7 +378,7 @@ entry:
   %rubyId_doubleCast.i = load i64, i64* @rubyIdPrecomputed_doubleCast, align 8, !dbg !42
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_doubleCast.i) #9, !dbg !42
   %rubyId_normal.i = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !42
-  %rawSym25.i = call i64 @rb_id2sym(i64 %rubyId_normal.i) #9, !dbg !42
+  %rawSym24.i = call i64 @rb_id2sym(i64 %rubyId_normal.i) #9, !dbg !42
   call void @rb_define_method(i64 %31, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @str_doubleCast, i64 0, i64 0), i64 (...)* bitcast (i64 (i32, i64*, i64)* @"func_Object#doubleCast" to i64 (...)*), i32 -1) #9, !dbg !42
   ret void
 }
