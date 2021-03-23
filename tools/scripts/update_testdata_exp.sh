@@ -35,6 +35,7 @@ passes=(
   ast-raw
   cfg
   cfg-raw
+  cfg-text
   autogen
   document-symbols
   package-tree

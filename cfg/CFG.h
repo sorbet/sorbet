@@ -70,6 +70,7 @@ public:
     };
 
     std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
+    std::string toTextualString(const core::GlobalState &gs, const CFG &cfg) const;
     std::string showRaw(const core::GlobalState &gs, const CFG &cfg) const;
 };
 
@@ -119,8 +120,10 @@ public:
         return basicBlocks[1].get();
     };
 
-    // Abbreviated debug output, useful if you already know what you're looking at
+    // Abbreviated debug output in dot format, useful if you already know what you're looking at
     std::string toString(const core::GlobalState &gs) const;
+    // As above, but without dot annotations
+    std::string toTextualString(const core::GlobalState &gs) const;
     // Verbose debug output
     std::string showRaw(core::Context ctx) const;
 

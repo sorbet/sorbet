@@ -71,6 +71,9 @@ public:
         if (print.CFG.enabled) {
             print.CFG.fmt("{}\n\n", cfg->toString(ctx));
         }
+        if (print.CFGText.enabled) {
+            print.CFG.fmt("{}\n\n", cfg->toTextualString(ctx));
+        }
         if (print.CFGRaw.enabled) {
             print.CFGRaw.fmt("{}\n\n", cfg->showRaw(ctx));
         }
