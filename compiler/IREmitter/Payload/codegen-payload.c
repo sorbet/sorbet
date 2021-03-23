@@ -63,6 +63,7 @@ SORBET_ALIVE(VALUE, sorbet_setConstant, (VALUE mod, const char *name, long nameL
 
 SORBET_ALIVE(const VALUE, sorbet_readRealpath, (void));
 SORBET_ALIVE(void, sorbet_pushCfuncFrame, (VALUE));
+SORBET_ALIVE(void, sorbet_pushStaticInitFrame, (VALUE));
 SORBET_ALIVE(void, sorbet_popRubyStack, (void));
 
 SORBET_ALIVE(void, sorbet_vm_env_write_slowpath, (const VALUE *, int, VALUE));
@@ -1015,22 +1016,21 @@ static const VALUE *vm_get_ep(const VALUE *const reg_ep, rb_num_t lv) {
 }
 
 SORBET_INLINE
-static int computeLocalIndex(long baseOffset, long index) {
+static int computeLocalIndex(long index) {
     // Local offset calculation needs to take into account the fixed values that
     // are present on the stack:
     // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L1509
-    return baseOffset + index + VM_ENV_DATA_SIZE;
+    return index + VM_ENV_DATA_SIZE;
 }
 
 // Read a value from the locals from this stack frame.
 //
-// * localsOffset - Offset into the locals (for static-init)
 // * index - local var index
 // * level - the number of blocks that need to be crossed to reach the
 //           outer-most stack frame.
 SORBET_INLINE
-VALUE sorbet_readLocal(long localsOffset, long index, long level) {
-    int offset = computeLocalIndex(localsOffset, index);
+VALUE sorbet_readLocal(long index, long level) {
+    int offset = computeLocalIndex(index);
     return *(vm_get_ep(GET_EC()->cfp->ep, level) - offset);
 }
 
@@ -1047,14 +1047,13 @@ static inline void vm_env_write(const VALUE *ep, int index, VALUE v) {
 
 // Write a value into the locals from this stack frame.
 //
-// * localsOffset - Offset into the locals (for static-init)
 // * index - local var index
 // * level - the number of blocks that need to be crossed to reach the
 //           outer-most stack frame.
 // * value - the value to write
 SORBET_INLINE
-void sorbet_writeLocal(long localsOffset, long index, long level, VALUE value) {
-    int offset = computeLocalIndex(localsOffset, index);
+void sorbet_writeLocal(long index, long level, VALUE value) {
+    int offset = computeLocalIndex(index);
     vm_env_write(vm_get_ep(GET_EC()->cfp->ep, level), -offset, value);
 }
 
@@ -1095,6 +1094,14 @@ VALUE sorbet_callFuncDirect(VALUE (*methodPtr)(int, VALUE *, VALUE), int argc, V
     return res;
 }
 
+SORBET_INLINE
+VALUE sorbet_callStaticInitDirect(VALUE (*methodPtr)(int, VALUE *, VALUE), int argc, VALUE *argv, VALUE recv) {
+    sorbet_pushStaticInitFrame(recv);
+    VALUE res = methodPtr(argc, argv, recv);
+    sorbet_popRubyStack();
+    return res;
+}
+
 unsigned int sorbet_vmCallKwarg() {
     return VM_CALL_KWARG;
 }
@@ -1118,8 +1125,7 @@ unsigned int sorbet_vmCallFCall() {
 // static struct rb_kwarg_call_data test_cd = {0};
 
 SORBET_INLINE
-const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isClassOrModuleStaticInit, int iseq_type,
-                                                   unsigned char *iseqchar) {
+const rb_control_frame_t *sorbet_setRubyStackFrame(int iseq_type, unsigned char *iseqchar) {
     const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
     rb_execution_context_t *ec = GET_EC();
     rb_control_frame_t *cfp = ec->cfp;
@@ -1127,7 +1133,7 @@ const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isClassOrModuleStaticIn
     // Depending on what kind of iseq we're switching to, we need to push a frame on the ruby stack.
     if (iseq_type == ISEQ_TYPE_RESCUE || iseq_type == ISEQ_TYPE_ENSURE) {
         sorbet_setExceptionStackFrame(ec, cfp, iseq);
-    } else if (!isClassOrModuleStaticInit) {
+    } else {
         cfp->iseq = iseq;
         VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
 

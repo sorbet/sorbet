@@ -360,7 +360,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
 
         if (mcctx.blk != nullptr) {
             // blocks require a locals offset parameter
-            llvm::Value *localsOffset = irctx.localsOffset[rubyBlockId];
+            llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
             ENFORCE(localsOffset != nullptr);
             return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
                                       {argc, argv, kw_splat, mcctx.blk, localsOffset}, "rawSendResult");
@@ -441,7 +441,7 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
     auto *cache = IREmitterHelpers::pushSendArgs(mcctx);
 
     if (mcctx.blk != nullptr) {
-        auto *closure = mcctx.irctx.localsOffset[mcctx.rubyBlockId];
+        auto *closure = Payload::buildLocalsOffset(mcctx.cs);
         return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, mcctx.blk, closure);
     } else {
         auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.build);

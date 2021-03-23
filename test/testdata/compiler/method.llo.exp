@@ -101,7 +101,6 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @"stackFramePrecomputed_func_<root>.<static-init>$152" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
-@"<static-init-locals-storage>" = internal global [0 x i64] zeroinitializer
 @rubyIdPrecomputed_normal = internal unnamed_addr global i64 0, align 8
 @str_normal = private unnamed_addr constant [7 x i8] c"normal\00", align 1
 @ic_keep_def = internal global %struct.FunctionInlineCache zeroinitializer
@@ -365,10 +364,12 @@ entry:
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @"ic_+.1", i64 %"rubyId_+3.i", i32 16, i32 1, i32 0, i64* null), !dbg !46
   %12 = call i64 @rb_fstring_new(i8* getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 16) #8
   call void @rb_gc_register_mark_object(i64 %12) #8
+  call void @llvm.lifetime.start.p0i8(i64 0, i8* nonnull %9)
   %"rubyId_<top (required)>.i.i" = load i64, i64* @"rubyIdPrecomputed_<top (required)>", align 8
-  %"rubyStr_test/testdata/compiler/method.rb.i8.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/method.rb", align 8
-  %13 = call i8* @sorbet_allocateRubyStackFrame(i64 %12, i64 %"rubyId_<top (required)>.i.i", i64 %"rubyStr_test/testdata/compiler/method.rb.i8.i", i64 %realpath, i8* null, i32 1, i32 1, i32 11, i64* getelementptr inbounds ([0 x i64], [0 x i64]* @"<static-init-locals-storage>", i64 0, i64 0), i32 0, i32 4)
+  %"rubyStr_test/testdata/compiler/method.rb.i9.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/method.rb", align 8
+  %13 = call i8* @sorbet_allocateRubyStackFrame(i64 %12, i64 %"rubyId_<top (required)>.i.i", i64 %"rubyStr_test/testdata/compiler/method.rb.i9.i", i64 %realpath, i8* null, i32 1, i32 1, i32 11, i64* nonnull %locals1.sub.i.i, i32 0, i32 4)
   store i8* %13, i8** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
+  call void @llvm.lifetime.end.p0i8(i64 0, i8* nonnull %9)
   %rubyId_keep_def.i = load i64, i64* @rubyIdPrecomputed_keep_def, align 8, !dbg !50
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_keep_def, i64 %rubyId_keep_def.i, i32 16, i32 3, i32 0, i64* null), !dbg !50
   %14 = call i64 @rb_fstring_new(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @str_sorbet, i64 0, i64 0), i64 6) #8

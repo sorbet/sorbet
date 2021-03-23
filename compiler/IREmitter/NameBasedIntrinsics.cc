@@ -95,8 +95,9 @@ public:
                 module = builder.CreateCall(cs.getFunction("sorbet_defineTopClassOrModule"), {classNameCStr, rawCall});
             }
         }
-        builder.CreateCall(IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc),
-                           {llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
+        builder.CreateCall(cs.getFunction("sorbet_callStaticInitDirect"),
+                           {IREmitterHelpers::getOrCreateStaticInit(cs, funcSym, send->receiverLoc),
+                            llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                             llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)), module});
         return Payload::rubyNil(cs, builder);
     }
@@ -212,9 +213,10 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
         blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
     }
 
+    llvm::Value *offset = Payload::buildLocalsOffset(cs);
+
     auto fun = Payload::idIntern(cs, builder, send->fun.shortName(cs));
-    return builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, irctx.localsOffset[rubyBlockId]},
-                              "rawSendResult");
+    return builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, offset}, "rawSendResult");
 }
 
 class CallCMethod : public NameBasedIntrinsicMethod {
@@ -448,7 +450,7 @@ public:
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
 
         if (mcctx.blk != nullptr) {
-            auto *closure = irctx.localsOffset[mcctx.rubyBlockId];
+            auto *closure = Payload::buildLocalsOffset(cs);
             return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, mcctx.blk, closure);
         } else {
             auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.build);
