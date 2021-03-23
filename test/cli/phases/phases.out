@@ -242,6 +242,28 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 }
 
 --- cfg-raw end ---
+--- cfg-text start ---
+method ::<Class:<root>>#<static-init> {
+
+bb0(rubyBlockId=0):
+    blockargs=()
+    <self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {
+      klass = <S <C <U <root>>> $1>
+      targs = [
+        <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)
+      ]
+    });
+    <returnMethodTemp>$2: Integer(1) = 1
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
+    <unconditional>(bb0 -> bb1)
+
+bb1(rubyBlockId=0):
+    blockargs=()
+    <unconditional>(bb1 -> bb1)
+
+}
+
+--- cfg-text end ---
 --- symbol-table start ---
 class ::<root> < ::Object ()
   class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
@@ -257,8 +279,13 @@ class <C <U <root>>> < <C <U Object>> ()
 
 --- symbol-table-raw end ---
 --- checking diff ---
+1,20d0
 1,24d0
 1,9d0
+< 
+< 
+< 
+< 
 <               localVariable = <U <blk>>
 <             }]
 <           args = [Local{
@@ -267,20 +294,32 @@ class <C <U <root>>> < <C <U Object>> ()
 <           orig = nullptr
 <           rhs = Literal{ value = 1 }
 <           symbol = (class ::<todo sym>)
+<         <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)
 <         MethodDef{
 <         }
 <         }]
 <       1
 <       ]
+<       ]
 <       ancestors = [ConstantLit{
 <       kind = class
+<       klass = <S <C <U <root>>> $1>
 <       name = EmptyTree<<C <U <root>>>>
 <       rhs = [
+<       targs = [
+<     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
+<     <returnMethodTemp>$2: Integer(1) = 1
+<     <self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {
+<     <unconditional>(bb0 -> bb1)
+<     <unconditional>(bb1 -> bb1)
 <     ClassDef{
 <     EmptyTree
+<     blockargs=()
+<     blockargs=()
 <     def self.<static-init><<static-init>$CENSORED>(<blk>)
 <     end
 <     }
+<     });
 <   <emptyTree>
 <   <emptyTree>
 <   ],
@@ -289,10 +328,15 @@ class <C <U <root>>> < <C <U Object>> ()
 <   expr = EmptyTree
 <   stats = [
 < InsSeq{
+< bb0(rubyBlockId=0):
+< bb1(rubyBlockId=0):
 < begin
 < end
+< method ::<Class:<root>>#<static-init> {
+< }
 < }
 diff -r out/ast fileout/ast
 diff -r out/ast-raw fileout/ast-raw
+diff -r out/cfg-text fileout/cfg-text
 --- checking crashes ---
 --- checking crashes end ---
