@@ -396,7 +396,6 @@ NameDef names[] = {
     {"PackageRegistry", "<PackageRegistry>", true},
     {"exportMethods", "export_methods"},
     {"PackageMethods", "<PackageMethods>", true},
-    {"PkgRoot_Package", "PkgRoot_Package", true},
 
     // GlobalState initEmpty()
     {"Top", "<top>", true},
