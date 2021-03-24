@@ -25,7 +25,7 @@ KNOWN_GEM_SHA265 = {
     "public_suffix-3.0.3": "d4f4addffbd1ad3e7b5bb2e258a761ccef5670c23c29b0476b2299bcca220623",
     "safe_yaml-1.0.5": "a6ac2d64b7eb027bdeeca1851fe7e7af0d668e133e8a88066a0c6f7087d9f848",
     "webmock-3.5.1": "b73fca6fbc3622a2a63e6a17075b07a95876ee8187f0911688361fdcb560e03d",
-    "sorbet-runtime-0.4.4488": "50ce17368635802c8f7f0a2f7e1ab5f1f1a47987e34a7dd49b41106377efde58",
+    "sorbet-runtime-0.5.6353": "edd643460c7c16ddd5b3df227fb90ff8f6fe536535cd2e9f9e1e6626421c0b49",
 }
 
 def get_known_gem_sha256(gem_name, default):
