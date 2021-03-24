@@ -44,16 +44,6 @@ snapshot_tests(
             "partial/*",
             "total/*",
         ],
-        exclude = [
-            # Requires native extensions.
-            # Can't be rewritten, because it's essentially an integration test
-            # that a certain private Rails API gives us back absolute vs
-            # relative paths.
-            "partial/rails-double-require",
-
-            # Requires ruby 2.6.
-            "partial/rails6",
-        ],
 
         # We only want to match directories with this glob
         exclude_directories = 0,
@@ -66,16 +56,6 @@ snapshot_tests(
         [
             "partial/*",
             "total/*",
-        ],
-        exclude = [
-            # Requires native extensions.
-            # Can't be rewritten, because it's essentially an integration test
-            # that a certain private Rails API gives us back absolute vs
-            # relative paths.
-            "partial/rails-double-require",
-
-            # Requires nokogiri, which builds a native extension
-            "partial/rails6",
         ],
 
         # We only want to match directories with this glob
