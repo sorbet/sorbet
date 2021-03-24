@@ -208,16 +208,21 @@ bool NameRef::isTEnumName(const GlobalState &gs) const {
 }
 
 bool NameRef::isPackagerName(const GlobalState &gs) const {
-    if (kind() == NameKind::UNIQUE) {
-        // May be the name of a package's singleton class.
-        auto data = dataUnique(gs);
-        return data->uniqueNameKind == UniqueNameKind::Singleton && data->original.isPackagerName(gs);
+    switch (kind()) {
+        case NameKind::UNIQUE: {
+            // May be the name of a package's singleton class.
+            auto data = dataUnique(gs);
+            return data->uniqueNameKind == UniqueNameKind::Singleton && data->original.isPackagerName(gs);
+        }
+        case NameKind::CONSTANT: {
+            auto original = dataCnst(gs)->original;
+            return original.kind() == NameKind::UNIQUE &&
+                   original.dataUnique(gs)->uniqueNameKind == UniqueNameKind::Packager;
+        }
+        case NameKind::UTF8: {
+            return false;
+        }
     }
-    if (kind() != NameKind::CONSTANT) {
-        return false;
-    }
-    auto original = dataCnst(gs)->original;
-    return original.kind() == NameKind::UNIQUE && original.dataUnique(gs)->uniqueNameKind == UniqueNameKind::Packager;
 }
 
 bool NameRef::isValidConstantName(const GlobalState &gs) const {
