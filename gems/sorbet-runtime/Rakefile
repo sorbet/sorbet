@@ -12,6 +12,11 @@ task :test do
   Dir.glob('./test/**/*.rb').reject {|path| path.match(%r{^./test/types/fixtures/})}.each(&method(:require))
 end
 
+task :test_vm_serde do
+  T::Configuration.enable_vm_prop_serde
+  Rake::Task[:test].invoke
+end
+
 require 'rubocop/rake_task'
 RuboCop::RakeTask.new(:rubocop) do |t|
   t.requires << 'rubocop-performance'

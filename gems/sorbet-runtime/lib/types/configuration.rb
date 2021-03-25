@@ -73,6 +73,27 @@ module T::Configuration
     @include_value_in_type_errors = true
   end
 
+  # Whether to use VM-defined prop serialization/deserialization routines.
+  #
+  # The default is to use runtime codegen inside sorbet-runtime itself.
+  #
+  # @return [T::Boolean]
+  def self.use_vm_prop_serde?
+    @use_vm_prop_serde || false
+  end
+
+  # Enable using VM-defined prop serialization/deserialization routines.
+  #
+  # This method is likely to break things outside of Stripe's systems.
+  def self.enable_vm_prop_serde
+    @use_vm_prop_serde = true
+  end
+
+  # Disable using VM-defined prop serialization/deserialization routines.
+  def self.disable_vm_prop_serde
+    @use_vm_prop_serde = false
+  end
+
   # Configure the default checked level for a sig with no explicit `.checked`
   # builder. When unset, the default checked level is `:always`.
   #

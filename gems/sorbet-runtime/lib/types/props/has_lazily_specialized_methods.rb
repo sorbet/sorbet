@@ -48,6 +48,11 @@ module T::Props
         @lazily_defined_methods ||= {}
       end
 
+      sig {returns(T::Hash[Symbol, T.untyped]).checked(:never)}
+      private def lazily_defined_vm_methods
+        @lazily_defined_vm_methods ||= {}
+      end
+
       sig {params(name: Symbol).void}
       private def eval_lazily_defined_method!(name)
         if !HasLazilySpecializedMethods.lazy_evaluation_enabled?
@@ -58,6 +63,18 @@ module T::Props
 
         cls = decorated_class
         cls.class_eval(source.to_s)
+        cls.send(:private, name)
+      end
+
+      sig {params(name: Symbol).void}
+      private def eval_lazily_defined_vm_method!(name)
+        if !HasLazilySpecializedMethods.lazy_evaluation_enabled?
+          raise SourceEvaluationDisabled.new
+        end
+
+        lazily_defined_vm_methods.fetch(name).call
+
+        cls = decorated_class
         cls.send(:private, name)
       end
 
@@ -76,6 +93,21 @@ module T::Props
         cls.send(:private, name)
       end
 
+      sig {params(name: Symbol, blk: T.untyped).void}
+      private def enqueue_lazy_vm_method_definition!(name, &blk)
+        lazily_defined_vm_methods[name] = blk
+
+        cls = decorated_class
+        cls.send(:define_method, name) do |*args|
+          self.class.decorator.send(:eval_lazily_defined_vm_method!, name)
+          send(name, *args)
+        end
+        if cls.respond_to?(:ruby2_keywords, true)
+          cls.send(:ruby2_keywords, name)
+        end
+        cls.send(:private, name)
+      end
+
       sig {void}
       def eagerly_define_lazy_methods!
         return if lazily_defined_methods.empty?
@@ -86,6 +118,17 @@ module T::Props
         cls.class_eval(source)
         lazily_defined_methods.each_key {|name| cls.send(:private, name)}
         lazily_defined_methods.clear
+      end
+
+      sig {void}
+      def eagerly_define_lazy_vm_methods!
+        return if lazily_defined_vm_methods.empty?
+
+        lazily_defined_vm_methods.values.map(&:call)
+
+        cls = decorated_class
+        lazily_defined_vm_methods.each_key {|name| cls.send(:private, name)}
+        lazily_defined_vm_methods.clear
       end
     end
   end
