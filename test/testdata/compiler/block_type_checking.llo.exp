@@ -569,59 +569,91 @@ sorbet_getMethodBlockAsProc.exit:                 ; preds = %fillRequiredArgs, %
   store i64* %16, i64** %10, align 8, !dbg !70, !tbaa !4
   %23 = and i64 %rawArg_x, 1, !dbg !71
   %24 = icmp eq i64 %23, 0, !dbg !71
-  br i1 %24, label %codeRepl, label %typeTestSuccess, !dbg !71, !prof !72
+  br i1 %24, label %25, label %typeTestSuccess, !dbg !71, !prof !72
 
-typeTestSuccess:                                  ; preds = %sorbet_getMethodBlockAsProc.exit
-  %25 = tail call i32 @rb_block_given_p() #10, !dbg !73
-  %26 = icmp eq i32 %25, 0, !dbg !73
-  br i1 %26, label %codeRepl29, label %typeTestSuccess7, !dbg !73, !prof !72
+25:                                               ; preds = %sorbet_getMethodBlockAsProc.exit
+  %26 = and i64 %rawArg_x, 7, !dbg !71
+  %27 = icmp ne i64 %26, 0, !dbg !71
+  %28 = and i64 %rawArg_x, -9, !dbg !71
+  %29 = icmp eq i64 %28, 0, !dbg !71
+  %30 = or i1 %27, %29, !dbg !71
+  br i1 %30, label %codeRepl, label %sorbet_isa_Integer.exit29, !dbg !71, !prof !73
 
-codeRepl:                                         ; preds = %sorbet_getMethodBlockAsProc.exit
+sorbet_isa_Integer.exit29:                        ; preds = %25
+  %31 = inttoptr i64 %rawArg_x to %struct.RBasic*, !dbg !71
+  %32 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %31, i64 0, i32 0, !dbg !71
+  %33 = load i64, i64* %32, align 8, !dbg !71, !tbaa !35
+  %34 = and i64 %33, 31, !dbg !71
+  %35 = icmp eq i64 %34, 10, !dbg !71
+  br i1 %35, label %typeTestSuccess, label %codeRepl, !dbg !71, !prof !74
+
+typeTestSuccess:                                  ; preds = %sorbet_getMethodBlockAsProc.exit, %sorbet_isa_Integer.exit29
+  %36 = tail call i32 @rb_block_given_p() #10, !dbg !75
+  %37 = icmp eq i32 %36, 0, !dbg !75
+  br i1 %37, label %codeRepl32, label %typeTestSuccess7, !dbg !75, !prof !72
+
+codeRepl:                                         ; preds = %sorbet_isa_Integer.exit29, %25
   tail call fastcc void @"func_Foo#bar.cold.1"(i64 %rawArg_x) #13, !dbg !71
   unreachable
 
 typeTestSuccess7:                                 ; preds = %typeTestSuccess
-  %27 = getelementptr inbounds i64, i64* %15, i64 2, !dbg !73
-  store i64* %27, i64** %10, align 8, !dbg !73, !tbaa !4
-  %28 = tail call i64 @rb_yield_values_kw(i32 0, i64* null, i32 0) #10, !dbg !74
-  %29 = getelementptr inbounds i64, i64* %15, i64 3, !dbg !74
-  store i64* %29, i64** %10, align 8, !dbg !74, !tbaa !4
-  %30 = and i64 %28, %23, !dbg !44
-  %31 = icmp eq i64 %30, 0, !dbg !44
-  br i1 %31, label %41, label %32, !dbg !44, !prof !75
+  %38 = getelementptr inbounds i64, i64* %15, i64 2, !dbg !75
+  store i64* %38, i64** %10, align 8, !dbg !75, !tbaa !4
+  %39 = tail call i64 @rb_yield_values_kw(i32 0, i64* null, i32 0) #10, !dbg !76
+  %40 = getelementptr inbounds i64, i64* %15, i64 3, !dbg !76
+  store i64* %40, i64** %10, align 8, !dbg !76, !tbaa !4
+  %41 = and i64 %39, %23, !dbg !44
+  %42 = icmp eq i64 %41, 0, !dbg !44
+  br i1 %42, label %52, label %43, !dbg !44, !prof !77
 
-32:                                               ; preds = %typeTestSuccess7
-  %33 = add nsw i64 %28, -1, !dbg !44
-  %34 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %rawArg_x, i64 %33) #10, !dbg !44
-  %35 = extractvalue { i64, i1 } %34, 1, !dbg !44
-  %36 = extractvalue { i64, i1 } %34, 0, !dbg !44
-  br i1 %35, label %37, label %sorbet_rb_int_plus.exit, !dbg !44
+43:                                               ; preds = %typeTestSuccess7
+  %44 = add nsw i64 %39, -1, !dbg !44
+  %45 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %rawArg_x, i64 %44) #10, !dbg !44
+  %46 = extractvalue { i64, i1 } %45, 1, !dbg !44
+  %47 = extractvalue { i64, i1 } %45, 0, !dbg !44
+  br i1 %46, label %48, label %sorbet_rb_int_plus.exit, !dbg !44
 
-37:                                               ; preds = %32
-  %38 = ashr i64 %36, 1, !dbg !44
-  %39 = xor i64 %38, -9223372036854775808, !dbg !44
-  %40 = tail call i64 @rb_int2big(i64 %39) #10, !dbg !44
+48:                                               ; preds = %43
+  %49 = ashr i64 %47, 1, !dbg !44
+  %50 = xor i64 %49, -9223372036854775808, !dbg !44
+  %51 = tail call i64 @rb_int2big(i64 %50) #10, !dbg !44
   br label %sorbet_rb_int_plus.exit, !dbg !44
 
-41:                                               ; preds = %typeTestSuccess7
-  %42 = tail call i64 @sorbet_rb_int_plus_slowpath(i64 %rawArg_x, i64 %28) #10, !dbg !44, !noalias !76
+52:                                               ; preds = %typeTestSuccess7
+  %53 = tail call i64 @sorbet_rb_int_plus_slowpath(i64 %rawArg_x, i64 %39) #10, !dbg !44, !noalias !78
   br label %sorbet_rb_int_plus.exit, !dbg !44
 
-sorbet_rb_int_plus.exit:                          ; preds = %37, %32, %41
-  %43 = phi i64 [ %42, %41 ], [ %40, %37 ], [ %36, %32 ], !dbg !44
-  %44 = and i64 %43, 1
-  %45 = icmp eq i64 %44, 0
-  br i1 %45, label %codeRepl30, label %typeTestSuccess17, !prof !72
+sorbet_rb_int_plus.exit:                          ; preds = %48, %43, %52
+  %54 = phi i64 [ %53, %52 ], [ %51, %48 ], [ %47, %43 ], !dbg !44
+  %55 = and i64 %54, 1
+  %56 = icmp eq i64 %55, 0
+  br i1 %56, label %57, label %typeTestSuccess17, !prof !72
 
-codeRepl29:                                       ; preds = %typeTestSuccess
-  tail call fastcc void @"func_Foo#bar.cold.2"(i64 %22) #13, !dbg !73
+57:                                               ; preds = %sorbet_rb_int_plus.exit
+  %58 = and i64 %54, 7
+  %59 = icmp ne i64 %58, 0
+  %60 = and i64 %54, -9
+  %61 = icmp eq i64 %60, 0
+  %62 = or i1 %59, %61
+  br i1 %62, label %codeRepl33, label %sorbet_isa_Integer.exit, !prof !73
+
+sorbet_isa_Integer.exit:                          ; preds = %57
+  %63 = inttoptr i64 %54 to %struct.RBasic*
+  %64 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %63, i64 0, i32 0
+  %65 = load i64, i64* %64, align 8, !tbaa !35
+  %66 = and i64 %65, 31
+  %67 = icmp eq i64 %66, 10
+  br i1 %67, label %typeTestSuccess17, label %codeRepl33, !prof !74
+
+codeRepl32:                                       ; preds = %typeTestSuccess
+  tail call fastcc void @"func_Foo#bar.cold.2"(i64 %22) #13, !dbg !75
   unreachable
 
-typeTestSuccess17:                                ; preds = %sorbet_rb_int_plus.exit
-  ret i64 %43
+typeTestSuccess17:                                ; preds = %sorbet_rb_int_plus.exit, %sorbet_isa_Integer.exit
+  ret i64 %54
 
-codeRepl30:                                       ; preds = %sorbet_rb_int_plus.exit
-  tail call fastcc void @"func_Foo#bar.cold.3"(i64 %43) #13
+codeRepl33:                                       ; preds = %sorbet_isa_Integer.exit, %57
+  tail call fastcc void @"func_Foo#bar.cold.3"(i64 %54) #13
   unreachable
 }
 
@@ -641,8 +673,8 @@ newFuncRoot:
 ; Function Attrs: cold minsize noreturn nounwind sspreq uwtable
 define internal fastcc void @"func_Foo#bar.cold.2"(i64) unnamed_addr #9 {
 newFuncRoot:
-  tail call void @sorbet_cast_failure(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_sig, i64 0, i64 0), i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_T.proc.returns(Integer)", i64 0, i64 0)) #10, !dbg !73
-  unreachable, !dbg !73
+  tail call void @sorbet_cast_failure(i64 %0, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_sig, i64 0, i64 0), i8* getelementptr inbounds ([24 x i8], [24 x i8]* @"str_T.proc.returns(Integer)", i64 0, i64 0)) #10, !dbg !75
+  unreachable, !dbg !75
 }
 
 ; Function Attrs: cold minsize noreturn nounwind sspreq uwtable
@@ -764,9 +796,11 @@ attributes #13 = { noinline }
 !70 = !DILocation(line: 0, scope: !45)
 !71 = !DILocation(line: 9, column: 11, scope: !45)
 !72 = !{!"branch_weights", i32 1, i32 2000}
-!73 = !DILocation(line: 9, column: 15, scope: !45)
-!74 = !DILocation(line: 10, column: 9, scope: !45)
-!75 = !{!"branch_weights", i32 4001, i32 4000000}
-!76 = !{!77}
-!77 = distinct !{!77, !78, !"sorbet_rb_int_plus: argument 0"}
-!78 = distinct !{!78, !"sorbet_rb_int_plus"}
+!73 = !{!"branch_weights", i32 1073205, i32 2146410443}
+!74 = !{!"branch_weights", i32 2000, i32 1}
+!75 = !DILocation(line: 9, column: 15, scope: !45)
+!76 = !DILocation(line: 10, column: 9, scope: !45)
+!77 = !{!"branch_weights", i32 4001, i32 4000000}
+!78 = !{!79}
+!79 = distinct !{!79, !80, !"sorbet_rb_int_plus: argument 0"}
+!80 = distinct !{!80, !"sorbet_rb_int_plus"}

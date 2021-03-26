@@ -155,7 +155,10 @@ VALUE sorbet_getVoidSingleton() {
 
 SORBET_ATTRIBUTE(const)
 _Bool sorbet_isa_Integer(VALUE obj) {
-    return RB_FIXNUM_P(obj);
+    if (LIKELY(RB_FIXNUM_P(obj))) {
+        return true;
+    }
+    return RB_TYPE_P(obj, T_BIGNUM);
 }
 
 SORBET_ATTRIBUTE(const)

@@ -73,6 +73,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.rb_kwarg_call_data = type { %struct.rb_call_cache, %struct.rb_call_info_with_kwarg }
 %struct.rb_call_info_with_kwarg = type { %struct.rb_call_info, %struct.rb_call_info_kw_arg* }
 %struct.rb_call_info_kw_arg = type { i32, [1 x i64] }
+%struct.RBasic = type { i64, i64 }
 
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
 @ruby_vm_global_constant_state = external local_unnamed_addr global i64, align 8
@@ -437,14 +438,30 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %rawArg_n = load i64, i64* %argArray, align 8, !dbg !56
   %18 = and i64 %rawArg_n, 1, !dbg !58
   %19 = icmp eq i64 %18, 0, !dbg !58
-  br i1 %19, label %codeRepl, label %typeTestSuccess, !dbg !58, !prof !59
+  br i1 %19, label %20, label %typeTestSuccess, !dbg !58, !prof !59
 
-typeTestSuccess:                                  ; preds = %fillRequiredArgs
-  %20 = getelementptr inbounds i64, i64* %15, i64 2, !dbg !58
-  store i64* %20, i64** %10, align 8, !dbg !58, !tbaa !20
+20:                                               ; preds = %fillRequiredArgs
+  %21 = and i64 %rawArg_n, 7, !dbg !58
+  %22 = icmp ne i64 %21, 0, !dbg !58
+  %23 = and i64 %rawArg_n, -9, !dbg !58
+  %24 = icmp eq i64 %23, 0, !dbg !58
+  %25 = or i1 %22, %24, !dbg !58
+  br i1 %25, label %codeRepl, label %sorbet_isa_Integer.exit, !dbg !58, !prof !60
+
+sorbet_isa_Integer.exit:                          ; preds = %20
+  %26 = inttoptr i64 %rawArg_n to %struct.RBasic*, !dbg !58
+  %27 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %26, i64 0, i32 0, !dbg !58
+  %28 = load i64, i64* %27, align 8, !dbg !58, !tbaa !61
+  %29 = and i64 %28, 31, !dbg !58
+  %30 = icmp eq i64 %29, 10, !dbg !58
+  br i1 %30, label %typeTestSuccess, label %codeRepl, !dbg !58, !prof !63
+
+typeTestSuccess:                                  ; preds = %fillRequiredArgs, %sorbet_isa_Integer.exit
+  %31 = getelementptr inbounds i64, i64* %15, i64 2, !dbg !58
+  store i64* %31, i64** %10, align 8, !dbg !58, !tbaa !20
   ret i64 %rawArg_n
 
-codeRepl:                                         ; preds = %fillRequiredArgs
+codeRepl:                                         ; preds = %sorbet_isa_Integer.exit, %20
   tail call fastcc void @func_A.foo.cold.1(i64 %rawArg_n) #11, !dbg !58
   unreachable
 }
@@ -474,17 +491,17 @@ functionEntryInitializers:
   %15 = load i64*, i64** %14, align 8, !tbaa !31
   %16 = getelementptr inbounds i64, i64* %15, i64 1
   store i64* %16, i64** %10, align 8, !tbaa !20
-  %17 = icmp eq i32 %argc, 1, !dbg !60
-  br i1 %17, label %fillRequiredArgs, label %argCountFailBlock, !dbg !60, !prof !57
+  %17 = icmp eq i32 %argc, 1, !dbg !64
+  br i1 %17, label %fillRequiredArgs, label %argCountFailBlock, !dbg !64, !prof !57
 
 argCountFailBlock:                                ; preds = %functionEntryInitializers
-  tail call void @sorbet_raiseArity(i32 %argc, i32 1, i32 1) #8, !dbg !60
-  unreachable, !dbg !60
+  tail call void @sorbet_raiseArity(i32 %argc, i32 1, i32 1) #8, !dbg !64
+  unreachable, !dbg !64
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
-  %rawArg_a = load i64, i64* %argArray, align 8, !dbg !60
-  %18 = getelementptr inbounds i64, i64* %15, i64 2, !dbg !61
-  store i64* %18, i64** %10, align 8, !dbg !61, !tbaa !20
+  %rawArg_a = load i64, i64* %argArray, align 8, !dbg !64
+  %18 = getelementptr inbounds i64, i64* %15, i64 2, !dbg !65
+  store i64* %18, i64** %10, align 8, !dbg !65, !tbaa !20
   %19 = load i64, i64* @guard_epoch_A, align 8, !dbg !16
   %20 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !16, !tbaa !48
   %needTakeSlowPath = icmp eq i64 %19, %20, !dbg !16
@@ -504,11 +521,11 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %27 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %26, i64 0, i32 2, !dbg !16
   %28 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %27, align 8, !dbg !16, !tbaa !22
   %29 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %28, i64 0, i32 1, !dbg !16
-  %30 = load i64*, i64** %29, align 8, !dbg !16, !tbaa !62
+  %30 = load i64*, i64** %29, align 8, !dbg !16, !tbaa !66
   %31 = getelementptr inbounds i64, i64* %30, i64 1, !dbg !16
   store i64 %23, i64* %30, align 8, !dbg !16, !tbaa !4
   %32 = getelementptr inbounds i64, i64* %30, i64 2, !dbg !16
-  store i64* %32, i64** %29, align 8, !dbg !16, !tbaa !62
+  store i64* %32, i64** %29, align 8, !dbg !16, !tbaa !66
   store i64 %rawArg_a, i64* %31, align 8, !dbg !16, !tbaa !4
   %send = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_foo, i64 0) #8, !dbg !16
   ret i64 %send
@@ -624,6 +641,10 @@ attributes #11 = { noinline }
 !57 = !{!"branch_weights", i32 4000000, i32 4001}
 !58 = !DILocation(line: 7, column: 16, scope: !55)
 !59 = !{!"branch_weights", i32 1, i32 2000}
-!60 = !DILocation(line: 12, column: 1, scope: !17)
-!61 = !DILocation(line: 12, column: 12, scope: !17)
-!62 = !{!27, !21, i64 8}
+!60 = !{!"branch_weights", i32 1073205, i32 2146410443}
+!61 = !{!62, !5, i64 0}
+!62 = !{!"RBasic", !5, i64 0, !5, i64 8}
+!63 = !{!"branch_weights", i32 2000, i32 1}
+!64 = !DILocation(line: 12, column: 1, scope: !17)
+!65 = !DILocation(line: 12, column: 12, scope: !17)
+!66 = !{!27, !21, i64 8}
