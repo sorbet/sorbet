@@ -12,6 +12,11 @@ namespace sorbet::realmain::options {
 namespace {
 
 // Returns true when the line starts with a '#', ignoring leading space.
+//
+// NOTE: we don't handle trailing comments because it would be difficult to handle the following case without a more
+// complicated parser:
+//
+// > -e 'puts "hello" # this is a comment' -p parse-tree
 bool isComment(string_view line) {
     auto hashPos = line.find('#');
     if (hashPos == string_view::npos) {
