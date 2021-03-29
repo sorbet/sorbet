@@ -2,7 +2,7 @@
 # typed: true
 
 module T::Types
-  # Takes a hash of types. Validates each item in an hash using the type in the same position
+  # Takes a hash of types. Validates each item in a hash using the type in the same position
   # in the list.
   class FixedHash < Base
     attr_reader :types
