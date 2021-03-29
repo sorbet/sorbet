@@ -26,6 +26,14 @@ read, located at `sorbet/config`. The config file is actually just a
 newline-separated list of arguments to pass to `srb tc`, the same as if they'd
 been passed at the command line.
 
+```plain
+--dir
+.
+# Full-line comment
+--ignore
+path/to/ignore.rb
+```
+
 Every line in this file acts as if it's prepended to the argument list of
 `srb tc`. So arguments in the config file are always passed first (if it
 exists), followed by arguments provided on the command line.
