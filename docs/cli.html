@@ -79,6 +79,12 @@ subcommand. For information about <code>srb init</code> and <code>srb rbi</code>
 read, located at <code>sorbet/config</code>. The config file is actually just a
 newline-separated list of arguments to pass to <code>srb tc</code>, the same as if they’d
 been passed at the command line.</p>
+<pre><code class="hljs css language-plain"><span class="hljs-comment">--dir</span>
+.
+# <span class="hljs-keyword">Full</span>-<span class="hljs-type">line</span> <span class="hljs-keyword">comment</span>
+<span class="hljs-comment">--ignore</span>
+<span class="hljs-type">path</span>/<span class="hljs-keyword">to</span>/ignore.rb
+</code></pre>
 <p>Every line in this file acts as if it’s prepended to the argument list of
 <code>srb tc</code>. So arguments in the config file are always passed first (if it
 exists), followed by arguments provided on the command line.</p>
