@@ -444,6 +444,16 @@ B = T.type_alias {A}
 Basically, Sorbet can emit more reliable warnings when users declare their
 intent to create a new type alias.)
 
+## 5035
+
+> Method \_ is marked override but does not override anything
+
+No corresponding `overridable` was found.
+
+- Check the ancestors of the class defining the `override`.
+- Check that the file defining the `overridable` method has a sigil greater than
+  `ignore`.
+
 ## 5036
 
 See [5014](#5014). 5036 is the same error as [5014](#5014) but slightly modified
