@@ -3,6 +3,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 
 #include "absl/strings/str_split.h"
 #include "absl/synchronization/mutex.h"
@@ -73,18 +74,22 @@ public:
     llvm::DICompileUnit *compileUnit = nullptr;
 
     // The basic-block that holds the initialization of string constants.
-    llvm::BasicBlock *allocRubyIdsEntry;
+    llvm::BasicBlock *allocRubyIdsEntry = nullptr;
 
     // The basic-block that holds the initialization of static-init constants.
-    llvm::BasicBlock *initializeStaticInitNamesEntry;
+    llvm::BasicBlock *initializeStaticInitNamesEntry = nullptr;
 
     // The function that holds calls to global constructors
     //
     // This works as a replacement to llvm.global_ctors so that we can delay initialization until after
     // our sorbet_ruby version check.
-    llvm::BasicBlock *globalConstructorsEntry;
+    llvm::BasicBlock *globalConstructorsEntry = nullptr;
 
     bool aborted = false;
+
+    const unique_ptr<const llvm::Module> codegenPayload;
+
+    TypecheckThreadState() : codegenPayload(compiler::PayloadLoader::readDefaultModule(lctx)) {}
 };
 
 class LLVMSemanticExtension : public SemanticExtension {
@@ -168,7 +173,7 @@ public:
             ENFORCE(threadState->globalConstructorsEntry == nullptr);
             ENFORCE(debug == nullptr);
             ENFORCE(compUnit == nullptr);
-            module = compiler::PayloadLoader::readDefaultModule(lctx);
+            module = llvm::CloneModule(*threadState->codegenPayload);
 
             module->addModuleFlag(llvm::Module::Warning, "Debug Info Version", llvm::DEBUG_METADATA_VERSION);
 
