@@ -259,11 +259,6 @@ string CFG::toTextualString(const core::GlobalState &gs) const {
                        "(bb{} -> bb{})\n\n",
                        basicBlock->id, basicBlock->rubyBlockId, fmt::join(lines.begin(), lines.end(), "\n    "),
                        basicBlock->id, basicBlock->bexit.thenb->id);
-
-        if (0 && basicBlock->bexit.thenb != basicBlock->bexit.elseb) {
-            fmt::format_to(buf, "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"tapered\"];\n\n", symbolName, basicBlock->id,
-                           symbolName, basicBlock->bexit.elseb->id);
-        }
     }
     fmt::format_to(buf, "}}");
     return to_string(buf);
