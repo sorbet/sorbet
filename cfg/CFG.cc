@@ -249,8 +249,7 @@ string CFG::toTextualString(const core::GlobalState &gs) const {
         if (!basicBlock->backEdges.empty()) {
             fmt::format_to(buf, "# backedges\n");
             for (auto *backEdge : basicBlock->backEdges) {
-                fmt::format_to(buf, "#  bb{}(rubyBlockId={})\n",
-                               backEdge->id, backEdge->rubyBlockId);
+                fmt::format_to(buf, "#  bb{}(rubyBlockId={})\n", backEdge->id, backEdge->rubyBlockId);
             }
         }
         fmt::format_to(buf,
