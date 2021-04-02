@@ -18,3 +18,8 @@ long sorbet_hash_string(VALUE a) {
 VALUE sorbet_rb_hash_any_forwarder(int argc, VALUE *argv, VALUE hash) {
     return rb_hash_any_p(argc, argv, hash);
 }
+
+// Avoid dispatch through the VM by calling the body of `rb_hash_update` directly.
+void sorbet_hashUpdate(VALUE hash, VALUE other) {
+    rb_hash_update(1, &other, hash);
+}
