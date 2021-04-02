@@ -374,3 +374,17 @@ VALUE sorbet_vm_check_match_array(rb_execution_context_t *ec, VALUE target, VALU
     int flag = VM_CHECKMATCH_ARRAY | VM_CHECKMATCH_TYPE_CASE;
     return vm_check_match(ec, target, pattern, flag);
 }
+
+VALUE sorbet_vm_getivar(VALUE obj, ID id, IVC ic) {
+    /* cf. getinstancevariable in insns.def and vm_getinstancevariable */
+    struct rb_call_cache *cc = 0;
+    int is_attr = 0;
+    return vm_getivar(obj, id, ic, cc, is_attr);
+}
+
+void sorbet_vm_setivar(VALUE obj, ID id, VALUE val, IVC ic) {
+    /* cf. setinstancevariable in insns.def and vm_setinstancevariable */
+    struct rb_call_cache *cc = 0;
+    int is_attr = 0;
+    vm_setivar(obj, id, val, ic, cc, is_attr);
+}

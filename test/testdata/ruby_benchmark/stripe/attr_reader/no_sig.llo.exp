@@ -73,7 +73,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.rb_kwarg_call_data = type { %struct.rb_call_cache, %struct.rb_call_info_with_kwarg }
 %struct.rb_call_info_with_kwarg = type { %struct.rb_call_info, %struct.rb_call_info_kw_arg* }
 %struct.rb_call_info_kw_arg = type { i32, [1 x i64] }
-%struct.RBasic = type { i64, i64 }
+%struct.iseq_inline_iv_cache_entry = type { i64, i64 }
 
 @ruby_current_vm_ptr = external local_unnamed_addr global %struct.rb_vm_struct*, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
@@ -112,8 +112,10 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @str_initialize = private unnamed_addr constant [11 x i8] c"initialize\00", align 1
 @str_sig = private unnamed_addr constant [4 x i8] c"sig\00", align 1
 @str_Integer = private unnamed_addr constant [8 x i8] c"Integer\00", align 1
+@"ivc_@foo" = internal global %struct.iseq_inline_iv_cache_entry zeroinitializer
 @"rubyIdPrecomputed_@foo" = internal unnamed_addr global i64 0, align 8
 @"str_@foo" = private unnamed_addr constant [5 x i8] c"@foo\00", align 1
+@"ivc_@foo.3" = internal global %struct.iseq_inline_iv_cache_entry zeroinitializer
 @"<void-singleton>" = internal unnamed_addr global i64 0
 @"stackFramePrecomputed_func_AttrReaderNoSig.<static-init>" = internal unnamed_addr global i8* null, align 8
 @"stackFramePrecomputed_func_AttrReaderNoSig.<static-init>$block_1" = internal unnamed_addr global i8* null, align 8
@@ -138,7 +140,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @str_keep_def = private unnamed_addr constant [9 x i8] c"keep_def\00", align 1
 @rubyIdPrecomputed_attr_reader = internal unnamed_addr global i64 0, align 8
 @str_attr_reader = private unnamed_addr constant [12 x i8] c"attr_reader\00", align 1
-@ic_keep_def.3 = internal global %struct.FunctionInlineCache zeroinitializer
+@ic_keep_def.4 = internal global %struct.FunctionInlineCache zeroinitializer
 @rb_cObject = external local_unnamed_addr constant i64
 @"guard_epoch_T::Sig" = linkonce local_unnamed_addr global i64 0
 @"guarded_const_T::Sig" = linkonce local_unnamed_addr global i64 0
@@ -171,6 +173,10 @@ declare i64 @sorbet_rb_int_plus_slowpath(i64, i64) local_unnamed_addr #2
 
 declare i64 @sorbet_rb_int_lt_slowpath(i64, i64) local_unnamed_addr #2
 
+declare i64 @sorbet_vm_getivar(i64, i64, %struct.iseq_inline_iv_cache_entry*) local_unnamed_addr #2
+
+declare void @sorbet_vm_setivar(i64, i64, i64, %struct.iseq_inline_iv_cache_entry*) local_unnamed_addr #2
+
 declare i64 @rb_define_class(i8*, i64) local_unnamed_addr #2
 
 declare extern_weak void @rb_define_method(i64, i8*, i64 (...)*, i32) local_unnamed_addr #2
@@ -184,10 +190,6 @@ declare i64 @rb_sprintf(i8*, ...) local_unnamed_addr #2
 declare i64 @rb_intern_str(i64) local_unnamed_addr #2
 
 declare void @rb_add_method(i64, i64, i32, i8*, i32) local_unnamed_addr #2
-
-declare i64 @rb_ivar_get(i64, i64) local_unnamed_addr #2
-
-declare i64 @rb_ivar_set(i64, i64, i64) local_unnamed_addr #2
 
 declare i64 @rb_intern2(i8*, i64) local_unnamed_addr #2
 
@@ -325,7 +327,7 @@ entry:
   %rubyId_keep_def.i = load i64, i64* @rubyIdPrecomputed_keep_def, align 8, !dbg !24
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_keep_def, i64 %rubyId_keep_def.i, i32 16, i32 3, i32 0, i64* null), !dbg !24
   %rubyId_keep_def18.i = load i64, i64* @rubyIdPrecomputed_keep_def, align 8, !dbg !25
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_keep_def.3, i64 %rubyId_keep_def18.i, i32 16, i32 3, i32 0, i64* null), !dbg !25
+  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* nonnull @ic_keep_def.4, i64 %rubyId_keep_def18.i, i32 16, i32 3, i32 0, i64* null), !dbg !25
   call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %0)
   %28 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !26
   %29 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %28, i64 0, i32 18
@@ -474,8 +476,8 @@ BB2.i:                                            ; preds = %BB2.i.backedge, %85
   br i1 %114, label %"alternativeCallIntrinsic_Integer_<.i", label %sorbet_isa_Integer.exit.i, !dbg !16, !prof !67
 
 sorbet_isa_Integer.exit.i:                        ; preds = %109
-  %115 = inttoptr i64 %i.sroa.0.0.i to %struct.RBasic*, !dbg !16
-  %116 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %115, i64 0, i32 0, !dbg !16
+  %115 = inttoptr i64 %i.sroa.0.0.i to %struct.iseq_inline_iv_cache_entry*, !dbg !16
+  %116 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %115, i64 0, i32 0, !dbg !16
   %117 = load i64, i64* %116, align 8, !dbg !16, !tbaa !68
   %118 = and i64 %117, 31, !dbg !16
   %119 = icmp eq i64 %118, 10, !dbg !16
@@ -648,8 +650,8 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   br i1 %25, label %codeRepl, label %sorbet_isa_Integer.exit, !dbg !81, !prof !67
 
 sorbet_isa_Integer.exit:                          ; preds = %20
-  %26 = inttoptr i64 %rawArg_foo to %struct.RBasic*, !dbg !81
-  %27 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %26, i64 0, i32 0, !dbg !81
+  %26 = inttoptr i64 %rawArg_foo to %struct.iseq_inline_iv_cache_entry*, !dbg !81
+  %27 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %26, i64 0, i32 0, !dbg !81
   %28 = load i64, i64* %27, align 8, !dbg !81, !tbaa !68
   %29 = and i64 %28, 31, !dbg !81
   %30 = icmp eq i64 %29, 10, !dbg !81
@@ -659,9 +661,9 @@ typeTestSuccess:                                  ; preds = %fillRequiredArgs, %
   %31 = getelementptr inbounds i64, i64* %15, i64 2, !dbg !82
   store i64* %31, i64** %10, align 8, !dbg !82, !tbaa !26
   %"rubyId_@foo" = load i64, i64* @"rubyIdPrecomputed_@foo", align 8, !dbg !83
-  %32 = tail call i64 @rb_ivar_set(i64 %selfRaw, i64 %"rubyId_@foo", i64 %rawArg_foo) #9, !dbg !83
+  tail call void @sorbet_vm_setivar(i64 %selfRaw, i64 %"rubyId_@foo", i64 %rawArg_foo, %struct.iseq_inline_iv_cache_entry* nonnull @"ivc_@foo") #9, !dbg !83
   %"rubyId_@foo18" = load i64, i64* @"rubyIdPrecomputed_@foo", align 8, !dbg !84
-  %33 = tail call i64 @rb_ivar_get(i64 %selfRaw, i64 %"rubyId_@foo18") #9, !dbg !84
+  %32 = tail call i64 @sorbet_vm_getivar(i64 %selfRaw, i64 %"rubyId_@foo18", %struct.iseq_inline_iv_cache_entry* nonnull @"ivc_@foo.3") #9, !dbg !84
   %"<void-singleton>" = load i64, i64* @"<void-singleton>", align 8
   ret i64 %"<void-singleton>"
 

@@ -73,7 +73,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.rb_kwarg_call_data = type { %struct.rb_call_cache, %struct.rb_call_info_with_kwarg }
 %struct.rb_call_info_with_kwarg = type { %struct.rb_call_info, %struct.rb_call_info_kw_arg* }
 %struct.rb_call_info_kw_arg = type { i32, [1 x i64] }
-%struct.RBasic = type { i64, i64 }
+%struct.iseq_inline_iv_cache_entry = type { i64, i64 }
 
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
 @ruby_vm_global_constant_state = external local_unnamed_addr global i64, align 8
@@ -487,8 +487,8 @@ sorbet_rb_int_minus.exit102:                      ; preds = %41, %37, %45
   br i1 %62, label %"alternativeCallIntrinsic_Integer_+", label %sorbet_isa_Integer.exit107, !dbg !19, !prof !65
 
 sorbet_isa_Integer.exit107:                       ; preds = %57
-  %63 = inttoptr i64 %send40 to %struct.RBasic*, !dbg !19
-  %64 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %63, i64 0, i32 0, !dbg !19
+  %63 = inttoptr i64 %send40 to %struct.iseq_inline_iv_cache_entry*, !dbg !19
+  %64 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %63, i64 0, i32 0, !dbg !19
   %65 = load i64, i64* %64, align 8, !dbg !19, !tbaa !66
   %66 = and i64 %65, 31, !dbg !19
   %67 = icmp eq i64 %66, 10, !dbg !19
@@ -510,8 +510,8 @@ BB4:                                              ; preds = %118, %113, %122, %"
   br i1 %75, label %codeRepl118, label %sorbet_isa_Integer.exit106, !prof !65
 
 sorbet_isa_Integer.exit106:                       ; preds = %70
-  %76 = inttoptr i64 %"<returnMethodTemp>.sroa.0.0" to %struct.RBasic*
-  %77 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %76, i64 0, i32 0
+  %76 = inttoptr i64 %"<returnMethodTemp>.sroa.0.0" to %struct.iseq_inline_iv_cache_entry*
+  %77 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %76, i64 0, i32 0
   %78 = load i64, i64* %77, align 8, !tbaa !66
   %79 = and i64 %78, 31
   %80 = icmp eq i64 %79, 10
@@ -536,8 +536,8 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   br i1 %88, label %codeRepl, label %sorbet_isa_Integer.exit, !dbg !70, !prof !65
 
 sorbet_isa_Integer.exit:                          ; preds = %83
-  %89 = inttoptr i64 %rawArg_n to %struct.RBasic*, !dbg !70
-  %90 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %89, i64 0, i32 0, !dbg !70
+  %89 = inttoptr i64 %rawArg_n to %struct.iseq_inline_iv_cache_entry*, !dbg !70
+  %90 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %89, i64 0, i32 0, !dbg !70
   %91 = load i64, i64* %90, align 8, !dbg !70, !tbaa !66
   %92 = and i64 %91, 31, !dbg !70
   %93 = icmp eq i64 %92, 10, !dbg !70

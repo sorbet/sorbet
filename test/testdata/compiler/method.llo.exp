@@ -73,7 +73,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.rb_kwarg_call_data = type { %struct.rb_call_cache, %struct.rb_call_info_with_kwarg }
 %struct.rb_call_info_with_kwarg = type { %struct.rb_call_info, %struct.rb_call_info_kw_arg* }
 %struct.rb_call_info_kw_arg = type { i32, [1 x i64] }
-%struct.RBasic = type { i64, i64 }
+%struct.iseq_inline_iv_cache_entry = type { i64, i64 }
 
 @ruby_current_vm_ptr = external local_unnamed_addr global %struct.rb_vm_struct*, align 8
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
@@ -206,8 +206,8 @@ BB2:                                              ; preds = %BB2.backedge, %fill
   br i1 %25, label %"alternativeCallIntrinsic_Integer_<", label %sorbet_isa_Integer.exit, !dbg !35, !prof !37
 
 sorbet_isa_Integer.exit:                          ; preds = %20
-  %26 = inttoptr i64 %i.sroa.0.0 to %struct.RBasic*, !dbg !35
-  %27 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %26, i64 0, i32 0, !dbg !35
+  %26 = inttoptr i64 %i.sroa.0.0 to %struct.iseq_inline_iv_cache_entry*, !dbg !35
+  %27 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %26, i64 0, i32 0, !dbg !35
   %28 = load i64, i64* %27, align 8, !dbg !35, !tbaa !38
   %29 = and i64 %28, 31, !dbg !35
   %30 = icmp eq i64 %29, 10, !dbg !35
@@ -228,8 +228,8 @@ BB5:                                              ; preds = %afterSend
   br i1 %35, label %"alternativeCallIntrinsic_String_+", label %sorbet_isa_String.exit, !dbg !42, !prof !37
 
 sorbet_isa_String.exit:                           ; preds = %BB5
-  %36 = inttoptr i64 %"rubyStr_hello " to %struct.RBasic*, !dbg !42
-  %37 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %36, i64 0, i32 0, !dbg !42
+  %36 = inttoptr i64 %"rubyStr_hello " to %struct.iseq_inline_iv_cache_entry*, !dbg !42
+  %37 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %36, i64 0, i32 0, !dbg !42
   %38 = load i64, i64* %37, align 8, !dbg !42, !tbaa !38
   %39 = and i64 %38, 31, !dbg !42
   %40 = icmp eq i64 %39, 5, !dbg !42

@@ -73,7 +73,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.rb_kwarg_call_data = type { %struct.rb_call_cache, %struct.rb_call_info_with_kwarg }
 %struct.rb_call_info_with_kwarg = type { %struct.rb_call_info, %struct.rb_call_info_kw_arg* }
 %struct.rb_call_info_kw_arg = type { i32, [1 x i64] }
-%struct.RBasic = type { i64, i64 }
+%struct.iseq_inline_iv_cache_entry = type { i64, i64 }
 
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
 @rb_eRuntimeError = external local_unnamed_addr global i64, align 8
@@ -232,8 +232,8 @@ BB2.i:                                            ; preds = %BB2.i.backedge, %en
   br i1 %37, label %"alternativeCallIntrinsic_Integer_<.i", label %sorbet_isa_Integer.exit.i, !dbg !8, !prof !40
 
 sorbet_isa_Integer.exit.i:                        ; preds = %32
-  %38 = inttoptr i64 %i.sroa.0.0.i to %struct.RBasic*, !dbg !8
-  %39 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %38, i64 0, i32 0, !dbg !8
+  %38 = inttoptr i64 %i.sroa.0.0.i to %struct.iseq_inline_iv_cache_entry*, !dbg !8
+  %39 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %38, i64 0, i32 0, !dbg !8
   %40 = load i64, i64* %39, align 8, !dbg !8, !tbaa !41
   %41 = and i64 %40, 31, !dbg !8
   %42 = icmp eq i64 %41, 10, !dbg !8

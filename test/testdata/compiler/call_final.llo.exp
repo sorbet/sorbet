@@ -73,7 +73,7 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 %struct.rb_kwarg_call_data = type { %struct.rb_call_cache, %struct.rb_call_info_with_kwarg }
 %struct.rb_call_info_with_kwarg = type { %struct.rb_call_info, %struct.rb_call_info_kw_arg* }
 %struct.rb_call_info_kw_arg = type { i32, [1 x i64] }
-%struct.RBasic = type { i64, i64 }
+%struct.iseq_inline_iv_cache_entry = type { i64, i64 }
 
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
 @ruby_vm_global_constant_state = external local_unnamed_addr global i64, align 8
@@ -449,8 +449,8 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   br i1 %25, label %codeRepl, label %sorbet_isa_Integer.exit, !dbg !58, !prof !60
 
 sorbet_isa_Integer.exit:                          ; preds = %20
-  %26 = inttoptr i64 %rawArg_n to %struct.RBasic*, !dbg !58
-  %27 = getelementptr inbounds %struct.RBasic, %struct.RBasic* %26, i64 0, i32 0, !dbg !58
+  %26 = inttoptr i64 %rawArg_n to %struct.iseq_inline_iv_cache_entry*, !dbg !58
+  %27 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %26, i64 0, i32 0, !dbg !58
   %28 = load i64, i64* %27, align 8, !dbg !58, !tbaa !61
   %29 = and i64 %28, 31, !dbg !58
   %30 = icmp eq i64 %29, 10, !dbg !58

@@ -787,6 +787,15 @@ llvm::Value *indexForLocalVariable(CompilerState &cs, const IREmitterContext &ir
     return llvm::ConstantInt::get(cs, llvm::APInt(64, escapeId, true));
 }
 
+llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name) {
+    auto *cacheTy = cs.module->getTypeByName("struct.iseq_inline_iv_cache_entry");
+    ENFORCE(cacheTy != nullptr);
+    auto *zero = llvm::ConstantAggregateZero::get(cacheTy);
+    // No special initialization necessary, unlike function inline caches.
+    return new llvm::GlobalVariable(*cs.module, cacheTy, false, llvm::GlobalVariable::InternalLinkage, zero,
+                                    llvm::Twine("ivc_") + (string)name);
+}
+
 } // namespace
 
 llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &build,
@@ -809,10 +818,21 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
                 return builder.CreateCall(cs.getFunction("sorbet_classVariableGet"),
                                           {getClassVariableStoreClass(cs, builder, irctx),
                                            Payload::idIntern(cs, builder, alias.classField.shortName(cs))});
-            case Alias::AliasKind::InstanceField:
+            case Alias::AliasKind::InstanceField: {
+                // Each instance variable reference receives its own cache; this
+                // is the easiest thing to do and is identical to what the VM does.
+                //
+                // TODO: attempt to create caches shared across variable references
+                // for each instance variable for a given class. This is different
+                // than what the VM does, but it ought to be a small size/performance
+                // win.  This change would require Sorbet changes so we have the
+                // necessary information at this point.
+                auto name = alias.instanceField.shortName(cs);
+                auto *cache = buildInstanceVariableCache(cs, name);
                 return builder.CreateCall(cs.getFunction("sorbet_instanceVariableGet"),
                                           {varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId),
-                                           Payload::idIntern(cs, builder, alias.instanceField.shortName(cs))});
+                                           Payload::idIntern(cs, builder, name), cache});
+            }
         }
     }
     if (irctx.escapedVariableIndices.contains(local)) {
@@ -853,11 +873,22 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
                                    {getClassVariableStoreClass(cs, builder, irctx),
                                     Payload::idIntern(cs, builder, alias.classField.shortName(cs)), var});
                 break;
-            case Alias::AliasKind::InstanceField:
+            case Alias::AliasKind::InstanceField: {
+                // Each instance variable reference receives its own cache; this
+                // is the easiest thing to do and is identical to what the VM does.
+                //
+                // TODO: attempt to create caches shared across variable references
+                // for each instance variable for a given class. This is different
+                // than what the VM does, but it ought to be a small size/performance
+                // win.  This change would require Sorbet changes so we have the
+                // necessary information at this point.
+                auto name = alias.instanceField.shortName(cs);
+                auto *cache = buildInstanceVariableCache(cs, name);
                 builder.CreateCall(cs.getFunction("sorbet_instanceVariableSet"),
                                    {Payload::varGet(cs, cfg::LocalRef::selfVariable(), builder, irctx, rubyBlockId),
-                                    Payload::idIntern(cs, builder, alias.instanceField.shortName(cs)), var});
+                                    Payload::idIntern(cs, builder, name), var, cache});
                 break;
+            }
         }
         return;
     }

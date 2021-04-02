@@ -104,6 +104,9 @@ SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long
 SORBET_ALIVE(long, sorbet_globalConstRegister, (VALUE val));
 SORBET_ALIVE(VALUE, sorbet_globalConstDupHash, (long index));
 
+SORBET_ALIVE(VALUE, sorbet_vm_getivar, (VALUE obj, ID id, struct iseq_inline_iv_cache_entry *cache));
+SORBET_ALIVE(void, sorbet_vm_setivar, (VALUE obj, ID id, VALUE val, struct iseq_inline_iv_cache_entry *cache));
+
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.
 
@@ -350,13 +353,13 @@ void sorbet_globalVariableSet(ID name, VALUE newValue) {
 }
 
 SORBET_INLINE
-VALUE sorbet_instanceVariableGet(VALUE receiver, ID name) {
-    return rb_ivar_get(receiver, name);
+VALUE sorbet_instanceVariableGet(VALUE receiver, ID name, struct iseq_inline_iv_cache_entry *cache) {
+    return sorbet_vm_getivar(receiver, name, cache);
 }
 
 SORBET_INLINE
-VALUE sorbet_instanceVariableSet(VALUE receiver, ID name, VALUE newValue) {
-    return rb_ivar_set(receiver, name, newValue);
+void sorbet_instanceVariableSet(VALUE receiver, ID name, VALUE newValue, struct iseq_inline_iv_cache_entry *cache) {
+    sorbet_vm_setivar(receiver, name, newValue, cache);
 }
 
 SORBET_INLINE
