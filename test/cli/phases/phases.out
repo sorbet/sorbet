@@ -257,6 +257,8 @@ bb0(rubyBlockId=0):
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
     <unconditional>(bb0 -> bb1)
 
+# backedges
+#  bb0(rubyBlockId=0)
 bb1(rubyBlockId=0):
     blockargs=()
     <unconditional>(bb1 -> bb1)
@@ -279,7 +281,7 @@ class <C <U <root>>> < <C <U Object>> ()
 
 --- symbol-table-raw end ---
 --- checking diff ---
-1,20d0
+1,22d0
 1,24d0
 1,9d0
 < 
@@ -327,6 +329,8 @@ class <C <U <root>>> < <C <U Object>> ()
 <   end
 <   expr = EmptyTree
 <   stats = [
+< #  bb0(rubyBlockId=0)
+< # backedges
 < InsSeq{
 < bb0(rubyBlockId=0):
 < bb1(rubyBlockId=0):
