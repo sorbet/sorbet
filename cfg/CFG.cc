@@ -238,6 +238,31 @@ string CFG::toString(const core::GlobalState &gs) const {
     return to_string(buf);
 }
 
+string CFG::toTextualString(const core::GlobalState &gs) const {
+    fmt::memory_buffer buf;
+    string symbolName = this->symbol.showFullName(gs);
+    fmt::format_to(buf, "method {} {{\n\n", symbolName);
+    for (auto &basicBlock : this->basicBlocks) {
+        auto text = basicBlock->toTextualString(gs, *this);
+        auto lines = absl::StrSplit(text, "\n");
+
+        if (!basicBlock->backEdges.empty()) {
+            fmt::format_to(buf, "# backedges\n");
+            for (auto *backEdge : basicBlock->backEdges) {
+                fmt::format_to(buf, "#  bb{}(rubyBlockId={})\n", backEdge->id, backEdge->rubyBlockId);
+            }
+        }
+        fmt::format_to(buf,
+                       "bb{}(rubyBlockId={}):\n"
+                       "    {}"
+                       "(bb{} -> bb{})\n\n",
+                       basicBlock->id, basicBlock->rubyBlockId, fmt::join(lines.begin(), lines.end(), "\n    "),
+                       basicBlock->id, basicBlock->bexit.thenb->id);
+    }
+    fmt::format_to(buf, "}}");
+    return to_string(buf);
+}
+
 string CFG::showRaw(core::Context ctx) const {
     fmt::memory_buffer buf;
     string symbolName = this->symbol.showFullName(ctx);
@@ -277,6 +302,23 @@ string CFG::showRaw(core::Context ctx) const {
 string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "block[id={}, rubyBlockId={}]({})\n", this->id, this->rubyBlockId,
+                   fmt::map_join(
+                       this->args.begin(), this->args.end(),
+                       ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
+
+    if (this->outerLoops > 0) {
+        fmt::format_to(buf, "outerLoops: {}\n", this->outerLoops);
+    }
+    for (const Binding &exp : this->exprs) {
+        fmt::format_to(buf, "{} = {}\n", exp.bind.toString(gs, cfg), exp.value->toString(gs, cfg));
+    }
+    fmt::format_to(buf, "{}", this->bexit.cond.toString(gs, cfg));
+    return to_string(buf);
+}
+
+string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) const {
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "blockargs=({})\n",
                    fmt::map_join(
                        this->args.begin(), this->args.end(),
                        ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
