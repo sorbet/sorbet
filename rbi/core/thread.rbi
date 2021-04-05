@@ -1004,8 +1004,8 @@ class Thread < Object
   #   # all exceptions inherited from Exception are prohibited.
   # }
   # ```
-  sig {params(hash: T.untyped).returns(T.untyped)}
-  def self.handle_interrupt(hash); end
+  sig {params(hash: T.untyped, block: T.proc.returns(T.untyped)).returns(T.untyped)}
+  def self.handle_interrupt(hash, &block); end
 
   # Causes the given `thread` to exit, see also
   # [`Thread::exit`](https://docs.ruby-lang.org/en/2.7.0/Thread.html#method-c-exit).
