@@ -1085,11 +1085,12 @@ class Module < Object
   # ```
   sig do
     params(
-        arg0: T.any(Symbol, String),
+        method_name: T.any(Symbol, String),
+        inherit: T::Boolean,
     )
     .returns(T::Boolean)
   end
-  def method_defined?(arg0); end
+  def method_defined?(method_name, inherit=true); end
 
   # Invoked as a callback whenever an instance method is removed from the
   # receiver.
