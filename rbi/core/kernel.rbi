@@ -206,9 +206,9 @@ module Kernel
   sig do
     params(
         tag: Object,
-        blk: T.proc.params(arg0: Object).returns(BasicObject),
+        blk: T.proc.params(arg0: Object).returns(T.untyped),
     )
-    .returns(BasicObject)
+    .returns(T.untyped)
   end
   def catch(tag=Object.new, &blk); end
 
