@@ -179,7 +179,7 @@ subgraph "cluster_::ControlFlow#orZero2" {
     "bb::ControlFlow#orZero2_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero2_1" -> "bb::ControlFlow#orZero2_1" [style="bold"];
@@ -193,7 +193,7 @@ subgraph "cluster_::ControlFlow#orZero2" {
     "bb::ControlFlow#orZero2_4" [
         shape = rectangle;
         color = black;
-        label = "block[id=4, rubyBlockId=0](a: Integer)\l<returnMethodTemp>$2: Integer = a\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=0](a: Integer)\l<returnMethodTemp>$2: Integer = a\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero2_4" -> "bb::ControlFlow#orZero2_1" [style="bold"];

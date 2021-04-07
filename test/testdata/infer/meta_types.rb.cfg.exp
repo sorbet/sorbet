@@ -55,7 +55,7 @@ subgraph "cluster_::TestMetaType#testit" {
     "bb::TestMetaType#testit_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_1" -> "bb::TestMetaType#testit_1" [style="bold"];
@@ -99,7 +99,7 @@ subgraph "cluster_::TestMetaType#testit" {
     "bb::TestMetaType#testit_7" [
         shape = rectangle;
         color = black;
-        label = "block[id=7, rubyBlockId=0](<self>: TestMetaType, <statTemp>$24: Object)\l<returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$24: Object)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7, rubyBlockId=0](<self>: TestMetaType, <statTemp>$24: Object)\l<returnMethodTemp>$2: NilClass = <self>: TestMetaType.puts(<statTemp>$24: Object)\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_7" -> "bb::TestMetaType#testit_1" [style="bold"];

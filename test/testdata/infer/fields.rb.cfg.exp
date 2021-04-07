@@ -26,14 +26,14 @@ subgraph "cluster_::Foo#initialize" {
     "bb::Foo#initialize_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l@ivar$3: Integer = alias @ivar\l<self>: Foo = cast(<self>: NilClass, Foo);\l<cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$8: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$8: T.class_of(Integer))\l<castTemp>$9: Integer(0) = 0\l@ivar$3: Integer = cast(<castTemp>$9: Integer(0), Integer);\l<returnMethodTemp>$2: Integer = @ivar$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l@ivar$3: Integer = alias @ivar\l<self>: Foo = cast(<self>: NilClass, Foo);\l<cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$8: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$8: T.class_of(Integer))\l<castTemp>$9: Integer(0) = 0\l@ivar$3: Integer = cast(<castTemp>$9: Integer(0), Integer);\l<returnMethodTemp>$2: Integer = @ivar$3\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Foo#initialize_0" -> "bb::Foo#initialize_1" [style="bold"];
     "bb::Foo#initialize_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Foo#initialize_1" -> "bb::Foo#initialize_1" [style="bold"];
@@ -46,14 +46,14 @@ subgraph "cluster_::Foo#foo" {
     "bb::Foo#foo_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l@ivar$4: Integer = alias @ivar\l<self>: Foo = cast(<self>: NilClass, Foo);\l@ivar$4: Integer(2) = 2\l@ivar$4: Integer = \"ss\"\l<returnMethodTemp>$2: Integer = @ivar$4\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l@ivar$4: Integer = alias @ivar\l<self>: Foo = cast(<self>: NilClass, Foo);\l@ivar$4: Integer(2) = 2\l@ivar$4: Integer = \"ss\"\l<returnMethodTemp>$2: Integer = @ivar$4\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Foo#foo_0" -> "bb::Foo#foo_1" [style="bold"];
     "bb::Foo#foo_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Foo#foo_1" -> "bb::Foo#foo_1" [style="bold"];

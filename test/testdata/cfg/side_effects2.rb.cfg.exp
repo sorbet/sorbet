@@ -35,7 +35,7 @@ subgraph "cluster_::Side#foo" {
     "bb::Side#foo_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Side#foo_1" -> "bb::Side#foo_1" [style="bold"];
@@ -56,7 +56,7 @@ subgraph "cluster_::Side#foo" {
     "bb::Side#foo_4" [
         shape = rectangle;
         color = black;
-        label = "block[id=4, rubyBlockId=0](a: T.any(TrueClass, Integer), <statTemp>$4: Side, <statTemp>$5: Side)\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: Side.bar(<statTemp>$5: Side, a: T.any(TrueClass, Integer), a: T.any(TrueClass, Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=4, rubyBlockId=0](a: T.any(TrueClass, Integer), <statTemp>$4: Side, <statTemp>$5: Side)\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: Side.bar(<statTemp>$5: Side, a: T.any(TrueClass, Integer), a: T.any(TrueClass, Integer))\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Side#foo_4" -> "bb::Side#foo_1" [style="bold"];
@@ -69,14 +69,14 @@ subgraph "cluster_::Side#bar" {
     "bb::Side#bar_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Side = cast(<self>: NilClass, Side);\la: T.untyped = load_arg(a)\lb: T.untyped = load_arg(b)\lc: T.untyped = load_arg(c)\l<returnMethodTemp>$2: NilClass = <self>: Side.puts(a: T.untyped, b: T.untyped, c: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Side = cast(<self>: NilClass, Side);\la: T.untyped = load_arg(a)\lb: T.untyped = load_arg(b)\lc: T.untyped = load_arg(c)\l<returnMethodTemp>$2: NilClass = <self>: Side.puts(a: T.untyped, b: T.untyped, c: T.untyped)\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Side#bar_0" -> "bb::Side#bar_1" [style="bold"];
     "bb::Side#bar_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Side#bar_1" -> "bb::Side#bar_1" [style="bold"];

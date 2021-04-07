@@ -94,14 +94,14 @@ subgraph "cluster_::Parent#returns_self" {
     "bb::Parent#returns_self_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Parent = cast(<self>: NilClass, Parent);\l<returnMethodTemp>$2: Parent = <self>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Parent\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Parent = cast(<self>: NilClass, Parent);\l<returnMethodTemp>$2: Parent = <self>\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Parent\l<unconditional>\l"
     ];
 
     "bb::Parent#returns_self_0" -> "bb::Parent#returns_self_1" [style="bold"];
     "bb::Parent#returns_self_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Parent#returns_self_1" -> "bb::Parent#returns_self_1" [style="bold"];
@@ -177,14 +177,14 @@ subgraph "cluster_::Generic#bad" {
     "bb::Generic#bad_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Generic[Generic::TM] = cast(<self>: NilClass, AppliedType {\l  klass = <C <U Generic>>\l  targs = [\l    <C <U TM>> = SelfTypeParam(<C <U Generic>><C <U TM>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Generic) = alias <C Generic>\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$6: <Type: T.untyped> = <cfgAlias>$8: T.class_of(T).untyped()\l<statTemp>$3: <Type: Generic[T.untyped]> = <cfgAlias>$5: T.class_of(Generic).[](<statTemp>$6: <Type: T.untyped>)\l<returnMethodTemp>$2: Generic[T.untyped] = <statTemp>$3: <Type: Generic[T.untyped]>.new()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Generic[T.untyped]\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Generic[Generic::TM] = cast(<self>: NilClass, AppliedType {\l  klass = <C <U Generic>>\l  targs = [\l    <C <U TM>> = SelfTypeParam(<C <U Generic>><C <U TM>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Generic) = alias <C Generic>\l<cfgAlias>$8: T.class_of(T) = alias <C T>\l<statTemp>$6: <Type: T.untyped> = <cfgAlias>$8: T.class_of(T).untyped()\l<statTemp>$3: <Type: Generic[T.untyped]> = <cfgAlias>$5: T.class_of(Generic).[](<statTemp>$6: <Type: T.untyped>)\l<returnMethodTemp>$2: Generic[T.untyped] = <statTemp>$3: <Type: Generic[T.untyped]>.new()\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Generic[T.untyped]\l<unconditional>\l"
     ];
 
     "bb::Generic#bad_0" -> "bb::Generic#bad_1" [style="bold"];
     "bb::Generic#bad_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Generic#bad_1" -> "bb::Generic#bad_1" [style="bold"];
@@ -260,14 +260,14 @@ subgraph "cluster_::Array#returns_self" {
     "bb::Array#returns_self_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T::Array[Array::Elem] = cast(<self>: NilClass, AppliedType {\l  klass = <C <U Array>>\l  targs = [\l    <C <U Elem>> = SelfTypeParam(<C <U Array>><C <U Elem>>)\l  ]\l});\l<returnMethodTemp>$2: T::Array[Array::Elem] = <self>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[Array::Elem]\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T::Array[Array::Elem] = cast(<self>: NilClass, AppliedType {\l  klass = <C <U Array>>\l  targs = [\l    <C <U Elem>> = SelfTypeParam(<C <U Array>><C <U Elem>>)\l  ]\l});\l<returnMethodTemp>$2: T::Array[Array::Elem] = <self>\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T::Array[Array::Elem]\l<unconditional>\l"
     ];
 
     "bb::Array#returns_self_0" -> "bb::Array#returns_self_1" [style="bold"];
     "bb::Array#returns_self_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Array#returns_self_1" -> "bb::Array#returns_self_1" [style="bold"];
@@ -343,14 +343,14 @@ subgraph "cluster_::B#returns_self" {
     "bb::B#returns_self_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: B = cast(<self>: NilClass, B);\l<returnMethodTemp>$2: B = <self>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: B\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: B = cast(<self>: NilClass, B);\l<returnMethodTemp>$2: B = <self>\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: B\l<unconditional>\l"
     ];
 
     "bb::B#returns_self_0" -> "bb::B#returns_self_1" [style="bold"];
     "bb::B#returns_self_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::B#returns_self_1" -> "bb::B#returns_self_1" [style="bold"];

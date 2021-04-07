@@ -26,14 +26,14 @@ subgraph "cluster_::TestRescue#meth" {
     "bb::TestRescue#meth_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\l<returnMethodTemp>$2: Integer(0) = 0\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(0)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\l<returnMethodTemp>$2: Integer(0) = 0\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(0)\l<unconditional>\l"
     ];
 
     "bb::TestRescue#meth_0" -> "bb::TestRescue#meth_1" [style="bold"];
     "bb::TestRescue#meth_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#meth_1" -> "bb::TestRescue#meth_1" [style="bold"];
@@ -46,14 +46,14 @@ subgraph "cluster_::TestRescue#foo" {
     "bb::TestRescue#foo_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\l<returnMethodTemp>$2: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::TestRescue#foo_0" -> "bb::TestRescue#foo_1" [style="bold"];
     "bb::TestRescue#foo_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#foo_1" -> "bb::TestRescue#foo_1" [style="bold"];
@@ -66,14 +66,14 @@ subgraph "cluster_::TestRescue#bar" {
     "bb::TestRescue#bar_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\l<returnMethodTemp>$2: Integer(2) = 2\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(2)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\l<returnMethodTemp>$2: Integer(2) = 2\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(2)\l<unconditional>\l"
     ];
 
     "bb::TestRescue#bar_0" -> "bb::TestRescue#bar_1" [style="bold"];
     "bb::TestRescue#bar_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#bar_1" -> "bb::TestRescue#bar_1" [style="bold"];
@@ -86,14 +86,14 @@ subgraph "cluster_::TestRescue#baz" {
     "bb::TestRescue#baz_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\l<returnMethodTemp>$2: Integer(3) = 3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(3)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\l<returnMethodTemp>$2: Integer(3) = 3\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(3)\l<unconditional>\l"
     ];
 
     "bb::TestRescue#baz_0" -> "bb::TestRescue#baz_1" [style="bold"];
     "bb::TestRescue#baz_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#baz_1" -> "bb::TestRescue#baz_1" [style="bold"];
@@ -106,14 +106,14 @@ subgraph "cluster_::TestRescue#take_arg" {
     "bb::TestRescue#take_arg_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\lx: T.untyped = load_arg(x)\l<returnMethodTemp>$2: T.untyped = x\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\lx: T.untyped = load_arg(x)\l<returnMethodTemp>$2: T.untyped = x\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::TestRescue#take_arg_0" -> "bb::TestRescue#take_arg_1" [style="bold"];
     "bb::TestRescue#take_arg_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#take_arg_1" -> "bb::TestRescue#take_arg_1" [style="bold"];
@@ -126,14 +126,14 @@ subgraph "cluster_::TestRescue#initialize" {
     "bb::TestRescue#initialize_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l@ex$3: T.nilable(StandardError) = alias @ex\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\l<cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$9: T.class_of(T) = alias <C T>\l<cfgAlias>$11: T.class_of(StandardError) = alias <C StandardError>\l<statTemp>$7: <Type: T.nilable(StandardError)> = <cfgAlias>$9: T.class_of(T).nilable(<cfgAlias>$11: T.class_of(StandardError))\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$7: <Type: T.nilable(StandardError)>)\l<castTemp>$12: NilClass = nil\l@ex$3: T.nilable(StandardError) = cast(<castTemp>$12: NilClass, StandardError | NilClass);\l<returnMethodTemp>$2: T.nilable(StandardError) = @ex$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(StandardError)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l@ex$3: T.nilable(StandardError) = alias @ex\l<self>: TestRescue = cast(<self>: NilClass, TestRescue);\l<cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$9: T.class_of(T) = alias <C T>\l<cfgAlias>$11: T.class_of(StandardError) = alias <C StandardError>\l<statTemp>$7: <Type: T.nilable(StandardError)> = <cfgAlias>$9: T.class_of(T).nilable(<cfgAlias>$11: T.class_of(StandardError))\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<statTemp>$7: <Type: T.nilable(StandardError)>)\l<castTemp>$12: NilClass = nil\l@ex$3: T.nilable(StandardError) = cast(<castTemp>$12: NilClass, StandardError | NilClass);\l<returnMethodTemp>$2: T.nilable(StandardError) = @ex$3\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.nilable(StandardError)\l<unconditional>\l"
     ];
 
     "bb::TestRescue#initialize_0" -> "bb::TestRescue#initialize_1" [style="bold"];
     "bb::TestRescue#initialize_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#initialize_1" -> "bb::TestRescue#initialize_1" [style="bold"];
@@ -488,7 +488,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12686" {
     "bb::TestRescue#parse_ruby_bug_12686_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12686_1" -> "bb::TestRescue#parse_ruby_bug_12686_1" [style="bold"];
@@ -543,7 +543,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12686" {
     "bb::TestRescue#parse_ruby_bug_12686_9" [
         shape = rectangle;
         color = black;
-        label = "block[id=9, rubyBlockId=0](<self>: TestRescue, <statTemp>$4: T.untyped)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.take_arg(<statTemp>$4: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=0](<self>: TestRescue, <statTemp>$4: T.untyped)\l<returnMethodTemp>$2: T.untyped = <self>: TestRescue.take_arg(<statTemp>$4: T.untyped)\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12686_9" -> "bb::TestRescue#parse_ruby_bug_12686_1" [style="bold"];
@@ -1027,7 +1027,7 @@ subgraph "cluster_::TestRescue#parse_rescue_mod_op_assign" {
     "bb::TestRescue#parse_rescue_mod_op_assign_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_1" -> "bb::TestRescue#parse_rescue_mod_op_assign_1" [style="bold"];
@@ -1082,7 +1082,7 @@ subgraph "cluster_::TestRescue#parse_rescue_mod_op_assign" {
     "bb::TestRescue#parse_rescue_mod_op_assign_9" [
         shape = rectangle;
         color = black;
-        label = "block[id=9, rubyBlockId=0](<statTemp>$3: NilClass, <statTemp>$4: T.untyped)\lfoo: T.untyped = <statTemp>$3: NilClass.+(<statTemp>$4: T.untyped)\l<returnMethodTemp>$2: T.untyped = foo\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=0](<statTemp>$3: NilClass, <statTemp>$4: T.untyped)\lfoo: T.untyped = <statTemp>$3: NilClass.+(<statTemp>$4: T.untyped)\l<returnMethodTemp>$2: T.untyped = foo\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_9" -> "bb::TestRescue#parse_rescue_mod_op_assign_1" [style="bold"];
@@ -1104,7 +1104,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402" {
     "bb::TestRescue#parse_ruby_bug_12402_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1" -> "bb::TestRescue#parse_ruby_bug_12402_1" [style="bold"];
@@ -1159,7 +1159,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402" {
     "bb::TestRescue#parse_ruby_bug_12402_9" [
         shape = rectangle;
         color = black;
-        label = "block[id=9, rubyBlockId=0](foo: NilClass)\l<returnMethodTemp>$2: NilClass = foo\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=0](foo: NilClass)\l<returnMethodTemp>$2: NilClass = foo\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_9" -> "bb::TestRescue#parse_ruby_bug_12402_1" [style="bold"];
@@ -1181,7 +1181,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_1" {
     "bb::TestRescue#parse_ruby_bug_12402_1_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_1" -> "bb::TestRescue#parse_ruby_bug_12402_1_1" [style="bold"];
@@ -1236,7 +1236,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_1" {
     "bb::TestRescue#parse_ruby_bug_12402_1_9" [
         shape = rectangle;
         color = black;
-        label = "block[id=9, rubyBlockId=0](<statTemp>$3: NilClass, <statTemp>$4: NilClass)\lfoo: T.untyped = <statTemp>$3: NilClass.+(<statTemp>$4: NilClass)\l<returnMethodTemp>$2: T.untyped = foo\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=0](<statTemp>$3: NilClass, <statTemp>$4: NilClass)\lfoo: T.untyped = <statTemp>$3: NilClass.+(<statTemp>$4: NilClass)\l<returnMethodTemp>$2: T.untyped = foo\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_9" -> "bb::TestRescue#parse_ruby_bug_12402_1_1" [style="bold"];
@@ -1258,7 +1258,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_2" {
     "bb::TestRescue#parse_ruby_bug_12402_2_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_1" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
@@ -1313,7 +1313,7 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_2" {
     "bb::TestRescue#parse_ruby_bug_12402_2_9" [
         shape = rectangle;
         color = black;
-        label = "block[id=9, rubyBlockId=0]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass)\l<statTemp>$8: T.untyped = <statTemp>$9: T.untyped.+(<statTemp>$12: NilClass)\l<returnMethodTemp>$2: T.untyped = []$3: T.untyped.[]=([]$4: Integer(0), <statTemp>$8: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=9, rubyBlockId=0]([]$3: T.untyped, []$4: Integer(0), <statTemp>$9: T.untyped, <statTemp>$12: NilClass)\l<statTemp>$8: T.untyped = <statTemp>$9: T.untyped.+(<statTemp>$12: NilClass)\l<returnMethodTemp>$2: T.untyped = []$3: T.untyped.[]=([]$4: Integer(0), <statTemp>$8: T.untyped)\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_9" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];

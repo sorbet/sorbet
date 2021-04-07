@@ -26,14 +26,14 @@ subgraph "cluster_::TestArray#an_int" {
     "bb::TestArray#an_int_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<returnMethodTemp>$2: Integer(0) = 0\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(0)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<returnMethodTemp>$2: Integer(0) = 0\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(0)\l<unconditional>\l"
     ];
 
     "bb::TestArray#an_int_0" -> "bb::TestArray#an_int_1" [style="bold"];
     "bb::TestArray#an_int_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestArray#an_int_1" -> "bb::TestArray#an_int_1" [style="bold"];
@@ -46,14 +46,14 @@ subgraph "cluster_::TestArray#a_string" {
     "bb::TestArray#a_string_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<returnMethodTemp>$2: String(\"str\") = \"str\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String(\"str\")\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<returnMethodTemp>$2: String(\"str\") = \"str\"\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: String(\"str\")\l<unconditional>\l"
     ];
 
     "bb::TestArray#a_string_0" -> "bb::TestArray#a_string_1" [style="bold"];
     "bb::TestArray#a_string_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestArray#a_string_1" -> "bb::TestArray#a_string_1" [style="bold"];
@@ -66,14 +66,14 @@ subgraph "cluster_::TestArray#test_arrays" {
     "bb::TestArray#test_arrays_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<magic>$4: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$3: [] = <magic>$4: T.class_of(<Magic>).<build-array>()\l<arrayTemp>$6: Integer(1) = 1\l<arrayTemp>$7: Integer(2) = 2\l<magic>$8: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$5: [Integer(1), Integer(2)] = <magic>$8: T.class_of(<Magic>).<build-array>(<arrayTemp>$6: Integer(1), <arrayTemp>$7: Integer(2))\l<arrayTemp>$9: Integer = <self>: TestArray.an_int()\l<arrayTemp>$11: String = <self>: TestArray.a_string()\l<magic>$14: T.class_of(<Magic>) = alias <C <Magic>>\l<arrayTemp>$13: [] = <magic>$14: T.class_of(<Magic>).<build-array>()\l<magic>$15: T.class_of(<Magic>) = alias <C <Magic>>\l<returnMethodTemp>$2: [Integer, String, []] = <magic>$15: T.class_of(<Magic>).<build-array>(<arrayTemp>$9: Integer, <arrayTemp>$11: String, <arrayTemp>$13: [])\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: [Integer, String, []]\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: TestArray = cast(<self>: NilClass, TestArray);\l<magic>$4: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$3: [] = <magic>$4: T.class_of(<Magic>).<build-array>()\l<arrayTemp>$6: Integer(1) = 1\l<arrayTemp>$7: Integer(2) = 2\l<magic>$8: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$5: [Integer(1), Integer(2)] = <magic>$8: T.class_of(<Magic>).<build-array>(<arrayTemp>$6: Integer(1), <arrayTemp>$7: Integer(2))\l<arrayTemp>$9: Integer = <self>: TestArray.an_int()\l<arrayTemp>$11: String = <self>: TestArray.a_string()\l<magic>$14: T.class_of(<Magic>) = alias <C <Magic>>\l<arrayTemp>$13: [] = <magic>$14: T.class_of(<Magic>).<build-array>()\l<magic>$15: T.class_of(<Magic>) = alias <C <Magic>>\l<returnMethodTemp>$2: [Integer, String, []] = <magic>$15: T.class_of(<Magic>).<build-array>(<arrayTemp>$9: Integer, <arrayTemp>$11: String, <arrayTemp>$13: [])\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: [Integer, String, []]\l<unconditional>\l"
     ];
 
     "bb::TestArray#test_arrays_0" -> "bb::TestArray#test_arrays_1" [style="bold"];
     "bb::TestArray#test_arrays_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::TestArray#test_arrays_1" -> "bb::TestArray#test_arrays_1" [style="bold"];

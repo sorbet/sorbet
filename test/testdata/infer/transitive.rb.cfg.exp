@@ -89,14 +89,14 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Bar = cast(<self>: NilClass, Bar);\l<returnMethodTemp>$2: Integer = <self>: Bar.foo()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Bar = cast(<self>: NilClass, Bar);\l<returnMethodTemp>$2: Integer = <self>: Bar.foo()\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_1" [style="bold"];
     "bb::Bar#baz_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_1" -> "bb::Bar#baz_1" [style="bold"];

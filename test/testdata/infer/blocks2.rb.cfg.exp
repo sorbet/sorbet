@@ -26,14 +26,14 @@ subgraph "cluster_::Foo#bar" {
     "bb::Foo#bar_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: Foo = cast(<self>: NilClass, Foo);\l<blk>: T.untyped = load_arg(<blk>)\l<statTemp>$4: Integer(1) = 1\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(<statTemp>$4: Integer(1))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: Foo = cast(<self>: NilClass, Foo);\l<blk>: T.untyped = load_arg(<blk>)\l<statTemp>$4: Integer(1) = 1\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(<statTemp>$4: Integer(1))\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_0" -> "bb::Foo#bar_1" [style="bold"];
     "bb::Foo#bar_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_1" -> "bb::Foo#bar_1" [style="bold"];
