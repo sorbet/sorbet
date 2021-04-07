@@ -29,6 +29,124 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
     return static_cast<llvm::IRBuilder<> &>(builder);
 };
 
+llvm::Function *getFinalForwarder(MethodCallContext &mcctx, IREmitterHelpers::FinalMethodInfo &finalInfo) {
+    if (auto *func = IREmitterHelpers::lookupFunction(mcctx.cs, finalInfo.method)) {
+        return func;
+    }
+
+    auto *send = mcctx.send;
+
+    auto *func = IREmitterHelpers::getOrCreateFunctionWeak(mcctx.cs, finalInfo.method);
+    llvm::IRBuilder builder{mcctx.cs};
+
+    auto *argc = func->arg_begin();
+    auto *argv = func->arg_begin() + 1;
+    auto *self = func->arg_begin() + 2;
+
+    auto *entry = llvm::BasicBlock::Create(mcctx.cs, "entry", func);
+    auto *forward = llvm::BasicBlock::Create(mcctx.cs, "forward", func);
+    auto funcCs = mcctx.cs.withFunctionEntry(entry);
+
+    // setup the forwarding call
+    {
+        builder.SetInsertPoint(forward);
+
+        // TODO(trevor) we could probably handle methods wih block args as well, following callWithSplatAndBlock
+
+        // build a splat array
+        auto *splat =
+            builder.CreateCall(funcCs.module->getFunction("sorbet_arrayNewFromValues"), {argc, argv}, "splat");
+
+        // setup the ruby stack
+        Payload::pushRubyStack(funcCs, builder, self);
+        Payload::pushRubyStack(funcCs, builder, splat);
+        auto methodName = string(send->fun.shortName(funcCs));
+        auto *cache =
+            IREmitterHelpers::makeInlineCache(funcCs, builder, methodName, {Payload::VM_CALL_ARGS_SPLAT}, 1, {});
+        auto *bh = Payload::vmBlockHandlerNone(funcCs, builder);
+        auto *res = Payload::callFuncWithCache(funcCs, builder, cache, bh);
+        builder.CreateRet(res);
+    }
+
+    // finalize the entry block
+    builder.SetInsertPoint(entry);
+    builder.CreateBr(forward);
+
+    ENFORCE(!llvm::verifyFunction(*func, &llvm::dbgs()));
+
+    return func;
+}
+
+llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
+    // TODO(trevor) we could probably handle methods wih block args as well, by passing the block handler through the
+    // current ruby execution context.
+    if (mcctx.blk != nullptr) {
+        return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+    }
+
+    // NOTE: if we don't see a final call to another compiled method, we skip this optimization as it would just degrade
+    // the performance of a normal send.
+    auto &cs = mcctx.cs;
+    auto recvType = mcctx.send->recv.type;
+    auto finalInfo = IREmitterHelpers::isFinalMethod(cs, recvType, mcctx.send->fun);
+    if (!finalInfo.has_value() || !finalInfo->isCompiled) {
+        return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+    }
+
+    auto *forwarder = getFinalForwarder(mcctx, *finalInfo);
+    if (forwarder == nullptr) {
+        return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+    }
+
+    auto &builder = builderCast(mcctx.build);
+    auto *send = mcctx.send;
+    auto *recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, mcctx.rubyBlockId);
+
+    auto methodName = string(send->fun.shortName(cs));
+    auto *fastFinalCall =
+        llvm::BasicBlock::Create(cs, llvm::Twine("fastFinalCall_") + methodName, builder.GetInsertBlock()->getParent());
+    auto *slowFinalCall =
+        llvm::BasicBlock::Create(cs, llvm::Twine("slowFinalCall_") + methodName, builder.GetInsertBlock()->getParent());
+    auto *afterFinalCall = llvm::BasicBlock::Create(cs, llvm::Twine("afterFinalCall_") + methodName,
+                                                    builder.GetInsertBlock()->getParent());
+
+    auto *typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(finalInfo->recv));
+    builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastFinalCall, slowFinalCall);
+
+    // fast path: emit a direct call
+    builder.SetInsertPoint(fastFinalCall);
+
+    // we need a method entry to be able to perform a direct call, so we ensure that an empty inline cache is available,
+    // and populate it on the first call to the fast path
+    vector<VMFlag> flags{};
+    if (send->isPrivateOk) {
+        flags.emplace_back(Payload::VM_CALL_FCALL);
+    } else {
+        flags.emplace_back(Payload::VM_CALL_ARGS_SIMPLE);
+    }
+    auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, methodName, flags, 0, {});
+
+    // this is unfortunate: fillSendArgsArray will allocate a hash when keyword arguments are present.
+    auto args = IREmitterHelpers::fillSendArgArray(mcctx);
+    auto *fastPathResult = Payload::callFuncDirect(cs, builder, cache, forwarder, args.argc, args.argv, recv);
+    auto *fastPathEnd = builder.GetInsertBlock();
+    builder.CreateBr(afterFinalCall);
+
+    // slow path: emit a call via the ruby vm
+    builder.SetInsertPoint(slowFinalCall);
+    auto *slowPathResult = IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+    auto *slowPathEnd = builder.GetInsertBlock();
+    builder.CreateBr(afterFinalCall);
+
+    // merge the two paths
+    builder.SetInsertPoint(afterFinalCall);
+    auto *phi = builder.CreatePHI(builder.getInt64Ty(), 2, llvm::Twine("finalCallResult_") + methodName);
+    phi->addIncoming(fastPathResult, fastPathEnd);
+    phi->addIncoming(slowPathResult, slowPathEnd);
+
+    return phi;
+}
+
 llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
     for (auto nameBasedIntrinsic : NameBasedIntrinsicMethod::definedIntrinsics()) {
         if (!absl::c_linear_search(nameBasedIntrinsic->applicableMethods(mcctx.cs), mcctx.send->fun)) {
@@ -41,7 +159,7 @@ llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
 
         return nameBasedIntrinsic->makeCall(mcctx);
     }
-    return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
+    return tryFinalMethodCall(mcctx);
 }
 
 llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {

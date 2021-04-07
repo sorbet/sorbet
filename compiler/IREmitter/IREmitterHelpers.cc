@@ -828,13 +828,19 @@ getOrCreateFunctionWithName(CompilerState &cs, std::string name, llvm::FunctionT
 
 llvm::Function *IREmitterHelpers::lookupFunction(CompilerState &cs, core::SymbolRef sym) {
     ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
-    auto func = cs.getFunction(IREmitterHelpers::getFunctionName(cs, sym));
+    auto *func = cs.module->getFunction(IREmitterHelpers::getFunctionName(cs, sym));
     return func;
 }
 llvm::Function *IREmitterHelpers::getOrCreateFunctionWeak(CompilerState &cs, core::SymbolRef sym) {
     ENFORCE(!isClassStaticInit(cs, sym), "use special helper instead");
-    return getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
-                                       llvm::Function::WeakAnyLinkage);
+    auto *fn = getOrCreateFunctionWithName(cs, IREmitterHelpers::getFunctionName(cs, sym), cs.getRubyFFIType(),
+                                           llvm::Function::WeakAnyLinkage);
+    // Ensure that the arguments have consistent naming.
+    fn->arg_begin()->setName("argc");
+    (fn->arg_begin() + 1)->setName("argArray");
+    (fn->arg_begin() + 2)->setName("selfRaw");
+
+    return fn;
 }
 
 llvm::Function *IREmitterHelpers::getOrCreateFunction(CompilerState &cs, core::SymbolRef sym) {
@@ -1051,6 +1057,33 @@ bool IREmitterHelpers::isRootishSymbol(const core::GlobalState &gs, core::Symbol
     }
 
     return false;
+}
+
+std::optional<IREmitterHelpers::FinalMethodInfo>
+IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvType, core::NameRef fun) {
+    core::ClassOrModuleRef recvSym;
+    if (core::isa_type<core::ClassType>(recvType)) {
+        recvSym = core::cast_type_nonnull<core::ClassType>(recvType).symbol;
+    } else if (auto *app = core::cast_type<core::AppliedType>(recvType)) {
+        recvSym = app->klass;
+    }
+
+    if (!recvSym.exists()) {
+        return std::nullopt;
+    }
+
+    auto funSym = recvSym.data(gs)->findMember(gs, fun);
+    if (!funSym.exists()) {
+        return std::nullopt;
+    }
+
+    if (!funSym.data(gs)->isFinalMethod()) {
+        return std::nullopt;
+    }
+
+    auto file = funSym.data(gs)->loc().file();
+    bool isCompiled = file.data(gs).source().find("# compiled: true\n") != string_view::npos;
+    return IREmitterHelpers::FinalMethodInfo{recvSym, funSym, isCompiled};
 }
 
 } // namespace sorbet::compiler

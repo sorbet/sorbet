@@ -144,6 +144,16 @@ public:
 
     // Return true if the given symbol is a "root" symbol.
     static bool isRootishSymbol(const core::GlobalState &gs, core::SymbolRef sym);
+
+    struct FinalMethodInfo {
+        core::ClassOrModuleRef recv;
+        core::SymbolRef method;
+        bool isCompiled{false};
+    };
+
+    // Return true when the symbol is a final method
+    static std::optional<FinalMethodInfo> isFinalMethod(const core::GlobalState &gs, core::TypePtr recvType,
+                                                        core::NameRef fun);
 };
 } // namespace sorbet::compiler
 #endif

@@ -93,6 +93,8 @@ public:
                                           llvm::Value *blockHandler);
     static llvm::Value *callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                                llvm::Value *blockFun, llvm::Value *closure);
+    static llvm::Value *callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
+                                       llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv);
 
     static const VMFlag VM_CALL_ARGS_SIMPLE;
     static const VMFlag VM_CALL_ARGS_SPLAT;

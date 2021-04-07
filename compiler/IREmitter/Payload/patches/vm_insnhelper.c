@@ -1,4 +1,11 @@
 
+// compiler is closely aware of layout of this struct
+struct FunctionInlineCache {
+    // We use an `rb_kwarg_call_data` instead of `rb_call_data` as they contain the same data, and the kwarg variant
+    // only adds a single pointer's worth of additional space.
+    struct rb_kwarg_call_data cd;
+};
+
 void sorbet_setExceptionStackFrame(rb_execution_context_t *ec, rb_control_frame_t *cfp, const rb_iseq_t *iseq) {
     // Self is the same in exception-handlers
     VALUE self = cfp->self;
@@ -31,10 +38,11 @@ void sorbet_pushStaticInitFrame(VALUE recv) {
     vm_push_frame(ec, NULL, frame_type, recv, block_handler, cref, 0, ec->cfp->sp, 0, 0);
 }
 
-void sorbet_pushCfuncFrame(VALUE recv) {
+void sorbet_pushCfuncFrame(struct FunctionInlineCache *cache, VALUE recv) {
     rb_execution_context_t *ec = GET_EC();
 
-    VALUE me = Qnil; // Qnil or T_IMEMO(cref) or T_IMEMO(ment)
+    // NOTE: method search must be done to ensure that this field is not NULL
+    const rb_callable_method_entry_t *me = cache->cd.cc.me;
     VALUE frame_type = VM_FRAME_MAGIC_CFUNC | VM_FRAME_FLAG_CFRAME | VM_ENV_FLAG_LOCAL;
 
     // TODO(trevor) we could pass this in to supply a block
@@ -82,13 +90,6 @@ void sorbet_setMethodStackFrame(rb_execution_context_t *ec, rb_control_frame_t *
     cfp->sp = sp + 1;
 }
 
-// compiler is closely aware of layout of this struct
-struct FunctionInlineCache {
-    // We use an `rb_kwarg_call_data` instead of `rb_call_data` as they contain the same data, and the kwarg variant
-    // only adds a single pointer's worth of additional space.
-    struct rb_kwarg_call_data cd;
-};
-
 // Initialize a method send cache. The values passed in for the keys must all be symbol values, and argc includes
 // num_kwargs.
 void sorbet_setupFunctionInlineCache(struct FunctionInlineCache *cache, ID mid, unsigned int flags, int argc,
@@ -112,6 +113,12 @@ void sorbet_setupFunctionInlineCache(struct FunctionInlineCache *cache, ID mid, 
     } else {
         cd->ci_kw.kw_arg = NULL;
     }
+}
+
+void sorbet_vmMethodSearch(struct FunctionInlineCache *cache, VALUE recv) {
+    // we keep an `rb_kwarg_call_data` in FunctionInline cache.
+    struct rb_call_data *cd = (struct rb_call_data *)&cache->cd;
+    vm_search_method(cd, recv);
 }
 
 // Send Support ********************************************************************************************************

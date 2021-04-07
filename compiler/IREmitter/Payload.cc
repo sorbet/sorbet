@@ -947,6 +947,12 @@ llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderB
                               "sendWithBlock");
 }
 
+llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cache, llvm::Value *fn,
+                                     llvm::Value *argc, llvm::Value *argv, llvm::Value *recv) {
+    auto &builder = builderCast(build);
+    return builder.CreateCall(cs.getFunction("sorbet_callFuncDirect"), {cache, fn, argc, argv, recv}, "sendDirect");
+}
+
 llvm::Value *VMFlag::build(CompilerState &cs, llvm::IRBuilderBase &build, const vector<VMFlag> &flags) {
     auto &builder = builderCast(build);
 

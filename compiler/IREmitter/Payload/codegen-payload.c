@@ -62,7 +62,7 @@ SORBET_ALIVE(VALUE, sorbet_getConstant, (const char *path, long pathLen));
 SORBET_ALIVE(VALUE, sorbet_setConstant, (VALUE mod, const char *name, long nameLen, VALUE value));
 
 SORBET_ALIVE(const VALUE, sorbet_readRealpath, (void));
-SORBET_ALIVE(void, sorbet_pushCfuncFrame, (VALUE));
+SORBET_ALIVE(void, sorbet_pushCfuncFrame, (struct FunctionInlineCache *, VALUE));
 SORBET_ALIVE(void, sorbet_pushStaticInitFrame, (VALUE));
 SORBET_ALIVE(void, sorbet_popRubyStack, (void));
 
@@ -70,6 +70,7 @@ SORBET_ALIVE(void, sorbet_vm_env_write_slowpath, (const VALUE *, int, VALUE));
 SORBET_ALIVE(void, sorbet_setupFunctionInlineCache,
              (struct FunctionInlineCache * cache, ID mid, unsigned int flags, int argc, int num_kwargs, VALUE *keys));
 SORBET_ALIVE(VALUE, sorbet_callFuncWithCache, (struct FunctionInlineCache * cache, VALUE bh));
+SORBET_ALIVE(void, sorbet_vmMethodSearch, (struct FunctionInlineCache * cache, VALUE recv));
 SORBET_ALIVE(VALUE, sorbet_getPassedBlockHandler, ());
 
 SORBET_ALIVE(void, sorbet_setMethodStackFrame,
@@ -464,6 +465,11 @@ VALUE sorbet_arrayDup(VALUE array) {
 SORBET_INLINE
 VALUE sorbet_arrayPop(VALUE array) {
     return rb_ary_pop(array);
+}
+
+SORBET_INLINE
+VALUE sorbet_arrayNewFromValues(int argc, VALUE *argv) {
+    return rb_ary_new_from_values(argc, argv);
 }
 
 // ****
@@ -1098,8 +1104,14 @@ VALUE sorbet_makeBlockHandlerProc(VALUE block) {
 }
 
 SORBET_INLINE
-VALUE sorbet_callFuncDirect(VALUE (*methodPtr)(int, VALUE *, VALUE), int argc, VALUE *argv, VALUE recv) {
-    sorbet_pushCfuncFrame(recv);
+VALUE sorbet_callFuncDirect(struct FunctionInlineCache *cache, VALUE (*methodPtr)(int, VALUE *, VALUE), int argc,
+                            VALUE *argv, VALUE recv) {
+    // we need a method entry from the call data to be able to setup the stack correctly.
+    if (UNLIKELY(cache->cd.cc.me == NULL)) {
+        sorbet_vmMethodSearch(cache, recv);
+    }
+
+    sorbet_pushCfuncFrame(cache, recv);
     VALUE res = methodPtr(argc, argv, recv);
     sorbet_popRubyStack();
     return res;
