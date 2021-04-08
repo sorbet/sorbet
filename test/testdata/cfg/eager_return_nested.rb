@@ -10,7 +10,7 @@ def example(x)
       begin
         puts 1
         if Random.rand(2).even?
-          x
+          x # error: Expected `Integer` but found `String` for method result type
         else
           T.unsafe(nil)
         end
