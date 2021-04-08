@@ -115,13 +115,28 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets l
     inserted.value->isSynthetic = true;
 }
 
+// The eagerReturn boolean controls whether we should put a `return $target` in the code right after
+// emitting the required `instr`. The idea is that sometimes during the walk we know we're in a
+// "terminal" position, where writing into `target` will have the same effect as having just
+// returnedd it directly. In these cases, we emit that `return` instruction ourselves, so that
+// Sorbet checks the types of all `return`'s independently of each other. Rather than trying to
+// unify all writes to `target` into one type, and then checking *that* type against the method's
+// result type, having one `return` instruction at each write into the method rersult `target` means
+// that the method result type will be checked in isolation at that site.
 BasicBlock *CFGBuilder::emitBinding(CFGContext cctx, BasicBlock *current, LocalRef target, core::LocOffsets loc,
-                                    unique_ptr<Instruction> instr) {
+                                    unique_ptr<Instruction> instr, bool eagerReturn) {
     current->exprs.emplace_back(target, loc, std::move(instr));
-    return current;
+    if (eagerReturn) {
+        synthesizeExpr(current, target, loc, make_unique<Return>(target, loc));
+        jumpToDead(current, cctx.inWhat, loc);
+        return cctx.inWhat.deadBlock();
+    } else {
+        return current;
+    }
 }
 
-BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method) {
+BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method,
+                                 bool eagerReturn) {
     InlinedVector<cfg::LocalRef, 2> vars;
     InlinedVector<core::LocOffsets, 2> locs;
     for (int i = 0; i < h.keys.size(); i++) {
@@ -139,7 +154,7 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *curr
 
     auto isPrivateOk = false;
     return emitBinding(cctx, current, cctx.target, h.loc,
-                       make_unique<Send>(magic, method, h.loc, vars.size(), vars, locs, isPrivateOk));
+                       make_unique<Send>(magic, method, h.loc, vars.size(), vars, locs, isPrivateOk), eagerReturn);
 }
 
 BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
@@ -191,6 +206,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
      * for some code snippets. */
     ENFORCE(!current->bexit.isCondSet() || current == cctx.inWhat.deadBlock(),
             "current block has already been finalized!");
+
+    // We set cctx.eagerReturn to false right away so that it affects *all* recursive calls, but
+    // remember the current value in a local variable so that we can pass it to all `emitBinding`
+    // calls for the current node.
+    auto eagerReturn = cctx.eagerReturn;
+    cctx.eagerReturn = false;
 
     try {
         BasicBlock *ret = nullptr;
@@ -245,6 +266,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::Return &a) {
                 LocalRef retSym = cctx.newTemporary(core::Names::returnTemp());
                 auto cont = walk(cctx.withTarget(retSym), a.expr, current);
+                // Not using emitBinding/eagerReturn here because if there's a literal `return`
+                // in the AST, there's no need for `emitBinding` to emit a second one.
                 cont->exprs.emplace_back(cctx.target, a.loc, make_unique<Return>(retSym, a.expr.loc())); // dead assign.
                 jumpToDead(cont, cctx.inWhat, a.loc);
                 ret = cctx.inWhat.deadBlock();
@@ -257,8 +280,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 auto elseBlock = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
                 conditionalJump(cont, ifSym, thenBlock, elseBlock, cctx.inWhat, a.cond.loc());
 
+                if (eagerReturn) {
+                    // This `if` is the last node in the method. Setting `cctx.eagerReturn` below
+                    // makes the `thenp` and `elsep` blocks each think that *they* are in the last
+                    // node in the block, so we exit from the `if` with an explicit return.
+                    cctx.eagerReturn = true;
+                }
                 auto thenEnd = walk(cctx, a.thenp, thenBlock);
                 auto elseEnd = walk(cctx, a.elsep, elseBlock);
+                cctx.eagerReturn = false;
 
                 // If exactly one of `thenEnd` or `elseEnd` is `deadBlock`, it means we don't have
                 // to join the control flow from the `thenp` and `elsep` blocks: one of the blocks
@@ -280,13 +310,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
             },
             [&](const ast::Literal &a) {
-                current = emitBinding(cctx, current, cctx.target, a.loc, make_unique<Literal>(a.value));
+                current = emitBinding(cctx, current, cctx.target, a.loc, make_unique<Literal>(a.value), eagerReturn);
                 ret = current;
             },
             [&](const ast::UnresolvedIdent &id) {
                 LocalRef loc = unresolvedIdent2Local(cctx, id);
                 ENFORCE(loc.exists());
-                current = emitBinding(cctx, current, cctx.target, id.loc, make_unique<Ident>(loc));
+                current = emitBinding(cctx, current, cctx.target, id.loc, make_unique<Ident>(loc), eagerReturn);
 
                 ret = current;
             },
@@ -294,6 +324,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 Exception::raise("Should have been eliminated by namer/resolver");
             },
             [&](ast::ConstantLit &a) {
+                // Doesn't respect eagerReturn because all the extra instructions we generate for
+                // aliases / keepForIde get in the way (can't `return` until the end, but then: what
+                // should we have returned? To be conservative, we do nothing).
                 auto aliasName = cctx.newTemporary(core::Names::cfgAlias());
                 if (a.symbol == core::Symbols::StubModule()) {
                     current->exprs.emplace_back(aliasName, a.loc, make_unique<Alias>(core::Symbols::untyped()));
@@ -315,7 +348,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
             [&](const ast::Local &a) {
                 current = emitBinding(cctx, current, cctx.target, a.loc,
-                                      make_unique<Ident>(cctx.inWhat.enterLocal(a.localVariable)));
+                                      make_unique<Ident>(cctx.inWhat.enterLocal(a.localVariable)), eagerReturn);
                 ret = current;
             },
             [&](ast::Assign &a) {
@@ -332,13 +365,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
 
                 auto rhsCont = walk(cctx.withTarget(lhs), a.rhs, current);
-                rhsCont = emitBinding(cctx, rhsCont, cctx.target, a.loc, make_unique<Ident>(lhs));
+                rhsCont = emitBinding(cctx, rhsCont, cctx.target, a.loc, make_unique<Ident>(lhs), eagerReturn);
                 ret = rhsCont;
             },
             [&](ast::InsSeq &a) {
                 for (auto &exp : a.stats) {
                     LocalRef temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), exp, current);
+                }
+                if (eagerReturn) {
+                    // If this InsSeq is the last thing in the method, then so is the final statement of this InsSeq.
+                    cctx.eagerReturn = true;
                 }
                 ret = walk(cctx, a.expr, current);
             },
@@ -383,7 +420,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                             auto temp = cctx.newTemporary(core::Names::statTemp());
                             current = walk(cctx.withTarget(temp), s.args[0], current);
-                            current = emitBinding(cctx, current, cctx.target, s.loc, make_unique<TAbsurd>(temp));
+                            current =
+                                emitBinding(cctx, current, cctx.target, s.loc, make_unique<TAbsurd>(temp), eagerReturn);
                             ret = current;
                             return;
                         }
@@ -427,6 +465,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
 
                 if (s.block != nullptr) {
+                    // We can't insert extra returns into the body of a block, because it changes
+                    // the meaning of the program (returns from the whole method, not just the block)
+                    // so we don't use emitBinding anywhere in this scope.
+
                     auto newRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
                     vector<ast::ParsedArg> blockArgs =
                         ast::ArgParsing::parseArgs(ast::cast_tree<ast::Block>(s.block)->args);
@@ -537,7 +579,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 } else {
                     current = emitBinding(cctx, current, cctx.target, s.loc,
                                           make_unique<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs, args, argLocs,
-                                                            !!s.flags.isPrivateOk));
+                                                            !!s.flags.isPrivateOk),
+                                          eagerReturn);
                 }
 
                 ret = current;
@@ -546,6 +589,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](const ast::Block &a) { Exception::raise("should never encounter a bare Block"); },
 
             [&](ast::Next &a) {
+                // Not using `emitBinding` in this case because if `eagerReturn` were true, it would
+                // mean this `next` node occurs outside a `do` block, which is an error.
                 LocalRef exprSym = cctx.newTemporary(core::Names::nextTemp());
                 auto afterNext = walk(cctx.withTarget(exprSym), a.expr, current);
                 if (afterNext != cctx.inWhat.deadBlock() && cctx.isInsideRubyBlock) {
@@ -568,6 +613,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Break &a) {
+                // Not using `emitBinding` in this case, because `break` is already control flow
+                // (never makes sense to follow it up with another `return` instruction).
+
                 LocalRef exprSym = cctx.newTemporary(core::Names::returnTemp());
                 auto afterBreak = walk(cctx.withTarget(exprSym), a.expr, current);
 
@@ -635,6 +683,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             },
 
             [&](ast::Rescue &a) {
+                // Rescue is doing a lot of weird control flow things, so we don't use `emitBinding`
+                // because it messes up the control flow.
                 auto bodyRubyBlockId = ++cctx.inWhat.maxRubyBlockId;
                 auto handlersRubyBlockId = bodyRubyBlockId + CFG::HANDLERS_BLOCK_OFFSET;
                 auto ensureRubyBlockId = bodyRubyBlockId + CFG::ENSURE_BLOCK_OFFSET;
@@ -746,7 +796,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a.loc);
             },
 
-            [&](ast::Hash &h) { ret = walkHash(cctx, h, current, core::Names::buildHash()); },
+            [&](ast::Hash &h) { ret = walkHash(cctx, h, current, core::Names::buildHash(), eagerReturn); },
 
             [&](ast::Array &a) {
                 InlinedVector<LocalRef, 2> vars;
@@ -762,7 +812,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 auto isPrivateOk = false;
                 current = emitBinding(
                     cctx, current, cctx.target, a.loc,
-                    make_unique<Send>(magic, core::Names::buildArray(), a.loc, vars.size(), vars, locs, isPrivateOk));
+                    make_unique<Send>(magic, core::Names::buildArray(), a.loc, vars.size(), vars, locs, isPrivateOk),
+                    eagerReturn);
                 ret = current;
             },
 
@@ -770,19 +821,20 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 LocalRef tmp = cctx.newTemporary(core::Names::castTemp());
                 current = walk(cctx.withTarget(tmp), c.arg, current);
                 if (c.cast == core::Names::uncheckedLet()) {
-                    current = emitBinding(cctx, current, cctx.target, c.loc, make_unique<Ident>(tmp));
+                    current = emitBinding(cctx, current, cctx.target, c.loc, make_unique<Ident>(tmp), eagerReturn);
                 } else if (c.cast == core::Names::bind()) {
                     if (c.arg.isSelfReference()) {
                         auto self = cctx.inWhat.enterLocal(core::LocalVariable::selfVariable());
                         current->exprs.emplace_back(self, c.loc, make_unique<Cast>(tmp, c.type, core::Names::cast()));
-                        current = emitBinding(cctx, current, cctx.target, c.loc, make_unique<Ident>(self));
+                        current = emitBinding(cctx, current, cctx.target, c.loc, make_unique<Ident>(self), eagerReturn);
                     } else {
                         if (auto e = cctx.ctx.beginError(what.loc(), core::errors::CFG::MalformedTBind)) {
                             e.setHeader("`{}` can only be used with `{}`", "T.bind", "self");
                         }
                     }
                 } else {
-                    current = emitBinding(cctx, current, cctx.target, c.loc, make_unique<Cast>(tmp, c.type, c.cast));
+                    current = emitBinding(cctx, current, cctx.target, c.loc, make_unique<Cast>(tmp, c.type, c.cast),
+                                          eagerReturn);
                 }
                 if (c.cast == core::Names::let()) {
                     cctx.inWhat.minLoops[cctx.target.id()] = CFG::MIN_LOOP_LET;
