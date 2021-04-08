@@ -452,16 +452,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                     for (int i = 0; i < blockArgs.size(); ++i) {
                         auto &arg = blockArgs[i];
-                        LocalRef argLoc = cctx.inWhat.enterLocal(arg.local);
+                        auto argLocal = cctx.inWhat.enterLocal(arg.local);
 
                         if (arg.flags.isRepeated) {
                             if (i != 0) {
                                 // Mixing positional and rest args in blocks is
                                 // not currently supported; drop in an untyped.
-                                bodyBlock->exprs.emplace_back(argLoc, arg.loc,
+                                bodyBlock->exprs.emplace_back(argLocal, arg.loc,
                                                               make_unique<Alias>(core::Symbols::untyped()));
                             } else {
-                                bodyBlock->exprs.emplace_back(argLoc, arg.loc, make_unique<Ident>(argTemp));
+                                bodyBlock->exprs.emplace_back(argLocal, arg.loc, make_unique<Ident>(argTemp));
                             }
                             continue;
                         }
@@ -475,7 +475,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         InlinedVector<LocalRef, 2> idxVec{idxTmp};
                         InlinedVector<core::LocOffsets, 2> locs{zeroLengthLoc};
                         auto isPrivateOk = false;
-                        bodyBlock->exprs.emplace_back(argLoc, arg.loc,
+                        bodyBlock->exprs.emplace_back(argLocal, arg.loc,
                                                       make_unique<Send>(argTemp, core::Names::squareBrackets(),
                                                                         s.block.loc(), idxVec.size(), idxVec, locs,
                                                                         isPrivateOk));
