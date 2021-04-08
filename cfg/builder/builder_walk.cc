@@ -115,6 +115,12 @@ void CFGBuilder::synthesizeExpr(BasicBlock *bb, LocalRef var, core::LocOffsets l
     inserted.value->isSynthetic = true;
 }
 
+BasicBlock *CFGBuilder::emitBinding(CFGContext cctx, BasicBlock *current, LocalRef target, core::LocOffsets loc,
+                                    unique_ptr<Instruction> instr) {
+    current->exprs.emplace_back(target, loc, std::move(instr));
+    return current;
+}
+
 BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *current, core::NameRef method) {
     InlinedVector<cfg::LocalRef, 2> vars;
     InlinedVector<core::LocOffsets, 2> locs;
@@ -132,9 +138,8 @@ BasicBlock *CFGBuilder::walkHash(CFGContext cctx, ast::Hash &h, BasicBlock *curr
     synthesizeExpr(current, magic, core::LocOffsets::none(), make_unique<Alias>(core::Symbols::Magic()));
 
     auto isPrivateOk = false;
-    current->exprs.emplace_back(cctx.target, h.loc,
-                                make_unique<Send>(magic, method, h.loc, vars.size(), vars, locs, isPrivateOk));
-    return current;
+    return emitBinding(cctx, current, cctx.target, h.loc,
+                       make_unique<Send>(magic, method, h.loc, vars.size(), vars, locs, isPrivateOk));
 }
 
 BasicBlock *CFGBuilder::joinBlocks(CFGContext cctx, BasicBlock *a, BasicBlock *b) {
@@ -275,13 +280,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
             },
             [&](const ast::Literal &a) {
-                current->exprs.emplace_back(cctx.target, a.loc, make_unique<Literal>(a.value));
+                current = emitBinding(cctx, current, cctx.target, a.loc, make_unique<Literal>(a.value));
                 ret = current;
             },
             [&](const ast::UnresolvedIdent &id) {
                 LocalRef loc = unresolvedIdent2Local(cctx, id);
                 ENFORCE(loc.exists());
-                current->exprs.emplace_back(cctx.target, id.loc, make_unique<Ident>(loc));
+                current = emitBinding(cctx, current, cctx.target, id.loc, make_unique<Ident>(loc));
 
                 ret = current;
             },
@@ -309,8 +314,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 ret = current;
             },
             [&](const ast::Local &a) {
-                current->exprs.emplace_back(cctx.target, a.loc,
-                                            make_unique<Ident>(cctx.inWhat.enterLocal(a.localVariable)));
+                current = emitBinding(cctx, current, cctx.target, a.loc,
+                                      make_unique<Ident>(cctx.inWhat.enterLocal(a.localVariable)));
                 ret = current;
             },
             [&](ast::Assign &a) {
@@ -327,7 +332,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 }
 
                 auto rhsCont = walk(cctx.withTarget(lhs), a.rhs, current);
-                rhsCont->exprs.emplace_back(cctx.target, a.loc, make_unique<Ident>(lhs));
+                rhsCont = emitBinding(cctx, rhsCont, cctx.target, a.loc, make_unique<Ident>(lhs));
                 ret = rhsCont;
             },
             [&](ast::InsSeq &a) {
@@ -378,7 +383,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                             auto temp = cctx.newTemporary(core::Names::statTemp());
                             current = walk(cctx.withTarget(temp), s.args[0], current);
-                            current->exprs.emplace_back(cctx.target, s.loc, make_unique<TAbsurd>(temp));
+                            current = emitBinding(cctx, current, cctx.target, s.loc, make_unique<TAbsurd>(temp));
                             ret = current;
                             return;
                         }
@@ -530,9 +535,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                      *
                      */
                 } else {
-                    current->exprs.emplace_back(cctx.target, s.loc,
-                                                make_unique<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs, args,
-                                                                  argLocs, !!s.flags.isPrivateOk));
+                    current = emitBinding(cctx, current, cctx.target, s.loc,
+                                          make_unique<Send>(recv, s.fun, s.recv.loc(), s.numPosArgs, args, argLocs,
+                                                            !!s.flags.isPrivateOk));
                 }
 
                 ret = current;
@@ -755,8 +760,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 LocalRef magic = cctx.newTemporary(core::Names::magic());
                 synthesizeExpr(current, magic, core::LocOffsets::none(), make_unique<Alias>(core::Symbols::Magic()));
                 auto isPrivateOk = false;
-                current->exprs.emplace_back(
-                    cctx.target, a.loc,
+                current = emitBinding(
+                    cctx, current, cctx.target, a.loc,
                     make_unique<Send>(magic, core::Names::buildArray(), a.loc, vars.size(), vars, locs, isPrivateOk));
                 ret = current;
             },
@@ -765,19 +770,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 LocalRef tmp = cctx.newTemporary(core::Names::castTemp());
                 current = walk(cctx.withTarget(tmp), c.arg, current);
                 if (c.cast == core::Names::uncheckedLet()) {
-                    current->exprs.emplace_back(cctx.target, c.loc, make_unique<Ident>(tmp));
+                    current = emitBinding(cctx, current, cctx.target, c.loc, make_unique<Ident>(tmp));
                 } else if (c.cast == core::Names::bind()) {
                     if (c.arg.isSelfReference()) {
                         auto self = cctx.inWhat.enterLocal(core::LocalVariable::selfVariable());
                         current->exprs.emplace_back(self, c.loc, make_unique<Cast>(tmp, c.type, core::Names::cast()));
-                        current->exprs.emplace_back(cctx.target, c.loc, make_unique<Ident>(self));
+                        current = emitBinding(cctx, current, cctx.target, c.loc, make_unique<Ident>(self));
                     } else {
                         if (auto e = cctx.ctx.beginError(what.loc(), core::errors::CFG::MalformedTBind)) {
                             e.setHeader("`{}` can only be used with `{}`", "T.bind", "self");
                         }
                     }
                 } else {
-                    current->exprs.emplace_back(cctx.target, c.loc, make_unique<Cast>(tmp, c.type, c.cast));
+                    current = emitBinding(cctx, current, cctx.target, c.loc, make_unique<Cast>(tmp, c.type, c.cast));
                 }
                 if (c.cast == core::Names::let()) {
                     cctx.inWhat.minLoops[cctx.target.id()] = CFG::MIN_LOOP_LET;
