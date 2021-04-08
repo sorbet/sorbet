@@ -254,6 +254,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
 
                 auto thenEnd = walk(cctx, a.thenp, thenBlock);
                 auto elseEnd = walk(cctx, a.elsep, elseBlock);
+
+                // If exactly one of `thenEnd` or `elseEnd` is `deadBlock`, it means we don't have
+                // to join the control flow from the `thenp` and `elsep` blocks: one of the blocks
+                // already had an explicit jump at the end of it (like a `return` or `next`), so we
+                // can continue accumulating bindings in the end block of the side that didn't jump.
+                // (This is hard to write in words. Jotting a quick picture will help clarify.)
                 if (thenEnd != cctx.inWhat.deadBlock() || elseEnd != cctx.inWhat.deadBlock()) {
                     if (thenEnd == cctx.inWhat.deadBlock()) {
                         ret = elseEnd;
