@@ -198,14 +198,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<returnMethodTemp>$2: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
+        label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -226,14 +226,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_0" [
         shape = invhouse;
         color = black;
-        label = "block[id=0]()\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l&nbsp;value = Cast {\l&nbsp;&nbsp;cast = T.cast,\l&nbsp;&nbsp;value = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;&nbsp;type = NilClass,\l&nbsp;&nbsp;},\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;type = Integer(1),\l&nbsp;},\l&nbsp;value = Literal { value = Integer(1) },\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <finalReturn>>,\l&nbsp;&nbsp;type = T.noreturn,\l&nbsp;},\l&nbsp;value = Return {\l&nbsp;&nbsp;what = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;&nbsp;type = Integer(1),\l&nbsp;&nbsp;},\l&nbsp;},\l}\lVariableUseSite { variable = <U <unconditional>> }\l"
+        label = "block[id=0]()\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l&nbsp;value = Cast {\l&nbsp;&nbsp;cast = T.cast,\l&nbsp;&nbsp;value = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <self>>,\l&nbsp;&nbsp;&nbsp;type = NilClass,\l&nbsp;&nbsp;},\l&nbsp;&nbsp;type = T.class_of(<root>),\l&nbsp;},\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;type = Integer(1),\l&nbsp;},\l&nbsp;value = Literal { value = Integer(1) },\l}\lBinding {\l&nbsp;bind = VariableUseSite {\l&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;type = T.noreturn,\l&nbsp;},\l&nbsp;value = Return {\l&nbsp;&nbsp;what = VariableUseSite {\l&nbsp;&nbsp;&nbsp;variable = <U <returnMethodTemp>>$2,\l&nbsp;&nbsp;&nbsp;type = Integer(1),\l&nbsp;&nbsp;},\l&nbsp;},\l}\lVariableUseSite { variable = <U <unconditional>> }\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
         shape = parallelogram;
         color = black;
-        label = "block[id=1]()\lVariableUseSite { variable = <U <unconditional>> }\l"
+        label = "block[id=1](VariableUseSite { variable = <U <returnMethodTemp>>$2 })\lBinding {\l&nbsp;bind = VariableUseSite { variable = <U <finalReturn>> },\l&nbsp;value = Return {\l&nbsp;&nbsp;what = VariableUseSite { variable = <U <returnMethodTemp>>$2 },\l&nbsp;},\l}\lVariableUseSite { variable = <U <unconditional>> }\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
@@ -254,13 +254,14 @@ bb0(rubyBlockId=0):
       ]
     });
     <returnMethodTemp>$2: Integer(1) = 1
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
+    <returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(1)
     <unconditional>(bb0 -> bb1)
 
 # backedges
 #  bb0(rubyBlockId=0)
 bb1(rubyBlockId=0):
-    blockargs=()
+    blockargs=(<returnMethodTemp>$2)
+    <finalReturn> = return <returnMethodTemp>$2
     <unconditional>(bb1 -> bb1)
 
 }
@@ -281,7 +282,7 @@ class <C <U <root>>> < <C <U Object>> ()
 
 --- symbol-table-raw end ---
 --- checking diff ---
-1,22d0
+1,23d0
 1,24d0
 1,9d0
 < 
@@ -309,15 +310,16 @@ class <C <U <root>>> < <C <U Object>> ()
 <       name = EmptyTree<<C <U <root>>>>
 <       rhs = [
 <       targs = [
-<     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
+<     <finalReturn> = return <returnMethodTemp>$2
 <     <returnMethodTemp>$2: Integer(1) = 1
+<     <returnMethodTemp>$2: T.noreturn = return <returnMethodTemp>$2: Integer(1)
 <     <self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {
 <     <unconditional>(bb0 -> bb1)
 <     <unconditional>(bb1 -> bb1)
 <     ClassDef{
 <     EmptyTree
 <     blockargs=()
-<     blockargs=()
+<     blockargs=(<returnMethodTemp>$2)
 <     def self.<static-init><<static-init>$CENSORED>(<blk>)
 <     end
 <     }
