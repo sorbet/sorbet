@@ -1,1 +1,20 @@
-TODO
+nested/nested.rb:5: TODO Class https://srb.help/3706
+     5 |module Wrong
+               ^^^^^
+
+nested/nested.rb:6: TODO Class https://srb.help/3706
+     6 |  class Inside; end
+                ^^^^^^
+
+nested/nested.rb:26: TODO Const https://srb.help/3706
+    26 |  NOT_IN_PACKAGE = T.let(1, Integer)
+          ^^^^^^^^^^^^^^
+
+nested/nested.rb:42: TODO Class https://srb.help/3706
+    42 |module Root::ModNotInPackage
+               ^^^^^^^^^^^^^^^^^^^^^
+
+nested/nested.rb:45: TODO Class https://srb.help/3706
+    45 |class Root::ClassNotInPackage
+              ^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 5
