@@ -2,12 +2,14 @@
 
 extend T::Sig
 
+module Wrong
+  class Inside; end
+end
+
 module Root::Nested
 
   ALLOWED_CONST = T.let(1, Integer)
-
-
-  # TODO should this be allowed?
+  A::B = 2
 
   class Inner
     CONST = T.let(1, Integer)
@@ -16,6 +18,12 @@ module Root::Nested
     def method
       true
     end
+  end
+end
+
+module Root
+  module Nested
+    class SomeClass; end
   end
 end
 
@@ -43,5 +51,10 @@ end
 class Root::ClassNotInPackage
 end
 
-class Other
+module ::TopLevel
+  class Foo
+    sig {void}
+    def foo
+    end
+  end
 end
