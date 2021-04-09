@@ -428,7 +428,6 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                             auto kwArgSet = llvm::BasicBlock::Create(cs, "kwArgSet", func);
                             auto kwArgDefault = llvm::BasicBlock::Create(cs, "kwArgDefault", func);
                             auto kwArgContinue = llvm::BasicBlock::Create(cs, "kwArgContinue", func);
-                            llvm::Value *defaultValue;
                             builder.CreateCondBr(isItUndef, kwArgDefault, kwArgSet);
 
                             // Write a default value out, and mark the variable as missing
@@ -437,8 +436,6 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
                                 Payload::varSet(cs, argPresent, Payload::rubyFalse(cs, builder), builder, irctx,
                                                 rubyBlockId);
                             }
-                            // TODO(trevor) should this be undef?
-                            defaultValue = Payload::rubyNil(cs, builder);
                             builder.CreateBr(kwArgContinue);
 
                             builder.SetInsertPoint(kwArgSet);
