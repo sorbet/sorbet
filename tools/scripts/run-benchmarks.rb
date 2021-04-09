@@ -136,8 +136,10 @@ module SorbetBenchmark
   def self.gather_results(topdir, benchmarks, baseline, verbose)
     Dir.chdir(topdir)
 
-    check_call(["./bazel", "build", "//main:sorbet", "-c", "opt"])
-    check_call(["./bazel", "run", "@sorbet_ruby_2_7//:ruby", "-c", "opt", "--", "--version"])
+    sorbet_ruby_target = "@sorbet_ruby_2_7//:ruby"
+
+    check_call(["./bazel", "build", "//main:sorbet", sorbet_ruby_target, "-c", "opt"])
+    check_call(["./bazel", "run", sorbet_ruby_target, "-c", "opt", "--", "--version"])
 
     FileUtils.mkdir_p('tmp/bench')
 

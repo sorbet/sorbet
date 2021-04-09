@@ -42,7 +42,7 @@ mkdir -p tmp/bench
 
 # TODO(jez) Careful! These must use the same configuration!
 # (Alternatively: be sure to compile the right one right before it's used.)
-./bazel build //main:sorbet -c opt
+./bazel build //main:sorbet @sorbet_ruby_2_7//:ruby -c opt
 ./bazel run @sorbet_ruby_2_7//:ruby -c opt -- --version
 
 if [ "${#benchmarks[@]}" -eq 0 ]; then
