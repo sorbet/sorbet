@@ -452,11 +452,11 @@ overridden exists in the ancestors of the class defining the `override` method,
 or remove `override` from the signature that's raising the error. See
 [Override Checking](override-checking) for more information about `override`.
 
-If the method exists in a
-[`# typed: ignore`](static#file-level-granularity-strictness-levels) file sorbet
+If the parent method definitely exists at runtime, it might be hidden in a
+[`# typed: ignore`](static#file-level-granularity-strictness-levels) file. Sorbet
 will not see it and this error will be raised. In that case you will need to
 either raise the `typed` sigil of that file above `ignore`, or generate an
-[rbi file](rbi) that contains signatures for the classes and methods that file
+[RBI file](rbi) that contains signatures for the classes and methods that file
 defines.
 
 ## 5036
