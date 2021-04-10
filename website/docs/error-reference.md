@@ -446,13 +446,18 @@ intent to create a new type alias.)
 
 ## 5035
 
-> Method \_ is marked override but does not override anything
+A method was marked `override`, but sorbet was unable to find a method in the
+class's ancestors that would be overridden. Ensure that the method being
+overridden exists in the ancestors of the class defining the `override` method,
+or remove `override` from the signature that's raising the error. See
+[Override Checking](override-checking) for more information about `override`.
 
-No corresponding `overridable` was found.
-
-- Check the ancestors of the class defining the `override`.
-- Check that the file defining the `overridable` method has a sigil greater than
-  `ignore`.
+If the method exists in a
+[`# typed: ignore`](static#file-level-granularity-strictness-levels) file sorbet
+will not see it and this error will be raised. In that case you will need to
+either raise the `typed` sigil of that file above `ignore`, or generate an
+[rbi file](rbi) that contains signatures for the classes and methods that file
+defines.
 
 ## 5036
 
