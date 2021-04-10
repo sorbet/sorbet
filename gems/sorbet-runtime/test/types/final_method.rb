@@ -125,6 +125,25 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be redefined$/, err.message)
   end
 
+  it "forbids redefinition with .checked(:never)" do
+    err = assert_raises(RuntimeError) do
+      c = Class.new do
+        extend T::Sig
+        sig (:final) {void.checked(:never)}
+        def self.foo; end
+      end
+
+      c.foo
+
+      Class.new(c) do
+        sig {returns(Integer)}
+        def self.foo
+          10
+        end
+      end
+    end
+  end
+
   it "allows redefining a regular instance method to be final" do
     Class.new do
       extend T::Sig
