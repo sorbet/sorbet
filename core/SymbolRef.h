@@ -853,6 +853,10 @@ public:
         return ClassOrModuleRef::fromRaw(85);
     }
 
+    static ClassOrModuleRef Thread() {
+        return ClassOrModuleRef::fromRaw(86);
+    }
+
     static MethodRef Class_new() {
         return MethodRef::fromRaw(9);
     }
@@ -887,7 +891,7 @@ public:
     static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 36;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
-    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 97;
+    static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 98;
 };
 
 template <typename H> H AbslHashValue(H h, const SymbolRef &m) {

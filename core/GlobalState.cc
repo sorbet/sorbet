@@ -458,6 +458,9 @@ void GlobalState::initEmpty() {
     id = synthesizeClass(core::Names::Constants::Encoding());
     ENFORCE(id == Symbols::Encoding());
 
+    id = synthesizeClass(core::Names::Constants::Thread());
+    ENFORCE(id == Symbols::Thread());
+
     // Class#new
     method = enterMethod(*this, Symbols::Class(), Names::new_()).repeatedArg(Names::args()).build();
     ENFORCE(method == Symbols::Class_new());
