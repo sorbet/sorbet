@@ -479,6 +479,7 @@ NameDef names[] = {
     {"AttachedClass", "<AttachedClass>", true},
     {"NonForcingConstants", "NonForcingConstants", true},
     {"VERSION", "VERSION", true},
+    {"Thread", "Thread", true},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
