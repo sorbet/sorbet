@@ -53,66 +53,6 @@ inline unsigned int hashNameRef(const GlobalState &gs, NameRef nref) {
     }
 }
 
-} // namespace
-
-ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
-    // This can't use enterClass since there is a chicken and egg problem.
-    // These will be added to Symbols::root().members later.
-    ClassOrModuleRef symRef = ClassOrModuleRef(*this, classAndModules.size());
-    classAndModules.emplace_back();
-    SymbolData data = symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
-    data->name = nameId;
-    data->owner = Symbols::root();
-    data->flags = 0;
-    data->setClassOrModule();
-    data->setIsModule(isModule);
-    data->setSuperClass(ClassOrModuleRef(*this, superclass));
-
-    if (symRef.id() > Symbols::root().id()) {
-        Symbols::root().data(*this)->members()[nameId] = symRef;
-    }
-    return symRef;
-}
-
-atomic<int> globalStateIdCounter(1);
-const int Symbols::MAX_PROC_ARITY;
-
-GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
-    : GlobalState(move(errorQueue), make_shared<lsp::TypecheckEpochManager>()) {}
-
-GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager)
-    : GlobalState(move(errorQueue), move(epochManager), globalStateIdCounter.fetch_add(1)) {}
-
-GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager,
-                         int globalStateId)
-    : globalStateId(globalStateId), errorQueue(std::move(errorQueue)), lspQuery(lsp::Query::noQuery()),
-      epochManager(move(epochManager)) {
-    // Reserve memory in internal vectors for the contents of payload.
-    utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
-    constantNames.reserve(PAYLOAD_MAX_CONSTANT_NAME_COUNT);
-    uniqueNames.reserve(PAYLOAD_MAX_UNIQUE_NAME_COUNT);
-    classAndModules.reserve(PAYLOAD_MAX_CLASS_AND_MODULE_COUNT);
-    methods.reserve(PAYLOAD_MAX_METHOD_COUNT);
-    fields.reserve(PAYLOAD_MAX_FIELD_COUNT);
-    typeArguments.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
-    typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
-
-    int namesByHashSize = nextPowerOfTwo(
-        2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
-    namesByHash.resize(namesByHashSize);
-    ENFORCE((namesByHashSize & (namesByHashSize - 1)) == 0, "namesByHashSize is not a power of 2");
-}
-
-unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logger &logger) {
-    // Note: Private constructor.
-    unique_ptr<GlobalState> rv(
-        new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
-                        make_shared<lsp::TypecheckEpochManager>(), -1));
-    rv->initEmpty();
-    rv->silenceErrors = true;
-    return rv;
-}
-
 struct MethodBuilder {
     GlobalState &gs;
     MethodRef method;
@@ -184,6 +124,66 @@ struct MethodBuilder {
 
 MethodBuilder def(GlobalState &gs, ClassOrModuleRef klass, NameRef name) {
     return MethodBuilder{gs, gs.enterMethodSymbol(Loc::none(), klass, name)};
+}
+
+} // namespace
+
+ClassOrModuleRef GlobalState::synthesizeClass(NameRef nameId, u4 superclass, bool isModule) {
+    // This can't use enterClass since there is a chicken and egg problem.
+    // These will be added to Symbols::root().members later.
+    ClassOrModuleRef symRef = ClassOrModuleRef(*this, classAndModules.size());
+    classAndModules.emplace_back();
+    SymbolData data = symRef.dataAllowingNone(*this); // allowing noSymbol is needed because this enters noSymbol.
+    data->name = nameId;
+    data->owner = Symbols::root();
+    data->flags = 0;
+    data->setClassOrModule();
+    data->setIsModule(isModule);
+    data->setSuperClass(ClassOrModuleRef(*this, superclass));
+
+    if (symRef.id() > Symbols::root().id()) {
+        Symbols::root().data(*this)->members()[nameId] = symRef;
+    }
+    return symRef;
+}
+
+atomic<int> globalStateIdCounter(1);
+const int Symbols::MAX_PROC_ARITY;
+
+GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
+    : GlobalState(move(errorQueue), make_shared<lsp::TypecheckEpochManager>()) {}
+
+GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager)
+    : GlobalState(move(errorQueue), move(epochManager), globalStateIdCounter.fetch_add(1)) {}
+
+GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager,
+                         int globalStateId)
+    : globalStateId(globalStateId), errorQueue(std::move(errorQueue)), lspQuery(lsp::Query::noQuery()),
+      epochManager(move(epochManager)) {
+    // Reserve memory in internal vectors for the contents of payload.
+    utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
+    constantNames.reserve(PAYLOAD_MAX_CONSTANT_NAME_COUNT);
+    uniqueNames.reserve(PAYLOAD_MAX_UNIQUE_NAME_COUNT);
+    classAndModules.reserve(PAYLOAD_MAX_CLASS_AND_MODULE_COUNT);
+    methods.reserve(PAYLOAD_MAX_METHOD_COUNT);
+    fields.reserve(PAYLOAD_MAX_FIELD_COUNT);
+    typeArguments.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
+    typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
+
+    int namesByHashSize = nextPowerOfTwo(
+        2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
+    namesByHash.resize(namesByHashSize);
+    ENFORCE((namesByHashSize & (namesByHashSize - 1)) == 0, "namesByHashSize is not a power of 2");
+}
+
+unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logger &logger) {
+    // Note: Private constructor.
+    unique_ptr<GlobalState> rv(
+        new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
+                        make_shared<lsp::TypecheckEpochManager>(), -1));
+    rv->initEmpty();
+    rv->silenceErrors = true;
+    return rv;
 }
 
 void GlobalState::initEmpty() {
