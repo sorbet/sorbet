@@ -134,6 +134,11 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
         case core::Names::createdProp().rawId():
+            ret.name = core::Names::created();
+            // 5 is the length of the _prop suffix
+            ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
+            ret.type = ast::MK::Constant(send->loc, core::Symbols::Float());
+            break;
         case core::Names::updatedProp().rawId(): {
             ret.name = send->fun == core::Names::createdProp() ? core::Names::created() : core::Names::updated();
             // 5 is the length of the _prop suffix

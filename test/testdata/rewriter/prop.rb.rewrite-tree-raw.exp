@@ -6875,15 +6875,9 @@ ClassDef{
               block = nullptr
               pos_args = 1
               args = [
-                UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U Chalk>>
-                    }
-                    cnst = <C <U ODM>>
-                  }
-                  cnst = <C <U DeprecatedNumeric>>
+                ConstantLit{
+                  orig = nullptr
+                  symbol = (class ::Float)
                 }
               ]
             }
@@ -6978,15 +6972,9 @@ ClassDef{
                 pos_args = 0
                 args = [
                   Literal{ value = :arg0 }
-                  UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = UnresolvedConstantLit{
-                        scope = EmptyTree
-                        cnst = <C <U Chalk>>
-                      }
-                      cnst = <C <U ODM>>
-                    }
-                    cnst = <C <U DeprecatedNumeric>>
+                  ConstantLit{
+                    orig = nullptr
+                    symbol = (class ::Float)
                   }
                 ]
               }
@@ -6994,15 +6982,9 @@ ClassDef{
               block = nullptr
               pos_args = 1
               args = [
-                UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U Chalk>>
-                    }
-                    cnst = <C <U ODM>>
-                  }
-                  cnst = <C <U DeprecatedNumeric>>
+                ConstantLit{
+                  orig = nullptr
+                  symbol = (class ::Float)
                 }
               ]
             }
@@ -7498,15 +7480,9 @@ ClassDef{
               block = nullptr
               pos_args = 1
               args = [
-                UnresolvedConstantLit{
-                  scope = UnresolvedConstantLit{
-                    scope = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <C <U Chalk>>
-                    }
-                    cnst = <C <U ODM>>
-                  }
-                  cnst = <C <U DeprecatedNumeric>>
+                ConstantLit{
+                  orig = nullptr
+                  symbol = (class ::Float)
                 }
               ]
             }
@@ -8658,30 +8634,6 @@ ClassDef{
         }
         Literal{ value = :main }
         Literal{ value = :normal }
-      ]
-    }
-
-    ClassDef{
-      kind = module
-      name = UnresolvedConstantLit{
-        scope = UnresolvedConstantLit{
-          scope = EmptyTree
-          cnst = <C <U Chalk>>
-        }
-        cnst = <C <U ODM>>
-      }<<C <U <todo sym>>>>
-      ancestors = []
-      rhs = [
-        Assign{
-          lhs = UnresolvedConstantLit{
-            scope = EmptyTree
-            cnst = <C <U DeprecatedNumeric>>
-          }
-          rhs = UnresolvedConstantLit{
-            scope = EmptyTree
-            cnst = <C <U Numeric>>
-          }
-        }
       ]
     }
   ]

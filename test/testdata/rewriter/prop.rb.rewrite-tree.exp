@@ -701,7 +701,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.returns(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>)
+      <self>.returns(::Float)
     end
 
     def created<<todo method>>(&<blk>)
@@ -712,7 +712,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.params(:arg0, <emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>).returns(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>)
+      <self>.params(:arg0, ::Float).returns(::Float)
     end
 
     def created=<<todo method>>(arg0, &<blk>)
@@ -781,7 +781,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
-      <self>.returns(<emptyTree>::<C Chalk>::<C ODM>::<C DeprecatedNumeric>)
+      <self>.returns(::Float)
     end
 
     def created<<todo method>>(&<blk>)
@@ -904,8 +904,4 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::Sorbet::Private::Static.keep_def(<self>, :main, :normal)
-
-  module <emptyTree>::<C Chalk>::<C ODM><<C <todo sym>>> < ()
-    <emptyTree>::<C DeprecatedNumeric> = <emptyTree>::<C Numeric>
-  end
 end
