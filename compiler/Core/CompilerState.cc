@@ -74,6 +74,13 @@ llvm::FunctionType *CompilerState::getSorbetIntrinsicFFIType() {
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
+llvm::FunctionType *CompilerState::getInlineForwarderType() {
+    llvm::Type *args[] = {
+        llvm::Type::getInt64Ty(lctx), // VALUE val
+    };
+    return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
+}
+
 llvm::Function *CompilerState::getFunction(llvm::StringRef name) const {
     llvm::Function *f = module->getFunction(name);
     ENFORCE(f, "could not find {} in the payload", name.str());

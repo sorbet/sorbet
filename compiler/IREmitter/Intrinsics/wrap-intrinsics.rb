@@ -624,7 +624,7 @@ module Intrinsics
         if should_wrap?(method)
           header << "    {core::Symbols::#{method.klass}(), "
           header << "\"#{method.rb_name}\", "
-          header << "\"#{method.sorbet_payload_wrapper_name}\", Intrinsics::HandleBlock::Unhandled},\n"
+          header << "\"#{method.sorbet_payload_wrapper_name}\"},\n"
         end
       end
       header << "    // clang-format on\n"

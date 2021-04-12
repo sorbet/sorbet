@@ -20,6 +20,8 @@
 
 typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, const VALUE *args, VALUE blockArg);
 typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE *iseq_encoded, VALUE closure);
+typedef VALUE (*BlockConsumerFFIType)(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk,
+                                      const struct rb_captured_block *captured, VALUE closure);
 
 // compiler is closely aware of layout of this struct
 struct FunctionInlineCache {
@@ -64,6 +66,7 @@ SORBET_ALIVE(VALUE, sorbet_setConstant, (VALUE mod, const char *name, long nameL
 SORBET_ALIVE(const VALUE, sorbet_readRealpath, (void));
 SORBET_ALIVE(void, sorbet_pushCfuncFrame, (struct FunctionInlineCache *, VALUE));
 SORBET_ALIVE(void, sorbet_pushStaticInitFrame, (VALUE));
+SORBET_ALIVE(void, sorbet_pushBlockFrame, (const struct rb_captured_block *));
 SORBET_ALIVE(void, sorbet_popRubyStack, (void));
 
 SORBET_ALIVE(void, sorbet_vm_env_write_slowpath, (const VALUE *, int, VALUE));
@@ -650,6 +653,41 @@ VALUE sorbet_rb_array_square_br(VALUE recv, ID fun, int argc, const VALUE *const
     return sorbet_rb_array_square_br_slowpath(recv, fun, argc, argv, blk, closure);
 }
 
+static VALUE sorbet_array_enum_length(VALUE recv, VALUE args, VALUE eobj) {
+    long len = RARRAY_LEN(recv);
+    return LONG2NUM(len);
+}
+
+// This is the no-block version of rb_ary_each: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L2128-L2138
+// In that version, the `RETURN_SIZED_ENUMERATOR` macro is what causes the early return when a block is not passed. In
+// this case, we know that the block wasn't passed, so we always return an enumerator
+SORBET_INLINE
+VALUE sorbet_rb_array_each(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                           VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_array_enum_length);
+}
+
+// This is the block version of rb_ary_each: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L2128-L2138
+// In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
+SORBET_INLINE
+VALUE sorbet_rb_array_each_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                     const struct rb_captured_block *captured, VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    for (int i = 0; i < RARRAY_LEN(recv); ++i) {
+        VALUE val = RARRAY_AREF(recv, i);
+        blk(val, closure, 1, &val, Qnil);
+    }
+
+    sorbet_popRubyStack();
+
+    return recv;
+}
+
 // This is an adjusted version of the intrinsic from the ruby vm. The major change is that instead of handling the case
 // where a range is used as the key, we defer back to the VM.
 // https://github.com/ruby/ruby/blob/ruby_2_6/array.c#L1980-L2005
@@ -838,6 +876,61 @@ VALUE sorbet_rb_int_to_s(VALUE x, ID fun, int argc, const VALUE *const restrict 
     }
 
     return rb_any_to_s(x);
+}
+
+static VALUE sorbet_int_dotimes_size(VALUE num, VALUE args, VALUE eobj) {
+    if (FIXNUM_P(num)) {
+        if (NUM2LONG(num) <= 0)
+            return INT2FIX(0);
+    } else {
+        if (RTEST(rb_funcall(num, '<', 1, INT2FIX(0))))
+            return INT2FIX(0);
+    }
+    return num;
+}
+
+// This is the enumerator version of `rb_int_dotimes`: https://github.com/ruby/ruby/blob/ruby_2_7/numeric.c#L5196-L5219
+// `RETURN_SIZED_ENUMERATOR` is what causes the early return in that version when no block is passed, but here we know
+// that no block is passed and unconditionally make the enumerator.
+SORBET_INLINE
+VALUE sorbet_rb_int_dotimes(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                            VALUE closure) {
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_int_dotimes_size);
+}
+
+// This is the looping version of `rb_int_dotimes`: https://github.com/ruby/ruby/blob/ruby_2_7/numeric.c#L5196-L5219
+// The implementation is very similar, but we call the block function directly instead of using `rb_yield` to aid
+// inlining.
+SORBET_INLINE
+VALUE sorbet_rb_int_dotimes_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                      const struct rb_captured_block *captured, VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+
+    sorbet_pushBlockFrame(captured);
+
+    if (LIKELY(FIXNUM_P(recv))) {
+        long i, end;
+
+        end = FIX2LONG(recv);
+        for (i = 0; i < end; i++) {
+            VALUE val = LONG2FIX(i);
+            blk(val, closure, 1, &val, Qnil);
+        }
+    } else {
+        VALUE i = INT2FIX(0);
+
+        for (;;) {
+            if (!RTEST(rb_funcall(i, '<', 1, recv)))
+                break;
+            VALUE val = LONG2FIX(i);
+            blk(val, closure, 1, &val, Qnil);
+            i = rb_funcall(i, '+', 1, INT2FIX(1));
+        }
+    }
+
+    sorbet_popRubyStack();
+
+    return recv;
 }
 
 // ****
@@ -1123,6 +1216,49 @@ VALUE sorbet_callStaticInitDirect(VALUE (*methodPtr)(int, VALUE *, VALUE), int a
     VALUE res = methodPtr(argc, argv, recv);
     sorbet_popRubyStack();
     return res;
+}
+
+struct sorbet_inlineIntrinsicEnv {
+    VALUE recv;
+    ID fun;
+    int argc;
+    VALUE *argv;
+    VALUE closure;
+};
+
+// This function should always inline, as it will be the body of the functions generated by the `CallCMethod`
+// symbol-based intrinsic method when a block handling function is provided. The body will always be given the intrinsic
+// and block function directly, so this will turn into a direct call to the intrinsic since LLVM will inline this
+// function.
+SORBET_INLINE
+VALUE sorbet_inlineIntrinsicEnv_apply(VALUE value, BlockConsumerFFIType intrinsic, BlockFFIType blk) {
+    // fetch the captured block so that it's available for the intrinsic to push a frame
+    rb_execution_context_t *ec = GET_EC();
+    VALUE block_handler = ec->passed_block_handler;
+    const struct rb_captured_block *captured = VM_BH_TO_IFUNC_BLOCK(block_handler);
+
+    // It's important that we clear out the passed block handler state in the execution context:
+    // https://github.com/ruby/ruby/blob/ruby_2_7/vm.c#L203-L210
+    ec->passed_block_handler = VM_BLOCK_HANDLER_NONE;
+
+    struct sorbet_inlineIntrinsicEnv *env = (struct sorbet_inlineIntrinsicEnv *)value;
+    return intrinsic(env->recv, env->fun, env->argc, env->argv, blk, captured, env->closure);
+}
+
+SORBET_INLINE
+VALUE sorbet_callIntrinsicInlineBlock(VALUE (*body)(VALUE), VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk,
+                                      VALUE closure) {
+    struct sorbet_inlineIntrinsicEnv env;
+    env.recv = recv;
+    env.fun = fun;
+    env.argc = argc;
+    env.argv = argv;
+    env.closure = closure;
+
+    // NOTE: we pass the block function to rb_iterate so that we ensure that the block handler is setup correctly.
+    // However it won't be called through the vm, as that would hide the direct call to the block function from the
+    // inliner.
+    return rb_iterate(body, (VALUE)&env, blk, closure);
 }
 
 unsigned int sorbet_vmCallKwarg() {

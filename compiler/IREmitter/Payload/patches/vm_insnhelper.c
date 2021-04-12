@@ -51,6 +51,12 @@ void sorbet_pushCfuncFrame(struct FunctionInlineCache *cache, VALUE recv) {
     vm_push_frame(ec, NULL, frame_type, recv, block_handler, (VALUE)me, 0, ec->cfp->sp, 0, 0);
 }
 
+void sorbet_pushBlockFrame(const struct rb_captured_block *captured) {
+    rb_execution_context_t *ec = GET_EC();
+    vm_push_frame(ec, (const rb_iseq_t *)captured->code.ifunc, VM_FRAME_MAGIC_IFUNC | VM_FRAME_FLAG_CFRAME,
+                  captured->self, VM_GUARDED_PREV_EP(captured->ep), (VALUE)NULL, 0, ec->cfp->sp, 0, 0);
+}
+
 void sorbet_popRubyStack() {
     rb_execution_context_t *ec = GET_EC();
     vm_pop_frame(ec, ec->cfp, ec->cfp->ep);

@@ -19,6 +19,7 @@
 #include "compiler/IREmitter/Payload.h"
 #include "compiler/IREmitter/SymbolBasedIntrinsicMethod.h"
 #include "compiler/Names/Names.h"
+#include <optional>
 #include <string_view>
 
 using namespace std;
@@ -47,11 +48,48 @@ protected:
     core::ClassOrModuleRef rubyClass;
     string_view rubyMethod;
     string cMethod;
+    optional<string> cMethodWithBlock;
+
+private:
+    // Generate a one-off function that looks like the following:
+    //
+    // > define VALUE @<fresh-name>(VALUE %env) {
+    // >     VALUE %res = call @sorbet_inlineIntrinsicEnv_apply(%env, @cMethod, %blkArg)
+    // >     ret VALUE %res
+    // > }
+    llvm::Function *generateForwarder(MethodCallContext &mcctx) const {
+        ENFORCE(cMethodWithBlock != "");
+
+        auto &cs = mcctx.cs;
+        auto &builder = builderCast(mcctx.build);
+
+        // function signature
+        auto linkage = llvm::Function::InternalLinkage;
+        llvm::Twine name{"forward_" + llvm::Twine{cMethod}};
+        auto *fn = llvm::Function::Create(cs.getInlineForwarderType(), linkage, name, cs.module);
+        auto *env = fn->arg_begin();
+
+        // function body
+        auto *entry = llvm::BasicBlock::Create(cs, "entry", fn);
+        auto ip = builder.saveIP();
+        builder.SetInsertPoint(entry);
+        auto *cfunc = cs.module->getFunction(*cMethodWithBlock);
+        auto *result = builder.CreateCall(cs.module->getFunction("sorbet_inlineIntrinsicEnv_apply"),
+                                          {env, cfunc, mcctx.blk}, "result");
+        builder.CreateRet(result);
+        builder.restoreIP(ip);
+
+        return fn;
+    }
 
 public:
-    CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod,
-                Intrinsics::HandleBlock handleBlocks)
-        : SymbolBasedIntrinsicMethod(handleBlocks), rubyClass(rubyClass), rubyMethod(rubyMethod), cMethod(cMethod){};
+    CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod)
+        : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled), rubyClass(rubyClass), rubyMethod(rubyMethod),
+          cMethod(cMethod), cMethodWithBlock(){};
+
+    CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod, string cMethodWithBlock)
+        : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled), rubyClass(rubyClass), rubyMethod(rubyMethod),
+          cMethod(cMethod), cMethodWithBlock(cMethodWithBlock){};
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         auto &cs = mcctx.cs;
@@ -59,20 +97,31 @@ public:
         auto *send = mcctx.send;
         auto rubyBlockId = mcctx.rubyBlockId;
 
-        auto [argc, argv, _] = IREmitterHelpers::fillSendArgArray(mcctx);
-
-        auto recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, rubyBlockId);
-        llvm::Value *blkPtr;
-        if (mcctx.blk != nullptr) {
-            blkPtr = mcctx.blk;
-        } else {
-            blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
-        }
-
+        auto *recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, rubyBlockId);
+        auto *id = Payload::idIntern(cs, builder, send->fun.shortName(cs));
         auto *offset = Payload::buildLocalsOffset(cs);
 
-        auto fun = Payload::idIntern(cs, builder, send->fun.shortName(cs));
-        return builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, offset}, "rawSendResult");
+        // kwsplat is used by the vm only, and we don't use the vm's api for calling an intrinsic directly.
+        auto [argc, argv, _kwSplat] = IREmitterHelpers::fillSendArgArray(mcctx);
+
+        llvm::Value *res{nullptr};
+        if (mcctx.blk != nullptr) {
+            if (!cMethodWithBlock.has_value()) {
+                core::Loc loc{mcctx.irctx.cfg.file, send->argLocs.back()};
+                compiler::failCompilation(cs, loc, "Unable to handle a block with this intrinsic");
+            }
+            auto *forwarder = generateForwarder(mcctx);
+
+            // The ruby stack doens't need to be managed here because the known c intrinsics don't expect to be called
+            // by the vm.
+            res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
+                                     {forwarder, recv, id, argc, argv, mcctx.blk, offset}, "rawSendResultWithBlock");
+        } else {
+            auto *blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
+            res = builder.CreateCall(cs.getFunction(cMethod), {recv, id, argc, argv, blkPtr, offset}, "rawSendResult");
+        }
+
+        return res;
     };
 
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
@@ -328,9 +377,12 @@ public:
 
 class CallCMethodSingleton : public CallCMethod {
 public:
+    CallCMethodSingleton(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod)
+        : CallCMethod(rubyClass, rubyMethod, cMethod){};
+
     CallCMethodSingleton(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod,
-                         Intrinsics::HandleBlock handleBlocks)
-        : CallCMethod(rubyClass, rubyMethod, cMethod, handleBlocks){};
+                         string cMethodWithBlock)
+        : CallCMethod(rubyClass, rubyMethod, cMethod, cMethodWithBlock){};
 
     virtual InlinedVector<core::ClassOrModuleRef, 2> applicableClasses(const core::GlobalState &gs) const override {
         return {rubyClass.data(gs)->lookupSingletonClass(gs)};
@@ -338,35 +390,37 @@ public:
 };
 
 static const vector<CallCMethod> knownCMethodsInstance{
-    {core::Symbols::Array(), "[]", "sorbet_rb_array_square_br", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Array(), "[]=", "sorbet_rb_array_square_br_eq", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Array(), "empty?", "sorbet_rb_array_empty", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Array(), "size", "sorbet_rb_array_len", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::TrueClass(), "|", "sorbet_int_bool_true", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::TrueClass(), "&", "sorbet_int_bool_and", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::FalseClass(), "&", "sorbet_int_bool_false", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::TrueClass(), "^", "sorbet_int_bool_nand", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::FalseClass(), "^", "sorbet_int_bool_and", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), "+", "sorbet_rb_int_plus", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), "-", "sorbet_rb_int_minus", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), "*", "sorbet_rb_int_mul", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), "/", "sorbet_rb_int_div", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), ">", "sorbet_rb_int_gt", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), "<", "sorbet_rb_int_lt", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), ">=", "sorbet_rb_int_ge", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), "<=", "sorbet_rb_int_le", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), "to_s", "sorbet_rb_int_to_s", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), "==", "sorbet_rb_int_equal", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::Array(), "[]", "sorbet_rb_array_square_br"},
+    {core::Symbols::Array(), "[]=", "sorbet_rb_array_square_br_eq"},
+    {core::Symbols::Array(), "empty?", "sorbet_rb_array_empty"},
+    {core::Symbols::Array(), "each", "sorbet_rb_array_each", "sorbet_rb_array_each_withBlock"},
+    {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br"},
+    {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq"},
+    {core::Symbols::Array(), "size", "sorbet_rb_array_len"},
+    {core::Symbols::TrueClass(), "|", "sorbet_int_bool_true"},
+    {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and"},
+    {core::Symbols::TrueClass(), "&", "sorbet_int_bool_and"},
+    {core::Symbols::FalseClass(), "&", "sorbet_int_bool_false"},
+    {core::Symbols::TrueClass(), "^", "sorbet_int_bool_nand"},
+    {core::Symbols::FalseClass(), "^", "sorbet_int_bool_and"},
+    {core::Symbols::Integer(), "+", "sorbet_rb_int_plus"},
+    {core::Symbols::Integer(), "-", "sorbet_rb_int_minus"},
+    {core::Symbols::Integer(), "*", "sorbet_rb_int_mul"},
+    {core::Symbols::Integer(), "/", "sorbet_rb_int_div"},
+    {core::Symbols::Integer(), ">", "sorbet_rb_int_gt"},
+    {core::Symbols::Integer(), "<", "sorbet_rb_int_lt"},
+    {core::Symbols::Integer(), ">=", "sorbet_rb_int_ge"},
+    {core::Symbols::Integer(), "<=", "sorbet_rb_int_le"},
+    {core::Symbols::Integer(), "to_s", "sorbet_rb_int_to_s"},
+    {core::Symbols::Integer(), "==", "sorbet_rb_int_equal"},
+    {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq"},
+    {core::Symbols::Integer(), "times", "sorbet_rb_int_dotimes", "sorbet_rb_int_dotimes_withBlock"},
 #include "WrappedIntrinsics.h"
 };
 
 static const vector<CallCMethodSingleton> knownCMethodsSingleton{
-    {core::Symbols::T(), "unsafe", "sorbet_T_unsafe", Intrinsics::HandleBlock::Unhandled},
-    {core::Symbols::T(), "must", "sorbet_T_must", Intrinsics::HandleBlock::Unhandled},
+    {core::Symbols::T(), "unsafe", "sorbet_T_unsafe"},
+    {core::Symbols::T(), "must", "sorbet_T_must"},
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {

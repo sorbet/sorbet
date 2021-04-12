@@ -79,8 +79,8 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 @ruby_current_execution_context_ptr = external local_unnamed_addr global %struct.rb_execution_context_struct*, align 8
 @ruby_vm_global_constant_state = external local_unnamed_addr global i64, align 8
 @rb_eRuntimeError = external local_unnamed_addr global i64, align 8
-@.str.7 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
-@.str.8 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
+@.str.8 = private unnamed_addr constant [95 x i8] c"sorbet_getBuildSCMRevision: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
+@.str.9 = private unnamed_addr constant [93 x i8] c"sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.\00", align 1
 @"stackFramePrecomputed_func_<root>.<static-init>$152" = internal unnamed_addr global i8* null, align 8
 @"rubyIdPrecomputed_<top (required)>" = internal unnamed_addr global i64 0, align 8
 @"str_<top (required)>" = private unnamed_addr constant [17 x i8] c"<top (required)>\00", align 1
@@ -187,10 +187,10 @@ declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #2
 ; Function Attrs: noreturn
 declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #1
 
+declare i64 @rb_int2big(i64) local_unnamed_addr #2
+
 ; Function Attrs: nounwind readnone speculatable
 declare { i64, i1 } @llvm.sadd.with.overflow.i64(i64, i64) #3
-
-declare i64 @rb_int2big(i64) local_unnamed_addr #2
 
 declare i64 @rb_yield_values_kw(i32, i64*, i32) local_unnamed_addr #2
 
@@ -210,14 +210,14 @@ declare i64 @rb_iterate(i64 (i64)*, i64, i64 (i64, i64, i32, i64*, i64)*, i64) l
 ; Function Attrs: nounwind ssp uwtable
 define weak i32 @sorbet_getIsReleaseBuild() local_unnamed_addr #4 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !13
-  tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* getelementptr inbounds ([93 x i8], [93 x i8]* @.str.8, i64 0, i64 0)) #12
+  tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* getelementptr inbounds ([93 x i8], [93 x i8]* @.str.9, i64 0, i64 0)) #12
   unreachable
 }
 
 ; Function Attrs: nounwind ssp uwtable
 define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #4 {
   %1 = load i64, i64* @rb_eRuntimeError, align 8, !tbaa !13
-  tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* getelementptr inbounds ([95 x i8], [95 x i8]* @.str.7, i64 0, i64 0)) #12
+  tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* getelementptr inbounds ([95 x i8], [95 x i8]* @.str.8, i64 0, i64 0)) #12
   unreachable
 }
 
@@ -577,9 +577,9 @@ sorbet_getMethodBlockAsProc.exit:                 ; preds = %fillRequiredArgs, %
   %28 = and i64 %rawArg_x, -9, !dbg !71
   %29 = icmp eq i64 %28, 0, !dbg !71
   %30 = or i1 %27, %29, !dbg !71
-  br i1 %30, label %codeRepl, label %sorbet_isa_Integer.exit29, !dbg !71, !prof !73
+  br i1 %30, label %codeRepl, label %sorbet_isa_Integer.exit28, !dbg !71, !prof !73
 
-sorbet_isa_Integer.exit29:                        ; preds = %25
+sorbet_isa_Integer.exit28:                        ; preds = %25
   %31 = inttoptr i64 %rawArg_x to %struct.iseq_inline_iv_cache_entry*, !dbg !71
   %32 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %31, i64 0, i32 0, !dbg !71
   %33 = load i64, i64* %32, align 8, !dbg !71, !tbaa !35
@@ -587,12 +587,12 @@ sorbet_isa_Integer.exit29:                        ; preds = %25
   %35 = icmp eq i64 %34, 10, !dbg !71
   br i1 %35, label %typeTestSuccess, label %codeRepl, !dbg !71, !prof !74
 
-typeTestSuccess:                                  ; preds = %sorbet_getMethodBlockAsProc.exit, %sorbet_isa_Integer.exit29
+typeTestSuccess:                                  ; preds = %sorbet_getMethodBlockAsProc.exit, %sorbet_isa_Integer.exit28
   %36 = tail call i32 @rb_block_given_p() #10, !dbg !75
   %37 = icmp eq i32 %36, 0, !dbg !75
-  br i1 %37, label %codeRepl32, label %typeTestSuccess7, !dbg !75, !prof !72
+  br i1 %37, label %codeRepl31, label %typeTestSuccess7, !dbg !75, !prof !72
 
-codeRepl:                                         ; preds = %sorbet_isa_Integer.exit29, %25
+codeRepl:                                         ; preds = %sorbet_isa_Integer.exit28, %25
   tail call fastcc void @"func_Foo#bar.cold.1"(i64 %rawArg_x) #13, !dbg !71
   unreachable
 
@@ -635,7 +635,7 @@ sorbet_rb_int_plus.exit:                          ; preds = %48, %43, %52
   %60 = and i64 %54, -9
   %61 = icmp eq i64 %60, 0
   %62 = or i1 %59, %61
-  br i1 %62, label %codeRepl33, label %sorbet_isa_Integer.exit, !prof !73
+  br i1 %62, label %codeRepl32, label %sorbet_isa_Integer.exit, !prof !73
 
 sorbet_isa_Integer.exit:                          ; preds = %57
   %63 = inttoptr i64 %54 to %struct.iseq_inline_iv_cache_entry*
@@ -643,16 +643,16 @@ sorbet_isa_Integer.exit:                          ; preds = %57
   %65 = load i64, i64* %64, align 8, !tbaa !35
   %66 = and i64 %65, 31
   %67 = icmp eq i64 %66, 10
-  br i1 %67, label %typeTestSuccess17, label %codeRepl33, !prof !74
+  br i1 %67, label %typeTestSuccess17, label %codeRepl32, !prof !74
 
-codeRepl32:                                       ; preds = %typeTestSuccess
+codeRepl31:                                       ; preds = %typeTestSuccess
   tail call fastcc void @"func_Foo#bar.cold.2"(i64 %22) #13, !dbg !75
   unreachable
 
 typeTestSuccess17:                                ; preds = %sorbet_rb_int_plus.exit, %sorbet_isa_Integer.exit
   ret i64 %54
 
-codeRepl33:                                       ; preds = %sorbet_isa_Integer.exit, %57
+codeRepl32:                                       ; preds = %sorbet_isa_Integer.exit, %57
   tail call fastcc void @"func_Foo#bar.cold.3"(i64 %54) #13
   unreachable
 }
