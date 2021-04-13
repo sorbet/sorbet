@@ -5,6 +5,8 @@
 
 class Array
   include ::JSON::Ext::Generator::GeneratorMethods::Array
+  def deconstruct(); end
+
   def shelljoin(); end
 
   def to_h(); end
@@ -23,7 +25,7 @@ class BigDecimal
 end
 
 class BigDecimal
-  def self.ver(); end
+  def self.interpret_loosely(_); end
 end
 
 class Binding
@@ -1900,10 +1902,6 @@ class Class
   def json_creatable?(); end
 end
 
-class Delegator
-  RUBYGEMS_ACTIVATION_MONITOR = ::T.let(nil, ::T.untyped)
-end
-
 class DidYouMean::ClassNameChecker
   def class_name(); end
 
@@ -1916,6 +1914,13 @@ class DidYouMean::ClassNameChecker
   def scopes(); end
 end
 
+class DidYouMean::CorrectElement
+  def call(names, element); end
+end
+
+class DidYouMean::CorrectElement
+end
+
 module DidYouMean::Correctable
   def corrections(); end
 
@@ -1924,15 +1929,6 @@ module DidYouMean::Correctable
   def spell_checker(); end
 
   def to_s(); end
-end
-
-class DidYouMean::DeprecatedIgnoredCallers
-  def +(*_); end
-
-  def <<(*_); end
-end
-
-class DidYouMean::DeprecatedIgnoredCallers
 end
 
 module DidYouMean::Jaro
@@ -1967,7 +1963,10 @@ class DidYouMean::MethodNameChecker
 
   def method_names(); end
 
+  def names_to_exclude(); end
+
   def receiver(); end
+  RB_RESERVED_WORDS = ::T.let(nil, ::T.untyped)
 end
 
 class DidYouMean::NullChecker
@@ -1976,11 +1975,37 @@ class DidYouMean::NullChecker
   def initialize(*_); end
 end
 
+class DidYouMean::ParseDimensions
+  def call(); end
+
+  def initialize(dictionary, separator); end
+end
+
+class DidYouMean::ParseDimensions
+end
+
 class DidYouMean::PlainFormatter
   def message_for(corrections); end
 end
 
 class DidYouMean::PlainFormatter
+end
+
+class DidYouMean::TreeSpellChecker
+  def augment(); end
+
+  def correct(input); end
+
+  def dictionary(); end
+
+  def dimensions(); end
+
+  def initialize(dictionary:, separator: T.unsafe(nil), augment: T.unsafe(nil)); end
+
+  def separator(); end
+end
+
+class DidYouMean::TreeSpellChecker
 end
 
 class DidYouMean::VariableNameChecker
@@ -1997,13 +2022,25 @@ class DidYouMean::VariableNameChecker
   def method_names(); end
 
   def name(); end
-  RB_PREDEFINED_OBJECTS = ::T.let(nil, ::T.untyped)
+  RB_RESERVED_WORDS = ::T.let(nil, ::T.untyped)
 end
 
 module DidYouMean
+  def self.correct_error(error_class, spell_checker); end
+
   def self.formatter(); end
 
   def self.formatter=(formatter); end
+end
+
+class Dir
+  def children(); end
+
+  def each_child(); end
+end
+
+module Dir::Tmpname
+  UNUSABLE_CHARS = ::T.let(nil, ::T.untyped)
 end
 
 class Dir
@@ -2018,6 +2055,7 @@ end
 
 class Encoding
   def _dump(*_); end
+  CESU_8 = ::T.let(nil, ::T.untyped)
 end
 
 class Encoding::Converter
@@ -2029,17 +2067,63 @@ class Encoding
 end
 
 module Enumerable
+  def chain(*_); end
+
   def sum(*_); end
 end
 
 class Enumerator
+  def +(_); end
+
   def each_with_index(); end
+end
+
+class Enumerator::ArithmeticSequence
+  def begin(); end
+
+  def each(&blk); end
+
+  def end(); end
+
+  def exclude_end?(); end
+
+  def last(*_); end
+
+  def step(); end
+end
+
+class Enumerator::ArithmeticSequence
+end
+
+class Enumerator::Chain
+end
+
+class Enumerator::Chain
 end
 
 class Enumerator::Generator
   def each(*_, &blk); end
 
   def initialize(*_); end
+end
+
+class Enumerator::Lazy
+  def eager(); end
+end
+
+class Enumerator::Producer
+  def each(&blk); end
+end
+
+class Enumerator::Producer
+end
+
+class Enumerator::Yielder
+  def to_proc(); end
+end
+
+class Enumerator
+  def self.produce(*_); end
 end
 
 Errno::ECAPMODE = Errno::NOERROR
@@ -2049,6 +2133,10 @@ Errno::EDOOFUS = Errno::NOERROR
 Errno::EIPSEC = Errno::NOERROR
 
 Errno::ENOTCAPABLE = Errno::NOERROR
+
+module Etc
+  VERSION = ::T.let(nil, ::T.untyped)
+end
 
 class Etc::Group
   def gid(); end
@@ -2114,7 +2202,13 @@ class FalseClass
   include ::JSON::Ext::Generator::GeneratorMethods::FalseClass
 end
 
+class Fiber
+  def initialize(*_); end
+end
+
 class File
+  def self.absolute_path?(_); end
+
   def self.exists?(_); end
 end
 
@@ -2173,42 +2267,37 @@ class Foo
   def baz(); end
 end
 
+class FrozenError
+  def receiver(); end
+end
+
 module GC
-  def garbage_collect(*_); end
+  def garbage_collect(full_mark: T.unsafe(nil), immediate_mark: T.unsafe(nil), immediate_sweep: T.unsafe(nil)); end
+end
+
+module GC
+  def self.verify_transient_heap_internal_consistency(); end
 end
 
 module Gem
   ConfigMap = ::T.let(nil, ::T.untyped)
   RbConfigPriorities = ::T.let(nil, ::T.untyped)
-  RubyGemsPackageVersion = ::T.let(nil, ::T.untyped)
   RubyGemsVersion = ::T.let(nil, ::T.untyped)
-  USE_BUNDLER_FOR_GEMDEPS = ::T.let(nil, ::T.untyped)
+  UNTAINT = ::T.let(nil, ::T.untyped)
 end
 
 class Gem::Dependency
   def pretty_print(q); end
 end
 
-class Gem::DependencyInstaller
-  def _deprecated_gems_to_install(); end
-
-  def add_found_dependencies(to_do, dependency_list); end
-
-  def gather_dependencies(); end
-
-  def gems_to_install(*args, &block); end
-end
-
-Gem::DependencyResolver = Gem::Resolver
-
-class Gem::Ext::BuildError
+class Gem::Exception
+  extend ::Gem::Deprecate
 end
 
 class Gem::Ext::BuildError
 end
 
-class Gem::Ext::Builder
-  def self.redirector(); end
+class Gem::Ext::BuildError
 end
 
 class Gem::Ext::ExtConfBuilder
@@ -2217,13 +2306,9 @@ end
 Gem::Ext::ExtConfBuilder::FileEntry = FileUtils::Entry_
 
 class Gem::Ext::ExtConfBuilder
-  def self.build(extension, directory, dest_path, results, args=T.unsafe(nil), lib_dir=T.unsafe(nil)); end
+  def self.build(extension, dest_path, results, args=T.unsafe(nil), lib_dir=T.unsafe(nil)); end
 
   def self.get_relative_path(path); end
-end
-
-class Gem::Licenses
-  IDENTIFIERS = ::T.let(nil, ::T.untyped)
 end
 
 class Gem::List
@@ -2231,7 +2316,7 @@ class Gem::List
 end
 
 class Gem::Package
-  def realpath(file); end
+  def gem(); end
 end
 
 class Gem::Package::DigestIO
@@ -2341,6 +2426,7 @@ class Gem::Package::TarHeader
   def update_checksum(); end
 
   def version(); end
+  EMPTY_HEADER = ::T.let(nil, ::T.untyped)
   FIELDS = ::T.let(nil, ::T.untyped)
   PACK_FORMAT = ::T.let(nil, ::T.untyped)
   UNPACK_FORMAT = ::T.let(nil, ::T.untyped)
@@ -2348,6 +2434,8 @@ end
 
 class Gem::Package::TarHeader
   def self.from(stream); end
+
+  def self.oct_or_256based(str); end
 
   def self.strict_oct(str); end
 end
@@ -2375,13 +2463,17 @@ class Gem::Package::TarReader::Entry
 
   def initialize(header, io); end
 
+  def length(); end
+
   def pos(); end
 
   def read(len=T.unsafe(nil)); end
 
-  def readpartial(len=T.unsafe(nil)); end
+  def readpartial(maxlen=T.unsafe(nil), outbuf=T.unsafe(nil)); end
 
   def rewind(); end
+
+  def size(); end
 
   def symlink?(); end
 end
@@ -2399,6 +2491,8 @@ end
 
 class Gem::Package
   def self.new(gem, security_policy=T.unsafe(nil)); end
+
+  def self.raw_spec(path, security_policy=T.unsafe(nil)); end
 end
 
 class Gem::PathSupport
@@ -2411,18 +2505,8 @@ class Gem::PathSupport
   def spec_cache_dir(); end
 end
 
-class Gem::RemoteFetcher
-  def api_endpoint(uri); end
-
-  def correct_for_windows_path(path); end
-
-  def s3_expiration(); end
-
-  def sign_s3_url(uri, expiration=T.unsafe(nil)); end
-  BASE64_URI_TRANSLATE = ::T.let(nil, ::T.untyped)
-end
-
 class Gem::RemoteFetcher::FetchError
+  include ::Gem::UriParsing
   def initialize(message, uri); end
 
   def uri(); end
@@ -2449,8 +2533,6 @@ class Gem::RequestSet
   def pretty_print(q); end
 end
 
-Gem::RequestSet::GemDepedencyAPI = Gem::RequestSet::GemDependencyAPI
-
 class Gem::Requirement
   def pretty_print(q); end
 end
@@ -2464,8 +2546,6 @@ class Gem::Resolver::APISpecification
 end
 
 class Gem::Resolver::ActivationRequest
-  def others_possible?(); end
-
   def pretty_print(q); end
 end
 
@@ -2565,9 +2645,18 @@ end
 class Gem::RuntimeRequirementNotMetError
 end
 
-class Gem::Source
-  def api_uri(); end
+class Gem::Security::Signer
+  include ::Gem::UserInteraction
+  include ::Gem::DefaultUserInteraction
+  include ::Gem::Text
+  def options(); end
+end
 
+class Gem::Security::Signer
+  def self.re_sign_cert(expired_cert, expired_cert_path, private_key); end
+end
+
+class Gem::Source
   def pretty_print(q); end
 end
 
@@ -2607,25 +2696,50 @@ end
 class Gem::Specification
   include ::Bundler::MatchPlatform
   include ::Bundler::GemHelpers
-  def bundled_gem_in_old_ruby?(); end
-
   def pretty_print(q); end
 
-  def rubyforge_project(); end
+  def removed_method_calls(); end
 
   def to_ruby(); end
-
-  def warning(statement); end
+  REMOVED_METHODS = ::T.let(nil, ::T.untyped)
 end
 
 class Gem::Specification
-  extend ::Enumerable
   extend ::Gem::Deprecate
-  def self.add_spec(spec); end
+  extend ::Enumerable
+end
 
-  def self.add_specs(*specs); end
+class Gem::SpecificationPolicy
+  include ::Gem::UserInteraction
+  include ::Gem::DefaultUserInteraction
+  include ::Gem::Text
+  def initialize(specification); end
 
-  def self.remove_spec(spec); end
+  def packaging(); end
+
+  def packaging=(packaging); end
+
+  def validate(strict=T.unsafe(nil)); end
+
+  def validate_dependencies(); end
+
+  def validate_metadata(); end
+
+  def validate_permissions(); end
+  HOMEPAGE_URI_PATTERN = ::T.let(nil, ::T.untyped)
+  LAZY = ::T.let(nil, ::T.untyped)
+  LAZY_PATTERN = ::T.let(nil, ::T.untyped)
+  METADATA_LINK_KEYS = ::T.let(nil, ::T.untyped)
+  SPECIAL_CHARACTERS = ::T.let(nil, ::T.untyped)
+  VALID_NAME_PATTERN = ::T.let(nil, ::T.untyped)
+  VALID_URI_PATTERN = ::T.let(nil, ::T.untyped)
+end
+
+class Gem::SpecificationPolicy
+end
+
+class Gem::StreamUI
+  def _deprecated_debug(statement); end
 end
 
 class Gem::StubSpecification
@@ -2662,11 +2776,16 @@ class Gem::StubSpecification
   def self.gemspec_stub(filename, base_dir, gems_dir); end
 end
 
-Gem::UnsatisfiableDepedencyError = Gem::UnsatisfiableDependencyError
+class Gem::UninstallError
+  def spec(); end
 
-module Gem::Util
-  NULL_DEVICE = ::T.let(nil, ::T.untyped)
+  def spec=(spec); end
 end
+
+class Gem::UninstallError
+end
+
+Gem::UnsatisfiableDepedencyError = Gem::UnsatisfiableDependencyError
 
 class Gem::Version
   def pretty_print(q); end
@@ -2674,19 +2793,16 @@ end
 
 Gem::Version::Requirement = Gem::Requirement
 
-module Gem
-  def self._deprecated_datadir(gem_name); end
-
-  def self.default_gems_use_full_paths?(); end
-
-  def self.remove_unresolved_default_spec(spec); end
-end
-
 class Hash
   include ::JSON::Ext::Generator::GeneratorMethods::Hash
+  def deconstruct_keys(_); end
 end
 
 class Hash
+  def self.ruby2_keywords_hash(_); end
+
+  def self.ruby2_keywords_hash?(_); end
+
   def self.try_convert(_); end
 end
 
@@ -2696,6 +2812,8 @@ class IO
   def pathconf(_); end
 
   def ready?(); end
+
+  def set_encoding_by_bom(); end
 
   def wait(*_); end
 
@@ -2707,12 +2825,6 @@ end
 IO::EWOULDBLOCKWaitReadable = IO::EAGAINWaitReadable
 
 IO::EWOULDBLOCKWaitWritable = IO::EAGAINWaitWritable
-
-class IPAddr
-  def ==(other); end
-
-  def initialize(addr=T.unsafe(nil), family=T.unsafe(nil)); end
-end
 
 class Integer
   include ::JSON::Ext::Generator::GeneratorMethods::Integer
@@ -2737,6 +2849,8 @@ module Kernel
 
   def object_id(); end
 
+  def then(); end
+
   def yield_self(); end
 end
 
@@ -2753,13 +2867,33 @@ class Monitor
 
   def exit(); end
 
+  def mon_check_owner(); end
+
+  def mon_enter(); end
+
+  def mon_exit(); end
+
+  def mon_locked?(); end
+
+  def mon_owned?(); end
+
+  def mon_synchronize(); end
+
+  def mon_try_enter(); end
+
+  def new_cond(); end
+
+  def synchronize(); end
+
   def try_enter(); end
+
+  def try_mon_enter(); end
+
+  def wait_for_cond(_, _1); end
 end
 
 module MonitorMixin
   def initialize(*args); end
-  EXCEPTION_IMMEDIATE = ::T.let(nil, ::T.untyped)
-  EXCEPTION_NEVER = ::T.let(nil, ::T.untyped)
 end
 
 class MonitorMixin::ConditionVariable
@@ -2772,6 +2906,12 @@ end
 
 class NilClass
   include ::JSON::Ext::Generator::GeneratorMethods::NilClass
+end
+
+class NoMatchingPatternError
+end
+
+class NoMatchingPatternError
 end
 
 class Object
@@ -2795,6 +2935,10 @@ class Object
   TOPLEVEL_BINDING = ::T.let(nil, ::T.untyped)
 end
 
+class OpenStruct
+  VERSION = ::T.let(nil, ::T.untyped)
+end
+
 class Pathname
   def fnmatch?(*_); end
 
@@ -2804,13 +2948,42 @@ class Pathname
 end
 
 class Proc
+  def <<(_); end
+
+  def >>(_); end
+
   def clone(); end
+end
+
+class Random
+  def self.bytes(_); end
+end
+
+class Range
+  def %(_); end
+
+  def entries(); end
+
+  def to_a(); end
 end
 
 module RbConfig
   def self.expand(val, config=T.unsafe(nil)); end
 
+  def self.fire_update!(key, val, mkconf=T.unsafe(nil), conf=T.unsafe(nil)); end
+
   def self.ruby(); end
+end
+
+module RubyVM::MJIT
+end
+
+module RubyVM::MJIT
+  def self.enabled?(); end
+
+  def self.pause(*_); end
+
+  def self.resume(); end
 end
 
 class Set
@@ -2834,10 +3007,6 @@ class Set
 
   def reset(); end
   InspectKey = ::T.let(nil, ::T.untyped)
-end
-
-class SimpleDelegator
-  RUBYGEMS_ACTIVATION_MONITOR = ::T.let(nil, ::T.untyped)
 end
 
 class Socket
@@ -2871,88 +3040,34 @@ class String
   extend ::JSON::Ext::Generator::GeneratorMethods::String::Extend
 end
 
+class Struct
+  def deconstruct(); end
+
+  def deconstruct_keys(_); end
+
+  def filter(*_); end
+end
+
 Struct::Group = Etc::Group
 
 Struct::Passwd = Etc::Passwd
 
 Struct::Tms = Process::Tms
 
+class TracePoint
+  def eval_script(); end
+
+  def instruction_sequence(); end
+
+  def parameters(); end
+end
+
+class TracePoint
+  def self.new(*events); end
+end
+
 class TrueClass
   include ::JSON::Ext::Generator::GeneratorMethods::TrueClass
-end
-
-module URI
-  include ::URI::RFC2396_REGEXP
-end
-
-class URI::FTP
-  def self.new2(user, password, host, port, path, typecode=T.unsafe(nil), arg_check=T.unsafe(nil)); end
-end
-
-class URI::LDAP
-  def attributes(); end
-
-  def attributes=(val); end
-
-  def dn(); end
-
-  def dn=(val); end
-
-  def extensions(); end
-
-  def extensions=(val); end
-
-  def filter(); end
-
-  def filter=(val); end
-
-  def initialize(*arg); end
-
-  def scope(); end
-
-  def scope=(val); end
-
-  def set_attributes(val); end
-
-  def set_dn(val); end
-
-  def set_extensions(val); end
-
-  def set_filter(val); end
-
-  def set_scope(val); end
-end
-
-class URI::MailTo
-  def initialize(*arg); end
-end
-
-URI::Parser = URI::RFC2396_Parser
-
-URI::REGEXP = URI::RFC2396_REGEXP
-
-class URI::RFC2396_Parser
-  def initialize(opts=T.unsafe(nil)); end
-end
-
-class URI::RFC3986_Parser
-  def join(*uris); end
-
-  def parse(uri); end
-
-  def regexp(); end
-
-  def split(uri); end
-  RFC3986_relative_ref = ::T.let(nil, ::T.untyped)
-end
-
-module URI::Util
-  def self.make_components_hash(klass, array_hash); end
-end
-
-module URI
-  extend ::URI::Escape
-  def self.get_encoding(label); end
 end
 
 module UnicodeNormalize

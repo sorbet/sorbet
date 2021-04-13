@@ -130,6 +130,7 @@ module Process
   CLOCK_MONOTONIC_RAW_APPROX = nil
   CLOCK_UPTIME_RAW = nil
   CLOCK_UPTIME_RAW_APPROX = nil
+  CLOCK_TAI = nil
 end
 
 module Socket::Constants
