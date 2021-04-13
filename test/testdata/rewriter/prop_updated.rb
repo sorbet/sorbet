@@ -17,4 +17,4 @@ class A < Chalk::ODM::Document
   updated_prop
 end
 
-updated_at = T.reveal_type(A.new.updated) # error: Revealed type: `Numeric`
+updated_at = T.reveal_type(A.new.updated) # error: Revealed type: `T.nilable(Numeric)`
