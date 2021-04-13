@@ -277,14 +277,6 @@ package(default_visibility = ["//visibility:public"])
     )
 
     http_archive(
-        name = "ruby_2_5",
-        urls = _ruby_urls("2.5/ruby-2.5.8.tar.gz"),
-        sha256 = "6c0bdf07876c69811a9e7dc237c43d40b1cb6369f68e0e17953d7279b524ad9a",
-        strip_prefix = "ruby-2.5.8",
-        build_file = "@com_stripe_ruby_typer//third_party/ruby:ruby.BUILD",
-    )
-
-    http_archive(
         name = "ruby_2_6",
         urls = _ruby_urls("2.6/ruby-2.6.5.tar.gz"),
         sha256 = "66976b716ecc1fd34f9b7c3c2b07bbd37631815377a2e3e85a5b194cfdcbed7d",
