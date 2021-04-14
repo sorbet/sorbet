@@ -5,8 +5,8 @@ class A
   sig do
     returns(Integer)
   end
-  def foo # error: Expected `Integer` but found `NilClass` for method result type
-  end
+  def foo
+  end # error: Expected `Integer` but found `NilClass` for method result type
 end
 
 class Bar < A
