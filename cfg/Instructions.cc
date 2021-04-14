@@ -22,7 +22,7 @@ string spacesForTabLevel(int tabs) {
 }
 } // namespace
 
-Return::Return(LocalRef what) : what(what) {
+Return::Return(LocalRef what, core::LocOffsets whatLoc) : what(what), whatLoc(whatLoc) {
     categoryCounterInc("cfg", "return");
 }
 
