@@ -1174,6 +1174,22 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, methodReturnType, ownerData->loc(), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
+                        if (i->whatLoc.exists()) {
+                            auto replaceLoc = core::Loc(ctx.file, i->whatLoc);
+                            if (ctx.state.suggestUnsafe.has_value()) {
+                                e.replaceWith(fmt::format("Wrap in `{}`", *ctx.state.suggestUnsafe), replaceLoc,
+                                              "{}({})", *ctx.state.suggestUnsafe, replaceLoc.source(ctx.state).value());
+                            } else {
+                                auto withoutNil = core::Types::approximateSubtract(ctx.state, typeAndOrigin.type,
+                                                                                   core::Types::nilClass());
+                                if (!withoutNil.isBottom() && core::Types::isSubTypeUnderConstraint(
+                                                                  ctx.state, constr, withoutNil, methodReturnType,
+                                                                  core::UntypedMode::AlwaysCompatible)) {
+                                    e.replaceWith("Wrap in `T.must`", replaceLoc, "T.must({})",
+                                                  replaceLoc.source(ctx.state).value());
+                                }
+                            }
+                        }
                     }
                 }
             },

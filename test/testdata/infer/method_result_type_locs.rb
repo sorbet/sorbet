@@ -1,7 +1,5 @@
 # typed: true
 
-# TODO(jez) Also want to double check our autocorrect locations
-
 class Main
   extend T::Sig
 
