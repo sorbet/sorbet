@@ -323,7 +323,7 @@ TEST_CASE("LSPTest") {
             BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
         opts->stripePackages = BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
         // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle this
-        // edge case. If you change this number, update the `lsp/fast_path/too_many_files` test.
+        // edge case. If you change this number, update the `lsp/fast_path/too_many_files` and `not_enough_files` tests.
         opts->lspMaxFilesOnFastPath = 10;
         lspWrapper = SingleThreadedLSPWrapper::create("", move(opts));
         lspWrapper->enableAllExperimentalFeatures();
