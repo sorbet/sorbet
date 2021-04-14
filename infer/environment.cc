@@ -1174,7 +1174,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, methodReturnType, ownerData->loc(), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
-                        if (i->whatLoc.exists()) {
+                        auto implicitReturnLoc = inWhat.implicitReturnLoc;
+                        if (i->whatLoc.exists() && i->whatLoc != implicitReturnLoc) {
                             auto replaceLoc = core::Loc(ctx.file, i->whatLoc);
                             if (ctx.state.suggestUnsafe.has_value()) {
                                 e.replaceWith(fmt::format("Wrap in `{}`", *ctx.state.suggestUnsafe), replaceLoc,

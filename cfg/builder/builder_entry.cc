@@ -92,8 +92,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     if (cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value.get())) {
         auto beginAdjust = md.loc.endPos() - md.loc.beginPos() - 3;
         auto endLoc = core::Loc(ctx.file, md.loc).adjust(ctx, beginAdjust, 0);
-        if (endLoc.exists()) {
+        if (endLoc.source(ctx) == "end") {
             rvLoc = endLoc.offsets();
+            res->implicitReturnLoc = rvLoc;
         } else {
             rvLoc = md.loc;
         }
