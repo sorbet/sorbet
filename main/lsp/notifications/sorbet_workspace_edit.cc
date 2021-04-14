@@ -56,7 +56,13 @@ void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
 }
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
-    updates = make_unique<LSPFileUpdates>(indexer.commitEdit(*params));
+    if (params->updates.size() <= config.maxFilesOnFastPath) {
+        updates = make_unique<LSPFileUpdates>(indexer.commitEdit(*params));
+    } else {
+        // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.
+        this->indexer = &indexer;
+        ENFORCE(canTakeFastPath(indexer) == false);
+    }
 }
 
 void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
@@ -64,6 +70,7 @@ void SorbetWorkspaceEditTask::run(LSPTypecheckerDelegate &typechecker) {
         latencyTimer->setTag("path", "fast");
     }
     ENFORCE(updates != nullptr);
+    ENFORCE(this->indexer == nullptr);
     if (!updates->canceledSlowPath) {
         latencyCancelSlowPath->cancel();
     }
@@ -87,6 +94,17 @@ void SorbetWorkspaceEditTask::runSpecial(LSPTypechecker &typechecker, WorkerPool
     if (latencyTimer != nullptr) {
         latencyTimer->setTag("path", "slow");
     }
+    if (indexer) {
+        ENFORCE(updates == nullptr);
+        // Using the `indexer` here is safe; the indexing thread is blocked until `startedNotification.Notify` is called
+        // later in this function.
+        // This is really gnarly; there's got to be a cleaner way to do threading here. We can't move this out because
+        // we need `workers`, which is a resource that is explicitly managed by typechecking.
+        updates = make_unique<LSPFileUpdates>(indexer->commitEdit(*params, workers));
+    } else {
+        ENFORCE(updates != nullptr);
+    }
+
     if (!updates->canceledSlowPath) {
         latencyCancelSlowPath->cancel();
     }
@@ -119,7 +137,6 @@ bool SorbetWorkspaceEditTask::canTakeFastPath(const LSPIndexer &index) const {
         return updates->canTakeFastPath;
     }
     if (!cachedFastPathDecisionValid) {
-        index.computeFileHashes(params->updates);
         cachedFastPathDecision = index.canTakeFastPath(params->updates);
         cachedFastPathDecisionValid = true;
     }
