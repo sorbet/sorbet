@@ -95,7 +95,7 @@ bool LSPIndexer::canTakeFastPathInternal(
     }
 
     if (changedFiles.size() > config->opts.lspMaxFilesOnFastPath) {
-        logger.debug("Taking slow path because too many files chnaged ({} files > {} files)", changedFiles.size(),
+        logger.debug("Taking slow path because too many files changed ({} files > {} files)", changedFiles.size(),
                      config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
         return false;
@@ -159,7 +159,7 @@ bool LSPIndexer::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFi
 
     // Avoid expensively computing file hashes if there are too many files.
     if (changedFiles.size() > config->opts.lspMaxFilesOnFastPath) {
-        config->logger->debug("Taking slow path because too many files chnaged ({} files > {} files)",
+        config->logger->debug("Taking slow path because too many files changed ({} files > {} files)",
                               changedFiles.size(), config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
         return false;
