@@ -118,10 +118,6 @@ autocorrect_method_return.rb:57: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:53: Possibly uninitialized (`NilClass`) in:
     53 |def implicit_return_without_keyword(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    autocorrect_method_return.rb:57: Replaced with `T.must(end)`
-    57 |end
-        ^^^
 Errors: 8
 
 --------------------------------------------------------------------------
@@ -182,7 +178,7 @@ def implicit_return_without_keyword(x)
   if T.unsafe(nil)
     ""
   end
-T.must(end)
+end
 
 --------------------------------------------------------------------------
 
@@ -248,10 +244,6 @@ autocorrect_method_return.rb:32: Expected `String` but found `NilClass` for meth
     autocorrect_method_return.rb:26: Possibly uninitialized (`NilClass`) in:
     26 |def implicit_return_via_else
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    autocorrect_method_return.rb:32: Replaced with `T.unsafe(end)`
-    32 |end
-        ^^^
 
 autocorrect_method_return.rb:36: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
     36 |  T.let("", T.nilable(String))
@@ -318,10 +310,6 @@ autocorrect_method_return.rb:57: Expected `String` but found `T.nilable(String)`
     autocorrect_method_return.rb:53: Possibly uninitialized (`NilClass`) in:
     53 |def implicit_return_without_keyword(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Done
-    autocorrect_method_return.rb:57: Replaced with `T.unsafe(end)`
-    57 |end
-        ^^^
 Errors: 8
 
 --------------------------------------------------------------------------
@@ -357,7 +345,7 @@ def implicit_return_via_else
   end
   # TODO(jez) This causes a syntax error that we should detect and skip
   # emitting an autocorrect for.
-T.unsafe(end)
+end
 
 sig {returns(String)}
 def direct_return
@@ -382,4 +370,4 @@ def implicit_return_without_keyword(x)
   if T.unsafe(nil)
     ""
   end
-T.unsafe(end)
+end
