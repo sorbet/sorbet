@@ -105,6 +105,10 @@ public:
 
     core::FileRef file;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
+
+    // Special loc that corresponds to implicit method return.
+    core::LocOffsets implicitReturnLoc;
+
     /** Blocks in topoligical sort. All parent blocks are earlier than child blocks
      *
      * The name here goes from using forwards or backwards edges as dependencies in topological sort.

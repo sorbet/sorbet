@@ -240,7 +240,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
             [&](ast::Return &a) {
                 LocalRef retSym = cctx.newTemporary(core::Names::returnTemp());
                 auto cont = walk(cctx.withTarget(retSym), a.expr, current);
-                cont->exprs.emplace_back(cctx.target, a.loc, make_unique<Return>(retSym)); // dead assign.
+                cont->exprs.emplace_back(cctx.target, a.loc, make_unique<Return>(retSym, a.expr.loc())); // dead assign.
                 jumpToDead(cont, cctx.inWhat, a.loc);
                 ret = cctx.inWhat.deadBlock();
             },

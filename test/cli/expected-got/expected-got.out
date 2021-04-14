@@ -1,7 +1,6 @@
-test/cli/expected-got/expected-got.rb:5: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
-     5 |def foo
-     6 |
+test/cli/expected-got/expected-got.rb:7: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
      7 |end
+        ^^^
   Expected `Integer` for result type of method `foo`:
     test/cli/expected-got/expected-got.rb:11:
     11 |def foo

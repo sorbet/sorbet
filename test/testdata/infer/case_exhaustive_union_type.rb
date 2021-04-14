@@ -69,19 +69,19 @@ def exhaustive_unreachable_when_after(x)
 end
 
 sig {params(x: T.any(Integer, String)).returns(Integer)}
-def non_exhaustive_some_cases(x) # error: Expected `Integer` but found `T.nilable(Integer)` for method result type
+def non_exhaustive_some_cases(x)
   case x
   when Integer
     x
   end
-end
+end # error: Expected `Integer` but found `T.nilable(Integer)` for method result type
 
 sig {params(x: T.any(Integer, String)).returns(Integer)}
-def non_exhaustive_some_cases_unreachable_when(x) # error: Expected `Integer` but found `T.nilable(Integer)` for method result type
+def non_exhaustive_some_cases_unreachable_when(x)
   case x
   when Integer
     x
   when Symbol
     3 # error: This code is unreachable
   end
-end
+end # error: Expected `Integer` but found `T.nilable(Integer)` for method result type

@@ -88,10 +88,20 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 
     LocalRef retSym1 = LocalRef::finalReturn();
 
-    auto rvLoc = cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value.get())
-                     ? md.loc
-                     : cont->exprs.back().loc;
-    synthesizeExpr(cont, retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
+    core::LocOffsets rvLoc;
+    if (cont->exprs.empty() || isa_instruction<LoadArg>(cont->exprs.back().value.get())) {
+        auto beginAdjust = md.loc.endPos() - md.loc.beginPos() - 3;
+        auto endLoc = core::Loc(ctx.file, md.loc).adjust(ctx, beginAdjust, 0);
+        if (endLoc.source(ctx) == "end") {
+            rvLoc = endLoc.offsets();
+            res->implicitReturnLoc = rvLoc;
+        } else {
+            rvLoc = md.loc;
+        }
+    } else {
+        rvLoc = cont->exprs.back().loc;
+    }
+    synthesizeExpr(cont, retSym1, rvLoc, make_unique<Return>(retSym, rvLoc)); // dead assign.
     jumpToDead(cont, *res.get(), rvLoc);
 
     vector<Binding> aliasesPrefix;

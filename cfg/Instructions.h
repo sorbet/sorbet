@@ -105,12 +105,13 @@ CheckSize(Send, 144, 8);
 class Return final : public Instruction {
 public:
     VariableUseSite what;
+    core::LocOffsets whatLoc;
 
-    Return(LocalRef what);
+    Return(LocalRef what, core::LocOffsets whatLoc);
     virtual std::string toString(const core::GlobalState &gs, const CFG &cfg) const;
     virtual std::string showRaw(const core::GlobalState &gs, const CFG &cfg, int tabs = 0) const;
 };
-CheckSize(Return, 40, 8);
+CheckSize(Return, 48, 8);
 
 class BlockReturn final : public Instruction {
 public:
