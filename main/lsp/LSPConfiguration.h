@@ -59,8 +59,6 @@ public:
  * initialized boolean. All other threads have read-only access.
  */
 class LSPConfiguration {
-    static constexpr u4 DEFAULT_MAX_FILES_ON_FAST_PATH = 50;
-
     // Raw access to clientConfig is restricted to avoid race conditions. `getClientConfig` safely mediates read-only
     // access to this object. Object is `const` to avoid mutations post-initialization.
     // clientConfig is set by the LSPPreprocessor.
@@ -79,8 +77,6 @@ public:
     const options::Options &opts;
     const std::shared_ptr<LSPOutput> output;
     const std::shared_ptr<spdlog::logger> logger;
-    /* The maximum number of files that are permitted to typecheck on the fast path concurrently. */
-    const u4 maxFilesOnFastPath;
     /** If true, all queries will hit the slow path. */
     const bool disableFastPath;
     /** File system root of LSP client workspace. May be empty if it is the current working directory. */
@@ -89,8 +85,7 @@ public:
     // The following properties are configured during initialization.
 
     LSPConfiguration(const options::Options &opts, const std::shared_ptr<LSPOutput> &output,
-                     const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath = false,
-                     u4 maxFilesOnFastPath = DEFAULT_MAX_FILES_ON_FAST_PATH);
+                     const std::shared_ptr<spdlog::logger> &logger, bool disableFastPath = false);
 
     // Note: These two methods should only be called from the LSPPreprocessor thread, which is the only place that
     // should have mutable access to LSPConfiguration.

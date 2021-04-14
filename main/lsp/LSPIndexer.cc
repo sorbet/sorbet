@@ -94,9 +94,9 @@ bool LSPIndexer::canTakeFastPathInternal(
         return false;
     }
 
-    if (changedFiles.size() > config->maxFilesOnFastPath) {
+    if (changedFiles.size() > config->opts.lspMaxFilesOnFastPath) {
         logger.debug("Taking slow path because too many files chnaged ({} files > {} files)", changedFiles.size(),
-                     config->maxFilesOnFastPath);
+                     config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
         return false;
     }
@@ -158,9 +158,9 @@ bool LSPIndexer::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFi
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
     // Avoid expensively computing file hashes if there are too many files.
-    if (changedFiles.size() > config->maxFilesOnFastPath) {
+    if (changedFiles.size() > config->opts.lspMaxFilesOnFastPath) {
         config->logger->debug("Taking slow path because too many files chnaged ({} files > {} files)",
-                              changedFiles.size(), config->maxFilesOnFastPath);
+                              changedFiles.size(), config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
         return false;
     }
@@ -340,7 +340,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPoo
 }
 
 LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
-    ENFORCE(edit.updates.size() <= config->maxFilesOnFastPath, "Too many files to index serially");
+    ENFORCE(edit.updates.size() <= config->opts.lspMaxFilesOnFastPath, "Too many files to index serially");
     return commitEdit(edit, *emptyWorkers);
 }
 

@@ -56,7 +56,7 @@ void SorbetWorkspaceEditTask::preprocess(LSPPreprocessor &preprocessor) {
 }
 
 void SorbetWorkspaceEditTask::index(LSPIndexer &indexer) {
-    if (params->updates.size() <= config.maxFilesOnFastPath) {
+    if (params->updates.size() <= config.opts.lspMaxFilesOnFastPath) {
         updates = make_unique<LSPFileUpdates>(indexer.commitEdit(*params));
     } else {
         // HACK: Too many files to `commitEdit` serially. Index in `runSpecial`.

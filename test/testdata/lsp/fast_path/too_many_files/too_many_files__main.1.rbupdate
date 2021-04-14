@@ -1,0 +1,8 @@
+# typed: true
+# assert-slow-path: true
+
+class MyClass
+  def my_method
+    a = T.let(10, Float) # error: Argument does not have asserted type `Float`
+  end
+end
