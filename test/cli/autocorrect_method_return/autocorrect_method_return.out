@@ -41,8 +41,8 @@ autocorrect_method_return.rb:22: Expected `String` but found `T.nilable(String)`
     22 |  return res
                  ^^^
 
-autocorrect_method_return.rb:32: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    32 |end
+autocorrect_method_return.rb:30: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    30 |end
         ^^^
   Expected `String` for result type of method `implicit_return_via_else`:
     autocorrect_method_return.rb:26:
@@ -53,70 +53,70 @@ autocorrect_method_return.rb:32: Expected `String` but found `NilClass` for meth
     26 |def implicit_return_via_else
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect_method_return.rb:36: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
-    36 |  T.let("", T.nilable(String))
+autocorrect_method_return.rb:34: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
+    34 |  T.let("", T.nilable(String))
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Expected `String` for result type of method `direct_return`:
-    autocorrect_method_return.rb:35:
-    35 |def direct_return
+    autocorrect_method_return.rb:33:
+    33 |def direct_return
         ^^^^^^^^^^^^^^^^^
   Got `T.nilable(String)` originating from:
-    autocorrect_method_return.rb:36:
-    36 |  T.let("", T.nilable(String))
+    autocorrect_method_return.rb:34:
+    34 |  T.let("", T.nilable(String))
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect_method_return.rb:36: Replaced with `T.must(T.let("", T.nilable(String)))`
-    36 |  T.let("", T.nilable(String))
+    autocorrect_method_return.rb:34: Replaced with `T.must(T.let("", T.nilable(String)))`
+    34 |  T.let("", T.nilable(String))
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect_method_return.rb:41: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
-    41 |  x
+autocorrect_method_return.rb:39: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
+    39 |  x
           ^
   Expected `String` for result type of method `return_arg`:
-    autocorrect_method_return.rb:40:
-    40 |def return_arg(x)
+    autocorrect_method_return.rb:38:
+    38 |def return_arg(x)
         ^^^^^^^^^^^^^^^^^
   Got `T.nilable(String)` originating from:
-    autocorrect_method_return.rb:40:
-    40 |def return_arg(x)
+    autocorrect_method_return.rb:38:
+    38 |def return_arg(x)
                        ^
   Autocorrect: Done
-    autocorrect_method_return.rb:41: Replaced with `T.must(x)`
-    41 |  x
+    autocorrect_method_return.rb:39: Replaced with `T.must(x)`
+    39 |  x
           ^
 
-autocorrect_method_return.rb:49: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
-    49 |  a
+autocorrect_method_return.rb:47: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
+    47 |  a
           ^
   Expected `String` for result type of method `return_uninitialized`:
-    autocorrect_method_return.rb:45:
-    45 |def return_uninitialized(x)
+    autocorrect_method_return.rb:43:
+    43 |def return_uninitialized(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `T.nilable(String)` originating from:
-    autocorrect_method_return.rb:47:
-    47 |    a = ""
+    autocorrect_method_return.rb:45:
+    45 |    a = ""
                 ^^
-    autocorrect_method_return.rb:45: Possibly uninitialized (`NilClass`) in:
-    45 |def return_uninitialized(x)
+    autocorrect_method_return.rb:43: Possibly uninitialized (`NilClass`) in:
+    43 |def return_uninitialized(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect_method_return.rb:49: Replaced with `T.must(a)`
-    49 |  a
+    autocorrect_method_return.rb:47: Replaced with `T.must(a)`
+    47 |  a
           ^
 
-autocorrect_method_return.rb:57: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
-    57 |end
+autocorrect_method_return.rb:55: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
+    55 |end
         ^^^
   Expected `String` for result type of method `implicit_return_without_keyword`:
-    autocorrect_method_return.rb:53:
-    53 |def implicit_return_without_keyword(x)
+    autocorrect_method_return.rb:51:
+    51 |def implicit_return_without_keyword(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `T.nilable(String)` originating from:
-    autocorrect_method_return.rb:55:
-    55 |    ""
+    autocorrect_method_return.rb:53:
+    53 |    ""
             ^^
-    autocorrect_method_return.rb:53: Possibly uninitialized (`NilClass`) in:
-    53 |def implicit_return_without_keyword(x)
+    autocorrect_method_return.rb:51: Possibly uninitialized (`NilClass`) in:
+    51 |def implicit_return_without_keyword(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 8
 
@@ -151,8 +151,6 @@ def implicit_return_via_else
   if T.unsafe(nil)
     return 'yep'
   end
-  # TODO(jez) This causes a syntax error that we should detect and skip
-  # emitting an autocorrect for.
 end
 
 sig {returns(String)}
@@ -233,8 +231,8 @@ autocorrect_method_return.rb:22: Expected `String` but found `T.nilable(String)`
     22 |  return res
                  ^^^
 
-autocorrect_method_return.rb:32: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    32 |end
+autocorrect_method_return.rb:30: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    30 |end
         ^^^
   Expected `String` for result type of method `implicit_return_via_else`:
     autocorrect_method_return.rb:26:
@@ -245,70 +243,70 @@ autocorrect_method_return.rb:32: Expected `String` but found `NilClass` for meth
     26 |def implicit_return_via_else
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect_method_return.rb:36: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
-    36 |  T.let("", T.nilable(String))
+autocorrect_method_return.rb:34: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
+    34 |  T.let("", T.nilable(String))
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Expected `String` for result type of method `direct_return`:
-    autocorrect_method_return.rb:35:
-    35 |def direct_return
+    autocorrect_method_return.rb:33:
+    33 |def direct_return
         ^^^^^^^^^^^^^^^^^
   Got `T.nilable(String)` originating from:
-    autocorrect_method_return.rb:36:
-    36 |  T.let("", T.nilable(String))
+    autocorrect_method_return.rb:34:
+    34 |  T.let("", T.nilable(String))
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect_method_return.rb:36: Replaced with `T.unsafe(T.let("", T.nilable(String)))`
-    36 |  T.let("", T.nilable(String))
+    autocorrect_method_return.rb:34: Replaced with `T.unsafe(T.let("", T.nilable(String)))`
+    34 |  T.let("", T.nilable(String))
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-autocorrect_method_return.rb:41: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
-    41 |  x
+autocorrect_method_return.rb:39: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
+    39 |  x
           ^
   Expected `String` for result type of method `return_arg`:
-    autocorrect_method_return.rb:40:
-    40 |def return_arg(x)
+    autocorrect_method_return.rb:38:
+    38 |def return_arg(x)
         ^^^^^^^^^^^^^^^^^
   Got `T.nilable(String)` originating from:
-    autocorrect_method_return.rb:40:
-    40 |def return_arg(x)
+    autocorrect_method_return.rb:38:
+    38 |def return_arg(x)
                        ^
   Autocorrect: Done
-    autocorrect_method_return.rb:41: Replaced with `T.unsafe(x)`
-    41 |  x
+    autocorrect_method_return.rb:39: Replaced with `T.unsafe(x)`
+    39 |  x
           ^
 
-autocorrect_method_return.rb:49: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
-    49 |  a
+autocorrect_method_return.rb:47: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
+    47 |  a
           ^
   Expected `String` for result type of method `return_uninitialized`:
-    autocorrect_method_return.rb:45:
-    45 |def return_uninitialized(x)
+    autocorrect_method_return.rb:43:
+    43 |def return_uninitialized(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `T.nilable(String)` originating from:
-    autocorrect_method_return.rb:47:
-    47 |    a = ""
+    autocorrect_method_return.rb:45:
+    45 |    a = ""
                 ^^
-    autocorrect_method_return.rb:45: Possibly uninitialized (`NilClass`) in:
-    45 |def return_uninitialized(x)
+    autocorrect_method_return.rb:43: Possibly uninitialized (`NilClass`) in:
+    43 |def return_uninitialized(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Done
-    autocorrect_method_return.rb:49: Replaced with `T.unsafe(a)`
-    49 |  a
+    autocorrect_method_return.rb:47: Replaced with `T.unsafe(a)`
+    47 |  a
           ^
 
-autocorrect_method_return.rb:57: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
-    57 |end
+autocorrect_method_return.rb:55: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
+    55 |end
         ^^^
   Expected `String` for result type of method `implicit_return_without_keyword`:
-    autocorrect_method_return.rb:53:
-    53 |def implicit_return_without_keyword(x)
+    autocorrect_method_return.rb:51:
+    51 |def implicit_return_without_keyword(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `T.nilable(String)` originating from:
-    autocorrect_method_return.rb:55:
-    55 |    ""
+    autocorrect_method_return.rb:53:
+    53 |    ""
             ^^
-    autocorrect_method_return.rb:53: Possibly uninitialized (`NilClass`) in:
-    53 |def implicit_return_without_keyword(x)
+    autocorrect_method_return.rb:51: Possibly uninitialized (`NilClass`) in:
+    51 |def implicit_return_without_keyword(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 8
 
@@ -343,8 +341,6 @@ def implicit_return_via_else
   if T.unsafe(nil)
     return 'yep'
   end
-  # TODO(jez) This causes a syntax error that we should detect and skip
-  # emitting an autocorrect for.
 end
 
 sig {returns(String)}

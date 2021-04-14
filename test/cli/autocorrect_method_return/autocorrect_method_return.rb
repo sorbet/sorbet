@@ -27,8 +27,6 @@ def implicit_return_via_else
   if T.unsafe(nil)
     return 'yep'
   end
-  # TODO(jez) This causes a syntax error that we should detect and skip
-  # emitting an autocorrect for.
 end
 
 sig {returns(String)}
