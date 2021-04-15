@@ -168,6 +168,23 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(e.message, "val.transform_values {|v| T::Props::Utils.deep_clone_object(v)}")
     end
 
+    it 'uses T::Configuration.deserialization_error_handler when we raise' do
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        raise "shouldn't be here"
+      end
+      T::Configuration.deserialization_error_handler = proc do |klass, prop_name, value, orig_err|
+        raise "#{orig_err.message} #{prop_name}"
+      end
+
+      e = assert_raises(RuntimeError) do
+        MySerializable.from_hash({'foo' => "Won't respond like hash"})
+      end
+
+      assert_includes(e.message, "undefined method `transform_values'")
+      assert_includes(e.message, "foo")
+      assert_includes(e.message, "val.transform_values {|v| T::Props::Utils.deep_clone_object(v)}")
+    end
+
     it 'includes relevant generated code on serialize' do
       m = a_serializable
       m.instance_variable_set(:@foo, "Won't respond like hash")
