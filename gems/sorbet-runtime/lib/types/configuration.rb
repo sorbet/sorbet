@@ -294,29 +294,44 @@ module T::Configuration
   #
   # These generally shouldn't stop execution of the program, but rather inform
   # some party of the error to action on later.
+  #
+  # @param [Lambda, Proc, Object, nil] value Proc that handles the error
+  #   report (pass nil to reset to default behavior)
+  #
+  # Parameters passed to value.call:
+  #
+  # @param [Class] klass The class of the top-level object being deserialized
+  # @param [String] prop_name The name of the prop being deserialized
+  # @param [Object] value The prop value being deserialized
+  # @param [Error] orig_error The original error raised during deserialization
+  #
+  # @example
+  #   T::Configuration.deserialization_error_handler = lambda do |klass, prop_name, value, orig_error}
+  #     puts "Error deserializing #{prop_name} on #{klass}: #{orig_error.message}
+  #   end
   def self.deserialization_error_handler=(value)
     validate_lambda_given!(value)
     @deserialization_error_handler = value
   end
 
-  private_class_method def self.deserialization_error_handler_default(klass, prop_name, value, orig_err)
+  private_class_method def self.deserialization_error_handler_default(klass, prop_name, value, orig_error)
     soft_assert_handler(
       'Deserialization error (probably unexpected stored type)',
       storytime: {
         klass: klass,
         prop: prop_name,
         value: value,
-        error: orig_err.message,
+        error: orig_error.message,
         notify: 'djudd'
       }
     )
   end
 
-  def self.deserialization_error_handler(klass, prop_name, value, orig_err)
+  def self.deserialization_error_handler(klass, prop_name, value, orig_error)
     if @deserialization_error_handler
-      @deserialization_error_handler.call(klass, prop_name, value, orig_err)
+      @deserialization_error_handler.call(klass, prop_name, value, orig_error)
     else
-      deserialization_error_handler_default(klass, prop_name, value, orig_err)
+      deserialization_error_handler_default(klass, prop_name, value, orig_error)
     end
   end
 
