@@ -235,6 +235,19 @@ module T::Props::Serializable::DecoratorMethods
     MSG
   end
 
+  def raise_deserialization_error(klass, prop_name, value, orig_error)
+    T::Configuration.soft_assert_handler(
+      'Deserialization error (probably unexpected stored type)',
+      storytime: {
+        klass: klass,
+        prop: prop_name,
+        value: value,
+        error: orig_error.message,
+        notify: 'djudd'
+      }
+    )
+  end
+
   def raise_nil_deserialize_error(hkey)
     msg = "Tried to deserialize a required prop from a nil value. It's "\
       "possible that a nil value exists in the database, so you should "\
