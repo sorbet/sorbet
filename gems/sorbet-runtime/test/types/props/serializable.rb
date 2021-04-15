@@ -152,6 +152,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(MySerializable, storytime[:klass])
       assert_equal(:foo, storytime[:prop])
       assert_equal("Won't respond like hash", storytime[:value])
+
+      T::Configuration.soft_assert_handler = nil
     end
 
     it 'includes relevant generated code on deserialize when we raise' do
@@ -166,6 +168,8 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(e.message, "undefined method `transform_values'")
       assert_includes(e.message, "foo")
       assert_includes(e.message, "val.transform_values {|v| T::Props::Utils.deep_clone_object(v)}")
+
+      T::Configuration.soft_assert_handler = nil
     end
 
     it 'uses T::Configuration.deserialization_error_handler when we raise' do
@@ -183,6 +187,9 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(e.message, "undefined method `transform_values'")
       assert_includes(e.message, "foo")
       assert_includes(e.message, "val.transform_values {|v| T::Props::Utils.deep_clone_object(v)}")
+
+      T::Configuration.soft_assert_handler = nil
+      T::Configuration.deserialization_error_handler = nil
     end
 
     it 'includes relevant generated code on serialize' do
