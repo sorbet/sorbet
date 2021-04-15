@@ -237,7 +237,7 @@ class Resolv::DNS
   # [`Resolv::IPv6`](https://docs.ruby-lang.org/en/2.7.0/Resolv/IPv6.html)
   sig do
     params(name: T.any(String, Resolv::DNS::Name))
-    .returns(T.any(Resolv::IPv4, Resolv::IPv6))
+    .returns(T::Array[T.any(Resolv::IPv4, Resolv::IPv6)])
   end
   def getaddresses(name); end
 
