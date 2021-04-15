@@ -261,7 +261,8 @@ module T::Props
     private_class_method def self.whitelisted_methods_for_deserialize
       @whitelisted_methods_for_deserialize ||= {
         lvar: %i{dup map transform_values transform_keys each_with_object nil? []= to_f},
-        const: %i[deserialize from_hash deep_clone_object soft_assert_handler],
+        self: %i{class},
+        const: %i[deserialize from_hash deep_clone_object deserialization_error_handler],
       }
     end
   end

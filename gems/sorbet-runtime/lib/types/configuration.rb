@@ -290,6 +290,36 @@ module T::Configuration
     end
   end
 
+  # Set a handler for deserialization errors
+  #
+  # These generally shouldn't stop execution of the program, but rather inform
+  # some party of the error to action on later.
+  def self.deserialization_error_handler=(value)
+    validate_lambda_given!(value)
+    @deserialization_error_handler = value
+  end
+
+  private_class_method def self.deserialization_error_handler_default(klass, prop_name, value, orig_err)
+    soft_assert_handler(
+      'Deserialization error (probably unexpected stored type)',
+      storytime: {
+        klass: klass,
+        prop: prop_name,
+        value: value,
+        error: orig_err.message,
+        notify: 'djudd'
+      }
+    )
+  end
+
+  def self.deserialization_error_handler(klass, prop_name, value, orig_err)
+    if @deserialization_error_handler
+      @deserialization_error_handler.call(klass, prop_name, value, orig_err)
+    else
+      deserialization_error_handler_default(klass, prop_name, value, orig_err)
+    end
+  end
+
   # Set a handler for soft assertions
   #
   # These generally shouldn't stop execution of the program, but rather inform
