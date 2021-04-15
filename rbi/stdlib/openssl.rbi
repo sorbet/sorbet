@@ -7404,6 +7404,16 @@ class OpenSSL::SSL::SSLContext
   # Server sessions are added to the session cache
   SESSION_CACHE_SERVER = ::T.let(nil, ::T.untyped)
 
+  sig do
+    params(
+      certificate: ::OpenSSL::X509::Certificate,
+      pkey: ::OpenSSL::PKey::PKey,
+      extra_certs: ::T.nilable(T::Array[::OpenSSL::X509::Certificate])
+    )
+    .returns(::OpenSSL::SSL::SSLContext)
+  end
+  def add_certificate(certificate, pkey, extra_certs = nil);
+
   # The path to a file containing a PEM-format CA certificate
   sig {returns(::T.untyped)}
   def ca_file(); end
