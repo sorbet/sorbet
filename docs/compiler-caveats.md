@@ -32,3 +32,43 @@ This can be mitigated by ensuring that only one shared object is loaded at a tim
 which Stripe enforces with a lock around `require` statements in the autoloader. As
 this assumption is present in Stripe's environment, we don't currently have plans to
 make initialization of shared objects work in the context of multiple threads.
+
+## The ruby stack
+
+There are a few different features that cause compiled code to interact directly
+with the ruby stack:
+
+* Accurate line numbers in stack traces
+* Closure variable storage
+* Method arguments for sends that will go through the vm
+
+In order to to support these features, we edit the top of the ruby stack when a
+compiled function is entered, making space for locals and populating the iseq
+pointer. The iseq pointer that is written into the stack it is allocated when
+the compiled module is first loaded, and has enough fields filled out to inform
+the vm of the stack layout required, and how to reconstruct a line number at a
+given point in time.
+
+One problem with this approach is that all of the functions emitted by the
+compiler now assume that it's fine to edit the top of the ruby stack. In the
+case where the function has been called through the vm this assumption is valid,
+but if the function is called directly from some other context a stack frame
+must be pushed to avoid corrupting the caller. This comes up in a few different
+cases:
+
+1. Class and method `<static-init>` functions, which don't correspond to real
+   functions that the vm will ever call, but that get called during compiled
+   module initialization:
+   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/NameBasedIntrinsics.cc#L98-L101
+   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/Payload/codegen-payload.c#L1213-L1219
+2. Final methods that are called directly would edit the frame of the calling
+   context and corrupt any locals of that context if a frame isn't pushed:
+   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/sends.cc#L131
+   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/Payload/codegen-payload.c#L1199-L1211
+3. Blocks that are inlined into the body of intrinsics that support direct block
+   calls will also need their own frames, as raising exceptions from that
+   context without them would put the vm into a strange state.
+   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/Payload/codegen-payload.c#L671-L689
+4. Block functions extracted from `rescue` blocks need to have a special frame
+   pushed that contains enough space for one local that holds `$!`:
+   * https://github.com/stripe/sorbet_llvm/blob/d963311f/compiler/IREmitter/Payload/patches/vm_insnhelper.c#L21-L22
