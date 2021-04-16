@@ -57,7 +57,6 @@ gemfile_lock_deps(
         for test in [
             "partial/bad-hash",
             "partial/bad-t",
-            "partial/codecov",
             "partial/create-config",
             "partial/explosive-object",
             "partial/fake-object",

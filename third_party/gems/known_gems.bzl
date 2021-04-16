@@ -3,7 +3,6 @@
 #  - bazel will print the "sha" for unknown gems when running(that's how these were collected)
 #  - bazel will sometimes redownload them(as it uses those sha's for invalidation)
 KNOWN_GEM_SHA265 = {
-    "codecov-0.2.6": "602e774ec832ca7f68f87e3bad2ec251ed161eb96bfba6ea59a72c43c938b1a8",
     "colorize-0.8.1": "0ba0c2a58232f9b706dc30621ea6aa6468eeea120eb6f1ccc400105b90c4798c",
     "docile-1.3.2": "2e3eb481209795084eaf3a8b55e35991048abc02cba9363afd88fefe948f3c63",
     "json-2.3.1": "3f9ebb42fcd46ec3ecad16c89c7b174dc539bdd353610c39c15aecca1d570e95",
