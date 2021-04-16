@@ -7412,7 +7412,7 @@ class OpenSSL::SSL::SSLContext
     )
     .returns(::OpenSSL::SSL::SSLContext)
   end
-  def add_certificate(certificate, pkey, extra_certs = nil);
+  def add_certificate(certificate, pkey, extra_certs = nil); end
 
   # The path to a file containing a PEM-format CA certificate
   sig {returns(::T.untyped)}
