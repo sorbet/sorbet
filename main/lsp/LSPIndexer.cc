@@ -82,14 +82,22 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
     computeFileHashes(files, *emptyWorkers);
 }
 
-bool LSPIndexer::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFiles,
-                                 const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
+bool LSPIndexer::canTakeFastPathInternal(
+    const vector<shared_ptr<core::File>> &changedFiles,
+    const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     Timer timeit(config->logger, "fast_path_decision");
     auto &logger = *config->logger;
     logger.debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
     if (config->disableFastPath) {
         logger.debug("Taking slow path because fast path is disabled.");
         prodCategoryCounterInc("lsp.slow_path_reason", "fast_path_disabled");
+        return false;
+    }
+
+    if (changedFiles.size() > config->opts.lspMaxFilesOnFastPath) {
+        logger.debug("Taking slow path because too many files changed ({} files > {} files)", changedFiles.size(),
+                     config->opts.lspMaxFilesOnFastPath);
+        prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
         return false;
     }
 
@@ -143,12 +151,23 @@ bool LSPIndexer::canTakeFastPath(const LSPFileUpdates &edit,
         prodCategoryCounterInc("lsp.slow_path_reason", "new_file");
         return false;
     }
-    return canTakeFastPath(edit.updatedFiles, evictedFiles);
+    return canTakeFastPathInternal(edit.updatedFiles, evictedFiles);
 }
 
 bool LSPIndexer::canTakeFastPath(const vector<shared_ptr<core::File>> &changedFiles) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
-    return canTakeFastPath(changedFiles, emptyMap);
+
+    // Avoid expensively computing file hashes if there are too many files.
+    if (changedFiles.size() > config->opts.lspMaxFilesOnFastPath) {
+        config->logger->debug("Taking slow path because too many files changed ({} files > {} files)",
+                              changedFiles.size(), config->opts.lspMaxFilesOnFastPath);
+        prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
+        return false;
+    }
+
+    // Ensure all files have computed hashes.
+    computeFileHashes(changedFiles);
+    return canTakeFastPathInternal(changedFiles, emptyMap);
 }
 
 void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
@@ -197,7 +216,7 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
     initialGS->errorQueue = move(savedErrorQueue);
 }
 
-LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
+LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
     Timer timeit(config->logger, "LSPIndexer::commitEdit");
     LSPFileUpdates update;
     update.epoch = edit.epoch;
@@ -250,7 +269,7 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
         initialGS->errorQueue = make_shared<core::ErrorQueue>(
             initialGS->errorQueue->logger, initialGS->errorQueue->tracer, make_shared<core::NullFlusher>());
         auto trees = hashing::Hashing::indexAndComputeFileHashes(initialGS, config->opts, *config->logger, frefs,
-                                                                 *emptyWorkers, kvstore);
+                                                                 workers, kvstore);
         update.updatedFileIndexes.resize(trees.size());
         for (auto &ast : trees) {
             const int i = fileToPos[ast.file];
@@ -318,6 +337,11 @@ LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
     pendingTypecheckUpdates.preemptionsExpected = 0;
 
     return update;
+}
+
+LSPFileUpdates LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit) {
+    ENFORCE(edit.updates.size() <= config->opts.lspMaxFilesOnFastPath, "Too many files to index serially");
+    return commitEdit(edit, *emptyWorkers);
 }
 
 core::FileRef LSPIndexer::uri2FileRef(string_view uri) const {

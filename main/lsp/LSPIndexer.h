@@ -48,8 +48,11 @@ class LSPIndexer final {
      */
     bool canTakeFastPath(const LSPFileUpdates &edit,
                          const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
-    bool canTakeFastPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                         const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
+    /**
+     * INVARIANT: `changedFiles` must have hashes computed.
+     */
+    bool canTakeFastPathInternal(const std::vector<std::shared_ptr<core::File>> &changedFiles,
+                                 const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
 public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> initialGS,
@@ -74,6 +77,7 @@ public:
      * Commits the given edit to `initialGS`, and returns a canonical LSPFileUpdates object containing indexed trees
      * and file hashes. Also handles canceling the running slow path.
      */
+    LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers);
     LSPFileUpdates commitEdit(SorbetWorkspaceEditParams &edit);
 
     /**

@@ -173,6 +173,10 @@ struct Options {
     u4 reserveConstantNameTableCapacity = 0;
     u4 reserveUniqueNameTableCapacity = 0;
 
+    /* The maximum number of files that are permitted to typecheck on the fast path concurrently. Not exposed on CLI.
+     * Placed on Options for convenience so tests can override. */
+    u4 lspMaxFilesOnFastPath = 50;
+
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";
     int statsdPort = 8200;
