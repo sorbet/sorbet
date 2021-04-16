@@ -2,22 +2,36 @@
 
 set -e
 
-if [ "$1" = -t ]; then
-    mode="test"
-else
-    mode="fix"
-fi
+mode="fix"
+
+while getopts 't' opt; do
+    case "$opt" in
+        t)
+            mode="test"
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
 
 cd "$(dirname "$0")/../.."
 
 ./bazel build @com_stripe_ruby_typer//tools:clang-format &> /dev/null
 
-# shellcheck disable=SC2207
-cxx_src=(
-    $(git ls-files -c -m -o --exclude-standard -- '*.cxx' '*.cc' '*.h' '*.c' | \
-          grep -v ^third_party/
+if [ "$#" -ne 0 ]; then
+    cxx_src=("$@")
+else
+    # shellcheck disable=SC2207
+    cxx_src=(
+        $(git ls-files -c -m -o --exclude-standard -- '*.cxx' '*.cc' '*.h' '*.c' | \
+              grep -v ^third_party/
+        )
     )
-)
+fi
+
 misformatted=()
 
 cleanup() {
@@ -59,5 +73,13 @@ fi
 for src in "${misformatted[@]}"; do
     echo "$src" >&2
 done
+
+if [ "${EMIT_SYNCBACK:-}" != "" ] && [ "${#misformatted[@]}" -ne 0 ]; then
+    echo '### BEGIN SYNCBACK ###'
+    for file in "${misformatted[@]}"; do
+        echo "$file"
+    done
+    echo '### END SYNCBACK ###'
+fi
 
 exit 1
