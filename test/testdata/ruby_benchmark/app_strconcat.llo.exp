@@ -323,7 +323,8 @@ BB2.i.backedge:                                   ; preds = %73, %69, %65, %"alt
   br label %BB2.i
 
 "func_<root>.<static-init>$152.exit":             ; preds = %afterSend.i
-  store i64* %26, i64** %20, align 8, !tbaa !17
+  %75 = getelementptr inbounds i64, i64* %25, i64 8
+  store i64* %75, i64** %20, align 8, !tbaa !17
   call void @llvm.lifetime.end.p0i8(i64 48, i8* nonnull %9)
   ret void
 }

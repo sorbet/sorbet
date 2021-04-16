@@ -416,6 +416,8 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
   unreachable, !dbg !52
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
+  %17 = getelementptr inbounds i64, i64* %15, i64 2, !dbg !53
+  store i64* %17, i64** %10, align 8, !dbg !53, !tbaa !12
   ret i64 8
 }
 
@@ -514,3 +516,4 @@ attributes #12 = { noinline }
 !50 = !DILocation(line: 5, column: 3, scope: !45, inlinedAt: !49)
 !51 = distinct !DISubprogram(name: "A#foo", linkageName: "func_A#foo", scope: null, file: !2, line: 5, type: !9, scopeLine: 5, flags: DIFlagPrototyped, spFlags: DISPFlagDefinition, unit: !1, retainedNodes: !3)
 !52 = !DILocation(line: 5, column: 3, scope: !51)
+!53 = !DILocation(line: 0, scope: !51)

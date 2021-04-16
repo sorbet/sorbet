@@ -247,7 +247,8 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   store i64* %42, i64** %39, align 8, !dbg !37, !tbaa !36
   store i64 %rubyStr_ok, i64* %41, align 8, !dbg !37, !tbaa !4
   %send31 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull %ic_puts.1.sink, i64 0) #6, !dbg !37
-  store i64* %16, i64** %10, align 8, !tbaa !12
+  %43 = getelementptr inbounds i64, i64* %15, i64 7
+  store i64* %43, i64** %10, align 8, !tbaa !12
   ret i64 %send31
 }
 
