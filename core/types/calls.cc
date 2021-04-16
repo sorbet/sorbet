@@ -2932,7 +2932,6 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Sorbet_Private_Static(), Intrinsic::Kind::Singleton, Names::sig(), &SorbetPrivateStatic_sig},
 
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildHash(), &Magic_buildHashOrKeywordArgs},
-    {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildKeywordArgs(), &Magic_buildHashOrKeywordArgs},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildArray(), &Magic_buildArray},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::buildRange(), &Magic_buildRange},
     {Symbols::Magic(), Intrinsic::Kind::Singleton, Names::expandSplat(), &Magic_expandSplat},

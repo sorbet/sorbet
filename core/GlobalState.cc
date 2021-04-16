@@ -487,11 +487,6 @@ void GlobalState::initEmpty() {
     method =
         enterMethod(*this, Symbols::MagicSingleton(), Names::buildHash()).repeatedUntypedArg(Names::arg0()).build();
     method.data(*this)->resultType = Types::hashOfUntyped();
-    // Synthesize <Magic>#<build-keyword-args>(*vs : T.untyped) => Hash
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildKeywordArgs())
-                 .repeatedUntypedArg(Names::arg0())
-                 .build();
-    method.data(*this)->resultType = Types::hashOfUntyped();
     // Synthesize <Magic>.<build-array>(*vs : T.untyped) => Array
     method =
         enterMethod(*this, Symbols::MagicSingleton(), Names::buildArray()).repeatedUntypedArg(Names::arg0()).build();
