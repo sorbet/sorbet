@@ -57,9 +57,9 @@ SORBET_ALIVE(void, sorbet_raiseArity, (int argc, int min, int max) __attribute__
 SORBET_ALIVE(void, sorbet_raiseExtraKeywords, (VALUE hash) __attribute__((__noreturn__)));
 SORBET_ALIVE(VALUE, sorbet_t_absurd, (VALUE val) __attribute__((__cold__)));
 
-SORBET_ALIVE(void *, sorbet_allocateRubyStackFrame,
-             (VALUE funcName, ID func, VALUE filename, VALUE realpath, unsigned char *parent, int iseqType,
-              int startline, int endline, ID *locals, int numLocals, int stackMax));
+SORBET_ALIVE(rb_iseq_t *, sorbet_allocateRubyStackFrame,
+             (VALUE funcName, ID func, VALUE filename, VALUE realpath, rb_iseq_t *parent, int iseqType, int startline,
+              int endline, ID *locals, int numLocals, int stackMax));
 SORBET_ALIVE(VALUE, sorbet_getConstant, (const char *path, long pathLen));
 SORBET_ALIVE(VALUE, sorbet_setConstant, (VALUE mod, const char *name, long nameLen, VALUE value));
 
@@ -1284,8 +1284,7 @@ unsigned int sorbet_vmCallFCall() {
 // static struct rb_kwarg_call_data test_cd = {0};
 
 SORBET_INLINE
-const rb_control_frame_t *sorbet_setRubyStackFrame(int iseq_type, unsigned char *iseqchar) {
-    const rb_iseq_t *iseq = (const rb_iseq_t *)iseqchar;
+const rb_control_frame_t *sorbet_setRubyStackFrame(int iseq_type, rb_iseq_t *iseq) {
     rb_execution_context_t *ec = GET_EC();
     rb_control_frame_t *cfp = ec->cfp;
 

@@ -167,8 +167,9 @@ void rb_iseq_insns_info_encode_positions(const rb_iseq_t *iseq);
 // nested within a rescue clause, it would be the outer rescue iseq.
 //
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L5669-L5671
-void *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename, VALUE realpath, unsigned char *parent,
-                                    int iseqType, int startline, int endline, ID *locals, int numLocals, int stackMax) {
+rb_iseq_t *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename, VALUE realpath, unsigned char *parent,
+                                         int iseqType, int startline, int endline, ID *locals, int numLocals,
+                                         int stackMax) {
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
 
@@ -234,8 +235,7 @@ void *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename, VAL
 
     iseq->body->stack_max = stackMax;
 
-    // Cast it to something easy since teaching LLVM about structs is a huge PITA
-    return (void *)iseq;
+    return iseq;
 }
 
 const VALUE sorbet_readRealpath() {

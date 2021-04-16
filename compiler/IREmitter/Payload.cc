@@ -434,6 +434,10 @@ llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &build, const IR
     }
 }
 
+llvm::PointerType *iseqType(CompilerState &cs) {
+    return llvm::PointerType::getUnqual(cs.module->getTypeByName("struct.rb_iseq_struct"));
+}
+
 std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
                                                    const IREmitterContext &irctx, const ast::MethodDef &md,
                                                    int rubyBlockId) {
@@ -442,13 +446,13 @@ std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBu
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
             funcName = md.symbol.data(cs)->name.shortName(cs);
-            parent = llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(cs));
+            parent = llvm::Constant::getNullValue(iseqType(cs));
             break;
 
         case FunctionType::StaticInitFile:
         case FunctionType::StaticInitModule:
             funcName = "<top (required)>";
-            parent = llvm::Constant::getNullValue(llvm::Type::getInt8PtrTy(cs));
+            parent = llvm::Constant::getNullValue(iseqType(cs));
             break;
 
         case FunctionType::Block:
@@ -634,7 +638,7 @@ string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx,
 
 llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
                                      const ast::MethodDef &md, int rubyBlockId) {
-    auto tp = llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(cs));
+    auto tp = iseqType(cs);
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     auto name = getStackFrameGlobalName(cs, irctx, md, rubyBlockId);
     llvm::Constant *indices[] = {zero};
