@@ -174,22 +174,21 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
             break;
 
         case ValidatorKind::Method:
-            fmt::print(
-                "      unless return_value.is_a?(return_type)\n"
-                "        message = method_sig.return_type.error_message_for_obj(return_value)\n"
-                "        if message\n"
-                "          CallValidation.report_error(\n"
-                "            method_sig,\n"
-                "            message,\n"
-                "            'Return value',\n"
-                "            nil,\n"
-                "            method_sig.return_type,\n"
-                "            return_value,\n"
-                "            caller_offset: -1\n"
-                "          )\n"
-                "        end\n"
-                "      end\n"
-                "      return_value\n");
+            fmt::print("      unless return_value.is_a?(return_type)\n"
+                       "        message = method_sig.return_type.error_message_for_obj(return_value)\n"
+                       "        if message\n"
+                       "          CallValidation.report_error(\n"
+                       "            method_sig,\n"
+                       "            message,\n"
+                       "            'Return value',\n"
+                       "            nil,\n"
+                       "            method_sig.return_type,\n"
+                       "            return_value,\n"
+                       "            caller_offset: -1\n"
+                       "          )\n"
+                       "        end\n"
+                       "      end\n"
+                       "      return_value\n");
             break;
     }
 
@@ -199,10 +198,11 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
 }
 
 void generateCreateValidatorMediumDispatcher() {
-    fmt::print("  def self.create_validator_medium(mod, original_method, method_sig)\n"
-               "    # trampoline to reduce stack frame size\n"
-               "    return_type = method_sig.return_type.is_a?(T::Private::Types::Void) ? nil : method_sig.return_type\n"
-               "\n");
+    fmt::print(
+        "  def self.create_validator_medium(mod, original_method, method_sig)\n"
+        "    # trampoline to reduce stack frame size\n"
+        "    return_type = method_sig.return_type.is_a?(T::Private::Types::Void) ? nil : method_sig.return_type\n"
+        "\n");
 
     for (size_t arity = 0; arity <= MAX_ARITY; arity++) {
         if (arity == 0) {
@@ -226,8 +226,7 @@ void generateCreateValidatorMediumDispatcher() {
 }
 
 void generateCreateValidatorMedium(const Options &options, size_t arity) {
-    fmt::print("  def self.create_validator_medium{}(mod, original_method, method_sig, return_type",
-               arity);
+    fmt::print("  def self.create_validator_medium{}(mod, original_method, method_sig, return_type", arity);
     for (size_t i = 0; i < arity; i++) {
         fmt::print(", arg{}_type", i);
     }
@@ -277,24 +276,23 @@ void generateCreateValidatorMedium(const Options &options, size_t arity) {
     }
     fmt::print("&blk)\n");
 
-    fmt::print(
-        "      if return_type\n"
-        "        if (message = return_type.error_message_for_obj(return_value))\n"
-        "          CallValidation.report_error(\n"
-        "            method_sig,\n"
-        "            message,\n"
-        "            'Return value',\n"
-        "            nil,\n"
-        "            return_type,\n"
-        "            return_value,\n"
-        "            caller_offset: -1\n"
-        "          )\n"
-        "        end\n"
-        "      else\n"
-        "        return_value = T::Private::Types::Void::VOID\n"
-        "      end\n"
-        "      return_value\n"
-        "\n");
+    fmt::print("      if return_type\n"
+               "        if (message = return_type.error_message_for_obj(return_value))\n"
+               "          CallValidation.report_error(\n"
+               "            method_sig,\n"
+               "            message,\n"
+               "            'Return value',\n"
+               "            nil,\n"
+               "            return_type,\n"
+               "            return_value,\n"
+               "            caller_offset: -1\n"
+               "          )\n"
+               "        end\n"
+               "      else\n"
+               "        return_value = T::Private::Types::Void::VOID\n"
+               "      end\n"
+               "      return_value\n"
+               "\n");
 
     fmt::print("    end\n"
                "  end\n"
