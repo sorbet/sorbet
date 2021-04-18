@@ -121,15 +121,7 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
     }
     fmt::print("&blk|\n");
 
-    fmt::print("      # This method is a manually sped-up version of more general code in `validate_call`\n"
-               "      T::Profile.typecheck_sample_attempts -= 1\n"
-               "      should_sample = T::Profile.typecheck_sample_attempts == 0\n"
-               "      if should_sample\n"
-               "        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE\n"
-               "        T::Profile.typecheck_samples += 1\n"
-               "        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n"
-               "      end\n"
-               "\n");
+    fmt::print("      # This method is a manually sped-up version of more general code in `validate_call`\n");
 
     for (size_t i = 0; i < arity; i++) {
         fmt::print("      unless arg{0}.is_a?(arg{0}_type)\n"
@@ -146,11 +138,6 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
                    "\n",
                    i);
     }
-
-    fmt::print("      if should_sample\n"
-               "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n"
-               "      end\n"
-               "\n");
 
     fmt::print("      # The following line breaks are intentional to show nice pry message\n");
     for (size_t i = 0; i < 10; i++) {
@@ -188,10 +175,6 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
 
         case ValidatorKind::Method:
             fmt::print(
-                "      if should_sample\n"
-                "        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n"
-                "      end\n"
-                "\n"
                 "      unless return_value.is_a?(return_type)\n"
                 "        message = method_sig.return_type.error_message_for_obj(return_value)\n"
                 "        if message\n"
@@ -205,9 +188,6 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
                 "            caller_offset: -1\n"
                 "          )\n"
                 "        end\n"
-                "      end\n"
-                "      if should_sample\n"
-                "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n"
                 "      end\n"
                 "      return_value\n");
             break;
@@ -259,15 +239,7 @@ void generateCreateValidatorMedium(const Options &options, size_t arity) {
     }
     fmt::print("&blk|\n");
 
-    fmt::print("      # This method is a manually sped-up version of more general code in `validate_call`\n"
-               "      T::Profile.typecheck_sample_attempts -= 1\n"
-               "      should_sample = T::Profile.typecheck_sample_attempts == 0\n"
-               "      if should_sample\n"
-               "        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE\n"
-               "        T::Profile.typecheck_samples += 1\n"
-               "        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n"
-               "      end\n"
-               "\n");
+    fmt::print("      # This method is a manually sped-up version of more general code in `validate_call`\n");
 
     for (size_t i = 0; i < arity; i++) {
         fmt::print("      if (err = arg{0}_type.error_message_for_obj(arg{0}))\n"
@@ -284,11 +256,6 @@ void generateCreateValidatorMedium(const Options &options, size_t arity) {
                    "\n",
                    i);
     }
-
-    fmt::print("      if should_sample\n"
-               "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n"
-               "      end\n"
-               "\n");
 
     fmt::print("      # The following line breaks are intentional to show nice pry message\n");
     for (size_t i = 0; i < 10; i++) {
@@ -311,10 +278,6 @@ void generateCreateValidatorMedium(const Options &options, size_t arity) {
     fmt::print("&blk)\n");
 
     fmt::print(
-        "      if should_sample\n"
-        "        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n"
-        "      end\n"
-        "\n"
         "      if return_type\n"
         "        if (message = return_type.error_message_for_obj(return_value))\n"
         "          CallValidation.report_error(\n"
@@ -329,9 +292,6 @@ void generateCreateValidatorMedium(const Options &options, size_t arity) {
         "        end\n"
         "      else\n"
         "        return_value = T::Private::Types::Void::VOID\n"
-        "      end\n"
-        "      if should_sample\n"
-        "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n"
         "      end\n"
         "      return_value\n"
         "\n");

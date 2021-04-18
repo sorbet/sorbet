@@ -39,18 +39,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_fast0(mod, original_method, method_sig, return_type)
     mod.send(:define_method, method_sig.method_name) do |&blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -67,10 +55,6 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(&blk)
-      if should_sample
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless return_value.is_a?(return_type)
         message = method_sig.return_type.error_message_for_obj(return_value)
         if message
@@ -85,9 +69,6 @@ module T::Private::Methods::CallValidation
           )
         end
       end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
       return_value
     end
   end
@@ -95,14 +76,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_fast1(mod, original_method, method_sig, return_type, arg0_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
           method_sig,
@@ -113,10 +86,6 @@ module T::Private::Methods::CallValidation
           arg0,
           caller_offset: -1
         )
-      end
-
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
 
       # The following line breaks are intentional to show nice pry message
@@ -135,10 +104,6 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, &blk)
-      if should_sample
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless return_value.is_a?(return_type)
         message = method_sig.return_type.error_message_for_obj(return_value)
         if message
@@ -153,9 +118,6 @@ module T::Private::Methods::CallValidation
           )
         end
       end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
       return_value
     end
   end
@@ -163,14 +125,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_fast2(mod, original_method, method_sig, return_type, arg0_type, arg1_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
           method_sig,
@@ -195,10 +149,6 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -215,10 +165,6 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, arg1, &blk)
-      if should_sample
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless return_value.is_a?(return_type)
         message = method_sig.return_type.error_message_for_obj(return_value)
         if message
@@ -233,9 +179,6 @@ module T::Private::Methods::CallValidation
           )
         end
       end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
       return_value
     end
   end
@@ -243,14 +186,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_fast3(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
           method_sig,
@@ -287,10 +222,6 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -307,10 +238,6 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, arg1, arg2, &blk)
-      if should_sample
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless return_value.is_a?(return_type)
         message = method_sig.return_type.error_message_for_obj(return_value)
         if message
@@ -325,9 +252,6 @@ module T::Private::Methods::CallValidation
           )
         end
       end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
       return_value
     end
   end
@@ -335,14 +259,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method_fast4(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
           method_sig,
@@ -391,10 +307,6 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -411,10 +323,6 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, arg1, arg2, arg3, &blk)
-      if should_sample
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless return_value.is_a?(return_type)
         message = method_sig.return_type.error_message_for_obj(return_value)
         if message
@@ -428,9 +336,6 @@ module T::Private::Methods::CallValidation
             caller_offset: -1
           )
         end
-      end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
       return_value
     end
@@ -466,18 +371,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_procedure_fast0(mod, original_method, method_sig)
     mod.send(:define_method, method_sig.method_name) do |&blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -501,14 +394,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_procedure_fast1(mod, original_method, method_sig, arg0_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
           method_sig,
@@ -519,10 +404,6 @@ module T::Private::Methods::CallValidation
           arg0,
           caller_offset: -1
         )
-      end
-
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
 
       # The following line breaks are intentional to show nice pry message
@@ -548,14 +429,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_procedure_fast2(mod, original_method, method_sig, arg0_type, arg1_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
           method_sig,
@@ -578,10 +451,6 @@ module T::Private::Methods::CallValidation
           arg1,
           caller_offset: -1
         )
-      end
-
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
 
       # The following line breaks are intentional to show nice pry message
@@ -607,14 +476,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_procedure_fast3(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
           method_sig,
@@ -651,10 +512,6 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -678,14 +535,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_procedure_fast4(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type, arg3_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       unless arg0.is_a?(arg0_type)
         CallValidation.report_error(
           method_sig,
@@ -732,10 +581,6 @@ module T::Private::Methods::CallValidation
           arg3,
           caller_offset: -1
         )
-      end
-
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
 
       # The following line breaks are intentional to show nice pry message
@@ -790,18 +635,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_medium0(mod, original_method, method_sig, return_type)
     mod.send(:define_method, method_sig.method_name) do |&blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -818,10 +651,6 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(&blk)
-      if should_sample
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       if return_type
         if (message = return_type.error_message_for_obj(return_value))
           CallValidation.report_error(
@@ -837,9 +666,6 @@ module T::Private::Methods::CallValidation
       else
         return_value = T::Private::Types::Void::VOID
       end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
       return_value
 
     end
@@ -848,14 +674,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_medium1(mod, original_method, method_sig, return_type, arg0_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       if (err = arg0_type.error_message_for_obj(arg0))
         CallValidation.report_error(
           method_sig,
@@ -866,10 +684,6 @@ module T::Private::Methods::CallValidation
           arg0,
           caller_offset: -1
         )
-      end
-
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
 
       # The following line breaks are intentional to show nice pry message
@@ -888,10 +702,6 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, &blk)
-      if should_sample
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       if return_type
         if (message = return_type.error_message_for_obj(return_value))
           CallValidation.report_error(
@@ -907,9 +717,6 @@ module T::Private::Methods::CallValidation
       else
         return_value = T::Private::Types::Void::VOID
       end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
       return_value
 
     end
@@ -918,14 +725,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_medium2(mod, original_method, method_sig, return_type, arg0_type, arg1_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       if (err = arg0_type.error_message_for_obj(arg0))
         CallValidation.report_error(
           method_sig,
@@ -950,10 +749,6 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -970,10 +765,6 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, arg1, &blk)
-      if should_sample
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       if return_type
         if (message = return_type.error_message_for_obj(return_value))
           CallValidation.report_error(
@@ -989,9 +780,6 @@ module T::Private::Methods::CallValidation
       else
         return_value = T::Private::Types::Void::VOID
       end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
       return_value
 
     end
@@ -1000,14 +788,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_medium3(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       if (err = arg0_type.error_message_for_obj(arg0))
         CallValidation.report_error(
           method_sig,
@@ -1044,10 +824,6 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -1064,10 +840,6 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, arg1, arg2, &blk)
-      if should_sample
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       if return_type
         if (message = return_type.error_message_for_obj(return_value))
           CallValidation.report_error(
@@ -1083,9 +855,6 @@ module T::Private::Methods::CallValidation
       else
         return_value = T::Private::Types::Void::VOID
       end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
       return_value
 
     end
@@ -1094,14 +863,6 @@ module T::Private::Methods::CallValidation
   def self.create_validator_medium4(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      T::Profile.typecheck_sample_attempts -= 1
-      should_sample = T::Profile.typecheck_sample_attempts == 0
-      if should_sample
-        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-        T::Profile.typecheck_samples += 1
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       if (err = arg0_type.error_message_for_obj(arg0))
         CallValidation.report_error(
           method_sig,
@@ -1150,10 +911,6 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-      end
-
       # The following line breaks are intentional to show nice pry message
 
 
@@ -1170,10 +927,6 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, arg1, arg2, arg3, &blk)
-      if should_sample
-        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      end
-
       if return_type
         if (message = return_type.error_message_for_obj(return_value))
           CallValidation.report_error(
@@ -1188,9 +941,6 @@ module T::Private::Methods::CallValidation
         end
       else
         return_value = T::Private::Types::Void::VOID
-      end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
       return_value
 

@@ -94,14 +94,6 @@ module T::Private::Methods::CallValidation
     # This method is called for every `sig`. It's critical to keep it fast and
     # reduce number of allocations that happen here.
 
-    T::Profile.typecheck_sample_attempts -= 1
-    should_sample = T::Profile.typecheck_sample_attempts == 0
-    if should_sample
-      T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-      T::Profile.typecheck_samples += 1
-      t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    end
-
     if method_sig.bind
       message = method_sig.bind.error_message_for_obj(instance)
       if message
@@ -147,10 +139,6 @@ module T::Private::Methods::CallValidation
       end
     end
 
-    if should_sample
-      T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-    end
-
     # The following line breaks are intentional to show nice pry message
 
 
@@ -167,9 +155,6 @@ module T::Private::Methods::CallValidation
     # Please issue `finish` to step out of it
 
     return_value = T::Configuration::AT_LEAST_RUBY_2_7 ? original_method.bind_call(instance, *args, &blk) : original_method.bind(instance).call(*args, &blk)
-    if should_sample
-      t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    end
 
     # The only type that is allowed to change the return value is `.void`.
     # It ignores what you returned and changes it to be a private singleton.
@@ -186,9 +171,6 @@ module T::Private::Methods::CallValidation
           method_sig.return_type,
           return_value,
         )
-      end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
       return_value
     end
