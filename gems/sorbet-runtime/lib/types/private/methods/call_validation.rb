@@ -59,16 +59,20 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
     has_fixed_arity = method_sig.kwarg_types.empty? && !method_sig.has_rest && !method_sig.has_keyrest &&
       original_method.parameters.all? {|(kind, _name)| kind == :req}
-    all_args_are_simple = method_sig.arg_types.all? {|_name, type| type.is_a?(T::Types::Simple)}
-    has_simple_method_types =  all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
-    has_simple_procedure_types = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
+    ok_for_fast_path = has_fixed_arity && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+
+    all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? {|_name, type| type.is_a?(T::Types::Simple)}
+    simple_method = all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
+    simple_procedure = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
 
     T::Configuration.without_ruby_warnings do
       T::Private::DeclState.current.without_on_method_added do
-        if has_fixed_arity && has_simple_method_types && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+        if simple_method
           create_validator_method_fast(mod, original_method, method_sig)
-        elsif has_fixed_arity && has_simple_procedure_types && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+        elsif simple_procedure
           create_validator_procedure_fast(mod, original_method, method_sig)
+        elsif ok_for_fast_path
+          create_validator_medium(mod, original_method, method_sig)
         else
           create_validator_slow(mod, original_method, method_sig)
         end

@@ -38,8 +38,6 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_method_fast0(mod, original_method, method_sig, return_type)
     mod.send(:define_method, method_sig.method_name) do |&blk|
-      # This block is called for every `sig`. It's critical to keep it fast and
-      # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -96,8 +94,6 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_method_fast1(mod, original_method, method_sig, return_type, arg0_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
-      # This block is called for every `sig`. It's critical to keep it fast and
-      # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -166,8 +162,6 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_method_fast2(mod, original_method, method_sig, return_type, arg0_type, arg1_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
-      # This block is called for every `sig`. It's critical to keep it fast and
-      # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -248,8 +242,6 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_method_fast3(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
-      # This block is called for every `sig`. It's critical to keep it fast and
-      # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -342,8 +334,6 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_method_fast4(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
-      # This block is called for every `sig`. It's critical to keep it fast and
-      # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -475,8 +465,6 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_procedure_fast0(mod, original_method, method_sig)
     mod.send(:define_method, method_sig.method_name) do |&blk|
-      # This block is called for every `sig`. It's critical to keep it fast and
-      # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -512,8 +500,6 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_procedure_fast1(mod, original_method, method_sig, arg0_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
-      # This block is called for every `sig`. It's critical to keep it fast and
-      # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -561,8 +547,6 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_procedure_fast2(mod, original_method, method_sig, arg0_type, arg1_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
-      # This block is called for every `sig`. It's critical to keep it fast and
-      # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -622,8 +606,6 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_procedure_fast3(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
-      # This block is called for every `sig`. It's critical to keep it fast and
-      # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -695,8 +677,6 @@ module T::Private::Methods::CallValidation
 
   def self.create_validator_procedure_fast4(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type, arg3_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
-      # This block is called for every `sig`. It's critical to keep it fast and
-      # reduce number of allocations that happen here.
       # This method is a manually sped-up version of more general code in `validate_call`
       T::Profile.typecheck_sample_attempts -= 1
       should_sample = T::Profile.typecheck_sample_attempts == 0
@@ -775,6 +755,445 @@ module T::Private::Methods::CallValidation
 
       original_method.bind_call(self, arg0, arg1, arg2, arg3, &blk)
       T::Private::Types::Void::VOID
+    end
+  end
+
+  def self.create_validator_medium(mod, original_method, method_sig)
+    # trampoline to reduce stack frame size
+    return_type = method_sig.return_type.is_a?(T::Private::Types::Void) ? nil : method_sig.return_type
+
+    if method_sig.arg_types.empty?
+      create_validator_medium0(mod, original_method, method_sig, return_type)
+    elsif method_sig.arg_types.length == 1
+      create_validator_medium1(mod, original_method, method_sig, return_type,
+                                    method_sig.arg_types[0][1])
+    elsif method_sig.arg_types.length == 2
+      create_validator_medium2(mod, original_method, method_sig, return_type,
+                                    method_sig.arg_types[0][1],
+                                    method_sig.arg_types[1][1])
+    elsif method_sig.arg_types.length == 3
+      create_validator_medium3(mod, original_method, method_sig, return_type,
+                                    method_sig.arg_types[0][1],
+                                    method_sig.arg_types[1][1],
+                                    method_sig.arg_types[2][1])
+    elsif method_sig.arg_types.length == 4
+      create_validator_medium4(mod, original_method, method_sig, return_type,
+                                    method_sig.arg_types[0][1],
+                                    method_sig.arg_types[1][1],
+                                    method_sig.arg_types[2][1],
+                                    method_sig.arg_types[3][1])
+    else
+      raise 'should not happen'
+    end
+  end
+
+  def self.create_validator_medium0(mod, original_method, method_sig, return_type)
+    mod.send(:define_method, method_sig.method_name) do |&blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      T::Profile.typecheck_sample_attempts -= 1
+      should_sample = T::Profile.typecheck_sample_attempts == 0
+      if should_sample
+        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
+        T::Profile.typecheck_samples += 1
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+
+      # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+      # PRY note:
+      # this code is sig validation code.
+      # Please issue `finish` to step out of it
+
+      return_value = original_method.bind_call(self, &blk)
+      if should_sample
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if return_type
+        if (message = return_type.error_message_for_obj(return_value))
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Return value',
+            nil,
+            return_type,
+            return_value,
+            caller_offset: -1
+          )
+        end
+      else
+        return_value = T::Private::Types::Void::VOID
+      end
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+      return_value
+
+    end
+  end
+
+  def self.create_validator_medium1(mod, original_method, method_sig, return_type, arg0_type)
+    mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      T::Profile.typecheck_sample_attempts -= 1
+      should_sample = T::Profile.typecheck_sample_attempts == 0
+      if should_sample
+        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
+        T::Profile.typecheck_samples += 1
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if (err = arg0_type.error_message_for_obj(arg0))
+        CallValidation.report_error(
+          method_sig,
+          err,
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+
+      # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+      # PRY note:
+      # this code is sig validation code.
+      # Please issue `finish` to step out of it
+
+      return_value = original_method.bind_call(self, arg0, &blk)
+      if should_sample
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if return_type
+        if (message = return_type.error_message_for_obj(return_value))
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Return value',
+            nil,
+            return_type,
+            return_value,
+            caller_offset: -1
+          )
+        end
+      else
+        return_value = T::Private::Types::Void::VOID
+      end
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+      return_value
+
+    end
+  end
+
+  def self.create_validator_medium2(mod, original_method, method_sig, return_type, arg0_type, arg1_type)
+    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      T::Profile.typecheck_sample_attempts -= 1
+      should_sample = T::Profile.typecheck_sample_attempts == 0
+      if should_sample
+        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
+        T::Profile.typecheck_samples += 1
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if (err = arg0_type.error_message_for_obj(arg0))
+        CallValidation.report_error(
+          method_sig,
+          err,
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+
+      if (err = arg1_type.error_message_for_obj(arg1))
+        CallValidation.report_error(
+          method_sig,
+          err,
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          arg1,
+          caller_offset: -1
+        )
+      end
+
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+
+      # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+      # PRY note:
+      # this code is sig validation code.
+      # Please issue `finish` to step out of it
+
+      return_value = original_method.bind_call(self, arg0, arg1, &blk)
+      if should_sample
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if return_type
+        if (message = return_type.error_message_for_obj(return_value))
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Return value',
+            nil,
+            return_type,
+            return_value,
+            caller_offset: -1
+          )
+        end
+      else
+        return_value = T::Private::Types::Void::VOID
+      end
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+      return_value
+
+    end
+  end
+
+  def self.create_validator_medium3(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type)
+    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      T::Profile.typecheck_sample_attempts -= 1
+      should_sample = T::Profile.typecheck_sample_attempts == 0
+      if should_sample
+        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
+        T::Profile.typecheck_samples += 1
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if (err = arg0_type.error_message_for_obj(arg0))
+        CallValidation.report_error(
+          method_sig,
+          err,
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+
+      if (err = arg1_type.error_message_for_obj(arg1))
+        CallValidation.report_error(
+          method_sig,
+          err,
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          arg1,
+          caller_offset: -1
+        )
+      end
+
+      if (err = arg2_type.error_message_for_obj(arg2))
+        CallValidation.report_error(
+          method_sig,
+          err,
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          arg2,
+          caller_offset: -1
+        )
+      end
+
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+
+      # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+      # PRY note:
+      # this code is sig validation code.
+      # Please issue `finish` to step out of it
+
+      return_value = original_method.bind_call(self, arg0, arg1, arg2, &blk)
+      if should_sample
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if return_type
+        if (message = return_type.error_message_for_obj(return_value))
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Return value',
+            nil,
+            return_type,
+            return_value,
+            caller_offset: -1
+          )
+        end
+      else
+        return_value = T::Private::Types::Void::VOID
+      end
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+      return_value
+
+    end
+  end
+
+  def self.create_validator_medium4(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
+    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      T::Profile.typecheck_sample_attempts -= 1
+      should_sample = T::Profile.typecheck_sample_attempts == 0
+      if should_sample
+        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
+        T::Profile.typecheck_samples += 1
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if (err = arg0_type.error_message_for_obj(arg0))
+        CallValidation.report_error(
+          method_sig,
+          err,
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+
+      if (err = arg1_type.error_message_for_obj(arg1))
+        CallValidation.report_error(
+          method_sig,
+          err,
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          arg1,
+          caller_offset: -1
+        )
+      end
+
+      if (err = arg2_type.error_message_for_obj(arg2))
+        CallValidation.report_error(
+          method_sig,
+          err,
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          arg2,
+          caller_offset: -1
+        )
+      end
+
+      if (err = arg3_type.error_message_for_obj(arg3))
+        CallValidation.report_error(
+          method_sig,
+          err,
+          'Parameter',
+          method_sig.arg_types[3][0],
+          arg3_type,
+          arg3,
+          caller_offset: -1
+        )
+      end
+
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+
+      # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+      # PRY note:
+      # this code is sig validation code.
+      # Please issue `finish` to step out of it
+
+      return_value = original_method.bind_call(self, arg0, arg1, arg2, arg3, &blk)
+      if should_sample
+        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      end
+
+      if return_type
+        if (message = return_type.error_message_for_obj(return_value))
+          CallValidation.report_error(
+            method_sig,
+            message,
+            'Return value',
+            nil,
+            return_type,
+            return_value,
+            caller_offset: -1
+          )
+        end
+      else
+        return_value = T::Private::Types::Void::VOID
+      end
+      if should_sample
+        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
+      end
+      return_value
+
     end
   end
 

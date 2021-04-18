@@ -121,9 +121,7 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
     }
     fmt::print("&blk|\n");
 
-    fmt::print("      # This block is called for every `sig`. It's critical to keep it fast and\n"
-               "      # reduce number of allocations that happen here.\n"
-               "      # This method is a manually sped-up version of more general code in `validate_call`\n"
+    fmt::print("      # This method is a manually sped-up version of more general code in `validate_call`\n"
                "      T::Profile.typecheck_sample_attempts -= 1\n"
                "      should_sample = T::Profile.typecheck_sample_attempts == 0\n"
                "      if should_sample\n"
@@ -220,6 +218,129 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
                "\n");
 }
 
+void generateCreateValidatorMediumDispatcher() {
+    fmt::print("  def self.create_validator_medium(mod, original_method, method_sig)\n"
+               "    # trampoline to reduce stack frame size\n"
+               "    return_type = method_sig.return_type.is_a?(T::Private::Types::Void) ? nil : method_sig.return_type\n"
+               "\n");
+
+    for (size_t arity = 0; arity <= MAX_ARITY; arity++) {
+        if (arity == 0) {
+            fmt::print("    if method_sig.arg_types.empty?\n");
+        } else {
+            fmt::print("    elsif method_sig.arg_types.length == {}\n", arity);
+        }
+
+        fmt::print("      create_validator_medium{}(mod, original_method, method_sig, return_type", arity);
+        for (size_t i = 0; i < arity; i++) {
+            fmt::print(",\n");
+            fmt::print("                                    method_sig.arg_types[{}][1]", i);
+        }
+        fmt::print(")\n");
+    }
+    fmt::print("    else\n"
+               "      raise 'should not happen'\n"
+               "    end\n"
+               "  end\n"
+               "\n");
+}
+
+void generateCreateValidatorMedium(const Options &options, size_t arity) {
+    fmt::print("  def self.create_validator_medium{}(mod, original_method, method_sig, return_type",
+               arity);
+    for (size_t i = 0; i < arity; i++) {
+        fmt::print(", arg{}_type", i);
+    }
+    fmt::print(")\n");
+
+    fmt::print("    mod.send(:define_method, method_sig.method_name) do |");
+    for (size_t i = 0; i < arity; i++) {
+        fmt::print("arg{}, ", i);
+    }
+    fmt::print("&blk|\n");
+
+    fmt::print("      # This method is a manually sped-up version of more general code in `validate_call`\n"
+               "      T::Profile.typecheck_sample_attempts -= 1\n"
+               "      should_sample = T::Profile.typecheck_sample_attempts == 0\n"
+               "      if should_sample\n"
+               "        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE\n"
+               "        T::Profile.typecheck_samples += 1\n"
+               "        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n"
+               "      end\n"
+               "\n");
+
+    for (size_t i = 0; i < arity; i++) {
+        fmt::print("      if (err = arg{0}_type.error_message_for_obj(arg{0}))\n"
+                   "        CallValidation.report_error(\n"
+                   "          method_sig,\n"
+                   "          err,\n"
+                   "          'Parameter',\n"
+                   "          method_sig.arg_types[{0}][0],\n"
+                   "          arg{0}_type,\n"
+                   "          arg{0},\n"
+                   "          caller_offset: -1\n"
+                   "        )\n"
+                   "      end\n"
+                   "\n",
+                   i);
+    }
+
+    fmt::print("      if should_sample\n"
+               "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n"
+               "      end\n"
+               "\n");
+
+    fmt::print("      # The following line breaks are intentional to show nice pry message\n");
+    for (size_t i = 0; i < 10; i++) {
+        fmt::print("\n");
+    }
+    fmt::print("      # PRY note:\n"
+               "      # this code is sig validation code.\n"
+               "      # Please issue `finish` to step out of it\n"
+               "\n");
+
+    fmt::print("      return_value = original_method");
+    if (options.bindCall) {
+        fmt::print(".bind_call(self, ");
+    } else {
+        fmt::print(".bind(self).call(");
+    }
+    for (size_t i = 0; i < arity; i++) {
+        fmt::print("arg{}, ", i);
+    }
+    fmt::print("&blk)\n");
+
+    fmt::print(
+        "      if should_sample\n"
+        "        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n"
+        "      end\n"
+        "\n"
+        "      if return_type\n"
+        "        if (message = return_type.error_message_for_obj(return_value))\n"
+        "          CallValidation.report_error(\n"
+        "            method_sig,\n"
+        "            message,\n"
+        "            'Return value',\n"
+        "            nil,\n"
+        "            return_type,\n"
+        "            return_value,\n"
+        "            caller_offset: -1\n"
+        "          )\n"
+        "        end\n"
+        "      else\n"
+        "        return_value = T::Private::Types::Void::VOID\n"
+        "      end\n"
+        "      if should_sample\n"
+        "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n"
+        "      end\n"
+        "      return_value\n"
+        "\n");
+
+    fmt::print("    end\n"
+               "  end\n"
+               "\n");
+}
+
 int generateCallValidation(const Options &options) {
     fmt::print("# frozen_string_literal: true\n"
                "# typed: false\n"
@@ -238,6 +359,11 @@ int generateCallValidation(const Options &options) {
     generateCreateValidatorFastDispatcher(ValidatorKind::Procedure);
     for (size_t i = 0; i <= MAX_ARITY; i++) {
         generateCreateValidatorFast(options, ValidatorKind::Procedure, i);
+    }
+
+    generateCreateValidatorMediumDispatcher();
+    for (size_t i = 0; i <= MAX_ARITY; i++) {
+        generateCreateValidatorMedium(options, i);
     }
 
     fmt::print("end\n");
