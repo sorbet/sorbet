@@ -925,7 +925,7 @@ class Pathname < Object
   # [`Dir.mkdir`](https://docs.ruby-lang.org/en/2.7.0/Dir.html#method-c-mkdir).
   sig do
     params(
-        p1: String,
+        p1: Integer,
     )
     .returns(Integer)
   end
