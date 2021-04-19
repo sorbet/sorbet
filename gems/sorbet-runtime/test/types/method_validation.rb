@@ -126,7 +126,45 @@ module Opus::Types::Test
                      ex.message)
       end
 
-      it "does not allocate much" do
+      it "does not allocate too much for complex sig" do
+        @mod.sig do
+          params(
+            x: String,
+            y: T::Array[Symbol],
+            z: T::Hash[Symbol, String]
+          )
+          .returns(T::Array[Symbol])
+        end
+        def @mod.foo(x, y, z:)
+          y
+        end
+        TEST_DATA = {
+          x: "foo",
+          y: Array.new(50) do |i|
+            "foo_#{i}".to_sym
+          end,
+          z: Array.new(50) do |i|
+            ["bar_#{i}".to_sym, i.to_s]
+          end.to_h,
+        }.freeze
+
+        Critic::Extensions::TypeExt.unpatch_types
+        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], z: TEST_DATA[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
+        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], z: TEST_DATA[:z]) # warmup, second run runs in real mode
+        before = GC.stat(:total_allocated_objects)
+        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], z: TEST_DATA[:z])
+        allocated = GC.stat(:total_allocated_objects) - before
+        Critic::Extensions::TypeExt.patch_types
+        if Gem::Version.new('2.6') <= Gem::Version.new(RUBY_VERSION)
+          assert_equal(5, allocated)
+        else
+          assert_equal(6, allocated)
+        end
+        # see https://git.corp.stripe.com/stripe-internal/pay-server/pull/103670 for where 4 of those allocations come from
+        # the others come from test harness in this test.
+      end
+
+      it "allocates little for medium-complexity sig" do
         @mod.sig do
           params(
             x: String,
@@ -155,13 +193,8 @@ module Opus::Types::Test
         @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z])
         allocated = GC.stat(:total_allocated_objects) - before
         Critic::Extensions::TypeExt.patch_types
-        if Gem::Version.new('2.6') <= Gem::Version.new(RUBY_VERSION)
-          assert_equal(3, allocated)
-        else
-          assert_equal(4, allocated)
-        end
-        # see https://git.corp.stripe.com/stripe-internal/pay-server/pull/103670 for where 4 of those allocations come from
-        # the others come from test harness in this test.
+        expected_allocations = T::Configuration::AT_LEAST_RUBY_2_7 ? 1 : 2
+        assert_equal(expected_allocations, allocated)
       end
 
       it "allocates little for simple sig" do
