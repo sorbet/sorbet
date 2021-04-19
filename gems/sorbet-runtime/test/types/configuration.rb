@@ -245,8 +245,6 @@ module Opus::Types::Test
       end
     end
 
-    # Tests for deserialization_error_handler are in serializable.rb.
-
     describe 'scalar_types' do
       describe 'when overridden' do
         it 'requires string values' do
