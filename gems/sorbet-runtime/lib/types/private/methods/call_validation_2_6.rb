@@ -603,26 +603,27 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_medium(mod, original_method, method_sig)
+  def self.create_validator_method_medium(mod, original_method, method_sig)
+    if method_sig.return_type.is_a?(T::Private::Types::Void)
+      raise 'Should have used create_validator_procedure_medium'
+    end
     # trampoline to reduce stack frame size
-    return_type = method_sig.return_type.is_a?(T::Private::Types::Void) ? nil : method_sig.return_type
-
     if method_sig.arg_types.empty?
-      create_validator_medium0(mod, original_method, method_sig, return_type)
+      create_validator_method_medium0(mod, original_method, method_sig, method_sig.return_type)
     elsif method_sig.arg_types.length == 1
-      create_validator_medium1(mod, original_method, method_sig, return_type,
+      create_validator_method_medium1(mod, original_method, method_sig, method_sig.return_type,
                                     method_sig.arg_types[0][1])
     elsif method_sig.arg_types.length == 2
-      create_validator_medium2(mod, original_method, method_sig, return_type,
+      create_validator_method_medium2(mod, original_method, method_sig, method_sig.return_type,
                                     method_sig.arg_types[0][1],
                                     method_sig.arg_types[1][1])
     elsif method_sig.arg_types.length == 3
-      create_validator_medium3(mod, original_method, method_sig, return_type,
+      create_validator_method_medium3(mod, original_method, method_sig, method_sig.return_type,
                                     method_sig.arg_types[0][1],
                                     method_sig.arg_types[1][1],
                                     method_sig.arg_types[2][1])
     elsif method_sig.arg_types.length == 4
-      create_validator_medium4(mod, original_method, method_sig, return_type,
+      create_validator_method_medium4(mod, original_method, method_sig, method_sig.return_type,
                                     method_sig.arg_types[0][1],
                                     method_sig.arg_types[1][1],
                                     method_sig.arg_types[2][1],
@@ -632,7 +633,7 @@ module T::Private::Methods::CallValidation
     end
   end
 
-  def self.create_validator_medium0(mod, original_method, method_sig, return_type)
+  def self.create_validator_method_medium0(mod, original_method, method_sig, return_type)
     mod.send(:define_method, method_sig.method_name) do |&blk|
       # This method is a manually sped-up version of more general code in `validate_call`
       # The following line breaks are intentional to show nice pry message
@@ -651,33 +652,31 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(&blk)
-      if return_type
-        if (message = return_type.error_message_for_obj(return_value))
+      unless return_type.valid?(return_value)
+        message = method_sig.return_type.error_message_for_obj(return_value)
+        if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            return_type,
+            method_sig.return_type,
             return_value,
             caller_offset: -1
           )
         end
-      else
-        return_value = T::Private::Types::Void::VOID
       end
       return_value
-
     end
   end
 
-  def self.create_validator_medium1(mod, original_method, method_sig, return_type, arg0_type)
+  def self.create_validator_method_medium1(mod, original_method, method_sig, return_type, arg0_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      if (err = arg0_type.error_message_for_obj(arg0))
+      unless arg0_type.valid?(arg0)
         CallValidation.report_error(
           method_sig,
-          err,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
           'Parameter',
           method_sig.arg_types[0][0],
           arg0_type,
@@ -702,33 +701,31 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, &blk)
-      if return_type
-        if (message = return_type.error_message_for_obj(return_value))
+      unless return_type.valid?(return_value)
+        message = method_sig.return_type.error_message_for_obj(return_value)
+        if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            return_type,
+            method_sig.return_type,
             return_value,
             caller_offset: -1
           )
         end
-      else
-        return_value = T::Private::Types::Void::VOID
       end
       return_value
-
     end
   end
 
-  def self.create_validator_medium2(mod, original_method, method_sig, return_type, arg0_type, arg1_type)
+  def self.create_validator_method_medium2(mod, original_method, method_sig, return_type, arg0_type, arg1_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      if (err = arg0_type.error_message_for_obj(arg0))
+      unless arg0_type.valid?(arg0)
         CallValidation.report_error(
           method_sig,
-          err,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
           'Parameter',
           method_sig.arg_types[0][0],
           arg0_type,
@@ -737,10 +734,10 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if (err = arg1_type.error_message_for_obj(arg1))
+      unless arg1_type.valid?(arg1)
         CallValidation.report_error(
           method_sig,
-          err,
+          method_sig.arg_types[1][1].error_message_for_obj(arg1),
           'Parameter',
           method_sig.arg_types[1][0],
           arg1_type,
@@ -765,33 +762,31 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, arg1, &blk)
-      if return_type
-        if (message = return_type.error_message_for_obj(return_value))
+      unless return_type.valid?(return_value)
+        message = method_sig.return_type.error_message_for_obj(return_value)
+        if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            return_type,
+            method_sig.return_type,
             return_value,
             caller_offset: -1
           )
         end
-      else
-        return_value = T::Private::Types::Void::VOID
       end
       return_value
-
     end
   end
 
-  def self.create_validator_medium3(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type)
+  def self.create_validator_method_medium3(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      if (err = arg0_type.error_message_for_obj(arg0))
+      unless arg0_type.valid?(arg0)
         CallValidation.report_error(
           method_sig,
-          err,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
           'Parameter',
           method_sig.arg_types[0][0],
           arg0_type,
@@ -800,10 +795,10 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if (err = arg1_type.error_message_for_obj(arg1))
+      unless arg1_type.valid?(arg1)
         CallValidation.report_error(
           method_sig,
-          err,
+          method_sig.arg_types[1][1].error_message_for_obj(arg1),
           'Parameter',
           method_sig.arg_types[1][0],
           arg1_type,
@@ -812,10 +807,10 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if (err = arg2_type.error_message_for_obj(arg2))
+      unless arg2_type.valid?(arg2)
         CallValidation.report_error(
           method_sig,
-          err,
+          method_sig.arg_types[2][1].error_message_for_obj(arg2),
           'Parameter',
           method_sig.arg_types[2][0],
           arg2_type,
@@ -840,33 +835,31 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, arg1, arg2, &blk)
-      if return_type
-        if (message = return_type.error_message_for_obj(return_value))
+      unless return_type.valid?(return_value)
+        message = method_sig.return_type.error_message_for_obj(return_value)
+        if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            return_type,
+            method_sig.return_type,
             return_value,
             caller_offset: -1
           )
         end
-      else
-        return_value = T::Private::Types::Void::VOID
       end
       return_value
-
     end
   end
 
-  def self.create_validator_medium4(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
+  def self.create_validator_method_medium4(mod, original_method, method_sig, return_type, arg0_type, arg1_type, arg2_type, arg3_type)
     mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
       # This method is a manually sped-up version of more general code in `validate_call`
-      if (err = arg0_type.error_message_for_obj(arg0))
+      unless arg0_type.valid?(arg0)
         CallValidation.report_error(
           method_sig,
-          err,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
           'Parameter',
           method_sig.arg_types[0][0],
           arg0_type,
@@ -875,10 +868,10 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if (err = arg1_type.error_message_for_obj(arg1))
+      unless arg1_type.valid?(arg1)
         CallValidation.report_error(
           method_sig,
-          err,
+          method_sig.arg_types[1][1].error_message_for_obj(arg1),
           'Parameter',
           method_sig.arg_types[1][0],
           arg1_type,
@@ -887,10 +880,10 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if (err = arg2_type.error_message_for_obj(arg2))
+      unless arg2_type.valid?(arg2)
         CallValidation.report_error(
           method_sig,
-          err,
+          method_sig.arg_types[2][1].error_message_for_obj(arg2),
           'Parameter',
           method_sig.arg_types[2][0],
           arg2_type,
@@ -899,10 +892,10 @@ module T::Private::Methods::CallValidation
         )
       end
 
-      if (err = arg3_type.error_message_for_obj(arg3))
+      unless arg3_type.valid?(arg3)
         CallValidation.report_error(
           method_sig,
-          err,
+          method_sig.arg_types[3][1].error_message_for_obj(arg3),
           'Parameter',
           method_sig.arg_types[3][0],
           arg3_type,
@@ -927,23 +920,283 @@ module T::Private::Methods::CallValidation
       # Please issue `finish` to step out of it
 
       return_value = original_method.bind(self).call(arg0, arg1, arg2, arg3, &blk)
-      if return_type
-        if (message = return_type.error_message_for_obj(return_value))
+      unless return_type.valid?(return_value)
+        message = method_sig.return_type.error_message_for_obj(return_value)
+        if message
           CallValidation.report_error(
             method_sig,
             message,
             'Return value',
             nil,
-            return_type,
+            method_sig.return_type,
             return_value,
             caller_offset: -1
           )
         end
-      else
-        return_value = T::Private::Types::Void::VOID
       end
       return_value
+    end
+  end
 
+  def self.create_validator_procedure_medium(mod, original_method, method_sig)
+    # trampoline to reduce stack frame size
+    if method_sig.arg_types.empty?
+      create_validator_procedure_medium0(mod, original_method, method_sig)
+    elsif method_sig.arg_types.length == 1
+      create_validator_procedure_medium1(mod, original_method, method_sig,
+                                    method_sig.arg_types[0][1])
+    elsif method_sig.arg_types.length == 2
+      create_validator_procedure_medium2(mod, original_method, method_sig,
+                                    method_sig.arg_types[0][1],
+                                    method_sig.arg_types[1][1])
+    elsif method_sig.arg_types.length == 3
+      create_validator_procedure_medium3(mod, original_method, method_sig,
+                                    method_sig.arg_types[0][1],
+                                    method_sig.arg_types[1][1],
+                                    method_sig.arg_types[2][1])
+    elsif method_sig.arg_types.length == 4
+      create_validator_procedure_medium4(mod, original_method, method_sig,
+                                    method_sig.arg_types[0][1],
+                                    method_sig.arg_types[1][1],
+                                    method_sig.arg_types[2][1],
+                                    method_sig.arg_types[3][1])
+    else
+      raise 'should not happen'
+    end
+  end
+
+  def self.create_validator_procedure_medium0(mod, original_method, method_sig)
+    mod.send(:define_method, method_sig.method_name) do |&blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+      # PRY note:
+      # this code is sig validation code.
+      # Please issue `finish` to step out of it
+
+      original_method.bind(self).call(&blk)
+      T::Private::Types::Void::VOID
+    end
+  end
+
+  def self.create_validator_procedure_medium1(mod, original_method, method_sig, arg0_type)
+    mod.send(:define_method, method_sig.method_name) do |arg0, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(arg0)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+
+      # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+      # PRY note:
+      # this code is sig validation code.
+      # Please issue `finish` to step out of it
+
+      original_method.bind(self).call(arg0, &blk)
+      T::Private::Types::Void::VOID
+    end
+  end
+
+  def self.create_validator_procedure_medium2(mod, original_method, method_sig, arg0_type, arg1_type)
+    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(arg0)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+
+      unless arg1_type.valid?(arg1)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(arg1),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          arg1,
+          caller_offset: -1
+        )
+      end
+
+      # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+      # PRY note:
+      # this code is sig validation code.
+      # Please issue `finish` to step out of it
+
+      original_method.bind(self).call(arg0, arg1, &blk)
+      T::Private::Types::Void::VOID
+    end
+  end
+
+  def self.create_validator_procedure_medium3(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type)
+    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(arg0)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+
+      unless arg1_type.valid?(arg1)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(arg1),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          arg1,
+          caller_offset: -1
+        )
+      end
+
+      unless arg2_type.valid?(arg2)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(arg2),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          arg2,
+          caller_offset: -1
+        )
+      end
+
+      # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+      # PRY note:
+      # this code is sig validation code.
+      # Please issue `finish` to step out of it
+
+      original_method.bind(self).call(arg0, arg1, arg2, &blk)
+      T::Private::Types::Void::VOID
+    end
+  end
+
+  def self.create_validator_procedure_medium4(mod, original_method, method_sig, arg0_type, arg1_type, arg2_type, arg3_type)
+    mod.send(:define_method, method_sig.method_name) do |arg0, arg1, arg2, arg3, &blk|
+      # This method is a manually sped-up version of more general code in `validate_call`
+      unless arg0_type.valid?(arg0)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[0][1].error_message_for_obj(arg0),
+          'Parameter',
+          method_sig.arg_types[0][0],
+          arg0_type,
+          arg0,
+          caller_offset: -1
+        )
+      end
+
+      unless arg1_type.valid?(arg1)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[1][1].error_message_for_obj(arg1),
+          'Parameter',
+          method_sig.arg_types[1][0],
+          arg1_type,
+          arg1,
+          caller_offset: -1
+        )
+      end
+
+      unless arg2_type.valid?(arg2)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[2][1].error_message_for_obj(arg2),
+          'Parameter',
+          method_sig.arg_types[2][0],
+          arg2_type,
+          arg2,
+          caller_offset: -1
+        )
+      end
+
+      unless arg3_type.valid?(arg3)
+        CallValidation.report_error(
+          method_sig,
+          method_sig.arg_types[3][1].error_message_for_obj(arg3),
+          'Parameter',
+          method_sig.arg_types[3][0],
+          arg3_type,
+          arg3,
+          caller_offset: -1
+        )
+      end
+
+      # The following line breaks are intentional to show nice pry message
+
+
+
+
+
+
+
+
+
+
+      # PRY note:
+      # this code is sig validation code.
+      # Please issue `finish` to step out of it
+
+      original_method.bind(self).call(arg0, arg1, arg2, arg3, &blk)
+      T::Private::Types::Void::VOID
     end
   end
 

@@ -71,8 +71,10 @@ module T::Private::Methods::CallValidation
           create_validator_method_fast(mod, original_method, method_sig)
         elsif simple_procedure
           create_validator_procedure_fast(mod, original_method, method_sig)
+        elsif ok_for_fast_path && method_sig.return_type.is_a?(T::Private::Types::Void)
+          create_validator_procedure_medium(mod, original_method, method_sig)
         elsif ok_for_fast_path
-          create_validator_medium(mod, original_method, method_sig)
+          create_validator_method_medium(mod, original_method, method_sig)
         else
           create_validator_slow(mod, original_method, method_sig)
         end
