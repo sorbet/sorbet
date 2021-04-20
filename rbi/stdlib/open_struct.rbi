@@ -100,7 +100,7 @@ class OpenStruct
     params(
       other: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .returns(::T::Boolean)
   end
   def ==(other); end
 
@@ -196,8 +196,14 @@ class OpenStruct
   # data = OpenStruct.new("country" => "Australia", :capital => "Canberra")
   # data.each_pair.to_a   # => [[:country, "Australia"], [:capital, "Canberra"]]
   # ```
-  sig {returns(::T.untyped)}
-  def each_pair(); end
+  sig do
+    params(
+        blk: T.proc.params(arg0: Symbol, arg1: ::T.untyped).returns(BasicObject),
+    )
+    .returns(T::Array[[Symbol, ::T.untyped]])
+  end
+  sig {returns(T::Enumerator[[Symbol,::T.untyped]])}
+  def each_pair(&blk); end
 
   # Compares this object and `other` for equality. An
   # [`OpenStruct`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html) is eql?
@@ -209,7 +215,7 @@ class OpenStruct
     params(
       other: ::T.untyped,
     )
-    .returns(::T.untyped)
+    .returns(::T::Boolean)
   end
   def eql?(other); end
 
@@ -224,7 +230,7 @@ class OpenStruct
   #
   # See also
   # [`Object#hash`](https://docs.ruby-lang.org/en/2.7.0/Object.html#method-i-hash).
-  sig {returns(::T.untyped)}
+  sig {returns(Integer)}
   def hash(); end
 
   sig do
@@ -239,7 +245,7 @@ class OpenStruct
   #
   # Also aliased as:
   # [`to_s`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html#method-i-to_s)
-  sig {returns(::T.untyped)}
+  sig {returns(String)}
   def inspect(); end
 
   # Provides marshalling support for use by the
@@ -298,11 +304,11 @@ class OpenStruct
   # data.to_h {|name, value| [name.to_s, value.upcase] }
   #             # => {"country" => "AUSTRALIA", "capital" => "CANBERRA" }
   # ```
-  sig {returns(::T.untyped)}
+  sig {returns(::T::Hash[Symbol, ::T.untyped])}
   def to_h(); end
 
   # Alias for:
   # [`inspect`](https://docs.ruby-lang.org/en/2.7.0/OpenStruct.html#method-i-inspect)
-  sig {returns(::T.untyped)}
+  sig {returns(String)}
   def to_s(); end
 end
