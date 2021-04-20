@@ -12,7 +12,6 @@ class PackageWalk {
     vector<core::NameRef> package;
     vector<QualifiedName> imports;
     vector<QualifiedName> exports;
-    optional<QualifiedName> exportMethods;
 
     // Convert a constant literal into a fully qualified name
     vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit *cnst) {
@@ -49,8 +48,7 @@ public:
         if (send.args.size() != 1) {
             return tree;
         }
-        if (send.fun != core::Names::export_() && send.fun != core::Names::import() &&
-            send.fun != core::Names::exportMethods()) {
+        if (send.fun != core::Names::export_() && send.fun != core::Names::import()) {
             return tree;
         }
 
@@ -64,8 +62,6 @@ public:
             exports.emplace_back(move(name));
         } else if (send.fun == core::Names::import()) {
             imports.emplace_back(move(name));
-        } else if (send.fun == core::Names::exportMethods()) {
-            exportMethods = optional<QualifiedName>{move(name)};
         }
 
         return tree;
@@ -76,7 +72,6 @@ public:
         pkg.package = move(package);
         pkg.imports = move(imports);
         pkg.exports = move(exports);
-        pkg.exportMethods = move(exportMethods);
         return pkg;
     }
 };
