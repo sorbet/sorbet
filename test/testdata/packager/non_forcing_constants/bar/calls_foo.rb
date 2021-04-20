@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 
-module BarMethods
+module CallsFoo
   extend T::Sig
 
   sig {returns(Project::Foo::Foo)}
@@ -13,6 +13,6 @@ module BarMethods
   sig {returns(T::Boolean)}
   def check_bar
     # Call an imported method.
-    Project::Foo.good_check_is_bar(Bar.new(5))
+    Project::Foo::FooNonForcing.good_check_is_bar(Bar.new(5))
   end
 end

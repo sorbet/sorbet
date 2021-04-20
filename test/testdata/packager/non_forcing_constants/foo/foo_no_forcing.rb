@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 # typed: strict
 
-module FooMethods
+module FooNonForcing
   extend T::Sig
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
-  def global_check_is_bar(arg)
+  def self.global_check_is_bar(arg)
     if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar") # error: Unable to resolve constant `::Bar`
       true
     else
@@ -14,7 +14,7 @@ module FooMethods
   end
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
-  def bad_not_keyword_arg(arg)
+  def self.bad_not_keyword_arg(arg)
     if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", "Project::Bar") # error: Too many positional arguments
       true
     else
@@ -23,7 +23,7 @@ module FooMethods
   end
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
-  def bad_wrong_keyword_arg(arg)
+  def self.bad_wrong_keyword_arg(arg)
     if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", pakige: "Project::Bar") # error: Unrecognized keyword argument
       true
     else
@@ -32,7 +32,7 @@ module FooMethods
   end
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
-  def bad_package_not_a_string(arg)
+  def self.bad_package_not_a_string(arg)
     if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", package: 5) # error: Expected `T.nilable(String)` but found `Integer(5)`
       true
     else
@@ -41,7 +41,7 @@ module FooMethods
   end
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
-  def bad_check_for_global_bar(arg)
+  def self.bad_check_for_global_bar(arg)
     if T::NonForcingConstants.non_forcing_is_a?(arg, "::Bar", package: "Project::Bar") # error: should not be an absolute constant reference
       true
     else
@@ -50,7 +50,7 @@ module FooMethods
   end
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
-  def bad_non_existent_package(arg)
+  def self.bad_non_existent_package(arg)
     # this is /temporarily/ okay because of #3778, but once we back it
     # out this will fail with `Unable to find package`
     if T::NonForcingConstants.non_forcing_is_a?(arg, "Bar", package: "Project::Quux")
@@ -61,7 +61,7 @@ module FooMethods
   end
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
-  def check_for_non_existing_bar(arg)
+  def self.check_for_non_existing_bar(arg)
     if T::NonForcingConstants.non_forcing_is_a?(arg, "Quux", package: "Project::Bar") # error: Unable to resolve constant `::Project::Bar::Quux`
       true
     else
@@ -70,7 +70,7 @@ module FooMethods
   end
 
   sig {params(arg: T.untyped).returns(T::Boolean)}
-  def good_check_is_bar(arg)
+  def self.good_check_is_bar(arg)
     if T::NonForcingConstants.non_forcing_is_a?(arg, "Bar", package: "Project::Bar")
       true
     else
