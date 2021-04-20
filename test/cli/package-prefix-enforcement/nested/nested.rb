@@ -23,7 +23,13 @@ end
 
 module Root
   module Nested
-    class SomeClass; end
+    class SomeClass
+      class Deeper; end
+    end
+
+    class OtherClass
+      class Deep2; end
+    end
   end
 end
 
