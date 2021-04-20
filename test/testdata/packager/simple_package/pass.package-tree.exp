@@ -4,18 +4,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Bar>)
 
-    <self>.export_methods(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C BarMethods>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C <PackageMethods>><<C <todo sym>>> < ()
-    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C BarMethods>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C CallsFoo>)
   end
 
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Project>::<C Foo><<C <todo sym>>> < ()
       <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Foo>
 
-      <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C <PackageMethods>>)
+      <emptyTree>::<C CallsBar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C CallsBar>
     end
   end
 end
@@ -38,12 +34,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 end
 class <emptyTree><<C <root>>> < (::<todo sym>)
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1><<C <todo sym>>> < ()
-    module <emptyTree>::<C BarMethods><<C <todo sym>>> < ()
+    module <emptyTree>::<C CallsFoo><<C <todo sym>>> < ()
       ::Sorbet::Private::Static.sig(<self>) do ||
         <self>.returns(<emptyTree>::<C Project>::<C Foo>::<C Foo>)
       end
 
-      def build_foo<<todo method>>(&<blk>)
+      def self.build_foo<<todo method>>(&<blk>)
         <emptyTree>::<C Project>::<C Foo>::<C Foo>.new(10)
       end
 
@@ -51,15 +47,15 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Bar>)
       end
 
-      def build_bar<<todo method>>(&<blk>)
-        <emptyTree>::<C Project>::<C Foo>.build_bar()
+      def self.build_bar<<todo method>>(&<blk>)
+        <emptyTree>::<C Project>::<C Foo>::<C CallsBar>.build_bar()
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :build_foo, :normal)
+      ::Sorbet::Private::Static.keep_self_def(<self>, :build_foo, :normal)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :build_bar, :normal)
+      ::Sorbet::Private::Static.keep_self_def(<self>, :build_bar, :normal)
     end
   end
 end
@@ -69,18 +65,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Foo>)
 
-    <self>.export_methods(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C FooMethods>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C <PackageMethods>><<C <todo sym>>> < ()
-    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C FooMethods>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C CallsBar>)
   end
 
   module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C Project>::<C Bar><<C <todo sym>>> < ()
       <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Bar>
 
-      <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C <PackageMethods>>)
+      <emptyTree>::<C CallsFoo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C CallsFoo>
+    end
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1><<C <todo sym>>> < ()
+    module <emptyTree>::<C CallsBar><<C <todo sym>>> < ()
+      ::Sorbet::Private::Static.sig(<self>) do ||
+        <self>.returns(<emptyTree>::<C Project>::<C Bar>::<C Bar>)
+      end
+
+      def self.build_bar<<todo method>>(&<blk>)
+        <emptyTree>::<C Project>::<C Bar>::<C Bar>.new(10)
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      ::Sorbet::Private::Static.keep_self_def(<self>, :build_bar, :normal)
     end
   end
 end
@@ -98,33 +107,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
       ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
-    end
-  end
-end
-class <emptyTree><<C <root>>> < (::<todo sym>)
-  module <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1><<C <todo sym>>> < ()
-    module <emptyTree>::<C FooMethods><<C <todo sym>>> < ()
-      ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.returns(<emptyTree>::<C Project>::<C Bar>::<C Bar>)
-      end
-
-      def build_bar<<todo method>>(&<blk>)
-        <emptyTree>::<C Project>::<C Bar>::<C Bar>.new(10)
-      end
-
-      ::Sorbet::Private::Static.sig(<self>) do ||
-        <self>.returns(<emptyTree>::<C Foo>)
-      end
-
-      def build_foo<<todo method>>(&<blk>)
-        <emptyTree>::<C Project>::<C Bar>.build_foo()
-      end
-
-      <self>.extend(<emptyTree>::<C T>::<C Sig>)
-
-      ::Sorbet::Private::Static.keep_def(<self>, :build_bar, :normal)
-
-      ::Sorbet::Private::Static.keep_def(<self>, :build_foo, :normal)
     end
   end
 end
