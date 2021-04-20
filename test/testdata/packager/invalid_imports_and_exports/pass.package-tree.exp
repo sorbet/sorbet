@@ -25,7 +25,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C AModule>)
   end
 
-  module <emptyTree>::<C <PackageRegistry>>::<C _Package$1><<C <todo sym>>> < ()
+  module <emptyTree>::<C <PackageRegistry>>::<C A_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C B><<C <todo sym>>> < ()
       <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C BClass>
 
@@ -118,4 +118,4 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::Sorbet::Private::Static.keep_self_def(<self>, :get_a, :normal)
     end
   end
-endA
+end
