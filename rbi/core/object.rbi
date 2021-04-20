@@ -52,6 +52,14 @@ class Object < BasicObject
   sig {returns(Integer)}
   def object_id(); end
 
+  # Returns the receiver `obj`.
+  #
+  # ```ruby
+  # obj = Object.new; obj.itself.object_id == o.object_id # => true
+  # ```
+  sig {returns(T.self_type)}
+  def itself(); end
+
   # Yields self to the block and returns the result of the block.
   #
   # ```ruby
