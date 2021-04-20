@@ -196,7 +196,6 @@ class OpenStruct
   # data = OpenStruct.new("country" => "Australia", :capital => "Canberra")
   # data.each_pair.to_a   # => [[:country, "Australia"], [:capital, "Canberra"]]
   # ```
-  # sig {returns(::T.untyped)}
   sig do
     params(
         blk: T.proc.params(arg0: Symbol, arg1: ::T.untyped).returns(BasicObject),
