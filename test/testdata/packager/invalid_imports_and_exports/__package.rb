@@ -23,16 +23,8 @@ class A < PackageSpec
   export 123 # error: Argument to `export` must be a constant
   export "hello" # error: Argument to `export` must be a constant
   export method # error: Argument to `export` must be a constant
-       # ^^^^^^ error: Not enough arguments 
+       # ^^^^^^ error: Not enough arguments
   export REFERENCE # Works; it's a constant.
   export AClass
-
-  # AModule export should still work. The rest will fail / cause errors.
-  export_methods 123, "hello", method, REFERENCE, AModule, AClass
-               # ^^^ error: Argument to `export_methods` must be a constant
-                    # ^^^^^^^ error: Argument to `export_methods` must be a constant
-                             # ^^^^^^ error: Argument to `export_methods` must be a constant
-                             # ^^^^^^ error: Not enough arguments
-#                                      ^^^^^^^^^ error: Only modules can be `include`d, but `ASecondClass` is a class
-#                                                          ^^^^^^ error: Only modules can be `include`d, but `AClass` is a class
+  export AModule
 end

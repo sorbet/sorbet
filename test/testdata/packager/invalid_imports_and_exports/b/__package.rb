@@ -6,5 +6,5 @@
 class B < PackageSpec
   import A
   export BClass
-  export_methods BModule
+  export BModule
 end
