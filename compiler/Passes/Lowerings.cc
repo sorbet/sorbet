@@ -25,37 +25,37 @@ public:
 // TODO: add more from https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/include/ruby/ruby.h#L1962. Will
 // need to modify core sorbet for it.
 const vector<pair<string, string>> knownSymbolMapping = {
-    {"Kernel", "rb_mKernel"},
-    {"Enumerable", "rb_mEnumerable"},
-    {"Comparable", "rb_mComparable"},
-    {"BasicObject", "rb_cBasicObject"},
-    {"Object", "rb_cObject"},
     {"Array", "rb_cArray"},
+    {"BasicObject", "rb_cBasicObject"},
     {"Class", "rb_cClass"},
-    {"Method", "rb_cMethod"},
-    {"Module", "rb_cModule"},
-    {"Numeric", "rb_cNumeric"},
+    {"Comparable", "rb_mComparable"},
+    {"Enumerable", "rb_mEnumerable"},
     {"FalseClass", "rb_cFalseClass"},
-    {"TrueClass", "rb_cTrueClass"},
     {"Float", "rb_cFloat"},
     {"Hash", "rb_cHash"},
     {"Integer", "rb_cInteger"},
+    {"Kernel", "rb_mKernel"},
+    {"Method", "rb_cMethod"},
     {"Module", "rb_cModule"},
+    {"Module", "rb_cModule"},
+    {"NameError", "rb_eNameError"},
     {"NilClass", "rb_cNilClass"},
+    {"NoMethodError", "rb_eNoMethodError"},
+    {"Numeric", "rb_cNumeric"},
+    {"Object", "rb_cObject"},
     {"Proc", "rb_cProc"},
     {"Range", "rb_cRange"},
     {"Rational", "rb_cRational"},
     {"Regexp", "rb_cRegexp"},
+    {"StandardError", "rb_eStandardError"},
     {"String", "rb_cString"},
     {"Struct", "rb_cStruct"},
     {"Symbol", "rb_cSymbol"},
-    {"StandardError", "rb_eStandardError"},
     {"Thread", "rb_cThread"},
-    {"NameError", "rb_eNameError"},
-    {"NoMethodError", "rb_eNoMethodError"},
+    {"TrueClass", "rb_cTrueClass"},
 };
 
-class ConstantLoading : public IRIntrinsic {
+class ClassAndModuleLoading : public IRIntrinsic {
 public:
     virtual vector<string> implementedFunctionCall() override {
         return {"sorbet_i_getRubyClass", "sorbet_i_getRubyConstant"};
