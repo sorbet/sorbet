@@ -641,7 +641,8 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                         auto skipTypeTest = bind.bind.variable.data(cfg) == core::LocalVariable::selfVariable();
 
                         if (!skipTypeTest) {
-                            IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type, i->cast.shortName(cs));
+                            IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type,
+                                                           fmt::format("T.{}", i->cast.shortName(cs)));
                         }
 
                         if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
