@@ -12,7 +12,7 @@ constexpr ErrorClass PackageNotFound{3704, StrictLevel::False};
 constexpr ErrorClass UnpackagedFile{3705, StrictLevel::False};
 constexpr ErrorClass InvalidImportOrExport{3706, StrictLevel::False};
 constexpr ErrorClass MultiplePackagesInOneFile{3707, StrictLevel::False};
-constexpr ErrorClass MultipleExportMethodsCalls{3708, StrictLevel::False};
+// 3708 MultipleExportMethodsCalls
 constexpr ErrorClass NoSelfImport{3709, StrictLevel::False};
 constexpr ErrorClass InvalidPackageExpression{3710, StrictLevel::False};
 constexpr ErrorClass PackageFileMustBeStrict{3711, StrictLevel::False};

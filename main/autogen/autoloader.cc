@@ -439,14 +439,6 @@ string renderPackageAutoloadSrc(const core::GlobalState &gs, const AutoloaderCon
                                 const string_view mangledName) {
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}\n", alCfg.preamble);
-
-    // TODO: what will the export_methods autoload actually look like? no idea, but this shows that the data is there
-    if (pkg.exportMethods) {
-        fmt::format_to(buf, "require_relative \"{}/{}.rb\"\n", mangledName, pkg.exportMethods->join(gs, "/"));
-        fmt::format_to(buf, "module ::PackageRoot::{}\n", mangledName);
-        fmt::format_to(buf, "  extend ::PackageRoot::{}::{}\n", mangledName, pkg.exportMethods->join(gs, "::"));
-        fmt::format_to(buf, "end\n");
-    }
     fmt::format_to(buf, "{}.autoload_map(::PackageRoot::{}, {{\n", alCfg.registryModule, mangledName);
     for (auto expt : pkg.exports) {
         auto name = expt.join(gs, "::");

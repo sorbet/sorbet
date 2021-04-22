@@ -182,7 +182,6 @@ struct Package {
     std::vector<core::NameRef> package;
     std::vector<QualifiedName> imports;
     std::vector<QualifiedName> exports;
-    std::optional<QualifiedName> exportMethods;
 };
 
 } // namespace sorbet::autogen

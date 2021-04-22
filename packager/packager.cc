@@ -234,8 +234,6 @@ ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameR
 struct PackageInfoFinder {
     unique_ptr<PackageInfo> info = nullptr;
     vector<FullyQualifiedName> exported;
-    vector<FullyQualifiedName> exportedMethods;
-    core::LocOffsets exportMethodsLoc = core::LocOffsets::none();
 
     ast::ExpressionPtr postTransformSend(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &send = ast::cast_tree_nonnull<ast::Send>(tree);
@@ -254,8 +252,7 @@ struct PackageInfoFinder {
         }
 
         // Sanity check arguments for unrecognized methods
-        if (send.fun != core::Names::export_() && send.fun != core::Names::import() &&
-            send.fun != core::Names::exportMethods()) {
+        if (send.fun != core::Names::export_() && send.fun != core::Names::import()) {
             for (const auto &arg : send.args) {
                 if (!ast::isa_tree<ast::Literal>(arg)) {
                     if (auto e = ctx.beginError(arg.loc(), core::errors::Packager::InvalidPackageExpression)) {
@@ -292,29 +289,6 @@ struct PackageInfoFinder {
             }
         }
 
-        if (send.fun == core::Names::exportMethods()) {
-            const bool alreadyCalled = exportMethodsLoc.exists();
-            if (alreadyCalled) {
-                if (auto e = ctx.beginError(send.loc, core::errors::Packager::MultipleExportMethodsCalls)) {
-                    e.setHeader("`{}` can only be called once in a package", "export_methods");
-                    e.addErrorLine(core::Loc(ctx.file, exportMethodsLoc), "Previous call to export_methods found here");
-                }
-            } else {
-                exportMethodsLoc = send.loc;
-            }
-            for (auto &arg : send.args) {
-                if (auto target = verifyConstant(ctx, core::Names::exportMethods(), arg)) {
-                    // Don't export the methods if export_methods was already called. Let dependents error until it is
-                    // fixed.
-                    if (!alreadyCalled) {
-                        exportedMethods.push_back(getFullyQualifiedName(ctx, target));
-                    }
-                    // Transform the constant lit to refer to the target within the mangled package namespace.
-                    arg = prependInternalPackageName(move(arg));
-                }
-            }
-        }
-
         return tree;
     }
 
@@ -342,33 +316,6 @@ struct PackageInfoFinder {
                 e.addErrorLine(info->loc, "Previous package declaration found here");
             }
         }
-
-        return tree;
-    }
-
-    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
-        auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
-        if (classDef.symbol != core::Symbols::root() || info == nullptr || exportedMethods.empty()) {
-            return tree;
-        }
-
-        // Inject <PackageRegistry>::Name_Package::<PackageMethods> within the <root> class
-        ast::ClassDef::RHS_store includeStatements;
-        for (auto &exportedMethod : exportedMethods) {
-            // include <PackageRegistry>::MangledPackageName::Path::To::Item
-            // Use the loc of the name so the error goes to the right place.
-            ENFORCE(exportedMethod.loc.file() == ctx.file);
-            includeStatements.emplace_back(ast::MK::Send1(
-                exportedMethod.loc.offsets(), ast::MK::Self(exportedMethod.loc.offsets()), core::Names::include(),
-                prependInternalPackageName(exportedMethod.toLiteral(exportedMethod.loc.offsets()))));
-        }
-
-        // Use the loc of the `export_methods` call so `include` errors goes to the right place.
-        classDef.rhs.emplace_back(ast::MK::Module(
-            exportMethodsLoc, exportMethodsLoc,
-            name2Expr(core::Names::Constants::PackageMethods(),
-                      name2Expr(this->info->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry()))),
-            {}, std::move(includeStatements)));
 
         return tree;
     }
@@ -419,15 +366,6 @@ struct PackageInfoFinder {
             info->exportedItems.emplace_back(
                 ast::MK::Assign(core::LocOffsets::none(), name2Expr(klass.parts.back()),
                                 prependInternalPackageName(klass.toLiteral(core::LocOffsets::none()))));
-        }
-
-        if (!exportedMethods.empty()) {
-            // extend <PackageRegistry>::Name_of_package::<PackageMethods>
-            info->exportedItems.emplace_back(
-                ast::MK::Send1(core::LocOffsets::none(), ast::MK::Self(core::LocOffsets::none()), core::Names::extend(),
-                               name2Expr(core::Names::Constants::PackageMethods(),
-                                         name2Expr(this->info->name.mangledName,
-                                                   name2Expr(core::Names::Constants::PackageRegistry())))));
         }
     }
 

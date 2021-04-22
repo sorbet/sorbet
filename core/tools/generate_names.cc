@@ -396,7 +396,6 @@ NameDef names[] = {
     {"export_", "export"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageRegistry", "<PackageRegistry>", true},
-    {"exportMethods", "export_methods"},
     {"PackageMethods", "<PackageMethods>", true},
 
     // GlobalState initEmpty()

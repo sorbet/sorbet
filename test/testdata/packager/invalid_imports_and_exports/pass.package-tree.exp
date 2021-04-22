@@ -22,22 +22,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C AClass>)
 
-    <self>.export_methods(123, "hello", <self>.method(), <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C REFERENCE>, <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C AModule>, <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C AClass>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C <PackageMethods>><<C <todo sym>>> < ()
-    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C REFERENCE>)
-
-    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C AModule>)
-
-    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C AClass>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C AModule>)
   end
 
   module <emptyTree>::<C <PackageRegistry>>::<C A_Package$1><<C <todo sym>>> < ()
     module <emptyTree>::<C B><<C <todo sym>>> < ()
       <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C BClass>
 
-      <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C <PackageMethods>>)
+      <emptyTree>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C BModule>
     end
   end
 end
@@ -54,7 +46,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def get_a<<todo method>>(&<blk>)
-        <emptyTree>::<C B>.get_a()
+        <emptyTree>::<C B>::<C BModule>.get_a()
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
@@ -67,13 +59,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C Integer>)
       end
 
-      def one<<todo method>>(&<blk>)
+      def self.one<<todo method>>(&<blk>)
         1
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :one, :normal)
+      ::Sorbet::Private::Static.keep_self_def(<self>, :one, :normal)
     end
   end
 end
@@ -83,11 +75,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C BClass>)
 
-    <self>.export_methods(<emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C BModule>)
-  end
-
-  module <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C <PackageMethods>><<C <todo sym>>> < ()
-    <self>.include(<emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C BModule>)
+    <self>.export(<emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C BModule>)
   end
 
   module <emptyTree>::<C <PackageRegistry>>::<C B_Package$1><<C <todo sym>>> < ()
@@ -96,7 +84,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C AClass>
 
-      <self>.extend(<emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C <PackageMethods>>)
+      <emptyTree>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C AModule>
     end
   end
 end
@@ -108,7 +96,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def get_one<<todo method>>(&<blk>)
-        <emptyTree>::<C A>.one()
+        <emptyTree>::<C A>::<C AModule>.one()
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
@@ -121,13 +109,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.returns(<emptyTree>::<C A>::<C AClass>)
       end
 
-      def get_a<<todo method>>(&<blk>)
+      def self.get_a<<todo method>>(&<blk>)
         <emptyTree>::<C A>::<C AClass>.new()
       end
 
       <self>.extend(<emptyTree>::<C T>::<C Sig>)
 
-      ::Sorbet::Private::Static.keep_def(<self>, :get_a, :normal)
+      ::Sorbet::Private::Static.keep_self_def(<self>, :get_a, :normal)
     end
   end
 end

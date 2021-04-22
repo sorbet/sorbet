@@ -3,5 +3,5 @@
 
 class Project::Foo < PackageSpec
   export Foo
-  export_methods FooMethods
+  export FooNonForcing
 end
