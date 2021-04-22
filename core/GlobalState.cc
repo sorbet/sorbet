@@ -110,6 +110,16 @@ struct MethodBuilder {
         return *this;
     }
 
+    MethodBuilder &resultTypeUntyped() {
+        method.data(gs)->resultType = Types::untyped(gs, method);
+        return *this;
+    }
+
+    MethodBuilder &resultType(TypePtr &&type) {
+        method.data(gs)->resultType = type;
+        return *this;
+    }
+
     MethodRef build() {
         auto &arg = gs.enterMethodArgumentSymbol(Loc::none(), method, Names::blkArg());
         arg.flags.isBlock = true;
@@ -484,120 +494,138 @@ void GlobalState::initEmpty() {
     id.data(*this)->resultType = make_type<LiteralType>(Symbols::String(), enterNameUTF8(sorbet_full_version_string));
 
     // Synthesize <Magic>.<build-hash>(*vs : T.untyped) => Hash
-    method =
-        enterMethod(*this, Symbols::MagicSingleton(), Names::buildHash()).repeatedUntypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::hashOfUntyped();
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildHash())
+                 .repeatedUntypedArg(Names::arg0())
+                 .resultType(Types::hashOfUntyped())
+                 .build();
     // Synthesize <Magic>.<build-array>(*vs : T.untyped) => Array
-    method =
-        enterMethod(*this, Symbols::MagicSingleton(), Names::buildArray()).repeatedUntypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::arrayOfUntyped();
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildArray())
+                 .repeatedUntypedArg(Names::arg0())
+                 .resultType(Types::arrayOfUntyped())
+                 .build();
 
     // Synthesize <Magic>.<build-range>(from: T.untyped, to: T.untyped) => Range
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::buildRange())
                  .untypedArg(Names::arg0())
                  .untypedArg(Names::arg1())
                  .untypedArg(Names::arg2())
+                 .resultType(Types::rangeOfUntyped())
                  .build();
-    method.data(*this)->resultType = Types::rangeOfUntyped();
 
     // Synthesize <Magic>.<splat>(a: T.untyped) => Untyped
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::splat()).untypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::untyped(*this, method);
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::splat())
+                 .untypedArg(Names::arg0())
+                 .resultTypeUntyped()
+                 .build();
 
     // Synthesize <Magic>.<defined>(*arg0: String) => Boolean
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::defined_p())
                  .repeatedTypedArg(Names::arg0(), Types::String())
+                 .resultType(Types::any(*this, Types::nilClass(), Types::String()))
                  .build();
-    method.data(*this)->resultType = Types::any(*this, Types::nilClass(), Types::String());
 
     // Synthesize <Magic>.<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::expandSplat())
                  .untypedArg(Names::arg0())
                  .untypedArg(Names::arg1())
                  .untypedArg(Names::arg2())
+                 .resultTypeUntyped()
                  .build();
-    method.data(*this)->resultType = Types::untyped(*this, method);
     // Synthesize <Magic>.<call-with-splat>(args: *T.untyped) => T.untyped
-    method =
-        enterMethod(*this, Symbols::MagicSingleton(), Names::callWithSplat()).repeatedUntypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::untyped(*this, method);
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithSplat())
+                 .repeatedUntypedArg(Names::arg0())
+                 .resultTypeUntyped()
+                 .build();
     // Synthesize <Magic>.<call-with-block>(args: *T.untyped) => T.untyped
-    method =
-        enterMethod(*this, Symbols::MagicSingleton(), Names::callWithBlock()).repeatedUntypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::untyped(*this, method);
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithBlock())
+                 .repeatedUntypedArg(Names::arg0())
+                 .resultTypeUntyped()
+                 .build();
     // Synthesize <Magic>.<call-with-splat-and-block>(args: *T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::callWithSplatAndBlock())
                  .repeatedUntypedArg(Names::arg0())
+                 .resultTypeUntyped()
                  .build();
-    method.data(*this)->resultType = Types::untyped(*this, method);
     // Synthesize <Magic>.<suggest-type>(arg: *T.untyped) => T.untyped
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::suggestType()).untypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::untyped(*this, method);
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::suggestType())
+                 .untypedArg(Names::arg0())
+                 .resultTypeUntyped()
+                 .build();
     // Synthesize <Magic>.<self-new>(arg: *T.untyped) => T.untyped
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::selfNew()).repeatedUntypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::untyped(*this, method);
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::selfNew())
+                 .repeatedUntypedArg(Names::arg0())
+                 .resultTypeUntyped()
+                 .build();
     // Synthesize <Magic>.<nil-for-safe-navigation>(recv: T.untyped) => NilClass
-    method =
-        enterMethod(*this, Symbols::MagicSingleton(), Names::nilForSafeNavigation()).untypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::nilClass();
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::nilForSafeNavigation())
+                 .untypedArg(Names::arg0())
+                 .resultType(Types::nilClass())
+                 .build();
     // Synthesize <Magic>.<string-interpolate>(arg: *T.untyped) => String
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::stringInterpolate())
                  .repeatedUntypedArg(Names::arg0())
+                 .resultType(Types::String())
                  .build();
-    method.data(*this)->resultType = Types::String();
     // Synthesize <Magic>.<define-top-class-or-module>(arg: T.untyped) => Void
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::defineTopClassOrModule())
                  .untypedArg(Names::arg0())
+                 .resultType(Types::void_())
                  .build();
-    method.data(*this)->resultType = Types::void_();
     // Synthesize <Magic>.<keep-for-cfg>(arg: T.untyped) => Void
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::keepForCfg()).untypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::void_();
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::keepForCfg())
+                 .untypedArg(Names::arg0())
+                 .resultType(Types::void_())
+                 .build();
     // Synthesize <Magic>.<retry>() => Void
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::retry()).build();
-    method.data(*this)->resultType = Types::void_();
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::retry()).resultType(Types::void_()).build();
 
     // Synthesize <Magic>.<blockBreak>(args: T.untyped) => T.untyped
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::blockBreak()).untypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::untyped(*this, method);
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::blockBreak())
+                 .untypedArg(Names::arg0())
+                 .resultTypeUntyped()
+                 .build();
 
     // Synthesize <Magic>.<getEncoding>() => Encoding
-    method = enterMethod(*this, Symbols::MagicSingleton(), Names::getEncoding()).build();
-    method.data(*this)->resultType = core::make_type<core::ClassType>(core::Symbols::Encoding());
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::getEncoding())
+                 .resultType(core::make_type<core::ClassType>(core::Symbols::Encoding()))
+                 .build();
 
     // Synthesize <Magic>.mixes_in_class_methods(self: T.untyped, arg: T.untyped) => Void
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::mixesInClassMethods())
                  .untypedArg(Names::selfLocal())
                  .untypedArg(Names::arg0())
+                 .resultType(Types::void_())
                  .build();
-    method.data(*this)->resultType = Types::void_();
 
     // Synthesize <Magic>.<check-match-array>(pattern: T.untyped, splatArray: T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::checkMatchArray())
                  .untypedArg(Names::arg0())
                  .untypedArg(Names::arg1())
+                 .resultTypeUntyped()
                  .build();
-    method.data(*this)->resultType = Types::untyped(*this, method);
 
     // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
-    method =
-        enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::params()).kwsplatArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
+    method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::params())
+                 .kwsplatArg(Names::arg0())
+                 .resultType(Types::declBuilderForProcsSingletonClass())
+                 .build();
     // Synthesize <DeclBuilderForProcs>.<bind>(args: T.untyped) =>
     // DeclBuilderForProcs
-    method =
-        enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::bind()).untypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
+    method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::bind())
+                 .untypedArg(Names::arg0())
+                 .resultType(Types::declBuilderForProcsSingletonClass())
+                 .build();
     // Synthesize <DeclBuilderForProcs>.<returns>(args: T.untyped) => DeclBuilderForProcs
-    method =
-        enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::returns()).untypedArg(Names::arg0()).build();
-    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
+    method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::returns())
+                 .untypedArg(Names::arg0())
+                 .resultType(Types::declBuilderForProcsSingletonClass())
+                 .build();
     // Synthesize <DeclBuilderForProcs>.<type_parameters>(args: T.untyped) =>
     // DeclBuilderForProcs
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::typeParameters())
                  .untypedArg(Names::arg0())
+                 .resultType(Types::declBuilderForProcsSingletonClass())
                  .build();
-    method.data(*this)->resultType = Types::declBuilderForProcsSingletonClass();
     // Some of these are Modules
     Symbols::StubModule().data(*this)->setIsModule(true);
     Symbols::T().data(*this)->setIsModule(true);
