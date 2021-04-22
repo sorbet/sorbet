@@ -63,19 +63,21 @@ public:
 
     virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module, llvm::CallInst *instr) override {
         auto elemPtr = llvm::dyn_cast<llvm::GEPOperator>(instr->getArgOperand(0));
-        if (!elemPtr) {
+        if (elemPtr == nullptr) {
             return llvm::UndefValue::get(instr->getType());
         }
         auto global = llvm::dyn_cast<llvm::GlobalVariable>(elemPtr->getOperand(0));
 
-        if (!global) {
+        if (global == nullptr) {
             return llvm::UndefValue::get(instr->getType());
         }
         auto initializer = llvm::dyn_cast<llvm::ConstantDataArray>(global->getInitializer());
-        if (!initializer) {
+        if (initializer == nullptr) {
             return llvm::UndefValue::get(instr->getType());
         }
+
         llvm::IRBuilder<> builder(instr);
+
         auto symName = initializer->getAsCString();
         for (const auto &[knownSym, name] : knownSymbolMapping) {
             if (symName == knownSym) {
@@ -161,7 +163,7 @@ public:
         }
         builder.CreateCall(recomputeFun);
         return splitPoint;
-    };
+    }
 } ClassAndModuleLoading;
 
 vector<pair<string, IRIntrinsic *>> getIRIntrinsics() {
