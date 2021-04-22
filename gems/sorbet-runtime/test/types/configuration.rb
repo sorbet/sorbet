@@ -15,6 +15,23 @@ module Opus::Types::Test
       def self.receive(*); end
     end
 
+    module Readable; end
+    module Writable
+      def write
+        T.bind(self, T.all(Readable, Writable))
+        true
+      end
+    end
+
+    class BadArticle
+      include Writable
+    end
+
+    class GoodArticle
+      include Writable
+      include Readable
+    end
+
     describe 'inline_type_error_handler' do
       describe 'when in default state' do
         it 'T.must raises an error' do
@@ -27,6 +44,33 @@ module Opus::Types::Test
           assert_raises(TypeError) do
             T.let(1, String)
           end
+        end
+
+        it 'T.bind raises an error if block is executing on the wrong type' do
+          block = -> {T.bind(self, String); upcase}
+
+          assert_raises(TypeError) do
+            123.instance_exec(&block)
+          end
+        end
+
+        it 'T.bind raises an error if block is executing on the wrong type' do
+          block = -> {T.bind(self, String); upcase}
+
+          assert_raises(TypeError) do
+            123.instance_exec(&block)
+          end
+        end
+
+        it 'T.bind raises error if type constraints are not all satisfied' do
+          bad_article = BadArticle.new
+
+          assert_raises(TypeError) do
+            bad_article.write
+          end
+
+          good_article = GoodArticle.new
+          assert good_article.write
         end
       end
 

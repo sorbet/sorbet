@@ -760,6 +760,16 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 current = walk(cctx.withTarget(tmp), c.arg, current);
                 if (c.cast == core::Names::uncheckedLet()) {
                     current->exprs.emplace_back(cctx.target, c.loc, make_unique<Ident>(tmp));
+                } else if (c.cast == core::Names::bind()) {
+                    if (c.arg.isSelfReference()) {
+                        auto self = cctx.inWhat.enterLocal(core::LocalVariable::selfVariable());
+                        current->exprs.emplace_back(self, c.loc, make_unique<Cast>(tmp, c.type, core::Names::cast()));
+                        current->exprs.emplace_back(cctx.target, c.loc, make_unique<Ident>(self));
+                    } else {
+                        if (auto e = cctx.ctx.beginError(what.loc(), core::errors::CFG::MalformedTBind)) {
+                            e.setHeader("T.bind can only be used with `self`");
+                        }
+                    }
                 } else {
                     current->exprs.emplace_back(cctx.target, c.loc, make_unique<Cast>(tmp, c.type, c.cast));
                 }

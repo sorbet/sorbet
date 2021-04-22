@@ -30,6 +30,7 @@ module T
 
   def self.cast(value, type, checked: true); value; end
   def self.let(value, type, checked: true); value; end
+  def self.bind(value, type, checked: true); value; end
   def self.assert_type!(value, type, checked: true); value; end
   def self.unsafe(value); value; end
   def self.must(arg, msg=nil); arg; end
