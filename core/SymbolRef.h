@@ -845,10 +845,6 @@ public:
         return MethodRef::fromRaw(7);
     }
 
-    static MethodRef PackageSpec_export_methods() {
-        return MethodRef::fromRaw(8);
-    }
-
     static ClassOrModuleRef Encoding() {
         return ClassOrModuleRef::fromRaw(85);
     }
@@ -858,11 +854,11 @@ public:
     }
 
     static MethodRef Class_new() {
-        return MethodRef::fromRaw(9);
+        return MethodRef::fromRaw(8);
     }
 
     static MethodRef todoMethod() {
-        return MethodRef::fromRaw(10);
+        return MethodRef::fromRaw(9);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
@@ -888,7 +884,7 @@ public:
     }
 
     static constexpr int MAX_SYNTHETIC_CLASS_SYMBOLS = 200;
-    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 35;
+    static constexpr int MAX_SYNTHETIC_METHOD_SYMBOLS = 34;
     static constexpr int MAX_SYNTHETIC_FIELD_SYMBOLS = 3;
     static constexpr int MAX_SYNTHETIC_TYPEARGUMENT_SYMBOLS = 4;
     static constexpr int MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 98;

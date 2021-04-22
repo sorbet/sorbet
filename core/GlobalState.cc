@@ -451,10 +451,6 @@ void GlobalState::initEmpty() {
     method = enterMethod(*this, Symbols::PackageSpecSingleton(), Names::export_()).arg(Names::arg0()).build();
     ENFORCE(method == Symbols::PackageSpec_export());
 
-    method =
-        enterMethod(*this, Symbols::PackageSpecSingleton(), Names::exportMethods()).repeatedArg(Names::arg0()).build();
-    ENFORCE(method == Symbols::PackageSpec_export_methods());
-
     id = synthesizeClass(core::Names::Constants::Encoding());
     ENFORCE(id == Symbols::Encoding());
 
