@@ -167,7 +167,7 @@ module T::Props
 
         assert_equal(:send, deserialization_error.type)
         receiver, method, *args = deserialization_error.children
-        assert_equal(s(:send, s(:send, s(:self), :class), :decorator), receiver)
+        assert_equal(nil, receiver)
         assert_equal(:raise_deserialization_error, method)
         args.each {|a| validate_lack_of_side_effects(a, whitelisted_methods_for_deserialize)}
 
@@ -270,7 +270,6 @@ module T::Props
     private_class_method def self.whitelisted_methods_for_deserialize
       @whitelisted_methods_for_deserialize ||= {
         lvar: %i{dup map transform_values transform_keys each_with_object nil? []= to_f},
-        self: %i{class},
         const: %i[deserialize from_hash deep_clone_object],
       }
     end

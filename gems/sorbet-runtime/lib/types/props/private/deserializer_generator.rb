@@ -57,8 +57,7 @@ module T::Props
               begin
                 #{transformation}
               rescue NoMethodError => e
-                self.class.decorator.raise_deserialization_error(
-                  self.class,
+                raise_deserialization_error(
                   #{prop.inspect},
                   val,
                   e,

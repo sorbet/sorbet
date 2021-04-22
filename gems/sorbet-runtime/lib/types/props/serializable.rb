@@ -156,6 +156,19 @@ module T::Props::Serializable
     @_required_props_missing_from_deserialize << prop
     nil
   end
+
+  private def raise_deserialization_error(prop_name, value, orig_error)
+    T::Configuration.soft_assert_handler(
+      'Deserialization error (probably unexpected stored type)',
+      storytime: {
+        klass: self.class,
+        prop: prop_name,
+        value: value,
+        error: orig_error.message,
+        notify: 'djudd'
+      }
+    )
+  end
 end
 
 
@@ -233,19 +246,6 @@ module T::Props::Serializable::DecoratorMethods
       at line #{line_num-previous_blank-1} in:
       #{context}
     MSG
-  end
-
-  def raise_deserialization_error(klass, prop_name, value, orig_error)
-    T::Configuration.soft_assert_handler(
-      'Deserialization error (probably unexpected stored type)',
-      storytime: {
-        klass: klass,
-        prop: prop_name,
-        value: value,
-        error: orig_error.message,
-        notify: 'djudd'
-      }
-    )
   end
 
   def raise_nil_deserialize_error(hkey)
