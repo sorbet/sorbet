@@ -18,7 +18,28 @@ namespace {
 class IRIntrinsic {
 public:
     virtual vector<string> implementedFunctionCall() = 0;
+
+    // The contract you're expected to implement here is basically:
+    //
+    // - You're given an llvm::CallInst (which is a subclass of llvm::Value) that corresponds to the
+    //   `call` instruction matching one of the names in implementedFunctionCall()
+    // - You can look at that instruction and all the rest of the `module` to do literally anything
+    //   LLVM allows you to do.
+    // - You return a new `llvm::Value *` (like a cfg::Binding in Sorbet--contains the instruction and
+    //   the variable to write that instruction into)
+    // - The framework will then update all reads from the variable of the `instr` assigns to to
+    //   instead read from the variable of the `llvm::Value *` you just returned.
+    // - The frameowrk will delete `instr` from the module. This might unlock further optimization
+    //   opportunities in later phases.
+    //
+    // You cannot (currently at least):
+    //
+    // - return `nullptr`
+    // - return `instr` unchanged
+    //
+    // We might change this (I don't know if this decision was intentional or accidental).
     virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module, llvm::CallInst *instr) = 0;
+
     virtual ~IRIntrinsic() = default;
 };
 

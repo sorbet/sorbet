@@ -3,7 +3,7 @@ set -euo pipefail
 
 payload="$1"
 
-# mark all our unternal functions as, well, available_externally :-)
+# mark all our internal functions as, well, available_externally :-)
 sed -i'.bak' 's/define double @sorbet_/define available_externally double @sorbet_/g' "$payload"
 sed -i'.bak' 's/define i64 @sorbet_/define available_externally i64 @sorbet_/g' "$payload"
 sed -i'.bak' 's/define i32 @sorbet_/define available_externally i32 @sorbet_/g' "$payload"

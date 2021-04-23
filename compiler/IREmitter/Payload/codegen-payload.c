@@ -1507,14 +1507,7 @@ const int sorbet_getIsReleaseBuild() __attribute__((weak)) {
              "sorbet_getIsReleaseBuild: Shared objects compiled by sorbet_llvm must be run by sorbet_ruby.");
 }
 
-// These forward declarations don't actually exist except in the LLVM IR we generate for each C extension,
-// so this function fails to link when compiling the payload into libruby.so.
-//
-// We don't actually need this function to be present in that shared object, so we can omit it.
-
-VALUE sorbet_i_getRubyClass(const char *const className, long classNameLen) __attribute__((const));
-VALUE sorbet_i_getRubyConstant(const char *const className, long classNameLen) __attribute__((const));
-
+// These are the methods that we need to keep alive long enough to use in the Lowerings.cc passes, but no longer.
 VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) {
     // this function will be nuked but it exists to keep forward definitions alive for clang
     return (long)&sorbet_i_getRubyClass + (long)&sorbet_i_getRubyConstant + (long)&sorbet_getConstantEpoch +
