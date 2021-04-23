@@ -37,7 +37,6 @@ const vector<pair<string, string>> knownSymbolMapping = {
     {"Kernel", "rb_mKernel"},
     {"Method", "rb_cMethod"},
     {"Module", "rb_cModule"},
-    {"Module", "rb_cModule"},
     {"NameError", "rb_eNameError"},
     {"NilClass", "rb_cNilClass"},
     {"NoMethodError", "rb_eNoMethodError"},
@@ -79,13 +78,16 @@ public:
         llvm::IRBuilder<> builder(instr);
 
         auto symName = initializer->getAsCString();
-        for (const auto &[knownSym, name] : knownSymbolMapping) {
-            if (symName == knownSym) {
-                auto tp = llvm::Type::getInt64Ty(lctx);
-                auto &nm = name; // C++ bindings don't play well with captures
-                auto globalDeclaration = module.getOrInsertGlobal(name, tp, [&] {
-                    auto ret =
-                        new llvm::GlobalVariable(module, tp, true, llvm::GlobalVariable::ExternalLinkage, nullptr, nm);
+        auto tp = llvm::Type::getInt64Ty(lctx);
+
+        for (const auto &[rubySourceName, rubyCApiName] : knownSymbolMapping) {
+            if (symName == rubySourceName) {
+                auto &nm = rubyCApiName; // C++ bindings don't play well with captures
+                auto globalDeclaration = module.getOrInsertGlobal(rubyCApiName, tp, [&] {
+                    auto isConstant = true;
+                    llvm::Constant *initializer = nullptr;
+                    auto ret = new llvm::GlobalVariable(module, tp, isConstant, llvm::GlobalVariable::ExternalLinkage,
+                                                        initializer, nm);
                     return ret;
                 });
                 return builder.CreateLoad(globalDeclaration);
@@ -97,16 +99,16 @@ public:
         auto guardEpochName = "guard_epoch_" + str;
         auto guardedConstName = "guarded_const_" + str;
 
-        auto tp = llvm::Type::getInt64Ty(lctx);
-
         auto guardEpochDeclaration = module.getOrInsertGlobal(guardEpochName, tp, [&] {
-            auto ret = new llvm::GlobalVariable(module, tp, false, llvm::GlobalVariable::LinkOnceAnyLinkage,
+            auto isConstant = false;
+            auto ret = new llvm::GlobalVariable(module, tp, isConstant, llvm::GlobalVariable::LinkOnceAnyLinkage,
                                                 llvm::ConstantInt::get(tp, 0), guardEpochName);
             return ret;
         });
 
         auto guardedConstDeclaration = module.getOrInsertGlobal(guardedConstName, tp, [&] {
-            auto ret = new llvm::GlobalVariable(module, tp, false, llvm::GlobalVariable::LinkOnceAnyLinkage,
+            auto isConstant = false;
+            auto ret = new llvm::GlobalVariable(module, tp, isConstant, llvm::GlobalVariable::LinkOnceAnyLinkage,
                                                 llvm::ConstantInt::get(tp, 0), guardedConstName);
             return ret;
         });
