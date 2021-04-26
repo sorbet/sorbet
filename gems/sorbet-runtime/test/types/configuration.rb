@@ -292,5 +292,31 @@ module Opus::Types::Test
         end
       end
     end
+
+    describe 'vm_prop_serde' do
+      it 'raises errors if no runtime support exists' do
+        # This test is checking that we get errors from serialization/deserialization
+        # when the VM we're running on doesn't support VM-backed serialization/deserialization
+        # routines, so bail if the VM does support such routines.
+        return if T::Props::Private::DeserializerGenerator.singleton_class.method_defined?(:generate2)
+
+        was_enabled = T::Configuration.use_vm_prop_serde?
+
+        begin
+          T::Configuration.enable_vm_prop_serde
+          c = Class.new(T::Struct) do
+            prop :p, Integer
+          end
+
+          i = c.new(p: 5)
+          e = assert_raises(NoMethodError) do
+            s = i.serialize
+          end
+          assert_equal(:generate2, e.name)
+        ensure
+          T::Configuration.disable_vm_prop_serde unless was_enabled
+        end
+      end
+    end
   end
 end
