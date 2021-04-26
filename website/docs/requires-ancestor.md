@@ -4,6 +4,10 @@ title: Requiring Ancestors
 sidebar_label: Requiring Ancestors
 ---
 
+> This feature is experimental and might be changed or removed without notice.
+> To enable it pass the `--enable-experimental-requires-ancestor` option to
+> Sorbet or add it to your `sorbet/config`.
+
 It's not uncommon in Ruby to define helper modules that depends on other
 modules. For example, let's take the following helper which provides `say_error`
 method:
