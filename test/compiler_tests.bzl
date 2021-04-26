@@ -35,10 +35,12 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
 
     oracle_tests = []
     validate_tests = []
+    filecheck_tests = []
     too_slow_tests = []
     for name in tests.keys():
         test_name = "test_{}".format(name)
         validate_exp = "validate_exp_{}".format(name)
+        filecheck = "filecheck_{}".format(name)
 
         path = tests[name]["path"]
         sentinel = tests[name]["sentinel"]
@@ -125,16 +127,25 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
 
             exp_tests = [validate_exp]
 
+        filecheck_test(
+            name = filecheck,
+            srcs = sources_name,
+            extension = extension,
+            tags = tags + extra_tags,
+            size = "small",
+        )
+
         if tests[name]["too_slow"]:
             too_slow_tests.append(test_name)
             too_slow_tests.extend(exp_tests)
         else:
             oracle_tests.append(test_name)
             validate_tests.extend(exp_tests)
+            filecheck_tests.append(filecheck)
 
     native.test_suite(
         name = suite_name,
-        tests = oracle_tests + validate_tests,
+        tests = oracle_tests + validate_tests + filecheck_tests,
     )
 
     native.test_suite(
@@ -145,6 +156,11 @@ def compiler_tests(suite_name, all_paths, extra_args = [], tags = []):
     native.test_suite(
         name = "{}_validate_exp".format(suite_name),
         tests = validate_tests,
+    )
+
+    native.test_suite(
+        name = "{}_filecheck".format(suite_name),
+        tests = filecheck_tests,
     )
 
     native.test_suite(
@@ -353,6 +369,60 @@ validate_exp_test = rule(
         ),
         "_llvm_diff": attr.label(
             default = "//test:llvm-diff",
+        ),
+    },
+)
+
+def _filecheck_test_impl(ctx):
+    output = ctx.attr.extension[SorbetOutput]
+
+    filecheck = ctx.attr._filecheck[DefaultInfo]
+
+    runfiles = ctx.runfiles(
+        ctx.files.srcs + [output.stdout, output.build, output.log],
+    )
+
+    runfiles = runfiles.merge(ctx.attr._filecheck[DefaultInfo].default_runfiles)
+    runfiles = runfiles.merge(ctx.attr._llvm_filecheck[DefaultInfo].default_runfiles)
+
+    ctx.actions.write(
+        ctx.outputs.executable,
+        content = """
+        cat "{build_log}"
+
+        cat "{sorbet_log}"
+
+        {filecheck} --build_dir="{build_dir}" {sources}
+        """.format(
+            build_log = output.log.short_path,
+            sorbet_log = output.stdout.short_path,
+            filecheck = ctx.executable._filecheck.short_path,
+            build_dir = output.build.short_path,
+            sources = " ".join([file.short_path for file in ctx.files.srcs]),
+        ),
+        is_executable = True,
+    )
+
+    return [DefaultInfo(runfiles = runfiles)]
+
+filecheck_test = rule(
+    test = True,
+    implementation = _filecheck_test_impl,
+    attrs = {
+        "srcs": attr.label(
+            mandatory = True,
+        ),
+        "extension": attr.label(
+            mandatory = True,
+            providers = [SorbetOutput],
+        ),
+        "_filecheck": attr.label(
+            cfg = "host",
+            default = "//test:filecheck",
+            executable = True,
+        ),
+        "_llvm_filecheck": attr.label(
+            default = "@llvm//:FileCheck",
         ),
     },
 )

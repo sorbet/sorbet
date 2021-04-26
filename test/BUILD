@@ -74,3 +74,11 @@ sh_binary(
         ":logging",
     ],
 )
+
+sh_binary(
+    name = "filecheck",
+    srcs = ["filecheck.sh"],
+    deps = [
+        ":logging",
+    ],
+)
