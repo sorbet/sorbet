@@ -341,7 +341,7 @@ entry:
   %33 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %31, i64 0, i32 4
   %34 = load i64*, i64** %33, align 8, !tbaa !46
   %35 = load i64, i64* %34, align 8, !tbaa !4
-  %36 = and i64 %35, -129
+  %36 = and i64 %35, -161
   store i64 %36, i64* %34, align 8, !tbaa !4
   call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %29, %struct.rb_control_frame_struct* nonnull %31, %struct.rb_iseq_struct* %"stackFrame_func_<root>.<static-init>$152.i") #6
   %37 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %31, i64 0, i32 0
@@ -364,7 +364,7 @@ entry:
   %50 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %48, i64 0, i32 4
   %51 = load i64*, i64** %50, align 8, !tbaa !46
   %52 = load i64, i64* %51, align 8, !tbaa !4
-  %53 = and i64 %52, -129
+  %53 = and i64 %52, -161
   store i64 %53, i64* %51, align 8, !tbaa !4
   call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %46, %struct.rb_control_frame_struct* nonnull %48, %struct.rb_iseq_struct* %"stackFrame_func_IFoo.<static-init>.i.i1") #6
   %54 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %48, i64 0, i32 0
@@ -476,7 +476,7 @@ entry:
   %111 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %109, i64 0, i32 4
   %112 = load i64*, i64** %111, align 8, !tbaa !46
   %113 = load i64, i64* %112, align 8, !tbaa !4
-  %114 = and i64 %113, -129
+  %114 = and i64 %113, -161
   store i64 %114, i64* %112, align 8, !tbaa !4
   call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %107, %struct.rb_control_frame_struct* nonnull %109, %struct.rb_iseq_struct* %"stackFrame_func_Foo.<static-init>.i.i") #6
   %115 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %109, i64 0, i32 0
@@ -545,7 +545,7 @@ functionEntryInitializers:
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %5 = load i64*, i64** %4, align 8, !tbaa !46
   %6 = load i64, i64* %5, align 8, !tbaa !4
-  %7 = and i64 %6, -129
+  %7 = and i64 %6, -161
   store i64 %7, i64* %5, align 8, !tbaa !4
   tail call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %0, %struct.rb_control_frame_struct* nonnull %2, %struct.rb_iseq_struct* %stackFrame_func_IFoo.foo) #6
   %8 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 0
@@ -611,7 +611,7 @@ functionEntryInitializers:
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %5 = load i64*, i64** %4, align 8, !tbaa !46
   %6 = load i64, i64* %5, align 8, !tbaa !4
-  %7 = and i64 %6, -129
+  %7 = and i64 %6, -161
   store i64 %7, i64* %5, align 8, !tbaa !4
   tail call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %0, %struct.rb_control_frame_struct* nonnull %2, %struct.rb_iseq_struct* %stackFrame_func_Foo.foo) #6
   %8 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 0

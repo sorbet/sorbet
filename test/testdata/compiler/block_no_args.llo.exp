@@ -169,7 +169,7 @@ functionEntryInitializers:
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %6 = load i64*, i64** %5, align 8, !tbaa !21
   %7 = load i64, i64* %6, align 8, !tbaa !4
-  %8 = and i64 %7, -129
+  %8 = and i64 %7, -161
   store i64 %8, i64* %6, align 8, !tbaa !4
   %9 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 0
   %10 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %3, align 8, !tbaa !19
@@ -290,7 +290,7 @@ rb_check_arity.1.exit:                            ; preds = %entry
   %37 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %34, i64 0, i32 4
   %38 = load i64*, i64** %37, align 8, !tbaa !21
   %39 = load i64, i64* %38, align 8, !tbaa !4
-  %40 = and i64 %39, -129
+  %40 = and i64 %39, -161
   store i64 %40, i64* %38, align 8, !tbaa !4
   %41 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %34, i64 0, i32 0
   %42 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %35, align 8, !tbaa !19
@@ -330,7 +330,7 @@ rb_check_arity.1.exit:                            ; preds = %entry
   %64 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %61, i64 0, i32 4
   %65 = load i64*, i64** %64, align 8, !tbaa !21
   %66 = load i64, i64* %65, align 8, !tbaa !4
-  %67 = and i64 %66, -129
+  %67 = and i64 %66, -161
   store i64 %67, i64* %65, align 8, !tbaa !4
   %68 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %61, i64 0, i32 0
   %69 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** %62, align 8, !tbaa !19
@@ -422,7 +422,7 @@ entry:
   %16 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %14, i64 0, i32 4
   %17 = load i64*, i64** %16, align 8, !tbaa !21
   %18 = load i64, i64* %17, align 8, !tbaa !4
-  %19 = and i64 %18, -129
+  %19 = and i64 %18, -161
   store i64 %19, i64* %17, align 8, !tbaa !4
   call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %12, %struct.rb_control_frame_struct* nonnull %14, %struct.rb_iseq_struct* %"stackFrame_func_<root>.<static-init>$152.i") #8
   %20 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %14, i64 0, i32 0

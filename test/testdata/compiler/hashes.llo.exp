@@ -197,7 +197,7 @@ entry:
   %18 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %16, i64 0, i32 4
   %19 = load i64*, i64** %18, align 8, !tbaa !30
   %20 = load i64, i64* %19, align 8, !tbaa !4
-  %21 = and i64 %20, -129
+  %21 = and i64 %20, -161
   store i64 %21, i64* %19, align 8, !tbaa !4
   call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %14, %struct.rb_control_frame_struct* nonnull %16, %struct.rb_iseq_struct* %"stackFrame_func_<root>.<static-init>$152.i") #6
   %22 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %16, i64 0, i32 0

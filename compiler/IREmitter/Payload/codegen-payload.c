@@ -1293,7 +1293,17 @@ const rb_control_frame_t *sorbet_setRubyStackFrame(int iseq_type, rb_iseq_t *ise
         sorbet_setExceptionStackFrame(ec, cfp, iseq);
     } else {
         cfp->iseq = iseq;
-        VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
+
+        // NOTE: we unset CFRAME here to convince the VM that this is a method that has a valid iseq backing it, that
+        // can be used to reconstruct line numbers. This works in concert with setting the iseq for the cfp above, and
+        // also with sorbet_setLineNumber.
+        //
+        // NOTE: we unset FINISH here to avoid issues with exceptions bubbling out of a static-init context.
+        // Specifically, we need to ensure that we don't jump to a tag in
+        // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm.c#L2112
+        // as this context will never have a tag pushed for it, and jumping in the context of this frame would break
+        // assumptions that those handlers make about the ruby stacks.
+        VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME | VM_FRAME_FLAG_FINISH);
 
         // For methods, allocate their locals on the ruby stack. This mirrors the implementation in vm_push_frame:
         // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L214-L248
