@@ -434,14 +434,22 @@ namespace typedruby27 {
 } while(false);
 
 void parser::error(const std::string &msg) {
-  std::string error_message = msg;
+	std::string error_message = msg;
 
-  int token_type = static_cast<int>(driver.last_token->type());
-  const char* token_str_name = yytname_[yytranslate_(token_type)];
+	int token_type = static_cast<int>(driver.last_token->type());
+	const char* token_str_name = yytname_[yytranslate_(token_type)];
 
-  if (token_str_name != nullptr) {
-    error_message = token_str_name;
-  }
+	if (token_type == token_type::tBDOT2) {
+		// Because we have two tokens matching `..`, we can't set the token name as `..` directly.
+		// This hack allows to display the real token string instead of `tBDOT2` in parsing errors.
+		error_message = "\"..\"";
+	} else if (token_type == token_type::tBDOT3) {
+		// Because we have two tokens matching `...`, we can't set the token name as `...` directly.
+		// This hack allows to display the real token string instead of `tBDOT3` in parsing errors.
+		error_message = "\"...\"";
+	} else if (token_str_name != nullptr) {
+		error_message = token_str_name;
+	}
 
 	driver.diagnostics.emplace_back(
 		dlevel::ERROR, dclass::UnexpectedToken,
