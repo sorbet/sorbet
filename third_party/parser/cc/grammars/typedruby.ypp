@@ -179,6 +179,8 @@ using namespace std::string_literals;
   tANDDOT             1142    "&."
   tRATIONAL_IMAGINARY 1143
   tFLOAT_IMAGINARY    1144
+  tBDOT2              1145    // Used to avoid shift/reduce conflicts with productions using `tDOT2`
+  tBDOT3              1146    // Used to avoid shift/reduce conflicts with productions using `tDOT3`
 ;
 
 %type <node>
@@ -388,7 +390,7 @@ using namespace std::string_literals;
 %right    tEQL tOP_ASGN
 %left     kRESCUE_MOD
 %right    tEH tCOLON
-%nonassoc tDOT2 tDOT3
+%nonassoc tDOT2 tDOT3 tBDOT2 tBDOT3
 %left     tOROP
 %left     tANDOP
 %nonassoc tCMP tEQ tEQQ tNEQ tMATCH tNMATCH
@@ -432,14 +434,22 @@ namespace typedruby27 {
 } while(false);
 
 void parser::error(const std::string &msg) {
-  std::string error_message = msg;
+	std::string error_message = msg;
 
-  int token_type = static_cast<int>(driver.last_token->type());
-  const char* token_str_name = yytname_[yytranslate_(token_type)];
+	int token_type = static_cast<int>(driver.last_token->type());
+	const char* token_str_name = yytname_[yytranslate_(token_type)];
 
-  if (token_str_name != nullptr) {
-    error_message = token_str_name;
-  }
+	if (token_type == token_type::tBDOT2) {
+		// Because we have two tokens matching `..`, we can't set the token name as `..` directly.
+		// This hack allows to display the real token string instead of `tBDOT2` in parsing errors.
+		error_message = "\"..\"";
+	} else if (token_type == token_type::tBDOT3) {
+		// Because we have two tokens matching `...`, we can't set the token name as `...` directly.
+		// This hack allows to display the real token string instead of `tBDOT3` in parsing errors.
+		error_message = "\"...\"";
+	} else if (token_str_name != nullptr) {
+		error_message = token_str_name;
+	}
 
 	driver.diagnostics.emplace_back(
 		dlevel::ERROR, dclass::UnexpectedToken,
@@ -714,8 +724,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                       driver.lex.in_kwarg = $<boolean>3;
                       $$ = driver.build.in_match(self, $1, $2, $4);
                     }
-                | arg tLBRACE_ARG
-                | arg
+                | arg %prec tLBRACE_ARG
 
       expr_value: expr
 
@@ -1127,11 +1136,11 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                     {
                       $$ = driver.build.range_exclusive(self, $1, $2, nullptr);
                     }
-                | tDOT2 arg
+                | tBDOT2 arg
                     {
                       $$ = driver.build.range_inclusive(self, nullptr, $1, $2);
                     }
-                | tDOT3 arg
+                | tBDOT3 arg
                     {
                       $$ = driver.build.range_exclusive(self, nullptr, $1, $2);
                     }
@@ -2619,11 +2628,11 @@ opt_block_args_tail:
                 | p_variable
                 | p_var_ref
                 | p_const
-                | tDOT2 p_primitive
+                | tBDOT2 p_primitive
                     {
                       $$ = driver.build.range_inclusive(self, nullptr, $1, $2);
                     }
-                | tDOT3 p_primitive
+                | tBDOT3 p_primitive
                     {
                       $$ = driver.build.range_exclusive(self, nullptr, $1, $2);
                     }
@@ -3225,7 +3234,7 @@ keyword_variable: kNIL
                     {
                       $$ = driver.alloc.node_list();
                     }
-    args_forward: tDOT3
+    args_forward: tBDOT3
                     {
                       $$ = $1;
                     }

@@ -2312,6 +2312,33 @@ void lexer::set_state_expr_value() {
       };
 
       #
+      # RUBY 2.7 BEGINLESS RANGE
+
+      '..'
+      => {
+        auto ident = tok(ts, te - 2);
+        if (version >= ruby_version::RUBY_27) {
+          emit(token_type::tBDOT2, ident, ts, te);
+        } else {
+          emit(token_type::tDOT2, ident, ts, te);
+        }
+
+        fnext expr_beg; fbreak;
+      };
+
+      '...'
+      => {
+        auto ident = tok(ts, te - 2);
+        if (version >= ruby_version::RUBY_27) {
+          emit(token_type::tBDOT3, ident, ts, te);
+        } else {
+          emit(token_type::tDOT3, ident, ts, te);
+        }
+
+        fnext expr_beg; fbreak;
+      };
+
+      #
       # CONTEXT-DEPENDENT VARIABLE LOOKUP OR COMMAND INVOCATION
       #
 
