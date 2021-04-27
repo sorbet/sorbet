@@ -718,7 +718,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
                         name2Expr(core::Names::Constants::PackageRegistry()), {},
                         std::move(importedPackages));
-    fmt::print("{}:\n{}\n\n", file.file.data(ctx).path(), packageNamespace.toString(ctx)); // TODO remove
+    // fmt::print("{}:\n{}\n\n", file.file.data(ctx).path(), packageNamespace.toString(ctx)); // TODO remove
 
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
