@@ -499,6 +499,18 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal('foo', CustomTypeStruct.from_hash({'single' => 'foo'}).serialize['single'])
     end
 
+    it 'raises serialize errors for members with a custom subtype' do
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@single, 'not a serializable thing')
+      e = assert_raises(TypeError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "Expected type T::Props::CustomType")
+    end
+
+    # It's hard to write tests for a CustomType with a custom deserialize method, so skip that.
+
     it 'round trips as array value' do
       assert_equal(['foo'], CustomTypeStruct.from_hash({'array' => ['foo']}).serialize['array'])
     end
