@@ -102,6 +102,7 @@ def sorbet_llvm_externals():
                 # (Removes the `a/` and `b/` prefixes that `patch` doesn't understand.)
                 patches = [
                     "@com_stripe_sorbet_llvm//third_party/ruby:gc-remove-write-barrier.patch",
+                    "@com_stripe_sorbet_llvm//third_party/ruby:vm-method-type-sorbet.patch",
                 ],
                 patch_tool = "patch",
             )

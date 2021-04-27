@@ -132,6 +132,181 @@ public:
     };
 };
 
+void emitParamInitialization(CompilerState &cs, llvm::IRBuilder<> &builder, const IREmitterContext &irctx,
+                             core::SymbolRef funcSym, int rubyBlockId, llvm::Value *param) {
+    // Following the comment in vm_core.h:
+    // https://github.com/ruby/ruby/blob/344a824ef9d4b6152703d02d7ffa042abd4252c1/vm_core.h#L321-L342
+    // Comment reproduced here to make things somewhat easier to follow.
+
+    /*
+     * parameter information
+     *
+     *  def m(a1, a2, ..., aM,                    # mandatory
+     *        b1=(...), b2=(...), ..., bN=(...),  # optional
+     *        *c,                                 # rest
+     *        d1, d2, ..., dO,                    # post
+     *        e1:(...), e2:(...), ..., eK:(...),  # keyword
+     *        **f,                                # keyword_rest
+     *        &g)                                 # block
+     * =>
+     *
+     *  lead_num     = M
+     *  opt_num      = N
+     *  rest_start   = M+N
+     *  post_start   = M+N+(*1)
+     *  post_num     = O
+     *  keyword_num  = K
+     *  block_start  = M+N+(*1)+O+K
+     *  keyword_bits = M+N+(*1)+O+K+(&1)
+     *  size         = M+N+O+(*1)+K+(&1)+(**1) // parameter size.
+     */
+
+    int leadNum = 0;    // # of required arguments (M)
+    int optNum = 0;     // # of optional arguments (N)
+    int restStart = 0;  // M + N
+    int postStart = 0;  // M + N + 1
+    int postNum = 0;    // # of required arguments after rest (O)
+    int kwNum = 0;      // # of keyword argments (K)
+    int blockStart = 0; // M + N + 1 + O + K
+    int reqKwNum = 0;   // # of required keyword arguments
+    bool hasRest = false;
+    bool hasPost = false;
+    bool hasKw = false;
+    bool hasKwRest = false;
+    bool hasBlock = false;
+
+    InlinedVector<const core::ArgInfo *, 4> nonKeywordArgInfo;
+    InlinedVector<const core::ArgInfo *, 4> keywordArgInfo;
+
+    int i = -1;
+    for (auto &argInfo : funcSym.data(cs)->arguments()) {
+        ++i;
+        auto &flags = argInfo.flags;
+        if (flags.isBlock) {
+            if (argInfo.loc.exists()) {
+                hasBlock = true;
+                blockStart = nonKeywordArgInfo.size();
+                nonKeywordArgInfo.emplace_back(&argInfo);
+            }
+        } else if (flags.isKeyword) {
+            if (flags.isRepeated) {
+                hasKwRest = true;
+            } else {
+                hasKw = true;
+                kwNum++;
+
+                if (!flags.isDefault) {
+                    reqKwNum++;
+                }
+            }
+            keywordArgInfo.emplace_back(&argInfo);
+        } else if (flags.isRepeated) {
+            hasRest = true;
+            restStart = i;
+            nonKeywordArgInfo.emplace_back(&argInfo);
+        } else if (flags.isDefault) {
+            optNum++;
+            nonKeywordArgInfo.emplace_back(&argInfo);
+        } else {
+            if (hasRest) {
+                // This is the first post-rest required argument we have seen.
+                if (postNum == 0) {
+                    hasPost = true;
+                    postStart = i;
+                }
+                postNum++;
+            } else {
+                leadNum++;
+            }
+            nonKeywordArgInfo.emplace_back(&argInfo);
+        }
+    }
+
+    // Construct all the necessary LLVM values to make the call.  We name them
+    // according to what arguments they correspond to on the C side.
+
+    // Flags structure.
+    auto *has_lead = builder.getInt1(leadNum != 0);
+    auto *has_opt = builder.getInt1(optNum != 0);
+    auto *has_rest = builder.getInt1(hasRest);
+    auto *has_post = builder.getInt1(hasPost);
+    auto *has_kw = builder.getInt1(hasKw);
+    auto *has_kwrest = builder.getInt1(hasKwRest);
+    auto *has_block = builder.getInt1(hasBlock);
+    // TODO: Sorbet doesn't supply enough information to be able to track this correctly:
+    // it is not !(has_kw || has_kwrest) but whether **nil was supplied in the arglist
+    auto *accepts_no_kwarg = builder.getInt1(false);
+
+    // Fields according to the diagram above.
+    auto *lead_num = IREmitterHelpers::buildS4(cs, leadNum);
+    auto *opt_num = IREmitterHelpers::buildS4(cs, optNum);
+    auto *rest_start = IREmitterHelpers::buildS4(cs, restStart);
+    auto *post_start = IREmitterHelpers::buildS4(cs, postStart);
+    auto *post_num = IREmitterHelpers::buildS4(cs, postNum);
+    auto *block_start = IREmitterHelpers::buildS4(cs, blockStart);
+    auto *size = IREmitterHelpers::buildU4(cs, leadNum + optNum + hasRest + postNum + hasBlock + kwNum + hasKwRest);
+
+    builder.CreateCall(cs.getFunction("sorbet_setParamInfo"),
+                       {param, has_lead, has_opt, has_rest, has_post, has_kw, has_kwrest, has_block, accepts_no_kwarg,
+                        lead_num, opt_num, rest_start, post_start, post_num, block_start, size});
+
+    if (!nonKeywordArgInfo.empty()) {
+        // Create a table for all the positional argument IDs.
+        auto *table = builder.CreateAlloca(llvm::Type::getInt64Ty(cs),
+                                           IREmitterHelpers::buildS4(cs, nonKeywordArgInfo.size()), "positional_table");
+
+        int i = -1;
+        for (auto info : nonKeywordArgInfo) {
+            ++i;
+            auto *id = Payload::idIntern(cs, builder, info->argumentName(cs));
+            auto *offset = IREmitterHelpers::buildU4(cs, i);
+            llvm::Value *indices[] = {offset};
+            builder.CreateStore(id, builder.CreateGEP(table, indices));
+        }
+
+        auto *tableSize = IREmitterHelpers::buildS4(cs, nonKeywordArgInfo.size());
+        builder.CreateCall(cs.getFunction("sorbet_setupParamPositional"), {param, tableSize, table});
+    }
+
+    if (hasKw) {
+        ENFORCE(kwNum > 0);
+        ENFORCE(reqKwNum <= kwNum);
+        ENFORCE(keywordArgInfo.size() == (kwNum + hasKwRest));
+
+        // Create a table for all the keyword argument IDs.
+        auto *table = builder.CreateAlloca(llvm::Type::getInt64Ty(cs),
+                                           IREmitterHelpers::buildS4(cs, keywordArgInfo.size()), "keyword_table");
+
+        int i = -1;
+        for (auto info : keywordArgInfo) {
+            ++i;
+            auto *id = Payload::idIntern(cs, builder, info->argumentName(cs));
+            auto *offset = IREmitterHelpers::buildU4(cs, i);
+            llvm::Value *indices[] = {offset};
+            builder.CreateStore(id, builder.CreateGEP(table, indices));
+        }
+
+        auto *kw_num = IREmitterHelpers::buildS4(cs, kwNum);
+        auto *required_num = IREmitterHelpers::buildS4(cs, reqKwNum);
+        auto *tableSize = IREmitterHelpers::buildS4(cs, keywordArgInfo.size());
+
+        builder.CreateCall(cs.getFunction("sorbet_setupParamKeywords"),
+                           {param, kw_num, required_num, tableSize, table});
+    }
+}
+
+// TODO(froydnj): we need to do something like this for blocks as well.
+llvm::Value *buildParamInfo(CompilerState &cs, llvm::IRBuilder<> &builderBase, const IREmitterContext &irctx,
+                            core::SymbolRef funcSym, int rubyBlockId) {
+    auto &builder = builderCast(builderBase);
+
+    auto *paramInfo = builder.CreateCall(cs.getFunction("sorbet_allocateParamInfo"), {}, "parameterInfo");
+
+    emitParamInitialization(cs, builder, irctx, funcSym, rubyBlockId, paramInfo);
+
+    return paramInfo;
+}
+
 class DefineMethodIntrinsic : public SymbolBasedIntrinsicMethod {
 public:
     DefineMethodIntrinsic() : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled){};
@@ -178,13 +353,13 @@ public:
                 ENFORCE(funcSym.data(cs)->isMethod());
 
                 auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
-                auto universalSignature =
-                    llvm::PointerType::getUnqual(llvm::FunctionType::get(llvm::Type::getInt64Ty(cs), true));
-                auto ptr = builder.CreateBitCast(funcHandle, universalSignature);
+                auto *stackFrameVar = Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, funcSym);
+                auto *stackFrame = builder.CreateLoad(stackFrameVar, "stackFrame");
 
                 const char *payloadFuncName = isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod";
                 auto rubyFunc = cs.getFunction(payloadFuncName);
-                builder.CreateCall(rubyFunc, {klass, name, ptr, llvm::ConstantInt::get(cs, llvm::APInt(32, -1, true))});
+                auto *paramInfo = buildParamInfo(cs, builder, mcctx.irctx, funcSym, mcctx.rubyBlockId);
+                builder.CreateCall(rubyFunc, {klass, name, funcHandle, paramInfo, stackFrame});
 
                 builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
                 break;

@@ -64,7 +64,7 @@ SORBET_ALIVE(VALUE, sorbet_getConstant, (const char *path, long pathLen));
 SORBET_ALIVE(VALUE, sorbet_setConstant, (VALUE mod, const char *name, long nameLen, VALUE value));
 
 SORBET_ALIVE(const VALUE, sorbet_readRealpath, (void));
-SORBET_ALIVE(void, sorbet_pushCfuncFrame, (struct FunctionInlineCache *, VALUE));
+SORBET_ALIVE(void, sorbet_pushCfuncFrame, (struct FunctionInlineCache *, VALUE, const rb_iseq_t *));
 SORBET_ALIVE(void, sorbet_pushStaticInitFrame, (VALUE));
 SORBET_ALIVE(void, sorbet_pushBlockFrame, (const struct rb_captured_block *));
 SORBET_ALIVE(void, sorbet_popRubyStack, (void));
@@ -319,14 +319,16 @@ VALUE sorbet_defineNestedClass(VALUE owner, const char *name, VALUE super) {
 
 // this DOES override existing methods
 SORBET_INLINE
-void sorbet_defineMethod(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc) {
-    rb_define_method(klass, name, methodPtr, argc);
+void sorbet_defineMethod(VALUE klass, const char *name, VALUE (*methodPtr)(int, VALUE *, VALUE), void *paramp,
+                         rb_iseq_t *iseq) {
+    rb_add_method_sorbet(klass, rb_intern(name), methodPtr, (rb_sorbet_param_t *)paramp, METHOD_VISI_PUBLIC, iseq);
 }
 
 // this DOES override existing methods
 SORBET_INLINE
-void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodPtr)(ANYARGS), int argc) {
-    rb_define_singleton_method(klass, name, methodPtr, argc);
+void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodPtr)(int, VALUE *, VALUE), void *paramp,
+                                  rb_iseq_t *iseq) {
+    rb_define_singleton_sorbet_method(klass, name, methodPtr, (rb_sorbet_param_t *)paramp, iseq);
 }
 
 SORBET_INLINE
@@ -1198,13 +1200,13 @@ VALUE sorbet_makeBlockHandlerProc(VALUE block) {
 
 SORBET_INLINE
 VALUE sorbet_callFuncDirect(struct FunctionInlineCache *cache, VALUE (*methodPtr)(int, VALUE *, VALUE), int argc,
-                            VALUE *argv, VALUE recv) {
+                            VALUE *argv, VALUE recv, rb_iseq_t *iseq) {
     // we need a method entry from the call data to be able to setup the stack correctly.
     if (UNLIKELY(cache->cd.cc.me == NULL)) {
         sorbet_vmMethodSearch(cache, recv);
     }
 
-    sorbet_pushCfuncFrame(cache, recv);
+    sorbet_pushCfuncFrame(cache, recv, iseq);
     VALUE res = methodPtr(argc, argv, recv);
     sorbet_popRubyStack();
     return res;
@@ -1284,14 +1286,17 @@ unsigned int sorbet_vmCallFCall() {
 // static struct rb_kwarg_call_data test_cd = {0};
 
 SORBET_INLINE
-const rb_control_frame_t *sorbet_setRubyStackFrame(int iseq_type, rb_iseq_t *iseq) {
+const rb_control_frame_t *sorbet_setRubyStackFrame(_Bool isStaticInit, int iseq_type, rb_iseq_t *iseq) {
     rb_execution_context_t *ec = GET_EC();
     rb_control_frame_t *cfp = ec->cfp;
 
     // Depending on what kind of iseq we're switching to, we need to push a frame on the ruby stack.
     if (iseq_type == ISEQ_TYPE_RESCUE || iseq_type == ISEQ_TYPE_ENSURE) {
         sorbet_setExceptionStackFrame(ec, cfp, iseq);
-    } else {
+    } else if (iseq_type == ISEQ_TYPE_BLOCK) {
+        cfp->iseq = iseq;
+        VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME);
+    } else if (isStaticInit) {
         cfp->iseq = iseq;
 
         // NOTE: we unset CFRAME here to convince the VM that this is a method that has a valid iseq backing it, that
@@ -1303,13 +1308,9 @@ const rb_control_frame_t *sorbet_setRubyStackFrame(int iseq_type, rb_iseq_t *ise
         // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm.c#L2112
         // as this context will never have a tag pushed for it, and jumping in the context of this frame would break
         // assumptions that those handlers make about the ruby stacks.
-        VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_CFRAME | VM_FRAME_FLAG_FINISH);
+        VM_ENV_FLAGS_UNSET(cfp->ep, VM_FRAME_FLAG_FINISH);
 
-        // For methods, allocate their locals on the ruby stack. This mirrors the implementation in vm_push_frame:
-        // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L214-L248
-        if (iseq_type == ISEQ_TYPE_METHOD) {
-            sorbet_setMethodStackFrame(ec, cfp, iseq);
-        }
+        sorbet_setMethodStackFrame(ec, cfp, iseq);
     }
 
     return cfp;
@@ -1386,6 +1387,80 @@ VALUE sorbet_callSuperBlock(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *co
     arg.kw_splat = kw_splat;
 
     return rb_iterate(sorbet_iterSuper, (VALUE)&arg, blockImpl, closure);
+}
+
+SORBET_INLINE
+void *sorbet_allocateParamInfo() {
+    rb_sorbet_param_t *info = ZALLOC(rb_sorbet_param_t);
+    // Make it a type that's easy to deal with in LLVM IR.
+    return (void *)info;
+}
+
+// It's not worth building this into Ruby; all of these parameters are expected to
+// be compile-time constants, and building the arguments for the call into Ruby
+// would be about as expensive as doing all the stores below.  Plus the compiler
+// can fold the stores into body->param.flags together in this version.
+SORBET_INLINE
+void sorbet_setParamInfo(void *paramp, bool has_lead, bool has_opt, bool has_rest, bool has_post, bool has_kw,
+                         bool has_kwrest, bool has_block, bool accepts_no_kwarg, int lead_num, int opt_num,
+                         int rest_start, int post_start, int post_num, int block_start, unsigned int size) {
+    rb_sorbet_param_t *param = (rb_sorbet_param_t *)paramp;
+    param->flags.has_lead = has_lead;
+    param->flags.has_opt = has_opt;
+    param->flags.has_rest = has_rest;
+    param->flags.has_post = has_post;
+    param->flags.has_kw = has_kw;
+    param->flags.has_kwrest = has_kwrest;
+    param->flags.has_block = has_block;
+    param->flags.accepts_no_kwarg = accepts_no_kwarg;
+
+    param->lead_num = lead_num;
+    param->opt_num = opt_num;
+    param->rest_start = rest_start;
+    param->post_start = post_start;
+    param->post_num = post_num;
+    param->block_start = block_start;
+
+    param->size = size;
+
+    // param->{opt_table, keyword} are set up elsewhere.
+}
+
+// TODO(froydnj): we may want to put this in the VM payload.
+SORBET_INLINE
+void sorbet_setupParamPositional(void *paramp, int n_ids, ID *table) {
+    rb_sorbet_param_t *param = (rb_sorbet_param_t *)paramp;
+
+    // This table is never freed.
+    ID *installed = ALLOC_N(ID, n_ids);
+    MEMCPY(installed, table, ID, n_ids);
+    param->pos_table = installed;
+}
+
+SORBET_INLINE
+void sorbet_setupParamKeywords(void *paramp, int kw_num, int required_num, int n_ids, ID *table) {
+    rb_sorbet_param_t *param = (rb_sorbet_param_t *)paramp;
+
+    param->kw_num = kw_num;
+    param->kw_required_num = required_num;
+
+    // kw_bits_start (rb_iseq_param_keyword::bits_start) is only cryptically
+    // documented as "keyword_bits" in the comment copied from vm_core.h that
+    // lives in Payload.cc.  Reverse-engineering compile.c and consulting
+    // RubyVM::InstructionSequence.compile("...").to_a suggests that
+    // bits_start is the index just after the keyword args end.
+    param->kw_bits_start = param->lead_num + param->opt_num + kw_num;
+    // And, likewise, kw_rest_start (rb_iseq_param_keyword::rest_start)
+    // appears to be one more after that...assuming, of course, that we have
+    // **rest.
+    if (param->flags.has_kwrest) {
+        param->kw_rest_start = param->kw_bits_start + 1;
+    }
+
+    // This table is never freed.
+    ID *kwtab = ALLOC_N(ID, n_ids);
+    MEMCPY(kwtab, table, ID, n_ids);
+    param->kw_table = kwtab;
 }
 
 // ****

@@ -94,7 +94,11 @@ public:
     static llvm::Value *callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                                llvm::Value *blockFun, llvm::Value *closure);
     static llvm::Value *callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
-                                       llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv);
+                                       llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
+                                       llvm::Value *iseq);
+
+    static llvm::Value *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                          const IREmitterContext &irctx, core::SymbolRef methodSym);
 
     static const VMFlag VM_CALL_ARGS_SIMPLE;
     static const VMFlag VM_CALL_ARGS_SPLAT;

@@ -863,6 +863,16 @@ llvm::Function *IREmitterHelpers::getInitFunction(CompilerState &cs, core::Symbo
     return getOrCreateFunctionWithName(cs, "Init_" + baseName, ft, linkageType);
 }
 
+// TODO(froydnj): LLVM datatypes don't really have the concept of signedness, only
+// LLVM operations.  Does that mean we should just be using IRBuilder::getInt32 etc.?
+llvm::Value *IREmitterHelpers::buildU4(CompilerState &cs, u4 i) {
+    return llvm::ConstantInt::get(cs, llvm::APInt(32, i));
+}
+
+llvm::Value *IREmitterHelpers::buildS4(CompilerState &cs, int i) {
+    return llvm::ConstantInt::get(cs, llvm::APInt(32, i, /*signed=*/true));
+}
+
 llvm::Function *IREmitterHelpers::cleanFunctionBody(CompilerState &cs, llvm::Function *func) {
     for (auto &bb : *func) {
         bb.dropAllReferences();

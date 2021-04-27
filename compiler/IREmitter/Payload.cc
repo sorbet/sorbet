@@ -617,9 +617,9 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
 }
 
 // The common suffix for stack frame related global names.
-string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx, const ast::MethodDef &md,
+string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx, core::SymbolRef methodSym,
                                int rubyBlockId) {
-    auto name = IREmitterHelpers::getFunctionName(cs, md.symbol);
+    auto name = IREmitterHelpers::getFunctionName(cs, methodSym);
 
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
@@ -636,37 +636,47 @@ string getStackFrameGlobalName(CompilerState &cs, const IREmitterContext &irctx,
     }
 }
 
-llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
-                                     const ast::MethodDef &md, int rubyBlockId) {
+llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                        core::SymbolRef methodSym, int rubyBlockId) {
     auto tp = iseqType(cs);
-    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
-    auto name = getStackFrameGlobalName(cs, irctx, md, rubyBlockId);
-    llvm::Constant *indices[] = {zero};
+    auto name = getStackFrameGlobalName(cs, irctx, methodSym, rubyBlockId);
     string rawName = "stackFramePrecomputed_" + name;
-    llvm::IRBuilder<> globalInitBuilder(cs);
-    auto globalDeclaration = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
-        auto nullv = llvm::ConstantPointerNull::get(tp);
+    auto *var = static_cast<llvm::GlobalVariable *>(cs.module->getOrInsertGlobal(rawName, tp, [&] {
         auto ret =
-            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, nullv, rawName);
+            new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, nullptr, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
         ret->setAlignment(8);
+
+        return ret;
+    }));
+
+    return var;
+}
+
+llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                     const ast::MethodDef &md, int rubyBlockId) {
+    llvm::IRBuilder<> globalInitBuilder(cs);
+    auto globalDeclaration = rubyStackFrameVar(cs, build, irctx, md.symbol, rubyBlockId);
+    if (!globalDeclaration->hasInitializer()) {
+        auto nullv = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(globalDeclaration->getValueType()));
+        globalDeclaration->setInitializer(nullv);
 
         // The realpath is the first argument to `sorbet_globalConstructors`
         auto realpath = cs.globalConstructorsEntry->getParent()->arg_begin();
         realpath->setName("realpath");
 
         // create constructor
-        auto constr = allocateRubyStackFramesImpl(cs, irctx, md, rubyBlockId, ret);
+        auto constr = allocateRubyStackFramesImpl(cs, irctx, md, rubyBlockId, globalDeclaration);
         globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
         globalInitBuilder.CreateCall(constr, {realpath});
-
-        return ret;
-    }));
+    }
 
     globalInitBuilder.SetInsertPoint(cs.functionEntryInitializers);
+    auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
+    llvm::Constant *indices[] = {zero};
     auto global = globalInitBuilder.CreateLoad(
         llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
-        {"stackFrame_", name});
+        "stackFrame");
 
     // todo(perf): mark these as immutable with https://llvm.org/docs/LangRef.html#llvm-invariant-start-intrinsic
     return global;
@@ -674,13 +684,21 @@ llvm::Value *allocateRubyStackFrames(CompilerState &cs, llvm::IRBuilderBase &bui
 
 } // namespace
 
+llvm::Value *Payload::rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                        core::SymbolRef methodSym) {
+    return ::sorbet::compiler::rubyStackFrameVar(cs, build, irctx, methodSym, 0);
+}
+
 std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build,
                                                                    const IREmitterContext &irctx,
                                                                    const ast::MethodDef &md, int rubyBlockId) {
     auto &builder = builderCast(build);
     auto stackFrame = allocateRubyStackFrames(cs, builder, irctx, md, rubyBlockId);
     auto *iseqType = getIseqType(cs, builder, irctx, rubyBlockId);
-    auto cfp = builder.CreateCall(cs.getFunction("sorbet_setRubyStackFrame"), {iseqType, stackFrame});
+    auto *isStaticInit = llvm::ConstantInt::get(
+        cs, llvm::APInt(1, static_cast<int>(irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitFile ||
+                                            irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitModule)));
+    auto cfp = builder.CreateCall(cs.getFunction("sorbet_setRubyStackFrame"), {isStaticInit, iseqType, stackFrame});
     auto pc = builder.CreateCall(cs.getFunction("sorbet_getPc"), {cfp});
     auto iseq_encoded = builder.CreateCall(cs.getFunction("sorbet_getIseqEncoded"), {cfp});
     return {pc, iseq_encoded};
@@ -952,9 +970,10 @@ llvm::Value *Payload::callFuncBlockWithCache(CompilerState &cs, llvm::IRBuilderB
 }
 
 llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cache, llvm::Value *fn,
-                                     llvm::Value *argc, llvm::Value *argv, llvm::Value *recv) {
+                                     llvm::Value *argc, llvm::Value *argv, llvm::Value *recv, llvm::Value *iseq) {
     auto &builder = builderCast(build);
-    return builder.CreateCall(cs.getFunction("sorbet_callFuncDirect"), {cache, fn, argc, argv, recv}, "sendDirect");
+    return builder.CreateCall(cs.getFunction("sorbet_callFuncDirect"), {cache, fn, argc, argv, recv, iseq},
+                              "sendDirect");
 }
 
 llvm::Value *VMFlag::build(CompilerState &cs, llvm::IRBuilderBase &build, const vector<VMFlag> &flags) {

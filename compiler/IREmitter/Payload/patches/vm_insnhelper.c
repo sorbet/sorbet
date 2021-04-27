@@ -38,17 +38,19 @@ void sorbet_pushStaticInitFrame(VALUE recv) {
     vm_push_frame(ec, NULL, frame_type, recv, block_handler, cref, 0, ec->cfp->sp, 0, 0);
 }
 
-void sorbet_pushCfuncFrame(struct FunctionInlineCache *cache, VALUE recv) {
+void sorbet_pushCfuncFrame(struct FunctionInlineCache *cache, VALUE recv, const rb_iseq_t *iseq) {
     rb_execution_context_t *ec = GET_EC();
 
     // NOTE: method search must be done to ensure that this field is not NULL
     const rb_callable_method_entry_t *me = cache->cd.cc.me;
-    VALUE frame_type = VM_FRAME_MAGIC_CFUNC | VM_FRAME_FLAG_CFRAME | VM_ENV_FLAG_LOCAL;
+    VALUE frame_type = VM_FRAME_MAGIC_CFUNC | VM_ENV_FLAG_LOCAL;
 
     // TODO(trevor) we could pass this in to supply a block
     VALUE block_handler = VM_BLOCK_HANDLER_NONE;
 
-    vm_push_frame(ec, NULL, frame_type, recv, block_handler, (VALUE)me, 0, ec->cfp->sp, 0, 0);
+    /* cf. vm_call_sorbet_with_frame_normal */
+    vm_push_frame(ec, iseq, frame_type, recv, block_handler, (VALUE)me, 0, ec->cfp->sp, iseq->body->local_table_size,
+                  iseq->body->stack_max);
 }
 
 void sorbet_pushBlockFrame(const struct rb_captured_block *captured) {
@@ -151,6 +153,10 @@ again:
         case VM_METHOD_TYPE_CFUNC:
             CC_SET_FASTPATH(cc, vm_call_cfunc, TRUE);
             return vm_call_cfunc(ec, cfp, calling, cd);
+
+        case VM_METHOD_TYPE_SORBET:
+            CC_SET_FASTPATH(cc, vm_call_sorbet, TRUE);
+            return vm_call_sorbet_maybe_setup_fastpath(ec, cfp, calling, cd);
 
         case VM_METHOD_TYPE_ATTRSET:
             CALLER_SETUP_ARG(cfp, calling, ci);
