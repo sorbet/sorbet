@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 # typed: true
 # compiled: true
-# run_filecheck: INITIAL
-# run_filecheck: OPT
 
 def foo
   yield
