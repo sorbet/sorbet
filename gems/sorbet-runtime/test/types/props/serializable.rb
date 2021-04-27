@@ -494,6 +494,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :hash_both, T::Hash[CustomType, CustomType], default: {}
   end
 
+  class CustomTypeWrapper
+    include T::Props::Serializable
+    prop :struct, CustomTypeStruct
+  end
+
   describe 'custom type' do
     it 'round trips as plain value' do
       assert_equal('foo', CustomTypeStruct.from_hash({'single' => 'foo'}).serialize['single'])
@@ -510,6 +515,25 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     # It's hard to write tests for a CustomType with a custom deserialize method, so skip that.
+
+    it 'raises serialize errors for members with a serializable subtype' do
+      struct = CustomTypeWrapper.new
+      struct.instance_variable_set(:@struct, 'not a serializable thing')
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `serialize'")
+    end
+
+    it 'raises deserialize errors for members with a serializable subtype' do
+      obj = 'not a serializable thing'
+      e = assert_raises(TypeError) do
+        CustomTypeWrapper.from_hash({'struct' => obj})
+      end
+
+      assert_includes(e.message, 'provided to from_hash')
+    end
 
     it 'round trips as array value' do
       assert_equal(['foo'], CustomTypeStruct.from_hash({'array' => ['foo']}).serialize['array'])
