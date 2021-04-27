@@ -640,6 +640,95 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class SetPropStruct
+    include T::Props::Serializable
+    prop :set, T::Set[String]
+  end
+
+  describe 'set props' do
+    it 'round trips' do
+      set = Set['foo']
+      struct = SetPropStruct.new
+      struct.set = set
+
+      h = struct.serialize
+      assert_equal(1, h['set'].length)
+      assert(h['set'].include?('foo'))
+
+      roundtripped = SetPropStruct.from_hash(h)
+      assert_equal(1, roundtripped.set.length)
+      assert(roundtripped.set.include?('foo'))
+    end
+
+    it 'does not share structure on serialize' do
+      set = Set['foo']
+      struct = SetPropStruct.new
+      struct.set = set
+      h = struct.serialize
+      refute_equal(struct.set.object_id, h['set'].object_id, "`set` is the same object")
+    end
+
+    it 'does not share structure on deserialize' do
+      set = Set['foo']
+      h = {
+        'set' => set,
+      }
+      struct = SetPropStruct.from_hash(h)
+      refute_equal(struct.set.object_id, h['set'].object_id, "`set` is the same object")
+    end
+  end
+
+  class CustomSetPropStruct
+    include T::Props::Serializable
+    prop :set, T::Set[CustomType]
+  end
+
+  describe 'custom set props' do
+    it 'round trips' do
+      array = [3]
+      obj = CustomType.new
+      obj.value = array 
+      set = Set[obj]
+      struct = CustomSetPropStruct.new
+      struct.set = set
+      h = struct.serialize
+      assert_equal(1, h['set'].length)
+      assert(h['set'].include?(array))
+
+      roundtripped = CustomSetPropStruct.from_hash(h)
+      assert_equal(1, roundtripped.set.length)
+      value = roundtripped.set.to_a[0].value
+      assert_equal(array, value)
+    end
+
+    it 'raises serialize errors' do
+      not_a_set = 1234
+      struct = CustomSetPropStruct.new
+      struct.instance_variable_set(:@set, not_a_set)
+      e = assert_raises(TypeError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "value must be enumerable")
+    end
+
+    it 'raises deserialize errors' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = CustomType.new
+      e = assert_raises(TypeError) do
+        result = CustomSetPropStruct.from_hash({'set' => obj})
+      end
+
+      assert_includes(e.message, "value must be enumerable")
+    end
+  end
+
   class MyEnum < T::Enum
     enums do
       FOO = new
