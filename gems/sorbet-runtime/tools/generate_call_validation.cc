@@ -16,12 +16,26 @@ enum class ValidatorKind {
     Procedure,
 };
 
+enum class TypeKind {
+    Simple,
+    Complex,
+};
+
 string_view validatorKindToString(ValidatorKind kind) {
     switch (kind) {
         case ValidatorKind::Method:
             return "method"sv;
         case ValidatorKind::Procedure:
             return "procedure"sv;
+    }
+}
+
+string_view typeKindToString(TypeKind kind) {
+    switch (kind) {
+        case TypeKind::Simple:
+            return "fast"sv;
+        case TypeKind::Complex:
+            return "medium"sv;
     }
 }
 
@@ -53,28 +67,31 @@ variant<Options, int> parseArgs(int argc, char **argv) {
     }
 }
 
-void generateCreateValidatorFastDispatcher(ValidatorKind kind) {
+void generateCreateValidatorFastDispatcher(ValidatorKind kind, TypeKind type) {
     auto kindString = validatorKindToString(kind);
-    fmt::print("  def self.create_validator_{}_fast(mod, original_method, method_sig)\n", kindString);
+    auto typeString = typeKindToString(type);
+    fmt::print("  def self.create_validator_{}_{}(mod, original_method, method_sig)\n", kindString, typeString);
     switch (kind) {
         case ValidatorKind::Method:
             fmt::print("    if method_sig.return_type.is_a?(T::Private::Types::Void)\n"
-                       "      raise 'Should have used create_validator_procedure_fast'\n"
-                       "    end\n");
+                       "      raise 'Should have used create_validator_procedure_{}'\n"
+                       "    end\n",
+                       typeString);
             break;
         case ValidatorKind::Procedure:
             break;
     }
 
-    const char *returnTypeArg;
-    switch (kind) {
-        case ValidatorKind::Method:
-            returnTypeArg = ", method_sig.return_type.raw_type";
+    const char *rawTypeMethodCall;
+    switch (type) {
+        case TypeKind::Simple:
+            rawTypeMethodCall = ".raw_type";
             break;
-        case ValidatorKind::Procedure:
-            returnTypeArg = "";
+        case TypeKind::Complex:
+            rawTypeMethodCall = "";
             break;
     }
+
     fmt::print("    # trampoline to reduce stack frame size\n");
     for (size_t arity = 0; arity <= MAX_ARITY; arity++) {
         if (arity == 0) {
@@ -83,11 +100,15 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind) {
             fmt::print("    elsif method_sig.arg_types.length == {}\n", arity);
         }
 
-        fmt::print("      create_validator_{}_fast{}(mod, original_method, method_sig{}", kindString, arity,
-                   returnTypeArg);
+        fmt::print("      create_validator_{}_{}{}(mod, original_method, method_sig", kindString, typeString, arity);
+
+        if (kind == ValidatorKind::Method) {
+            fmt::print(", method_sig.return_type{}", rawTypeMethodCall);
+        }
+
         for (size_t i = 0; i < arity; i++) {
             fmt::print(",\n");
-            fmt::print("                                    method_sig.arg_types[{}][1].raw_type", i);
+            fmt::print("                                    method_sig.arg_types[{}][1]{}", i, rawTypeMethodCall);
         }
         fmt::print(")\n");
     }
@@ -98,7 +119,7 @@ void generateCreateValidatorFastDispatcher(ValidatorKind kind) {
                "\n");
 }
 
-void generateCreateValidatorFast(const Options &options, ValidatorKind kind, size_t arity) {
+void generateCreateValidatorFast(const Options &options, ValidatorKind kind, TypeKind type, size_t arity) {
     const char *returnTypeArg;
     switch (kind) {
         case ValidatorKind::Method:
@@ -108,8 +129,8 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
             returnTypeArg = "";
             break;
     }
-    fmt::print("  def self.create_validator_{}_fast{}(mod, original_method, method_sig{}", validatorKindToString(kind),
-               arity, returnTypeArg);
+    fmt::print("  def self.create_validator_{}_{}{}(mod, original_method, method_sig{}", validatorKindToString(kind),
+               typeKindToString(type), arity, returnTypeArg);
     for (size_t i = 0; i < arity; i++) {
         fmt::print(", arg{}_type", i);
     }
@@ -121,21 +142,19 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
     }
     fmt::print("&blk|\n");
 
-    fmt::print("      # This block is called for every `sig`. It's critical to keep it fast and\n"
-               "      # reduce number of allocations that happen here.\n"
-               "      # This method is a manually sped-up version of more general code in `validate_call`\n"
-               "      T::Profile.typecheck_sample_attempts -= 1\n"
-               "      should_sample = T::Profile.typecheck_sample_attempts == 0\n"
-               "      if should_sample\n"
-               "        T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE\n"
-               "        T::Profile.typecheck_samples += 1\n"
-               "        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n"
-               "      end\n"
-               "\n");
+    fmt::print("      # This method is a manually sped-up version of more general code in `validate_call`\n");
 
     for (size_t i = 0; i < arity; i++) {
-        fmt::print("      unless arg{0}.is_a?(arg{0}_type)\n"
-                   "        CallValidation.report_error(\n"
+        switch (type) {
+            case TypeKind::Simple:
+                fmt::print("      unless arg{0}.is_a?(arg{0}_type)\n", i);
+                break;
+            case TypeKind::Complex:
+                fmt::print("      unless arg{0}_type.valid?(arg{0})\n", i);
+                break;
+        }
+
+        fmt::print("        CallValidation.report_error(\n"
                    "          method_sig,\n"
                    "          method_sig.arg_types[{0}][1].error_message_for_obj(arg{0}),\n"
                    "          'Parameter',\n"
@@ -148,11 +167,6 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
                    "\n",
                    i);
     }
-
-    fmt::print("      if should_sample\n"
-               "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n"
-               "      end\n"
-               "\n");
 
     fmt::print("      # The following line breaks are intentional to show nice pry message\n");
     for (size_t i = 0; i < 10; i++) {
@@ -183,35 +197,38 @@ void generateCreateValidatorFast(const Options &options, ValidatorKind kind, siz
     }
     fmt::print("&blk)\n");
 
+    const char *returnValueTypecheck;
+    switch (type) {
+        case TypeKind::Simple:
+            returnValueTypecheck = "return_value.is_a?(return_type)";
+            break;
+        case TypeKind::Complex:
+            returnValueTypecheck = "return_type.valid?(return_value)";
+            break;
+    }
+
     switch (kind) {
         case ValidatorKind::Procedure:
             fmt::print("      T::Private::Types::Void::VOID\n");
             break;
 
         case ValidatorKind::Method:
-            fmt::print(
-                "      if should_sample\n"
-                "        t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\n"
-                "      end\n"
-                "\n"
-                "      unless return_value.is_a?(return_type)\n"
-                "        message = method_sig.return_type.error_message_for_obj(return_value)\n"
-                "        if message\n"
-                "          CallValidation.report_error(\n"
-                "            method_sig,\n"
-                "            message,\n"
-                "            'Return value',\n"
-                "            nil,\n"
-                "            method_sig.return_type,\n"
-                "            return_value,\n"
-                "            caller_offset: -1\n"
-                "          )\n"
-                "        end\n"
-                "      end\n"
-                "      if should_sample\n"
-                "        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)\n"
-                "      end\n"
-                "      return_value\n");
+            fmt::print("      unless {}\n"
+                       "        message = method_sig.return_type.error_message_for_obj(return_value)\n"
+                       "        if message\n"
+                       "          CallValidation.report_error(\n"
+                       "            method_sig,\n"
+                       "            message,\n"
+                       "            'Return value',\n"
+                       "            nil,\n"
+                       "            method_sig.return_type,\n"
+                       "            return_value,\n"
+                       "            caller_offset: -1\n"
+                       "          )\n"
+                       "        end\n"
+                       "      end\n"
+                       "      return_value\n",
+                       returnValueTypecheck);
             break;
     }
 
@@ -230,14 +247,24 @@ int generateCallValidation(const Options &options) {
                "\n"
                "module T::Private::Methods::CallValidation\n");
 
-    generateCreateValidatorFastDispatcher(ValidatorKind::Method);
+    generateCreateValidatorFastDispatcher(ValidatorKind::Method, TypeKind::Simple);
     for (size_t i = 0; i <= MAX_ARITY; i++) {
-        generateCreateValidatorFast(options, ValidatorKind::Method, i);
+        generateCreateValidatorFast(options, ValidatorKind::Method, TypeKind::Simple, i);
     }
 
-    generateCreateValidatorFastDispatcher(ValidatorKind::Procedure);
+    generateCreateValidatorFastDispatcher(ValidatorKind::Procedure, TypeKind::Simple);
     for (size_t i = 0; i <= MAX_ARITY; i++) {
-        generateCreateValidatorFast(options, ValidatorKind::Procedure, i);
+        generateCreateValidatorFast(options, ValidatorKind::Procedure, TypeKind::Simple, i);
+    }
+
+    generateCreateValidatorFastDispatcher(ValidatorKind::Method, TypeKind::Complex);
+    for (size_t i = 0; i <= MAX_ARITY; i++) {
+        generateCreateValidatorFast(options, ValidatorKind::Method, TypeKind::Complex, i);
+    }
+
+    generateCreateValidatorFastDispatcher(ValidatorKind::Procedure, TypeKind::Complex);
+    for (size_t i = 0; i <= MAX_ARITY; i++) {
+        generateCreateValidatorFast(options, ValidatorKind::Procedure, TypeKind::Complex, i);
     }
 
     fmt::print("end\n");

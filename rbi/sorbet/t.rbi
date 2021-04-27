@@ -168,18 +168,6 @@ module T::Configuration
   def self.class_owner_finder; end
 end
 
-module T::Profile
-  def self.reset; end
-  def self.typecheck_count_estimate; end
-  def self.typecheck_duration; end
-  def self.typecheck_duration=(arg0); end
-  def self.typecheck_duration_estimate; end
-  def self.typecheck_sample_attempts; end
-  def self.typecheck_sample_attempts=(arg0); end
-  def self.typecheck_samples; end
-  def self.typecheck_samples=(arg0); end
-end
-
 module T::Utils
   def self.arity(method); end
   def self.coerce(val); end

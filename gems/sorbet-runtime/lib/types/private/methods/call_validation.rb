@@ -59,16 +59,22 @@ module T::Private::Methods::CallValidation
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
     has_fixed_arity = method_sig.kwarg_types.empty? && !method_sig.has_rest && !method_sig.has_keyrest &&
       original_method.parameters.all? {|(kind, _name)| kind == :req}
-    all_args_are_simple = method_sig.arg_types.all? {|_name, type| type.is_a?(T::Types::Simple)}
-    has_simple_method_types =  all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
-    has_simple_procedure_types = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
+    ok_for_fast_path = has_fixed_arity && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+
+    all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? {|_name, type| type.is_a?(T::Types::Simple)}
+    simple_method = all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
+    simple_procedure = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
 
     T::Configuration.without_ruby_warnings do
       T::Private::DeclState.current.without_on_method_added do
-        if has_fixed_arity && has_simple_method_types && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+        if simple_method
           create_validator_method_fast(mod, original_method, method_sig)
-        elsif has_fixed_arity && has_simple_procedure_types && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+        elsif simple_procedure
           create_validator_procedure_fast(mod, original_method, method_sig)
+        elsif ok_for_fast_path && method_sig.return_type.is_a?(T::Private::Types::Void)
+          create_validator_procedure_medium(mod, original_method, method_sig)
+        elsif ok_for_fast_path
+          create_validator_method_medium(mod, original_method, method_sig)
         else
           create_validator_slow(mod, original_method, method_sig)
         end
@@ -89,14 +95,6 @@ module T::Private::Methods::CallValidation
   def self.validate_call(instance, original_method, method_sig, args, blk)
     # This method is called for every `sig`. It's critical to keep it fast and
     # reduce number of allocations that happen here.
-
-    T::Profile.typecheck_sample_attempts -= 1
-    should_sample = T::Profile.typecheck_sample_attempts == 0
-    if should_sample
-      T::Profile.typecheck_sample_attempts = T::Profile::SAMPLE_RATE
-      T::Profile.typecheck_samples += 1
-      t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    end
 
     if method_sig.bind
       message = method_sig.bind.error_message_for_obj(instance)
@@ -143,10 +141,6 @@ module T::Private::Methods::CallValidation
       end
     end
 
-    if should_sample
-      T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
-    end
-
     # The following line breaks are intentional to show nice pry message
 
 
@@ -163,9 +157,6 @@ module T::Private::Methods::CallValidation
     # Please issue `finish` to step out of it
 
     return_value = T::Configuration::AT_LEAST_RUBY_2_7 ? original_method.bind_call(instance, *args, &blk) : original_method.bind(instance).call(*args, &blk)
-    if should_sample
-      t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    end
 
     # The only type that is allowed to change the return value is `.void`.
     # It ignores what you returned and changes it to be a private singleton.
@@ -182,9 +173,6 @@ module T::Private::Methods::CallValidation
           method_sig.return_type,
           return_value,
         )
-      end
-      if should_sample
-        T::Profile.typecheck_duration += (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t1)
       end
       return_value
     end
