@@ -503,16 +503,140 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(['foo'], CustomTypeStruct.from_hash({'array' => ['foo']}).serialize['array'])
     end
 
+    it 'raises serialize errors for members needing map' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@array, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `map'")
+    end
+
+    it 'raises deserialize errors for members needing map' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = CustomType.new
+      result = CustomTypeStruct.from_hash({'array' => obj})
+      assert_equal(obj, result.array)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:array, storytime[:prop])
+      assert_equal(obj, storytime[:value])
+    end
+
     it 'round trips as hash key' do
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_key' => {'foo' => 'bar'}}).serialize['hash_key'])
+    end
+
+    it 'raises serialize errors for members needing transform_keys' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@hash_key, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `transform_keys'")
+    end
+
+    it 'raises deserialize errors for bad members needing transform_keys' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = 'not a hash'
+      result = CustomTypeStruct.from_hash({'hash_key' => obj})
+      assert_equal('not a hash', result.hash_key)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:hash_key, storytime[:prop])
+      assert_equal(obj, storytime[:value])
     end
 
     it 'round trips as hash value' do
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_value' => {'foo' => 'bar'}}).serialize['hash_value'])
     end
 
+    it 'raises serialize errors for members needing transform_values' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@hash_value, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `transform_values'")
+    end
+
+    it 'raises deserialize errors for members needing transform_values' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = 'not a hash'
+      result = CustomTypeStruct.from_hash({'hash_value' => obj})
+      assert_equal('not a hash', result.hash_value)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:hash_value, storytime[:prop])
+      assert_equal(obj, storytime[:value])
+    end
+
     it 'round trips as hash key and value' do
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_both' => {'foo' => 'bar'}}).serialize['hash_both'])
+    end
+
+    it 'raises serialize errors for members needing each_with_object' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@hash_both, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `each_with_object'")
+    end
+
+    it 'raises deserialize errors for members needing each_with_object' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = 'not a hash'
+      result = CustomTypeStruct.from_hash({'hash_both' => obj})
+      assert_equal('not a hash', result.hash_both)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:hash_both, storytime[:prop])
+      assert_equal(obj, storytime[:value])
     end
   end
 
