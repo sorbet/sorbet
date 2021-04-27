@@ -77,7 +77,9 @@ sh_binary(
 
 sh_binary(
     name = "filecheck",
+    testonly = 1,
     srcs = ["filecheck.sh"],
+    data = ["@llvm//:FileCheck"],
     deps = [
         ":logging",
     ],

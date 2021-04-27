@@ -20,7 +20,7 @@ rb=( "$@" )
 
 root=$PWD
 
-filecheck_path=$root/external/llvm/FileCheck
+filecheck_path="${root}/external/llvm/FileCheck"
 
 diff_dir="$(mktemp -d)"
 

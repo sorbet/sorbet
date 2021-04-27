@@ -383,7 +383,6 @@ def _filecheck_test_impl(ctx):
     )
 
     runfiles = runfiles.merge(ctx.attr._filecheck[DefaultInfo].default_runfiles)
-    runfiles = runfiles.merge(ctx.attr._llvm_filecheck[DefaultInfo].default_runfiles)
 
     ctx.actions.write(
         ctx.outputs.executable,
@@ -420,9 +419,6 @@ filecheck_test = rule(
             cfg = "host",
             default = "//test:filecheck",
             executable = True,
-        ),
-        "_llvm_filecheck": attr.label(
-            default = "@llvm//:FileCheck",
         ),
     },
 )
