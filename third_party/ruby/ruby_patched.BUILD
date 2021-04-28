@@ -14,7 +14,13 @@ ruby(
         "--disable-maintainer-mode",
         "--disable-dependency-tracking",
         "--disable-jit-support",
-    ],
+    ] + select({
+        # Enforce that we don't need Ruby to build in release builds.
+        # (In non-release builds, we allow for an available system Ruby to
+        # speed up the build.)
+        "@com_stripe_sorbet_llvm//tools/config:release": ["--with-baseruby=no"],
+        "//conditions:default": [],
+    }),
     copts = [
         "-g",
         "-fstack-protector-strong",
