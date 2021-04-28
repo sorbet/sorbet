@@ -688,12 +688,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       struct.set = set
 
       h = struct.serialize
-      assert_equal(1, h['set'].length)
-      assert(h['set'].include?('foo'))
+      assert_equal(set, h['set'])
 
       roundtripped = SetPropStruct.from_hash(h)
-      assert_equal(1, roundtripped.set.length)
-      assert(roundtripped.set.include?('foo'))
+      assert_equal(roundtripped.set, set)
     end
 
     it 'does not share structure on serialize' do
