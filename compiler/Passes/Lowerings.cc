@@ -17,7 +17,7 @@ namespace {
 
 class IRIntrinsic {
 public:
-    virtual vector<string> implementedFunctionCall() = 0;
+    virtual vector<string> implementedFunctionCall() const = 0;
 
     // The contract you're expected to implement here is basically:
     //
@@ -38,7 +38,7 @@ public:
     // - return `instr` unchanged
     //
     // We might change this (I don't know if this decision was intentional or accidental).
-    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module, llvm::CallInst *instr) = 0;
+    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module, llvm::CallInst *instr) const = 0;
 
     virtual ~IRIntrinsic() = default;
 };
@@ -77,11 +77,12 @@ const vector<pair<string, string>> knownSymbolMapping = {
 
 class ClassAndModuleLoading : public IRIntrinsic {
 public:
-    virtual vector<string> implementedFunctionCall() override {
+    virtual vector<string> implementedFunctionCall() const override {
         return {"sorbet_i_getRubyClass", "sorbet_i_getRubyConstant"};
     }
 
-    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module, llvm::CallInst *instr) override {
+    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
+                                     llvm::CallInst *instr) const override {
         auto elemPtr = llvm::dyn_cast<llvm::GEPOperator>(instr->getArgOperand(0));
         if (elemPtr == nullptr) {
             return llvm::UndefValue::get(instr->getType());
@@ -189,55 +190,79 @@ public:
     }
 } ClassAndModuleLoading;
 
-vector<pair<string, IRIntrinsic *>> getIRIntrinsics() {
-    vector<IRIntrinsic *> irIntrinsics{&ClassAndModuleLoading};
+vector<IRIntrinsic *> getIRIntrinsics() {
+    vector<IRIntrinsic *> irIntrinsics{
+        &ClassAndModuleLoading,
+    };
 
-    vector<pair<string, IRIntrinsic *>> res;
-    for (auto intrinsic : irIntrinsics) {
-        for (auto &call : intrinsic->implementedFunctionCall()) {
-            res.emplace_back(call, intrinsic);
-        }
-    }
-    return res;
+    return irIntrinsics;
 }
-static const vector<pair<string, IRIntrinsic *>> irIntrinsics = getIRIntrinsics();
+static const vector<IRIntrinsic *> irIntrinsics = getIRIntrinsics();
 
 class LowerIntrinsicsPass : public llvm::ModulePass {
 public:
+    // The contents of this variable don't matter; LLVM just uses the pointer address of it as an ID.
     static char ID;
     LowerIntrinsicsPass() : llvm::ModulePass(ID){};
+
     struct CallInstVisitor : public llvm::InstVisitor<CallInstVisitor> {
-        vector<pair<llvm::CallInst *, IRIntrinsic *>> result;
-        UnorderedMap<llvm::Function *, IRIntrinsic *> lookups;
+        vector<llvm::CallInst *> result;
+        UnorderedSet<llvm::Function *> lookups;
+
         void visitCallInst(llvm::CallInst &ci) {
             auto maybeFunc = ci.getCalledFunction();
-            if (!maybeFunc) {
+            if (maybeFunc == nullptr) {
                 return;
             }
+
             auto fnd = lookups.find(maybeFunc);
             if (fnd == lookups.end()) {
                 return;
             }
-            result.emplace_back(&ci, fnd->second);
+
+            // We're taking the address of a llvm::CallInst & here to avoid having to deal with a
+            // vector of references.
+            //
+            // This lives at least long enough (owned by the llvm::Module) to let the visitor finish
+            // and also run the replaceCall callback.
+            //
+            // An alternative here would be to run the replaceCall callback and do the replacements
+            // right here, but it's probably not great to have a visitor that simultaneously mutates
+            // the structure it's visiting, which is why we accumulate a to-do list of results.
+            result.emplace_back(&ci);
         }
     };
+
     virtual bool runOnModule(llvm::Module &mod) override {
-        CallInstVisitor visitor;
         mod.getFunction("__sorbet_only_exists_to_keep_functions_alive__")->eraseFromParent();
-        for (const auto &[name, instr] : irIntrinsics) {
-            auto fun = mod.getFunction(name);
-            if (fun) {
-                visitor.lookups.emplace(fun, instr);
+
+        // We run each lowering pass in sequence. Each does a full visit on the module.
+        // We don't have that many lowering passes right now, so this cost is small.
+        //
+        // When we get around to optimizing compile-time performance in the future, this might need to change.
+        // At the very least, it should be easy enough to schedule `ClassAndModuleLoading` and `ObjIsKindOf`
+        // to run in sequence **at each call site**, but still in one `llvm::ModulePass`.
+        for (const auto *intrinsic : irIntrinsics) {
+            CallInstVisitor visitor;
+
+            for (const auto &name : intrinsic->implementedFunctionCall()) {
+                if (auto fun = mod.getFunction(name)) {
+                    visitor.lookups.insert(fun);
+                }
+            }
+
+            visitor.visit(mod);
+
+            for (const auto &callInst : visitor.result) {
+                auto newRes = intrinsic->replaceCall(mod.getContext(), mod, callInst);
+                callInst->replaceAllUsesWith(newRes);
+                callInst->eraseFromParent();
             }
         }
-        visitor.visit(mod);
-        for (const auto &[instr, intrinsicHandler] : visitor.result) {
-            auto newRes = intrinsicHandler->replaceCall(mod.getContext(), mod, instr);
-            instr->replaceAllUsesWith(newRes);
-            instr->eraseFromParent();
-        }
+
         return true;
     };
+
     virtual ~LowerIntrinsicsPass() = default;
 } LowerInrinsicsPass;
 char LowerIntrinsicsPass::ID = 0;
