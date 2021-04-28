@@ -637,9 +637,17 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(ImportTree *root, vector<core::
         return ast::MK::Assign(todoLoc, name2Expr(parts.back()), std::move(rhs));
     }
     ast::ClassDef::RHS_store rhs;
-    for (auto const& [nameRef, child] : root->children) {
+
+    // Ensure stable ordering
+    // TODO: better way of doing this?
+    vector<pair<core::NameRef, ImportTree*>> childPairs;
+    std::transform(root->children.begin(), root->children.end(), back_inserter(childPairs),
+            [](const auto &pair) { return make_pair(pair.first, pair.second.get()); });
+    fast_sort(childPairs, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first.rawId() < rhs.first.rawId(); });
+
+    for (auto const& [nameRef, child] : childPairs) {
         parts.emplace_back(nameRef);
-        rhs.emplace_back(makeModule(child.get(), parts, todo));
+        rhs.emplace_back(makeModule(child, parts, todo));
         parts.pop_back();
     }
     core::NameRef name = parts.empty() ? todo : parts.back(); // TODO cleanup "todo"
