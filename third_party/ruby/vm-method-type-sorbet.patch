@@ -476,7 +476,7 @@ index 76e56fa..d18e79e 100644
          if (calling->kw_splat &&
                  calling->argc > 0 &&
 diff --git vm_insnhelper.c vm_insnhelper.c
-index c0d9092..bebdf53 100644
+index c0d9092..8730a0c 100644
 --- vm_insnhelper.c
 +++ vm_insnhelper.c
 @@ -1894,6 +1894,7 @@ static VALUE vm_call_method_each_type(rb_execution_context_t *ec, rb_control_fra
@@ -495,7 +495,7 @@ index c0d9092..bebdf53 100644
  # undef METHOD_BUG
        default:
  	rb_bug("wrong method type: %d", me->def->type);
-@@ -2539,6 +2541,165 @@ vm_call_cfunc(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb
+@@ -2539,6 +2541,166 @@ vm_call_cfunc(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb
      return vm_call_cfunc_with_frame(ec, reg_cfp, calling, cd, empty_kw_splat);
  }
  
@@ -503,7 +503,8 @@ index c0d9092..bebdf53 100644
 +static bool
 +vm_call_sorbet_simple_p(const rb_method_sorbet_t *sorbet)
 +{
-+    return sorbet->param->flags.has_rest == FALSE &&
++    return sorbet->param->flags.has_opt == FALSE &&
++        sorbet->param->flags.has_rest == FALSE &&
 +        sorbet->param->flags.has_post == FALSE &&
 +        sorbet->param->flags.has_kw == FALSE &&
 +        sorbet->param->flags.has_kwrest == FALSE &&
@@ -661,7 +662,7 @@ index c0d9092..bebdf53 100644
  static VALUE
  vm_call_ivar(rb_execution_context_t *ec, rb_control_frame_t *cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
  {
-@@ -2924,6 +3085,10 @@ vm_call_method_each_type(rb_execution_context_t *ec, rb_control_frame_t *cfp, st
+@@ -2924,6 +3086,10 @@ vm_call_method_each_type(rb_execution_context_t *ec, rb_control_frame_t *cfp, st
          CC_SET_FASTPATH(cc, vm_call_cfunc, TRUE);
          return vm_call_cfunc(ec, cfp, calling, cd);
  
