@@ -1746,6 +1746,28 @@ class ResolveTypeMembersAndFieldsWalk {
         }
     }
 
+    ast::ExpressionPtr sendToCast(core::Context ctx, core::LocOffsets castLoc, core::NameRef castName,
+                                  ast::ExpressionPtr expr, ast::ExpressionPtr type) {
+        ResolveCastItem item;
+        item.file = ctx.file;
+
+        // Compute the containing class when translating the type, as there's a very good chance
+        // this has been called from a method context.
+        item.owner = ctx.owner.enclosingClass(ctx);
+
+        auto typeExpr = ast::MK::KeepForTypechecking(std::move(type));
+        auto cast = ast::make_expression<ast::Cast>(castLoc, core::Types::todo(), std::move(expr), castName);
+        item.cast = ast::cast_tree<ast::Cast>(cast);
+        item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
+
+        // We should be able to resolve simple casts immediately.
+        if (!tryResolveSimpleClassCastItem(ctx.withOwner(item.owner), item)) {
+            this->todoResolveCastItems_.emplace_back(move(item));
+        }
+
+        return ast::MK::InsSeq1(castLoc, move(typeExpr), move(cast));
+    }
+
     void validateNonForcingIsA(core::Context ctx, const ast::Send &send) {
         constexpr string_view method = "T::NonForcingConstants.non_forcing_is_a?";
 
@@ -2053,31 +2075,20 @@ public:
                 case core::Names::uncheckedLet().rawId():
                 case core::Names::assertType().rawId():
                 case core::Names::cast().rawId(): {
-                    if (send.args.size() < 2) {
+                    if (send.args.empty() || send.args.size() > 3) {
+                        return tree;
+                    } else if (send.args.size() == 1) {
+                        if (auto castBlock = ast::cast_tree<ast::Block>(send.block)) {
+                            return sendToCast(ctx, send.loc, send.fun, std::move(send.args[0]),
+                                              std::move(castBlock->body));
+                        } else {
+                            return tree;
+                        }
+                    } else if (send.block == nullptr) {
+                        return sendToCast(ctx, send.loc, send.fun, std::move(send.args[0]), std::move(send.args[1]));
+                    } else {
                         return tree;
                     }
-
-                    ResolveCastItem item;
-                    item.file = ctx.file;
-
-                    // Compute the containing class when translating the type,
-                    // as there's a very good chance this has been called from a
-                    // method context.
-                    item.owner = ctx.owner.enclosingClass(ctx);
-
-                    auto typeExpr = ast::MK::KeepForTypechecking(std::move(send.args[1]));
-                    auto expr = std::move(send.args[0]);
-                    auto cast =
-                        ast::make_expression<ast::Cast>(send.loc, core::Types::todo(), std::move(expr), send.fun);
-                    item.cast = ast::cast_tree<ast::Cast>(cast);
-                    item.typeArg = &ast::cast_tree_nonnull<ast::Send>(typeExpr).args[0];
-
-                    // We should be able to resolve simple casts immediately.
-                    if (!tryResolveSimpleClassCastItem(ctx.withOwner(item.owner), item)) {
-                        todoResolveCastItems_.emplace_back(move(item));
-                    }
-
-                    return ast::MK::InsSeq1(send.loc, move(typeExpr), move(cast));
                 }
                 case core::Names::revealType().rawId():
                 case core::Names::absurd().rawId(): {
