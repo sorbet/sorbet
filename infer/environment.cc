@@ -928,7 +928,7 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
         core::TypeAndOrigins tp;
         bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value.get()) ||
                               cfg::isa_instruction<cfg::LoadArg>(bind.value.get()) ||
-                              cfg::isa_instruction<cfg::LoadSelf>(bind.value.get());
+                              bind.bind.variable == cfg::LocalRef::selfVariable();
 
         bool checkFullyDefined = true;
         const core::lsp::Query &lspQuery = ctx.state.lspQuery;
@@ -1280,7 +1280,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                 }
 
                 const core::TypeAndOrigins &ty = getAndFillTypeAndOrigin(ctx, c->value);
-                ENFORCE(c->cast != core::Names::uncheckedLet());
+                ENFORCE(c->cast != core::Names::uncheckedLet() && c->cast != core::Names::bind());
+
                 if (c->cast != core::Names::cast()) {
                     if (c->cast == core::Names::assertType() && ty.type.isUntyped()) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {

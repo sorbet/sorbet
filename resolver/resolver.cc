@@ -2049,6 +2049,7 @@ public:
 
             switch (send.fun.rawId()) {
                 case core::Names::let().rawId():
+                case core::Names::bind().rawId():
                 case core::Names::uncheckedLet().rawId():
                 case core::Names::assertType().rawId():
                 case core::Names::cast().rawId(): {

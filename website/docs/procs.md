@@ -104,7 +104,7 @@ Note that the `yield` itself in the method body doesn't need to change at all.
 Since every Ruby method can only accept one block, both Ruby and Sorbet are able
 to connect the `yield` call to the `blk` parameter automatically.
 
-## Modifying the self type
+## Annotating the self type with `T.proc.bind`
 
 Many Ruby constructs accept a block argument in one context, but then execute it
 in a different context entirely. This means that the methods that exist inside
@@ -163,6 +163,70 @@ end
 
 puts(upcased) # => "HELLO"
 ```
+
+## Casting the self type with `T.bind`
+
+As mentioned above, by default, Sorbet assumes that a block executes in a
+context where `self` has the same type as the lexically surrounding scope.
+
+The `T.proc.bind` annotation (from the previous section) can change this
+assumption, but is only valid for use on the distinguished `&blk` parameter of a
+method:
+
+- It cannot be used with non-`&blk` parameters at a call site.
+- It cannot be used with procs or lambdas that are assigned into a variable,
+  disconnected from any single call site.
+
+(This is due to some simplifying architectural choices in the implementation of
+Sorbet's type checking algorithm.)
+
+We still might want to ascribe a type to `self` for non-`&blk` usages. For
+example, look at the block passed to `before_create` below:
+
+```ruby
+class Post
+  before_create :set_pending, if: -> {
+    draft? # error: Method `draft?` does not exist on `T.class_of(Post)`
+  }
+
+  def draft?
+    true
+  end
+end
+```
+
+By default, Sorbet assumes that when `draft?` runs, `self` will have type
+`T.class_of(Post)`. In reality, `before_create` will execute the lambda provided
+to the `if` argument in a context where the block's `self` has type `Post`.
+
+To type this code accurately, Sorbet requires a
+[`T.bind` annotation](type-assertions.md#tbind) in the lambda:
+
+```ruby
+class Post
+  before_create :set_pending, if: -> {
+    T.bind(self, Post)
+    draft? # OK!
+  }
+
+  # ...
+end
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Base%0A%20%20def%20self.before_create(name%2C%20**options)%0A%20%20end%0Aend%0A%0Aclass%20Post%20%3C%20Base%0A%20%20before_create%20%3Aset_pending%2C%20if%3A%20-%3E%20%7B%20T.bind(self%2C%20Post).draft%3F%20%7D%0A%0A%20%20def%20draft%3F%0A%20%20%20%20true%0A%20%20end%0Aend%0A%0Aclass%20Article%20%3C%20Base%0A%20%20before_create%20%3Aset_pending%2C%20if%3A%20-%3E%20%7B%20draft%3F%20%7D%0A%0A%20%20def%20draft%3F%0A%20%20%20%20true%0A%20%20end%0Aend">
+  → View on sorbet.run
+</a>
+
+Like with `T.cast`, the full range of Sorbet types can be used in the `T.bind`
+annotation. For example, here is a more complicated example that uses `T.any`
+with `T.bind`:
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Concern%0A%20%20def%20included(%26block)%0A%20%20end%0Aend%0A%0Amodule%20Taggeable%0A%20%20extend%20Concern%0A%0A%20%20included%20do%0A%20%20%20%20T.bind(self%2C%20T.any(Post%2C%20Article))%0A%0A%20%20%20%20create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Post%0A%20%20include%20Taggeable%0A%0A%20%20def%20self.create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Article%0A%20%20include%20Taggeable%0Aend">
+  → View on sorbet.run
+</a>
+
+For more information on `T.bind`, see
+[Type Assertions](type-assertions.md#tbind).
 
 ## Proc.new vs proc
 
