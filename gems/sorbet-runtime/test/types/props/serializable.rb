@@ -504,7 +504,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal('foo', CustomTypeStruct.from_hash({'single' => 'foo'}).serialize['single'])
     end
 
-    it 'raises serialize errors for members with a custom subtype' do
+    it 'raises serialize errors when props with a custom subtype store the wrong datatype' do
       struct = CustomTypeStruct.new
       struct.instance_variable_set(:@single, 'not a serializable thing')
       e = assert_raises(TypeError) do
@@ -516,7 +516,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     # It's hard to write tests for a CustomType with a custom deserialize method, so skip that.
 
-    it 'raises serialize errors for members with a serializable subtype' do
+    it 'raises serialize errors when props with a serializable subtype store the wrong datatype' do
       struct = CustomTypeWrapper.new
       struct.instance_variable_set(:@struct, 'not a serializable thing')
       e = assert_raises(NoMethodError) do
@@ -526,7 +526,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(e.message, "undefined method `serialize'")
     end
 
-    it 'raises deserialize errors for members with a serializable subtype' do
+    it 'raises deserialize errors when props with a serializable subtype store the wrong datatype' do
       obj = 'not a serializable thing'
       e = assert_raises(TypeError) do
         CustomTypeWrapper.from_hash({'struct' => obj})
@@ -539,7 +539,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(['foo'], CustomTypeStruct.from_hash({'array' => ['foo']}).serialize['array'])
     end
 
-    it 'raises serialize errors for members needing map' do
+    it 'raises serialize errors when props with an array of a custom subtype store the wrong datatype' do
       obj = CustomType.new
       struct = CustomTypeStruct.new
       struct.instance_variable_set(:@array, obj)
@@ -550,7 +550,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(e.message, "undefined method `map'")
     end
 
-    it 'raises deserialize errors for members needing map' do
+    it 'raises deserialize errors when props with an array of a custom subtype store the wrong datatype' do
       msg_string = nil
       extra_hash = nil
       T::Configuration.soft_assert_handler = proc do |msg, extra|
@@ -574,7 +574,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_key' => {'foo' => 'bar'}}).serialize['hash_key'])
     end
 
-    it 'raises serialize errors for members needing transform_keys' do
+    it 'raises serialize errors when props with a hash with keys of a custom subtype store the wrong datatype' do
       obj = CustomType.new
       struct = CustomTypeStruct.new
       struct.instance_variable_set(:@hash_key, obj)
@@ -585,7 +585,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(e.message, "undefined method `transform_keys'")
     end
 
-    it 'raises deserialize errors for bad members needing transform_keys' do
+    it 'raises deserialize errors when props with a hash with keys of a custom subtype store the wrong datatype' do
       msg_string = nil
       extra_hash = nil
       T::Configuration.soft_assert_handler = proc do |msg, extra|
@@ -609,7 +609,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_value' => {'foo' => 'bar'}}).serialize['hash_value'])
     end
 
-    it 'raises serialize errors for members needing transform_values' do
+    it 'raises serialize errors when props with a hash with values of a custom subtype store the wrong datatype' do
       obj = CustomType.new
       struct = CustomTypeStruct.new
       struct.instance_variable_set(:@hash_value, obj)
@@ -620,7 +620,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(e.message, "undefined method `transform_values'")
     end
 
-    it 'raises deserialize errors for members needing transform_values' do
+    it 'raises deserialize errors when props with a hash with values of a custom subtype store the wrong datatype' do
       msg_string = nil
       extra_hash = nil
       T::Configuration.soft_assert_handler = proc do |msg, extra|
@@ -644,7 +644,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_both' => {'foo' => 'bar'}}).serialize['hash_both'])
     end
 
-    it 'raises serialize errors for members needing each_with_object' do
+    it 'raises serialize errors when props with a hash with keys/values of a custom subtype store the wrong datatype' do
       obj = CustomType.new
       struct = CustomTypeStruct.new
       struct.instance_variable_set(:@hash_both, obj)
@@ -655,7 +655,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_includes(e.message, "undefined method `each_with_object'")
     end
 
-    it 'raises deserialize errors for members needing each_with_object' do
+    it 'raises deserialize errors when props with a hash with keys/values of a custom subtype store the wrong datatype' do
       msg_string = nil
       extra_hash = nil
       T::Configuration.soft_assert_handler = proc do |msg, extra|
