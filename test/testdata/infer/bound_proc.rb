@@ -55,7 +55,7 @@ class Post < Base
 
   def score
     T.bind("100", Integer)
-  # ^^^^^^^^^^^^^^^^^^^^^^ error: T.bind can only be used with `self`
+  # ^^^^^^^^^^^^^^^^^^^^^^ error: `T.bind` can only be used with `self`
   end
 end
 
