@@ -568,6 +568,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(CustomTypeStruct, storytime[:klass])
       assert_equal(:array, storytime[:prop])
       assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `map'")
     end
 
     it 'round trips as hash key' do
@@ -603,6 +604,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(CustomTypeStruct, storytime[:klass])
       assert_equal(:hash_key, storytime[:prop])
       assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `transform_keys'")
     end
 
     it 'round trips as hash value' do
@@ -638,6 +640,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(CustomTypeStruct, storytime[:klass])
       assert_equal(:hash_value, storytime[:prop])
       assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `transform_values'")
     end
 
     it 'round trips as hash key and value' do
@@ -673,6 +676,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(CustomTypeStruct, storytime[:klass])
       assert_equal(:hash_both, storytime[:prop])
       assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `each_with_object'")
     end
   end
 
