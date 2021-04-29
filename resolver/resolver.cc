@@ -2097,11 +2097,6 @@ public:
                             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                                 e.setHeader("Using `{}` in block form requires `{}`",
                                             fmt::format("T.{}", send.fun.show(ctx)), "checked: false");
-                                auto endPos = send.loc.endPos();
-                                if (send.loc.exists() && endPos > 0) {
-                                    auto insertLoc = core::Loc(ctx.file, endPos - 1, endPos - 1);
-                                    e.replaceWith("Insert `checked: false`", insertLoc, ", checked: false");
-                                }
                             }
 
                             return sendToCast(ctx, send.loc, send.fun, std::move(send.args[0]),
@@ -2122,10 +2117,6 @@ public:
                             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                                 e.setHeader("Using `{}` in block form requires `{}`",
                                             fmt::format("T.{}", send.fun.show(ctx)), "checked: false");
-                                auto replaceLoc = core::Loc(ctx.file, keywordVal->loc);
-                                if (replaceLoc.source(ctx) == "true") {
-                                    e.replaceWith("Change to `false`", replaceLoc, "false");
-                                }
                             }
                         }
 
@@ -2136,10 +2127,6 @@ public:
                             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                                 e.setHeader("Passed type to `{}` twice, via argument and block",
                                             fmt::format("T.{}", send.fun.show(ctx)));
-                                auto deleteLoc = core::Loc(ctx.file, castBlock->loc).adjust(ctx, -2, 0);
-                                if (deleteLoc.exists()) {
-                                    e.replaceWith("Remove block", deleteLoc, "");
-                                }
                             }
                         }
 
