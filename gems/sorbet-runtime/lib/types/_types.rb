@@ -147,7 +147,7 @@ module T
     Private::Casts.cast(value, type, cast_method: "T.let")
   end
 
-  # Tells the typechecker to bind the current proc to the type `type`.
+  # Tells the type checker to treat `self` in the current block as `type`.
   # Useful for blocks that are captured and executed later with instance_exec.
   # Use like:
   #
@@ -156,10 +156,10 @@ module T
   #    ...
   #  end
   #
-  # Compared to `T.cast`, `T.let` is _checked_ by static system.
+  # `T.bind` behaves like `T.cast` in that it is assumed to be true statically.
   #
   # If `checked` is true, raises an exception at runtime if the value
-  # doesn't match the type.
+  # doesn't match the type (this is the default).
   def self.bind(value, type, checked: true)
     return value unless checked
 

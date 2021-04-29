@@ -767,7 +767,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                         current->exprs.emplace_back(cctx.target, c.loc, make_unique<Ident>(self));
                     } else {
                         if (auto e = cctx.ctx.beginError(what.loc(), core::errors::CFG::MalformedTBind)) {
-                            e.setHeader("T.bind can only be used with `self`");
+                            e.setHeader("`{}` can only be used with `{}`", "T.bind", "self");
                         }
                     }
                 } else {
