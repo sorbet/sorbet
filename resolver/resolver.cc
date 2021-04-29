@@ -2080,7 +2080,7 @@ public:
                         return tree;
                     }
 
-                    auto castBlock = ast::cast_tree<ast::Block>(send.block);
+                    auto *castBlock = ast::cast_tree<ast::Block>(send.block);
                     if (send.numPosArgs == 1) {
                         if (castBlock == nullptr) {
                             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
