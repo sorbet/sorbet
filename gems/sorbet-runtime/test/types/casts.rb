@@ -39,11 +39,21 @@ module Opus::Types::Test
           assert_equal(:foo, method.call(:foo, checked: false) {T.noreturn})
         end
 
-        it 'allows invalid casts with block form, even without checked: false' do
-          # We don't necessarily want to allow this, but we do anyways for speed.
-          assert_equal(:foo, method.call(:foo) {Integer})
-          assert_equal(:foo, method.call(:foo) {T.any(String, Integer)})
-          assert_equal(:foo, method.call(:foo) {T.noreturn})
+        it 'rejects block form casts without checked: false' do
+          exn = assert_raises(RuntimeError) do
+            assert_equal(:foo, method.call(:foo) {Integer})
+          end
+          assert_match(/with a block must use `checked: false`/, exn.message)
+
+          exn = assert_raises(RuntimeError) do
+            assert_equal(:foo, method.call(:foo) {T.any(String, Integer)})
+          end
+          assert_match(/with a block must use `checked: false`/, exn.message)
+
+          exn = assert_raises(RuntimeError) do
+            assert_equal(:foo, method.call(:foo) {T.noreturn})
+          end
+          assert_match(/with a block must use `checked: false`/, exn.message)
         end
 
         it 'has a good error message' do
