@@ -138,7 +138,7 @@ parameter will need a name:</p>
 <p>Note that the <code>yield</code> itself in the method body doesn’t need to change at all.
 Since every Ruby method can only accept one block, both Ruby and Sorbet are able
 to connect the <code>yield</code> call to the <code>blk</code> parameter automatically.</p>
-<h2><a class="anchor" aria-hidden="true" id="modifying-the-self-type"></a><a href="#modifying-the-self-type" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Modifying the self type</h2>
+<h2><a class="anchor" aria-hidden="true" id="annotating-the-self-type-with-tprocbind"></a><a href="#annotating-the-self-type-with-tprocbind" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Annotating the self type with <code>T.proc.bind</code></h2>
 <p>Many Ruby constructs accept a block argument in one context, but then execute it
 in a different context entirely. This means that the methods that exist inside
 the block are not the methods that exist outside the block (like is usually the
@@ -187,6 +187,56 @@ upcased = foo <span class="hljs-keyword">do</span>
 
 puts(upcased) <span class="hljs-comment"># =&gt; "HELLO"</span>
 </code></pre>
+<h2><a class="anchor" aria-hidden="true" id="casting-the-self-type-with-tbind"></a><a href="#casting-the-self-type-with-tbind" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Casting the self type with <code>T.bind</code></h2>
+<p>As mentioned above, by default, Sorbet assumes that a block executes in a
+context where <code>self</code> has the same type as the lexically surrounding scope.</p>
+<p>The <code>T.proc.bind</code> annotation (from the previous section) can change this
+assumption, but is only valid for use on the distinguished <code>&amp;blk</code> parameter of a
+method:</p>
+<ul>
+<li>It cannot be used with non-<code>&amp;blk</code> parameters at a call site.</li>
+<li>It cannot be used with procs or lambdas that are assigned into a variable,
+disconnected from any single call site.</li>
+</ul>
+<p>(This is due to some simplifying architectural choices in the implementation of
+Sorbet’s type checking algorithm.)</p>
+<p>We still might want to ascribe a type to <code>self</code> for non-<code>&amp;blk</code> usages. For
+example, look at the block passed to <code>before_create</code> below:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span></span>
+  before_create <span class="hljs-symbol">:set_pending</span>, <span class="hljs-symbol">if:</span> -&gt; {
+    draft? <span class="hljs-comment"># error: Method `draft?` does not exist on `T.class_of(Post)`</span>
+  }
+
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">draft?</span></span>
+    <span class="hljs-literal">true</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p>By default, Sorbet assumes that when <code>draft?</code> runs, <code>self</code> will have type
+<code>T.class_of(Post)</code>. In reality, <code>before_create</code> will execute the lambda provided
+to the <code>if</code> argument in a context where the block’s <code>self</code> has type <code>Post</code>.</p>
+<p>To type this code accurately, Sorbet requires a
+<a href="/docs/type-assertions#tbind"><code>T.bind</code> annotation</a> in the lambda:</p>
+<pre><code class="hljs css language-ruby"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Post</span></span>
+  before_create <span class="hljs-symbol">:set_pending</span>, <span class="hljs-symbol">if:</span> -&gt; {
+    T.bind(<span class="hljs-keyword">self</span>, Post)
+    draft? <span class="hljs-comment"># OK!</span>
+  }
+
+  <span class="hljs-comment"># ...</span>
+<span class="hljs-keyword">end</span>
+</code></pre>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Base%0A%20%20def%20self.before_create(name%2C%20**options)%0A%20%20end%0Aend%0A%0Aclass%20Post%20%3C%20Base%0A%20%20before_create%20%3Aset_pending%2C%20if%3A%20-%3E%20%7B%20T.bind(self%2C%20Post).draft%3F%20%7D%0A%0A%20%20def%20draft%3F%0A%20%20%20%20true%0A%20%20end%0Aend%0A%0Aclass%20Article%20%3C%20Base%0A%20%20before_create%20%3Aset_pending%2C%20if%3A%20-%3E%20%7B%20draft%3F%20%7D%0A%0A%20%20def%20draft%3F%0A%20%20%20%20true%0A%20%20end%0Aend">
+→ View on sorbet.run
+</a></p>
+<p>Like with <code>T.cast</code>, the full range of Sorbet types can be used in the <code>T.bind</code>
+annotation. For example, here is a more complicated example that uses <code>T.any</code>
+with <code>T.bind</code>:</p>
+<p><a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Concern%0A%20%20def%20included(%26block)%0A%20%20end%0Aend%0A%0Amodule%20Taggeable%0A%20%20extend%20Concern%0A%0A%20%20included%20do%0A%20%20%20%20T.bind(self%2C%20T.any(Post%2C%20Article))%0A%0A%20%20%20%20create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Post%0A%20%20include%20Taggeable%0A%0A%20%20def%20self.create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Article%0A%20%20include%20Taggeable%0Aend">
+→ View on sorbet.run
+</a></p>
+<p>For more information on <code>T.bind</code>, see
+<a href="/docs/type-assertions#tbind">Type Assertions</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="procnew-vs-proc"></a><a href="#procnew-vs-proc" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Proc.new vs proc</h2>
 <p>In Ruby there’s several ways to create a Proc: <code>proc</code> and <code>Proc.new</code>. Sorbet
 handles them differently because of how parameter arity works internally.
@@ -214,7 +264,7 @@ sig {returns(Proc)}
 <p>In general, you’re better off avoiding <code>Proc.new</code> if you can. There’s a
 <a href="https://docs.rubocop.org/rubocop/0.92/cops_style.html#styleproc">rubocop rule</a>
 you can use to enforce this.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/untyped"><span class="arrow-prev">← </span><span>T.untyped</span></a><a class="docs-next button" href="/docs/abstract"><span>Abstract Classes &amp; Interfaces</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#optional-blocks">Optional blocks</a></li><li><a href="#annotating-methods-that-use-yield">Annotating methods that use <code>yield</code></a></li><li><a href="#modifying-the-self-type">Modifying the self type</a></li><li><a href="#procnew-vs-proc">Proc.new vs proc</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2021 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/untyped"><span class="arrow-prev">← </span><span>T.untyped</span></a><a class="docs-next button" href="/docs/abstract"><span>Abstract Classes &amp; Interfaces</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#optional-blocks">Optional blocks</a></li><li><a href="#annotating-methods-that-use-yield">Annotating methods that use <code>yield</code></a></li><li><a href="#annotating-the-self-type-with-tprocbind">Annotating the self type with <code>T.proc.bind</code></a></li><li><a href="#casting-the-self-type-with-tbind">Casting the self type with <code>T.bind</code></a></li><li><a href="#procnew-vs-proc">Proc.new vs proc</a></li></ul></nav></div><footer class="nav-footer" id="footer"><div class="wrapper"><p class="footer">© 2021 Stripe · <a href="/docs/adopting">Get started</a> · <a href="/docs/overview">Docs</a> · <a href="https://sorbet.run">Try</a> · <a href="/en/community">Community</a> · <a href="/blog">Blog</a> · <a href="https://twitter.com/sorbet_ruby">Twitter</a></p></div></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
                 document.addEventListener('keyup', function(e) {
                   if (e.target !== document.body) {
                     return;
