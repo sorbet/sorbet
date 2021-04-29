@@ -160,74 +160,40 @@ end
 
 ## `T.bind`
 
-When blocks are captured to be executed in a different context, Sorbet tries to
-match methods to the current context of `self`. For example,
+`T.bind` works like `T.cast`, except with special syntactic sugar for `self`.
+Like `T.cast`, it is unchecked statically but checked at runtime. Unlike
+`T.cast`, it does not require assigning the result to a variable.
+
+Sometimes we would like to use `T.cast` to ascribe a type for `self`. One option
+is to assign the cast result to a variable, perhaps called `this`:
 
 ```ruby
-class Post
-  # The method before_create is executed in the context of T.class_of(Post)
-  # and this will cause an error saying that `draft?` does not exist in
-  # T.class_of(Post). Sorbet doesn't know that the block is captured and executed
-  # in the context of an instance of Post.
-  before_create :set_pending, if: -> { draft? }
-
-  def draft?
-    true
-  end
-end
+this = T.cast(self, MyClass)
+this.method_on_my_class
 ```
 
-The `T.bind` assertion allows developers to change the context of `self` inside
-a block, proc, lambda or method, so that the context is checked against the
-correct types.
+This is annoying:
+
+- It requires replacing `self` with `this` everywhere it's used.
+- It prevents calling private methods.
+
+If we tried to clean this up with something like `self = T.cast(self, ...)`, the
+Ruby VM rejects our code with a syntax error: `self` is not a variable, and
+can't be used as the name of one.
+
+Thus, Sorbet provides `T.bind` for this specific usecase instead:
 
 ```ruby
-class Post
-  before_create :set_pending, if: -> { T.bind(self, Post).draft? } # no error
-
-  def draft?
-    true
-  end
-end
+T.cast(self, MyClass)
+self.method_on_my_class
 ```
 
-<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Base%0A%20%20def%20self.before_create(name%2C%20**options)%0A%20%20end%0Aend%0A%0Aclass%20Post%20%3C%20Base%0A%20%20before_create%20%3Aset_pending%2C%20if%3A%20-%3E%20%7B%20T.bind(self%2C%20Post).draft%3F%20%7D%0A%0A%20%20def%20draft%3F%0A%20%20%20%20true%0A%20%20end%0Aend%0A%0Aclass%20Article%20%3C%20Base%0A%20%20before_create%20%3Aset_pending%2C%20if%3A%20-%3E%20%7B%20draft%3F%20%7D%0A%0A%20%20def%20draft%3F%0A%20%20%20%20true%0A%20%20end%0Aend">
-  → View on sorbet.run
-</a>
+`T.bind` is the only type assertion that does not require assigning the
+assertion result into a variable, and it can only be used on `self`.
 
-The `T.bind` assertion can also be used with combinators, which helps guarantee
-that blocks executed in different contexts fully satisfy type checking.
-
-```ruby
-module Taggeable
-  extend ActiveSupport::Concern
-
-  included do
-    T.bind(self, T.any(Post, Article))
-
-    create_tag! # error: Article does not implement create_tag!, which is part
-                # of the typing requirements for this block
-  end
-end
-
-class Post
-  include Taggeable
-
-  def self.create_tag!
-    # ...
-  end
-end
-
-class Article
-  include Taggeable
-
-  # The create_tag! method is missing
-end
-```
-
-<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Concern%0A%20%20def%20included(%26block)%0A%20%20end%0Aend%0A%0Amodule%20Taggeable%0A%20%20extend%20Concern%0A%0A%20%20included%20do%0A%20%20%20%20T.bind(self%2C%20T.any(Post%2C%20Article))%0A%0A%20%20%20%20create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Post%0A%20%20include%20Taggeable%0A%0A%20%20def%20self.create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Article%0A%20%20include%20Taggeable%0Aend">
-  → View on sorbet.run
-</a>
+`T.bind` can be used anywhere `self` is used (i.e., methods, blocks, lambdas,
+etc.), though it is most usually useful within blocks. See
+[Blocks, Procs, and Lambda Types](procs.md) for more real-world usage examples.
 
 ## Comparison of type assertions
 
@@ -269,3 +235,17 @@ assertions:
   ```ruby
   T.must(nil_or_string)
   ```
+
+- `T.bind` is like `T.cast`, but only for `self`,
+
+  ```ruby
+  T.bind(self, String)
+  ```
+
+  behaves like
+
+  ```ruby
+  self = T.cast(self, String)
+  ```
+
+  if it were valid in Ruby to assign to `self`.
