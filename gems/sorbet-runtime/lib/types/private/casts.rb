@@ -11,7 +11,10 @@ module T::Private
   end
 
   module Casts
-    def self.cast(value, type, cast_method:)
+    def self.cast(value, type, cast_method:, block_given:)
+      raise "T.#{cast_method} with a block must use `checked: false`" if block_given
+      raise "T.#{cast_method} be given a type" unless type
+
       begin
         error = T::Utils.coerce(type).error_message_for_obj(value)
         return value unless error
