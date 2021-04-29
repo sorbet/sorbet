@@ -3,12 +3,13 @@ id: type-assertions
 title: Type Assertions
 ---
 
-There are four ways to assert the types of expressions in Sorbet:
+There are five ways to assert the types of expressions in Sorbet:
 
 - `T.let(expr, Type)`
 - `T.cast(expr, Type)`
 - `T.must(expr)`
 - `T.assert_type!(expr, Type)`
+- `T.bind(self, Type)`
 
 > There is also `T.unsafe` which is not a "type assertion" so much as an
 > [Escape Hatch](troubleshooting.md#escape-hatches).
@@ -154,6 +155,77 @@ end
 ```
 
 <a href="https://sorbet.run/#%23%20typed%3A%20true%0Aclass%20A%0A%20%20extend%20T%3A%3ASig%0A%0A%20%20sig%20%7Bparams(x%3A%20T.untyped).void%7D%0A%20%20def%20foo(x)%0A%20%20%20%20T.assert_type!(x%2C%20String)%20%23%20error%20here%0A%20%20end%0Aend">
+  → View on sorbet.run
+</a>
+
+## `T.bind`
+
+When blocks are captured to be executed in a different context, Sorbet tries to
+match methods to the current context of `self`. For example,
+
+```ruby
+class Post
+  # The method before_create is executed in the context of T.class_of(Post)
+  # and this will cause an error saying that `draft?` does not exist in
+  # T.class_of(Post). Sorbet doesn't know that the block is captured and executed
+  # in the context of an instance of Post.
+  before_create :set_pending, if: -> { draft? }
+
+  def draft?
+    true
+  end
+end
+```
+
+The `T.bind` assertion allows developers to change the context of `self` inside
+a block, proc, lambda or method, so that the context is checked against the
+correct types.
+
+```ruby
+class Post
+  before_create :set_pending, if: -> { T.bind(self, Post).draft? } # no error
+
+  def draft?
+    true
+  end
+end
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Aclass%20Base%0A%20%20def%20self.before_create(name%2C%20**options)%0A%20%20end%0Aend%0A%0Aclass%20Post%20%3C%20Base%0A%20%20before_create%20%3Aset_pending%2C%20if%3A%20-%3E%20%7B%20T.bind(self%2C%20Post).draft%3F%20%7D%0A%0A%20%20def%20draft%3F%0A%20%20%20%20true%0A%20%20end%0Aend%0A%0Aclass%20Article%20%3C%20Base%0A%20%20before_create%20%3Aset_pending%2C%20if%3A%20-%3E%20%7B%20draft%3F%20%7D%0A%0A%20%20def%20draft%3F%0A%20%20%20%20true%0A%20%20end%0Aend">
+  → View on sorbet.run
+</a>
+
+The `T.bind` assertion can also be used with combinators, which helps guarantee
+that blocks executed in different contexts fully satisfy type checking.
+
+```ruby
+module Taggeable
+  extend ActiveSupport::Concern
+
+  included do
+    T.bind(self, T.any(Post, Article))
+
+    create_tag! # error: Article does not implement create_tag!, which is part
+                # of the typing requirements for this block
+  end
+end
+
+class Post
+  include Taggeable
+
+  def self.create_tag!
+    # ...
+  end
+end
+
+class Article
+  include Taggeable
+
+  # The create_tag! method is missing
+end
+```
+
+<a href="https://sorbet.run/#%23%20typed%3A%20true%0A%0Amodule%20Concern%0A%20%20def%20included(%26block)%0A%20%20end%0Aend%0A%0Amodule%20Taggeable%0A%20%20extend%20Concern%0A%0A%20%20included%20do%0A%20%20%20%20T.bind(self%2C%20T.any(Post%2C%20Article))%0A%0A%20%20%20%20create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Post%0A%20%20include%20Taggeable%0A%0A%20%20def%20self.create_tag!%0A%20%20end%0Aend%0A%0Aclass%20Article%0A%20%20include%20Taggeable%0Aend">
   → View on sorbet.run
 </a>
 

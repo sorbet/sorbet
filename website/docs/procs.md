@@ -164,6 +164,10 @@ end
 puts(upcased) # => "HELLO"
 ```
 
+The `T.bind` assertion allows the `self` type to be changed on a case by case
+basis, for cases when changing the method signature binding doesn't satisfy all
+conditions. See [Type Assertions](type-assertions.md#tbind).
+
 ## Proc.new vs proc
 
 In Ruby there's several ways to create a Proc: `proc` and `Proc.new`. Sorbet
