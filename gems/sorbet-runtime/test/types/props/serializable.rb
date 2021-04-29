@@ -494,25 +494,276 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     prop :hash_both, T::Hash[CustomType, CustomType], default: {}
   end
 
+  class CustomTypeWrapper
+    include T::Props::Serializable
+    prop :struct, CustomTypeStruct
+  end
+
   describe 'custom type' do
     it 'round trips as plain value' do
       assert_equal('foo', CustomTypeStruct.from_hash({'single' => 'foo'}).serialize['single'])
+    end
+
+    it 'raises serialize errors when props with a custom subtype store the wrong datatype' do
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@single, 'not a serializable thing')
+      e = assert_raises(TypeError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "Expected type T::Props::CustomType")
+    end
+
+    # It's hard to write tests for a CustomType with a custom deserialize method, so skip that.
+
+    it 'raises serialize errors when props with a serializable subtype store the wrong datatype' do
+      struct = CustomTypeWrapper.new
+      struct.instance_variable_set(:@struct, 'not a serializable thing')
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `serialize'")
+    end
+
+    it 'raises deserialize errors when props with a serializable subtype store the wrong datatype' do
+      obj = 'not a serializable thing'
+      e = assert_raises(TypeError) do
+        CustomTypeWrapper.from_hash({'struct' => obj})
+      end
+
+      assert_includes(e.message, 'provided to from_hash')
     end
 
     it 'round trips as array value' do
       assert_equal(['foo'], CustomTypeStruct.from_hash({'array' => ['foo']}).serialize['array'])
     end
 
+    it 'raises serialize errors when props with an array of a custom subtype store the wrong datatype' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@array, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `map'")
+    end
+
+    it 'raises deserialize errors when props with an array of a custom subtype store the wrong datatype' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = CustomType.new
+      result = CustomTypeStruct.from_hash({'array' => obj})
+      assert_equal(obj, result.array)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:array, storytime[:prop])
+      assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `map'")
+    end
+
     it 'round trips as hash key' do
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_key' => {'foo' => 'bar'}}).serialize['hash_key'])
+    end
+
+    it 'raises serialize errors when props with a hash with keys of a custom subtype store the wrong datatype' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@hash_key, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `transform_keys'")
+    end
+
+    it 'raises deserialize errors when props with a hash with keys of a custom subtype store the wrong datatype' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = 'not a hash'
+      result = CustomTypeStruct.from_hash({'hash_key' => obj})
+      assert_equal('not a hash', result.hash_key)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:hash_key, storytime[:prop])
+      assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `transform_keys'")
     end
 
     it 'round trips as hash value' do
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_value' => {'foo' => 'bar'}}).serialize['hash_value'])
     end
 
+    it 'raises serialize errors when props with a hash with values of a custom subtype store the wrong datatype' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@hash_value, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `transform_values'")
+    end
+
+    it 'raises deserialize errors when props with a hash with values of a custom subtype store the wrong datatype' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = 'not a hash'
+      result = CustomTypeStruct.from_hash({'hash_value' => obj})
+      assert_equal('not a hash', result.hash_value)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:hash_value, storytime[:prop])
+      assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `transform_values'")
+    end
+
     it 'round trips as hash key and value' do
       assert_equal({'foo' => 'bar'}, CustomTypeStruct.from_hash({'hash_both' => {'foo' => 'bar'}}).serialize['hash_both'])
+    end
+
+    it 'raises serialize errors when props with a hash with keys/values of a custom subtype store the wrong datatype' do
+      obj = CustomType.new
+      struct = CustomTypeStruct.new
+      struct.instance_variable_set(:@hash_both, obj)
+      e = assert_raises(NoMethodError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "undefined method `each_with_object'")
+    end
+
+    it 'raises deserialize errors when props with a hash with keys/values of a custom subtype store the wrong datatype' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = 'not a hash'
+      result = CustomTypeStruct.from_hash({'hash_both' => obj})
+      assert_equal('not a hash', result.hash_both)
+
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      storytime = extra_hash[:storytime]
+      assert_equal(CustomTypeStruct, storytime[:klass])
+      assert_equal(:hash_both, storytime[:prop])
+      assert_equal(obj, storytime[:value])
+      assert_includes(storytime[:error], "undefined method `each_with_object'")
+    end
+  end
+
+  class SetPropStruct
+    include T::Props::Serializable
+    prop :set, T::Set[String]
+  end
+
+  describe 'set props' do
+    it 'round trips' do
+      set = Set['foo']
+      struct = SetPropStruct.new
+      struct.set = set
+
+      h = struct.serialize
+      assert_equal(set, h['set'])
+
+      roundtripped = SetPropStruct.from_hash(h)
+      assert_equal(roundtripped.set, set)
+    end
+
+    it 'does not share structure on serialize' do
+      set = Set['foo']
+      struct = SetPropStruct.new
+      struct.set = set
+      h = struct.serialize
+      refute_equal(struct.set.object_id, h['set'].object_id, "`set` is the same object")
+    end
+
+    it 'does not share structure on deserialize' do
+      set = Set['foo']
+      h = {
+        'set' => set,
+      }
+      struct = SetPropStruct.from_hash(h)
+      refute_equal(struct.set.object_id, h['set'].object_id, "`set` is the same object")
+    end
+  end
+
+  class CustomSetPropStruct
+    include T::Props::Serializable
+    prop :set, T::Set[CustomType]
+  end
+
+  describe 'custom set props' do
+    it 'round trips' do
+      array = [3]
+      obj = CustomType.new
+      obj.value = array 
+      set = Set[obj]
+      struct = CustomSetPropStruct.new
+      struct.set = set
+      h = struct.serialize
+      assert_equal(1, h['set'].length)
+      assert(h['set'].include?(array))
+
+      roundtripped = CustomSetPropStruct.from_hash(h)
+      assert_equal(1, roundtripped.set.length)
+      value = roundtripped.set.to_a[0].value
+      assert_equal(array, value)
+    end
+
+    it 'raises serialize errors' do
+      not_a_set = 1234
+      struct = CustomSetPropStruct.new
+      struct.instance_variable_set(:@set, not_a_set)
+      e = assert_raises(TypeError) do
+        struct.serialize
+      end
+
+      assert_includes(e.message, "value must be enumerable")
+    end
+
+    it 'raises deserialize errors' do
+      msg_string = nil
+      extra_hash = nil
+      T::Configuration.soft_assert_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      obj = CustomType.new
+      e = assert_raises(TypeError) do
+        result = CustomSetPropStruct.from_hash({'set' => obj})
+      end
+
+      assert_includes(e.message, "value must be enumerable")
     end
   end
 
