@@ -7,7 +7,6 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
 #include "Passes.h"
-#include "compiler/Core/CompilerState.h"
 #include "core/core.h"
 #include <string>
 
@@ -190,9 +189,71 @@ public:
     }
 } ClassAndModuleLoading;
 
+class ObjIsKindOf : public IRIntrinsic {
+    llvm::Value *fallbackToVM(llvm::Module &module, llvm::CallInst *instr) const {
+        llvm::IRBuilder<> builder(instr);
+        return builder.CreateCall(module.getFunction("rb_obj_is_kind_of"),
+                                  {instr->getArgOperand(0), instr->getArgOperand(1)});
+    }
+
+public:
+    virtual vector<string> implementedFunctionCall() const override {
+        return {"sorbet_i_objIsKindOf"};
+    }
+
+    // Detects code that looks like this:
+    //
+    //     %44 = load i64, i64* @rb_cNilClass, align 8, !dbg !14
+    //     %45 = load i64, i64* @rb_cModule, align 8, !dbg !14
+    //     %46 = call i64 @sorbet_i_objIsKindOf(i64 %44, i64 %45) #1, !dbg !14
+    //
+    // and returns an instrution that looks like this:
+    //
+    //     %47 = call i64 @sorbet_rubyTrue()
+    //
+    // Then the LowerIntrinsicsPass harness below will update all reads from %46 to read from %47
+    // instead and then delete the write to %46 entirely (which might unlock other optimizations).
+    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
+                                     llvm::CallInst *instr) const override {
+        auto valueLoad = llvm::dyn_cast<llvm::LoadInst>(instr->getArgOperand(0));
+        auto kindLoad = llvm::dyn_cast<llvm::LoadInst>(instr->getArgOperand(1));
+
+        if (valueLoad == nullptr || kindLoad == nullptr) {
+            return this->fallbackToVM(module, instr);
+        }
+
+        auto value = llvm::dyn_cast<llvm::GlobalVariable>(valueLoad->getPointerOperand());
+        auto kind = llvm::dyn_cast<llvm::GlobalVariable>(kindLoad->getPointerOperand());
+
+        if (value == nullptr || kind == nullptr) {
+            return this->fallbackToVM(module, instr);
+        }
+
+        llvm::IRBuilder<> builder(instr);
+
+        auto kindName = kind->getName();
+        if (kindName != "rb_cModule") {
+            return this->fallbackToVM(module, instr);
+        }
+
+        auto valueName = value->getName();
+        for (const auto &[_rubySourceName, rubyCApiName] : knownSymbolMapping) {
+            if (valueName == rubyCApiName) {
+                // We could use Payload::rubyTrue, but it takes a CompilerState which we don't have.
+                auto fn = module.getFunction("sorbet_rubyTrue");
+                ENFORCE(fn != nullptr);
+                return builder.CreateCall(fn, {}, "trueValueRaw");
+            }
+        }
+
+        return this->fallbackToVM(module, instr);
+    }
+} ObjIsKindOf;
+
 vector<IRIntrinsic *> getIRIntrinsics() {
     vector<IRIntrinsic *> irIntrinsics{
         &ClassAndModuleLoading,
+        &ObjIsKindOf,
     };
 
     return irIntrinsics;

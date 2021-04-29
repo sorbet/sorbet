@@ -43,3 +43,4 @@ sed -i'.bak' 's/{  }/{ "addedToSilenceEmptyAttrsError" }/g' "$payload"
 # in the pipeline. As a result, marking it availble_externally causes the implementation to disappear, earlier, and
 # inline is broken at the point where it's introduced.
 sed -i'.bak' 's/define available_externally i64 @sorbet_getConstantEpoch/define internal i64 @sorbet_getConstantEpoch/g' "$payload"
+sed -i'.bak' 's/define available_externally i64 @sorbet_rubyTrue/define internal i64 @sorbet_rubyTrue/g' "$payload"

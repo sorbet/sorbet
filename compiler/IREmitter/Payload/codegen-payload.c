@@ -104,6 +104,7 @@ SORBET_ALIVE(VALUE, sorbet_rb_int_ge_slowpath, (VALUE, VALUE));
 
 SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
+SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
 
 SORBET_ALIVE(long, sorbet_globalConstRegister, (VALUE val));
 SORBET_ALIVE(VALUE, sorbet_globalConstDupHash, (long index));
@@ -238,12 +239,12 @@ SORBET_ATTRIBUTE(const) VALUE rb_class_inherited_p(VALUE, VALUE);
 
 SORBET_ATTRIBUTE(const)
 _Bool sorbet_isa(VALUE obj, VALUE class) {
-    return rb_obj_is_kind_of(obj, class) == Qtrue;
+    return sorbet_i_objIsKindOf(obj, class) == Qtrue;
 }
 
 SORBET_ATTRIBUTE(const)
 _Bool sorbet_isa_class_of(VALUE obj, VALUE class) {
-    return (obj == class) || (rb_obj_is_kind_of(obj, rb_cModule) && rb_class_inherited_p(obj, class));
+    return (obj == class) || (sorbet_i_objIsKindOf(obj, rb_cModule) && rb_class_inherited_p(obj, class));
 }
 
 SORBET_INLINE
@@ -1596,5 +1597,6 @@ const int sorbet_getIsReleaseBuild() __attribute__((weak)) {
 VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) {
     // this function will be nuked but it exists to keep forward definitions alive for clang
     return (long)&sorbet_i_getRubyClass + (long)&sorbet_i_getRubyConstant + (long)&sorbet_getConstantEpoch +
-           (long)&sorbet_getConstant + (long)&rb_id2sym + (long)&rb_errinfo;
+           (long)&sorbet_getConstant + (long)&sorbet_rubyTrue + (long)&rb_id2sym + (long)&rb_errinfo +
+           (long)&rb_obj_is_kind_of;
 }
