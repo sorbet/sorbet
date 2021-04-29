@@ -5,10 +5,10 @@ MyType = T.type_alias {Integer}
 
 # For these using **expr, I don't really care what happens as long as it doesn't crash.
 
-T.let(**expr) # error: Not enough arguments
-T.let(**expr) {MyType} # error: Not enough arguments
-T.let(expr, **expr) # error: Not enough arguments
-T.let(expr, **expr) {MyType} # error: Not enough arguments
+T.let(**expr)
+T.let(**expr) {MyType}
+T.let(expr, **expr)
+T.let(expr, **expr) {MyType}
 
 T.let(checked: false, **expr)
 T.let(checked: false, **expr) {MyType}
@@ -32,7 +32,7 @@ T.let(expr, checked: 1) {MyType} # error: Expected `T::Boolean` but found `Integ
 T.let(expr, checked: true) {MyType} # error: Using `T.let` in block form requires `checked: false`
 
 x1 = T.let(1, checked: false) {T.nilable(Integer)}
-T.reveal_type(x1) # error: type `T.nilable(Integer)`
+T.reveal_type(x1) # error: type: `T.nilable(Integer)`
 
 T.let('not an int', checked: false) {T.nilable(Integer)} # error: Argument does not have asserted type `T.nilable(Integer)`
 

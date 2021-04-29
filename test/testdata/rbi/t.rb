@@ -17,9 +17,9 @@ T.any(String, Integer, Symbol)
 T.all(String, Integer, Symbol)
 
 
-T.let # error: Not enough arguments provided for method `T.let`. Expected: `2`, got: `0`
-T.assert_type! # error: Not enough arguments provided for method `T.assert_type!`. Expected: `2`, got: `0`
-T.cast # error: Not enough arguments provided for method `T.cast`. Expected: `2`, got: `0`
+T.let # error: Not enough arguments provided for method `T.let`. Expected: `1..2`, got: `0`
+T.assert_type! # error: Not enough arguments provided for method `T.assert_type!`. Expected: `1..2`, got: `0`
+T.cast # error: Not enough arguments provided for method `T.cast`. Expected: `1..2`, got: `0`
 T.unsafe # error: Not enough arguments provided for method `T.unsafe`. Expected: `1`, got: `0`
 T.nilable # error: Not enough arguments provided for method `T.nilable`. Expected: `1`, got: `0`
   T.proc(String)
