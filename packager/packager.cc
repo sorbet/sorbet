@@ -586,7 +586,7 @@ class ImportTree {
 class ImportTreeBuilder {
     public:
     static void addImport(ImportTree *root, const FullyQualifiedName &fqn, const PackageInfo &package);
-    static ast::ExpressionPtr makeModule(ImportTree *root, vector<core::NameRef> &parts, core::NameRef);
+    static ast::ExpressionPtr makeModule(core::Context, ImportTree *root, vector<core::NameRef> &parts, core::NameRef);
 };
 
 void ImportTreeBuilder::addImport(ImportTree *root, const FullyQualifiedName &fqn, const PackageInfo &package) {
@@ -627,7 +627,7 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef name) { /
     }
 }
 
-ast::ExpressionPtr ImportTreeBuilder::makeModule(ImportTree *root, vector<core::NameRef> &parts, core::NameRef todo) {
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, vector<core::NameRef> &parts, core::NameRef todo) {
     auto todoLoc = core::LocOffsets::none();
     if (root->srcPackageMangledName.exists()) { // Assignment
         ENFORCE(root->children.empty()); // Must be a leaf node
@@ -638,16 +638,15 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(ImportTree *root, vector<core::
     }
     ast::ClassDef::RHS_store rhs;
 
-    // Ensure stable ordering
-    // TODO: better way of doing this?
+    // Sort by name for stability
     vector<pair<core::NameRef, ImportTree*>> childPairs;
     std::transform(root->children.begin(), root->children.end(), back_inserter(childPairs),
             [](const auto &pair) { return make_pair(pair.first, pair.second.get()); });
-    fast_sort(childPairs, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first.rawId() < rhs.first.rawId(); });
+    fast_sort(childPairs, [&ctx](const auto &lhs, const auto &rhs) -> bool { return lhs.first.show(ctx) < rhs.first.show(ctx); });
 
     for (auto const& [nameRef, child] : childPairs) {
         parts.emplace_back(nameRef);
-        rhs.emplace_back(makeModule(child, parts, todo));
+        rhs.emplace_back(makeModule(ctx, child, parts, todo));
         parts.pop_back();
     }
     core::NameRef name = parts.empty() ? todo : parts.back(); // TODO cleanup "todo"
@@ -719,7 +718,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
             }
         }
         vector<core::NameRef> parts; // TODO bad api
-        importedPackages.emplace_back(ImportTreeBuilder::makeModule(&importTree, parts, package->name.mangledName));
+        importedPackages.emplace_back(ImportTreeBuilder::makeModule(ctx, &importTree, parts, package->name.mangledName));
     }
 
     auto packageNamespace =
