@@ -54,14 +54,6 @@ module Opus::Types::Test
           end
         end
 
-        it 'T.bind raises an error if block is executing on the wrong type' do
-          block = -> {T.bind(self, String); upcase}
-
-          assert_raises(TypeError) do
-            123.instance_exec(&block)
-          end
-        end
-
         it 'T.bind raises error if type constraints are not all satisfied' do
           bad_article = BadArticle.new
 
