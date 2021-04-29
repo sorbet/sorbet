@@ -2075,16 +2075,74 @@ public:
                 case core::Names::uncheckedLet().rawId():
                 case core::Names::assertType().rawId():
                 case core::Names::cast().rawId(): {
-                    if (send.args.empty() || send.args.size() > 3) {
+                    auto numKwargs = send.args.size() - send.numPosArgs;
+                    if (numKwargs % 2 != 0) {
                         return tree;
-                    } else if (send.args.size() == 1) {
-                        if (auto castBlock = ast::cast_tree<ast::Block>(send.block)) {
-                            return sendToCast(ctx, send.loc, send.fun, std::move(send.args[0]),
-                                              std::move(castBlock->body));
-                        } else {
+                    }
+
+                    auto castBlock = ast::cast_tree<ast::Block>(send.block);
+                    if (send.numPosArgs == 1) {
+                        if (castBlock == nullptr) {
+                            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                                e.setHeader("No type provided to `{}` ", fmt::format("T.{}", send.fun.show(ctx)));
+                            }
                             return tree;
                         }
-                    } else if (send.block == nullptr) {
+
+                        if (numKwargs > 2) {
+                            return tree;
+                        }
+
+                        if (numKwargs < 2) {
+                            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                                e.setHeader("Using `{}` in block form requires `{}`",
+                                            fmt::format("T.{}", send.fun.show(ctx)), "checked: false");
+                                auto endPos = send.loc.endPos();
+                                if (send.loc.exists() && endPos > 0) {
+                                    auto insertLoc = core::Loc(ctx.file, endPos - 1, endPos - 1);
+                                    e.replaceWith("Insert `checked: false`", insertLoc, ", checked: false");
+                                }
+                            }
+
+                            return sendToCast(ctx, send.loc, send.fun, std::move(send.args[0]),
+                                              std::move(castBlock->body));
+                        }
+
+                        auto keywordArg = ast::cast_tree<ast::Literal>(send.args[1]);
+                        if (keywordArg == nullptr || !keywordArg->isSymbol(ctx) ||
+                            keywordArg->asSymbol(ctx) != core::Names::checked()) {
+                            return tree;
+                        }
+                        auto keywordVal = ast::cast_tree<ast::Literal>(send.args[2]);
+                        if (keywordVal == nullptr || (!keywordVal->isTrue(ctx) && !keywordVal->isFalse(ctx))) {
+                            return tree;
+                        }
+
+                        if (!keywordVal->isFalse(ctx)) {
+                            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                                e.setHeader("Using `{}` in block form requires `{}`",
+                                            fmt::format("T.{}", send.fun.show(ctx)), "checked: false");
+                                auto replaceLoc = core::Loc(ctx.file, keywordVal->loc);
+                                if (replaceLoc.source(ctx) == "true") {
+                                    e.replaceWith("Change to `false`", replaceLoc, "false");
+                                }
+                            }
+                        }
+
+                        return sendToCast(ctx, send.loc, send.fun, std::move(send.args[0]), std::move(castBlock->body));
+                    } else if (send.numPosArgs == 2) {
+                        if (castBlock != nullptr) {
+                            // T.let(expr, Type) {Type}
+                            if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                                e.setHeader("Passed type to `{}` twice, via argument and block",
+                                            fmt::format("T.{}", send.fun.show(ctx)));
+                                auto deleteLoc = core::Loc(ctx.file, castBlock->loc).adjust(ctx, -2, 0);
+                                if (deleteLoc.exists()) {
+                                    e.replaceWith("Remove block", deleteLoc, "");
+                                }
+                            }
+                        }
+
                         return sendToCast(ctx, send.loc, send.fun, std::move(send.args[0]), std::move(send.args[1]));
                     } else {
                         return tree;

@@ -126,7 +126,9 @@ module T
   # exception at runtime if the value doesn't match the type.
   #
   # Compared to `T.let`, `T.cast` is _trusted_ by static system.
-  def self.cast(value, type, checked: true)
+  def self.cast(value, type=nil, checked: true, &blk)
+    # To save time, we don't additionally validation that `checked` is `false` (enforced statically at `typed: false`)
+    return value if block_given?
     return value unless checked
 
     Private::Casts.cast(value, type, cast_method: "T.cast")
@@ -141,7 +143,9 @@ module T
   #
   # If `checked` is true, raises an exception at runtime if the value
   # doesn't match the type.
-  def self.let(value, type, checked: true)
+  def self.let(value, type=nil, checked: true, &blk)
+    # To save time, we don't additionally validation that `checked` is `false` (enforced statically at `typed: false`)
+    return value if block_given?
     return value unless checked
 
     Private::Casts.cast(value, type, cast_method: "T.let")
@@ -170,7 +174,9 @@ module T
   # fail). Use this for debugging typechecking errors, or to ensure that type information is
   # statically known and being checked appropriately. If `checked` is true, raises an exception at
   # runtime if the value doesn't match the type.
-  def self.assert_type!(value, type, checked: true)
+  def self.assert_type!(value, type=nil, checked: true, &blk)
+    # To save time, we don't additionally validation that `checked` is `false` (enforced statically at `typed: false`)
+    return value if block_given?
     return value unless checked
 
     Private::Casts.cast(value, type, cast_method: "T.assert_type!")

@@ -28,10 +28,10 @@ module T
   def self.type_alias(type=nil, &blk); end
   def self.type_parameter(name); end
 
-  def self.cast(value, type, checked: true); value; end
-  def self.let(value, type, checked: true); value; end
-  def self.bind(value, type, checked: true); value; end
-  def self.assert_type!(value, type, checked: true); value; end
+  def self.cast(value, type=nil, checked: true, &blk); value; end
+  def self.let(value, type=nil, checked: true, &blk); value; end
+  def self.bind(value, type=nil, checked: true, &blk); value; end
+  def self.assert_type!(value, type=nil, checked: true, &blk); value; end
   def self.unsafe(value); value; end
   def self.must(arg, msg=nil); arg; end
   def self.reveal_type(value); value; end

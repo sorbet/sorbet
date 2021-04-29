@@ -85,9 +85,24 @@ module SorbetBenchmarks
         type.valid?(false)
       end
 
+      time_block("T.unsafe(...)") do
+        T.unsafe(0)
+        T.unsafe(1)
+      end
+
       time_block("T.let(..., Integer)") do
         T.let(0, Integer)
         T.let(1, Integer)
+      end
+
+      time_block("T.let(..., Integer, checked: false)") do
+        T.let(0, Integer, checked: false)
+        T.let(1, Integer, checked: false)
+      end
+
+      time_block("T.let(..., checked: false) {Integer}") do
+        T.let(0, checked: false) {Integer}
+        T.let(1, checked: false) {Integer}
       end
 
       time_block("sig {params(x: Integer).void}") do
@@ -100,6 +115,16 @@ module SorbetBenchmarks
         T.let(1, T.nilable(Integer))
       end
 
+      time_block("T.let(..., T.nilable(Integer), checked: false)") do
+        T.let(nil, T.nilable(Integer), checked: false)
+        T.let(1, T.nilable(Integer), checked: false)
+      end
+
+      time_block("T.let(..., checked: false) {T.nilable(Integer)}") do
+        T.let(nil, checked: false) {T.nilable(Integer)}
+        T.let(1, checked: false) {T.nilable(Integer)}
+      end
+
       time_block("sig {params(x: T.nilable(Integer)).void}") do
         nilable_integer_param(nil)
         nilable_integer_param(1)
@@ -110,6 +135,16 @@ module SorbetBenchmarks
         T.let(example, Example)
       end
 
+      time_block("T.let(..., Example, checked: false)") do
+        T.let(example, Example, checked: false)
+        T.let(example, Example, checked: false)
+      end
+
+      time_block("T.let(..., checked: false) {Example}") do
+        T.let(example, checked: false) {Example}
+        T.let(example, checked: false) {Example}
+      end
+
       time_block("sig {params(x: Example).void}") do
         application_class_param(example)
         application_class_param(example)
@@ -118,6 +153,16 @@ module SorbetBenchmarks
       time_block("T.let(..., T.nilable(Example))") do
         T.let(nil, T.nilable(Example))
         T.let(example, T.nilable(Example))
+      end
+
+      time_block("T.let(..., T.nilable(Example), checked: false)") do
+        T.let(nil, T.nilable(Example), checked: false)
+        T.let(example, T.nilable(Example), checked: false)
+      end
+
+      time_block("T.let(..., checked: false) {T.nilable(Example)}") do
+        T.let(nil, checked: false) {T.nilable(Example)}
+        T.let(example, checked: false) {T.nilable(Example)}
       end
 
       time_block("sig {params(x: T.nilable(Example)).void}") do

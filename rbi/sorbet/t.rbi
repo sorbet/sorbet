@@ -26,17 +26,17 @@ module T
   # here still applies, but additional checking and/or analysis is
   # performed in C++ for that method.
 
-  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
-  def self.let(value, type, checked: true); end
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean, blk: T.untyped).returns(BasicObject)}
+  def self.let(value, type=nil, checked: true, &blk); end
 
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
-  def self.bind(value, type, checked: true); end
+  def self.bind(value, type=nil, checked: true, &blk); end
 
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
-  def self.assert_type!(value, type, checked: true); end
+  def self.assert_type!(value, type=nil, checked: true, &blk); end
 
-  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
-  def self.cast(value, type, checked: true); end
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean, blk: T.untyped).returns(BasicObject)}
+  def self.cast(value, type=nil, checked: true, &blk); end
 
   sig {params(type: T.untyped).returns(BasicObject)}
   def self.nilable(type); end

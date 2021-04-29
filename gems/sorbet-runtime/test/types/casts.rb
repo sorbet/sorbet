@@ -33,6 +33,19 @@ module Opus::Types::Test
           assert_equal(:foo, method.call(:foo, T.noreturn, checked: false))
         end
 
+        it 'allows invalid casts with block form' do
+          assert_equal(:foo, method.call(:foo, checked: false) {Integer})
+          assert_equal(:foo, method.call(:foo, checked: false) {T.any(String, Integer)})
+          assert_equal(:foo, method.call(:foo, checked: false) {T.noreturn})
+        end
+
+        it 'allows invalid casts with block form, even without checked: false' do
+          # We don't necessarily want to allow this, but we do anyways for speed.
+          assert_equal(:foo, method.call(:foo) {Integer})
+          assert_equal(:foo, method.call(:foo) {T.any(String, Integer)})
+          assert_equal(:foo, method.call(:foo) {T.noreturn})
+        end
+
         it 'has a good error message' do
           lno = nil
           ex = assert_raises(TypeError) do
@@ -42,6 +55,7 @@ module Opus::Types::Test
           assert_match(/type T.any\(Integer, String\)/, ex.message)
           assert_match(/\nCaller: #{__FILE__}:#{lno}/, ex.message)
         end
+
       end
     end
 
