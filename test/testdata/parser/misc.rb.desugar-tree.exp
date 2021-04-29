@@ -106,7 +106,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <emptyTree>
   end
 
-  x.to_hash()
+  begin
+    <hashTemp>$8 = ::<Magic>.<to-hash-dup>(x)
+    <hashTemp>$8
+  end
 
   87
 
@@ -149,16 +152,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   begin
-    <assignTemp>$8 = 1
-    <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8, 2, 0)
-    a = <assignTemp>$9.[](0)
+    <assignTemp>$9 = 1
+    <assignTemp>$10 = ::<Magic>.<expand-splat>(<assignTemp>$9, 2, 0)
+    a = <assignTemp>$10.[](0)
     begin
-      <assignTemp>$10 = <assignTemp>$9.[](1)
-      <assignTemp>$11 = ::<Magic>.<expand-splat>(<assignTemp>$10, 1, 0)
-      x = <assignTemp>$11.[](0)
-      <assignTemp>$10
+      <assignTemp>$11 = <assignTemp>$10.[](1)
+      <assignTemp>$12 = ::<Magic>.<expand-splat>(<assignTemp>$11, 1, 0)
+      x = <assignTemp>$12.[](0)
+      <assignTemp>$11
     end
-    <assignTemp>$8
+    <assignTemp>$9
   end
 
   4
@@ -182,10 +185,10 @@ rescue <emptyTree>::<C E> => x
   nil
 
   begin
-    <assignTemp>$12 = ::<Magic>.<splat>(y)
-    <assignTemp>$13 = ::<Magic>.<expand-splat>(<assignTemp>$12, 0, 0)
-    x = <assignTemp>$13.slice(::Range.new(0, -1, false))
-    <assignTemp>$12
+    <assignTemp>$14 = ::<Magic>.<splat>(y)
+    <assignTemp>$15 = ::<Magic>.<expand-splat>(<assignTemp>$14, 0, 0)
+    x = <assignTemp>$15.slice(::Range.new(0, -1, false))
+    <assignTemp>$14
   end
 
   ::<Magic>.<string-interpolate>("foo", <self>.bar()).intern()
