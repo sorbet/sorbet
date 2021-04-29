@@ -568,9 +568,8 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
     return move(finder.info);
 }
 
-
 class ImportTree {
-    public:
+public:
     UnorderedMap<core::NameRef, std::unique_ptr<ImportTree>> children;
     core::NameRef srcPackageMangledName;
 
@@ -584,7 +583,7 @@ class ImportTree {
 };
 
 class ImportTreeBuilder {
-    public:
+public:
     static void addImport(ImportTree *root, const FullyQualifiedName &fqn, const PackageInfo &package);
     static ast::ExpressionPtr makeModule(core::Context, ImportTree *root, vector<core::NameRef> &parts, core::NameRef);
 };
@@ -605,7 +604,8 @@ void ImportTreeBuilder::addImport(ImportTree *root, const FullyQualifiedName &fq
     ENFORCE(node->children.empty()); // TODO naming conflicts
 }
 
-ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef name) { // TODO duplicated code copied prependInternalPackageName
+ast::ExpressionPtr prependName(ast::ExpressionPtr scope,
+                               core::NameRef name) { // TODO duplicated code copied prependInternalPackageName
     // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
     ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
     if (lastConstLit != nullptr) {
@@ -617,8 +617,7 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef name) { /
     // If `lastConstLit` is `nullptr`, then `scope` should be EmptyTree.
     ENFORCE(lastConstLit != nullptr || ast::cast_tree<ast::EmptyTree>(scope) != nullptr);
 
-    auto scopeToPrepend =
-        name2Expr(name, name2Expr(core::Names::Constants::PackageRegistry()));
+    auto scopeToPrepend = name2Expr(name, name2Expr(core::Names::Constants::PackageRegistry()));
     if (lastConstLit == nullptr) {
         return scopeToPrepend;
     } else {
@@ -627,10 +626,11 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef name) { /
     }
 }
 
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, vector<core::NameRef> &parts, core::NameRef todo) {
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, vector<core::NameRef> &parts,
+                                                 core::NameRef todo) {
     auto todoLoc = core::LocOffsets::none();
     if (root->srcPackageMangledName.exists()) { // Assignment
-        ENFORCE(root->children.empty()); // Must be a leaf node
+        ENFORCE(root->children.empty());        // Must be a leaf node
         ENFORCE(!parts.empty());
 
         auto rhs = prependName(parts2literal(parts, todoLoc), root->srcPackageMangledName);
@@ -639,12 +639,13 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
     ast::ClassDef::RHS_store rhs;
 
     // Sort by name for stability
-    vector<pair<core::NameRef, ImportTree*>> childPairs;
+    vector<pair<core::NameRef, ImportTree *>> childPairs;
     std::transform(root->children.begin(), root->children.end(), back_inserter(childPairs),
-            [](const auto &pair) { return make_pair(pair.first, pair.second.get()); });
-    fast_sort(childPairs, [&ctx](const auto &lhs, const auto &rhs) -> bool { return lhs.first.show(ctx) < rhs.first.show(ctx); });
+                   [](const auto &pair) { return make_pair(pair.first, pair.second.get()); });
+    fast_sort(childPairs,
+              [&ctx](const auto &lhs, const auto &rhs) -> bool { return lhs.first.show(ctx) < rhs.first.show(ctx); });
 
-    for (auto const& [nameRef, child] : childPairs) {
+    for (auto const &[nameRef, child] : childPairs) {
         parts.emplace_back(nameRef);
         rhs.emplace_back(makeModule(ctx, child, parts, todo));
         parts.pop_back();
@@ -718,15 +719,14 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
             }
         }
         vector<core::NameRef> parts; // TODO bad api
-        importedPackages.emplace_back(ImportTreeBuilder::makeModule(ctx, &importTree, parts, package->name.mangledName));
+        importedPackages.emplace_back(
+            ImportTreeBuilder::makeModule(ctx, &importTree, parts, package->name.mangledName));
     }
 
     auto packageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                        name2Expr(core::Names::Constants::PackageRegistry()), {},
-                        std::move(importedPackages));
+                        name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(importedPackages));
     // fmt::print("{}:\n{}\n\n", file.file.data(ctx).path(), packageNamespace.toString(ctx)); // TODO remove
-
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     rootKlass.rhs.emplace_back(move(packageNamespace));
