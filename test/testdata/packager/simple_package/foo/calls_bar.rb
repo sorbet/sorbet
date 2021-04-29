@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 
-module CallsBar
+module Project::Foo::CallsBar
   extend T::Sig
 
   sig {returns(Project::Bar::Bar)}

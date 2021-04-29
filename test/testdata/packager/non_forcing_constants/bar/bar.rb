@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 
-class Bar
+class Project::Bar::Bar
   extend T::Sig
   sig {params(value: Integer).void}
   def initialize(value)

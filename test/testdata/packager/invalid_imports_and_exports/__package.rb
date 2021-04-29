@@ -24,7 +24,7 @@ class A < PackageSpec
   export "hello" # error: Argument to `export` must be a constant
   export method # error: Argument to `export` must be a constant
        # ^^^^^^ error: Not enough arguments
-  export REFERENCE # Works; it's a constant.
-  export AClass
-  export AModule
+  export A::REFERENCE # Works; it's a constant.
+  export A::AClass
+  export A::AModule
 end

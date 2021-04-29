@@ -1,27 +1,29 @@
 # frozen_string_literal: true
 # typed: strict
 
-REFERENCE = ASecondClass
+module A
+  REFERENCE = ASecondClass
 
-class ASecondClass
+  class ASecondClass
 
-end
-
-class AClass
-  extend T::Sig
-
-  sig {returns(AClass)}
-  def get_a
-    B::BModule.get_a
   end
-end
+
+  class AClass
+    extend T::Sig
+
+    sig {returns(AClass)}
+    def get_a
+      B::BModule.get_a
+    end
+  end
 
 
-module AModule
-  extend T::Sig
+  module AModule
+    extend T::Sig
 
-  sig {returns(Integer)}
-  def self.one
-    1
+    sig {returns(Integer)}
+    def self.one
+      1
+    end
   end
 end

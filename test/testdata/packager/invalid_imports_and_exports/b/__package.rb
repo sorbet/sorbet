@@ -5,6 +5,6 @@
 
 class B < PackageSpec
   import A
-  export BClass
-  export BModule
+  export B::BClass
+  export B::BModule
 end

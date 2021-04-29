@@ -5,5 +5,5 @@
 class A < PackageSpec
   import B
 
-  export AClass
+  export A::AClass
 end

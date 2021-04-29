@@ -4,6 +4,6 @@
 class Project::Foo < PackageSpec
   import Project::Bar
 
-  export Foo
-  export CallsBar
+  export Project::Foo::Foo
+  export Project::Foo::CallsBar
 end
