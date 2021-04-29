@@ -26,9 +26,10 @@ T.let(expr, checked: false, garbage: true) {MyType} # error: Unrecognized keywor
 T.let(expr) {MyType} # error: Using `T.let` in block form requires `checked: false`
 
 T.let(expr, garbage: true) {MyType} # error: Unrecognized keyword argument `garbage`
-T.let(expr, checked: nil) {MyType} # error: Expected `T::Boolean` but found `NilClass`
-T.let(expr, checked: 1) {MyType} # error: Expected `T::Boolean` but found `Integer(1)`
 
+T.let(expr, checked: nil) {MyType} # error: Using `T.let` in block form requires `checked: false`
+T.let(expr, checked: 1) {MyType} # error: Using `T.let` in block form requires `checked: false`
+T.let(expr, checked: expr) {MyType} # error: Using `T.let` in block form requires `checked: false`
 T.let(expr, checked: true) {MyType} # error: Using `T.let` in block form requires `checked: false`
 
 x1 = T.let(1, checked: false) {T.nilable(Integer)}

@@ -2109,11 +2109,7 @@ public:
                             return tree;
                         }
                         auto keywordVal = ast::cast_tree<ast::Literal>(send.args[2]);
-                        if (keywordVal == nullptr || (!keywordVal->isTrue(ctx) && !keywordVal->isFalse(ctx))) {
-                            return tree;
-                        }
-
-                        if (!keywordVal->isFalse(ctx)) {
+                        if (keywordVal == nullptr || !keywordVal->isFalse(ctx)) {
                             if (auto e = ctx.beginError(send.loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                                 e.setHeader("Using `{}` in block form requires `{}`",
                                             fmt::format("T.{}", send.fun.show(ctx)), "checked: false");
