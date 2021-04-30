@@ -160,10 +160,10 @@ module T
   #
   # If `checked` is true, raises an exception at runtime if the value
   # doesn't match the type (this is the default).
-  def self.bind(value, type, checked: true)
+  def self.bind(value, type=nil, checked: true, &blk)
     return value unless checked
 
-    Private::Casts.cast(value, type, cast_method: "T.bind")
+    Private::Casts.cast(value, type, cast_method: "T.bind", block_given: block_given?)
   end
 
   # Tells the typechecker to ensure that `value` is of type `type` (if not, the typechecker will
