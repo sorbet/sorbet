@@ -205,7 +205,7 @@ this.method_on_my_class
 Ruby VM rejects our code with a syntax error: <code>self</code> is not a variable, and
 can’t be used as the name of one.</p>
 <p>Thus, Sorbet provides <code>T.bind</code> for this specific usecase instead:</p>
-<pre><code class="hljs css language-ruby">T.cast(<span class="hljs-keyword">self</span>, MyClass)
+<pre><code class="hljs css language-ruby">T.bind(<span class="hljs-keyword">self</span>, MyClass)
 <span class="hljs-keyword">self</span>.method_on_my_class
 </code></pre>
 <p><code>T.bind</code> is the only type assertion that does not require assigning the
