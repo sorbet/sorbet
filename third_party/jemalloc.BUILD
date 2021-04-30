@@ -31,7 +31,23 @@ JEMALLOC_BUILD_COMMAND = """
   export LTOFLAGS="$$([ "$$(uname)" = "Linux" ] && echo "-flto=thin")" # todo: on next clang toolchain upgrade, check if it's fixed and we can re-enable thinlto on mac
   export EXTRA_CFLAGS="$${LTOFLAGS}"
   export EXTRA_CXXFLAGS="-stdlib=libc++ $${EXTRA_CFLAGS}"
-  export LDFLAGS="$${LTOFLAGS} $$([ "$$(uname)" = "Linux" ] && echo " -fuse-ld=lld")"
+
+  LDFLAGS="$${LTOFLAGS}"
+
+  case "$$(uname)" in
+    Linux)
+      LDFLAGS="$${LDFLAGS} -fuse-ld=lld"
+      ;;
+    Darwin)
+      LDFLAGS="$${LDFLAGS} -mlinker-version=400"
+      ;;
+  esac
+
+  export LDFLAGS
+
+  # we need to include CFLAGS in CPPFLAGS so that the --sysroot flag makes it in
+  export CPPFLAGS="$${CFLAGS}"
+
   pushd $$(dirname $(location autogen.sh)) > /dev/null
 
   if compile_output=$$(./autogen.sh --without-export --disable-shared --enable-static 2>&1 && make build_lib_static -j4 2>&1); then
