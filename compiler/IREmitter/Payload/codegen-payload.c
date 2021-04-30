@@ -636,6 +636,35 @@ VALUE sorbet_T_must(VALUE recv, ID fun, int argc, const VALUE *const restrict ar
     }
 }
 
+SORBET_INLINE
+VALUE sorbet_Thread_current(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                            VALUE closure) {
+    return rb_thread_current();
+}
+
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/thread.c#L3281-L3287
+SORBET_INLINE
+VALUE sorbet_Thread_square_br(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                              VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+    VALUE key = argv[0];
+    ID id = rb_check_id(&key);
+    if (!id) {
+        return Qnil;
+    }
+    return rb_thread_local_aref(recv, id);
+}
+
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/thread.c#L3386-L3390
+SORBET_INLINE
+VALUE sorbet_Thread_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                 VALUE closure) {
+    sorbet_ensure_arity(argc, 2);
+    VALUE id = argv[0];
+    VALUE val = argv[1];
+    return rb_thread_local_aset(recv, rb_to_id(id), val);
+}
+
 VALUE sorbet_rb_array_len(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                           VALUE closure) {
     sorbet_ensure_arity(argc, 0);

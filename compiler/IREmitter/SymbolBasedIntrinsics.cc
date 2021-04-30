@@ -590,12 +590,15 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Integer(), "==", "sorbet_rb_int_equal"},
     {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq"},
     {core::Symbols::Integer(), "times", "sorbet_rb_int_dotimes", "sorbet_rb_int_dotimes_withBlock"},
+    {core::Symbols::Thread(), "[]", "sorbet_Thread_square_br"},
+    {core::Symbols::Thread(), "[]=", "sorbet_Thread_square_br_eq"},
 #include "WrappedIntrinsics.h"
 };
 
 static const vector<CallCMethodSingleton> knownCMethodsSingleton{
     {core::Symbols::T(), "unsafe", "sorbet_T_unsafe"},
     {core::Symbols::T(), "must", "sorbet_T_must"},
+    {core::Symbols::Thread(), "current", "sorbet_Thread_current"},
 };
 
 vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
