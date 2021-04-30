@@ -29,10 +29,10 @@ module T
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean, blk: T.untyped).returns(BasicObject)}
   def self.let(value, type=nil, checked: true, &blk); end
 
-  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean, blk: T.untyped).returns(BasicObject)}
   def self.bind(value, type=nil, checked: true, &blk); end
 
-  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean).returns(BasicObject)}
+  sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean, blk: T.untyped).returns(BasicObject)}
   def self.assert_type!(value, type=nil, checked: true, &blk); end
 
   sig {params(value: T.untyped, type: T.untyped, checked: T::Boolean, blk: T.untyped).returns(BasicObject)}
