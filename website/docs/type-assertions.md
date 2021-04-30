@@ -184,7 +184,7 @@ can't be used as the name of one.
 Thus, Sorbet provides `T.bind` for this specific usecase instead:
 
 ```ruby
-T.cast(self, MyClass)
+T.bind(self, MyClass)
 self.method_on_my_class
 ```
 
