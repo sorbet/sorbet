@@ -260,7 +260,7 @@ public:
             // Ignore top-level <root>
             return tree;
         }
-        auto &pkgName = pkg->name.fullName.parts;
+        const auto &pkgName = pkg->name.fullName.parts;
         bool skipCheck = nameParts.size() > pkgName.size(); // TODO can we skip push with a counter?
         auto &constantLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
         pushConstantLit(&constantLit);
@@ -269,8 +269,9 @@ public:
         if (!skipCheck && rootConsts == 0 &&
             !std::equal(pkgName.begin(), pkgName.begin() + minSize, nameParts.begin(), nameParts.begin() + minSize)) {
             if (auto e =
-                    ctx.beginError(constantLit.loc, core::errors::Packager::InvalidImportOrExport)) { // TODO new error
-                e.setHeader("TODO Class");
+                    ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                e.setHeader("Class or method definition must match enclosing package namespace `{}`",
+                        fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx);} ));
             }
         }
         return tree;
@@ -297,8 +298,9 @@ public:
             if (rootConsts == 0 &&
                 !std::equal(pkgName.begin(), pkgName.end(), nameParts.begin(), nameParts.begin() + minSize)) {
                 if (auto e =
-                        ctx.beginError(lhs->loc, core::errors::Packager::InvalidImportOrExport)) { // TODO new error
-                    e.setHeader("TODO Const");
+                        ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                    e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
+                        fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx);} ));
                 }
             }
         }
@@ -318,7 +320,7 @@ private:
                 rootConsts++;
             }
         }
-        reverse(nameParts.begin() + oldLen, nameParts.end()); // TODO I could do this recursively
+        reverse(nameParts.begin() + oldLen, nameParts.end());
     }
 
     void popConstantLit(ast::UnresolvedConstantLit *lit) {

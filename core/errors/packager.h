@@ -17,5 +17,6 @@ constexpr ErrorClass NoSelfImport{3709, StrictLevel::False};
 constexpr ErrorClass InvalidPackageExpression{3710, StrictLevel::False};
 constexpr ErrorClass PackageFileMustBeStrict{3711, StrictLevel::False};
 constexpr ErrorClass InvalidPackageName{3712, StrictLevel::False};
+constexpr ErrorClass DefinitionPackageMismatch{3713, StrictLevel::False};
 } // namespace sorbet::core::errors::Packager
 #endif
