@@ -284,6 +284,20 @@ For example, this should probably be placed as the first line of any `rake test`
 target, as well as any other entry point to a project's tests. If this line is
 absent, `.checked(:tests)` sigs behave as if they had been `.checked(:never)`.
 
+## `checked: false` with `T.let` and other assertions
+
+Similar to the section above for method signatures, it is also possible to turn
+off type checking for individual `T.let` assertions:
+
+```ruby
+x = T.let(nil, checked: false) {T.nilable(Integer)}
+```
+
+In this form, the block will never be executed, so the runtime object
+representing the type will never execute, and the value `nil` will be returned
+unchanged. This works with all other [Type Assertions](type-assertions.md) that
+require types.
+
 ## `T::Sig::WithoutRuntime.sig`
 
 Even with `.checked(:never)`, there is some slight runtime overhead. The block
