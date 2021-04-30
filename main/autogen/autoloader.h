@@ -55,7 +55,8 @@ struct NamedDefinition {
     Definition def;
     QualifiedName qname;
     QualifiedName parentName;
-    std::vector<core::NameRef> requires;
+    std::vector<core::NameRef>
+    requires;
     core::FileRef fileRef;
     u4 pathDepth;
 

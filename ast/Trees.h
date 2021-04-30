@@ -218,7 +218,7 @@ public:
     }
 };
 
-template <class E, typename... Args> ExpressionPtr make_expression(Args &&... args) {
+template <class E, typename... Args> ExpressionPtr make_expression(Args &&...args) {
     return ExpressionPtr(ExpressionToTag<E>::value, new E(std::forward<Args>(args)...));
 }
 

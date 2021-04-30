@@ -15,7 +15,8 @@ namespace sorbet::autogen {
 class AutogenWalk {
     vector<Definition> defs;
     vector<Reference> refs;
-    vector<core::NameRef> requires;
+    vector<core::NameRef>
+    requires;
     vector<DefinitionRef> nesting;
 
     enum class ScopeType { Class, Block };
