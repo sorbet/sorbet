@@ -13,6 +13,15 @@ class A
 
   sig {returns(Integer).checked(:never)}
   attr_reader :using_attr_reader_sig_checked_never
+
+  sig(:final) {returns(Integer)}
+  attr_reader :using_attr_reader_sig_final
+
+  sig(:final) {returns(Integer).checked(:tests)}
+  attr_reader :using_attr_reader_sig_final_checked_tests
+
+  sig(:final) {returns(Integer).checked(:never)}
+  attr_reader :using_attr_reader_sig_final_checked_never
 end
 
 class B < T::Struct

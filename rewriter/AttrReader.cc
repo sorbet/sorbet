@@ -149,6 +149,15 @@ bool sigIsUnchecked(core::MutableContext ctx, ast::Send *sig) {
         return true;
     }
 
+    // We want sig(:final) to overrule .checked(:never)
+    if (sig->args.size() > 0) {
+        int final_arg = sig->args.size() == 1 ? 0 : 1;
+        auto lit = ast::cast_tree<ast::Literal>(sig->args[final_arg]);
+        if (lit != nullptr && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::final_()) {
+            return false;
+        }
+    }
+
     auto checked = findSendChecked(sig);
     if (checked == nullptr || checked->args.size() != 1) {
         // Unknown: default to false
