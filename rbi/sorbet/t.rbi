@@ -145,6 +145,9 @@ module T::Configuration
   def self.exclude_value_in_type_errors; end
   sig {void}
   def self.include_value_in_type_errors; end
+  def self.use_vm_prop_serde?; end
+  def self.enable_vm_prop_serde; end
+  def self.disable_vm_prop_serde; end
   def self.hard_assert_handler(str, extra); end
   def self.hard_assert_handler=(value); end
   def self.inline_type_error_handler(error); end
