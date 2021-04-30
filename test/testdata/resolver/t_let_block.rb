@@ -57,3 +57,12 @@ y = T.assert_type!('', checked: false) {T.nilable(Float)} # error: does not have
 T.reveal_type(y) # error: Revealed type: `T.nilable(Float)`
 
 # TODO(jez) Update this test after rebasing on the `T.bind` branch.
+
+def bad_bind_block
+  T.bind(self) {Integer} # error: requires `checked: false`
+end
+
+def good_bind_block
+  T.bind(self, checked: false) {T.nilable(Integer)}
+  T.reveal_type(self) # error: type: `T.nilable(Integer)`
+end
