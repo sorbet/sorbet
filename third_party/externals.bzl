@@ -146,9 +146,9 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "com_google_absl",
-        urls = _github_public_urls("abseil/abseil-cpp/archive/62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08.zip"),
-        sha256 = "afcab9f226ac4ca6b6b7c9ec704a995fe32a6b555d6935b0de247ae6ac6940e0",
-        strip_prefix = "abseil-cpp-62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08",
+        urls = _github_public_urls("abseil/abseil-cpp/archive/e9b9e38f67a008d66133535a72ada843bd66013f.zip"),
+        sha256 = "49c93740b3b09f73cd2f10da778ea4129d59733085393f458a4acd17774503fb",
+        strip_prefix = "abseil-cpp-e9b9e38f67a008d66133535a72ada843bd66013f",
     )
 
     http_archive(
