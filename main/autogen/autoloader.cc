@@ -19,8 +19,7 @@ namespace sorbet::autogen {
 // converts it to a `DefTree`, and then emits the autoloader files based on passed-in string fragments
 
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
-    return !nd.qname.nameParts.empty() &&
-           topLevelNamespaceRefs.contains(nd.qname.nameParts[0]);
+    return !nd.qname.nameParts.empty() && topLevelNamespaceRefs.contains(nd.qname.nameParts[0]);
 }
 
 bool AutoloaderConfig::includePath(string_view path) const {
