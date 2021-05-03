@@ -156,7 +156,7 @@ SimilarMethodsByName mergeSimilarMethods(SimilarMethodsByName left, SimilarMetho
     auto result = SimilarMethodsByName{};
 
     for (auto [methodName, leftSimilarMethods] : left) {
-        if (right.find(methodName) != right.end()) {
+        if (right.contains(methodName)) {
             for (auto similarMethod : leftSimilarMethods) {
                 result[methodName].emplace_back(similarMethod);
             }

@@ -20,7 +20,7 @@ namespace sorbet::autogen {
 
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
     return !nd.qname.nameParts.empty() &&
-           topLevelNamespaceRefs.find(nd.qname.nameParts[0]) != topLevelNamespaceRefs.end();
+           topLevelNamespaceRefs.contains(nd.qname.nameParts[0]);
 }
 
 bool AutoloaderConfig::includePath(string_view path) const {

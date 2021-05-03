@@ -972,7 +972,7 @@ DispatchResult dispatchCallSymbol(const GlobalState &gs, const DispatchArgs &arg
                         }
 
                         NameRef arg = key.asName(gs);
-                        if (consumed.find(arg) != consumed.end()) {
+                        if (consumed.contains(arg)) {
                             continue;
                         }
                         consumed.insert(arg);

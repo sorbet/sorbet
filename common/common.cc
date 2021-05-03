@@ -279,7 +279,7 @@ void appendFilesInDir(string_view basePath, string_view path, const sorbet::Unor
             // Note: Can't call substr with an index > string length, so explicitly check if a dot isn't found.
             if (dotLocation != string::npos) {
                 auto ext = fullPath.substr(dotLocation);
-                if (extensions.find(ext) != extensions.end()) {
+                if (extensions.contains(ext)) {
                     result.emplace_back(fullPath);
                 }
             }
