@@ -566,9 +566,9 @@ public:
             return;
         }
 
-        if (isSymbol && hashKeySymbols.find(nameRef) == hashKeySymbols.end()) {
+        if (isSymbol && !hashKeySymbols.contains(nameRef)) {
             hashKeySymbols[nameRef] = key.loc();
-        } else if (!isSymbol && hashKeyStrings.find(nameRef) == hashKeyStrings.end()) {
+        } else if (!isSymbol && !hashKeyStrings.contains(nameRef)) {
             hashKeyStrings[nameRef] = key.loc();
         } else {
             if (auto e = dctx.ctx.beginError(key.loc(), core::errors::Desugar::DuplicatedHashKeys)) {

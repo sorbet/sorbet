@@ -823,7 +823,7 @@ public:
         std::vector<std::string> emitOrder;
         for (auto &variant : variants) {
             auto cppType = variant->getCPPType();
-            if (uniqueTypes.find(cppType) == uniqueTypes.end()) {
+            if (!uniqueTypes.contains(cppType)) {
                 uniqueTypes.insert(cppType);
                 emitOrder.push_back(cppType);
             }

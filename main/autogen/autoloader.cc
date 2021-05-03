@@ -30,11 +30,11 @@ bool AutoloaderConfig::includePath(string_view path) const {
 }
 
 bool AutoloaderConfig::includeRequire(core::NameRef req) const {
-    return excludedRequireRefs.find(req) == excludedRequireRefs.end();
+    return !excludedRequireRefs.contains(req);
 }
 
 bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) const {
-    return nonCollapsableModuleNames.find(module) == nonCollapsableModuleNames.end();
+    return !nonCollapsableModuleNames.contains(module);
 }
 
 string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {
