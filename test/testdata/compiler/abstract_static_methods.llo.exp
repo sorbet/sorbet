@@ -479,8 +479,8 @@ entry:
   call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %109, i8 0, i64 28, i1 false) #8, !dbg !68
   call void @rb_define_singleton_sorbet_method(i64 %102, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (i32, i64*, i64)* nonnull @func_IFoo.foo, i8* nonnull %105, i8* %stackFrame471.i.i) #8, !dbg !68
   call void @sorbet_popRubyStack() #8, !dbg !59
-  %110 = getelementptr inbounds i64, i64* %42, i64 14, !dbg !58
-  store i64* %110, i64** %37, align 8, !dbg !58, !tbaa !29
+  %110 = getelementptr inbounds i64, i64* %42, i64 14, !dbg !59
+  store i64* %110, i64** %37, align 8, !dbg !59, !tbaa !29
   %111 = call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Foo, i64 0, i64 0), i64 %102) #8, !dbg !69
   call void @sorbet_pushStaticInitFrame(i64 %111) #8, !dbg !69
   %stackFrame.i.i1 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Foo.<static-init>", align 8
@@ -532,8 +532,8 @@ entry:
   call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %138, i8 0, i64 28, i1 false) #8, !dbg !72
   call void @rb_define_singleton_sorbet_method(i64 %131, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (i32, i64*, i64)* nonnull @func_Foo.foo, i8* nonnull %134, i8* %stackFrame221.i.i) #8, !dbg !72
   call void @sorbet_popRubyStack() #8, !dbg !69
-  %139 = getelementptr inbounds i64, i64* %42, i64 22, !dbg !58
-  store i64* %139, i64** %37, align 8, !dbg !58, !tbaa !29
+  %139 = getelementptr inbounds i64, i64* %42, i64 22, !dbg !69
+  store i64* %139, i64** %37, align 8, !dbg !69, !tbaa !29
   %140 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !8, !tbaa !29
   %141 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %140, i64 0, i32 2, !dbg !8
   %142 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %141, align 8, !dbg !8, !tbaa !41
@@ -553,7 +553,7 @@ entry:
   %152 = getelementptr inbounds i64, i64* %150, i64 2, !dbg !13
   store i64* %152, i64** %149, align 8, !dbg !13, !tbaa !65
   store i64 %send.i, i64* %151, align 8, !dbg !13, !tbaa !4
-  %send54.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_p, i64 0) #8, !dbg !13
+  %send28.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_p, i64 0) #8, !dbg !13
   ret void
 }
 

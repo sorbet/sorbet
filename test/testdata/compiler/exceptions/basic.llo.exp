@@ -487,8 +487,8 @@ entry:
   store i8* %89, i8** %92, align 8, !dbg !69, !tbaa !75
   call void @rb_define_singleton_sorbet_method(i64 %76, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_test, i64 0, i64 0), i64 (i32, i64*, i64)* nonnull @func_A.test, i8* nonnull %79, i8* %stackFrame81.i.i) #10, !dbg !69
   call void @sorbet_popRubyStack() #10, !dbg !66
-  %93 = getelementptr inbounds i64, i64* %53, i64 23, !dbg !65
-  store i64* %93, i64** %48, align 8, !dbg !65, !tbaa !37
+  %93 = getelementptr inbounds i64, i64* %53, i64 23, !dbg !66
+  store i64* %93, i64** %48, align 8, !dbg !66, !tbaa !37
   %"rubyStr_=== no-raise ===.i" = load i64, i64* @"rubyStrFrozen_=== no-raise ===", align 8, !dbg !76
   %94 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !15, !tbaa !37
   %95 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %94, i64 0, i32 2, !dbg !15
@@ -513,7 +513,7 @@ entry:
   %108 = getelementptr inbounds i64, i64* %106, i64 2, !dbg !20
   store i64* %108, i64** %105, align 8, !dbg !20, !tbaa !77
   store i64 0, i64* %107, align 8, !dbg !20, !tbaa !14
-  %send42.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_test, i64 0) #10, !dbg !20
+  %send34.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_test, i64 0) #10, !dbg !20
   %109 = getelementptr inbounds i64, i64* %53, i64 26, !dbg !20
   store i64* %109, i64** %48, align 8, !dbg !20, !tbaa !37
   %"rubyStr_=== raise ===.i" = load i64, i64* @"rubyStrFrozen_=== raise ===", align 8, !dbg !78
@@ -527,7 +527,7 @@ entry:
   %116 = getelementptr inbounds i64, i64* %114, i64 2, !dbg !21
   store i64* %116, i64** %113, align 8, !dbg !21, !tbaa !77
   store i64 %"rubyStr_=== raise ===.i", i64* %115, align 8, !dbg !21, !tbaa !14
-  %send48.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_puts.1, i64 0) #10, !dbg !21
+  %send40.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_puts.1, i64 0) #10, !dbg !21
   %117 = getelementptr inbounds i64, i64* %53, i64 27, !dbg !21
   store i64* %117, i64** %48, align 8, !dbg !21, !tbaa !37
   %118 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !22, !tbaa !37
@@ -540,7 +540,7 @@ entry:
   %124 = getelementptr inbounds i64, i64* %122, i64 2, !dbg !22
   store i64* %124, i64** %121, align 8, !dbg !22, !tbaa !77
   store i64 20, i64* %123, align 8, !dbg !22, !tbaa !14
-  %send53.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_test.2, i64 0) #10, !dbg !22
+  %send45.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_test.2, i64 0) #10, !dbg !22
   ret void
 }
 

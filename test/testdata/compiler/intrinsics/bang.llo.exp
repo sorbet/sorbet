@@ -357,8 +357,8 @@ entry:
   %65 = bitcast i8* %59 to %struct.rb_sorbet_param_struct*, !dbg !50
   call void @rb_add_method_sorbet(i64 %56, i64 %64, i64 (i32, i64*, i64)* nonnull @"func_Bad#!", %struct.rb_sorbet_param_struct* nonnull %65, i32 1, i8* %stackFrame81.i5.i) #8, !dbg !50
   call void @sorbet_popRubyStack() #8, !dbg !47
-  %66 = getelementptr inbounds i64, i64* %33, i64 12, !dbg !46
-  store i64* %66, i64** %28, align 8, !dbg !46, !tbaa !26
+  %66 = getelementptr inbounds i64, i64* %33, i64 12, !dbg !47
+  store i64* %66, i64** %28, align 8, !dbg !47, !tbaa !26
   %67 = call i64 @rb_define_module(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_Main, i64 0, i64 0)) #8, !dbg !54
   call void @sorbet_pushStaticInitFrame(i64 %67) #8, !dbg !54
   %stackFrame.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Main.<static-init>", align 8
@@ -410,8 +410,8 @@ entry:
   call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %94, i8 0, i64 28, i1 false) #8, !dbg !57
   call void @rb_define_singleton_sorbet_method(i64 %87, i8* getelementptr inbounds ([5 x i8], [5 x i8]* @str_test, i64 0, i64 0), i64 (i32, i64*, i64)* nonnull @func_Main.test, i8* nonnull %90, i8* %stackFrame81.i.i) #8, !dbg !57
   call void @sorbet_popRubyStack() #8, !dbg !54
-  %95 = getelementptr inbounds i64, i64* %33, i64 22, !dbg !46
-  store i64* %95, i64** %28, align 8, !dbg !46, !tbaa !26
+  %95 = getelementptr inbounds i64, i64* %33, i64 22, !dbg !54
+  store i64* %95, i64** %28, align 8, !dbg !54, !tbaa !26
   %96 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !8, !tbaa !26
   %97 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %96, i64 0, i32 2, !dbg !8
   %98 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %97, align 8, !dbg !8, !tbaa !28

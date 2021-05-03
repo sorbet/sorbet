@@ -190,13 +190,13 @@ define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #5 {
 ; Function Attrs: ssp
 define internal i64 @"func_<root>.<static-init>$152$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #8 !dbg !14 {
 functionEntryInitializers:
-  %stackFrame54 = load i64, i64* bitcast (%struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$152$block_1" to i64*), align 8
+  %stackFrame38 = load i64, i64* bitcast (%struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$152$block_1" to i64*), align 8
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !4
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !19
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   %4 = bitcast %struct.rb_iseq_struct** %3 to i64*
-  store i64 %stackFrame54, i64* %4, align 8, !tbaa !20
+  store i64 %stackFrame38, i64* %4, align 8, !tbaa !20
   %5 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
   %6 = load i64*, i64** %5, align 8, !tbaa !22
   %7 = load i64, i64* %6, align 8, !tbaa !13
@@ -285,17 +285,17 @@ fillFromDefaultBlockDone2:                        ; preds = %sorbet_isa_Array.ex
   br i1 %49, label %50, label %typeTestSuccess, !dbg !40, !prof !38
 
 50:                                               ; preds = %fillFromDefaultBlockDone2.thread, %fillFromDefaultBlockDone2
-  %el1.sroa.0.161 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ]
-  %el2.sroa.0.059 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ]
-  %51 = and i64 %el1.sroa.0.161, 7, !dbg !40
+  %el1.sroa.0.145 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ]
+  %el2.sroa.0.043 = phi i64 [ 8, %fillFromDefaultBlockDone2.thread ], [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ]
+  %51 = and i64 %el1.sroa.0.145, 7, !dbg !40
   %52 = icmp ne i64 %51, 0, !dbg !40
-  %53 = and i64 %el1.sroa.0.161, -9, !dbg !40
+  %53 = and i64 %el1.sroa.0.145, -9, !dbg !40
   %54 = icmp eq i64 %53, 0, !dbg !40
   %55 = or i1 %52, %54, !dbg !40
-  br i1 %55, label %codeRepl, label %sorbet_isa_Integer.exit55, !dbg !40, !prof !41
+  br i1 %55, label %codeRepl, label %sorbet_isa_Integer.exit39, !dbg !40, !prof !41
 
-sorbet_isa_Integer.exit55:                        ; preds = %50
-  %56 = inttoptr i64 %el1.sroa.0.161 to %struct.iseq_inline_iv_cache_entry*, !dbg !40
+sorbet_isa_Integer.exit39:                        ; preds = %50
+  %56 = inttoptr i64 %el1.sroa.0.145 to %struct.iseq_inline_iv_cache_entry*, !dbg !40
   %57 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %56, i64 0, i32 0, !dbg !40
   %58 = load i64, i64* %57, align 8, !dbg !40, !tbaa !35
   %59 = and i64 %58, 31, !dbg !40
@@ -313,46 +313,46 @@ fillFromDefaultBlockDone2.thread:                 ; preds = %fillRequiredArgs
   store i64* %61, i64** %9, align 8, !dbg !39, !tbaa !4
   br label %50, !dbg !40
 
-typeTestSuccess:                                  ; preds = %fillFromDefaultBlockDone2, %sorbet_isa_Integer.exit55
-  %el2.sroa.0.05865 = phi i64 [ %el2.sroa.0.059, %sorbet_isa_Integer.exit55 ], [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ]
-  %el1.sroa.0.16064 = phi i64 [ %el1.sroa.0.161, %sorbet_isa_Integer.exit55 ], [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ]
-  %62 = phi i64 [ 0, %sorbet_isa_Integer.exit55 ], [ 1, %fillFromDefaultBlockDone2 ]
-  %63 = and i64 %el2.sroa.0.05865, 1, !dbg !43
+typeTestSuccess:                                  ; preds = %fillFromDefaultBlockDone2, %sorbet_isa_Integer.exit39
+  %el2.sroa.0.04249 = phi i64 [ %el2.sroa.0.043, %sorbet_isa_Integer.exit39 ], [ %el2.sroa.0.0, %fillFromDefaultBlockDone2 ]
+  %el1.sroa.0.14448 = phi i64 [ %el1.sroa.0.145, %sorbet_isa_Integer.exit39 ], [ %el1.sroa.0.1, %fillFromDefaultBlockDone2 ]
+  %62 = phi i64 [ 0, %sorbet_isa_Integer.exit39 ], [ 1, %fillFromDefaultBlockDone2 ]
+  %63 = and i64 %el2.sroa.0.04249, 1, !dbg !43
   %64 = icmp eq i64 %63, 0, !dbg !43
   br i1 %64, label %65, label %"fastSymCallIntrinsic_Integer_+", !dbg !43, !prof !38
 
 65:                                               ; preds = %typeTestSuccess
-  %66 = and i64 %el2.sroa.0.05865, 7, !dbg !43
+  %66 = and i64 %el2.sroa.0.04249, 7, !dbg !43
   %67 = icmp ne i64 %66, 0, !dbg !43
-  %68 = and i64 %el2.sroa.0.05865, -9, !dbg !43
+  %68 = and i64 %el2.sroa.0.04249, -9, !dbg !43
   %69 = icmp eq i64 %68, 0, !dbg !43
   %70 = or i1 %67, %69, !dbg !43
-  br i1 %70, label %codeRepl80, label %sorbet_isa_Integer.exit, !dbg !43, !prof !41
+  br i1 %70, label %codeRepl64, label %sorbet_isa_Integer.exit, !dbg !43, !prof !41
 
 sorbet_isa_Integer.exit:                          ; preds = %65
-  %71 = inttoptr i64 %el2.sroa.0.05865 to %struct.iseq_inline_iv_cache_entry*, !dbg !43
+  %71 = inttoptr i64 %el2.sroa.0.04249 to %struct.iseq_inline_iv_cache_entry*, !dbg !43
   %72 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %71, i64 0, i32 0, !dbg !43
   %73 = load i64, i64* %72, align 8, !dbg !43, !tbaa !35
   %74 = and i64 %73, 31, !dbg !43
   %75 = icmp eq i64 %74, 10, !dbg !43
-  br i1 %75, label %"fastSymCallIntrinsic_Integer_+", label %codeRepl80, !dbg !43, !prof !42
+  br i1 %75, label %"fastSymCallIntrinsic_Integer_+", label %codeRepl64, !dbg !43, !prof !42
 
-codeRepl:                                         ; preds = %sorbet_isa_Integer.exit55, %50
-  tail call fastcc void @"func_<root>.<static-init>$152$block_1.cold.1"(i64 %el1.sroa.0.161) #15, !dbg !40
+codeRepl:                                         ; preds = %sorbet_isa_Integer.exit39, %50
+  tail call fastcc void @"func_<root>.<static-init>$152$block_1.cold.1"(i64 %el1.sroa.0.145) #15, !dbg !40
   unreachable
 
-codeRepl80:                                       ; preds = %sorbet_isa_Integer.exit, %65
-  tail call void @sorbet_cast_failure(i64 %el2.sroa.0.05865, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_T.let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)), !dbg !44
+codeRepl64:                                       ; preds = %sorbet_isa_Integer.exit, %65
+  tail call void @sorbet_cast_failure(i64 %el2.sroa.0.04249, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_T.let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)), !dbg !44
   unreachable, !dbg !44
 
 "fastSymCallIntrinsic_Integer_+":                 ; preds = %typeTestSuccess, %sorbet_isa_Integer.exit
-  %76 = and i64 %62, %el2.sroa.0.05865, !dbg !40
+  %76 = and i64 %62, %el2.sroa.0.04249, !dbg !40
   %77 = icmp eq i64 %76, 0, !dbg !40
   br i1 %77, label %87, label %78, !dbg !40, !prof !46
 
 78:                                               ; preds = %"fastSymCallIntrinsic_Integer_+"
-  %79 = add nsw i64 %el2.sroa.0.05865, -1, !dbg !40
-  %80 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %el1.sroa.0.16064, i64 %79) #12, !dbg !40
+  %79 = add nsw i64 %el2.sroa.0.04249, -1, !dbg !40
+  %80 = tail call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %el1.sroa.0.14448, i64 %79) #12, !dbg !40
   %81 = extractvalue { i64, i1 } %80, 1, !dbg !40
   %82 = extractvalue { i64, i1 } %80, 0, !dbg !40
   br i1 %81, label %83, label %sorbet_rb_int_plus.exit, !dbg !40
@@ -364,7 +364,7 @@ codeRepl80:                                       ; preds = %sorbet_isa_Integer.
   br label %sorbet_rb_int_plus.exit, !dbg !40
 
 87:                                               ; preds = %"fastSymCallIntrinsic_Integer_+"
-  %88 = tail call i64 @sorbet_rb_int_plus_slowpath(i64 %el1.sroa.0.16064, i64 %el2.sroa.0.05865) #12, !dbg !40, !noalias !47
+  %88 = tail call i64 @sorbet_rb_int_plus_slowpath(i64 %el1.sroa.0.14448, i64 %el2.sroa.0.04249) #12, !dbg !40, !noalias !47
   br label %sorbet_rb_int_plus.exit, !dbg !40
 
 sorbet_rb_int_plus.exit:                          ; preds = %83, %78, %87
@@ -597,9 +597,9 @@ fastSymCallIntrinsic_Array_each.i:                ; preds = %sorbet_isa_Array.ex
 declare void @llvm.memset.p0i8.i64(i8* nocapture writeonly, i8, i64, i1 immarg) #3
 
 ; Function Attrs: cold minsize noreturn ssp
-define internal fastcc void @"func_<root>.<static-init>$152$block_1.cold.1"(i64 %el1.sroa.0.161) unnamed_addr #11 {
+define internal fastcc void @"func_<root>.<static-init>$152$block_1.cold.1"(i64 %el1.sroa.0.145) unnamed_addr #11 {
 newFuncRoot:
-  tail call void @sorbet_cast_failure(i64 %el1.sroa.0.161, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_T.let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)), !dbg !40
+  tail call void @sorbet_cast_failure(i64 %el1.sroa.0.145, i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_T.let, i64 0, i64 0), i8* getelementptr inbounds ([8 x i8], [8 x i8]* @str_Integer, i64 0, i64 0)), !dbg !40
   unreachable, !dbg !40
 }
 
@@ -662,7 +662,7 @@ attributes #15 = { noinline }
 !36 = !{!"RBasic", !10, i64 0, !10, i64 8}
 !37 = !{!6, !6, i64 0}
 !38 = !{!"branch_weights", i32 1, i32 2000}
-!39 = !DILocation(line: 0, scope: !14)
+!39 = !DILocation(line: 5, column: 24, scope: !14)
 !40 = !DILocation(line: 7, column: 3, scope: !14)
 !41 = !{!"branch_weights", i32 1073205, i32 2146410443}
 !42 = !{!"branch_weights", i32 2000, i32 1}

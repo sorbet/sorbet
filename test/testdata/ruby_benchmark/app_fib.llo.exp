@@ -169,9 +169,6 @@ declare i64 @sorbet_rb_int_minus_slowpath(i64, i64) local_unnamed_addr #2
 declare i64 @sorbet_rb_int_lt_slowpath(i64, i64) local_unnamed_addr #2
 
 ; Function Attrs: nounwind readnone
-declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
-
-; Function Attrs: nounwind readnone
 declare i64 @rb_class_inherited_p(i64, i64) local_unnamed_addr #3
 
 declare i64 @rb_define_class(i8*, i64) local_unnamed_addr #2
@@ -219,6 +216,9 @@ define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #7 {
   tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* getelementptr inbounds ([95 x i8], [95 x i8]* @.str.8, i64 0, i64 0)) #15
   unreachable
 }
+
+; Function Attrs: nounwind readnone
+declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @func_HasFib.fib(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #8 !dbg !8 {
@@ -288,7 +288,7 @@ sorbet_rb_int_minus.exit:                         ; preds = %18, %14, %22
 
 33:                                               ; preds = %28
   %34 = load i64, i64* @rb_cModule, align 8, !dbg !38, !tbaa !4
-  %35 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %34) #3, !dbg !38
+  %35 = tail call i64 @rb_obj_is_kind_of(i64 %selfRaw, i64 %34), !dbg !38
   %36 = icmp eq i64 %35, 0, !dbg !38
   br i1 %36, label %slowFinalCall_fib, label %sorbet_isa_class_of.exit, !dbg !38, !prof !42
 
@@ -728,8 +728,8 @@ entry:
   store i8* %75, i8** %78, align 8, !dbg !82, !tbaa !86
   call void @rb_define_singleton_sorbet_method(i64 %62, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_fib, i64 0, i64 0), i64 (i32, i64*, i64)* nonnull @func_HasFib.fib, i8* nonnull %65, i8* %stackFrame311.i.i) #12, !dbg !82
   call void @sorbet_popRubyStack() #12, !dbg !77
-  %79 = getelementptr inbounds i64, i64* %38, i64 16, !dbg !76
-  store i64* %79, i64** %33, align 8, !dbg !76, !tbaa !12
+  %79 = getelementptr inbounds i64, i64* %38, i64 16, !dbg !77
+  store i64* %79, i64** %33, align 8, !dbg !77, !tbaa !12
   %callArgs0Addr.i = getelementptr inbounds [2 x i64], [2 x i64]* %callArgs.i, i64 0, i64 0, !dbg !71
   store i64 69, i64* %callArgs0Addr.i, align 8, !dbg !71
   %80 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @stackFramePrecomputed_func_HasFib.fib, align 8, !dbg !71

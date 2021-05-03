@@ -437,8 +437,8 @@ entry:
   %78 = bitcast i8* %63 to %struct.rb_sorbet_param_struct*, !dbg !59
   call void @rb_add_method_sorbet(i64 %60, i64 %77, i64 (i32, i64*, i64)* nonnull @"func_A#+", %struct.rb_sorbet_param_struct* nonnull %78, i32 1, i8* %stackFrame81.i.i) #8, !dbg !59
   call void @sorbet_popRubyStack() #8, !dbg !56
-  %79 = getelementptr inbounds i64, i64* %37, i64 12, !dbg !55
-  store i64* %79, i64** %32, align 8, !dbg !55, !tbaa !12
+  %79 = getelementptr inbounds i64, i64* %37, i64 12, !dbg !56
+  store i64* %79, i64** %32, align 8, !dbg !56, !tbaa !12
   %80 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !39, !tbaa !12
   %81 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %80, i64 0, i32 2, !dbg !39
   %82 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %81, align 8, !dbg !39, !tbaa !14
@@ -453,8 +453,8 @@ entry:
   %rubyId_delegate.i2 = load i64, i64* @rubyIdPrecomputed_delegate, align 8, !dbg !41
   %rawSym.i = call i64 @rb_id2sym(i64 %rubyId_delegate.i2) #8, !dbg !41
   %rubyId_normal.i = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !41
-  %rawSym30.i = call i64 @rb_id2sym(i64 %rubyId_normal.i) #8, !dbg !41
-  %stackFrame321.i = load i8*, i8** bitcast (%struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#delegate" to i8**), align 8, !dbg !41
+  %rawSym22.i = call i64 @rb_id2sym(i64 %rubyId_normal.i) #8, !dbg !41
+  %stackFrame241.i = load i8*, i8** bitcast (%struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#delegate" to i8**), align 8, !dbg !41
   %87 = call noalias nonnull i8* @ruby_xcalloc(i64 1, i64 64) #10, !dbg !41
   %88 = bitcast i8* %87 to i16*, !dbg !41
   %89 = load i16, i16* %88, align 8, !dbg !41
@@ -478,7 +478,7 @@ entry:
   store i8* %97, i8** %100, align 8, !dbg !41, !tbaa !65
   %101 = call i64 @rb_intern(i8* getelementptr inbounds ([9 x i8], [9 x i8]* @str_delegate, i64 0, i64 0)) #8, !dbg !41
   %102 = bitcast i8* %87 to %struct.rb_sorbet_param_struct*, !dbg !41
-  call void @rb_add_method_sorbet(i64 %39, i64 %101, i64 (i32, i64*, i64)* nonnull @"func_Object#delegate", %struct.rb_sorbet_param_struct* nonnull %102, i32 1, i8* %stackFrame321.i) #8, !dbg !41
+  call void @rb_add_method_sorbet(i64 %39, i64 %101, i64 (i32, i64*, i64)* nonnull @"func_Object#delegate", %struct.rb_sorbet_param_struct* nonnull %102, i32 1, i8* %stackFrame241.i) #8, !dbg !41
   %103 = getelementptr inbounds i64, i64* %37, i64 22, !dbg !41
   store i64* %103, i64** %32, align 8, !dbg !41, !tbaa !12
   %104 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !42, !tbaa !12
@@ -491,7 +491,7 @@ entry:
   %110 = getelementptr inbounds i64, i64* %108, i64 2, !dbg !42
   store i64* %110, i64** %107, align 8, !dbg !42, !tbaa !35
   store i64 %send.i, i64* %109, align 8, !dbg !42, !tbaa !4
-  %send43.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_delegate, i64 0) #8, !dbg !42
+  %send35.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_delegate, i64 0) #8, !dbg !42
   ret void
 }
 

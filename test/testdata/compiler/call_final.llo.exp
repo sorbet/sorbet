@@ -394,8 +394,8 @@ entry:
   store i8* %77, i8** %80, align 8, !dbg !47, !tbaa !54
   call void @rb_define_singleton_sorbet_method(i64 %64, i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0), i64 (i32, i64*, i64)* nonnull @func_A.foo, i8* nonnull %67, i8* %stackFrame311.i.i) #10, !dbg !47
   call void @sorbet_popRubyStack() #10, !dbg !42
-  %81 = getelementptr inbounds i64, i64* %40, i64 11, !dbg !40
-  store i64* %81, i64** %35, align 8, !dbg !40, !tbaa !20
+  %81 = getelementptr inbounds i64, i64* %40, i64 11, !dbg !42
+  store i64* %81, i64** %35, align 8, !dbg !42, !tbaa !20
   %82 = call i64 @rb_define_class(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @str_B, i64 0, i64 0), i64 %42) #10, !dbg !55
   call void @sorbet_pushStaticInitFrame(i64 %82) #10, !dbg !55
   %stackFrame.i.i2 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_B.<static-init>", align 8

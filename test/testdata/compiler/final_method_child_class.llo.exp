@@ -420,8 +420,8 @@ entry:
   %99 = bitcast i8* %93 to %struct.rb_sorbet_param_struct*, !dbg !54
   call void @rb_add_method_sorbet(i64 %90, i64 %98, i64 (i32, i64*, i64)* nonnull @"func_Parent#final_method", %struct.rb_sorbet_param_struct* nonnull %99, i32 1, i8* %stackFrame451.i.i) #8, !dbg !54
   call void @sorbet_popRubyStack() #8, !dbg !43
-  %100 = getelementptr inbounds i64, i64* %36, i64 15, !dbg !42
-  store i64* %100, i64** %31, align 8, !dbg !42, !tbaa !22
+  %100 = getelementptr inbounds i64, i64* %36, i64 15, !dbg !43
+  store i64* %100, i64** %31, align 8, !dbg !43, !tbaa !22
   %101 = call i64 @rb_define_class(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @str_Child, i64 0, i64 0), i64 %90) #8, !dbg !55
   call void @sorbet_pushStaticInitFrame(i64 %101) #8, !dbg !55
   %stackFrame.i.i2 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Child.<static-init>", align 8
@@ -445,8 +445,8 @@ entry:
   %116 = getelementptr inbounds i64, i64* %115, i64 1
   store i64* %116, i64** %110, align 8, !dbg !56, !tbaa !22
   call void @sorbet_popRubyStack() #8, !dbg !55
-  %117 = getelementptr inbounds i64, i64* %36, i64 20, !dbg !42
-  store i64* %117, i64** %31, align 8, !dbg !42, !tbaa !22
+  %117 = getelementptr inbounds i64, i64* %36, i64 20, !dbg !55
+  store i64* %117, i64** %31, align 8, !dbg !55, !tbaa !22
   %118 = load i64, i64* @guard_epoch_Child, align 8, !dbg !8
   %119 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !8, !tbaa !49
   %needTakeSlowPath7 = icmp eq i64 %118, %119, !dbg !8
@@ -479,7 +479,7 @@ entry:
   %136 = getelementptr inbounds i64, i64* %135, i64 1, !dbg !8
   store i64* %136, i64** %134, align 8, !dbg !8, !tbaa !52
   store i64 %send.i, i64* %135, align 8, !dbg !8, !tbaa !4
-  %send53.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_final_method, i64 0) #8, !dbg !8
+  %send27.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* nonnull @ic_final_method, i64 0) #8, !dbg !8
   ret void
 }
 

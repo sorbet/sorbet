@@ -426,8 +426,8 @@ entry:
   %105 = bitcast i8* %99 to %struct.rb_sorbet_param_struct*, !dbg !60
   call void @rb_add_method_sorbet(i64 %96, i64 %104, i64 (i32, i64*, i64)* nonnull @"func_IFoo#foo", %struct.rb_sorbet_param_struct* nonnull %105, i32 1, i8* %stackFrame471.i.i) #8, !dbg !60
   call void @sorbet_popRubyStack() #8, !dbg !51
-  %106 = getelementptr inbounds i64, i64* %37, i64 14, !dbg !50
-  store i64* %106, i64** %32, align 8, !dbg !50, !tbaa !21
+  %106 = getelementptr inbounds i64, i64* %37, i64 14, !dbg !51
+  store i64* %106, i64** %32, align 8, !dbg !51, !tbaa !21
   %"rubyStr_./impl_abstract_via_extend__1.i" = load i64, i64* @"rubyStrFrozen_./impl_abstract_via_extend__1", align 8, !dbg !61
   %107 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !8, !tbaa !21
   %108 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %107, i64 0, i32 2, !dbg !8

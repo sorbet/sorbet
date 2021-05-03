@@ -265,8 +265,8 @@ entry:
   store i64* %62, i64** %56, align 8, !dbg !41, !tbaa !8
   call void @sorbet_popRubyStack() #7, !dbg !37
   call void @sorbet_popRubyStack() #7, !dbg !33
-  %63 = getelementptr inbounds i64, i64* %21, i64 8, !dbg !28
-  store i64* %63, i64** %16, align 8, !dbg !28, !tbaa !8
+  %63 = getelementptr inbounds i64, i64* %21, i64 8, !dbg !33
+  store i64* %63, i64** %16, align 8, !dbg !33, !tbaa !8
   %64 = call i64 @rb_define_class(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str_Baz, i64 0, i64 0), i64 %46) #7, !dbg !44
   call void @sorbet_pushStaticInitFrame(i64 %64) #7, !dbg !44
   %stackFrame.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Baz.<static-init>", align 8

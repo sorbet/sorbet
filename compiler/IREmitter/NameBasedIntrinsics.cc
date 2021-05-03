@@ -49,10 +49,21 @@ public:
         return Payload::rubyNil(mcctx.cs, mcctx.build);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
-        return {core::Names::keepForIde(), core::Names::keepForTypechecking(), core::Names::keepForCfg(),
-                core::Names::nilForSafeNavigation()};
+        return {core::Names::keepForCfg(), core::Names::nilForSafeNavigation()};
     }
 } DoNothingIntrinsic;
+
+class ShouldNeverSeeIntrinsic : public NameBasedIntrinsicMethod {
+public:
+    ShouldNeverSeeIntrinsic() : NameBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled){};
+    virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
+        failCompilation(mcctx.cs, core::Loc(core::FileRef(), mcctx.send->receiverLoc),
+                        "Emitting intrinsic that should have been deleted!");
+    }
+    virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
+        return {core::Names::keepForIde(), core::Names::keepForTypechecking()};
+    }
+} ShouldNeverSeeIntrinsic;
 
 class DefineClassIntrinsic : public NameBasedIntrinsicMethod {
 public:
@@ -477,9 +488,9 @@ static const vector<CallCMethod> knownCMethods{
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
-    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic, &IdentityIntrinsic,
-                                                 &CallWithBlock,      &ExceptionRetry,       &BuildHash,
-                                                 &CallWithSplat};
+    vector<const NameBasedIntrinsicMethod *> ret{&DoNothingIntrinsic, &DefineClassIntrinsic,   &IdentityIntrinsic,
+                                                 &CallWithBlock,      &ExceptionRetry,         &BuildHash,
+                                                 &CallWithSplat,      &ShouldNeverSeeIntrinsic};
     for (auto &method : knownCMethods) {
         ret.emplace_back(&method);
     }

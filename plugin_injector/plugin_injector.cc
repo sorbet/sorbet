@@ -10,6 +10,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 #include "common/FileOps.h"
+#include "common/typecase.h"
 #include "compiler/Core/AbortCompilation.h"
 #include "compiler/Core/CompilerState.h"
 #include "compiler/Errors/Errors.h"
@@ -129,6 +130,46 @@ class LLVMSemanticExtension : public SemanticExtension {
         return f.data(gs).source().find("# compiled: true\n") != string_view::npos;
     }
 
+    // There are a certain class of method calls that sorbet generates for auxiliary
+    // information for IDEs that do not have meaning at runtime.  These calls are all
+    // of the form `foo(bar(baz))`, i.e. straight line code with no variables.
+    // We take advantage of this special knowledge to do a simple form of dead code
+    // elimination.
+    void deleteDoNothingSends(cfg::CFG &cfg) const {
+        for (auto &block : cfg.basicBlocks) {
+            UnorderedSet<cfg::LocalRef> refsToDelete;
+            for (auto i = block->exprs.rbegin(), e = block->exprs.rend(); i != e; ++i) {
+                auto &binding = *i;
+                if (auto *send = cfg::cast_instruction<cfg::Send>(binding.value.get())) {
+                    switch (send->fun.rawId()) {
+                        case core::Names::keepForIde().rawId():
+                        case core::Names::keepForTypechecking().rawId():
+                            // TODO: figure out why we can't delete this.
+                            // case core::Names::keepForCfg().rawId():
+                            refsToDelete.emplace(binding.bind.variable);
+                            break;
+                        default:
+                            if (!refsToDelete.contains(binding.bind.variable)) {
+                                continue;
+                            }
+                            break;
+                    }
+
+                    // We're binding a ref that is unneeded, so anything that this
+                    // instruction requires must be unneeded as well.
+                    for (auto &arg : send->args) {
+                        refsToDelete.emplace(arg.variable);
+                    }
+                    refsToDelete.emplace(send->recv.variable);
+                }
+            }
+
+            auto e = std::remove_if(block->exprs.begin(), block->exprs.end(),
+                                    [&](auto &binding) { return refsToDelete.contains(binding.bind.variable); });
+            block->exprs.erase(e, block->exprs.end());
+        }
+    }
+
 public:
     LLVMSemanticExtension(optional<string> irOutputDir, bool forceCompiled) {
         this->irOutputDir = move(irOutputDir);
@@ -161,6 +202,9 @@ public:
         if (threadState->aborted) {
             return;
         }
+
+        deleteDoNothingSends(cfg);
+
         llvm::LLVMContext &lctx = threadState->lctx;
         unique_ptr<llvm::Module> &module = threadState->combinedModule;
         unique_ptr<llvm::DIBuilder> &debug = threadState->debugInfo;
