@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: true
+# typed: strict
 # compiled: true
 
 # pay-server does this stuff. It currently doesn't compile (haven't looked into
@@ -42,6 +42,7 @@
 #end
 
 class ::Exception
+  T::Sig::WithoutRuntime.sig(:final) {returns(T.nilable(Opus::LSpace::Private::AbstractSpace)).checked(:never)}
   attr_accessor :lspace
 end
 module Opus; end
@@ -55,25 +56,28 @@ class Opus::LSpace
   module Private
     class AbstractSpace
       extend T::Sig
+      sig(:final) {returns(T::Hash[KeyTypes, T.untyped]).checked(:never)}
       attr_reader :data
 
+      sig {params(data: T::Hash[KeyTypes, T.untyped]).void.checked(:never)}
       def initialize(data)
         @data = data
       end
 
-      sig {params(key: KeyTypes).returns(T.untyped).checked(:never)}
+      sig(:final) {params(key: KeyTypes).returns(T.untyped).checked(:never)}
       def [](key)
         @data[key]
       end
     end
 
     class WritableSpace < AbstractSpace
+      sig {params(data: T::Hash[KeyTypes, T.untyped]).void.checked(:never)}
       def initialize(data)
         super
-        @from_thread = Thread.current.object_id
+        @from_thread = T.let(Thread.current.object_id, Integer)
       end
 
-      sig do
+      sig(:final) do
         params(
           key: KeyTypes,
           value: T.untyped,
@@ -93,17 +97,17 @@ class Opus::LSpace
     end
   end
 
-  sig {params(key: KeyTypes, value: T.untyped).void.checked(:never)}
+  sig(:final) {params(key: KeyTypes, value: T.untyped).void.checked(:never)}
   def self.[]=(key, value)
     current[key] = value
   end
 
-  sig {params(key: KeyTypes).returns(T.untyped).checked(:never)}
+  sig(:final) {params(key: KeyTypes).returns(T.untyped).checked(:never)}
   def self.[](key)
     Thread.current[:lspace_internal]&.[](key)
   end
 
-  sig {returns(Private::WritableSpace).checked(:never)}
+  sig(:final) {returns(Private::WritableSpace).checked(:never)}
   def self.current
     lspace = Thread.current[:lspace]
     return lspace if lspace
@@ -115,7 +119,7 @@ class Opus::LSpace
     lspace
   end
 
-  sig do
+  sig(:final) do
     type_parameters(:Result)
     .params(
       data: T::Hash[KeyTypes, T.untyped],
@@ -140,7 +144,7 @@ class Opus::LSpace
     end
   end
 
-  sig {params(lspace: T.nilable(Private::AbstractSpace)).void.checked(:never)}
+  sig(:final) {params(lspace: T.nilable(Private::AbstractSpace)).void.checked(:never)}
   private_class_method def self.current=(lspace)
     Thread.current[:lspace] = lspace
     Thread.current[:lspace_internal] = lspace&.data
@@ -148,7 +152,7 @@ class Opus::LSpace
 
   # Clone the entire LSpace with a deep copy, preventing writes across boundaries.
   # Used for things like forking or thread creation.
-  sig {returns(T::Hash[KeyTypes, T.untyped]).checked(:tests)}
+  sig(:final) {returns(T::Hash[KeyTypes, T.untyped]).checked(:tests)}
   def self.deep_copy_current
     deep_copy(current.data)
   end
@@ -156,7 +160,7 @@ class Opus::LSpace
   # WARNING
   # This is only offered as a way of re-entering a cloned LSpace in a Thread or fork.
   # You should not be building code that relies on it directly. If you need to re-enter LSpace use `enter`.
-  sig {params(data: T::Hash[KeyTypes, T.untyped]).void}
+  sig(:final) {params(data: T::Hash[KeyTypes, T.untyped]).void}
   def self.enter_for_thread(data)
     if Thread.current[:lspace]
       raise RuntimeError.new("You cannot call this if Thread.current has a LSpace in it")
@@ -165,7 +169,7 @@ class Opus::LSpace
     self.current = Private::WritableSpace.new(data)
   end
 
-  sig {params(data: Object).returns(T.untyped).checked(:never)}
+  sig(:final) {params(data: Object).returns(T.untyped).checked(:never)}
   private_class_method def self.deep_copy(data)
     if data.is_a?(Array)
       data.map {|row| deep_copy(row)}
