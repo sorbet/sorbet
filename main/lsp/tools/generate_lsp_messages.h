@@ -823,7 +823,7 @@ public:
         std::vector<std::string> emitOrder;
         for (auto &variant : variants) {
             auto cppType = variant->getCPPType();
-            if (uniqueTypes.find(cppType) == uniqueTypes.end()) {
+            if (!uniqueTypes.contains(cppType)) {
                 uniqueTypes.insert(cppType);
                 emitOrder.push_back(cppType);
             }
@@ -930,12 +930,12 @@ public:
                 variant->getJSONBaseKind() == BaseKind::ComplexKind) {
                 throw std::invalid_argument("Invalid variant type: Complex are not supported.");
             }
-            if (cppKindSeen.find(variant->getCPPBaseKind()) != cppKindSeen.end()) {
+            if (cppKindSeen.contains(variant->getCPPBaseKind())) {
                 throw std::invalid_argument(
                     "Invalid variant type: Cannot discriminate between multiple types with same base C++ kind.");
             }
             cppKindSeen.insert(variant->getCPPBaseKind());
-            if (jsonKindSeen.find(variant->getJSONBaseKind()) != jsonKindSeen.end()) {
+            if (jsonKindSeen.contains(variant->getJSONBaseKind())) {
                 throw std::invalid_argument(
                     "Invalid variant type: Cannot discriminate between multiple types with same base JSON kind.");
             }

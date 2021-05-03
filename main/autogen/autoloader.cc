@@ -19,8 +19,7 @@ namespace sorbet::autogen {
 // converts it to a `DefTree`, and then emits the autoloader files based on passed-in string fragments
 
 bool AutoloaderConfig::include(const NamedDefinition &nd) const {
-    return !nd.qname.nameParts.empty() &&
-           topLevelNamespaceRefs.find(nd.qname.nameParts[0]) != topLevelNamespaceRefs.end();
+    return !nd.qname.nameParts.empty() && topLevelNamespaceRefs.contains(nd.qname.nameParts[0]);
 }
 
 bool AutoloaderConfig::includePath(string_view path) const {
@@ -30,11 +29,11 @@ bool AutoloaderConfig::includePath(string_view path) const {
 }
 
 bool AutoloaderConfig::includeRequire(core::NameRef req) const {
-    return excludedRequireRefs.find(req) == excludedRequireRefs.end();
+    return !excludedRequireRefs.contains(req);
 }
 
 bool AutoloaderConfig::sameFileCollapsable(const vector<core::NameRef> &module) const {
-    return nonCollapsableModuleNames.find(module) == nonCollapsableModuleNames.end();
+    return !nonCollapsableModuleNames.contains(module);
 }
 
 string_view AutoloaderConfig::normalizePath(const core::GlobalState &gs, core::FileRef file) const {

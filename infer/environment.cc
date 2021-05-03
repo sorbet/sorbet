@@ -726,7 +726,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
     auto &noTests = knowledgeToChoose->noTypeTests;
 
     for (auto &typeTested : yesTests) {
-        if (filter.find(typeTested.first) == filter.end()) {
+        if (!filter.contains(typeTested.first)) {
             continue;
         }
         core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
@@ -743,7 +743,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, cfg::LocalRef 
     }
 
     for (auto &typeTested : noTests) {
-        if (filter.find(typeTested.first) == filter.end()) {
+        if (!filter.contains(typeTested.first)) {
             continue;
         }
         core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
