@@ -189,6 +189,44 @@ public:
         return false;
     }
 
+    ast::ExpressionPtr preTransformMethodDef(core::Context ctx, ast::ExpressionPtr tree) {
+        auto *original = ast::cast_tree<ast::MethodDef>(tree);
+
+        // Create a new `Reference`
+        auto &ref = refs.emplace_back();
+        ref.id = refs.size() - 1;
+
+        ref.nesting = nesting;
+        reverse(ref.nesting.begin(), ref.nesting.end());
+        ref.nesting.pop_back();
+        ref.scope = nesting.back();
+        ref.loc = core::Loc(ctx.file, original->loc);
+
+        ref.definitionLoc = core::Loc(ctx.file, original->loc);
+        ref.name = QualifiedName::fromFullName({ original->name });
+
+        auto sym = original->symbol;
+        ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
+        ref.is_resolved_statically = true;
+        ref.is_defining_ref = true;
+
+        if (!defs.empty() && !nesting.empty() && defs.back().id._id != nesting.back()._id) {
+            ref.parentKind = ClassKind::Class;
+        }
+        // now, add it to the refmap
+        refMap[tree.get()] = ref.id;
+
+        // Create the Definition for it
+        auto &def = defs.emplace_back();
+        def.id = defs.size() - 1;
+        def.type = Definition::Type::Method;
+        def.defines_behavior = true;
+        def.is_empty = false;
+        def.defining_ref = ref.id;
+
+        return tree;
+    }
+
     ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
         auto *original = ast::cast_tree<ast::ConstantLit>(tree);
 
@@ -309,7 +347,23 @@ public:
         // if this send was something we were ignoring (i.e. a `keepForIde` or an `include` or `require`) then pop this
         if (!ignoring.empty() && ignoring.back() == original) {
             ignoring.pop_back();
+            return tree;
         }
+
+        // Do nothing if the receiver is not a constant node, as in that case it definitely has not been marked as a reference
+        auto *constantReceiver = ast::cast_tree<ast::ConstantLit>(original->recv);
+        if (constantReceiver == NULL) {
+            return tree;
+        }
+
+        // Skip if the receiver reference is still unrecorded (despite being a constant)
+        if (refMap.find(original->recv.get()) == refMap.end()) {
+            return tree;
+        }
+
+        auto &receiverRef = refs[refMap[original->recv.get()].id()];
+        receiverRef.called_method = QualifiedName::fromFullName({ original->fun });
+
         return tree;
     }
 

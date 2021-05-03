@@ -96,6 +96,9 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
             case Definition::Type::Alias:
                 type = "alias"sv;
                 break;
+            case Definition::Type::Method:
+                type = "method"sv;
+                break;
         }
 
         fmt::format_to(out,
@@ -143,6 +146,10 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
                        fmt::map_join(ref.name.nameParts, " ", nameToString), fmt::join(nestingStrings, " "),
                        fmt::map_join(ref.resolved.nameParts, " ", nameToString), ref.loc.filePosToString(gs),
                        (int)ref.is_defining_ref);
+
+        if (!ref.called_method.empty()) {
+            fmt::format_to(out, " called_method=[{}]\n", fmt::map_join(ref.called_method.nameParts, " ", nameToString));
+        }
 
         if (ref.parent_of.exists()) {
             auto parentOfFullName = showFullName(gs, ref.parent_of);

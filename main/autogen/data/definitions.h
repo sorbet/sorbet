@@ -88,7 +88,7 @@ struct ReferenceRef {
 
 // A constant definition---a class, module, constant definition, or constant alias---along with relevant metadata
 struct Definition {
-    enum class Type : u8 { Module, Class, Casgn, Alias };
+    enum class Type : u8 { Module, Class, Casgn, Alias, Method };
 
     // the reference to this definition. Once `AutogenWalk` is completed and a full `ParsedFile` has been created, it
     // should always be the case that
@@ -148,6 +148,9 @@ struct Reference {
     // If this is a ref used in an `include` or `extend`, then this will point to the definition of the class in which
     // this is being `include`d or `extend`ed
     DefinitionRef parent_of;
+
+    // If this ref corresponds to a method call (a.k.a send node), we annotate it with the name of the called method
+    QualifiedName called_method;
 };
 
 // A `ParsedFile` contains all the `Definition`s and `References` used in a particular file
@@ -165,8 +168,7 @@ struct ParsedFile {
     // every static constant usage in this file
     std::vector<Reference> refs;
     // every required gem in this file
-    std::vector<core::NameRef>
-    requires;
+    std::vector<core::NameRef> requires;
 
     std::string toString(const core::GlobalState &gs) const;
     std::string toMsgpack(core::Context ctx, int version);

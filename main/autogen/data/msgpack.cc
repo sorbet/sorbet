@@ -187,6 +187,9 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
             case Definition::Type::Alias:
                 str = "alias";
                 break;
+            case Definition::Type::Method:
+                str = "method";
+                break;
             default:
                 str = sym.show(ctx);
         }
@@ -235,6 +238,7 @@ const map<int, vector<string>> MsgpackWriter::refAttrMap{
             "resolved",
             "is_defining_ref",
             "parent_of",
+            "called_method"
         },
     },
 };

@@ -34,3 +34,4 @@ gems/sorbet-runtime/Gemfile.lock
 
 # clangd caches data in this folder.
 /.clangd
+Dockerfile
