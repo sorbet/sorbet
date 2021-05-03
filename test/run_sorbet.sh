@@ -72,7 +72,7 @@ fi
 if [ -z "$debug" ]; then
   command=( "bazel-bin/main/sorbet" )
 else
-  command=( "lldb" "--" "./bazel-bin/main/sorbet" )
+  command=( "${LLDB:-lldb}" "--" "./bazel-bin/main/sorbet" )
 fi
 
 command=( "${command[@]}" --silence-dev-message "--llvm-ir-folder=$llvmir" \
