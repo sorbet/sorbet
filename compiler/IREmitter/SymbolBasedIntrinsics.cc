@@ -334,38 +334,35 @@ public:
         ENFORCE(litMethodKind.literalKind == core::LiteralType::LiteralTypeKind::Symbol);
         auto methodKind = litMethodKind.asName(cs);
 
-        switch (methodKind.rawId()) {
-            case core::Names::attrReader().rawId(): {
-                const char *payloadFuncName = isSelf ? "sorbet_defineIvarMethodSingleton" : "sorbet_defineIvarMethod";
-                auto payloadFunc = cs.getFunction(payloadFuncName);
+        auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
+        if (ownerSym == core::Symbols::Object() && !isSelf) {
+            // TODO Figure out if this speicial case is right
+            lookupSym = core::Symbols::Object();
+        }
+        auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
+        ENFORCE(funcSym.exists());
+        ENFORCE(funcSym.data(cs)->isMethod());
 
-                builder.CreateCall(payloadFunc, {klass, name});
-                break;
-            }
-            case core::Names::normal().rawId(): {
-                auto lookupSym = isSelf ? ownerSym : ownerSym.data(cs)->attachedClass(cs);
-                if (ownerSym == core::Symbols::Object() && !isSelf) {
-                    // TODO Figure out if this speicial case is right
-                    lookupSym = core::Symbols::Object();
-                }
-                auto funcSym = lookupSym.data(cs)->findMember(cs, funcNameRef);
-                ENFORCE(funcSym.exists());
-                ENFORCE(funcSym.data(cs)->isMethod());
+        if (methodKind == core::Names::attrReader() && !funcSym.data(cs)->isFinalMethod()) {
+            const char *payloadFuncName = isSelf ? "sorbet_defineIvarMethodSingleton" : "sorbet_defineIvarMethod";
+            auto payloadFunc = cs.getFunction(payloadFuncName);
 
-                auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
-                auto *stackFrameVar = Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, funcSym);
-                auto *stackFrame = builder.CreateLoad(stackFrameVar, "stackFrame");
+            builder.CreateCall(payloadFunc, {klass, name});
+        } else {
+            ENFORCE(methodKind == core::Names::normal() ||
+                        (methodKind == core::Names::attrReader() && funcSym.data(cs)->isFinalMethod()),
+                    "Unknown method kind: {}", methodKind.show(cs));
 
-                const char *payloadFuncName = isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod";
-                auto rubyFunc = cs.getFunction(payloadFuncName);
-                auto *paramInfo = buildParamInfo(cs, builder, mcctx.irctx, funcSym, mcctx.rubyBlockId);
-                builder.CreateCall(rubyFunc, {klass, name, funcHandle, paramInfo, stackFrame});
+            auto funcHandle = IREmitterHelpers::getOrCreateFunction(cs, funcSym);
+            auto *stackFrameVar = Payload::rubyStackFrameVar(cs, builder, mcctx.irctx, funcSym);
+            auto *stackFrame = builder.CreateLoad(stackFrameVar, "stackFrame");
 
-                builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
-                break;
-            }
-            default:
-                Exception::raise("Unknown method kind: {}", methodKind.show(cs));
+            const char *payloadFuncName = isSelf ? "sorbet_defineMethodSingleton" : "sorbet_defineMethod";
+            auto rubyFunc = cs.getFunction(payloadFuncName);
+            auto *paramInfo = buildParamInfo(cs, builder, mcctx.irctx, funcSym, mcctx.rubyBlockId);
+            builder.CreateCall(rubyFunc, {klass, name, funcHandle, paramInfo, stackFrame});
+
+            builder.CreateCall(IREmitterHelpers::getInitFunction(cs, funcSym), {});
         }
 
         // Return the symbol of the method name even if we don't emit a definition. This will be a problem if there are

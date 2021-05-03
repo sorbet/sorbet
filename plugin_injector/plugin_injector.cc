@@ -187,7 +187,7 @@ public:
 
         // This method will be handled as a VM_METHOD_TYPE_IVAR method by the
         // standard VM mechanisms, so we don't need to generate code for it.
-        if (md.flags.isAttrReader) {
+        if (md.flags.isAttrReader && !md.symbol.data(gs)->isFinalMethod()) {
             return;
         }
 
