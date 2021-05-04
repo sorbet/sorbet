@@ -3,8 +3,22 @@
 set -euo pipefail
 
 # ---- Option parsing ----
-branch="${1:-master}"
-sorbet_repo="${2:-$HOME/stripe/sorbet}"
+branch_default=master
+branch="${1:-$branch_default}"
+sorbet_repo_default=$HOME/stripe/sorbet
+sorbet_repo="${2:-$sorbet_repo_default}"
+
+case "$branch" in
+  -h|--help)
+    echo "Usage:"
+    echo "  $0 [<branch> [<repo>]]"
+    echo ""
+    echo "Arguments:"
+    echo "  <branch>    Branch to bump to [default: $branch_default]"
+    echo "  <repo>      Where Sorbet is [default: $sorbet_repo_default]"
+    exit
+    ;;
+esac
 
 # Fetch the sha for the branch given
 fetch_branch_sha() {
