@@ -268,10 +268,10 @@ public:
         size_t minSize = std::min(pkgName.size(), nameParts.size());
         if (!skipCheck && rootConsts == 0 &&
             !std::equal(pkgName.begin(), pkgName.begin() + minSize, nameParts.begin(), nameParts.begin() + minSize)) {
-            if (auto e =
-                    ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                e.setHeader("Class or method definition must match enclosing package namespace `{}`",
-                        fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx);} ));
+            if (auto e = ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                e.setHeader(
+                    "Class or method definition must match enclosing package namespace `{}`",
+                    fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
             }
         }
         return tree;
@@ -297,10 +297,10 @@ public:
             size_t minSize = std::min(pkgName.size(), nameParts.size());
             if (rootConsts == 0 &&
                 !std::equal(pkgName.begin(), pkgName.end(), nameParts.begin(), nameParts.begin() + minSize)) {
-                if (auto e =
-                        ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
                     e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
-                        fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx);} ));
+                                fmt::map_join(pkgName.begin(), pkgName.end(),
+                                              "::", [&](const auto &nr) { return nr.show(ctx); }));
                 }
             }
         }
@@ -588,10 +588,14 @@ public:
 class ImportTreeBuilder {
 public:
     static void addImport(core::Context, ImportTree *root, const FullyQualifiedName &fqn, const PackageInfo &package);
+    static ast::ExpressionPtr makeModule(core::Context, ImportTree *root, core::NameRef);
+
+private:
     static ast::ExpressionPtr makeModule(core::Context, ImportTree *root, vector<core::NameRef> &parts, core::NameRef);
 };
 
-void ImportTreeBuilder::addImport(core::Context ctx, ImportTree *root, const FullyQualifiedName &fqn, const PackageInfo &package) {
+void ImportTreeBuilder::addImport(core::Context ctx, ImportTree *root, const FullyQualifiedName &fqn,
+                                  const PackageInfo &package) {
     ImportTree *node = root;
     for (auto nameRef : fqn.parts) {
         auto &child = node->children[nameRef];
@@ -640,6 +644,11 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope,
         lastConstLit->scope = move(scopeToPrepend);
         return scope;
     }
+}
+
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, core::NameRef todo) {
+    vector<core::NameRef> parts;
+    return makeModule(ctx, root, parts, todo);
 }
 
 ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, vector<core::NameRef> &parts,
@@ -734,9 +743,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 //                                               std::move(exportedItemsCopy)));
             }
         }
-        vector<core::NameRef> parts; // TODO bad api
-        importedPackages.emplace_back(
-            ImportTreeBuilder::makeModule(ctx, &importTree, parts, package->name.mangledName));
+        importedPackages.emplace_back(ImportTreeBuilder::makeModule(ctx, &importTree, package->name.mangledName));
     }
 
     auto packageNamespace =
