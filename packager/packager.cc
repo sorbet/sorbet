@@ -572,6 +572,7 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
 
 class ImportTree {
 public:
+    // Invariant: a tree node may only have `children` XOR `srcPackageMangledName`.
     UnorderedMap<core::NameRef, std::unique_ptr<ImportTree>> children;
     core::NameRef srcPackageMangledName;
 
@@ -586,24 +587,37 @@ public:
 
 class ImportTreeBuilder {
 public:
-    static void addImport(ImportTree *root, const FullyQualifiedName &fqn, const PackageInfo &package);
+    static void addImport(core::Context, ImportTree *root, const FullyQualifiedName &fqn, const PackageInfo &package);
     static ast::ExpressionPtr makeModule(core::Context, ImportTree *root, vector<core::NameRef> &parts, core::NameRef);
 };
 
-void ImportTreeBuilder::addImport(ImportTree *root, const FullyQualifiedName &fqn, const PackageInfo &package) {
+void ImportTreeBuilder::addImport(core::Context ctx, ImportTree *root, const FullyQualifiedName &fqn, const PackageInfo &package) {
     ImportTree *node = root;
     for (auto nameRef : fqn.parts) {
         auto &child = node->children[nameRef];
         if (!child) {
             child = make_unique<ImportTree>();
-        } else {
-            // TODO handle naming conflicts
-            ENFORCE(!child->srcPackageMangledName.exists());
+        } else if (child->srcPackageMangledName.exists()) {
+            // This node already has a definition attached to it. It may not be the prefix of a
+            // deeper node. For example:
+            // import A::B
+            // import A::B::C <-- ERR
+            if (auto e = ctx.beginError(fqn.loc.offsets(), core::errors::Packager::ImportConflict)) {
+                e.setHeader("TODO TODO");
+            }
         }
         node = child.get();
     }
     node->srcPackageMangledName = package.name.mangledName;
-    ENFORCE(node->children.empty()); // TODO naming conflicts
+    if (!node->children.empty()) {
+        // Attempting to attach a definition to a node that already has child nodes. Similar error
+        // as above when import ordering is reversed. For example:
+        // import A::B::C
+        // import A::B <-- ERR
+        if (auto e = ctx.beginError(fqn.loc.offsets(), core::errors::Packager::ImportConflict)) {
+            e.setHeader("TODO TODO");
+        }
+    }
 }
 
 ast::ExpressionPtr prependName(ast::ExpressionPtr scope,
@@ -702,7 +716,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
             } else {
                 importedNames[imported.mangledName] = imported.loc;
                 for (auto &ex : importedPackage->exports) {
-                    ImportTreeBuilder::addImport(&importTree, ex, *importedPackage);
+                    ImportTreeBuilder::addImport(ctx, &importTree, ex, *importedPackage);
                 }
                 // foos.emplace_back({importedPackage
 
