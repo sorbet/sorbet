@@ -81,7 +81,7 @@ echo
 info "Building Ruby..."
 
 if [ -n "$debug" ]; then
-  ./bazel build @sorbet_ruby_2_7//:ruby --config dbg
+  ./bazel build @sorbet_ruby_2_7//:ruby --config dbg --config=static-libs
   command=("${LLDB:-lldb}" "--" "${ruby}")
 else
   ./bazel build @sorbet_ruby_2_7//:ruby -c opt

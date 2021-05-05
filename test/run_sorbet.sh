@@ -64,7 +64,7 @@ fi
 echo
 info "Building SorbetLLVM..."
 if [ -n "$debug" ]; then
-  ./bazel build //main:sorbet --config dbg
+  ./bazel build //main:sorbet --config dbg --config=static-libs
 else
   ./bazel build //main:sorbet -c opt
 fi
