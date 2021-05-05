@@ -170,7 +170,7 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
     err = assert_raises(RuntimeError) do
       klass.new.foo
     end
-    assert_includes(err.message, "Incompatible return type in implementation of method")
+    assert_includes(err.message, "Incompatible return type in signature for implementation of method")
   end
 
 end
