@@ -35,6 +35,9 @@ gems/sorbet-runtime/Gemfile.lock
 # Used by tools/scripts/run_benchmarks.sh
 /tmp
 
+# Used by tools/scripts/ll-view.sh
+/ll-view.out
+
 compiler/IREmitter/Intrinsics/PayloadIntrinsics.c
 compiler/IREmitter/Intrinsics/PayloadIntrinsics.formatted.c
 compiler/IREmitter/Intrinsics/WrappedIntrinsics.h
