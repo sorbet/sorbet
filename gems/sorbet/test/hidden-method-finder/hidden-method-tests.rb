@@ -20,8 +20,8 @@ TEST_CASES = [
 
 class Sorbet::Private::HiddenMethodFinder::Test::Simple < MiniTest::Spec
   TEST_CASES.each do |path|
-
     it "works on the #{path} example" do
+
       Dir.mktmpdir do |dir|
         FileUtils.cp_r(File.join(__dir__, path), dir)
         olddir = __dir__
