@@ -1912,6 +1912,18 @@ class C3
   X = ::T.let(nil, ::T.untyped)
 end
 
+class C4
+  def m_five(); end
+
+  def m_six(); end
+end
+
+class C5
+  def self.m_eight(); end
+
+  def self.m_seven(); end
+end
+
 class Class
   def json_creatable?(); end
 end

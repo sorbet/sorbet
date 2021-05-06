@@ -20,8 +20,8 @@ TEST_CASES = [
 
 class Sorbet::Private::HiddenMethodFinder::Test::Simple < MiniTest::Spec
   TEST_CASES.each do |path|
-    it "works on the #{path} example" do
 
+    it "works on the #{path} example" do
       Dir.mktmpdir do |dir|
         FileUtils.cp_r(File.join(__dir__, path), dir)
         olddir = __dir__
@@ -56,7 +56,7 @@ class Sorbet::Private::HiddenMethodFinder::Test::Simple < MiniTest::Spec
             # we also might expect some substring to definitely /not/ appear in hidden.rbi
             elsif exp["assertion"] == "omits"
               refute_match(exp["substring"], hidden)
-            # we should also fail loudly if someone mistypeed one of the assertions
+            # we should also fail loudly if someone mistyped one of the assertions
             else
               assert(false, "Unknown assertion: #{exp['assertion']}")
             end
