@@ -13,3 +13,8 @@ end
 
 class C3; end
 C3.const_set('X', 5)
+
+C4 = Class.new do
+  define_method(:m_five) do; end
+  alias_method(:m_six, :m_five)
+end
