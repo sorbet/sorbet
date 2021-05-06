@@ -12,7 +12,7 @@ cc_library(
     deps = [
         "@com_stripe_ruby_typer//common",
         "@com_stripe_ruby_typer//core",
-        "@llvm//:core",
+        "@llvm//:Core",
         "@spdlog",
     ],
 )

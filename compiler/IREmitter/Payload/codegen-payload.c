@@ -1293,22 +1293,27 @@ VALUE sorbet_callIntrinsicInlineBlock(VALUE (*body)(VALUE), VALUE recv, ID fun, 
     return rb_iterate(body, (VALUE)&env, blk, closure);
 }
 
+SORBET_INLINE
 unsigned int sorbet_vmCallKwarg() {
     return VM_CALL_KWARG;
 }
 
+SORBET_INLINE
 unsigned int sorbet_vmCallArgsSimple() {
     return VM_CALL_ARGS_SIMPLE;
 }
 
+SORBET_INLINE
 unsigned int sorbet_vmCallArgsSplat() {
     return VM_CALL_ARGS_SPLAT;
 }
 
+SORBET_INLINE
 unsigned int sorbet_vmCallKwSplat() {
     return VM_CALL_KW_SPLAT;
 }
 
+SORBET_INLINE
 unsigned int sorbet_vmCallFCall() {
     return VM_CALL_FCALL;
 }

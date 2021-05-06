@@ -4,6 +4,7 @@
 #include "llvm/Analysis/TargetLibraryInfo.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/Analysis/TypeBasedAliasAnalysis.h"
+#include "llvm/CodeGen/CommandFlags.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/IRPrintingPasses.h"
@@ -61,7 +62,7 @@ bool outputObjectFile(spdlog::logger &logger, llvm::legacy::PassManager &pm, con
         return false;
     }
 
-    auto fileType = llvm::LLVMTargetMachine::CGFT_ObjectFile;
+    auto fileType = llvm::CGFT_ObjectFile;
 
     if (targetMachine->addPassesToEmitFile(pm, dest, nullptr, fileType, !debug_mode)) {
         llvm::errs() << "TheTargetMachine can't emit a file of this type";
@@ -161,7 +162,12 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createLoopVectorizePass(false, false));
     pm.add(llvm::createLoopLoadEliminationPass());
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
-    pm.add(llvm::createCFGSimplificationPass(1, true, true, false, true));
+    // pm.add(llvm::createCFGSimplificationPass(1, true, true, false, true));
+    pm.add(llvm::createCFGSimplificationPass(llvm::SimplifyCFGOptions()
+                                                 .forwardSwitchCondToPhi(true)
+                                                 .convertSwitchToLookupTable(true)
+                                                 .needCanonicalLoops(false)
+                                                 .sinkCommonInsts(true)));
     pm.add(llvm::createSLPVectorizerPass());
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
     pm.add(llvm::createLoopUnrollPass(2, false, false));
@@ -319,6 +325,10 @@ void ObjectFileEmitter::init() {
 
 bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, unique_ptr<llvm::Module> module,
                             string_view dir, string_view objectName) {
+    // We need to ensure that the codegen flags have been initialized, so that InitTargetOptionsFromCodeGenFlags has
+    // sane defaults to use.
+    static llvm::codegen::RegisterCodeGenFlags codeGenFlags;
+
     /* setup target */
     std::string error;
     auto targetTriple = llvm::sys::getDefaultTargetTriple();
@@ -336,7 +346,7 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
                           // mac and thus brings us closer to their assembly
     auto features = "";
 
-    llvm::TargetOptions opt;
+    auto opt = llvm::codegen::InitTargetOptionsFromCodeGenFlags(llvm::Triple(targetTriple));
     auto relocationModel = llvm::Optional<llvm::Reloc::Model>(llvm::Reloc::PIC_);
     auto targetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, relocationModel);
     ENFORCE(targetMachine);

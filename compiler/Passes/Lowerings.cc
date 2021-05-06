@@ -140,7 +140,7 @@ public:
 
         auto splitPoint = builder.CreateLoad(guardedConstDeclaration);
         builder.CreateIntrinsic(
-            llvm::Intrinsic::ID::assume, {},
+            llvm::Intrinsic::IndependentIntrinsics::assume, {},
             {builder.CreateICmpEQ(builder.CreateLoad(guardEpochDeclaration),
                                   builder.CreateCall(module.getFunction("sorbet_getConstantEpoch")), "guardUpdated")}
 

@@ -71,6 +71,10 @@ payload_files = [
         "-g",
         "-fPIC",
         "-march=x86-64",
+
+        # The definition of id_intern in ruby.h triggers this warning, and it's
+        # pretty noisy.
+        "-Wno-compound-token-split-by-macro",
     ],
     # disable opt flags, as they add `-ffunction-sections` and `-fdata-sections`
     # See https://github.com/bazelbuild/bazel/issues/8706 for why `nocopts` is gone

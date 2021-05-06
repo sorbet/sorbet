@@ -297,7 +297,7 @@ public:
                 auto ret = new llvm::GlobalVariable(*mcctx.cs.module, tp, false, llvm::GlobalVariable::InternalLinkage,
                                                     zero, rawName);
                 ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-                ret->setAlignment(8);
+                ret->setAlignment(llvm::MaybeAlign(8));
 
                 auto voidTy = llvm::Type::getVoidTy(mcctx.cs);
                 std::vector<llvm::Type *> NoArgs(0, voidTy);

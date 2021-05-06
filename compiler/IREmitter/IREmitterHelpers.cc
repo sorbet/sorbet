@@ -906,7 +906,7 @@ void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &buil
         column = start.column;
     }
 
-    builder.SetCurrentDebugLocation(llvm::DebugLoc::get(line, column, scope));
+    builder.SetCurrentDebugLocation(llvm::DILocation::get(cs, line, column, scope));
 }
 
 void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,

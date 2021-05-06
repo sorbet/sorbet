@@ -60,8 +60,8 @@ def gentbl(name, tblgen, td_file, td_srcs, tbl_outs, library = True, **kwargs):
             tools = [tblgen],
             message = "Generating code from table: %s" % td_file,
             cmd = (("$(location %s) " + "-I external/llvm/include " +
-                    "-I external/llvm/tools/clang/include " +
-                    "-I $$(dirname $(location %s)) " + "%s $(location %s) -o $@") % (
+                    "-I $$(dirname $(location %s)) " + ("%s $(location %s) --long-string-literals=0 " +
+                                                        "-o $@")) % (
                 tblgen,
                 td_file,
                 opts,
@@ -102,7 +102,7 @@ def _quote(s):
       command.
     """
     return ('"' +
-            s.replace("\\", "\\\\").replace("$", "\\$").replace('"', '\\"') +
+            s.replace("\\", "\\\\").replace("$", "\\$").replace('"', "\\\"") +
             '"')
 
 def cmake_var_string(cmake_vars):
@@ -141,11 +141,7 @@ def expand_cmake_vars(name, src, dst, cmake_vars):
         srcs = [src],
         tools = [expand_cmake_vars_tool],
         outs = [dst],
-        # Work around this issue: https://github.com/bazelbuild/bazel/issues/8685
-        # TODO(jez) Delete python3 if ^ this issue is resolved.
-        # tl;dr: Bazel hardcodes searching for `python` on the PATH in a py_binary wrapper script.
-        # Ubuntu 20.04 has removed `python` from the PATH in favor of `python3`.
-        cmd = ("python3 $(location {}) ".format(expand_cmake_vars_tool) + cmake_vars +
+        cmd = ("$(location {}) ".format(expand_cmake_vars_tool) + cmake_vars +
                "< $< > $@"),
     )
 
@@ -194,6 +190,7 @@ posix_cmake_vars = {
     "HAVE_PTHREAD_H": 1,
     "HAVE_SIGNAL_H": 1,
     "HAVE_STDINT_H": 1,
+    "HAVE_SYSEXITS_H": 1,
     "HAVE_SYS_IOCTL_H": 1,
     "HAVE_SYS_MMAN_H": 1,
     "HAVE_SYS_PARAM_H": 1,
@@ -296,11 +293,6 @@ win32_cmake_vars = {
 
     # LLVM features
     "LTDL_SHLIB_EXT": ".dll",
-
-    # ThreadPoolExecutor global destructor and thread handshaking do not work
-    # on this platform when used as a DLL.
-    # See: https://github.com/google/iree/issues/114
-    "LLVM_ENABLE_THREADS": 0,
 }
 
 # Select a set of CMake variables based on the platform.
@@ -329,9 +321,7 @@ llvm_linkopts = select({
     "//conditions:default": ["-ldl", "-lm", "-lpthread"],
 })
 
-llvm_defines = select({
-    "//conditions:default": [],
-}) + [
+llvm_defines = [
     "LLVM_ENABLE_STATS",
     "__STDC_LIMIT_MACROS",
     "__STDC_CONSTANT_MACROS",
@@ -339,9 +329,13 @@ llvm_defines = select({
     "LLVM_BUILD_GLOBAL_ISEL",
 ]
 
-llvm_copts = select({
-    "//conditions:default": ["-fno-lto"],  # don't compile llvm with lto. It's too slow to compile and not worth it
-})
+llvm_copts = [
+    "-Wno-error=implicit-fallthrough",
+    "-Wno-error=range-loop-construct",
+
+    # don't compile llvm with lto. It's too slow to compile and not worth it
+    "-fno-lto",
+]
 
 # Platform specific sources for libSupport.
 

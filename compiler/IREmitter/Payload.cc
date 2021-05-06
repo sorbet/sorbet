@@ -21,8 +21,8 @@ llvm::IRBuilder<> &builderCast(llvm::IRBuilderBase &builder) {
 
 llvm::Value *Payload::setExpectedBool(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *value,
                                       bool expected) {
-    return builderCast(builder).CreateIntrinsic(llvm::Intrinsic::ID::expect, {llvm::Type::getInt1Ty(cs)},
-                                                {value, builder.getInt1(expected)});
+    return builderCast(builder).CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::expect,
+                                                {llvm::Type::getInt1Ty(cs)}, {value, builder.getInt1(expected)});
 }
 
 void Payload::boxRawValue(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::AllocaInst *target,
@@ -87,7 +87,7 @@ llvm::Value *Payload::cPtrToRubyRegexp(CompilerState &cs, llvm::IRBuilderBase &b
         auto ret =
             new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(8);
+        ret->setAlignment(llvm::MaybeAlign(8));
         // create constructor
         std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
         auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
@@ -145,7 +145,7 @@ llvm::Value *Payload::cPtrToRubyString(CompilerState &cs, llvm::IRBuilderBase &b
         auto ret =
             new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(8);
+        ret->setAlignment(llvm::MaybeAlign(8));
         // create constructor
         std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
         auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
@@ -195,7 +195,7 @@ llvm::Value *Payload::idIntern(CompilerState &cs, llvm::IRBuilderBase &build, st
         auto ret =
             new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, zero, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(8);
+        ret->setAlignment(llvm::MaybeAlign(8));
         // create constructor
         std::vector<llvm::Type *> NoArgs(0, llvm::Type::getVoidTy(cs));
         auto ft = llvm::FunctionType::get(llvm::Type::getVoidTy(cs), NoArgs, false);
@@ -260,7 +260,7 @@ llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuil
                 new llvm::GlobalVariable(*cs.module, builder.getInt8PtrTy(), true,
                                          llvm::GlobalVariable::InternalLinkage, addrGlobalInitializer, globalName);
             addrGlobal->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-            addrGlobal->setAlignment(8);
+            addrGlobal->setAlignment(llvm::MaybeAlign(8));
 
             return addrGlobal;
         }));
@@ -435,7 +435,7 @@ llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &build, const IR
 }
 
 llvm::PointerType *iseqType(CompilerState &cs) {
-    return llvm::PointerType::getUnqual(cs.module->getTypeByName("struct.rb_iseq_struct"));
+    return llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(cs, "struct.rb_iseq_struct"));
 }
 
 std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
@@ -645,7 +645,7 @@ llvm::GlobalVariable *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &
         auto ret =
             new llvm::GlobalVariable(*cs.module, tp, false, llvm::GlobalVariable::InternalLinkage, nullptr, rawName);
         ret->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-        ret->setAlignment(8);
+        ret->setAlignment(llvm::MaybeAlign(8));
 
         return ret;
     }));
@@ -810,7 +810,7 @@ llvm::Value *indexForLocalVariable(CompilerState &cs, const IREmitterContext &ir
 }
 
 llvm::Value *buildInstanceVariableCache(CompilerState &cs, std::string_view name) {
-    auto *cacheTy = cs.module->getTypeByName("struct.iseq_inline_iv_cache_entry");
+    auto *cacheTy = llvm::StructType::getTypeByName(cs, "struct.iseq_inline_iv_cache_entry");
     ENFORCE(cacheTy != nullptr);
     auto *zero = llvm::ConstantAggregateZero::get(cacheTy);
     // No special initialization necessary, unlike function inline caches.

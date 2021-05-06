@@ -3,6 +3,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
+#include "llvm/Support/Host.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
 #include "absl/strings/str_split.h"
@@ -226,7 +227,7 @@ public:
                 module->addModuleFlag(llvm::Module::Warning, "Dwarf Version", 2);
             }
 
-            debug = llvm::make_unique<llvm::DIBuilder>(*module);
+            debug = std::make_unique<llvm::DIBuilder>(*module);
 
             // NOTE: we use C here because our generated functions follow its abi
             auto language = llvm::dwarf::DW_LANG_C;

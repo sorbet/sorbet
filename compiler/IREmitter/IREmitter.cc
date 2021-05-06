@@ -48,7 +48,7 @@ vector<core::ArgInfo::ArgFlags> getArgFlagsForBlockId(CompilerState &cs, int blo
 
 void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitterContext &irctx,
                      llvm::IRBuilderBase &build, int rubyBlockId) {
-    llvm::IRBuilder<> builder = static_cast<llvm::IRBuilder<> &>(build);
+    llvm::IRBuilder<> &builder = static_cast<llvm::IRBuilder<> &>(build);
 
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:

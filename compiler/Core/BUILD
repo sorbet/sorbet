@@ -12,8 +12,9 @@ cc_library(
     deps = [
         "//compiler/Errors",
         "@com_stripe_ruby_typer//core",
-        "@llvm//:passes",
-        "@llvm//:x86_asm_parser",
-        "@llvm//:x86_code_gen",
+        "@llvm//:Passes",
+        "@llvm//:TextAPI",
+        "@llvm//:X86AsmParser",
+        "@llvm//:X86CodeGen",
     ],
 )

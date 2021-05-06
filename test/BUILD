@@ -70,8 +70,13 @@ sh_binary(
 sh_binary(
     name = "validate_exp",
     srcs = ["validate_exp.sh"],
+    data = [
+        "diff-diff.rb",
+        "@sorbet_ruby_2_7//:ruby",
+    ],
     deps = [
         ":logging",
+        "@bazel_tools//tools/bash/runfiles",
     ],
 )
 
