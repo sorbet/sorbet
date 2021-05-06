@@ -473,7 +473,7 @@ struct PackageInfoFinder {
 
         fast_sort(exported, [](const auto &a, const auto &b) -> bool { return a.parts.size() < b.parts.size(); });
         // TODO this could be sped up
-        for (auto longer = exported.begin() + 1; longer != exported.end(); longer++) {
+        for (auto longer = exported.begin(); longer != exported.end(); longer++) {
             for (auto shorter = exported.begin(); shorter != longer; shorter++) {
                 if (std::equal(longer->parts.begin(), longer->parts.begin() + shorter->parts.size(),
                                shorter->parts.begin())) {
