@@ -372,9 +372,6 @@ class Sorbet::Private::HiddenMethodFinder
         next
       end
 
-      super_method = method.super_method
-      # next if super_method && T::AbstractUtils.abstract_method?(method) == T::AbstractUtils.abstract_method?(super_method)
-
       errors = capture_stderr do
         ret << maker.serialize_method(method, is_singleton, with_sig: false)
       end
