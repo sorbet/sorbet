@@ -234,8 +234,8 @@ ast::ExpressionPtr parts2literal(const vector<core::NameRef> &parts, core::LocOf
     return name;
 }
 
-ast::ExpressionPtr prependName(ast::ExpressionPtr scope,
-                               core::NameRef name) { // TODO duplicated code copied prependInternalPackageName
+// Prefix a constant referene with a name: `Foo::Bar` -> `<name>::Foo::Bar`
+ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef name) {
     // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
     ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
     if (lastConstLit != nullptr) {
@@ -649,7 +649,8 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
 
 ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, vector<core::NameRef> &parts,
                                                  core::NameRef todo) {
-    auto todoLoc = core::LocOffsets::none();
+    auto todoLoc = core::LocOffsets::none(); // TODO TODO real locs
+
     if (root->srcPackageMangledName.exists()) { // Assignment
         ENFORCE(root->children.empty());        // Must be a leaf node
         ENFORCE(!parts.empty());
