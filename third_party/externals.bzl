@@ -146,9 +146,9 @@ def register_sorbet_dependencies():
 
     http_archive(
         name = "com_google_absl",
-        urls = _github_public_urls("abseil/abseil-cpp/archive/62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08.zip"),
-        sha256 = "afcab9f226ac4ca6b6b7c9ec704a995fe32a6b555d6935b0de247ae6ac6940e0",
-        strip_prefix = "abseil-cpp-62f05b1f57ad660e9c09e02ce7d591dcc4d0ca08",
+        urls = _github_public_urls("abseil/abseil-cpp/archive/e9b9e38f67a008d66133535a72ada843bd66013f.zip"),
+        sha256 = "49c93740b3b09f73cd2f10da778ea4129d59733085393f458a4acd17774503fb",
+        strip_prefix = "abseil-cpp-e9b9e38f67a008d66133535a72ada843bd66013f",
     )
 
     http_archive(
@@ -166,9 +166,9 @@ package(default_visibility = ["//visibility:public"])
     # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain
     http_archive(
         name = "com_grail_bazel_toolchain",
-        urls = _github_public_urls("sorbet/bazel-toolchain/archive/0c3130d83ed918d7a51490ea4dd814cb2cc68a85.zip"),
-        sha256 = "4d23f1e8b6ec0e8f612d47ae6189eb00e01461c8ad37cc6c0a41c0e9d5727084",
-        strip_prefix = "bazel-toolchain-0c3130d83ed918d7a51490ea4dd814cb2cc68a85",
+        urls = _github_public_urls("sorbet/bazel-toolchain/archive/a685e1e6bd1e7cc9a5b84f832539585bb68d8ab4.zip"),
+        sha256 = "90c59f14cada755706a38bdd0f5ad8f0402cbf766387929cfbee9c3f1b4c82d7",
+        strip_prefix = "bazel-toolchain-a685e1e6bd1e7cc9a5b84f832539585bb68d8ab4",
     )
 
     http_archive(

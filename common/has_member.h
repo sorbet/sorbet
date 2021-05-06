@@ -41,27 +41,27 @@ template <class> struct sfinae_true : std::true_type {};
  * CALL_MEMBER_toString<core::NameRef>::call(name, gs); // calls name.toString(gs)
  * CALL_MEMBER_toString<int>::call(10, gs); // returns ""
  */
-#define GENERATE_CALL_MEMBER(method_name, default_behavior, arg_types...)               \
-    GENERATE_HAS_MEMBER(method_name, arg_types)                                         \
-    template <typename T, bool has> class CALL_MEMBER_impl_##method_name {              \
-    public:                                                                             \
-        template <class... Args> static decltype(auto) call(T &self, Args &&... args) { \
-            Exception::raise("should never be called");                                 \
-        };                                                                              \
-    };                                                                                  \
-    template <typename T> class CALL_MEMBER_impl_##method_name<T, true> {               \
-    public:                                                                             \
-        template <class... Args> static decltype(auto) call(T &self, Args &&... args) { \
-            return self.method_name(std::forward<Args>(args)...);                       \
-        };                                                                              \
-    };                                                                                  \
-    template <typename T> class CALL_MEMBER_impl_##method_name<T, false> {              \
-    public:                                                                             \
-        template <class... Args> static decltype(auto) call(T &self, Args &&... args) { \
-            default_behavior;                                                           \
-        };                                                                              \
-    };                                                                                  \
-    template <typename T>                                                               \
+#define GENERATE_CALL_MEMBER(method_name, default_behavior, arg_types...)              \
+    GENERATE_HAS_MEMBER(method_name, arg_types)                                        \
+    template <typename T, bool has> class CALL_MEMBER_impl_##method_name {             \
+    public:                                                                            \
+        template <class... Args> static decltype(auto) call(T &self, Args &&...args) { \
+            Exception::raise("should never be called");                                \
+        };                                                                             \
+    };                                                                                 \
+    template <typename T> class CALL_MEMBER_impl_##method_name<T, true> {              \
+    public:                                                                            \
+        template <class... Args> static decltype(auto) call(T &self, Args &&...args) { \
+            return self.method_name(std::forward<Args>(args)...);                      \
+        };                                                                             \
+    };                                                                                 \
+    template <typename T> class CALL_MEMBER_impl_##method_name<T, false> {             \
+    public:                                                                            \
+        template <class... Args> static decltype(auto) call(T &self, Args &&...args) { \
+            default_behavior;                                                          \
+        };                                                                             \
+    };                                                                                 \
+    template <typename T>                                                              \
     class CALL_MEMBER_##method_name : public CALL_MEMBER_impl_##method_name<T, HAS_MEMBER_##method_name<T>()> {};
 
 } // namespace sorbet

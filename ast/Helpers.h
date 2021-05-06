@@ -28,7 +28,7 @@ public:
         return Block(loc, std::move(body), std::move(args));
     }
 
-    template <typename... Args> static Send::ARGS_store SendArgs(Args &&... args) {
+    template <typename... Args> static Send::ARGS_store SendArgs(Args &&...args) {
         Send::ARGS_store store;
         (store.emplace_back(std::forward<Args>(args)), ...);
         return store;

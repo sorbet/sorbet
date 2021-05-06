@@ -17,6 +17,8 @@
 #include "test/lsp/ProtocolTest.h"
 #include <sys/wait.h>
 
+#include <iostream> // for cerr
+
 namespace sorbet::test::lsp {
 using namespace std;
 using namespace sorbet::realmain::lsp;
