@@ -1,7 +1,7 @@
 # typed: true
 
 case foo; 
-        in {Foo: 42
+        in {a:
         }
-          false
+          true
       ; end

@@ -1,5 +1,5 @@
 s(:begin,
-  s(:in_match,
+  s(:match_pattern,
     s(:int, "1"),
     s(:array_pattern,
       s(:match_var, :a))),
