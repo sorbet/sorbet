@@ -234,6 +234,28 @@ ast::ExpressionPtr parts2literal(const vector<core::NameRef> &parts, core::LocOf
     return name;
 }
 
+ast::ExpressionPtr prependName(ast::ExpressionPtr scope,
+                               core::NameRef name) { // TODO duplicated code copied prependInternalPackageName
+    // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
+    ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
+    if (lastConstLit != nullptr) {
+        while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
+            lastConstLit = constLit;
+        }
+    }
+
+    // If `lastConstLit` is `nullptr`, then `scope` should be EmptyTree.
+    ENFORCE(lastConstLit != nullptr || ast::cast_tree<ast::EmptyTree>(scope) != nullptr);
+
+    auto scopeToPrepend = name2Expr(name, name2Expr(core::Names::Constants::PackageRegistry()));
+    if (lastConstLit == nullptr) {
+        return scopeToPrepend;
+    } else {
+        lastConstLit->scope = move(scopeToPrepend);
+        return scope;
+    }
+}
+
 ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameRef fun, ast::ExpressionPtr &expr) {
     auto target = ast::cast_tree<ast::UnresolvedConstantLit>(expr);
     if (target == nullptr) {
@@ -428,26 +450,7 @@ struct PackageInfoFinder {
 
     // Bar::Baz => <PackageRegistry>::Foo_Package::Bar::Baz
     ast::ExpressionPtr prependInternalPackageName(ast::ExpressionPtr scope) {
-        ENFORCE(info != nullptr);
-        // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
-        ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
-        if (lastConstLit != nullptr) {
-            while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
-                lastConstLit = constLit;
-            }
-        }
-
-        // If `lastConstLit` is `nullptr`, then `scope` should be EmptyTree.
-        ENFORCE(lastConstLit != nullptr || ast::cast_tree<ast::EmptyTree>(scope) != nullptr);
-
-        auto scopeToPrepend =
-            name2Expr(this->info->name.mangledName, name2Expr(core::Names::Constants::PackageRegistry()));
-        if (lastConstLit == nullptr) {
-            return scopeToPrepend;
-        } else {
-            lastConstLit->scope = move(scopeToPrepend);
-            return scope;
-        }
+        return prependName(move(scope), this->info->name.mangledName);
     }
 
     // Generates `exportModule`, which dependent packages copy to set up their namespaces.
@@ -472,7 +475,8 @@ struct PackageInfoFinder {
         // TODO this could be sped up
         for (auto longer = exported.begin() + 1; longer != exported.end(); longer++) {
             for (auto shorter = exported.begin(); shorter != longer; shorter++) {
-                if (std::equal(longer->parts.begin(), longer->parts.begin() + shorter->parts.size(), shorter->parts.begin())) {
+                if (std::equal(longer->parts.begin(), longer->parts.begin() + shorter->parts.size(),
+                               shorter->parts.begin())) {
                     if (auto e = ctx.beginError(longer->loc.offsets(), core::errors::Packager::ImportConflict)) {
                         e.setHeader("Exported names may not be prefixes of each other");
                         e.addErrorLine(shorter->loc, "Prefix exported here");
@@ -635,28 +639,6 @@ void ImportTreeBuilder::addImport(core::Context ctx, ImportTree *root, const Ful
         if (auto e = ctx.beginError(fqn.loc.offsets(), core::errors::Packager::ImportConflict)) {
             e.setHeader("TODO TODO");
         }
-    }
-}
-
-ast::ExpressionPtr prependName(ast::ExpressionPtr scope,
-                               core::NameRef name) { // TODO duplicated code copied prependInternalPackageName
-    // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
-    ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
-    if (lastConstLit != nullptr) {
-        while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
-            lastConstLit = constLit;
-        }
-    }
-
-    // If `lastConstLit` is `nullptr`, then `scope` should be EmptyTree.
-    ENFORCE(lastConstLit != nullptr || ast::cast_tree<ast::EmptyTree>(scope) != nullptr);
-
-    auto scopeToPrepend = name2Expr(name, name2Expr(core::Names::Constants::PackageRegistry()));
-    if (lastConstLit == nullptr) {
-        return scopeToPrepend;
-    } else {
-        lastConstLit->scope = move(scopeToPrepend);
-        return scope;
     }
 }
 
