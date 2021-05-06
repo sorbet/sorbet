@@ -18,3 +18,8 @@ C4 = Class.new do
   define_method(:m_five) do; end
   alias_method(:m_six, :m_five)
 end
+
+C5 = Class.new do
+  define_singleton_method(:m_seven) do; end
+  alias_method(:m_eight, :m_seven)
+end

@@ -6,5 +6,11 @@
   },
   {"assertion": "contains",
    "substring": "class C3\n  X = ::T.let(nil, ::T.untyped)"
+  },
+  {"assertion": "contains",
+   "substring": "class C4\n  def m_six()"
+  },
+  {"assertion": "contains",
+   "substring": "class C5\n  def self.m_eight()"
   }
 ]
