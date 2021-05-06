@@ -166,9 +166,9 @@ package(default_visibility = ["//visibility:public"])
     # NOTE: we use the sorbet branch for development to keep our changes rebasable on grailio/bazel-toolchain
     http_archive(
         name = "com_grail_bazel_toolchain",
-        urls = _github_public_urls("sorbet/bazel-toolchain/archive/0c3130d83ed918d7a51490ea4dd814cb2cc68a85.zip"),
-        sha256 = "4d23f1e8b6ec0e8f612d47ae6189eb00e01461c8ad37cc6c0a41c0e9d5727084",
-        strip_prefix = "bazel-toolchain-0c3130d83ed918d7a51490ea4dd814cb2cc68a85",
+        urls = _github_public_urls("sorbet/bazel-toolchain/archive/a685e1e6bd1e7cc9a5b84f832539585bb68d8ab4.zip"),
+        sha256 = "90c59f14cada755706a38bdd0f5ad8f0402cbf766387929cfbee9c3f1b4c82d7",
+        strip_prefix = "bazel-toolchain-a685e1e6bd1e7cc9a5b84f832539585bb68d8ab4",
     )
 
     http_archive(
