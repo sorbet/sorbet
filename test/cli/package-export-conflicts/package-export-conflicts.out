@@ -1,0 +1,14 @@
+__package.rb:5: Exported names may not be prefixes of each other https://srb.help/3714
+     5 |  export MyPackage::A::B
+                 ^^^^^^^^^^^^^^^
+    __package.rb:7: Prefix exported here
+     7 |  export MyPackage::A
+                 ^^^^^^^^^^^^
+
+__package.rb:6: Exported names may not be prefixes of each other https://srb.help/3714
+     6 |  export MyPackage::A::C
+                 ^^^^^^^^^^^^^^^
+    __package.rb:7: Prefix exported here
+     7 |  export MyPackage::A
+                 ^^^^^^^^^^^^
+Errors: 2
