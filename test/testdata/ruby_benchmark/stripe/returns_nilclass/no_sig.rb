@@ -2,20 +2,19 @@
 # typed: true
 # compiled: true
 
-class Main
-  extend T::Sig
-  sig {returns(NilClass).checked(:never)}
-  def self.main
-    nil
-  end
+extend T::Sig
+
+def returns_nilclass
+  nil
 end
 
 i = 0
 while i < 10_000_000
 
-  Main.main
+  self.returns_nilclass
 
   i += 1
 end
 
 puts i
+puts returns_nilclass
