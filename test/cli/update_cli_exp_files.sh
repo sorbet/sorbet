@@ -13,7 +13,7 @@ bazel build //test/cli:actual_cli > /dev/null 2>&1
 
 info "Updating exp files"
 
-if [[ -n "${EMIT_SYNCBACK}" ]]; then
+if [[ -n "${EMIT_SYNCBACK:-}" ]]; then
   echo '### BEGIN SYNCBACK ###'
 fi
 
@@ -30,7 +30,7 @@ bazel cquery 'filter("\.out$", deps("//test/cli:actual_cli", 1))' 2>/dev/null | 
     cp "bazel-bin/${target}" "${output}"
   done
 
-if [[ -n "${EMIT_SYNCBACK}" ]]; then
+if [[ -n "${EMIT_SYNCBACK:-}" ]]; then
   echo '### END SYNCBACK ###'
 fi
 
