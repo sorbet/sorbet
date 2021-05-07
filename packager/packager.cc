@@ -625,7 +625,7 @@ void ImportTreeBuilder::addImport(core::Context ctx, ImportTree *root, const Ful
             // import A::B
             // import A::B::C <-- ERR
             if (auto e = ctx.beginError(fqn.loc.offsets(), core::errors::Packager::ImportConflict)) {
-                e.setHeader("TODO TODO");
+                e.setHeader("TODO TODO A");
             }
         }
         node = child.get();
@@ -637,7 +637,7 @@ void ImportTreeBuilder::addImport(core::Context ctx, ImportTree *root, const Ful
         // import A::B::C
         // import A::B <-- ERR
         if (auto e = ctx.beginError(fqn.loc.offsets(), core::errors::Packager::ImportConflict)) {
-            e.setHeader("TODO TODO");
+            e.setHeader("TODO TODO B");
         }
     }
 }
@@ -652,9 +652,6 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
     auto todoLoc = core::LocOffsets::none(); // TODO TODO real locs
 
     if (root->srcPackageMangledName.exists()) { // Assignment
-        ENFORCE(root->children.empty());        // Must be a leaf node
-        ENFORCE(!parts.empty());
-
         auto rhs = prependName(parts2literal(parts, todoLoc), root->srcPackageMangledName);
         return ast::MK::Assign(todoLoc, name2Expr(parts.back()), std::move(rhs));
     }
