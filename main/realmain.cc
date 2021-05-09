@@ -239,11 +239,11 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 AutogenResult::Serialized serialized;
                 if (opts.print.Autogen.enabled) {
                     Timer timeit(logger, "autogenToString");
-                    serialized.strval = pf.toString(ctx);
+                    serialized.strval = pf.toString(ctx, opts.autogenIncludeMethods);
                 }
                 if (opts.print.AutogenMsgPack.enabled) {
                     Timer timeit(logger, "autogenToMsgpack");
-                    serialized.msgpack = pf.toMsgpack(ctx, opts.autogenVersion);
+                    serialized.msgpack = pf.toMsgpack(ctx, opts.autogenVersion, opts.autogenIncludeMethods);
                 }
                 if (opts.print.AutogenClasslist.enabled) {
                     Timer timeit(logger, "autogenClasslist");

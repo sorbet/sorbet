@@ -87,7 +87,7 @@ void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition
     mpack_finish_array(&writer);
 }
 
-void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &ref) {
+void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &ref, bool autogenIncludeMethods) {
     mpack_start_array(&writer, refAttrs[version].size());
 
     // scope
@@ -121,6 +121,12 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
 
     // parent_of
     packDefinitionRef(ref.parent_of);
+
+    // method call
+    if (autogenIncludeMethods && !ref.called_method.empty()) {
+        packNames(ref.called_method.nameParts);
+    }
+
     mpack_finish_array(&writer);
 }
 
@@ -129,7 +135,7 @@ MsgpackWriter::MsgpackWriter(int version)
     : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)),
       symbols(4) {}
 
-string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
+string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, bool autogenIncludeMethods) {
     char *data;
     size_t size;
     mpack_writer_init_growable(&writer, &data, &size);
@@ -148,13 +154,16 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
 
     mpack_start_array(&writer, pf.defs.size());
     for (auto &def : pf.defs) {
+        if (def.type == Definition::Type::Method && !autogenIncludeMethods) {
+            continue;
+        }
         packDefinition(ctx, pf, def);
     }
 
     mpack_finish_array(&writer);
     mpack_start_array(&writer, pf.refs.size());
     for (auto &ref : pf.refs) {
-        packReference(ctx, pf, ref);
+        packReference(ctx, pf, ref, autogenIncludeMethods);
     }
     mpack_finish_array(&writer);
     mpack_finish_array(&writer);
@@ -228,7 +237,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
 
 const map<int, vector<string>> MsgpackWriter::refAttrMap{
     {
-        2,
+        3,
         {
             "scope",
             "name",

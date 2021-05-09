@@ -71,7 +71,7 @@ QualifiedName ParsedFile::showQualifiedName(const core::GlobalState &gs, Definit
 }
 
 // Pretty-print a `ParsedFile`, including all definitions and references and the pieces of metadata associated with them
-string ParsedFile::toString(const core::GlobalState &gs) const {
+string ParsedFile::toString(const core::GlobalState &gs, bool autogenIncludeMethods) const {
     fmt::memory_buffer out;
     auto nameToString = [&](const auto &nm) -> string { return nm.show(gs); };
 
@@ -83,6 +83,10 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
 
     for (auto &def : defs) {
         string_view type;
+        if (def.type == Definition::Type::Method && !autogenIncludeMethods) {
+            continue;
+        }
+
         switch (def.type) {
             case Definition::Type::Module:
                 type = "module"sv;
@@ -147,7 +151,7 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
                        fmt::map_join(ref.resolved.nameParts, " ", nameToString), ref.loc.filePosToString(gs),
                        (int)ref.is_defining_ref);
 
-        if (!ref.called_method.empty()) {
+        if (!ref.called_method.empty() && autogenIncludeMethods) {
             fmt::format_to(out, " called_method=[{}]\n", fmt::map_join(ref.called_method.nameParts, " ", nameToString));
         }
 
@@ -177,9 +181,9 @@ vector<string> ParsedFile::listAllClasses(core::Context ctx) {
 }
 
 // Convert this parsedfile to a msgpack representation
-string ParsedFile::toMsgpack(core::Context ctx, int version) {
+string ParsedFile::toMsgpack(core::Context ctx, int version, bool autogenIncludeMethods) {
     MsgpackWriter write(version);
-    return write.pack(ctx, *this);
+    return write.pack(ctx, *this, autogenIncludeMethods);
 }
 
 } // namespace sorbet::autogen

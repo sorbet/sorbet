@@ -149,6 +149,7 @@ struct Options {
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     int autogenVersion = 0;
+    bool autogenIncludeMethods = false;
     bool stripeMode = false;
     bool stripePackages = false;
     std::string typedSource = "";

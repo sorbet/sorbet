@@ -170,8 +170,8 @@ struct ParsedFile {
     // every required gem in this file
     std::vector<core::NameRef> requires;
 
-    std::string toString(const core::GlobalState &gs) const;
-    std::string toMsgpack(core::Context ctx, int version);
+    std::string toString(const core::GlobalState &gs, bool autogenIncludeMethods) const;
+    std::string toMsgpack(core::Context ctx, int version, bool autogenIncludeMethods);
     std::vector<core::NameRef> showFullName(const core::GlobalState &gs, DefinitionRef id) const;
     QualifiedName showQualifiedName(const core::GlobalState &gs, DefinitionRef id) const;
     std::vector<std::string> listAllClasses(core::Context ctx);
