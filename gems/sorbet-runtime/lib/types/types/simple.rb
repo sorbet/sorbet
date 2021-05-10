@@ -41,11 +41,26 @@ module T::Types
     module Private
       module Pool
         def self.type_for_module(mod)
-          cached = mod.instance_variable_get(:@__as_sorbet_simple_type)
+          cached = mod.instance_variable_get(:@__as_sorbet_type)
           return cached if cached
 
-          type = Simple.new(mod)
-          mod.instance_variable_set(:@__as_sorbet_simple_type, type) unless mod.frozen?
+          type = if mod == ::Array
+            T::Array[T.untyped]
+          elsif mod == ::Set
+            T::Set[T.untyped]
+          elsif mod == ::Hash
+            T::Hash[T.untyped, T.untyped]
+          elsif mod == ::Enumerable
+            T::Enumerable[T.untyped]
+          elsif mod == ::Enumerator
+            T::Enumerator[T.untyped]
+          elsif mod == ::Range
+            T::Range[T.untyped]
+          else
+            Simple.new(mod)
+          end
+
+          mod.instance_variable_set(:@__as_sorbet_type, type) unless mod.frozen?
           type
         end
       end
