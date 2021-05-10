@@ -147,6 +147,11 @@ VALUE sorbet_rubyTopSelf() {
 }
 
 SORBET_INLINE
+rb_control_frame_t *sorbet_getCFP() {
+    return GET_EC()->cfp;
+}
+
+SORBET_INLINE
 VALUE sorbet_getSelfFromFrame() {
     return GET_EC()->cfp->self;
 }
@@ -1142,9 +1147,8 @@ VALUE sorbet_callBlock(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const r
 
 // Push an entry to the ruby stack
 SORBET_INLINE
-void sorbet_push(const VALUE val) {
-    rb_execution_context_t *ec = GET_EC();
-    *(ec->cfp->sp++) = val;
+void sorbet_push(rb_control_frame_t *cfp, const VALUE val) {
+    *(cfp->sp++) = val;
 }
 
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L2919-L2928
@@ -1171,9 +1175,9 @@ static int computeLocalIndex(long index) {
 // * level - the number of blocks that need to be crossed to reach the
 //           outer-most stack frame.
 SORBET_INLINE
-VALUE sorbet_readLocal(long index, long level) {
+VALUE sorbet_readLocal(rb_control_frame_t *cfp, long index, long level) {
     int offset = computeLocalIndex(index);
-    return *(vm_get_ep(GET_EC()->cfp->ep, level) - offset);
+    return *(vm_get_ep(cfp->ep, level) - offset);
 }
 
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L361-L371
@@ -1194,9 +1198,9 @@ static inline void vm_env_write(const VALUE *ep, int index, VALUE v) {
 //           outer-most stack frame.
 // * value - the value to write
 SORBET_INLINE
-void sorbet_writeLocal(long index, long level, VALUE value) {
+void sorbet_writeLocal(rb_control_frame_t *cfp, long index, long level, VALUE value) {
     int offset = computeLocalIndex(index);
-    vm_env_write(vm_get_ep(GET_EC()->cfp->ep, level), -offset, value);
+    vm_env_write(vm_get_ep(cfp->ep, level), -offset, value);
 }
 
 VALUE sorbet_vmBlockHandlerNone() {

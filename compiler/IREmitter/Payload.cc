@@ -858,10 +858,11 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
         }
     }
     if (irctx.escapedVariableIndices.contains(local)) {
+        auto *cfp = builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
         auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, irctx.escapedVariableIndices.at(local));
         auto level = irctx.rubyBlockLevel[rubyBlockId];
         return builder.CreateCall(cs.getFunction("sorbet_readLocal"),
-                                  {index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true))});
+                                  {cfp, index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true))});
     }
 
     // normal local variable
@@ -915,10 +916,11 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
         return;
     }
     if (irctx.escapedVariableIndices.contains(local)) {
+        auto *cfp = builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
         auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, irctx.escapedVariableIndices.at(local));
         auto level = irctx.rubyBlockLevel[rubyBlockId];
         builder.CreateCall(cs.getFunction("sorbet_writeLocal"),
-                           {index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true)), var});
+                           {cfp, index, llvm::ConstantInt::get(cs, llvm::APInt(64, level, true)), var});
         return;
     }
 
@@ -936,9 +938,9 @@ void Payload::dbg_p(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *
     builder.CreateCall(cs.getFunction("sorbet_dbg_p"), {val});
 }
 
-void Payload::pushRubyStack(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *val) {
+void Payload::pushRubyStack(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cfp, llvm::Value *val) {
     auto &builder = builderCast(build);
-    builder.CreateCall(cs.getFunction("sorbet_push"), {val});
+    builder.CreateCall(cs.getFunction("sorbet_push"), {cfp, val});
 }
 
 llvm::Value *Payload::vmBlockHandlerNone(CompilerState &cs, llvm::IRBuilderBase &build) {

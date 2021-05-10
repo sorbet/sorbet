@@ -370,8 +370,11 @@ public:
 
         auto &builder = builderCast(mcctx.build);
 
+        auto *cfp = builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
+
         // Push receiver.
-        Payload::pushRubyStack(cs, builder, Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId));
+        Payload::pushRubyStack(cs, builder, cfp,
+                               Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId));
 
         // For the VM send there will be two cases:
         //
@@ -455,7 +458,7 @@ public:
         }
 
         // Push the splat array.
-        Payload::pushRubyStack(cs, builder, splatArray);
+        Payload::pushRubyStack(cs, builder, cfp, splatArray);
 
         // Call the receiver.
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});

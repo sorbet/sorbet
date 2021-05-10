@@ -58,8 +58,9 @@ llvm::Function *getFinalForwarder(MethodCallContext &mcctx, IREmitterHelpers::Fi
             builder.CreateCall(funcCs.module->getFunction("sorbet_arrayNewFromValues"), {argc, argv}, "splat");
 
         // setup the ruby stack
-        Payload::pushRubyStack(funcCs, builder, self);
-        Payload::pushRubyStack(funcCs, builder, splat);
+        auto *cfp = builder.CreateCall(funcCs.getFunction("sorbet_getCFP"), {}, "cfp");
+        Payload::pushRubyStack(funcCs, builder, cfp, self);
+        Payload::pushRubyStack(funcCs, builder, cfp, splat);
         auto methodName = string(send->fun.shortName(funcCs));
         auto *cache =
             IREmitterHelpers::makeInlineCache(funcCs, builder, methodName, {Payload::VM_CALL_ARGS_SPLAT}, 1, {});
@@ -431,8 +432,9 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
     // the receiver isn't included in the arg count
     int argc = stack.size() - 1;
 
+    auto *cfp = builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
     for (auto *arg : stack) {
-        Payload::pushRubyStack(cs, builder, arg);
+        Payload::pushRubyStack(cs, builder, cfp, arg);
     }
 
     return makeInlineCache(cs, builder, methodName, flags, argc, keywords);
