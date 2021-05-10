@@ -335,7 +335,9 @@ static inline VALUE sorbet_vm_sendish(struct rb_execution_context_struct *ec, st
 
     // We need to avoid using `vm_call_general`, and instead call `sorbet_vm_call_general`. See the comments in
     // `sorbet_vm_call_method_each_type` for more information.
-    if (LIKELY(cc->call == vm_call_general)) {
+    //
+    // Uses UNLIKELY to make the fast path of "call cache hit" faster
+    if (UNLIKELY(cc->call == vm_call_general)) {
         val = sorbet_vm_call_method(ec, GET_CFP(), &calling, cd);
     } else {
         val = cc->call(ec, GET_CFP(), &calling, cd);
