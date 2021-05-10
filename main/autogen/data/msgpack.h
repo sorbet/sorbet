@@ -29,7 +29,7 @@ private:
     void packDefinitionRef(DefinitionRef ref);
     void packRange(u4 begin, u4 end);
     void packDefinition(core::Context ctx, ParsedFile &pf, Definition &def);
-    void packReference(core::Context ctx, ParsedFile &pf, Reference &ref, bool autogenIncludeMethods);
+    void packReference(core::Context ctx, ParsedFile &pf, Reference &ref/*, bool autogenIncludeMethods*/);
     static int assertValidVersion(int version) {
         if (version < MIN_VERSION || version > MAX_VERSION) {
             Exception::raise("msgpack version {} not in available range [{}, {}]", version, MIN_VERSION, MAX_VERSION);
@@ -42,7 +42,7 @@ public:
 
     constexpr static int MIN_VERSION = 2;
     constexpr static int MAX_VERSION = 2;
-    std::string pack(core::Context ctx, ParsedFile &pf, bool autogenIncludeMethods);
+    std::string pack(core::Context ctx, ParsedFile &pf/*, bool autogenIncludeMethods*/);
 };
 
 } // namespace sorbet::autogen

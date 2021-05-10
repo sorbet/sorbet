@@ -87,7 +87,7 @@ void MsgpackWriter::packDefinition(core::Context ctx, ParsedFile &pf, Definition
     mpack_finish_array(&writer);
 }
 
-void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &ref, bool autogenIncludeMethods) {
+void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &ref/*, bool autogenIncludeMethods*/) {
     mpack_start_array(&writer, refAttrs[version].size());
 
     // scope
@@ -123,9 +123,9 @@ void MsgpackWriter::packReference(core::Context ctx, ParsedFile &pf, Reference &
     packDefinitionRef(ref.parent_of);
 
     // method call
-    if (autogenIncludeMethods && !ref.called_method.empty()) {
-        packNames(ref.called_method.nameParts);
-    }
+    /* if (autogenIncludeMethods && !ref.called_method.empty()) { */
+    /*     packNames(ref.called_method.nameParts); */
+    /* } */
 
     mpack_finish_array(&writer);
 }
@@ -135,7 +135,7 @@ MsgpackWriter::MsgpackWriter(int version)
     : version(assertValidVersion(version)), refAttrs(refAttrMap.at(version)), defAttrs(defAttrMap.at(version)),
       symbols(4) {}
 
-string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, bool autogenIncludeMethods) {
+string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf/*, bool autogenIncludeMethods*/) {
     char *data;
     size_t size;
     mpack_writer_init_growable(&writer, &data, &size);
@@ -154,16 +154,16 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, bool autogenInclud
 
     mpack_start_array(&writer, pf.defs.size());
     for (auto &def : pf.defs) {
-        if (def.type == Definition::Type::Method && !autogenIncludeMethods) {
-            continue;
-        }
+        /* if (def.type == Definition::Type::Method && !autogenIncludeMethods) { */
+        /*     continue; */
+        /* } */
         packDefinition(ctx, pf, def);
     }
 
     mpack_finish_array(&writer);
     mpack_start_array(&writer, pf.refs.size());
     for (auto &ref : pf.refs) {
-        packReference(ctx, pf, ref, autogenIncludeMethods);
+        packReference(ctx, pf, ref/*, autogenIncludeMethods*/);
     }
     mpack_finish_array(&writer);
     mpack_finish_array(&writer);
@@ -237,7 +237,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf, bool autogenInclud
 
 const map<int, vector<string>> MsgpackWriter::refAttrMap{
     {
-        3,
+        2,
         {
             "scope",
             "name",
@@ -246,8 +246,7 @@ const map<int, vector<string>> MsgpackWriter::refAttrMap{
             "expression_pos_range",
             "resolved",
             "is_defining_ref",
-            "parent_of",
-            "called_method"
+            "parent_of"
         },
     },
 };
