@@ -1027,6 +1027,21 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class DefaultStringProp
+    include T::Props::Serializable
+
+    prop :stringprop, String, default: "default"
+  end
+
+  describe 'with defaulted string props' do
+    it 'does not share structure' do
+      h = {}
+      obj1 = DefaultStringProp.from_hash(h)
+      obj2 = DefaultStringProp.from_hash(h)
+      refute_equal(obj1.stringprop.object_id, obj2.stringprop.object_id)
+    end
+  end
+
   class ComplexStruct < T::Struct
     prop :primitive, Integer
     prop :nilable, T.nilable(Integer)
