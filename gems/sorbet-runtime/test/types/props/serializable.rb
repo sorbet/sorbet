@@ -1173,4 +1173,30 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     assert_instance_of(Float, swf2.my_float)
     assert_in_delta(1.0, swf2.my_float, 0.0001)
   end
+
+  class DynamicProps
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :nilstring, T.nilable(String)
+  end
+
+  describe 'dynamic props' do
+    it 'serializes when new props are added' do
+      obj = DynamicProps.new(nilstring: 'foo')
+      h = obj.serialize
+
+      assert_equal('foo', h['nilstring'])
+
+      DynamicProps.prop(:arrayprop, T::Array[String], default: ['default'])
+
+      assert_raises(TypeError) do
+        obj.serialize
+      end
+
+      obj.arrayprop = ['bar']
+      h = obj.serialize
+      assert_equal(['bar'], h['arrayprop'])
+    end
+  end
 end
