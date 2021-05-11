@@ -26,6 +26,8 @@ ruby(
         "-fstack-protector-strong",
         "-Wformat",
         "-Werror=format-security",
+        # The Ruby build is very noisy without this flag.
+        "-Wno-compound-token-split-by-macro",
     ] + select({
         "@com_stripe_ruby_typer//tools/config:dbg": [],
         "//conditions:default": ["-O2"],
