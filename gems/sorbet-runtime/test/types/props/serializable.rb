@@ -80,6 +80,36 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     )
   end
 
+  class DefaultArrayStruct
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :arrayprop, T::Array[String], default: []
+  end
+
+  class DefaultHashStruct
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :hashprop, T::Hash[String, String], default: {}
+  end
+
+  describe 'default: with literals' do
+    it 'does not share structure for arrays' do
+      a = DefaultArrayStruct.new
+      b = DefaultArrayStruct.new
+
+      refute_equal(a.arrayprop.object_id, b.arrayprop.object_id)
+    end
+
+    it 'does not share structure for hashes' do
+      a = DefaultHashStruct.new
+      b = DefaultHashStruct.new
+
+      refute_equal(a.hashprop.object_id, b.hashprop.object_id)
+    end
+  end
+
   class ParentWithNoDefault < T::InexactStruct
     prop :prop, String
   end
