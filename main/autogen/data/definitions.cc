@@ -181,9 +181,9 @@ vector<string> ParsedFile::listAllClasses(core::Context ctx) {
 }
 
 // Convert this parsedfile to a msgpack representation*/
-string ParsedFile::toMsgpack(core::Context ctx, int version/*, bool autogenIncludeMethods*/) {
+string ParsedFile::toMsgpack(core::Context ctx, int version, bool autogenIncludeMethods) {
     MsgpackWriter write(version);
-    return write.pack(ctx, *this/*, autogenIncludeMethods*/);
+    return write.pack(ctx, *this, autogenIncludeMethods);
 }
 
 } // namespace sorbet::autogen

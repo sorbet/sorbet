@@ -243,7 +243,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 }
                 if (opts.print.AutogenMsgPack.enabled) {
                     Timer timeit(logger, "autogenToMsgpack");
-                    serialized.msgpack = pf.toMsgpack(ctx, opts.autogenVersion/*, opts.autogenIncludeMethods*/);
+                    serialized.msgpack = pf.toMsgpack(ctx, opts.autogenVersion, opts.autogenIncludeMethods);
                 }
                 if (opts.print.AutogenClasslist.enabled) {
                     Timer timeit(logger, "autogenClasslist");
