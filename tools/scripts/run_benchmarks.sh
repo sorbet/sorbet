@@ -2,6 +2,33 @@
 
 set -euo pipefail
 
+usage() {
+  cat <<EOF
+Compare the performance of the compiler against the interpreter.
+
+Usage:
+  tools/scripts/run_benchmarks.sh [options] [[-b <baseline>.rb] -f <benchmark>.rb ...]
+
+Options:
+  -f <benchmark>.rb  Run benchmark specified in <benchmark>.rb via the
+                     interpreter and via the compiled output. May be repeated
+                     to run multiple benchmarks. If omitted, runs all files in
+                     test/testdata/ruby_benchmark/**/*.rb, except those that
+                     are disabled or too slow.
+
+  -b <baseline>.rb   Run benchmark <baseline>.rb, and treat it like the
+                     baseline (subtract its time from all other benchmarks)
+
+  -d <delimiter>     Use <delimiter> to separate columns of output.
+                     Suggestions are ',' or '|' or $'\\n'. [default: $'\\t']
+
+  -v                 Verbose mode. Shows commands that are run, verbatim.
+                     Useful for running the last (or only) benchmark elsewhere,
+                     like under 'perf record --' or 'lldb --'.
+                     (Looks best with with -d $'\\n', see above.)
+EOF
+}
+
 verbose=
 delim=$'\t'
 baseline=""
@@ -26,7 +53,7 @@ while getopts 'vd:b:f:' optname; do
       ;;
 
     *)
-      echo "Usage: $0 [-v] [-d delimiter] [[-b path/to/baseline.rb] -f path/to/benchmark.rb]*"
+      usage
       exit 1
       ;;
   esac
@@ -116,6 +143,25 @@ compile_benchmark() {
   llvmir=. test/run_sorbet.sh tmp/bench/target.rb &>/dev/null
 }
 
+
+# We require GNU printf for the fancy %q functionality.
+__system_printf_has_q=
+if env printf ' %q' 'test' &> /dev/null; then
+  __system_printf_has_q=1
+fi
+
+echo_command() {
+  # (The `env` avoids the bash built-in printf, which doesn't have %q)
+  if [ "$__system_printf_has_q" != "" ]; then
+    env printf ' %q' "${command[@]}"
+  else
+    # Won't be quoted, but at least it'll print something.
+    # User will have to add their own quotes.
+    env printf ' %s' "${command[@]}"
+  fi
+  printf '\n'
+}
+
 echo "ruby vm startup time: $(set_startup; measure)"
 
 baseline_interpreted=
@@ -135,7 +181,8 @@ for benchmark in "$baseline" "${benchmarks[@]}"; do
 
   set_interpreted
   if [ -n "$verbose" ]; then
-    echo "interpreted: ${command[*]}" >&2
+    >&2 printf '(in tmp/bench/) interpreted:'
+    >&2 echo_command
   fi
   time_interpreted="$(measure)"
   echo -en "$time_interpreted$delim"
@@ -145,7 +192,8 @@ for benchmark in "$baseline" "${benchmarks[@]}"; do
 
   set_compiled
   if [ -n "$verbose" ]; then
-    echo "compiled: ${command[*]}" >&2
+    >&2 printf '(in tmp/bench/) compiled: llvmir=.'
+    >&2 echo_command
   fi
   time_compiled="$(measure)"
   echo "$time_compiled"
