@@ -62,9 +62,8 @@ public:
     static llvm::Value *typeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
                                          const core::TypePtr &type);
     static llvm::Value *boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1);
-    static std::pair<llvm::Value *, llvm::Value *> setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder,
-                                                                     const IREmitterContext &irctx,
-                                                                     const ast::MethodDef &md, int rubyBlockId);
+    static llvm::Value *setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &builder,
+                                          const IREmitterContext &irctx, const ast::MethodDef &md, int rubyBlockId);
 
     static llvm::Value *readKWRestArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
     static llvm::Value *assertNoExtraKWArg(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *maybeHash);
@@ -73,8 +72,7 @@ public:
     static llvm::Value *readRestArgs(CompilerState &cs, llvm::IRBuilderBase &builder, int maxPositionalArgCount,
                                      llvm::Value *argCountRaw, llvm::Value *argArrayRaw);
     static core::Loc setLineNumber(CompilerState &cs, llvm::IRBuilderBase &builder, core::Loc loc,
-                                   core::Loc methodStart, core::Loc lastLoc, llvm::AllocaInst *iseqEncodedPtr,
-                                   llvm::AllocaInst *lineNumberPtr);
+                                   core::Loc methodStart, core::Loc lastLoc, llvm::AllocaInst *lineNumberPtr);
     static llvm::Value *varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBuilderBase &builder,
                                const IREmitterContext &irctx, int rubyBlockId);
     static void varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, llvm::IRBuilderBase &builder,
@@ -99,6 +97,9 @@ public:
 
     static llvm::Value *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder,
                                           const IREmitterContext &irctx, core::SymbolRef methodSym);
+
+    static llvm::Value *getFileLineNumberInfo(CompilerState &gs, llvm::IRBuilderBase &builder, core::FileRef file);
+    static llvm::Value *getIseqEncodedPointer(CompilerState &gs, llvm::IRBuilderBase &builder, core::FileRef file);
 
     static const VMFlag VM_CALL_ARGS_SIMPLE;
     static const VMFlag VM_CALL_ARGS_SPLAT;

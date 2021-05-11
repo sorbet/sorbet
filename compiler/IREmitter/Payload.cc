@@ -583,30 +583,19 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
     // We are building a new function. We should redefine where do function initializers go
     auto cs1 = cs.withFunctionEntry(bei);
 
-    auto loc = IREmitterHelpers::getMethodLineBounds(cs, md.symbol, cs.file, md.loc);
+    auto file = cs.file;
     auto *iseqType = getIseqType(cs1, builder, irctx, rubyBlockId);
     auto [funcName, parent] = getIseqInfo(cs1, builder, irctx, md, rubyBlockId);
     auto funcNameId = Payload::idIntern(cs1, builder, funcName);
     auto funcNameValue = Payload::cPtrToRubyString(cs1, builder, funcName, true);
-    auto filename = loc.file().data(cs).path();
+    auto filename = file.data(cs).path();
     auto filenameValue = Payload::cPtrToRubyString(cs1, builder, filename, true);
-    // The method might have been synthesized by Sorbet (e.g. in the case of packages).
-    // Give such methods line numbers of 0.
-    unsigned startLine, endLine;
-    if (loc.exists()) {
-        startLine = loc.position(cs).first.line;
-        endLine = loc.position(cs).second.line;
-    } else {
-        startLine = 0;
-        endLine = 0;
-    }
     auto [locals, numLocals] = getLocals(cs1, builder, irctx, md, rubyBlockId);
     auto sendMax = llvm::ConstantInt::get(cs, llvm::APInt(32, irctx.maxSendArgCount, true));
+    auto *fileLineNumberInfo = Payload::getFileLineNumberInfo(cs, builder, file);
     auto *fn = cs.getFunction("sorbet_allocateRubyStackFrame");
-    auto ret =
-        builder.CreateCall(fn, {funcNameValue, funcNameId, filenameValue, realpath, parent, iseqType,
-                                llvm::ConstantInt::get(cs, llvm::APInt(32, startLine)),
-                                llvm::ConstantInt::get(cs, llvm::APInt(32, endLine)), locals, numLocals, sendMax});
+    auto ret = builder.CreateCall(fn, {funcNameValue, funcNameId, filenameValue, realpath, parent, iseqType,
+                                       fileLineNumberInfo, locals, numLocals, sendMax});
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     llvm::Constant *indices[] = {zero};
     builder.CreateStore(ret, llvm::ConstantExpr::getInBoundsGetElementPtr(store->getValueType(), store, indices));
@@ -689,9 +678,8 @@ llvm::Value *Payload::rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &
     return ::sorbet::compiler::rubyStackFrameVar(cs, build, irctx, methodSym, 0);
 }
 
-std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build,
-                                                                   const IREmitterContext &irctx,
-                                                                   const ast::MethodDef &md, int rubyBlockId) {
+llvm::Value *Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                        const ast::MethodDef &md, int rubyBlockId) {
     auto &builder = builderCast(build);
     auto stackFrame = allocateRubyStackFrames(cs, builder, irctx, md, rubyBlockId);
     auto *iseqType = getIseqType(cs, builder, irctx, rubyBlockId);
@@ -700,8 +688,7 @@ std::pair<llvm::Value *, llvm::Value *> Payload::setRubyStackFrame(CompilerState
                                             irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitModule)));
     auto cfp = builder.CreateCall(cs.getFunction("sorbet_setRubyStackFrame"), {isStaticInit, iseqType, stackFrame});
     auto pc = builder.CreateCall(cs.getFunction("sorbet_getPc"), {cfp});
-    auto iseq_encoded = builder.CreateCall(cs.getFunction("sorbet_getIseqEncoded"), {cfp});
-    return {pc, iseq_encoded};
+    return pc;
 }
 
 // Ensure that the retry singleton is present during module initialization, and store it in a module-local global.
@@ -751,8 +738,62 @@ llvm::Value *Payload::voidSingleton(CompilerState &cs, llvm::IRBuilderBase &buil
     return builderCast(build).CreateLoad(global, rawName);
 }
 
+// Lazily initialize a global that contains enough noops to represent all the lines in the file as an iseq_encoded
+// array.
+llvm::Value *Payload::getFileLineNumberInfo(CompilerState &cs, llvm::IRBuilderBase &build, core::FileRef file) {
+    auto *iseqEncodedInitFn = cs.module->getFunction("sorbet_initLineNumberInfo");
+    auto *infoPointerTy = iseqEncodedInitFn->getFunctionType()->params()[0];
+    ENFORCE(infoPointerTy != nullptr);
+
+    auto *globalTy = llvm::cast<llvm::PointerType>(infoPointerTy)->getElementType();
+
+    auto *iseqEncoded = getIseqEncodedPointer(cs, build, file);
+    const string rawName = "fileLineNumberInfo";
+    auto *global = cs.module->getOrInsertGlobal(
+        rawName, globalTy, [&cs, &rawName, &iseqEncoded, file, globalTy, iseqEncodedInitFn]() {
+            auto globalInitBuilder = llvm::IRBuilder<>(cs);
+
+            bool isConstant = false;
+            auto *zero = llvm::ConstantAggregateZero::get(globalTy);
+            auto *fileLineNumberInfo = new llvm::GlobalVariable(*cs.module, globalTy, isConstant,
+                                                                llvm::GlobalVariable::InternalLinkage, zero, rawName);
+
+            globalInitBuilder.SetInsertPoint(cs.globalConstructorsEntry);
+
+            auto *numLines = llvm::ConstantInt::get(cs, llvm::APInt(32, file.data(cs).lineCount(), true));
+            auto *intzero = llvm::ConstantInt::get(cs, llvm::APInt(32, 0));
+            llvm::Value *indices[] = {intzero, intzero};
+            globalInitBuilder.CreateCall(
+                iseqEncodedInitFn, {fileLineNumberInfo, globalInitBuilder.CreateGEP(iseqEncoded, indices), numLines});
+
+            return fileLineNumberInfo;
+        });
+
+    return global;
+}
+
+llvm::Value *Payload::getIseqEncodedPointer(CompilerState &cs, llvm::IRBuilderBase &builder, core::FileRef file) {
+    auto *int64Ty = llvm::Type::getInt64Ty(cs);
+    uint32_t lineCount = file.data(cs).lineCount();
+    auto *globalTy = llvm::ArrayType::get(int64Ty, lineCount);
+
+    const string rawName = "iseqEncodedArray";
+    auto *global = cs.module->getOrInsertGlobal(rawName, globalTy, [&cs, &rawName, globalTy]() {
+        auto globalInitBuilder = llvm::IRBuilder<>(cs);
+
+        bool isConstant = false;
+        auto *zero = llvm::ConstantAggregateZero::get(globalTy);
+        auto *iseqEncodedArray = new llvm::GlobalVariable(*cs.module, globalTy, isConstant,
+                                                          llvm::GlobalVariable::InternalLinkage, zero, rawName);
+
+        return iseqEncodedArray;
+    });
+
+    return global;
+}
+
 core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, core::Loc loc, core::Loc methodStart,
-                                 core::Loc lastLoc, llvm::AllocaInst *iseqEncodedPtr, llvm::AllocaInst *lineNumberPtr) {
+                                 core::Loc lastLoc, llvm::AllocaInst *lineNumberPtr) {
     if (!loc.exists()) {
         return lastLoc;
     }
@@ -764,10 +805,15 @@ core::Loc Payload::setLineNumber(CompilerState &cs, llvm::IRBuilderBase &build, 
     if (!methodStart.exists()) {
         return lastLoc;
     }
-    auto offset = lineno - methodStart.position(cs).first.line;
+
+    // turn the line number into an offset into the iseq_encoded global array
+    auto *offset = llvm::ConstantInt::get(cs, llvm::APInt(32, lineno - 1));
+
+    auto *encoded = Payload::getIseqEncodedPointer(cs, builder, loc.file());
+    auto *intzero = llvm::ConstantInt::get(cs, llvm::APInt(32, 0));
+    llvm::Value *indices[] = {intzero, intzero};
     builder.CreateCall(cs.getFunction("sorbet_setLineNumber"),
-                       {llvm::ConstantInt::get(cs, llvm::APInt(32, offset)), builder.CreateLoad(iseqEncodedPtr),
-                        builder.CreateLoad(lineNumberPtr)});
+                       {offset, builder.CreateGEP(encoded, indices), builder.CreateLoad(lineNumberPtr)});
     return loc;
 }
 

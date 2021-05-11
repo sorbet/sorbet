@@ -359,8 +359,7 @@ void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Func
 
                 // argument names
                 fp->arg_begin()->setName("pc");
-                (fp->arg_begin() + 1)->setName("iseq_encoded");
-                (fp->arg_begin() + 2)->setName("localsOffset");
+                (fp->arg_begin() + 1)->setName("localsOffset");
 
                 funcs[i] = fp;
                 break;
@@ -552,11 +551,9 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
-    vector<llvm::AllocaInst *> iseqEncodedPtrsByFunction;
 
     int i = 0;
     auto lineNumberPtrType = llvm::PointerType::getUnqual(llvm::Type::getInt64PtrTy(cs));
-    auto iseqEncodedPtrType = llvm::Type::getInt64PtrTy(cs);
     for (auto &fun : rubyBlock2Function) {
         auto inits = functionInitializersByFunction.emplace_back(llvm::BasicBlock::Create(
             cs, "functionEntryInitializers",
@@ -567,8 +564,6 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         sendArgArrayByBlock.emplace_back(sendArgArray);
         auto lineNumberPtr = builder.CreateAlloca(lineNumberPtrType, nullptr, "lineCountStore");
         lineNumberPtrsByFunction.emplace_back(lineNumberPtr);
-        auto iseqEncodedPtr = builder.CreateAlloca(iseqEncodedPtrType, nullptr, "iseqEncodedStore");
-        iseqEncodedPtrsByFunction.emplace_back(iseqEncodedPtr);
         argumentSetupBlocksByFunction.emplace_back(llvm::BasicBlock::Create(cs, "argumentSetup", fun));
         i++;
     }
@@ -718,7 +713,6 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockParents),
         move(blockLevels),
         move(lineNumberPtrsByFunction),
-        move(iseqEncodedPtrsByFunction),
         usesBlockArgs,
         move(exceptionHandlingBlockHeaders),
         move(deadBlocks),
@@ -789,15 +783,6 @@ bool IREmitterHelpers::isClassStaticInit(const core::GlobalState &gs, core::Symb
 
 bool IREmitterHelpers::isFileOrClassStaticInit(const core::GlobalState &gs, core::SymbolRef sym) {
     return isFileStaticInit(gs, sym) || isClassStaticInit(gs, sym);
-}
-
-core::Loc IREmitterHelpers::getMethodLineBounds(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef file,
-                                                core::LocOffsets offsets) {
-    if (IREmitterHelpers::isFileStaticInit(gs, sym)) {
-        return core::Loc(file, core::LocOffsets{0, offsets.endLoc});
-    } else {
-        return core::Loc(file, offsets);
-    }
 }
 
 namespace {

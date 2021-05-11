@@ -197,9 +197,6 @@ struct IREmitterContext {
     // TODO(jez) document lineNumberPtrsByFunction
     std::vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
 
-    // TODO(jez) document iseqEncodedPtrsByFunction
-    std::vector<llvm::AllocaInst *> iseqEncodedPtrsByFunction;
-
     // TODO(jez) usesBlockArgs
     bool usesBlockArgs;
 

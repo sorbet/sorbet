@@ -58,9 +58,8 @@ void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitte
         case FunctionType::Rescue:
         case FunctionType::Ensure: {
             // Switch the current control frame from a C frame to a Ruby-esque one
-            auto [pc, iseq_encoded] = Payload::setRubyStackFrame(cs, builder, irctx, md, rubyBlockId);
+            auto pc = Payload::setRubyStackFrame(cs, builder, irctx, md, rubyBlockId);
             builder.CreateStore(pc, irctx.lineNumberPtrsByFunction[rubyBlockId]);
-            builder.CreateStore(iseq_encoded, irctx.iseqEncodedPtrsByFunction[rubyBlockId]);
             break;
         }
 
@@ -68,9 +67,7 @@ void setupStackFrame(CompilerState &cs, const ast::MethodDef &md, const IREmitte
             // Exception functions get their pc and iseq_encoded values as arguments
             auto func = irctx.rubyBlocks2Functions[rubyBlockId];
             auto *pc = func->arg_begin();
-            auto *iseq_encoded = func->arg_begin() + 1;
             builder.CreateStore(pc, irctx.lineNumberPtrsByFunction[rubyBlockId]);
-            builder.CreateStore(iseq_encoded, irctx.iseqEncodedPtrsByFunction[rubyBlockId]);
             break;
         }
 
@@ -112,9 +109,8 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
 
         setupStackFrame(cs, md, irctx, builder, rubyBlockId);
         auto lastLoc = core::Loc::none();
-        auto startLoc = IREmitterHelpers::getMethodStart(cs, md.symbol);
+        auto startLoc = md.symbol.data(base)->loc();
         Payload::setLineNumber(cs, builder, core::Loc(cs.file, md.loc), startLoc, lastLoc,
-                               irctx.iseqEncodedPtrsByFunction[rubyBlockId],
                                irctx.lineNumberPtrsByFunction[rubyBlockId]);
     }
 }
@@ -500,7 +496,7 @@ llvm::BasicBlock *resolveJumpTarget(cfg::CFG &cfg, const IREmitterContext &irctx
 void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &irctx) {
     llvm::IRBuilder<> builder(base);
     UnorderedSet<cfg::LocalRef> loadYieldParamsResults; // methods calls on these are ignored
-    auto startLoc = IREmitterHelpers::getMethodStart(base, cfg.symbol);
+    auto startLoc = cfg.symbol.data(base)->loc();
     auto &arguments = cfg.symbol.data(base)->arguments();
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
         cfg::BasicBlock *bb = *it;
@@ -521,7 +517,6 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                 auto loc = core::Loc(cs.file, bind.loc);
 
                 lastLoc = Payload::setLineNumber(cs, builder, loc, startLoc, lastLoc,
-                                                 irctx.iseqEncodedPtrsByFunction[bb->rubyBlockId],
                                                  irctx.lineNumberPtrsByFunction[bb->rubyBlockId]);
 
                 IREmitterHelpers::emitDebugLoc(cs, builder, irctx, bb->rubyBlockId, loc);

@@ -19,7 +19,7 @@
 #define SORBET_INLINE __attribute__((always_inline))
 
 typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, const VALUE *args, VALUE blockArg);
-typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE *iseq_encoded, VALUE closure);
+typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE closure);
 typedef VALUE (*BlockConsumerFFIType)(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk,
                                       const struct rb_captured_block *captured, VALUE closure);
 
@@ -35,6 +35,12 @@ struct sorbet_iterMethodArg {
     const VALUE *argv;
     int kw_splat;
     struct FunctionInlineCache *cache;
+};
+
+struct SorbetLineNumberInfo {
+    int iseq_size;
+    struct iseq_insn_info_entry *insns_info;
+    VALUE *iseq_encoded;
 };
 
 // Functions known to the compiler.
@@ -58,8 +64,9 @@ SORBET_ALIVE(void, sorbet_raiseExtraKeywords, (VALUE hash) __attribute__((__nore
 SORBET_ALIVE(VALUE, sorbet_t_absurd, (VALUE val) __attribute__((__cold__)));
 
 SORBET_ALIVE(rb_iseq_t *, sorbet_allocateRubyStackFrame,
-             (VALUE funcName, ID func, VALUE filename, VALUE realpath, rb_iseq_t *parent, int iseqType, int startline,
-              int endline, ID *locals, int numLocals, int stackMax));
+             (VALUE funcName, ID func, VALUE filename, VALUE realpath, rb_iseq_t *parent, int iseqType,
+              struct SorbetLineNumberInfo *info, ID *locals, int numLocals, int stackMax));
+SORBET_ALIVE(void, sorbet_initLineNumberInfo, (struct SorbetLineNumberInfo * info, VALUE *, int numLines));
 SORBET_ALIVE(VALUE, sorbet_getConstant, (const char *path, long pathLen));
 SORBET_ALIVE(VALUE, sorbet_setConstant, (VALUE mod, const char *name, long nameLen, VALUE value));
 
@@ -81,7 +88,7 @@ SORBET_ALIVE(void, sorbet_setMethodStackFrame,
 SORBET_ALIVE(void, sorbet_setExceptionStackFrame,
              (rb_execution_context_t * ec, rb_control_frame_t *cfp, const rb_iseq_t *iseq));
 
-SORBET_ALIVE(VALUE, sorbet_blockReturnUndef, (VALUE * *pc, VALUE *iseq_encoded, VALUE closure));
+SORBET_ALIVE(VALUE, sorbet_blockReturnUndef, (VALUE * *pc, VALUE closure));
 
 SORBET_ALIVE(VALUE, sorbet_vm_expandSplatIntrinsic, (VALUE thing, VALUE before, VALUE after));
 SORBET_ALIVE(VALUE, sorbet_vm_check_match_array, (rb_execution_context_t * ec, VALUE target, VALUE pattern));
@@ -1127,14 +1134,9 @@ const VALUE **sorbet_getPc(rb_control_frame_t *cfp) {
 }
 
 SORBET_INLINE
-const VALUE *sorbet_getIseqEncoded(rb_control_frame_t *cfp) {
-    return cfp->iseq->body->iseq_encoded;
-}
-
-SORBET_INLINE
-void sorbet_setLineNumber(int offset, VALUE *iseq_encoded, VALUE **storeLocation) {
+void sorbet_setLineNumber(int offset, VALUE *encoded, VALUE **storeLocation) {
     // use pos+1 because PC should point at the next instruction
-    (*storeLocation) = iseq_encoded + offset + 1;
+    (*storeLocation) = encoded + offset + 1;
 }
 
 SORBET_INLINE
@@ -1517,14 +1519,13 @@ extern void rb_set_errinfo(VALUE);
 struct ExceptionClosure {
     ExceptionFFIType body;
     VALUE **pc;
-    VALUE *iseq_encoded;
     VALUE methodClosure;
     VALUE *returnValue;
 };
 
 static VALUE sorbet_applyExceptionClosure(VALUE arg) {
     struct ExceptionClosure *closure = (struct ExceptionClosure *)arg;
-    VALUE res = closure->body(closure->pc, closure->iseq_encoded, closure->methodClosure);
+    VALUE res = closure->body(closure->pc, closure->methodClosure);
     if (res != sorbet_rubyUndef()) {
         *closure->returnValue = res;
     }
@@ -1541,14 +1542,13 @@ static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr, VALUE errinfo)
 }
 
 // Run a function with a closure, and populate an exceptionValue pointer if an exception is raised.
-VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE *iseq_encoded, VALUE methodClosure, VALUE exceptionContext,
+VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE methodClosure, VALUE exceptionContext,
                  VALUE *exceptionValue) {
     VALUE returnValue = sorbet_rubyUndef();
 
     struct ExceptionClosure closure;
     closure.body = body;
     closure.pc = pc;
-    closure.iseq_encoded = iseq_encoded;
     closure.methodClosure = methodClosure;
     closure.returnValue = &returnValue;
 

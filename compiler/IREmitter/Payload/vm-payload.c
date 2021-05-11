@@ -38,7 +38,7 @@ void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 
 typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, const VALUE *args, VALUE blockArg);
 
-typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE *iseq_encoded, VALUE closure);
+typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE closure);
 
 // ****
 // ****                       Internal Helper Functions
@@ -162,13 +162,38 @@ struct iseq_insn_info_entry {
 void rb_iseq_insns_info_encode_positions(const rb_iseq_t *iseq);
 /* End from inseq.h */
 
+struct SorbetLineNumberInfo {
+    int iseq_size;
+    struct iseq_insn_info_entry *insns_info;
+    VALUE *iseq_encoded;
+};
+
+void sorbet_initLineNumberInfo(struct SorbetLineNumberInfo *info, VALUE *iseq_encoded, int numLines) {
+    // This is the table that tells us the hash entry for instruction types
+    const void *const *table = rb_vm_get_insns_address_table();
+    VALUE nop = (VALUE)(table[YARVINSN_nop]);
+
+    info->iseq_size = numLines;
+    info->insns_info = ALLOC_N(struct iseq_insn_info_entry, numLines);
+    info->iseq_encoded = iseq_encoded;
+
+    for (int i = 0; i < numLines; i++) {
+        int lineno = i + 1;
+        info->insns_info[i].line_no = lineno;
+
+        // we fill iseq_encoded with NOP instructions; it only exists because it
+        // has to match the length of insns_info.
+        info->iseq_encoded[i] = nop;
+    }
+}
+
 // NOTE: parent is the immediate parent frame, so for the rescue clause of a
 // top-level method the parent would be the method iseq, but for a rescue clause
 // nested within a rescue clause, it would be the outer rescue iseq.
 //
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L5669-L5671
 rb_iseq_t *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename, VALUE realpath, unsigned char *parent,
-                                         int iseqType, int startline, int endline, ID *locals, int numLocals,
+                                         int iseqType, struct SorbetLineNumberInfo *info, ID *locals, int numLocals,
                                          int stackMax) {
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
@@ -178,33 +203,20 @@ rb_iseq_t *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename
     rb_iseq_t *iseq = rb_iseq_new(0, funcName, filename, realpath, (rb_iseq_t *)parent, iseqType);
     rb_gc_register_mark_object((VALUE)iseq);
 
-    // This is the table that tells us the hash entry for instruction types
-    const void *const *table = rb_vm_get_insns_address_table();
-    VALUE nop = (VALUE)table[YARVINSN_nop];
+    // NOTE: positions is freed by rb_iseq_insns_info_encode_positions
+    unsigned int *positions = ALLOC_N(unsigned int, info->iseq_size);
 
-    // Even if start and end are on the same line, we still want one insns_info made
-    int insn_num = endline - startline + 1;
-    struct iseq_insn_info_entry *insns_info = ALLOC_N(struct iseq_insn_info_entry, insn_num);
-    unsigned int *positions = ALLOC_N(unsigned int, insn_num);
-    VALUE *iseq_encoded = ALLOC_N(VALUE, insn_num);
-    for (int i = 0; i < insn_num; i++) {
-        int lineno = i + startline;
+    for (int i = 0; i < info->iseq_size; i++) {
         positions[i] = i;
-        insns_info[i].line_no = lineno;
-
-        // we fill iseq_encoded with NOP instructions; it only exists because it
-        // has to match the length of insns_info.
-        iseq_encoded[i] = nop;
     }
-    iseq->body->insns_info.body = insns_info;
+
+    iseq->body->insns_info.body = info->insns_info;
     iseq->body->insns_info.positions = positions;
-    // One iseq per line
-    iseq->body->iseq_size = insn_num;
-    iseq->body->insns_info.size = insn_num;
+    iseq->body->iseq_size = info->iseq_size;
+    iseq->body->insns_info.size = info->iseq_size;
     rb_iseq_insns_info_encode_positions(iseq);
 
-    // One NOP per line, to match insns_info
-    iseq->body->iseq_encoded = iseq_encoded;
+    iseq->body->iseq_encoded = info->iseq_encoded;
 
     // if this is a rescue frame, we need to set up some local storage for
     // exception values ($!).
@@ -315,6 +327,6 @@ VALUE sorbet_stringInterpolate(VALUE recv, ID fun, int argc, VALUE *argv, BlockF
 // ****
 
 // This is a function that can be used in place of any exception function, and does nothing except for return nil.
-VALUE sorbet_blockReturnUndef(VALUE **pc, VALUE *iseq_encoded, VALUE closure) {
+VALUE sorbet_blockReturnUndef(VALUE **pc, VALUE closure) {
     return RUBY_Qundef;
 }

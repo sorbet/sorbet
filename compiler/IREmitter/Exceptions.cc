@@ -82,28 +82,26 @@ public:
         return irctx.rubyBlocks2Functions[handlersRubyBlockId];
     }
 
-    // Fetch the pc, iseq_encoded, and closure values that are used when calling an exception function.
-    tuple<llvm::Value *, llvm::Value *, llvm::Value *> getExceptionArgs() {
+    // Fetch the pc, and closure values that are used when calling an exception function.
+    tuple<llvm::Value *, llvm::Value *> getExceptionArgs() {
         auto *pc = builder.CreateLoad(irctx.lineNumberPtrsByFunction[rubyBlockId]);
-        auto *iseq_encoded = builder.CreateLoad(irctx.iseqEncodedPtrsByFunction[rubyBlockId]);
         auto *closure = Payload::buildLocalsOffset(cs);
-        return {pc, iseq_encoded, closure};
+        return {pc, closure};
     }
 
     // Run a function that may raiase exceptions.
     tuple<llvm::Value *, llvm::Value *> sorbetTry(llvm::Function *fun, llvm::Value *exceptionContext) {
-        auto [pc, iseq_encoded, closure] = getExceptionArgs();
-        auto *result =
-            builder.CreateCall(cs.getFunction("sorbet_try"),
-                               {fun, pc, iseq_encoded, closure, exceptionContext, exceptionResultPtr}, "result");
+        auto [pc, closure] = getExceptionArgs();
+        auto *result = builder.CreateCall(cs.getFunction("sorbet_try"),
+                                          {fun, pc, closure, exceptionContext, exceptionResultPtr}, "result");
 
         return {result, exceptionResultPtr};
     }
 
     // Run the ensure clause, overwriting the previous return value that was passed in if it's present.
     llvm::Value *sorbetEnsure(llvm::Value *previousReturnValue) {
-        auto [pc, iseq_encoded, closure] = getExceptionArgs();
-        auto *res = builder.CreateCall(getEnsure(), {pc, iseq_encoded, closure}, "ensureResult");
+        auto [pc, closure] = getExceptionArgs();
+        auto *res = builder.CreateCall(getEnsure(), {pc, closure}, "ensureResult");
         auto *notUndef = builder.CreateICmpNE(res, Payload::rubyUndef(cs, builder), "ensureReturnValue");
         return builder.CreateSelect(notUndef, res, previousReturnValue);
     }
