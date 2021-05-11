@@ -290,6 +290,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class NilSingleFieldStruct < T::Struct
+    prop :foo, T.nilable(Integer), raise_on_nil_write: true
+  end
+
   class NilFieldStruct < T::Struct
     prop :foo, T.nilable(Integer), raise_on_nil_write: true
     prop :bar, T.nilable(String), raise_on_nil_write: true
@@ -348,6 +352,39 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'does not assert when strict=false' do
       foo = NilFieldStruct.allocate
       foo.serialize(false)
+    end
+
+    it 'records the non-presence of required properties on deserialize' do
+      struct = NilSingleFieldStruct.from_hash({})
+      assert_nil(struct.foo)
+      missing_props = struct.instance_variable_get(:@_required_props_missing_from_deserialize)
+      refute_nil(missing_props)
+      refute(missing_props.empty?)
+      assert_equal(1, missing_props.length)
+      assert(missing_props.include?(:foo))
+    end
+
+    it 'round-trips when required properties are not provided to deserialize' do
+      struct = NilSingleFieldStruct.from_hash({})
+      assert_nil(struct.foo)
+
+      msg_string = nil
+      extra_hash = nil
+
+      T::Configuration.log_info_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      h = struct.serialize
+
+      assert_instance_of(Hash, h)
+      assert(h.empty?)
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      assert_includes(msg_string, "missing required property in serialize")
+      assert_equal(:foo, extra_hash[:prop])
+      assert_includes(extra_hash[:class], "NilSingleFieldStruct")
     end
 
     describe 'with weak constructor' do
