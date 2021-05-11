@@ -721,20 +721,6 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 for (auto &ex : importedPackage->exports) {
                     ImportTreeBuilder::addImport(ctx, &importTree, ex, *importedPackage);
                 }
-                // foos.emplace_back({importedPackage
-
-                // ast::ClassDef::RHS_store exportedItemsCopy;
-                // for (const auto &exported : importedPackage->exportedItems) {
-                //     exportedItemsCopy.emplace_back(exported.deepCopy());
-                // }
-
-                // ENFORCE(!imported.fullName.parts.empty());
-                // // Create a module for the imported package that sets up constant references to exported items.
-                // // Use proper loc information on the module name so that `import Foo` displays in the results of LSP
-                // // Find All References on `Foo`.
-                // importedPackages.emplace_back(ast::MK::Module(imported.loc, imported.loc,
-                //                                               imported.fullName.toLiteral(imported.loc), {},
-                //                                               std::move(exportedItemsCopy)));
             }
         }
         importedPackages.emplace_back(ImportTreeBuilder::makeModule(ctx, &importTree, package->name.mangledName));
