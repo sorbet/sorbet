@@ -334,7 +334,7 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         cxxopts::value<vector<string>>(), "string");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     options.add_options("advanced")("autogen-version", "Autogen version to output", cxxopts::value<int>());
-    options.add_options("advanced")("autogen-include-methods", "Include method definitions/references in Autogen", cxxopts::value<bool>());
+    options.add_options("advanced")("autogen-include-methods", "Include methods in autogen output");
     options.add_options("advanced")("stripe-mode", "Enable Stripe specific error enforcement", cxxopts::value<bool>());
     options.add_options("advanced")("stripe-packages", "Enable support for Stripe's internal Ruby package system",
                                     cxxopts::value<bool>());
@@ -825,9 +825,7 @@ void readOptions(Options &opts,
             }
             opts.autogenVersion = raw["autogen-version"].as<int>();
         }
-        if (raw.count("autogen-include-methods") > 0) {
-            opts.autogenIncludeMethods = true;
-        }
+        opts.autogenIncludeMethods = raw["autogen-include-methods"].as<bool>();
         opts.stripeMode = raw["stripe-mode"].as<bool>();
         opts.stripePackages = raw["stripe-packages"].as<bool>();
         extractAutoloaderConfig(raw, opts, logger);
