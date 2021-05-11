@@ -571,6 +571,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal('foo', CustomTypeStruct.from_hash({'single' => 'foo'}).serialize['single'])
     end
 
+    it 'round trips with arrays' do
+      a = ['bar', 'baz']
+      assert_equal(a, CustomTypeStruct.from_hash({'array' => a}).serialize['array'])
+    end
+
     it 'raises serialize errors when props with a custom subtype store the wrong datatype' do
       struct = CustomTypeStruct.new
       struct.instance_variable_set(:@single, 'not a serializable thing')
