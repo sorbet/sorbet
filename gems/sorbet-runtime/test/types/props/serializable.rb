@@ -995,6 +995,38 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class Hashlike < Hash
+    def initialize
+      @called = false
+      super()
+    end
+
+    def [](key)
+      @called = true
+      super(key)
+    end
+
+    def was_called
+      @called
+    end
+  end
+
+  class StructForHashlike
+    include T::Props::Serializable
+
+    prop :stringprop, String
+  end
+
+  describe 'with a custom hash-like type' do
+    it 'calls the overridden aref method' do
+      h = Hashlike['stringprop', 'foo']
+      assert_instance_of(Hashlike, h)
+      obj = StructForHashlike.from_hash(h)
+      assert_equal("foo", obj.stringprop)
+      assert(h.was_called)
+    end
+  end
+
   class ComplexStruct < T::Struct
     prop :primitive, Integer
     prop :nilable, T.nilable(Integer)
