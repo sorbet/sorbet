@@ -80,6 +80,36 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     )
   end
 
+  class DefaultArrayStruct
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :arrayprop, T::Array[String], default: []
+  end
+
+  class DefaultHashStruct
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :hashprop, T::Hash[String, String], default: {}
+  end
+
+  describe 'default: with literals' do
+    it 'does not share structure for arrays' do
+      a = DefaultArrayStruct.new
+      b = DefaultArrayStruct.new
+
+      refute_equal(a.arrayprop.object_id, b.arrayprop.object_id)
+    end
+
+    it 'does not share structure for hashes' do
+      a = DefaultHashStruct.new
+      b = DefaultHashStruct.new
+
+      refute_equal(a.hashprop.object_id, b.hashprop.object_id)
+    end
+  end
+
   class ParentWithNoDefault < T::InexactStruct
     prop :prop, String
   end
@@ -260,6 +290,10 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class NilSingleFieldStruct < T::Struct
+    prop :foo, T.nilable(Integer), raise_on_nil_write: true
+  end
+
   class NilFieldStruct < T::Struct
     prop :foo, T.nilable(Integer), raise_on_nil_write: true
     prop :bar, T.nilable(String), raise_on_nil_write: true
@@ -318,6 +352,39 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'does not assert when strict=false' do
       foo = NilFieldStruct.allocate
       foo.serialize(false)
+    end
+
+    it 'records the non-presence of required properties on deserialize' do
+      struct = NilSingleFieldStruct.from_hash({})
+      assert_nil(struct.foo)
+      missing_props = struct.instance_variable_get(:@_required_props_missing_from_deserialize)
+      refute_nil(missing_props)
+      refute(missing_props.empty?)
+      assert_equal(1, missing_props.length)
+      assert(missing_props.include?(:foo))
+    end
+
+    it 'round-trips when required properties are not provided to deserialize' do
+      struct = NilSingleFieldStruct.from_hash({})
+      assert_nil(struct.foo)
+
+      msg_string = nil
+      extra_hash = nil
+
+      T::Configuration.log_info_handler = proc do |msg, extra|
+        msg_string = msg
+        extra_hash = extra
+      end
+
+      h = struct.serialize
+
+      assert_instance_of(Hash, h)
+      assert(h.empty?)
+      refute_nil(msg_string)
+      refute_nil(extra_hash)
+      assert_includes(msg_string, "missing required property in serialize")
+      assert_equal(:foo, extra_hash[:prop])
+      assert_includes(extra_hash[:class], "NilSingleFieldStruct")
     end
 
     describe 'with weak constructor' do
@@ -502,6 +569,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   describe 'custom type' do
     it 'round trips as plain value' do
       assert_equal('foo', CustomTypeStruct.from_hash({'single' => 'foo'}).serialize['single'])
+    end
+
+    it 'round trips with arrays' do
+      a = ['bar', 'baz']
+      assert_equal(a, CustomTypeStruct.from_hash({'array' => a}).serialize['array'])
     end
 
     it 'raises serialize errors when props with a custom subtype store the wrong datatype' do
@@ -965,6 +1037,53 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
   end
 
+  class Hashlike < Hash
+    def initialize
+      @called = false
+      super()
+    end
+
+    def [](key)
+      @called = true
+      super(key)
+    end
+
+    def was_called
+      @called
+    end
+  end
+
+  class StructForHashlike
+    include T::Props::Serializable
+
+    prop :stringprop, String
+  end
+
+  describe 'with a custom hash-like type' do
+    it 'calls the overridden aref method' do
+      h = Hashlike['stringprop', 'foo']
+      assert_instance_of(Hashlike, h)
+      obj = StructForHashlike.from_hash(h)
+      assert_equal("foo", obj.stringprop)
+      assert(h.was_called)
+    end
+  end
+
+  class DefaultStringProp
+    include T::Props::Serializable
+
+    prop :stringprop, String, default: "default"
+  end
+
+  describe 'with defaulted string props' do
+    it 'does not share structure' do
+      h = {}
+      obj1 = DefaultStringProp.from_hash(h)
+      obj2 = DefaultStringProp.from_hash(h)
+      refute_equal(obj1.stringprop.object_id, obj2.stringprop.object_id)
+    end
+  end
+
   class ComplexStruct < T::Struct
     prop :primitive, Integer
     prop :nilable, T.nilable(Integer)
@@ -1095,5 +1214,31 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     assert_instance_of(Float, swf2.my_float)
     assert_in_delta(1.0, swf2.my_float, 0.0001)
+  end
+
+  class DynamicProps
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :nilstring, T.nilable(String)
+  end
+
+  describe 'dynamic props' do
+    it 'serializes when new props are added' do
+      obj = DynamicProps.new(nilstring: 'foo')
+      h = obj.serialize
+
+      assert_equal('foo', h['nilstring'])
+
+      DynamicProps.prop(:arrayprop, T::Array[String], default: ['default'])
+
+      assert_raises(TypeError) do
+        obj.serialize
+      end
+
+      obj.arrayprop = ['bar']
+      h = obj.serialize
+      assert_equal(['bar'], h['arrayprop'])
+    end
   end
 end
