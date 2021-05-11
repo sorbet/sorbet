@@ -180,6 +180,7 @@ NameDef names[] = {
     {"encryptedProp", "encrypted_prop"},
     {"array"},
     {"defDelegator", "def_delegator"},
+    {"defDelegators", "def_delegators"},
     {"delegate"},
     {"type"},
     {"optional"},
