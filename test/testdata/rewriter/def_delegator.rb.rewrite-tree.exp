@@ -16,6 +16,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.untyped(), :<blk>, ::T.nilable(::Proc)).returns(::T.untyped())
+    end
+
+    def baz<<todo method>>(*arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.untyped(), :<blk>, ::T.nilable(::Proc)).returns(::T.untyped())
+    end
+
+    def qux<<todo method>>(*arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
     ::Sorbet::Private::Static.sig(<self>) do ||
       <self>.void()
     end
@@ -52,6 +68,36 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.aliased_bar(:hey, true) do ||
           <emptyTree>
         end
+        <self>.baz() do ||
+          <emptyTree>
+        end
+        <self>.baz(1, 2)
+        <self>.baz(1, 2) do ||
+          <emptyTree>
+        end
+        <self>.baz(1, 2, :hey, true)
+        <self>.baz(1, 2, :hey, true) do ||
+          <emptyTree>
+        end
+        <self>.baz(:hey, true)
+        <self>.baz(:hey, true) do ||
+          <emptyTree>
+        end
+        <self>.qux() do ||
+          <emptyTree>
+        end
+        <self>.qux(1, 2)
+        <self>.qux(1, 2) do ||
+          <emptyTree>
+        end
+        <self>.qux(1, 2, :hey, true)
+        <self>.qux(1, 2, :hey, true) do ||
+          <emptyTree>
+        end
+        <self>.qux(:hey, true)
+        <self>.qux(:hey, true) do ||
+          <emptyTree>
+        end
         <self>.bar()
       end
     end
@@ -67,6 +113,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar, :normal)
 
     <self>.def_delegator(:thing, :bar, :aliased_bar)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :qux, :normal)
+
+    <self>.def_delegators(:thing, :baz, :qux)
+
+    <self>.def_delegators(:thing)
 
     ::Sorbet::Private::Static.keep_def(<self>, :usages, :normal)
   end
@@ -88,6 +142,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.untyped(), :<blk>, ::T.nilable(::Proc)).returns(::T.untyped())
+    end
+
+    def baz<<todo method>>(*arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.untyped(), :<blk>, ::T.nilable(::Proc)).returns(::T.untyped())
+    end
+
+    def qux<<todo method>>(*arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
     <self>.extend(<emptyTree>::<C Forwardable>)
 
     ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
@@ -97,6 +167,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar, :normal)
 
     <self>.def_delegator(:thing, :bar, :aliased_bar)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :qux, :normal)
+
+    <self>.def_delegators(:thing, :baz, :qux)
+
+    <self>.def_delegators(:thing)
   end
 
   class <emptyTree>::<C ErrorsWhenMissingForwardable><<C <todo sym>>> < (::<todo sym>)
@@ -116,6 +194,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
     end
 
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.untyped(), :<blk>, ::T.nilable(::Proc)).returns(::T.untyped())
+    end
+
+    def baz<<todo method>>(*arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
+    ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
+      <self>.params(:arg0, ::T.untyped(), :<blk>, ::T.nilable(::Proc)).returns(::T.untyped())
+    end
+
+    def qux<<todo method>>(*arg0, &<blk>)
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+
     ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
 
     <self>.def_delegator(:thing, :foo)
@@ -123,6 +217,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     ::Sorbet::Private::Static.keep_def(<self>, :aliased_bar, :normal)
 
     <self>.def_delegator(:thing, :bar, :aliased_bar)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :qux, :normal)
+
+    <self>.def_delegators(:thing, :baz, :qux)
+
+    <self>.def_delegators(:thing)
   end
 
   class <emptyTree>::<C IgnoredUsages><<C <todo sym>>> < (::<todo sym>)
@@ -149,6 +251,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.def_delegator(234, :foo)
 
     <self>.def_delegator(:thing, :foo)
+
+    <self>.def_delegators()
+
+    <self>.def_delegators(:thing, :foo, :bar, :kwarg, :thing)
+
+    <self>.def_delegators(:foo, :kwarg1, :thing, :kwarg2, local)
+
+    <self>.def_delegators(:foo, {local => :thing})
+
+    <self>.def_delegators(234, :foo)
+
+    <self>.def_delegators(:thing, :foo)
   end
 
   class <emptyTree>::<C EnumerableUsage><<C <todo sym>>> < (::<todo sym>)
