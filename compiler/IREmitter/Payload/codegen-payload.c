@@ -265,6 +265,16 @@ int sorbet_rubyIseqTypeMethod() {
 }
 
 SORBET_INLINE
+int sorbet_rubyIseqTypeTop() {
+    return ISEQ_TYPE_TOP;
+}
+
+SORBET_INLINE
+int sorbet_rubyIseqTypeClass() {
+    return ISEQ_TYPE_CLASS;
+}
+
+SORBET_INLINE
 int sorbet_rubyIseqTypeBlock() {
     return ISEQ_TYPE_BLOCK;
 }

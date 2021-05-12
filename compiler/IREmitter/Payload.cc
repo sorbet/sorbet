@@ -408,9 +408,13 @@ llvm::Value *getIseqType(CompilerState &cs, llvm::IRBuilderBase &build, const IR
     auto &builder = builderCast(build);
     switch (irctx.rubyBlockType[rubyBlockId]) {
         case FunctionType::Method:
-        case FunctionType::StaticInitFile:
-        case FunctionType::StaticInitModule:
             return builder.CreateCall(cs.getFunction("sorbet_rubyIseqTypeMethod"), {}, "ISEQ_TYPE_METHOD");
+
+        case FunctionType::StaticInitFile:
+            return builder.CreateCall(cs.getFunction("sorbet_rubyIseqTypeTop"), {}, "ISEQ_TYPE_TOP");
+
+        case FunctionType::StaticInitModule:
+            return builder.CreateCall(cs.getFunction("sorbet_rubyIseqTypeClass"), {}, "ISEQ_TYPE_CLASS");
 
         case FunctionType::Block:
             return builder.CreateCall(cs.getFunction("sorbet_rubyIseqTypeBlock"), {}, "ISEQ_TYPE_BLOCK");

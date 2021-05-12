@@ -232,7 +232,7 @@ rb_iseq_t *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename
         iseq->body->local_table = ids;
     }
 
-    if (iseqType == ISEQ_TYPE_METHOD && numLocals > 0) {
+    if ((iseqType == ISEQ_TYPE_METHOD || iseqType == ISEQ_TYPE_CLASS || iseqType == ISEQ_TYPE_TOP) && numLocals > 0) {
         // this is a simplified version of `iseq_set_local_table` from
         // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L1767-L1789
 
