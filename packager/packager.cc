@@ -642,20 +642,19 @@ void ImportTreeBuilder::addImport(core::Context ctx, ImportTree *root, const Ful
     }
 }
 
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, core::NameRef todo) {
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, core::NameRef pkgMangledName) {
     vector<core::NameRef> parts;
-    return makeModule(ctx, root, parts, todo);
+    return makeModule(ctx, root, parts, pkgMangledName);
 }
 
 ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, vector<core::NameRef> &parts,
-                                                 core::NameRef todo) {
+                                                 core::NameRef pkgMangledName) {
     auto todoLoc = core::LocOffsets::none(); // TODO TODO real locs
 
     if (root->srcPackageMangledName.exists()) { // Assignment
         auto rhs = prependName(parts2literal(parts, todoLoc), root->srcPackageMangledName);
         return ast::MK::Assign(todoLoc, name2Expr(parts.back()), std::move(rhs));
     }
-    ast::ClassDef::RHS_store rhs;
 
     // Sort by name for stability
     vector<pair<core::NameRef, ImportTree *>> childPairs;
@@ -664,14 +663,14 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
     fast_sort(childPairs,
               [&ctx](const auto &lhs, const auto &rhs) -> bool { return lhs.first.show(ctx) < rhs.first.show(ctx); });
 
+    ast::ClassDef::RHS_store rhs;
     for (auto const &[nameRef, child] : childPairs) {
         parts.emplace_back(nameRef);
-        rhs.emplace_back(makeModule(ctx, child, parts, todo));
+        rhs.emplace_back(makeModule(ctx, child, parts, pkgMangledName));
         parts.pop_back();
     }
-    core::NameRef name = parts.empty() ? todo : parts.back(); // TODO cleanup "todo"
-
-    return ast::MK::Module(todoLoc, todoLoc, name2Expr(name), {}, std::move(rhs));
+    core::NameRef moduleName = parts.empty() ? pkgMangledName : parts.back();
+    return ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), name2Expr(moduleName), {}, std::move(rhs));
 }
 
 // Add:
