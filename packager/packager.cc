@@ -589,11 +589,11 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
 }
 
 class ImportTree {
-public:
     // Invariant: a tree node may only have `children` XOR `srcPackageMangledName`.
     UnorderedMap<core::NameRef, std::unique_ptr<ImportTree>> children;
     core::NameRef srcPackageMangledName;
 
+public:
     ImportTree() = default;
     ImportTree(const ImportTree &) = delete;
     ImportTree(ImportTree &&) = default;
@@ -604,18 +604,37 @@ public:
 };
 
 class ImportTreeBuilder {
+    PackageInfo package; // The package we are building an import tree for.
+    ImportTree root;
+
 public:
-    static void addImport(core::Context, ImportTree *root, const FullyQualifiedName &fqn, const PackageInfo &package);
-    static ast::ExpressionPtr makeModule(core::Context, ImportTree *root, core::NameRef);
+    ImportTreeBuilder(PackageInfo package) : package(package) {}
+    ImportTreeBuilder(const ImportTreeBuilder &) = delete;
+    ImportTreeBuilder(ImportTreeBuilder &&) = default;
+    ImportTreeBuilder &operator=(const ImportTreeBuilder &) = delete;
+    ImportTreeBuilder &operator=(ImportTreeBuilder &&) = default;
+
+    void mergeImports(core::Context, const PackageInfo &importedPackage, core::LocOffsets loc);
+    ast::ExpressionPtr makeModule(core::Context, core::NameRef);
 
 private:
-    static ast::ExpressionPtr makeModule(core::Context, ImportTree *root, vector<core::NameRef> &parts, core::NameRef);
+    void addImport(core::Context, const PackageInfo &importedPackage, core::LocOffsets loc,
+                   const FullyQualifiedName &exportFqn);
+    ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts, core::NameRef);
+
+    const PackageName &findImportByMangledName(core::NameRef mangledName);
 };
 
-void ImportTreeBuilder::addImport(core::Context ctx, ImportTree *root, const FullyQualifiedName &fqn,
-                                  const PackageInfo &package) {
-    ImportTree *node = root;
-    for (auto nameRef : fqn.parts) {
+void ImportTreeBuilder::mergeImports(core::Context ctx, const PackageInfo &importedPackage, core::LocOffsets loc) {
+    for (const auto &exportedFqn : importedPackage.exports) {
+        addImport(ctx, importedPackage, loc, exportedFqn);
+    }
+}
+
+void ImportTreeBuilder::addImport(core::Context ctx, const PackageInfo &importedPackage, core::LocOffsets loc,
+                                  const FullyQualifiedName &exportFqn) {
+    ImportTree *node = &root;
+    for (auto nameRef : exportFqn.parts) {
         auto &child = node->children[nameRef];
         if (!child) {
             child = make_unique<ImportTree>();
@@ -624,41 +643,44 @@ void ImportTreeBuilder::addImport(core::Context ctx, ImportTree *root, const Ful
             // deeper node. For example:
             // import A::B
             // import A::B::C <-- ERR
-            if (auto e = ctx.beginError(fqn.loc.offsets(), core::errors::Packager::ImportConflict)) {
-                e.setHeader("TODO TODO A");
+            if (auto e = ctx.beginError(loc, core::errors::Packager::ImportConflict)) {
+                e.setHeader("Cannot import packages that export the same name");
+                const auto &conflictImport = findImportByMangledName(child->srcPackageMangledName);
+                e.addErrorLine(core::Loc(ctx.file, conflictImport.loc), "Source of conflicting import");
             }
         }
         node = child.get();
     }
-    node->srcPackageMangledName = package.name.mangledName;
+    node->srcPackageMangledName = importedPackage.name.mangledName;
     if (!node->children.empty()) {
         // Attempting to attach a definition to a node that already has child nodes. Similar error
         // as above when import ordering is reversed. For example:
         // import A::B::C
         // import A::B <-- ERR
-        if (auto e = ctx.beginError(fqn.loc.offsets(), core::errors::Packager::ImportConflict)) {
+        if (auto e = ctx.beginError(loc, core::errors::Packager::ImportConflict)) {
             e.setHeader("TODO TODO B");
+            // const auto &conflictImport = findImportByMangledName(node->children.begin().);
         }
     }
 }
 
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, core::NameRef pkgMangledName) {
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, core::NameRef pkgMangledName) {
     vector<core::NameRef> parts;
-    return makeModule(ctx, root, parts, pkgMangledName);
+    return makeModule(ctx, &root, parts, pkgMangledName);
 }
 
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *root, vector<core::NameRef> &parts,
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts,
                                                  core::NameRef pkgMangledName) {
     auto todoLoc = core::LocOffsets::none(); // TODO TODO real locs
 
-    if (root->srcPackageMangledName.exists()) { // Assignment
-        auto rhs = prependName(parts2literal(parts, todoLoc), root->srcPackageMangledName);
+    if (node->srcPackageMangledName.exists()) { // Assignment
+        auto rhs = prependName(parts2literal(parts, todoLoc), node->srcPackageMangledName);
         return ast::MK::Assign(todoLoc, name2Expr(parts.back()), std::move(rhs));
     }
 
     // Sort by name for stability
     vector<pair<core::NameRef, ImportTree *>> childPairs;
-    std::transform(root->children.begin(), root->children.end(), back_inserter(childPairs),
+    std::transform(node->children.begin(), node->children.end(), back_inserter(childPairs),
                    [](const auto &pair) { return make_pair(pair.first, pair.second.get()); });
     fast_sort(childPairs,
               [&ctx](const auto &lhs, const auto &rhs) -> bool { return lhs.first.show(ctx) < rhs.first.show(ctx); });
@@ -670,7 +692,17 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
         parts.pop_back();
     }
     core::NameRef moduleName = parts.empty() ? pkgMangledName : parts.back();
-    return ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), name2Expr(moduleName), {}, std::move(rhs));
+    return ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), name2Expr(moduleName), {},
+                           std::move(rhs));
+}
+
+const PackageName &ImportTreeBuilder::findImportByMangledName(core::NameRef mangledName) {
+    const auto &names = package.importedPackageNames;
+    auto it = absl::c_find_if(names, [mangledName](const PackageName &importedPkgName) -> bool {
+        return importedPkgName.mangledName == mangledName;
+    });
+    ENFORCE(it != names.end());
+    return *it;
 }
 
 // Add:
@@ -699,8 +731,8 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 
     {
         UnorderedMap<core::NameRef, core::LocOffsets> importedNames;
-        ImportTree importTree;
-        for (auto imported : package->importedPackageNames) {
+        ImportTreeBuilder treeBuilder(*package);
+        for (auto &imported : package->importedPackageNames) {
             auto importedPackage = packageDB.getPackageByMangledName(imported.mangledName);
             if (importedPackage == nullptr) {
                 if (auto e = ctx.beginError(imported.loc, core::errors::Packager::PackageNotFound)) {
@@ -717,12 +749,10 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 }
             } else {
                 importedNames[imported.mangledName] = imported.loc;
-                for (auto &ex : importedPackage->exports) {
-                    ImportTreeBuilder::addImport(ctx, &importTree, ex, *importedPackage);
-                }
+                treeBuilder.mergeImports(ctx, *importedPackage, imported.loc);
             }
         }
-        importedPackages.emplace_back(ImportTreeBuilder::makeModule(ctx, &importTree, package->name.mangledName));
+        importedPackages.emplace_back(treeBuilder.makeModule(ctx, package->name.mangledName));
     }
 
     auto packageNamespace =
