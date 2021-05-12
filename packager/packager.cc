@@ -615,12 +615,12 @@ public:
     ImportTreeBuilder &operator=(ImportTreeBuilder &&) = default;
 
     void mergeImports(core::Context, const PackageInfo &importedPackage, core::LocOffsets loc);
-    ast::ExpressionPtr makeModule(core::Context, core::NameRef);
+    ast::ExpressionPtr makeModule(core::Context);
 
 private:
     void addImport(core::Context, const PackageInfo &importedPackage, core::LocOffsets loc,
                    const FullyQualifiedName &exportFqn);
-    ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts, core::NameRef);
+    ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts);
 
     const PackageName &findImportByMangledName(core::NameRef mangledName);
 };
@@ -664,13 +664,12 @@ void ImportTreeBuilder::addImport(core::Context ctx, const PackageInfo &imported
     }
 }
 
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, core::NameRef pkgMangledName) {
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx) {
     vector<core::NameRef> parts;
-    return makeModule(ctx, &root, parts, pkgMangledName);
+    return makeModule(ctx, &root, parts);
 }
 
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts,
-                                                 core::NameRef pkgMangledName) {
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts) {
     auto todoLoc = core::LocOffsets::none(); // TODO TODO real locs
 
     if (node->srcPackageMangledName.exists()) { // Assignment
@@ -688,10 +687,10 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
     ast::ClassDef::RHS_store rhs;
     for (auto const &[nameRef, child] : childPairs) {
         parts.emplace_back(nameRef);
-        rhs.emplace_back(makeModule(ctx, child, parts, pkgMangledName));
+        rhs.emplace_back(makeModule(ctx, child, parts));
         parts.pop_back();
     }
-    core::NameRef moduleName = parts.empty() ? pkgMangledName : parts.back();
+    core::NameRef moduleName = parts.empty() ? package.name.mangledName : parts.back();
     return ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), name2Expr(moduleName), {},
                            std::move(rhs));
 }
@@ -752,7 +751,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 treeBuilder.mergeImports(ctx, *importedPackage, imported.loc);
             }
         }
-        importedPackages.emplace_back(treeBuilder.makeModule(ctx, package->name.mangledName));
+        importedPackages.emplace_back(treeBuilder.makeModule(ctx));
     }
 
     auto packageNamespace =
