@@ -339,7 +339,7 @@ class Resolv::DNS
   # ```ruby
   # dns.timeouts = 3
   # ```
-  sig { params(values: T.any(NilClass, Integer, T::Array[Integer])).void }
+  sig { params(values: T.any(NilClass, Numeric, T::Array[Numeric])).void }
   def timeouts=(values); end
 
   # Creates a new [`DNS`](https://docs.ruby-lang.org/en/2.7.0/Resolv/DNS.html)
