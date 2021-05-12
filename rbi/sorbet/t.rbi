@@ -145,6 +145,7 @@ module T::Configuration
   def self.exclude_value_in_type_errors; end
   sig {void}
   def self.include_value_in_type_errors; end
+  def self.can_enable_vm_prop_serde?; end
   def self.use_vm_prop_serde?; end
   def self.enable_vm_prop_serde; end
   def self.disable_vm_prop_serde; end

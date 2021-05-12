@@ -327,30 +327,26 @@ module Opus::Types::Test
           assert_equal('T.let: Expected type Integer, got type String', e.message.split("\n").first)
         end
       end
-    end
 
-    describe 'vm_prop_serde' do
-      it 'raises errors if no runtime support exists' do
-        # This test is checking that we get errors from serialization/deserialization
-        # when the VM we're running on doesn't support VM-backed serialization/deserialization
-        # routines, so bail if the VM does support such routines.
-        return if T::Props::Private::DeserializerGenerator.singleton_class.method_defined?(:generate2)
+      describe 'enable_vm_prop_serde' do
+        it "fails if the VM doesn't support it" do
+          return if T::Configuration.can_enable_vm_prop_serde?
 
-        was_enabled = T::Configuration.use_vm_prop_serde?
-
-        begin
-          T::Configuration.enable_vm_prop_serde
-          c = Class.new(T::Struct) do
-            prop :p, Integer
+          assert_raises(RuntimeError) do
+            T::Configuration.enable_vm_prop_serde
           end
+        end
 
-          i = c.new(p: 5)
-          e = assert_raises(NoMethodError) do
-            s = i.serialize
+        it "succeeds if the VM does support it" do
+          return unless T::Configuration.can_enable_vm_prop_serde?
+
+          was_enabled = T::Configuration.use_vm_prop_serde?
+
+          begin
+            T::Configuration.enable_vm_prop_serde
+          ensure
+            T::Configuration.disable_vm_prop_serde unless was_enabled
           end
-          assert_equal(:generate2, e.name)
-        ensure
-          T::Configuration.disable_vm_prop_serde unless was_enabled
         end
       end
     end
