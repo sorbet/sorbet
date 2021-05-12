@@ -756,6 +756,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
         func->arg_begin()->setName("argc");
         (func->arg_begin() + 1)->setName("argArray");
         (func->arg_begin() + 2)->setName("selfRaw");
+        (func->arg_begin() + 3)->setName("cfp");
     }
     func->addFnAttr(llvm::Attribute::AttrKind::StackProtectReq);
     func->addFnAttr(llvm::Attribute::AttrKind::NoUnwind);
@@ -847,6 +848,7 @@ void IREmitter::buildInitFor(CompilerState &cs, const core::SymbolRef &sym, stri
                                llvm::ConstantInt::get(cs, llvm::APInt(32, 0, true)),
                                llvm::ConstantPointerNull::get(llvm::Type::getInt64PtrTy(cs)),
                                Payload::rubyTopSelf(cs, builder),
+                               builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfpTop"),
                            },
                            staticInitName);
     }

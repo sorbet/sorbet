@@ -370,7 +370,7 @@ public:
 
         auto &builder = builderCast(mcctx.build);
 
-        auto *cfp = builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
 
         // Push receiver.
         Payload::pushRubyStack(cs, builder, cfp,

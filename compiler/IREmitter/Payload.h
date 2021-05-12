@@ -101,6 +101,9 @@ public:
     static llvm::Value *getFileLineNumberInfo(CompilerState &gs, llvm::IRBuilderBase &builder, core::FileRef file);
     static llvm::Value *getIseqEncodedPointer(CompilerState &gs, llvm::IRBuilderBase &builder, core::FileRef file);
 
+    static llvm::Value *getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                       int rubyBlockId);
+
     static const VMFlag VM_CALL_ARGS_SIMPLE;
     static const VMFlag VM_CALL_ARGS_SPLAT;
     static const VMFlag VM_CALL_KWARG;

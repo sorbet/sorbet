@@ -71,8 +71,8 @@ SORBET_ALIVE(VALUE, sorbet_getConstant, (const char *path, long pathLen));
 SORBET_ALIVE(VALUE, sorbet_setConstant, (VALUE mod, const char *name, long nameLen, VALUE value));
 
 SORBET_ALIVE(const VALUE, sorbet_readRealpath, (void));
-SORBET_ALIVE(void, sorbet_pushCfuncFrame, (struct FunctionInlineCache *, VALUE, const rb_iseq_t *));
-SORBET_ALIVE(void, sorbet_pushStaticInitFrame, (VALUE));
+SORBET_ALIVE(rb_control_frame_t *, sorbet_pushCfuncFrame, (struct FunctionInlineCache *, VALUE, const rb_iseq_t *));
+SORBET_ALIVE(rb_control_frame_t *, sorbet_pushStaticInitFrame, (VALUE));
 SORBET_ALIVE(void, sorbet_pushBlockFrame, (const struct rb_captured_block *));
 SORBET_ALIVE(void, sorbet_popRubyStack, (void));
 
@@ -332,14 +332,13 @@ VALUE sorbet_defineNestedClass(VALUE owner, const char *name, VALUE super) {
 
 // this DOES override existing methods
 SORBET_INLINE
-void sorbet_defineMethod(VALUE klass, const char *name, VALUE (*methodPtr)(int, VALUE *, VALUE), void *paramp,
-                         rb_iseq_t *iseq) {
+void sorbet_defineMethod(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp, rb_iseq_t *iseq) {
     rb_add_method_sorbet(klass, rb_intern(name), methodPtr, (rb_sorbet_param_t *)paramp, METHOD_VISI_PUBLIC, iseq);
 }
 
 // this DOES override existing methods
 SORBET_INLINE
-void sorbet_defineMethodSingleton(VALUE klass, const char *name, VALUE (*methodPtr)(int, VALUE *, VALUE), void *paramp,
+void sorbet_defineMethodSingleton(VALUE klass, const char *name, rb_sorbet_func_t methodPtr, void *paramp,
                                   rb_iseq_t *iseq) {
     rb_define_singleton_sorbet_method(klass, name, methodPtr, (rb_sorbet_param_t *)paramp, iseq);
 }
@@ -1235,23 +1234,23 @@ VALUE sorbet_makeBlockHandlerProc(VALUE block) {
 }
 
 SORBET_INLINE
-VALUE sorbet_callFuncDirect(struct FunctionInlineCache *cache, VALUE (*methodPtr)(int, VALUE *, VALUE), int argc,
-                            VALUE *argv, VALUE recv, rb_iseq_t *iseq) {
+VALUE sorbet_callFuncDirect(struct FunctionInlineCache *cache, rb_sorbet_func_t methodPtr, int argc, VALUE *argv,
+                            VALUE recv, rb_iseq_t *iseq) {
     // we need a method entry from the call data to be able to setup the stack correctly.
     if (UNLIKELY(cache->cd.cc.me == NULL)) {
         sorbet_vmMethodSearch(cache, recv);
     }
 
-    sorbet_pushCfuncFrame(cache, recv, iseq);
-    VALUE res = methodPtr(argc, argv, recv);
+    rb_control_frame_t *cfp = sorbet_pushCfuncFrame(cache, recv, iseq);
+    VALUE res = methodPtr(argc, argv, recv, cfp);
     sorbet_popRubyStack();
     return res;
 }
 
 SORBET_INLINE
-VALUE sorbet_callStaticInitDirect(VALUE (*methodPtr)(int, VALUE *, VALUE), int argc, VALUE *argv, VALUE recv) {
-    sorbet_pushStaticInitFrame(recv);
-    VALUE res = methodPtr(argc, argv, recv);
+VALUE sorbet_callStaticInitDirect(rb_sorbet_func_t methodPtr, int argc, VALUE *argv, VALUE recv) {
+    rb_control_frame_t *cfp = sorbet_pushStaticInitFrame(recv);
+    VALUE res = methodPtr(argc, argv, recv, cfp);
     sorbet_popRubyStack();
     return res;
 }

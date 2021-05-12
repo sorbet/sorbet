@@ -432,7 +432,7 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
     // the receiver isn't included in the arg count
     int argc = stack.size() - 1;
 
-    auto *cfp = builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
+    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
     for (auto *arg : stack) {
         Payload::pushRubyStack(cs, builder, cfp, arg);
     }

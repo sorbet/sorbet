@@ -37,7 +37,8 @@ llvm::FunctionType *CompilerState::getRubyFFIType() {
     llvm::Type *args[] = {
         llvm::Type::getInt32Ty(lctx),    // arg count
         llvm::Type::getInt64PtrTy(lctx), // argArray
-        llvm::Type::getInt64Ty(lctx)     // self
+        llvm::Type::getInt64Ty(lctx),    // self
+        llvm::StructType::getTypeByName(lctx, "struct.rb_control_frame_struct")->getPointerTo(),
     };
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }

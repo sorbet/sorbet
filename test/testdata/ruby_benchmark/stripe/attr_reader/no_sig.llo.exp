@@ -2,17 +2,16 @@
 source_filename = "llvm-link"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 
-%struct.rb_vm_struct = type { i64, %struct.rb_global_vm_lock_struct, %struct.rb_thread_struct*, %struct.rb_thread_struct*, i8*, i64, %union.pthread_mutex_t, %struct.list_head, %struct.list_head, %struct.list_head, %struct.list_head, i64, i32, i32, i8, i32, i64, [5 x i64], i64, i64, i64, i64, i64, i64, i64, %struct.st_table*, %struct.st_table*, %struct.anon.5, %struct.rb_hook_list_struct, %struct.st_table*, %struct.rb_postponed_job_struct*, i32, i32, %struct.list_head, %union.pthread_mutex_t, i64, i64, i64, i64, i64, i32, %struct.st_table*, %struct.rb_objspace*, %struct.rb_at_exit_list*, i64*, %struct.st_table*, %struct.rb_builtin_function*, i32, %struct.anon.6, [29 x i16] }
+%struct.rb_vm_struct = type { i64, %struct.rb_global_vm_lock_struct, %struct.rb_thread_struct*, %struct.rb_thread_struct*, i8*, i64, %union.pthread_mutex_t, %struct.list_head, %struct.list_head, %struct.list_head, %struct.list_head, i64, i32, i32, i8, i32, i64, [5 x i64], i64, i64, i64, i64, i64, i64, i64, %struct.st_table*, %struct.st_table*, %struct.anon.3, %struct.rb_hook_list_struct, %struct.st_table*, %struct.rb_postponed_job_struct*, i32, i32, %struct.list_head, %union.pthread_mutex_t, i64, i64, i64, i64, i64, i32, %struct.st_table*, %struct.rb_objspace*, %struct.rb_at_exit_list*, i64*, %struct.st_table*, %struct.rb_builtin_function*, i32, %struct.anon.4, [29 x i16] }
 %struct.rb_global_vm_lock_struct = type { %struct.rb_thread_struct*, %union.pthread_mutex_t, %struct.list_head, %struct.rb_thread_struct*, i32, %union.pthread_cond_t, %union.pthread_cond_t, i32, i32 }
-%union.pthread_cond_t = type { %struct.__pthread_cond_s }
-%struct.__pthread_cond_s = type { %union.anon, %union.anon, [2 x i32], [2 x i32], i32, i32, [2 x i32] }
-%union.anon = type { i64 }
-%struct.rb_thread_struct = type { %struct.list_node, i64, %struct.rb_vm_struct*, %struct.rb_execution_context_struct*, i64, %struct.rb_calling_info*, i64, i64, i64, i8, i8, i32, %struct.native_thread_data_struct, i8*, i64, i64, i64, i64, %union.pthread_mutex_t, %struct.rb_unblock_callback, i64, %struct.rb_mutex_struct*, %struct.rb_thread_list_struct*, %union.anon.10, i32, i64, %struct.rb_fiber_struct*, [5 x i8*], i64 }
+%union.pthread_cond_t = type { %struct.anon.2 }
+%struct.anon.2 = type { i32, i32, i64, i64, i64, i8*, i32, i32 }
+%struct.rb_thread_struct = type { %struct.list_node, i64, %struct.rb_vm_struct*, %struct.rb_execution_context_struct*, i64, %struct.rb_calling_info*, i64, i64, i64, i8, i8, i32, %struct.native_thread_data_struct, i8*, i64, i64, i64, i64, %union.pthread_mutex_t, %struct.rb_unblock_callback, i64, %struct.rb_mutex_struct*, %struct.rb_thread_list_struct*, %union.anon.7, i32, i64, %struct.rb_fiber_struct*, [5 x i8*], i64 }
 %struct.list_node = type { %struct.list_node*, %struct.list_node* }
-%struct.rb_execution_context_struct = type { i64*, i64, %struct.rb_control_frame_struct*, %struct.rb_vm_tag*, %struct.rb_vm_protect_tag*, i32, i32, %struct.rb_fiber_struct*, %struct.rb_thread_struct*, %struct.st_table*, i64, i64, i64*, i64, %struct.rb_ensure_list*, %struct.rb_trace_arg_struct*, i64, i64, i8, i8, i64, %struct.anon.7 }
+%struct.rb_execution_context_struct = type { i64*, i64, %struct.rb_control_frame_struct*, %struct.rb_vm_tag*, %struct.rb_vm_protect_tag*, i32, i32, %struct.rb_fiber_struct*, %struct.rb_thread_struct*, %struct.st_table*, i64, i64, i64*, i64, %struct.rb_ensure_list*, %struct.rb_trace_arg_struct*, i64, i64, i8, i8, i64, %struct.anon.5 }
 %struct.rb_control_frame_struct = type { i64*, i64*, %struct.rb_iseq_struct*, i64, i64*, i8*, i64* }
-%struct.rb_iseq_struct = type { i64, i64, %struct.rb_iseq_constant_body*, %union.anon.17 }
-%struct.rb_iseq_constant_body = type { i32, i32, i64*, %struct.anon, %struct.rb_iseq_location_struct, %struct.iseq_insn_info, i64*, %struct.iseq_catch_table*, %struct.rb_iseq_struct*, %struct.rb_iseq_struct*, %union.iseq_inline_storage_entry*, %struct.rb_call_data*, %struct.anon.16, i32, i32, i32, i32, i32, i8, i64 }
+%struct.rb_iseq_struct = type { i64, i64, %struct.rb_iseq_constant_body*, %union.anon.14 }
+%struct.rb_iseq_constant_body = type { i32, i32, i64*, %struct.anon, %struct.rb_iseq_location_struct, %struct.iseq_insn_info, i64*, %struct.iseq_catch_table*, %struct.rb_iseq_struct*, %struct.rb_iseq_struct*, %union.iseq_inline_storage_entry*, %struct.rb_call_data*, %struct.anon.13, i32, i32, i32, i32, i32, i8, i64 }
 %struct.anon = type { %struct.anon.0, i32, i32, i32, i32, i32, i32, i32, i64*, %struct.rb_iseq_param_keyword* }
 %struct.anon.0 = type { i16, [2 x i8] }
 %struct.rb_iseq_param_keyword = type { i32, i32, i32, i32, i64*, i64* }
@@ -28,34 +27,34 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 %struct.rb_cref_struct = type { i64, i64, i64, %struct.rb_cref_struct*, %struct.rb_scope_visi_struct }
 %struct.rb_scope_visi_struct = type { i8, [3 x i8] }
 %struct.rb_call_data = type { %struct.rb_call_cache, %struct.rb_call_info }
-%struct.rb_call_cache = type { i64, [3 x i64], %struct.rb_callable_method_entry_struct*, i64, i64 (%struct.rb_execution_context_struct*, %struct.rb_control_frame_struct*, %struct.rb_calling_info*, %struct.rb_call_data*)*, %union.anon.15 }
+%struct.rb_call_cache = type { i64, [3 x i64], %struct.rb_callable_method_entry_struct*, i64, i64 (%struct.rb_execution_context_struct*, %struct.rb_control_frame_struct*, %struct.rb_calling_info*, %struct.rb_call_data*)*, %union.anon.12 }
 %struct.rb_callable_method_entry_struct = type { i64, i64, %struct.rb_method_definition_struct*, i64, i64 }
-%struct.rb_method_definition_struct = type { i64, %union.anon.13, i64, i64 }
-%union.anon.13 = type { %struct.rb_method_cfunc_struct }
+%struct.rb_method_definition_struct = type { i64, %union.anon.10, i64, i64 }
+%union.anon.10 = type { %struct.rb_method_cfunc_struct }
 %struct.rb_method_cfunc_struct = type { i64 (...)*, i64 (i64, i32, i64*, i64 (...)*)*, i32 }
-%union.anon.15 = type { i32 }
+%union.anon.12 = type { i32 }
 %struct.rb_call_info = type { i64, i32, i32 }
-%struct.anon.16 = type { i64, i64, i64, i64* }
-%union.anon.17 = type { %struct.anon.18 }
-%struct.anon.18 = type { i64, i32 }
+%struct.anon.13 = type { i64, i64, i64, i64* }
+%union.anon.14 = type { %struct.anon.15 }
+%struct.anon.15 = type { i64, i32 }
 %struct.rb_vm_tag = type { i64, i64, [5 x i8*], %struct.rb_vm_tag*, i32 }
 %struct.rb_vm_protect_tag = type { %struct.rb_vm_protect_tag* }
 %struct.rb_ensure_list = type { %struct.rb_ensure_list*, %struct.rb_ensure_entry }
 %struct.rb_ensure_entry = type { i64, i64 (i64)*, i64 }
 %struct.rb_trace_arg_struct = type { i32, %struct.rb_execution_context_struct*, %struct.rb_control_frame_struct*, i64, i64, i64, i64, i64, i32, i32, i64 }
-%struct.anon.7 = type { i64*, i64*, i64, [1 x %struct.__jmp_buf_tag] }
+%struct.anon.5 = type { i64*, i64*, i64, [1 x %struct.__jmp_buf_tag] }
 %struct.__jmp_buf_tag = type { [8 x i64], i32, %struct.__sigset_t }
 %struct.__sigset_t = type { [16 x i64] }
 %struct.rb_calling_info = type { i64, i64, i32, i32 }
-%struct.native_thread_data_struct = type { %struct.list_head, %union.anon.9 }
-%union.anon.9 = type { %union.pthread_cond_t }
+%struct.native_thread_data_struct = type { %struct.list_head, %union.anon.6 }
+%union.anon.6 = type { %union.pthread_cond_t }
 %struct.rb_unblock_callback = type { void (i8*)*, i8* }
 %struct.rb_mutex_struct = type opaque
 %struct.rb_thread_list_struct = type { %struct.rb_thread_list_struct*, %struct.rb_thread_struct* }
-%union.anon.10 = type { %struct.anon.11 }
-%struct.anon.11 = type { i64, i64, i32 }
+%union.anon.7 = type { %struct.anon.8 }
+%struct.anon.8 = type { i64, i64, i32 }
 %struct.rb_fiber_struct = type opaque
-%struct.anon.5 = type { [65 x i64] }
+%struct.anon.3 = type { [65 x i64] }
 %struct.rb_hook_list_struct = type { %struct.rb_event_hook_struct*, i32, i32, i32 }
 %struct.rb_event_hook_struct = type opaque
 %struct.rb_postponed_job_struct = type opaque
@@ -69,7 +68,7 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 %struct.st_hash_type = type { i32 (i64, i64)*, i64 (i64)* }
 %struct.st_table_entry = type opaque
 %struct.rb_builtin_function = type opaque
-%struct.anon.6 = type { i64, i64, i64, i64 }
+%struct.anon.4 = type { i64, i64, i64, i64 }
 %struct.SorbetLineNumberInfo = type { i32, %struct.iseq_insn_info_entry*, i64* }
 %struct.FunctionInlineCache = type { %struct.rb_kwarg_call_data }
 %struct.rb_kwarg_call_data = type { %struct.rb_call_cache, %struct.rb_call_info_with_kwarg }
@@ -166,7 +165,7 @@ declare i64 @sorbet_getConstant(i8*, i64) local_unnamed_addr #2
 
 declare i64 @sorbet_readRealpath() local_unnamed_addr #2
 
-declare void @sorbet_pushStaticInitFrame(i64) local_unnamed_addr #2
+declare %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64) local_unnamed_addr #2
 
 declare void @sorbet_popRubyStack() local_unnamed_addr #2
 
@@ -188,7 +187,7 @@ declare i64 @rb_define_class(i8*, i64) local_unnamed_addr #2
 
 declare i64 @rb_intern(i8*) local_unnamed_addr #2
 
-declare void @rb_add_method_sorbet(i64, i64, i64 (i32, i64*, i64)*, %struct.rb_sorbet_param_struct*, i32, i8*) local_unnamed_addr #2
+declare void @rb_add_method_sorbet(i64, i64, i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)*, %struct.rb_sorbet_param_struct*, i32, i8*) local_unnamed_addr #2
 
 declare i64 @rb_id2str(i64) local_unnamed_addr #2
 
@@ -351,10 +350,10 @@ entry:
   %27 = load %struct.rb_vm_struct*, %struct.rb_vm_struct** @ruby_current_vm_ptr, align 8, !tbaa !28
   %28 = getelementptr inbounds %struct.rb_vm_struct, %struct.rb_vm_struct* %27, i64 0, i32 18
   %29 = load i64, i64* %28, align 8, !tbaa !30
-  %stackFrame.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
   %30 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !28
   %31 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %30, i64 0, i32 2
   %32 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %31, align 8, !tbaa !40
+  %stackFrame.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$152", align 8
   %33 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %32, i64 0, i32 2
   store %struct.rb_iseq_struct* %stackFrame.i, %struct.rb_iseq_struct** %33, align 8, !tbaa !43
   %34 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %32, i64 0, i32 4
@@ -362,282 +361,248 @@ entry:
   %36 = load i64, i64* %35, align 8, !tbaa !4
   %37 = and i64 %36, -33
   store i64 %37, i64* %35, align 8, !tbaa !4
-  call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %30, %struct.rb_control_frame_struct* align 8 %32, %struct.rb_iseq_struct* %stackFrame.i) #17
+  call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %30, %struct.rb_control_frame_struct* %32, %struct.rb_iseq_struct* %stackFrame.i) #17
   %38 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %32, i64 0, i32 0
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 5), i64** %38, align 8, !dbg !46, !tbaa !28
   %39 = load i64, i64* @rb_cObject, align 8, !dbg !47
   %40 = call i64 @rb_define_class(i8* noundef getelementptr inbounds ([16 x i8], [16 x i8]* @str_AttrReaderNoSig, i64 0, i64 0), i64 %39) #17, !dbg !47
-  call void @sorbet_pushStaticInitFrame(i64 %40) #17, !dbg !47
-  %41 = bitcast i64* %positional_table.i.i to i8*
-  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %41) #17
+  %41 = call %struct.rb_control_frame_struct* @sorbet_pushStaticInitFrame(i64 %40) #17, !dbg !47
+  %42 = bitcast i64* %positional_table.i.i to i8*
+  call void @llvm.lifetime.start.p0i8(i64 8, i8* nonnull %42) #17
   %stackFrame.i.i1 = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderNoSig.<static-init>", align 8
-  %42 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !28
-  %43 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %42, i64 0, i32 2
-  %44 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %43, align 8, !tbaa !40
-  %45 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %44, i64 0, i32 2
-  store %struct.rb_iseq_struct* %stackFrame.i.i1, %struct.rb_iseq_struct** %45, align 8, !tbaa !43
-  %46 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %44, i64 0, i32 4
-  %47 = load i64*, i64** %46, align 8, !tbaa !45
-  %48 = load i64, i64* %47, align 8, !tbaa !4
-  %49 = and i64 %48, -33
-  store i64 %49, i64* %47, align 8, !tbaa !4
-  call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %42, %struct.rb_control_frame_struct* align 8 %44, %struct.rb_iseq_struct* %stackFrame.i.i1) #17
-  %50 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %44, i64 0, i32 0
-  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %50, align 8, !dbg !48, !tbaa !28
-  %51 = load i64, i64* @"guard_epoch_T::Sig", align 8, !dbg !49
-  %52 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !49, !tbaa !50
-  %needTakeSlowPath = icmp ne i64 %51, %52, !dbg !49
-  br i1 %needTakeSlowPath, label %53, label %54, !dbg !49, !prof !51
+  %43 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !28
+  %44 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %43, i64 0, i32 2
+  %45 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %44, align 8, !tbaa !40
+  %46 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %45, i64 0, i32 2
+  store %struct.rb_iseq_struct* %stackFrame.i.i1, %struct.rb_iseq_struct** %46, align 8, !tbaa !43
+  %47 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %45, i64 0, i32 4
+  %48 = load i64*, i64** %47, align 8, !tbaa !45
+  %49 = load i64, i64* %48, align 8, !tbaa !4
+  %50 = and i64 %49, -33
+  store i64 %50, i64* %48, align 8, !tbaa !4
+  call void @sorbet_setMethodStackFrame(%struct.rb_execution_context_struct* %43, %struct.rb_control_frame_struct* %45, %struct.rb_iseq_struct* %stackFrame.i.i1) #17
+  %51 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %41, i64 0, i32 0
+  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %51, align 8, !dbg !48, !tbaa !28
+  %52 = load i64, i64* @"guard_epoch_T::Sig", align 8, !dbg !49
+  %53 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !49, !tbaa !50
+  %needTakeSlowPath = icmp ne i64 %52, %53, !dbg !49
+  br i1 %needTakeSlowPath, label %54, label %55, !dbg !49, !prof !51
 
-53:                                               ; preds = %entry
+54:                                               ; preds = %entry
   call void @"const_recompute_T::Sig"(), !dbg !49
-  br label %54, !dbg !49
+  br label %55, !dbg !49
 
-54:                                               ; preds = %entry, %53
-  %55 = load i64, i64* @"guarded_const_T::Sig", align 8, !dbg !49
-  %56 = load i64, i64* @"guard_epoch_T::Sig", align 8, !dbg !49
-  %57 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !49, !tbaa !50
-  %guardUpdated = icmp eq i64 %56, %57, !dbg !49
+55:                                               ; preds = %entry, %54
+  %56 = load i64, i64* @"guarded_const_T::Sig", align 8, !dbg !49
+  %57 = load i64, i64* @"guard_epoch_T::Sig", align 8, !dbg !49
+  %58 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !49, !tbaa !50
+  %guardUpdated = icmp eq i64 %57, %58, !dbg !49
   call void @llvm.assume(i1 %guardUpdated), !dbg !49
-  %58 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !49, !tbaa !28
-  %59 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %58, i64 0, i32 2, !dbg !49
-  %60 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %59, align 8, !dbg !49, !tbaa !40
-  %61 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %60, i64 0, i32 1, !dbg !49
-  %62 = load i64*, i64** %61, align 8, !dbg !49, !tbaa !52
-  %63 = getelementptr inbounds i64, i64* %62, i64 1, !dbg !49
-  store i64 %40, i64* %62, align 8, !dbg !49, !tbaa !4
-  %64 = getelementptr inbounds i64, i64* %63, i64 1, !dbg !49
-  store i64* %64, i64** %61, align 8, !dbg !49, !tbaa !52
-  store i64 %55, i64* %63, align 8, !dbg !49, !tbaa !4
+  %59 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %41, i64 0, i32 1, !dbg !49
+  %60 = load i64*, i64** %59, align 8, !dbg !49, !tbaa !52
+  %61 = getelementptr inbounds i64, i64* %60, i64 1, !dbg !49
+  store i64 %40, i64* %60, align 8, !dbg !49, !tbaa !4
+  %62 = getelementptr inbounds i64, i64* %61, i64 1, !dbg !49
+  store i64* %62, i64** %59, align 8, !dbg !49, !tbaa !52
+  store i64 %56, i64* %61, align 8, !dbg !49, !tbaa !4
   %send.i.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_extend, i64 0) #17, !dbg !49
-  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %50, align 8, !dbg !49, !tbaa !28
+  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %51, align 8, !dbg !49, !tbaa !28
   %rubyId_initialize.i.i2 = load i64, i64* @rubyIdPrecomputed_initialize, align 8, !dbg !8
   %rawSym.i.i = call i64 @rb_id2sym(i64 %rubyId_initialize.i.i2) #17, !dbg !8
   %rubyId_normal.i.i = load i64, i64* @rubyIdPrecomputed_normal, align 8, !dbg !8
-  %rawSym37.i.i = call i64 @rb_id2sym(i64 %rubyId_normal.i.i) #17, !dbg !8
-  %65 = load i64, i64* @guard_epoch_AttrReaderNoSig, align 8, !dbg !8
-  %66 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !8, !tbaa !50
-  %needTakeSlowPath3 = icmp ne i64 %65, %66, !dbg !8
-  br i1 %needTakeSlowPath3, label %67, label %68, !dbg !8, !prof !51
+  %rawSym36.i.i = call i64 @rb_id2sym(i64 %rubyId_normal.i.i) #17, !dbg !8
+  %63 = load i64, i64* @guard_epoch_AttrReaderNoSig, align 8, !dbg !8
+  %64 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !8, !tbaa !50
+  %needTakeSlowPath3 = icmp ne i64 %63, %64, !dbg !8
+  br i1 %needTakeSlowPath3, label %65, label %66, !dbg !8, !prof !51
 
-67:                                               ; preds = %54
+65:                                               ; preds = %55
   call void @const_recompute_AttrReaderNoSig(), !dbg !8
-  br label %68, !dbg !8
+  br label %66, !dbg !8
 
-68:                                               ; preds = %54, %67
-  %69 = load i64, i64* @guarded_const_AttrReaderNoSig, align 8, !dbg !8
-  %70 = load i64, i64* @guard_epoch_AttrReaderNoSig, align 8, !dbg !8
-  %71 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !8, !tbaa !50
-  %guardUpdated4 = icmp eq i64 %70, %71, !dbg !8
+66:                                               ; preds = %55, %65
+  %67 = load i64, i64* @guarded_const_AttrReaderNoSig, align 8, !dbg !8
+  %68 = load i64, i64* @guard_epoch_AttrReaderNoSig, align 8, !dbg !8
+  %69 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !8, !tbaa !50
+  %guardUpdated4 = icmp eq i64 %68, %69, !dbg !8
   call void @llvm.assume(i1 %guardUpdated4), !dbg !8
-  %stackFrame39.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderNoSig#initialize", align 8, !dbg !8
-  %72 = call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #15, !dbg !8
-  %73 = bitcast i8* %72 to i16*, !dbg !8
-  %74 = load i16, i16* %73, align 8, !dbg !8
-  %75 = and i16 %74, -384, !dbg !8
-  %76 = or i16 %75, 1, !dbg !8
-  store i16 %76, i16* %73, align 8, !dbg !8
-  %77 = getelementptr inbounds i8, i8* %72, i64 8, !dbg !8
-  %78 = bitcast i8* %77 to i32*, !dbg !8
-  store i32 1, i32* %78, align 8, !dbg !8, !tbaa !53
-  %79 = getelementptr inbounds i8, i8* %72, i64 12, !dbg !8
-  %80 = getelementptr inbounds i8, i8* %72, i64 4, !dbg !8
-  %81 = bitcast i8* %80 to i32*, !dbg !8
-  call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %79, i8 0, i64 20, i1 false) #17, !dbg !8
-  store i32 1, i32* %81, align 4, !dbg !8, !tbaa !56
+  %stackFrame38.i.i = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_AttrReaderNoSig#initialize", align 8, !dbg !8
+  %70 = call noalias nonnull i8* @ruby_xcalloc(i64 noundef 1, i64 noundef 64) #15, !dbg !8
+  %71 = bitcast i8* %70 to i16*, !dbg !8
+  %72 = load i16, i16* %71, align 8, !dbg !8
+  %73 = and i16 %72, -384, !dbg !8
+  %74 = or i16 %73, 1, !dbg !8
+  store i16 %74, i16* %71, align 8, !dbg !8
+  %75 = getelementptr inbounds i8, i8* %70, i64 8, !dbg !8
+  %76 = bitcast i8* %75 to i32*, !dbg !8
+  store i32 1, i32* %76, align 8, !dbg !8, !tbaa !53
+  %77 = getelementptr inbounds i8, i8* %70, i64 12, !dbg !8
+  %78 = getelementptr inbounds i8, i8* %70, i64 4, !dbg !8
+  %79 = bitcast i8* %78 to i32*, !dbg !8
+  call void @llvm.memset.p0i8.i64(i8* nonnull align 4 %77, i8 0, i64 20, i1 false) #17, !dbg !8
+  store i32 1, i32* %79, align 4, !dbg !8, !tbaa !56
   %rubyId_foo.i.i = load i64, i64* @rubyIdPrecomputed_foo, align 8, !dbg !8
   store i64 %rubyId_foo.i.i, i64* %positional_table.i.i, align 8, !dbg !8
-  %82 = call noalias nonnull i8* @ruby_xmalloc2(i64 noundef 1, i64 noundef 8) #15, !dbg !8
-  call void @llvm.memcpy.p0i8.p0i8.i64(i8* nocapture nonnull writeonly align 1 %82, i8* nocapture noundef nonnull readonly align 8 dereferenceable(8) %41, i64 noundef 8, i1 noundef false) #17, !dbg !8
-  %83 = getelementptr inbounds i8, i8* %72, i64 32, !dbg !8
-  %84 = bitcast i8* %83 to i8**, !dbg !8
-  store i8* %82, i8** %84, align 8, !dbg !8, !tbaa !57
-  %85 = call i64 @rb_intern(i8* noundef getelementptr inbounds ([11 x i8], [11 x i8]* @str_initialize, i64 0, i64 0)) #17, !dbg !8
-  %86 = bitcast i8* %72 to %struct.rb_sorbet_param_struct*, !dbg !8
-  %87 = bitcast %struct.rb_iseq_struct* %stackFrame39.i.i to i8*, !dbg !8
-  call void @rb_add_method_sorbet(i64 %69, i64 %85, i64 (i32, i64*, i64)* noundef @"func_AttrReaderNoSig#initialize", %struct.rb_sorbet_param_struct* nonnull %86, i32 noundef 1, i8* %87) #17, !dbg !8
-  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %50, align 8, !dbg !8, !tbaa !28
-  %rubyId_foo47.i.i = load i64, i64* @rubyIdPrecomputed_foo, align 8, !dbg !58
-  %rawSym48.i.i = call i64 @rb_id2sym(i64 %rubyId_foo47.i.i) #17, !dbg !58
+  %80 = call noalias nonnull i8* @ruby_xmalloc2(i64 noundef 1, i64 noundef 8) #15, !dbg !8
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* nocapture nonnull writeonly align 1 %80, i8* nocapture noundef nonnull readonly align 8 dereferenceable(8) %42, i64 noundef 8, i1 noundef false) #17, !dbg !8
+  %81 = getelementptr inbounds i8, i8* %70, i64 32, !dbg !8
+  %82 = bitcast i8* %81 to i8**, !dbg !8
+  store i8* %80, i8** %82, align 8, !dbg !8, !tbaa !57
+  %83 = call i64 @rb_intern(i8* noundef getelementptr inbounds ([11 x i8], [11 x i8]* @str_initialize, i64 0, i64 0)) #17, !dbg !8
+  %84 = bitcast i8* %70 to %struct.rb_sorbet_param_struct*, !dbg !8
+  %85 = bitcast %struct.rb_iseq_struct* %stackFrame38.i.i to i8*, !dbg !8
+  call void @rb_add_method_sorbet(i64 %67, i64 %83, i64 (i32, i64*, i64, %struct.rb_control_frame_struct*)* noundef @"func_AttrReaderNoSig#initialize", %struct.rb_sorbet_param_struct* nonnull %84, i32 noundef 1, i8* %85) #17, !dbg !8
+  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 13), i64** %51, align 8, !dbg !8, !tbaa !28
+  %rubyId_foo45.i.i = load i64, i64* @rubyIdPrecomputed_foo, align 8, !dbg !58
+  %rawSym46.i.i = call i64 @rb_id2sym(i64 %rubyId_foo45.i.i) #17, !dbg !58
   %rubyId_attr_reader.i.i = load i64, i64* @rubyIdPrecomputed_attr_reader, align 8, !dbg !58
-  %rawSym49.i.i = call i64 @rb_id2sym(i64 %rubyId_attr_reader.i.i) #17, !dbg !58
-  %88 = call i64 @rb_intern(i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0)) #17, !dbg !58
-  %89 = call i64 @rb_id2str(i64 %88) #17, !dbg !58
-  %90 = call i64 (i8*, ...) @rb_sprintf(i8* noundef getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i64 0, i64 0), i64 %89) #17, !dbg !58
-  %91 = call i64 @rb_intern_str(i64 %90) #17, !dbg !58
-  %92 = inttoptr i64 %91 to i8*, !dbg !58
-  call void @rb_add_method(i64 %69, i64 %88, i32 noundef 4, i8* %92, i32 noundef 1) #17, !dbg !58
-  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %41) #17
+  %rawSym47.i.i = call i64 @rb_id2sym(i64 %rubyId_attr_reader.i.i) #17, !dbg !58
+  %86 = call i64 @rb_intern(i8* noundef getelementptr inbounds ([4 x i8], [4 x i8]* @str_foo, i64 0, i64 0)) #17, !dbg !58
+  %87 = call i64 @rb_id2str(i64 %86) #17, !dbg !58
+  %88 = call i64 (i8*, ...) @rb_sprintf(i8* noundef getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i64 0, i64 0), i64 %87) #17, !dbg !58
+  %89 = call i64 @rb_intern_str(i64 %88) #17, !dbg !58
+  %90 = inttoptr i64 %89 to i8*, !dbg !58
+  call void @rb_add_method(i64 %67, i64 %86, i32 noundef 4, i8* %90, i32 noundef 1) #17, !dbg !58
+  call void @llvm.lifetime.end.p0i8(i64 8, i8* nonnull %42) #17
   call void @sorbet_popRubyStack() #17, !dbg !47
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 16), i64** %38, align 8, !dbg !47, !tbaa !28
-  %93 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !17, !tbaa !28
-  %94 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %93, i64 0, i32 2, !dbg !17
-  %95 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %94, align 8, !dbg !17, !tbaa !40
-  %96 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %95, i64 0, i32 1, !dbg !17
-  %97 = load i64*, i64** %96, align 8, !dbg !17, !tbaa !52
-  %98 = getelementptr inbounds i64, i64* %97, i64 1, !dbg !17
-  store i64 %69, i64* %97, align 8, !dbg !17, !tbaa !4
-  %99 = getelementptr inbounds i64, i64* %98, i64 1, !dbg !17
-  store i64* %99, i64** %96, align 8, !dbg !17, !tbaa !52
-  store i64 2497, i64* %98, align 8, !dbg !17, !tbaa !4
+  %91 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %32, i64 0, i32 1, !dbg !17
+  %92 = load i64*, i64** %91, align 8, !dbg !17, !tbaa !52
+  %93 = getelementptr inbounds i64, i64* %92, i64 1, !dbg !17
+  store i64 %67, i64* %92, align 8, !dbg !17, !tbaa !4
+  %94 = getelementptr inbounds i64, i64* %93, i64 1, !dbg !17
+  store i64* %94, i64** %91, align 8, !dbg !17, !tbaa !52
+  store i64 2497, i64* %93, align 8, !dbg !17, !tbaa !4
   %send.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_new, i64 0) #17, !dbg !17
-  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 18), i64** %38, align 8, !dbg !17, !tbaa !28
   br label %BB2.i, !dbg !59
 
-BB2.i:                                            ; preds = %BB2.i.backedge, %68
-  %i.sroa.0.0.i = phi i64 [ 1, %68 ], [ %i.sroa.0.0.i.be, %BB2.i.backedge ], !dbg !46
+BB2.i:                                            ; preds = %BB2.i.backedge, %66
+  %i.sroa.0.0.i = phi i64 [ 1, %66 ], [ %i.sroa.0.0.i.be, %BB2.i.backedge ], !dbg !46
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 19), i64** %38, align 8, !tbaa !28
-  %100 = and i64 %i.sroa.0.0.i, 1, !dbg !18
+  %95 = and i64 %i.sroa.0.0.i, 1, !dbg !18
+  %96 = icmp eq i64 %95, 0, !dbg !18
+  br i1 %96, label %97, label %116, !dbg !18, !prof !60
+
+97:                                               ; preds = %BB2.i
+  %98 = and i64 %i.sroa.0.0.i, 7, !dbg !18
+  %99 = icmp ne i64 %98, 0, !dbg !18
+  %100 = and i64 %i.sroa.0.0.i, -9, !dbg !18
   %101 = icmp eq i64 %100, 0, !dbg !18
-  br i1 %101, label %102, label %129, !dbg !18, !prof !60
+  %102 = or i1 %99, %101, !dbg !18
+  br i1 %102, label %"alternativeCallIntrinsic_Integer_<.i", label %sorbet_isa_Integer.exit.i, !dbg !18, !prof !61
 
-102:                                              ; preds = %BB2.i
-  %103 = and i64 %i.sroa.0.0.i, 7, !dbg !18
-  %104 = icmp ne i64 %103, 0, !dbg !18
-  %105 = and i64 %i.sroa.0.0.i, -9, !dbg !18
-  %106 = icmp eq i64 %105, 0, !dbg !18
-  %107 = or i1 %104, %106, !dbg !18
-  br i1 %107, label %"alternativeCallIntrinsic_Integer_<.i", label %sorbet_isa_Integer.exit.i, !dbg !18, !prof !61
-
-sorbet_isa_Integer.exit.i:                        ; preds = %102
-  %108 = inttoptr i64 %i.sroa.0.0.i to %struct.iseq_inline_iv_cache_entry*, !dbg !18
-  %109 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %108, i64 0, i32 0, !dbg !18
-  %110 = load i64, i64* %109, align 8, !dbg !18, !tbaa !62
-  %111 = and i64 %110, 31, !dbg !18
-  %112 = icmp eq i64 %111, 10, !dbg !18
-  br i1 %112, label %133, label %"alternativeCallIntrinsic_Integer_<.i", !dbg !18, !prof !64
+sorbet_isa_Integer.exit.i:                        ; preds = %97
+  %103 = inttoptr i64 %i.sroa.0.0.i to %struct.iseq_inline_iv_cache_entry*, !dbg !18
+  %104 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %103, i64 0, i32 0, !dbg !18
+  %105 = load i64, i64* %104, align 8, !dbg !18, !tbaa !62
+  %106 = and i64 %105, 31, !dbg !18
+  %107 = icmp eq i64 %106, 10, !dbg !18
+  br i1 %107, label %120, label %"alternativeCallIntrinsic_Integer_<.i", !dbg !18, !prof !64
 
 BB5.i:                                            ; preds = %afterSend33.i
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 21), i64** %38, align 8, !tbaa !28
-  %113 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !19, !tbaa !28
-  %114 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %113, i64 0, i32 2, !dbg !19
-  %115 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %114, align 8, !dbg !19, !tbaa !40
-  %116 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %115, i64 0, i32 1, !dbg !19
-  %117 = load i64*, i64** %116, align 8, !dbg !19, !tbaa !52
-  %118 = getelementptr inbounds i64, i64* %117, i64 1, !dbg !19
-  store i64* %118, i64** %116, align 8, !dbg !19, !tbaa !52
-  store i64 %send.i, i64* %117, align 8, !dbg !19, !tbaa !4
-  %send47.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_foo, i64 0) #17, !dbg !19
+  %108 = load i64*, i64** %91, align 8, !dbg !19, !tbaa !52
+  %109 = getelementptr inbounds i64, i64* %108, i64 1, !dbg !19
+  store i64* %109, i64** %91, align 8, !dbg !19, !tbaa !52
+  store i64 %send.i, i64* %108, align 8, !dbg !19, !tbaa !4
+  %send45.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_foo, i64 0) #17, !dbg !19
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 23), i64** %38, align 8, !dbg !19, !tbaa !28
-  br i1 %119, label %"fastSymCallIntrinsic_Integer_+.i", label %"alternativeCallIntrinsic_Integer_+.i", !dbg !20
+  br i1 %110, label %"fastSymCallIntrinsic_Integer_+.i", label %"alternativeCallIntrinsic_Integer_+.i", !dbg !20
 
-afterSend33.i:                                    ; preds = %133, %129, %"alternativeCallIntrinsic_Integer_<.i"
-  %119 = phi i1 [ false, %"alternativeCallIntrinsic_Integer_<.i" ], [ true, %129 ], [ true, %133 ]
-  %"symIntrinsicRawPhi_<.i" = phi i64 [ %send41.i, %"alternativeCallIntrinsic_Integer_<.i" ], [ %132, %129 ], [ %134, %133 ], !dbg !18
-  %120 = and i64 %"symIntrinsicRawPhi_<.i", -9, !dbg !18
-  %121 = icmp ne i64 %120, 0, !dbg !18
-  br i1 %121, label %BB5.i, label %"func_<root>.<static-init>$152.exit", !dbg !18
+afterSend33.i:                                    ; preds = %120, %116, %"alternativeCallIntrinsic_Integer_<.i"
+  %110 = phi i1 [ false, %"alternativeCallIntrinsic_Integer_<.i" ], [ true, %116 ], [ true, %120 ]
+  %"symIntrinsicRawPhi_<.i" = phi i64 [ %send40.i, %"alternativeCallIntrinsic_Integer_<.i" ], [ %119, %116 ], [ %121, %120 ], !dbg !18
+  %111 = and i64 %"symIntrinsicRawPhi_<.i", -9, !dbg !18
+  %112 = icmp ne i64 %111, 0, !dbg !18
+  br i1 %112, label %BB5.i, label %"func_<root>.<static-init>$152.exit", !dbg !18
 
-"alternativeCallIntrinsic_Integer_<.i":           ; preds = %sorbet_isa_Integer.exit.i, %102
-  %122 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !18, !tbaa !28
-  %123 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %122, i64 0, i32 2, !dbg !18
-  %124 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %123, align 8, !dbg !18, !tbaa !40
-  %125 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %124, i64 0, i32 1, !dbg !18
-  %126 = load i64*, i64** %125, align 8, !dbg !18, !tbaa !52
-  %127 = getelementptr inbounds i64, i64* %126, i64 1, !dbg !18
-  store i64 %i.sroa.0.0.i, i64* %126, align 8, !dbg !18, !tbaa !4
-  %128 = getelementptr inbounds i64, i64* %127, i64 1, !dbg !18
-  store i64* %128, i64** %125, align 8, !dbg !18, !tbaa !52
-  store i64 20000001, i64* %127, align 8, !dbg !18, !tbaa !4
-  %send41.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @"ic_<", i64 0) #17, !dbg !18
+"alternativeCallIntrinsic_Integer_<.i":           ; preds = %sorbet_isa_Integer.exit.i, %97
+  %113 = load i64*, i64** %91, align 8, !dbg !18, !tbaa !52
+  %114 = getelementptr inbounds i64, i64* %113, i64 1, !dbg !18
+  store i64 %i.sroa.0.0.i, i64* %113, align 8, !dbg !18, !tbaa !4
+  %115 = getelementptr inbounds i64, i64* %114, i64 1, !dbg !18
+  store i64* %115, i64** %91, align 8, !dbg !18, !tbaa !52
+  store i64 20000001, i64* %114, align 8, !dbg !18, !tbaa !4
+  %send40.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @"ic_<", i64 0) #17, !dbg !18
   br label %afterSend33.i, !dbg !18
 
-129:                                              ; preds = %BB2.i
+116:                                              ; preds = %BB2.i
   call void @llvm.experimental.noalias.scope.decl(metadata !65) #17, !dbg !18
-  %130 = ashr i64 %i.sroa.0.0.i, 1, !dbg !18
-  %131 = icmp slt i64 %130, 10000000, !dbg !18
-  %132 = select i1 %131, i64 20, i64 0, !dbg !18
+  %117 = ashr i64 %i.sroa.0.0.i, 1, !dbg !18
+  %118 = icmp slt i64 %117, 10000000, !dbg !18
+  %119 = select i1 %118, i64 20, i64 0, !dbg !18
   br label %afterSend33.i, !dbg !18
 
-133:                                              ; preds = %sorbet_isa_Integer.exit.i
+120:                                              ; preds = %sorbet_isa_Integer.exit.i
   call void @llvm.experimental.noalias.scope.decl(metadata !68) #17, !dbg !18
-  %134 = call i64 @sorbet_rb_int_lt_slowpath(i64 %i.sroa.0.0.i, i64 noundef 20000001) #17, !dbg !18, !noalias !65
+  %121 = call i64 @sorbet_rb_int_lt_slowpath(i64 %i.sroa.0.0.i, i64 noundef 20000001) #17, !dbg !18, !noalias !65
   br label %afterSend33.i, !dbg !18
 
 "alternativeCallIntrinsic_Integer_+.i":           ; preds = %BB5.i
-  %135 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !20, !tbaa !28
-  %136 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %135, i64 0, i32 2, !dbg !20
-  %137 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %136, align 8, !dbg !20, !tbaa !40
-  %138 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %137, i64 0, i32 1, !dbg !20
-  %139 = load i64*, i64** %138, align 8, !dbg !20, !tbaa !52
-  %140 = getelementptr inbounds i64, i64* %139, i64 1, !dbg !20
-  store i64 %i.sroa.0.0.i, i64* %139, align 8, !dbg !20, !tbaa !4
-  %141 = getelementptr inbounds i64, i64* %140, i64 1, !dbg !20
-  store i64* %141, i64** %138, align 8, !dbg !20, !tbaa !52
-  store i64 3, i64* %140, align 8, !dbg !20, !tbaa !4
-  %send60.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @"ic_+", i64 0) #17, !dbg !20
+  %122 = load i64*, i64** %91, align 8, !dbg !20, !tbaa !52
+  %123 = getelementptr inbounds i64, i64* %122, i64 1, !dbg !20
+  store i64 %i.sroa.0.0.i, i64* %122, align 8, !dbg !20, !tbaa !4
+  %124 = getelementptr inbounds i64, i64* %123, i64 1, !dbg !20
+  store i64* %124, i64** %91, align 8, !dbg !20, !tbaa !52
+  store i64 3, i64* %123, align 8, !dbg !20, !tbaa !4
+  %send57.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @"ic_+", i64 0) #17, !dbg !20
   br label %BB2.i.backedge, !dbg !20
 
 "fastSymCallIntrinsic_Integer_+.i":               ; preds = %BB5.i
   call void @llvm.experimental.noalias.scope.decl(metadata !70) #17, !dbg !20
-  br i1 %101, label %150, label %142, !dbg !20, !prof !73
+  br i1 %96, label %133, label %125, !dbg !20, !prof !73
 
-142:                                              ; preds = %"fastSymCallIntrinsic_Integer_+.i"
-  %143 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0.i, i64 noundef 2) #18, !dbg !20
-  %144 = extractvalue { i64, i1 } %143, 1, !dbg !20
-  %145 = extractvalue { i64, i1 } %143, 0, !dbg !20
-  br i1 %144, label %146, label %BB2.i.backedge, !dbg !20
+125:                                              ; preds = %"fastSymCallIntrinsic_Integer_+.i"
+  %126 = call { i64, i1 } @llvm.sadd.with.overflow.i64(i64 %i.sroa.0.0.i, i64 noundef 2) #18, !dbg !20
+  %127 = extractvalue { i64, i1 } %126, 1, !dbg !20
+  %128 = extractvalue { i64, i1 } %126, 0, !dbg !20
+  br i1 %127, label %129, label %BB2.i.backedge, !dbg !20
 
-146:                                              ; preds = %142
-  %147 = ashr i64 %145, 1, !dbg !20
-  %148 = xor i64 %147, -9223372036854775808, !dbg !20
-  %149 = call i64 @rb_int2big(i64 %148) #17, !dbg !20
+129:                                              ; preds = %125
+  %130 = ashr i64 %128, 1, !dbg !20
+  %131 = xor i64 %130, -9223372036854775808, !dbg !20
+  %132 = call i64 @rb_int2big(i64 %131) #17, !dbg !20
   br label %BB2.i.backedge, !dbg !20
 
-150:                                              ; preds = %"fastSymCallIntrinsic_Integer_+.i"
-  %151 = call i64 @sorbet_rb_int_plus_slowpath(i64 %i.sroa.0.0.i, i64 noundef 3) #17, !dbg !20, !noalias !70
+133:                                              ; preds = %"fastSymCallIntrinsic_Integer_+.i"
+  %134 = call i64 @sorbet_rb_int_plus_slowpath(i64 %i.sroa.0.0.i, i64 noundef 3) #17, !dbg !20, !noalias !70
   br label %BB2.i.backedge, !dbg !20
 
-BB2.i.backedge:                                   ; preds = %150, %146, %142, %"alternativeCallIntrinsic_Integer_+.i"
-  %i.sroa.0.0.i.be = phi i64 [ %send60.i, %"alternativeCallIntrinsic_Integer_+.i" ], [ %151, %150 ], [ %149, %146 ], [ %145, %142 ]
+BB2.i.backedge:                                   ; preds = %133, %129, %125, %"alternativeCallIntrinsic_Integer_+.i"
+  %i.sroa.0.0.i.be = phi i64 [ %send57.i, %"alternativeCallIntrinsic_Integer_+.i" ], [ %134, %133 ], [ %132, %129 ], [ %128, %125 ]
   br label %BB2.i
 
 "func_<root>.<static-init>$152.exit":             ; preds = %afterSend33.i
   %i.sroa.0.0.i.lcssa = phi i64 [ %i.sroa.0.0.i, %afterSend33.i ], !dbg !46
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 26), i64** %38, align 8, !tbaa !28
-  %152 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !21, !tbaa !28
-  %153 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %152, i64 0, i32 2, !dbg !21
-  %154 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %153, align 8, !dbg !21, !tbaa !40
-  %155 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %154, i64 0, i32 1, !dbg !21
-  %156 = load i64*, i64** %155, align 8, !dbg !21, !tbaa !52
-  %157 = getelementptr inbounds i64, i64* %156, i64 1, !dbg !21
-  store i64 %29, i64* %156, align 8, !dbg !21, !tbaa !4
-  %158 = getelementptr inbounds i64, i64* %157, i64 1, !dbg !21
-  store i64* %158, i64** %155, align 8, !dbg !21, !tbaa !52
-  store i64 %i.sroa.0.0.i.lcssa, i64* %157, align 8, !dbg !21, !tbaa !4
-  %send66.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 0) #17, !dbg !21
+  %135 = load i64*, i64** %91, align 8, !dbg !21, !tbaa !52
+  %136 = getelementptr inbounds i64, i64* %135, i64 1, !dbg !21
+  store i64 %29, i64* %135, align 8, !dbg !21, !tbaa !4
+  %137 = getelementptr inbounds i64, i64* %136, i64 1, !dbg !21
+  store i64* %137, i64** %91, align 8, !dbg !21, !tbaa !52
+  store i64 %i.sroa.0.0.i.lcssa, i64* %136, align 8, !dbg !21, !tbaa !4
+  %send62.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 0) #17, !dbg !21
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 27), i64** %38, align 8, !dbg !21, !tbaa !28
-  %159 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !22, !tbaa !28
-  %160 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %159, i64 0, i32 2, !dbg !22
-  %161 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %160, align 8, !dbg !22, !tbaa !40
-  %162 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %161, i64 0, i32 1, !dbg !22
-  %163 = load i64*, i64** %162, align 8, !dbg !22, !tbaa !52
-  %164 = getelementptr inbounds i64, i64* %163, i64 1, !dbg !22
-  store i64* %164, i64** %162, align 8, !dbg !22, !tbaa !52
-  store i64 %send.i, i64* %163, align 8, !dbg !22, !tbaa !4
-  %send72.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_foo.1, i64 0) #17, !dbg !22
-  %165 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !23, !tbaa !28
-  %166 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %165, i64 0, i32 2, !dbg !23
-  %167 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %166, align 8, !dbg !23, !tbaa !40
-  %168 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %167, i64 0, i32 1, !dbg !23
-  %169 = load i64*, i64** %168, align 8, !dbg !23, !tbaa !52
-  %170 = getelementptr inbounds i64, i64* %169, i64 1, !dbg !23
-  store i64 %29, i64* %169, align 8, !dbg !23, !tbaa !4
-  %171 = getelementptr inbounds i64, i64* %170, i64 1, !dbg !23
-  store i64* %171, i64** %168, align 8, !dbg !23, !tbaa !52
-  store i64 %send72.i, i64* %170, align 8, !dbg !23, !tbaa !4
-  %send79.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts.2, i64 0) #17, !dbg !23
+  %138 = load i64*, i64** %91, align 8, !dbg !22, !tbaa !52
+  %139 = getelementptr inbounds i64, i64* %138, i64 1, !dbg !22
+  store i64* %139, i64** %91, align 8, !dbg !22, !tbaa !52
+  store i64 %send.i, i64* %138, align 8, !dbg !22, !tbaa !4
+  %send67.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_foo.1, i64 0) #17, !dbg !22
+  %140 = load i64*, i64** %91, align 8, !dbg !23, !tbaa !52
+  %141 = getelementptr inbounds i64, i64* %140, i64 1, !dbg !23
+  store i64 %29, i64* %140, align 8, !dbg !23, !tbaa !4
+  %142 = getelementptr inbounds i64, i64* %141, i64 1, !dbg !23
+  store i64* %142, i64** %91, align 8, !dbg !23, !tbaa !52
+  store i64 %send67.i, i64* %141, align 8, !dbg !23, !tbaa !4
+  %send73.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts.2, i64 0) #17, !dbg !23
   ret void
 }
 
 ; Function Attrs: nounwind sspreq uwtable
-define i64 @"func_AttrReaderNoSig#initialize"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw) #9 !dbg !74 {
+define i64 @"func_AttrReaderNoSig#initialize"(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nocapture nonnull writeonly align 8 dereferenceable(8) %cfp) #9 !dbg !74 {
 functionEntryInitializers:
-  %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !28
-  %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
-  %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !40
-  %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 0
-  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %3, align 8, !tbaa !28
+  %0 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %cfp, i64 0, i32 0
+  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %0, align 8, !tbaa !28
   %tooManyArgs = icmp ugt i32 %argc, 1, !dbg !75
   %tooFewArgs = icmp ult i32 %argc, 1, !dbg !75
   %or.cond = or i1 %tooManyArgs, %tooFewArgs, !dbg !75
@@ -649,36 +614,36 @@ argCountFailBlock:                                ; preds = %functionEntryInitia
 
 fillRequiredArgs:                                 ; preds = %functionEntryInitializers
   %rawArg_foo = load i64, i64* %argArray, align 8, !dbg !75
-  %4 = and i64 %rawArg_foo, 1, !dbg !76
-  %5 = icmp eq i64 %4, 0, !dbg !76
-  br i1 %5, label %6, label %typeTestSuccess, !dbg !76, !prof !60
+  %1 = and i64 %rawArg_foo, 1, !dbg !76
+  %2 = icmp eq i64 %1, 0, !dbg !76
+  br i1 %2, label %3, label %typeTestSuccess, !dbg !76, !prof !60
 
-6:                                                ; preds = %fillRequiredArgs
-  %7 = and i64 %rawArg_foo, 7, !dbg !76
-  %8 = icmp ne i64 %7, 0, !dbg !76
-  %9 = and i64 %rawArg_foo, -9, !dbg !76
-  %10 = icmp eq i64 %9, 0, !dbg !76
-  %11 = or i1 %8, %10, !dbg !76
-  br i1 %11, label %codeRepl, label %sorbet_isa_Integer.exit, !dbg !76, !prof !61
+3:                                                ; preds = %fillRequiredArgs
+  %4 = and i64 %rawArg_foo, 7, !dbg !76
+  %5 = icmp ne i64 %4, 0, !dbg !76
+  %6 = and i64 %rawArg_foo, -9, !dbg !76
+  %7 = icmp eq i64 %6, 0, !dbg !76
+  %8 = or i1 %5, %7, !dbg !76
+  br i1 %8, label %codeRepl, label %sorbet_isa_Integer.exit, !dbg !76, !prof !61
 
-sorbet_isa_Integer.exit:                          ; preds = %6
-  %12 = inttoptr i64 %rawArg_foo to %struct.iseq_inline_iv_cache_entry*, !dbg !76
-  %13 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %12, i64 0, i32 0, !dbg !76
-  %14 = load i64, i64* %13, align 8, !dbg !76, !tbaa !62
-  %15 = and i64 %14, 31, !dbg !76
-  %16 = icmp eq i64 %15, 10, !dbg !76
-  br i1 %16, label %typeTestSuccess, label %codeRepl, !dbg !76, !prof !64
+sorbet_isa_Integer.exit:                          ; preds = %3
+  %9 = inttoptr i64 %rawArg_foo to %struct.iseq_inline_iv_cache_entry*, !dbg !76
+  %10 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %9, i64 0, i32 0, !dbg !76
+  %11 = load i64, i64* %10, align 8, !dbg !76, !tbaa !62
+  %12 = and i64 %11, 31, !dbg !76
+  %13 = icmp eq i64 %12, 10, !dbg !76
+  br i1 %13, label %typeTestSuccess, label %codeRepl, !dbg !76, !prof !64
 
 typeTestSuccess:                                  ; preds = %fillRequiredArgs, %sorbet_isa_Integer.exit
-  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %3, align 8, !dbg !76, !tbaa !28
+  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %0, align 8, !dbg !76, !tbaa !28
   %"rubyId_@foo" = load i64, i64* @"rubyIdPrecomputed_@foo", align 8, !dbg !77
   tail call void @sorbet_vm_setivar(i64 %selfRaw, i64 %"rubyId_@foo", i64 %rawArg_foo, %struct.iseq_inline_iv_cache_entry* noundef @"ivc_@foo") #17, !dbg !77
   %"rubyId_@foo13" = load i64, i64* @"rubyIdPrecomputed_@foo", align 8, !dbg !78
-  %17 = tail call i64 @sorbet_vm_getivar(i64 %selfRaw, i64 %"rubyId_@foo13", %struct.iseq_inline_iv_cache_entry* noundef @"ivc_@foo.3") #17, !dbg !78
+  %14 = tail call i64 @sorbet_vm_getivar(i64 %selfRaw, i64 %"rubyId_@foo13", %struct.iseq_inline_iv_cache_entry* noundef @"ivc_@foo.3") #17, !dbg !78
   %"<void-singleton>" = load i64, i64* @"<void-singleton>", align 8
   ret i64 %"<void-singleton>"
 
-codeRepl:                                         ; preds = %sorbet_isa_Integer.exit, %6
+codeRepl:                                         ; preds = %sorbet_isa_Integer.exit, %3
   tail call fastcc void @"func_AttrReaderNoSig#initialize.cold.1"(i64 %rawArg_foo) #19, !dbg !76
   unreachable
 }

@@ -686,7 +686,8 @@ llvm::Value *Payload::setRubyStackFrame(CompilerState &cs, llvm::IRBuilderBase &
     auto *isStaticInit = llvm::ConstantInt::get(
         cs, llvm::APInt(1, static_cast<int>(irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitFile ||
                                             irctx.rubyBlockType[rubyBlockId] == FunctionType::StaticInitModule)));
-    auto cfp = builder.CreateCall(cs.getFunction("sorbet_setRubyStackFrame"), {isStaticInit, iseqType, stackFrame});
+    builder.CreateCall(cs.getFunction("sorbet_setRubyStackFrame"), {isStaticInit, iseqType, stackFrame});
+    auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
     auto pc = builder.CreateCall(cs.getFunction("sorbet_getPc"), {cfp});
     return pc;
 }
@@ -904,7 +905,7 @@ llvm::Value *Payload::varGet(CompilerState &cs, cfg::LocalRef local, llvm::IRBui
         }
     }
     if (irctx.escapedVariableIndices.contains(local)) {
-        auto *cfp = builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
+        auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
         auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, irctx.escapedVariableIndices.at(local));
         auto level = irctx.rubyBlockLevel[rubyBlockId];
         return builder.CreateCall(cs.getFunction("sorbet_readLocal"),
@@ -962,7 +963,7 @@ void Payload::varSet(CompilerState &cs, cfg::LocalRef local, llvm::Value *var, l
         return;
     }
     if (irctx.escapedVariableIndices.contains(local)) {
-        auto *cfp = builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
+        auto *cfp = getCFPForBlock(cs, builder, irctx, rubyBlockId);
         auto *index = indexForLocalVariable(cs, irctx, rubyBlockId, irctx.escapedVariableIndices.at(local));
         auto level = irctx.rubyBlockLevel[rubyBlockId];
         builder.CreateCall(cs.getFunction("sorbet_writeLocal"),
@@ -1022,6 +1023,23 @@ llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &bui
     auto &builder = builderCast(build);
     return builder.CreateCall(cs.getFunction("sorbet_callFuncDirect"), {cache, fn, argc, argv, recv, iseq},
                               "sendDirect");
+}
+
+llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                     int rubyBlockId) {
+    auto &builder = builderCast(build);
+    switch (irctx.rubyBlockType[rubyBlockId]) {
+        case FunctionType::Method:
+        case FunctionType::StaticInitModule:
+        case FunctionType::StaticInitFile:
+            return irctx.rubyBlocks2Functions[rubyBlockId]->arg_begin() + 3;
+        case FunctionType::Block:
+        case FunctionType::Rescue:
+        case FunctionType::Ensure:
+        case FunctionType::ExceptionBegin:
+        case FunctionType::Unused:
+            return builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
+    }
 }
 
 llvm::Value *VMFlag::build(CompilerState &cs, llvm::IRBuilderBase &build, const vector<VMFlag> &flags) {

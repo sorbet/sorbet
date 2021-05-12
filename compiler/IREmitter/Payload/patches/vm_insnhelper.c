@@ -26,7 +26,7 @@ void sorbet_setExceptionStackFrame(rb_execution_context_t *ec, rb_control_frame_
                         num_locals, iseq->body->stack_max);
 }
 
-void sorbet_pushStaticInitFrame(VALUE recv) {
+rb_control_frame_t *sorbet_pushStaticInitFrame(VALUE recv) {
     rb_execution_context_t *ec = GET_EC();
 
     VALUE cref = (VALUE)vm_cref_push(ec, recv, NULL, FALSE); // Qnil or T_IMEMO(cref) or T_IMEMO(ment)
@@ -35,10 +35,10 @@ void sorbet_pushStaticInitFrame(VALUE recv) {
     // TODO(trevor) we could pass this in to supply a block
     VALUE block_handler = VM_BLOCK_HANDLER_NONE;
 
-    vm_push_frame(ec, NULL, frame_type, recv, block_handler, cref, 0, ec->cfp->sp, 0, 0);
+    return vm_push_frame(ec, NULL, frame_type, recv, block_handler, cref, 0, ec->cfp->sp, 0, 0);
 }
 
-void sorbet_pushCfuncFrame(struct FunctionInlineCache *cache, VALUE recv, const rb_iseq_t *iseq) {
+rb_control_frame_t *sorbet_pushCfuncFrame(struct FunctionInlineCache *cache, VALUE recv, const rb_iseq_t *iseq) {
     rb_execution_context_t *ec = GET_EC();
 
     // NOTE: method search must be done to ensure that this field is not NULL
@@ -49,8 +49,8 @@ void sorbet_pushCfuncFrame(struct FunctionInlineCache *cache, VALUE recv, const 
     VALUE block_handler = VM_BLOCK_HANDLER_NONE;
 
     /* cf. vm_call_sorbet_with_frame_normal */
-    vm_push_frame(ec, iseq, frame_type, recv, block_handler, (VALUE)me, 0, ec->cfp->sp, iseq->body->local_table_size,
-                  iseq->body->stack_max);
+    return vm_push_frame(ec, iseq, frame_type, recv, block_handler, (VALUE)me, 0, ec->cfp->sp,
+                         iseq->body->local_table_size, iseq->body->stack_max);
 }
 
 void sorbet_pushBlockFrame(const struct rb_captured_block *captured) {
