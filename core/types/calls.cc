@@ -2698,7 +2698,9 @@ class Magic_mergeHashValues : public IntrinsicMethod {
 
         TypeAndOrigins argument{shape, {}};
         sendArgs.emplace_back(&argument);
-        sendArgLocs.emplace_back(args.locs.args[1]);
+
+        auto hashLoc = args.locs.args[1].join(args.locs.args.back());
+        sendArgLocs.emplace_back(hashLoc);
 
         CallLocs sendLocs{args.locs.file, args.locs.call, args.locs.receiver, sendArgLocs};
 
