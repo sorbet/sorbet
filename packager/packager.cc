@@ -620,7 +620,7 @@ public:
 private:
     void addImport(core::Context, const PackageInfo &importedPackage, core::LocOffsets loc,
                    const FullyQualifiedName &exportFqn);
-    ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts);
+    ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts, core::NameRef parentPkg);
 
     const PackageName &findImportByMangledName(core::NameRef mangledName);
 };
@@ -666,15 +666,14 @@ void ImportTreeBuilder::addImport(core::Context ctx, const PackageInfo &imported
 
 ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx) {
     vector<core::NameRef> parts;
-    return makeModule(ctx, &root, parts);
+    return makeModule(ctx, &root, parts, core::NameRef());
 }
 
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts) {
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, core::NameRef parentPkg) {
     auto todoLoc = core::LocOffsets::none(); // TODO TODO real locs
-
-    if (node->srcPackageMangledName.exists()) { // Assignment
-        auto rhs = prependName(parts2literal(parts, todoLoc), node->srcPackageMangledName);
-        return ast::MK::Assign(todoLoc, name2Expr(parts.back()), std::move(rhs));
+    auto newParentPkg = parentPkg;
+    if (node->srcPackageMangledName.exists() && !parentPkg.exists()) {
+        newParentPkg = node->srcPackageMangledName;
     }
 
     // Sort by name for stability
@@ -683,13 +682,21 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
                    [](const auto &pair) { return make_pair(pair.first, pair.second.get()); });
     fast_sort(childPairs,
               [&ctx](const auto &lhs, const auto &rhs) -> bool { return lhs.first.show(ctx) < rhs.first.show(ctx); });
-
     ast::ClassDef::RHS_store rhs;
     for (auto const &[nameRef, child] : childPairs) {
         parts.emplace_back(nameRef);
-        rhs.emplace_back(makeModule(ctx, child, parts));
+        rhs.emplace_back(makeModule(ctx, child, parts, newParentPkg));
         parts.pop_back();
     }
+
+    if (node->srcPackageMangledName.exists()) { // Assignment
+        if (parentPkg.exists()) {
+            fmt::print("CONFLICT!\n"); // TODO
+        }
+        auto rhs = prependName(parts2literal(parts, todoLoc), node->srcPackageMangledName);
+        return ast::MK::Assign(todoLoc, name2Expr(parts.back()), std::move(rhs));
+    }
+
     core::NameRef moduleName = parts.empty() ? package.name.mangledName : parts.back();
     return ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), name2Expr(moduleName), {},
                            std::move(rhs));
