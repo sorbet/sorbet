@@ -648,6 +648,13 @@ VALUE sorbet_T_must(VALUE recv, ID fun, int argc, const VALUE *const restrict ar
 }
 
 SORBET_INLINE
+VALUE sorbet_rb_sym_equal(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+    return sorbet_boolToRuby(recv == argv[0]);
+}
+
+SORBET_INLINE
 VALUE sorbet_Thread_current(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                             VALUE closure) {
     return rb_thread_current();
