@@ -73,6 +73,13 @@ module T::Configuration
     @include_value_in_type_errors = true
   end
 
+  # Whether VM-defined prop serialization/deserialization routines can be enabled.
+  #
+  # @return [T::Boolean]
+  def self.can_enable_vm_prop_serde?
+    T::Props::Private::DeserializerGenerator.respond_to?(:generate2)
+  end
+
   # Whether to use VM-defined prop serialization/deserialization routines.
   #
   # The default is to use runtime codegen inside sorbet-runtime itself.
@@ -86,6 +93,9 @@ module T::Configuration
   #
   # This method is likely to break things outside of Stripe's systems.
   def self.enable_vm_prop_serde
+    if !can_enable_vm_prop_serde?
+      hard_assert_handler('Ruby VM is not setup to use VM-defined prop serde')
+    end
     @use_vm_prop_serde = true
   end
 
