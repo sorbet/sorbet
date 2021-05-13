@@ -592,7 +592,9 @@ class ImportTree {
     struct Source {
         core::NameRef packageMangledName;
         core::LocOffsets importLoc;
-        bool exists() { return importLoc.exists(); }
+        bool exists() {
+            return importLoc.exists();
+        }
     };
 
     // To avoid conflicts, a node should either be a leaf (source exists, no children) OR have children
@@ -627,7 +629,8 @@ public:
 private:
     void addImport(core::Context, const PackageInfo &importedPackage, core::LocOffsets loc,
                    const FullyQualifiedName &exportFqn);
-    ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts, ImportTree::Source parentSrc);
+    ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts,
+                                  ImportTree::Source parentSrc);
 };
 
 void ImportTreeBuilder::mergeImports(core::Context ctx, const PackageInfo &importedPackage, core::LocOffsets loc) {
@@ -647,7 +650,6 @@ void ImportTreeBuilder::addImport(core::Context ctx, const PackageInfo &imported
         node = child.get();
     }
     node->source = {importedPackage.name.mangledName, loc};
-
 }
 
 ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx) {
@@ -655,11 +657,12 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx) {
     return makeModule(ctx, &root, parts, ImportTree::Source());
 }
 
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, ImportTree::Source parentSrc) {
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts,
+                                                 ImportTree::Source parentSrc) {
     auto todoLoc = core::LocOffsets::none(); // TODO TODO real locs
-    auto newParentPkg = parentSrc;
+    auto newParentSrc = parentSrc;
     if (node->source.exists() && !parentSrc.exists()) {
-        newParentPkg = node->source;
+        newParentSrc = node->source;
     }
 
     // Sort by name for stability
@@ -671,15 +674,17 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
     ast::ClassDef::RHS_store rhs;
     for (auto const &[nameRef, child] : childPairs) {
         parts.emplace_back(nameRef);
-        rhs.emplace_back(makeModule(ctx, child, parts, newParentPkg));
+        rhs.emplace_back(makeModule(ctx, child, parts, newParentSrc));
         parts.pop_back();
     }
 
     if (node->source.exists()) { // Assignment
         if (parentSrc.exists()) {
             if (auto e = ctx.beginError(node->source.importLoc, core::errors::Packager::ImportConflict)) {
+                // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
+                // and the file processing order is consistent.
                 e.setHeader("Conflicting import sources for `{}`",
-                    fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                            fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
                 e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
             }
         }
