@@ -2640,7 +2640,11 @@ public:
 
 } Magic_toHash;
 
-// Interpret this `<Magic>.<merge-hash>(a, b)` as `a.merge(b)`
+// Interpret this `<Magic>.<merge-hash>(a, b)` as `a.merge!(b)`.
+//
+// NOTE: this will not update the type of `a` as `merge!` would in ruby. However, we only ever emit calls to this
+// intrinsic that look like `a = <Magic>.<merge-hash>(a, b)`, so the fact that `merge!` won't update the type of the
+// receiver isn't a problem here.
 class Magic_mergeHash : public IntrinsicMethod {
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         ENFORCE(args.args.size() == 2);
@@ -2670,7 +2674,9 @@ class Magic_mergeHash : public IntrinsicMethod {
     }
 } Magic_mergeHash;
 
-// Interpret this `<Magic>.<merge-hash-values>(a, k, v, ...)` as `a.merge({k => v, ...})`
+// Interpret this `<Magic>.<merge-hash-values>(a, k, v, ...)` as `a.merge!({k => v, ...})`
+//
+// See the note on Magic_mergeHash for why this doesn't dispatch to `merge!`.
 class Magic_mergeHashValues : public IntrinsicMethod {
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // Argument format is
@@ -2691,7 +2697,7 @@ class Magic_mergeHashValues : public IntrinsicMethod {
             values.emplace_back(value->type);
         }
 
-        auto shape = make_type<ShapeType>(keys, values);
+        auto shape = make_type<ShapeType>(std::move(keys), std::move(values));
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;

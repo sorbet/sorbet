@@ -16,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <hashTemp>$5
   end
 
-  {:a => "a"}.merge(<self>.x().to_hash())
+  {:a => "a"}.merge!(<self>.x().to_hash())
 
   begin
     <hashTemp>$7 = ::<Magic>.<to-hash-dup>(<self>.x())
@@ -24,7 +24,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <hashTemp>$7
   end
 
-  <self>.x().to_hash().merge(:a, "a")
+  <self>.x().to_hash().dup().merge!(:a, "a")
 
   begin
     <hashTemp>$8 = {:a => "a"}
@@ -36,5 +36,5 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <hashTemp>$8
   end
 
-  {:a => "a"}.merge(<self>.x().to_hash()).merge(<self>.y().to_hash()).merge(:b, "b", :c, "c").merge(<self>.y().to_hash()).merge(:d, "d")
+  {:a => "a"}.merge!(<self>.x().to_hash()).merge!(<self>.y().to_hash()).merge!(:b, "b", :c, "c").merge!(<self>.y().to_hash()).merge!(:d, "d")
 end

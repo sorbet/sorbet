@@ -1543,7 +1543,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 Send::ARGS_store mergeValues;
                 mergeValues.reserve(hash->pairs.size() * 2 + 1);
                 mergeValues.emplace_back(MK::Local(loc, acc));
-                bool hashLitPresent = false;
+                bool havePairsToMerge = false;
 
                 // build a hash literal assuming that the argument follows the same format as `mergeValues`:
                 // arg 0: the hash to merge into
@@ -1586,50 +1586,51 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                         auto value = node2TreeImpl(dctx, std::move(pair->value));
                         mergeValues.emplace_back(std::move(value));
 
-                        hashLitPresent = true;
-                    } else {
-                        auto *splat = parser::cast_node<parser::Kwsplat>(pairAsExpression.get());
-                        ENFORCE(splat != nullptr, "kwsplat cast failed");
+                        havePairsToMerge = true;
+                        continue;
+                    }
 
-                        if (hashLitPresent) {
-                            hashLitPresent = false;
+                    auto *splat = parser::cast_node<parser::Kwsplat>(pairAsExpression.get());
+                    ENFORCE(splat != nullptr, "kwsplat cast failed");
 
-                            // ensure that there's something to update
-                            if (updateStmts.empty()) {
-                                updateStmts.emplace_back(MK::Assign(loc, acc, buildHashLiteral(mergeValues)));
-                            } else {
-                                int numPosArgs = mergeValues.size();
-                                updateStmts.emplace_back(MK::Assign(
-                                    loc, acc,
-                                    MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                             core::Names::mergeHashValues(), numPosArgs, std::move(mergeValues))));
-                            }
+                    if (havePairsToMerge) {
+                        havePairsToMerge = false;
 
-                            mergeValues.clear();
-                            mergeValues.emplace_back(MK::Local(loc, acc));
-                        }
-
-                        auto expr = node2TreeImpl(dctx, std::move(splat->expr));
-
-                        // If this is the first argument to `<Magic>.<merge-hash>`, it needs to be duplicated as that
-                        // intrinsic is assumed to mutate its first argument.
+                        // ensure that there's something to update
                         if (updateStmts.empty()) {
-                            updateStmts.emplace_back(
-                                MK::Assign(loc, acc,
-                                           MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                                     core::Names::toHashDup(), std::move(expr))));
+                            updateStmts.emplace_back(MK::Assign(loc, acc, buildHashLiteral(mergeValues)));
                         } else {
-                            updateStmts.emplace_back(
-                                MK::Assign(loc, acc,
-                                           MK::Send2(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                                     core::Names::mergeHash(), MK::Local(loc, acc),
-                                                     MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                                               core::Names::toHashNoDup(), std::move(expr)))));
+                            int numPosArgs = mergeValues.size();
+                            updateStmts.emplace_back(MK::Assign(
+                                loc, acc,
+                                MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
+                                         core::Names::mergeHashValues(), numPosArgs, std::move(mergeValues))));
                         }
+
+                        mergeValues.clear();
+                        mergeValues.emplace_back(MK::Local(loc, acc));
+                    }
+
+                    auto expr = node2TreeImpl(dctx, std::move(splat->expr));
+
+                    // If this is the first argument to `<Magic>.<merge-hash>`, it needs to be duplicated as that
+                    // intrinsic is assumed to mutate its first argument.
+                    if (updateStmts.empty()) {
+                        updateStmts.emplace_back(
+                            MK::Assign(loc, acc,
+                                       MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()),
+                                                 core::Names::toHashDup(), std::move(expr))));
+                    } else {
+                        updateStmts.emplace_back(
+                            MK::Assign(loc, acc,
+                                       MK::Send2(loc, MK::Constant(loc, core::Symbols::Magic()),
+                                                 core::Names::mergeHash(), MK::Local(loc, acc),
+                                                 MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()),
+                                                           core::Names::toHashNoDup(), std::move(expr)))));
                     }
                 };
 
-                if (hashLitPresent) {
+                if (havePairsToMerge) {
                     // There were only keyword args/values present, so construct a hash literal directly
                     if (updateStmts.empty()) {
                         result = buildHashLiteral(mergeValues);
