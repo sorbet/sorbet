@@ -588,6 +588,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq"},
     {core::Symbols::Integer(), "times", "sorbet_rb_int_dotimes", "sorbet_rb_int_dotimes_withBlock"},
     {core::Symbols::Symbol(), "==", "sorbet_rb_sym_equal"},
+    {core::Symbols::Symbol(), "===", "sorbet_rb_sym_equal"},
     {core::Symbols::Thread(), "[]", "sorbet_Thread_square_br"},
     {core::Symbols::Thread(), "[]=", "sorbet_Thread_square_br_eq"},
 #include "WrappedIntrinsics.h"
