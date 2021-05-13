@@ -206,8 +206,9 @@ bool isReferenceToPackageSpec(core::Context ctx, ast::ExpressionPtr &expr) {
     return constLit != nullptr && constLit->cnst == core::Names::Constants::PackageSpec();
 }
 
-ast::ExpressionPtr name2Expr(core::NameRef name, ast::ExpressionPtr scope = ast::MK::EmptyTree()) {
-    return ast::MK::UnresolvedConstant(core::LocOffsets::none(), move(scope), name);
+ast::ExpressionPtr name2Expr(core::NameRef name, ast::ExpressionPtr scope = ast::MK::EmptyTree(),
+                             core::LocOffsets loc = core::LocOffsets::none()) {
+    return ast::MK::UnresolvedConstant(loc, move(scope), name);
 }
 
 ast::ExpressionPtr FullyQualifiedName::toLiteral(core::LocOffsets loc) const {
@@ -472,7 +473,7 @@ struct PackageInfoFinder {
         }
 
         fast_sort(exported, [](const auto &a, const auto &b) -> bool { return a.parts.size() < b.parts.size(); });
-        // TODO this could be sped up
+        // TODO(nroman) If this is too slow could probably be sped up with lexigraphic sort.
         for (auto longer = exported.begin(); longer != exported.end(); longer++) {
             for (auto shorter = exported.begin(); shorter != longer; shorter++) {
                 if (std::equal(longer->parts.begin(), longer->parts.begin() + shorter->parts.size(),
@@ -598,7 +599,7 @@ class ImportTree {
     };
 
     // To avoid conflicts, a node should either be a leaf (source exists, no children) OR have children
-    // and an non-existent source. This is validated during in `makeModule`.
+    // and an non-existent source. This is validated in `makeModule`.
     UnorderedMap<core::NameRef, std::unique_ptr<ImportTree>> children;
     Source source;
 
@@ -659,7 +660,6 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx) {
 
 ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts,
                                                  ImportTree::Source parentSrc) {
-    auto todoLoc = core::LocOffsets::none(); // TODO TODO real locs
     auto newParentSrc = parentSrc;
     if (node->source.exists() && !parentSrc.exists()) {
         newParentSrc = node->source;
@@ -678,7 +678,7 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
         parts.pop_back();
     }
 
-    if (node->source.exists()) { // Assignment
+    if (node->source.exists()) {
         if (parentSrc.exists()) {
             if (auto e = ctx.beginError(node->source.importLoc, core::errors::Packager::ImportConflict)) {
                 // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
@@ -688,8 +688,9 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
                 e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
             }
         }
-        auto rhs = prependName(parts2literal(parts, todoLoc), node->source.packageMangledName);
-        return ast::MK::Assign(todoLoc, name2Expr(parts.back()), std::move(rhs));
+        auto rhs = prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
+        return ast::MK::Assign(core::LocOffsets::none(),
+                               name2Expr(parts.back(), ast::MK::EmptyTree(), node->source.importLoc), std::move(rhs));
     }
 
     core::NameRef moduleName = parts.empty() ? package.name.mangledName : parts.back();
@@ -750,7 +751,6 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
     auto packageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
                         name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(importedPackages));
-    // fmt::print("{}:\n{}\n\n", file.file.data(ctx).path(), packageNamespace.toString(ctx)); // TODO remove
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     rootKlass.rhs.emplace_back(move(packageNamespace));
