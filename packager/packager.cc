@@ -271,6 +271,7 @@ class EnforcePackagePrefix {
     const PackageInfo *pkg;
     vector<core::NameRef> nameParts;
     int rootConsts = 0;
+    int skipPush = 0;
 
 public:
     EnforcePackagePrefix(const PackageInfo *pkg) : pkg(pkg) {
@@ -284,17 +285,21 @@ public:
             return tree;
         }
         const auto &pkgName = pkg->name.fullName.parts;
-        bool skipCheck = nameParts.size() > pkgName.size(); // TODO can we skip push with a counter?
-        auto &constantLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
-        pushConstantLit(&constantLit);
+        if (nameParts.size() > pkgName.size()) {
+            // At this depth we can stop checking the prefixes since beyond the end of the prefix.
+            skipPush++;
+        } else {
+            auto &constantLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
+            pushConstantLit(&constantLit);
 
-        size_t minSize = std::min(pkgName.size(), nameParts.size());
-        if (!skipCheck && rootConsts == 0 &&
-            !std::equal(pkgName.begin(), pkgName.begin() + minSize, nameParts.begin(), nameParts.begin() + minSize)) {
-            if (auto e = ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                e.setHeader(
-                    "Class or method definition must match enclosing package namespace `{}`",
-                    fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+            size_t minSize = std::min(pkgName.size(), nameParts.size());
+            if (rootConsts == 0 &&
+                    !std::equal(pkgName.begin(), pkgName.begin() + minSize, nameParts.begin(), nameParts.begin() + minSize)) {
+                if (auto e = ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                    e.setHeader(
+                            "Class or method definition must match enclosing package namespace `{}`",
+                            fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+                }
             }
         }
         return tree;
@@ -303,12 +308,18 @@ public:
     ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
-            ENFORCE(nameParts.size() == 0); // Sanity check bookkeeping
+            // Sanity check bookkeeping
+            ENFORCE(nameParts.size() == 0);
             ENFORCE(rootConsts == 0);
+            ENFORCE(skipPush == 0);
             return tree;
         }
         auto *constantLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
-        popConstantLit(constantLit);
+        if (skipPush > 0) {
+            skipPush--;
+        } else {
+            popConstantLit(constantLit);
+        }
         return tree;
     }
 
