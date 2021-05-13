@@ -589,9 +589,16 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
 }
 
 class ImportTree {
-    // Invariant: a tree node may only have `children` XOR `srcPackageMangledName`.
+    struct Source {
+        core::NameRef packageMangledName;
+        core::LocOffsets importLoc;
+        bool exists() { return importLoc.exists(); }
+    };
+
+    // To avoid conflicts, a node should either be a leaf (source exists, no children) OR have children
+    // and an non-existent source. This is validated during in `makeModule`.
     UnorderedMap<core::NameRef, std::unique_ptr<ImportTree>> children;
-    core::NameRef srcPackageMangledName;
+    Source source;
 
 public:
     ImportTree() = default;
@@ -620,9 +627,7 @@ public:
 private:
     void addImport(core::Context, const PackageInfo &importedPackage, core::LocOffsets loc,
                    const FullyQualifiedName &exportFqn);
-    ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts, core::NameRef parentPkg);
-
-    const PackageName &findImportByMangledName(core::NameRef mangledName);
+    ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts, ImportTree::Source parentSrc);
 };
 
 void ImportTreeBuilder::mergeImports(core::Context ctx, const PackageInfo &importedPackage, core::LocOffsets loc) {
@@ -638,42 +643,23 @@ void ImportTreeBuilder::addImport(core::Context ctx, const PackageInfo &imported
         auto &child = node->children[nameRef];
         if (!child) {
             child = make_unique<ImportTree>();
-        } else if (child->srcPackageMangledName.exists()) {
-            // This node already has a definition attached to it. It may not be the prefix of a
-            // deeper node. For example:
-            // import A::B
-            // import A::B::C <-- ERR
-            if (auto e = ctx.beginError(loc, core::errors::Packager::ImportConflict)) {
-                e.setHeader("Cannot import packages that export the same name");
-                const auto &conflictImport = findImportByMangledName(child->srcPackageMangledName);
-                e.addErrorLine(core::Loc(ctx.file, conflictImport.loc), "Source of conflicting import");
-            }
         }
         node = child.get();
     }
-    node->srcPackageMangledName = importedPackage.name.mangledName;
-    if (!node->children.empty()) {
-        // Attempting to attach a definition to a node that already has child nodes. Similar error
-        // as above when import ordering is reversed. For example:
-        // import A::B::C
-        // import A::B <-- ERR
-        if (auto e = ctx.beginError(loc, core::errors::Packager::ImportConflict)) {
-            e.setHeader("TODO TODO B");
-            // const auto &conflictImport = findImportByMangledName(node->children.begin().);
-        }
-    }
+    node->source = {importedPackage.name.mangledName, loc};
+
 }
 
 ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx) {
     vector<core::NameRef> parts;
-    return makeModule(ctx, &root, parts, core::NameRef());
+    return makeModule(ctx, &root, parts, ImportTree::Source());
 }
 
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, core::NameRef parentPkg) {
+ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, ImportTree::Source parentSrc) {
     auto todoLoc = core::LocOffsets::none(); // TODO TODO real locs
-    auto newParentPkg = parentPkg;
-    if (node->srcPackageMangledName.exists() && !parentPkg.exists()) {
-        newParentPkg = node->srcPackageMangledName;
+    auto newParentPkg = parentSrc;
+    if (node->source.exists() && !parentSrc.exists()) {
+        newParentPkg = node->source;
     }
 
     // Sort by name for stability
@@ -689,26 +675,21 @@ ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *
         parts.pop_back();
     }
 
-    if (node->srcPackageMangledName.exists()) { // Assignment
-        if (parentPkg.exists()) {
-            fmt::print("CONFLICT!\n"); // TODO
+    if (node->source.exists()) { // Assignment
+        if (parentSrc.exists()) {
+            if (auto e = ctx.beginError(node->source.importLoc, core::errors::Packager::ImportConflict)) {
+                e.setHeader("Conflicting import sources for `{}`",
+                    fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
+            }
         }
-        auto rhs = prependName(parts2literal(parts, todoLoc), node->srcPackageMangledName);
+        auto rhs = prependName(parts2literal(parts, todoLoc), node->source.packageMangledName);
         return ast::MK::Assign(todoLoc, name2Expr(parts.back()), std::move(rhs));
     }
 
     core::NameRef moduleName = parts.empty() ? package.name.mangledName : parts.back();
     return ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), name2Expr(moduleName), {},
                            std::move(rhs));
-}
-
-const PackageName &ImportTreeBuilder::findImportByMangledName(core::NameRef mangledName) {
-    const auto &names = package.importedPackageNames;
-    auto it = absl::c_find_if(names, [mangledName](const PackageName &importedPkgName) -> bool {
-        return importedPkgName.mangledName == mangledName;
-    });
-    ENFORCE(it != names.end());
-    return *it;
 }
 
 // Add:
