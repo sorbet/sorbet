@@ -327,6 +327,28 @@ index e189c20..87c1653 100644
  	return rb_unnamed_parameters(method_arity(method));
      }
      return rb_iseq_parameters(iseq, 0);
+diff --git vm_backtrace.c vm_backtrace.c
+index f6b4e8e..1c4a7ff 100644
+--- vm_backtrace.c
++++ vm_backtrace.c
+@@ -1321,7 +1321,7 @@ rb_profile_frames(int start, int limit, VALUE *buff, int *lines)
+ 
+ 	    /* record frame info */
+ 	    cme = rb_vm_frame_method_entry(cfp);
+-	    if (cme && cme->def->type == VM_METHOD_TYPE_ISEQ) {
++	    if (cme && (cme->def->type == VM_METHOD_TYPE_ISEQ || cme->def->type == VM_METHOD_TYPE_SORBET)) {
+ 		buff[i] = (VALUE)cme;
+ 	    }
+ 	    else {
+@@ -1353,6 +1353,8 @@ frame2iseq(VALUE frame)
+ 		switch (cme->def->type) {
+ 		  case VM_METHOD_TYPE_ISEQ:
+ 		    return cme->def->body.iseq.iseqptr;
++                  case VM_METHOD_TYPE_SORBET:
++                    return cme->def->body.sorbet.iseqptr;
+ 		  default:
+ 		    return NULL;
+ 		}
 diff --git vm_eval.c vm_eval.c
 index 76e56fa..52805d3 100644
 --- vm_eval.c
