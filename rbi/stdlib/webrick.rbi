@@ -1358,10 +1358,11 @@ class WEBrick::HTTPAuth::Htpasswd
   sig do
     params(
       path: T.untyped,
+      password_hash: T.untyped,
     )
     .returns(T.untyped)
   end
-  def initialize(path); end
+  def initialize(path, password_hash: T.unsafe(nil)); end
 
   # Reload passwords from the database
   sig {returns(T.untyped)}
