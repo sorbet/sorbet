@@ -1601,10 +1601,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                             updateStmts.emplace_back(MK::Assign(loc, acc, buildHashLiteral(mergeValues)));
                         } else {
                             int numPosArgs = mergeValues.size();
-                            updateStmts.emplace_back(MK::Assign(
-                                loc, acc,
-                                MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                         core::Names::mergeHashValues(), numPosArgs, std::move(mergeValues))));
+                            updateStmts.emplace_back(MK::Assign(loc, acc,
+                                                                MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()),
+                                                                         core::Names::mergeHashValues(), numPosArgs,
+                                                                         std::move(mergeValues))));
                         }
 
                         mergeValues.clear();
@@ -1616,10 +1616,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     // If this is the first argument to `<Magic>.<merge-hash>`, it needs to be duplicated as that
                     // intrinsic is assumed to mutate its first argument.
                     if (updateStmts.empty()) {
-                        updateStmts.emplace_back(
-                            MK::Assign(loc, acc,
-                                       MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()),
-                                                 core::Names::toHashDup(), std::move(expr))));
+                        updateStmts.emplace_back(MK::Assign(loc, acc,
+                                                            MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()),
+                                                                      core::Names::toHashDup(), std::move(expr))));
                     } else {
                         updateStmts.emplace_back(
                             MK::Assign(loc, acc,
