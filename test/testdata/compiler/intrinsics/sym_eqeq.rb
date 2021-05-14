@@ -11,7 +11,7 @@ def symeq(sym, obj)
 end
 
 # INITIAL-LABEL: "func_Object#symeq"
-# INITIAL: sorbet_rb_sym_equal
+# INITIAL: call i64 @sorbet_rb_sym_equal
 # INITIAL{LITERAL}: }
 
 p symeq(:sym, 1)
