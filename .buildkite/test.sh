@@ -31,7 +31,7 @@ echo "--- building ruby with gcc"
   @sorbet_ruby_2_7//:ruby \
   --crosstool_top=@bazel_tools//tools/cpp:toolchain
 
-echo "--- running tests"
+echo "+++ running tests"
 ./bazel test @com_stripe_ruby_typer//test //... --config=dbg -c opt --test_summary=terse --test_output=errors || err=$?
 
 echo "--- uploading test results"
