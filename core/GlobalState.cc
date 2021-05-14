@@ -580,6 +580,27 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg1())
                  .buildWithResultUntyped();
 
+    // Synthesize <Magic>.<to-hash-dup>(arg: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::toHashDup())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+
+    // Synthesize <Magic>.<to-hash-nodup>(arg: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::toHashNoDup())
+                 .untypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+
+    // Synthesize <Magic>.<merge-hash>(*arg: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::mergeHash())
+                 .repeatedUntypedArg(Names::arg0())
+                 .buildWithResultUntyped();
+
+    // Synthesize <Magic>.<merge-hash-values>(arg0: T.untyped, *arg1: T.untyped) => T.untyped
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::mergeHashValues())
+                 .untypedArg(Names::arg0())
+                 .repeatedUntypedArg(Names::arg())
+                 .buildWithResultUntyped();
+
     // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::params())
                  .kwsplatArg(Names::arg0())

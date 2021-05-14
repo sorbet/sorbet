@@ -3,19 +3,38 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   {:a => "a"}
 
-  <self>.x().to_hash()
+  begin
+    <hashTemp>$4 = ::<Magic>.<to-hash-dup>(<self>.x())
+    <hashTemp>$4
+  end
 
   <self>.x()
 
-  {:a => "a"}.merge(<self>.x().to_hash())
+  begin
+    <hashTemp>$5 = {:a => "a"}
+    <hashTemp>$5 = ::<Magic>.<merge-hash>(<hashTemp>$5, ::<Magic>.<to-hash-nodup>(<self>.x()))
+    <hashTemp>$5
+  end
 
-  {:a => "a"}.merge(<self>.x().to_hash())
+  {:a => "a"}.merge!(<self>.x().to_hash())
 
-  <self>.x().to_hash().merge({:a => "a"})
+  begin
+    <hashTemp>$7 = ::<Magic>.<to-hash-dup>(<self>.x())
+    <hashTemp>$7 = ::<Magic>.<merge-hash-values>(<hashTemp>$7, :a, "a")
+    <hashTemp>$7
+  end
 
-  <self>.x().to_hash().merge(:a, "a")
+  <self>.x().to_hash().dup().merge!(:a, "a")
 
-  {:a => "a"}.merge(<self>.x().to_hash()).merge(<self>.y().to_hash()).merge({:b => "b", :c => "c"}).merge(<self>.y().to_hash()).merge({:d => "d"})
+  begin
+    <hashTemp>$8 = {:a => "a"}
+    <hashTemp>$8 = ::<Magic>.<merge-hash>(<hashTemp>$8, ::<Magic>.<to-hash-nodup>(<self>.x()))
+    <hashTemp>$8 = ::<Magic>.<merge-hash>(<hashTemp>$8, ::<Magic>.<to-hash-nodup>(<self>.y()))
+    <hashTemp>$8 = ::<Magic>.<merge-hash-values>(<hashTemp>$8, :b, "b", :c, "c")
+    <hashTemp>$8 = ::<Magic>.<merge-hash>(<hashTemp>$8, ::<Magic>.<to-hash-nodup>(<self>.y()))
+    <hashTemp>$8 = ::<Magic>.<merge-hash-values>(<hashTemp>$8, :d, "d")
+    <hashTemp>$8
+  end
 
-  {:a => "a"}.merge(<self>.x().to_hash()).merge(<self>.y().to_hash()).merge(:b, "b", :c, "c").merge(<self>.y().to_hash()).merge(:d, "d")
+  {:a => "a"}.merge!(<self>.x().to_hash()).merge!(<self>.y().to_hash()).merge!(:b, "b", :c, "c").merge!(<self>.y().to_hash()).merge!(:d, "d")
 end
