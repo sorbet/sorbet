@@ -488,6 +488,12 @@ static const vector<CallCMethod> knownCMethods{
     {"<block-break>", "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {"!", "sorbet_bang", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
     {"<check-match-array>", "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+
+    // for kwsplat building
+    {"<to-hash-dup>", "sorbet_magic_toHashDup", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<to-hash-nodup>", "sorbet_magic_toHashNoDup", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<merge-hash>", "sorbet_magic_mergeHash", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<merge-hash-values>", "sorbet_magic_mergeHashValues", NoReceiver, Intrinsics::HandleBlock::Unhandled},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {

@@ -316,8 +316,7 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
         llvm::Value *kwHash = nullptr;
         if (numKwArgs == 0) {
             // no inlined keyword args, lookup the hash to be splatted
-            auto *splat = Payload::varGet(cs, args.back().variable, builder, irctx, rubyBlockId);
-            kwHash = builder.CreateCall(cs.getFunction("sorbet_hashDup"), {splat});
+            kwHash = Payload::varGet(cs, args.back().variable, builder, irctx, rubyBlockId);
         } else {
             // fill in inlined args (posEnd .. kwEnd)
             auto it = args.begin() + posEnd;
@@ -405,10 +404,8 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
             ENFORCE(numKwArgs == 1);
             flags.emplace_back(Payload::VM_CALL_KW_SPLAT);
 
-            // TODO(perf) we can avoid duplicating the hash here if we know that it was created specifically for this
-            // kwsplat.
             auto var = Payload::varGet(cs, send->args[argIdx].variable, builder, irctx, rubyBlockId);
-            stack.emplace_back(builder.CreateCall(cs.getFunction("sorbet_hashDup"), {var}, "kwsplat"));
+            stack.emplace_back(var);
         } else {
             flags.emplace_back(Payload::VM_CALL_KWARG);
 

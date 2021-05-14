@@ -115,6 +115,7 @@ SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
 
 SORBET_ALIVE(long, sorbet_globalConstRegister, (VALUE val));
 SORBET_ALIVE(VALUE, sorbet_globalConstDupHash, (long index));
+SORBET_ALIVE(VALUE, sorbet_magic_mergeHashHelper, (VALUE, VALUE));
 
 SORBET_ALIVE(VALUE, sorbet_vm_getivar, (VALUE obj, ID id, struct iseq_inline_iv_cache_entry *cache));
 SORBET_ALIVE(void, sorbet_vm_setivar, (VALUE obj, ID id, VALUE val, struct iseq_inline_iv_cache_entry *cache));
@@ -996,6 +997,46 @@ VALUE sorbet_rb_int_dotimes_withBlock(VALUE recv, ID fun, int argc, const VALUE 
 // ****
 // ****                       Name Based Intrinsics
 // ****
+
+SORBET_INLINE
+VALUE sorbet_magic_toHashDup(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                             VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+
+    // if this is too slow, we can inline the type conversion code
+    VALUE hash = rb_to_hash_type(argv[0]);
+
+    return rb_hash_dup(hash);
+}
+
+SORBET_INLINE
+VALUE sorbet_magic_toHashNoDup(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                               VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+
+    // if this is too slow, we can inline the type conversion code
+    return rb_to_hash_type(argv[0]);
+}
+
+SORBET_INLINE
+VALUE sorbet_magic_mergeHash(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                             VALUE closure) {
+    sorbet_ensure_arity(argc, 2);
+
+    return sorbet_magic_mergeHashHelper(argv[0], argv[1]);
+}
+
+SORBET_INLINE
+VALUE sorbet_magic_mergeHashValues(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                   VALUE closure) {
+    if (UNLIKELY((argc % 2) != 1)) {
+        sorbet_raiseArity(argc, 1, UNLIMITED_ARGUMENTS);
+    }
+
+    VALUE hash = argv[0];
+    rb_hash_bulk_insert(argc - 1, argv + 1, hash);
+    return hash;
+}
 
 SORBET_INLINE
 VALUE sorbet_splatIntrinsic(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
