@@ -809,17 +809,11 @@ class Pathname < Object
   sig do
     params(
         ignore_error: T::Boolean,
-        blk: T.proc.params(arg0: Pathname).returns(BasicObject),
+        blk: T.nilable(T.proc.params(arg0: Pathname).void),
     )
-    .returns(T.untyped)
+    .returns(T.nilable(T::Enumerator[Pathname]))
   end
-  sig do
-    params(
-        ignore_error: T::Boolean,
-    )
-    .returns(T::Enumerator[Pathname])
-  end
-  def find(ignore_error, &blk); end
+  def find(ignore_error: true, &blk); end
 
   # Return `true` if the receiver matches the given pattern.
   #
