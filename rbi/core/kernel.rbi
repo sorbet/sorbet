@@ -486,7 +486,7 @@ module Kernel
 
   sig do
     params(
-        arg0: T.any(Class, Module),
+        arg0: T.any(Module),
     )
     .returns(T::Boolean)
   end
@@ -494,7 +494,7 @@ module Kernel
 
   sig do
     params(
-        arg0: Class,
+        arg0: Module,
     )
     .returns(T::Boolean)
   end
