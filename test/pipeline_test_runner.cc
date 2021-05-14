@@ -191,12 +191,16 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     // Parser
     vector<core::FileRef> files;
     constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
+    constexpr string_view packageFileName = "__package.rb"sv;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
 
         for (auto &sourceFile : test.sourceFiles) {
             auto fref = gs->enterFile(test.sourceFileContents[test.folder + sourceFile]);
             if (FileOps::getFileName(sourceFile) == whitelistedTypedNoneTest) {
+                fref.data(*gs).strictLevel = core::StrictLevel::False;
+            }
+            if (FileOps::getFileName(sourceFile) == packageFileName && fref.data(*gs).source().empty()) {
                 fref.data(*gs).strictLevel = core::StrictLevel::False;
             }
             files.emplace_back(fref);
@@ -206,7 +210,8 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     ExpectationHandler handler(test, errorQueue, errorCollector);
 
     for (auto file : files) {
-        if (FileOps::getFileName(file.data(*gs).path()) != whitelistedTypedNoneTest &&
+        auto fileName = FileOps::getFileName(file.data(*gs).path());
+        if (fileName != whitelistedTypedNoneTest && (fileName != packageFileName || !file.data(*gs).source().empty()) &&
             file.data(*gs).source().find("# typed:") == string::npos) {
             ADD_FAIL_CHECK_AT(file.data(*gs).path().data(), 1, "Add a `# typed: strict` line to the top of this file");
         }

@@ -352,8 +352,12 @@ struct PackageInfoFinder {
     //   end
     void finalize(core::MutableContext ctx) {
         if (info == nullptr) {
-            if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::InvalidPackageDefinition)) {
-                e.setHeader("Package file must contain a package definition of form `Foo::Bar < PackageSpec`");
+            // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
+            // instead replaces deleted files with the empty string. It should really mark files as Tombstones instead.
+            if (!ctx.file.data(ctx).source().empty()) {
+                if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Packager::InvalidPackageDefinition)) {
+                    e.setHeader("Package file must contain a package definition of form `Foo::Bar < PackageSpec`");
+                }
             }
             return;
         }
