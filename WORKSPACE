@@ -37,7 +37,9 @@ m4_register_toolchains()
 
 load("@rules_bison//bison:bison.bzl", "bison_register_toolchains")
 
-bison_register_toolchains()
+bison_register_toolchains(
+    extra_copts = ["-Wno-implicit-const-int-float-conversion"]
+)
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 

@@ -252,9 +252,9 @@ package(default_visibility = ["//visibility:public"])
 
     http_archive(
         name = "rules_bison",
-        urls = _github_public_urls("jez/rules_bison/archive/fece3b14754228c7623537a972a778f7d5443b4f.zip"),
-        sha256 = "03039da0cd8a3b512fa57a8b4c1b0b8ca7732867975e292db61de01a32a4c0bc",
-        strip_prefix = "rules_bison-fece3b14754228c7623537a972a778f7d5443b4f",
+        urls = _github_public_urls("jez/rules_bison/archive/478079b28605a38000eaf83719568d756b3383a0.zip"),
+        sha256 = "d662d200f4e2a868f6873d666402fa4d413f07ba1a433591c5f60ac601157fb9",
+        strip_prefix = "rules_bison-478079b28605a38000eaf83719568d756b3383a0",
     )
 
     http_archive(
