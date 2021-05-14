@@ -622,9 +622,11 @@ module Intrinsics
       grouped_methods.each do |methods|
         method = methods.fetch(0)
         if should_wrap?(method)
-          header << "    {core::Symbols::#{method.klass}(), "
-          header << "\"#{method.rb_name}\", "
-          header << "\"#{method.sorbet_payload_wrapper_name}\"},\n"
+          methods.each do |method|
+            header << "    {core::Symbols::#{method.klass}(), "
+            header << "\"#{method.rb_name}\", "
+            header << "\"#{method.sorbet_payload_wrapper_name}\"},\n"
+          end
         end
       end
       header << "    // clang-format on\n"
