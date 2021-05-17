@@ -197,6 +197,11 @@ struct IREmitterContext {
     // TODO(jez) document lineNumberPtrsByFunction
     std::vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
 
+    // Stores the control frame (GET_EC()->cfp) for ordinary ruby blocks.
+    //
+    // idx: cfg::BasicBlock::rubyBlockId
+    UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
+
     // TODO(jez) usesBlockArgs
     bool usesBlockArgs;
 

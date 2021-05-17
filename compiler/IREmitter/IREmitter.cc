@@ -107,6 +107,11 @@ void setupStackFrames(CompilerState &base, const ast::MethodDef &md, const IREmi
                 break;
         }
 
+        if (irctx.rubyBlockType[rubyBlockId] == FunctionType::Block) {
+            auto *cfp = builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
+            builder.CreateStore(cfp, irctx.blockControlFramePtrs.at(rubyBlockId));
+        }
+
         setupStackFrame(cs, md, irctx, builder, rubyBlockId);
         auto lastLoc = core::Loc::none();
         auto startLoc = md.symbol.data(base)->loc();

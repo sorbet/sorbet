@@ -261,10 +261,10 @@ afterSend11:                                      ; preds = %functionEntryInitia
 ; Function Attrs: ssp
 define internal i64 @"func_Object#foo$block_1"(i64 %firstYieldArgRaw, i64 %localsOffset, i32 %argc, i64* nocapture readonly %argArray, i64 %blockArg) #7 !dbg !29 {
 functionEntryInitializers:
-  %stackFrame = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#foo$block_1", align 8
   %0 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !12
   %1 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %0, i64 0, i32 2
   %2 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %1, align 8, !tbaa !30
+  %stackFrame = load %struct.rb_iseq_struct*, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#foo$block_1", align 8
   %3 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 2
   store %struct.rb_iseq_struct* %stackFrame, %struct.rb_iseq_struct** %3, align 8, !tbaa !33
   %4 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 4
@@ -319,16 +319,13 @@ fillRequiredArgs:                                 ; preds = %argArrayExpandArray
   %29 = load i64, i64* @ruby_vm_global_constant_state, align 8, !dbg !39, !tbaa !18
   %guardUpdated = icmp eq i64 %28, %29, !dbg !39
   tail call void @llvm.assume(i1 %guardUpdated), !dbg !39
-  %30 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !39, !tbaa !12
-  %31 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %30, i64 0, i32 2, !dbg !39
-  %32 = load %struct.rb_control_frame_struct*, %struct.rb_control_frame_struct** %31, align 8, !dbg !39, !tbaa !30
-  %33 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %32, i64 0, i32 1, !dbg !39
-  %34 = load i64*, i64** %33, align 8, !dbg !39, !tbaa !21
-  %35 = getelementptr inbounds i64, i64* %34, i64 1, !dbg !39
-  store i64 %22, i64* %34, align 8, !dbg !39, !tbaa !4
-  %36 = getelementptr inbounds i64, i64* %35, i64 1, !dbg !39
-  store i64* %36, i64** %33, align 8, !dbg !39, !tbaa !21
-  store i64 %27, i64* %35, align 8, !dbg !39, !tbaa !4
+  %30 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %2, i64 0, i32 1, !dbg !39
+  %31 = load i64*, i64** %30, align 8, !dbg !39, !tbaa !21
+  %32 = getelementptr inbounds i64, i64* %31, i64 1, !dbg !39
+  store i64 %22, i64* %31, align 8, !dbg !39, !tbaa !4
+  %33 = getelementptr inbounds i64, i64* %32, i64 1, !dbg !39
+  store i64* %33, i64** %30, align 8, !dbg !39, !tbaa !21
+  store i64 %27, i64* %32, align 8, !dbg !39, !tbaa !4
   %send = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts.1, i64 0), !dbg !39
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 7), i64** %8, align 8, !dbg !39, !tbaa !12
   ret i64 %send, !dbg !38

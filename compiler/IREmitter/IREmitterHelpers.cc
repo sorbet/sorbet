@@ -551,9 +551,13 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
     vector<llvm::BasicBlock *> userEntryBlockByFunction(rubyBlock2Function.size());
     vector<llvm::AllocaInst *> sendArgArrayByBlock;
     vector<llvm::AllocaInst *> lineNumberPtrsByFunction;
+    UnorderedMap<int, llvm::AllocaInst *> blockControlFramePtrs;
 
     int i = 0;
     auto lineNumberPtrType = llvm::PointerType::getUnqual(llvm::Type::getInt64PtrTy(cs));
+    auto *controlFrameStructType = llvm::StructType::getTypeByName(cs, "struct.rb_control_frame_struct");
+    ENFORCE(controlFrameStructType != nullptr);
+    auto *controlFramePtrType = controlFrameStructType->getPointerTo();
     for (auto &fun : rubyBlock2Function) {
         auto inits = functionInitializersByFunction.emplace_back(llvm::BasicBlock::Create(
             cs, "functionEntryInitializers",
@@ -564,6 +568,14 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         sendArgArrayByBlock.emplace_back(sendArgArray);
         auto lineNumberPtr = builder.CreateAlloca(lineNumberPtrType, nullptr, "lineCountStore");
         lineNumberPtrsByFunction.emplace_back(lineNumberPtr);
+        // We cache cfp for ordinary ruby blocks; methods receive cfp as an argument and
+        // we currently consider caching not worth it for exception-related blocks.
+        // Exception-related blocks are, after all, exceptional, and probably don't
+        // contain enough code to make it worth caching the CFP.
+        if (blockTypes[i] == FunctionType::Block) {
+            auto *controlFramePtr = builder.CreateAlloca(controlFramePtrType, nullptr, "controlFrameStore");
+            blockControlFramePtrs[i] = controlFramePtr;
+        }
         argumentSetupBlocksByFunction.emplace_back(llvm::BasicBlock::Create(cs, "argumentSetup", fun));
         i++;
     }
@@ -713,6 +725,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(blockParents),
         move(blockLevels),
         move(lineNumberPtrsByFunction),
+        std::move(blockControlFramePtrs),
         usesBlockArgs,
         move(exceptionHandlingBlockHeaders),
         move(deadBlocks),

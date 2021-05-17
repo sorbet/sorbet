@@ -1038,6 +1038,7 @@ llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &bui
         case FunctionType::StaticInitFile:
             return irctx.rubyBlocks2Functions[rubyBlockId]->arg_begin() + 3;
         case FunctionType::Block:
+            return builder.CreateLoad(irctx.blockControlFramePtrs.at(rubyBlockId), "cached_cfp");
         case FunctionType::Rescue:
         case FunctionType::Ensure:
         case FunctionType::ExceptionBegin:
