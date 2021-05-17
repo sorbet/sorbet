@@ -267,6 +267,8 @@ ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameR
     return target;
 }
 
+// Visitor that ensures for constants defined within a package that all have the package as a
+// prefix.
 class EnforcePackagePrefix {
     const PackageInfo *pkg;
     vector<core::NameRef> nameParts;
@@ -465,12 +467,7 @@ struct PackageInfoFinder {
         return prependName(move(scope), this->info->name.mangledName);
     }
 
-    // Generates `exportModule`, which dependent packages copy to set up their namespaces.
-    // For package Foo::Bar:
-    //   module Foo::Bar
-    //     ExportedItem1 = <PackageRegistry>::Foo_Bar_Package::Path::To::ExportedItem1
-    //     extend <PackageRegistry>::Foo_Bar_Package::<PackageMethods>
-    //   end
+    // Generate a list of FQNs exported by this package. No export may be a prefix of another.
     void finalize(core::MutableContext ctx) {
         if (info == nullptr) {
             // HACKFIX: Tolerate completely empty packages. LSP does not support the notion of a deleted file, and
@@ -600,6 +597,8 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
     return move(finder.info);
 }
 
+// For a given package, a tree that is the union of all constants exported by the packages it
+// imports.
 class ImportTree {
     struct Source {
         core::NameRef packageMangledName;
