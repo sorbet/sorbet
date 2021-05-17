@@ -295,12 +295,12 @@ public:
             pushConstantLit(&constantLit);
 
             size_t minSize = std::min(pkgName.size(), nameParts.size());
-            if (rootConsts == 0 &&
-                    !std::equal(pkgName.begin(), pkgName.begin() + minSize, nameParts.begin(), nameParts.begin() + minSize)) {
+            if (rootConsts == 0 && !std::equal(pkgName.begin(), pkgName.begin() + minSize, nameParts.begin(),
+                                               nameParts.begin() + minSize)) {
                 if (auto e = ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                    e.setHeader(
-                            "Class or method definition must match enclosing package namespace `{}`",
-                            fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    e.setHeader("Class or method definition must match enclosing package namespace `{}`",
+                                fmt::map_join(pkgName.begin(), pkgName.end(),
+                                              "::", [&](const auto &nr) { return nr.show(ctx); }));
                 }
             }
         }
