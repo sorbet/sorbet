@@ -36,3 +36,7 @@ untyped_values_hash = T.let(shaped_hash, T::Hash[Symbol, T.untyped])
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Passing a hash where the specific keys are unknown to a method taking keyword arguments
   g(3, **untyped_values_hash, w: 2.0)
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Passing a hash where the specific keys are unknown to a method taking keyword arguments
+
+# Ensure that constructing a kwargs hash with untyped keys works
+untyped = T.unsafe(:y)
+f(3, **untyped_hash, untyped => 20)

@@ -2688,21 +2688,33 @@ class Magic_mergeHashValues : public IntrinsicMethod {
 
         auto accType = args.args.front()->type;
 
+        TypePtr argType = nullptr;
+
         vector<TypePtr> keys;
         vector<TypePtr> values;
         for (auto it = args.args.begin() + 1; it != args.args.end();) {
             auto *key = *it++;
+
+            // Guard shape construction on keys being valid, falling back on T::Hash[T.untyped, T.untyped] if it's
+            // invalid.
+            if (!isa_type<LiteralType>(key->type)) {
+                argType = Types::hashOfUntyped();
+                break;
+            }
+
             auto *value = *it++;
             keys.emplace_back(key->type);
             values.emplace_back(value->type);
         }
 
-        auto shape = make_type<ShapeType>(std::move(keys), std::move(values));
+        if (argType == nullptr) {
+            argType = make_type<ShapeType>(std::move(keys), std::move(values));
+        }
 
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         InlinedVector<LocOffsets, 2> sendArgLocs;
 
-        TypeAndOrigins argument{shape, {}};
+        TypeAndOrigins argument{argType, {}};
         sendArgs.emplace_back(&argument);
 
         auto hashLoc = args.locs.args[1].join(args.locs.args.back());
