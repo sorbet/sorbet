@@ -102,3 +102,51 @@ module Test5
     include M2
   end
 end
+
+### Abstract module requires unrelated classes
+
+module Test6
+  module M1
+    extend T::Helpers
+    abstract!
+    requires_ancestor R2
+  end
+
+  module M2
+# ^^^^^^^^^ error: `Test6::M2` requires unrelated classes `R2` and `R3` making it impossible to include
+    extend T::Helpers
+    abstract!
+    requires_ancestor R2, R3
+  end
+
+  module M3
+# ^^^^^^^^^ error: `Test6::M3` requires unrelated classes `R2` and `R3` making it impossible to include
+    include M2
+    extend T::Helpers
+    abstract!
+  end
+end
+
+### Interface module requires unrelated classes
+
+module Test7
+  module M1
+    extend T::Helpers
+    interface!
+    requires_ancestor R2
+  end
+
+  module M2
+# ^^^^^^^^^ error: `Test7::M2` requires unrelated classes `R2` and `R3` making it impossible to include
+    extend T::Helpers
+    interface!
+    requires_ancestor R2, R3
+  end
+
+  module M3
+# ^^^^^^^^^ error: `Test7::M3` requires unrelated classes `R2` and `R3` making it impossible to include
+    include M2
+    extend T::Helpers
+    interface!
+  end
+end

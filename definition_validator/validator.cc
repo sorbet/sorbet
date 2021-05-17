@@ -544,7 +544,7 @@ void validateUnsatisfiableRequiredAncestors(core::Context ctx, const core::Class
         }
     }
 
-    if (data->isClassOrModuleAbstract()) {
+    if (data->isClassOrModuleClass() && data->isClassOrModuleAbstract()) {
         for (auto ancst : requiredClasses) {
             if (!sym.data(ctx)->derivesFrom(ctx, ancst.symbol) && !ancst.symbol.data(ctx)->derivesFrom(ctx, sym)) {
                 if (auto e = ctx.state.beginError(data->loc(), core::errors::Resolver::UnsatisfiableRequiredAncestor)) {
