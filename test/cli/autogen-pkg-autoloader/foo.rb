@@ -3,7 +3,7 @@
 require 'byebug'
 require 'my_gem'
 
-module Foo
+module RootPackage::Foo
 
   # :Foo doesn't define behavior therefore this constant should get its own
   # autoloader file.
@@ -29,6 +29,6 @@ module Foo
   end
 end
 
-module DontInclude
+module ::DontInclude
   p 1
 end

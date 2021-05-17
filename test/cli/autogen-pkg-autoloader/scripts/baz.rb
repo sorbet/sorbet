@@ -3,6 +3,6 @@
 # This file should be excluded
 require 'script_gem'
 
-module Foo::Baz
+module RootPackage::Foo::Baz
   p 'x'
 end

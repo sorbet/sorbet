@@ -1,6 +1,6 @@
 # typed: true
 
-module Foo
+module RootPackage::Foo
   module Errors
     class BaseError < StandardError
       def foo

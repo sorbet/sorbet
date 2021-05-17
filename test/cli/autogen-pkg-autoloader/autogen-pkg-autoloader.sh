@@ -5,13 +5,19 @@ preamble="# frozen_string_literal: true
 # typed: true
 "
 
-rm -rf output
-mkdir -p output
+cwd="$(pwd)"
+tmp=$(mktemp -d)
+mkdir -p "$tmp/test/cli"
+cp -r test/cli/autogen-pkg-autoloader "$tmp/test/cli"
 
-main/sorbet --silence-dev-message --stop-after=namer \
+cd "$tmp" || exit 1
+
+mkdir output
+
+"$cwd/main/sorbet" --silence-dev-message --stop-after=namer \
   --stripe-packages \
   -p autogen-autoloader:output \
-  --autogen-autoloader-modules={Foo,Yabba} \
+  --autogen-autoloader-modules=RootPackage \
   --autogen-autoloader-exclude-require=byebug \
   --autogen-autoloader-ignore=scripts/ \
   --autogen-autoloader-preamble "$preamble" \
@@ -22,3 +28,5 @@ for file in $(find output -type f | sort); do
   printf "\n--- %s\n" "$file"
   cat "$file"
 done
+
+rm -rf "$tmp"

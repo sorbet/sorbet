@@ -1,6 +1,6 @@
 # typed: true
 
-module Yabba
+module RootPackage::Yabba
   module Dabba
     class Quuz < AWS::String
       p 'x'
