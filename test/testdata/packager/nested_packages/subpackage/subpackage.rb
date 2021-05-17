@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 
-class SubpackageClass
+class Package::Subpackage::SubpackageClass
   extend T::Sig
 
   sig {returns(Package::PackageClass)}
