@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 # typed: strict
 
-class Foo
-  extend T::Sig
-  sig {params(value: Integer).void}
-  def initialize(value)
-    @value = T.let(value, Integer)
-  end
+module Project::Foo
+  class FooClass
+    extend T::Sig
+    sig {params(value: Integer).void}
+    def initialize(value)
+      @value = T.let(value, Integer)
+    end
 
-  Project::Bar::Bard
+    Project::Bar::BardClass
+  end
 end

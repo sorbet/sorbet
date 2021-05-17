@@ -4,6 +4,6 @@
 class Project::Foo < PackageSpec
   import Project::Bar
 
-  export Foo
-  export FooMethods
+  export Project::Foo::FooClass
+  export Project::Foo::FooMethods
 end
