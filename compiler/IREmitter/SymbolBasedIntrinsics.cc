@@ -566,6 +566,9 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Array(), "[]=", "sorbet_rb_array_square_br_eq"},
     {core::Symbols::Array(), "empty?", "sorbet_rb_array_empty"},
     {core::Symbols::Array(), "each", "sorbet_rb_array_each", "sorbet_rb_array_each_withBlock"},
+    {core::Symbols::Array(), "select", "sorbet_rb_array_select", "sorbet_rb_array_select_withBlock"},
+    // filter is an alias for select, so we call the same intrinsic
+    {core::Symbols::Array(), "filter", "sorbet_rb_array_select", "sorbet_rb_array_select_withBlock"},
     {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br"},
     {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq"},
     {core::Symbols::Array(), "size", "sorbet_rb_array_len"},
