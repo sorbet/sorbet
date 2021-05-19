@@ -327,7 +327,7 @@ public:
 
     ast::ExpressionPtr preTransformAssign(core::MutableContext ctx, ast::ExpressionPtr original) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(original);
-        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
+        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs != nullptr) {
             auto &pkgName = pkg->name.fullName.parts;
             size_t minSize = std::min(pkgName.size(), nameParts.size());
@@ -348,7 +348,7 @@ private:
         auto oldLen = nameParts.size();
         while (lit != nullptr) {
             nameParts.emplace_back(lit->cnst);
-            auto scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
+            auto *scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
@@ -637,78 +637,72 @@ public:
     ImportTreeBuilder &operator=(const ImportTreeBuilder &) = delete;
     ImportTreeBuilder &operator=(ImportTreeBuilder &&) = default;
 
-    void mergeImports(const PackageInfo &importedPackage, core::LocOffsets loc);
-    ast::ExpressionPtr makeModule(core::Context);
+    void mergeImports(const PackageInfo &importedPackage, core::LocOffsets loc) {
+        for (const auto &exportedFqn : importedPackage.exports) {
+            addImport(importedPackage, loc, exportedFqn);
+        }
+    }
+
+    ast::ExpressionPtr makeModule(core::Context ctx) {
+        vector<core::NameRef> parts;
+        return makeModule(ctx, &root, parts, ImportTree::Source());
+    }
 
 private:
-    void addImport(const PackageInfo &importedPackage, core::LocOffsets loc, const FullyQualifiedName &exportFqn);
-    ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts,
-                                  ImportTree::Source parentSrc);
-};
-
-void ImportTreeBuilder::mergeImports(const PackageInfo &importedPackage, core::LocOffsets loc) {
-    for (const auto &exportedFqn : importedPackage.exports) {
-        addImport(importedPackage, loc, exportedFqn);
-    }
-}
-
-void ImportTreeBuilder::addImport(const PackageInfo &importedPackage, core::LocOffsets loc,
-                                  const FullyQualifiedName &exportFqn) {
-    ImportTree *node = &root;
-    for (auto nameRef : exportFqn.parts) {
-        auto &child = node->children[nameRef];
-        if (!child) {
-            child = make_unique<ImportTree>();
-        }
-        node = child.get();
-    }
-    node->source = {importedPackage.name.mangledName, loc};
-}
-
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx) {
-    vector<core::NameRef> parts;
-    return makeModule(ctx, &root, parts, ImportTree::Source());
-}
-
-ast::ExpressionPtr ImportTreeBuilder::makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts,
-                                                 ImportTree::Source parentSrc) {
-    auto newParentSrc = parentSrc;
-    if (node->source.exists() && !parentSrc.exists()) {
-        newParentSrc = node->source;
-    }
-
-    // Sort by name for stability
-    vector<pair<core::NameRef, ImportTree *>> childPairs;
-    std::transform(node->children.begin(), node->children.end(), back_inserter(childPairs),
-                   [](const auto &pair) { return make_pair(pair.first, pair.second.get()); });
-    fast_sort(childPairs,
-              [&ctx](const auto &lhs, const auto &rhs) -> bool { return lhs.first.show(ctx) < rhs.first.show(ctx); });
-    ast::ClassDef::RHS_store rhs;
-    for (auto const &[nameRef, child] : childPairs) {
-        parts.emplace_back(nameRef);
-        rhs.emplace_back(makeModule(ctx, child, parts, newParentSrc));
-        parts.pop_back();
-    }
-
-    if (node->source.exists()) {
-        if (parentSrc.exists()) {
-            if (auto e = ctx.beginError(node->source.importLoc, core::errors::Packager::ImportConflict)) {
-                // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
-                // and the file processing order is consistent.
-                e.setHeader("Conflicting import sources for `{}`",
-                            fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
-                e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
+    void addImport(const PackageInfo &importedPackage, core::LocOffsets loc, const FullyQualifiedName &exportFqn) {
+        ImportTree *node = &root;
+        for (auto nameRef : exportFqn.parts) {
+            auto &child = node->children[nameRef];
+            if (!child) {
+                child = make_unique<ImportTree>();
             }
+            node = child.get();
         }
-        auto rhs = prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
-        return ast::MK::Assign(core::LocOffsets::none(),
-                               name2Expr(parts.back(), ast::MK::EmptyTree(), node->source.importLoc), std::move(rhs));
+        node->source = {importedPackage.name.mangledName, loc};
     }
 
-    core::NameRef moduleName = parts.empty() ? package.name.mangledName : parts.back();
-    return ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), name2Expr(moduleName), {},
-                           std::move(rhs));
-}
+    ast::ExpressionPtr makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts,
+                                  ImportTree::Source parentSrc) {
+        auto newParentSrc = parentSrc;
+        if (node->source.exists() && !parentSrc.exists()) {
+            newParentSrc = node->source;
+        }
+
+        // Sort by name for stability
+        vector<pair<core::NameRef, ImportTree *>> childPairs;
+        std::transform(node->children.begin(), node->children.end(), back_inserter(childPairs),
+                       [](const auto &pair) { return make_pair(pair.first, pair.second.get()); });
+        fast_sort(childPairs, [&ctx](const auto &lhs, const auto &rhs) -> bool {
+            return lhs.first.show(ctx) < rhs.first.show(ctx);
+        });
+        ast::ClassDef::RHS_store rhs;
+        for (auto const &[nameRef, child] : childPairs) {
+            parts.emplace_back(nameRef);
+            rhs.emplace_back(makeModule(ctx, child, parts, newParentSrc));
+            parts.pop_back();
+        }
+
+        if (node->source.exists()) {
+            if (parentSrc.exists()) {
+                if (auto e = ctx.beginError(node->source.importLoc, core::errors::Packager::ImportConflict)) {
+                    // TODO Fix flaky ordering of errors. This is strange...not being done in parallel,
+                    // and the file processing order is consistent.
+                    e.setHeader("Conflicting import sources for `{}`",
+                                fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                    e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
+                }
+            }
+            auto rhs = prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
+            return ast::MK::Assign(core::LocOffsets::none(),
+                                   name2Expr(parts.back(), ast::MK::EmptyTree(), node->source.importLoc),
+                                   std::move(rhs));
+        }
+
+        core::NameRef moduleName = parts.empty() ? package.name.mangledName : parts.back();
+        return ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), name2Expr(moduleName), {},
+                               std::move(rhs));
+    }
+};
 
 // Add:
 //    module <PackageRegistry>::Mangled_Name_Package
