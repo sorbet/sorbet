@@ -113,6 +113,7 @@ module Comparable
   # ```ruby
   # 100.clamp(0...100)       # ArgumentError
   # ```
-  sig { params(min: T.untyped, max: T.untyped).returns(T.untyped) }
-  def clamp(min, max); end
+  sig { params(s: T::Range[T.untyped]).returns(T.untyped) }
+  sig { params(s: T.untyped, e: T.untyped).returns(T.untyped) }
+  def clamp(s, e); end
 end
