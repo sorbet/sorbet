@@ -1241,4 +1241,84 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       assert_equal(['bar'], h['arrayprop'])
     end
   end
+
+  class MuckAboutWithPropInternals
+    include T::Props::Serializable
+    include T::Props::WeakConstructor
+
+    prop :nilstring, T.nilable(String)
+  end
+
+  # These tests are gross, but they are the only way certain exceptions are ever
+  # going to be raised from the {de,}serialization generation process.
+  #
+  # Safe names are (currently) defined as /\A[A-Za-z_][A-Za-z0-9_-]*\z/.
+  # We can't test everything outside of this set, but we can make a pass over
+  # non-letter ASCII and get some coverage.
+  DISALLOWED_CHARS = '!@#$%^&*()[{}]\|;:\'",<.>/?`~'.chars
+  DISALLOWED_PREFIXES = DISALLOWED_CHARS + DISALLOWED_CHARS.map {|c| "a#{c}"}
+
+  describe 'prop name safety checks' do
+    it "catches when a prop name doesn't pass safe name checks" do
+      DISALLOWED_PREFIXES.each do |c|
+        bad_prop_name = :"#{c}nilstring"
+        props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
+        refute_nil(props)
+        refute_nil(props[:nilstring])
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(bad_prop_name => props[:nilstring]))
+        assert_raises(RuntimeError) do
+          MuckAboutWithPropInternals.from_hash({})
+        end
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props)
+      end
+    end
+
+    it "catches when a hash key doesn't pass safe name checks" do
+      DISALLOWED_PREFIXES.each do |c|
+        ok_prop_name = :nilstring2
+        bad_hash_key = "#{c}nilstring"
+        props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
+        refute_nil(props)
+        refute_nil(props[:nilstring])
+        bad_rules = props[:nilstring].merge(:serialized_form => bad_hash_key)
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(ok_prop_name => bad_rules))
+        assert_raises(RuntimeError) do
+          MuckAboutWithPropInternals.from_hash({})
+        end
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props)
+      end
+    end
+
+    it "catches when the accessor key doesn't begin with @" do
+      DISALLOWED_PREFIXES.select {|c| c != "@" }.each do |c|
+        ok_prop_name = :nilstring2
+        bad_accessor_key = :"#{c}nilstring"
+        props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
+        refute_nil(props)
+        refute_nil(props[:nilstring])
+        bad_rules = props[:nilstring].merge(:accessor_key => bad_accessor_key)
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(ok_prop_name => bad_rules))
+        assert_raises(RuntimeError) do
+          MuckAboutWithPropInternals.from_hash({})
+        end
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props)
+      end
+    end
+
+    it "catches when the accessor key doesn't pass safe name checks" do
+      DISALLOWED_PREFIXES.each do |c|
+        ok_prop_name = :nilstring2
+        bad_accessor_key = :"@!nilstring"
+        props = MuckAboutWithPropInternals.decorator.instance_variable_get(:@props)
+        refute_nil(props)
+        refute_nil(props[:nilstring])
+        bad_rules = props[:nilstring].merge(:accessor_key => bad_accessor_key)
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props.merge(ok_prop_name => bad_rules))
+        assert_raises(RuntimeError) do
+          MuckAboutWithPropInternals.from_hash({})
+        end
+        MuckAboutWithPropInternals.decorator.instance_variable_set(:@props, props)
+      end
+    end
+  end
 end
