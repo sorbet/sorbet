@@ -64,7 +64,7 @@ SORBET_ALIVE(void, sorbet_raiseExtraKeywords, (VALUE hash) __attribute__((__nore
 SORBET_ALIVE(VALUE, sorbet_t_absurd, (VALUE val) __attribute__((__cold__)));
 
 SORBET_ALIVE(rb_iseq_t *, sorbet_allocateRubyStackFrame,
-             (VALUE funcName, ID func, VALUE filename, VALUE realpath, rb_iseq_t *parent, int iseqType,
+             (VALUE funcName, ID func, VALUE filename, VALUE realpath, rb_iseq_t *parent, int iseqType, int startLine,
               struct SorbetLineNumberInfo *info, ID *locals, int numLocals, int stackMax));
 SORBET_ALIVE(void, sorbet_initLineNumberInfo, (struct SorbetLineNumberInfo * info, VALUE *, int numLines));
 SORBET_ALIVE(VALUE, sorbet_getConstant, (const char *path, long pathLen));

@@ -193,8 +193,8 @@ void sorbet_initLineNumberInfo(struct SorbetLineNumberInfo *info, VALUE *iseq_en
 //
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/compile.c#L5669-L5671
 rb_iseq_t *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename, VALUE realpath, unsigned char *parent,
-                                         int iseqType, struct SorbetLineNumberInfo *info, ID *locals, int numLocals,
-                                         int stackMax) {
+                                         int iseqType, int startLine, struct SorbetLineNumberInfo *info, ID *locals,
+                                         int numLocals, int stackMax) {
     // DO NOT ALLOCATE RUBY LEVEL OBJECTS HERE. All objects that are passed to
     // this function should be retained (for GC purposes) by something else.
 
@@ -202,6 +202,18 @@ rb_iseq_t *sorbet_allocateRubyStackFrame(VALUE funcName, ID func, VALUE filename
     // so we pin this object right here. TODO: This leaks memory
     rb_iseq_t *iseq = rb_iseq_new(0, funcName, filename, realpath, (rb_iseq_t *)parent, iseqType);
     rb_gc_register_mark_object((VALUE)iseq);
+
+    // The SorbetLineNumberInfo that we pass in, and the way we set up the encoded
+    // positions for the iseq, use absolute line numbers from the beginning of the
+    // file.  This setup feeds in to tracking the PC in the control frame, and how
+    // Ruby determines line numbers etc. in backtraces.
+    //
+    // However, there is a separate set of information for the actual location of
+    // the function associated with the iseq, rb_iseq_constant_body.location.  Ruby
+    // consults this information for things like Method#source_location.  This
+    // information has been setup by rb_iseq_new, but we need to fixup the first
+    // line of the function.
+    iseq->body->location.first_lineno = INT2FIX(startLine);
 
     // NOTE: positions is freed by rb_iseq_insns_info_encode_positions
     unsigned int *positions = ALLOC_N(unsigned int, info->iseq_size);

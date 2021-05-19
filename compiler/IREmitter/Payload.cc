@@ -587,6 +587,7 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
     // We are building a new function. We should redefine where do function initializers go
     auto cs1 = cs.withFunctionEntry(bei);
 
+    auto loc = md.symbol.data(cs)->loc();
     auto file = cs.file;
     auto *iseqType = getIseqType(cs1, builder, irctx, rubyBlockId);
     auto [funcName, parent] = getIseqInfo(cs1, builder, irctx, md, rubyBlockId);
@@ -594,12 +595,21 @@ llvm::Function *allocateRubyStackFramesImpl(CompilerState &cs, const IREmitterCo
     auto funcNameValue = Payload::cPtrToRubyString(cs1, builder, funcName, true);
     auto filename = file.data(cs).path();
     auto filenameValue = Payload::cPtrToRubyString(cs1, builder, filename, true);
+    // The method might have been synthesized by Sorbet (e.g. in the case of packages).
+    // Give such methods line numbers of 0.
+    unsigned startLine;
+    if (loc.exists()) {
+        startLine = loc.position(cs).first.line;
+    } else {
+        startLine = 0;
+    }
     auto [locals, numLocals] = getLocals(cs1, builder, irctx, md, rubyBlockId);
     auto sendMax = llvm::ConstantInt::get(cs, llvm::APInt(32, irctx.maxSendArgCount, true));
     auto *fileLineNumberInfo = Payload::getFileLineNumberInfo(cs, builder, file);
     auto *fn = cs.getFunction("sorbet_allocateRubyStackFrame");
     auto ret = builder.CreateCall(fn, {funcNameValue, funcNameId, filenameValue, realpath, parent, iseqType,
-                                       fileLineNumberInfo, locals, numLocals, sendMax});
+                                       llvm::ConstantInt::get(cs, llvm::APInt(32, startLine)), fileLineNumberInfo,
+                                       locals, numLocals, sendMax});
     auto zero = llvm::ConstantInt::get(cs, llvm::APInt(64, 0));
     llvm::Constant *indices[] = {zero};
     builder.CreateStore(ret, llvm::ConstantExpr::getInBoundsGetElementPtr(store->getValueType(), store, indices));

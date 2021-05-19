@@ -158,7 +158,7 @@ index b26caaa..842b85c 100644
  void rb_add_refined_method_entry(VALUE refined_class, ID mid);
  void rb_add_method(VALUE klass, ID mid, rb_method_type_t type, void *option, rb_method_visibility_t visi);
 diff --git proc.c proc.c
-index e189c20..87c1653 100644
+index e189c20..d10ae0c 100644
 --- proc.c
 +++ proc.c
 @@ -1067,6 +1067,22 @@ rb_iseq_min_max_arity(const rb_iseq_t *iseq, int *max)
@@ -193,15 +193,27 @@ index e189c20..87c1653 100644
      }
      rb_bug("rb_method_entry_min_max_arity: invalid method entry type (%d)", def->type);
      UNREACHABLE_RETURN(Qnil);
-@@ -2682,6 +2700,7 @@ method_def_iseq(const rb_method_definition_t *def)
+@@ -2682,6 +2700,10 @@ method_def_iseq(const rb_method_definition_t *def)
        case VM_METHOD_TYPE_OPTIMIZED:
        case VM_METHOD_TYPE_MISSING:
        case VM_METHOD_TYPE_REFINED:
++          /* don't return iseqptr here because sorbet method iseqs don't necessarily
++           * have all the information required by all the places that call method_def_iseq
++           */
 +      case VM_METHOD_TYPE_SORBET:
  	break;
      }
      return NULL;
-@@ -2742,6 +2761,114 @@ rb_method_location(VALUE method)
+@@ -2717,6 +2739,8 @@ method_def_location(const rb_method_definition_t *def)
+ 	if (!def->body.attr.location)
+ 	    return Qnil;
+ 	return rb_ary_dup(def->body.attr.location);
++    } else if (def->type == VM_METHOD_TYPE_SORBET) {
++        return iseq_location(def->body.sorbet.iseqptr);
+     }
+     return iseq_location(method_def_iseq(def));
+ }
+@@ -2742,6 +2766,114 @@ rb_method_location(VALUE method)
      return method_def_location(rb_method_def(method));
  }
  
@@ -316,7 +328,7 @@ index e189c20..87c1653 100644
  /*
   * call-seq:
   *    meth.parameters  -> array
-@@ -2766,6 +2893,10 @@ rb_method_parameters(VALUE method)
+@@ -2766,6 +2898,10 @@ rb_method_parameters(VALUE method)
  {
      const rb_iseq_t *iseq = rb_method_iseq(method);
      if (!iseq) {
