@@ -267,6 +267,18 @@ ast::UnresolvedConstantLit *verifyConstant(core::MutableContext ctx, core::NameR
     return target;
 }
 
+bool isPrefix(const vector<core::NameRef> &prefix, const vector<core::NameRef> &names) {
+    size_t minSize = std::min(prefix.size(), names.size());
+    ENFORCE(minSize > 0);
+    return std::equal(prefix.begin(), prefix.end(), names.begin(), names.begin() + minSize);
+}
+
+bool sharesPrefix(const vector<core::NameRef> &a, const vector<core::NameRef> &b) {
+    size_t minSize = std::min(a.size(), b.size());
+    ENFORCE(minSize > 0);
+    return std::equal(a.begin(), a.begin() + minSize, b.begin(), b.begin() + minSize);
+}
+
 // Visitor that ensures for constants defined within a package that all have the package as a
 // prefix.
 class EnforcePackagePrefix {
@@ -295,9 +307,7 @@ public:
         auto &constantLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
         pushConstantLit(&constantLit);
 
-        size_t minSize = std::min(pkgName.size(), nameParts.size());
-        if (rootConsts == 0 &&
-            !std::equal(pkgName.begin(), pkgName.begin() + minSize, nameParts.begin(), nameParts.begin() + minSize)) {
+        if (rootConsts == 0 && !sharesPrefix(pkgName, nameParts)) {
             if (auto e = ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
                 e.setHeader(
                     "Class or method definition must match enclosing package namespace `{}`",
@@ -330,9 +340,7 @@ public:
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs != nullptr) {
             auto &pkgName = pkg->name.fullName.parts;
-            size_t minSize = std::min(pkgName.size(), nameParts.size());
-            if (rootConsts == 0 &&
-                !std::equal(pkgName.begin(), pkgName.end(), nameParts.begin(), nameParts.begin() + minSize)) {
+            if (rootConsts == 0 && !isPrefix(pkgName, nameParts)) {
                 if (auto e = ctx.beginError(lhs->loc, core::errors::Packager::DefinitionPackageMismatch)) {
                     e.setHeader("Constants may not be defined outside of the enclosing package namespace `{}`",
                                 fmt::map_join(pkgName.begin(), pkgName.end(),
