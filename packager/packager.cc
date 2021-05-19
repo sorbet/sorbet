@@ -229,16 +229,16 @@ ast::ExpressionPtr parts2literal(const vector<core::NameRef> &parts, core::LocOf
         name = name2Expr(part, move(name));
     }
     // Outer name should have the provided loc.
-    if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(name)) {
+    if (auto *lit = ast::cast_tree<ast::UnresolvedConstantLit>(name)) {
         name = ast::MK::UnresolvedConstant(loc, move(lit->scope), lit->cnst);
     }
     return name;
 }
 
-// Prefix a constant referene with a name: `Foo::Bar` -> `<name>::Foo::Bar`
+// Prefix a constant reference with a name: `Foo::Bar` -> `<name>::Foo::Bar`
 ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef name) {
     // For `Bar::Baz::Bat`, `UnresolvedConstantLit` will contain `Bar`.
-    ast::UnresolvedConstantLit *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
+    auto *lastConstLit = ast::cast_tree<ast::UnresolvedConstantLit>(scope);
     if (lastConstLit != nullptr) {
         while (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(lastConstLit->scope)) {
             lastConstLit = constLit;
@@ -246,7 +246,7 @@ ast::ExpressionPtr prependName(ast::ExpressionPtr scope, core::NameRef name) {
     }
 
     // If `lastConstLit` is `nullptr`, then `scope` should be EmptyTree.
-    ENFORCE(lastConstLit != nullptr || ast::cast_tree<ast::EmptyTree>(scope) != nullptr);
+    ENFORCE(lastConstLit != nullptr || ast::isa_tree<ast::EmptyTree>(scope));
 
     auto scopeToPrepend = name2Expr(name, name2Expr(core::Names::Constants::PackageRegistry()));
     if (lastConstLit == nullptr) {
@@ -290,18 +290,18 @@ public:
         if (nameParts.size() > pkgName.size()) {
             // At this depth we can stop checking the prefixes since beyond the end of the prefix.
             skipPush++;
-        } else {
-            auto &constantLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
-            pushConstantLit(&constantLit);
+            return tree;
+        }
+        auto &constantLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
+        pushConstantLit(&constantLit);
 
-            size_t minSize = std::min(pkgName.size(), nameParts.size());
-            if (rootConsts == 0 && !std::equal(pkgName.begin(), pkgName.begin() + minSize, nameParts.begin(),
-                                               nameParts.begin() + minSize)) {
-                if (auto e = ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
-                    e.setHeader("Class or method definition must match enclosing package namespace `{}`",
-                                fmt::map_join(pkgName.begin(), pkgName.end(),
-                                              "::", [&](const auto &nr) { return nr.show(ctx); }));
-                }
+        size_t minSize = std::min(pkgName.size(), nameParts.size());
+        if (rootConsts == 0 &&
+            !std::equal(pkgName.begin(), pkgName.begin() + minSize, nameParts.begin(), nameParts.begin() + minSize)) {
+            if (auto e = ctx.beginError(constantLit.loc, core::errors::Packager::DefinitionPackageMismatch)) {
+                e.setHeader(
+                    "Class or method definition must match enclosing package namespace `{}`",
+                    fmt::map_join(pkgName.begin(), pkgName.end(), "::", [&](const auto &nr) { return nr.show(ctx); }));
             }
         }
         return tree;
@@ -319,9 +319,9 @@ public:
         auto *constantLit = &ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(classDef.name);
         if (skipPush > 0) {
             skipPush--;
-        } else {
-            popConstantLit(constantLit);
+            return tree;
         }
+        popConstantLit(constantLit);
         return tree;
     }
 
@@ -362,7 +362,7 @@ private:
     void popConstantLit(ast::UnresolvedConstantLit *lit) {
         while (lit != nullptr) {
             nameParts.pop_back();
-            auto scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
+            auto *scope = ast::cast_tree<ast::ConstantLit>(lit->scope);
             lit = ast::cast_tree<ast::UnresolvedConstantLit>(lit->scope);
             if (scope != nullptr) {
                 ENFORCE(lit == nullptr);
@@ -480,9 +480,12 @@ struct PackageInfoFinder {
             return;
         }
 
+        if (exported.empty()) {
+            return;
+        }
         fast_sort(exported, [](const auto &a, const auto &b) -> bool { return a.parts.size() < b.parts.size(); });
         // TODO(nroman) If this is too slow could probably be sped up with lexigraphic sort.
-        for (auto longer = exported.begin(); longer != exported.end(); longer++) {
+        for (auto longer = exported.begin() + 1; longer != exported.end(); longer++) {
             for (auto shorter = exported.begin(); shorter != longer; shorter++) {
                 if (std::equal(longer->parts.begin(), longer->parts.begin() + shorter->parts.size(),
                                shorter->parts.begin())) {
@@ -634,23 +637,22 @@ public:
     ImportTreeBuilder &operator=(const ImportTreeBuilder &) = delete;
     ImportTreeBuilder &operator=(ImportTreeBuilder &&) = default;
 
-    void mergeImports(core::Context, const PackageInfo &importedPackage, core::LocOffsets loc);
+    void mergeImports(const PackageInfo &importedPackage, core::LocOffsets loc);
     ast::ExpressionPtr makeModule(core::Context);
 
 private:
-    void addImport(core::Context, const PackageInfo &importedPackage, core::LocOffsets loc,
-                   const FullyQualifiedName &exportFqn);
+    void addImport(const PackageInfo &importedPackage, core::LocOffsets loc, const FullyQualifiedName &exportFqn);
     ast::ExpressionPtr makeModule(core::Context, ImportTree *node, vector<core::NameRef> &parts,
                                   ImportTree::Source parentSrc);
 };
 
-void ImportTreeBuilder::mergeImports(core::Context ctx, const PackageInfo &importedPackage, core::LocOffsets loc) {
+void ImportTreeBuilder::mergeImports(const PackageInfo &importedPackage, core::LocOffsets loc) {
     for (const auto &exportedFqn : importedPackage.exports) {
-        addImport(ctx, importedPackage, loc, exportedFqn);
+        addImport(importedPackage, loc, exportedFqn);
     }
 }
 
-void ImportTreeBuilder::addImport(core::Context ctx, const PackageInfo &importedPackage, core::LocOffsets loc,
+void ImportTreeBuilder::addImport(const PackageInfo &importedPackage, core::LocOffsets loc,
                                   const FullyQualifiedName &exportFqn) {
     ImportTree *node = &root;
     for (auto nameRef : exportFqn.parts) {
@@ -752,7 +754,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 }
             } else {
                 importedNames[imported.mangledName] = imported.loc;
-                treeBuilder.mergeImports(ctx, *importedPackage, imported.loc);
+                treeBuilder.mergeImports(*importedPackage, imported.loc);
             }
         }
         importedPackages.emplace_back(treeBuilder.makeModule(ctx));
