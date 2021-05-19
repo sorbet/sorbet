@@ -2027,8 +2027,6 @@ class Encoding
 end
 
 module Enumerable
-  def chain(*_); end
-
   def sum(*_); end
 end
 

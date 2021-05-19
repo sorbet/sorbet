@@ -82,6 +82,12 @@ module Enumerable
   sig { params(pattern: T.untyped).returns(T::Boolean) }
   def any?(pattern = nil, &blk); end
 
+  sig do
+    type_parameters(:U).params(enums: T::Enumerable[T.type_parameter(:U)])
+    .returns(T::Enumerator[T.any(Elem, T.type_parameter(:U))])
+  end
+  def chain(*enums); end
+
   # Enumerates over the items, chunking them together based on the return value
   # of the block.
   #
