@@ -13,7 +13,15 @@ module T::Types
 
     # @override Base
     def name
-      "{#{@types.map {|(k, v)| "#{k}: #{v}"}.join(', ')}}"
+      entries = @types.map do |(k, v)|
+        if Symbol === k && ":#{k}" == k.inspect
+          "#{k}: #{v}"
+        else
+          "#{k.inspect} => #{v}"
+        end
+      end
+
+      "{#{entries.join(', ')}}"
     end
 
     # @override Base
