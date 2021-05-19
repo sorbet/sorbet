@@ -29,6 +29,9 @@ class Opus::Types::Test::TypesToRubyTest < Critic::Unit::UnitTest
 
     # FixedHash:
     [{a: T.nilable(String)}, "{a: T.nilable(String)}"],
+    [{"a" => T.nilable(String)}, "{\"a\" => T.nilable(String)}"],
+    [{"a" => String, b: T.any(Integer, Float)}, "{\"a\" => String, b: T.any(Float, Integer)}"],
+    [{"foo bar" => String, :"foo bar" => T.any(Integer, Float)}, "{\"foo bar\" => String, :\"foo bar\" => T.any(Float, Integer)}"],
 
     # TypedHash:
     [T::Hash[T.any(String, Symbol), String], "T::Hash[T.any(String, Symbol), String]"],
