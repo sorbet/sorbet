@@ -436,8 +436,8 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
             auto *elseBlock = CFGHelpers::findRubyBlockEntry(cfg, elseBlockId);
             auto *ensureBlock = CFGHelpers::findRubyBlockEntry(cfg, ensureBlockId);
 
-            // Because of the way the CFG is constructed, we'll either have an else bock, and ensure block, or both
-            // present. It's currently not possible to end up with neither.
+            // The way the CFG is constructed ensures that there will always be an else block, an ensure block, or both
+            // present.
             ENFORCE(elseBlock || ensureBlock);
 
             {

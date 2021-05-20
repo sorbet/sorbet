@@ -9,6 +9,8 @@ end
 def g
   begin
     raise "oops"
+  rescue
+    puts "exception"
   ensure
     f { puts "hello" }
   end

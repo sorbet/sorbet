@@ -7,6 +7,32 @@ using namespace std;
 
 namespace sorbet::compiler {
 
+namespace {
+
+bool validExit(cfg::CFG &cfg, int rubyBlockId, vector<cfg::BasicBlock *> &exits, cfg::BasicBlock *candidate) {
+    if (candidate->rubyBlockId == rubyBlockId) {
+        return false;
+    }
+
+    if (candidate == cfg.deadBlock()) {
+        return false;
+    }
+
+    // Block calls will be jumped over explicitly, using the basicBlockJumpOverrides map constructed in
+    // IREmitterHelpers::getRubyBlocks2FunctionsMapping, so they shouldn't be considered to be valid exits.
+    if (candidate->bexit.cond.variable == cfg::LocalRef::blockCall()) {
+        return false;
+    }
+
+    if (absl::c_find(exits, candidate) != exits.end()) {
+        return false;
+    }
+
+    return true;
+}
+
+} // namespace
+
 // Find all of the nodes that are jumped to from the given ruby block.
 vector<cfg::BasicBlock *> CFGHelpers::findRubyBlockExits(cfg::CFG &cfg, int rubyBlockId) {
     vector<cfg::BasicBlock *> exits;
@@ -19,13 +45,11 @@ vector<cfg::BasicBlock *> CFGHelpers::findRubyBlockExits(cfg::CFG &cfg, int ruby
         auto *thenb = node->bexit.thenb;
         auto *elseb = node->bexit.elseb;
 
-        if (thenb->rubyBlockId != rubyBlockId && thenb != cfg.deadBlock() &&
-            absl::c_all_of(exits, [&](auto *other) { return other != thenb; })) {
+        if (validExit(cfg, rubyBlockId, exits, thenb)) {
             exits.emplace_back(thenb);
         }
 
-        if (elseb->rubyBlockId != rubyBlockId && elseb != cfg.deadBlock() &&
-            absl::c_all_of(exits, [&](auto *other) { return other != elseb; })) {
+        if (validExit(cfg, rubyBlockId, exits, elseb)) {
             exits.emplace_back(elseb);
         }
     }
