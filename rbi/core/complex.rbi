@@ -273,7 +273,10 @@ class Complex < Numeric
   end
   def ==(arg0); end
 
-  # Returns 0, 1, -1 based on the imaginary number's real part compared to the object. Otherwise, returns nil.
+  # If `cmp`'s imaginary part is zero, and `object` is also a real number (or a
+  # [`Complex`](https://docs.ruby-lang.org/en/2.7.0/Complex.html) number where
+  # the imaginary part is zero), compare the real part of `cmp` to object.
+  # Otherwise, return nil.
   #
   # ```ruby
   # Complex(2, 3)  <=> Complex(2, 3)   #=> nil
