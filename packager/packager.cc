@@ -281,7 +281,7 @@ bool sharesPrefix(const vector<core::NameRef> &a, const vector<core::NameRef> &b
 
 // Visitor that ensures for constants defined within a package that all have the package as a
 // prefix.
-class EnforcePackagePrefix {
+class EnforcePackagePrefix final {
     const PackageInfo *pkg;
     vector<core::NameRef> nameParts;
     int rootConsts = 0;
@@ -610,7 +610,7 @@ unique_ptr<PackageInfo> getPackageInfo(core::MutableContext ctx, ast::ParsedFile
 
 // For a given package, a tree that is the union of all constants exported by the packages it
 // imports.
-class ImportTree {
+class ImportTree final {
     struct Source {
         core::NameRef packageMangledName;
         core::LocOffsets importLoc;
@@ -634,7 +634,7 @@ public:
     friend class ImportTreeBuilder;
 };
 
-class ImportTreeBuilder {
+class ImportTreeBuilder final {
     PackageInfo package; // The package we are building an import tree for.
     ImportTree root;
 
