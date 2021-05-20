@@ -7,6 +7,7 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/TypeConstraint.h"
+#include "core/TypeDrivenAutocorrect.h"
 #include "core/Types.h"
 #include "core/errors/infer.h"
 #include "core/errors/resolver.h"
@@ -195,18 +196,7 @@ unique_ptr<Error> matchArgType(const GlobalState &gs, TypeConstraint &constr, Lo
             e.addErrorSection(TypeAndOrigins::explainExpected(gs, expectedType, argSym.loc, for_));
         }
         e.addErrorSection(argTpe.explainGot(gs, originForUninitialized));
-        if (loc.exists()) {
-            if (gs.suggestUnsafe.has_value()) {
-                e.replaceWith(fmt::format("Wrap in `{}`", *gs.suggestUnsafe), loc, "{}({})", *gs.suggestUnsafe,
-                              loc.source(gs).value());
-            } else {
-                auto withoutNil = Types::approximateSubtract(gs, argTpe.type, Types::nilClass());
-                if (!withoutNil.isBottom() && Types::isSubTypeUnderConstraint(gs, constr, withoutNil, expectedType,
-                                                                              UntypedMode::AlwaysCompatible)) {
-                    e.replaceWith("Wrap in `T.must`", loc, "T.must({})", loc.source(gs).value());
-                }
-            }
-        }
+        TypeDrivenAutocorrect::maybeAutocorrect(gs, e, loc, constr, expectedType, argTpe.type);
         return e.build();
     }
     return nullptr;

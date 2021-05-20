@@ -3,6 +3,7 @@
 #include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/TypeConstraint.h"
+#include "core/TypeDrivenAutocorrect.h"
 #include <algorithm> // find, remove_if
 
 template struct std::pair<sorbet::core::LocalVariable, std::shared_ptr<sorbet::core::Type>>;
@@ -1174,22 +1175,10 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, methodReturnType, ownerData->loc(), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
-                        auto implicitReturnLoc = inWhat.implicitReturnLoc;
-                        if (i->whatLoc.exists() && i->whatLoc != implicitReturnLoc) {
+                        if (i->whatLoc != inWhat.implicitReturnLoc) {
                             auto replaceLoc = core::Loc(ctx.file, i->whatLoc);
-                            if (ctx.state.suggestUnsafe.has_value()) {
-                                e.replaceWith(fmt::format("Wrap in `{}`", *ctx.state.suggestUnsafe), replaceLoc,
-                                              "{}({})", *ctx.state.suggestUnsafe, replaceLoc.source(ctx.state).value());
-                            } else {
-                                auto withoutNil = core::Types::approximateSubtract(ctx.state, typeAndOrigin.type,
-                                                                                   core::Types::nilClass());
-                                if (!withoutNil.isBottom() && core::Types::isSubTypeUnderConstraint(
-                                                                  ctx.state, constr, withoutNil, methodReturnType,
-                                                                  core::UntypedMode::AlwaysCompatible)) {
-                                    e.replaceWith("Wrap in `T.must`", replaceLoc, "T.must({})",
-                                                  replaceLoc.source(ctx.state).value());
-                                }
-                            }
+                            core::TypeDrivenAutocorrect::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
+                                                                          typeAndOrigin.type);
                         }
                     }
                 }
