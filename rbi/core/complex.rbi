@@ -273,6 +273,23 @@ class Complex < Numeric
   end
   def ==(arg0); end
 
+  # Returns 0, 1, -1 based on the imaginary number's real part compared to the object. Otherwise, returns nil.
+  #
+  # ```ruby
+  # Complex(2, 3)  <=> Complex(2, 3)   #=> nil
+  # Complex(2, 3)  <=> 1               #=> nil
+  # Complex(2)     <=> 1               #=> 1
+  # Complex(2)     <=> 2               #=> 0
+  # Complex(2)     <=> 3               #=> -1
+  # ```
+  sig do
+    params(
+      arg0: Object,
+    )
+    .returns(T.nilable(Integer))
+  end
+  def <=>(arg0); end
+
   # Returns the absolute part of its polar form.
   #
   # ```ruby
