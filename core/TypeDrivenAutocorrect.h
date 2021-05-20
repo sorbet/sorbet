@@ -8,9 +8,18 @@
 
 namespace sorbet::core {
 
-void typeDrivenAutocorrect(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc,
-                           core::TypeConstraint &constr, core::TypePtr expectedType, core::TypePtr actualType);
+class TypeDrivenAutocorrect final {
+public:
+    // Uses heuristics to insert an autocorrect that converts from `expectedType` to `actualType`.
+    //
+    // `loc` should be the location of the expression to fix up.
+    // (It should usually be a cfg::Send::argLocs element or cfg::Return::whatLoc)
+    //
+    // Statefully accumulates the autocorrect directly onto the provided `ErrorBuilder`.
+    static void maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
+                                 TypePtr expectedType, TypePtr actualType);
+};
 
-}
+} // namespace sorbet::core
 
 #endif

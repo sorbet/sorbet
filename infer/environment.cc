@@ -1177,8 +1177,8 @@ core::TypePtr Environment::processBinding(core::Context ctx, const cfg::CFG &inW
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         if (i->whatLoc != inWhat.implicitReturnLoc) {
                             auto replaceLoc = core::Loc(ctx.file, i->whatLoc);
-                            core::typeDrivenAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
-                                                        typeAndOrigin.type);
+                            core::TypeDrivenAutocorrect::maybeAutocorrect(ctx, e, replaceLoc, constr, methodReturnType,
+                                                                          typeAndOrigin.type);
                         }
                     }
                 }

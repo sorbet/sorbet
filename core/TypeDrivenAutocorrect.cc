@@ -4,8 +4,8 @@ using namespace std;
 
 namespace sorbet::core {
 
-void typeDrivenAutocorrect(const core::GlobalState &gs, core::ErrorBuilder &e, core::Loc loc,
-                           core::TypeConstraint &constr, core::TypePtr expectedType, core::TypePtr actualType) {
+void TypeDrivenAutocorrect::maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, TypeConstraint &constr,
+                                             TypePtr expectedType, TypePtr actualType) {
     if (!loc.exists()) {
         return;
     }
