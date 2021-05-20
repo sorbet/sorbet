@@ -360,6 +360,7 @@ void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Func
                 // argument names
                 fp->arg_begin()->setName("pc");
                 (fp->arg_begin() + 1)->setName("localsOffset");
+                (fp->arg_begin() + 2)->setName("cfp");
 
                 funcs[i] = fp;
                 break;
@@ -568,10 +569,11 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         sendArgArrayByBlock.emplace_back(sendArgArray);
         auto lineNumberPtr = builder.CreateAlloca(lineNumberPtrType, nullptr, "lineCountStore");
         lineNumberPtrsByFunction.emplace_back(lineNumberPtr);
-        // We cache cfp for ordinary ruby blocks; methods receive cfp as an argument and
-        // we currently consider caching not worth it for exception-related blocks.
-        // Exception-related blocks are, after all, exceptional, and probably don't
-        // contain enough code to make it worth caching the CFP.
+        // We cache cfp for ordinary ruby blocks; methods and exception begin/else
+        // blocks receive cfp as an argument.  We currently consider caching not
+        // worth it for ensure/rescue blocks.  They are, after all, exceptional,
+        // and probably don't contain enough code to make it worth caching the
+        // CFP.
         if (blockTypes[i] == FunctionType::Block) {
             auto *controlFramePtr = builder.CreateAlloca(controlFramePtrType, nullptr, "controlFrameStore");
             blockControlFramePtrs[i] = controlFramePtr;

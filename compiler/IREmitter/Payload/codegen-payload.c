@@ -19,7 +19,7 @@
 #define SORBET_INLINE __attribute__((always_inline))
 
 typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, const VALUE *args, VALUE blockArg);
-typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE closure);
+typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE closure, rb_control_frame_t *);
 typedef VALUE (*BlockConsumerFFIType)(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk,
                                       const struct rb_captured_block *captured, VALUE closure);
 
@@ -88,7 +88,7 @@ SORBET_ALIVE(void, sorbet_setMethodStackFrame,
 SORBET_ALIVE(void, sorbet_setExceptionStackFrame,
              (rb_execution_context_t * ec, rb_control_frame_t *cfp, const rb_iseq_t *iseq));
 
-SORBET_ALIVE(VALUE, sorbet_blockReturnUndef, (VALUE * *pc, VALUE closure));
+SORBET_ALIVE(VALUE, sorbet_blockReturnUndef, (VALUE * *pc, VALUE closure, rb_control_frame_t *));
 
 SORBET_ALIVE(VALUE, sorbet_vm_expandSplatIntrinsic, (VALUE thing, VALUE before, VALUE after));
 SORBET_ALIVE(VALUE, sorbet_vm_check_match_array, (rb_execution_context_t * ec, VALUE target, VALUE pattern));
@@ -1611,12 +1611,13 @@ struct ExceptionClosure {
     ExceptionFFIType body;
     VALUE **pc;
     VALUE methodClosure;
+    rb_control_frame_t *cfp;
     VALUE *returnValue;
 };
 
 static VALUE sorbet_applyExceptionClosure(VALUE arg) {
     struct ExceptionClosure *closure = (struct ExceptionClosure *)arg;
-    VALUE res = closure->body(closure->pc, closure->methodClosure);
+    VALUE res = closure->body(closure->pc, closure->methodClosure, closure->cfp);
     if (res != sorbet_rubyUndef()) {
         *closure->returnValue = res;
     }
@@ -1633,14 +1634,15 @@ static VALUE sorbet_rescueStoreException(VALUE exceptionValuePtr, VALUE errinfo)
 }
 
 // Run a function with a closure, and populate an exceptionValue pointer if an exception is raised.
-VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE methodClosure, VALUE exceptionContext,
-                 VALUE *exceptionValue) {
+VALUE sorbet_try(ExceptionFFIType body, VALUE **pc, VALUE methodClosure, rb_control_frame_t *cfp,
+                 VALUE exceptionContext, VALUE *exceptionValue) {
     VALUE returnValue = sorbet_rubyUndef();
 
     struct ExceptionClosure closure;
     closure.body = body;
     closure.pc = pc;
     closure.methodClosure = methodClosure;
+    closure.cfp = cfp;
     closure.returnValue = &returnValue;
 
     *exceptionValue = RUBY_Qnil;

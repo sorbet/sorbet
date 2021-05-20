@@ -38,7 +38,7 @@ void abort(void) __attribute__((__cold__)) __attribute__((__noreturn__));
 
 typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, const VALUE *args, VALUE blockArg);
 
-typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE closure);
+typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE closure, rb_control_frame_t *cfp);
 
 // ****
 // ****                       Internal Helper Functions
@@ -339,6 +339,6 @@ VALUE sorbet_stringInterpolate(VALUE recv, ID fun, int argc, VALUE *argv, BlockF
 // ****
 
 // This is a function that can be used in place of any exception function, and does nothing except for return nil.
-VALUE sorbet_blockReturnUndef(VALUE **pc, VALUE closure) {
+VALUE sorbet_blockReturnUndef(VALUE **pc, VALUE closure, rb_control_frame_t *cfp) {
     return RUBY_Qundef;
 }

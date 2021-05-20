@@ -83,25 +83,26 @@ public:
     }
 
     // Fetch the pc, and closure values that are used when calling an exception function.
-    tuple<llvm::Value *, llvm::Value *> getExceptionArgs() {
+    tuple<llvm::Value *, llvm::Value *, llvm::Value *> getExceptionArgs() {
         auto *pc = builder.CreateLoad(irctx.lineNumberPtrsByFunction[rubyBlockId]);
         auto *closure = Payload::buildLocalsOffset(cs);
-        return {pc, closure};
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+        return {pc, closure, cfp};
     }
 
     // Run a function that may raiase exceptions.
     tuple<llvm::Value *, llvm::Value *> sorbetTry(llvm::Function *fun, llvm::Value *exceptionContext) {
-        auto [pc, closure] = getExceptionArgs();
+        auto [pc, closure, cfp] = getExceptionArgs();
         auto *result = builder.CreateCall(cs.getFunction("sorbet_try"),
-                                          {fun, pc, closure, exceptionContext, exceptionResultPtr}, "result");
+                                          {fun, pc, closure, cfp, exceptionContext, exceptionResultPtr}, "result");
 
         return {result, exceptionResultPtr};
     }
 
     // Run the ensure clause, overwriting the previous return value that was passed in if it's present.
     llvm::Value *sorbetEnsure(llvm::Value *previousReturnValue) {
-        auto [pc, closure] = getExceptionArgs();
-        auto *res = builder.CreateCall(getEnsure(), {pc, closure}, "ensureResult");
+        auto [pc, closure, cfp] = getExceptionArgs();
+        auto *res = builder.CreateCall(getEnsure(), {pc, closure, cfp}, "ensureResult");
         auto *notUndef = builder.CreateICmpNE(res, Payload::rubyUndef(cs, builder), "ensureReturnValue");
         return builder.CreateSelect(notUndef, res, previousReturnValue);
     }

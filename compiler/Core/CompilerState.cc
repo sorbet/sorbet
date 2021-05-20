@@ -56,8 +56,9 @@ llvm::FunctionType *CompilerState::getRubyBlockFFIType() {
 
 llvm::FunctionType *CompilerState::getRubyExceptionFFIType() {
     llvm::Type *args[] = {
-        llvm::Type::getInt64PtrTy(lctx)->getPointerTo(), // VALUE **pc
-        llvm::Type::getInt64Ty(lctx),                    // VALUE captures
+        llvm::Type::getInt64PtrTy(lctx)->getPointerTo(),                                         // VALUE **pc
+        llvm::Type::getInt64Ty(lctx),                                                            // VALUE captures
+        llvm::StructType::getTypeByName(lctx, "struct.rb_control_frame_struct")->getPointerTo(), // cfp
     };
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }

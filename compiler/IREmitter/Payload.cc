@@ -1049,9 +1049,10 @@ llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &bui
             return irctx.rubyBlocks2Functions[rubyBlockId]->arg_begin() + 3;
         case FunctionType::Block:
             return builder.CreateLoad(irctx.blockControlFramePtrs.at(rubyBlockId), "cached_cfp");
+        case FunctionType::ExceptionBegin:
+            return irctx.rubyBlocks2Functions[rubyBlockId]->arg_begin() + 2;
         case FunctionType::Rescue:
         case FunctionType::Ensure:
-        case FunctionType::ExceptionBegin:
         case FunctionType::Unused:
             return builder.CreateCall(cs.getFunction("sorbet_getCFP"), {}, "cfp");
     }
