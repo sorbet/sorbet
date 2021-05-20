@@ -526,6 +526,12 @@ class Integer < Numeric
     )
     .returns(Integer)
   end
+  sig do
+    params(
+      arg0: T::Range[Integer],
+    )
+    .returns(Integer)
+  end
   def [](arg0); end
 
   # Bitwise EXCLUSIVE OR.
