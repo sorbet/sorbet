@@ -702,7 +702,7 @@ private:
             }
             auto rhs = prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
             return ast::MK::Assign(core::LocOffsets::none(),
-                                   name2Expr(parts.back(), ast::MK::EmptyTree(), node->source.importLoc),
+                                   name2Expr(parts.back(), ast::MK::EmptyTree()),
                                    std::move(rhs));
         }
 
