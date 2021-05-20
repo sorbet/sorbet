@@ -1167,6 +1167,11 @@ VALUE sorbet_bang(VALUE recv, ID fun, int argc, const VALUE *const restrict argv
 }
 
 SORBET_INLINE
+VALUE sorbet_nil_p(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure) {
+    return sorbet_isa_NilClass(recv) ? Qtrue : Qfalse;
+}
+
+SORBET_INLINE
 VALUE sorbet_selfNew(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk, VALUE closure) {
     rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
     VALUE obj = argv[0];

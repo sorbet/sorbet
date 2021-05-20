@@ -21,6 +21,12 @@ before loading the shared object.
 In our tests, we patch require and provide this value before loading the shared
 object: https://github.com/stripe/sorbet_llvm/blob/c6f55f98/test/patch_require.rb#L31.
 
+The compiler assumes that you have a monkey patch for `BasicObject#nil?` that
+behaves identically to `Kernel#nil?`. If you do not have this, calling `.nil?`
+on an object that does respond to `nil?` or defines it in some other way will
+not throw an exception (as the interpreter would do) but will instead evaluate
+to whether the receiver is `nil` or not.
+
 ## Thread safety
 
 The compiler currently assumes that the artifacts it produces are used in a single-threaded context.
