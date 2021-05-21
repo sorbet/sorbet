@@ -1,3 +1,4 @@
+#include "absl/algorithm/container.h"
 #include "main/autogen/data/definitions.h"
 #include "ast/ast.h"
 #include "common/formatting.h"
@@ -81,9 +82,14 @@ string ParsedFile::toString(const core::GlobalState &gs, bool autogenIncludeMeth
                    "## defs:\n",
                    path, fmt::map_join(requires, ", ", nameToString));
 
+    vector<ReferenceRef> methodDefiningRefIds;
+
     for (auto &def : defs) {
         string_view type;
         if (def.type == Definition::Type::Method && !autogenIncludeMethods) {
+            if (def.defining_ref.exists()) {
+                methodDefiningRefIds.emplace_back(def.defining_ref);
+            }
             continue;
         }
 
@@ -128,8 +134,16 @@ string ParsedFile::toString(const core::GlobalState &gs, bool autogenIncludeMeth
             fmt::format_to(out, " aliased_ref=[{}]\n", fmt::map_join(ref.name.nameParts, " ", nameToString));
         }
     }
+
     fmt::format_to(out, "## refs:\n");
     for (auto &ref : refs) {
+        if (!autogenIncludeMethods) {
+            auto mDefRef = absl::c_find_if(methodDefiningRefIds, [&](const auto &r) { return r._id == ref.id._id; });
+            if (mDefRef != methodDefiningRefIds.end()) {
+                continue;
+            }
+        }
+
         vector<string> nestingStrings;
         for (auto &scope : ref.nesting) {
             auto fullScopeName = showFullName(gs, scope);

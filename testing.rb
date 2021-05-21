@@ -1,15 +1,13 @@
 # typed: true
 
-class B
-  def bar
-    puts 'hello'
+class Bar
+  def self.print
+    puts 'hello!'
   end
 end
 
-class A
-  extend T::Sig
-
-  def baz
-    B.bar
+class Foo
+  def self.bar
+    Bar.print
   end
 end
