@@ -31,9 +31,7 @@ class Thing
     @some_attr = some_attr
   end
 
-  # Note that as of this writing, if we replace Boolean with T::Boolean in the signature, interpreted is a little more
-  # than twice as slow, while compiled runs at about the same speed.
-  sig {returns(Boolean)}
+  sig {returns(T::Boolean)}
   def has_some_attr?
     !@some_attr.nil?
   end
