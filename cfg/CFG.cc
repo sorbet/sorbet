@@ -208,24 +208,24 @@ string CFG::toString(const core::GlobalState &gs) const {
     fmt::format_to(buf,
                    "subgraph \"cluster_{}\" {{\n"
                    "    label = \"{}\";\n"
-                   "    color = blue;\n"
-                   "    \"bb{}_0\" [shape = invhouse];\n"
-                   "    \"bb{}_1\" [shape = parallelogram];\n\n",
+                   "    color = blue;\n\n",
                    symbolName, symbolName, symbolName, symbolName);
     for (auto &basicBlock : this->basicBlocks) {
         auto text = basicBlock->toString(gs, *this);
         auto lines = absl::StrSplit(text, "\n");
 
+        auto shape = basicBlock->id == 0 ? "invhouse" : basicBlock->id == 1 ? "parallelogram" : "rectangle";
         // whole block red if whole block is dead
         auto color = basicBlock->firstDeadInstructionIdx == 0 ? "red" : "black";
         fmt::format_to(
             buf,
             "    \"bb{}_{}\" [\n"
+            "        shape = {};\n"
             "        color = {};\n"
             "        label = \"{}\\l\"\n"
             "    ];\n\n"
             "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
-            symbolName, basicBlock->id, color,
+            symbolName, basicBlock->id, shape, color,
             fmt::map_join(lines.begin(), lines.end(), "\\l", [](auto line) -> string { return absl::CEscape(line); }),
             symbolName, basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
 
@@ -269,24 +269,24 @@ string CFG::showRaw(core::Context ctx) const {
     fmt::format_to(buf,
                    "subgraph \"cluster_{}\" {{\n"
                    "    label = \"{}\";\n"
-                   "    color = blue;\n"
-                   "    \"bb{}_0\" [shape = box];\n"
-                   "    \"bb{}_1\" [shape = parallelogram];\n\n",
+                   "    color = blue;\n\n",
                    symbolName, symbolName, symbolName, symbolName);
     for (auto &basicBlock : this->basicBlocks) {
         auto text = basicBlock->showRaw(ctx, *this);
         auto lines = absl::StrSplit(text, "\n");
 
+        auto shape = basicBlock->id == 0 ? "invhouse" : basicBlock->id == 1 ? "parallelogram" : "rectangle";
         // whole block red if whole block is dead
         auto color = basicBlock->firstDeadInstructionIdx == 0 ? "red" : "black";
         fmt::format_to(
             buf,
             "    \"bb{}_{}\" [\n"
+            "        shape = {};\n"
             "        color = {};\n"
             "        label = \"{}\\l\"\n"
             "    ];\n\n"
             "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
-            symbolName, basicBlock->id, color,
+            symbolName, basicBlock->id, shape, color,
             fmt::map_join(lines.begin(), lines.end(), "\\l", [](auto line) -> string { return absl::CEscape(line); }),
             symbolName, basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
 

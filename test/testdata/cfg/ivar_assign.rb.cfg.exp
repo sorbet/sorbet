@@ -2,16 +2,16 @@ digraph "ivar_assign.rb" {
 subgraph "cluster_::<Class:<root>>#<static-init>" {
     label = "::<Class:<root>>#<static-init>";
     color = blue;
-    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$7: T.class_of(TestIVar) = alias <C TestIVar>\l<statTemp>$3: Sorbet::Private::Static::Void = <cfgAlias>$5: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$7: T.class_of(TestIVar))\l<cfgAlias>$10: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$12: T.class_of(TestIVar) = alias <C TestIVar>\l<statTemp>$8: Sorbet::Private::Static::Void = <cfgAlias>$10: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$12: T.class_of(TestIVar))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -22,16 +22,16 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 subgraph "cluster_::TestIVar#initialize" {
     label = "::TestIVar#initialize";
     color = blue;
-    "bb::TestIVar#initialize_0" [shape = invhouse];
-    "bb::TestIVar#initialize_1" [shape = parallelogram];
 
     "bb::TestIVar#initialize_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l@foo$3: Integer = alias @foo\l<self>: TestIVar = cast(<self>: NilClass, TestIVar);\l<cfgAlias>$6: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$8: T.class_of(Integer) = alias <C Integer>\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(Sorbet::Private::Static).keep_for_typechecking(<cfgAlias>$8: T.class_of(Integer))\l<castTemp>$9: Integer(0) = 0\l@foo$3: Integer = cast(<castTemp>$9: Integer(0), Integer);\l<returnMethodTemp>$2: Integer = @foo$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::TestIVar#initialize_0" -> "bb::TestIVar#initialize_1" [style="bold"];
     "bb::TestIVar#initialize_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -42,16 +42,16 @@ subgraph "cluster_::TestIVar#initialize" {
 subgraph "cluster_::TestIVar#test" {
     label = "::TestIVar#test";
     color = blue;
-    "bb::TestIVar#test_0" [shape = invhouse];
-    "bb::TestIVar#test_1" [shape = parallelogram];
 
     "bb::TestIVar#test_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l@foo$3: Integer = alias @foo\l<self>: TestIVar = cast(<self>: NilClass, TestIVar);\l@foo$3: Integer = nil\l<returnMethodTemp>$2: Integer = @foo$3\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::TestIVar#test_0" -> "bb::TestIVar#test_1" [style="bold"];
     "bb::TestIVar#test_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -62,16 +62,16 @@ subgraph "cluster_::TestIVar#test" {
 subgraph "cluster_::<Class:TestIVar>#<static-init>" {
     label = "::<Class:TestIVar>#<static-init>";
     color = blue;
-    "bb::<Class:TestIVar>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:TestIVar>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:TestIVar>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(TestIVar) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U TestIVar>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U TestIVar>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: Symbol(:initialize) = :initialize\l<statTemp>$8: Symbol(:normal) = :normal\l<statTemp>$3: Symbol(:initialize) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestIVar), <statTemp>$7: Symbol(:initialize), <statTemp>$8: Symbol(:normal))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$13: Symbol(:test) = :test\l<statTemp>$14: Symbol(:normal) = :normal\l<statTemp>$9: Symbol(:test) = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(TestIVar), <statTemp>$13: Symbol(:test), <statTemp>$14: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:TestIVar>#<static-init>_0" -> "bb::<Class:TestIVar>#<static-init>_1" [style="bold"];
     "bb::<Class:TestIVar>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];

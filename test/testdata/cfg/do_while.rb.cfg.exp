@@ -2,22 +2,23 @@ digraph "do_while.rb" {
 subgraph "cluster_::<Class:<root>>#<static-init>" {
     label = "::<Class:<root>>#<static-init>";
     color = blue;
-    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_2" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_1" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_2" [
+        shape = rectangle;
         color = black;
         label = "block[id=2, rubyBlockId=0](<self>: T.class_of(<root>))\louterLoops: 1\l<whileTemp>$4: TrueClass = true\l<whileTemp>$4: TrueClass\l"
     ];
@@ -26,6 +27,7 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_2" -> "bb::<Class:<root>>#<static-init>_8" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_5" [
+        shape = rectangle;
         color = black;
         label = "block[id=5, rubyBlockId=0](<self>: T.class_of(<root>))\louterLoops: 1\l<statTemp>$8: Integer(2) = 2\l<statTemp>$6: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$8: Integer(2))\l<statTemp>$10: FalseClass = false\l<ifTemp>$9: TrueClass = <statTemp>$10: FalseClass.!()\l<ifTemp>$9: TrueClass\l"
     ];
@@ -34,12 +36,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_5" -> "bb::<Class:<root>>#<static-init>_2" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_6" [
+        shape = rectangle;
         color = black;
         label = "block[id=6, rubyBlockId=0](<self>: T.class_of(<root>))\louterLoops: 1\l<block-break-assign>$12: NilClass = <returnTemp>$11\l<magic>$13: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$14: T.untyped = <magic>$13: T.class_of(<Magic>).<block-break>(<returnTemp>$11: NilClass)\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_6" -> "bb::<Class:<root>>#<static-init>_8" [style="bold"];
     "bb::<Class:<root>>#<static-init>_8" [
+        shape = rectangle;
         color = black;
         label = "block[id=8, rubyBlockId=0](<self>: T.class_of(<root>))\louterLoops: 1\l<whileTemp>$16: TrueClass = true\l<whileTemp>$16: TrueClass\l"
     ];
@@ -48,12 +52,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_8" -> "bb::<Class:<root>>#<static-init>_10" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_10" [
+        shape = rectangle;
         color = black;
         label = "block[id=10, rubyBlockId=0](<self>: T.class_of(<root>))\lx: Integer(0) = 0\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_10" -> "bb::<Class:<root>>#<static-init>_14" [style="bold"];
     "bb::<Class:<root>>#<static-init>_11" [
+        shape = rectangle;
         color = black;
         label = "block[id=11, rubyBlockId=0](<self>: T.class_of(<root>))\louterLoops: 1\l<statTemp>$20: Integer(2) = 2\l<statTemp>$18: NilClass = <self>: T.class_of(<root>).puts(<statTemp>$20: Integer(2))\l<ifTemp>$21: TrueClass = true\l<ifTemp>$21: TrueClass\l"
     ];
@@ -62,12 +68,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_11" -> "bb::<Class:<root>>#<static-init>_8" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_12" [
+        shape = rectangle;
         color = black;
         label = "block[id=12, rubyBlockId=0](<self>: T.class_of(<root>))\louterLoops: 1\l<block-break-assign>$23: NilClass = <returnTemp>$22\l<magic>$24: T.class_of(<Magic>) = alias <C <Magic>>\l<block-break>$25: T.untyped = <magic>$24: T.class_of(<Magic>).<block-break>(<returnTemp>$22: NilClass)\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_12" -> "bb::<Class:<root>>#<static-init>_10" [style="bold"];
     "bb::<Class:<root>>#<static-init>_14" [
+        shape = rectangle;
         color = black;
         label = "block[id=14, rubyBlockId=0](<self>: T.class_of(<root>), x: Integer(0))\louterLoops: 1\l<whileTemp>$28: FalseClass = false\l<whileTemp>$28: FalseClass\l"
     ];
@@ -76,18 +84,21 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_14" -> "bb::<Class:<root>>#<static-init>_16" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_16" [
+        shape = rectangle;
         color = black;
         label = "block[id=16, rubyBlockId=0](<self>: T.class_of(<root>), x: Integer(0))\ly: Integer(0) = 0\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_16" -> "bb::<Class:<root>>#<static-init>_18" [style="bold"];
     "bb::<Class:<root>>#<static-init>_17" [
+        shape = rectangle;
         color = red;
         label = "block[id=17, rubyBlockId=0](<self>: T.class_of(<root>), x: Integer(0))\louterLoops: 1\l<statTemp>$32 = 2\l<statTemp>$30 = <self>.puts(<statTemp>$32)\lx = 1\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_17" -> "bb::<Class:<root>>#<static-init>_14" [style="bold"];
     "bb::<Class:<root>>#<static-init>_18" [
+        shape = rectangle;
         color = black;
         label = "block[id=18, rubyBlockId=0](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0))\louterLoops: 1\l<statTemp>$36: TrueClass = true\l<whileTemp>$35: FalseClass = <statTemp>$36: TrueClass.!()\l<whileTemp>$35: FalseClass\l"
     ];
@@ -96,12 +107,14 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
     "bb::<Class:<root>>#<static-init>_18" -> "bb::<Class:<root>>#<static-init>_20" [style="tapered"];
 
     "bb::<Class:<root>>#<static-init>_20" [
+        shape = rectangle;
         color = black;
         label = "block[id=20, rubyBlockId=0](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0))\l<statTemp>$41: NilClass = <self>: T.class_of(<root>).puts(x: Integer(0), y: Integer(0))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_20" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_21" [
+        shape = rectangle;
         color = red;
         label = "block[id=21, rubyBlockId=0](<self>: T.class_of(<root>), x: Integer(0), y: Integer(0))\louterLoops: 1\l<statTemp>$40 = 2\l<statTemp>$38 = <self>.puts(<statTemp>$40)\ly = 1\l<unconditional>\l"
     ];
