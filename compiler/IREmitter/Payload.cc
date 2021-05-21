@@ -285,7 +285,41 @@ const vector<pair<core::ClassOrModuleRef, string>> optimizedTypeTests = {
     {core::Symbols::Symbol(), "sorbet_isa_Symbol"},
     {core::Symbols::rootSingleton(), "sorbet_isa_RootSingleton"},
 };
+
+bool hasOptimizedTest(core::ClassOrModuleRef sym) {
+    return absl::c_any_of(optimizedTypeTests, [sym](const auto &pair) { return pair.first == sym; });
 }
+
+bool hasOptimizedTest(const core::TypePtr &type) {
+    bool res = false;
+    typecase(
+        type, [&res](const core::ClassType &ct) { res = hasOptimizedTest(ct.symbol); },
+        [&res](const core::AppliedType &at) { res = hasOptimizedTest(at.klass); }, [](const core::TypePtr &def) {});
+
+    return res;
+}
+
+void flattenAndType(vector<core::TypePtr> &results, const core::AndType &type) {
+    typecase(
+        type.left, [&results](const core::AndType &type) { flattenAndType(results, type); },
+        [&results](const core::TypePtr &def) { results.emplace_back(def); });
+
+    typecase(
+        type.right, [&results](const core::AndType &type) { flattenAndType(results, type); },
+        [&results](const core::TypePtr &def) { results.emplace_back(def); });
+}
+
+void flattenOrType(vector<core::TypePtr> &results, const core::OrType &type) {
+    typecase(
+        type.left, [&results](const core::OrType &type) { flattenOrType(results, type); },
+        [&results](const core::TypePtr &def) { results.emplace_back(def); });
+
+    typecase(
+        type.right, [&results](const core::OrType &type) { flattenOrType(results, type); },
+        [&results](const core::TypePtr &def) { results.emplace_back(def); });
+}
+
+} // namespace
 
 static bool isProc(core::SymbolRef sym) {
     if (sym.kind() != core::SymbolRef::Kind::ClassOrModule) {
@@ -333,37 +367,75 @@ llvm::Value *Payload::typeTest(CompilerState &cs, llvm::IRBuilderBase &b, llvm::
             // todo: ranges, hashes, sets, enumerator, and, overall, enumerables
         },
         [&](const core::OrType &ct) {
-            // TODO: reoder types so that cheap test is done first
-            auto left = typeTest(cs, builder, val, ct.left);
-            auto rightBlockStart = llvm::BasicBlock::Create(cs, "orRight", builder.GetInsertBlock()->getParent());
-            auto contBlock = llvm::BasicBlock::Create(cs, "orContinue", builder.GetInsertBlock()->getParent());
-            auto leftEnd = builder.GetInsertBlock();
-            builder.CreateCondBr(left, contBlock, rightBlockStart);
-            builder.SetInsertPoint(rightBlockStart);
-            auto right = typeTest(cs, builder, val, ct.right);
-            auto rightEnd = builder.GetInsertBlock();
-            builder.CreateBr(contBlock);
-            builder.SetInsertPoint(contBlock);
-            auto phi = builder.CreatePHI(builder.getInt1Ty(), 2, "orTypeTest");
-            phi->addIncoming(left, leftEnd);
-            phi->addIncoming(right, rightEnd);
+            // flatten the or, and order it so that the optimized type tests show up first
+            vector<core::TypePtr> parts;
+            flattenOrType(parts, ct);
+            absl::c_partition(parts, [](const auto &ty) { return hasOptimizedTest(ty); });
+
+            // forward-declare the exit
+            auto *fun = builder.GetInsertBlock()->getParent();
+            auto *exitBlock = llvm::BasicBlock::Create(cs, "orContinue", fun);
+            llvm::PHINode *phi;
+
+            {
+                auto ip = builder.saveIP();
+                builder.SetInsertPoint(exitBlock);
+                phi = builder.CreatePHI(builder.getInt1Ty(), 2, "orTypeTest");
+                builder.restoreIP(ip);
+            }
+
+            llvm::Value *testResult = nullptr;
+            for (const auto &part : parts) {
+                // for all cases after the first, close the previous block by adding a conditional branch
+                if (testResult != nullptr) {
+                    auto *block = llvm::BasicBlock::Create(cs, "orCase", fun);
+                    builder.CreateCondBr(testResult, exitBlock, block);
+                    builder.SetInsertPoint(block);
+                }
+
+                testResult = typeTest(cs, builder, val, part);
+                phi->addIncoming(testResult, builder.GetInsertBlock());
+            }
+
+            // close the last block by adding an unconditional branch to the exit block
+            builder.CreateBr(exitBlock);
+            builder.SetInsertPoint(exitBlock);
             ret = phi;
         },
         [&](const core::AndType &ct) {
-            // TODO: reoder types so that cheap test is done first
-            auto left = typeTest(cs, builder, val, ct.left);
-            auto rightBlockStart = llvm::BasicBlock::Create(cs, "andRight", builder.GetInsertBlock()->getParent());
-            auto contBlock = llvm::BasicBlock::Create(cs, "andContinue", builder.GetInsertBlock()->getParent());
-            auto leftEnd = builder.GetInsertBlock();
-            builder.CreateCondBr(left, rightBlockStart, contBlock);
-            builder.SetInsertPoint(rightBlockStart);
-            auto right = typeTest(cs, builder, val, ct.right);
-            auto rightEnd = builder.GetInsertBlock();
-            builder.CreateBr(contBlock);
-            builder.SetInsertPoint(contBlock);
-            auto phi = builder.CreatePHI(builder.getInt1Ty(), 2, "andTypeTest");
-            phi->addIncoming(left, leftEnd);
-            phi->addIncoming(right, rightEnd);
+            // flatten the and, and order it so that the optimized type tests show up first
+            vector<core::TypePtr> parts;
+            flattenAndType(parts, ct);
+            absl::c_partition(parts, [](const auto &ty) { return hasOptimizedTest(ty); });
+
+            // forward-declare the exit
+            auto *fun = builder.GetInsertBlock()->getParent();
+            auto *exitBlock = llvm::BasicBlock::Create(cs, "andContinue", fun);
+            llvm::PHINode *phi;
+
+            {
+                auto ip = builder.saveIP();
+                builder.SetInsertPoint(exitBlock);
+                phi = builder.CreatePHI(builder.getInt1Ty(), 2, "andTypeTest");
+                builder.restoreIP(ip);
+            }
+
+            llvm::Value *testResult = nullptr;
+            for (const auto &part : parts) {
+                // for all cases after the first, close the previous block by adding a conditional branch
+                if (testResult != nullptr) {
+                    auto *block = llvm::BasicBlock::Create(cs, "andCase", fun);
+                    builder.CreateCondBr(testResult, block, exitBlock);
+                    builder.SetInsertPoint(block);
+                }
+
+                testResult = typeTest(cs, builder, val, part);
+                phi->addIncoming(testResult, builder.GetInsertBlock());
+            }
+
+            // close the last block by adding an unconditional branch to the exit block
+            builder.CreateBr(exitBlock);
+            builder.SetInsertPoint(exitBlock);
             ret = phi;
         },
         [&](const core::TypePtr &_default) { ret = builder.getInt1(true); });
