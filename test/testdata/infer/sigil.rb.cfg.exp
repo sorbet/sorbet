@@ -2,16 +2,16 @@ digraph "sigil.rb" {
 subgraph "cluster_::Object#foo" {
     label = "::Object#foo";
     color = blue;
-    "bb::Object#foo_0" [shape = invhouse];
-    "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: Object = cast(<self>: NilClass, Object);\l<statTemp>$3: String(\"3\") = \"3\"\l<statTemp>$4: Integer(3) = 3\l<returnMethodTemp>$2: String = <statTemp>$3: String(\"3\").+(<statTemp>$4: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -22,16 +22,16 @@ subgraph "cluster_::Object#foo" {
 subgraph "cluster_::<Class:<root>>#<static-init>" {
     label = "::<Class:<root>>#<static-init>";
     color = blue;
-    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:foo) = :foo\l<statTemp>$7: Symbol(:normal) = :normal\l<returnMethodTemp>$2: Symbol(:foo) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(<root>), <statTemp>$6: Symbol(:foo), <statTemp>$7: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:foo)\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];

@@ -2,16 +2,16 @@ digraph "yield.rb" {
 subgraph "cluster_::<Class:<root>>#<static-init>" {
     label = "::<Class:<root>>#<static-init>";
     color = blue;
-    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$8: T.class_of(Main) = alias <C Main>\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(Main))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$13: T.class_of(Main) = alias <C Main>\l<statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(Main))\l<cfgAlias>$17: T.class_of(Main) = alias <C Main>\l<statTemp>$15: Main = <cfgAlias>$17: T.class_of(Main).new()\l<statTemp>$14: T.untyped = <statTemp>$15: Main.main()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -22,16 +22,16 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 subgraph "cluster_::Main#yielder" {
     label = "::Main#yielder";
     color = blue;
-    "bb::Main#yielder_0" [shape = invhouse];
-    "bb::Main#yielder_1" [shape = parallelogram];
 
     "bb::Main#yielder_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: Main = cast(<self>: NilClass, Main);\l<blk>: T.untyped = load_arg(<blk>)\l<statTemp>$5: Integer(1) = 1\la: T.untyped = <blk>: T.untyped.call(<statTemp>$5: Integer(1))\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#yielder_0" -> "bb::Main#yielder_1" [style="bold"];
     "bb::Main#yielder_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -42,16 +42,16 @@ subgraph "cluster_::Main#yielder" {
 subgraph "cluster_::Main#blockpass" {
     label = "::Main#blockpass";
     color = blue;
-    "bb::Main#blockpass_0" [shape = invhouse];
-    "bb::Main#blockpass_1" [shape = parallelogram];
 
     "bb::Main#blockpass_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: Main = cast(<self>: NilClass, Main);\lblk: T.untyped = load_arg(blk)\l<statTemp>$5: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$5: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockpass_0" -> "bb::Main#blockpass_1" [style="bold"];
     "bb::Main#blockpass_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -62,16 +62,16 @@ subgraph "cluster_::Main#blockpass" {
 subgraph "cluster_::Main#mixed" {
     label = "::Main#mixed";
     color = blue;
-    "bb::Main#mixed_0" [shape = invhouse];
-    "bb::Main#mixed_1" [shape = parallelogram];
 
     "bb::Main#mixed_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: Main = cast(<self>: NilClass, Main);\lblk: T.untyped = load_arg(blk)\l<statTemp>$5: Integer(1) = 1\la: T.untyped = blk: T.untyped.call(<statTemp>$5: Integer(1))\l<returnMethodTemp>$2: T.untyped = blk: T.untyped.call(a: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#mixed_0" -> "bb::Main#mixed_1" [style="bold"];
     "bb::Main#mixed_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -82,22 +82,23 @@ subgraph "cluster_::Main#mixed" {
 subgraph "cluster_::Main#blockyield" {
     label = "::Main#blockyield";
     color = blue;
-    "bb::Main#blockyield_0" [shape = invhouse];
-    "bb::Main#blockyield_1" [shape = parallelogram];
 
     "bb::Main#blockyield_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: Main = cast(<self>: NilClass, Main);\l<blk>: T.untyped = load_arg(<blk>)\l<block-pre-call-temp>$4: Sorbet::Private::Static::Void = <self>: Main.yielder()\l<selfRestore>$5: Main = <self>\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_0" -> "bb::Main#blockyield_2" [style="bold"];
     "bb::Main#blockyield_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_1" -> "bb::Main#blockyield_1" [style="bold"];
     "bb::Main#blockyield_2" [
+        shape = rectangle;
         color = black;
         label = "block[id=2, rubyBlockId=1](<self>: Main, <blk>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
@@ -106,12 +107,14 @@ subgraph "cluster_::Main#blockyield" {
     "bb::Main#blockyield_2" -> "bb::Main#blockyield_3" [style="tapered"];
 
     "bb::Main#blockyield_3" [
+        shape = rectangle;
         color = black;
         label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main)\l<returnMethodTemp>$2: T.untyped = Solve<<block-pre-call-temp>$4, yielder>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_3" -> "bb::Main#blockyield_1" [style="bold"];
     "bb::Main#blockyield_5" [
+        shape = rectangle;
         color = black;
         label = "block[id=5, rubyBlockId=1](<self>: Main, <blk>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main)\louterLoops: 1\l<self>: Main = loadSelf\l<blk>$6: T.untyped = load_yield_params(yielder)\l<blk>$7: Integer(0) = 0\li$1: T.untyped = <blk>$6: T.untyped.[](<blk>$7: Integer(0))\l<blockReturnTemp>$8: T.untyped = <blk>: T.untyped.call(i$1: T.untyped)\l<blockReturnTemp>$11: T.noreturn = blockreturn<yielder> <blockReturnTemp>$8: T.untyped\l<unconditional>\l"
     ];
@@ -122,22 +125,23 @@ subgraph "cluster_::Main#blockyield" {
 subgraph "cluster_::Main#main" {
     label = "::Main#main";
     color = blue;
-    "bb::Main#main_0" [shape = invhouse];
-    "bb::Main#main_1" [shape = parallelogram];
 
     "bb::Main#main_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: Main = cast(<self>: NilClass, Main);\l<block-pre-call-temp>$5: Sorbet::Private::Static::Void = <self>: Main.lambda()\l<selfRestore>$6: Main = <self>\l<unconditional>\l"
     ];
 
     "bb::Main#main_0" -> "bb::Main#main_2" [style="bold"];
     "bb::Main#main_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
 
     "bb::Main#main_1" -> "bb::Main#main_1" [style="bold"];
     "bb::Main#main_2" [
+        shape = rectangle;
         color = black;
         label = "block[id=2, rubyBlockId=1](<self>: Main, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Main)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
@@ -146,12 +150,14 @@ subgraph "cluster_::Main#main" {
     "bb::Main#main_2" -> "bb::Main#main_3" [style="tapered"];
 
     "bb::Main#main_3" [
+        shape = rectangle;
         color = black;
         label = "block[id=3, rubyBlockId=0](<block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Main)\ll: T.proc.params(arg0: T.untyped).returns(T.untyped) = Solve<<block-pre-call-temp>$5, lambda>\l<self>: Main = <selfRestore>$6\l<cfgAlias>$16: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$18: Symbol(:yielder) = :yielder\l<statTemp>$14: T.untyped = <cfgAlias>$16: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$18: Symbol(:yielder), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<cfgAlias>$22: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$24: Symbol(:blockpass) = :blockpass\l<statTemp>$20: T.untyped = <cfgAlias>$22: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$24: Symbol(:blockpass), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<cfgAlias>$28: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$30: Symbol(:mixed) = :mixed\l<statTemp>$26: T.untyped = <cfgAlias>$28: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$30: Symbol(:mixed), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<cfgAlias>$33: T.class_of(<Magic>) = alias <C <Magic>>\l<statTemp>$35: Symbol(:blockyield) = :blockyield\l<returnMethodTemp>$2: T.untyped = <cfgAlias>$33: T.class_of(<Magic>).<call-with-block>(<self>: Main, <statTemp>$35: Symbol(:blockyield), l: T.proc.params(arg0: T.untyped).returns(T.untyped))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#main_3" -> "bb::Main#main_1" [style="bold"];
     "bb::Main#main_5" [
+        shape = rectangle;
         color = black;
         label = "block[id=5, rubyBlockId=1](<self>: Main, <block-pre-call-temp>$5: Sorbet::Private::Static::Void, <selfRestore>$6: Main)\louterLoops: 1\l<self>: Main = loadSelf\l<blk>$7: T.untyped = load_yield_params(lambda)\l<blk>$8: Integer(0) = 0\lx$1: T.untyped = <blk>$7: T.untyped.[](<blk>$8: Integer(0))\l<statTemp>$10: NilClass = <self>: Main.puts(x$1: T.untyped)\l<blockReturnTemp>$9: Integer(3) = 3\l<blockReturnTemp>$13: T.noreturn = blockreturn<lambda> <blockReturnTemp>$9: Integer(3)\l<unconditional>\l"
     ];
@@ -162,16 +168,16 @@ subgraph "cluster_::Main#main" {
 subgraph "cluster_::<Class:Main>#<static-init>" {
     label = "::<Class:Main>#<static-init>";
     color = blue;
-    "bb::<Class:Main>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:Main>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:Main>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(Main) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U Main>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U Main>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$5: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$7: Symbol(:yielder) = :yielder\l<statTemp>$8: Symbol(:normal) = :normal\l<statTemp>$3: Symbol(:yielder) = <cfgAlias>$5: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Main), <statTemp>$7: Symbol(:yielder), <statTemp>$8: Symbol(:normal))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$13: Symbol(:blockpass) = :blockpass\l<statTemp>$14: Symbol(:normal) = :normal\l<statTemp>$9: Symbol(:blockpass) = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Main), <statTemp>$13: Symbol(:blockpass), <statTemp>$14: Symbol(:normal))\l<cfgAlias>$17: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$19: Symbol(:mixed) = :mixed\l<statTemp>$20: Symbol(:normal) = :normal\l<statTemp>$15: Symbol(:mixed) = <cfgAlias>$17: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Main), <statTemp>$19: Symbol(:mixed), <statTemp>$20: Symbol(:normal))\l<cfgAlias>$23: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$25: Symbol(:blockyield) = :blockyield\l<statTemp>$26: Symbol(:normal) = :normal\l<statTemp>$21: Symbol(:blockyield) = <cfgAlias>$23: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Main), <statTemp>$25: Symbol(:blockyield), <statTemp>$26: Symbol(:normal))\l<cfgAlias>$29: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$31: Symbol(:main) = :main\l<statTemp>$32: Symbol(:normal) = :normal\l<statTemp>$27: Symbol(:main) = <cfgAlias>$29: T.class_of(Sorbet::Private::Static).keep_def(<self>: T.class_of(Main), <statTemp>$31: Symbol(:main), <statTemp>$32: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#<static-init>_0" -> "bb::<Class:Main>#<static-init>_1" [style="bold"];
     "bb::<Class:Main>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];

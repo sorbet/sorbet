@@ -2,16 +2,16 @@ digraph "huge_unions.rb" {
 subgraph "cluster_::<Class:<root>>#<static-init>" {
     label = "::<Class:<root>>#<static-init>";
     color = blue;
-    "bb::<Class:<root>>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:<root>>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:<root>>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(<root>) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U <root>>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U <root>>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$6: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$8: T.class_of(C1) = alias <C C1>\l<statTemp>$4: Sorbet::Private::Static::Void = <cfgAlias>$6: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$8: T.class_of(C1))\l<cfgAlias>$11: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$13: T.class_of(C1) = alias <C C1>\l<statTemp>$9: Sorbet::Private::Static::Void = <cfgAlias>$11: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$13: T.class_of(C1))\l<cfgAlias>$17: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$19: T.class_of(C2) = alias <C C2>\l<statTemp>$15: Sorbet::Private::Static::Void = <cfgAlias>$17: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$19: T.class_of(C2))\l<cfgAlias>$22: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$24: T.class_of(C2) = alias <C C2>\l<statTemp>$20: Sorbet::Private::Static::Void = <cfgAlias>$22: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$24: T.class_of(C2))\l<cfgAlias>$28: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$30: T.class_of(C3) = alias <C C3>\l<statTemp>$26: Sorbet::Private::Static::Void = <cfgAlias>$28: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$30: T.class_of(C3))\l<cfgAlias>$33: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$35: T.class_of(C3) = alias <C C3>\l<statTemp>$31: Sorbet::Private::Static::Void = <cfgAlias>$33: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$35: T.class_of(C3))\l<cfgAlias>$39: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$41: T.class_of(C4) = alias <C C4>\l<statTemp>$37: Sorbet::Private::Static::Void = <cfgAlias>$39: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$41: T.class_of(C4))\l<cfgAlias>$44: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$46: T.class_of(C4) = alias <C C4>\l<statTemp>$42: Sorbet::Private::Static::Void = <cfgAlias>$44: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$46: T.class_of(C4))\l<cfgAlias>$50: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$52: T.class_of(C5) = alias <C C5>\l<statTemp>$48: Sorbet::Private::Static::Void = <cfgAlias>$50: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$52: T.class_of(C5))\l<cfgAlias>$55: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$57: T.class_of(C5) = alias <C C5>\l<statTemp>$53: Sorbet::Private::Static::Void = <cfgAlias>$55: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$57: T.class_of(C5))\l<cfgAlias>$61: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$63: T.class_of(C6) = alias <C C6>\l<statTemp>$59: Sorbet::Private::Static::Void = <cfgAlias>$61: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$63: T.class_of(C6))\l<cfgAlias>$66: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$68: T.class_of(C6) = alias <C C6>\l<statTemp>$64: Sorbet::Private::Static::Void = <cfgAlias>$66: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$68: T.class_of(C6))\l<cfgAlias>$72: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$74: T.class_of(C7) = alias <C C7>\l<statTemp>$70: Sorbet::Private::Static::Void = <cfgAlias>$72: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$74: T.class_of(C7))\l<cfgAlias>$77: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$79: T.class_of(C7) = alias <C C7>\l<statTemp>$75: Sorbet::Private::Static::Void = <cfgAlias>$77: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$79: T.class_of(C7))\l<cfgAlias>$83: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$85: T.class_of(C8) = alias <C C8>\l<statTemp>$81: Sorbet::Private::Static::Void = <cfgAlias>$83: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$85: T.class_of(C8))\l<cfgAlias>$88: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$90: T.class_of(C8) = alias <C C8>\l<statTemp>$86: Sorbet::Private::Static::Void = <cfgAlias>$88: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$90: T.class_of(C8))\l<cfgAlias>$94: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$96: T.class_of(C9) = alias <C C9>\l<statTemp>$92: Sorbet::Private::Static::Void = <cfgAlias>$94: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$96: T.class_of(C9))\l<cfgAlias>$99: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$101: T.class_of(C9) = alias <C C9>\l<statTemp>$97: Sorbet::Private::Static::Void = <cfgAlias>$99: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$101: T.class_of(C9))\l<cfgAlias>$105: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$107: T.class_of(C10) = alias <C C10>\l<statTemp>$103: Sorbet::Private::Static::Void = <cfgAlias>$105: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$107: T.class_of(C10))\l<cfgAlias>$110: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$112: T.class_of(C10) = alias <C C10>\l<statTemp>$108: Sorbet::Private::Static::Void = <cfgAlias>$110: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$112: T.class_of(C10))\l<cfgAlias>$116: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$118: T.class_of(C11) = alias <C C11>\l<statTemp>$114: Sorbet::Private::Static::Void = <cfgAlias>$116: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$118: T.class_of(C11))\l<cfgAlias>$121: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$123: T.class_of(C11) = alias <C C11>\l<statTemp>$119: Sorbet::Private::Static::Void = <cfgAlias>$121: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$123: T.class_of(C11))\l<cfgAlias>$127: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$129: T.class_of(C12) = alias <C C12>\l<statTemp>$125: Sorbet::Private::Static::Void = <cfgAlias>$127: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$129: T.class_of(C12))\l<cfgAlias>$132: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$134: T.class_of(C12) = alias <C C12>\l<statTemp>$130: Sorbet::Private::Static::Void = <cfgAlias>$132: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$134: T.class_of(C12))\l<cfgAlias>$138: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$140: T.class_of(C13) = alias <C C13>\l<statTemp>$136: Sorbet::Private::Static::Void = <cfgAlias>$138: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$140: T.class_of(C13))\l<cfgAlias>$143: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$145: T.class_of(C13) = alias <C C13>\l<statTemp>$141: Sorbet::Private::Static::Void = <cfgAlias>$143: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$145: T.class_of(C13))\l<cfgAlias>$149: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$151: T.class_of(C13) = alias <C C13>\l<statTemp>$147: Sorbet::Private::Static::Void = <cfgAlias>$149: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$151: T.class_of(C13))\l<cfgAlias>$154: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$156: T.class_of(C13) = alias <C C13>\l<statTemp>$152: Sorbet::Private::Static::Void = <cfgAlias>$154: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$156: T.class_of(C13))\l<cfgAlias>$160: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$162: T.class_of(C13) = alias <C C13>\l<statTemp>$158: Sorbet::Private::Static::Void = <cfgAlias>$160: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$162: T.class_of(C13))\l<cfgAlias>$165: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$167: T.class_of(C13) = alias <C C13>\l<statTemp>$163: Sorbet::Private::Static::Void = <cfgAlias>$165: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$167: T.class_of(C13))\l<cfgAlias>$171: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$173: T.class_of(C13) = alias <C C13>\l<statTemp>$169: Sorbet::Private::Static::Void = <cfgAlias>$171: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$173: T.class_of(C13))\l<cfgAlias>$176: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$178: T.class_of(C13) = alias <C C13>\l<statTemp>$174: Sorbet::Private::Static::Void = <cfgAlias>$176: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$178: T.class_of(C13))\l<cfgAlias>$182: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$184: T.class_of(C13) = alias <C C13>\l<statTemp>$180: Sorbet::Private::Static::Void = <cfgAlias>$182: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$184: T.class_of(C13))\l<cfgAlias>$187: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$189: T.class_of(C13) = alias <C C13>\l<statTemp>$185: Sorbet::Private::Static::Void = <cfgAlias>$187: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$189: T.class_of(C13))\l<cfgAlias>$193: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$195: T.class_of(C13) = alias <C C13>\l<statTemp>$191: Sorbet::Private::Static::Void = <cfgAlias>$193: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$195: T.class_of(C13))\l<cfgAlias>$198: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$200: T.class_of(C13) = alias <C C13>\l<statTemp>$196: Sorbet::Private::Static::Void = <cfgAlias>$198: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$200: T.class_of(C13))\l<cfgAlias>$204: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$206: T.class_of(C13) = alias <C C13>\l<statTemp>$202: Sorbet::Private::Static::Void = <cfgAlias>$204: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$206: T.class_of(C13))\l<cfgAlias>$209: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$211: T.class_of(C13) = alias <C C13>\l<statTemp>$207: Sorbet::Private::Static::Void = <cfgAlias>$209: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$211: T.class_of(C13))\l<cfgAlias>$215: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$217: T.class_of(C14) = alias <C C14>\l<statTemp>$213: Sorbet::Private::Static::Void = <cfgAlias>$215: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$217: T.class_of(C14))\l<cfgAlias>$220: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$222: T.class_of(C14) = alias <C C14>\l<statTemp>$218: Sorbet::Private::Static::Void = <cfgAlias>$220: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$222: T.class_of(C14))\l<cfgAlias>$226: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$228: T.class_of(C15) = alias <C C15>\l<statTemp>$224: Sorbet::Private::Static::Void = <cfgAlias>$226: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$228: T.class_of(C15))\l<cfgAlias>$231: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$233: T.class_of(C15) = alias <C C15>\l<statTemp>$229: Sorbet::Private::Static::Void = <cfgAlias>$231: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$233: T.class_of(C15))\l<cfgAlias>$237: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$239: T.class_of(C16) = alias <C C16>\l<statTemp>$235: Sorbet::Private::Static::Void = <cfgAlias>$237: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$239: T.class_of(C16))\l<cfgAlias>$242: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$244: T.class_of(C16) = alias <C C16>\l<statTemp>$240: Sorbet::Private::Static::Void = <cfgAlias>$242: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$244: T.class_of(C16))\l<cfgAlias>$248: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$250: T.class_of(C17) = alias <C C17>\l<statTemp>$246: Sorbet::Private::Static::Void = <cfgAlias>$248: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$250: T.class_of(C17))\l<cfgAlias>$253: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$255: T.class_of(C17) = alias <C C17>\l<statTemp>$251: Sorbet::Private::Static::Void = <cfgAlias>$253: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$255: T.class_of(C17))\l<cfgAlias>$259: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$261: T.class_of(C18) = alias <C C18>\l<statTemp>$257: Sorbet::Private::Static::Void = <cfgAlias>$259: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$261: T.class_of(C18))\l<cfgAlias>$264: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$266: T.class_of(C18) = alias <C C18>\l<statTemp>$262: Sorbet::Private::Static::Void = <cfgAlias>$264: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$266: T.class_of(C18))\l<cfgAlias>$270: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$272: T.class_of(C19) = alias <C C19>\l<statTemp>$268: Sorbet::Private::Static::Void = <cfgAlias>$270: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$272: T.class_of(C19))\l<cfgAlias>$275: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$277: T.class_of(C19) = alias <C C19>\l<statTemp>$273: Sorbet::Private::Static::Void = <cfgAlias>$275: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$277: T.class_of(C19))\l<cfgAlias>$281: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$283: T.class_of(C20) = alias <C C20>\l<statTemp>$279: Sorbet::Private::Static::Void = <cfgAlias>$281: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$283: T.class_of(C20))\l<cfgAlias>$286: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$288: T.class_of(C20) = alias <C C20>\l<statTemp>$284: Sorbet::Private::Static::Void = <cfgAlias>$286: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$288: T.class_of(C20))\l<cfgAlias>$292: T.class_of(<Magic>) = alias <C <Magic>>\l<cfgAlias>$294: T.class_of(A) = alias <C A>\l<statTemp>$290: Sorbet::Private::Static::Void = <cfgAlias>$292: T.class_of(<Magic>).<define-top-class-or-module>(<cfgAlias>$294: T.class_of(A))\l<cfgAlias>$297: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<cfgAlias>$299: T.class_of(A) = alias <C A>\l<statTemp>$295: Sorbet::Private::Static::Void = <cfgAlias>$297: T.class_of(Sorbet::Private::Static).keep_for_ide(<cfgAlias>$299: T.class_of(A))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:<root>>#<static-init>_0" -> "bb::<Class:<root>>#<static-init>_1" [style="bold"];
     "bb::<Class:<root>>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -22,16 +22,16 @@ subgraph "cluster_::<Class:<root>>#<static-init>" {
 subgraph "cluster_::<Class:C1>#<static-init>" {
     label = "::<Class:C1>#<static-init>";
     color = blue;
-    "bb::<Class:C1>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C1>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C1>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C1) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C1>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C1>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C1>#<static-init>_0" -> "bb::<Class:C1>#<static-init>_1" [style="bold"];
     "bb::<Class:C1>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -42,16 +42,16 @@ subgraph "cluster_::<Class:C1>#<static-init>" {
 subgraph "cluster_::<Class:C2>#<static-init>" {
     label = "::<Class:C2>#<static-init>";
     color = blue;
-    "bb::<Class:C2>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C2>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C2>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C2) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C2>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C2>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C2>#<static-init>_0" -> "bb::<Class:C2>#<static-init>_1" [style="bold"];
     "bb::<Class:C2>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -62,16 +62,16 @@ subgraph "cluster_::<Class:C2>#<static-init>" {
 subgraph "cluster_::<Class:C3>#<static-init>" {
     label = "::<Class:C3>#<static-init>";
     color = blue;
-    "bb::<Class:C3>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C3>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C3>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C3) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C3>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C3>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C3>#<static-init>_0" -> "bb::<Class:C3>#<static-init>_1" [style="bold"];
     "bb::<Class:C3>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -82,16 +82,16 @@ subgraph "cluster_::<Class:C3>#<static-init>" {
 subgraph "cluster_::<Class:C4>#<static-init>" {
     label = "::<Class:C4>#<static-init>";
     color = blue;
-    "bb::<Class:C4>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C4>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C4>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C4) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C4>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C4>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C4>#<static-init>_0" -> "bb::<Class:C4>#<static-init>_1" [style="bold"];
     "bb::<Class:C4>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -102,16 +102,16 @@ subgraph "cluster_::<Class:C4>#<static-init>" {
 subgraph "cluster_::<Class:C5>#<static-init>" {
     label = "::<Class:C5>#<static-init>";
     color = blue;
-    "bb::<Class:C5>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C5>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C5>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C5) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C5>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C5>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C5>#<static-init>_0" -> "bb::<Class:C5>#<static-init>_1" [style="bold"];
     "bb::<Class:C5>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -122,16 +122,16 @@ subgraph "cluster_::<Class:C5>#<static-init>" {
 subgraph "cluster_::<Class:C6>#<static-init>" {
     label = "::<Class:C6>#<static-init>";
     color = blue;
-    "bb::<Class:C6>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C6>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C6>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C6) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C6>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C6>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C6>#<static-init>_0" -> "bb::<Class:C6>#<static-init>_1" [style="bold"];
     "bb::<Class:C6>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -142,16 +142,16 @@ subgraph "cluster_::<Class:C6>#<static-init>" {
 subgraph "cluster_::<Class:C7>#<static-init>" {
     label = "::<Class:C7>#<static-init>";
     color = blue;
-    "bb::<Class:C7>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C7>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C7>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C7) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C7>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C7>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C7>#<static-init>_0" -> "bb::<Class:C7>#<static-init>_1" [style="bold"];
     "bb::<Class:C7>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -162,16 +162,16 @@ subgraph "cluster_::<Class:C7>#<static-init>" {
 subgraph "cluster_::<Class:C8>#<static-init>" {
     label = "::<Class:C8>#<static-init>";
     color = blue;
-    "bb::<Class:C8>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C8>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C8>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C8) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C8>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C8>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C8>#<static-init>_0" -> "bb::<Class:C8>#<static-init>_1" [style="bold"];
     "bb::<Class:C8>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -182,16 +182,16 @@ subgraph "cluster_::<Class:C8>#<static-init>" {
 subgraph "cluster_::<Class:C9>#<static-init>" {
     label = "::<Class:C9>#<static-init>";
     color = blue;
-    "bb::<Class:C9>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C9>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C9>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C9) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C9>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C9>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C9>#<static-init>_0" -> "bb::<Class:C9>#<static-init>_1" [style="bold"];
     "bb::<Class:C9>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -202,16 +202,16 @@ subgraph "cluster_::<Class:C9>#<static-init>" {
 subgraph "cluster_::<Class:C10>#<static-init>" {
     label = "::<Class:C10>#<static-init>";
     color = blue;
-    "bb::<Class:C10>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C10>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C10>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C10) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C10>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C10>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C10>#<static-init>_0" -> "bb::<Class:C10>#<static-init>_1" [style="bold"];
     "bb::<Class:C10>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -222,16 +222,16 @@ subgraph "cluster_::<Class:C10>#<static-init>" {
 subgraph "cluster_::<Class:C11>#<static-init>" {
     label = "::<Class:C11>#<static-init>";
     color = blue;
-    "bb::<Class:C11>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C11>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C11>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C11) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C11>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C11>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C11>#<static-init>_0" -> "bb::<Class:C11>#<static-init>_1" [style="bold"];
     "bb::<Class:C11>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -242,16 +242,16 @@ subgraph "cluster_::<Class:C11>#<static-init>" {
 subgraph "cluster_::<Class:C12>#<static-init>" {
     label = "::<Class:C12>#<static-init>";
     color = blue;
-    "bb::<Class:C12>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C12>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C12>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C12) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C12>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C12>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C12>#<static-init>_0" -> "bb::<Class:C12>#<static-init>_1" [style="bold"];
     "bb::<Class:C12>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -262,16 +262,16 @@ subgraph "cluster_::<Class:C12>#<static-init>" {
 subgraph "cluster_::<Class:C13>#<static-init>" {
     label = "::<Class:C13>#<static-init>";
     color = blue;
-    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C13>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
     "bb::<Class:C13>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -282,16 +282,16 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
 subgraph "cluster_::<Class:C13>#<static-init>" {
     label = "::<Class:C13>#<static-init>";
     color = blue;
-    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C13>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
     "bb::<Class:C13>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -302,16 +302,16 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
 subgraph "cluster_::<Class:C13>#<static-init>" {
     label = "::<Class:C13>#<static-init>";
     color = blue;
-    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C13>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
     "bb::<Class:C13>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -322,16 +322,16 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
 subgraph "cluster_::<Class:C13>#<static-init>" {
     label = "::<Class:C13>#<static-init>";
     color = blue;
-    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C13>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
     "bb::<Class:C13>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -342,16 +342,16 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
 subgraph "cluster_::<Class:C13>#<static-init>" {
     label = "::<Class:C13>#<static-init>";
     color = blue;
-    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C13>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
     "bb::<Class:C13>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -362,16 +362,16 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
 subgraph "cluster_::<Class:C13>#<static-init>" {
     label = "::<Class:C13>#<static-init>";
     color = blue;
-    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C13>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
     "bb::<Class:C13>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -382,16 +382,16 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
 subgraph "cluster_::<Class:C13>#<static-init>" {
     label = "::<Class:C13>#<static-init>";
     color = blue;
-    "bb::<Class:C13>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C13>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C13>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C13) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C13>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C13>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C13>#<static-init>_0" -> "bb::<Class:C13>#<static-init>_1" [style="bold"];
     "bb::<Class:C13>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -402,16 +402,16 @@ subgraph "cluster_::<Class:C13>#<static-init>" {
 subgraph "cluster_::<Class:C14>#<static-init>" {
     label = "::<Class:C14>#<static-init>";
     color = blue;
-    "bb::<Class:C14>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C14>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C14>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C14) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C14>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C14>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C14>#<static-init>_0" -> "bb::<Class:C14>#<static-init>_1" [style="bold"];
     "bb::<Class:C14>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -422,16 +422,16 @@ subgraph "cluster_::<Class:C14>#<static-init>" {
 subgraph "cluster_::<Class:C15>#<static-init>" {
     label = "::<Class:C15>#<static-init>";
     color = blue;
-    "bb::<Class:C15>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C15>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C15>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C15) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C15>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C15>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C15>#<static-init>_0" -> "bb::<Class:C15>#<static-init>_1" [style="bold"];
     "bb::<Class:C15>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -442,16 +442,16 @@ subgraph "cluster_::<Class:C15>#<static-init>" {
 subgraph "cluster_::<Class:C16>#<static-init>" {
     label = "::<Class:C16>#<static-init>";
     color = blue;
-    "bb::<Class:C16>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C16>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C16>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C16) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C16>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C16>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C16>#<static-init>_0" -> "bb::<Class:C16>#<static-init>_1" [style="bold"];
     "bb::<Class:C16>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -462,16 +462,16 @@ subgraph "cluster_::<Class:C16>#<static-init>" {
 subgraph "cluster_::<Class:C17>#<static-init>" {
     label = "::<Class:C17>#<static-init>";
     color = blue;
-    "bb::<Class:C17>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C17>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C17>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C17) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C17>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C17>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C17>#<static-init>_0" -> "bb::<Class:C17>#<static-init>_1" [style="bold"];
     "bb::<Class:C17>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -482,16 +482,16 @@ subgraph "cluster_::<Class:C17>#<static-init>" {
 subgraph "cluster_::<Class:C18>#<static-init>" {
     label = "::<Class:C18>#<static-init>";
     color = blue;
-    "bb::<Class:C18>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C18>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C18>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C18) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C18>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C18>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C18>#<static-init>_0" -> "bb::<Class:C18>#<static-init>_1" [style="bold"];
     "bb::<Class:C18>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -502,16 +502,16 @@ subgraph "cluster_::<Class:C18>#<static-init>" {
 subgraph "cluster_::<Class:C19>#<static-init>" {
     label = "::<Class:C19>#<static-init>";
     color = blue;
-    "bb::<Class:C19>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C19>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C19>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C19) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C19>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C19>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C19>#<static-init>_0" -> "bb::<Class:C19>#<static-init>_1" [style="bold"];
     "bb::<Class:C19>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -522,16 +522,16 @@ subgraph "cluster_::<Class:C19>#<static-init>" {
 subgraph "cluster_::<Class:C20>#<static-init>" {
     label = "::<Class:C20>#<static-init>";
     color = blue;
-    "bb::<Class:C20>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:C20>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:C20>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(C20) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U C20>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U C20>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::<Class:C20>#<static-init>_0" -> "bb::<Class:C20>#<static-init>_1" [style="bold"];
     "bb::<Class:C20>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
@@ -542,10 +542,9 @@ subgraph "cluster_::<Class:C20>#<static-init>" {
 subgraph "cluster_::<Class:A>#send_beta_invitation" {
     label = "::<Class:A>#send_beta_invitation";
     color = blue;
-    "bb::<Class:A>#send_beta_invitation_0" [shape = invhouse];
-    "bb::<Class:A>#send_beta_invitation_1" [shape = parallelogram];
 
     "bb::<Class:A>#send_beta_invitation_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\linvite: T.untyped = load_arg(invite)\l<statTemp>$6: Integer(1) = 1\l<ifTemp>$5: T::Boolean = <statTemp>$6: Integer(1).===(invite: T.untyped)\l<ifTemp>$5: T::Boolean\l"
     ];
@@ -554,18 +553,21 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_0" -> "bb::<Class:A>#send_beta_invitation_3" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_1" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_2" [
+        shape = rectangle;
         color = black;
         label = "block[id=2, rubyBlockId=0]()\l<cfgAlias>$8: T.class_of(C1) = alias <C C1>\lr: T.class_of(C1) = <cfgAlias>$8\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_2" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_3" [
+        shape = rectangle;
         color = black;
         label = "block[id=3, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$10: Integer(2) = 2\l<ifTemp>$9: T::Boolean = <statTemp>$10: Integer(2).===(invite: T.untyped)\l<ifTemp>$9: T::Boolean\l"
     ];
@@ -574,12 +576,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_3" -> "bb::<Class:A>#send_beta_invitation_5" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_4" [
+        shape = rectangle;
         color = black;
         label = "block[id=4, rubyBlockId=0]()\l<cfgAlias>$12: T.class_of(C2) = alias <C C2>\lr: T.class_of(C2) = <cfgAlias>$12\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_4" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_5" [
+        shape = rectangle;
         color = black;
         label = "block[id=5, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$14: Integer(3) = 3\l<ifTemp>$13: T::Boolean = <statTemp>$14: Integer(3).===(invite: T.untyped)\l<ifTemp>$13: T::Boolean\l"
     ];
@@ -588,12 +592,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_5" -> "bb::<Class:A>#send_beta_invitation_7" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_6" [
+        shape = rectangle;
         color = black;
         label = "block[id=6, rubyBlockId=0]()\l<cfgAlias>$16: T.class_of(C3) = alias <C C3>\lr: T.class_of(C3) = <cfgAlias>$16\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_6" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_7" [
+        shape = rectangle;
         color = black;
         label = "block[id=7, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$18: Integer(4) = 4\l<ifTemp>$17: T::Boolean = <statTemp>$18: Integer(4).===(invite: T.untyped)\l<ifTemp>$17: T::Boolean\l"
     ];
@@ -602,12 +608,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_7" -> "bb::<Class:A>#send_beta_invitation_9" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_8" [
+        shape = rectangle;
         color = black;
         label = "block[id=8, rubyBlockId=0]()\l<cfgAlias>$20: T.class_of(C4) = alias <C C4>\lr: T.class_of(C4) = <cfgAlias>$20\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_8" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_9" [
+        shape = rectangle;
         color = black;
         label = "block[id=9, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$22: Integer(5) = 5\l<ifTemp>$21: T::Boolean = <statTemp>$22: Integer(5).===(invite: T.untyped)\l<ifTemp>$21: T::Boolean\l"
     ];
@@ -616,12 +624,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_9" -> "bb::<Class:A>#send_beta_invitation_11" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_10" [
+        shape = rectangle;
         color = black;
         label = "block[id=10, rubyBlockId=0]()\l<cfgAlias>$24: T.class_of(C5) = alias <C C5>\lr: T.class_of(C5) = <cfgAlias>$24\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_10" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_11" [
+        shape = rectangle;
         color = black;
         label = "block[id=11, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$26: Integer(6) = 6\l<ifTemp>$25: T::Boolean = <statTemp>$26: Integer(6).===(invite: T.untyped)\l<ifTemp>$25: T::Boolean\l"
     ];
@@ -630,12 +640,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_11" -> "bb::<Class:A>#send_beta_invitation_13" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_12" [
+        shape = rectangle;
         color = black;
         label = "block[id=12, rubyBlockId=0]()\l<cfgAlias>$28: T.class_of(C6) = alias <C C6>\lr: T.class_of(C6) = <cfgAlias>$28\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_12" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_13" [
+        shape = rectangle;
         color = black;
         label = "block[id=13, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$30: Integer(7) = 7\l<ifTemp>$29: T::Boolean = <statTemp>$30: Integer(7).===(invite: T.untyped)\l<ifTemp>$29: T::Boolean\l"
     ];
@@ -644,12 +656,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_13" -> "bb::<Class:A>#send_beta_invitation_15" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_14" [
+        shape = rectangle;
         color = black;
         label = "block[id=14, rubyBlockId=0]()\l<cfgAlias>$32: T.class_of(C7) = alias <C C7>\lr: T.class_of(C7) = <cfgAlias>$32\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_14" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_15" [
+        shape = rectangle;
         color = black;
         label = "block[id=15, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$34: Integer(8) = 8\l<ifTemp>$33: T::Boolean = <statTemp>$34: Integer(8).===(invite: T.untyped)\l<ifTemp>$33: T::Boolean\l"
     ];
@@ -658,12 +672,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_15" -> "bb::<Class:A>#send_beta_invitation_17" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_16" [
+        shape = rectangle;
         color = black;
         label = "block[id=16, rubyBlockId=0]()\l<cfgAlias>$36: T.class_of(C8) = alias <C C8>\lr: T.class_of(C8) = <cfgAlias>$36\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_16" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_17" [
+        shape = rectangle;
         color = black;
         label = "block[id=17, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$38: Integer(9) = 9\l<ifTemp>$37: T::Boolean = <statTemp>$38: Integer(9).===(invite: T.untyped)\l<ifTemp>$37: T::Boolean\l"
     ];
@@ -672,12 +688,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_17" -> "bb::<Class:A>#send_beta_invitation_19" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_18" [
+        shape = rectangle;
         color = black;
         label = "block[id=18, rubyBlockId=0]()\l<cfgAlias>$40: T.class_of(C9) = alias <C C9>\lr: T.class_of(C9) = <cfgAlias>$40\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_18" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_19" [
+        shape = rectangle;
         color = black;
         label = "block[id=19, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$42: Integer(10) = 10\l<ifTemp>$41: T::Boolean = <statTemp>$42: Integer(10).===(invite: T.untyped)\l<ifTemp>$41: T::Boolean\l"
     ];
@@ -686,12 +704,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_19" -> "bb::<Class:A>#send_beta_invitation_21" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_20" [
+        shape = rectangle;
         color = black;
         label = "block[id=20, rubyBlockId=0]()\l<cfgAlias>$44: T.class_of(C10) = alias <C C10>\lr: T.class_of(C10) = <cfgAlias>$44\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_20" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_21" [
+        shape = rectangle;
         color = black;
         label = "block[id=21, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$46: Integer(11) = 11\l<ifTemp>$45: T::Boolean = <statTemp>$46: Integer(11).===(invite: T.untyped)\l<ifTemp>$45: T::Boolean\l"
     ];
@@ -700,12 +720,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_21" -> "bb::<Class:A>#send_beta_invitation_23" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_22" [
+        shape = rectangle;
         color = black;
         label = "block[id=22, rubyBlockId=0]()\l<cfgAlias>$48: T.class_of(C11) = alias <C C11>\lr: T.class_of(C11) = <cfgAlias>$48\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_22" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_23" [
+        shape = rectangle;
         color = black;
         label = "block[id=23, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$50: Integer(12) = 12\l<ifTemp>$49: T::Boolean = <statTemp>$50: Integer(12).===(invite: T.untyped)\l<ifTemp>$49: T::Boolean\l"
     ];
@@ -714,12 +736,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_23" -> "bb::<Class:A>#send_beta_invitation_25" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_24" [
+        shape = rectangle;
         color = black;
         label = "block[id=24, rubyBlockId=0]()\l<cfgAlias>$52: T.class_of(C12) = alias <C C12>\lr: T.class_of(C12) = <cfgAlias>$52\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_24" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_25" [
+        shape = rectangle;
         color = black;
         label = "block[id=25, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$54: Integer(13) = 13\l<ifTemp>$53: T::Boolean = <statTemp>$54: Integer(13).===(invite: T.untyped)\l<ifTemp>$53: T::Boolean\l"
     ];
@@ -728,12 +752,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_25" -> "bb::<Class:A>#send_beta_invitation_27" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_26" [
+        shape = rectangle;
         color = black;
         label = "block[id=26, rubyBlockId=0]()\l<cfgAlias>$56: T.class_of(C13) = alias <C C13>\lr: T.class_of(C13) = <cfgAlias>$56\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_26" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_27" [
+        shape = rectangle;
         color = black;
         label = "block[id=27, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$58: Integer(14) = 14\l<ifTemp>$57: T::Boolean = <statTemp>$58: Integer(14).===(invite: T.untyped)\l<ifTemp>$57: T::Boolean\l"
     ];
@@ -742,12 +768,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_27" -> "bb::<Class:A>#send_beta_invitation_29" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_28" [
+        shape = rectangle;
         color = black;
         label = "block[id=28, rubyBlockId=0]()\l<cfgAlias>$60: T.class_of(C14) = alias <C C14>\lr: T.class_of(C14) = <cfgAlias>$60\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_28" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_29" [
+        shape = rectangle;
         color = black;
         label = "block[id=29, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$62: Integer(15) = 15\l<ifTemp>$61: T::Boolean = <statTemp>$62: Integer(15).===(invite: T.untyped)\l<ifTemp>$61: T::Boolean\l"
     ];
@@ -756,12 +784,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_29" -> "bb::<Class:A>#send_beta_invitation_31" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_30" [
+        shape = rectangle;
         color = black;
         label = "block[id=30, rubyBlockId=0]()\l<cfgAlias>$64: T.class_of(C15) = alias <C C15>\lr: T.class_of(C15) = <cfgAlias>$64\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_30" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_31" [
+        shape = rectangle;
         color = black;
         label = "block[id=31, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$66: Integer(16) = 16\l<ifTemp>$65: T::Boolean = <statTemp>$66: Integer(16).===(invite: T.untyped)\l<ifTemp>$65: T::Boolean\l"
     ];
@@ -770,12 +800,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_31" -> "bb::<Class:A>#send_beta_invitation_33" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_32" [
+        shape = rectangle;
         color = black;
         label = "block[id=32, rubyBlockId=0]()\l<cfgAlias>$68: T.class_of(C16) = alias <C C16>\lr: T.class_of(C16) = <cfgAlias>$68\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_32" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_33" [
+        shape = rectangle;
         color = black;
         label = "block[id=33, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$70: Integer(17) = 17\l<ifTemp>$69: T::Boolean = <statTemp>$70: Integer(17).===(invite: T.untyped)\l<ifTemp>$69: T::Boolean\l"
     ];
@@ -784,12 +816,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_33" -> "bb::<Class:A>#send_beta_invitation_35" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_34" [
+        shape = rectangle;
         color = black;
         label = "block[id=34, rubyBlockId=0]()\l<cfgAlias>$72: T.class_of(C17) = alias <C C17>\lr: T.class_of(C17) = <cfgAlias>$72\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_34" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_35" [
+        shape = rectangle;
         color = black;
         label = "block[id=35, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$74: Integer(18) = 18\l<ifTemp>$73: T::Boolean = <statTemp>$74: Integer(18).===(invite: T.untyped)\l<ifTemp>$73: T::Boolean\l"
     ];
@@ -798,12 +832,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_35" -> "bb::<Class:A>#send_beta_invitation_37" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_36" [
+        shape = rectangle;
         color = black;
         label = "block[id=36, rubyBlockId=0]()\l<cfgAlias>$76: T.class_of(C18) = alias <C C18>\lr: T.class_of(C18) = <cfgAlias>$76\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_36" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_37" [
+        shape = rectangle;
         color = black;
         label = "block[id=37, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$78: Integer(19) = 19\l<ifTemp>$77: T::Boolean = <statTemp>$78: Integer(19).===(invite: T.untyped)\l<ifTemp>$77: T::Boolean\l"
     ];
@@ -812,12 +848,14 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_37" -> "bb::<Class:A>#send_beta_invitation_39" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_38" [
+        shape = rectangle;
         color = black;
         label = "block[id=38, rubyBlockId=0]()\l<cfgAlias>$80: T.class_of(C19) = alias <C C19>\lr: T.class_of(C19) = <cfgAlias>$80\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_38" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_39" [
+        shape = rectangle;
         color = black;
         label = "block[id=39, rubyBlockId=0](<self>: T.class_of(A), invite: T.untyped)\l<statTemp>$82: Integer(20) = 20\l<ifTemp>$81: T::Boolean = <statTemp>$82: Integer(20).===(invite: T.untyped)\l<ifTemp>$81: T::Boolean\l"
     ];
@@ -826,18 +864,21 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_39" -> "bb::<Class:A>#send_beta_invitation_41" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_40" [
+        shape = rectangle;
         color = black;
         label = "block[id=40, rubyBlockId=0]()\l<cfgAlias>$84: T.class_of(C20) = alias <C C20>\lr: T.class_of(C20) = <cfgAlias>$84\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_40" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_41" [
+        shape = rectangle;
         color = black;
         label = "block[id=41, rubyBlockId=0](<self>: T.class_of(A))\l<statTemp>$86: String(\"Bla bla bla\") = \"Bla bla bla\"\l<statTemp>$3: T.noreturn = <self>: T.class_of(A).raise(<statTemp>$86: String(\"Bla bla bla\"))\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_41" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_61" [
+        shape = rectangle;
         color = black;
         label = "block[id=61, rubyBlockId=0](r: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)))\ls: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)) = r\l<returnMethodTemp>$2: T.noreturn = return s: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20))\l<unconditional>\l"
     ];
@@ -848,16 +889,16 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 subgraph "cluster_::<Class:A>#<static-init>" {
     label = "::<Class:A>#<static-init>";
     color = blue;
-    "bb::<Class:A>#<static-init>_0" [shape = invhouse];
-    "bb::<Class:A>#<static-init>_1" [shape = parallelogram];
 
     "bb::<Class:A>#<static-init>_0" [
+        shape = invhouse;
         color = black;
         label = "block[id=0, rubyBlockId=0]()\l<self>: T.class_of(A) = cast(<self>: NilClass, AppliedType {\l  klass = <S <C <U A>> $1>\l  targs = [\l    <C <U <AttachedClass>>> = SelfTypeParam(<S <C <U A>> $1><C <U <AttachedClass>>>)\l  ]\l});\l<cfgAlias>$4: T.class_of(Sorbet::Private::Static) = alias <C Static>\l<statTemp>$6: Symbol(:send_beta_invitation) = :send_beta_invitation\l<statTemp>$7: Symbol(:normal) = :normal\l<returnMethodTemp>$2: Symbol(:send_beta_invitation) = <cfgAlias>$4: T.class_of(Sorbet::Private::Static).keep_self_def(<self>: T.class_of(A), <statTemp>$6: Symbol(:send_beta_invitation), <statTemp>$7: Symbol(:normal))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:send_beta_invitation)\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#<static-init>_0" -> "bb::<Class:A>#<static-init>_1" [style="bold"];
     "bb::<Class:A>#<static-init>_1" [
+        shape = parallelogram;
         color = black;
         label = "block[id=1, rubyBlockId=0]()\l<unconditional>\l"
     ];
