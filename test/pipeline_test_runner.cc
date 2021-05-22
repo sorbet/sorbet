@@ -189,6 +189,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     } else {
         core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
     }
+
+    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
+        gs->suggestUnsafe = "T.unsafe";
+    }
+
     // Parser
     vector<core::FileRef> files;
     constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;

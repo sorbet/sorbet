@@ -24,15 +24,23 @@ for src in "${srcs[@]}"; do
   cp "$src" "$tmpdir"
 done
 
+options=(
+  --silence-dev-message
+  --suppress-non-critical
+  --censor-for-snapshot-tests
+  --autocorrect
+  "--max-threads=0"
+)
+
+if grep -q '^# enable-suggest-unsafe: true$' "${srcs[@]}"; then
+  options+=("--suggest-unsafe")
+fi
+
 cwd="$PWD"
 pushd "$tmpdir" &> /dev/null
 
 "$cwd"/bazel-bin/main/sorbet \
-  --silence-dev-message \
-  --suppress-non-critical \
-  --censor-for-snapshot-tests \
-  --autocorrect \
-  --max-threads 0 \
+  "${options[@]}" \
   "${srcs_basenames[@]}" \
   &> /dev/null || true
 
