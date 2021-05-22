@@ -150,23 +150,6 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "autocorrect-test",
-    size = "small",
-    srcs = ["autocorrect-test.cc"],
-    linkstatic = select({
-        "//tools/config:linkshared": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//common",
-        "//core",
-        "@doctest",
-        "@doctest//:doctest_main",
-    ],
-)
-
 # Passes with --config=dbg but I'm not smart enough to figure out how to make it
 # only run when in that config
 # sh_test(

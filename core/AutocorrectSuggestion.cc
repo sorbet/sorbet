@@ -26,8 +26,18 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     return false;
 }
 
-UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> autocorrects,
-                                                           UnorderedMap<FileRef, string> sources) {
+UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(const GlobalState &gs, FileSystem &fs,
+                                                           const vector<AutocorrectSuggestion> &autocorrects) {
+    UnorderedMap<FileRef, string> sources;
+    for (auto &autocorrect : autocorrects) {
+        for (auto &edit : autocorrect.edits) {
+            auto file = edit.loc.file();
+            if (!sources.count(file)) {
+                sources[file] = fs.readFile(file.data(gs).path());
+            }
+        }
+    }
+
     vector<AutocorrectSuggestion::Edit> edits;
     for (auto &autocorrect : autocorrects) {
         move(autocorrect.edits.begin(), autocorrect.edits.end(), back_inserter(edits));
