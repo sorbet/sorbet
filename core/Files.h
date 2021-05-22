@@ -4,6 +4,7 @@
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include <string>
+#include <string_view>
 
 namespace sorbet::core {
 class GlobalState;
@@ -104,6 +105,9 @@ public:
 
     void setFileHash(std::unique_ptr<const FileHash> hash);
     const std::shared_ptr<const FileHash> &getFileHash() const;
+
+    static constexpr std::string_view URL_PREFIX = "https://github.com/sorbet/sorbet/tree/master/";
+    static std::string censorFilePathForSnapshotTests(std::string_view orig);
 
 private:
     const std::string path_;

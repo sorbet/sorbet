@@ -12,6 +12,12 @@ using namespace std;
 
 namespace sorbet::core {
 
+namespace {
+
+constexpr auto EXTERNAL_PREFIX = "external/com_stripe_ruby_typer/"sv;
+
+} // namespace
+
 vector<int> findLineBreaks(string_view s) {
     vector<int> res;
     int i = -1;
@@ -205,6 +211,28 @@ string_view File::getLine(int i) {
     auto start = lineBreaks[i - 1] + 1;
     auto end = lineBreaks[i];
     return source().substr(start, end - start);
+}
+
+string File::censorFilePathForSnapshotTests(string_view orig) {
+    string_view result = orig;
+    if (absl::StartsWith(result, EXTERNAL_PREFIX)) {
+        // When running tests from outside of the sorbet repo, the files have a different path in the sandbox.
+        result.remove_prefix(EXTERNAL_PREFIX.size());
+    }
+
+    if (absl::StartsWith(result, URL_PREFIX)) {
+        // This is so that changing RBIs doesn't mean invalidating every symbol-table exp test.
+        result.remove_prefix(URL_PREFIX.size());
+        if (absl::StartsWith(result, EXTERNAL_PREFIX)) {
+            result.remove_prefix(EXTERNAL_PREFIX.size());
+        }
+    }
+
+    if (absl::StartsWith(orig, URL_PREFIX)) {
+        return fmt::format("{}{}", URL_PREFIX, result);
+    } else {
+        return string(result);
+    }
 }
 
 } // namespace sorbet::core
