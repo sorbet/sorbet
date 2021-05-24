@@ -439,7 +439,7 @@ index 76e56fa..52805d3 100644
          if (calling->kw_splat &&
                  calling->argc > 0 &&
 diff --git vm_insnhelper.c vm_insnhelper.c
-index c0d9092..ae6b87b 100644
+index c0d9092..824efb5 100644
 --- vm_insnhelper.c
 +++ vm_insnhelper.c
 @@ -1894,6 +1894,7 @@ static VALUE vm_call_method_each_type(rb_execution_context_t *ec, rb_control_fra
@@ -458,7 +458,7 @@ index c0d9092..ae6b87b 100644
  # undef METHOD_BUG
        default:
  	rb_bug("wrong method type: %d", me->def->type);
-@@ -2539,6 +2541,405 @@ vm_call_cfunc(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb
+@@ -2539,6 +2541,412 @@ vm_call_cfunc(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb
      return vm_call_cfunc_with_frame(ec, reg_cfp, calling, cd, empty_kw_splat);
  }
  
@@ -502,7 +502,14 @@ index c0d9092..ae6b87b 100644
 +}
 +
 +/* -- Remove empty_kw_splat In 3.0 -- */
-+static inline VALUE
++/* Inlining this into the fastpath (vm_call_sorbet_fast_*) functions means the
++ * compiler can collapse away some of the stack manipulation in vm_push_frame.
++ * Compare the ALWAYS_INLINE declaration on vm_call_iseq_setup_normal, which
++ * works on the same principles.
++ */
++ALWAYS_INLINE(static VALUE vm_call_sorbet_with_frame_normal(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd, const rb_callable_method_entry_t *me, int check_kw_splat, int empty_kw_splat, int param_size, int local_size));
++
++static VALUE
 +vm_call_sorbet_with_frame_normal(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd, const rb_callable_method_entry_t *me, int check_kw_splat, int empty_kw_splat, int param_size, int local_size)
 +{
 +    const struct rb_call_info *ci = &cd->ci;
@@ -864,7 +871,7 @@ index c0d9092..ae6b87b 100644
  static VALUE
  vm_call_ivar(rb_execution_context_t *ec, rb_control_frame_t *cfp, struct rb_calling_info *calling, struct rb_call_data *cd)
  {
-@@ -2924,6 +3325,10 @@ vm_call_method_each_type(rb_execution_context_t *ec, rb_control_frame_t *cfp, st
+@@ -2924,6 +3332,10 @@ vm_call_method_each_type(rb_execution_context_t *ec, rb_control_frame_t *cfp, st
          CC_SET_FASTPATH(cc, vm_call_cfunc, TRUE);
          return vm_call_cfunc(ec, cfp, calling, cd);
  
