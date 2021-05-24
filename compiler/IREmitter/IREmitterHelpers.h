@@ -10,7 +10,7 @@
 namespace sorbet::compiler {
 
 struct IREmitterContext;
-struct MethodCallContext;
+class MethodCallContext;
 struct VMFlag;
 
 // TODO(jez) This shouldn't be at the top-level (sorbet::compiler). It should probably be nested in something.

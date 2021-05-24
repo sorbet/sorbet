@@ -28,9 +28,7 @@ public:
     // doesn't match up with the static type information, or ensure that it is impossible for that
     // information to mismatch. This most commonly means falling back to dispatch the method via the
     // Ruby VM.
-    virtual bool skipReceiverTypeTest() const {
-        return false;
-    };
+    virtual llvm::Value *receiverFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass) const;
 
     SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock blockHandled) : blockHandled(blockHandled){};
     virtual ~SymbolBasedIntrinsicMethod() = default;

@@ -101,7 +101,7 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
 
     auto &builder = builderCast(mcctx.build);
     auto *send = mcctx.send;
-    auto *recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, mcctx.rubyBlockId);
+    auto *recv = mcctx.varGetRecv();
 
     auto methodName = string(send->fun.shortName(cs));
     auto *fastFinalCall =
@@ -208,14 +208,7 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
                     cs, llvm::Twine("fastSymCallIntrinsic_") + clazNameRef + "_" + methodNameRef,
                     builder.GetInsertBlock()->getParent());
 
-                llvm::Value *typeTest;
-                if (symbolBasedIntrinsic->skipReceiverTypeTest()) {
-                    typeTest = builder.getInt1(true);
-                } else {
-                    auto recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, mcctx.rubyBlockId);
-                    typeTest = Payload::typeTest(cs, builder, recv, core::make_type<core::ClassType>(c));
-                }
-
+                auto *typeTest = symbolBasedIntrinsic->receiverFastPathTest(mcctx, c);
                 builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, alternative);
                 builder.SetInsertPoint(fastPath);
                 auto fastPathRes = symbolBasedIntrinsic->makeCall(mcctx);

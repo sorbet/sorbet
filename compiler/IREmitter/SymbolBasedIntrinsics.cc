@@ -95,9 +95,8 @@ public:
         auto &cs = mcctx.cs;
         auto &builder = builderCast(mcctx.build);
         auto *send = mcctx.send;
-        auto rubyBlockId = mcctx.rubyBlockId;
 
-        auto *recv = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, rubyBlockId);
+        auto *recv = mcctx.varGetRecv();
         auto *id = Payload::idIntern(cs, builder, send->fun.shortName(cs));
         auto *offset = Payload::buildLocalsOffset(cs);
 
@@ -411,7 +410,7 @@ public:
 
         auto &builder = builderCast(mcctx.build);
 
-        auto recvValue = Payload::varGet(cs, send->recv.variable, builder, mcctx.irctx, mcctx.rubyBlockId);
+        auto recvValue = mcctx.varGetRecv();
         auto representedClassValue = Payload::getRubyConstant(cs, representedClass, builder);
         auto classEq = builder.CreateICmpEQ(recvValue, representedClassValue, "Module_tripleEq_shortCircuit");
 
@@ -526,8 +525,8 @@ public:
     virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
         return {core::Names::new_()};
     };
-    virtual bool skipReceiverTypeTest() const override {
-        return true;
+    virtual llvm::Value *receiverFastPathTest(MethodCallContext &mcctx, core::ClassOrModuleRef c) const override {
+        return builderCast(mcctx.build).getInt1(true);
     };
 } TEnum_new;
 
@@ -619,6 +618,13 @@ vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
 
 // stuff
 }; // namespace
+
+llvm::Value *SymbolBasedIntrinsicMethod::receiverFastPathTest(MethodCallContext &mcctx,
+                                                              core::ClassOrModuleRef potentialClass) const {
+    auto *recv = mcctx.varGetRecv();
+    return Payload::typeTest(mcctx.cs, mcctx.build, recv, core::make_type<core::ClassType>(potentialClass));
+}
+
 vector<const SymbolBasedIntrinsicMethod *> &SymbolBasedIntrinsicMethod::definedIntrinsics() {
     static vector<const SymbolBasedIntrinsicMethod *> ret = getKnownCMethodPtrs();
 

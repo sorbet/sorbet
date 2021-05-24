@@ -204,15 +204,12 @@ enum ShouldTakeReceiver {
 llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, ShouldTakeReceiver takesReceiver) {
     auto &cs = mcctx.cs;
     auto &builder = builderCast(mcctx.build);
-    auto &irctx = mcctx.irctx;
-    auto rubyBlockId = mcctx.rubyBlockId;
-    auto *send = mcctx.send;
 
     auto [argc, argv, _] = IREmitterHelpers::fillSendArgArray(mcctx);
 
     llvm::Value *recv;
     if (takesReceiver == TakesReceiver) {
-        recv = Payload::varGet(cs, send->recv.variable, builder, irctx, rubyBlockId);
+        recv = mcctx.varGetRecv();
     } else {
         recv = Payload::rubyNil(cs, builder);
     }
@@ -226,7 +223,7 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
 
     llvm::Value *offset = Payload::buildLocalsOffset(cs);
 
-    auto fun = Payload::idIntern(cs, builder, send->fun.shortName(cs));
+    auto fun = Payload::idIntern(cs, builder, mcctx.send->fun.shortName(cs));
     return builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, offset}, "rawSendResult");
 }
 
@@ -372,7 +369,8 @@ public:
 
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
 
-        // Push receiver.
+        // Push receiver. We can't use MethodCallContext::varGetRecv here because the real receiver
+        // is actually the first arg of the callWithSplat intrinsic method.
         Payload::pushRubyStack(cs, builder, cfp,
                                Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId));
 
