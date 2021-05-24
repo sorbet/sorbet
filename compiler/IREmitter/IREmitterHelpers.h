@@ -111,6 +111,8 @@ public:
     static void emitDebugLoc(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                              int rubyBlockId, core::Loc loc);
 
+    static void emitUncheckedReturn(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
+                                    int rubyBlockId, llvm::Value *retVal);
     static void emitReturn(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                            int rubyBlockId, llvm::Value *retVal);
 

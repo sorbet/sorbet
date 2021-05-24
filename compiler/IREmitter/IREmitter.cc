@@ -560,30 +560,17 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     },
                     [&](cfg::Return *i) {
                         isTerminated = true;
-                        auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
-                        switch (irctx.rubyBlockType[bb->rubyBlockId]) {
-                            case FunctionType::Method:
-                            case FunctionType::StaticInitFile:
-                            case FunctionType::StaticInitModule: {
-                                Payload::varSet(cs, returnValue(cfg, cs), var, builder, irctx, bb->rubyBlockId);
-                                builder.CreateBr(irctx.postProcessBlock);
-                                break;
-                            }
 
-                            case FunctionType::Block:
-                                // NOTE: this doesn't catch all block-return cases:
-                                // https://github.com/stripe/sorbet_llvm/issues/94
-                                failCompilation(cs, core::Loc(cs.file, bind.loc),
-                                                "returns through multiple stacks not implemented");
-                                break;
-
-                            case FunctionType::ExceptionBegin:
-                            case FunctionType::Rescue:
-                            case FunctionType::Ensure:
-                            case FunctionType::Unused:
-                                IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
-                                break;
+                        if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
+                            // NOTE: this doesn't catch all block-return cases:
+                            // https://github.com/stripe/sorbet_llvm/issues/94
+                            failCompilation(cs, core::Loc(cs.file, bind.loc),
+                                            "returns through multiple stacks not implemented");
+                            return;
                         }
+
+                        auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
+                        IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
                     },
                     [&](cfg::BlockReturn *i) {
                         ENFORCE(bb->rubyBlockId != 0, "should never happen");
@@ -726,14 +713,14 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     auto var = Payload::varGet(cs, returnValue(cfg, cs), builder, irctx, rubyBlockId);
     auto expectedType = cfg.symbol.data(cs)->resultType;
     if (expectedType == nullptr) {
-        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, var);
+        IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, var);
         return;
     }
 
     if (core::isa_type<core::ClassType>(expectedType) &&
         core::cast_type_nonnull<core::ClassType>(expectedType).symbol == core::Symbols::void_()) {
         auto void_ = Payload::voidSingleton(cs, builder, irctx);
-        IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, void_);
+        IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, void_);
         return;
     }
     // sorbet-runtime doesn't check this type for abstract methods, so we won't either.
@@ -741,7 +728,7 @@ void emitPostProcess(CompilerState &cs, cfg::CFG &cfg, const IREmitterContext &i
     if (!cfg.symbol.data(cs)->isAbstract()) {
         IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "Return value");
     }
-    IREmitterHelpers::emitReturn(cs, builder, irctx, rubyBlockId, var);
+    IREmitterHelpers::emitUncheckedReturn(cs, builder, irctx, rubyBlockId, var);
 }
 
 void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) {

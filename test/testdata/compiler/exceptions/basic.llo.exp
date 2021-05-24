@@ -537,6 +537,10 @@ functionEntryInitializers:
   %or.cond = or i1 %tooManyArgs, %tooFewArgs, !dbg !70
   br i1 %or.cond, label %argCountFailBlock, label %fillRequiredArgs, !dbg !70, !prof !71
 
+postProcess:                                      ; preds = %exception-ensure, %sorbet_raiseIfNotNil.exit, %exception-body-return
+  %"<returnValue>.sroa.0.0" = phi i64 [ %.lcssa, %exception-body-return ], [ %137, %sorbet_raiseIfNotNil.exit ], [ %.lcssa33, %exception-ensure ], !dbg !72
+  ret i64 %"<returnValue>.sroa.0.0"
+
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call void @sorbet_raiseArity(i32 %argc, i32 noundef 1, i32 noundef 1) #0, !dbg !70
   unreachable, !dbg !70
@@ -548,7 +552,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %7 = load i64, i64* %6, align 8, !dbg !70, !tbaa !14
   %8 = and i64 %7, 8, !dbg !70
   %9 = icmp eq i64 %8, 0, !dbg !70
-  br i1 %9, label %10, label %12, !dbg !70, !prof !72
+  br i1 %9, label %10, label %12, !dbg !70, !prof !73
 
 10:                                               ; preds = %fillRequiredArgs
   %11 = getelementptr inbounds i64, i64* %6, i64 -4, !dbg !70
@@ -560,7 +564,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   br label %sorbet_writeLocal.exit, !dbg !70
 
 sorbet_writeLocal.exit:                           ; preds = %10, %12
-  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %4, align 8, !dbg !73, !tbaa !39
+  store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %4, align 8, !dbg !72, !tbaa !39
   %previousException = tail call i64 @rb_errinfo(), !dbg !69
   %13 = bitcast i64* %0 to i8*
   %14 = bitcast %struct.ExceptionClosure* %1 to i8*
@@ -587,7 +591,7 @@ exception-entry.us:                               ; preds = %sorbet_writeLocal.e
   %32 = load i64, i64* %31, align 8, !dbg !69, !tbaa !14
   %33 = and i64 %32, 8, !dbg !69
   %34 = icmp eq i64 %33, 0, !dbg !69
-  br i1 %34, label %36, label %35, !dbg !69, !prof !72
+  br i1 %34, label %36, label %35, !dbg !69, !prof !73
 
 35:                                               ; preds = %exception-entry.us
   call void @sorbet_vm_env_write_slowpath(i64* nonnull align 8 dereferenceable(8) %31, i32 noundef -3, i64 noundef 8) #13, !dbg !69
@@ -622,7 +626,7 @@ exception-body-continue.us:                       ; preds = %sorbet_writeLocal.e
   %43 = load i64, i64* %42, align 8, !dbg !69, !tbaa !14
   %44 = and i64 %43, 8, !dbg !69
   %45 = icmp eq i64 %44, 0, !dbg !69
-  br i1 %45, label %47, label %46, !dbg !69, !prof !72
+  br i1 %45, label %47, label %46, !dbg !69, !prof !73
 
 46:                                               ; preds = %exception-body-continue.us
   call void @sorbet_vm_env_write_slowpath(i64* nonnull align 8 dereferenceable(8) %42, i32 noundef -3, i64 %41) #13, !dbg !69
@@ -677,7 +681,7 @@ exception-entry:                                  ; preds = %sorbet_writeLocal.e
   %65 = load i64, i64* %64, align 8, !dbg !69, !tbaa !14
   %66 = and i64 %65, 8, !dbg !69
   %67 = icmp eq i64 %66, 0, !dbg !69
-  br i1 %67, label %68, label %70, !dbg !69, !prof !72
+  br i1 %67, label %68, label %70, !dbg !69, !prof !73
 
 68:                                               ; preds = %exception-entry
   %69 = getelementptr inbounds i64, i64* %64, i64 -3, !dbg !69
@@ -735,7 +739,7 @@ exception-body-return:                            ; preds = %sorbet_writeLocal.e
   store i64 %rubyStr_ensure.i29, i64* %88, align 8, !dbg !77, !tbaa !14
   %send.i30 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts.7, i64 0), !dbg !77
   call void @sorbet_popRubyStack()
-  ret i64 %.lcssa, !dbg !69
+  br label %postProcess, !dbg !69
 
 exception-body-continue:                          ; preds = %sorbet_writeLocal.exit23
   %90 = load i64, i64* %exceptionValue, align 8, !dbg !69
@@ -743,7 +747,7 @@ exception-body-continue:                          ; preds = %sorbet_writeLocal.e
   %92 = load i64, i64* %91, align 8, !dbg !69, !tbaa !14
   %93 = and i64 %92, 8, !dbg !69
   %94 = icmp eq i64 %93, 0, !dbg !69
-  br i1 %94, label %95, label %97, !dbg !69, !prof !72
+  br i1 %94, label %95, label %97, !dbg !69, !prof !73
 
 95:                                               ; preds = %exception-body-continue
   %96 = getelementptr inbounds i64, i64* %91, i64 -3, !dbg !69
@@ -822,7 +826,7 @@ exception-ensure:                                 ; preds = %sorbet_try.exit, %s
   %send.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts.7, i64 0), !dbg !80
   call void @sorbet_popRubyStack()
   %isReturnValue13 = icmp ne i64 %.lcssa33, 52, !dbg !69
-  br i1 %isReturnValue13, label %exception-return, label %exception-continue, !dbg !69
+  br i1 %isReturnValue13, label %postProcess, label %exception-continue, !dbg !69
 
 exception-continue:                               ; preds = %exception-ensure
   %129 = icmp eq i64 %.lcssa32, 8, !dbg !69
@@ -847,10 +851,7 @@ sorbet_raiseIfNotNil.exit:                        ; preds = %sorbet_raiseIfNotNi
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 20), i64** %4, align 8, !tbaa !39
   %136 = getelementptr inbounds i64, i64* %131, i64 -5, !dbg !81
   %137 = load i64, i64* %136, align 8, !dbg !81, !tbaa !14
-  ret i64 %137
-
-exception-return:                                 ; preds = %exception-ensure
-  ret i64 %.lcssa33, !dbg !69
+  br label %postProcess, !dbg !81
 }
 
 ; Function Attrs: ssp
@@ -904,7 +905,7 @@ BB5:                                              ; preds = %functionEntryInitia
   %25 = load i64, i64* %24, align 8, !dbg !30, !tbaa !14
   %26 = and i64 %25, 8, !dbg !30
   %27 = icmp eq i64 %26, 0, !dbg !30
-  br i1 %27, label %28, label %30, !dbg !30, !prof !72
+  br i1 %27, label %28, label %30, !dbg !30, !prof !73
 
 28:                                               ; preds = %BB5
   %29 = getelementptr inbounds i64, i64* %24, i64 -5, !dbg !30
@@ -976,7 +977,7 @@ vm_get_ep.exit30:                                 ; preds = %vm_get_ep.exit32
   %36 = load i64, i64* %35, align 8, !dbg !84, !tbaa !14
   %37 = and i64 %36, 8, !dbg !84
   %38 = icmp eq i64 %37, 0, !dbg !84
-  br i1 %38, label %39, label %41, !dbg !84, !prof !72
+  br i1 %38, label %39, label %41, !dbg !84, !prof !73
 
 39:                                               ; preds = %vm_get_ep.exit30
   %40 = getelementptr inbounds i64, i64* %35, i64 -3, !dbg !84
@@ -1012,7 +1013,7 @@ vm_get_ep.exit28:                                 ; preds = %39, %41
   %58 = load i64, i64* %57, align 8, !dbg !35, !tbaa !14
   %59 = and i64 %58, 8, !dbg !35
   %60 = icmp eq i64 %59, 0, !dbg !35
-  br i1 %60, label %61, label %63, !dbg !35, !prof !72
+  br i1 %60, label %61, label %63, !dbg !35, !prof !73
 
 61:                                               ; preds = %vm_get_ep.exit28
   %62 = getelementptr inbounds i64, i64* %57, i64 -5, !dbg !35
@@ -1037,7 +1038,7 @@ vm_get_ep.exit:                                   ; preds = %vm_get_ep.exit32
   %73 = load i64, i64* %72, align 8, !dbg !86, !tbaa !14
   %74 = and i64 %73, 8, !dbg !86
   %75 = icmp eq i64 %74, 0, !dbg !86
-  br i1 %75, label %76, label %78, !dbg !86, !prof !72
+  br i1 %75, label %76, label %78, !dbg !86, !prof !73
 
 76:                                               ; preds = %vm_get_ep.exit
   %77 = getelementptr inbounds i64, i64* %72, i64 -7, !dbg !86
@@ -1072,7 +1073,7 @@ functionEntryInitializers:
   %11 = load i64, i64* %10, align 8, !dbg !31, !tbaa !14
   %12 = and i64 %11, 8, !dbg !31
   %13 = icmp eq i64 %12, 0, !dbg !31
-  br i1 %13, label %14, label %16, !dbg !31, !prof !72
+  br i1 %13, label %14, label %16, !dbg !31, !prof !73
 
 14:                                               ; preds = %functionEntryInitializers
   %15 = getelementptr inbounds i64, i64* %10, i64 -5, !dbg !31
@@ -1193,8 +1194,8 @@ attributes #14 = { noreturn nounwind }
 !69 = !DILocation(line: 8, column: 7, scope: !28)
 !70 = !DILocation(line: 6, column: 3, scope: !28)
 !71 = !{!"branch_weights", i32 4001, i32 4000000}
-!72 = !{!"branch_weights", i32 2000, i32 1}
-!73 = !DILocation(line: 0, scope: !28)
+!72 = !DILocation(line: 0, scope: !28)
+!73 = !{!"branch_weights", i32 2000, i32 1}
 !74 = !{!54, !9, i64 24}
 !75 = !DILocation(line: 18, column: 12, scope: !37, inlinedAt: !76)
 !76 = distinct !DILocation(line: 8, column: 7, scope: !28)

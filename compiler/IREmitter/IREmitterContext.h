@@ -52,6 +52,27 @@ constexpr bool functionTypePushesFrame(FunctionType ty) {
     }
 }
 
+constexpr bool functionTypeNeedsPostprocessing(FunctionType ty) {
+    switch (ty) {
+        case FunctionType::Method:
+            return true;
+        case FunctionType::StaticInitModule:
+            return true;
+        case FunctionType::StaticInitFile:
+            return true;
+        case FunctionType::Block:
+            return false;
+        case FunctionType::Rescue:
+            return false;
+        case FunctionType::Ensure:
+            return false;
+        case FunctionType::ExceptionBegin:
+            return false;
+        case FunctionType::Unused:
+            return false;
+    }
+}
+
 struct Alias;
 
 // Contains a bunch of state that gets populated and accessed while emitting IR for a single Ruby method.

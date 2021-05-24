@@ -569,6 +569,10 @@ functionEntryInitializers:
   %tooManyArgs = icmp ugt i32 %argc, 0, !dbg !63
   br i1 %tooManyArgs, label %argCountFailBlock, label %fillRequiredArgs, !dbg !63, !prof !64
 
+postProcess:                                      ; preds = %exception-ensure, %sorbet_raiseIfNotNil.exit, %exception-body-return
+  %"<returnValue>.sroa.0.0" = phi i64 [ %.lcssa28, %exception-body-return ], [ %112, %sorbet_raiseIfNotNil.exit ], [ %.lcssa31, %exception-ensure ], !dbg !65
+  ret i64 %"<returnValue>.sroa.0.0"
+
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call void @sorbet_raiseArity(i32 %argc, i32 noundef 0, i32 noundef 0) #0, !dbg !63
   unreachable, !dbg !63
@@ -736,7 +740,7 @@ exception-body-return:                            ; preds = %sorbet_writeLocal.e
   %73 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %72, i64 0, i32 0
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %73, align 8, !tbaa !41
   call void @sorbet_popRubyStack()
-  ret i64 %.lcssa28, !dbg !62
+  br label %postProcess, !dbg !62
 
 exception-body-continue:                          ; preds = %sorbet_writeLocal.exit
   %74 = load i64, i64* %exceptionValue, align 8, !dbg !62
@@ -809,7 +813,7 @@ exception-ensure:                                 ; preds = %sorbet_try.exit26, 
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %103, align 8, !tbaa !41
   call void @sorbet_popRubyStack()
   %isReturnValue13 = icmp ne i64 %.lcssa31, 52, !dbg !62
-  br i1 %isReturnValue13, label %exception-return, label %exception-continue, !dbg !62
+  br i1 %isReturnValue13, label %postProcess, label %exception-continue, !dbg !62
 
 exception-continue:                               ; preds = %exception-ensure
   %104 = icmp eq i64 %.lcssa30, 8, !dbg !62
@@ -834,10 +838,7 @@ sorbet_raiseIfNotNil.exit:                        ; preds = %sorbet_raiseIfNotNi
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 12), i64** %4, align 8, !tbaa !41
   %111 = getelementptr inbounds i64, i64* %106, i64 -5, !dbg !67
   %112 = load i64, i64* %111, align 8, !dbg !67, !tbaa !14
-  ret i64 %112
-
-exception-return:                                 ; preds = %exception-ensure
-  ret i64 %.lcssa31, !dbg !62
+  br label %postProcess, !dbg !67
 }
 
 ; Function Attrs: nounwind ssp
@@ -1030,6 +1031,10 @@ functionEntryInitializers:
   %or.cond = or i1 %tooManyArgs, %tooFewArgs, !dbg !77
   br i1 %or.cond, label %argCountFailBlock, label %fillRequiredArgs, !dbg !77, !prof !78
 
+postProcess:                                      ; preds = %exception-ensure, %sorbet_raiseIfNotNil.exit, %exception-body-return
+  %"<returnValue>.sroa.0.0" = phi i64 [ %.lcssa, %exception-body-return ], [ %119, %sorbet_raiseIfNotNil.exit ], [ %.lcssa31, %exception-ensure ], !dbg !79
+  ret i64 %"<returnValue>.sroa.0.0"
+
 argCountFailBlock:                                ; preds = %functionEntryInitializers
   tail call void @sorbet_raiseArity(i32 %argc, i32 noundef 1, i32 noundef 1) #0, !dbg !77
   unreachable, !dbg !77
@@ -1214,7 +1219,7 @@ exception-body-return:                            ; preds = %sorbet_writeLocal.e
   %80 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %79, i64 0, i32 0
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 14), i64** %80, align 8, !tbaa !41
   call void @sorbet_popRubyStack()
-  ret i64 %.lcssa, !dbg !76
+  br label %postProcess, !dbg !76
 
 exception-body-continue:                          ; preds = %sorbet_writeLocal.exit23
   %81 = load i64, i64* %exceptionValue, align 8, !dbg !76
@@ -1287,7 +1292,7 @@ exception-ensure:                                 ; preds = %sorbet_try.exit, %s
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 14), i64** %110, align 8, !tbaa !41
   call void @sorbet_popRubyStack()
   %isReturnValue13 = icmp ne i64 %.lcssa31, 52, !dbg !76
-  br i1 %isReturnValue13, label %exception-return, label %exception-continue, !dbg !76
+  br i1 %isReturnValue13, label %postProcess, label %exception-continue, !dbg !76
 
 exception-continue:                               ; preds = %exception-ensure
   %111 = icmp eq i64 %.lcssa30, 8, !dbg !76
@@ -1312,10 +1317,7 @@ sorbet_raiseIfNotNil.exit:                        ; preds = %sorbet_raiseIfNotNi
   store i64* getelementptr inbounds ([28 x i64], [28 x i64]* @iseqEncodedArray, i64 0, i64 21), i64** %4, align 8, !tbaa !41
   %118 = getelementptr inbounds i64, i64* %113, i64 -6, !dbg !80
   %119 = load i64, i64* %118, align 8, !dbg !80, !tbaa !14
-  ret i64 %119
-
-exception-return:                                 ; preds = %exception-ensure
-  ret i64 %.lcssa31, !dbg !76
+  br label %postProcess, !dbg !80
 }
 
 ; Function Attrs: ssp

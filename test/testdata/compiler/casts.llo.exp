@@ -272,7 +272,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %6 = and i64 %rawArg_arg, -9, !dbg !22
   %7 = icmp eq i64 %6, 0, !dbg !22
   %8 = or i1 %5, %7, !dbg !22
-  br i1 %8, label %orRight, label %sorbet_isa_Integer.exit, !dbg !22
+  br i1 %8, label %orCase, label %sorbet_isa_Integer.exit, !dbg !22
 
 sorbet_isa_Integer.exit:                          ; preds = %3
   %9 = inttoptr i64 %rawArg_arg to %struct.iseq_inline_iv_cache_entry*, !dbg !22
@@ -289,15 +289,15 @@ switch.early.test:                                ; preds = %sorbet_isa_Integer.
     i64 4, label %typeTestSuccess
   ], !dbg !22
 
-orRight:                                          ; preds = %3
+orCase:                                           ; preds = %3
   %15 = and i64 %rawArg_arg, 3, !dbg !22
   %16 = icmp eq i64 %15, 2, !dbg !22
   br i1 %16, label %typeTestSuccess, label %codeRepl, !dbg !22
 
-typeTestSuccess:                                  ; preds = %switch.early.test, %switch.early.test, %sorbet_isa_Integer.exit, %orRight, %fillRequiredArgs
+typeTestSuccess:                                  ; preds = %switch.early.test, %switch.early.test, %sorbet_isa_Integer.exit, %orCase, %fillRequiredArgs
   ret i64 %rawArg_arg
 
-codeRepl:                                         ; preds = %switch.early.test, %orRight
+codeRepl:                                         ; preds = %switch.early.test, %orCase
   tail call fastcc void @"func_Object#fooAny1.cold.1"(i64 %rawArg_arg) #16, !dbg !22
   unreachable
 }
@@ -329,7 +329,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %6 = and i64 %rawArg_arg, -9, !dbg !29
   %7 = icmp eq i64 %6, 0, !dbg !29
   %8 = or i1 %5, %7, !dbg !29
-  br i1 %8, label %orRight, label %sorbet_isa_Float.exit, !dbg !29
+  br i1 %8, label %orCase, label %sorbet_isa_Float.exit, !dbg !29
 
 sorbet_isa_Float.exit:                            ; preds = %3
   %9 = inttoptr i64 %rawArg_arg to %struct.iseq_inline_iv_cache_entry*, !dbg !29
@@ -345,15 +345,15 @@ sorbet_isa_Float.exit:                            ; preds = %3
   %or.cond17 = or i1 %or.cond16.not, %16, !dbg !29
   br i1 %or.cond17, label %typeTestSuccess, label %codeRepl, !dbg !29, !prof !30
 
-orRight:                                          ; preds = %3
+orCase:                                           ; preds = %3
   %17 = and i64 %rawArg_arg, 1, !dbg !29
   %18 = icmp eq i64 %17, 0, !dbg !29
   br i1 %18, label %codeRepl, label %typeTestSuccess, !dbg !29, !prof !23
 
-typeTestSuccess:                                  ; preds = %orRight, %fillRequiredArgs, %sorbet_isa_Float.exit
+typeTestSuccess:                                  ; preds = %orCase, %fillRequiredArgs, %sorbet_isa_Float.exit
   ret i64 %rawArg_arg
 
-codeRepl:                                         ; preds = %sorbet_isa_Float.exit, %orRight
+codeRepl:                                         ; preds = %sorbet_isa_Float.exit, %orCase
   tail call fastcc void @"func_Object#fooAny2.cold.1"(i64 %rawArg_arg) #16, !dbg !29
   unreachable
 }

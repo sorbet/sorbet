@@ -910,8 +910,8 @@ void IREmitterHelpers::emitDebugLoc(CompilerState &cs, llvm::IRBuilderBase &buil
     builder.SetCurrentDebugLocation(llvm::DILocation::get(cs, line, column, scope));
 }
 
-void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
-                                  int rubyBlockId, llvm::Value *retVal) {
+void IREmitterHelpers::emitUncheckedReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                           int rubyBlockId, llvm::Value *retVal) {
     auto &builder = static_cast<llvm::IRBuilder<> &>(build);
 
     if (functionTypePushesFrame(irctx.rubyBlockType[rubyBlockId])) {
@@ -919,6 +919,19 @@ void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build,
     }
 
     builder.CreateRet(retVal);
+}
+
+void IREmitterHelpers::emitReturn(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
+                                  int rubyBlockId, llvm::Value *retVal) {
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+
+    if (functionTypeNeedsPostprocessing(irctx.rubyBlockType[rubyBlockId])) {
+        auto returnValue = irctx.cfg.enterLocal({Names::returnValue(cs), 1});
+        Payload::varSet(cs, returnValue, retVal, builder, irctx, rubyBlockId);
+        builder.CreateBr(irctx.postProcessBlock);
+    } else {
+        emitUncheckedReturn(cs, builder, irctx, rubyBlockId, retVal);
+    }
 }
 
 namespace {
