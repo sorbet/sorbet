@@ -12,34 +12,6 @@ namespace sorbet::core {
 
 using namespace std;
 
-constexpr auto EXTERNAL_PREFIX = "external/com_stripe_ruby_typer/"sv;
-constexpr auto URL_PREFIX = "https://github.com/sorbet/sorbet/tree/master/"sv;
-
-namespace {
-string censorFilePathForSnapshotTests(string_view orig) {
-    string_view result = orig;
-    if (absl::StartsWith(result, EXTERNAL_PREFIX)) {
-        // When running tests from outside of the sorbet repo, the files have a different path in the sandbox.
-        result.remove_prefix(EXTERNAL_PREFIX.size());
-    }
-
-    if (absl::StartsWith(result, URL_PREFIX)) {
-        // This is so that changing RBIs doesn't mean invalidating every symbol-table exp test.
-        result.remove_prefix(URL_PREFIX.size());
-        if (absl::StartsWith(result, EXTERNAL_PREFIX)) {
-            result.remove_prefix(EXTERNAL_PREFIX.size());
-        }
-    }
-
-    if (absl::StartsWith(orig, URL_PREFIX)) {
-        return fmt::format("{}{}", URL_PREFIX, result);
-    } else {
-        return string(result);
-    }
-}
-
-} // namespace
-
 LocOffsets LocOffsets::join(LocOffsets other) const {
     if (!this->exists()) {
         return other;
@@ -229,8 +201,8 @@ string Loc::showRaw(const GlobalState &gs) const {
 
     string censored;
     if (gs.censorForSnapshotTests) {
-        censored = censorFilePathForSnapshotTests(path);
-        if (absl::StartsWith(path, URL_PREFIX)) {
+        censored = File::censorFilePathForSnapshotTests(path);
+        if (absl::StartsWith(path, File::URL_PREFIX)) {
             return fmt::format("Loc {{file={} start=removed end=removed}}", censored);
         }
         path = censored;
@@ -251,7 +223,7 @@ string Loc::filePosToString(const GlobalState &gs, bool showFull) const {
     } else {
         auto path = gs.getPrintablePath(file().data(gs).path());
         if (gs.censorForSnapshotTests) {
-            buf << censorFilePathForSnapshotTests(path);
+            buf << File::censorFilePathForSnapshotTests(path);
         } else {
             buf << path;
         }

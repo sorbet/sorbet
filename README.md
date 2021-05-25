@@ -366,7 +366,14 @@ bazel test //test:test_PosTests/testdata/path/to/<name>
 ```
 
 Files that begin with a prefix and `__` will be run together. For example,
-`foo__1.rb` and `foo__2.rb` will be run together as test `foo`.
+`foo__1.rb` and `foo__2.rb` will be run together as test `foo`. If such sets of
+files have `*.exp` files associated with them, the `*.exp` files must instead
+follow the pattern `<name>.<phase>.exp`, where `<name>` does not include the
+`__*.rb` suffix. So `foo__1.rb` and `foo__2.rb` would have an exp file like
+`foo.<pass>.exp`.
+
+Another exception: for `package-tree` exp tests, the filename is always
+`pass.package-tree.exp`, no matter the name of the test.
 
 ### CLI tests
 

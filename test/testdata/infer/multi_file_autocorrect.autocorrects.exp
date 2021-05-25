@@ -1,0 +1,21 @@
+# -- test/testdata/infer/multi_file_autocorrect__1.rb --
+# typed: strict
+
+class MyClass1
+  extend T::Sig
+  sig {returns(NilClass)}
+  def missing_sig; end # error: This function does not have a `sig`
+end
+# ------------------------------
+# -- test/testdata/infer/multi_file_autocorrect__2.rb --
+# typed: strict
+
+class MyClass2
+  extend T::Sig
+  sig {returns(String)}
+  def returns_integer
+    result = T.let('', T.nilable(String))
+    T.must(result) # error: Expected `String` but found `T.nilable(String)` for method result type
+  end
+end
+# ------------------------------

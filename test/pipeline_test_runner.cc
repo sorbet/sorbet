@@ -82,7 +82,8 @@ UnorderedSet<string> knownExpectations = {"parse-tree",       "parse-tree-json",
                                           "name-tree-raw",    "resolve-tree",     "resolve-tree-raw",
                                           "flatten-tree",     "flatten-tree-raw", "cfg",
                                           "cfg-raw",          "cfg-text",         "autogen",
-                                          "document-symbols", "package-tree",     "document-formatting-rubyfmt"};
+                                          "document-symbols", "package-tree",     "document-formatting-rubyfmt",
+                                          "autocorrects"};
 
 ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
     auto &savedFile = expr.file.data(gs);
@@ -188,6 +189,11 @@ TEST_CASE("PerPhaseTest") { // NOLINT
     } else {
         core::serialize::Serializer::loadGlobalState(*gs, getNameTablePayload);
     }
+
+    if (BooleanPropertyAssertion::getValue("enable-suggest-unsafe", assertions).value_or(false)) {
+        gs->suggestUnsafe = "T.unsafe";
+    }
+
     // Parser
     vector<core::FileRef> files;
     constexpr string_view whitelistedTypedNoneTest = "missing_typed_sigil.rb"sv;
@@ -456,6 +462,47 @@ TEST_CASE("PerPhaseTest") { // NOLINT
         }
         ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
     }
+
+    // Check autocorrects
+    {
+        auto autocorrects = vector<core::AutocorrectSuggestion>{};
+        for (const auto &error : handler.errors) {
+            if (error->isSilenced) {
+                continue;
+            }
+
+            for (const auto &autocorrect : error->autocorrects) {
+                autocorrects.push_back(autocorrect);
+            }
+        }
+
+        auto fs = OSFileSystem{};
+        auto applied = core::AutocorrectSuggestion::apply(*gs, fs, autocorrects);
+
+        auto toWrite = vector<pair<core::FileRef, string>>{};
+        for (const auto &[file, editedSource] : applied) {
+            toWrite.emplace_back(file, move(editedSource));
+        }
+
+        fast_sort(toWrite, [&](const auto &lhs, const auto &rhs) {
+            return lhs.first.data(*gs).path() < rhs.first.data(*gs).path();
+        });
+
+        auto addNewline = false;
+        handler.addObserved(
+            *gs, "autocorrects",
+            [&]() {
+                fmt::memory_buffer buf;
+                for (const auto &[file, editedSource] : toWrite) {
+                    fmt::format_to(buf, "# -- {} --\n{}# ------------------------------\n",
+                                   core::File::censorFilePathForSnapshotTests(file.data(*gs).path()), editedSource);
+                }
+                return to_string(buf);
+            },
+            addNewline);
+    }
+
+    handler.checkExpectations();
 
     // Allow later phases to have errors that we didn't test for
     errorQueue->flushAllErrors(*gs);
