@@ -2,6 +2,7 @@
 # typed: true
 
 module Simpsons
+  #    ^^^^^^^^ symbol-search: "Simpsons", name = "Simpsons", container = "Simpsons"
   class Family
       # ^^^^^^ def: family
       extend T::Sig
@@ -22,7 +23,7 @@ module Simpsons
           Bart::Character.new
       #   ^^^^ usage: bart
           #     ^^^^^^^^^ usage: character
-          #     ^^^^^^^^^ hover: T.class_of(Character)
+          #     ^^^^^^^^^ hover: T.class_of(Bart::Character)
           #     ^^^^^^^^^ hover: Character class description
           #               ^^^ hover: Description of Character initialize
           Bart::C # error: Unable to resolve constant `C`

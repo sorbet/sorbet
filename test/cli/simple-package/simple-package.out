@@ -5,7 +5,5 @@ foo/foo.rb:12: Unable to resolve constant `BardClass` https://srb.help/5002
     foo/foo.rb:12: Replace with `Project::Bar::BarClass`
     12 |    Project::Bar::BardClass
             ^^^^^^^^^^^^^^^^^^^^^^^
-    foo/__package.rb:5: Did you mean: `Project::Bar::BarClass`?
-     5 |  import Project::Bar
-                 ^^^^^^^^^^^^
+    foo/__package.rb: Did you mean: `Project::Bar::BarClass`?
 Errors: 1

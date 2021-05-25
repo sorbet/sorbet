@@ -701,8 +701,7 @@ private:
                 }
             }
             auto rhs = prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
-            return ast::MK::Assign(core::LocOffsets::none(),
-                                   name2Expr(parts.back(), ast::MK::EmptyTree()),
+            return ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
                                    std::move(rhs));
         }
 
@@ -738,7 +737,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 
     {
         UnorderedMap<core::NameRef, core::LocOffsets> importedNames;
-        ImportTreeBuilder treeBuilder(*package);
+        // ImportTreeBuilder treeBuilder(*package);
         for (auto &imported : package->importedPackageNames) {
             auto importedPackage = packageDB.getPackageByMangledName(imported.mangledName);
             if (importedPackage == nullptr) {
@@ -756,15 +755,49 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 }
             } else {
                 importedNames[imported.mangledName] = imported.loc;
-                treeBuilder.mergeImports(*importedPackage, imported.loc);
+                // fmt::print("IMPORT {}\n{}\n---\n", ctx.file.data(ctx).path(), core::Loc {ctx.file,
+                // imported.loc}.toString(ctx)); treeBuilder.mergeImports(*importedPackage, imported.loc);
+                // fmt::print("IMPORT IN {}\n", ctx.file.data(ctx).path());
+
+                ImportTreeBuilder importSpecific(*package); // TODO shouldn't be package
+                importSpecific.mergeImports(*importedPackage, imported.loc);
+                // fmt::print("---{}\n{}\n---\n", ctx.file.data(ctx).path(),
+                // importSpecific.makeModule(ctx).toString(ctx));
+                for (const auto &exportFqn : importedPackage->exports) {
+                    auto rhs =
+                        prependName(parts2literal(exportFqn.parts, core::LocOffsets::none()), imported.mangledName);
+                    auto assign =
+                        ast::MK::Assign(core::LocOffsets::none(),
+                                        name2Expr(exportFqn.parts.back(), ast::MK::EmptyTree()), std::move(rhs));
+
+                    vector<core::NameRef> derp = exportFqn.parts; // TODO TODO
+                    derp.pop_back();
+                    derp.insert(derp.begin(), package->name.mangledName);
+
+                    ast::ClassDef::RHS_store mod_rhs;
+                    mod_rhs.emplace_back(std::move(assign));
+                    // auto mod = ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
+                    // parts2literal(derp, imported.loc), {}, std::move(mod_rhs)); auto mod =
+                    // ast::MK::Module(core::LocOffsets::none(), imported.loc, parts2literal(derp, imported.loc), {},
+                    // std::move(mod_rhs)); fmt::print("--\n{} {}\n{}\n--\n", ctx.file.data(ctx).path(),
+                    // imported.loc.showRaw(ctx), imported.fullName.loc.showRaw(ctx));
+                    auto mod = ast::MK::Module(core::LocOffsets::none(), imported.loc,
+                                               parts2literal(derp, imported.loc), {}, std::move(mod_rhs));
+                    // fmt::print("{}\n", ctx.file.data(ctx).path());
+                    // fmt::print("{}\n", core::Loc{ctx.file, imported.loc}.toString(ctx));
+                    // fmt::print("** {}\n", mod.toString(ctx));
+
+                    importedPackages.emplace_back(move(mod));
+                }
             }
         }
-        importedPackages.emplace_back(treeBuilder.makeModule(ctx));
+        // importedPackages.emplace_back(treeBuilder.makeModule(ctx));
     }
 
     auto packageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
                         name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(importedPackages));
+    // fmt::print("{}\n{}\n", ctx.file.data(ctx).path(), packageNamespace.toString(ctx));
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     rootKlass.rhs.emplace_back(move(packageNamespace));
