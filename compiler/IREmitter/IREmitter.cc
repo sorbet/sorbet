@@ -234,7 +234,7 @@ void setupArguments(CompilerState &base, cfg::CFG &cfg, const ast::MethodDef &md
             }
 
             if (isBlock) {
-                if (minPositionalArgCount != 1) {
+                if (maxPositionalArgCount > 1) {
                     // blocks can expand their first argument in arg array
                     auto arrayTestBlock = llvm::BasicBlock::Create(cs, "argArrayExpandArrayTest", func);
                     auto argExpandBlock = llvm::BasicBlock::Create(cs, "argArrayExpand", func);
