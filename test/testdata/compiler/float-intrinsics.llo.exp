@@ -323,7 +323,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %rawArg_y = load i64, i64* %1, align 8, !dbg !14
   %2 = and i64 %rawArg_x, 3, !dbg !16
   %3 = icmp eq i64 %2, 2, !dbg !16
-  br i1 %3, label %typeTestSuccess16, label %4, !dbg !16
+  br i1 %3, label %typeTestSuccess15, label %4, !dbg !16
 
 4:                                                ; preds = %fillRequiredArgs
   %5 = and i64 %rawArg_x, 7, !dbg !16
@@ -339,13 +339,13 @@ sorbet_isa_Float.exit:                            ; preds = %4
   %12 = load i64, i64* %11, align 8, !dbg !16, !tbaa !18
   %13 = and i64 %12, 31, !dbg !16
   %14 = icmp eq i64 %13, 4, !dbg !16
-  br i1 %14, label %typeTestSuccess16, label %codeRepl, !dbg !16, !prof !20
+  br i1 %14, label %typeTestSuccess15, label %codeRepl, !dbg !16, !prof !20
 
 codeRepl:                                         ; preds = %sorbet_isa_Float.exit, %4
   tail call fastcc void @"func_Object#lt.cold.2"(i64 %rawArg_x) #16, !dbg !16
   unreachable
 
-typeTestSuccess16:                                ; preds = %fillRequiredArgs, %sorbet_isa_Float.exit
+typeTestSuccess15:                                ; preds = %fillRequiredArgs, %sorbet_isa_Float.exit
   store i64* getelementptr inbounds ([49 x i64], [49 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %0, align 8, !dbg !21, !tbaa !12
   %callArgs0Addr = getelementptr [2 x i64], [2 x i64]* %callArgs, i32 0, i64 0, !dbg !22
   store i64 %rawArg_y, i64* %callArgs0Addr, align 8, !dbg !22
@@ -440,7 +440,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %7 = and i64 %rawArg_x, -9, !dbg !35
   %8 = icmp eq i64 %7, 0, !dbg !35
   %9 = or i1 %6, %8, !dbg !35
-  br i1 %9, label %codeRepl26, label %sorbet_isa_Float.exit, !dbg !35, !prof !17
+  br i1 %9, label %codeRepl24, label %sorbet_isa_Float.exit, !dbg !35, !prof !17
 
 sorbet_isa_Float.exit:                            ; preds = %4
   %10 = inttoptr i64 %rawArg_x to %struct.iseq_inline_iv_cache_entry*, !dbg !35
@@ -448,9 +448,9 @@ sorbet_isa_Float.exit:                            ; preds = %4
   %12 = load i64, i64* %11, align 8, !dbg !35, !tbaa !18
   %13 = and i64 %12, 31, !dbg !35
   %14 = icmp eq i64 %13, 4, !dbg !35
-  br i1 %14, label %typeTestSuccess7, label %codeRepl26, !dbg !35, !prof !20
+  br i1 %14, label %typeTestSuccess7, label %codeRepl24, !dbg !35, !prof !20
 
-codeRepl26:                                       ; preds = %sorbet_isa_Float.exit, %4
+codeRepl24:                                       ; preds = %sorbet_isa_Float.exit, %4
   tail call fastcc void @"func_Object#lt.cold.2"(i64 %rawArg_x) #16, !dbg !35
   unreachable
 
@@ -463,11 +463,11 @@ typeTestSuccess7:                                 ; preds = %fillRequiredArgs, %
   %16 = load i64, i64* %15, align 8, !dbg !37, !tbaa !4, !alias.scope !38
   %17 = tail call i64 @sorbet_flo_lt(i64 %rawArg_x, i64 %16) #17, !dbg !37, !noalias !38
   switch i64 %17, label %codeRepl [
-    i64 20, label %typeTestSuccess16
-    i64 0, label %typeTestSuccess16
+    i64 20, label %typeTestSuccess15
+    i64 0, label %typeTestSuccess15
   ], !prof !41
 
-typeTestSuccess16:                                ; preds = %typeTestSuccess7, %typeTestSuccess7
+typeTestSuccess15:                                ; preds = %typeTestSuccess7, %typeTestSuccess7
   ret i64 %17
 
 codeRepl:                                         ; preds = %typeTestSuccess7
@@ -504,7 +504,7 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   %7 = and i64 %rawArg_x, -9, !dbg !45
   %8 = icmp eq i64 %7, 0, !dbg !45
   %9 = or i1 %6, %8, !dbg !45
-  br i1 %9, label %codeRepl26, label %sorbet_isa_Float.exit, !dbg !45, !prof !17
+  br i1 %9, label %codeRepl24, label %sorbet_isa_Float.exit, !dbg !45, !prof !17
 
 sorbet_isa_Float.exit:                            ; preds = %4
   %10 = inttoptr i64 %rawArg_x to %struct.iseq_inline_iv_cache_entry*, !dbg !45
@@ -512,9 +512,9 @@ sorbet_isa_Float.exit:                            ; preds = %4
   %12 = load i64, i64* %11, align 8, !dbg !45, !tbaa !18
   %13 = and i64 %12, 31, !dbg !45
   %14 = icmp eq i64 %13, 4, !dbg !45
-  br i1 %14, label %typeTestSuccess7, label %codeRepl26, !dbg !45, !prof !20
+  br i1 %14, label %typeTestSuccess7, label %codeRepl24, !dbg !45, !prof !20
 
-codeRepl26:                                       ; preds = %sorbet_isa_Float.exit, %4
+codeRepl24:                                       ; preds = %sorbet_isa_Float.exit, %4
   tail call fastcc void @"func_Object#lt.cold.2"(i64 %rawArg_x) #16, !dbg !45
   unreachable
 
@@ -527,11 +527,11 @@ typeTestSuccess7:                                 ; preds = %fillRequiredArgs, %
   %16 = load i64, i64* %15, align 8, !dbg !47, !tbaa !4, !alias.scope !48
   %17 = tail call i64 @sorbet_flo_le(i64 %rawArg_x, i64 %16) #17, !dbg !47, !noalias !48
   switch i64 %17, label %codeRepl [
-    i64 20, label %typeTestSuccess16
-    i64 0, label %typeTestSuccess16
+    i64 20, label %typeTestSuccess15
+    i64 0, label %typeTestSuccess15
   ], !prof !41
 
-typeTestSuccess16:                                ; preds = %typeTestSuccess7, %typeTestSuccess7
+typeTestSuccess15:                                ; preds = %typeTestSuccess7, %typeTestSuccess7
   ret i64 %17
 
 codeRepl:                                         ; preds = %typeTestSuccess7

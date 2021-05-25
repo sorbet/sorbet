@@ -587,7 +587,7 @@ sorbet_isa_Integer.exit:                          ; preds = %8
 typeTestSuccess:                                  ; preds = %sorbet_getMethodBlockAsProc.exit, %sorbet_isa_Integer.exit
   %19 = tail call i32 @rb_block_given_p() #16, !dbg !70
   %20 = icmp ne i32 %19, 0, !dbg !70
-  br i1 %20, label %typeTestSuccess7, label %codeRepl30, !dbg !70, !prof !69
+  br i1 %20, label %typeTestSuccess7, label %codeRepl28, !dbg !70, !prof !69
 
 codeRepl:                                         ; preds = %sorbet_isa_Integer.exit, %8
   tail call fastcc void @"func_Foo#bar.cold.1"(i64 %rawArg_x) #19, !dbg !66
@@ -624,7 +624,7 @@ sorbet_rb_int_plus.exit:                          ; preds = %29, %24, %33
   %35 = phi i64 [ %34, %33 ], [ %32, %29 ], [ %28, %24 ], !dbg !35
   %36 = and i64 %35, 1
   %37 = icmp eq i64 %36, 0
-  br i1 %37, label %38, label %typeTestSuccess17, !prof !67
+  br i1 %37, label %38, label %typeTestSuccess16, !prof !67
 
 38:                                               ; preds = %sorbet_rb_int_plus.exit
   %39 = and i64 %35, 7
@@ -632,24 +632,24 @@ sorbet_rb_int_plus.exit:                          ; preds = %29, %24, %33
   %41 = and i64 %35, -9
   %42 = icmp eq i64 %41, 0
   %43 = or i1 %40, %42
-  br i1 %43, label %codeRepl29, label %sorbet_isa_Integer.exit26, !prof !68
+  br i1 %43, label %codeRepl27, label %sorbet_isa_Integer.exit24, !prof !68
 
-sorbet_isa_Integer.exit26:                        ; preds = %38
+sorbet_isa_Integer.exit24:                        ; preds = %38
   %44 = inttoptr i64 %35 to %struct.iseq_inline_iv_cache_entry*
   %45 = getelementptr inbounds %struct.iseq_inline_iv_cache_entry, %struct.iseq_inline_iv_cache_entry* %44, i64 0, i32 0
   %46 = load i64, i64* %45, align 8, !tbaa !24
   %47 = and i64 %46, 31
   %48 = icmp eq i64 %47, 10
-  br i1 %48, label %typeTestSuccess17, label %codeRepl29, !prof !69
+  br i1 %48, label %typeTestSuccess16, label %codeRepl27, !prof !69
 
-codeRepl30:                                       ; preds = %typeTestSuccess
+codeRepl28:                                       ; preds = %typeTestSuccess
   tail call fastcc void @"func_Foo#bar.cold.3"(i64 %5) #19, !dbg !70
   unreachable
 
-typeTestSuccess17:                                ; preds = %sorbet_rb_int_plus.exit, %sorbet_isa_Integer.exit26
+typeTestSuccess16:                                ; preds = %sorbet_rb_int_plus.exit, %sorbet_isa_Integer.exit24
   ret i64 %35
 
-codeRepl29:                                       ; preds = %sorbet_isa_Integer.exit26, %38
+codeRepl27:                                       ; preds = %sorbet_isa_Integer.exit24, %38
   tail call fastcc void @"func_Foo#bar.cold.2"(i64 %35) #19, !dbg !65
   unreachable
 }

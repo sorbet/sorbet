@@ -783,6 +783,40 @@ VALUE sorbet_rb_array_select_withBlock(VALUE recv, ID fun, int argc, const VALUE
     return result;
 }
 
+// This is the no-block version of rb_ary_collect: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3056-L3068
+// In that version, the `RETURN_SIZED_ENUMERATOR` macro is what causes the early return when a block is not passed. In
+// this case, we know that the block wasn't passed, so we always return an enumerator
+SORBET_INLINE
+VALUE sorbet_rb_array_collect(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                              VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_array_enum_length);
+}
+
+// This is the no-block version of rb_ary_collect: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3056-L3068
+// In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
+SORBET_INLINE
+VALUE sorbet_rb_array_collect_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                        BlockFFIType blk, const struct rb_captured_block *captured, VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    // We can't coalesce the RARRAY_LEN calls because the loop needs to be responsive
+    // to changes in the array's length.
+    VALUE collect = rb_ary_new2(RARRAY_LEN(recv));
+
+    for (long i = 0; i < RARRAY_LEN(recv); ++i) {
+        VALUE val = RARRAY_AREF(recv, i);
+        rb_ary_push(collect, blk(val, closure, 1, &val, Qnil));
+    }
+
+    sorbet_popRubyStack();
+
+    return collect;
+}
+
 // This is an adjusted version of the intrinsic from the ruby vm. The major change is that instead of handling the case
 // where a range is used as the key, we defer back to the VM.
 // https://github.com/ruby/ruby/blob/ruby_2_6/array.c#L1980-L2005
