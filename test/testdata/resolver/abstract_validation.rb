@@ -189,3 +189,9 @@ class BadStructMissingOverride < T::Struct
   const :foo, Integer
 # ^^^^^^^^^^^^^^^^^^^ error: Method `BadStructMissingOverride#foo` implements an abstract method `GoodInterface#foo` but is not declared with `override.`
 end
+
+class IncompatibleOverride < T::Struct
+  include GoodInterface
+
+  const :foo, Integer, override: true, allow_incompatible: true
+end

@@ -312,10 +312,15 @@ private:
     }
 
 public:
-    static ExpressionPtr Sig(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret, bool isOverride = false) {
+    static ExpressionPtr Sig(core::LocOffsets loc, Send::ARGS_store args, ExpressionPtr ret, bool isOverride = false,
+                             bool allowIncompatible = false) {
         sorbet::ast::ExpressionPtr receiver;
+
         if (isOverride) {
-            receiver = Send0(loc, Self(loc), core::Names::override_());
+            auto incompatible = allowIncompatible ? True(loc) : False(loc);
+            auto args = SendArgs(Symbol(loc, core::Names::allowIncompatible()), std::move(incompatible));
+
+            receiver = Send(loc, Self(loc), core::Names::override_(), 0, std::move(args));
         } else {
             receiver = Self(loc);
         }
@@ -341,10 +346,14 @@ public:
         return sig;
     }
 
-    static ExpressionPtr Sig0(core::LocOffsets loc, ExpressionPtr ret, bool isOverride = false) {
+    static ExpressionPtr Sig0(core::LocOffsets loc, ExpressionPtr ret, bool isOverride = false,
+                              bool allowIncompatible = false) {
         sorbet::ast::ExpressionPtr receiver;
         if (isOverride) {
-            receiver = Send0(loc, Self(loc), core::Names::override_());
+            auto incompatible = allowIncompatible ? True(loc) : False(loc);
+            auto args = SendArgs(Symbol(loc, core::Names::allowIncompatible()), std::move(incompatible));
+
+            receiver = Send(loc, Self(loc), core::Names::override_(), 0, std::move(args));
         } else {
             receiver = Self(loc);
         }
@@ -359,8 +368,8 @@ public:
     }
 
     static ExpressionPtr Sig1(core::LocOffsets loc, ExpressionPtr key, ExpressionPtr value, ExpressionPtr ret,
-                              bool isOverride = false) {
-        return Sig(loc, SendArgs(std::move(key), std::move(value)), std::move(ret), isOverride);
+                              bool isOverride = false, bool allowIncompatible = false) {
+        return Sig(loc, SendArgs(std::move(key), std::move(value)), std::move(ret), isOverride, allowIncompatible);
     }
 
     static ExpressionPtr T(core::LocOffsets loc) {

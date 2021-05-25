@@ -98,6 +98,7 @@ struct PropInfo {
     bool isImmutable = false;
     bool hasWithoutAccessors = false;
     bool isOverride = false;
+    bool allowIncompatible = false;
     core::NameRef name;
     core::LocOffsets nameLoc;
     ast::ExpressionPtr type;
@@ -230,6 +231,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             ret.isOverride = true;
         }
 
+        if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::allowIncompatible())) {
+            ret.allowIncompatible = true;
+        }
+
         if (ASTUtil::hasTruthyHashValue(ctx, *rules, core::Names::factory())) {
             ret.default_ = ast::MK::RaiseUnimplemented(ret.loc);
         } else if (ASTUtil::hasHashValue(ctx, *rules, core::Names::default_())) {
@@ -299,7 +304,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
     auto ivarName = name.addAt(ctx);
 
-    nodes.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(getType), ret.isOverride));
+    nodes.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(getType), ret.isOverride, ret.allowIncompatible));
 
     if (computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
@@ -358,7 +363,8 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
         ast::Send::ARGS_store sigArgs;
         sigArgs.emplace_back(ast::MK::Symbol(nameLoc, core::Names::arg0()));
         sigArgs.emplace_back(ASTUtil::dupType(setType));
-        nodes.emplace_back(ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType), ret.isOverride));
+        nodes.emplace_back(
+            ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType), ret.isOverride, ret.allowIncompatible));
 
         if (propContext.classDefKind == ast::ClassDef::Kind::Module) {
             // Not all modules include Kernel, can't make an initialize, etc. so we're punting on props in modules rn.
@@ -415,7 +421,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
         // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
         nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
-                                         std::move(type), ret.isOverride));
+                                         std::move(type), ret.isOverride, ret.allowIncompatible));
 
         // def $fk_method(**opts)
         //  T.unsafe(nil)
@@ -432,7 +438,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &ret, 
 
         // sig {params(opts: T.untyped).returns($foreign)}
         nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::opts()), ast::MK::Untyped(loc),
-                                         std::move(nonNilType), ret.isOverride));
+                                         std::move(nonNilType), ret.isOverride, ret.allowIncompatible));
 
         // def $fk_method_!(**opts)
         //  T.unsafe(nil)
