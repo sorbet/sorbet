@@ -63,18 +63,6 @@ llvm::FunctionType *CompilerState::getRubyExceptionFFIType() {
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
-llvm::FunctionType *CompilerState::getSorbetIntrinsicFFIType() {
-    llvm::Type *args[] = {
-        llvm::Type::getInt64Ty(lctx),          // self
-        llvm::Type::getInt32Ty(lctx),          // arg count
-        llvm::Type::getInt64PtrTy(lctx),       // argArray
-        getRubyBlockFFIType()->getPointerTo(), // block
-        llvm::Type::getInt64Ty(lctx)           // closure
-
-    };
-    return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
-}
-
 llvm::FunctionType *CompilerState::getInlineForwarderType() {
     llvm::Type *args[] = {
         llvm::Type::getInt64Ty(lctx), // VALUE val
