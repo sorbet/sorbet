@@ -713,7 +713,10 @@ public:
             variance::validateMethodVariance(ctx, methodDef.symbol);
         }
 
-        validateOverriding(ctx, methodDef.symbol);
+        if (methodDef.flags.performOverrideChecks) {
+            validateOverriding(ctx, methodDef.symbol);
+        }
+
         return tree;
     }
 };

@@ -23,8 +23,11 @@ void generateStub(vector<ast::ExpressionPtr> &methodStubs, const core::LocOffset
     args.emplace_back(ast::MK::RestArg(loc, ast::MK::Local(loc, core::Names::arg0())));
     args.emplace_back(ast::make_expression<ast::BlockArg>(loc, ast::MK::Local(loc, core::Names::blkArg())));
 
+    auto flags = ast::MethodDef::Flags();
+    flags.performOverrideChecks = false;
+
     methodStubs.push_back(
-        ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::RaiseUnimplemented(loc)));
+        ast::MK::SyntheticMethod(loc, loc, methodName, std::move(args), ast::MK::RaiseUnimplemented(loc), flags));
 }
 
 /// Handle #def_delegator for a single delegate method
