@@ -74,8 +74,10 @@ private:
         auto ip = builder.saveIP();
         builder.SetInsertPoint(entry);
         auto *cfunc = cs.module->getFunction(*cMethodWithBlock);
-        auto *result = builder.CreateCall(cs.module->getFunction("sorbet_inlineIntrinsicEnv_apply"),
-                                          {env, cfunc, mcctx.blk}, "result");
+        auto *blk = mcctx.blkAsFunction();
+        ENFORCE(blk != nullptr);
+        auto *result =
+            builder.CreateCall(cs.module->getFunction("sorbet_inlineIntrinsicEnv_apply"), {env, cfunc, blk}, "result");
         builder.CreateRet(result);
         builder.restoreIP(ip);
 
@@ -104,7 +106,7 @@ public:
         auto [argc, argv, _kwSplat] = IREmitterHelpers::fillSendArgArray(mcctx);
 
         llvm::Value *res{nullptr};
-        if (mcctx.blk != nullptr) {
+        if (auto *blk = mcctx.blkAsFunction()) {
             if (!cMethodWithBlock.has_value()) {
                 core::Loc loc{mcctx.irctx.cfg.file, send->argLocs.back()};
                 compiler::failCompilation(cs, loc, "Unable to handle a block with this intrinsic");
@@ -114,7 +116,7 @@ public:
             // The ruby stack doens't need to be managed here because the known c intrinsics don't expect to be called
             // by the vm.
             res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
-                                     {forwarder, recv, id, argc, argv, mcctx.blk, offset}, "rawSendResultWithBlock");
+                                     {forwarder, recv, id, argc, argv, blk, offset}, "rawSendResultWithBlock");
         } else {
             auto *blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
             res = builder.CreateCall(cs.getFunction(cMethod), {recv, id, argc, argv, blkPtr, offset}, "rawSendResult");

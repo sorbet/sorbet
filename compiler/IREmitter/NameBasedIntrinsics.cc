@@ -215,8 +215,8 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
     }
 
     llvm::Value *blkPtr;
-    if (mcctx.blk != nullptr) {
-        blkPtr = mcctx.blk;
+    if (auto *blk = mcctx.blkAsFunction()) {
+        blkPtr = blk;
     } else {
         blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
     }
@@ -461,9 +461,9 @@ public:
         // Call the receiver.
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});
 
-        if (mcctx.blk != nullptr) {
+        if (auto *blk = mcctx.blkAsFunction()) {
             auto *closure = Payload::buildLocalsOffset(cs);
-            return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, mcctx.blk, closure);
+            return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, blk, closure);
         } else {
             auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.build);
             return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);

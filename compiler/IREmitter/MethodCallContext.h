@@ -3,6 +3,8 @@
 
 #include "compiler/Core/ForwardDeclarations.h"
 
+#include <optional>
+
 namespace sorbet::compiler {
 
 class CompilerState;
@@ -27,17 +29,20 @@ public:
     // The method call being emitted right now.
     cfg::Send *send;
 
-    // The compiled function (like `func_A.main$block_1`) associated with this send via the
-    // core::SendAndBlockLink. `nullptr` if no `do ... end` block provided at the call site.
-    llvm::Function *blk;
+    // The block id associated with this send via core::SendAndBlockLink.
+    // `std::nullopt` if no `do ... end` block is provided at the call site.
+    std::optional<int> blk;
 
     // Get the receiver for the send being emitted right now.
     // Use this to avoid accidentally calling Payload::varGet multiple times per one send,
     // duplicating work.
     llvm::Value *varGetRecv();
 
+    // Return the function associated with the block, nullptr if blk is std::nullopt.
+    llvm::Function *blkAsFunction() const;
+
     MethodCallContext(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx, int rubyBlockId,
-                      cfg::Send *send, llvm::Function *blk)
+                      cfg::Send *send, std::optional<int> blk)
         : cs(cs), build(build), irctx(irctx), rubyBlockId(rubyBlockId), send(send), blk(blk){};
 };
 

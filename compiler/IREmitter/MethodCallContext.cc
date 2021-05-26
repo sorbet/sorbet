@@ -3,6 +3,7 @@
 
 #include "cfg/CFG.h"
 
+#include "compiler/IREmitter/IREmitterContext.h"
 #include "compiler/IREmitter/MethodCallContext.h"
 #include "compiler/IREmitter/Payload.h"
 
@@ -21,6 +22,14 @@ llvm::Value *MethodCallContext::varGetRecv() {
     }
 
     return this->recv;
+}
+
+llvm::Function *MethodCallContext::blkAsFunction() const {
+    if (!blk.has_value()) {
+        return nullptr;
+    }
+
+    return irctx.rubyBlocks2Functions[*blk];
 }
 
 } // namespace sorbet::compiler

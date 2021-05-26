@@ -550,9 +550,9 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                             return;
                         }
 
-                        llvm::Function *blk = nullptr;
+                        std::optional<int> blk;
                         if (i->link != nullptr) {
-                            blk = irctx.rubyBlocks2Functions[i->link->rubyBlockId];
+                            blk.emplace(i->link->rubyBlockId);
                         }
                         MethodCallContext mcctx{cs, builder, irctx, bb->rubyBlockId, i, blk};
                         auto rawCall = IREmitterHelpers::emitMethodCall(mcctx);

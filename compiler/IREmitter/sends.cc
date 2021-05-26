@@ -81,7 +81,7 @@ llvm::Function *getFinalForwarder(MethodCallContext &mcctx, IREmitterHelpers::Fi
 llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
     // TODO(trevor) we could probably handle methods wih block args as well, by passing the block handler through the
     // current ruby execution context.
-    if (mcctx.blk != nullptr) {
+    if (mcctx.blk.has_value()) {
         return IREmitterHelpers::emitMethodCallViaRubyVM(mcctx);
     }
 
@@ -157,7 +157,7 @@ llvm::Value *tryNameBasedIntrinsic(MethodCallContext &mcctx) {
             continue;
         }
 
-        if (mcctx.blk != nullptr && nameBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Unhandled) {
+        if (mcctx.blk.has_value() && nameBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Unhandled) {
             continue;
         }
 
@@ -184,7 +184,7 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
                 continue;
             }
 
-            if (mcctx.blk != nullptr && symbolBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Unhandled) {
+            if (mcctx.blk.has_value() && symbolBasedIntrinsic->blockHandled == Intrinsics::HandleBlock::Unhandled) {
                 continue;
             }
 
@@ -447,7 +447,7 @@ bool canCallBlockViaRubyVM(MethodCallContext &mcctx) {
     }
 
     // Can't handle invoking blocks that take blocks.
-    if (mcctx.blk != nullptr) {
+    if (mcctx.blk.has_value()) {
         return false;
     }
 
@@ -471,12 +471,12 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
         // fill in args
         auto [argc, argv, kw_splat] = IREmitterHelpers::fillSendArgArray(mcctx);
 
-        if (mcctx.blk != nullptr) {
+        if (auto *blk = mcctx.blkAsFunction()) {
             // blocks require a locals offset parameter
             llvm::Value *localsOffset = Payload::buildLocalsOffset(cs);
             ENFORCE(localsOffset != nullptr);
             return builder.CreateCall(cs.getFunction("sorbet_callSuperBlock"),
-                                      {argc, argv, kw_splat, mcctx.blk, localsOffset}, "rawSendResult");
+                                      {argc, argv, kw_splat, blk, localsOffset}, "rawSendResult");
         }
 
         return builder.CreateCall(cs.getFunction("sorbet_callSuper"), {argc, argv, kw_splat}, "rawSendResult");
@@ -553,9 +553,9 @@ llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilde
 llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
     auto *cache = IREmitterHelpers::pushSendArgs(mcctx);
 
-    if (mcctx.blk != nullptr) {
+    if (auto *blk = mcctx.blkAsFunction()) {
         auto *closure = Payload::buildLocalsOffset(mcctx.cs);
-        return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, mcctx.blk, closure);
+        return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, blk, closure);
     } else {
         auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.build);
         return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
