@@ -292,7 +292,7 @@ public:
         ENFORCE(pkg != nullptr);
     }
 
-    ast::ExpressionPtr preTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Ignore top-level <root>
@@ -317,7 +317,7 @@ public:
         return tree;
     }
 
-    ast::ExpressionPtr postTransformClassDef(core::MutableContext ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
         auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
         if (classDef.symbol == core::Symbols::root()) {
             // Sanity check bookkeeping
@@ -335,7 +335,7 @@ public:
         return tree;
     }
 
-    ast::ExpressionPtr preTransformAssign(core::MutableContext ctx, ast::ExpressionPtr original) {
+    ast::ExpressionPtr preTransformAssign(core::Context ctx, ast::ExpressionPtr original) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(original);
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs != nullptr) {
@@ -797,7 +797,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
     return file;
 }
 
-ast::ParsedFile rewritePackagedFile(core::MutableContext ctx, ast::ParsedFile file, core::NameRef packageMangledName,
+ast::ParsedFile rewritePackagedFile(core::Context ctx, ast::ParsedFile file, core::NameRef packageMangledName,
                                     const PackageInfo *pkg) {
     if (ast::isa_tree<ast::EmptyTree>(file.tree)) {
         // Nothing to wrap. This occurs when a file is marked typed: Ignore.
@@ -890,7 +890,7 @@ vector<ast::ParsedFile> Packager::run(core::GlobalState &gs, WorkerPool &workers
                 if (result.gotItem()) {
                     filesProcessed++;
                     if (job.file.data(gs).sourceType == core::File::Type::Normal) {
-                        core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                        core::Context ctx(gs, core::Symbols::root(), job.file);
                         if (auto pkg = constPkgDB.getPackageForContext(ctx)) {
                             job = rewritePackagedFile(ctx, move(job), pkg->name.mangledName, pkg);
                         } else {
