@@ -43,15 +43,106 @@ class T::Props::Decorator
   # checked(:never) - Rules hash is expensive to check
   sig {params(prop: Symbol, rules: Rules).void.checked(:never)}
   def add_prop_definition(prop, rules)
-    override = rules.delete(:override)
+    @override = rules.delete(:override)
+    @allow_incompatible = rules.delete(:allow_incompatible)
 
-    if props.include?(prop) && !override
-      raise ArgumentError.new("Attempted to redefine prop #{prop.inspect} that's already defined without specifying :override => true: #{prop_rules(prop)}")
-    elsif !props.include?(prop) && override
+    setter_name = :"#{prop}="
+    parent_prop = props[prop]
+    has_non_prop_getter = non_prop_method_exists?(prop, prop)
+    has_non_prop_setter = non_prop_method_exists?(prop, setter_name)
+    mutable_override = !rules[:immutable] && (has_non_prop_getter || has_non_prop_setter)
+    missing_mutable_override = !rules[:immutable] && !has_non_prop_getter && !has_non_prop_setter
+
+    # If the prop is not marked as an override, but the prop has been inherited, or a method of the same
+    # name has been inherited, then this is should be marked as an override.
+    # 
+    # Or else if it has been marked as an override, but no props or methods with the same name have been inherited,
+    # then it's an override with no parent method.
+    if !@override && !rules[:without_accessors] && !rules[:clobber_existing_method!] &&
+      (props.include?(prop) || mutable_override || has_non_prop_getter)
+
+      message = if parent_prop
+        "Attempted to redefine prop #{prop.inspect} that's already defined without specifying :override => true: #{parent_prop}"
+      else
+        "Attempted to redefine method #{prop.inspect} using a prop without specifying :override => true"
+      end
+
+      raise ArgumentError.new(message)
+    elsif @override && !props.include?(prop) && (missing_mutable_override || (rules[:immutable] && !has_non_prop_getter))
       raise ArgumentError.new("Attempted to override a prop #{prop.inspect} that doesn't already exist")
     end
 
+    # Check if an inherited prop produces type mismatches. This has to be checked here, before
+    # the new prop overrides the parent prop inside `props`.
+    unless rules[:without_accessors] || rules[:clobber_existing_method!]
+      if parent_prop && parent_prop[:type] != rules[:type] && !@allow_incompatible
+        raise RuntimeError, "Incompatible prop override type for `#{prop}`. Original type was #{parent_prop[:type]}"
+      end
+    end
+
     @props = @props.merge(prop => rules.freeze).freeze
+  end
+
+  sig {params(prop: Symbol, method_name: Symbol).returns(T::Boolean)}
+  private def non_prop_method_exists?(prop, method_name)
+    # Verify if the method exists, but was not implemented via props.
+    return false unless @class.instance_methods.include?(method_name)
+
+    owner = @class.instance_method(method_name).owner
+    !owner.respond_to?(:props) || !owner.props[prop]
+  end
+
+  sig do
+    params(
+      prop: Symbol,
+      original_method: UnboundMethod,
+      type: PropTypeOrClass,
+      params: T.nilable(T::Hash[Symbol, Module])
+    ).void
+  end
+  private def validate_prop_override(prop, original_method, type, params)
+    # Build an artificial signature declaration for the prop and validate it
+    # against the signature of the super_method.
+
+    builder = T::Private::Methods::DeclBuilder.new(@class)
+    builder.override(allow_incompatible: @allow_incompatible)
+    builder.params(**params) if params
+    builder.returns(type)
+    declaration = builder.finalize!.decl
+
+    signature = T::Private::Methods::Signature.new(
+      method: original_method,
+      method_name: prop,
+      raw_arg_types: declaration.params,
+      raw_return_type: declaration.returns,
+      bind: declaration.bind,
+      mode: declaration.mode,
+      check_level: declaration.checked,
+      on_failure: declaration.on_failure,
+      override_allow_incompatible: declaration.override_allow_incompatible,
+    )
+
+    T::Private::Methods::SignatureValidation.validate(signature)
+  end
+
+  sig {params(name: Symbol, rules: Rules).void.checked(:never)}
+  private def validate_overrides(name, rules)
+    # The override of a prop may refer to the getter, the setter or both. Therefore,
+    # if a super_method exists, validate overrides for each.
+    getter = @class.instance_method(name)
+    
+    if getter.super_method
+      validate_prop_override(name, getter, rules[:type], nil)
+    end
+
+    unless rules[:immutable]
+      setter_name = :"#{name}="
+      setter = @class.instance_method(setter_name)
+
+      if setter.super_method
+        validate_prop_override(setter_name, setter, rules[:type], { val: rules[:type] })
+      end
+    end
   end
 
   VALID_RULE_KEYS = T.let(%i[
@@ -61,6 +152,7 @@ class T::Props::Decorator
     ifunset
     immutable
     override
+    allow_incompatible
     redaction
     sensitivity
     without_accessors
@@ -351,7 +443,11 @@ class T::Props::Decorator
 
     # NB: using `without_accessors` doesn't make much sense unless you also define some other way to
     # get at the property (e.g., Chalk::ODM::Document exposes `get` and `set`).
-    define_getter_and_setter(name, rules) unless rules[:without_accessors]
+    unless rules[:without_accessors]
+      define_getter_and_setter(name, rules) 
+
+      validate_overrides(name, rules) if @override
+    end
 
     if rules[:foreign] && rules[:foreign_hint_only]
       raise ArgumentError.new(":foreign and :foreign_hint_only are mutually exclusive.")

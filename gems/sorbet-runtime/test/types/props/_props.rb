@@ -66,7 +66,7 @@ class Opus::Types::Test::Props::PropsTest < Critic::Unit::UnitTest
 
   class OverrideSubProps
     include BaseProps
-    prop :prop2, T::Array[Object], override: true
+    prop :prop2, T::Array[Object], override: true, allow_incompatible: true
   end
 
   class InheritedOverrideSubProps < OverrideSubProps
