@@ -694,6 +694,15 @@ VALUE sorbet_Thread_square_br_eq(VALUE recv, ID fun, int argc, const VALUE *cons
     return rb_thread_local_aset(recv, rb_to_id(id), val);
 }
 
+// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/thread.c#L3386-L3390
+SORBET_INLINE
+VALUE sorbet_rb_obj_is_kind_of(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                               VALUE closure) {
+    sorbet_ensure_arity(argc, 1);
+    VALUE klass = argv[0];
+    return rb_obj_is_kind_of(recv, klass);
+}
+
 VALUE sorbet_rb_array_len(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
                           VALUE closure) {
     sorbet_ensure_arity(argc, 0);
@@ -1402,6 +1411,15 @@ VALUE sorbet_callFuncBlockWithCache(struct FunctionInlineCache *cache, BlockFFIT
 SORBET_INLINE
 VALUE sorbet_makeBlockHandlerProc(VALUE block) {
     return rb_funcall(block, rb_intern2("to_proc", 7), 0);
+}
+
+SORBET_INLINE
+bool sorbet_isCachedMethod(struct FunctionInlineCache *cache, VALUE (*expectedFnPtr)(), VALUE recv) {
+    // Assumes that the cache is already up-to-date. If you haven't done this
+    // yourself, call: `sorbet_vmMethodSearch(cache, recv)`
+
+    rb_method_definition_t *def = cache->cd.cc.me->def;
+    return (def->type == VM_METHOD_TYPE_CFUNC) && (def->body.cfunc.func == expectedFnPtr);
 }
 
 SORBET_INLINE

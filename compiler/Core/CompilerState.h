@@ -43,6 +43,7 @@ public:
     llvm::FunctionType *getRubyBlockFFIType();
     llvm::FunctionType *getRubyExceptionFFIType();
     llvm::FunctionType *getInlineForwarderType();
+    llvm::FunctionType *getAnyRubyCApiFunctionType();
 
     // Run some cheap, per-function optimizations immediately after IR emission.
     void runCheapOptimizations(llvm::Function *);

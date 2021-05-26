@@ -43,12 +43,52 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     return sym;
 }
 
+llvm::Value *receiverFastPathTestWithCache(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass,
+                                           const vector<string> &expectedRubyCFuncs, string methodNameForDebug) {
+    auto &cs = mcctx.cs;
+    auto *send = mcctx.send;
+    auto &builder = builderCast(mcctx.build);
+
+    auto flags = vector<VMFlag>{};
+    if (send->isPrivateOk) {
+        flags.emplace_back(Payload::VM_CALL_FCALL);
+    } else {
+        flags.emplace_back(Payload::VM_CALL_ARGS_SIMPLE);
+    }
+    auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, methodNameForDebug, flags, 0, {});
+    auto *recv = mcctx.varGetRecv();
+
+    // TODO(jez) We could do even better by hoisting this out, so that all potential
+    // things that want to use the cache cooperate in updating it once per call.
+    builder.CreateCall(cs.getFunction("sorbet_vmMethodSearch"), {cache, recv}, "vmMethodSearch");
+
+    // We could initialize result with the first result (because expectedRubyCFunc is
+    // non-empty), but this makes the code slightly cleaner, and LLVM will optimize.
+    llvm::Value *result = builder.getInt1(false);
+    for (const auto &expectedFunc : expectedRubyCFuncs) {
+        auto *expectedFnPtr = cs.getFunction(expectedFunc);
+        if (expectedFnPtr == nullptr) {
+            Exception::raise("Couldn't find expected Ruby C func `{}` in the current Module. Is it static (private)?",
+                             expectedFunc);
+        }
+        auto *fnPtrAsAnyFn =
+            builder.CreatePointerCast(expectedFnPtr, cs.getAnyRubyCApiFunctionType()->getPointerTo(), "fnPtrCast");
+
+        auto current =
+            builder.CreateCall(cs.getFunction("sorbet_isCachedMethod"), {cache, fnPtrAsAnyFn, recv}, "isCached");
+        result = builder.CreateOr(result, current);
+    }
+
+    return result;
+}
+
 class CallCMethod : public SymbolBasedIntrinsicMethod {
 protected:
     core::ClassOrModuleRef rubyClass;
     string_view rubyMethod;
     string cMethod;
     optional<string> cMethodWithBlock;
+    vector<string> expectedRubyCFuncs;
 
 private:
     // Generate a one-off function that looks like the following:
@@ -85,13 +125,10 @@ private:
     }
 
 public:
-    CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod)
-        : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Unhandled), rubyClass(rubyClass), rubyMethod(rubyMethod),
-          cMethod(cMethod), cMethodWithBlock(){};
-
-    CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod, string cMethodWithBlock)
+    CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod,
+                optional<string> cMethodWithBlock = nullopt, vector<string> expectedRubyCFuncs = {})
         : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled), rubyClass(rubyClass), rubyMethod(rubyMethod),
-          cMethod(cMethod), cMethodWithBlock(cMethodWithBlock){};
+          cMethod(cMethod), cMethodWithBlock(cMethodWithBlock), expectedRubyCFuncs(expectedRubyCFuncs){};
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
         auto &cs = mcctx.cs;
@@ -131,6 +168,14 @@ public:
     virtual InlinedVector<core::NameRef, 2> applicableMethods(const core::GlobalState &gs) const override {
         return {gs.lookupNameUTF8(rubyMethod)};
     };
+    virtual llvm::Value *receiverFastPathTest(MethodCallContext &mcctx,
+                                              core::ClassOrModuleRef potentialClass) const override {
+        if (!this->expectedRubyCFuncs.empty()) {
+            return receiverFastPathTestWithCache(mcctx, potentialClass, this->expectedRubyCFuncs, string(rubyMethod));
+        } else {
+            return SymbolBasedIntrinsicMethod::receiverFastPathTest(mcctx, potentialClass);
+        }
+    }
 };
 
 void emitParamInitialization(CompilerState &cs, llvm::IRBuilder<> &builder, const IREmitterContext &irctx,
@@ -600,6 +645,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Symbol(), "===", "sorbet_rb_sym_equal"},
     {core::Symbols::Thread(), "[]", "sorbet_Thread_square_br"},
     {core::Symbols::Thread(), "[]=", "sorbet_Thread_square_br_eq"},
+    {core::Symbols::Kernel(), "is_a?", "sorbet_rb_obj_is_kind_of", nullopt, {"rb_obj_is_kind_of"}},
+    {core::Symbols::Kernel(), "kind_of?", "sorbet_rb_obj_is_kind_of", nullopt, {"rb_obj_is_kind_of"}},
 #include "WrappedIntrinsics.h"
 };
 

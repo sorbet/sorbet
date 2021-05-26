@@ -70,6 +70,11 @@ llvm::FunctionType *CompilerState::getInlineForwarderType() {
     return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, false /*not varargs*/);
 }
 
+llvm::FunctionType *CompilerState::getAnyRubyCApiFunctionType() {
+    auto args = vector<llvm::Type *>{};
+    return llvm::FunctionType::get(llvm::Type::getInt64Ty(lctx), args, true /*IS varargs*/);
+}
+
 llvm::Function *CompilerState::getFunction(llvm::StringRef name) const {
     llvm::Function *f = module->getFunction(name);
     ENFORCE(f, "could not find {} in the payload", name.str());
