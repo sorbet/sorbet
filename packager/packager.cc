@@ -651,9 +651,11 @@ public:
         }
     }
 
-    ast::ExpressionPtr makeModule(core::Context ctx) {
+    ast::ClassDef::RHS_store makeModule(core::Context ctx) {
         vector<core::NameRef> parts;
-        return makeModule(ctx, &root, parts, ImportTree::Source());
+        ast::ClassDef::RHS_store modRhs;
+        makeModule(ctx, &root, parts, modRhs, ImportTree::Source());
+        return modRhs;
     }
 
 private:
@@ -669,8 +671,8 @@ private:
         node->source = {importedPackage.name.mangledName, loc};
     }
 
-    ast::ExpressionPtr makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts,
-                                  ImportTree::Source parentSrc) {
+    void makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts,
+                                  ast::ClassDef::RHS_store &modRhs, ImportTree::Source parentSrc) {
         auto newParentSrc = parentSrc;
         if (node->source.exists() && !parentSrc.exists()) {
             newParentSrc = node->source;
@@ -683,10 +685,10 @@ private:
         fast_sort(childPairs, [&ctx](const auto &lhs, const auto &rhs) -> bool {
             return lhs.first.show(ctx) < rhs.first.show(ctx);
         });
-        ast::ClassDef::RHS_store rhs;
+        // ast::ClassDef::RHS_store rhs;
         for (auto const &[nameRef, child] : childPairs) {
             parts.emplace_back(nameRef);
-            rhs.emplace_back(makeModule(ctx, child, parts, newParentSrc));
+            makeModule(ctx, child, parts, modRhs,newParentSrc);
             parts.pop_back();
         }
 
@@ -699,15 +701,34 @@ private:
                                 fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
                     e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
                 }
-            }
-            auto rhs = prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
-            return ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
-                                   std::move(rhs));
-        }
+            } else {
+                // fmt::print("{}\n", fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                auto importLoc = node->source.importLoc;
+                auto assignRhs = prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
+                auto assign =
+                    ast::MK::Assign(core::LocOffsets::none(),
+                                    name2Expr(parts.back(), ast::MK::EmptyTree()), std::move(assignRhs));
 
-        core::NameRef moduleName = parts.empty() ? package.name.mangledName : parts.back();
-        return ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(), name2Expr(moduleName), {},
-                               std::move(rhs));
+                ast::ClassDef::RHS_store mod_rhs;
+                mod_rhs.emplace_back(std::move(assign));
+                auto mod = ast::MK::Module(core::LocOffsets::none(), importLoc,
+                                           importModuleName(parts, importLoc), {}, std::move(mod_rhs));
+                // fmt::print("--NEW\n{}\n", mod.toString(ctx));
+                // parts.emplace_back(back);
+
+                modRhs.emplace_back(std::move(mod));
+            }
+        }
+    }
+
+    ast::ExpressionPtr importModuleName(vector<core::NameRef> &parts, core::LocOffsets importLoc) {
+        ast::ExpressionPtr name = name2Expr(package.name.mangledName);
+        for (auto part = parts.begin(); part < parts.end() - 1; part++) {
+            name = name2Expr(*part, move(name));
+        }
+        // Put the loc on the outer name:
+        auto &lit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(name);
+        return ast::MK::UnresolvedConstant(importLoc, move(lit.scope), lit.cnst);
     }
 };
 
@@ -737,7 +758,7 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
 
     {
         UnorderedMap<core::NameRef, core::LocOffsets> importedNames;
-        // ImportTreeBuilder treeBuilder(*package);
+        ImportTreeBuilder treeBuilder(*package);
         for (auto &imported : package->importedPackageNames) {
             auto importedPackage = packageDB.getPackageByMangledName(imported.mangledName);
             if (importedPackage == nullptr) {
@@ -755,43 +776,44 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
                 }
             } else {
                 importedNames[imported.mangledName] = imported.loc;
+                treeBuilder.mergeImports(*importedPackage, imported.loc);
                 // fmt::print("IMPORT {}\n{}\n---\n", ctx.file.data(ctx).path(), core::Loc {ctx.file,
                 // imported.loc}.toString(ctx)); treeBuilder.mergeImports(*importedPackage, imported.loc);
                 // fmt::print("IMPORT IN {}\n", ctx.file.data(ctx).path());
-
-                ImportTreeBuilder importSpecific(*package); // TODO shouldn't be package
-                importSpecific.mergeImports(*importedPackage, imported.loc);
                 // fmt::print("---{}\n{}\n---\n", ctx.file.data(ctx).path(),
                 // importSpecific.makeModule(ctx).toString(ctx));
-                for (const auto &exportFqn : importedPackage->exports) {
-                    auto rhs =
-                        prependName(parts2literal(exportFqn.parts, core::LocOffsets::none()), imported.mangledName);
-                    auto assign =
-                        ast::MK::Assign(core::LocOffsets::none(),
-                                        name2Expr(exportFqn.parts.back(), ast::MK::EmptyTree()), std::move(rhs));
+                // for (const auto &exportFqn : importedPackage->exports) {
+                //     auto rhs =
+                //         prependName(parts2literal(exportFqn.parts, core::LocOffsets::none()), imported.mangledName);
+                //     auto assign =
+                //         ast::MK::Assign(core::LocOffsets::none(),
+                //                         name2Expr(exportFqn.parts.back(), ast::MK::EmptyTree()), std::move(rhs));
 
-                    vector<core::NameRef> derp = exportFqn.parts; // TODO TODO
-                    derp.pop_back();
-                    derp.insert(derp.begin(), package->name.mangledName);
+                //     vector<core::NameRef> derp = exportFqn.parts; // TODO TODO
+                //     derp.pop_back();
+                //     derp.insert(derp.begin(), package->name.mangledName);
 
-                    ast::ClassDef::RHS_store mod_rhs;
-                    mod_rhs.emplace_back(std::move(assign));
-                    // auto mod = ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                    // parts2literal(derp, imported.loc), {}, std::move(mod_rhs)); auto mod =
-                    // ast::MK::Module(core::LocOffsets::none(), imported.loc, parts2literal(derp, imported.loc), {},
-                    // std::move(mod_rhs)); fmt::print("--\n{} {}\n{}\n--\n", ctx.file.data(ctx).path(),
-                    // imported.loc.showRaw(ctx), imported.fullName.loc.showRaw(ctx));
-                    auto mod = ast::MK::Module(core::LocOffsets::none(), imported.loc,
-                                               parts2literal(derp, imported.loc), {}, std::move(mod_rhs));
-                    // fmt::print("{}\n", ctx.file.data(ctx).path());
-                    // fmt::print("{}\n", core::Loc{ctx.file, imported.loc}.toString(ctx));
-                    // fmt::print("** {}\n", mod.toString(ctx));
+                //     ast::ClassDef::RHS_store mod_rhs;
+                //     mod_rhs.emplace_back(std::move(assign));
+                //     // auto mod = ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
+                //     // parts2literal(derp, imported.loc), {}, std::move(mod_rhs)); auto mod =
+                //     // ast::MK::Module(core::LocOffsets::none(), imported.loc, parts2literal(derp, imported.loc), {},
+                //     // std::move(mod_rhs)); fmt::print("--\n{} {}\n{}\n--\n", ctx.file.data(ctx).path(),
+                //     // imported.loc.showRaw(ctx), imported.fullName.loc.showRaw(ctx));
+                //     auto mod = ast::MK::Module(core::LocOffsets::none(), imported.loc,
+                //                                parts2literal(derp, imported.loc), {}, std::move(mod_rhs));
+                //     // fmt::print("{}\n", ctx.file.data(ctx).path());
+                //     // fmt::print("{}\n", core::Loc{ctx.file, imported.loc}.toString(ctx));
+                //     // fmt::print("** {}\n", mod.toString(ctx));
 
-                    importedPackages.emplace_back(move(mod));
-                }
+                //     // fmt::print("--ORIG--\n{}\n\n", mod.toString(ctx));
+                //     importedPackages.emplace_back(move(mod));
+                // }
             }
         }
+        // auto x = treeBuilder.makeModule(ctx); // TODO
         // importedPackages.emplace_back(treeBuilder.makeModule(ctx));
+        importedPackages = treeBuilder.makeModule(ctx);
     }
 
     auto packageNamespace =
