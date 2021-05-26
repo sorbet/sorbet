@@ -685,7 +685,6 @@ private:
         fast_sort(childPairs, [&ctx](const auto &lhs, const auto &rhs) -> bool {
             return lhs.first.show(ctx) < rhs.first.show(ctx);
         });
-        // ast::ClassDef::RHS_store rhs;
         for (auto const &[nameRef, child] : childPairs) {
             parts.emplace_back(nameRef);
             makeModule(ctx, child, parts, modRhs, newParentSrc);
@@ -702,20 +701,26 @@ private:
                     e.addErrorLine(core::Loc(ctx.file, parentSrc.importLoc), "Conflict from");
                 }
             } else {
-                // fmt::print("{}\n", fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
+                // Construct a module containing an assignment for an imported name:
+                // For name `A::B::C::D` imported from package `A::B` construct:
+                // module A::B::C
+                //   D = <Mangled A::B>::A::B::C::D
+                // end
                 auto importLoc = node->source.importLoc;
                 auto assignRhs =
                     prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
                 auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
                                               std::move(assignRhs));
 
-                ast::ClassDef::RHS_store mod_rhs;
-                mod_rhs.emplace_back(std::move(assign));
+                ast::ClassDef::RHS_store rhs;
+                rhs.emplace_back(std::move(assign));
+                // Use the loc from the import in the module name and declaration to get the
+                // following jump to definition behavior:
+                // imported constant: `Foo::Bar::Baz` from package `Foo::Bar`
+                //                     ^^^^^^^^       jump to the import statement
+                //                               ^^^  jump to actual definition of `Baz` class
                 auto mod = ast::MK::Module(core::LocOffsets::none(), importLoc, importModuleName(parts, importLoc), {},
-                                           std::move(mod_rhs));
-                // fmt::print("--NEW\n{}\n", mod.toString(ctx));
-                // parts.emplace_back(back);
-
+                                           std::move(rhs));
                 modRhs.emplace_back(std::move(mod));
             }
         }
@@ -734,9 +739,10 @@ private:
 
 // Add:
 //    module <PackageRegistry>::Mangled_Name_Package
-//      module ImportedPackage1
-//        # imported aliases go here
+//      module A::B::C
+//        D = Mangled_Imported_Package::A::B::C::D
 //      end
+//      ...
 //    end
 // ...to __package.rb files to set up the package namespace.
 ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const PackageDB &packageDB) {
@@ -777,49 +783,14 @@ ast::ParsedFile rewritePackage(core::Context ctx, ast::ParsedFile file, const Pa
             } else {
                 importedNames[imported.mangledName] = imported.loc;
                 treeBuilder.mergeImports(*importedPackage, imported.loc);
-                // fmt::print("IMPORT {}\n{}\n---\n", ctx.file.data(ctx).path(), core::Loc {ctx.file,
-                // imported.loc}.toString(ctx)); treeBuilder.mergeImports(*importedPackage, imported.loc);
-                // fmt::print("IMPORT IN {}\n", ctx.file.data(ctx).path());
-                // fmt::print("---{}\n{}\n---\n", ctx.file.data(ctx).path(),
-                // importSpecific.makeModule(ctx).toString(ctx));
-                // for (const auto &exportFqn : importedPackage->exports) {
-                //     auto rhs =
-                //         prependName(parts2literal(exportFqn.parts, core::LocOffsets::none()), imported.mangledName);
-                //     auto assign =
-                //         ast::MK::Assign(core::LocOffsets::none(),
-                //                         name2Expr(exportFqn.parts.back(), ast::MK::EmptyTree()), std::move(rhs));
-
-                //     vector<core::NameRef> derp = exportFqn.parts; // TODO TODO
-                //     derp.pop_back();
-                //     derp.insert(derp.begin(), package->name.mangledName);
-
-                //     ast::ClassDef::RHS_store mod_rhs;
-                //     mod_rhs.emplace_back(std::move(assign));
-                //     // auto mod = ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
-                //     // parts2literal(derp, imported.loc), {}, std::move(mod_rhs)); auto mod =
-                //     // ast::MK::Module(core::LocOffsets::none(), imported.loc, parts2literal(derp, imported.loc), {},
-                //     // std::move(mod_rhs)); fmt::print("--\n{} {}\n{}\n--\n", ctx.file.data(ctx).path(),
-                //     // imported.loc.showRaw(ctx), imported.fullName.loc.showRaw(ctx));
-                //     auto mod = ast::MK::Module(core::LocOffsets::none(), imported.loc,
-                //                                parts2literal(derp, imported.loc), {}, std::move(mod_rhs));
-                //     // fmt::print("{}\n", ctx.file.data(ctx).path());
-                //     // fmt::print("{}\n", core::Loc{ctx.file, imported.loc}.toString(ctx));
-                //     // fmt::print("** {}\n", mod.toString(ctx));
-
-                //     // fmt::print("--ORIG--\n{}\n\n", mod.toString(ctx));
-                //     importedPackages.emplace_back(move(mod));
-                // }
             }
         }
-        // auto x = treeBuilder.makeModule(ctx); // TODO
-        // importedPackages.emplace_back(treeBuilder.makeModule(ctx));
         importedPackages = treeBuilder.makeModule(ctx);
     }
 
     auto packageNamespace =
         ast::MK::Module(core::LocOffsets::none(), core::LocOffsets::none(),
                         name2Expr(core::Names::Constants::PackageRegistry()), {}, std::move(importedPackages));
-    // fmt::print("{}\n{}\n", ctx.file.data(ctx).path(), packageNamespace.toString(ctx));
 
     auto &rootKlass = ast::cast_tree_nonnull<ast::ClassDef>(file.tree);
     rootKlass.rhs.emplace_back(move(packageNamespace));
