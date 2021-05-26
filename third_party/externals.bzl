@@ -104,6 +104,7 @@ def sorbet_llvm_externals():
                     "@com_stripe_sorbet_llvm//third_party/ruby:gc-remove-write-barrier.patch",
                     "@com_stripe_sorbet_llvm//third_party/ruby:vm-method-type-sorbet.patch",
                     "@com_stripe_sorbet_llvm//third_party/ruby:is-lambda-ifunc.patch",
+                    "@com_stripe_sorbet_llvm//third_party/ruby:init-sorbet-t-modules.patch",
                 ],
                 patch_tool = "patch",
             )
