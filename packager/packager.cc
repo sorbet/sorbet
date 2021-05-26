@@ -671,8 +671,8 @@ private:
         node->source = {importedPackage.name.mangledName, loc};
     }
 
-    void makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts,
-                                  ast::ClassDef::RHS_store &modRhs, ImportTree::Source parentSrc) {
+    void makeModule(core::Context ctx, ImportTree *node, vector<core::NameRef> &parts, ast::ClassDef::RHS_store &modRhs,
+                    ImportTree::Source parentSrc) {
         auto newParentSrc = parentSrc;
         if (node->source.exists() && !parentSrc.exists()) {
             newParentSrc = node->source;
@@ -688,7 +688,7 @@ private:
         // ast::ClassDef::RHS_store rhs;
         for (auto const &[nameRef, child] : childPairs) {
             parts.emplace_back(nameRef);
-            makeModule(ctx, child, parts, modRhs,newParentSrc);
+            makeModule(ctx, child, parts, modRhs, newParentSrc);
             parts.pop_back();
         }
 
@@ -704,15 +704,15 @@ private:
             } else {
                 // fmt::print("{}\n", fmt::map_join(parts, "::", [&](const auto &nr) { return nr.show(ctx); }));
                 auto importLoc = node->source.importLoc;
-                auto assignRhs = prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
-                auto assign =
-                    ast::MK::Assign(core::LocOffsets::none(),
-                                    name2Expr(parts.back(), ast::MK::EmptyTree()), std::move(assignRhs));
+                auto assignRhs =
+                    prependName(parts2literal(parts, core::LocOffsets::none()), node->source.packageMangledName);
+                auto assign = ast::MK::Assign(core::LocOffsets::none(), name2Expr(parts.back(), ast::MK::EmptyTree()),
+                                              std::move(assignRhs));
 
                 ast::ClassDef::RHS_store mod_rhs;
                 mod_rhs.emplace_back(std::move(assign));
-                auto mod = ast::MK::Module(core::LocOffsets::none(), importLoc,
-                                           importModuleName(parts, importLoc), {}, std::move(mod_rhs));
+                auto mod = ast::MK::Module(core::LocOffsets::none(), importLoc, importModuleName(parts, importLoc), {},
+                                           std::move(mod_rhs));
                 // fmt::print("--NEW\n{}\n", mod.toString(ctx));
                 // parts.emplace_back(back);
 
