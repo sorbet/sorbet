@@ -6,12 +6,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Package$1><<C <todo sym>>> < ()
-      module <emptyTree>::<C Package><<C <todo sym>>> < ()
-        module <emptyTree>::<C Subpackage><<C <todo sym>>> < ()
-          <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
-        end
-      end
+    module <emptyTree>::<C Package_Package$1>::<C Package>::<C Subpackage><<C <todo sym>>> < ()
+      <emptyTree>::<C SubpackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Subpackage_Package$1>::<C Package>::<C Subpackage>::<C SubpackageClass>
     end
   end
 end
@@ -40,10 +36,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Package_Subpackage_Package$1><<C <todo sym>>> < ()
-      module <emptyTree>::<C Package><<C <todo sym>>> < ()
-        <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
-      end
+    module <emptyTree>::<C Package_Subpackage_Package$1>::<C Package><<C <todo sym>>> < ()
+      <emptyTree>::<C PackageClass> = <emptyTree>::<C <PackageRegistry>>::<C Package_Package$1>::<C Package>::<C PackageClass>
     end
   end
 end

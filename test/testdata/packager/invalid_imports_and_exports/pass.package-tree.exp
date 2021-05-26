@@ -26,12 +26,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C A_Package$1><<C <todo sym>>> < ()
-      module <emptyTree>::<C B><<C <todo sym>>> < ()
-        <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>
+    module <emptyTree>::<C A_Package$1>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C BClass> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BClass>
+    end
 
-        <emptyTree>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BModule>
-      end
+    module <emptyTree>::<C A_Package$1>::<C B><<C <todo sym>>> < ()
+      <emptyTree>::<C BModule> = <emptyTree>::<C <PackageRegistry>>::<C B_Package$1>::<C B>::<C BModule>
     end
   end
 end
@@ -83,14 +83,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C B_Package$1><<C <todo sym>>> < ()
-      module <emptyTree>::<C A><<C <todo sym>>> < ()
-        <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AClass>
+    module <emptyTree>::<C B_Package$1>::<C A><<C <todo sym>>> < ()
+      <emptyTree>::<C AClass> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AClass>
+    end
 
-        <emptyTree>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AModule>
+    module <emptyTree>::<C B_Package$1>::<C A><<C <todo sym>>> < ()
+      <emptyTree>::<C AModule> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C AModule>
+    end
 
-        <emptyTree>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C REFERENCE>
-      end
+    module <emptyTree>::<C B_Package$1>::<C A><<C <todo sym>>> < ()
+      <emptyTree>::<C REFERENCE> = <emptyTree>::<C <PackageRegistry>>::<C A_Package$1>::<C A>::<C REFERENCE>
     end
   end
 end

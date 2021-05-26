@@ -8,14 +8,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Bar_Package$1><<C <todo sym>>> < ()
-      module <emptyTree>::<C Project><<C <todo sym>>> < ()
-        module <emptyTree>::<C Foo><<C <todo sym>>> < ()
-          <emptyTree>::<C CallsBar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C CallsBar>
+    module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C CallsBar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C CallsBar>
+    end
 
-          <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C Foo>
-        end
-      end
+    module <emptyTree>::<C Project_Bar_Package$1>::<C Project>::<C Foo><<C <todo sym>>> < ()
+      <emptyTree>::<C Foo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Foo_Package$1>::<C Project>::<C Foo>::<C Foo>
     end
   end
 end
@@ -73,14 +71,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C <PackageRegistry>><<C <todo sym>>> < ()
-    module <emptyTree>::<C Project_Foo_Package$1><<C <todo sym>>> < ()
-      module <emptyTree>::<C Project><<C <todo sym>>> < ()
-        module <emptyTree>::<C Bar><<C <todo sym>>> < ()
-          <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C Bar>
+    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C Bar> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C Bar>
+    end
 
-          <emptyTree>::<C CallsFoo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C CallsFoo>
-        end
-      end
+    module <emptyTree>::<C Project_Foo_Package$1>::<C Project>::<C Bar><<C <todo sym>>> < ()
+      <emptyTree>::<C CallsFoo> = <emptyTree>::<C <PackageRegistry>>::<C Project_Bar_Package$1>::<C Project>::<C Bar>::<C CallsFoo>
     end
   end
 end
