@@ -1033,4 +1033,28 @@ def foo(x, y)
 end
 ```
 
+## 7035
+
+Sorbet detected that the method `select` does not take a block. 
+Currently Sorbet does not support multiple sigs per def. Since a select could run on an object, or an array, the type would look like:
+`T.any(Model::ActiveRecord_Relation, T::Array[Model])`
+
+If you are running `select` on an array, append `.to_a` before calling select like so: 
+
+```ruby
+# typed: true
+
+extend T::Sig
+
+def get_valid_users
+  valid_ids = [1, 2, 3, 4]
+  users = User.where(id: valid_ids)
+  even_users = users.select { |u| u.id.even? } # Error: Method `User::QueryMethodsReturningAssociationRelation#select` does not take a block
+  
+  # append `.to_a`
+  even_users = users.to_a.select { |u| u.id.even? } # No Error
+end
+
+```
+
 <script src="/js/error-reference.js"></script>
