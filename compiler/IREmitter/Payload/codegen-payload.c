@@ -770,7 +770,7 @@ VALUE sorbet_rb_array_select_withBlock(VALUE recv, ID fun, int argc, const VALUE
     // must push a frame for the captured block
     sorbet_pushBlockFrame(captured);
 
-    for (int i = 0; i < RARRAY_LEN(recv); ++i) {
+    for (long i = 0; i < RARRAY_LEN(recv); ++i) {
         VALUE val = RARRAY_AREF(recv, i);
         VALUE ret = blk(val, closure, 1, &val, Qnil);
         if (RTEST(ret)) {
@@ -779,6 +779,46 @@ VALUE sorbet_rb_array_select_withBlock(VALUE recv, ID fun, int argc, const VALUE
     }
 
     sorbet_popRubyStack();
+
+    return result;
+}
+
+// This is the non-block version of rb_enum_find: https://github.com/ruby/ruby/blob/ruby_2_7/enum.c#L292-L309
+// In that version, the `RETURN_ENUMERATOR` macro is what causes the early return when a block is not passed. In
+// this case, we know that the block wasn't passed, so we always return an enumerator
+SORBET_INLINE
+VALUE sorbet_rb_array_find(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                           VALUE closure) {
+    rb_check_arity(argc, 1, 1);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_array_enum_length);
+}
+
+// This is the block version of rb_enum_find: https://github.com/ruby/ruby/blob/ruby_2_7/enum.c#L292-L309
+// That version uses `rb_block_call`, whereas we call the block function pointer directly.
+SORBET_INLINE
+VALUE sorbet_rb_array_find_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                     const struct rb_captured_block *captured, VALUE closure) {
+    rb_check_arity(argc, 0, 1);
+    VALUE result = Qnil;
+    VALUE if_none = argc == 1 ? argv[0] : Qnil;
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    for (long i = 0; i < RARRAY_LEN(recv); ++i) {
+        VALUE val = RARRAY_AREF(recv, i);
+        VALUE ret = blk(val, closure, 1, &val, Qnil);
+        if (RTEST(ret)) {
+            result = val;
+            break;
+        }
+    }
+
+    sorbet_popRubyStack();
+
+    if (NIL_P(result) && !NIL_P(if_none)) {
+        return rb_funcallv(if_none, idCall, 0, 0);
+    }
 
     return result;
 }

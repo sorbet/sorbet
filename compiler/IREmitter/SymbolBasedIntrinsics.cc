@@ -570,6 +570,7 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Array(), "select", "sorbet_rb_array_select", "sorbet_rb_array_select_withBlock"},
     // filter is an alias for select, so we call the same intrinsic
     {core::Symbols::Array(), "filter", "sorbet_rb_array_select", "sorbet_rb_array_select_withBlock"},
+    {core::Symbols::Array(), "find", "sorbet_rb_array_find", "sorbet_rb_array_find_withBlock"},
     {core::Symbols::Array(), "collect", "sorbet_rb_array_collect", "sorbet_rb_array_collect_withBlock"},
     // Ruby implements map and collect with the same function (named with "collect" in its name).
     // We do the same for consistency.
