@@ -1,5 +1,5 @@
 # typed: strict
 
-class AClass
+class A::AClass
 
 end
