@@ -523,6 +523,24 @@ module T::Configuration
     @legacy_t_enum_migration_mode || false
   end
 
+  # Disable runtime type assertions. This is useful for a bit of a performance
+  # boost at the expense of type safety during runtime.
+  # If this option is not explicity set, its default state will mean that all
+  # type assertions behave normally during runtime.
+  #
+  # Note: setting this option is potentially dangerous! Sorbet can't check all
+  # code statically.
+  def self.disable_runtime_type_assertions
+    @runtime_type_assertions_enabled = false
+  end
+  def self.enable_runtime_type_assertions
+    @runtime_type_assertions_enabled = true
+  end
+  def self.runtime_type_assertions_enabled?
+    return false if @runtime_type_assertions_enabled == false
+    true
+  end
+
   # @param [Array] sealed_violation_whitelist An array of Regexp to validate
   #   whether inheriting /including a sealed module outside the defining module
   #   should be allowed. Useful to whitelist benign violations, like shim files

@@ -350,5 +350,53 @@ module Opus::Types::Test
         end
       end
     end
+
+    describe 'runtime_type_assertions' do
+      describe 'when in default state' do
+        # Default behaviours for other assertions are checked
+        # elsewhere in this file
+        it 'T.cast raises an error' do
+          assert_raises(TypeError) do
+            T.cast(1, String)
+          end
+        end
+
+        it 'T.absurd raises an error' do
+          assert_raises(TypeError) do
+            T.absurd("Hello")
+          end
+        end
+      end
+
+      describe 'when overridden' do
+        before do
+          T::Configuration.disable_runtime_type_assertions
+        end
+
+        it 'T.let returns the given value without error' do
+          assert_equal 1, T.let(1, String)
+        end
+
+        it 'T.cast returns the given value without error' do
+          assert_equal 1, T.cast(1, String)
+        end
+
+        it 'T.must returns nil without error' do
+          assert_nil T.must(nil)
+        end
+
+        it 'T.absurd returns the given value without error' do
+          assert_equal "Hello", T.absurd("Hello")
+        end
+
+        it 'T.bind returns the given value without error' do
+          assert_equal 123, T.bind(123, String)
+        end
+
+        after do
+          T::Configuration.remove_instance_variable(:@runtime_type_assertions_enabled)
+        end
+      end
+    end
   end
 end

@@ -126,7 +126,7 @@ module T
   # exception at runtime if the value doesn't match the type.
   #
   # Compared to `T.let`, `T.cast` is _trusted_ by static system.
-  def self.cast(value, type, checked: true)
+  def self.cast(value, type, checked: T::Configuration.runtime_type_assertions_enabled?)
     return value unless checked
 
     Private::Casts.cast(value, type, cast_method: "T.cast")
@@ -141,7 +141,7 @@ module T
   #
   # If `checked` is true, raises an exception at runtime if the value
   # doesn't match the type.
-  def self.let(value, type, checked: true)
+  def self.let(value, type, checked: T::Configuration.runtime_type_assertions_enabled?)
     return value unless checked
 
     Private::Casts.cast(value, type, cast_method: "T.let")
@@ -160,7 +160,7 @@ module T
   #
   # If `checked` is true, raises an exception at runtime if the value
   # doesn't match the type (this is the default).
-  def self.bind(value, type, checked: true)
+  def self.bind(value, type, checked: T::Configuration.runtime_type_assertions_enabled?)
     return value unless checked
 
     Private::Casts.cast(value, type, cast_method: "T.bind")
@@ -210,6 +210,7 @@ module T
   #
   # sig {params(arg: T.nilable(A)).returns(A)}
   def self.must(arg)
+    return arg unless T::Configuration.runtime_type_assertions_enabled?
     return arg if arg
     return arg if arg == false
 
@@ -231,6 +232,7 @@ module T
   # happens. Commonly used to assert that a case or if statement exhausts all
   # possible cases.
   def self.absurd(value)
+    return value unless T::Configuration.runtime_type_assertions_enabled?
     msg = "Control flow reached T.absurd."
 
     case value
