@@ -631,6 +631,14 @@ class Array < Object
   end
   sig do
     params(
+      arg0: Integer,
+      arg1: Integer,
+      arg2: T::Array[Elem],
+    )
+    .returns(T::Array[Elem])
+  end
+  sig do
+    params(
         arg0: T::Range[Integer],
         arg1: Elem,
     )
