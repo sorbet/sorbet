@@ -21,7 +21,7 @@
 typedef VALUE (*BlockFFIType)(VALUE firstYieldedArg, VALUE closure, int argCount, const VALUE *args, VALUE blockArg);
 typedef VALUE (*ExceptionFFIType)(VALUE **pc, VALUE closure, rb_control_frame_t *);
 typedef VALUE (*BlockConsumerFFIType)(VALUE recv, ID fun, int argc, VALUE *argv, BlockFFIType blk,
-                                      const struct rb_captured_block *captured, VALUE closure);
+                                      const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs);
 
 // compiler is closely aware of layout of this struct
 struct FunctionInlineCache {
@@ -742,7 +742,7 @@ VALUE sorbet_rb_array_each(VALUE recv, ID fun, int argc, const VALUE *const rest
 // In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
 SORBET_INLINE
 VALUE sorbet_rb_array_each_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                     const struct rb_captured_block *captured, VALUE closure) {
+                                     const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
     rb_check_arity(argc, 0, 0);
 
     // must push a frame for the captured block
@@ -772,7 +772,7 @@ VALUE sorbet_rb_array_select(VALUE recv, ID fun, int argc, const VALUE *const re
 // In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
 SORBET_INLINE
 VALUE sorbet_rb_array_select_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                       const struct rb_captured_block *captured, VALUE closure) {
+                                       const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
     rb_check_arity(argc, 0, 0);
     VALUE result = rb_ary_new2(RARRAY_LEN(recv));
 
@@ -806,7 +806,7 @@ VALUE sorbet_rb_array_find(VALUE recv, ID fun, int argc, const VALUE *const rest
 // That version uses `rb_block_call`, whereas we call the block function pointer directly.
 SORBET_INLINE
 VALUE sorbet_rb_array_find_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                     const struct rb_captured_block *captured, VALUE closure) {
+                                     const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
     rb_check_arity(argc, 0, 1);
     VALUE result = Qnil;
     VALUE if_none = argc == 1 ? argv[0] : Qnil;
@@ -846,7 +846,8 @@ VALUE sorbet_rb_array_collect(VALUE recv, ID fun, int argc, const VALUE *const r
 // In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
 SORBET_INLINE
 VALUE sorbet_rb_array_collect_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
-                                        BlockFFIType blk, const struct rb_captured_block *captured, VALUE closure) {
+                                        BlockFFIType blk, const struct rb_captured_block *captured, VALUE closure,
+                                        int numPositionalArgs) {
     rb_check_arity(argc, 0, 0);
 
     // must push a frame for the captured block
@@ -1081,7 +1082,7 @@ VALUE sorbet_rb_int_dotimes(VALUE recv, ID fun, int argc, const VALUE *const res
 // inlining.
 SORBET_INLINE
 VALUE sorbet_rb_int_dotimes_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                      const struct rb_captured_block *captured, VALUE closure) {
+                                      const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
     rb_check_arity(argc, 0, 0);
 
     sorbet_pushBlockFrame(captured);
@@ -1105,6 +1106,63 @@ VALUE sorbet_rb_int_dotimes_withBlock(VALUE recv, ID fun, int argc, const VALUE 
             i = rb_funcall(i, '+', 1, INT2FIX(1));
         }
     }
+
+    sorbet_popRubyStack();
+
+    return recv;
+}
+
+static VALUE sorbet_hash_enum_size(VALUE recv, VALUE args, VALUE eobj) {
+    return rb_hash_size(recv);
+}
+
+// This is the no-block version of rb_hash_each_pair: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L3088-L3097
+// In that version, the `RETURN_SIZED_ENUMERATOR` macro is what causes the early return when a block is not passed. In
+// this case, we know that the block wasn't passed, so we always return an enumerator
+SORBET_INLINE
+VALUE sorbet_rb_hash_each_pair(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                               VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_hash_enum_size);
+}
+
+struct sorbet_rb_hash_each_closure {
+    BlockFFIType fun;
+    VALUE toplevel_closure;
+};
+
+static int sorbet_rb_hash_each_fun_fast(VALUE key, VALUE value, VALUE closure) {
+    VALUE argv[2];
+    argv[0] = key;
+    argv[1] = value;
+    struct sorbet_rb_hash_each_closure *c = (struct sorbet_rb_hash_each_closure *)closure;
+    c->fun(key, c->toplevel_closure, 2, &argv[0], Qnil);
+    return ST_CONTINUE;
+}
+
+static int sorbet_rb_hash_each_fun_slow(VALUE key, VALUE value, VALUE closure) {
+    VALUE array = rb_assoc_new(key, value);
+    struct sorbet_rb_hash_each_closure *c = (struct sorbet_rb_hash_each_closure *)closure;
+    c->fun(key, c->toplevel_closure, 1, &array, Qnil);
+    return ST_CONTINUE;
+}
+
+// This is the block version of rb_hash_each_pair: https://github.com/ruby/ruby/blob/ruby_2_7/hash.c#L3088-L3097
+// In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
+SORBET_INLINE
+VALUE sorbet_rb_hash_each_pair_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                         BlockFFIType blk, const struct rb_captured_block *captured, VALUE closure,
+                                         int numPositionalArgs) {
+    rb_check_arity(argc, 0, 0);
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    struct sorbet_rb_hash_each_closure passthrough;
+    passthrough.fun = blk;
+    passthrough.toplevel_closure = closure;
+    rb_hash_foreach(recv, numPositionalArgs > 1 ? sorbet_rb_hash_each_fun_fast : sorbet_rb_hash_each_fun_slow,
+                    (VALUE)&passthrough);
 
     sorbet_popRubyStack();
 
@@ -1457,7 +1515,8 @@ struct sorbet_inlineIntrinsicEnv {
 // and block function directly, so this will turn into a direct call to the intrinsic since LLVM will inline this
 // function.
 SORBET_INLINE
-VALUE sorbet_inlineIntrinsicEnv_apply(VALUE value, BlockConsumerFFIType intrinsic, BlockFFIType blk) {
+VALUE sorbet_inlineIntrinsicEnv_apply(VALUE value, BlockConsumerFFIType intrinsic, BlockFFIType blk,
+                                      int numPositionalArgs) {
     // fetch the captured block so that it's available for the intrinsic to push a frame
     rb_execution_context_t *ec = GET_EC();
     VALUE block_handler = ec->passed_block_handler;
@@ -1468,7 +1527,7 @@ VALUE sorbet_inlineIntrinsicEnv_apply(VALUE value, BlockConsumerFFIType intrinsi
     ec->passed_block_handler = VM_BLOCK_HANDLER_NONE;
 
     struct sorbet_inlineIntrinsicEnv *env = (struct sorbet_inlineIntrinsicEnv *)value;
-    return intrinsic(env->recv, env->fun, env->argc, env->argv, blk, captured, env->closure);
+    return intrinsic(env->recv, env->fun, env->argc, env->argv, blk, captured, env->closure, numPositionalArgs);
 }
 
 SORBET_INLINE

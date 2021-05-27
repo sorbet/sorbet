@@ -116,8 +116,29 @@ private:
         auto *cfunc = cs.module->getFunction(*cMethodWithBlock);
         auto *blk = mcctx.blkAsFunction();
         ENFORCE(blk != nullptr);
+        ENFORCE(mcctx.blk.has_value());
+        int blockRubyBlockId = *mcctx.blk;
+        const auto &argsFlags = mcctx.irctx.blockLinks[blockRubyBlockId]->argFlags;
+        int maxPositionalArgs = 0;
+        for (auto &flag : argsFlags) {
+            if (flag.isKeyword) {
+                continue;
+            }
+            if (flag.isRepeated) {
+                continue;
+            }
+            if (flag.isDefault) {
+                maxPositionalArgs += 1;
+                continue;
+            }
+            if (flag.isBlock) {
+                continue;
+            }
+            maxPositionalArgs += 1;
+        }
         auto *result =
-            builder.CreateCall(cs.module->getFunction("sorbet_inlineIntrinsicEnv_apply"), {env, cfunc, blk}, "result");
+            builder.CreateCall(cs.module->getFunction("sorbet_inlineIntrinsicEnv_apply"),
+                               {env, cfunc, blk, IREmitterHelpers::buildS4(cs, maxPositionalArgs)}, "result");
         builder.CreateRet(result);
         builder.restoreIP(ip);
 
@@ -622,6 +643,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Array(), "map", "sorbet_rb_array_collect", "sorbet_rb_array_collect_withBlock"},
     {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br"},
     {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq"},
+    {core::Symbols::Hash(), "each_pair", "sorbet_rb_hash_each_pair", "sorbet_rb_hash_each_pair_withBlock"},
+    {core::Symbols::Hash(), "each", "sorbet_rb_hash_each_pair", "sorbet_rb_hash_each_pair_withBlock"},
     {core::Symbols::Array(), "size", "sorbet_rb_array_len"},
     {core::Symbols::TrueClass(), "|", "sorbet_int_bool_true"},
     {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and"},
