@@ -1,16 +1,9 @@
-foo/foo.rb:11: Unable to resolve constant `Bard` https://srb.help/5002
-    11 |  Project::Bar::Bard
-          ^^^^^^^^^^^^^^^^^^
+foo/foo.rb:12: Unable to resolve constant `BardClass` https://srb.help/5002
+    12 |    Project::Bar::BardClass
+            ^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    foo/foo.rb:11: Replace with `Project::Bar`
-    11 |  Project::Bar::Bard
-          ^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    foo/foo.rb:11: Replace with `Project::Bar::Bar`
-    11 |  Project::Bar::Bard
-          ^^^^^^^^^^^^^^^^^^
-    foo/__package.rb:5: Did you mean: `Project::Bar`?
-     5 |  import Project::Bar
-                 ^^^^^^^^^^^^
-    foo/__package.rb: Did you mean: `Project::Bar::Bar`?
+    foo/foo.rb:12: Replace with `Project::Bar::BarClass`
+    12 |    Project::Bar::BardClass
+            ^^^^^^^^^^^^^^^^^^^^^^^
+    foo/__package.rb: Did you mean: `Project::Bar::BarClass`?
 Errors: 1

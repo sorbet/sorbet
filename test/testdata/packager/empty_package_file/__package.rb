@@ -3,6 +3,6 @@
 # enable-packager: true
 
 class A < PackageSpec
-  export AClass
-  export BClass
+  export A::AClass
+  export A::BClass
 end

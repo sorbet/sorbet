@@ -2,5 +2,5 @@
 # typed: strict
 
 class RBI < PackageSpec
-  export Foo
+  export RBI::Foo
 end

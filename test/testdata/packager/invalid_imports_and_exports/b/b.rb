@@ -1,20 +1,22 @@
 # frozen_string_literal: true
 # typed: strict
 
-class BClass
-  extend T::Sig
+module B
+  class BClass
+    extend T::Sig
 
-  sig {returns(Integer)}
-  def get_one
-    A::AModule.one
+    sig {returns(Integer)}
+    def get_one
+      A::AModule.one
+    end
   end
-end
 
-module BModule
-  extend T::Sig
+  module BModule
+    extend T::Sig
 
-  sig {returns(A::AClass)}
-  def self.get_a
-    A::AClass.new
+    sig {returns(A::AClass)}
+    def self.get_a
+      A::AClass.new
+    end
   end
 end

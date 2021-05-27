@@ -3,5 +3,5 @@
 class Project::Foo < PackageSpec
   import Project::Bar
 
-  export Foo
+  export Project::Foo::FooClass
 end

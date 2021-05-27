@@ -11,6 +11,6 @@ class Simpsons < PackageSpec
     #      ^^^^ def: bart 1 not-def-of-self
     #      ^^^^ usage: bartpkg
     #      ^^^^ hover: Bart package description
-    export Family
-    #      ^^^^^^ usage: family
+    export Simpsons::Family
+    #                ^^^^^^ usage: family
 end

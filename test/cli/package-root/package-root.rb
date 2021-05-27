@@ -1,6 +1,6 @@
 # typed: strict
 
-class ClassWithMethod
+class MainPackage::ClassWithMethod
   extend T::Sig
 
   sig {returns(Integer)}

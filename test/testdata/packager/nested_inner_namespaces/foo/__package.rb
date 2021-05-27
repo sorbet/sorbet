@@ -3,7 +3,7 @@
 # enable-packager: true
 
 class RootPackage::Foo < PackageSpec
-  export Foo
-  export Foo::Bar
-  export Foo::Bar::Baz
+  export RootPackage::Foo::Constant
+  export RootPackage::Foo::Bar::Constant
+  export RootPackage::Foo::Bar::Baz
 end

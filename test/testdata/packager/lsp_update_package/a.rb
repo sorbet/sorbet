@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: strict
 
-class A
+class Package::A
   extend T::Sig
 
   sig {returns(Dep::ExportedItem)} # error: Unable to resolve constant `ExportedItem`

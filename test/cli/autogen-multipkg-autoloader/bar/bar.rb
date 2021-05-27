@@ -1,6 +1,6 @@
 # typed: strict
 
-class Bar
+class Project::Bar::BarClass
   extend T::Sig
   sig {params(value: Integer).void}
   def initialize(value)

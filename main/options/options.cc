@@ -586,6 +586,11 @@ bool extractAutoloaderConfig(cxxopts::ParseResult &raw, Options &opts, shared_pt
     cfg.registryModule = raw["autogen-registry-module"].as<string>();
     cfg.rootDir = stripTrailingSlashes(raw["autogen-autoloader-root"].as<string>());
     cfg.packagedAutoloader = raw["autogen-autoloader-packaged"].as<bool>();
+    if (cfg.packagedAutoloader) {
+        // TODO(ngroman) Multi-package autoloader runtime support
+        logger->error("Flag --autogen-autoloader-packaged is currently not supported.");
+        throw EarlyReturnWithCode(1);
+    }
     cfg.rootObject = raw["autogen-root-object"].as<string>();
     return true;
 }
