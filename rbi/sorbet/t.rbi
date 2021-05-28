@@ -138,6 +138,9 @@ module T::Configuration
   def self.enable_checking_for_sigs_marked_checked_tests; end
   def self.enable_final_checks_on_hooks; end
   def self.enable_legacy_t_enum_migration_mode; end
+  def self.disable_runtime_type_assertions; end
+  def self.enable_runtime_type_assertions; end
+  def self.runtime_type_assertions_enabled?; end
   def self.reset_final_checks_on_hooks; end
   sig {returns(T::Boolean)}
   def self.include_value_in_type_errors?; end
