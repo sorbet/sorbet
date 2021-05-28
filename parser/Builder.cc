@@ -754,8 +754,8 @@ public:
                                 std::move(body));
     }
 
-    unique_ptr<Node> forward_args(const token *begin, const token *dots, const token *end) {
-        return make_unique<ForwardArgs>(tokLoc(begin).join(tokLoc(dots)).join(tokLoc(end)));
+    unique_ptr<Node> forward_arg(const token *begin, const token *dots, const token *end) {
+        return make_unique<ForwardArg>(tokLoc(dots));
     }
 
     unique_ptr<Node> forwarded_args(const token *dots) {
@@ -1797,9 +1797,9 @@ ForeignPtr for_(SelfPtr builder, const token *for_, ForeignPtr iterator, const t
                                         build->cast_node(body), end));
 }
 
-ForeignPtr forward_args(SelfPtr builder, const token *begin, const token *dots, const token *end) {
+ForeignPtr forward_arg(SelfPtr builder, const token *begin, const token *dots, const token *end) {
     auto build = cast_builder(builder);
-    return build->toForeign(build->forward_args(begin, dots, end));
+    return build->toForeign(build->forward_arg(begin, dots, end));
 }
 
 ForeignPtr forwarded_args(SelfPtr builder, const token *dots) {
@@ -2312,7 +2312,7 @@ struct ruby_parser::builder Builder::interface = {
     float_,
     floatComplex,
     for_,
-    forward_args,
+    forward_arg,
     forwarded_args,
     gvar,
     hash_pattern,

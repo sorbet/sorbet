@@ -273,8 +273,8 @@ NodeDef nodes[] = {
     },
     // "..." argument forwarding in definition site
     {
-        "ForwardArgs",
-        "forward_args",
+        "ForwardArg",
+        "forward_arg",
         vector<FieldDef>(),
     },
     // "..." argument forwarding in call site
