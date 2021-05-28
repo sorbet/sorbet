@@ -2542,12 +2542,13 @@ private:
         auto methodInfo = method.data(ctx);
 
         // Is this a signature for a method defined with argument forwarding syntax?
-        if (methodInfo->arguments().size() == 3) {
-            // To match, the definition must have been desugared in exaclty 3 parameters named
+        if (methodInfo->arguments().size() >= 3) {
+            // To match, the definition must have been desugared with at least 3 parameters named
             // `<fwd-args>`, `<fwd-kwargs>` and `<fwd-block>`
-            auto l1 = getArgLocal(ctx, methodInfo->arguments()[0], mdef, 0, isOverloaded)->localVariable;
-            auto l2 = getArgLocal(ctx, methodInfo->arguments()[1], mdef, 1, isOverloaded)->localVariable;
-            auto l3 = getArgLocal(ctx, methodInfo->arguments()[2], mdef, 2, isOverloaded)->localVariable;
+            auto len = methodInfo->arguments().size();
+            auto l1 = getArgLocal(ctx, methodInfo->arguments()[len - 3], mdef, len - 3, isOverloaded)->localVariable;
+            auto l2 = getArgLocal(ctx, methodInfo->arguments()[len - 2], mdef, len - 2, isOverloaded)->localVariable;
+            auto l3 = getArgLocal(ctx, methodInfo->arguments()[len - 1], mdef, len - 1, isOverloaded)->localVariable;
             if (l1._name == core::Names::fwdArgs() && l2._name == core::Names::fwdKwargs() &&
                 l3._name == core::Names::fwdBlock()) {
                 if (auto e = ctx.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {

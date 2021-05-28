@@ -71,6 +71,24 @@ class Foo
     puts kargs # error: Method `kargs` does not exist on `Foo`
     puts block # error: Method `block` does not exist on `Foo`
   end
+
+  sig do
+    params(
+      a: T.untyped,
+      b: T::Hash[T.untyped, T.untyped],
+      c: T.untyped
+    ).void
+  end # error: Unsupported `sig` for argument forwarding syntax
+  def foo_fwd4(a, b, c, ...)
+    puts a, b, c
+  end
+
+  def foo_fwd5(a, b, c, ...)
+    T.reveal_type(a) # error: Revealed type: `T.untyped`
+    T.reveal_type(b) # error: Revealed type: `T.untyped`
+    T.reveal_type(c) # error: Revealed type: `T.untyped`
+    d = T.unsafe(self).bar(a, b, c, ...)
+  end
 end
 
 Foo.new.foo_fwd
