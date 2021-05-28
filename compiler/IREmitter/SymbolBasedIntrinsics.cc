@@ -647,6 +647,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq"},
     {core::Symbols::Hash(), "each_pair", "sorbet_rb_hash_each_pair", "sorbet_rb_hash_each_pair_withBlock"},
     {core::Symbols::Hash(), "each", "sorbet_rb_hash_each_pair", "sorbet_rb_hash_each_pair_withBlock"},
+    {core::Symbols::Hash(), "each_with_object", "sorbet_rb_hash_each_with_object",
+     "sorbet_rb_hash_each_with_object_withBlock"},
     {core::Symbols::Array(), "size", "sorbet_rb_array_len"},
     {core::Symbols::TrueClass(), "|", "sorbet_int_bool_true"},
     {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and"},

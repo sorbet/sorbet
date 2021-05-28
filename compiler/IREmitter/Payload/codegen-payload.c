@@ -1261,6 +1261,61 @@ VALUE sorbet_rb_hash_each_pair_withBlock(VALUE recv, ID fun, int argc, const VAL
     return recv;
 }
 
+// This is the no-block version of enum_each_with_object:
+// https://github.com/ruby/ruby/blob/b0b7751f3b94e7983d124e43102f76ff598caabd/enum.c#L2749-L2757 In that version, the
+// `RETURN_SIZED_ENUMERATOR` macro is what causes the early return when a block is not passed. In this case, we know
+// that the block wasn't passed, so we always return an enumerator
+SORBET_INLINE
+VALUE sorbet_rb_hash_each_with_object(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                      VALUE closure) {
+    rb_check_arity(argc, 1, 1);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_hash_enum_size);
+}
+
+struct sorbet_rb_hash_each_with_object_closure {
+    BlockFFIType fun;
+    VALUE toplevel_closure;
+    // We use this to pass to the block function; argv[0] is going to be rewritten
+    // on each iteration with the [k, v] array.  argv[1] will be written once outside
+    // of the iteration with the object to be passed.
+    VALUE argv[2];
+};
+
+static int sorbet_rb_hash_each_with_object_fun(VALUE key, VALUE value, VALUE closure) {
+    // TODO: it would be nice if we could statically analyze the block that each_with_object
+    // is being called with and determine that we could safely re-use an array on every
+    // iteration,.
+    VALUE array = rb_assoc_new(key, value);
+    struct sorbet_rb_hash_each_with_object_closure *c = (struct sorbet_rb_hash_each_with_object_closure *)closure;
+    c->argv[0] = array;
+    c->fun(array, c->toplevel_closure, 2, &c->argv[0], Qnil);
+    return ST_CONTINUE;
+}
+
+// This is the block version of Hash#each_with_object -- which doesn't exist as a separate C function in the VM.
+// In the no-block version, above, the code uses `rb_yield`, whereas we call the block function pointer directly.
+SORBET_INLINE
+VALUE sorbet_rb_hash_each_with_object_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                                BlockFFIType blk, const struct rb_captured_block *captured,
+                                                VALUE closure, int numPositionalArgs) {
+    rb_check_arity(argc, 1, 1);
+
+    VALUE object = argv[0];
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    struct sorbet_rb_hash_each_with_object_closure passthrough;
+    passthrough.fun = blk;
+    passthrough.toplevel_closure = closure;
+    passthrough.argv[1] = object;
+    rb_hash_foreach(recv, sorbet_rb_hash_each_with_object_fun, (VALUE)&passthrough);
+
+    sorbet_popRubyStack();
+
+    return object;
+}
+
 // ****
 // ****                       Name Based Intrinsics
 // ****
