@@ -10,6 +10,14 @@ class Foo
   def foo2(*args, **kwargs, &block)
     T.unsafe(self).bar(*args, **kwargs, &block)
   end
+
+  def foo3(...)
+    T.unsafe(self).bar(*[1, 2, 3], ...)
+  end
+
+  def foo4(*args, **kwargs, &block)
+    T.unsafe(self).bar(*[1, 2, 3], *args, **kwargs, &block)
+  end
 end
 
 Foo.new.foo
