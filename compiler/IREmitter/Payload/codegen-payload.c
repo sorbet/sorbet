@@ -867,6 +867,98 @@ VALUE sorbet_rb_array_collect_withBlock(VALUE recv, ID fun, int argc, const VALU
     return collect;
 }
 
+// This is the no-block version of rb_ary_any_p: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L6338-L6364
+SORBET_INLINE
+VALUE sorbet_rb_array_any(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
+    rb_check_arity(argc, 0, 1);
+    long len = RARRAY_LEN(recv);
+    if (argc == 1) {
+        for (long i = 0; i < len; ++i) {
+            if (RTEST(rb_funcall(argv[0], idEqq, 1, RARRAY_AREF(recv, i)))) {
+                return Qtrue;
+            }
+        }
+    } else {
+        for (long i = 0; i < len; ++i) {
+            if (RTEST(RARRAY_AREF(recv, i))) {
+                return Qtrue;
+            }
+        }
+    }
+    return Qfalse;
+}
+
+// This is the block version of rb_ary_any_p: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L6338-L6364
+// In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
+SORBET_INLINE
+VALUE sorbet_rb_array_any_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                    const struct rb_captured_block *captured, VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    for (long i = 0; i < RARRAY_LEN(recv); ++i) {
+        VALUE val = RARRAY_AREF(recv, i);
+        VALUE ret = blk(val, closure, 1, &val, Qnil);
+        if (RTEST(ret)) {
+            sorbet_popRubyStack();
+            return Qtrue;
+        }
+    }
+
+    sorbet_popRubyStack();
+
+    return Qfalse;
+}
+
+// This is the no-block version of rb_ary_all_p: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L6374-L6400
+SORBET_INLINE
+VALUE sorbet_rb_array_all(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                          VALUE closure) {
+    rb_check_arity(argc, 0, 1);
+    long len = RARRAY_LEN(recv);
+    if (argc == 1) {
+        for (long i = 0; i < len; ++i) {
+            if (!RTEST(rb_funcall(argv[0], idEqq, 1, RARRAY_AREF(recv, i)))) {
+                return Qfalse;
+            }
+        }
+    } else {
+        for (long i = 0; i < len; ++i) {
+            if (!RTEST(RARRAY_AREF(recv, i))) {
+                return Qfalse;
+            }
+        }
+    }
+    return Qtrue;
+}
+
+// This is the block version of rb_ary_all_p: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L6374-L6400
+// In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
+SORBET_INLINE
+VALUE sorbet_rb_array_all_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                    const struct rb_captured_block *captured, VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    for (long i = 0; i < RARRAY_LEN(recv); ++i) {
+        VALUE val = RARRAY_AREF(recv, i);
+        VALUE ret = blk(val, closure, 1, &val, Qnil);
+        if (!RTEST(ret)) {
+            sorbet_popRubyStack();
+            return Qfalse;
+        }
+    }
+
+    sorbet_popRubyStack();
+
+    return Qtrue;
+}
+
 // This is an adjusted version of the intrinsic from the ruby vm. The major change is that instead of handling the case
 // where a range is used as the key, we defer back to the VM.
 // https://github.com/ruby/ruby/blob/ruby_2_6/array.c#L1980-L2005

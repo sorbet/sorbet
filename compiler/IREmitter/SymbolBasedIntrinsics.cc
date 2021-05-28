@@ -641,6 +641,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
     // Ruby implements map and collect with the same function (named with "collect" in its name).
     // We do the same for consistency.
     {core::Symbols::Array(), "map", "sorbet_rb_array_collect", "sorbet_rb_array_collect_withBlock"},
+    {core::Symbols::Array(), "any?", "sorbet_rb_array_any", "sorbet_rb_array_any_withBlock"},
+    {core::Symbols::Array(), "all?", "sorbet_rb_array_all", "sorbet_rb_array_all_withBlock"},
     {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br"},
     {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq"},
     {core::Symbols::Hash(), "each_pair", "sorbet_rb_hash_each_pair", "sorbet_rb_hash_each_pair_withBlock"},
