@@ -191,6 +191,9 @@ declare void @rb_gc_register_mark_object(i64) local_unnamed_addr #2
 ; Function Attrs: noreturn
 declare void @rb_raise(i64, i8*, ...) local_unnamed_addr #1
 
+; Function Attrs: nounwind readnone willreturn
+declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
+
 declare i64 @rb_int2big(i64) local_unnamed_addr #2
 
 ; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
@@ -227,9 +230,6 @@ define weak i8* @sorbet_getBuildSCMRevision() local_unnamed_addr #8 {
   tail call void (i64, i8*, ...) @rb_raise(i64 %1, i8* noundef getelementptr inbounds ([95 x i8], [95 x i8]* @.str.8, i64 0, i64 0)) #17
   unreachable
 }
-
-; Function Attrs: nounwind readnone willreturn
-declare i64 @rb_obj_is_kind_of(i64, i64) local_unnamed_addr #3
 
 ; Function Attrs: nounwind sspreq uwtable
 define i64 @func_HasFib.fib(i32 %argc, i64* nocapture readonly %argArray, i64 %selfRaw, %struct.rb_control_frame_struct* nocapture nonnull align 8 dereferenceable(8) %cfp) #9 !dbg !8 {

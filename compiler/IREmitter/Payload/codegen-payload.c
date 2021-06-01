@@ -1316,6 +1316,80 @@ VALUE sorbet_rb_hash_each_with_object_withBlock(VALUE recv, ID fun, int argc, co
     return object;
 }
 
+struct sorbet_rb_hash_any_closure {
+    BlockFFIType fun;
+    VALUE toplevel_closure;
+    VALUE retval;
+};
+
+extern VALUE sorbet_rb_hash_any_forwarder(int argc, VALUE *argv, VALUE hash);
+
+// no-block rb_hash_any_p: https://github.com/ruby/ruby/blob/67f1cd20bfb97ff6e5a15d27c8ef06cdb97ed37a/hash.c#L4354-L4381
+SORBET_INLINE
+VALUE sorbet_rb_hash_any(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                         VALUE closure) {
+    return sorbet_rb_hash_any_forwarder(argc, (VALUE *)argv, recv);
+}
+
+static int sorbet_rb_hash_any_fun_fast(VALUE key, VALUE value, VALUE arg) {
+    VALUE argv[2];
+    argv[0] = key;
+    argv[1] = value;
+    struct sorbet_rb_hash_any_closure *c = (struct sorbet_rb_hash_any_closure *)arg;
+    VALUE ret = c->fun(key, c->toplevel_closure, 2, argv, Qnil);
+    if (RTEST(ret)) {
+        c->retval = Qtrue;
+        return ST_STOP;
+    }
+    return ST_CONTINUE;
+}
+
+static int sorbet_rb_hash_any_fun_slow(VALUE key, VALUE value, VALUE arg) {
+    VALUE array = rb_assoc_new(key, value);
+    struct sorbet_rb_hash_any_closure *c = (struct sorbet_rb_hash_any_closure *)arg;
+    VALUE ret = c->fun(key, c->toplevel_closure, 1, &array, Qnil);
+    if (RTEST(ret)) {
+        c->retval = Qtrue;
+        return ST_STOP;
+    }
+    return ST_CONTINUE;
+}
+
+// block rb_hash_any_p: https://github.com/ruby/ruby/blob/67f1cd20bfb97ff6e5a15d27c8ef06cdb97ed37a/hash.c#L4354-L4381
+SORBET_INLINE
+VALUE sorbet_rb_hash_any_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                   const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
+    // TODO: do we need to handle argc == 1?
+    rb_check_arity(argc, 0, 1);
+
+    // correctness first
+    if (UNLIKELY(argc == 1)) {
+        return sorbet_rb_hash_any_forwarder(argc, (VALUE *)argv, recv);
+    }
+
+    if (RHASH_EMPTY_P(recv)) {
+        return Qfalse;
+    }
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    struct sorbet_rb_hash_any_closure passthrough;
+    passthrough.fun = blk;
+    passthrough.toplevel_closure = closure;
+    passthrough.retval = Qfalse;
+    // Hash#any is a little weird: the VM will dynamically check the arity of the
+    // block and pass a different number of args as appropriate.  This mimics the
+    // array unpacking that blocks would normally do, except that we can do it
+    // faster in the caller because we don't have to allocate the array each time.
+    rb_hash_foreach(recv, numPositionalArgs > 1 ? sorbet_rb_hash_any_fun_fast : sorbet_rb_hash_any_fun_slow,
+                    (VALUE)&passthrough);
+
+    sorbet_popRubyStack();
+
+    return passthrough.retval;
+}
+
 // ****
 // ****                       Name Based Intrinsics
 // ****
