@@ -12,9 +12,6 @@
 // This is probably a bad idea but is needed for so many things
 #include "vm_core.h"
 
-// This is for the enum definition for YARV instructions
-#include "insns.inc"
-
 #define SORBET_ATTRIBUTE(...) __attribute__((__VA_ARGS__))
 #define SORBET_INLINE __attribute__((always_inline))
 
