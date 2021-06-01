@@ -893,7 +893,7 @@ VALUE sorbet_rb_array_any(VALUE recv, ID fun, int argc, const VALUE *const restr
 // In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
 SORBET_INLINE
 VALUE sorbet_rb_array_any_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                    const struct rb_captured_block *captured, VALUE closure) {
+                                    const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
     rb_check_arity(argc, 0, 0);
 
     // must push a frame for the captured block
@@ -939,7 +939,7 @@ VALUE sorbet_rb_array_all(VALUE recv, ID fun, int argc, const VALUE *const restr
 // In that version the for loop uses `rb_yield`, whereas we call the block function pointer directly.
 SORBET_INLINE
 VALUE sorbet_rb_array_all_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
-                                    const struct rb_captured_block *captured, VALUE closure) {
+                                    const struct rb_captured_block *captured, VALUE closure, int numPositionalArgs) {
     rb_check_arity(argc, 0, 0);
 
     // must push a frame for the captured block
