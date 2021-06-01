@@ -12,7 +12,7 @@ vector<core::FileRef> ErrorReporter::filesWithErrorsSince(u4 epoch) {
     vector<core::FileRef> filesUpdatedSince;
     for (size_t i = 1; i < fileErrorStatuses.size(); ++i) {
         ErrorStatus fileErrorStatus = fileErrorStatuses[i];
-        if (fileErrorStatus.lastReportedEpoch >= epoch && fileErrorStatus.hasErrors) {
+        if (fileErrorStatus.lastReportedEpoch >= epoch && fileErrorStatus.errorCount > 0) {
             filesUpdatedSince.push_back(core::FileRef(i));
         }
     }
@@ -73,11 +73,11 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
     }
 
     // If errors is empty and the file had no errors previously, break
-    if (errors.empty() && fileErrorStatus.hasErrors == false) {
+    if (errors.empty() && fileErrorStatus.errorCount == 0) {
         return;
     }
 
-    fileErrorStatus.hasErrors = !errors.empty();
+    fileErrorStatus.errorCount = errors.size();
 
     const string uri = config->fileRef2Uri(gs, file);
     vector<unique_ptr<Diagnostic>> diagnostics;

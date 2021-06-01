@@ -15,8 +15,8 @@ struct EpochTimers {
 struct ErrorStatus {
     // The epoch at which we last sent diagnostics for this file.
     u4 lastReportedEpoch = 0;
-    // If true, the client believes this file has errors.
-    bool hasErrors = false;
+    // The number of errors reported for this file during the last reported epoch.
+    u4 errorCount = 0;
 };
 
 class ErrorReporter {
