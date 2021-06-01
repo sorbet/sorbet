@@ -15,6 +15,7 @@
 #include "compiler/IREmitter/CFGHelpers.h"
 #include "compiler/IREmitter/IREmitterContext.h"
 #include "compiler/IREmitter/IREmitterHelpers.h"
+#include "compiler/IREmitter/MethodCallContext.h"
 #include "compiler/Names/Names.h"
 
 using namespace std;
@@ -1108,6 +1109,46 @@ IREmitterHelpers::isFinalMethod(const core::GlobalState &gs, core::TypePtr recvT
     auto file = funSym.data(gs)->loc().file();
     bool isCompiled = file.data(gs).source().find("# compiled: true\n") != string_view::npos;
     return IREmitterHelpers::FinalMethodInfo{recvSym, funSym, isCompiled};
+}
+
+llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &mcctx,
+                                                             const vector<string> &expectedRubyCFuncs,
+                                                             const string &methodNameForDebug) {
+    auto &cs = mcctx.cs;
+    auto *send = mcctx.send;
+    auto &builder = static_cast<llvm::IRBuilder<> &>(mcctx.build);
+
+    auto flags = vector<VMFlag>{};
+    if (send->isPrivateOk) {
+        flags.emplace_back(Payload::VM_CALL_FCALL);
+    } else {
+        flags.emplace_back(Payload::VM_CALL_ARGS_SIMPLE);
+    }
+    auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, methodNameForDebug, flags, 0, {});
+    auto *recv = mcctx.varGetRecv();
+
+    // TODO(jez) We could do even better by hoisting this out, so that all potential
+    // things that want to use the cache cooperate in updating it once per call.
+    builder.CreateCall(cs.getFunction("sorbet_vmMethodSearch"), {cache, recv}, "vmMethodSearch");
+
+    // We could initialize result with the first result (because expectedRubyCFunc is
+    // non-empty), but this makes the code slightly cleaner, and LLVM will optimize.
+    llvm::Value *result = builder.getInt1(false);
+    for (const auto &expectedFunc : expectedRubyCFuncs) {
+        auto *expectedFnPtr = cs.getFunction(expectedFunc);
+        if (expectedFnPtr == nullptr) {
+            Exception::raise("Couldn't find expected Ruby C func `{}` in the current Module. Is it static (private)?",
+                             expectedFunc);
+        }
+        auto *fnPtrAsAnyFn =
+            builder.CreatePointerCast(expectedFnPtr, cs.getAnyRubyCApiFunctionType()->getPointerTo(), "fnPtrCast");
+
+        auto current =
+            builder.CreateCall(cs.getFunction("sorbet_isCachedMethod"), {cache, fnPtrAsAnyFn, recv}, "isCached");
+        result = builder.CreateOr(result, current);
+    }
+
+    return result;
 }
 
 } // namespace sorbet::compiler

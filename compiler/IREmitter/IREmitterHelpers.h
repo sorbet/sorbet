@@ -149,6 +149,10 @@ public:
     // Return true when the symbol is a final method
     static std::optional<FinalMethodInfo> isFinalMethod(const core::GlobalState &gs, core::TypePtr recvType,
                                                         core::NameRef fun);
+
+    static llvm::Value *receiverFastPathTestWithCache(MethodCallContext &mcctx,
+                                                      const std::vector<std::string> &expectedRubyCFuncs,
+                                                      const std::string &methodNameForDebug);
 };
 } // namespace sorbet::compiler
 #endif

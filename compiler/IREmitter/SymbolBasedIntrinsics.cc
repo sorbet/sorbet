@@ -43,45 +43,6 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     return sym;
 }
 
-llvm::Value *receiverFastPathTestWithCache(MethodCallContext &mcctx, core::ClassOrModuleRef potentialClass,
-                                           const vector<string> &expectedRubyCFuncs, string methodNameForDebug) {
-    auto &cs = mcctx.cs;
-    auto *send = mcctx.send;
-    auto &builder = builderCast(mcctx.build);
-
-    auto flags = vector<VMFlag>{};
-    if (send->isPrivateOk) {
-        flags.emplace_back(Payload::VM_CALL_FCALL);
-    } else {
-        flags.emplace_back(Payload::VM_CALL_ARGS_SIMPLE);
-    }
-    auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, methodNameForDebug, flags, 0, {});
-    auto *recv = mcctx.varGetRecv();
-
-    // TODO(jez) We could do even better by hoisting this out, so that all potential
-    // things that want to use the cache cooperate in updating it once per call.
-    builder.CreateCall(cs.getFunction("sorbet_vmMethodSearch"), {cache, recv}, "vmMethodSearch");
-
-    // We could initialize result with the first result (because expectedRubyCFunc is
-    // non-empty), but this makes the code slightly cleaner, and LLVM will optimize.
-    llvm::Value *result = builder.getInt1(false);
-    for (const auto &expectedFunc : expectedRubyCFuncs) {
-        auto *expectedFnPtr = cs.getFunction(expectedFunc);
-        if (expectedFnPtr == nullptr) {
-            Exception::raise("Couldn't find expected Ruby C func `{}` in the current Module. Is it static (private)?",
-                             expectedFunc);
-        }
-        auto *fnPtrAsAnyFn =
-            builder.CreatePointerCast(expectedFnPtr, cs.getAnyRubyCApiFunctionType()->getPointerTo(), "fnPtrCast");
-
-        auto current =
-            builder.CreateCall(cs.getFunction("sorbet_isCachedMethod"), {cache, fnPtrAsAnyFn, recv}, "isCached");
-        result = builder.CreateOr(result, current);
-    }
-
-    return result;
-}
-
 class CallCMethod : public SymbolBasedIntrinsicMethod {
 protected:
     core::ClassOrModuleRef rubyClass;
@@ -192,7 +153,7 @@ public:
     virtual llvm::Value *receiverFastPathTest(MethodCallContext &mcctx,
                                               core::ClassOrModuleRef potentialClass) const override {
         if (!this->expectedRubyCFuncs.empty()) {
-            return receiverFastPathTestWithCache(mcctx, potentialClass, this->expectedRubyCFuncs, string(rubyMethod));
+            return IREmitterHelpers::receiverFastPathTestWithCache(mcctx, this->expectedRubyCFuncs, string(rubyMethod));
         } else {
             return SymbolBasedIntrinsicMethod::receiverFastPathTest(mcctx, potentialClass);
         }
