@@ -19,7 +19,7 @@ vector<core::FileRef> ErrorReporter::filesWithErrorsSince(u4 epoch) {
     return filesUpdatedSince;
 }
 
-void ErrorReporter::beginEpoch(u4 epoch, vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
+void ErrorReporter::beginEpoch(u4 epoch, bool isIncremental, vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     ENFORCE(epochTimers.find(epoch) == epochTimers.end());
     vector<Timer> firstDiagnosticLatencyTimers;
     if (config->getClientConfig().enableTypecheckInfo) {
@@ -139,10 +139,10 @@ u4 ErrorReporter::lastDiagnosticEpochForFile(core::FileRef file) {
     return getFileErrorStatus(file).lastReportedEpoch;
 }
 
-ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch,
+ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, bool isIncremental,
                        std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers)
     : errorReporter(errorReporter), epoch(epoch) {
-    errorReporter.beginEpoch(epoch, move(diagnosticLatencyTimers));
+    errorReporter.beginEpoch(epoch, isIncremental, move(diagnosticLatencyTimers));
 };
 
 ErrorEpoch::~ErrorEpoch() {

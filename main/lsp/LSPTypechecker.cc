@@ -93,7 +93,8 @@ void LSPTypechecker::initialize(LSPFileUpdates updates, WorkerPool &workers) {
     // TODO(jvilk): Make it preemptible.
     auto committed = false;
     {
-        ErrorEpoch epoch(*errorReporter, updates.epoch, {});
+        const bool isIncremental = false;
+        ErrorEpoch epoch(*errorReporter, updates.epoch, isIncremental, {});
         committed = runSlowPath(move(updates), workers, /* cancelable */ false);
         epoch.committed = committed;
     }
@@ -138,7 +139,7 @@ bool LSPTypechecker::typecheck(LSPFileUpdates updates, WorkerPool &workers,
     const bool isFastPath = updates.canTakeFastPath;
     sendTypecheckInfo(*config, *gs, SorbetTypecheckRunStatus::Started, isFastPath, {});
     {
-        ErrorEpoch epoch(*errorReporter, updates.epoch, move(diagnosticLatencyTimers));
+        ErrorEpoch epoch(*errorReporter, updates.epoch, isFastPath, move(diagnosticLatencyTimers));
 
         if (isFastPath) {
             filesTypechecked =

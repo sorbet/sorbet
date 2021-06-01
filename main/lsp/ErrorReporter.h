@@ -37,7 +37,7 @@ public:
     void pushDiagnostics(u4 epoch, core::FileRef file, const std::vector<std::unique_ptr<core::Error>> &errors,
                          const core::GlobalState &gs);
 
-    void beginEpoch(u4 epoch, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+    void beginEpoch(u4 epoch, bool isIncremental, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
     void endEpoch(u4 epoch, bool committed = true);
     u4 lastDiagnosticEpochForFile(core::FileRef file);
 };
@@ -47,7 +47,8 @@ class ErrorEpoch final {
     u4 epoch;
 
 public:
-    ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
+    ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, bool isIncremental,
+               std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
 
     ~ErrorEpoch();
 

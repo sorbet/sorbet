@@ -72,7 +72,7 @@ TEST_CASE("NotifiesVSCodeWhenFileHasErrors") {
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
-    er.beginEpoch(epoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, errors, *gs);
 
     auto output = outputVector->getOutput();
@@ -111,10 +111,10 @@ TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
-    er.beginEpoch(epoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, errors, *gs);
 
-    er.beginEpoch(newEpoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(newEpoch, true, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
     auto output = outputVector->getOutput();
     CHECK_EQ(2, output.size());
@@ -144,10 +144,10 @@ TEST_CASE("DoesNotReportToVSCodeWhenFileNeverHadErrors") {
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
-    er.beginEpoch(epoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
 
-    er.beginEpoch(newEpoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(newEpoch, true, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
 
     auto output = outputVector->getOutput();
@@ -177,15 +177,15 @@ TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
-    er.beginEpoch(initialEpoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(initialEpoch, false, move(emptyDiagnosticLatencyTimers));
     // pushDiagnostics is called for foo.rb at epoch 0 with no errors (initial state)
     er.pushDiagnostics(initialEpoch, fref, emptyErrorList, *gs);
 
-    er.beginEpoch(latestEpoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(latestEpoch, true, move(emptyDiagnosticLatencyTimers));
     // pushDiagnostics is called for foo.rb at epoch 2 with no errors (the fast path preemption)
     er.pushDiagnostics(latestEpoch, fref, emptyErrorList, *gs);
 
-    er.beginEpoch(slowPathEpoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(slowPathEpoch, true, move(emptyDiagnosticLatencyTimers));
     // pushDiagnostics is called for foo.rb at epoch 1 with errors (the slow path)
     er.pushDiagnostics(slowPathEpoch, fref, errors, *gs);
 
@@ -215,7 +215,7 @@ TEST_CASE("FirstAndLastLatencyReporting") {
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
 
-    er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
     Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, errors, *gs);
 
@@ -266,7 +266,7 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
-    er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
     Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
     Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
@@ -305,7 +305,7 @@ TEST_CASE("FirstAndLastLatencyNotReportedWhenEpochIsCancelled") {
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
 
-    er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
 
     Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
@@ -344,12 +344,12 @@ TEST_CASE("filesWithErrorsSince") {
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
 
-    er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, errors, *gs);
     INFO("Only returns files with lastReportedEpoch >= sent epoch");
     CHECK(er.filesWithErrorsSince(requestedEpoch).empty());
 
-    er.beginEpoch(requestedEpoch, move(diagnosticLatencyTimers));
+    er.beginEpoch(requestedEpoch, true, move(diagnosticLatencyTimers));
     er.pushDiagnostics(requestedEpoch, fref, errors, *gs);
     er.pushDiagnostics(requestedEpoch, frefWithoutErrors, emptyErrorList, *gs);
 
