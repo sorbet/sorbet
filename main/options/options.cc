@@ -321,6 +321,11 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options("advanced")("enable-all-beta-lsp-features",
                                     "Enable (expected-to-be-non-crashy) early-access LSP features.");
     options.add_options("advanced")(
+        "lsp-max-errors-reported",
+        "Limits the maximum number of simultaneous errors that LSP reports to the editor. Can prevent "
+        "editor slowdowns with large error lists.",
+        cxxopts::value<int>()->default_value(to_string(empty.lspMaxErrorsReported)), "limit");
+    options.add_options("advanced")(
         "ignore",
         "Ignores input files that contain the given string in their paths (relative to the input path passed to "
         "Sorbet). Strings beginning with / match against the prefix of these relative paths; others are substring "
@@ -701,6 +706,8 @@ void readOptions(Options &opts,
                 opts.lspDirsMissingFromClient.push_back(pNormalized);
             }
         }
+
+        opts.lspMaxErrorsReported = raw["lsp-max-errors-reported"].as<int>();
 
         opts.cacheDir = raw["cache-dir"].as<string>();
         if (!extractPrinters(raw, opts, logger)) {

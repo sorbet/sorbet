@@ -29,6 +29,12 @@ void ErrorReporter::beginEpoch(u4 epoch, bool isIncremental, vector<unique_ptr<T
         firstDiagnosticLatencyTimers.emplace_back(timer->clone("first_diagnostic_latency"));
     }
 
+    if (!isIncremental) {
+        // Sorbet is going to retypecheck every file. Reset the error count so we do not suppress new errors.
+        this->lastFullTypecheckEpoch = epoch;
+        this->clientErrorCount = 0;
+    }
+
     epochTimers[epoch] = EpochTimers{move(firstDiagnosticLatencyTimers), move(diagnosticLatencyTimers)};
 }
 
@@ -57,6 +63,28 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
         return;
     }
 
+    // Update clientErrorCount
+    if (fileErrorStatus.lastReportedEpoch >= this->lastFullTypecheckEpoch) {
+        // clientErrorCount contains the errors from the last reported epoch. Subtract them since this action will
+        // revoke them via publishing a new error list.
+        this->clientErrorCount = this->clientErrorCount - fileErrorStatus.errorCount;
+    }
+
+    u4 errorsToReport = errors.size();
+    {
+        const auto maxErrors = config->opts.lspMaxErrorsReported;
+        // N.B.: A value of 0 means no maximum is imposed.
+        if (maxErrors > 0) {
+            if (maxErrors > this->clientErrorCount) {
+                errorsToReport = min(static_cast<u4>(errors.size()), maxErrors - this->clientErrorCount);
+            } else {
+                errorsToReport = 0;
+            }
+        }
+    }
+
+    this->clientErrorCount += errors.size();
+
     fileErrorStatus.lastReportedEpoch = epoch;
 
     auto it = epochTimers.find(epoch);
@@ -82,6 +110,11 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
     const string uri = config->fileRef2Uri(gs, file);
     vector<unique_ptr<Diagnostic>> diagnostics;
     for (auto &error : errors) {
+        if (errorsToReport == 0) {
+            break;
+        }
+        errorsToReport--;
+
         ENFORCE(!error->isSilenced);
 
         auto range = Range::fromLoc(gs, error->loc);
@@ -137,6 +170,15 @@ ErrorStatus &ErrorReporter::getFileErrorStatus(core::FileRef file) {
 
 u4 ErrorReporter::lastDiagnosticEpochForFile(core::FileRef file) {
     return getFileErrorStatus(file).lastReportedEpoch;
+}
+
+void ErrorReporter::sanityCheck() const {
+    DEBUG_ONLY(u4 errorCount = 0; for (auto &status
+                                       : this->fileErrorStatuses) {
+        if (status.lastReportedEpoch >= this->lastFullTypecheckEpoch) {
+            errorCount += status.errorCount;
+        }
+    } ENFORCE(errorCount == this->clientErrorCount));
 }
 
 ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, bool isIncremental,

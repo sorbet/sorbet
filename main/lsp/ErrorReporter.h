@@ -25,6 +25,11 @@ class ErrorReporter {
     std::vector<ErrorStatus> fileErrorStatuses;
     ErrorStatus &getFileErrorStatus(core::FileRef file);
     UnorderedMap<u4, EpochTimers> epochTimers;
+    // The number of errors currently displayed in the editor. Reset whenever Sorbet begins a non-incremental epoch,
+    // which promises to retypecheck every file. Used to implement a global error limit.
+    u4 clientErrorCount = 0;
+    // Tracks the last epoch that was a full typecheck. Used to sanity check clientErrorCount.
+    u4 lastFullTypecheckEpoch = 0;
 
 public:
     ErrorReporter(std::shared_ptr<const LSPConfiguration> config);
@@ -40,6 +45,9 @@ public:
     void beginEpoch(u4 epoch, bool isIncremental, std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers);
     void endEpoch(u4 epoch, bool committed = true);
     u4 lastDiagnosticEpochForFile(core::FileRef file);
+
+    // Sanity checks error count data.
+    void sanityCheck() const;
 };
 
 class ErrorEpoch final {
