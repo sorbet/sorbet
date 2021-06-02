@@ -122,6 +122,10 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
                             std::move(typeMember)));
     }
 
+    body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
+    body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
+                                               ast::MK::RaiseUnimplemented(loc)));
+
     if (send->block != nullptr) {
         auto &block = ast::cast_tree_nonnull<ast::Block>(send->block);
 
@@ -137,10 +141,6 @@ vector<ast::ExpressionPtr> Struct::run(core::MutableContext ctx, ast::Assign *as
 
         // NOTE: the code in this block _STEALS_ trees. No _return empty_'s should go after it
     }
-
-    body.emplace_back(ast::MK::SigVoid(loc, std::move(sigArgs)));
-    body.emplace_back(ast::MK::SyntheticMethod(loc, loc, core::Names::initialize(), std::move(newArgs),
-                                               ast::MK::RaiseUnimplemented(loc)));
 
     ast::ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),

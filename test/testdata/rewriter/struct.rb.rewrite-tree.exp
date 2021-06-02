@@ -259,13 +259,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
 
+      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
       <self>.include(<emptyTree>::<C MyMixin>)
 
       ::<Magic>.<self-new>(<self>).x()
 
       ::<Magic>.<self-new>(<self>).foo()
-
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
 
     class <emptyTree>::<C MyKeywordInitStruct><<C <todo sym>>> < (::<root>::<C Struct>)
@@ -291,6 +291,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <emptyTree>::<C Elem> = <self>.type_member(:fixed, ::T.untyped())
 
+      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
+
       <self>.include(<emptyTree>::<C MyMixin>)
 
       ::<Magic>.<self-new>(<self>).x()
@@ -300,8 +302,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       ::<Magic>.<self-new>(<self>, 1, 2)
 
       ::<Magic>.<self-new>(<self>, :giberish, 1)
-
-      ::Sorbet::Private::Static.keep_def(<self>, :initialize, :normal)
     end
 
     <emptyTree>::<C MyKeywordInitStruct>.new(1, 2)
