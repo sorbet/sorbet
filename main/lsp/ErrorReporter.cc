@@ -173,12 +173,17 @@ u4 ErrorReporter::lastDiagnosticEpochForFile(core::FileRef file) {
 }
 
 void ErrorReporter::sanityCheck() const {
-    DEBUG_ONLY(u4 errorCount = 0; for (auto &status
-                                       : this->fileErrorStatuses) {
+    if (!debug_mode) {
+        return;
+    }
+
+    u4 errorCount = 0;
+    for (auto &status : this->fileErrorStatuses) {
         if (status.lastReportedEpoch >= this->lastFullTypecheckEpoch) {
             errorCount += status.errorCount;
         }
-    } ENFORCE(errorCount == this->clientErrorCount));
+    }
+    ENFORCE(errorCount == this->clientErrorCount);
 }
 
 ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, bool isIncremental,

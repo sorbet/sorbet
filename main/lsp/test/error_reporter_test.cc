@@ -459,6 +459,14 @@ TEST_CASE("Global error limit") {
         }
     }
 
+    SUBCASE("Does not impose a cap with a cap of 0") {
+        opts.lspErrorCap = 0;
+        generateErrors(fref1, errorsFile1, 100);
+        er.beginEpoch(epoch, false, {});
+        er.pushDiagnostics(epoch, fref1, errorsFile1, *gs);
+        CHECK_EQ(100, errorsReported(*outputVector));
+    }
+
     er.sanityCheck();
 }
 
