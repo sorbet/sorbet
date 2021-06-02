@@ -320,11 +320,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
         "End users should prefer to use `--enable-all-beta-lsp-features`, instead.)");
     options.add_options("advanced")("enable-all-beta-lsp-features",
                                     "Enable (expected-to-be-non-crashy) early-access LSP features.");
-    options.add_options("advanced")(
-        "lsp-max-errors-reported",
-        "Limits the maximum number of simultaneous errors that LSP reports to the editor. Can prevent "
-        "editor slowdowns with large error lists.",
-        cxxopts::value<int>()->default_value(to_string(empty.lspMaxErrorsReported)), "limit");
+    options.add_options("advanced")("lsp-error-cap",
+                                    "Caps the maximum number of errors that LSP reports to the editor. Can prevent "
+                                    "editor slowdown triggered by large error lists. A cap of 0 means 'no cap'.",
+                                    cxxopts::value<int>()->default_value(to_string(empty.lspErrorCap)), "cap");
     options.add_options("advanced")(
         "ignore",
         "Ignores input files that contain the given string in their paths (relative to the input path passed to "
@@ -707,7 +706,7 @@ void readOptions(Options &opts,
             }
         }
 
-        opts.lspMaxErrorsReported = raw["lsp-max-errors-reported"].as<int>();
+        opts.lspErrorCap = raw["lsp-error-cap"].as<int>();
 
         opts.cacheDir = raw["cache-dir"].as<string>();
         if (!extractPrinters(raw, opts, logger)) {

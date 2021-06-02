@@ -389,7 +389,7 @@ TEST_CASE("filesWithErrorsSince") {
 TEST_CASE("Global error limit") {
     auto opts = makeOptions("");
     // Limit is 5 for these tests.
-    opts.lspMaxErrorsReported = 5;
+    opts.lspErrorCap = 5;
     auto cs = makeConfig(opts);
     auto gs = makeGS();
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);

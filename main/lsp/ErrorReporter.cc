@@ -72,7 +72,7 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
 
     u4 errorsToReport = errors.size();
     {
-        const auto maxErrors = config->opts.lspMaxErrorsReported;
+        const auto maxErrors = config->opts.lspErrorCap;
         // N.B.: A value of 0 means no maximum is imposed.
         if (maxErrors > 0) {
             if (maxErrors > this->clientErrorCount) {
