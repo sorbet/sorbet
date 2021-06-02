@@ -212,6 +212,7 @@ llvm::Value *trySymbolBasedIntrinsic(MethodCallContext &mcctx) {
                 builder.CreateCondBr(Payload::setExpectedBool(cs, builder, typeTest, true), fastPath, alternative);
                 builder.SetInsertPoint(fastPath);
                 auto fastPathRes = symbolBasedIntrinsic->makeCall(mcctx);
+                Payload::afterIntrinsic(cs, builder);
                 auto fastPathEnd = builder.GetInsertBlock();
                 builder.CreateBr(afterSend);
                 phi->addIncoming(fastPathRes, fastPathEnd);

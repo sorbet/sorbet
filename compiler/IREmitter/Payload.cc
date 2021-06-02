@@ -1111,6 +1111,11 @@ llvm::Value *Payload::callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &bui
                               "sendDirect");
 }
 
+void Payload::afterIntrinsic(CompilerState &cs, llvm::IRBuilderBase &build) {
+    auto &builder = builderCast(build);
+    builder.CreateCall(cs.getFunction("sorbet_afterIntrinsic"), {});
+}
+
 llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &build, const IREmitterContext &irctx,
                                      int rubyBlockId) {
     auto &builder = builderCast(build);

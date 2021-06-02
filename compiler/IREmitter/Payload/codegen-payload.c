@@ -1648,6 +1648,14 @@ static inline void vm_env_write(const VALUE *ep, int index, VALUE v) {
     }
 }
 
+// Called after intrinsic implementations to run any cleanup actions that the vm would normally have done.
+// TODO: This might be a good candidate for storing in the vm-payload, as RUBY_VM_CHECK_INTS will likely inline.
+SORBET_INLINE
+void sorbet_afterIntrinsic() {
+    rb_execution_context_t *ec = GET_EC();
+    RUBY_VM_CHECK_INTS(ec);
+}
+
 // Write a value into the locals from this stack frame.
 //
 // * index - local var index

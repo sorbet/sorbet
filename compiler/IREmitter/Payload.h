@@ -94,6 +94,7 @@ public:
     static llvm::Value *callFuncDirect(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *cache,
                                        llvm::Value *fn, llvm::Value *argc, llvm::Value *argv, llvm::Value *recv,
                                        llvm::Value *iseq);
+    static void afterIntrinsic(CompilerState &cs, llvm::IRBuilderBase &builder);
 
     static llvm::Value *rubyStackFrameVar(CompilerState &cs, llvm::IRBuilderBase &builder,
                                           const IREmitterContext &irctx, core::SymbolRef methodSym);
