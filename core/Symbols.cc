@@ -723,8 +723,10 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                     // order the recommendations from this scope.
                     // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
                     // ID'd symbols to be recommended first.
-                    fast_sort(scopeBest, [&](auto lhs, auto rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
-                    for (auto item : scopeBest) {
+                    fast_sort(scopeBest, [&](const auto &lhs, const auto &rhs) -> bool {
+                        return lhs.symbol._id > rhs.symbol._id;
+                    });
+                    for (auto &item : scopeBest) {
                         result.emplace_back(item);
                     }
                 }
@@ -775,7 +777,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         // deterministic order.
         // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
         // ID'd symbols to be recommended first.
-        fast_sort(globalBest, [&](auto lhs, auto rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
+        fast_sort(globalBest,
+                  [&](const auto &lhs, const auto &rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
         for (auto &e : globalBest) {
             result.emplace_back(e);
         }
