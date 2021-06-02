@@ -682,6 +682,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
 
             // find scopes that would be considered for search
             vector<ClassOrModuleRef> candidateScopes;
+            vector<Symbol::FuzzySearchResult> scopeBest;
             candidateScopes.emplace_back(base.asClassOrModuleRef());
             int i = 0;
             // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
@@ -700,17 +701,33 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 i++;
             }
             for (const auto scope : candidateScopes) {
-                for (auto member : scope.data(gs)->membersStableOrderSlow(gs)) {
+                scopeBest.clear();
+                for (auto member : scope.data(gs)->members()) {
                     if (member.first.kind() == NameKind::CONSTANT &&
                         member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
                         auto thisDistance = Levenstein::distance(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
                         if (thisDistance <= best.distance) {
+                            if (thisDistance < best.distance) {
+                                scopeBest.clear();
+                            }
                             best.distance = thisDistance;
                             best.symbol = member.second;
                             best.name = member.first;
-                            result.emplace_back(best);
+                            scopeBest.emplace_back(best);
                         }
+                    }
+                }
+                if (!scopeBest.empty()) {
+                    // NOTE: Iteration order over members is nondeterministic, so we use SymbolId to deterministically
+                    // order the recommendations from this scope.
+                    // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
+                    // ID'd symbols to be recommended first.
+                    fast_sort(scopeBest, [&](const auto &lhs, const auto &rhs) -> bool {
+                        return lhs.symbol._id > rhs.symbol._id;
+                    });
+                    for (auto &item : scopeBest) {
+                        result.emplace_back(item);
                     }
                 }
             }
@@ -719,10 +736,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         } while (best.distance > 0 && base.data(gs)->owner.exists() && base != Symbols::root());
     }
 
-    // make sure we have a stable order
-    fast_sort(result, [&](auto lhs, auto rhs) -> bool {
-        return lhs.distance < rhs.distance || (lhs.distance == rhs.distance && lhs.symbol._id < rhs.symbol._id);
-    });
+    // At this point, `result` is in a deterministic order, and is ordered with _decreasing_ edit distance
 
     if (best.distance > 0) {
         // find the closest by global dfs.
@@ -733,7 +747,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         while (!yetToGoDeeper.empty()) {
             const ClassOrModuleRef thisIter = yetToGoDeeper.back();
             yetToGoDeeper.pop_back();
-            for (auto member : thisIter.data(gs)->membersStableOrderSlow(gs)) {
+            for (auto member : thisIter.data(gs)->members()) {
                 if (member.second.exists() && member.first.exists() && member.first.kind() == NameKind::CONSTANT &&
                     member.first.dataCnst(gs)->original.kind() == NameKind::UTF8) {
                     if (member.second.isClassOrModule() &&
@@ -758,10 +772,20 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 }
             }
         }
+        // globalBest is nondeterministically ordered since iteration over `members()` is non deterministic.
+        // Everything in globalBest has the same edit distance, so we just have to sort by symbol ID to get a
+        // deterministic order.
+        // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
+        // ID'd symbols to be recommended first.
+        fast_sort(globalBest,
+                  [&](const auto &lhs, const auto &rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
         for (auto &e : globalBest) {
             result.emplace_back(e);
         }
     }
+
+    // result is ordered in decreasing edit distance order. We want to flip the order so the items w/ the smallest edit
+    // distance are first.
     absl::c_reverse(result);
     return result;
 }

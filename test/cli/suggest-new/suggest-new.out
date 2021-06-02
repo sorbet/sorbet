@@ -2,11 +2,11 @@ test/cli/suggest-new/suggest-new.rb:9: Method `ABC` does not exist on `T.class_o
      9 |ABC(1)
         ^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-new/suggest-new.rb:9: Replace with `ABE.new`
+    test/cli/suggest-new/suggest-new.rb:9: Replace with `ABD.new`
      9 |ABC(1)
         ^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-new/suggest-new.rb:9: Replace with `ABD.new`
+    test/cli/suggest-new/suggest-new.rb:9: Replace with `ABE.new`
      9 |ABC(1)
         ^^^
 Errors: 1
