@@ -97,6 +97,7 @@ SORBET_ALIVE(VALUE, sorbet_stringInterpolate,
 
 SORBET_ALIVE(VALUE, sorbet_rb_array_square_br_slowpath,
              (VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk, VALUE closure));
+SORBET_ALIVE(VALUE, rb_ary_compact_bang_forwarder, (VALUE recv));
 
 SORBET_ALIVE(VALUE, sorbet_rb_int_plus_slowpath, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_rb_int_minus_slowpath, (VALUE, VALUE));
@@ -954,6 +955,22 @@ VALUE sorbet_rb_array_all_withBlock(VALUE recv, ID fun, int argc, const VALUE *c
     sorbet_popRubyStack();
 
     return Qtrue;
+}
+
+// This is an inlinable version of rb_ary_compact_bang https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L5088-L5094
+SORBET_INLINE
+VALUE sorbet_rb_array_compact_bang(VALUE ary, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                   VALUE closure) {
+    return rb_ary_compact_bang_forwarder(ary);
+}
+
+// This is an inlinable version of rb_ary_compact https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L5088-L5094
+SORBET_INLINE
+VALUE sorbet_rb_array_compact(VALUE ary, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                              VALUE closure) {
+    ary = rb_ary_dup(ary);
+    rb_ary_compact_bang_forwarder(ary);
+    return ary;
 }
 
 // This is an adjusted version of the intrinsic from the ruby vm. The major change is that instead of handling the case

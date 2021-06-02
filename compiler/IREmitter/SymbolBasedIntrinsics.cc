@@ -604,6 +604,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Array(), "map", "sorbet_rb_array_collect", "sorbet_rb_array_collect_withBlock"},
     {core::Symbols::Array(), "any?", "sorbet_rb_array_any", "sorbet_rb_array_any_withBlock"},
     {core::Symbols::Array(), "all?", "sorbet_rb_array_all", "sorbet_rb_array_all_withBlock"},
+    {core::Symbols::Array(), "compact", "sorbet_rb_array_compact"},
+    {core::Symbols::Array(), "compact!", "sorbet_rb_array_compact_bang"},
     {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br"},
     {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq"},
     {core::Symbols::Hash(), "each_pair", "sorbet_rb_hash_each_pair", "sorbet_rb_hash_each_pair_withBlock"},

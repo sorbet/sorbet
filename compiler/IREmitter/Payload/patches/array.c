@@ -12,3 +12,7 @@ VALUE sorbet_rb_array_square_br_slowpath(VALUE recv, ID fun, int argc, const VAL
     // handled the argc == 1 && FIXNUM_P(argv[0]) case.  But it's less code duplication.
     return rb_ary_aref1(ary, argv[0]);
 }
+
+VALUE rb_ary_compact_bang_forwarder(VALUE ary) {
+    return rb_ary_compact_bang(ary);
+}
