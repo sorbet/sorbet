@@ -34,8 +34,8 @@ auto nullSink = make_shared<spdlog::sinks::null_sink_mt>();
 auto nullOpts = makeOptions("");
 auto logger = make_shared<spdlog::logger>("console", nullSink);
 
-shared_ptr<LSPConfiguration> makeConfig() {
-    auto config = make_shared<LSPConfiguration>(nullOpts, make_shared<LSPOutputToVector>(), logger, false);
+shared_ptr<LSPConfiguration> makeConfig(options::Options &opts = nullOpts) {
+    auto config = make_shared<LSPConfiguration>(opts, make_shared<LSPOutputToVector>(), logger, false);
     InitializeParams initParams("", make_unique<ClientCapabilities>());
     initParams.rootPath = "";
     initParams.initializationOptions = make_unique<SorbetInitializationOptions>();
@@ -49,6 +49,25 @@ unique_ptr<core::GlobalState> makeGS() {
     unique_ptr<const OwnedKeyValueStore> kvstore;
     payload::createInitialGlobalState(gs, nullOpts, kvstore);
     return gs;
+}
+
+// Generate `count` errors for `fref` in `errors`.
+void generateErrors(core::FileRef fref, vector<unique_ptr<core::Error>> &errors, u2 count) {
+    for (u2 i = 0; i < count; i++) {
+        errors.emplace_back(
+            make_unique<core::Error>(core::Loc(fref, 0, 0), core::ErrorClass{1, core::StrictLevel::True}, "MyError",
+                                     vector<core::ErrorSection>(), vector<core::AutocorrectSuggestion>(), false));
+    }
+}
+u4 errorsReported(LSPOutputToVector &outputVector) {
+    auto output = outputVector.getOutput();
+    u4 count = 0;
+    for (auto &message : output) {
+        auto &notificationMessage = message->asNotification();
+        auto &publishDiagnosticParams = get<unique_ptr<PublishDiagnosticsParams>>(notificationMessage.params);
+        count += publishDiagnosticParams->diagnostics.size();
+    }
+    return count;
 }
 
 } // namespace
@@ -72,7 +91,7 @@ TEST_CASE("NotifiesVSCodeWhenFileHasErrors") {
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
-    er.beginEpoch(epoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, errors, *gs);
 
     auto output = outputVector->getOutput();
@@ -85,6 +104,7 @@ TEST_CASE("NotifiesVSCodeWhenFileHasErrors") {
     INFO("Reports file with errors to VS code");
     CHECK_EQ(publishDiagnosticParams->uri, cs->fileRef2Uri(*gs, fref));
     CHECK_EQ(1, publishDiagnosticParams->diagnostics.size());
+    er.sanityCheck();
 }
 
 TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
@@ -111,10 +131,10 @@ TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
-    er.beginEpoch(epoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, errors, *gs);
 
-    er.beginEpoch(newEpoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(newEpoch, true, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
     auto output = outputVector->getOutput();
     CHECK_EQ(2, output.size());
@@ -125,6 +145,7 @@ TEST_CASE("ReportsEmptyErrorsToVSCodeIfFilePreviouslyHadErrors") {
     INFO("Sends empty errors to VS code when file previously had errors");
     CHECK_EQ(latestDiagnosticParams->uri, cs->fileRef2Uri(*gs, fref));
     CHECK(latestDiagnosticParams->diagnostics.empty());
+    er.sanityCheck();
 }
 
 TEST_CASE("DoesNotReportToVSCodeWhenFileNeverHadErrors") {
@@ -144,14 +165,15 @@ TEST_CASE("DoesNotReportToVSCodeWhenFileNeverHadErrors") {
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
-    er.beginEpoch(epoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
 
-    er.beginEpoch(newEpoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(newEpoch, true, move(emptyDiagnosticLatencyTimers));
     er.pushDiagnostics(newEpoch, fref, emptyErrorList, *gs);
 
     auto output = outputVector->getOutput();
     CHECK(output.empty());
+    er.sanityCheck();
 }
 
 TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
@@ -177,21 +199,22 @@ TEST_CASE("ErrorReporterIgnoresErrorsFromOldEpochs") {
 
     vector<unique_ptr<Timer>> emptyDiagnosticLatencyTimers;
 
-    er.beginEpoch(initialEpoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(initialEpoch, false, move(emptyDiagnosticLatencyTimers));
     // pushDiagnostics is called for foo.rb at epoch 0 with no errors (initial state)
     er.pushDiagnostics(initialEpoch, fref, emptyErrorList, *gs);
 
-    er.beginEpoch(latestEpoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(latestEpoch, true, move(emptyDiagnosticLatencyTimers));
     // pushDiagnostics is called for foo.rb at epoch 2 with no errors (the fast path preemption)
     er.pushDiagnostics(latestEpoch, fref, emptyErrorList, *gs);
 
-    er.beginEpoch(slowPathEpoch, move(emptyDiagnosticLatencyTimers));
+    er.beginEpoch(slowPathEpoch, true, move(emptyDiagnosticLatencyTimers));
     // pushDiagnostics is called for foo.rb at epoch 1 with errors (the slow path)
     er.pushDiagnostics(slowPathEpoch, fref, errors, *gs);
 
     // We expect that no errors are reported to VS Code
     auto output = outputVector->getOutput();
     CHECK(output.empty());
+    er.sanityCheck();
 }
 
 TEST_CASE("FirstAndLastLatencyReporting") {
@@ -215,7 +238,7 @@ TEST_CASE("FirstAndLastLatencyReporting") {
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
 
-    er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
     Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, errors, *gs);
 
@@ -244,6 +267,7 @@ TEST_CASE("FirstAndLastLatencyReporting") {
     auto &lastDiagnosticLatency = lastDiagnosticLatencies.front();
     auto lastDiagnosticDuration = lastDiagnosticLatency->end.usec - lastDiagnosticLatency->start.usec;
     CHECK_GE(chrono::microseconds(lastDiagnosticDuration), chrono::milliseconds(100));
+    er.sanityCheck();
 }
 
 TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
@@ -266,7 +290,7 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
     auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
 
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
-    er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
     Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
     Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
@@ -285,6 +309,7 @@ TEST_CASE("FirstAndLastLatencyAboutEqualWhenNoErrors") {
     INFO("first_ and last_diagnostic_latency ~equal when there are no errors to report");
     CHECK_LT(chrono::microseconds(firstDiagnosticDuration), chrono::milliseconds(100));
     CHECK_LT(chrono::microseconds(lastDiagnosticDuration), chrono::milliseconds(100));
+    er.sanityCheck();
 }
 
 TEST_CASE("FirstAndLastLatencyNotReportedWhenEpochIsCancelled") {
@@ -305,7 +330,7 @@ TEST_CASE("FirstAndLastLatencyNotReportedWhenEpochIsCancelled") {
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
 
-    er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
 
     Timer::timedSleep(chrono::milliseconds(50), *logger, "delay so timer is reported");
     er.pushDiagnostics(epoch, fref, emptyErrorList, *gs);
@@ -317,6 +342,7 @@ TEST_CASE("FirstAndLastLatencyNotReportedWhenEpochIsCancelled") {
     INFO("first_ and last_diagnostic_latency are not reported when epoch is cancelled");
     CHECK(counterStateDatabase.getTimings("first_diagnostic_latency").empty());
     CHECK(counterStateDatabase.getTimings("last_diagnostic_latency").empty());
+    er.sanityCheck();
 }
 
 TEST_CASE("filesWithErrorsSince") {
@@ -344,12 +370,12 @@ TEST_CASE("filesWithErrorsSince") {
     vector<unique_ptr<Timer>> diagnosticLatencyTimers;
     diagnosticLatencyTimers.emplace_back(make_unique<Timer>(logger, "last_diagnostic_latency"));
 
-    er.beginEpoch(epoch, move(diagnosticLatencyTimers));
+    er.beginEpoch(epoch, false, move(diagnosticLatencyTimers));
     er.pushDiagnostics(epoch, fref, errors, *gs);
     INFO("Only returns files with lastReportedEpoch >= sent epoch");
     CHECK(er.filesWithErrorsSince(requestedEpoch).empty());
 
-    er.beginEpoch(requestedEpoch, move(diagnosticLatencyTimers));
+    er.beginEpoch(requestedEpoch, true, move(diagnosticLatencyTimers));
     er.pushDiagnostics(requestedEpoch, fref, errors, *gs);
     er.pushDiagnostics(requestedEpoch, frefWithoutErrors, emptyErrorList, *gs);
 
@@ -357,5 +383,91 @@ TEST_CASE("filesWithErrorsSince") {
     INFO("Only returns files with errors");
     CHECK_EQ(1, filesWithErrorsSince.size());
     CHECK_EQ(fref, filesWithErrorsSince[0]);
+    er.sanityCheck();
 }
+
+TEST_CASE("Global error limit") {
+    auto opts = makeOptions("");
+    // Limit is 5 for these tests.
+    opts.lspErrorCap = 5;
+    auto cs = makeConfig(opts);
+    auto gs = makeGS();
+    auto outputVector = dynamic_pointer_cast<LSPOutputToVector>(cs->output);
+
+    ErrorReporter er(cs);
+    auto epoch = 0;
+    auto file1 = make_shared<core::File>("foo.rb", "foo", core::File::Type::Normal, epoch);
+    auto file2 = make_shared<core::File>("bar.rb", "bar", core::File::Type::Normal, epoch);
+    core::FileRef fref1;
+    core::FileRef fref2;
+    {
+        core::UnfreezeFileTable fileTableAccess(*gs);
+        fref1 = gs->enterFile(file1);
+        fref2 = gs->enterFile(file2);
+    }
+
+    vector<unique_ptr<core::Error>> errorsFile1;
+    vector<unique_ptr<core::Error>> errorsFile2;
+
+    SUBCASE("Reports all errors when error count does not exceed limit") {
+        generateErrors(fref1, errorsFile1, 2);
+        generateErrors(fref2, errorsFile2, 3);
+        er.beginEpoch(epoch, false, {});
+        er.pushDiagnostics(epoch, fref1, errorsFile1, *gs);
+        er.pushDiagnostics(epoch, fref2, errorsFile2, *gs);
+        CHECK_EQ(5, errorsReported(*outputVector));
+    }
+
+    SUBCASE("When error count exceeds the limit") {
+        generateErrors(fref1, errorsFile1, 3);
+        generateErrors(fref2, errorsFile2, 3);
+        er.beginEpoch(epoch, false, {});
+        er.pushDiagnostics(epoch, fref1, errorsFile1, *gs);
+        CHECK_EQ(3, errorsReported(*outputVector));
+
+        er.pushDiagnostics(epoch, fref2, errorsFile2, *gs);
+        CHECK_EQ(2, errorsReported(*outputVector));
+        er.endEpoch(epoch);
+
+        SUBCASE("Reports partial error list for a single file that exceeds the limit") {
+            // Only tests the common part of the test above.
+        }
+
+        SUBCASE("Reports new errors in subsequent epochs if they bring global error count down") {
+            epoch++;
+            const bool isIncremental = true;
+            er.beginEpoch(epoch, isIncremental, {});
+            errorsFile1.clear();
+            er.pushDiagnostics(epoch, fref1, errorsFile1, *gs);
+            er.pushDiagnostics(epoch, fref2, errorsFile2, *gs);
+            CHECK_EQ(3, errorsReported(*outputVector));
+        }
+
+        SUBCASE("Reports all errors (up to limit) from a fresh full typecheck") {
+            // At this point, the error count is 6 -- which is above the limit.
+            // However, when we initiate a non-incremental typecheck, the error reporter
+            // should accept new errors up to the error limit since it will refresh the
+            // error list of all files.
+            epoch++;
+            const bool isIncremental = false;
+            er.beginEpoch(epoch, isIncremental, {});
+            er.pushDiagnostics(epoch, fref1, errorsFile1, *gs);
+            CHECK_EQ(3, errorsReported(*outputVector));
+
+            er.pushDiagnostics(epoch, fref2, errorsFile2, *gs);
+            CHECK_EQ(2, errorsReported(*outputVector));
+        }
+    }
+
+    SUBCASE("Does not impose a cap with a cap of 0") {
+        opts.lspErrorCap = 0;
+        generateErrors(fref1, errorsFile1, 100);
+        er.beginEpoch(epoch, false, {});
+        er.pushDiagnostics(epoch, fref1, errorsFile1, *gs);
+        CHECK_EQ(100, errorsReported(*outputVector));
+    }
+
+    er.sanityCheck();
+}
+
 } // namespace sorbet::realmain::lsp::test

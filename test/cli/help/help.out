@@ -115,6 +115,10 @@ Usage:
       --enable-all-beta-lsp-features
                                 Enable (expected-to-be-non-crashy)
                                 early-access LSP features.
+      --lsp-error-cap cap       Caps the maximum number of errors that LSP
+                                reports to the editor. Can prevent editor
+                                slowdown triggered by large error lists. A cap of 0
+                                means 'no cap'. (default: 1000)
       --ignore string           Ignores input files that contain the given
                                 string in their paths (relative to the input
                                 path passed to Sorbet). Strings beginning with /

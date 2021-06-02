@@ -176,6 +176,9 @@ struct Options {
     /* The maximum number of files that are permitted to typecheck on the fast path concurrently. Not exposed on CLI.
      * Placed on Options for convenience so tests can override. */
     u4 lspMaxFilesOnFastPath = 50;
+    /* The maximum number of errors to report to the client when in LSP mode. Prevents editor UI slowdown
+     * related to large error lists. 0 means no limit. */
+    u4 lspErrorCap = 1000;
 
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";

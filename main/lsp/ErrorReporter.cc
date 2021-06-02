@@ -12,14 +12,14 @@ vector<core::FileRef> ErrorReporter::filesWithErrorsSince(u4 epoch) {
     vector<core::FileRef> filesUpdatedSince;
     for (size_t i = 1; i < fileErrorStatuses.size(); ++i) {
         ErrorStatus fileErrorStatus = fileErrorStatuses[i];
-        if (fileErrorStatus.lastReportedEpoch >= epoch && fileErrorStatus.hasErrors) {
+        if (fileErrorStatus.lastReportedEpoch >= epoch && fileErrorStatus.errorCount > 0) {
             filesUpdatedSince.push_back(core::FileRef(i));
         }
     }
     return filesUpdatedSince;
 }
 
-void ErrorReporter::beginEpoch(u4 epoch, vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
+void ErrorReporter::beginEpoch(u4 epoch, bool isIncremental, vector<unique_ptr<Timer>> diagnosticLatencyTimers) {
     ENFORCE(epochTimers.find(epoch) == epochTimers.end());
     vector<Timer> firstDiagnosticLatencyTimers;
     if (config->getClientConfig().enableTypecheckInfo) {
@@ -27,6 +27,12 @@ void ErrorReporter::beginEpoch(u4 epoch, vector<unique_ptr<Timer>> diagnosticLat
     }
     for (auto &timer : diagnosticLatencyTimers) {
         firstDiagnosticLatencyTimers.emplace_back(timer->clone("first_diagnostic_latency"));
+    }
+
+    if (!isIncremental) {
+        // Sorbet is going to retypecheck every file. Reset the error count so we do not suppress new errors.
+        this->lastFullTypecheckEpoch = epoch;
+        this->clientErrorCount = 0;
     }
 
     epochTimers[epoch] = EpochTimers{move(firstDiagnosticLatencyTimers), move(diagnosticLatencyTimers)};
@@ -57,6 +63,28 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
         return;
     }
 
+    // Update clientErrorCount
+    if (fileErrorStatus.lastReportedEpoch >= this->lastFullTypecheckEpoch) {
+        // clientErrorCount contains the errors from the last reported epoch. Subtract them since this action will
+        // revoke them via publishing a new error list.
+        this->clientErrorCount = this->clientErrorCount - fileErrorStatus.errorCount;
+    }
+
+    u4 errorsToReport = errors.size();
+    {
+        const auto maxErrors = config->opts.lspErrorCap;
+        // N.B.: A value of 0 means no maximum is imposed.
+        if (maxErrors > 0) {
+            if (maxErrors > this->clientErrorCount) {
+                errorsToReport = min(static_cast<u4>(errors.size()), maxErrors - this->clientErrorCount);
+            } else {
+                errorsToReport = 0;
+            }
+        }
+    }
+
+    this->clientErrorCount += errors.size();
+
     fileErrorStatus.lastReportedEpoch = epoch;
 
     auto it = epochTimers.find(epoch);
@@ -73,15 +101,20 @@ void ErrorReporter::pushDiagnostics(u4 epoch, core::FileRef file, const vector<u
     }
 
     // If errors is empty and the file had no errors previously, break
-    if (errors.empty() && fileErrorStatus.hasErrors == false) {
+    if (errors.empty() && fileErrorStatus.errorCount == 0) {
         return;
     }
 
-    fileErrorStatus.hasErrors = !errors.empty();
+    fileErrorStatus.errorCount = errors.size();
 
     const string uri = config->fileRef2Uri(gs, file);
     vector<unique_ptr<Diagnostic>> diagnostics;
     for (auto &error : errors) {
+        if (errorsToReport == 0) {
+            break;
+        }
+        errorsToReport--;
+
         ENFORCE(!error->isSilenced);
 
         auto range = Range::fromLoc(gs, error->loc);
@@ -139,10 +172,24 @@ u4 ErrorReporter::lastDiagnosticEpochForFile(core::FileRef file) {
     return getFileErrorStatus(file).lastReportedEpoch;
 }
 
-ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch,
+void ErrorReporter::sanityCheck() const {
+    if (!debug_mode) {
+        return;
+    }
+
+    u4 errorCount = 0;
+    for (auto &status : this->fileErrorStatuses) {
+        if (status.lastReportedEpoch >= this->lastFullTypecheckEpoch) {
+            errorCount += status.errorCount;
+        }
+    }
+    ENFORCE(errorCount == this->clientErrorCount);
+}
+
+ErrorEpoch::ErrorEpoch(ErrorReporter &errorReporter, u4 epoch, bool isIncremental,
                        std::vector<std::unique_ptr<Timer>> diagnosticLatencyTimers)
     : errorReporter(errorReporter), epoch(epoch) {
-    errorReporter.beginEpoch(epoch, move(diagnosticLatencyTimers));
+    errorReporter.beginEpoch(epoch, isIncremental, move(diagnosticLatencyTimers));
 };
 
 ErrorEpoch::~ErrorEpoch() {
