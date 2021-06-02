@@ -14,7 +14,7 @@
 set -euo pipefail
 set -x
 
-REF=b328d5f4d38e5347feb91aa9e55157c858b07cc6
+REF=b69e8e595b804fd8e70ee1b90fc6dee81e183126
 TARGET_RUBY_VERSION="2.7"
 
 SCRIPT=$(realpath "$0")
@@ -52,7 +52,8 @@ bundle exec racc --superclass=Parser::Base lib/parser/ruby24.y -o lib/parser/rub
 bundle exec racc --superclass=Parser::Base lib/parser/ruby25.y -o lib/parser/ruby25.rb --no-line-convert
 bundle exec racc --superclass=Parser::Base lib/parser/ruby26.y -o lib/parser/ruby26.rb --no-line-convert
 bundle exec racc --superclass=Parser::Base lib/parser/ruby27.y -o lib/parser/ruby27.rb --no-line-convert
-bundle exec racc --superclass=Parser::Base lib/parser/ruby28.y -o lib/parser/ruby28.rb --no-line-convert
+bundle exec racc --superclass=Parser::Base lib/parser/ruby30.y -o lib/parser/ruby30.rb --no-line-convert
+bundle exec racc --superclass=Parser::Base lib/parser/ruby31.y -o lib/parser/ruby31.rb --no-line-convert
 bundle exec racc --superclass=Parser::Base lib/parser/macruby.y -o lib/parser/macruby.rb --no-line-convert
 bundle exec racc --superclass=Parser::Base lib/parser/rubymotion.y -o lib/parser/rubymotion.rb --no-line-convert
 
