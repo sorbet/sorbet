@@ -1129,7 +1129,7 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
 
     // TODO(jez) We could do even better by hoisting this out, so that all potential
     // things that want to use the cache cooperate in updating it once per call.
-    builder.CreateCall(cs.getFunction("sorbet_vmMethodSearch"), {cache, recv}, "vmMethodSearch");
+    builder.CreateCall(cs.getFunction("sorbet_vmMethodSearch"), {cache, recv});
 
     // We could initialize result with the first result (because expectedRubyCFunc is
     // non-empty), but this makes the code slightly cleaner, and LLVM will optimize.
