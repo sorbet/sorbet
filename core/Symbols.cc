@@ -682,6 +682,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
 
             // find scopes that would be considered for search
             vector<ClassOrModuleRef> candidateScopes;
+            vector<Symbol::FuzzySearchResult> scopeBest;
             candidateScopes.emplace_back(base.asClassOrModuleRef());
             int i = 0;
             // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
@@ -700,26 +701,32 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 i++;
             }
             for (const auto scope : candidateScopes) {
-                bool newBestChosen = false;
+                scopeBest.clear();
                 for (auto member : scope.data(gs)->members()) {
                     if (member.first.kind() == NameKind::CONSTANT &&
                         member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
                         auto thisDistance = Levenstein::distance(
                             currentName, member.first.dataCnst(gs)->original.dataUtf8(gs)->utf8, best.distance);
-                        // NOTE: Iteration order over members is nondeterministic, so we use SymbolId as a consistent
-                        // tiebreaker. With this tiebreaker, the 'best' symbol from this scope is deterministic.
-                        if (thisDistance < best.distance ||
-                            (thisDistance == best.distance && best.symbol._id > member.second._id)) {
+                        if (thisDistance <= best.distance) {
+                            if (thisDistance < best.distance) {
+                                scopeBest.clear();
+                            }
                             best.distance = thisDistance;
                             best.symbol = member.second;
                             best.name = member.first;
-                            newBestChosen = true;
+                            scopeBest.emplace_back(best);
                         }
                     }
                 }
-                if (newBestChosen) {
-                    // Choose the best result from this scope.
-                    result.emplace_back(best);
+                if (!scopeBest.empty()) {
+                    // NOTE: Iteration order over members is nondeterministic, so we use SymbolId to deterministically
+                    // order the recommendations from this scope.
+                    // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
+                    // ID'd symbols to be recommended first.
+                    fast_sort(scopeBest, [&](auto lhs, auto rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
+                    for (auto item : scopeBest) {
+                        result.emplace_back(item);
+                    }
                 }
             }
 
@@ -727,7 +734,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         } while (best.distance > 0 && base.data(gs)->owner.exists() && base != Symbols::root());
     }
 
-    // At this point, `result` is in a deterministic order, and is ordered with _decreasing_ edit distance.
+    // At this point, `result` is in a deterministic order, and is ordered with _decreasing_ edit distance
 
     if (best.distance > 0) {
         // find the closest by global dfs.
@@ -766,7 +773,9 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         // globalBest is nondeterministically ordered since iteration over `members()` is non deterministic.
         // Everything in globalBest has the same edit distance, so we just have to sort by symbol ID to get a
         // deterministic order.
-        fast_sort(globalBest, [&](auto lhs, auto rhs) -> bool { return lhs.symbol._id < rhs.symbol._id; });
+        // We order in decreasing symbol ID order because `result` is later reversed and we want earlier
+        // ID'd symbols to be recommended first.
+        fast_sort(globalBest, [&](auto lhs, auto rhs) -> bool { return lhs.symbol._id > rhs.symbol._id; });
         for (auto &e : globalBest) {
             result.emplace_back(e);
         }
