@@ -11,16 +11,6 @@ struct IREmitterContext;
 struct Alias;
 class CompilerState;
 
-struct VMFlag {
-    // The sorbet function that returns the constant
-    std::string fnName;
-
-    // The name to give to the result of the sorbet function (useful when reading the llvm bitcode)
-    std::string flagName;
-
-    static llvm::Value *build(CompilerState &cs, llvm::IRBuilderBase &build, const std::vector<VMFlag> &flags);
-};
-
 // This class serves as forwarder to payload.c, which are the c wrappers for
 // Ruby functions. These functions can (and do) use information known during
 // compile time to dispatch to different c functions, but other than that, they
@@ -104,12 +94,6 @@ public:
 
     static llvm::Value *getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                        int rubyBlockId);
-
-    static const VMFlag VM_CALL_ARGS_SIMPLE;
-    static const VMFlag VM_CALL_ARGS_SPLAT;
-    static const VMFlag VM_CALL_KWARG;
-    static const VMFlag VM_CALL_KW_SPLAT;
-    static const VMFlag VM_CALL_FCALL;
 
     static llvm::Value *buildLocalsOffset(CompilerState &cs);
 };

@@ -62,8 +62,9 @@ llvm::Function *getFinalForwarder(MethodCallContext &mcctx, IREmitterHelpers::Fi
         Payload::pushRubyStack(funcCs, builder, cfp, self);
         Payload::pushRubyStack(funcCs, builder, cfp, splat);
         auto methodName = string(send->fun.shortName(funcCs));
-        auto *cache =
-            IREmitterHelpers::makeInlineCache(funcCs, builder, methodName, {Payload::VM_CALL_ARGS_SPLAT}, 1, {});
+        CallCacheFlags flags;
+        flags.args_splat = true;
+        auto *cache = IREmitterHelpers::makeInlineCache(funcCs, builder, methodName, flags, 1, {});
         auto *bh = Payload::vmBlockHandlerNone(funcCs, builder);
         auto *res = Payload::callFuncWithCache(funcCs, builder, cache, bh);
         builder.CreateRet(res);
@@ -119,11 +120,11 @@ llvm::Value *tryFinalMethodCall(MethodCallContext &mcctx) {
 
     // we need a method entry to be able to perform a direct call, so we ensure that an empty inline cache is available,
     // and populate it on the first call to the fast path
-    vector<VMFlag> flags{};
+    CallCacheFlags flags;
     if (send->isPrivateOk) {
-        flags.emplace_back(Payload::VM_CALL_FCALL);
+        flags.fcall = true;
     } else {
-        flags.emplace_back(Payload::VM_CALL_ARGS_SIMPLE);
+        flags.args_simple = true;
     }
     auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, methodName, flags, 0, {});
 
@@ -366,10 +367,9 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
     auto &send = mcctx.send;
     auto rubyBlockId = mcctx.rubyBlockId;
 
-    vector<VMFlag> flags;
+    CallCacheFlags flags;
 
     auto name = string(send->fun.shortName(cs));
-    auto flag = Payload::VM_CALL_ARGS_SIMPLE;
     vector<string_view> keywords{};
     vector<llvm::Value *> stack{};
 
@@ -396,12 +396,12 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
             // we'll pass in. This enforce is here so that we remember to update the behavior of this function when we
             // eventually fix that desugaring.
             ENFORCE(numKwArgs == 1);
-            flags.emplace_back(Payload::VM_CALL_KW_SPLAT);
+            flags.kw_splat = true;
 
             auto var = Payload::varGet(cs, send->args[argIdx].variable, builder, irctx, rubyBlockId);
             stack.emplace_back(var);
         } else {
-            flags.emplace_back(Payload::VM_CALL_KWARG);
+            flags.kwarg = true;
 
             while (argIdx < kwEnd) {
                 auto kwArg = send->args[argIdx++].variable;
@@ -413,11 +413,11 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
             }
         }
     } else {
-        flags.emplace_back(Payload::VM_CALL_ARGS_SIMPLE);
+        flags.args_simple = true;
     }
 
     if (send->isPrivateOk) {
-        flags.emplace_back(Payload::VM_CALL_FCALL);
+        flags.fcall = true;
     }
 
     // the receiver isn't included in the arg count
@@ -499,8 +499,7 @@ llvm::Value *IREmitterHelpers::emitMethodCallViaRubyVM(MethodCallContext &mcctx)
 
 // Create a global to hold the FunctionInlineCache value, and setup its initialization in the `Init_` function.
 llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &build, string methodName,
-                                               const vector<VMFlag> &flags, int argc,
-                                               const vector<string_view> &keywords) {
+                                               CallCacheFlags flags, int argc, const vector<string_view> &keywords) {
     auto &builder = builderCast(build);
 
     auto *setupFn = cs.getFunction("sorbet_setupFunctionInlineCache");
@@ -542,7 +541,7 @@ llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilde
             }
         }
 
-        auto *flagVal = VMFlag::build(cs, build, flags);
+        auto *flagVal = flags.build(cs, build);
         builder.CreateCall(setupFn, {cache, midVal, flagVal, argcVal, keywordsLenVal, keywordsVal});
 
         builder.restoreIP(restore);

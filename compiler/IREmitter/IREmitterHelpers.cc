@@ -1118,11 +1118,11 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
     auto *send = mcctx.send;
     auto &builder = static_cast<llvm::IRBuilder<> &>(mcctx.build);
 
-    auto flags = vector<VMFlag>{};
+    CallCacheFlags flags;
     if (send->isPrivateOk) {
-        flags.emplace_back(Payload::VM_CALL_FCALL);
+        flags.fcall = true;
     } else {
-        flags.emplace_back(Payload::VM_CALL_ARGS_SIMPLE);
+        flags.args_simple = true;
     }
     auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, methodNameForDebug, flags, 0, {});
     auto *recv = mcctx.varGetRecv();
@@ -1149,6 +1149,32 @@ llvm::Value *IREmitterHelpers::receiverFastPathTestWithCache(MethodCallContext &
     }
 
     return result;
+}
+
+llvm::Value *CallCacheFlags::build(CompilerState &cs, llvm::IRBuilderBase &build) {
+    auto &builder = static_cast<llvm::IRBuilder<> &>(build);
+
+    static struct {
+        bool CallCacheFlags::*field;
+        string_view functionName;
+        llvm::StringRef flagName;
+    } flags[] = {
+        {&CallCacheFlags::args_simple, "sorbet_vmCallArgsSimple", "VM_CALL_ARGS_SIMPLE"},
+        {&CallCacheFlags::args_splat, "sorbet_vmCallArgsSplat", "VM_CALL_ARGS_SPLAT"},
+        {&CallCacheFlags::kwarg, "sorbet_vmCallKwarg", "VM_CALL_KWARG"},
+        {&CallCacheFlags::kw_splat, "sorbet_vmCallKwSplat", "VM_CALL_KW_SPLAT"},
+        {&CallCacheFlags::fcall, "sorbet_vmCallFCall", "VM_CALL_FCALL"},
+    };
+
+    llvm::Value *acc = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, false));
+    for (auto &flag : flags) {
+        if (this->*flag.field) {
+            auto *flagVal = builder.CreateCall(cs.getFunction(flag.functionName), {}, flag.flagName);
+            acc = builder.CreateBinOp(llvm::Instruction::Or, acc, flagVal);
+        }
+    }
+
+    return acc;
 }
 
 } // namespace sorbet::compiler

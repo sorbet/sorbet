@@ -3,6 +3,7 @@
 #include "IREmitter.h"
 #include "cfg/CFG.h"
 #include "compiler/Core/ForwardDeclarations.h"
+#include "compiler/IREmitter/CallCacheFlags.h"
 #include "core/core.h"
 #include <string_view>
 #include <vector>
@@ -95,8 +96,7 @@ public:
     static llvm::Value *emitMethodCall(MethodCallContext &mcctx);
 
     static llvm::Value *makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &build, std::string methodName,
-                                        const std::vector<VMFlag> &flags, int argc,
-                                        const std::vector<std::string_view> &keywords);
+                                        CallCacheFlags flags, int argc, const std::vector<std::string_view> &keywords);
 
     static llvm::Value *callViaRubyVMSimple(MethodCallContext &mcctx);
 

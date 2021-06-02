@@ -408,15 +408,13 @@ public:
         // splat.
         llvm::Value *splatArray = builder.CreateCall(cs.getFunction("sorbet_arrayDup"), {splatArgs}, "splatArray");
 
-        struct VMFlag flag;
-
-        vector<VMFlag> flags;
+        CallCacheFlags flags;
 
         if (kwArgsType.derivesFrom(mcctx.cs, core::Symbols::NilClass())) {
-            flags.emplace_back(Payload::VM_CALL_ARGS_SPLAT);
+            flags.args_splat = true;
         } else if (auto *ptt = core::cast_type<core::TupleType>(kwArgsType)) {
-            flags.emplace_back(Payload::VM_CALL_ARGS_SPLAT);
-            flags.emplace_back(Payload::VM_CALL_KW_SPLAT);
+            flags.args_splat = true;
+            flags.kw_splat = true;
 
             auto *kwArgArray = Payload::varGet(mcctx.cs, kwArgsVar, mcctx.build, irctx, mcctx.rubyBlockId);
 
@@ -452,7 +450,7 @@ public:
         }
 
         if (send->isPrivateOk) {
-            flags.emplace_back(Payload::VM_CALL_FCALL);
+            flags.fcall = true;
         }
 
         // Push the splat array.

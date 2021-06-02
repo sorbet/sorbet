@@ -1135,24 +1135,6 @@ llvm::Value *Payload::getCFPForBlock(CompilerState &cs, llvm::IRBuilderBase &bui
     }
 }
 
-llvm::Value *VMFlag::build(CompilerState &cs, llvm::IRBuilderBase &build, const vector<VMFlag> &flags) {
-    auto &builder = builderCast(build);
-
-    llvm::Value *acc = llvm::ConstantInt::get(cs, llvm::APInt(32, 0, false));
-    for (auto &flag : flags) {
-        auto *flagVal = builder.CreateCall(cs.getFunction(flag.fnName), {}, flag.flagName);
-        acc = builder.CreateBinOp(llvm::Instruction::Or, acc, flagVal);
-    }
-
-    return acc;
-}
-
-const VMFlag Payload::VM_CALL_ARGS_SIMPLE{"sorbet_vmCallArgsSimple", "VM_CALL_ARGS_SIMPLE"};
-const VMFlag Payload::VM_CALL_ARGS_SPLAT{"sorbet_vmCallArgsSplat", "VM_CALL_ARGS_SPLAT"};
-const VMFlag Payload::VM_CALL_KWARG{"sorbet_vmCallKwarg", "VM_CALL_KWARG"};
-const VMFlag Payload::VM_CALL_KW_SPLAT{"sorbet_vmCallKwSplat", "VM_CALL_KW_SPLAT"};
-const VMFlag Payload::VM_CALL_FCALL{"sorbet_vmCallFCall", "VM_CALL_FCALL"};
-
 // Currently this function is an historical artifact. Prior to https://github.com/stripe/sorbet_llvm/pull/353, it was
 // used to compute an offset into a global array that was used to hold locals for all method and class static-init
 // functions. We now push stack frames for these functions to track the locals. Computing such an offset into the
