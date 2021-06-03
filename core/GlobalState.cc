@@ -601,7 +601,7 @@ void GlobalState::initEmpty() {
                  .repeatedUntypedArg(Names::arg())
                  .buildWithResultUntyped();
 
-    // Synthesize <Magic>.<raise-unimplemented>() => T.untyped
+    // Synthesize <Magic>.<rewriter-raise-unimplemented>() => T.untyped
     method =
         enterMethod(*this, Symbols::MagicSingleton(), Names::rewriterRaiseUnimplemented()).buildWithResultUntyped();
 
