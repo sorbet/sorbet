@@ -44,5 +44,5 @@ end
 
 sig {params(x: BadBang).returns(T::Boolean)}
 def should_not_suggest_bang_bang(x)
-  x # error: Expected `T::Boolean` but found `Boolean`
+  x # error: Expected `T::Boolean` but found `BadBang`
 end
