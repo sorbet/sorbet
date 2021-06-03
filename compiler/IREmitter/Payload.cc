@@ -514,6 +514,15 @@ llvm::PointerType *iseqType(CompilerState &cs) {
     return llvm::PointerType::getUnqual(llvm::StructType::getTypeByName(cs, "struct.rb_iseq_struct"));
 }
 
+// Given a Ruby block, finds the block id of the nearest _proper_ ancestor of that block that allocates an iseq.
+int getNearestIseqAllocatorBlock(const IREmitterContext &irctx, int rubyBlockId) {
+    do {
+        rubyBlockId = irctx.rubyBlockParent[rubyBlockId];
+    } while (rubyBlockId > 0 && irctx.rubyBlockType[rubyBlockId] == FunctionType::ExceptionBegin);
+
+    return rubyBlockId;
+}
+
 std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBuilderBase &build,
                                                    const IREmitterContext &irctx, const ast::MethodDef &md,
                                                    int rubyBlockId) {
@@ -533,17 +542,17 @@ std::tuple<string_view, llvm::Value *> getIseqInfo(CompilerState &cs, llvm::IRBu
 
         case FunctionType::Block:
             funcName = "block for"sv;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, irctx.rubyBlockParent[rubyBlockId]);
+            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
         case FunctionType::Rescue:
             funcName = "rescue for"sv;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, irctx.rubyBlockParent[rubyBlockId]);
+            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
         case FunctionType::Ensure:
             funcName = "ensure for"sv;
-            parent = allocateRubyStackFrames(cs, build, irctx, md, irctx.rubyBlockParent[rubyBlockId]);
+            parent = allocateRubyStackFrames(cs, build, irctx, md, getNearestIseqAllocatorBlock(irctx, rubyBlockId));
             break;
 
         case FunctionType::ExceptionBegin:

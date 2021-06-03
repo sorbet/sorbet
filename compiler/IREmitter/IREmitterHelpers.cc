@@ -377,18 +377,6 @@ void getRubyBlocks2FunctionsMapping(CompilerState &cs, cfg::CFG &cfg, llvm::Func
     }
 };
 
-// Resolve a ruby block id to one that will have a frame allocated.
-int resolveParent(const vector<FunctionType> &blockTypes, const vector<int> &blockParents, int candidate) {
-    while (candidate > 0) {
-        if (blockTypes[candidate] != FunctionType::ExceptionBegin) {
-            break;
-        }
-        candidate = blockParents[candidate];
-    }
-
-    return candidate;
-}
-
 // Returns the mapping of ruby block id to function type, as well as the mapping from basic block to exception handling
 // body block id.
 void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> &blockTypes, vector<int> &blockParents,
@@ -414,7 +402,7 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
             blockTypes[b->rubyBlockId] = FunctionType::Block;
 
             // the else branch always points back to the original owning rubyBlockId of the block call
-            blockParents[b->rubyBlockId] = resolveParent(blockTypes, blockParents, b->bexit.elseb->rubyBlockId);
+            blockParents[b->rubyBlockId] = b->bexit.elseb->rubyBlockId;
 
         } else if (b->bexit.cond.variable.data(cfg)._name == core::Names::exceptionValue()) {
             auto *bodyBlock = b->bexit.elseb;
@@ -468,11 +456,10 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
             }
 
             // All exception handling blocks are children of `b`, as far as ruby iseq allocation is concerned.
-            auto parent = resolveParent(blockTypes, blockParents, b->rubyBlockId);
-            blockParents[bodyBlockId] = parent;
-            blockParents[handlersBlockId] = parent;
-            blockParents[elseBlockId] = parent;
-            blockParents[ensureBlockId] = parent;
+            blockParents[bodyBlockId] = b->rubyBlockId;
+            blockParents[handlersBlockId] = b->rubyBlockId;
+            blockParents[elseBlockId] = b->rubyBlockId;
+            blockParents[ensureBlockId] = b->rubyBlockId;
         }
     }
 
