@@ -865,6 +865,35 @@ VALUE sorbet_rb_array_collect_withBlock(VALUE recv, ID fun, int argc, const VALU
     return collect;
 }
 
+// This is the no-block version of rb_ary_collect_bang: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3092-L3103
+SORBET_INLINE
+VALUE sorbet_rb_array_collect_bang(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                   VALUE closure) {
+    rb_check_arity(argc, 0, 0);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_array_enum_length);
+}
+
+// This is the block version of rb_ary_collect_bang: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3092-L3103
+SORBET_INLINE
+VALUE sorbet_rb_array_collect_bang_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                             BlockFFIType blk, const struct rb_captured_block *captured, VALUE closure,
+                                             int numPositionalArgs) {
+    rb_check_arity(argc, 0, 0);
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    rb_ary_modify(recv);
+    for (long i = 0; i < RARRAY_LEN(recv); i++) {
+        VALUE val = RARRAY_AREF(recv, i);
+        rb_ary_store(recv, i, blk(val, closure, 1, &val, Qnil));
+    }
+
+    sorbet_popRubyStack();
+
+    return recv;
+}
+
 // This is the no-block version of rb_ary_any_p: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L6338-L6364
 SORBET_INLINE
 VALUE sorbet_rb_array_any(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
