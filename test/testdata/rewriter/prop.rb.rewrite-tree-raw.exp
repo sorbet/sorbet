@@ -3297,26 +3297,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3599,26 +3587,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3686,26 +3662,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -3988,26 +3952,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4075,26 +4027,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4377,26 +4317,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4464,26 +4392,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4762,26 +4678,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4856,26 +4760,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -4921,26 +4813,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -5106,26 +4986,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -5616,26 +5484,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -7965,26 +7821,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -8056,26 +7900,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -8158,26 +7990,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -8290,26 +8110,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -8366,26 +8174,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }
@@ -8457,26 +8253,14 @@ ClassDef{
               name = <U <blk>>
             } }]
           rhs = Send{
-            recv = Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = (module ::T)
-              }
-              fun = <U unsafe>
-              block = nullptr
-              pos_args = 1
-              args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = (module ::Kernel)
-                }
-              ]
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = (class ::<Magic>)
             }
-            fun = <U raise>
+            fun = <U <rewriter-raise-unimplemented>>
             block = nullptr
-            pos_args = 1
+            pos_args = 0
             args = [
-              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
             ]
           }
         }

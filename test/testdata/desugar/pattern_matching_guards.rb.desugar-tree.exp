@@ -3,16 +3,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   y = begin
     <assignTemp>$1 = nil
-    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    if ::<Magic>.<rewriter-raise-unimplemented>()
       1
     else
-      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      if ::<Magic>.<rewriter-raise-unimplemented>()
         2
       else
-        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        if ::<Magic>.<rewriter-raise-unimplemented>()
           3
         else
-          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          if ::<Magic>.<rewriter-raise-unimplemented>()
             45
           else
             6

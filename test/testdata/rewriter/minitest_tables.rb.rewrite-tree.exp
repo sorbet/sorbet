@@ -84,7 +84,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def <it 'succeed with a local variable but cannot type it'><<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented").each() do |value|
+      ::<Magic>.<rewriter-raise-unimplemented>().each() do |value|
         begin
           <self>.puts(value.foo())
           <emptyTree>::<C T>.reveal_type(value)

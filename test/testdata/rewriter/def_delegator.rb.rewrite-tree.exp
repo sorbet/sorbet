@@ -5,7 +5,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def aliased_bar<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -21,7 +21,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def baz<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -29,7 +29,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def qux<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(<self>) do ||
@@ -131,7 +131,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -139,7 +139,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def aliased_bar<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -147,7 +147,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def baz<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -155,7 +155,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def qux<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     <self>.extend(<emptyTree>::<C Forwardable>)
@@ -183,7 +183,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -191,7 +191,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def aliased_bar<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -199,7 +199,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def baz<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -207,7 +207,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def qux<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
@@ -271,7 +271,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def each<<todo method>>(*arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     <self>.extend(<emptyTree>::<C T>::<C Generic>)

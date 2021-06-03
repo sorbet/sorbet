@@ -5,31 +5,31 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   begin
     <assignTemp>$1 = nil
-    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    if ::<Magic>.<rewriter-raise-unimplemented>()
       <emptyTree>
     else
-      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      if ::<Magic>.<rewriter-raise-unimplemented>()
         <emptyTree>
       else
-        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        if ::<Magic>.<rewriter-raise-unimplemented>()
           <emptyTree>
         else
-          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          if ::<Magic>.<rewriter-raise-unimplemented>()
             begin
-              x = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              x = ::<Magic>.<rewriter-raise-unimplemented>()
               <emptyTree>::<C T>.reveal_type(x)
             end
           else
-            if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            if ::<Magic>.<rewriter-raise-unimplemented>()
               begin
-                x = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                x = ::<Magic>.<rewriter-raise-unimplemented>()
                 <emptyTree>::<C T>.reveal_type(x)
               end
             else
-              if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              if ::<Magic>.<rewriter-raise-unimplemented>()
                 begin
-                  x = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  y = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                  x = ::<Magic>.<rewriter-raise-unimplemented>()
+                  y = ::<Magic>.<rewriter-raise-unimplemented>()
                   begin
                     <emptyTree>::<C T>.reveal_type(x)
                     <emptyTree>::<C T>.reveal_type(y)

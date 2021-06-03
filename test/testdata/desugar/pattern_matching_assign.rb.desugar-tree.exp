@@ -5,34 +5,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   x = begin
     <assignTemp>$1 = expr
-    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    if ::<Magic>.<rewriter-raise-unimplemented>()
       begin
-        s = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        s = ::<Magic>.<rewriter-raise-unimplemented>()
         begin
           <emptyTree>::<C T>.reveal_type(s)
           1
         end
       end
     else
-      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      if ::<Magic>.<rewriter-raise-unimplemented>()
         begin
-          x = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          x = ::<Magic>.<rewriter-raise-unimplemented>()
           begin
             <emptyTree>::<C T>.reveal_type(x)
             1
           end
         end
       else
-        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        if ::<Magic>.<rewriter-raise-unimplemented>()
           begin
-            expr = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            expr = ::<Magic>.<rewriter-raise-unimplemented>()
             begin
               <emptyTree>::<C T>.reveal_type(expr)
               1
             end
           end
         else
-          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          if ::<Magic>.<rewriter-raise-unimplemented>()
             begin
               <emptyTree>::<C T>.reveal_type(x)
               <emptyTree>::<C T>.reveal_type(expr)

@@ -3,34 +3,34 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   begin
     <assignTemp>$2 = expr
-    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    if ::<Magic>.<rewriter-raise-unimplemented>()
       begin
-        a = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        a = ::<Magic>.<rewriter-raise-unimplemented>()
         <emptyTree>::<C T>.reveal_type(a)
       end
     else
-      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      if ::<Magic>.<rewriter-raise-unimplemented>()
         begin
-          b = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          b = ::<Magic>.<rewriter-raise-unimplemented>()
           <emptyTree>::<C T>.reveal_type(b)
         end
       else
-        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        if ::<Magic>.<rewriter-raise-unimplemented>()
           begin
-            c = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-            d = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            c = ::<Magic>.<rewriter-raise-unimplemented>()
+            d = ::<Magic>.<rewriter-raise-unimplemented>()
             begin
               <emptyTree>::<C T>.reveal_type(c)
               <emptyTree>::<C T>.reveal_type(d)
             end
           end
         else
-          if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+          if ::<Magic>.<rewriter-raise-unimplemented>()
             begin
-              i = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              e = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              g = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-              h = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              i = ::<Magic>.<rewriter-raise-unimplemented>()
+              e = ::<Magic>.<rewriter-raise-unimplemented>()
+              g = ::<Magic>.<rewriter-raise-unimplemented>()
+              h = ::<Magic>.<rewriter-raise-unimplemented>()
               begin
                 <emptyTree>::<C T>.reveal_type(e)
                 <emptyTree>::<C T>.reveal_type(g)
@@ -39,11 +39,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
               end
             end
           else
-            if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+            if ::<Magic>.<rewriter-raise-unimplemented>()
               begin
-                m = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                j = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                l = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                m = ::<Magic>.<rewriter-raise-unimplemented>()
+                j = ::<Magic>.<rewriter-raise-unimplemented>()
+                l = ::<Magic>.<rewriter-raise-unimplemented>()
                 begin
                   <emptyTree>::<C T>.reveal_type(j)
                   <emptyTree>::<C T>.reveal_type(l)
@@ -51,12 +51,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
                 end
               end
             else
-              if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+              if ::<Magic>.<rewriter-raise-unimplemented>()
                 begin
-                  n4 = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  n1 = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  n2 = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
-                  n3 = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                  n4 = ::<Magic>.<rewriter-raise-unimplemented>()
+                  n1 = ::<Magic>.<rewriter-raise-unimplemented>()
+                  n2 = ::<Magic>.<rewriter-raise-unimplemented>()
+                  n3 = ::<Magic>.<rewriter-raise-unimplemented>()
                   begin
                     <emptyTree>::<C T>.reveal_type(n1)
                     <emptyTree>::<C T>.reveal_type(n2)
@@ -65,13 +65,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
                   end
                 end
               else
-                if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                if ::<Magic>.<rewriter-raise-unimplemented>()
                   begin
-                    o = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                    o = ::<Magic>.<rewriter-raise-unimplemented>()
                     <emptyTree>::<C T>.reveal_type(o)
                   end
                 else
-                  if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+                  if ::<Magic>.<rewriter-raise-unimplemented>()
                     <emptyTree>
                   else
                     <emptyTree>

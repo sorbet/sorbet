@@ -7,13 +7,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   begin
     <assignTemp>$1 = nil
-    if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    if ::<Magic>.<rewriter-raise-unimplemented>()
       <emptyTree>
     else
-      if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      if ::<Magic>.<rewriter-raise-unimplemented>()
         <emptyTree>
       else
-        if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+        if ::<Magic>.<rewriter-raise-unimplemented>()
           <emptyTree>
         else
           <emptyTree>

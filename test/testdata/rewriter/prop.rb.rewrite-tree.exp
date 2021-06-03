@@ -302,7 +302,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def enum_prop=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -336,7 +336,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_<<todo method>>(*opts:, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -344,7 +344,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_!<<todo method>>(*opts:, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -378,7 +378,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_lazy_<<todo method>>(*opts:, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -386,7 +386,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_lazy_!<<todo method>>(*opts:, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -420,7 +420,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_proc_<<todo method>>(*opts:, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -428,7 +428,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_proc_!<<todo method>>(*opts:, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -462,7 +462,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_invalid_<<todo method>>(*opts:, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -470,7 +470,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foreign_invalid_!<<todo method>>(*opts:, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -478,7 +478,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def ifunset<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -501,7 +501,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def ifunset_nilable<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -561,7 +561,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def hash_rules=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
@@ -843,7 +843,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -851,7 +851,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def encrypted_foo<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -859,7 +859,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def foo=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -867,7 +867,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def encrypted_foo=<<todo method>>(arg0, &<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -875,7 +875,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def bar<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     ::Sorbet::Private::Static.sig(::T::Sig::WithoutRuntime) do ||
@@ -883,7 +883,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
 
     def encrypted_bar<<todo method>>(&<blk>)
-      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::<Magic>.<rewriter-raise-unimplemented>()
     end
 
     <self>.include(<emptyTree>::<C T>::<C Props>)
