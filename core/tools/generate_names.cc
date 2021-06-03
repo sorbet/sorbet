@@ -269,7 +269,7 @@ NameDef names[] = {
     {"normal"},
 
     {"raise"},
-    {"rewriterRaiseUnimplemented", "Sorbet rewriter pass partially unimplemented"},
+    {"rewriterRaiseUnimplemented", "<rewriter-raise-unimplemented>"},
 
     {"test"},
     // end DSL methods

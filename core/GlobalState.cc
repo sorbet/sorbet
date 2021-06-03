@@ -601,6 +601,10 @@ void GlobalState::initEmpty() {
                  .repeatedUntypedArg(Names::arg())
                  .buildWithResultUntyped();
 
+    // Synthesize <Magic>.<raise-unimplemented>() => T.untyped
+    method =
+        enterMethod(*this, Symbols::MagicSingleton(), Names::rewriterRaiseUnimplemented()).buildWithResultUntyped();
+
     // Synthesize <DeclBuilderForProcs>.<params>(args: T.untyped) => DeclBuilderForProcs
     method = enterMethod(*this, Symbols::DeclBuilderForProcsSingleton(), Names::params())
                  .kwsplatArg(Names::arg0())
