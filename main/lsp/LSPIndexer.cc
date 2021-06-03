@@ -196,6 +196,10 @@ void LSPIndexer::initialize(LSPFileUpdates &updates, WorkerPool &workers) {
         // asts are in fref order, but we (currently) don't index and compute file hashes for payload files, so vector
         // index != FileRef ID. Fix that by slotting them into `indexed`.
         for (auto &ast : asts) {
+            auto &hash = ast.file.data(*initialGS).getFileHash();
+            prodHistogramInc("trees.usages.sends", hash->usages.sends.size());
+            prodHistogramInc("trees.usages.symbols", hash->usages.symbols.size());
+
             int id = ast.file.id();
             ENFORCE_NO_TIMER(id < indexed.size());
             indexed[id] = move(ast);
