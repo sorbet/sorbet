@@ -561,6 +561,30 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
                     [&](cfg::Return *i) {
                         isTerminated = true;
 
+                        // If we see a 'return' statement that crosses both block and exception frames, emit an error
+                        // message.
+                        bool sawBlockType = false;
+                        bool sawExceptionType = false;
+
+                        for (int blockId = bb->rubyBlockId; blockId != 0; blockId = irctx.rubyBlockParent[blockId]) {
+                            auto funcType = irctx.rubyBlockType[blockId];
+                            if (funcType == FunctionType::Block) {
+                                sawBlockType = true;
+                            } else if (funcType == FunctionType::Rescue || funcType == FunctionType::Ensure ||
+                                       funcType == FunctionType::ExceptionBegin) {
+                                sawExceptionType = true;
+                            }
+                        }
+
+                        if (sawBlockType && sawExceptionType) {
+                            failCompilation(
+                                cs, core::Loc(cs.file, bind.loc),
+                                "return statements crossing both block and exception frames are not yet implemented");
+                            return;
+                        }
+
+                        // TODO(aprocter): Once we're able to support return statements that cross block frames but
+                        // _don't_ cross exception frames, delete this more general restriction:
                         if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
                             // NOTE: this doesn't catch all block-return cases:
                             // https://github.com/stripe/sorbet_llvm/issues/94
