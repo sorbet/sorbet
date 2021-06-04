@@ -347,6 +347,7 @@ class SymbolFinder {
     // `private` with no arguments toggles the visibility of all methods below in the class def.
     // This tracks those as they appear.
     vector<optional<Modifier>> methodVisiStack = {nullopt};
+    bool inBlock = false;
 
     void findClassModifiers(core::Context ctx, FoundDefinitionRef klass, ast::ExpressionPtr &line) {
         auto *send = ast::cast_tree<ast::Send>(line);
@@ -453,11 +454,13 @@ public:
     }
 
     ast::ExpressionPtr preTransformBlock(core::Context ctx, ast::ExpressionPtr block) {
+        inBlock = true;
         methodVisiStack.emplace_back(nullopt);
         return block;
     }
 
     ast::ExpressionPtr postTransformBlock(core::Context ctx, ast::ExpressionPtr block) {
+        inBlock = false;
         methodVisiStack.pop_back();
         return block;
     }
@@ -692,6 +695,13 @@ public:
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
         if (lhs == nullptr) {
             return tree;
+        }
+
+        if (inBlock) {
+            if (auto e = ctx.state.beginError(core::Loc(ctx.file, lhs->loc),
+                                              core::errors::Namer::DynamicConstantAssignment)) {
+                e.setHeader("Dynamic constant assignment");
+            }
         }
 
         auto *send = ast::cast_tree<ast::Send>(asgn.rhs);
