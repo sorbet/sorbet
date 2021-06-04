@@ -435,11 +435,22 @@ void determineBlockTypes(CompilerState &cs, cfg::CFG &cfg, vector<FunctionType> 
                 auto exits = CFGHelpers::findRubyBlockExits(cfg, exit->rubyBlockId);
 
                 // The ensure block should only ever jump to the code that follows the begin/end block.
-                ENFORCE(exits.size() == 1);
+                ENFORCE(exits.size() <= 1);
 
-                // Have the entry block jump over all of the exception handling machinery.
-                basicBlockJumpOverrides[handlersBlock->id] = exits.front()->id;
-                basicBlockJumpOverrides[bodyBlock->id] = exits.front()->id;
+                if (exits.empty()) {
+                    // When control flow terminates in the block that ends exception handling, else or ensure, that
+                    // block will transition to the dead block. As `findRubyBlockExits` will ignore the dead block to
+                    // simplify the common case of looking for reachable exits, the exits vector being empty indicates
+                    // that a return is present in the exception handling exit, and that the transition will never
+                    // happen. In this case we can explicitly jump from the exception handling entry block directly to
+                    // the dead block.
+                    basicBlockJumpOverrides[handlersBlock->id] = cfg.deadBlock()->id;
+                    basicBlockJumpOverrides[bodyBlock->id] = cfg.deadBlock()->id;
+                } else {
+                    // Have the entry block jump over all of the exception handling machinery.
+                    basicBlockJumpOverrides[handlersBlock->id] = exits.front()->id;
+                    basicBlockJumpOverrides[bodyBlock->id] = exits.front()->id;
+                }
             }
 
             exceptionHandlingBlockHeaders[b->id] = bodyBlockId;
