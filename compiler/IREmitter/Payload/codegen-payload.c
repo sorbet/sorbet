@@ -756,6 +756,43 @@ VALUE sorbet_rb_array_each_withBlock(VALUE recv, ID fun, int argc, const VALUE *
     return recv;
 }
 
+// This is the no-block version of enum_each_with_object for arrays:
+// https://github.com/ruby/ruby/blob/b0b7751f3b94e7983d124e43102f76ff598caabd/enum.c#L2749-L2757 In that version, the
+// `RETURN_SIZED_ENUMERATOR` macro is what causes the early return when a block is not passed. In this case, we know
+// that the block wasn't passed, so we always return an enumerator
+SORBET_INLINE
+VALUE sorbet_rb_array_each_with_object(VALUE recv, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                                       VALUE closure) {
+    rb_check_arity(argc, 1, 1);
+    return rb_enumeratorize_with_size(recv, ID2SYM(fun), argc, argv, sorbet_array_enum_length);
+}
+
+// This is the block version of Array#each_with_object -- which doesn't exist as a separate C function in the VM.
+// In the no-block version, above, the code uses `rb_yield`, whereas we call the block function pointer directly.
+SORBET_INLINE
+VALUE sorbet_rb_array_each_with_object_withBlock(VALUE recv, ID fun, int argc, const VALUE *const restrict argv,
+                                                 BlockFFIType blk, const struct rb_captured_block *captured,
+                                                 VALUE closure, int numPositionalArgs) {
+    rb_check_arity(argc, 1, 1);
+
+    VALUE object = argv[0];
+    VALUE block_argv[2];
+    block_argv[1] = object;
+
+    // must push a frame for the captured block
+    sorbet_pushBlockFrame(captured);
+
+    for (long i = 0; i < RARRAY_LEN(recv); ++i) {
+        VALUE val = RARRAY_AREF(recv, i);
+        block_argv[0] = val;
+        blk(val, closure, 2, &block_argv[0], Qnil);
+    }
+
+    sorbet_popRubyStack();
+
+    return object;
+}
+
 // This is the no-block version of rb_ary_select: https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L3212-L3226
 // In that version, the `RETURN_SIZED_ENUMERATOR` macro is what causes the early return when a block is not passed. In
 // this case, we know that the block wasn't passed, so we always return an enumerator
