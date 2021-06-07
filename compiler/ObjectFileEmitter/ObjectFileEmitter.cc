@@ -193,7 +193,7 @@ void addModulePasses(llvm::legacy::PassManager &pm) {
         pm.add(llvm::createCFGSimplificationPass());
     }
 }
-void addLTOPasses(llvm::legacy::PassManager &pm) {
+void addLTOPasses(llvm::legacy::PassManager &pm, llvm::ModulePass *printLowered) {
     // this is intended to mimic llvm::PassManagerBuilder::populateLTOPassManager
     // while disabling optimizations that don't help us much to speedup and adding ones that do. Please explicitly
     // leave comments with added/removed passes
@@ -266,6 +266,9 @@ void addLTOPasses(llvm::legacy::PassManager &pm) {
     pm.add(llvm::createLoopUnrollPass(2, false, false));
     pm.add(llvm::createInstructionCombiningPass(runExpensiveInstructionConbining));
     {
+        // print out the IR right before the sorbet lowerings
+        pm.add(printLowered);
+
         // Sorbet modifications, run our lowering super late in pipeline
         // this allows other optimizations to move intrinsics around as black boxes and keep optimizing them under
         // assumptions(that are marked with function attributes)
@@ -391,10 +394,6 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     targetMachine->adjustPassManager(pmbuilder);
     pmbuilder.populateFunctionPassManager(fnPasses);
     std::error_code ec1;
-    // print lowered IR
-    auto nameOptl = ((string)dir) + "/" + (string)objectName + ".lll";
-    llvm::raw_fd_ostream lllFile(nameOptl, ec1, llvm::sys::fs::F_Text);
-    pm.add(llvm::createPrintModulePass(lllFile, ""));
     // We need to run this early, prior to inlining, so the intrinsics to remove
     // still exist in some fashion.
     pm.add(Passes::createDeleteUnusedSorbetIntrinsticsPass());
@@ -403,7 +402,11 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     // Module passes
     addModulePasses(pm);
     // LTO passes
-    addLTOPasses(pm);
+    // print lowered IR
+    auto nameOptl = ((string)dir) + "/" + (string)objectName + ".lll";
+    llvm::raw_fd_ostream lllFile(nameOptl, ec1, llvm::sys::fs::F_Text);
+    auto *printLowered = llvm::createPrintModulePass(lllFile, "");
+    addLTOPasses(pm, printLowered);
     // print optimized IR
     auto nameOpt = ((string)dir) + "/" + (string)objectName + ".llo";
     llvm::raw_fd_ostream lloFile(nameOpt, ec1, llvm::sys::fs::F_Text);
