@@ -257,7 +257,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::ExpressionPtr &what, BasicBlo
                 if (thenEnd != cctx.inWhat.deadBlock() || elseEnd != cctx.inWhat.deadBlock()) {
                     if (thenEnd == cctx.inWhat.deadBlock()) {
                         ret = elseEnd;
-                    } else if (thenEnd == cctx.inWhat.deadBlock()) {
+                    } else if (elseEnd == cctx.inWhat.deadBlock()) {
                         ret = thenEnd;
                     } else {
                         ret = cctx.inWhat.freshBlock(cctx.loops, current->rubyBlockId);
