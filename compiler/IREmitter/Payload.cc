@@ -466,6 +466,20 @@ llvm::Value *Payload::typeTestForBlock(CompilerState &cs, llvm::IRBuilderBase &b
     return typeTest(cs, b, val, type);
 }
 
+// Emit an `llvm.assume` intrinsic with the result of a `Payload::typeTest` with the given symbol. For example, this can
+// be used assert that a value will be an array.
+//
+// NOTE: this will make the optimizer behave as though the type test can never be false, and undefined behavior will
+// arise if it is false at runtime. If it's not clear that the type test will always be true, err on the side of not
+// adding an assertion.
+void Payload::assumeType(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *val,
+                         core::ClassOrModuleRef sym) {
+    auto type = core::make_type<core::ClassType>(sym);
+    auto *cond = Payload::typeTest(cs, builder, val, type);
+    builderCast(builder).CreateIntrinsic(llvm::Intrinsic::IndependentIntrinsics::assume, {}, {cond});
+    return;
+}
+
 llvm::Value *Payload::boolToRuby(CompilerState &cs, llvm::IRBuilderBase &builder, llvm::Value *u1) {
     return builderCast(builder).CreateCall(cs.getFunction("sorbet_boolToRuby"), {u1}, "rubyBool");
 }
