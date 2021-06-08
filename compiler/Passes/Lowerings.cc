@@ -250,10 +250,47 @@ public:
     }
 } ObjIsKindOf;
 
+class TypeTest : public IRIntrinsic {
+    static const vector<pair<string, string>> intrinsicMap;
+
+public:
+    virtual vector<string> implementedFunctionCall() const override {
+        vector<string> methods;
+        for (auto &[intrinsic, realMethod] : intrinsicMap) {
+            methods.emplace_back(intrinsic);
+        }
+        return methods;
+    }
+
+    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
+                                     llvm::CallInst *instr) const override {
+        llvm::IRBuilder<> builder(instr);
+        auto *arg = instr->getArgOperand(0);
+        auto name = instr->getCalledFunction()->getName().str();
+
+        auto realMethod = absl::c_find_if(intrinsicMap, [&name](const auto &pair) { return pair.first == name; });
+        ENFORCE(realMethod != intrinsicMap.end());
+
+        return builder.CreateCall(module.getFunction(realMethod->second), {arg});
+    }
+
+} TypeTest;
+
+const vector<pair<string, string>> TypeTest::intrinsicMap{
+    {"sorbet_i_isa_Array", "sorbet_isa_Array"},         {"sorbet_i_isa_Integer", "sorbet_isa_Integer"},
+    {"sorbet_i_isa_TrueClass", "sorbet_isa_TrueClass"}, {"sorbet_i_isa_FalseClass", "sorbet_isa_FalseClass"},
+    {"sorbet_i_isa_NilClass", "sorbet_isa_NilClass"},   {"sorbet_i_isa_Symbol", "sorbet_isa_Symbol"},
+    {"sorbet_i_isa_Float", "sorbet_isa_Float"},         {"sorbet_i_isa_Untyped", "sorbet_isa_Untyped"},
+    {"sorbet_i_isa_Hash", "sorbet_isa_Hash"},           {"sorbet_i_isa_Array", "sorbet_isa_Array"},
+    {"sorbet_i_isa_Regexp", "sorbet_isa_Regexp"},       {"sorbet_i_isa_String", "sorbet_isa_String"},
+    {"sorbet_i_isa_Proc", "sorbet_isa_Proc"},           {"sorbet_i_isa_RootSingleton", "sorbet_isa_RootSingleton"},
+};
+
 vector<IRIntrinsic *> getIRIntrinsics() {
     vector<IRIntrinsic *> irIntrinsics{
         &ClassAndModuleLoading,
         &ObjIsKindOf,
+        &TypeTest,
     };
 
     return irIntrinsics;

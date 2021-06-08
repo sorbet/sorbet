@@ -111,6 +111,20 @@ SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long cl
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
 
+SORBET_ALIVE(_Bool, sorbet_i_isa_Integer, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_TrueClass, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_FalseClass, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_NilClass, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_Symbol, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_Float, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_Untyped, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_Hash, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_Array, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_Regexp, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_String, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_Proc, (VALUE) __attribute__((const)));
+SORBET_ALIVE(_Bool, sorbet_i_isa_RootSingleton, (VALUE) __attribute__((const)));
+
 SORBET_ALIVE(long, sorbet_globalConstRegister, (VALUE val));
 SORBET_ALIVE(VALUE, sorbet_globalConstDupHash, (long index));
 SORBET_ALIVE(VALUE, sorbet_magic_mergeHashHelper, (VALUE, VALUE));
@@ -2194,5 +2208,9 @@ VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) 
     // this function will be nuked but it exists to keep forward definitions alive for clang
     return (long)&sorbet_i_getRubyClass + (long)&sorbet_i_getRubyConstant + (long)&sorbet_getConstantEpoch +
            (long)&sorbet_getConstant + (long)&sorbet_rubyTrue + (long)&rb_id2sym + (long)&rb_errinfo +
-           (long)&rb_obj_is_kind_of;
+           (long)&rb_obj_is_kind_of + (long)&sorbet_isa_Integer + (long)&sorbet_isa_TrueClass +
+           (long)&sorbet_isa_FalseClass + (long)&sorbet_isa_NilClass + (long)&sorbet_isa_Symbol +
+           (long)&sorbet_isa_Float + (long)&sorbet_isa_Untyped + (long)&sorbet_isa_Hash + (long)&sorbet_isa_Array +
+           (long)&sorbet_isa_Regexp + (long)&sorbet_isa_String + (long)&sorbet_isa_Proc +
+           (long)&sorbet_isa_RootSingleton;
 }

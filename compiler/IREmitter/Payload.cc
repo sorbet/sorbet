@@ -270,20 +270,20 @@ llvm::Value *Payload::toCString(CompilerState &cs, string_view str, llvm::IRBuil
 
 namespace {
 const vector<pair<core::ClassOrModuleRef, string>> optimizedTypeTests = {
-    {core::Symbols::untyped(), "sorbet_isa_Untyped"},
-    {core::Symbols::Array(), "sorbet_isa_Array"},
-    {core::Symbols::FalseClass(), "sorbet_isa_FalseClass"},
-    {core::Symbols::TrueClass(), "sorbet_isa_TrueClass"},
-    {core::Symbols::Float(), "sorbet_isa_Float"},
-    {core::Symbols::Hash(), "sorbet_isa_Hash"},
-    {core::Symbols::Integer(), "sorbet_isa_Integer"},
-    {core::Symbols::NilClass(), "sorbet_isa_NilClass"},
-    {core::Symbols::Proc(), "sorbet_isa_Proc"},
-    {core::Symbols::Rational(), "sorbet_isa_Rational"},
-    {core::Symbols::Regexp(), "sorbet_isa_Regexp"},
-    {core::Symbols::String(), "sorbet_isa_String"},
-    {core::Symbols::Symbol(), "sorbet_isa_Symbol"},
-    {core::Symbols::rootSingleton(), "sorbet_isa_RootSingleton"},
+    {core::Symbols::untyped(), "sorbet_i_isa_Untyped"},
+    {core::Symbols::Array(), "sorbet_i_isa_Array"},
+    {core::Symbols::FalseClass(), "sorbet_i_isa_FalseClass"},
+    {core::Symbols::TrueClass(), "sorbet_i_isa_TrueClass"},
+    {core::Symbols::Float(), "sorbet_i_isa_Float"},
+    {core::Symbols::Hash(), "sorbet_i_isa_Hash"},
+    {core::Symbols::Integer(), "sorbet_i_isa_Integer"},
+    {core::Symbols::NilClass(), "sorbet_i_isa_NilClass"},
+    {core::Symbols::Proc(), "sorbet_i_isa_Proc"},
+    {core::Symbols::Rational(), "sorbet_i_isa_Rational"},
+    {core::Symbols::Regexp(), "sorbet_i_isa_Regexp"},
+    {core::Symbols::String(), "sorbet_i_isa_String"},
+    {core::Symbols::Symbol(), "sorbet_i_isa_Symbol"},
+    {core::Symbols::rootSingleton(), "sorbet_i_isa_RootSingleton"},
 };
 
 bool hasOptimizedTest(core::ClassOrModuleRef sym) {
