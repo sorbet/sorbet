@@ -1289,6 +1289,12 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                     {
                       $$ = driver.alloc.delimited_node_list($1, $2, $3);
                     }
+                | tLPAREN2 args tCOMMA args_forward rparen
+                    {
+                      auto forwarded_args = driver.build.forwarded_args(self, $4);
+                      $2->emplace_back(forwarded_args);
+                      $$ = driver.alloc.delimited_node_list($1, $2, $5);
+                    }
                 | tLPAREN2 args_forward rparen
                     {
                       auto forwarded_args = driver.build.forwarded_args(self, $2);
@@ -3075,11 +3081,20 @@ keyword_variable: kNIL
                       driver.lex.set_state_expr_value();
                       $$ = driver.build.args(self, $1, $2, $3, true);
                     }
+                | tLPAREN2 f_arg tCOMMA args_forward rparen
+                    {
+                      driver.lex.declare_forward_args();
+                      auto forward_arg = driver.build.forward_arg(self, nullptr, $4, nullptr);
+                      $2->emplace_back(forward_arg);
+                      $$ = driver.build.args(self, $1, $2, $5, true);
+                    }
                 | tLPAREN2 args_forward rparen
                     {
                       driver.lex.set_state_expr_value();
                       driver.lex.declare_forward_args();
-                      $$ = driver.build.forward_args(self, $1, $2, $3);
+                      auto forward_arg = driver.build.forward_arg(self, $1, $2, $3);
+                      auto node_list = driver.alloc.node_list(forward_arg);
+                      $$ = driver.build.args(self, $1, node_list, $3, true);
                     }
                 |   {
                       $<boolean>$ = driver.lex.in_kwarg;

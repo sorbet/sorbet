@@ -1,2 +1,0 @@
-s(:def, :foo,
-  s(:forward_args), nil)
