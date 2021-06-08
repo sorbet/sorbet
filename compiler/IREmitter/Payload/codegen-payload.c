@@ -1053,6 +1053,29 @@ VALUE sorbet_rb_array_compact(VALUE ary, ID fun, int argc, const VALUE *const re
     return ary;
 }
 
+// This is the no-block version of rb_ary_to_h https://github.com/ruby/ruby/blob/ruby_2_7/array.c#L2496-L2518
+SORBET_INLINE
+VALUE sorbet_rb_array_to_h(VALUE ary, ID fun, int argc, const VALUE *const restrict argv, BlockFFIType blk,
+                           VALUE closure) {
+    // the uses of RARRAY_LEN in rb_ary_to_h can be coalesced because there's no block passed in this case
+    long len = RARRAY_LEN(ary);
+    VALUE hash = rb_hash_new_with_size(len);
+
+    for (long i = 0; i < len; i++) {
+        const VALUE elt = RARRAY_AREF(ary, i);
+        const VALUE key_value_pair = rb_check_array_type(elt);
+        if (NIL_P(key_value_pair)) {
+            rb_raise(rb_eTypeError, "wrong element type %" PRIsVALUE " at %ld (expected array)", rb_obj_class(elt), i);
+        }
+        if (RARRAY_LEN(key_value_pair) != 2) {
+            rb_raise(rb_eArgError, "wrong array length at %ld (expected 2, was %ld)", i, RARRAY_LEN(key_value_pair));
+        }
+        rb_hash_aset(hash, RARRAY_AREF(key_value_pair, 0), RARRAY_AREF(key_value_pair, 1));
+    }
+
+    return hash;
+}
+
 // This is an adjusted version of the intrinsic from the ruby vm. The major change is that instead of handling the case
 // where a range is used as the key, we defer back to the VM.
 // https://github.com/ruby/ruby/blob/ruby_2_6/array.c#L1980-L2005
