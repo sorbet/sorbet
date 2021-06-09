@@ -100,15 +100,14 @@ AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cf
 }
 
 std::tuple<UnorderedMap<cfg::LocalRef, llvm::AllocaInst *>, UnorderedMap<int, llvm::AllocaInst *>>
-setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
-                    const UnorderedMap<cfg::LocalRef, optional<int>> &variablesPrivateToBlocks,
+setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, const UnorderedMap<cfg::LocalRef, int> &variablesPrivateToBlocks,
                     const IREmitterContext &irctx) {
     UnorderedMap<cfg::LocalRef, llvm::AllocaInst *> llvmVariables;
     llvm::IRBuilder<> builder(cs);
     {
         // nill out block local variables.
         auto valueType = cs.getValueType();
-        vector<pair<cfg::LocalRef, optional<int>>> variablesPrivateToBlocksSorted;
+        vector<pair<cfg::LocalRef, int>> variablesPrivateToBlocksSorted;
 
         for (const auto &entry : variablesPrivateToBlocks) {
             variablesPrivateToBlocksSorted.emplace_back(entry);
@@ -117,11 +116,8 @@ setupLocalVariables(CompilerState &cs, cfg::CFG &cfg,
                   [](const auto &left, const auto &right) -> bool { return left.first.id() < right.first.id(); });
         for (const auto &entry : variablesPrivateToBlocksSorted) {
             auto var = entry.first;
-            if (entry.second == std::nullopt) {
-                continue;
-            }
             auto svName = var.data(cfg)._name.shortName(cs);
-            builder.SetInsertPoint(irctx.functionInitializersByFunction[entry.second.value()]);
+            builder.SetInsertPoint(irctx.functionInitializersByFunction[entry.second]);
             auto alloca = llvmVariables[var] =
                 builder.CreateAlloca(valueType, nullptr, llvm::StringRef(svName.data(), svName.length()));
             auto nilValueRaw = Payload::rubyNil(cs, builder);
@@ -188,8 +184,19 @@ public:
         }
     }
 
-    tuple<UnorderedMap<cfg::LocalRef, optional<int>>, UnorderedMap<cfg::LocalRef, int>, bool> finalize() {
-        return {std::move(privateUsages), std::move(escapedIndexes), usesBlockArg};
+    tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, int>, bool> finalize() {
+        // privateUsages entries that have nullopt values are only interesting to the
+        // capture analysis process, so remove them
+        UnorderedMap<cfg::LocalRef, int> realPrivateUsages;
+        for (auto &entry : privateUsages) {
+            if (!entry.second.has_value()) {
+                continue;
+            }
+
+            realPrivateUsages[entry.first] = entry.second.value();
+        }
+
+        return {std::move(realPrivateUsages), std::move(escapedIndexes), usesBlockArg};
     }
 };
 
@@ -197,7 +204,7 @@ public:
 
 /* if local variable is only used in block X, it maps the local variable to X, otherwise, it maps local variable to a
  * negative number */
-tuple<UnorderedMap<cfg::LocalRef, optional<int>>, UnorderedMap<cfg::LocalRef, int>, bool>
+tuple<UnorderedMap<cfg::LocalRef, int>, UnorderedMap<cfg::LocalRef, int>, bool>
 findCaptures(CompilerState &cs, const ast::MethodDef &mdef, cfg::CFG &cfg,
              const UnorderedMap<cfg::LocalRef, Alias> &aliases) {
     TrackCaptures usage(aliases);
