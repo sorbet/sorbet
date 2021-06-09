@@ -79,10 +79,12 @@ module T::Utils
     case type
     when T::Types::Union
       non_nil_types = type.types.reject {|t| t == Nilable::NIL_TYPE}
-      if non_nil_types.length == 1
-        non_nil_types.first
+      return nil if type.types.length == non_nil_types.length
+      case non_nil_types.length
+      when 0 then nil
+      when 1 then non_nil_types.first
       else
-        nil
+        T::Types::Union::Private::Pool.union_of_types(non_nil_types[0], non_nil_types[1], non_nil_types[2..])
       end
     else
       nil
