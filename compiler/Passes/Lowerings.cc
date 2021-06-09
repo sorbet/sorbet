@@ -16,7 +16,7 @@ namespace {
 
 class IRIntrinsic {
 public:
-    virtual vector<string> implementedFunctionCall() const = 0;
+    virtual vector<llvm::StringRef> implementedFunctionCall() const = 0;
 
     // The contract you're expected to implement here is basically:
     //
@@ -44,7 +44,7 @@ public:
 
 // TODO: add more from https://git.corp.stripe.com/stripe-internal/ruby/blob/48bf9833/include/ruby/ruby.h#L1962. Will
 // need to modify core sorbet for it.
-const vector<pair<string, string>> knownSymbolMapping = {
+const vector<pair<llvm::StringRef, llvm::StringRef>> knownSymbolMapping = {
     {"Array", "rb_cArray"},
     {"BasicObject", "rb_cBasicObject"},
     {"Class", "rb_cClass"},
@@ -76,7 +76,7 @@ const vector<pair<string, string>> knownSymbolMapping = {
 
 class ClassAndModuleLoading : public IRIntrinsic {
 public:
-    virtual vector<string> implementedFunctionCall() const override {
+    virtual vector<llvm::StringRef> implementedFunctionCall() const override {
         return {"sorbet_i_getRubyClass", "sorbet_i_getRubyConstant"};
     }
 
@@ -197,7 +197,7 @@ class ObjIsKindOf : public IRIntrinsic {
     }
 
 public:
-    virtual vector<string> implementedFunctionCall() const override {
+    virtual vector<llvm::StringRef> implementedFunctionCall() const override {
         return {"sorbet_i_objIsKindOf"};
     }
 
@@ -251,11 +251,11 @@ public:
 } ObjIsKindOf;
 
 class TypeTest : public IRIntrinsic {
-    static const vector<pair<string, string>> intrinsicMap;
+    static const vector<pair<llvm::StringRef, llvm::StringRef>> intrinsicMap;
 
 public:
-    virtual vector<string> implementedFunctionCall() const override {
-        vector<string> methods;
+    virtual vector<llvm::StringRef> implementedFunctionCall() const override {
+        vector<llvm::StringRef> methods;
         for (auto &[intrinsic, realMethod] : intrinsicMap) {
             methods.emplace_back(intrinsic);
         }
@@ -266,7 +266,7 @@ public:
                                      llvm::CallInst *instr) const override {
         llvm::IRBuilder<> builder(instr);
         auto *arg = instr->getArgOperand(0);
-        auto name = instr->getCalledFunction()->getName().str();
+        auto name = instr->getCalledFunction()->getName();
 
         auto realMethod = absl::c_find_if(intrinsicMap, [&name](const auto &pair) { return pair.first == name; });
         ENFORCE(realMethod != intrinsicMap.end());
@@ -276,7 +276,7 @@ public:
 
 } TypeTest;
 
-const vector<pair<string, string>> TypeTest::intrinsicMap{
+const vector<pair<llvm::StringRef, llvm::StringRef>> TypeTest::intrinsicMap{
     {"sorbet_i_isa_Array", "sorbet_isa_Array"},         {"sorbet_i_isa_Integer", "sorbet_isa_Integer"},
     {"sorbet_i_isa_TrueClass", "sorbet_isa_TrueClass"}, {"sorbet_i_isa_FalseClass", "sorbet_isa_FalseClass"},
     {"sorbet_i_isa_NilClass", "sorbet_isa_NilClass"},   {"sorbet_i_isa_Symbol", "sorbet_isa_Symbol"},
