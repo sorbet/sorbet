@@ -710,6 +710,20 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                     {
                       $$ = driver.build.not_op(self, $1, nullptr, $2, nullptr);
                     }
+                | arg tASSOC
+                    {
+                      driver.lex.set_state_expr_beg();
+                      driver.lex.unset_command_start();
+                      driver.pattern_variables.push();
+
+                      $<boolean>$ = driver.lex.in_kwarg;
+                      driver.lex.in_kwarg = true;
+                    }
+                  p_expr
+                    {
+                      driver.lex.in_kwarg = $<boolean>3;
+                      $$ = driver.build.match_pattern(self, $1, $2, $4);
+                    }
                 | arg kIN
                     {
                       driver.lex.set_state_expr_beg();
@@ -722,7 +736,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby27 &driver) {
                   p_expr
                     {
                       driver.lex.in_kwarg = $<boolean>3;
-                      $$ = driver.build.in_match(self, $1, $2, $4);
+                      $$ = driver.build.match_pattern_p(self, $1, $2, $4);
                     }
                 | arg %prec tLBRACE_ARG
 
