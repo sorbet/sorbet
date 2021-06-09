@@ -13,3 +13,10 @@ end
 # INITIAL{LITERAL}: }
 
 p result
+
+result = [1, 2, 3, 4, 5, 6, 7, 8].map do |x|
+  puts "-- #{x} --"
+  break :finished if x == 6
+end
+
+p result

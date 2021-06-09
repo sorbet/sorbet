@@ -50,3 +50,12 @@ result = arr.find do |x|
 end
 puts arr
 puts result
+
+arr = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+result = arr.find do |x|
+  puts x
+  break :finished if x == 5
+  x == 8
+end
+puts arr
+puts result

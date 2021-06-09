@@ -15,3 +15,14 @@ end
 # INITIAL{LITERAL}: }
 
 p result
+
+array = [1, 2, 3, 4, 5, 6, 7, 8]
+
+result = array.map! do |x|
+  break :finished if x == 6
+  puts "-- #{x} --"
+  x + 1
+end
+
+p result
+p array

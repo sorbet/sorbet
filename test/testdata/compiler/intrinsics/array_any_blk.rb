@@ -8,6 +8,13 @@ result = [1, 2, 3, 4, 5, 6].any? do |x|
 end
 puts result
 
+result = [1, 2, 3, 4, 5, 6].any? do |x|
+  puts x
+  break :finished if x == 1
+  x.even?
+end
+puts result
+
 def foo(&blk)
   result = [1, 2, 3, 4, 5, 6].any?(&blk)
   puts result

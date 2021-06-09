@@ -15,4 +15,16 @@ end
 p result
 p state
 
-# INITIAL: call i64 @sorbet_callIntrinsicInlineBlock
+state = [{}, 0]
+
+result = a.each_with_object(state) do |x, state|
+  state[0][x] = state[1]
+  state[1] += 1
+  break if x == 2
+end
+
+p result
+p state
+
+# INITIAL-COUNT-2: call i64 @sorbet_callIntrinsicInlineBlock
+# INITIAL-NOT: call i64 @sorbet_callIntrinsicInlineBlock

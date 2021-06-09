@@ -20,4 +20,21 @@ end
 
 p result
 
-# INITIAL-COUNT-2: call i64 @sorbet_callIntrinsicInlineBlock
+h = T.let({a: 1, b: 1, c: 2, d: 3, e: 5, f: 8}, T::Hash[Symbol, Integer])
+
+obj = []
+# We can't rely on the ordering of the keys, so break out when we've processed ~half.
+i = 0
+limit = h.size / 2
+result = h.each_with_object(obj) do |(k, v), a|
+  break :finished if i == limit
+  a << k
+  a << v
+  i += 1
+end
+
+p result
+p obj
+
+# INITIAL-COUNT-3: call i64 @sorbet_callIntrinsicInlineBlock
+# INITIAL-NOT: call i64 @sorbet_callIntrinsicInlineBlock
