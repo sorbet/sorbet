@@ -1,7 +1,7 @@
 # typed: true
 
 a = nil
-b =01
+b = 1
 c = ""
 
 case nil
