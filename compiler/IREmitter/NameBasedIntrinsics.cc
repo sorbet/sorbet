@@ -201,7 +201,8 @@ enum ShouldTakeReceiver {
     NoReceiver,
 };
 
-llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, ShouldTakeReceiver takesReceiver) {
+llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, ShouldTakeReceiver takesReceiver,
+                              core::ClassOrModuleRef klass) {
     auto &cs = mcctx.cs;
     auto &builder = builderCast(mcctx.build);
 
@@ -224,7 +225,11 @@ llvm::Value *buildCMethodCall(MethodCallContext &mcctx, const string &cMethod, S
     llvm::Value *offset = Payload::buildLocalsOffset(cs);
 
     auto fun = Payload::idIntern(cs, builder, mcctx.send->fun.shortName(cs));
-    return builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, offset}, "rawSendResult");
+    auto *value = builder.CreateCall(cs.getFunction(cMethod), {recv, fun, argc, argv, blkPtr, offset}, "rawSendResult");
+    if (klass.exists()) {
+        Payload::assumeType(cs, builder, value, klass);
+    }
+    return value;
 }
 
 class CallCMethod : public NameBasedIntrinsicMethod {
@@ -232,15 +237,16 @@ protected:
     string_view rubyMethod;
     string cMethod;
     ShouldTakeReceiver takesReceiver;
+    core::ClassOrModuleRef klass;
 
 public:
     CallCMethod(string_view rubyMethod, string cMethod, ShouldTakeReceiver takesReceiver,
-                Intrinsics::HandleBlock supportsBlocks)
+                Intrinsics::HandleBlock supportsBlocks, core::ClassOrModuleRef klass = core::ClassOrModuleRef{})
         : NameBasedIntrinsicMethod(supportsBlocks), rubyMethod(rubyMethod), cMethod(cMethod),
-          takesReceiver(takesReceiver){};
+          takesReceiver(takesReceiver), klass(klass){};
 
     virtual llvm::Value *makeCall(MethodCallContext &mcctx) const override {
-        return buildCMethodCall(mcctx, cMethod, takesReceiver);
+        return buildCMethodCall(mcctx, cMethod, takesReceiver, klass);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
         return {cs.gs.lookupNameUTF8(rubyMethod)};
@@ -274,7 +280,7 @@ public:
         // empty hash, and we don't have to waste space on the extra pre-built
         // hash.
         if (mcctx.send->args.empty() || !literalHash) {
-            return buildCMethodCall(mcctx, "sorbet_buildHashIntrinsic", NoReceiver);
+            return buildCMethodCall(mcctx, "sorbet_buildHashIntrinsic", NoReceiver, core::Symbols::Hash());
         }
 
         // We're going to build a literal hash at initialization time, and then
@@ -339,6 +345,7 @@ public:
             llvm::ConstantExpr::getInBoundsGetElementPtr(globalDeclaration->getValueType(), globalDeclaration, indices),
             "hashLiteral");
         auto *copy = builder.CreateCall(mcctx.cs.getFunction("sorbet_globalConstDupHash"), {index}, "duplicatedHash");
+        Payload::assumeType(mcctx.cs, builder, copy, core::Symbols::Hash());
         return copy;
     }
 
@@ -473,24 +480,32 @@ public:
 } CallWithSplat;
 
 static const vector<CallCMethod> knownCMethods{
-    {"<expand-splat>", "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<splat>", "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<expand-splat>", "sorbet_expandSplatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Array()},
+    {"<splat>", "sorbet_splatIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled, core::Symbols::Array()},
     {"defined?", "sorbet_definedIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<build-keyword-args>", "sorbet_buildHashIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<build-range>", "sorbet_buildRangeIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<string-interpolate>", "sorbet_stringInterpolate", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<build-keyword-args>", "sorbet_buildHashIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Hash()},
+    {"<build-array>", "sorbet_buildArrayIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Array()},
+    {"<build-range>", "sorbet_buildRangeIntrinsic", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::ClassOrModuleRef()},
+    {"<string-interpolate>", "sorbet_stringInterpolate", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::String()},
     {"<self-new>", "sorbet_selfNew", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {"<block-break>", "sorbet_block_break", NoReceiver, Intrinsics::HandleBlock::Unhandled},
     {"!", "sorbet_bang", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
     {"nil?", "sorbet_nil_p", TakesReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<check-match-array>", "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<check-match-array>", "sorbet_check_match_array", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::ClassOrModuleRef()},
 
     // for kwsplat building
-    {"<to-hash-dup>", "sorbet_magic_toHashDup", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<to-hash-nodup>", "sorbet_magic_toHashNoDup", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<merge-hash>", "sorbet_magic_mergeHash", NoReceiver, Intrinsics::HandleBlock::Unhandled},
-    {"<merge-hash-values>", "sorbet_magic_mergeHashValues", NoReceiver, Intrinsics::HandleBlock::Unhandled},
+    {"<to-hash-dup>", "sorbet_magic_toHashDup", NoReceiver, Intrinsics::HandleBlock::Unhandled, core::Symbols::Hash()},
+    {"<to-hash-nodup>", "sorbet_magic_toHashNoDup", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Hash()},
+    {"<merge-hash>", "sorbet_magic_mergeHash", NoReceiver, Intrinsics::HandleBlock::Unhandled, core::Symbols::Hash()},
+    {"<merge-hash-values>", "sorbet_magic_mergeHashValues", NoReceiver, Intrinsics::HandleBlock::Unhandled,
+     core::Symbols::Hash()},
 };
 
 vector<const NameBasedIntrinsicMethod *> computeNameBasedIntrinsics() {
