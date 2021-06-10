@@ -517,172 +517,174 @@ void emitUserBody(CompilerState &base, cfg::CFG &cfg, const IREmitterContext &ir
         builder.SetCurrentDebugLocation(llvm::DebugLoc());
 
         core::Loc lastLoc;
-        if (bb != cfg.deadBlock()) {
-            for (cfg::Binding &bind : bb->exprs) {
-                auto loc = core::Loc(cs.file, bind.loc);
+        if (bb == cfg.deadBlock()) {
+            continue;
+        }
 
-                lastLoc = Payload::setLineNumber(cs, builder, loc, startLoc, lastLoc,
-                                                 irctx.lineNumberPtrsByFunction[bb->rubyBlockId]);
+        for (cfg::Binding &bind : bb->exprs) {
+            auto loc = core::Loc(cs.file, bind.loc);
 
-                IREmitterHelpers::emitDebugLoc(cs, builder, irctx, bb->rubyBlockId, loc);
+            lastLoc = Payload::setLineNumber(cs, builder, loc, startLoc, lastLoc,
+                                             irctx.lineNumberPtrsByFunction[bb->rubyBlockId]);
 
-                typecase(
-                    bind.value.get(),
-                    [&](cfg::Ident *i) {
-                        auto var = Payload::varGet(cs, i->what, builder, irctx, bb->rubyBlockId);
-                        Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
-                    },
-                    [&](cfg::Alias *i) {
-                        // We compute the alias map when IREmitterContext is first created, so if an entry is missing,
-                        // there's a problem.
-                        ENFORCE(irctx.aliases.find(bind.bind.variable) != irctx.aliases.end(),
-                                "Alias is missing from the alias map");
-                    },
-                    [&](cfg::SolveConstraint *i) {
-                        auto var = Payload::varGet(cs, i->send, builder, irctx, bb->rubyBlockId);
-                        Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
-                    },
-                    [&](cfg::Send *i) {
-                        if (i->recv.variable.data(cfg)._name == core::Names::blkArg() &&
-                            loadYieldParamsResults.contains(i->recv.variable)) {
-                            // this loads an argument of a block.
-                            // They are already loaded in preambula of the method
-                            return;
+            IREmitterHelpers::emitDebugLoc(cs, builder, irctx, bb->rubyBlockId, loc);
+
+            typecase(
+                bind.value.get(),
+                [&](cfg::Ident *i) {
+                    auto var = Payload::varGet(cs, i->what, builder, irctx, bb->rubyBlockId);
+                    Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
+                },
+                [&](cfg::Alias *i) {
+                    // We compute the alias map when IREmitterContext is first created, so if an entry is missing,
+                    // there's a problem.
+                    ENFORCE(irctx.aliases.find(bind.bind.variable) != irctx.aliases.end(),
+                            "Alias is missing from the alias map");
+                },
+                [&](cfg::SolveConstraint *i) {
+                    auto var = Payload::varGet(cs, i->send, builder, irctx, bb->rubyBlockId);
+                    Payload::varSet(cs, bind.bind.variable, var, builder, irctx, bb->rubyBlockId);
+                },
+                [&](cfg::Send *i) {
+                    if (i->recv.variable.data(cfg)._name == core::Names::blkArg() &&
+                        loadYieldParamsResults.contains(i->recv.variable)) {
+                        // this loads an argument of a block.
+                        // They are already loaded in preambula of the method
+                        return;
+                    }
+
+                    std::optional<int> blk;
+                    if (i->link != nullptr) {
+                        blk.emplace(i->link->rubyBlockId);
+                    }
+                    MethodCallContext mcctx{cs, builder, irctx, bb->rubyBlockId, i, blk};
+                    auto rawCall = IREmitterHelpers::emitMethodCall(mcctx);
+                    Payload::varSet(cs, bind.bind.variable, rawCall, builder, irctx, bb->rubyBlockId);
+                },
+                [&](cfg::Return *i) {
+                    isTerminated = true;
+
+                    // If we see a 'return' statement that crosses both block and exception frames, emit an error
+                    // message.
+                    bool sawBlockType = false;
+                    bool sawExceptionType = false;
+
+                    for (int blockId = bb->rubyBlockId; blockId != 0; blockId = irctx.rubyBlockParent[blockId]) {
+                        auto funcType = irctx.rubyBlockType[blockId];
+                        if (funcType == FunctionType::Block) {
+                            sawBlockType = true;
+                        } else if (funcType == FunctionType::Rescue || funcType == FunctionType::Ensure ||
+                                   funcType == FunctionType::ExceptionBegin) {
+                            sawExceptionType = true;
                         }
+                    }
 
-                        std::optional<int> blk;
-                        if (i->link != nullptr) {
-                            blk.emplace(i->link->rubyBlockId);
+                    if (sawBlockType && sawExceptionType) {
+                        failCompilation(
+                            cs, core::Loc(cs.file, bind.loc),
+                            "return statements crossing both block and exception frames are not yet implemented");
+                        return;
+                    }
+
+                    // TODO(aprocter): Once we're able to support return statements that cross block frames but
+                    // _don't_ cross exception frames, delete this more general restriction:
+                    if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
+                        // NOTE: this doesn't catch all block-return cases:
+                        // https://github.com/stripe/sorbet_llvm/issues/94
+                        failCompilation(cs, core::Loc(cs.file, bind.loc),
+                                        "returns through multiple stacks not implemented");
+                        return;
+                    }
+
+                    auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
+                    IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
+                },
+                [&](cfg::BlockReturn *i) {
+                    ENFORCE(bb->rubyBlockId != 0, "should never happen");
+                    isTerminated = true;
+                    auto var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
+                    IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
+                },
+                [&](cfg::LoadSelf *i) {
+                    // it's done in function setup, no need to do anything here
+                },
+                [&](cfg::Literal *i) {
+                    auto rawValue = IREmitterHelpers::emitLiteralish(cs, builder, i->value);
+                    Payload::varSet(cs, bind.bind.variable, rawValue, builder, irctx, bb->rubyBlockId);
+                },
+                [&](cfg::GetCurrentException *i) {
+                    // if this block isn't an exception block header, there's nothing to do here.
+                    auto bodyRubyBlockId = irctx.exceptionBlockHeader[bb->id];
+                    if (bodyRubyBlockId == 0) {
+                        return;
+                    }
+
+                    IREmitterHelpers::emitExceptionHandlers(cs, builder, irctx, bb->rubyBlockId, bodyRubyBlockId,
+                                                            bind.bind.variable);
+                },
+                [&](cfg::ArgPresent *i) {
+                    ENFORCE(bb->rubyBlockId == 0, "ArgPresent found outside of entry-method");
+                    // Intentionally omitted: the result of the ArgPresent call is filled out in `setupArguments`
+                },
+                [&](cfg::LoadArg *i) {
+                    ENFORCE(bb->rubyBlockId == 0, "LoadArg found outside of entry-method");
+
+                    // Argument values are loaded by `setupArguments`, we just need to check their type here
+                    auto &argInfo = arguments[i->argId];
+                    auto local = irctx.rubyBlockArgs[0][i->argId];
+                    auto var = Payload::varGet(cs, local, builder, irctx, 0);
+                    if (auto &expectedType = argInfo.type) {
+                        if (argInfo.flags.isBlock) {
+                            IREmitterHelpers::emitTypeTestForBlock(cs, builder, var, expectedType, "sig");
+                        } else {
+                            IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "sig");
                         }
-                        MethodCallContext mcctx{cs, builder, irctx, bb->rubyBlockId, i, blk};
-                        auto rawCall = IREmitterHelpers::emitMethodCall(mcctx);
-                        Payload::varSet(cs, bind.bind.variable, rawCall, builder, irctx, bb->rubyBlockId);
-                    },
-                    [&](cfg::Return *i) {
-                        isTerminated = true;
+                    }
+                },
+                [&](cfg::LoadYieldParams *i) {
+                    loadYieldParamsResults.insert(bind.bind.variable);
+                    /* intentionally omitted, it's part of method preambula */
+                },
+                [&](cfg::Cast *i) {
+                    auto val = Payload::varGet(cs, i->value.variable, builder, irctx, bb->rubyBlockId);
 
-                        // If we see a 'return' statement that crosses both block and exception frames, emit an error
-                        // message.
-                        bool sawBlockType = false;
-                        bool sawExceptionType = false;
+                    // We skip the type test for Cast instructions that assign into <self>.
+                    // These instructions only exist in the CFG for the purpose of type checking.
+                    // The Ruby VM already checks that self is a valid type when calling `.bind()`
+                    // on an UnboundMethod object.
+                    auto skipTypeTest = bind.bind.variable.data(cfg) == core::LocalVariable::selfVariable();
 
-                        for (int blockId = bb->rubyBlockId; blockId != 0; blockId = irctx.rubyBlockParent[blockId]) {
-                            auto funcType = irctx.rubyBlockType[blockId];
-                            if (funcType == FunctionType::Block) {
-                                sawBlockType = true;
-                            } else if (funcType == FunctionType::Rescue || funcType == FunctionType::Ensure ||
-                                       funcType == FunctionType::ExceptionBegin) {
-                                sawExceptionType = true;
-                            }
-                        }
+                    if (!skipTypeTest) {
+                        IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type,
+                                                       fmt::format("T.{}", i->cast.shortName(cs)));
+                    }
 
-                        if (sawBlockType && sawExceptionType) {
-                            failCompilation(
-                                cs, core::Loc(cs.file, bind.loc),
-                                "return statements crossing both block and exception frames are not yet implemented");
-                            return;
-                        }
-
-                        // TODO(aprocter): Once we're able to support return statements that cross block frames but
-                        // _don't_ cross exception frames, delete this more general restriction:
-                        if (irctx.rubyBlockType[bb->rubyBlockId] == FunctionType::Block) {
-                            // NOTE: this doesn't catch all block-return cases:
-                            // https://github.com/stripe/sorbet_llvm/issues/94
-                            failCompilation(cs, core::Loc(cs.file, bind.loc),
-                                            "returns through multiple stacks not implemented");
-                            return;
-                        }
-
-                        auto *var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
-                        IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
-                    },
-                    [&](cfg::BlockReturn *i) {
-                        ENFORCE(bb->rubyBlockId != 0, "should never happen");
-                        isTerminated = true;
-                        auto var = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
-                        IREmitterHelpers::emitReturn(cs, builder, irctx, bb->rubyBlockId, var);
-                    },
-                    [&](cfg::LoadSelf *i) {
-                        // it's done in function setup, no need to do anything here
-                    },
-                    [&](cfg::Literal *i) {
-                        auto rawValue = IREmitterHelpers::emitLiteralish(cs, builder, i->value);
-                        Payload::varSet(cs, bind.bind.variable, rawValue, builder, irctx, bb->rubyBlockId);
-                    },
-                    [&](cfg::GetCurrentException *i) {
-                        // if this block isn't an exception block header, there's nothing to do here.
-                        auto bodyRubyBlockId = irctx.exceptionBlockHeader[bb->id];
-                        if (bodyRubyBlockId == 0) {
-                            return;
-                        }
-
-                        IREmitterHelpers::emitExceptionHandlers(cs, builder, irctx, bb->rubyBlockId, bodyRubyBlockId,
-                                                                bind.bind.variable);
-                    },
-                    [&](cfg::ArgPresent *i) {
-                        ENFORCE(bb->rubyBlockId == 0, "ArgPresent found outside of entry-method");
-                        // Intentionally omitted: the result of the ArgPresent call is filled out in `setupArguments`
-                    },
-                    [&](cfg::LoadArg *i) {
-                        ENFORCE(bb->rubyBlockId == 0, "LoadArg found outside of entry-method");
-
-                        // Argument values are loaded by `setupArguments`, we just need to check their type here
-                        auto &argInfo = arguments[i->argId];
-                        auto local = irctx.rubyBlockArgs[0][i->argId];
-                        auto var = Payload::varGet(cs, local, builder, irctx, 0);
-                        if (auto &expectedType = argInfo.type) {
-                            if (argInfo.flags.isBlock) {
-                                IREmitterHelpers::emitTypeTestForBlock(cs, builder, var, expectedType, "sig");
-                            } else {
-                                IREmitterHelpers::emitTypeTest(cs, builder, var, expectedType, "sig");
-                            }
-                        }
-                    },
-                    [&](cfg::LoadYieldParams *i) {
-                        loadYieldParamsResults.insert(bind.bind.variable);
-                        /* intentionally omitted, it's part of method preambula */
-                    },
-                    [&](cfg::Cast *i) {
-                        auto val = Payload::varGet(cs, i->value.variable, builder, irctx, bb->rubyBlockId);
-
-                        // We skip the type test for Cast instructions that assign into <self>.
-                        // These instructions only exist in the CFG for the purpose of type checking.
-                        // The Ruby VM already checks that self is a valid type when calling `.bind()`
-                        // on an UnboundMethod object.
-                        auto skipTypeTest = bind.bind.variable.data(cfg) == core::LocalVariable::selfVariable();
-
-                        if (!skipTypeTest) {
-                            IREmitterHelpers::emitTypeTest(cs, builder, val, bind.bind.type,
-                                                           fmt::format("T.{}", i->cast.shortName(cs)));
-                        }
-
-                        if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
-                            Payload::varSet(cs, bind.bind.variable, val, builder, irctx, bb->rubyBlockId);
-                        } else if (i->cast == core::Names::assertType()) {
-                            Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, irctx,
-                                            bb->rubyBlockId);
-                        }
-                    },
-                    [&](cfg::TAbsurd *i) {
-                        auto val = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
-                        builder.CreateCall(cs.getFunction("sorbet_t_absurd"), {val});
-                    });
-                if (isTerminated) {
-                    break;
-                }
+                    if (i->cast == core::Names::let() || i->cast == core::Names::cast()) {
+                        Payload::varSet(cs, bind.bind.variable, val, builder, irctx, bb->rubyBlockId);
+                    } else if (i->cast == core::Names::assertType()) {
+                        Payload::varSet(cs, bind.bind.variable, Payload::rubyFalse(cs, builder), builder, irctx,
+                                        bb->rubyBlockId);
+                    }
+                },
+                [&](cfg::TAbsurd *i) {
+                    auto val = Payload::varGet(cs, i->what.variable, builder, irctx, bb->rubyBlockId);
+                    builder.CreateCall(cs.getFunction("sorbet_t_absurd"), {val});
+                });
+            if (isTerminated) {
+                break;
             }
-            if (!isTerminated) {
-                auto *thenb = resolveJumpTarget(cfg, irctx, bb, bb->bexit.thenb);
-                auto *elseb = resolveJumpTarget(cfg, irctx, bb, bb->bexit.elseb);
+        }
+        if (!isTerminated) {
+            auto *thenb = resolveJumpTarget(cfg, irctx, bb, bb->bexit.thenb);
+            auto *elseb = resolveJumpTarget(cfg, irctx, bb, bb->bexit.elseb);
 
-                if (thenb != elseb && bb->bexit.cond.variable != cfg::LocalRef::blockCall()) {
-                    auto var = Payload::varGet(cs, bb->bexit.cond.variable, builder, irctx, bb->rubyBlockId);
-                    auto condValue = Payload::testIsTruthy(cs, builder, var);
+            if (thenb != elseb && bb->bexit.cond.variable != cfg::LocalRef::blockCall()) {
+                auto var = Payload::varGet(cs, bb->bexit.cond.variable, builder, irctx, bb->rubyBlockId);
+                auto condValue = Payload::testIsTruthy(cs, builder, var);
 
-                    builder.CreateCondBr(condValue, thenb, elseb);
-                } else {
-                    builder.CreateBr(thenb);
-                }
+                builder.CreateCondBr(condValue, thenb, elseb);
+            } else {
+                builder.CreateBr(thenb);
             }
         }
     }
