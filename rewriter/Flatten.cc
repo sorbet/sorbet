@@ -3,6 +3,7 @@
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "core/core.h"
+#include "core/errors/rewriter.h"
 
 #include <utility>
 
@@ -291,11 +292,41 @@ class FlattenWalk {
     }
 
 public:
+    bool inBlock = false;
+
     FlattenWalk() {
         newMethodSet();
     }
     ~FlattenWalk() {
         ENFORCE(classScopes.empty());
+    }
+
+    ast::ExpressionPtr preTransformBlock(core::Context ctx, ast::ExpressionPtr block) {
+        inBlock = true;
+        return block;
+    }
+
+    ast::ExpressionPtr postTransformBlock(core::Context ctx, ast::ExpressionPtr block) {
+        inBlock = false;
+        return block;
+    }
+
+       ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
+        auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
+
+        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
+        if (lhs == nullptr) {
+            return tree;
+        }
+
+        if (inBlock) {
+            printf("we're in a block\n");
+            if (auto e = ctx.state.beginError(core::Loc(ctx.file, lhs->loc),
+                                              core::errors::Rewriter::DynamicConstant)) {
+                e.setHeader("Dynamic constant assignment");
+            }
+        }
+        return tree;
     }
 
     ast::ExpressionPtr preTransformClassDef(core::Context ctx, ast::ExpressionPtr tree) {
