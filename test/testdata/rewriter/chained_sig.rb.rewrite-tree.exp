@@ -1,0 +1,332 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Interface><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.interface!()
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C Override><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.overridable().void()
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include(<emptyTree>::<C Interface>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+  end
+
+  class <emptyTree>::<C Incompatible><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override(:allow_incompatible, true).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      123
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include(<emptyTree>::<C Interface>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C Final><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>, :final) do ||
+      <self>.void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C InvalidInvocationsOnSig><<C <todo sym>>> < (::<todo sym>)
+    <self>.sig()
+
+    def foo<<todo method>>(a, &<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig()
+
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig()
+
+    def baz<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig()
+
+    def blah<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig()
+
+    def bip<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig()
+
+    def bop<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <emptyTree>.params(:a, <emptyTree>::<C Integer>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+
+    <emptyTree>.returns(<emptyTree>::<C Integer>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+
+    <emptyTree>.void()
+
+    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+
+    <emptyTree>.checked(:never)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :blah, :normal)
+
+    <emptyTree>.on_failure(:soft, :notify, "me")
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bip, :normal)
+
+    <emptyTree>.type_parameters(:T)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bop, :normal)
+  end
+
+  module <emptyTree>::<C Interface><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.interface!()
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C DuplicateBlock><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include(<emptyTree>::<C Interface>)
+
+    <emptyTree>.final() do ||
+      <self>.void()
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C WithoutRuntime><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<emptyTree>::<C T>::<C Sig>::<C WithoutRuntime>, :final) do ||
+      <self>.void()
+    end
+
+    def baz<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <emptyTree>::<C T>::<C Sig>::<C WithoutRuntime>.sig()
+
+    def bar<<todo method>>(a, &<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<emptyTree>::<C T>::<C Sig>::<C WithoutRuntime>) do ||
+      <self>.override().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include(<emptyTree>::<C Interface>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+
+    <emptyTree>.params(:a, <emptyTree>::<C Integer>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+
+    <emptyTree>.final() do ||
+      <self>.void()
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C MissingBlocks><<C <todo sym>>> < (::<todo sym>)
+    <self>.sig()
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.sig()
+
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+
+    <emptyTree>.final()
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+  end
+
+  class <emptyTree>::<C InstructionSequenceInSig><<C <todo sym>>> < (::<todo sym>)
+    <self>.sig()
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <emptyTree>.final() do ||
+      begin
+        <emptyTree>::<C Kernel>.puts("")
+        <self>.void()
+      end
+    end
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C DuplicateInvocations><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.overridable().overridable().void()
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().override().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().abstract().void()
+    end
+
+    def baz<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.include(<emptyTree>::<C Interface>)
+
+    <self>.abstract!()
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :baz, :normal)
+  end
+
+  class <emptyTree>::<C DuplicateButMissingBlock><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>, :final) do ||
+      <self>.void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include(<emptyTree>::<C Interface>)
+
+    <emptyTree>.override()
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C ValidDoubleChain><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>, :final) do ||
+      <self>.override().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include(<emptyTree>::<C Interface>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+end

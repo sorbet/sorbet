@@ -2,9 +2,23 @@
 # typed: true
 
 module T::Private::Methods
-  Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw)
+  Declaration = Struct.new(
+    :mod,
+    :params,
+    :returns,
+    :bind,
+    :mode,
+    :checked,
+    :finalized,
+    :on_failure,
+    :override_allow_incompatible,
+    :type_parameters,
+    :raw,
+    :final
+  )
 
   class DeclBuilder
+    # The signature declaration the builder is composing (class `Declaration`)
     attr_reader :decl
 
     class BuilderError < StandardError; end
@@ -12,6 +26,12 @@ module T::Private::Methods
     private def check_live!
       if decl.finalized
         raise BuilderError.new("You can't modify a signature declaration after it has been used.")
+      end
+    end
+
+    private def check_sig_block_is_unset!
+      if T::Private::DeclState.current.active_declaration.blk
+        raise BuilderError.new("Cannot define two separate signature blocks")
       end
     end
 
@@ -28,8 +48,17 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # on_failure
         nil, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
-        raw
+        raw,
+        false, # final
       )
+      @inside_sig_block = false
+    end
+
+    def run!(&block)
+      @inside_sig_block = true
+      instance_exec(&block)
+      finalize!
+      self
     end
 
     def params(**params)
@@ -115,7 +144,7 @@ module T::Private::Methods
       self
     end
 
-    def abstract
+    def abstract(&blk)
       check_live!
 
       case decl.mode
@@ -127,15 +156,40 @@ module T::Private::Methods
         raise BuilderError.new("`.abstract` cannot be combined with `.override` or `.overridable`.")
       end
 
+      if blk
+        check_sig_block_is_unset!
+        T::Private::DeclState.current.active_declaration.blk = blk
+      end
+
       self
     end
 
-    def final
+    def final(&blk)
       check_live!
-      raise BuilderError.new("The syntax for declaring a method final is `sig(:final) {...}`, not `sig {final. ...}`")
+
+      if @inside_sig_block
+        raise BuilderError.new(
+          "The syntax for declaring a method final is `sig(:final) {...}` or `sig.final {...}`, not `sig {final. ...}`"
+        )
+      end
+
+      raise BuilderError.new(".final cannot be repeated in a single signature") if final?
+
+      decl.final = true
+
+      if blk
+        check_sig_block_is_unset!
+        T::Private::DeclState.current.active_declaration.blk = blk
+      end
+
+      self
     end
 
-    def override(allow_incompatible: false)
+    def final?
+      decl.final
+    end
+
+    def override(allow_incompatible: false, &blk)
       check_live!
 
       case decl.mode
@@ -150,10 +204,15 @@ module T::Private::Methods
         raise BuilderError.new("`.override` cannot be combined with `.abstract`.")
       end
 
+      if blk
+        check_sig_block_is_unset!
+        T::Private::DeclState.current.active_declaration.blk = blk
+      end
+
       self
     end
 
-    def overridable
+    def overridable(&blk)
       check_live!
 
       case decl.mode
@@ -165,6 +224,11 @@ module T::Private::Methods
         decl.mode = Modes.overridable
       when Modes.overridable, Modes.overridable_override
         raise BuilderError.new(".overridable cannot be repeated in a single signature")
+      end
+
+      if blk
+        check_sig_block_is_unset!
+        T::Private::DeclState.current.active_declaration.blk = blk
       end
 
       self
