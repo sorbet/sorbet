@@ -14,7 +14,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
   sig {abstract.returns(Object)}
   def foo; end
 
-  sig {abstract.returns(Object)}
+  sig.abstract {returns(Object)}
   def bar; end
 
   sig {returns(Object)}
@@ -114,7 +114,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       sig {override.returns(Object)}
       def foo; end
 
-      sig {override.returns(Object)}
+      sig.override {returns(Object)}
       def bar; end
     end
 
@@ -310,7 +310,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         sig {override.returns(Object)}
         def self.foo; end
 
-        sig {override.returns(Object)}
+        sig.override {returns(Object)}
         def bar; end
       end
       klass.foo
@@ -321,7 +321,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       klass = Class.new(AbstractClass) do
         extend T::Sig
         extend T::Helpers
-        sig {override.returns(Object)}
+        sig.override {returns(Object)}
         def bar; end
       end
 
@@ -373,7 +373,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
         sig {override.returns(Object)}
         def self.foo; end
 
-        sig {override.returns(Object)}
+        sig.override {returns(Object)}
         def bar; "baz"; end
       end
       assert_equal("baz", klass.new.bar)

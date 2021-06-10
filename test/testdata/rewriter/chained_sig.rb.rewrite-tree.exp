@@ -1,0 +1,75 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Interface><<C <todo sym>>> < ()
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.abstract().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+    <self>.interface!()
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C Override><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override().void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.overridable().void()
+    end
+
+    def bar<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include(<emptyTree>::<C Interface>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :bar, :normal)
+  end
+
+  class <emptyTree>::<C Incompatible><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>) do ||
+      <self>.override(:allow_incompatible, true).returns(<emptyTree>::<C Integer>)
+    end
+
+    def foo<<todo method>>(&<blk>)
+      123
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.include(<emptyTree>::<C Interface>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+
+  class <emptyTree>::<C Final><<C <todo sym>>> < (::<todo sym>)
+    ::Sorbet::Private::Static.sig(<self>, :final) do ||
+      <self>.void()
+    end
+
+    def foo<<todo method>>(&<blk>)
+      <emptyTree>
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    ::Sorbet::Private::Static.keep_def(<self>, :foo, :normal)
+  end
+end

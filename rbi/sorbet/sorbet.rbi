@@ -4,9 +4,9 @@ module Sorbet::Private::Static
     params(
         arg0: T.untyped,
         arg1: T.nilable(Symbol),
-        blk: T.proc.bind(T::Private::Methods::DeclBuilder).void
+        blk: T.nilable(T.proc.bind(T::Private::Methods::DeclBuilder).void)
     )
-    .void
+    .returns(T::Private::Methods::DeclBuilder)
   end
   def self.sig(arg0, arg1=nil, &blk)
   end
