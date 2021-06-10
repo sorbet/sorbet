@@ -214,7 +214,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       extend T::Helpers
       final!
 
-      T::Private::Methods._with_declaring_final_method do
+      T::Private::Methods._with_declaring_final_method_INTERNAL do
         def self.i_am_secretly_final; end
       end
     end
@@ -226,7 +226,7 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       extend T::Helpers
       final!
 
-      T::Private::Methods._with_declaring_final_method do
+      T::Private::Methods._with_declaring_final_method_INTERNAL do
         def i_am_secretly_final; end
       end
     end

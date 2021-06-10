@@ -182,7 +182,8 @@ module T::Private::Methods
     @modules_with_final[mod.singleton_class]
   end
 
-  def self._with_declaring_final_method(&blk)
+  # See tests for how to use this.
+  def self._with_declaring_final_method_INTERNAL(&blk)
     begin
       prev_value = @declaring_final_method
       @declaring_final_method = true
