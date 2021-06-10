@@ -993,18 +993,28 @@ llvm::Value *IREmitterHelpers::emitLiteralish(CompilerState &cs, llvm::IRBuilder
 
     auto litType = core::cast_type_nonnull<core::LiteralType>(lit);
     switch (litType.literalKind) {
-        case core::LiteralType::LiteralTypeKind::Integer:
-            return Payload::longToRubyValue(cs, builder, litType.asInteger());
-        case core::LiteralType::LiteralTypeKind::Float:
-            return Payload::doubleToRubyValue(cs, builder, litType.asFloat());
+        case core::LiteralType::LiteralTypeKind::Integer: {
+            auto *value = Payload::longToRubyValue(cs, builder, litType.asInteger());
+            Payload::assumeType(cs, builder, value, core::Symbols::Integer());
+            return value;
+        }
+        case core::LiteralType::LiteralTypeKind::Float: {
+            auto *value = Payload::doubleToRubyValue(cs, builder, litType.asFloat());
+            Payload::assumeType(cs, builder, value, core::Symbols::Float());
+            return value;
+        }
         case core::LiteralType::LiteralTypeKind::Symbol: {
             auto str = litType.asName(cs).shortName(cs);
             auto rawId = Payload::idIntern(cs, builder, str);
-            return builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
+            auto *value = builder.CreateCall(cs.getFunction("rb_id2sym"), {rawId}, "rawSym");
+            Payload::assumeType(cs, builder, value, core::Symbols::Symbol());
+            return value;
         }
         case core::LiteralType::LiteralTypeKind::String: {
             auto str = litType.asName(cs).shortName(cs);
-            return Payload::cPtrToRubyString(cs, builder, str, true);
+            auto *value = Payload::cPtrToRubyString(cs, builder, str, true);
+            Payload::assumeType(cs, builder, value, core::Symbols::String());
+            return value;
         }
     }
 }
