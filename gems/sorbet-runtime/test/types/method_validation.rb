@@ -138,7 +138,7 @@ module Opus::Types::Test
         def @mod.foo(x, y, z:)
           y
         end
-        TEST_DATA = {
+        test_data = {
           x: "foo",
           y: Array.new(50) do |i|
             "foo_#{i}".to_sym
@@ -149,10 +149,10 @@ module Opus::Types::Test
         }.freeze
 
         Critic::Extensions::TypeExt.unpatch_types
-        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], z: TEST_DATA[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
-        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], z: TEST_DATA[:z]) # warmup, second run runs in real mode
+        @mod.foo(test_data[:x], test_data[:y], z: test_data[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
+        @mod.foo(test_data[:x], test_data[:y], z: test_data[:z]) # warmup, second run runs in real mode
         before = GC.stat(:total_allocated_objects)
-        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], z: TEST_DATA[:z])
+        @mod.foo(test_data[:x], test_data[:y], z: test_data[:z])
         allocated = GC.stat(:total_allocated_objects) - before
         Critic::Extensions::TypeExt.patch_types
         if Gem::Version.new('2.6') <= Gem::Version.new(RUBY_VERSION)
@@ -176,7 +176,7 @@ module Opus::Types::Test
         def @mod.foo(x, y, z)
           y
         end
-        TEST_DATA = {
+        test_data = {
           x: "foo",
           y: Array.new(50) do |i|
             "foo_#{i}".to_sym
@@ -187,10 +187,10 @@ module Opus::Types::Test
         }.freeze
 
         Critic::Extensions::TypeExt.unpatch_types
-        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
-        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z]) # warmup, second run runs in real mode
+        @mod.foo(test_data[:x], test_data[:y], test_data[:z]) # warmup, first run runs in mixed mode, when method is replaced but called in a weird way
+        @mod.foo(test_data[:x], test_data[:y], test_data[:z]) # warmup, second run runs in real mode
         before = GC.stat(:total_allocated_objects)
-        @mod.foo(TEST_DATA[:x], TEST_DATA[:y], TEST_DATA[:z])
+        @mod.foo(test_data[:x], test_data[:y], test_data[:z])
         allocated = GC.stat(:total_allocated_objects) - before
         Critic::Extensions::TypeExt.patch_types
         expected_allocations = T::Configuration::AT_LEAST_RUBY_2_7 ? 1 : 2
