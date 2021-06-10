@@ -241,6 +241,13 @@ struct IREmitterContext {
 
     // Mappinf from ruby block id to debug info scope.
     std::vector<llvm::DISubprogram *> blockScopes;
+
+    // Records which ruby blocks use `break`, as that will forbid us from emitting type assertions on intrinsics that
+    // they are used with.
+    //
+    // idx: cfg::BasicBlock::rubyBlockId
+    // val: true when the block uses `break`
+    std::vector<bool> blockUsesBreak;
 };
 
 } // namespace sorbet::compiler

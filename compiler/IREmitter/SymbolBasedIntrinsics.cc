@@ -43,12 +43,31 @@ core::SymbolRef typeToSym(const core::GlobalState &gs, core::TypePtr typ) {
     return sym;
 }
 
+class CMethod final {
+public:
+    string cMethod;
+    core::ClassOrModuleRef resultType;
+
+    CMethod(string cMethod, core::ClassOrModuleRef resultType = core::Symbols::noClassOrModule())
+        : cMethod{cMethod}, resultType{resultType} {}
+
+    llvm::Function *getFunction(CompilerState &cs) const {
+        return cs.module->getFunction(cMethod);
+    }
+
+    void assertResultType(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *res) const {
+        if (resultType.exists()) {
+            Payload::assumeType(cs, build, res, resultType);
+        }
+    }
+};
+
 class CallCMethod : public SymbolBasedIntrinsicMethod {
 protected:
     core::ClassOrModuleRef rubyClass;
     string_view rubyMethod;
-    string cMethod;
-    optional<string> cMethodWithBlock;
+    CMethod cMethod;
+    optional<CMethod> cMethodWithBlock;
     vector<string> expectedRubyCFuncs;
 
 private:
@@ -59,14 +78,12 @@ private:
     // >     ret VALUE %res
     // > }
     llvm::Function *generateForwarder(MethodCallContext &mcctx) const {
-        ENFORCE(cMethodWithBlock != "");
-
         auto &cs = mcctx.cs;
         auto &builder = builderCast(mcctx.build);
 
         // function signature
         auto linkage = llvm::Function::InternalLinkage;
-        llvm::Twine name{"forward_" + llvm::Twine{cMethod}};
+        llvm::Twine name{"forward_" + llvm::Twine{cMethodWithBlock->cMethod}};
         auto *fn = llvm::Function::Create(cs.getInlineForwarderType(), linkage, name, cs.module);
         auto *env = fn->arg_begin();
 
@@ -74,7 +91,7 @@ private:
         auto *entry = llvm::BasicBlock::Create(cs, "entry", fn);
         auto ip = builder.saveIP();
         builder.SetInsertPoint(entry);
-        auto *cfunc = cs.module->getFunction(*cMethodWithBlock);
+        auto *cfunc = cMethodWithBlock->getFunction(cs);
         auto *blk = mcctx.blkAsFunction();
         ENFORCE(blk != nullptr);
         ENFORCE(mcctx.blk.has_value());
@@ -107,8 +124,8 @@ private:
     }
 
 public:
-    CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, string cMethod,
-                optional<string> cMethodWithBlock = nullopt, vector<string> expectedRubyCFuncs = {})
+    CallCMethod(core::ClassOrModuleRef rubyClass, string_view rubyMethod, CMethod cMethod,
+                optional<CMethod> cMethodWithBlock = nullopt, vector<string> expectedRubyCFuncs = {})
         : SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock::Handled), rubyClass(rubyClass), rubyMethod(rubyMethod),
           cMethod(cMethod), cMethodWithBlock(cMethodWithBlock), expectedRubyCFuncs(expectedRubyCFuncs){};
 
@@ -136,9 +153,16 @@ public:
             // by the vm.
             res = builder.CreateCall(cs.module->getFunction("sorbet_callIntrinsicInlineBlock"),
                                      {forwarder, recv, id, argc, argv, blk, offset}, "rawSendResultWithBlock");
+
+            // NOTE: we can't emit a type annotation if the block passed might use break, as the break would potentially
+            // change the type of value returned.
+            if (!mcctx.irctx.blockUsesBreak[mcctx.blk.value()]) {
+                cMethodWithBlock->assertResultType(cs, builder, res);
+            }
         } else {
             auto *blkPtr = llvm::ConstantPointerNull::get(cs.getRubyBlockFFIType()->getPointerTo());
-            res = builder.CreateCall(cs.getFunction(cMethod), {recv, id, argc, argv, blkPtr, offset}, "rawSendResult");
+            res = builder.CreateCall(cMethod.getFunction(cs), {recv, id, argc, argv, blkPtr, offset}, "rawSendResult");
+            cMethod.assertResultType(cs, builder, res);
         }
 
         return res;
@@ -590,59 +614,63 @@ public:
 };
 
 static const vector<CallCMethod> knownCMethodsInstance{
-    {core::Symbols::Array(), "[]", "sorbet_rb_array_square_br"},
-    {core::Symbols::Array(), "[]=", "sorbet_rb_array_square_br_eq"},
-    {core::Symbols::Array(), "empty?", "sorbet_rb_array_empty"},
-    {core::Symbols::Array(), "each", "sorbet_rb_array_each", "sorbet_rb_array_each_withBlock"},
-    {core::Symbols::Array(), "each_with_object", "sorbet_rb_array_each_with_object",
-     "sorbet_rb_array_each_with_object_withBlock"},
-    {core::Symbols::Array(), "select", "sorbet_rb_array_select", "sorbet_rb_array_select_withBlock"},
+    {core::Symbols::Array(), "[]", CMethod{"sorbet_rb_array_square_br"}},
+    {core::Symbols::Array(), "[]=", CMethod{"sorbet_rb_array_square_br_eq"}},
+    {core::Symbols::Array(), "empty?", CMethod{"sorbet_rb_array_empty"}},
+    {core::Symbols::Array(), "each", CMethod{"sorbet_rb_array_each"}, CMethod{"sorbet_rb_array_each_withBlock"}},
+    {core::Symbols::Array(), "each_with_object", CMethod{"sorbet_rb_array_each_with_object"},
+     CMethod{"sorbet_rb_array_each_with_object_withBlock"}},
+    {core::Symbols::Array(), "select", CMethod{"sorbet_rb_array_select"}, CMethod{"sorbet_rb_array_select_withBlock"}},
     // filter is an alias for select, so we call the same intrinsic
-    {core::Symbols::Array(), "filter", "sorbet_rb_array_select", "sorbet_rb_array_select_withBlock"},
-    {core::Symbols::Array(), "find", "sorbet_rb_array_find", "sorbet_rb_array_find_withBlock"},
-    {core::Symbols::Array(), "collect", "sorbet_rb_array_collect", "sorbet_rb_array_collect_withBlock"},
+    {core::Symbols::Array(), "filter", CMethod{"sorbet_rb_array_select"}, CMethod{"sorbet_rb_array_select_withBlock"}},
+    {core::Symbols::Array(), "find", CMethod{"sorbet_rb_array_find"}, CMethod{"sorbet_rb_array_find_withBlock"}},
+    {core::Symbols::Array(), "collect", CMethod{"sorbet_rb_array_collect"},
+     CMethod{"sorbet_rb_array_collect_withBlock"}},
     // Ruby implements map and collect with the same function (named with "collect" in its name).
     // We do the same for consistency.
-    {core::Symbols::Array(), "map", "sorbet_rb_array_collect", "sorbet_rb_array_collect_withBlock"},
-    {core::Symbols::Array(), "collect!", "sorbet_rb_array_collect_bang", "sorbet_rb_array_collect_bang_withBlock"},
-    {core::Symbols::Array(), "map!", "sorbet_rb_array_collect_bang", "sorbet_rb_array_collect_bang_withBlock"},
-    {core::Symbols::Array(), "any?", "sorbet_rb_array_any", "sorbet_rb_array_any_withBlock"},
-    {core::Symbols::Array(), "all?", "sorbet_rb_array_all", "sorbet_rb_array_all_withBlock"},
-    {core::Symbols::Array(), "compact", "sorbet_rb_array_compact"},
-    {core::Symbols::Array(), "compact!", "sorbet_rb_array_compact_bang"},
-    {core::Symbols::Array(), "to_h", "sorbet_rb_array_to_h"},
-    {core::Symbols::Hash(), "[]", "sorbet_rb_hash_square_br"},
-    {core::Symbols::Hash(), "[]=", "sorbet_rb_hash_square_br_eq"},
-    {core::Symbols::Hash(), "each_pair", "sorbet_rb_hash_each_pair", "sorbet_rb_hash_each_pair_withBlock"},
-    {core::Symbols::Hash(), "each", "sorbet_rb_hash_each_pair", "sorbet_rb_hash_each_pair_withBlock"},
-    {core::Symbols::Hash(), "each_with_object", "sorbet_rb_hash_each_with_object",
-     "sorbet_rb_hash_each_with_object_withBlock"},
-    {core::Symbols::Hash(), "any?", "sorbet_rb_hash_any", "sorbet_rb_hash_any_withBlock"},
-    {core::Symbols::Array(), "size", "sorbet_rb_array_len"},
-    {core::Symbols::TrueClass(), "|", "sorbet_int_bool_true"},
-    {core::Symbols::FalseClass(), "|", "sorbet_int_bool_and"},
-    {core::Symbols::TrueClass(), "&", "sorbet_int_bool_and"},
-    {core::Symbols::FalseClass(), "&", "sorbet_int_bool_false"},
-    {core::Symbols::TrueClass(), "^", "sorbet_int_bool_nand"},
-    {core::Symbols::FalseClass(), "^", "sorbet_int_bool_and"},
-    {core::Symbols::Integer(), "+", "sorbet_rb_int_plus"},
-    {core::Symbols::Integer(), "-", "sorbet_rb_int_minus"},
-    {core::Symbols::Integer(), "*", "sorbet_rb_int_mul"},
-    {core::Symbols::Integer(), "/", "sorbet_rb_int_div"},
-    {core::Symbols::Integer(), ">", "sorbet_rb_int_gt"},
-    {core::Symbols::Integer(), "<", "sorbet_rb_int_lt"},
-    {core::Symbols::Integer(), ">=", "sorbet_rb_int_ge"},
-    {core::Symbols::Integer(), "<=", "sorbet_rb_int_le"},
-    {core::Symbols::Integer(), "to_s", "sorbet_rb_int_to_s"},
-    {core::Symbols::Integer(), "==", "sorbet_rb_int_equal"},
-    {core::Symbols::Integer(), "!=", "sorbet_rb_int_neq"},
-    {core::Symbols::Integer(), "times", "sorbet_rb_int_dotimes", "sorbet_rb_int_dotimes_withBlock"},
-    {core::Symbols::Symbol(), "==", "sorbet_rb_sym_equal"},
-    {core::Symbols::Symbol(), "===", "sorbet_rb_sym_equal"},
-    {core::Symbols::Thread(), "[]", "sorbet_Thread_square_br"},
-    {core::Symbols::Thread(), "[]=", "sorbet_Thread_square_br_eq"},
-    {core::Symbols::Kernel(), "is_a?", "sorbet_rb_obj_is_kind_of", nullopt, {"rb_obj_is_kind_of"}},
-    {core::Symbols::Kernel(), "kind_of?", "sorbet_rb_obj_is_kind_of", nullopt, {"rb_obj_is_kind_of"}},
+    {core::Symbols::Array(), "map", CMethod{"sorbet_rb_array_collect"}, CMethod{"sorbet_rb_array_collect_withBlock"}},
+    {core::Symbols::Array(), "collect!", CMethod{"sorbet_rb_array_collect_bang"},
+     CMethod{"sorbet_rb_array_collect_bang_withBlock"}},
+    {core::Symbols::Array(), "map!", CMethod{"sorbet_rb_array_collect_bang"},
+     CMethod{"sorbet_rb_array_collect_bang_withBlock"}},
+    {core::Symbols::Array(), "any?", CMethod{"sorbet_rb_array_any"}, CMethod{"sorbet_rb_array_any_withBlock"}},
+    {core::Symbols::Array(), "all?", CMethod{"sorbet_rb_array_all"}, CMethod{"sorbet_rb_array_all_withBlock"}},
+    {core::Symbols::Array(), "compact", CMethod{"sorbet_rb_array_compact"}},
+    {core::Symbols::Array(), "compact!", CMethod{"sorbet_rb_array_compact_bang"}},
+    {core::Symbols::Array(), "to_h", CMethod{"sorbet_rb_array_to_h"}},
+    {core::Symbols::Hash(), "[]", CMethod{"sorbet_rb_hash_square_br"}},
+    {core::Symbols::Hash(), "[]=", CMethod{"sorbet_rb_hash_square_br_eq"}},
+    {core::Symbols::Hash(), "each_pair", CMethod{"sorbet_rb_hash_each_pair"},
+     CMethod{"sorbet_rb_hash_each_pair_withBlock"}},
+    {core::Symbols::Hash(), "each", CMethod{"sorbet_rb_hash_each_pair"}, CMethod{"sorbet_rb_hash_each_pair_withBlock"}},
+    {core::Symbols::Hash(), "each_with_object", CMethod{"sorbet_rb_hash_each_with_object"},
+     CMethod{"sorbet_rb_hash_each_with_object_withBlock"}},
+    {core::Symbols::Hash(), "any?", CMethod{"sorbet_rb_hash_any"}, CMethod{"sorbet_rb_hash_any_withBlock"}},
+    {core::Symbols::Array(), "size", CMethod{"sorbet_rb_array_len"}},
+    {core::Symbols::TrueClass(), "|", CMethod{"sorbet_int_bool_true"}},
+    {core::Symbols::FalseClass(), "|", CMethod{"sorbet_int_bool_and"}},
+    {core::Symbols::TrueClass(), "&", CMethod{"sorbet_int_bool_and"}},
+    {core::Symbols::FalseClass(), "&", CMethod{"sorbet_int_bool_false"}},
+    {core::Symbols::TrueClass(), "^", CMethod{"sorbet_int_bool_nand"}},
+    {core::Symbols::FalseClass(), "^", CMethod{"sorbet_int_bool_and"}},
+    {core::Symbols::Integer(), "+", CMethod{"sorbet_rb_int_plus"}},
+    {core::Symbols::Integer(), "-", CMethod{"sorbet_rb_int_minus"}},
+    {core::Symbols::Integer(), "*", CMethod{"sorbet_rb_int_mul"}},
+    {core::Symbols::Integer(), "/", CMethod{"sorbet_rb_int_div"}},
+    {core::Symbols::Integer(), ">", CMethod{"sorbet_rb_int_gt"}},
+    {core::Symbols::Integer(), "<", CMethod{"sorbet_rb_int_lt"}},
+    {core::Symbols::Integer(), ">=", CMethod{"sorbet_rb_int_ge"}},
+    {core::Symbols::Integer(), "<=", CMethod{"sorbet_rb_int_le"}},
+    {core::Symbols::Integer(), "to_s", CMethod{"sorbet_rb_int_to_s"}},
+    {core::Symbols::Integer(), "==", CMethod{"sorbet_rb_int_equal"}},
+    {core::Symbols::Integer(), "!=", CMethod{"sorbet_rb_int_neq"}},
+    {core::Symbols::Integer(), "times", CMethod{"sorbet_rb_int_dotimes"}, CMethod{"sorbet_rb_int_dotimes_withBlock"}},
+    {core::Symbols::Symbol(), "==", CMethod{"sorbet_rb_sym_equal"}},
+    {core::Symbols::Symbol(), "===", CMethod{"sorbet_rb_sym_equal"}},
+    {core::Symbols::Thread(), "[]", CMethod{"sorbet_Thread_square_br"}},
+    {core::Symbols::Thread(), "[]=", CMethod{"sorbet_Thread_square_br_eq"}},
+    {core::Symbols::Kernel(), "is_a?", CMethod{"sorbet_rb_obj_is_kind_of"}, nullopt, {"rb_obj_is_kind_of"}},
+    {core::Symbols::Kernel(), "kind_of?", CMethod{"sorbet_rb_obj_is_kind_of"}, nullopt, {"rb_obj_is_kind_of"}},
 #include "WrappedIntrinsics.h"
 };
 

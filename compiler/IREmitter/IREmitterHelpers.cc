@@ -99,6 +99,22 @@ AliasesAndKeywords setupAliasesAndKeywords(CompilerState &cs, const cfg::CFG &cf
     return res;
 }
 
+// Iterate over all instructions in the CFG, determining which ruby blocks use `break`
+vector<bool> blocksThatUseBreak(CompilerState &cs, const cfg::CFG &cfg) {
+    vector<bool> res(cfg.maxRubyBlockId + 1, false);
+
+    for (auto &bb : cfg.basicBlocks) {
+        for (auto &bind : bb->exprs) {
+            if (bind.bind.variable.data(cfg)._name == core::Names::blockBreak()) {
+                res[bb->rubyBlockId] = true;
+                break;
+            }
+        }
+    }
+
+    return res;
+}
+
 std::tuple<UnorderedMap<cfg::LocalRef, llvm::AllocaInst *>, UnorderedMap<int, llvm::AllocaInst *>>
 setupLocalVariables(CompilerState &cs, cfg::CFG &cfg, const UnorderedMap<cfg::LocalRef, int> &variablesPrivateToBlocks,
                     const IREmitterContext &irctx) {
@@ -707,6 +723,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         }
     }
 
+    auto blockUsesBreak = blocksThatUseBreak(cs, cfg);
     llvm::BasicBlock *postProcessBlock = llvm::BasicBlock::Create(cs, "postProcess", mainFunc);
 
     IREmitterContext approximation{
@@ -739,6 +756,7 @@ IREmitterContext IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(CompilerStat
         move(deadBlocks),
         move(blockExits),
         move(blockScopes),
+        move(blockUsesBreak),
     };
 
     auto [llvmVariables, selfVariables] = setupLocalVariables(cs, cfg, variablesPrivateToBlocks, approximation);

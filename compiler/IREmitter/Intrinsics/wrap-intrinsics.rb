@@ -625,7 +625,7 @@ module Intrinsics
           methods.each do |method|
             header << "    {core::Symbols::#{method.klass}(), "
             header << "\"#{method.rb_name}\", "
-            header << "\"#{method.sorbet_payload_wrapper_name}\"},\n"
+            header << "CMethod{\"#{method.sorbet_payload_wrapper_name}\"}},\n"
           end
         end
       end
