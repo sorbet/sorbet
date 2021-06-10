@@ -23,7 +23,5 @@ end
 def outside_on_root; end
 
 # No method def at all later in the file
-sig do
-  ${1}
-end${0} # error: no block
+sig${0} # error: no block
 #  ^ apply-completion: [B] item: 0

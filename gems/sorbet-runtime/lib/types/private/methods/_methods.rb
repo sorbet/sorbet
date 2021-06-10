@@ -29,12 +29,13 @@ module T::Private::Methods
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
 
-  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw)
+  DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw, :decl_builder)
 
   def self.declare_sig(mod, loc, arg, &blk)
-    T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
+    declaration = _declare_sig_internal(mod, loc, arg, &blk)
+    T::Private::DeclState.current.active_declaration = declaration
 
-    nil
+    declaration.decl_builder
   end
 
   # See tests for how to use this.  But you shouldn't be using this.
@@ -54,7 +55,8 @@ module T::Private::Methods
       raise "Invalid argument to `sig`: #{arg}"
     end
 
-    DeclarationBlock.new(mod, loc, blk, arg == :final, raw)
+    decl_builder = DeclBuilder.new(mod, raw)
+    DeclarationBlock.new(mod, loc, blk, arg == :final, raw, decl_builder)
   end
 
   def self._with_declared_signature(mod, declblock, &blk)
@@ -344,10 +346,9 @@ module T::Private::Methods
   end
 
   def self.run_builder(declaration_block)
-    builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
-    builder
-      .instance_exec(&declaration_block.blk)
-      .finalize!
+    declaration_block
+      .decl_builder
+      .compile!(&declaration_block.blk)
       .decl
   end
 

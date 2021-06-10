@@ -5,6 +5,7 @@ module T::Private::Methods
   Declaration = Struct.new(:mod, :params, :returns, :bind, :mode, :checked, :finalized, :on_failure, :override_allow_incompatible, :type_parameters, :raw)
 
   class DeclBuilder
+    # The signature declaration the builder is composing
     attr_reader :decl
 
     class BuilderError < StandardError; end
@@ -30,6 +31,14 @@ module T::Private::Methods
         ARG_NOT_PROVIDED, # type_parameters
         raw
       )
+      @inside_sig_block = false
+    end
+
+    def compile!(&block)
+      @inside_sig_block = true
+      instance_exec(&block)
+      finalize!
+      self
     end
 
     def params(**params)
@@ -115,7 +124,7 @@ module T::Private::Methods
       self
     end
 
-    def abstract
+    def abstract(&blk)
       check_live!
 
       case decl.mode
@@ -127,15 +136,33 @@ module T::Private::Methods
         raise BuilderError.new("`.abstract` cannot be combined with `.override` or `.overridable`.")
       end
 
+      if blk
+        T::Private::DeclState.current.active_declaration.blk = blk
+      end
+
       self
     end
 
-    def final
+    def final(&blk)
       check_live!
-      raise BuilderError.new("The syntax for declaring a method final is `sig(:final) {...}`, not `sig {final. ...}`")
+
+      if @inside_sig_block
+        raise BuilderError.new(
+          "The syntax for declaring a method final is `sig(:final) {...}` or `sig.final {...}`, not `sig {final. ...}`"
+        )
+      end
+
+      active_declaration = T::Private::DeclState.current.active_declaration
+
+      if blk
+        active_declaration.blk = blk
+        active_declaration.final = true
+      end
+
+      self
     end
 
-    def override(allow_incompatible: false)
+    def override(allow_incompatible: false, &blk)
       check_live!
 
       case decl.mode
@@ -150,10 +177,14 @@ module T::Private::Methods
         raise BuilderError.new("`.override` cannot be combined with `.abstract`.")
       end
 
+      if blk
+        T::Private::DeclState.current.active_declaration.blk = blk
+      end
+
       self
     end
 
-    def overridable
+    def overridable(&blk)
       check_live!
 
       case decl.mode
@@ -165,6 +196,10 @@ module T::Private::Methods
         decl.mode = Modes.overridable
       when Modes.overridable, Modes.overridable_override
         raise BuilderError.new(".overridable cannot be repeated in a single signature")
+      end
+
+      if blk
+        T::Private::DeclState.current.active_declaration.blk = blk
       end
 
       self
