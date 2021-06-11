@@ -37,7 +37,7 @@ T.reveal_type(Child.new.foo) # Revealed type: Child
 
 module Mixin
   extend T::Sig
-  
+
   sig {returns(T.self_type)}
   def bar
     self
