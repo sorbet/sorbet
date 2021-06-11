@@ -35,14 +35,14 @@ bool shouldExtract(core::Context ctx, const ast::ExpressionPtr &what) {
 ast::ExpressionPtr extractClassInit(core::Context ctx, ast::ClassDef *klass) {
     ast::InsSeq::STATS_store inits;
 
-    for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
-        if (!shouldExtract(ctx, *it)) {
-            ++it;
-            continue;
+    auto it = remove_if(klass->rhs.begin(), klass->rhs.end(), [&](ast::ExpressionPtr &expr) {
+        bool b = shouldExtract(ctx, expr);
+        if (b) {
+            inits.emplace_back(std::move(expr));
         }
-        inits.emplace_back(std::move(*it));
-        it = klass->rhs.erase(it);
-    }
+        return b;
+    });
+    klass->rhs.erase(it, klass->rhs.end());
 
     if (inits.empty()) {
         return ast::MK::EmptyTree();
