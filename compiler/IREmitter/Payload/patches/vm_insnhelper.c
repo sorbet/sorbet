@@ -134,8 +134,8 @@ void sorbet_vmMethodSearch(struct FunctionInlineCache *cache, VALUE recv) {
 // Wrapped version of vm_call_opt_call:
 // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/vm_insnhelper.c#L2683-L2691
 // The wrapper catches TAG_RETURN jumps (from return statements inside lambdas), and handles appropriately.
-static VALUE
-sorbet_vm_call_opt_call(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, struct rb_calling_info *calling, struct rb_call_data *cd) {
+static VALUE sorbet_vm_call_opt_call(rb_execution_context_t *ec, rb_control_frame_t *reg_cfp,
+                                     struct rb_calling_info *calling, struct rb_call_data *cd) {
     enum ruby_tag_type state;
     VALUE retval;
     rb_control_frame_t *const volatile save_cfp = ec->cfp;
@@ -475,9 +475,8 @@ void sorbet_vm_setivar(VALUE obj, ID id, VALUE val, IVC ic) {
     vm_setivar(obj, id, val, ic, cc, is_attr);
 }
 
-VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp,
-                      rb_num_t throw_state, VALUE throwobj)
-{
+VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, rb_num_t throw_state,
+                      VALUE throwobj) {
     return vm_throw(ec, reg_cfp, throw_state, throwobj);
 }
 

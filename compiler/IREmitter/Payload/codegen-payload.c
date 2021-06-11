@@ -132,10 +132,10 @@ SORBET_ALIVE(VALUE, sorbet_magic_mergeHashHelper, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_vm_getivar, (VALUE obj, ID id, struct iseq_inline_iv_cache_entry *cache));
 SORBET_ALIVE(void, sorbet_vm_setivar, (VALUE obj, ID id, VALUE val, struct iseq_inline_iv_cache_entry *cache));
 
-SORBET_ALIVE(int, sorbet_initializeTag, (struct rb_vm_tag *tag));
+SORBET_ALIVE(int, sorbet_initializeTag, (struct rb_vm_tag * tag));
 SORBET_ALIVE(VALUE, sorbet_processThrowReturnSetJmp,
              (int setjmp_retval, rb_control_frame_t *cfp, struct rb_vm_tag *tag));
-SORBET_ALIVE(void, sorbet_teardownTagForThrowReturn, (struct rb_vm_tag *tag));
+SORBET_ALIVE(void, sorbet_teardownTagForThrowReturn, (struct rb_vm_tag * tag));
 
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.
@@ -2212,8 +2212,8 @@ void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_ti
     }
 }
 
-extern VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp,
-                             rb_num_t throw_state, VALUE throwobj);
+extern VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, rb_num_t throw_state,
+                             VALUE throwobj);
 extern void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt);
 
 SORBET_INLINE
@@ -2252,8 +2252,7 @@ int sorbet_initializeTag(struct rb_vm_tag *tag) {
 // or return the (non-Qundef) return value to the caller, which should return the return value (applying a type test on
 // the way out if appropriate).
 SORBET_INLINE
-VALUE sorbet_processThrowReturnSetJmp(int setjmp_retval, rb_control_frame_t *cfp,
-                                      struct rb_vm_tag *tag) {
+VALUE sorbet_processThrowReturnSetJmp(int setjmp_retval, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
     rb_execution_context_t *ec = GET_EC();
 
     VALUE retval = Qundef;
@@ -2285,8 +2284,7 @@ VALUE sorbet_processThrowReturnSetJmp(int setjmp_retval, rb_control_frame_t *cfp
             ec->tag->state = state;
             RUBY_LONGJMP(ec->tag->buf, 1);
         }
-    }
-    else {
+    } else {
         // See EC_REPUSH_TAG:
         // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L144
         ec->tag = tag;
