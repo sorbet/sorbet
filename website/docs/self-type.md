@@ -19,7 +19,7 @@ we call a method on i.e., `x` in `x.foo`). For instance, `#dup` returns
 type.
 
 ```ruby
-# typed: strict
+# typed: true
 
 class Parent
   extend T::Sig
