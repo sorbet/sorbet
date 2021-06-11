@@ -14,7 +14,7 @@ go () {
   sorbet --silence-dev-message --llvm-ir-folder="$llvmir" "$source" || echo 'sorbet failed'
 }
 
-go soon_to_be_supported_case.rb
+go supported_case.rb
 
 go block_under_begin.rb
 go block_under_rescue.rb
