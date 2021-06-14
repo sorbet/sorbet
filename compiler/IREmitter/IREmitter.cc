@@ -793,10 +793,14 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     for (int funId = 0; funId < irctx.functionInitializersByFunction.size(); funId++) {
         llvm::BasicBlock *nextBlock;
 
-        // Block 0 (the root Ruby block) is a special case: rather than jumping straight to argument setup, we need to
-        // push an EC tag and execute setjmp. The EC tag setup will subsequently branch to the argument setup block;
-        // that branch is built in Payload::setupEcTag (called here).
-        if (funId == 0) {
+        // Block 0 (the root Ruby block) is a special case: rather than jumping straight to argument setup, we may need
+        // to push an EC tag and execute setjmp. (If irctx.ecTag is nullptr, that means that we detected statically in
+        // IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping that the EC tag is actually unnecessary.) The EC tag
+        // setup will subsequently branch to the argument setup block; that branch is built in Payload::setupEcTag,
+        // which is called here.
+        //
+        // In other cases, we will just jump directly from the init block to the argument setup block.
+        if (funId == 0 && irctx.ecTag != nullptr) {
             llvm::BasicBlock *ecTagSetupBlock = llvm::BasicBlock::Create(cs, "ecTagSetup", func);
             builder.SetInsertPoint(ecTagSetupBlock);
             Payload::setupEcTag(cs, builder, irctx);
