@@ -1,0 +1,26 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    begin
+      a = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+  else
+    <emptyTree>
+  end
+
+  <emptyTree>::<C T>.reveal_type(a)
+
+  if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    begin
+      a = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      b = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+      ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
+    end
+  else
+    <emptyTree>
+  end
+
+  <emptyTree>::<C T>.reveal_type(a)
+
+  <emptyTree>::<C T>.reveal_type(b)
+end

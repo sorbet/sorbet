@@ -790,10 +790,6 @@ public:
         return make_unique<IfGuard>(tokLoc(tok).join(if_body->loc), std::move(if_body));
     }
 
-    unique_ptr<Node> in_match(unique_ptr<Node> lhs, const token *tok, unique_ptr<Node> rhs) {
-        return make_unique<InMatch>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
-    }
-
     unique_ptr<Node> in_pattern(const token *inTok, unique_ptr<Node> pattern, unique_ptr<Node> guard,
                                 const token *thenTok, unique_ptr<Node> body) {
         return make_unique<InPattern>(tokLoc(inTok).join(maybe_loc(body)), std::move(pattern), std::move(guard),
@@ -972,6 +968,14 @@ public:
         sorbet::parser::NodeVec args;
         args.emplace_back(std::move(arg));
         return make_unique<Send>(loc, std::move(receiver), gs_.enterNameUTF8(oper->string()), std::move(args));
+    }
+
+    unique_ptr<Node> match_pattern(unique_ptr<Node> lhs, const token *tok, unique_ptr<Node> rhs) {
+        return make_unique<MatchPattern>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
+    }
+
+    unique_ptr<Node> match_pattern_p(unique_ptr<Node> lhs, const token *tok, unique_ptr<Node> rhs) {
+        return make_unique<MatchPatternP>(lhs->loc.join(rhs->loc), std::move(lhs), std::move(rhs));
     }
 
     unique_ptr<Node> match_nil_pattern(const token *dstar, const token *nil) {
@@ -1827,11 +1831,6 @@ ForeignPtr ident(SelfPtr builder, const token *tok) {
     return build->toForeign(build->ident(tok));
 }
 
-ForeignPtr in_match(SelfPtr builder, ForeignPtr lhs, const token *tok, ForeignPtr rhs) {
-    auto build = cast_builder(builder);
-    return build->toForeign(build->in_match(build->cast_node(lhs), tok, build->cast_node(rhs)));
-}
-
 ForeignPtr in_pattern(SelfPtr builder, const token *tok, ForeignPtr pattern, ForeignPtr guard, const token *thenToken,
                       ForeignPtr body) {
     auto build = cast_builder(builder);
@@ -1987,6 +1986,16 @@ ForeignPtr match_as(SelfPtr builder, ForeignPtr value, const token *assoc, Forei
 ForeignPtr match_label(SelfPtr builder, ForeignPtr label) {
     auto build = cast_builder(builder);
     return build->toForeign(build->match_label(build->cast_node(label)));
+}
+
+ForeignPtr match_pattern(SelfPtr builder, ForeignPtr lhs, const token *tok, ForeignPtr rhs) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->match_pattern(build->cast_node(lhs), tok, build->cast_node(rhs)));
+}
+
+ForeignPtr match_pattern_p(SelfPtr builder, ForeignPtr lhs, const token *tok, ForeignPtr rhs) {
+    auto build = cast_builder(builder);
+    return build->toForeign(build->match_pattern_p(build->cast_node(lhs), tok, build->cast_node(rhs)));
 }
 
 ForeignPtr match_nil_pattern(SelfPtr builder, const token *dstar, const token *nil) {
@@ -2318,7 +2327,6 @@ struct ruby_parser::builder Builder::interface = {
     hash_pattern,
     ident,
     if_guard,
-    in_match,
     in_pattern,
     index,
     indexAsgn,
@@ -2348,6 +2356,8 @@ struct ruby_parser::builder Builder::interface = {
     match_alt,
     match_as,
     match_label,
+    match_pattern,
+    match_pattern_p,
     match_nil_pattern,
     match_op,
     match_pair,

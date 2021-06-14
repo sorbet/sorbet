@@ -454,6 +454,21 @@ void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, 
     }
 }
 
+// Desugar `in` and `=>` oneline pattern matching
+ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &match) {
+    auto matchExpr = MK::RaiseUnimplemented(loc);
+    auto bodyExpr = MK::RaiseUnimplemented(loc);
+    auto elseExpr = MK::EmptyTree();
+
+    InsSeq::STATS_store vars;
+    desugarPatternMatchingVars(vars, dctx, match);
+    if (!vars.empty()) {
+        bodyExpr = MK::InsSeq(match->loc, std::move(vars), std::move(bodyExpr));
+    }
+
+    return MK::If(loc, std::move(matchExpr), std::move(bodyExpr), std::move(elseExpr));
+}
+
 bool locReported = false;
 
 ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node> node) {
@@ -2105,6 +2120,14 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::EncodingLiteral *encodingLiteral) {
                 auto recv = MK::Constant(loc, core::Symbols::Magic());
                 result = MK::Send0(loc, std::move(recv), core::Names::getEncoding());
+            },
+            [&](parser::MatchPattern *pattern) {
+                auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs);
+                result = std::move(res);
+            },
+            [&](parser::MatchPatternP *pattern) {
+                auto res = desugarOnelinePattern(dctx, pattern->loc, pattern->rhs);
+                result = std::move(res);
             },
 
             [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },

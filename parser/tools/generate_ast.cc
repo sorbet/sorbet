@@ -332,12 +332,6 @@ NodeDef nodes[] = {
         "iflipflop",
         vector<FieldDef>({{"left", FieldType::Node}, {"right", FieldType::Node}}),
     },
-    // Pattern matching pattern   sion
-    {
-        "InMatch",
-        "in_match",
-        vector<FieldDef>({{"lhs", FieldType::Node}, {"rhs", FieldType::Node}}),
-    },
     // Pattern matching pattern: `in x`
     {
         "InPattern",
@@ -451,6 +445,18 @@ NodeDef nodes[] = {
         "MatchNilPattern",
         "match_nil_pattern",
         vector<FieldDef>(),
+    },
+    // Pattern matching pattern with `=`
+    {
+        "MatchPattern",
+        "match_pattern",
+        vector<FieldDef>({{"lhs", FieldType::Node}, {"rhs", FieldType::Node}}),
+    },
+    // Pattern matching pattern with `in`
+    {
+        "MatchPatternP",
+        "match_pattern_p",
+        vector<FieldDef>({{"lhs", FieldType::Node}, {"rhs", FieldType::Node}}),
     },
     // Pattern matching pattern variable with rest
     {
