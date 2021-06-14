@@ -454,7 +454,7 @@ void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, 
     }
 }
 
-// Desugar `in` and `=>` online pattern matching
+// Desugar `in` and `=>` oneline pattern matching
 ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &match) {
     auto matchExpr = MK::RaiseUnimplemented(loc);
     auto bodyExpr = MK::RaiseUnimplemented(loc);
