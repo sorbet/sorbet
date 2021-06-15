@@ -2,10 +2,8 @@
 # typed: true
 # compiled: false
 
+extend T::Sig
+
 def yield_from_2
   yield
-end
-
-def yield_with_arg_from_2(x)
-  yield x
 end

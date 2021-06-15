@@ -1,4 +1,8 @@
-No errors! Great job.
+soon_to_be_supported_case.rb:19: returns through multiple stacks not implemented https://srb.help/10002
+    19 |      g { return 99 }
+                  ^^^^^^^^^
+Errors: 1
+sorbet failed
 block_under_begin.rb:11: return statements crossing both block and exception frames are not yet implemented https://srb.help/10002
     11 |    g { return 99 }
                 ^^^^^^^^^

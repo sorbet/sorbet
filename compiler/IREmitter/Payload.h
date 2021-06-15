@@ -98,8 +98,6 @@ public:
                                        int rubyBlockId);
 
     static llvm::Value *buildLocalsOffset(CompilerState &cs);
-
-    static void setupEcTag(CompilerState &cs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx);
 };
 } // namespace sorbet::compiler
 #endif

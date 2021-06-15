@@ -15,11 +15,5 @@ end
 begin
   puts f
 rescue TypeError
-  puts "got a TypeError as expected from the block"
-end
-
-begin
-  puts some_lambda.call
-rescue TypeError
-  puts "whoops, got an unexpected TypeError from the lambda"
+  puts "got a TypeError as expected"
 end

@@ -132,11 +132,6 @@ SORBET_ALIVE(VALUE, sorbet_magic_mergeHashHelper, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_vm_getivar, (VALUE obj, ID id, struct iseq_inline_iv_cache_entry *cache));
 SORBET_ALIVE(void, sorbet_vm_setivar, (VALUE obj, ID id, VALUE val, struct iseq_inline_iv_cache_entry *cache));
 
-SORBET_ALIVE(int, sorbet_initializeTag, (struct rb_vm_tag * tag));
-SORBET_ALIVE(VALUE, sorbet_processThrowReturnSetJmp,
-             (int setjmp_retval, rb_control_frame_t *cfp, struct rb_vm_tag *tag));
-SORBET_ALIVE(void, sorbet_teardownTagForThrowReturn, (struct rb_vm_tag * tag));
-
 // The next several functions exist to convert Ruby definitions into LLVM IR, and
 // are always inlined as a consequence.
 
@@ -2210,95 +2205,6 @@ void sorbet_ensureSorbetRuby(int compile_time_is_release_build, char *compile_ti
                  "SorbetLLVM runtime version mismatch: sorbet_ruby compiled with %s but shared object compiled with %s",
                  runtime_build_scm_revision, compile_time_build_scm_revision);
     }
-}
-
-extern VALUE sorbet_vm_throw(const rb_execution_context_t *ec, rb_control_frame_t *reg_cfp, rb_num_t throw_state,
-                             VALUE throwobj);
-extern void sorbet_ec_jump_tag(rb_execution_context_t *ec, enum ruby_tag_type tt);
-
-SORBET_INLINE
-void sorbet_throwReturn(VALUE retval) {
-    rb_execution_context_t *ec = GET_EC();
-
-    VALUE v = sorbet_vm_throw(ec, ec->cfp, TAG_RETURN, retval);
-
-    ec->errinfo = v;
-    sorbet_ec_jump_tag(ec, ec->tag->state);
-}
-
-// This is invoked at the beginning of a method's body, and is analogous to EC_PUSH_TAG followed by the setjmp in
-// EC_EXEC_TAG:
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L130-L135
-// https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L181-L182
-SORBET_INLINE
-int sorbet_initializeTag(struct rb_vm_tag *tag) {
-    const rb_execution_context_t *ec = GET_EC();
-
-    // inlined from EC_PUSH_TAG
-    tag->state = TAG_NONE;
-    tag->tag = Qundef;
-    tag->prev = ec->tag;
-
-    return RUBY_SETJMP(tag->buf);
-}
-
-// Used by method and static init functions, for setjmp handling for returns from block statements.
-//
-// This is analogous to what comes after return from the setjmp (whether it's the initial setjmp or a longjmp back to
-// it) in EC_EXEC_TAG. For the initial setjmp, we just do something analogous to EC_REPUSH_TAG and return Qundef to the
-// caller, indicating that tag setup is complete and the function should continue as normal. For a longjmp back, we
-// will do subsequent processing: extract the tag state with something analogous to rb_ec_tag_state, inspect the throw
-// data to see if it's a return statement meant for us, pop the tag, then either re-throw (if the return wasn't for us)
-// or return the (non-Qundef) return value to the caller, which should return the return value (applying a type test on
-// the way out if appropriate).
-SORBET_INLINE
-VALUE sorbet_processThrowReturnSetJmp(int setjmp_retval, rb_control_frame_t *cfp, struct rb_vm_tag *tag) {
-    rb_execution_context_t *ec = GET_EC();
-
-    VALUE retval = Qundef;
-
-    if (setjmp_retval) {
-        // See rb_ec_tag_state:
-        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L160-L167
-        int state = ec->tag->state;
-        ec->tag->state = TAG_NONE;
-
-        const struct vm_throw_data *const err = (struct vm_throw_data *)ec->errinfo;
-        const rb_control_frame_t *const escape_cfp = err->catch_frame;
-
-        if (state == TAG_RETURN && cfp == escape_cfp) {
-            rb_vm_rewind_cfp(ec, cfp);
-            state = 0;
-
-            ec->errinfo = Qnil;
-
-            retval = err->throw_obj;
-        }
-
-        // See EC_POP_TAG:
-        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L137-L139
-        ec->tag = tag->prev;
-
-        if (state != 0) {
-            // inlined from rb_ec_tag_jump
-            ec->tag->state = state;
-            RUBY_LONGJMP(ec->tag->buf, 1);
-        }
-    } else {
-        // See EC_REPUSH_TAG:
-        // https://github.com/ruby/ruby/blob/5445e0435260b449decf2ac16f9d09bae3cafe72/eval_intern.h#L144
-        ec->tag = tag;
-    }
-
-    return retval;
-}
-
-SORBET_INLINE
-void sorbet_teardownTagForThrowReturn(struct rb_vm_tag *tag) {
-    rb_execution_context_t *ec = GET_EC();
-
-    // inlined from EC_POP_TAG
-    ec->tag = tag->prev;
 }
 
 // ****
