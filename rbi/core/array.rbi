@@ -834,6 +834,13 @@ class Array < Object
   #
   # Also aliased as:
   # [`map!`](https://docs.ruby-lang.org/en/2.7.0/Array.html#method-i-map-21)
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+    )
+    .returns(T::Array[T.type_parameter(:U)])
+  end
+  sig {returns(T::Enumerator[Elem])}
   def collect!(&blk); end
 
   # When invoked with a block, yields all combinations of length `n` of elements
