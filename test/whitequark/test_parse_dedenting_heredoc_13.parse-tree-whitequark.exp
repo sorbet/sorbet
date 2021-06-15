@@ -1,0 +1,8 @@
+s(:send, nil, :p,
+  s(:xstr,
+    s(:str, "  x
+"),
+    s(:begin,
+      s(:lvar, :foo)),
+    s(:str, "
+")))
