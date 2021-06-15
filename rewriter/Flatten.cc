@@ -311,7 +311,7 @@ public:
         return block;
     }
 
-       ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
+    ast::ExpressionPtr postTransformAssign(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
         auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn.lhs);
@@ -320,10 +320,10 @@ public:
         }
 
         if (inBlock) {
-            printf("we're in a block\n");
             if (auto e = ctx.state.beginError(core::Loc(ctx.file, lhs->loc),
-                                              core::errors::Rewriter::DynamicConstant)) {
-                e.setHeader("Dynamic constant assignment");
+                                              core::errors::Rewriter::DynamicConstantAssignment)) {
+                e.setHeader("Assigning constant `{}` inside a block", lhs->cnst.show(ctx));
+                e.addErrorNote("You may want to move the constant outside of the block");
             }
         }
         return tree;

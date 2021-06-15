@@ -347,6 +347,7 @@ class SymbolFinder {
     // `private` with no arguments toggles the visibility of all methods below in the class def.
     // This tracks those as they appear.
     vector<optional<Modifier>> methodVisiStack = {nullopt};
+
     void findClassModifiers(core::Context ctx, FoundDefinitionRef klass, ast::ExpressionPtr &line) {
         auto *send = ast::cast_tree<ast::Send>(line);
         if (send == nullptr) {
