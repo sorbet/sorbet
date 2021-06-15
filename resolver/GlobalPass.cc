@@ -113,7 +113,13 @@ void resolveTypeMembers(core::GlobalState &gs, core::ClassOrModuleRef sym,
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
                 if (sym.data(gs)->typeMembers()[i] != my) {
                     if (auto e = gs.beginError(my.data(gs)->loc(), core::errors::Resolver::TypeMembersInWrongOrder)) {
-                        e.setHeader("Type members in wrong order");
+                        e.setHeader("Type members for `{}` repeated in wrong order", sym.show(gs));
+                        e.addErrorLine(my.data(gs)->loc(), "Found type member with name `{}`",
+                                       my.data(gs)->name.show(gs));
+                        e.addErrorLine(sym.data(gs)->typeMembers()[i].data(gs)->loc(),
+                                       "Expected type member with name `{}`",
+                                       sym.data(gs)->typeMembers()[i].data(gs)->name.show(gs));
+                        e.addErrorLine(tp.data(gs)->loc(), "`{}` defined in parent here:", tp.data(gs)->name.show(gs));
                     }
                     int foundIdx = 0;
                     while (foundIdx < sym.data(gs)->typeMembers().size() &&
