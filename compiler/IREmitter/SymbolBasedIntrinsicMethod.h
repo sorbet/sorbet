@@ -32,7 +32,9 @@ public:
 
     SymbolBasedIntrinsicMethod(Intrinsics::HandleBlock blockHandled) : blockHandled(blockHandled){};
     virtual ~SymbolBasedIntrinsicMethod() = default;
-    static std::vector<const SymbolBasedIntrinsicMethod *> &definedIntrinsics();
+    static std::vector<const SymbolBasedIntrinsicMethod *> &definedIntrinsics(const core::GlobalState &gs);
+
+    virtual void sanityCheck(const core::GlobalState &gs) const;
 };
 }; // namespace sorbet::compiler
 #endif

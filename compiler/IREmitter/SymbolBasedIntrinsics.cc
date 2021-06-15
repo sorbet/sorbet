@@ -60,6 +60,44 @@ public:
             Payload::assumeType(cs, build, res, resultType);
         }
     }
+
+    void sanityCheck(const core::GlobalState &gs, core::ClassOrModuleRef rubyClass, string_view rubyMethod) const {
+        if (resultType.exists()) {
+            auto intrinsicResultType = resultType.data(gs)->externalType();
+
+            auto methodName = gs.lookupNameUTF8(rubyMethod);
+            ENFORCE(methodName.exists());
+
+            // We can only reasonably add type assertions for methods that have signatures
+            auto primaryMethod = rubyClass.data(gs)->findMemberTransitive(gs, methodName);
+            ENFORCE(primaryMethod.exists());
+            ENFORCE(primaryMethod.data(gs)->hasSig())
+
+            // test all overloads to see if we can find a sig that produces this type
+            if (core::Types::isSubType(gs, intrinsicResultType, primaryMethod.data(gs)->resultType)) {
+                return;
+            }
+
+            int i = 0;
+            auto current = primaryMethod;
+            while (current.data(gs)->isOverloaded()) {
+                i++;
+                auto overloadName = gs.lookupNameUnique(core::UniqueNameKind::Overload, methodName, i);
+                auto overload = primaryMethod.data(gs)->owner.data(gs)->findMember(gs, overloadName);
+                ENFORCE(overload.exists());
+                ENFORCE(overload.isMethod());
+
+                if (core::Types::isSubType(gs, intrinsicResultType, overload.data(gs)->resultType)) {
+                    return;
+                }
+
+                current = overload;
+            }
+
+            ENFORCE(false, "The method `{}#{}` (or an overload) does not return `{}`", rubyClass.show(gs), rubyMethod,
+                    intrinsicResultType.show(gs));
+        }
+    }
 };
 
 class CallCMethod : public SymbolBasedIntrinsicMethod {
@@ -180,6 +218,13 @@ public:
             return IREmitterHelpers::receiverFastPathTestWithCache(mcctx, this->expectedRubyCFuncs, string(rubyMethod));
         } else {
             return SymbolBasedIntrinsicMethod::receiverFastPathTest(mcctx, potentialClass);
+        }
+    }
+
+    virtual void sanityCheck(const core::GlobalState &gs) const override {
+        cMethod.sanityCheck(gs, rubyClass, rubyMethod);
+        if (cMethodWithBlock.has_value()) {
+            cMethodWithBlock->sanityCheck(gs, rubyClass, rubyMethod);
         }
     }
 };
@@ -617,36 +662,42 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Array(), "[]", CMethod{"sorbet_rb_array_square_br"}},
     {core::Symbols::Array(), "[]=", CMethod{"sorbet_rb_array_square_br_eq"}},
     {core::Symbols::Array(), "empty?", CMethod{"sorbet_rb_array_empty"}},
-    {core::Symbols::Array(), "each", CMethod{"sorbet_rb_array_each"}, CMethod{"sorbet_rb_array_each_withBlock"}},
-    {core::Symbols::Array(), "each_with_object", CMethod{"sorbet_rb_array_each_with_object"},
+    {core::Symbols::Array(), "each", CMethod{"sorbet_rb_array_each", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_array_each_withBlock", core::Symbols::Array()}},
+    {core::Symbols::Array(), "each_with_object",
+     CMethod{"sorbet_rb_array_each_with_object", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_array_each_with_object_withBlock"}},
-    {core::Symbols::Array(), "select", CMethod{"sorbet_rb_array_select"}, CMethod{"sorbet_rb_array_select_withBlock"}},
+    {core::Symbols::Array(), "select", CMethod{"sorbet_rb_array_select", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_array_select_withBlock", core::Symbols::Array()}},
     // filter is an alias for select, so we call the same intrinsic
-    {core::Symbols::Array(), "filter", CMethod{"sorbet_rb_array_select"}, CMethod{"sorbet_rb_array_select_withBlock"}},
+    {core::Symbols::Array(), "filter", CMethod{"sorbet_rb_array_select", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_array_select_withBlock", core::Symbols::Array()}},
     {core::Symbols::Array(), "find", CMethod{"sorbet_rb_array_find"}, CMethod{"sorbet_rb_array_find_withBlock"}},
-    {core::Symbols::Array(), "collect", CMethod{"sorbet_rb_array_collect"},
-     CMethod{"sorbet_rb_array_collect_withBlock"}},
+    {core::Symbols::Array(), "collect", CMethod{"sorbet_rb_array_collect", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_array_collect_withBlock", core::Symbols::Array()}},
     // Ruby implements map and collect with the same function (named with "collect" in its name).
     // We do the same for consistency.
-    {core::Symbols::Array(), "map", CMethod{"sorbet_rb_array_collect"}, CMethod{"sorbet_rb_array_collect_withBlock"}},
+    {core::Symbols::Array(), "map", CMethod{"sorbet_rb_array_collect", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_array_collect_withBlock", core::Symbols::Array()}},
     {core::Symbols::Array(), "collect!", CMethod{"sorbet_rb_array_collect_bang"},
      CMethod{"sorbet_rb_array_collect_bang_withBlock"}},
-    {core::Symbols::Array(), "map!", CMethod{"sorbet_rb_array_collect_bang"},
-     CMethod{"sorbet_rb_array_collect_bang_withBlock"}},
+    {core::Symbols::Array(), "map!", CMethod{"sorbet_rb_array_collect_bang", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_array_collect_bang_withBlock", core::Symbols::Array()}},
     {core::Symbols::Array(), "any?", CMethod{"sorbet_rb_array_any"}, CMethod{"sorbet_rb_array_any_withBlock"}},
     {core::Symbols::Array(), "all?", CMethod{"sorbet_rb_array_all"}, CMethod{"sorbet_rb_array_all_withBlock"}},
-    {core::Symbols::Array(), "compact", CMethod{"sorbet_rb_array_compact"}},
+    {core::Symbols::Array(), "compact", CMethod{"sorbet_rb_array_compact", core::Symbols::Array()}},
     {core::Symbols::Array(), "compact!", CMethod{"sorbet_rb_array_compact_bang"}},
-    {core::Symbols::Array(), "to_h", CMethod{"sorbet_rb_array_to_h"}},
+    {core::Symbols::Array(), "to_h", CMethod{"sorbet_rb_array_to_h", core::Symbols::Hash()}},
+    {core::Symbols::Array(), "size", CMethod{"sorbet_rb_array_len", core::Symbols::Integer()}},
     {core::Symbols::Hash(), "[]", CMethod{"sorbet_rb_hash_square_br"}},
     {core::Symbols::Hash(), "[]=", CMethod{"sorbet_rb_hash_square_br_eq"}},
-    {core::Symbols::Hash(), "each_pair", CMethod{"sorbet_rb_hash_each_pair"},
-     CMethod{"sorbet_rb_hash_each_pair_withBlock"}},
-    {core::Symbols::Hash(), "each", CMethod{"sorbet_rb_hash_each_pair"}, CMethod{"sorbet_rb_hash_each_pair_withBlock"}},
-    {core::Symbols::Hash(), "each_with_object", CMethod{"sorbet_rb_hash_each_with_object"},
+    {core::Symbols::Hash(), "each_pair", CMethod{"sorbet_rb_hash_each_pair", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_hash_each_pair_withBlock", core::Symbols::Hash()}},
+    {core::Symbols::Hash(), "each", CMethod{"sorbet_rb_hash_each_pair", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_hash_each_pair_withBlock", core::Symbols::Hash()}},
+    {core::Symbols::Hash(), "each_with_object", CMethod{"sorbet_rb_hash_each_with_object", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_hash_each_with_object_withBlock"}},
     {core::Symbols::Hash(), "any?", CMethod{"sorbet_rb_hash_any"}, CMethod{"sorbet_rb_hash_any_withBlock"}},
-    {core::Symbols::Array(), "size", CMethod{"sorbet_rb_array_len"}},
     {core::Symbols::TrueClass(), "|", CMethod{"sorbet_int_bool_true"}},
     {core::Symbols::FalseClass(), "|", CMethod{"sorbet_int_bool_and"}},
     {core::Symbols::TrueClass(), "&", CMethod{"sorbet_int_bool_and"}},
@@ -661,10 +712,11 @@ static const vector<CallCMethod> knownCMethodsInstance{
     {core::Symbols::Integer(), "<", CMethod{"sorbet_rb_int_lt"}},
     {core::Symbols::Integer(), ">=", CMethod{"sorbet_rb_int_ge"}},
     {core::Symbols::Integer(), "<=", CMethod{"sorbet_rb_int_le"}},
-    {core::Symbols::Integer(), "to_s", CMethod{"sorbet_rb_int_to_s"}},
+    {core::Symbols::Integer(), "to_s", CMethod{"sorbet_rb_int_to_s", core::Symbols::String()}},
     {core::Symbols::Integer(), "==", CMethod{"sorbet_rb_int_equal"}},
     {core::Symbols::Integer(), "!=", CMethod{"sorbet_rb_int_neq"}},
-    {core::Symbols::Integer(), "times", CMethod{"sorbet_rb_int_dotimes"}, CMethod{"sorbet_rb_int_dotimes_withBlock"}},
+    {core::Symbols::Integer(), "times", CMethod{"sorbet_rb_int_dotimes", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_int_dotimes_withBlock", core::Symbols::Integer()}},
     {core::Symbols::Symbol(), "==", CMethod{"sorbet_rb_sym_equal"}},
     {core::Symbols::Symbol(), "===", CMethod{"sorbet_rb_sym_equal"}},
     {core::Symbols::Thread(), "[]", CMethod{"sorbet_Thread_square_br"}},
@@ -680,15 +732,21 @@ static const vector<CallCMethodSingleton> knownCMethodsSingleton{
     {core::Symbols::Thread(), "current", "sorbet_Thread_current"},
 };
 
-vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs() {
+vector<const SymbolBasedIntrinsicMethod *> getKnownCMethodPtrs(const core::GlobalState &gs) {
     vector<const SymbolBasedIntrinsicMethod *> res{
         &DefineMethodIntrinsic, &SorbetPrivateStaticSigIntrinsic, &Module_tripleEq, &Regexp_new, &TEnum_new,
         &TEnum_abstract,
     };
     for (auto &method : knownCMethodsInstance) {
+        if (debug_mode) {
+            method.sanityCheck(gs);
+        }
         res.emplace_back(&method);
     }
     for (auto &method : knownCMethodsSingleton) {
+        if (debug_mode) {
+            method.sanityCheck(gs);
+        }
         res.emplace_back(&method);
     }
     return res;
@@ -703,8 +761,10 @@ llvm::Value *SymbolBasedIntrinsicMethod::receiverFastPathTest(MethodCallContext 
     return Payload::typeTest(mcctx.cs, mcctx.build, recv, core::make_type<core::ClassType>(potentialClass));
 }
 
-vector<const SymbolBasedIntrinsicMethod *> &SymbolBasedIntrinsicMethod::definedIntrinsics() {
-    static vector<const SymbolBasedIntrinsicMethod *> ret = getKnownCMethodPtrs();
+void SymbolBasedIntrinsicMethod::sanityCheck(const core::GlobalState &gs) const {}
+
+vector<const SymbolBasedIntrinsicMethod *> &SymbolBasedIntrinsicMethod::definedIntrinsics(const core::GlobalState &gs) {
+    static vector<const SymbolBasedIntrinsicMethod *> ret = getKnownCMethodPtrs(gs);
 
     return ret;
 }
