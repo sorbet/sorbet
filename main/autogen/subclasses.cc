@@ -160,7 +160,7 @@ vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<s
             descendantsMap[parentName];
         }
 
-        descendantsMap.emplace(parentName, *descendants);
+        descendantsMap.emplace(parentName, std::move(*descendants));
     }
 
     return Subclasses::serializeSubclassMap(descendantsMap, parentNames);
