@@ -157,6 +157,7 @@ vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<s
         auto descendants = Subclasses::descendantsOf(childMap, parentName);
         if (!descendants) {
             descendantsMap[parentName];
+            continue;
         }
 
         descendantsMap.emplace(parentName, std::move(*descendants));
