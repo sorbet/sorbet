@@ -62,8 +62,9 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
             fmt::format("{}", fmt::map_join(pf.showFullName(ctx, defn),
                                             "::", [&ctx](const core::NameRef &nm) -> string { return nm.show(ctx); }));
 
-        out[parentName].entries.insert(make_pair(childName, defn.data(pf).type));
-        out[parentName].classKind = ref.parentKind;
+        auto &mapEntry = out[parentName];
+        mapEntry.entries.insert(make_pair(childName, defn.data(pf).type));
+        mapEntry.classKind = ref.parentKind;
     }
 
     return out;
@@ -77,7 +78,7 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
     if (fnd == childMap.end()) {
         return nullopt;
     }
-    const Subclasses::Entries children = fnd->second.entries;
+    const Subclasses::Entries &children = fnd->second.entries;
 
     Subclasses::Entries out;
     out.insert(children.begin(), children.end());
@@ -88,7 +89,7 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
         }
     }
 
-    return SubclassInfo(fnd->second.classKind, out);
+    return SubclassInfo(fnd->second.classKind, std::move(out));
 }
 
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
@@ -160,7 +161,7 @@ vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<s
             descendantsMap[parentName];
         }
 
-        descendantsMap.emplace(parentName, *descendants);
+        descendantsMap.emplace(parentName, std::move(*descendants));
     }
 
     return Subclasses::serializeSubclassMap(descendantsMap, parentNames);
