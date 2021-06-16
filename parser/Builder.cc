@@ -655,25 +655,37 @@ public:
             },
 
             [&](DString *d) {
+                sorbet::parser::NodeVec parts;
                 for (auto &p : d->nodes) {
                     if (auto *s = parser::cast_node<String>(p.get())) {
                         std::string dedented = dedenter.dedent(s->val.shortName(gs_));
+                        if (dedented.empty()) {
+                            continue;
+                        }
                         unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
-                        p.swap(newstr);
+                        parts.emplace_back(std::move(newstr));
+                    } else {
+                        parts.emplace_back(std::move(p));
                     }
                 }
-                result = std::move(node);
+                result = make_unique<DString>(d->loc, std::move(parts));
             },
 
             [&](XString *d) {
+                sorbet::parser::NodeVec parts;
                 for (auto &p : d->nodes) {
                     if (auto *s = parser::cast_node<String>(p.get())) {
                         std::string dedented = dedenter.dedent(s->val.shortName(gs_));
+                        if (dedented.empty()) {
+                            continue;
+                        }
                         unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
-                        p.swap(newstr);
+                        parts.emplace_back(std::move(newstr));
+                    } else {
+                        parts.emplace_back(std::move(p));
                     }
                 }
-                result = std::move(node);
+                result = make_unique<XString>(d->loc, std::move(parts));
             },
 
             [&](Node *n) { Exception::raise("Unexpected dedent node: {}", n->nodeName()); });
