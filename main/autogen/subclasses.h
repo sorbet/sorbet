@@ -14,7 +14,7 @@ public:
         Entries entries;
 
         SubclassInfo() = default;
-        SubclassInfo(ClassKind classKind, Entries entries) : classKind(classKind), entries(entries){};
+        SubclassInfo(ClassKind classKind, Entries entries) : classKind(classKind), entries(std::move(entries)){};
     };
     using Map = UnorderedMap<std::string, SubclassInfo>;
 
