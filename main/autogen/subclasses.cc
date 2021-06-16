@@ -156,10 +156,11 @@ vector<string> Subclasses::genDescendantsMap(Subclasses::Map &childMap, vector<s
 
         auto descendants = Subclasses::descendantsOf(childMap, parentName);
         if (!descendants) {
+            // Initialize an empty entry associated with parentName.
             descendantsMap[parentName];
+        } else {
+            descendantsMap.emplace(parentName, std::move(*descendants));
         }
-
-        descendantsMap.emplace(parentName, std::move(*descendants));
     }
 
     return Subclasses::serializeSubclassMap(descendantsMap, parentNames);
