@@ -679,8 +679,8 @@ static const vector<CallCMethod> knownCMethodsInstance{
     // We do the same for consistency.
     {core::Symbols::Array(), "map", CMethod{"sorbet_rb_array_collect", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_array_collect_withBlock", core::Symbols::Array()}},
-    {core::Symbols::Array(), "collect!", CMethod{"sorbet_rb_array_collect_bang"},
-     CMethod{"sorbet_rb_array_collect_bang_withBlock"}},
+    {core::Symbols::Array(), "collect!", CMethod{"sorbet_rb_array_collect_bang", core::Symbols::Enumerator()},
+     CMethod{"sorbet_rb_array_collect_bang_withBlock", core::Symbols::Array()}},
     {core::Symbols::Array(), "map!", CMethod{"sorbet_rb_array_collect_bang", core::Symbols::Enumerator()},
      CMethod{"sorbet_rb_array_collect_bang_withBlock", core::Symbols::Array()}},
     {core::Symbols::Array(), "any?", CMethod{"sorbet_rb_array_any"}, CMethod{"sorbet_rb_array_any_withBlock"}},
