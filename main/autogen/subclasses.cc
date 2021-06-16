@@ -62,8 +62,9 @@ optional<Subclasses::Map> Subclasses::listAllSubclasses(core::Context ctx, Parse
             fmt::format("{}", fmt::map_join(pf.showFullName(ctx, defn),
                                             "::", [&ctx](const core::NameRef &nm) -> string { return nm.show(ctx); }));
 
-        out[parentName].entries.insert(make_pair(childName, defn.data(pf).type));
-        out[parentName].classKind = ref.parentKind;
+        auto &mapEntry = out[parentName];
+        mapEntry.entries.insert(make_pair(childName, defn.data(pf).type));
+        mapEntry.classKind = ref.parentKind;
     }
 
     return out;
