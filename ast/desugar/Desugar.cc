@@ -615,6 +615,17 @@ public:
     }
 };
 
+core::NameRef freshNameFromRef(DesugarContext dctx, const ExpressionPtr &ref) {
+    if (auto *nm = cast_tree<UnresolvedIdent>(ref)) {
+        return dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, nm->name, ++dctx.uniqueCounter);
+    }
+    if (auto *nm = cast_tree<ast::Local>(ref)) {
+        return dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, nm->localVariable._name,
+                                              ++dctx.uniqueCounter);
+    }
+    Exception::notImplemented();
+}
+
 ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
     try {
         if (what.get() == nullptr) {
@@ -950,11 +961,15 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
                     result = std::move(wrapped);
                 } else if (isa_reference(recv)) {
-                    auto cond = MK::cpRef(recv);
-                    auto elsep = MK::cpRef(recv);
-                    auto body = MK::Assign(loc, std::move(recv), std::move(arg));
-                    auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
-                    result = std::move(iff);
+                    auto temp = freshNameFromRef(dctx, recv);
+                    auto resultTemp = freshNameFromRef(dctx, recv);
+                    auto assign = MK::Assign(loc, MK::Local(loc, temp), MK::cpRef(recv));
+                    auto cond = MK::Local(loc, temp);
+                    auto elsep = MK::Local(loc, temp);
+                    auto iff = MK::If(loc, std::move(cond), std::move(arg), std::move(elsep));
+                    result =
+                        MK::InsSeq2(loc, std::move(assign), MK::Assign(loc, MK::Local(loc, resultTemp), std::move(iff)),
+                                    MK::Assign(loc, std::move(recv), MK::Local(loc, resultTemp)));
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
                     if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
                         e.setHeader("Constant reassignment is not supported");
@@ -1014,11 +1029,15 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
                     result = std::move(wrapped);
                 } else if (isa_reference(recv)) {
-                    auto cond = MK::cpRef(recv);
-                    auto elsep = MK::cpRef(recv);
-                    auto body = MK::Assign(loc, std::move(recv), std::move(arg));
-                    auto iff = MK::If(loc, std::move(cond), std::move(elsep), std::move(body));
-                    result = std::move(iff);
+                    auto temp = freshNameFromRef(dctx, recv);
+                    auto resultTemp = freshNameFromRef(dctx, recv);
+                    auto assign = MK::Assign(loc, MK::Local(loc, temp), MK::cpRef(recv));
+                    auto cond = MK::Local(loc, temp);
+                    auto elsep = MK::Local(loc, temp);
+                    auto iff = MK::If(loc, std::move(cond), std::move(elsep), std::move(arg));
+                    result =
+                        MK::InsSeq2(loc, std::move(assign), MK::Assign(loc, MK::Local(loc, resultTemp), std::move(iff)),
+                                    MK::Assign(loc, std::move(recv), MK::Local(loc, resultTemp)));
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
                     if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
                         e.setHeader("Constant reassignment is not supported");

@@ -190,6 +190,13 @@ public:
         return InsSeq(loc, std::move(stats), std::move(expr));
     }
 
+    static ExpressionPtr InsSeq2(core::LocOffsets loc, ExpressionPtr stat1, ExpressionPtr stat2, ExpressionPtr expr) {
+        InsSeq::STATS_store stats;
+        stats.emplace_back(std::move(stat1));
+        stats.emplace_back(std::move(stat2));
+        return InsSeq(loc, std::move(stats), std::move(expr));
+    }
+
     static ExpressionPtr True(core::LocOffsets loc) {
         return make_expression<ast::Literal>(loc, core::Types::trueClass());
     }
