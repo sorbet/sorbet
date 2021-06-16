@@ -77,7 +77,7 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
     if (fnd == childMap.end()) {
         return nullopt;
     }
-    const Subclasses::Entries children = fnd->second.entries;
+    const Subclasses::Entries &children = fnd->second.entries;
 
     Subclasses::Entries out;
     out.insert(children.begin(), children.end());
@@ -88,7 +88,7 @@ optional<Subclasses::SubclassInfo> Subclasses::descendantsOf(const Subclasses::M
         }
     }
 
-    return SubclassInfo(fnd->second.classKind, out);
+    return SubclassInfo(fnd->second.classKind, std::move(out));
 }
 
 // Manually patch the child map to account for inheritance that happens at runtime `self.included`
