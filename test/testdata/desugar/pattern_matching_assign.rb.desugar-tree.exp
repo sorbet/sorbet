@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <emptyTree>::<C T>.reveal_type(expr)
 
   x = begin
-    <assignTemp>$1 = expr
+    <assignTemp>$2 = expr
     if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       begin
         s = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
