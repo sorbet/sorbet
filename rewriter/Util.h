@@ -8,7 +8,7 @@
 namespace sorbet::rewriter {
 class ASTUtil {
 public:
-    static ast::ExpressionPtr dupType(const ast::ExpressionPtr &orig);
+    static ast::ExpressionPtr dupType(const ast::ExpressionPtr &orig, const ast::ExpressionPtr **failing = nullptr);
     static bool hasHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name);
     static bool hasTruthyHashValue(core::MutableContext ctx, const ast::Hash &hash, core::NameRef name);
 
