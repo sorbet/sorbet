@@ -617,11 +617,10 @@ public:
 
 core::NameRef freshNameFromRef(DesugarContext dctx, const ExpressionPtr &ref) {
     if (auto *nm = cast_tree<UnresolvedIdent>(ref)) {
-        return dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, nm->name, ++dctx.uniqueCounter);
+        return dctx.freshNameUnique(nm->name);
     }
     if (auto *nm = cast_tree<ast::Local>(ref)) {
-        return dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, nm->localVariable._name,
-                                              ++dctx.uniqueCounter);
+        return dctx.freshNameUnique(nm->localVariable._name);
     }
     Exception::notImplemented();
 }
