@@ -1,4 +1,3 @@
 s(:dstr,
-  s(:str, "a\
-"),
+  s(:str, "a"),
   s(:str, "b"))
