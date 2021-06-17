@@ -385,6 +385,8 @@ NameDef names[] = {
     // Pattern matching
     {"patternMatch", "<pattern-match>"},
 
+    {"regexBackref", "<regex-backref>"},
+
     {"staticInit", "<static-init>"},
 
     {"require"},

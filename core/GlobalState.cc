@@ -504,6 +504,10 @@ void GlobalState::initEmpty() {
                  .untypedArg(Names::arg2())
                  .buildWithResult(Types::rangeOfUntyped());
 
+    // Synthesize <Magic>,<regex-backref>() => T.nilable(String)
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::regexBackref())
+                 .buildWithResult(Types::any(*this, Types::nilClass(), Types::String()));
+
     // Synthesize <Magic>.<splat>(a: T.untyped) => Untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::splat())
                  .untypedArg(Names::arg0())

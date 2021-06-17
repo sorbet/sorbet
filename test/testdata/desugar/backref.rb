@@ -20,3 +20,12 @@ T.reveal_type(x6) # error: Revealed type: `T.untyped`
 
 x7 = $9 # contains the 9th match group;
 T.reveal_type(x7) # error: Revealed type: `T.untyped`
+
+class TestNotPinningBackrefs
+  /foo/.match("foo") do |m|
+    x = $&
+    T.reveal_type(x) # error: Revealed type: `T.nilable(String)`
+    x = false
+    T.reveal_type(x) # error: Revealed type: `FalseClass`
+  end
+end
