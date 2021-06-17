@@ -1027,9 +1027,9 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     result = std::move(wrapped);
                 } else if (isa_reference(recv)) {
                     if (auto *ident = cast_tree<UnresolvedIdent>(recv)) {
-                        // Inference has special treatment for instance variables, so
+                        // Inference has special treatment for class/instance variables, so
                         // desugar them more straightforwardly.
-                        if (ident->kind == UnresolvedIdent::Kind::Instance) {
+                        if (ident->kind == UnresolvedIdent::Kind::Instance || ident->kind == UnresolvedIdent::Kind::Class) {
                             auto cond = MK::cpRef(recv);
                             auto elsep = MK::cpRef(recv);
                             auto body = MK::Assign(loc, std::move(recv), std::move(arg));

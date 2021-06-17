@@ -1,0 +1,32 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  class <emptyTree>::<C Config><<C <todo sym>>> < (::<todo sym>)
+    if @@supported_methods
+      @@supported_methods
+    else
+      @@supported_methods = <emptyTree>::<C T>.let(nil, <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>))
+    end
+
+    def self.supported_methods<<todo method>>(&<blk>)
+      begin
+        if @@supported_methods
+          @@supported_methods
+        else
+          @@supported_methods = begin
+            temp = <emptyTree>::<C T>.let(["fast", "slow", "special"].uniq().freeze(), <emptyTree>::<C T>.nilable(<emptyTree>::<C T>::<C Array>.[](<emptyTree>::<C String>)))
+            temp
+          end
+        end
+        <emptyTree>::<C T>.reveal_type(@@supported_methods)
+        <emptyTree>::<C T>.must(@@supported_methods)
+      end
+    end
+  end
+end
