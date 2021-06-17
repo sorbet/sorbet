@@ -29,6 +29,10 @@ struct DesugarContext final {
                    core::LocOffsets enclosingMethodLoc, core::NameRef enclosingMethodName)
         : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockArg(enclosingBlockArg),
           enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName){};
+
+    core::NameRef freshNameUnique(core::NameRef name) {
+        return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, name, ++uniqueCounter);
+    }
 };
 
 core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
@@ -87,8 +91,7 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
         args.reserve(oargs->args.size());
         for (auto &arg : oargs->args) {
             if (auto *lhs = parser::cast_node<parser::Mlhs>(arg.get())) {
-                core::NameRef temporary = dctx.ctx.state.freshNameUnique(
-                    core::UniqueNameKind::Desugar, core::Names::destructureArg(), ++dctx.uniqueCounter);
+                core::NameRef temporary = dctx.freshNameUnique(core::Names::destructureArg());
                 args.emplace_back(MK::Local(arg->loc, temporary));
                 unique_ptr<parser::Node> lvarNode = make_unique<parser::LVar>(arg->loc, temporary);
                 unique_ptr<parser::Node> destructure =
@@ -326,8 +329,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
 
 ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     auto loc = expr.loc();
-    core::NameRef temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::blockPassTemp(),
-                                                        ++dctx.uniqueCounter);
+    core::NameRef temp = dctx.freshNameUnique(core::Names::blockPassTemp());
     Literal *lit = cast_tree<Literal>(expr);
     ENFORCE(lit && lit->isSymbol(dctx.ctx));
 
@@ -350,10 +352,8 @@ ExpressionPtr unsupportedNode(DesugarContext dctx, parser::Node *node) {
 ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlhs *lhs, ExpressionPtr rhs) {
     InsSeq::STATS_store stats;
 
-    core::NameRef tempRhs =
-        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++dctx.uniqueCounter);
-    core::NameRef tempExpanded =
-        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++dctx.uniqueCounter);
+    core::NameRef tempRhs = dctx.freshNameUnique(core::Names::assignTemp());
+    core::NameRef tempExpanded = dctx.freshNameUnique(core::Names::assignTemp());
 
     int i = 0;
     int before = 0, after = 0;
@@ -517,8 +517,7 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
     // temporary assignment and the last for the actual update we're desugaring.
     InsSeq::STATS_store stats;
     stats.reserve(s->args.size() + 2);
-    core::NameRef tempRecv =
-        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
+    core::NameRef tempRecv = dctx.freshNameUnique(s->fun);
     stats.emplace_back(MK::Assign(s->loc, tempRecv, std::move(s->recv)));
     Send::ARGS_store readArgs;
     Send::ARGS_store assgnArgs;
@@ -531,8 +530,7 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
 
     for (auto &arg : s->args) {
         auto argLoc = arg.loc();
-        core::NameRef name =
-            dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
+        core::NameRef name = dctx.freshNameUnique(s->fun);
         stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
         readArgs.emplace_back(MK::Local(argLoc, name));
         assgnArgs.emplace_back(MK::Local(argLoc, name));
@@ -909,8 +907,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto iff = MK::If(loc, std::move(cond), std::move(rhs), std::move(lhs));
                     result = std::move(iff);
                 } else {
-                    core::NameRef tempName = dctx.ctx.state.freshNameUnique(
-                        core::UniqueNameKind::Desugar, core::Names::andAnd(), ++dctx.uniqueCounter);
+                    core::NameRef tempName = dctx.freshNameUnique(core::Names::andAnd());
                     auto temp = MK::Assign(loc, tempName, std::move(lhs));
                     auto iff = MK::If(loc, MK::Local(loc, tempName), std::move(rhs), MK::Local(loc, tempName));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
@@ -925,8 +922,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto iff = MK::If(loc, std::move(cond), std::move(lhs), std::move(rhs));
                     result = std::move(iff);
                 } else {
-                    core::NameRef tempName = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
-                                                                            core::Names::orOr(), ++dctx.uniqueCounter);
+                    core::NameRef tempName = dctx.freshNameUnique(core::Names::orOr());
                     auto temp = MK::Assign(loc, tempName, std::move(lhs));
                     auto iff = MK::If(loc, MK::Local(loc, tempName), MK::Local(loc, tempName), std::move(rhs));
                     auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
@@ -944,8 +940,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     assgnArgs.emplace_back(std::move(arg));
                     auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, numPosArgs, std::move(readArgs),
                                          s->flags);
-                    core::NameRef tempResult =
-                        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
+                    core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, std::move(cond)));
 
                     auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx), numPosAssgnArgs,
@@ -983,8 +978,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     assgnArgs.emplace_back(std::move(arg));
                     auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, numPosArgs, std::move(readArgs),
                                          s->flags);
-                    core::NameRef tempResult =
-                        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
+                    core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, std::move(cond)));
 
                     auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx), numPosAssgnArgs,
@@ -1010,8 +1004,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     assgnArgs.emplace_back(std::move(arg));
                     auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, numPosArgs, std::move(readArgs),
                                          s->flags);
-                    core::NameRef tempResult =
-                        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
+                    core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, std::move(cond)));
 
                     auto elsep = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
@@ -1049,8 +1042,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     assgnArgs.emplace_back(std::move(arg));
                     auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, numPosArgs, std::move(readArgs),
                                          s->flags);
-                    core::NameRef tempResult =
-                        dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++dctx.uniqueCounter);
+                    core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, std::move(cond)));
 
                     auto elsep = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
@@ -1132,8 +1124,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
             },
             [&](parser::CSend *csend) {
-                core::NameRef tempRecv = dctx.ctx.state.freshNameUnique(
-                    core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++dctx.uniqueCounter);
+                core::NameRef tempRecv = dctx.freshNameUnique(core::Names::assignTemp());
                 auto recvLoc = csend->receiver->loc;
                 // Assign some desugar-produced nodes with zero-length Locs so IDE ignores them when mapping text
                 // location to node.
@@ -1426,8 +1417,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 if (canProvideNiceDesugar) {
                     block = MK::Block(loc, std::move(body), std::move(args));
                 } else {
-                    auto temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
-                                                               ++dctx.uniqueCounter);
+                    auto temp = dctx.freshNameUnique(core::Names::forTemp());
 
                     unique_ptr<parser::Node> masgn =
                         make_unique<parser::Masgn>(loc, std::move(mlhsNode), make_unique<parser::LVar>(loc, temp));
@@ -1546,8 +1536,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 InsSeq::STATS_store updateStmts;
                 updateStmts.reserve(hash->pairs.size());
 
-                auto acc = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::hashTemp(),
-                                                          ++dctx.uniqueCounter);
+                auto acc = dctx.freshNameUnique(core::Names::hashTemp());
 
                 DuplicateHashKeyCheck hashKeyDupes(dctx);
                 Send::ARGS_store mergeValues;
@@ -1891,8 +1880,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 }
 
                 if (!var.exists()) {
-                    var = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::rescueTemp(),
-                                                         ++dctx.uniqueCounter);
+                    var = dctx.freshNameUnique(core::Names::rescueTemp());
                 }
 
                 if (isa_tree<EmptyTree>(varExpr)) {
@@ -1950,8 +1938,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
 
                 if (case_->condition != nullptr) {
                     cloc = case_->condition->loc;
-                    temp = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp(),
-                                                          ++dctx.uniqueCounter);
+                    temp = dctx.freshNameUnique(core::Names::assignTemp());
                     assign = MK::Assign(cloc, temp, node2TreeImpl(dctx, std::move(case_->condition)));
                 }
                 ExpressionPtr res = node2TreeImpl(dctx, std::move(case_->else_));
@@ -2066,8 +2053,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             [&](parser::CaseMatch *caseMatch) {
                 // Create a local var to store the expression used in each match clause
                 auto exprLoc = caseMatch->expr->loc;
-                auto exprName = dctx.ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp(),
-                                                               dctx.uniqueCounter++);
+                auto exprName = dctx.freshNameUnique(core::Names::assignTemp());
                 auto exprVar = MK::Assign(exprLoc, exprName, node2TreeImpl(dctx, std::move(caseMatch->expr)));
 
                 // Desugar the `else` block
