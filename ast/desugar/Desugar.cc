@@ -1050,11 +1050,11 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     auto argTemp = freshNameFromRef(dctx, recv);
                     auto argAssign = MK::Assign(loc, MK::Local(loc, argTemp), std::move(arg));
                     auto iff = MK::If(loc, std::move(cond), MK::EmptyTree(),
-                                      MK::InsSeq2(loc, std::move(argAssign), MK::Assign(loc, MK::Local(loc, temp), MK::Local(loc, argTemp)),
+                                      MK::InsSeq2(loc, std::move(argAssign),
+                                                  MK::Assign(loc, MK::Local(loc, temp), MK::Local(loc, argTemp)),
                                                   MK::Local(loc, temp)));
-                    result =
-                        MK::InsSeq2(loc, std::move(assign), std::move(iff),
-                                    MK::Assign(loc, std::move(recv), MK::Local(loc, temp)));
+                    result = MK::InsSeq2(loc, std::move(assign), std::move(iff),
+                                         MK::Assign(loc, std::move(recv), MK::Local(loc, temp)));
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
                     if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
                         e.setHeader("Constant reassignment is not supported");
