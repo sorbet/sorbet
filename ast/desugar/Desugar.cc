@@ -1029,21 +1029,19 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                     result = std::move(wrapped);
                 } else if (isa_reference(recv)) {
                     auto temp = freshNameFromRef(dctx, recv);
-                    auto resultTemp = freshNameFromRef(dctx, recv);
                     auto assign = MK::Assign(loc, MK::Local(loc, temp), MK::cpRef(recv));
                     auto cond = MK::Local(loc, temp);
-                    auto elsep = MK::Local(loc, temp);
-                    // We ought to be able to return `arg` directly.  But we need to account
-                    // for `arg` being T.let; if we return it directly, inference will be
-                    // confused about how the assignment works.  So use a temporary variable
-                    // so the let is not assigned directly out of the if.
+                    // We ought to be able to assign `arg` directly to temp.  But we need to account
+                    // for `arg` being T.let; if we assign it directly, inference will be
+                    // confused about how the assignment works.  So use a temporary variable.
                     auto argTemp = freshNameFromRef(dctx, recv);
                     auto argAssign = MK::Assign(loc, MK::Local(loc, argTemp), std::move(arg));
-                    auto iff = MK::If(loc, std::move(cond), std::move(elsep),
-                                      MK::InsSeq1(loc, std::move(argAssign), MK::Local(loc, argTemp)));
+                    auto iff = MK::If(loc, std::move(cond), MK::EmptyTree(),
+                                      MK::InsSeq2(loc, std::move(argAssign), MK::Assign(loc, MK::Local(loc, temp), MK::Local(loc, argTemp)),
+                                                  MK::Local(loc, temp)));
                     result =
-                        MK::InsSeq2(loc, std::move(assign), MK::Assign(loc, MK::Local(loc, resultTemp), std::move(iff)),
-                                    MK::Assign(loc, std::move(recv), MK::Local(loc, resultTemp)));
+                        MK::InsSeq2(loc, std::move(assign), std::move(iff),
+                                    MK::Assign(loc, std::move(recv), MK::Local(loc, temp)));
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv)) {
                     if (auto e = dctx.ctx.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
                         e.setHeader("Constant reassignment is not supported");
