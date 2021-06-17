@@ -12,7 +12,8 @@ using namespace std;
 
 extern "C" {
 void EMSCRIPTEN_KEEPALIVE typecheck(const char *rubySrc) {
-    const char *argv[] = {"sorbet", "--color=always", "--silence-dev-message", "-e", rubySrc};
+    const char *argv[] = {
+        "sorbet", "--enable-experimental-requires-ancestor", "--color=always", "--silence-dev-message", "-e", rubySrc};
     sorbet::realmain::realmain(size(argv), const_cast<char **>(argv));
 }
 
