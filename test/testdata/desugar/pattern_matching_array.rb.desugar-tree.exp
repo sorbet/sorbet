@@ -2,7 +2,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   expr = []
 
   begin
-    <assignTemp>$1 = expr
+    <assignTemp>$2 = expr
     if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
       begin
         a = ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
