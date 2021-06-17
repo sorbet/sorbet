@@ -193,7 +193,7 @@ subgraph "cluster_::ControlFlow#orZero2" {
     "bb::ControlFlow#orZero2_3" [
         shape = rectangle;
         color = black;
-        label = "block[id=3, rubyBlockId=0]()\la$3: Integer(0) = 0\l<unconditional>\l"
+        label = "block[id=3, rubyBlockId=0]()\la$4: Integer(0) = 0\la$3: Integer(0) = a$4\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero2_3" -> "bb::ControlFlow#orZero2_4" [style="bold"];
