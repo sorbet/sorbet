@@ -30,64 +30,64 @@ begin
       begin
         begin
           a$2 = a
-          a$3 = if a$2
-            :a
+          if a$2
+            a$2 = :a
           else
-            a$2
+            <emptyTree>
           end
-          a = a$3
+          a = a$2
         end
         begin
-          b$4 = <self>
-          b$5 = b$4.b()
-          if b$5
-            b$4.b=(:b)
+          b$3 = <self>
+          b$4 = b$3.b()
+          if b$4
+            b$3.b=(:b)
           else
-            b$5
-          end
-        end
-        begin
-          []$6 = a
-          []$7 = <self>.y()
-          []$8 = <self>.z()
-          []$9 = []$6.[]([]$7, []$8)
-          if []$9
-            []$6.[]=([]$7, []$8, 1)
-          else
-            []$9
+            b$4
           end
         end
         begin
-          a$10 = a
-          if a$10
+          []$5 = a
+          []$6 = <self>.y()
+          []$7 = <self>.z()
+          []$8 = []$5.[]([]$6, []$7)
+          if []$8
+            []$5.[]=([]$6, []$7, 1)
+          else
+            []$8
+          end
+        end
+        begin
+          a$9 = a
+          if a$9
             <emptyTree>
           else
             begin
-              a$11 = :a
-              a$10 = a$11
-              a$10
+              a$10 = :a
+              a$9 = a$10
+              a$9
             end
           end
-          a = a$10
+          a = a$9
         end
         begin
-          b$12 = <self>
-          b$13 = b$12.b()
-          if b$13
-            b$13
+          b$11 = <self>
+          b$12 = b$11.b()
+          if b$12
+            b$12
           else
-            b$12.b=(:b)
+            b$11.b=(:b)
           end
         end
         begin
-          []$14 = a
-          []$15 = <self>.y()
-          []$16 = <self>.z()
-          []$17 = []$14.[]([]$15, []$16)
-          if []$17
-            []$17
+          []$13 = a
+          []$14 = <self>.y()
+          []$15 = <self>.z()
+          []$16 = []$13.[]([]$14, []$15)
+          if []$16
+            []$16
           else
-            []$14.[]=([]$15, []$16, 1)
+            []$13.[]=([]$14, []$15, 1)
           end
         end
       end
