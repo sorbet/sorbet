@@ -2084,7 +2084,10 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
                 result = std::move(res);
             },
             [&](parser::Backref *backref) {
-                auto res = unsupportedNode(dctx, backref);
+                // Desugar backref expression as T.let(nil, T.nilable(String))
+                auto value = MK::Nil(loc);
+                auto type = MK::Nilable(loc, MK::Constant(loc, core::Symbols::String()));
+                ExpressionPtr res = MK::Let(loc, std::move(value), std::move(type));
                 result = std::move(res);
             },
             [&](parser::EFlipflop *eflipflop) {
