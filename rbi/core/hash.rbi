@@ -327,6 +327,8 @@ class Hash < Object
   sig {returns(T::Hash[K, V])}
   def clear(); end
 
+  ### This is implemented in C++ to fix the return type
+  
   # Returns a new hash with the nil values/key pairs removed
   #
   # ```ruby
@@ -334,6 +336,7 @@ class Hash < Object
   # h.compact     #=> { a: 1, b: false }
   # h             #=> { a: 1, b: false, c: nil }
   # ```
+  sig {returns(T::Hash[K, T.untyped])}
   def compact; end
 
   # Removes all nil values from the hash. Returns nil if no changes were made,

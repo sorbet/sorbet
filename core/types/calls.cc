@@ -2913,6 +2913,47 @@ public:
     }
 } Array_zip;
 
+class Hash_compact : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        TypePtr keyType;
+        TypePtr valueType;
+        if (auto *ap = cast_type<AppliedType>(args.thisType)) {
+            ENFORCE(ap->klass == Symbols::Hash() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Hash()));
+            ENFORCE(!ap->targs.empty());
+            keyType = ap->targs[0];
+            valueType = ap->targs[1];
+        } else {
+            ENFORCE(false, "Hash#compact on unexpected type: {}", args.selfType.show(gs));
+        }
+        auto nonNilableValueType = Types::approximateSubtract(gs, valueType, Types::nilClass());
+        vector<TypePtr> tupleArgs{keyType, nonNilableValueType};
+        vector<TypePtr> targs{keyType, nonNilableValueType, make_type<TupleType>(move(tupleArgs))};
+        res.returnType = make_type<AppliedType>(Symbols::Hash(), move(targs));
+    }
+} Hash_compact;
+
+class Shape_compact : public IntrinsicMethod {
+public:
+    void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
+        if (auto *ap = cast_type<ShapeType>(args.thisType)) {
+            // There's not much we can do here, even though the method might remove some key/value pairs,
+            // we don't have information about which ones at this point.
+            // This method exists just to shapes don't go through `Hash_compact`, which would
+            // break this common idiom:
+            // ```ruby
+            // my_params = {foo: 1, bar: nil}.compact
+            // my_method(my_params)
+            // ```
+            // If `my_method takes` keyword args `foo` and `bar`, using the Hash_compact would say:
+            // `Passing a hash where the specific keys are unknown to a method taking keyword arguments`
+            res.returnType = Types::untypedUntracked();
+        } else {
+            ENFORCE(false, "Shape#compact on unexpected type: {}", args.selfType.show(gs));
+        }
+    }
+} Shape_compact;
+
 class Kernel_proc : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
@@ -3051,11 +3092,14 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::squareBracketsEq(), &Shape_squareBracketsEq},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::merge(), &Shape_merge},
     {Symbols::Shape(), Intrinsic::Kind::Instance, Names::toHash(), &Shape_to_hash},
+    {Symbols::Shape(), Intrinsic::Kind::Instance, Names::compact(), &Shape_compact},
 
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::flatten(), &Array_flatten},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::product(), &Array_product},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::compact(), &Array_compact},
     {Symbols::Array(), Intrinsic::Kind::Instance, Names::zip(), &Array_zip},
+
+    {Symbols::Hash(), Intrinsic::Kind::Instance, Names::compact(), &Hash_compact},
 
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), Intrinsic::Kind::Instance, Names::lambda(), &Kernel_proc},
