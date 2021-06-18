@@ -19,11 +19,13 @@ QualifiedName QualifiedName::fromFullName(vector<core::NameRef> name) {
 
 string QualifiedName::show(const core::GlobalState &gs) const {
     if (auto pkg = package) {
-        return fmt::format("<package {}>::{}", pkg->show(gs),
-                           fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string { return string(nr.shortName(gs)); }));
+        return fmt::format(
+            "<package {}>::{}", pkg->show(gs),
+            fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string { return string(nr.shortName(gs)); }));
     } else {
-        return fmt::format("::{}",
-                           fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string { return string(nr.shortName(gs)); }));
+        return fmt::format("::{}", fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string {
+                               return string(nr.shortName(gs));
+                           }));
     }
 }
 
