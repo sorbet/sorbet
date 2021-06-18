@@ -188,7 +188,7 @@ string MsgpackWriter::pack(core::Context ctx, ParsedFile &pf) {
                 str = "alias";
                 break;
             default:
-                str = sym.show(ctx);
+                str = sym.shortName(ctx);
         }
         packString(str);
     }
