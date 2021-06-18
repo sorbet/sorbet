@@ -25,5 +25,6 @@ class Child < Parent
     self["foo"] || self["bar"]
 #        ^^^^^ error: Expected `Child::A` but found `String("foo")` for argument `k`
 #                       ^^^^^ error: This code is unreachable
+#   ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Can't use void types in conditional
   end
 end

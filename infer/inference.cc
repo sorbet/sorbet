@@ -269,6 +269,14 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         for (auto &pair : current.vars()) {
             pair.second.knowledge.emitKnowledgeSizeMetric();
         }
+
+        core::TypePtr conditionalType = current.getTypeAndOrigin(ctx, bb->bexit.cond.variable).type;
+
+        if (!conditionalType.isUntyped() && core::Types::isSubType(ctx, core::Types::void_(), conditionalType)) {
+            if (auto e = ctx.beginError(bb->bexit.loc, core::errors::Infer::InvalidVoidUsage)) {
+                e.setHeader("Can't use void types in conditional");
+            }
+        }
     }
     if (startErrorCount == ctx.state.totalErrors()) {
         counterInc("infer.methods_typechecked.no_errors");
