@@ -1120,6 +1120,7 @@ string_view GlobalState::enterString(string_view nm) {
     char *from = nullptr;
     if (nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
         auto &inserted = strings.emplace_back(make_unique<vector<char>>(nm.size()));
+        counterInc("stringPages");
         from = inserted->data();
         if (strings.size() > 1) {
             // last page wasn't full, keep it in the end
@@ -1131,12 +1132,14 @@ string_view GlobalState::enterString(string_view nm) {
             // Insert a new empty page at the end to enforce the invariant that inserting a huge string will always
             // leave a page that can be written to at the end of the table.
             strings.emplace_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
+            counterInc("stringPages");
             stringsLastPageUsed = 0;
         }
     } else {
         if (stringsLastPageUsed + nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
             strings.emplace_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
-            // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - stringsLastPageUsed);
+            counterInc("stringPages");
+            counterAdd("stringWastage", STRINGS_PAGE_SIZE - stringsLastPageUsed);
             stringsLastPageUsed = 0;
         }
         from = strings.back()->data() + stringsLastPageUsed;
