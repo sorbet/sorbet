@@ -2859,7 +2859,7 @@ public:
             } else {
                 overloadSym = mdef.symbol;
             }
-            fillInInfoFromSig(ctx, overloadSym, sig.loc, move(sig.sig), isOverloaded, mdef);
+            fillInInfoFromSig(ctx, overloadSym, sig.loc, sig.sig, isOverloaded, mdef);
         }
         handleAbstractMethod(ctx, mdef);
     }
@@ -2867,7 +2867,7 @@ public:
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
-        fillInInfoFromSig(ctx, mdef.symbol, job.loc, move(job.sig), isOverloaded, mdef);
+        fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
         handleAbstractMethod(ctx, mdef);
     }
 
