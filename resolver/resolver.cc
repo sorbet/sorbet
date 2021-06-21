@@ -2492,7 +2492,7 @@ private:
     }
 
     static void fillInInfoFromSig(core::MutableContext ctx, core::MethodRef method, core::LocOffsets exprLoc,
-                                  ParsedSig sig, bool isOverloaded, const ast::MethodDef &mdef) {
+                                  ParsedSig &sig, bool isOverloaded, const ast::MethodDef &mdef) {
         ENFORCE(isOverloaded || mdef.symbol == method);
         ENFORCE(isOverloaded || method.data(ctx)->arguments().size() == mdef.args.size());
 
@@ -2832,7 +2832,7 @@ private:
     }
 
 public:
-    static void resolveMultiSignatureJob(core::MutableContext ctx, const ResolveMultiSignatureJob &job) {
+    static void resolveMultiSignatureJob(core::MutableContext ctx, ResolveMultiSignatureJob &job) {
         auto &sigs = job.sigs;
         auto &mdef = *job.mdef;
         ENFORCE_NO_TIMER(sigs.size() > 1);
@@ -2863,7 +2863,7 @@ public:
         }
         handleAbstractMethod(ctx, mdef);
     }
-    static void resolveSignatureJob(core::MutableContext ctx, const ResolveSignatureJob &job) {
+    static void resolveSignatureJob(core::MutableContext ctx, ResolveSignatureJob &job) {
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
