@@ -2594,7 +2594,7 @@ private:
 
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
-                arg.type = spec->type;
+                arg.type = std::move(spec->type);
                 arg.loc = spec->loc;
                 arg.rebind = spec->rebind;
                 sig.argTypes.erase(spec);
