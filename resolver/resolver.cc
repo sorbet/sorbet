@@ -2562,10 +2562,7 @@ private:
         }
 
         // Get the parameters order from the signature
-        vector<ParsedSig::ArgSpec> sigParams;
-        for (auto &spec : sig.argTypes) {
-            sigParams.push_back(spec);
-        }
+        vector<ParsedSig::ArgSpec> sigParams(sig.argTypes);
 
         vector<ast::Local const *> defParams; // Parameters order from the method declaration
         bool seenOptional = false;
