@@ -2796,15 +2796,10 @@ public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         TypePtr element;
-        if (auto *ap = cast_type<AppliedType>(args.thisType)) {
-            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
-            ENFORCE(!ap->targs.empty());
-            element = ap->targs.front();
-        } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
-            element = tuple->elementType(gs);
-        } else {
-            ENFORCE(false, "Array#flatten on unexpected type: {}", args.selfType.show(gs));
-        }
+        auto *ap = cast_type<AppliedType>(args.thisType);
+        ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
+        ENFORCE(!ap->targs.empty());
+        element = ap->targs.front();
 
         int64_t depth;
         if (args.args.size() == 1) {
@@ -2848,19 +2843,10 @@ public:
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
-        if (auto *ap = cast_type<AppliedType>(args.thisType)) {
-            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
-            ENFORCE(!ap->targs.empty());
-            unwrappedElems.emplace_back(ap->targs.front());
-        } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
-            unwrappedElems.emplace_back(tuple->elementType(gs));
-        } else {
-            // We will have only dispatched to this intrinsic when we knew the receiver.
-            // Did we register this intrinsic on the wrong symbol?
-            ENFORCE(false, "Array#product on unexpected receiver type: {}", args.selfType.show(gs));
-            res.returnType = Types::untypedUntracked();
-            return;
-        }
+        auto *ap = cast_type<AppliedType>(args.thisType);
+        ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
+        ENFORCE(!ap->targs.empty());
+        unwrappedElems.emplace_back(ap->targs.front());
 
         for (auto arg : args.args) {
             auto argTyp = arg->type;
@@ -2885,15 +2871,12 @@ class Array_compact : public IntrinsicMethod {
 public:
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
         TypePtr element;
-        if (auto *ap = cast_type<AppliedType>(args.thisType)) {
-            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
-            ENFORCE(!ap->targs.empty());
-            element = ap->targs.front();
-        } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
-            element = tuple->elementType(gs);
-        } else {
-            ENFORCE(false, "Array#compact on unexpected type: {}", args.selfType.show(gs));
-        }
+
+        auto *ap = cast_type<AppliedType>(args.thisType);
+        ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
+        ENFORCE(!ap->targs.empty());
+        element = ap->targs.front();
+
         auto ret = Types::approximateSubtract(gs, element, Types::nilClass());
         res.returnType = Types::arrayOf(gs, ret);
     }
@@ -2905,17 +2888,10 @@ public:
         vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(args.args.size() + 1);
 
-        if (auto *ap = cast_type<AppliedType>(args.thisType)) {
-            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
-            ENFORCE(!ap->targs.empty());
-            unwrappedElems.emplace_back(ap->targs.front());
-        } else if (auto *tuple = cast_type<TupleType>(args.thisType)) {
-            unwrappedElems.emplace_back(tuple->elementType(gs));
-        } else {
-            ENFORCE(false, "Array#zip on unexpected type: {}", args.selfType.show(gs));
-            res.returnType = Types::untypedUntracked();
-            return;
-        }
+        auto *ap = cast_type<AppliedType>(args.thisType);
+        ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(gs)->derivesFrom(gs, Symbols::Array()));
+        ENFORCE(!ap->targs.empty());
+        unwrappedElems.emplace_back(ap->targs.front());
 
         for (auto arg : args.args) {
             auto argTyp = arg->type;
