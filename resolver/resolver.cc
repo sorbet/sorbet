@@ -2632,8 +2632,8 @@ private:
         // Check params ordering match between signature and definition
         if (sig.argTypes.empty()) {
             int j = 0;
-            for (auto spec : sigParams) {
-                auto param = defParams[j];
+            for (const auto &spec : sigParams) {
+                auto *param = defParams[j];
                 auto sname = spec.name;
                 auto dname = param->localVariable._name;
                 // TODO(jvilk): Do we need to check .show? Typically NameRef equality is equal to string equality.
