@@ -47,7 +47,7 @@ only used as hints for the static type system, and are ignored entirely by the
 runtime type system.
 
 > **Note**: Sorbet used to take these type parameters into account during
-> runtime type-checking, but this turned out to be an common and
+> runtime type-checking, but this turned out to be a common and
 > difficult-to-debug source of performance problems: In order to verify that an
 > array contained the values it claimed it did, the Sorbet runtime used to
 > recursively check the type of every member of a collection, which would take a
