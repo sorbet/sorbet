@@ -2085,7 +2085,8 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
             },
             [&](parser::Backref *backref) {
                 auto recv = MK::Constant(loc, core::Symbols::Magic());
-                result = MK::Send0(loc, std::move(recv), core::Names::regexBackref());
+                auto arg = MK::Symbol(backref->loc, backref->name);
+                result = MK::Send1(loc, std::move(recv), core::Names::regexBackref(), std::move(arg));
             },
             [&](parser::EFlipflop *eflipflop) {
                 auto res = unsupportedNode(dctx, eflipflop);
