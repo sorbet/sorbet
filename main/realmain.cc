@@ -271,8 +271,8 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     autogen::DefTree root;
     AutogenResult out;
     vector<pair<int, AutogenResult::Serialized>> merged;
-    for (auto res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger); !res.done();
-         res = resultq->wait_pop_timed(out, chrono::seconds{1}, *logger)) {
+    for (auto res = resultq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), *logger); !res.done();
+         res = resultq->wait_pop_timed(out, WorkerPool::BLOCK_INTERVAL(), *logger)) {
         if (!res.gotItem()) {
             continue;
         }
