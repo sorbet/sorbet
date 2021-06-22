@@ -283,7 +283,10 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
             root = autogen::DefTreeBuilder::merge(gs, move(root), move(*out.defTree));
         }
     }
-    fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
+    {
+        Timer timeit(logger, "autogenAutoloaderDefTreeSort");
+        fast_sort(merged, [](const auto &lhs, const auto &rhs) -> bool { return lhs.first < rhs.first; });
+    }
 
     for (auto &elem : merged) {
         if (opts.print.Autogen.enabled) {
