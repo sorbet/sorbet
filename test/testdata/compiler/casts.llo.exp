@@ -105,9 +105,7 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @rubyIdPrecomputed_fooInt = internal unnamed_addr global i64 0, align 8
 @str_fooInt = private unnamed_addr constant [7 x i8] c"fooInt\00", align 1
 @str_Integer = private unnamed_addr constant [8 x i8] c"Integer\00", align 1
-@"rubyIdPrecomputed_+" = internal unnamed_addr global i64 0, align 8
 @"str_+" = private unnamed_addr constant [2 x i8] c"+\00", align 1
-@"ic_+" = internal global %struct.FunctionInlineCache zeroinitializer
 @"stackFramePrecomputed_func_Object#fooArray" = internal unnamed_addr global %struct.rb_iseq_struct* null, align 8
 @rubyIdPrecomputed_fooArray = internal unnamed_addr global i64 0, align 8
 @str_fooArray = private unnamed_addr constant [9 x i8] c"fooArray\00", align 1
@@ -885,7 +883,6 @@ entry:
   %3 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([7 x i8], [7 x i8]* @str_fooInt, i64 0, i64 0), i64 noundef 6) #17
   store i64 %3, i64* @rubyIdPrecomputed_fooInt, align 8
   %4 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([2 x i8], [2 x i8]* @"str_+", i64 0, i64 0), i64 noundef 1) #17
-  store i64 %4, i64* @"rubyIdPrecomputed_+", align 8
   %5 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([9 x i8], [9 x i8]* @str_fooArray, i64 0, i64 0), i64 noundef 8) #17
   store i64 %5, i64* @rubyIdPrecomputed_fooArray, align 8
   %6 = tail call i64 @rb_intern2(i8* noundef getelementptr inbounds ([17 x i8], [17 x i8]* @"str_<top (required)>", i64 0, i64 0), i64 noundef 16) #17
@@ -929,8 +926,6 @@ entry:
   %"rubyStr_test/testdata/compiler/casts.rb.i37.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/casts.rb", align 8
   %20 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %19, i64 %rubyId_fooInt.i.i, i64 %"rubyStr_test/testdata/compiler/casts.rb.i37.i", i64 %realpath, %struct.rb_iseq_struct* noundef null, i32 noundef 1, i32 noundef 17, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef nonnull %locals.i38.i, i32 noundef 0, i32 noundef 2)
   store %struct.rb_iseq_struct* %20, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_Object#fooInt", align 8
-  %"rubyId_+.i" = load i64, i64* @"rubyIdPrecomputed_+", align 8, !dbg !33
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @"ic_+", i64 %"rubyId_+.i", i32 noundef 16, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !33
   %21 = call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([9 x i8], [9 x i8]* @str_fooArray, i64 0, i64 0), i64 noundef 8) #17
   call void @rb_gc_register_mark_object(i64 %21) #17
   %rubyId_fooArray.i.i = load i64, i64* @rubyIdPrecomputed_fooArray, align 8

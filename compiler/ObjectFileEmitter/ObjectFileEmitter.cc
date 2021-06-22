@@ -397,6 +397,7 @@ bool ObjectFileEmitter::run(spdlog::logger &logger, llvm::LLVMContext &lctx, uni
     // We need to run this early, prior to inlining, so the intrinsics to remove
     // still exist in some fashion.
     pm.add(Passes::createDeleteUnusedSorbetIntrinsticsPass());
+    pm.add(Passes::createDeleteUnusedInlineCachesPass());
     pm.add(llvm::createAlwaysInlinerLegacyPass(false)); // Force inline functions early
     pm.add(llvm::createGlobalDCEPass());                // Remove dead fns and globals. We benefit from this a lot
     // Module passes

@@ -492,6 +492,66 @@ static llvm::RegisterPass<DeleteUnusedSorbetIntrinsicsPass> Y("deleteUnusuedSorb
                                                               false, // Only looks at CFG
                                                               false  // Analysis Pass
 );
+
+// When through optimization llvm is able to prune out sends that go through the VM, the inline cache that they
+// allocated will still be initialized during the module's Init function, and the global will persist. This pass detects
+// this case by finding globals whose type is `struct FunctionInlineCache`, and that only have a single user which is a
+// call to the `sorbet_setupFunctionInlineCache` function.
+class DeleteUnusedInlineCachesPass : public llvm::ModulePass {
+public:
+    static char ID;
+
+    DeleteUnusedInlineCachesPass() : llvm::ModulePass(ID) {}
+
+    virtual bool runOnModule(llvm::Module &mod) override {
+        auto *setupInlineCacheFun = mod.getFunction("sorbet_setupFunctionInlineCache");
+        if (setupInlineCacheFun == nullptr) {
+            // Unlikely, but this would mean that there were no uses of the function, and that it was removed. If this
+            // function is missing, there would be no inline caches allocated in this module.
+            return false;
+        }
+
+        auto *inlineCacheType = llvm::StructType::getTypeByName(mod.getContext(), "struct.FunctionInlineCache");
+        ENFORCE(inlineCacheType != nullptr);
+
+        std::vector<llvm::Instruction *> toRemove;
+        for (auto &global : mod.globals()) {
+            if (global.getValueType() != inlineCacheType) {
+                continue;
+            }
+
+            int numUses = std::distance(global.user_begin(), global.user_end());
+            if (numUses != 1) {
+                continue;
+            }
+
+            auto *inst = llvm::dyn_cast<llvm::CallInst>(global.user_back());
+            if (inst == nullptr || inst->getCalledFunction() != setupInlineCacheFun) {
+                continue;
+            }
+
+            toRemove.emplace_back(inst);
+        }
+
+        if (toRemove.empty()) {
+            return false;
+        }
+
+        for (auto *inst : toRemove) {
+            inst->eraseFromParent();
+        }
+
+        return true;
+    }
+};
+
+char DeleteUnusedInlineCachesPass::ID = 0;
+
+static llvm::RegisterPass<DeleteUnusedInlineCachesPass> Z("deleteUnusuedInlineCaches", "Delete Unused Inline Caches",
+                                                          false, // Only looks at CFG
+                                                          false  // Analysis Pass
+);
+
 } // namespace
 const std::vector<llvm::ModulePass *> Passes::standardLowerings() {
     // LLVM pass manager is going to destuct them, so we need to allocate them every time
@@ -500,5 +560,9 @@ const std::vector<llvm::ModulePass *> Passes::standardLowerings() {
 
 llvm::ModulePass *Passes::createDeleteUnusedSorbetIntrinsticsPass() {
     return new DeleteUnusedSorbetIntrinsicsPass();
+}
+
+llvm::ModulePass *Passes::createDeleteUnusedInlineCachesPass() {
+    return new DeleteUnusedInlineCachesPass();
 }
 } // namespace sorbet::compiler

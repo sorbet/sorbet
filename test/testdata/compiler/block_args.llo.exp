@@ -102,7 +102,6 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @"str_<build-array>" = private unnamed_addr constant [14 x i8] c"<build-array>\00", align 1
 @rubyIdPrecomputed_map = internal unnamed_addr global i64 0, align 8
 @str_map = private unnamed_addr constant [4 x i8] c"map\00", align 1
-@ic_map = internal global %struct.FunctionInlineCache zeroinitializer
 @"rubyIdPrecomputed_+" = internal unnamed_addr global i64 0, align 8
 @"str_+" = private unnamed_addr constant [2 x i8] c"+\00", align 1
 @"ic_+" = internal global %struct.FunctionInlineCache zeroinitializer
@@ -432,8 +431,6 @@ entry:
   %"rubyStr_test/testdata/compiler/block_args.rb.i3.i" = load i64, i64* @"rubyStrFrozen_test/testdata/compiler/block_args.rb", align 8
   %11 = call %struct.rb_iseq_struct* @sorbet_allocateRubyStackFrame(i64 %10, i64 %"rubyId_block for.i.i", i64 %"rubyStr_test/testdata/compiler/block_args.rb.i3.i", i64 %realpath, %struct.rb_iseq_struct* %stackFrame.i.i, i32 noundef 2, i32 noundef 4, %struct.SorbetLineNumberInfo* noundef @fileLineNumberInfo, i64* noundef null, i32 noundef 0, i32 noundef 3)
   store %struct.rb_iseq_struct* %11, %struct.rb_iseq_struct** @"stackFramePrecomputed_func_<root>.<static-init>$152$block_1", align 8
-  %rubyId_map.i = load i64, i64* @rubyIdPrecomputed_map, align 8, !dbg !36
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_map, i64 %rubyId_map.i, i32 noundef 16, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !36
   %"rubyId_+.i" = load i64, i64* @"rubyIdPrecomputed_+", align 8, !dbg !24
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @"ic_+", i64 %"rubyId_+.i", i32 noundef 16, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !24
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !44
@@ -464,13 +461,13 @@ entry:
   %27 = getelementptr [3 x i64], [3 x i64]* %callArgs.i, i64 0, i64 0, !dbg !36
   call void @llvm.experimental.noalias.scope.decl(metadata !55) #12, !dbg !36
   %28 = call i64 @rb_ary_new_from_values(i64 noundef 2, i64* noundef nonnull %27) #12, !dbg !36
-  %rubyId_map.i1 = load i64, i64* @rubyIdPrecomputed_map, align 8, !dbg !36
+  %rubyId_map.i = load i64, i64* @rubyIdPrecomputed_map, align 8, !dbg !36
   %29 = bitcast %struct.sorbet_inlineIntrinsicEnv* %0 to i8*, !dbg !36
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %29) #12, !dbg !36
   %30 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 0, !dbg !36
   store i64 %28, i64* %30, align 8, !dbg !36, !tbaa !38
   %31 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 1, !dbg !36
-  store i64 %rubyId_map.i1, i64* %31, align 8, !dbg !36, !tbaa !58
+  store i64 %rubyId_map.i, i64* %31, align 8, !dbg !36, !tbaa !58
   %32 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 2, !dbg !36
   store i32 0, i32* %32, align 8, !dbg !36, !tbaa !40
   %33 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 3, !dbg !36

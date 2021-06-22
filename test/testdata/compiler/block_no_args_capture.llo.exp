@@ -102,7 +102,6 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 @str_hi = private unnamed_addr constant [3 x i8] c"hi\00", align 1
 @rubyIdPrecomputed_times = internal unnamed_addr global i64 0, align 8
 @str_times = private unnamed_addr constant [6 x i8] c"times\00", align 1
-@ic_times = internal global %struct.FunctionInlineCache zeroinitializer
 @ic_puts = internal global %struct.FunctionInlineCache zeroinitializer
 @rubyIdPrecomputed_puts = internal unnamed_addr global i64 0, align 8
 @str_puts = private unnamed_addr constant [5 x i8] c"puts\00", align 1
@@ -382,8 +381,6 @@ entry:
   %12 = call i64 @rb_fstring_new(i8* noundef getelementptr inbounds ([3 x i8], [3 x i8]* @str_hi, i64 0, i64 0), i64 noundef 2) #9
   call void @rb_gc_register_mark_object(i64 %12) #9
   store i64 %12, i64* @rubyStrFrozen_hi, align 8
-  %rubyId_times.i = load i64, i64* @rubyIdPrecomputed_times, align 8, !dbg !23
-  call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_times, i64 %rubyId_times.i, i32 noundef 16, i32 noundef 0, i32 noundef 0, i64* noundef null), !dbg !23
   %rubyId_puts.i = load i64, i64* @rubyIdPrecomputed_puts, align 8, !dbg !22
   call void @sorbet_setupFunctionInlineCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 %rubyId_puts.i, i32 noundef 16, i32 noundef 1, i32 noundef 0, i64* noundef null), !dbg !22
   %13 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !tbaa !13
@@ -418,13 +415,13 @@ entry:
 
 sorbet_writeLocal.exit.i:                         ; preds = %28, %26
   store i64* getelementptr inbounds ([8 x i64], [8 x i64]* @iseqEncodedArray, i64 0, i64 5), i64** %21, align 8, !dbg !40, !tbaa !13
-  %rubyId_times.i1 = load i64, i64* @rubyIdPrecomputed_times, align 8, !dbg !23
+  %rubyId_times.i = load i64, i64* @rubyIdPrecomputed_times, align 8, !dbg !23
   %29 = bitcast %struct.sorbet_inlineIntrinsicEnv* %0 to i8*, !dbg !23
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %29) #9, !dbg !23
   %30 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 0, !dbg !23
   store i64 21, i64* %30, align 8, !dbg !23, !tbaa !25
   %31 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 1, !dbg !23
-  store i64 %rubyId_times.i1, i64* %31, align 8, !dbg !23, !tbaa !42
+  store i64 %rubyId_times.i, i64* %31, align 8, !dbg !23, !tbaa !42
   %32 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 2, !dbg !23
   store i32 0, i32* %32, align 8, !dbg !23, !tbaa !27
   %33 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 3, !dbg !23
