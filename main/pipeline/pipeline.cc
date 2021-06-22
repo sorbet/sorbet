@@ -273,8 +273,9 @@ vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::Pa
 vector<core::FileRef> reserveFiles(unique_ptr<core::GlobalState> &gs, const vector<string> &files) {
     Timer timeit(gs->tracer(), "reserveFiles");
     vector<core::FileRef> ret;
+    ret.reserve(files.size());
     core::UnfreezeFileTable unfreezeFiles(*gs);
-    for (auto f : files) {
+    for (auto &f : files) {
         auto fileRef = gs->findFileByPath(f);
         if (!fileRef.exists()) {
             fileRef = gs->reserveFileRef(f);
