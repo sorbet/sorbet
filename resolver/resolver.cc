@@ -2649,6 +2649,15 @@ private:
                 j++;
             }
         }
+
+        // Later passes are going to separate the sig and the method definition.
+        // Record some information in the sig call itself so that we can reassociate
+        // them later.
+        auto *send = sig.origSend;
+        auto &origArgs = send->args;
+        auto it = origArgs.insert(origArgs.begin(), mdef.flags.isSelfMethod ? ast::MK::True(send->loc) : ast::MK::False(send->loc));
+        it = origArgs.insert(it + 1, ast::MK::Symbol(send->loc, method.data(ctx)->name));
+        send->numPosArgs += 2;
     }
 
     // Force errors from any signatures that didn't attach to methods.

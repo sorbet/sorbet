@@ -103,7 +103,7 @@ namespace {
 ParsedSig parseSigWithSelfTypeParams(core::Context ctx, const ast::Send &sigSend, const ParsedSig *parent,
                                      TypeSyntaxArgs args) {
     ParsedSig sig;
-    sig.origSend = const_cast<ast::Send*>(&sigSend);
+    sig.origSend = const_cast<ast::Send *>(&sigSend);
 
     vector<const ast::Send *> sends;
 
