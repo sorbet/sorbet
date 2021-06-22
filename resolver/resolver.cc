@@ -189,7 +189,7 @@ private:
     vector<ClassMethodsResolutionItem> todoClassMethods_;
     vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
 
-    static core::SymbolRef resolveLhs(core::Context ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
+    static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
             auto lookup = scope->scope.data(ctx)->findMember(ctx, name);
@@ -234,7 +234,7 @@ private:
         return !checker.seenUnresolved;
     }
 
-    static core::SymbolRef resolveConstant(core::Context ctx, shared_ptr<Nesting> nesting,
+    static core::SymbolRef resolveConstant(core::Context ctx, const shared_ptr<Nesting> &nesting,
                                            const ast::UnresolvedConstantLit &c, bool &resolutionFailed) {
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c.cnst);
