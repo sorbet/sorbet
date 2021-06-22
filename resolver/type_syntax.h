@@ -26,6 +26,8 @@ struct ParsedSig {
     };
     std::vector<TypeArgSpec> typeArgs;
 
+    ast::Send *origSend;
+
     struct {
         bool sig = false;
         bool proc = false;
