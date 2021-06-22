@@ -2132,7 +2132,7 @@ ExpressionPtr node2TreeImpl(DesugarContext &dctx, unique_ptr<parser::Node> what)
     }
 }
 
-ExpressionPtr liftTopLevel(DesugarContext &dctx, core::LocOffsets loc, ExpressionPtr what) {
+ExpressionPtr liftTopLevel(core::LocOffsets loc, ExpressionPtr what) {
     ClassDef::RHS_store rhs;
     ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(MK::Constant(loc, core::Symbols::todo()));
@@ -2159,7 +2159,7 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what)
                             core::NameRef::noName());
         auto loc = what->loc;
         auto result = node2TreeImpl(dctx, std::move(what));
-        result = liftTopLevel(dctx, loc, std::move(result));
+        result = liftTopLevel(loc, std::move(result));
         auto verifiedResult = Verifier::run(ctx, std::move(result));
         return verifiedResult;
     } catch (SorbetException &) {
