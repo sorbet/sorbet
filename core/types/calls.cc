@@ -1587,26 +1587,28 @@ public:
 
 class SorbetPrivateStatic_sig : public IntrinsicMethod {
 public:
-    // Forward Sorbet::Private::Static.sig(recv, ...) {...} to recv.sig(...) {...}
+    // Forward Sorbet::Private::Static.sig(<self-method>, <method-name>, recv, ...) {...} to recv.sig(...) {...}
     void apply(const GlobalState &gs, const DispatchArgs &args, DispatchResult &res) const override {
-        if (args.args.size() < 1) {
+        if (args.args.size() < 3) {
             return;
         }
 
-        auto callLocsReceiver = args.locs.args[0];
+        const size_t receiverOffset = 2;
+        const size_t argsOffset = receiverOffset + 1;
+        auto callLocsReceiver = args.locs.args[receiverOffset];
         auto callLocsArgs = InlinedVector<LocOffsets, 2>{};
-        for (auto loc = args.locs.args.begin() + 1; loc != args.locs.args.end(); ++loc) {
+        for (auto loc = args.locs.args.begin() + argsOffset; loc != args.locs.args.end(); ++loc) {
             callLocsArgs.emplace_back(*loc);
         }
         CallLocs callLocs{args.locs.file, args.locs.call, callLocsReceiver, callLocsArgs};
 
-        u2 numPosArgs = args.numPosArgs - 1;
+        u2 numPosArgs = args.numPosArgs - argsOffset;
         auto dispatchArgsArgs = InlinedVector<const TypeAndOrigins *, 2>{};
-        for (auto arg = args.args.begin() + 1; arg != args.args.end(); ++arg) {
+        for (auto arg = args.args.begin() + argsOffset; arg != args.args.end(); ++arg) {
             dispatchArgsArgs.emplace_back(*arg);
         }
 
-        auto recv = *args.args[0];
+        auto recv = *args.args[receiverOffset];
         res = recv.type.dispatchCall(gs, {core::Names::sig(), callLocs, numPosArgs, dispatchArgsArgs, recv.type, recv,
                                           recv.type, args.block, args.originForUninitialized});
     }
