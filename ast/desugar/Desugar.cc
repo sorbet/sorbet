@@ -35,7 +35,7 @@ struct DesugarContext final {
     }
 };
 
-core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
+core::NameRef blockArg2Name(DesugarContext &dctx, const BlockArg &blkArg) {
     auto blkIdent = cast_tree<UnresolvedIdent>(blkArg.expr);
     ENFORCE(blkIdent != nullptr, "BlockArg must wrap UnresolvedIdent in desugar.");
     return blkIdent->name;
@@ -43,7 +43,7 @@ core::NameRef blockArg2Name(DesugarContext dctx, const BlockArg &blkArg) {
 
 // Get the num from the name of the Node if it's a LVar.
 // Return -1 otherwise.
-int numparamNum(DesugarContext dctx, parser::Node *decl) {
+int numparamNum(DesugarContext &dctx, parser::Node *decl) {
     if (auto *lvar = parser::cast_node<parser::LVar>(decl)) {
         auto name_str = lvar->name.show(dctx.ctx);
         return name_str[1] - 48;
@@ -53,7 +53,7 @@ int numparamNum(DesugarContext dctx, parser::Node *decl) {
 
 // Get the highest numparams used in `decls`
 // Return 0 if the list of declarations is empty.
-int numparamMax(DesugarContext dctx, parser::NodeVec *decls) {
+int numparamMax(DesugarContext &dctx, parser::NodeVec *decls) {
     int max = 0;
     for (auto &decl : *decls) {
         auto num = numparamNum(dctx, decl.get());
@@ -66,7 +66,7 @@ int numparamMax(DesugarContext dctx, parser::NodeVec *decls) {
 
 // Create a local variable from the first declaration for the name "_num" from all the `decls` if any.
 // Return a dummy variable if no declaration is found for `num`.
-ExpressionPtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls) {
+ExpressionPtr numparamTree(DesugarContext &dctx, int num, parser::NodeVec *decls) {
     for (auto &decl : *decls) {
         if (auto *lvar = parser::cast_node<parser::LVar>(decl.get())) {
             if (numparamNum(dctx, decl.get()) == num) {
@@ -80,9 +80,9 @@ ExpressionPtr numparamTree(DesugarContext dctx, int num, parser::NodeVec *decls)
     return MK::Local(core::LocOffsets::none(), name);
 }
 
-ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what);
+ExpressionPtr node2TreeImpl(DesugarContext &dctx, unique_ptr<parser::Node> what);
 
-pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx, core::LocOffsets loc,
+pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext &dctx, core::LocOffsets loc,
                                                              unique_ptr<parser::Node> &argnode) {
     MethodDef::ARGS_store args;
     InsSeq::STATS_store destructures;
@@ -130,7 +130,7 @@ pair<MethodDef::ARGS_store, InsSeq::STATS_store> desugarArgs(DesugarContext dctx
     return make_pair(std::move(args), std::move(destructures));
 }
 
-ExpressionPtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &bodynode,
+ExpressionPtr desugarBody(DesugarContext &dctx, core::LocOffsets loc, unique_ptr<parser::Node> &bodynode,
                           InsSeq::STATS_store destructures) {
     auto body = node2TreeImpl(dctx, std::move(bodynode));
     if (!destructures.empty()) {
@@ -144,7 +144,7 @@ ExpressionPtr desugarBody(DesugarContext dctx, core::LocOffsets loc, unique_ptr<
     return body;
 }
 
-ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
+ExpressionPtr desugarBlock(DesugarContext &dctx, core::LocOffsets loc, core::LocOffsets blockLoc,
                            unique_ptr<parser::Node> &blockSend, unique_ptr<parser::Node> &blockArgs,
                            unique_ptr<parser::Node> &blockBody) {
     blockSend->loc = loc;
@@ -177,12 +177,12 @@ ExpressionPtr desugarBlock(DesugarContext dctx, core::LocOffsets loc, core::LocO
     return res;
 }
 
-bool isStringLit(DesugarContext dctx, ExpressionPtr &expr) {
+bool isStringLit(DesugarContext &dctx, ExpressionPtr &expr) {
     Literal *lit;
     return (lit = cast_tree<Literal>(expr)) && lit->isString(dctx.ctx);
 }
 
-ExpressionPtr mergeStrings(DesugarContext dctx, core::LocOffsets loc,
+ExpressionPtr mergeStrings(DesugarContext &dctx, core::LocOffsets loc,
                            InlinedVector<ExpressionPtr, 4> stringsAccumulated) {
     if (stringsAccumulated.size() == 1) {
         return move(stringsAccumulated[0]);
@@ -200,7 +200,7 @@ ExpressionPtr mergeStrings(DesugarContext dctx, core::LocOffsets loc,
     }
 }
 
-ExpressionPtr desugarDString(DesugarContext dctx, core::LocOffsets loc, parser::NodeVec nodes) {
+ExpressionPtr desugarDString(DesugarContext &dctx, core::LocOffsets loc, parser::NodeVec nodes) {
     if (nodes.empty()) {
         return MK::String(loc, core::Names::empty());
     }
@@ -260,7 +260,7 @@ bool isIVarAssign(ExpressionPtr &stat) {
     return true;
 }
 
-ExpressionPtr validateRBIBody(DesugarContext dctx, ExpressionPtr body) {
+ExpressionPtr validateRBIBody(DesugarContext &dctx, ExpressionPtr body) {
     if (!dctx.ctx.file.data(dctx.ctx).isRBI()) {
         return body;
     }
@@ -302,7 +302,7 @@ ExpressionPtr validateRBIBody(DesugarContext dctx, ExpressionPtr body) {
     return body;
 }
 
-ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
+ExpressionPtr buildMethod(DesugarContext &dctx, core::LocOffsets loc, core::LocOffsets declLoc, core::NameRef name,
                           unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body, bool isSelf) {
     // Reset uniqueCounter within this scope (to keep numbers small)
     u4 uniqueCounter = 1;
@@ -327,7 +327,7 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     return mdef;
 }
 
-ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
+ExpressionPtr symbol2Proc(DesugarContext &dctx, ExpressionPtr expr) {
     auto loc = expr.loc();
     core::NameRef temp = dctx.freshNameUnique(core::Names::blockPassTemp());
     Literal *lit = cast_tree<Literal>(expr);
@@ -342,14 +342,14 @@ ExpressionPtr symbol2Proc(DesugarContext dctx, ExpressionPtr expr) {
     return MK::Block1(loc, std::move(body), MK::Local(zeroLengthLoc, temp));
 }
 
-ExpressionPtr unsupportedNode(DesugarContext dctx, parser::Node *node) {
+ExpressionPtr unsupportedNode(DesugarContext &dctx, parser::Node *node) {
     if (auto e = dctx.ctx.beginError(node->loc, core::errors::Desugar::UnsupportedNode)) {
         e.setHeader("Unsupported node type `{}`", node->nodeName());
     }
     return MK::EmptyTree();
 }
 
-ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlhs *lhs, ExpressionPtr rhs) {
+ExpressionPtr desugarMlhs(DesugarContext &dctx, core::LocOffsets loc, parser::Mlhs *lhs, ExpressionPtr rhs) {
     InsSeq::STATS_store stats;
 
     core::NameRef tempRhs = dctx.freshNameUnique(core::Names::assignTemp());
@@ -419,7 +419,7 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
 }
 
 // Map all MatchVars used in `pattern` to local variables initialized from magic calls
-void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, unique_ptr<parser::Node> &node) {
+void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext &dctx, unique_ptr<parser::Node> &node) {
     if (auto var = parser::cast_node<parser::MatchVar>(node.get())) {
         auto loc = var->loc;
         auto recv = MK::Constant(loc, core::Symbols::Magic());
@@ -455,7 +455,7 @@ void desugarPatternMatchingVars(InsSeq::STATS_store &vars, DesugarContext dctx, 
 }
 
 // Desugar `in` and `=>` oneline pattern matching
-ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, unique_ptr<parser::Node> &match) {
+ExpressionPtr desugarOnelinePattern(DesugarContext &dctx, core::LocOffsets loc, unique_ptr<parser::Node> &match) {
     auto matchExpr = MK::RaiseUnimplemented(loc);
     auto bodyExpr = MK::RaiseUnimplemented(loc);
     auto elseExpr = MK::EmptyTree();
@@ -471,7 +471,7 @@ ExpressionPtr desugarOnelinePattern(DesugarContext dctx, core::LocOffsets loc, u
 
 bool locReported = false;
 
-ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node> node) {
+ClassDef::RHS_store scopeNodeToBody(DesugarContext &dctx, unique_ptr<parser::Node> node) {
     ClassDef::RHS_store body;
     // Reset uniqueCounter within this scope (to keep numbers small)
     u4 uniqueCounter = 1;
@@ -506,7 +506,7 @@ struct OpAsgnScaffolding {
 // original (to allow for the passed value). This function creates both argument lists as well as the instruction block
 // and the temporary variable: how these will be used will differ slightly depending on whether we're desugaring &&=,
 // ||=, or some other op-assign, but the logic contained here will stay in common.
-OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
+OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext &dctx, Send *s) {
     // this is for storing the temporary assignments followed by the final update. In the case that we have other
     // arguments to the send (e.g. in the case of x.y[z] += 1) we'll want to store the other parameters (z) in a
     // temporary as well, producing a sequence like
@@ -545,7 +545,7 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
 //     break
 //   end
 // end
-ExpressionPtr doUntil(DesugarContext dctx, core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr body) {
+ExpressionPtr doUntil(DesugarContext &dctx, core::LocOffsets loc, ExpressionPtr cond, ExpressionPtr body) {
     auto breaker = MK::If(loc, std::move(cond), MK::Break(loc, MK::EmptyTree()), MK::EmptyTree());
     auto breakWithBody = MK::InsSeq1(loc, std::move(body), std::move(breaker));
     return MK::While(loc, MK::True(loc), std::move(breakWithBody));
@@ -605,7 +605,7 @@ public:
     }
 
     // This is only used with Send::ARGS_store and Array::ELEMS_store
-    template <typename T> static void checkSendArgs(DesugarContext dctx, int numPosArgs, const T &args) {
+    template <typename T> static void checkSendArgs(DesugarContext &dctx, int numPosArgs, const T &args) {
         DuplicateHashKeyCheck duplicateKeyCheck{dctx};
 
         // increment by two so that a keyword args splat gets skipped.
@@ -615,7 +615,7 @@ public:
     }
 };
 
-ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) {
+ExpressionPtr node2TreeImpl(DesugarContext &dctx, unique_ptr<parser::Node> what) {
     try {
         if (what.get() == nullptr) {
             return MK::EmptyTree();
@@ -2132,7 +2132,7 @@ ExpressionPtr node2TreeImpl(DesugarContext dctx, unique_ptr<parser::Node> what) 
     }
 }
 
-ExpressionPtr liftTopLevel(DesugarContext dctx, core::LocOffsets loc, ExpressionPtr what) {
+ExpressionPtr liftTopLevel(DesugarContext &dctx, core::LocOffsets loc, ExpressionPtr what) {
     ClassDef::RHS_store rhs;
     ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(MK::Constant(loc, core::Symbols::todo()));
