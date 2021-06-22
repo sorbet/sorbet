@@ -107,10 +107,12 @@ private:
     struct ResolutionItem {
         shared_ptr<Nesting> scope;
         core::FileRef file;
-        ast::ConstantLit *out;
         bool resolutionFailed = false;
+        ast::ConstantLit *out;
 
         ResolutionItem() = default;
+        ResolutionItem(const shared_ptr<Nesting> &scope, core::FileRef file, ast::ConstantLit *lit)
+            : scope(scope), file(file), out(lit) {}
         ResolutionItem(ResolutionItem &&rhs) noexcept = default;
         ResolutionItem &operator=(ResolutionItem &&rhs) noexcept = default;
 
