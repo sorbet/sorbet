@@ -271,8 +271,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
 
         auto conditionalType = current.getTypeAndOrigin(ctx, bb->bexit.cond.variable);
+        core::TypePtr basicObject = core::make_type<core::ClassType>(core::Symbols::BasicObject());
 
         if (!conditionalType.type.isUntyped() && conditionalType.type != core::Types::Object() &&
+            conditionalType.type != basicObject &&
             core::Types::isSubType(ctx, core::Types::void_(), conditionalType.type)) {
             if (auto e = ctx.beginError(bb->bexit.loc, core::errors::Infer::InvalidVoidUsage)) {
                 e.setHeader("Can't use `{}` types in conditional", "void");
