@@ -275,7 +275,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         if (!conditionalType.type.isUntyped() && conditionalType.type != core::Types::Object() &&
             core::Types::isSubType(ctx, core::Types::void_(), conditionalType.type)) {
             if (auto e = ctx.beginError(bb->bexit.loc, core::errors::Infer::InvalidVoidUsage)) {
-                e.setHeader("Can't use void types in conditional");
+                e.setHeader("Can't use `{}` types in conditional", "void");
                 e.addErrorSection(conditionalType.explainGot(ctx, core::Loc(ctx.file, bb->bexit.loc)));
             }
         }
