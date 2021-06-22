@@ -44,7 +44,7 @@ class DidYouMean::NullChecker < Object
 end
 
 class DidYouMean::SpellChecker < Object
-  sig {params(dictionary: T::Array[T.any(String, Symbol)]).returns(DidYouMean::SpellChecker)}
+  sig {params(dictionary: T::Enumerable[T.any(String, Symbol)]).returns(DidYouMean::SpellChecker)}
   def initialize(dictionary:)
   end
 
