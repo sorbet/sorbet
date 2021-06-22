@@ -90,9 +90,16 @@ payload_files = [
     ],
 ) for name, srcs in payload_files]
 
-sh_binary(
-    name = "payload_postprocess",
-    srcs = ["tools/postprocess_payload.sh"],
+cc_binary(
+    name = "postprocess_payload",
+    srcs = ["tools/postprocess_payload.cc"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@llvm//:BitWriter",
+        "@llvm//:Core",
+        "@llvm//:IRReader",
+        "@llvm//:Support",
+    ],
 )
 
 sh_binary(
@@ -117,17 +124,30 @@ genrule(
 )
 
 genrule(
-    name = "generate_payload_ll",
+    name = "generate_payload_bc",
     srcs = [
         "payload.bc.orig",
     ],
     outs = [
+        "payload.bc",
+    ],
+    cmd = "$(location :postprocess_payload) $(location payload.bc.orig) $(location payload.bc)",
+    tools = [
+        ":postprocess_payload",
+    ],
+)
+
+genrule(
+    name = "generate_payload_ll",
+    srcs = [
+        "payload.bc",
+    ],
+    outs = [
         "payload.ll",
     ],
-    cmd = "$(location :llvm-dis) -o $(location payload.ll) $(location :payload.bc.orig) && $(location :payload_postprocess) $(location payload.ll)",
+    cmd = "$(location :llvm-dis) $(location payload.bc) -o $(location payload.ll)",
     tools = [
         ":llvm-dis",
-        ":payload_postprocess",
     ],
 )
 
@@ -140,17 +160,5 @@ genrule(
     cmd = "$(location :generate_load_payload) $(location payload.bc) $(location Payload_gen.cc)",
     tools = [
         ":generate_load_payload",
-    ],
-)
-
-genrule(
-    name = "generate_payload_bc",
-    srcs = ["payload.ll"],
-    outs = [
-        "payload.bc",
-    ],
-    cmd = "$(location :llvm-as) -o=$(location payload.bc) $(location payload.ll)",
-    tools = [
-        ":llvm-as",
     ],
 )
