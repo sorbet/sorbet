@@ -44,6 +44,8 @@ sed -i'.bak' 's/{  }/{ "addedToSilenceEmptyAttrsError" }/g' "$payload"
 # inline is broken at the point where it's introduced.
 sed -i'.bak' 's/define available_externally i64 @sorbet_getConstantEpoch/define internal i64 @sorbet_getConstantEpoch/g' "$payload"
 sed -i'.bak' 's/define available_externally i64 @sorbet_rubyTrue/define internal i64 @sorbet_rubyTrue/g' "$payload"
+sed -i'.bak' 's/define nonnull i64\*\* @sorbet_get_sp/define internal nonnull i64** @sorbet_get_sp/g' "$payload"
+sed -i'.bak' 's/define available_externally nonnull i64\* @sorbet_push/define internal nonnull i64* @sorbet_push/g' "$payload"
 sed -i'.bak' 's/define available_externally zeroext i1 @sorbet_isa_Integer/define internal zeroext i1 @sorbet_isa_Integer/g' "$payload"
 sed -i'.bak' 's/define available_externally zeroext i1 @sorbet_isa_TrueClass/define internal zeroext i1 @sorbet_isa_TrueClass/g' "$payload"
 sed -i'.bak' 's/define available_externally zeroext i1 @sorbet_isa_FalseClass/define internal zeroext i1 @sorbet_isa_FalseClass/g' "$payload"
@@ -57,3 +59,26 @@ sed -i'.bak' 's/define available_externally zeroext i1 @sorbet_isa_Regexp/define
 sed -i'.bak' 's/define available_externally zeroext i1 @sorbet_isa_String/define internal zeroext i1 @sorbet_isa_String/g' "$payload"
 sed -i'.bak' 's/define available_externally zeroext i1 @sorbet_isa_Proc/define internal zeroext i1 @sorbet_isa_Proc/g' "$payload"
 sed -i'.bak' 's/define available_externally zeroext i1 @sorbet_isa_RootSingleton/define internal zeroext i1 @sorbet_isa_RootSingleton/g' "$payload"
+# When given ruby code like the following:
+#   if cond
+#     ABC.new(1)
+#   else
+#     DEF.new(1)
+#   end
+# We emit something like the following:
+#   %1 = <cond>
+#   br i1 %1, label %BB1, label %BB2
+#   BB1:
+#   class = sorbet_i_getRubyClass("ABC")
+#   sorbet_i_send(class, "new")
+#   BB2:
+#   class = sorbet_i_getRubyClass("DEF")
+#   sorbet_i_send(class, "new")
+# LLVM notices that ABC and DEF are string constants of the same length, and replaces this with:
+#   class = sorbet_i_getRubyClass(phi "ABC", "DEF")
+#   sorbet_i_send(class, "new")
+# This causes an issue, because sorbet_i_getRubyClass can only handle constants, and returns undef when
+# it encounters the phi node.
+# By marking sorbet_i_send as nomerge, we are telling LLVM not to attempt to dedup calls to sorbet_i_send, and emit
+# the original LLVM code instead.
+sed -i'.bak' 's/declare i64 @sorbet_i_send\(.*\)$/declare i64 @sorbet_i_send\1 nomerge/g' "$payload"

@@ -266,13 +266,13 @@ entry:
 34:                                               ; preds = %entry
   %35 = ashr i64 %31, 1, !dbg !8
   %36 = call i64 @rb_ary_entry(i64 %30, i64 %35) #10, !dbg !8
-  br label %sorbet_rb_array_square_br.exit370.i, !dbg !8
+  br label %sorbet_rb_array_square_br.exit359.i, !dbg !8
 
 37:                                               ; preds = %entry
   %38 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %30, i64 %"rubyId_[].i1", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !8
-  br label %sorbet_rb_array_square_br.exit370.i, !dbg !8
+  br label %sorbet_rb_array_square_br.exit359.i, !dbg !8
 
-sorbet_rb_array_square_br.exit370.i:              ; preds = %37, %34
+sorbet_rb_array_square_br.exit359.i:              ; preds = %37, %34
   %39 = phi i64 [ %38, %37 ], [ %36, %34 ], !dbg !8
   %40 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !8, !tbaa !18
   %41 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %40, i64 0, i32 5, !dbg !8
@@ -284,13 +284,13 @@ sorbet_rb_array_square_br.exit370.i:              ; preds = %37, %34
   %47 = icmp eq i32 %46, 0, !dbg !8
   br i1 %47, label %rb_vm_check_ints.exit3.i, label %48, !dbg !8, !prof !50
 
-48:                                               ; preds = %sorbet_rb_array_square_br.exit370.i
+48:                                               ; preds = %sorbet_rb_array_square_br.exit359.i
   %49 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %40, i64 0, i32 8, !dbg !8
   %50 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %49, align 8, !dbg !8, !tbaa !51
   %51 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %50, i32 noundef 0) #10, !dbg !8
   br label %rb_vm_check_ints.exit3.i, !dbg !8
 
-rb_vm_check_ints.exit3.i:                         ; preds = %48, %sorbet_rb_array_square_br.exit370.i
+rb_vm_check_ints.exit3.i:                         ; preds = %48, %sorbet_rb_array_square_br.exit359.i
   %"rubyId_[]130.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !8
   store i64 -3, i64* %callArgs0Addr.i, align 8, !dbg !8
   call void @llvm.experimental.noalias.scope.decl(metadata !52) #10, !dbg !8
@@ -302,13 +302,13 @@ rb_vm_check_ints.exit3.i:                         ; preds = %48, %sorbet_rb_arra
 55:                                               ; preds = %rb_vm_check_ints.exit3.i
   %56 = ashr i64 %52, 1, !dbg !8
   %57 = call i64 @rb_ary_entry(i64 %30, i64 %56) #10, !dbg !8
-  br label %sorbet_rb_array_square_br.exit371.i, !dbg !8
+  br label %sorbet_rb_array_square_br.exit360.i, !dbg !8
 
 58:                                               ; preds = %rb_vm_check_ints.exit3.i
   %59 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %30, i64 %"rubyId_[]130.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !8
-  br label %sorbet_rb_array_square_br.exit371.i, !dbg !8
+  br label %sorbet_rb_array_square_br.exit360.i, !dbg !8
 
-sorbet_rb_array_square_br.exit371.i:              ; preds = %58, %55
+sorbet_rb_array_square_br.exit360.i:              ; preds = %58, %55
   %60 = phi i64 [ %59, %58 ], [ %57, %55 ], !dbg !8
   %61 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !8, !tbaa !18
   %62 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %61, i64 0, i32 5, !dbg !8
@@ -320,14 +320,14 @@ sorbet_rb_array_square_br.exit371.i:              ; preds = %58, %55
   %68 = icmp eq i32 %67, 0, !dbg !8
   br i1 %68, label %rb_vm_check_ints.exit5.i, label %69, !dbg !8, !prof !50
 
-69:                                               ; preds = %sorbet_rb_array_square_br.exit371.i
+69:                                               ; preds = %sorbet_rb_array_square_br.exit360.i
   %70 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %61, i64 0, i32 8, !dbg !8
   %71 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %70, align 8, !dbg !8, !tbaa !51
   %72 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %71, i32 noundef 0) #10, !dbg !8
   br label %rb_vm_check_ints.exit5.i, !dbg !8
 
-rb_vm_check_ints.exit5.i:                         ; preds = %69, %sorbet_rb_array_square_br.exit371.i
-  %"rubyId_[]144.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !8
+rb_vm_check_ints.exit5.i:                         ; preds = %69, %sorbet_rb_array_square_br.exit360.i
+  %"rubyId_[]143.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !8
   store i64 -1, i64* %callArgs0Addr.i, align 8, !dbg !8
   call void @llvm.experimental.noalias.scope.decl(metadata !55) #10, !dbg !8
   %73 = load i64, i64* %24, align 8, !dbg !8, !tbaa !4, !alias.scope !55
@@ -338,13 +338,13 @@ rb_vm_check_ints.exit5.i:                         ; preds = %69, %sorbet_rb_arra
 76:                                               ; preds = %rb_vm_check_ints.exit5.i
   %77 = ashr i64 %73, 1, !dbg !8
   %78 = call i64 @rb_ary_entry(i64 %30, i64 %77) #10, !dbg !8
-  br label %sorbet_rb_array_square_br.exit372.i, !dbg !8
+  br label %sorbet_rb_array_square_br.exit361.i, !dbg !8
 
 79:                                               ; preds = %rb_vm_check_ints.exit5.i
-  %80 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %30, i64 %"rubyId_[]144.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !8
-  br label %sorbet_rb_array_square_br.exit372.i, !dbg !8
+  %80 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %30, i64 %"rubyId_[]143.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !8
+  br label %sorbet_rb_array_square_br.exit361.i, !dbg !8
 
-sorbet_rb_array_square_br.exit372.i:              ; preds = %79, %76
+sorbet_rb_array_square_br.exit361.i:              ; preds = %79, %76
   %81 = phi i64 [ %80, %79 ], [ %78, %76 ], !dbg !8
   %82 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !8, !tbaa !18
   %83 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %82, i64 0, i32 5, !dbg !8
@@ -356,13 +356,13 @@ sorbet_rb_array_square_br.exit372.i:              ; preds = %79, %76
   %89 = icmp eq i32 %88, 0, !dbg !8
   br i1 %89, label %rb_vm_check_ints.exit7.i, label %90, !dbg !8, !prof !50
 
-90:                                               ; preds = %sorbet_rb_array_square_br.exit372.i
+90:                                               ; preds = %sorbet_rb_array_square_br.exit361.i
   %91 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %82, i64 0, i32 8, !dbg !8
   %92 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %91, align 8, !dbg !8, !tbaa !51
   %93 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %92, i32 noundef 0) #10, !dbg !8
   br label %rb_vm_check_ints.exit7.i, !dbg !8
 
-rb_vm_check_ints.exit7.i:                         ; preds = %90, %sorbet_rb_array_square_br.exit372.i
+rb_vm_check_ints.exit7.i:                         ; preds = %90, %sorbet_rb_array_square_br.exit361.i
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 6), i64** %21, align 8, !dbg !36, !tbaa !18
   store i64 %39, i64* %callArgs0Addr.i, align 8, !dbg !58
   store i64 %60, i64* %callArgs1Addr.i, align 8, !dbg !58
@@ -370,27 +370,27 @@ rb_vm_check_ints.exit7.i:                         ; preds = %90, %sorbet_rb_arra
   call void @llvm.experimental.noalias.scope.decl(metadata !59) #10, !dbg !58
   %94 = call i64 @rb_ary_new_from_values(i64 noundef 3, i64* noundef nonnull %24) #10, !dbg !58
   %95 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %13, i64 0, i32 1, !dbg !13
-  %96 = load i64*, i64** %95, align 8, !dbg !13, !tbaa !62
-  %97 = getelementptr inbounds i64, i64* %96, i64 1, !dbg !13
+  %96 = load i64*, i64** %95, align 8, !dbg !13
   store i64 %10, i64* %96, align 8, !dbg !13, !tbaa !4
-  %98 = getelementptr inbounds i64, i64* %97, i64 1, !dbg !13
-  store i64* %98, i64** %95, align 8, !dbg !13, !tbaa !62
+  %97 = getelementptr inbounds i64, i64* %96, i64 1, !dbg !13
   store i64 %94, i64* %97, align 8, !dbg !13, !tbaa !4
-  %send167.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 0) #10, !dbg !13
+  %98 = getelementptr inbounds i64, i64* %97, i64 1, !dbg !13
+  store i64* %98, i64** %95, align 8, !dbg !13
+  %send = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !13
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 8), i64** %21, align 8, !dbg !13, !tbaa !18
-  %99 = bitcast i64* %callArgs0Addr.i to <2 x i64>*, !dbg !63
-  store <2 x i64> <i64 3, i64 5>, <2 x i64>* %99, align 8, !dbg !63
-  call void @llvm.experimental.noalias.scope.decl(metadata !64) #10, !dbg !63
-  %100 = call i64 @rb_ary_new_from_values(i64 noundef 2, i64* noundef nonnull %24) #10, !dbg !63
+  %99 = bitcast i64* %callArgs0Addr.i to <2 x i64>*, !dbg !62
+  store <2 x i64> <i64 3, i64 5>, <2 x i64>* %99, align 8, !dbg !62
+  call void @llvm.experimental.noalias.scope.decl(metadata !63) #10, !dbg !62
+  %100 = call i64 @rb_ary_new_from_values(i64 noundef 2, i64* noundef nonnull %24) #10, !dbg !62
   store i64 %100, i64* %callArgs0Addr.i, align 8, !dbg !14
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %26, align 8, !dbg !14
-  call void @llvm.experimental.noalias.scope.decl(metadata !67) #10, !dbg !14
-  %101 = load i64, i64* %24, align 8, !dbg !14, !tbaa !4, !alias.scope !67
-  %102 = call i64 @sorbet_vm_expandSplatIntrinsic(i64 %101, i64 3, i64 5) #10, !dbg !14, !noalias !67
-  %"rubyId_[]198.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !14
+  call void @llvm.experimental.noalias.scope.decl(metadata !66) #10, !dbg !14
+  %101 = load i64, i64* %24, align 8, !dbg !14, !tbaa !4, !alias.scope !66
+  %102 = call i64 @sorbet_vm_expandSplatIntrinsic(i64 %101, i64 3, i64 5) #10, !dbg !14, !noalias !66
+  %"rubyId_[]195.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !14
   store i64 1, i64* %callArgs0Addr.i, align 8, !dbg !14
-  call void @llvm.experimental.noalias.scope.decl(metadata !70) #10, !dbg !14
-  %103 = load i64, i64* %24, align 8, !dbg !14, !tbaa !4, !alias.scope !70
+  call void @llvm.experimental.noalias.scope.decl(metadata !69) #10, !dbg !14
+  %103 = load i64, i64* %24, align 8, !dbg !14, !tbaa !4, !alias.scope !69
   %104 = and i64 %103, 1, !dbg !14
   %105 = icmp eq i64 %104, 0, !dbg !14
   br i1 %105, label %109, label %106, !dbg !14, !prof !47
@@ -398,13 +398,13 @@ rb_vm_check_ints.exit7.i:                         ; preds = %90, %sorbet_rb_arra
 106:                                              ; preds = %rb_vm_check_ints.exit7.i
   %107 = ashr i64 %103, 1, !dbg !14
   %108 = call i64 @rb_ary_entry(i64 %102, i64 %107) #10, !dbg !14
-  br label %sorbet_rb_array_square_br.exit373.i, !dbg !14
+  br label %sorbet_rb_array_square_br.exit362.i, !dbg !14
 
 109:                                              ; preds = %rb_vm_check_ints.exit7.i
-  %110 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %102, i64 %"rubyId_[]198.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !14
-  br label %sorbet_rb_array_square_br.exit373.i, !dbg !14
+  %110 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %102, i64 %"rubyId_[]195.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !14
+  br label %sorbet_rb_array_square_br.exit362.i, !dbg !14
 
-sorbet_rb_array_square_br.exit373.i:              ; preds = %109, %106
+sorbet_rb_array_square_br.exit362.i:              ; preds = %109, %106
   %111 = phi i64 [ %110, %109 ], [ %108, %106 ], !dbg !14
   %112 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !14, !tbaa !18
   %113 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %112, i64 0, i32 5, !dbg !14
@@ -416,17 +416,17 @@ sorbet_rb_array_square_br.exit373.i:              ; preds = %109, %106
   %119 = icmp eq i32 %118, 0, !dbg !14
   br i1 %119, label %rb_vm_check_ints.exit8.i, label %120, !dbg !14, !prof !50
 
-120:                                              ; preds = %sorbet_rb_array_square_br.exit373.i
+120:                                              ; preds = %sorbet_rb_array_square_br.exit362.i
   %121 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %112, i64 0, i32 8, !dbg !14
   %122 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %121, align 8, !dbg !14, !tbaa !51
   %123 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %122, i32 noundef 0) #10, !dbg !14
   br label %rb_vm_check_ints.exit8.i, !dbg !14
 
-rb_vm_check_ints.exit8.i:                         ; preds = %120, %sorbet_rb_array_square_br.exit373.i
-  %"rubyId_[]212.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !14
+rb_vm_check_ints.exit8.i:                         ; preds = %120, %sorbet_rb_array_square_br.exit362.i
+  %"rubyId_[]208.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !14
   store i64 -3, i64* %callArgs0Addr.i, align 8, !dbg !14
-  call void @llvm.experimental.noalias.scope.decl(metadata !73) #10, !dbg !14
-  %124 = load i64, i64* %24, align 8, !dbg !14, !tbaa !4, !alias.scope !73
+  call void @llvm.experimental.noalias.scope.decl(metadata !72) #10, !dbg !14
+  %124 = load i64, i64* %24, align 8, !dbg !14, !tbaa !4, !alias.scope !72
   %125 = and i64 %124, 1, !dbg !14
   %126 = icmp eq i64 %125, 0, !dbg !14
   br i1 %126, label %130, label %127, !dbg !14, !prof !47
@@ -434,13 +434,13 @@ rb_vm_check_ints.exit8.i:                         ; preds = %120, %sorbet_rb_arr
 127:                                              ; preds = %rb_vm_check_ints.exit8.i
   %128 = ashr i64 %124, 1, !dbg !14
   %129 = call i64 @rb_ary_entry(i64 %102, i64 %128) #10, !dbg !14
-  br label %sorbet_rb_array_square_br.exit374.i, !dbg !14
+  br label %sorbet_rb_array_square_br.exit363.i, !dbg !14
 
 130:                                              ; preds = %rb_vm_check_ints.exit8.i
-  %131 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %102, i64 %"rubyId_[]212.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !14
-  br label %sorbet_rb_array_square_br.exit374.i, !dbg !14
+  %131 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %102, i64 %"rubyId_[]208.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !14
+  br label %sorbet_rb_array_square_br.exit363.i, !dbg !14
 
-sorbet_rb_array_square_br.exit374.i:              ; preds = %130, %127
+sorbet_rb_array_square_br.exit363.i:              ; preds = %130, %127
   %132 = phi i64 [ %131, %130 ], [ %129, %127 ], !dbg !14
   %133 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !14, !tbaa !18
   %134 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %133, i64 0, i32 5, !dbg !14
@@ -452,17 +452,17 @@ sorbet_rb_array_square_br.exit374.i:              ; preds = %130, %127
   %140 = icmp eq i32 %139, 0, !dbg !14
   br i1 %140, label %rb_vm_check_ints.exit6.i, label %141, !dbg !14, !prof !50
 
-141:                                              ; preds = %sorbet_rb_array_square_br.exit374.i
+141:                                              ; preds = %sorbet_rb_array_square_br.exit363.i
   %142 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %133, i64 0, i32 8, !dbg !14
   %143 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %142, align 8, !dbg !14, !tbaa !51
   %144 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %143, i32 noundef 0) #10, !dbg !14
   br label %rb_vm_check_ints.exit6.i, !dbg !14
 
-rb_vm_check_ints.exit6.i:                         ; preds = %141, %sorbet_rb_array_square_br.exit374.i
-  %"rubyId_[]226.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !14
+rb_vm_check_ints.exit6.i:                         ; preds = %141, %sorbet_rb_array_square_br.exit363.i
+  %"rubyId_[]221.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !14
   store i64 -1, i64* %callArgs0Addr.i, align 8, !dbg !14
-  call void @llvm.experimental.noalias.scope.decl(metadata !76) #10, !dbg !14
-  %145 = load i64, i64* %24, align 8, !dbg !14, !tbaa !4, !alias.scope !76
+  call void @llvm.experimental.noalias.scope.decl(metadata !75) #10, !dbg !14
+  %145 = load i64, i64* %24, align 8, !dbg !14, !tbaa !4, !alias.scope !75
   %146 = and i64 %145, 1, !dbg !14
   %147 = icmp eq i64 %146, 0, !dbg !14
   br i1 %147, label %151, label %148, !dbg !14, !prof !47
@@ -470,13 +470,13 @@ rb_vm_check_ints.exit6.i:                         ; preds = %141, %sorbet_rb_arr
 148:                                              ; preds = %rb_vm_check_ints.exit6.i
   %149 = ashr i64 %145, 1, !dbg !14
   %150 = call i64 @rb_ary_entry(i64 %102, i64 %149) #10, !dbg !14
-  br label %sorbet_rb_array_square_br.exit375.i, !dbg !14
+  br label %sorbet_rb_array_square_br.exit364.i, !dbg !14
 
 151:                                              ; preds = %rb_vm_check_ints.exit6.i
-  %152 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %102, i64 %"rubyId_[]226.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !14
-  br label %sorbet_rb_array_square_br.exit375.i, !dbg !14
+  %152 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %102, i64 %"rubyId_[]221.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !14
+  br label %sorbet_rb_array_square_br.exit364.i, !dbg !14
 
-sorbet_rb_array_square_br.exit375.i:              ; preds = %151, %148
+sorbet_rb_array_square_br.exit364.i:              ; preds = %151, %148
   %153 = phi i64 [ %152, %151 ], [ %150, %148 ], !dbg !14
   %154 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !14, !tbaa !18
   %155 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %154, i64 0, i32 5, !dbg !14
@@ -488,155 +488,157 @@ sorbet_rb_array_square_br.exit375.i:              ; preds = %151, %148
   %161 = icmp eq i32 %160, 0, !dbg !14
   br i1 %161, label %rb_vm_check_ints.exit4.i, label %162, !dbg !14, !prof !50
 
-162:                                              ; preds = %sorbet_rb_array_square_br.exit375.i
+162:                                              ; preds = %sorbet_rb_array_square_br.exit364.i
   %163 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %154, i64 0, i32 8, !dbg !14
   %164 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %163, align 8, !dbg !14, !tbaa !51
   %165 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %164, i32 noundef 0) #10, !dbg !14
   br label %rb_vm_check_ints.exit4.i, !dbg !14
 
-rb_vm_check_ints.exit4.i:                         ; preds = %162, %sorbet_rb_array_square_br.exit375.i
+rb_vm_check_ints.exit4.i:                         ; preds = %162, %sorbet_rb_array_square_br.exit364.i
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 9), i64** %21, align 8, !dbg !36, !tbaa !18
-  store i64 %111, i64* %callArgs0Addr.i, align 8, !dbg !79
-  store i64 %132, i64* %callArgs1Addr.i, align 8, !dbg !79
-  store i64 %153, i64* %callArgs2Addr.i, align 8, !dbg !79
-  call void @llvm.experimental.noalias.scope.decl(metadata !80) #10, !dbg !79
-  %166 = call i64 @rb_ary_new_from_values(i64 noundef 3, i64* noundef nonnull %24) #10, !dbg !79
-  %167 = load i64*, i64** %95, align 8, !dbg !15, !tbaa !62
-  %168 = getelementptr inbounds i64, i64* %167, i64 1, !dbg !15
-  store i64 %10, i64* %167, align 8, !dbg !15, !tbaa !4
+  store i64 %111, i64* %callArgs0Addr.i, align 8, !dbg !78
+  store i64 %132, i64* %callArgs1Addr.i, align 8, !dbg !78
+  store i64 %153, i64* %callArgs2Addr.i, align 8, !dbg !78
+  call void @llvm.experimental.noalias.scope.decl(metadata !79) #10, !dbg !78
+  %166 = call i64 @rb_ary_new_from_values(i64 noundef 3, i64* noundef nonnull %24) #10, !dbg !78
+  %167 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %13, i64 0, i32 1, !dbg !15
+  %168 = load i64*, i64** %167, align 8, !dbg !15
+  store i64 %10, i64* %168, align 8, !dbg !15, !tbaa !4
   %169 = getelementptr inbounds i64, i64* %168, i64 1, !dbg !15
-  store i64* %169, i64** %95, align 8, !dbg !15, !tbaa !62
-  store i64 %166, i64* %168, align 8, !dbg !15, !tbaa !4
-  %send250.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts.6, i64 0) #10, !dbg !15
+  store i64 %166, i64* %169, align 8, !dbg !15, !tbaa !4
+  %170 = getelementptr inbounds i64, i64* %169, i64 1, !dbg !15
+  store i64* %170, i64** %167, align 8, !dbg !15
+  %send2 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts.6, i64 0), !dbg !15
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 11), i64** %21, align 8, !dbg !36, !tbaa !18
-  call void @llvm.experimental.noalias.scope.decl(metadata !83) #10, !dbg !86
-  %170 = call i64 @rb_ary_new() #10, !dbg !86
-  store i64 %170, i64* %callArgs0Addr.i, align 8, !dbg !16
+  call void @llvm.experimental.noalias.scope.decl(metadata !82) #10, !dbg !85
+  %171 = call i64 @rb_ary_new() #10, !dbg !85
+  store i64 %171, i64* %callArgs0Addr.i, align 8, !dbg !16
   store <2 x i64> <i64 3, i64 5>, <2 x i64>* %26, align 8, !dbg !16
-  call void @llvm.experimental.noalias.scope.decl(metadata !87) #10, !dbg !16
-  %171 = load i64, i64* %24, align 8, !dbg !16, !tbaa !4, !alias.scope !87
-  %172 = call i64 @sorbet_vm_expandSplatIntrinsic(i64 %171, i64 3, i64 5) #10, !dbg !16, !noalias !87
-  %"rubyId_[]275.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
+  call void @llvm.experimental.noalias.scope.decl(metadata !86) #10, !dbg !16
+  %172 = load i64, i64* %24, align 8, !dbg !16, !tbaa !4, !alias.scope !86
+  %173 = call i64 @sorbet_vm_expandSplatIntrinsic(i64 %172, i64 3, i64 5) #10, !dbg !16, !noalias !86
+  %"rubyId_[]268.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
   store i64 1, i64* %callArgs0Addr.i, align 8, !dbg !16
-  call void @llvm.experimental.noalias.scope.decl(metadata !90) #10, !dbg !16
-  %173 = load i64, i64* %24, align 8, !dbg !16, !tbaa !4, !alias.scope !90
-  %174 = and i64 %173, 1, !dbg !16
-  %175 = icmp eq i64 %174, 0, !dbg !16
-  br i1 %175, label %179, label %176, !dbg !16, !prof !47
+  call void @llvm.experimental.noalias.scope.decl(metadata !89) #10, !dbg !16
+  %174 = load i64, i64* %24, align 8, !dbg !16, !tbaa !4, !alias.scope !89
+  %175 = and i64 %174, 1, !dbg !16
+  %176 = icmp eq i64 %175, 0, !dbg !16
+  br i1 %176, label %180, label %177, !dbg !16, !prof !47
 
-176:                                              ; preds = %rb_vm_check_ints.exit4.i
-  %177 = ashr i64 %173, 1, !dbg !16
-  %178 = call i64 @rb_ary_entry(i64 %172, i64 %177) #10, !dbg !16
-  br label %sorbet_rb_array_square_br.exit376.i, !dbg !16
+177:                                              ; preds = %rb_vm_check_ints.exit4.i
+  %178 = ashr i64 %174, 1, !dbg !16
+  %179 = call i64 @rb_ary_entry(i64 %173, i64 %178) #10, !dbg !16
+  br label %sorbet_rb_array_square_br.exit365.i, !dbg !16
 
-179:                                              ; preds = %rb_vm_check_ints.exit4.i
-  %180 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %172, i64 %"rubyId_[]275.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !16
-  br label %sorbet_rb_array_square_br.exit376.i, !dbg !16
+180:                                              ; preds = %rb_vm_check_ints.exit4.i
+  %181 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %173, i64 %"rubyId_[]268.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !16
+  br label %sorbet_rb_array_square_br.exit365.i, !dbg !16
 
-sorbet_rb_array_square_br.exit376.i:              ; preds = %179, %176
-  %181 = phi i64 [ %180, %179 ], [ %178, %176 ], !dbg !16
-  %182 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !16, !tbaa !18
-  %183 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %182, i64 0, i32 5, !dbg !16
-  %184 = load i32, i32* %183, align 8, !dbg !16, !tbaa !48
-  %185 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %182, i64 0, i32 6, !dbg !16
-  %186 = load i32, i32* %185, align 4, !dbg !16, !tbaa !49
-  %187 = xor i32 %186, -1, !dbg !16
-  %188 = and i32 %187, %184, !dbg !16
-  %189 = icmp eq i32 %188, 0, !dbg !16
-  br i1 %189, label %rb_vm_check_ints.exit2.i, label %190, !dbg !16, !prof !50
+sorbet_rb_array_square_br.exit365.i:              ; preds = %180, %177
+  %182 = phi i64 [ %181, %180 ], [ %179, %177 ], !dbg !16
+  %183 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !16, !tbaa !18
+  %184 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %183, i64 0, i32 5, !dbg !16
+  %185 = load i32, i32* %184, align 8, !dbg !16, !tbaa !48
+  %186 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %183, i64 0, i32 6, !dbg !16
+  %187 = load i32, i32* %186, align 4, !dbg !16, !tbaa !49
+  %188 = xor i32 %187, -1, !dbg !16
+  %189 = and i32 %188, %185, !dbg !16
+  %190 = icmp eq i32 %189, 0, !dbg !16
+  br i1 %190, label %rb_vm_check_ints.exit2.i, label %191, !dbg !16, !prof !50
 
-190:                                              ; preds = %sorbet_rb_array_square_br.exit376.i
-  %191 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %182, i64 0, i32 8, !dbg !16
-  %192 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %191, align 8, !dbg !16, !tbaa !51
-  %193 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %192, i32 noundef 0) #10, !dbg !16
+191:                                              ; preds = %sorbet_rb_array_square_br.exit365.i
+  %192 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %183, i64 0, i32 8, !dbg !16
+  %193 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %192, align 8, !dbg !16, !tbaa !51
+  %194 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %193, i32 noundef 0) #10, !dbg !16
   br label %rb_vm_check_ints.exit2.i, !dbg !16
 
-rb_vm_check_ints.exit2.i:                         ; preds = %190, %sorbet_rb_array_square_br.exit376.i
-  %"rubyId_[]289.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
+rb_vm_check_ints.exit2.i:                         ; preds = %191, %sorbet_rb_array_square_br.exit365.i
+  %"rubyId_[]281.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
   store i64 -3, i64* %callArgs0Addr.i, align 8, !dbg !16
-  call void @llvm.experimental.noalias.scope.decl(metadata !93) #10, !dbg !16
-  %194 = load i64, i64* %24, align 8, !dbg !16, !tbaa !4, !alias.scope !93
-  %195 = and i64 %194, 1, !dbg !16
-  %196 = icmp eq i64 %195, 0, !dbg !16
-  br i1 %196, label %200, label %197, !dbg !16, !prof !47
+  call void @llvm.experimental.noalias.scope.decl(metadata !92) #10, !dbg !16
+  %195 = load i64, i64* %24, align 8, !dbg !16, !tbaa !4, !alias.scope !92
+  %196 = and i64 %195, 1, !dbg !16
+  %197 = icmp eq i64 %196, 0, !dbg !16
+  br i1 %197, label %201, label %198, !dbg !16, !prof !47
 
-197:                                              ; preds = %rb_vm_check_ints.exit2.i
-  %198 = ashr i64 %194, 1, !dbg !16
-  %199 = call i64 @rb_ary_entry(i64 %172, i64 %198) #10, !dbg !16
-  br label %sorbet_rb_array_square_br.exit369.i, !dbg !16
+198:                                              ; preds = %rb_vm_check_ints.exit2.i
+  %199 = ashr i64 %195, 1, !dbg !16
+  %200 = call i64 @rb_ary_entry(i64 %173, i64 %199) #10, !dbg !16
+  br label %sorbet_rb_array_square_br.exit358.i, !dbg !16
 
-200:                                              ; preds = %rb_vm_check_ints.exit2.i
-  %201 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %172, i64 %"rubyId_[]289.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !16
-  br label %sorbet_rb_array_square_br.exit369.i, !dbg !16
+201:                                              ; preds = %rb_vm_check_ints.exit2.i
+  %202 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %173, i64 %"rubyId_[]281.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !16
+  br label %sorbet_rb_array_square_br.exit358.i, !dbg !16
 
-sorbet_rb_array_square_br.exit369.i:              ; preds = %200, %197
-  %202 = phi i64 [ %201, %200 ], [ %199, %197 ], !dbg !16
-  %203 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !16, !tbaa !18
-  %204 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %203, i64 0, i32 5, !dbg !16
-  %205 = load i32, i32* %204, align 8, !dbg !16, !tbaa !48
-  %206 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %203, i64 0, i32 6, !dbg !16
-  %207 = load i32, i32* %206, align 4, !dbg !16, !tbaa !49
-  %208 = xor i32 %207, -1, !dbg !16
-  %209 = and i32 %208, %205, !dbg !16
-  %210 = icmp eq i32 %209, 0, !dbg !16
-  br i1 %210, label %rb_vm_check_ints.exit1.i, label %211, !dbg !16, !prof !50
+sorbet_rb_array_square_br.exit358.i:              ; preds = %201, %198
+  %203 = phi i64 [ %202, %201 ], [ %200, %198 ], !dbg !16
+  %204 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !16, !tbaa !18
+  %205 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %204, i64 0, i32 5, !dbg !16
+  %206 = load i32, i32* %205, align 8, !dbg !16, !tbaa !48
+  %207 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %204, i64 0, i32 6, !dbg !16
+  %208 = load i32, i32* %207, align 4, !dbg !16, !tbaa !49
+  %209 = xor i32 %208, -1, !dbg !16
+  %210 = and i32 %209, %206, !dbg !16
+  %211 = icmp eq i32 %210, 0, !dbg !16
+  br i1 %211, label %rb_vm_check_ints.exit1.i, label %212, !dbg !16, !prof !50
 
-211:                                              ; preds = %sorbet_rb_array_square_br.exit369.i
-  %212 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %203, i64 0, i32 8, !dbg !16
-  %213 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %212, align 8, !dbg !16, !tbaa !51
-  %214 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %213, i32 noundef 0) #10, !dbg !16
+212:                                              ; preds = %sorbet_rb_array_square_br.exit358.i
+  %213 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %204, i64 0, i32 8, !dbg !16
+  %214 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %213, align 8, !dbg !16, !tbaa !51
+  %215 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %214, i32 noundef 0) #10, !dbg !16
   br label %rb_vm_check_ints.exit1.i, !dbg !16
 
-rb_vm_check_ints.exit1.i:                         ; preds = %211, %sorbet_rb_array_square_br.exit369.i
-  %"rubyId_[]303.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
+rb_vm_check_ints.exit1.i:                         ; preds = %212, %sorbet_rb_array_square_br.exit358.i
+  %"rubyId_[]294.i" = load i64, i64* @"rubyIdPrecomputed_[]", align 8, !dbg !16
   store i64 -1, i64* %callArgs0Addr.i, align 8, !dbg !16
-  call void @llvm.experimental.noalias.scope.decl(metadata !96) #10, !dbg !16
-  %215 = load i64, i64* %24, align 8, !dbg !16, !tbaa !4, !alias.scope !96
-  %216 = and i64 %215, 1, !dbg !16
-  %217 = icmp eq i64 %216, 0, !dbg !16
-  br i1 %217, label %221, label %218, !dbg !16, !prof !47
+  call void @llvm.experimental.noalias.scope.decl(metadata !95) #10, !dbg !16
+  %216 = load i64, i64* %24, align 8, !dbg !16, !tbaa !4, !alias.scope !95
+  %217 = and i64 %216, 1, !dbg !16
+  %218 = icmp eq i64 %217, 0, !dbg !16
+  br i1 %218, label %222, label %219, !dbg !16, !prof !47
 
-218:                                              ; preds = %rb_vm_check_ints.exit1.i
-  %219 = ashr i64 %215, 1, !dbg !16
-  %220 = call i64 @rb_ary_entry(i64 %172, i64 %219) #10, !dbg !16
+219:                                              ; preds = %rb_vm_check_ints.exit1.i
+  %220 = ashr i64 %216, 1, !dbg !16
+  %221 = call i64 @rb_ary_entry(i64 %173, i64 %220) #10, !dbg !16
   br label %sorbet_rb_array_square_br.exit.i, !dbg !16
 
-221:                                              ; preds = %rb_vm_check_ints.exit1.i
-  %222 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %172, i64 %"rubyId_[]303.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !16
+222:                                              ; preds = %rb_vm_check_ints.exit1.i
+  %223 = call i64 @sorbet_rb_array_square_br_slowpath(i64 %173, i64 %"rubyId_[]294.i", i32 noundef 1, i64* noundef nonnull %24, i64 (i64, i64, i32, i64*, i64)* noundef null, i64 noundef 0) #10, !dbg !16
   br label %sorbet_rb_array_square_br.exit.i, !dbg !16
 
-sorbet_rb_array_square_br.exit.i:                 ; preds = %221, %218
-  %223 = phi i64 [ %222, %221 ], [ %220, %218 ], !dbg !16
-  %224 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !16, !tbaa !18
-  %225 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %224, i64 0, i32 5, !dbg !16
-  %226 = load i32, i32* %225, align 8, !dbg !16, !tbaa !48
-  %227 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %224, i64 0, i32 6, !dbg !16
-  %228 = load i32, i32* %227, align 4, !dbg !16, !tbaa !49
-  %229 = xor i32 %228, -1, !dbg !16
-  %230 = and i32 %229, %226, !dbg !16
-  %231 = icmp eq i32 %230, 0, !dbg !16
-  br i1 %231, label %"func_<root>.<static-init>$152.exit", label %232, !dbg !16, !prof !50
+sorbet_rb_array_square_br.exit.i:                 ; preds = %222, %219
+  %224 = phi i64 [ %223, %222 ], [ %221, %219 ], !dbg !16
+  %225 = load %struct.rb_execution_context_struct*, %struct.rb_execution_context_struct** @ruby_current_execution_context_ptr, align 8, !dbg !16, !tbaa !18
+  %226 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %225, i64 0, i32 5, !dbg !16
+  %227 = load i32, i32* %226, align 8, !dbg !16, !tbaa !48
+  %228 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %225, i64 0, i32 6, !dbg !16
+  %229 = load i32, i32* %228, align 4, !dbg !16, !tbaa !49
+  %230 = xor i32 %229, -1, !dbg !16
+  %231 = and i32 %230, %227, !dbg !16
+  %232 = icmp eq i32 %231, 0, !dbg !16
+  br i1 %232, label %"func_<root>.<static-init>$152.exit", label %233, !dbg !16, !prof !50
 
-232:                                              ; preds = %sorbet_rb_array_square_br.exit.i
-  %233 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %224, i64 0, i32 8, !dbg !16
-  %234 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %233, align 8, !dbg !16, !tbaa !51
-  %235 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %234, i32 noundef 0) #10, !dbg !16
+233:                                              ; preds = %sorbet_rb_array_square_br.exit.i
+  %234 = getelementptr inbounds %struct.rb_execution_context_struct, %struct.rb_execution_context_struct* %225, i64 0, i32 8, !dbg !16
+  %235 = load %struct.rb_thread_struct*, %struct.rb_thread_struct** %234, align 8, !dbg !16, !tbaa !51
+  %236 = call i32 @rb_threadptr_execute_interrupts(%struct.rb_thread_struct* %235, i32 noundef 0) #10, !dbg !16
   br label %"func_<root>.<static-init>$152.exit", !dbg !16
 
-"func_<root>.<static-init>$152.exit":             ; preds = %sorbet_rb_array_square_br.exit.i, %232
+"func_<root>.<static-init>$152.exit":             ; preds = %sorbet_rb_array_square_br.exit.i, %233
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 12), i64** %21, align 8, !dbg !36, !tbaa !18
-  store i64 %181, i64* %callArgs0Addr.i, align 8, !dbg !99
-  store i64 %202, i64* %callArgs1Addr.i, align 8, !dbg !99
-  store i64 %223, i64* %callArgs2Addr.i, align 8, !dbg !99
-  call void @llvm.experimental.noalias.scope.decl(metadata !100) #10, !dbg !99
-  %236 = call i64 @rb_ary_new_from_values(i64 noundef 3, i64* noundef nonnull %24) #10, !dbg !99
-  %237 = load i64*, i64** %95, align 8, !dbg !17, !tbaa !62
-  %238 = getelementptr inbounds i64, i64* %237, i64 1, !dbg !17
-  store i64 %10, i64* %237, align 8, !dbg !17, !tbaa !4
-  %239 = getelementptr inbounds i64, i64* %238, i64 1, !dbg !17
-  store i64* %239, i64** %95, align 8, !dbg !17, !tbaa !62
-  store i64 %236, i64* %238, align 8, !dbg !17, !tbaa !4
-  %send327.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts.10, i64 0) #10, !dbg !17
+  store i64 %182, i64* %callArgs0Addr.i, align 8, !dbg !98
+  store i64 %203, i64* %callArgs1Addr.i, align 8, !dbg !98
+  store i64 %224, i64* %callArgs2Addr.i, align 8, !dbg !98
+  call void @llvm.experimental.noalias.scope.decl(metadata !99) #10, !dbg !98
+  %237 = call i64 @rb_ary_new_from_values(i64 noundef 3, i64* noundef nonnull %24) #10, !dbg !98
+  %238 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %13, i64 0, i32 1, !dbg !17
+  %239 = load i64*, i64** %238, align 8, !dbg !17
+  store i64 %10, i64* %239, align 8, !dbg !17, !tbaa !4
+  %240 = getelementptr inbounds i64, i64* %239, i64 1, !dbg !17
+  store i64 %237, i64* %240, align 8, !dbg !17, !tbaa !4
+  %241 = getelementptr inbounds i64, i64* %240, i64 1, !dbg !17
+  store i64* %241, i64** %238, align 8, !dbg !17
+  %send3 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts.10, i64 0), !dbg !17
   call void @llvm.lifetime.end.p0i8(i64 64, i8* nonnull %14)
   ret void
 }
@@ -727,44 +729,43 @@ attributes #10 = { nounwind }
 !59 = !{!60}
 !60 = distinct !{!60, !61, !"sorbet_buildArrayIntrinsic: argument 0"}
 !61 = distinct !{!61, !"sorbet_buildArrayIntrinsic"}
-!62 = !{!34, !19, i64 8}
-!63 = !DILocation(line: 8, column: 11, scope: !9)
-!64 = !{!65}
-!65 = distinct !{!65, !66, !"sorbet_buildArrayIntrinsic: argument 0"}
-!66 = distinct !{!66, !"sorbet_buildArrayIntrinsic"}
-!67 = !{!68}
-!68 = distinct !{!68, !69, !"sorbet_expandSplatIntrinsic: argument 0"}
-!69 = distinct !{!69, !"sorbet_expandSplatIntrinsic"}
-!70 = !{!71}
-!71 = distinct !{!71, !72, !"sorbet_rb_array_square_br: argument 0"}
-!72 = distinct !{!72, !"sorbet_rb_array_square_br"}
-!73 = !{!74}
-!74 = distinct !{!74, !75, !"sorbet_rb_array_square_br: argument 0"}
-!75 = distinct !{!75, !"sorbet_rb_array_square_br"}
-!76 = !{!77}
-!77 = distinct !{!77, !78, !"sorbet_rb_array_square_br: argument 0"}
-!78 = distinct !{!78, !"sorbet_rb_array_square_br"}
-!79 = !DILocation(line: 9, column: 6, scope: !9)
-!80 = !{!81}
-!81 = distinct !{!81, !82, !"sorbet_buildArrayIntrinsic: argument 0"}
-!82 = distinct !{!82, !"sorbet_buildArrayIntrinsic"}
-!83 = !{!84}
-!84 = distinct !{!84, !85, !"sorbet_buildArrayIntrinsic: argument 0"}
-!85 = distinct !{!85, !"sorbet_buildArrayIntrinsic"}
-!86 = !DILocation(line: 11, column: 11, scope: !9)
-!87 = !{!88}
-!88 = distinct !{!88, !89, !"sorbet_expandSplatIntrinsic: argument 0"}
-!89 = distinct !{!89, !"sorbet_expandSplatIntrinsic"}
-!90 = !{!91}
-!91 = distinct !{!91, !92, !"sorbet_rb_array_square_br: argument 0"}
-!92 = distinct !{!92, !"sorbet_rb_array_square_br"}
-!93 = !{!94}
-!94 = distinct !{!94, !95, !"sorbet_rb_array_square_br: argument 0"}
-!95 = distinct !{!95, !"sorbet_rb_array_square_br"}
-!96 = !{!97}
-!97 = distinct !{!97, !98, !"sorbet_rb_array_square_br: argument 0"}
-!98 = distinct !{!98, !"sorbet_rb_array_square_br"}
-!99 = !DILocation(line: 12, column: 6, scope: !9)
-!100 = !{!101}
-!101 = distinct !{!101, !102, !"sorbet_buildArrayIntrinsic: argument 0"}
-!102 = distinct !{!102, !"sorbet_buildArrayIntrinsic"}
+!62 = !DILocation(line: 8, column: 11, scope: !9)
+!63 = !{!64}
+!64 = distinct !{!64, !65, !"sorbet_buildArrayIntrinsic: argument 0"}
+!65 = distinct !{!65, !"sorbet_buildArrayIntrinsic"}
+!66 = !{!67}
+!67 = distinct !{!67, !68, !"sorbet_expandSplatIntrinsic: argument 0"}
+!68 = distinct !{!68, !"sorbet_expandSplatIntrinsic"}
+!69 = !{!70}
+!70 = distinct !{!70, !71, !"sorbet_rb_array_square_br: argument 0"}
+!71 = distinct !{!71, !"sorbet_rb_array_square_br"}
+!72 = !{!73}
+!73 = distinct !{!73, !74, !"sorbet_rb_array_square_br: argument 0"}
+!74 = distinct !{!74, !"sorbet_rb_array_square_br"}
+!75 = !{!76}
+!76 = distinct !{!76, !77, !"sorbet_rb_array_square_br: argument 0"}
+!77 = distinct !{!77, !"sorbet_rb_array_square_br"}
+!78 = !DILocation(line: 9, column: 6, scope: !9)
+!79 = !{!80}
+!80 = distinct !{!80, !81, !"sorbet_buildArrayIntrinsic: argument 0"}
+!81 = distinct !{!81, !"sorbet_buildArrayIntrinsic"}
+!82 = !{!83}
+!83 = distinct !{!83, !84, !"sorbet_buildArrayIntrinsic: argument 0"}
+!84 = distinct !{!84, !"sorbet_buildArrayIntrinsic"}
+!85 = !DILocation(line: 11, column: 11, scope: !9)
+!86 = !{!87}
+!87 = distinct !{!87, !88, !"sorbet_expandSplatIntrinsic: argument 0"}
+!88 = distinct !{!88, !"sorbet_expandSplatIntrinsic"}
+!89 = !{!90}
+!90 = distinct !{!90, !91, !"sorbet_rb_array_square_br: argument 0"}
+!91 = distinct !{!91, !"sorbet_rb_array_square_br"}
+!92 = !{!93}
+!93 = distinct !{!93, !94, !"sorbet_rb_array_square_br: argument 0"}
+!94 = distinct !{!94, !"sorbet_rb_array_square_br"}
+!95 = !{!96}
+!96 = distinct !{!96, !97, !"sorbet_rb_array_square_br: argument 0"}
+!97 = distinct !{!97, !"sorbet_rb_array_square_br"}
+!98 = !DILocation(line: 12, column: 6, scope: !9)
+!99 = !{!100}
+!100 = distinct !{!100, !101, !"sorbet_buildArrayIntrinsic: argument 0"}
+!101 = distinct !{!101, !"sorbet_buildArrayIntrinsic"}

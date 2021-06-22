@@ -164,7 +164,11 @@ public:
             blockHandler = Payload::makeBlockHandlerProc(cs, mcctx.build, block);
         }
 
-        auto *cache = IREmitterHelpers::pushSendArgs(mcctx, recv, string(name), 3);
+        auto [stack, keywords, flags] = IREmitterHelpers::buildSendArgs(mcctx, recv, 3);
+        auto &builder = builderCast(mcctx.build);
+        auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+        Payload::pushRubyStackVector(cs, builder, cfp, stack);
+        auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, string(name), flags, stack.size() - 1, keywords);
         return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
     }
     virtual InlinedVector<core::NameRef, 2> applicableMethods(CompilerState &cs) const override {
@@ -376,11 +380,6 @@ public:
 
         auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, mcctx.rubyBlockId);
 
-        // Push receiver. We can't use MethodCallContext::varGetRecv here because the real receiver
-        // is actually the first arg of the callWithSplat intrinsic method.
-        Payload::pushRubyStack(cs, builder, cfp,
-                               Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId));
-
         // For the VM send there will be two cases:
         //
         // 1. We do not have keyword args (args[3] is nil). Then we can just dup args[2] and use VM_CALL_ARGS_SPLAT.
@@ -460,8 +459,11 @@ public:
             flags.fcall = true;
         }
 
-        // Push the splat array.
-        Payload::pushRubyStack(cs, builder, cfp, splatArray);
+        // Push receiver and the splat array.
+        // For the receiver, we can't use MethodCallContext::varGetRecv here because the real receiver
+        // is actually the first arg of the callWithSplat intrinsic method.
+        Payload::pushRubyStackVector(
+            cs, builder, cfp, {Payload::varGet(mcctx.cs, recv, mcctx.build, irctx, mcctx.rubyBlockId), splatArray});
 
         // Call the receiver.
         auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, std::string(methodName), flags, 1, {});

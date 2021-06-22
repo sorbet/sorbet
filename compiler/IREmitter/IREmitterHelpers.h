@@ -88,12 +88,17 @@ public:
     static llvm::Value *buildU4(CompilerState &cs, u4 i);
     static llvm::Value *buildS4(CompilerState &cs, int i);
 
-    // Push all send args to the ruby stack, and return the call cache global that will be needed to call the method.
-    static llvm::Value *pushSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv, std::string methodName,
-                                     const std::size_t offset);
-    static llvm::Value *pushSendArgs(MethodCallContext &mcctx);
-
     static llvm::Value *emitMethodCall(MethodCallContext &mcctx);
+
+    struct RubyStackArgs {
+        RubyStackArgs(std::vector<llvm::Value *> stack, std::vector<std::string_view> keywords, CallCacheFlags flags);
+
+        std::vector<llvm::Value *> stack;
+        std::vector<std::string_view> keywords;
+        CallCacheFlags flags;
+    };
+
+    static RubyStackArgs buildSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv, const std::size_t offset);
 
     static llvm::Value *makeInlineCache(CompilerState &cs, llvm::IRBuilderBase &build, std::string methodName,
                                         CallCacheFlags flags, int argc, const std::vector<std::string_view> &keywords);

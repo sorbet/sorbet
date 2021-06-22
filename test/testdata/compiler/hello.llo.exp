@@ -184,13 +184,13 @@ entry:
   store i64* getelementptr inbounds ([5 x i64], [5 x i64]* @iseqEncodedArray, i64 0, i64 4), i64** %17, align 8, !dbg !31, !tbaa !13
   %"rubyStr_hello world.i" = load i64, i64* @"rubyStrFrozen_hello world", align 8, !dbg !32
   %18 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %11, i64 0, i32 1, !dbg !8
-  %19 = load i64*, i64** %18, align 8, !dbg !8, !tbaa !33
-  %20 = getelementptr inbounds i64, i64* %19, i64 1, !dbg !8
+  %19 = load i64*, i64** %18, align 8, !dbg !8
   store i64 %8, i64* %19, align 8, !dbg !8, !tbaa !4
-  %21 = getelementptr inbounds i64, i64* %20, i64 1, !dbg !8
-  store i64* %21, i64** %18, align 8, !dbg !8, !tbaa !33
+  %20 = getelementptr inbounds i64, i64* %19, i64 1, !dbg !8
   store i64 %"rubyStr_hello world.i", i64* %20, align 8, !dbg !8, !tbaa !4
-  %send.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 0) #8, !dbg !8
+  %21 = getelementptr inbounds i64, i64* %20, i64 1, !dbg !8
+  store i64* %21, i64** %18, align 8, !dbg !8
+  %send = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !8
   ret void
 }
 
@@ -240,4 +240,3 @@ attributes #8 = { nounwind }
 !30 = !{!29, !14, i64 32}
 !31 = !DILocation(line: 0, scope: !9)
 !32 = !DILocation(line: 4, column: 6, scope: !9)
-!33 = !{!29, !14, i64 8}

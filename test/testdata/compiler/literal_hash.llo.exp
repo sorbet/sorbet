@@ -390,25 +390,25 @@ entry:
   %duplicatedHash105.i = call i64 @sorbet_globalConstDupHash(i64 %hashLiteral104.i) #9, !dbg !40
   store i64* getelementptr inbounds ([15 x i64], [15 x i64]* @iseqEncodedArray, i64 0, i64 14), i64** %50, align 8, !dbg !40, !tbaa !13
   %51 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %44, i64 0, i32 1, !dbg !8
-  %52 = load i64*, i64** %51, align 8, !dbg !8, !tbaa !41
-  %53 = getelementptr inbounds i64, i64* %52, i64 1, !dbg !8
+  %52 = load i64*, i64** %51, align 8, !dbg !8
   store i64 %41, i64* %52, align 8, !dbg !8, !tbaa !4
-  %54 = getelementptr inbounds i64, i64* %53, i64 1, !dbg !8
+  %53 = getelementptr inbounds i64, i64* %52, i64 1, !dbg !8
   store i64 %duplicatedHash.i, i64* %53, align 8, !dbg !8, !tbaa !4
-  %55 = getelementptr inbounds i64, i64* %54, i64 1, !dbg !8
+  %54 = getelementptr inbounds i64, i64* %53, i64 1, !dbg !8
   store i64 %duplicatedHash80.i, i64* %54, align 8, !dbg !8, !tbaa !4
-  %56 = getelementptr inbounds i64, i64* %55, i64 1, !dbg !8
+  %55 = getelementptr inbounds i64, i64* %54, i64 1, !dbg !8
   store i64 %duplicatedHash85.i, i64* %55, align 8, !dbg !8, !tbaa !4
-  %57 = getelementptr inbounds i64, i64* %56, i64 1, !dbg !8
+  %56 = getelementptr inbounds i64, i64* %55, i64 1, !dbg !8
   store i64 %duplicatedHash90.i, i64* %56, align 8, !dbg !8, !tbaa !4
-  %58 = getelementptr inbounds i64, i64* %57, i64 1, !dbg !8
+  %57 = getelementptr inbounds i64, i64* %56, i64 1, !dbg !8
   store i64 %duplicatedHash95.i, i64* %57, align 8, !dbg !8, !tbaa !4
-  %59 = getelementptr inbounds i64, i64* %58, i64 1, !dbg !8
+  %58 = getelementptr inbounds i64, i64* %57, i64 1, !dbg !8
   store i64 %duplicatedHash100.i, i64* %58, align 8, !dbg !8, !tbaa !4
-  %60 = getelementptr inbounds i64, i64* %59, i64 1, !dbg !8
-  store i64* %60, i64** %51, align 8, !dbg !8, !tbaa !41
+  %59 = getelementptr inbounds i64, i64* %58, i64 1, !dbg !8
   store i64 %duplicatedHash105.i, i64* %59, align 8, !dbg !8, !tbaa !4
-  %send.i = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* noundef @ic_puts, i64 0) #9, !dbg !8
+  %60 = getelementptr inbounds i64, i64* %59, i64 1, !dbg !8
+  store i64* %60, i64** %51, align 8, !dbg !8
+  %send = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !8
   ret void
 }
 
@@ -473,4 +473,3 @@ attributes #9 = { nounwind }
 !38 = !DILocation(line: 12, column: 5, scope: !9)
 !39 = !DILocation(line: 13, column: 7, scope: !9)
 !40 = !DILocation(line: 13, column: 5, scope: !9)
-!41 = !{!29, !14, i64 8}

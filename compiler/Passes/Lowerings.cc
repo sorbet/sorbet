@@ -286,11 +286,70 @@ const vector<pair<llvm::StringRef, llvm::StringRef>> TypeTest::intrinsicMap{
     {"sorbet_i_isa_Proc", "sorbet_isa_Proc"},           {"sorbet_i_isa_RootSingleton", "sorbet_isa_RootSingleton"},
 };
 
+class SorbetSend : public IRIntrinsic {
+public:
+    virtual vector<llvm::StringRef> implementedFunctionCall() const override {
+        return {"sorbet_i_send"};
+    }
+
+    // Original ruby code:
+    //   puts "a"
+    //
+    // Detects code that looks like this:
+    //
+    //   %VM_BLOCK_HANDLER_NONE = call i64 @sorbet_vmBlockHandlerNone(), !dbg !121
+    //   %3 = call ... @sorbet_i_send(%struct.FunctionInlineCache* @ic_puts,
+    //                                i64 %VM_BLOCK_HANDLER_NONE,
+    //                                %struct.rb_control_frame_struct* %cfp,
+    //                                i64 %selfRaw,
+    //                                i64 %rubyStr_a
+    //                               ), !dbg !121
+    //
+    // and replaces it with:
+    //
+    // (disabling clang-format here because it will otherwise remove all the newlines)
+    // clang-format off
+    //   (1) %18 = getelementptr inbounds %struct.rb_control_frame_struct, %struct.rb_control_frame_struct* %11, i64 0, i32 1, !dbg !8
+    //   (2) %19 = load i64*, i64** %18, align 8, !dbg !8
+    //   (3) store i64 %8, i64* %19, align 8, !dbg !8, !tbaa !4
+    //   (4) %20 = getelementptr inbounds i64, i64* %19, i64 1, !dbg !8
+    //   (5) store i64 %rubyStr_a.i, i64* %20, align 8, !dbg !8, !tbaa !4
+    //   (6) %21 = getelementptr inbounds i64, i64* %20, i64 1, !dbg !8
+    //   (7) store i64* %21, i64** %18, align 8, !dbg !8
+    //   (8) %send = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !8
+    // clang-format on
+    //
+    // Lines 1 & 2 correspond to the sorbet_get_sp call, and the sp load from spPtr
+    // Lines 3 & 4 correspond to the sorbet_push call for self, while 5 & 6 correspond to the sorbet_push call for "a".
+    // Line 7 corresponds to the store to spPtr.
+    // Line 8 corresponds to the sorbet_callFuncWithCache call.
+    virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
+                                     llvm::CallInst *instr) const override {
+        // Make sure cache, blockHandler, cfp and self are passed in.
+        ENFORCE(instr->arg_size() >= 4);
+
+        llvm::IRBuilder<> builder(instr);
+        auto *cache = instr->getArgOperand(0);
+        auto *blockHandler = instr->getArgOperand(1);
+        auto *cfp = instr->getArgOperand(2);
+
+        auto *spPtr = builder.CreateCall(module.getFunction("sorbet_get_sp"), {cfp});
+        auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
+        llvm::Value *sp = builder.CreateLoad(spPtrType->getElementType(), spPtr);
+        for (auto iter = std::next(instr->arg_begin(), 3); iter < instr->arg_end(); ++iter) {
+            sp = builder.CreateCall(module.getFunction("sorbet_push"), {sp, iter->get()});
+        }
+        builder.CreateStore(sp, spPtr);
+        return builder.CreateCall(module.getFunction("sorbet_callFuncWithCache"), {cache, blockHandler}, "send");
+    }
+} SorbetSend;
+
 vector<IRIntrinsic *> getIRIntrinsics() {
     vector<IRIntrinsic *> irIntrinsics{
         &ClassAndModuleLoading,
         &ObjIsKindOf,
         &TypeTest,
+        &SorbetSend,
     };
 
     return irIntrinsics;

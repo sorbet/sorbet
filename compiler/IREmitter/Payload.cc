@@ -1094,9 +1094,16 @@ void Payload::dbg_p(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *
     builder.CreateCall(cs.getFunction("sorbet_dbg_p"), {val});
 }
 
-void Payload::pushRubyStack(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cfp, llvm::Value *val) {
+void Payload::pushRubyStackVector(CompilerState &cs, llvm::IRBuilderBase &build, llvm::Value *cfp,
+                                  const std::vector<llvm::Value *> &stack) {
     auto &builder = builderCast(build);
-    builder.CreateCall(cs.getFunction("sorbet_push"), {cfp, val});
+    auto *spPtr = builder.CreateCall(cs.getFunction("sorbet_get_sp"), {cfp});
+    auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
+    llvm::Value *sp = builder.CreateLoad(spPtrType->getElementType(), spPtr);
+    for (auto *arg : stack) {
+        sp = builder.CreateCall(cs.getFunction("sorbet_push"), {sp, arg});
+    }
+    builder.CreateStore(sp, spPtr);
 }
 
 llvm::Value *Payload::vmBlockHandlerNone(CompilerState &cs, llvm::IRBuilderBase &build) {

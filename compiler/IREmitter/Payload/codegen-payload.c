@@ -110,6 +110,7 @@ SORBET_ALIVE(VALUE, sorbet_rb_int_ge_slowpath, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
+SORBET_ALIVE(VALUE, sorbet_i_send, (struct FunctionInlineCache *, VALUE, rb_control_frame_t *, ...));
 
 SORBET_ALIVE(_Bool, sorbet_i_isa_Integer, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_TrueClass, (VALUE) __attribute__((const)));
@@ -1722,10 +1723,17 @@ VALUE sorbet_callBlock(int argc, SORBET_ATTRIBUTE(noescape) const VALUE *const r
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.h#L123
 #define GET_PREV_EP(ep) ((VALUE *)((ep)[VM_ENV_DATA_INDEX_SPECVAL] & ~0x03))
 
-// Push an entry to the ruby stack
+// get sp from the cfp
 SORBET_INLINE
-void sorbet_push(rb_control_frame_t *cfp, const VALUE val) {
-    *(cfp->sp++) = val;
+VALUE **sorbet_get_sp(rb_control_frame_t *cfp) {
+    return &(cfp->sp);
+}
+
+// Push an entry to the ruby stack and return the new sp
+SORBET_INLINE
+VALUE *sorbet_push(VALUE *sp, const VALUE val) {
+    *sp = val;
+    return (sp + 1);
 }
 
 // https://github.com/ruby/ruby/blob/a9a48e6a741f048766a2a287592098c4f6c7b7c7/vm_insnhelper.c#L2919-L2928
@@ -2235,5 +2243,6 @@ VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) 
            (long)&sorbet_isa_FalseClass + (long)&sorbet_isa_NilClass + (long)&sorbet_isa_Symbol +
            (long)&sorbet_isa_Float + (long)&sorbet_isa_Untyped + (long)&sorbet_isa_Hash + (long)&sorbet_isa_Array +
            (long)&sorbet_isa_Regexp + (long)&sorbet_isa_String + (long)&sorbet_isa_Proc +
-           (long)&sorbet_isa_RootSingleton;
+           (long)&sorbet_isa_RootSingleton + (long)&sorbet_get_sp + (long)&sorbet_push +
+           (long)&sorbet_callFuncWithCache;
 }

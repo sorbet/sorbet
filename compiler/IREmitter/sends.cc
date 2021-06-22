@@ -59,8 +59,7 @@ llvm::Function *getFinalForwarder(MethodCallContext &mcctx, IREmitterHelpers::Fi
 
         // setup the ruby stack
         auto *cfp = builder.CreateCall(funcCs.getFunction("sorbet_getCFP"), {}, "cfp");
-        Payload::pushRubyStack(funcCs, builder, cfp, self);
-        Payload::pushRubyStack(funcCs, builder, cfp, splat);
+        Payload::pushRubyStackVector(funcCs, builder, cfp, {self, splat});
         auto methodName = string(send->fun.shortName(funcCs));
         CallCacheFlags flags;
         flags.args_splat = true;
@@ -352,15 +351,12 @@ IREmitterHelpers::SendArgInfo IREmitterHelpers::fillSendArgArray(MethodCallConte
     return fillSendArgArray(mcctx, 0);
 }
 
-llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx) {
-    auto recv = mcctx.send->recv.variable;
-    auto methodName = string(mcctx.send->fun.shortName(mcctx.cs));
-    size_t offset = 0;
-    return IREmitterHelpers::pushSendArgs(mcctx, recv, methodName, offset);
-}
+IREmitterHelpers::RubyStackArgs::RubyStackArgs(std::vector<llvm::Value *> stack, std::vector<std::string_view> keywords,
+                                               CallCacheFlags flags)
+    : stack{std::move(stack)}, keywords{std::move(keywords)}, flags{flags} {}
 
-llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv, string methodName,
-                                            const std::size_t offset) {
+IREmitterHelpers::RubyStackArgs IREmitterHelpers::buildSendArgs(MethodCallContext &mcctx, cfg::LocalRef recv,
+                                                                const std::size_t offset) {
     auto &cs = mcctx.cs;
     auto &irctx = mcctx.irctx;
     auto &builder = builderCast(mcctx.build);
@@ -420,15 +416,7 @@ llvm::Value *IREmitterHelpers::pushSendArgs(MethodCallContext &mcctx, cfg::Local
         flags.fcall = true;
     }
 
-    // the receiver isn't included in the arg count
-    int argc = stack.size() - 1;
-
-    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
-    for (auto *arg : stack) {
-        Payload::pushRubyStack(cs, builder, cfp, arg);
-    }
-
-    return makeInlineCache(cs, builder, methodName, flags, argc, keywords);
+    return IREmitterHelpers::RubyStackArgs(std::move(stack), std::move(keywords), flags);
 }
 
 namespace {
@@ -551,14 +539,33 @@ llvm::Value *IREmitterHelpers::makeInlineCache(CompilerState &cs, llvm::IRBuilde
 }
 
 llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
-    auto *cache = IREmitterHelpers::pushSendArgs(mcctx);
+    auto &cs = mcctx.cs;
+    auto &builder = builderCast(mcctx.build);
+    auto &irctx = mcctx.irctx;
+    auto rubyBlockId = mcctx.rubyBlockId;
+    auto *cfp = Payload::getCFPForBlock(cs, builder, irctx, rubyBlockId);
+    auto recv = mcctx.send->recv.variable;
+    auto methodName = string(mcctx.send->fun.shortName(mcctx.cs));
+    auto [stack, keywords, flags] = buildSendArgs(mcctx, recv, 0);
+
+    auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, methodName, flags, stack.size() - 1, keywords);
 
     if (auto *blk = mcctx.blkAsFunction()) {
         auto *closure = Payload::buildLocalsOffset(mcctx.cs);
+        Payload::pushRubyStackVector(cs, builder, cfp, stack);
+
         return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, blk, closure);
     } else {
         auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.build);
-        return Payload::callFuncWithCache(mcctx.cs, mcctx.build, cache, blockHandler);
+        vector<llvm::Value *> args;
+        args.emplace_back(cache);
+        args.emplace_back(blockHandler);
+        args.emplace_back(cfp);
+        for (auto *arg : stack) {
+            args.emplace_back(arg);
+        }
+        // TODO(neil) add methodName as a phantom arg to sorbet_i_send
+        return builder.CreateCall(cs.getFunction("sorbet_i_send"), llvm::ArrayRef(args));
     }
 }
 
