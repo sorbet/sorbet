@@ -578,6 +578,9 @@ module Opus::Types::Test
           end
         end
         assert_equal("ok", c.new.bad_return)
+        # Force the sig block to be actually run.
+        T::Utils.signature_for_method(c.instance_method(:bad_return))
+        assert_equal("ok", c.new.bad_return)
       end
 
       it 'should not raise errors on argument type mismatch' do
@@ -594,6 +597,9 @@ module Opus::Types::Test
             end
           end
         end
+        assert_equal(:ok, c.new.bad_arg("wrong arg type"))
+        # Force the sig block to be actually run.
+        T::Utils.signature_for_method(c.instance_method(:bad_arg))
         assert_equal(:ok, c.new.bad_arg("wrong arg type"))
       end
     end

@@ -77,7 +77,7 @@ module T::Private::Methods
   end
 
   def self.start_proc
-    DeclBuilder.new(PROC_TYPE)
+    DeclBuilder.new(PROC_TYPE, false)
   end
 
   def self.finalize_proc(decl)
@@ -348,7 +348,7 @@ module T::Private::Methods
   end
 
   def self.run_builder(declaration_block)
-    builder = DeclBuilder.new(declaration_block.mod)
+    builder = DeclBuilder.new(declaration_block.mod, declaration_block.raw)
     builder
       .instance_exec(&declaration_block.blk)
       .finalize!
@@ -379,6 +379,7 @@ module T::Private::Methods
         check_level: current_declaration.checked,
         on_failure: current_declaration.on_failure,
         override_allow_incompatible: current_declaration.override_allow_incompatible,
+        defined_raw: current_declaration.raw,
       )
 
       SignatureValidation.validate(signature)
