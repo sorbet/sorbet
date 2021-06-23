@@ -26,8 +26,6 @@ module T::Private::Methods
   # in installed_hooks.
   @old_hooks = nil
 
-  @declaring_final_method = false
-
   ARG_NOT_PROVIDED = Object.new
   PROC_TYPE = Object.new
 
@@ -182,17 +180,6 @@ module T::Private::Methods
     @modules_with_final[mod.singleton_class]
   end
 
-  # See tests for how to use this.
-  def self._with_declaring_final_method_INTERNAL(&blk)
-    begin
-      prev_value = @declaring_final_method
-      @declaring_final_method = true
-      yield
-    ensure
-      @declaring_final_method = prev_value
-    end
-  end
-
   # Only public because it needs to get called below inside the replace_method blocks below.
   def self._on_method_added(hook_mod, method_name, is_singleton_method: false)
     if T::Private::DeclState.current.skip_on_method_added
@@ -202,9 +189,7 @@ module T::Private::Methods
     current_declaration = T::Private::DeclState.current.active_declaration
     mod = is_singleton_method ? hook_mod.singleton_class : hook_mod
 
-    directly_declaring_final_method = @declaring_final_method
-    method_is_final = directly_declaring_final_method || current_declaration&.final
-    if T::Private::Final.final_module?(mod) && !method_is_final
+    if T::Private::Final.final_module?(mod) && (current_declaration.nil? || !current_declaration.final)
       raise "#{mod} was declared as final but its method `#{method_name}` was not declared as final"
     end
     # Don't compute mod.ancestors if we don't need to bother checking final-ness.
@@ -227,49 +212,46 @@ module T::Private::Methods
       )
     end
 
-    unless directly_declaring_final_method
-      original_method = mod.instance_method(method_name)
-      sig_block = lambda do
-        T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
-      end
-
-      # Always replace the original method with this wrapper,
-      # which is called only on the *first* invocation.
-      # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
-      # (or unwrap back to the original method).
-      key = method_owner_and_name_to_key(mod, method_name)
-      T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
-        method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
-        method_sig ||= T::Private::Methods._handle_missing_method_signature(
-          self,
-          original_method,
-          __callee__,
-        )
-
-        # Should be the same logic as CallValidation.wrap_method_if_needed but we
-        # don't want that extra layer of indirection in the callstack
-        if method_sig.mode == T::Private::Methods::Modes.abstract
-          # We're in an interface method, keep going up the chain
-          if defined?(super)
-            super(*args, &blk)
-          else
-            raise NotImplementedError.new("The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation.")
-          end
-        # Note, this logic is duplicated (intentionally, for micro-perf) at `CallValidation.wrap_method_if_needed`,
-        # make sure to keep changes in sync.
-        elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
-          CallValidation.validate_call(self, original_method, method_sig, args, blk)
-        elsif T::Configuration::AT_LEAST_RUBY_2_7
-          original_method.bind_call(self, *args, &blk)
-        else
-          original_method.bind(self).call(*args, &blk)
-        end
-      end
-
-      @sig_wrappers[key] = sig_block
+    original_method = mod.instance_method(method_name)
+    sig_block = lambda do
+      T::Private::Methods.run_sig(hook_mod, method_name, original_method, current_declaration)
     end
 
-    if method_is_final
+    # Always replace the original method with this wrapper,
+    # which is called only on the *first* invocation.
+    # This wrapper is very slow, so it will subsequently re-wrap with a much faster wrapper
+    # (or unwrap back to the original method).
+    key = method_owner_and_name_to_key(mod, method_name)
+    T::Private::ClassUtils.replace_method(mod, method_name) do |*args, &blk|
+      method_sig = T::Private::Methods.maybe_run_sig_block_for_key(key)
+      method_sig ||= T::Private::Methods._handle_missing_method_signature(
+        self,
+        original_method,
+        __callee__,
+      )
+
+      # Should be the same logic as CallValidation.wrap_method_if_needed but we
+      # don't want that extra layer of indirection in the callstack
+      if method_sig.mode == T::Private::Methods::Modes.abstract
+        # We're in an interface method, keep going up the chain
+        if defined?(super)
+          super(*args, &blk)
+        else
+          raise NotImplementedError.new("The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation.")
+        end
+      # Note, this logic is duplicated (intentionally, for micro-perf) at `CallValidation.wrap_method_if_needed`,
+      # make sure to keep changes in sync.
+      elsif method_sig.check_level == :always || (method_sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
+        CallValidation.validate_call(self, original_method, method_sig, args, blk)
+      elsif T::Configuration::AT_LEAST_RUBY_2_7
+        original_method.bind_call(self, *args, &blk)
+      else
+        original_method.bind(self).call(*args, &blk)
+      end
+    end
+
+    @sig_wrappers[key] = sig_block
+    if current_declaration.final
       @was_ever_final_names.add(method_name)
       # use hook_mod, not mod, because for example, we want class C to be marked as having final if we def C.foo as
       # final. change this to mod to see some final_method tests fail.

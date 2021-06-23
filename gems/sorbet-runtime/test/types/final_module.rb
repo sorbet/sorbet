@@ -208,28 +208,4 @@ class Opus::Types::Test::FinalModuleTest < Critic::Unit::UnitTest
       final!
     end
   end
-
-  it "can use secret flag to declare final class methods without sigs" do
-    c = Class.new do
-      extend T::Helpers
-      final!
-
-      T::Private::Methods._with_declaring_final_method_INTERNAL do
-        def self.i_am_secretly_final; end
-      end
-    end
-    c.i_am_secretly_final
-  end
-
-  it "can use secret flag to declare final instance methods without sigs" do
-    c = Class.new do
-      extend T::Helpers
-      final!
-
-      T::Private::Methods._with_declaring_final_method_INTERNAL do
-        def i_am_secretly_final; end
-      end
-    end
-    c.new.i_am_secretly_final
-  end
 end
