@@ -892,7 +892,7 @@ public:
     const core::SymbolRef scope;
     const std::vector<core::NameRef> names;
     UnresolvedClassType(SymbolRef scope, std::vector<core::NameRef> names)
-        : ClassType(core::Symbols::untyped()), scope(scope), names(names){};
+        : ClassType(core::Symbols::untyped()), scope(scope), names(std::move(names)){};
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string show(const GlobalState &gs) const;
     u4 hash(const GlobalState &gs) const;
