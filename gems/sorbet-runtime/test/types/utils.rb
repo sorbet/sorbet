@@ -22,6 +22,15 @@ module Opus::Types::Test
         assert_nil(T::Utils.signature_for_method(c.instance_method(:no_sig)))
       end
 
+      it 'returns nil on secretly-defined methods with no sigs' do
+        c = Class.new do
+          T::Private::Methods.__with_declared_signature(self, nil) do
+            def no_sig; end
+          end
+        end
+        assert_nil(T::Utils.signature_for_method(c.instance_method(:no_sig)))
+      end
+
       it 'returns things on methods with sigs' do
         c = Class.new do
           extend T::Sig
