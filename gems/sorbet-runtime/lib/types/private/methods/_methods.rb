@@ -32,6 +32,19 @@ module T::Private::Methods
   DeclarationBlock = Struct.new(:mod, :loc, :blk, :final)
 
   def self.declare_sig(mod, arg, &blk)
+    # caller_depth is 2: 1 to get to our caller and 1 to get to sig()'s caller.
+    T::Private::DeclState.current.active_declaration = __declare_sig_internal(mod, arg, caller_depth: 2, &blk)
+
+    nil
+  end
+
+  # See tests for how to use this.  But you shouldn't be using this.
+  def self.__declare_sig(mod, arg=nil, &blk)
+    # caller_depth is 1: 1 to get to our caller.
+    __declare_sig_internal(mod, arg, caller_depth: 1, &blk)
+  end
+
+  private_class_method def self.__declare_sig_internal(mod, arg, caller_depth:, &blk)
     install_hooks(mod)
 
     if T::Private::DeclState.current.active_declaration
@@ -43,11 +56,24 @@ module T::Private::Methods
       raise "Invalid argument to `sig`: #{arg}"
     end
 
-    loc = caller_locations(2, 1).first
+    loc = caller_locations(caller_depth + 1, 1).first
 
-    T::Private::DeclState.current.active_declaration = DeclarationBlock.new(mod, loc, blk, arg == :final)
+    DeclarationBlock.new(mod, loc, blk, arg == :final)
+  end
 
-    nil
+  def self.__with_declared_signature(mod, declblock, &blk)
+    # If declblock is provided, this code is equivalent to the check in
+    # __declare_sig_internal, above.
+    # If declblock is not provided and we have an active declaration, we are
+    # obviously doing something wrong.
+    if T::Private::DeclState.current.active_declaration
+      T::Private::DeclState.current.reset!
+      raise "You called sig twice without declaring a method in between"
+    end
+    if declblock
+      T::Private::DeclState.current.active_declaration = declblock
+    end
+    mod.module_exec(&blk)
   end
 
   def self.start_proc
