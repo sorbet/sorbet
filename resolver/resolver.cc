@@ -2959,6 +2959,7 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
     auto inputq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(trees.size());
     auto outputq = make_shared<BlockingBoundedQueue<ResolveSignaturesWalk::ResolveSignaturesWalkResult>>(trees.size());
 
+    const size_t n_trees = trees.size();
     for (auto &tree : trees) {
         inputq->push(move(tree), 1);
     }
@@ -2986,6 +2987,8 @@ ast::ParsedFilesOrCancelled Resolver::resolveSigs(core::GlobalState &gs, vector<
 
     vector<ResolveSignaturesWalk::ResolveFileSignatures> combinedFileJobs;
     vector<ast::ParsedFile> combinedTrees;
+    combinedTrees.reserve(n_trees);
+    combinedFileJobs.reserve(n_trees);
     {
         ResolveSignaturesWalk::ResolveSignaturesWalkResult threadResult;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
