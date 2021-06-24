@@ -107,9 +107,6 @@ public:
 
     static llvm::Value *emitMethodCallViaRubyVM(MethodCallContext &mcctx);
 
-    static IREmitterContext getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
-                                                             llvm::Function *mainFunc);
-
     static void emitExceptionHandlers(CompilerState &gs, llvm::IRBuilderBase &builder, const IREmitterContext &irctx,
                                       int rubyBlockId, int bodyRubyBlockId, cfg::LocalRef exceptionValue);
 

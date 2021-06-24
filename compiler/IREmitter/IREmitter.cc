@@ -781,7 +781,7 @@ void IREmitter::run(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md) 
     func->addFnAttr(llvm::Attribute::AttrKind::UWTable);
     llvm::IRBuilder<> builder(cs);
 
-    const IREmitterContext irctx = IREmitterHelpers::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, func);
+    const IREmitterContext irctx = IREmitterContext::getSorbetBlocks2LLVMBlockMapping(cs, cfg, md, func);
 
     ENFORCE(cs.functionEntryInitializers == nullptr, "modules shouldn't be reused");
 

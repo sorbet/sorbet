@@ -1,9 +1,12 @@
 #ifndef SORBET_COMPILER_IREMITTER_IREMITTERCONTEXT_H
 #define SORBET_COMPILER_IREMITTER_IREMITTERCONTEXT_H
 
+#include "compiler/Core/ForwardDeclarations.h"
 #include "core/core.h"
 
 namespace sorbet::compiler {
+
+class CompilerState;
 
 enum class FunctionType {
     // A normal method
@@ -248,6 +251,9 @@ struct IREmitterContext {
     // idx: cfg::BasicBlock::rubyBlockId
     // val: true when the block uses `break`
     std::vector<bool> blockUsesBreak;
+
+    static IREmitterContext getSorbetBlocks2LLVMBlockMapping(CompilerState &cs, cfg::CFG &cfg, const ast::MethodDef &md,
+                                                             llvm::Function *mainFunc);
 };
 
 } // namespace sorbet::compiler
