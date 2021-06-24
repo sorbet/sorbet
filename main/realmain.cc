@@ -286,12 +286,15 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
         }
     }
 
-    for (auto &elem : merged) {
-        if (opts.print.Autogen.enabled) {
-            opts.print.Autogen.print(elem.strval);
-        }
-        if (opts.print.AutogenMsgPack.enabled) {
-            opts.print.AutogenMsgPack.print(elem.msgpack);
+    {
+        Timer timeit(logger, "autogenDependencyDBPrint");
+        for (auto &elem : merged) {
+            if (opts.print.Autogen.enabled) {
+                opts.print.Autogen.print(elem.strval);
+            }
+            if (opts.print.AutogenMsgPack.enabled) {
+                opts.print.AutogenMsgPack.print(elem.msgpack);
+            }
         }
     }
     if (opts.print.AutogenAutoloader.enabled) {
@@ -343,6 +346,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
 
     if (opts.autoloaderConfig.packagedAutoloader) {
+        Timer timeit(logger, "autogenPackageAutoloads");
         autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
                                                        packageq);
     }
