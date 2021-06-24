@@ -284,6 +284,29 @@ class Set < Object
   end
   def intersection(enum); end
 
+  # Returns a string created by converting each element of the array to a
+  # string, separated by the given `separator`. If the `separator` is `nil`, it
+  # uses current `$,`. If both the `separator` and `$,` are `nil`, it uses an
+  # empty string.
+  #
+  # ```ruby
+  # [ "a", "b", "c" ].join        #=> "abc"
+  # [ "a", "b", "c" ].join("-")   #=> "a-b-c"
+  # ```
+  #
+  # For nested arrays, join is applied recursively:
+  #
+  # ```ruby
+  # [ "a", [1, 2, [:x, :y]], "b" ].join("-")   #=> "a-1-2-x-y-b"
+  # ```
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
+  def join(arg0=T.unsafe(nil)); end
+
   # Deletes every element of the set for which block evaluates to false, and
   # returns self. Returns an enumerator if no block is given.
   sig do
