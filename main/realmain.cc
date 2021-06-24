@@ -287,7 +287,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
 
     {
-        Timer timeit(logger, "autogenAutoloaderPrint");
+        Timer timeit(logger, "autogenDependencyDBPrint");
         for (auto &elem : merged) {
             if (opts.print.Autogen.enabled) {
                 opts.print.Autogen.print(elem.strval);
