@@ -346,6 +346,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     }
 
     if (opts.autoloaderConfig.packagedAutoloader) {
+        Timer timeit(logger, "autogenPackageAutoloads");
         autogen::AutoloadWriter::writePackageAutoloads(gs, autoloaderCfg, opts.print.AutogenAutoloader.outputPath,
                                                        packageq);
     }
