@@ -355,7 +355,7 @@ rb_check_arity.1.exit:                            ; preds = %entry
   store i64 %rubyStr_THX1138..i, i64* %87, align 8, !dbg !40, !tbaa !4
   %88 = getelementptr inbounds i64, i64* %87, i64 1, !dbg !40
   store i64* %88, i64** %85, align 8, !dbg !40
-  %send10 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_match, i64 0), !dbg !40
+  %send11 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_match, i64 0), !dbg !40
   call void @llvm.lifetime.start.p0i8(i64 noundef 8, i8* noundef nonnull %25) #9, !dbg !29
   store i64 3, i64* %26, align 8, !dbg !29
   %89 = call i64 @rb_funcallv_with_cc(%struct.rb_call_data* noundef nonnull @sorbet_rb_int_dotimes_withBlock.rb_funcallv_data.5, i64 %63, i64 noundef 43, i32 noundef 1, i64* noundef nonnull %26) #9, !dbg !29

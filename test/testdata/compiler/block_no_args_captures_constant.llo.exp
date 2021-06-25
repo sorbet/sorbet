@@ -451,7 +451,7 @@ rb_check_arity.1.exit:                            ; preds = %entry
   store i64 %32, i64* %79, align 8, !dbg !48, !tbaa !4
   %80 = getelementptr inbounds i64, i64* %79, i64 1, !dbg !48
   store i64* %80, i64** %77, align 8, !dbg !48
-  %send9 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts.1, i64 0), !dbg !48
+  %send10 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts.1, i64 0), !dbg !48
   store i64* getelementptr inbounds ([13 x i64], [13 x i64]* @iseqEncodedArray, i64 0, i64 7), i64** %76, align 8, !dbg !48, !tbaa !12
   call void @llvm.lifetime.start.p0i8(i64 noundef 8, i8* noundef nonnull %25) #13, !dbg !21
   store i64 3, i64* %26, align 8, !dbg !21

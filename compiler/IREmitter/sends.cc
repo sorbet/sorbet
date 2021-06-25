@@ -550,23 +550,22 @@ llvm::Value *IREmitterHelpers::callViaRubyVMSimple(MethodCallContext &mcctx) {
 
     auto *cache = IREmitterHelpers::makeInlineCache(cs, builder, methodName, flags, stack.size() - 1, keywords);
 
+    auto *closure = Payload::buildLocalsOffset(mcctx.cs);
+    vector<llvm::Value *> args;
+    args.emplace_back(cache);
     if (auto *blk = mcctx.blkAsFunction()) {
-        auto *closure = Payload::buildLocalsOffset(mcctx.cs);
-        Payload::pushRubyStackVector(cs, builder, cfp, stack);
-
-        return Payload::callFuncBlockWithCache(mcctx.cs, mcctx.build, cache, blk, closure);
+        args.emplace_back(blk);
     } else {
-        auto *blockHandler = Payload::vmBlockHandlerNone(mcctx.cs, mcctx.build);
-        vector<llvm::Value *> args;
-        args.emplace_back(cache);
-        args.emplace_back(blockHandler);
-        args.emplace_back(cfp);
-        for (auto *arg : stack) {
-            args.emplace_back(arg);
-        }
-        // TODO(neil) add methodName as a phantom arg to sorbet_i_send
-        return builder.CreateCall(cs.getFunction("sorbet_i_send"), llvm::ArrayRef(args));
+        args.emplace_back(llvm::ConstantPointerNull::get(llvm::PointerType::getUnqual(cs.getRubyBlockFFIType())));
     }
+    args.emplace_back(closure);
+    args.emplace_back(cfp);
+    for (auto *arg : stack) {
+        args.emplace_back(arg);
+    }
+
+    // TODO(neil), RUBYLANG-338: add methodName as a phantom arg to sorbet_i_send
+    return builder.CreateCall(cs.getFunction("sorbet_i_send"), llvm::ArrayRef(args));
 }
 
 } // namespace sorbet::compiler

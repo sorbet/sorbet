@@ -325,22 +325,31 @@ public:
     // Line 8 corresponds to the sorbet_callFuncWithCache call.
     virtual llvm::Value *replaceCall(llvm::LLVMContext &lctx, llvm::Module &module,
                                      llvm::CallInst *instr) const override {
-        // Make sure cache, blockHandler, cfp and self are passed in.
-        ENFORCE(instr->arg_size() >= 4);
+        // Make sure cache, blk, closure, cfp and self are passed in.
+        ENFORCE(instr->arg_size() >= 5);
 
         llvm::IRBuilder<> builder(instr);
         auto *cache = instr->getArgOperand(0);
-        auto *blockHandler = instr->getArgOperand(1);
-        auto *cfp = instr->getArgOperand(2);
+        auto *blk = instr->getArgOperand(1);
+        auto *closure = instr->getArgOperand(2);
+        auto *cfp = instr->getArgOperand(3);
 
         auto *spPtr = builder.CreateCall(module.getFunction("sorbet_get_sp"), {cfp});
         auto spPtrType = llvm::dyn_cast<llvm::PointerType>(spPtr->getType());
         llvm::Value *sp = builder.CreateLoad(spPtrType->getElementType(), spPtr);
-        for (auto iter = std::next(instr->arg_begin(), 3); iter < instr->arg_end(); ++iter) {
+        for (auto iter = std::next(instr->arg_begin(), 4); iter < instr->arg_end(); ++iter) {
             sp = builder.CreateCall(module.getFunction("sorbet_push"), {sp, iter->get()});
         }
         builder.CreateStore(sp, spPtr);
-        return builder.CreateCall(module.getFunction("sorbet_callFuncWithCache"), {cache, blockHandler}, "send");
+
+        if (llvm::isa<llvm::ConstantPointerNull>(blk)) {
+            auto *blockHandler =
+                builder.CreateCall(module.getFunction("sorbet_vmBlockHandlerNone"), {}, "VM_BLOCK_HANDLER_NONE");
+            return builder.CreateCall(module.getFunction("sorbet_callFuncWithCache"), {cache, blockHandler}, "send");
+        } else {
+            return builder.CreateCall(module.getFunction("sorbet_callFuncBlockWithCache"), {cache, blk, closure},
+                                      "sendWithBlock");
+        }
     }
 } SorbetSend;
 

@@ -1420,13 +1420,13 @@ rb_vm_check_ints.exit3.i:                         ; preds = %53, %entry
 
 rb_vm_check_ints.exit4.i:                         ; preds = %73, %rb_vm_check_ints.exit3.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 18), i64** %32, align 8, !dbg !69, !tbaa !13
-  %rubyId_each73.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !77
+  %rubyId_each72.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !77
   %77 = bitcast %struct.sorbet_inlineIntrinsicEnv* %0 to i8*, !dbg !77
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %77) #13, !dbg !77
   %78 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 0, !dbg !77
   store i64 %36, i64* %78, align 8, !dbg !77, !tbaa !64
   %79 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 1, !dbg !77
-  store i64 %rubyId_each73.i, i64* %79, align 8, !dbg !77, !tbaa !98
+  store i64 %rubyId_each72.i, i64* %79, align 8, !dbg !77, !tbaa !98
   %80 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 2, !dbg !77
   store i32 0, i32* %80, align 8, !dbg !77, !tbaa !66
   %81 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %0, i64 0, i32 3, !dbg !77
@@ -1453,13 +1453,13 @@ rb_vm_check_ints.exit4.i:                         ; preds = %73, %rb_vm_check_in
 
 rb_vm_check_ints.exit2.i:                         ; preds = %93, %rb_vm_check_ints.exit4.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 23), i64** %32, align 8, !dbg !77, !tbaa !13
-  %rubyId_each85.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !85
+  %rubyId_each83.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !85
   %97 = bitcast %struct.sorbet_inlineIntrinsicEnv* %3 to i8*, !dbg !85
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %97) #13, !dbg !85
   %98 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 0, !dbg !85
   store i64 %36, i64* %98, align 8, !dbg !85, !tbaa !64
   %99 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 1, !dbg !85
-  store i64 %rubyId_each85.i, i64* %99, align 8, !dbg !85, !tbaa !98
+  store i64 %rubyId_each83.i, i64* %99, align 8, !dbg !85, !tbaa !98
   %100 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 2, !dbg !85
   store i32 0, i32* %100, align 8, !dbg !85, !tbaa !66
   %101 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %3, i64 0, i32 3, !dbg !85
@@ -1486,13 +1486,13 @@ rb_vm_check_ints.exit2.i:                         ; preds = %93, %rb_vm_check_in
 
 rb_vm_check_ints.exit1.i:                         ; preds = %113, %rb_vm_check_ints.exit2.i
   store i64* getelementptr inbounds ([32 x i64], [32 x i64]* @iseqEncodedArray, i64 0, i64 28), i64** %32, align 8, !dbg !85, !tbaa !13
-  %rubyId_each97.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !87
+  %rubyId_each94.i = load i64, i64* @rubyIdPrecomputed_each, align 8, !dbg !87
   %117 = bitcast %struct.sorbet_inlineIntrinsicEnv* %4 to i8*, !dbg !87
   call void @llvm.lifetime.start.p0i8(i64 noundef 40, i8* noundef nonnull %117) #13, !dbg !87
   %118 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 0, !dbg !87
   store i64 %36, i64* %118, align 8, !dbg !87, !tbaa !64
   %119 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 1, !dbg !87
-  store i64 %rubyId_each97.i, i64* %119, align 8, !dbg !87, !tbaa !98
+  store i64 %rubyId_each94.i, i64* %119, align 8, !dbg !87, !tbaa !98
   %120 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 2, !dbg !87
   store i32 0, i32* %120, align 8, !dbg !87, !tbaa !66
   %121 = getelementptr inbounds %struct.sorbet_inlineIntrinsicEnv, %struct.sorbet_inlineIntrinsicEnv* %4, i64 0, i32 3, !dbg !87

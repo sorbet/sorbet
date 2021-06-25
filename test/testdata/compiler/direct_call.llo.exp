@@ -350,7 +350,7 @@ fastSymCallIntrinsic_Static_keep_def33.i:         ; preds = %42, %entry
   store i64 %send, i64* %71, align 8, !dbg !25, !tbaa !4
   %72 = getelementptr inbounds i64, i64* %71, i64 1, !dbg !25
   store i64* %72, i64** %69, align 8, !dbg !25
-  %send3 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !25
+  %send4 = call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_puts, i64 0), !dbg !25
   ret void
 }
 

@@ -110,7 +110,7 @@ SORBET_ALIVE(VALUE, sorbet_rb_int_ge_slowpath, (VALUE, VALUE));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyClass, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_getRubyConstant, (const char *const className, long classNameLen) __attribute__((const)));
 SORBET_ALIVE(VALUE, sorbet_i_objIsKindOf, (VALUE, VALUE));
-SORBET_ALIVE(VALUE, sorbet_i_send, (struct FunctionInlineCache *, VALUE, rb_control_frame_t *, ...));
+SORBET_ALIVE(VALUE, sorbet_i_send, (struct FunctionInlineCache *, BlockFFIType blk, VALUE, rb_control_frame_t *, ...));
 
 SORBET_ALIVE(_Bool, sorbet_i_isa_Integer, (VALUE) __attribute__((const)));
 SORBET_ALIVE(_Bool, sorbet_i_isa_TrueClass, (VALUE) __attribute__((const)));
@@ -2244,5 +2244,5 @@ VALUE __sorbet_only_exists_to_keep_functions_alive__() __attribute__((optnone)) 
            (long)&sorbet_isa_Float + (long)&sorbet_isa_Untyped + (long)&sorbet_isa_Hash + (long)&sorbet_isa_Array +
            (long)&sorbet_isa_Regexp + (long)&sorbet_isa_String + (long)&sorbet_isa_Proc +
            (long)&sorbet_isa_RootSingleton + (long)&sorbet_get_sp + (long)&sorbet_push +
-           (long)&sorbet_callFuncWithCache;
+           (long)&sorbet_callFuncWithCache + (long)&sorbet_callFuncBlockWithCache + (long)&sorbet_vmBlockHandlerNone;
 }

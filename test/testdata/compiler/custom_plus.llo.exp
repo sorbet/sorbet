@@ -225,8 +225,8 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   store i64 %rawArg_a, i64* %7, align 8, !dbg !17, !tbaa !4
   %8 = getelementptr inbounds i64, i64* %7, i64 1, !dbg !17
   store i64* %8, i64** %5, align 8, !dbg !17
-  %send40 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @"ic_==", i64 0), !dbg !17
-  %9 = and i64 %send40, -9, !dbg !17
+  %send38 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @"ic_==", i64 0), !dbg !17
+  %9 = and i64 %send38, -9, !dbg !17
   %10 = icmp ne i64 %9, 0, !dbg !17
   %.sink = select i1 %10, i64* getelementptr inbounds ([23 x i64], [23 x i64]* @iseqEncodedArray, i64 0, i64 16), i64* getelementptr inbounds ([23 x i64], [23 x i64]* @iseqEncodedArray, i64 0, i64 18), !dbg !17
   %rubyStrFrozen_ok.sink = select i1 %10, i64* @rubyStrFrozen_ok, i64* @rubyStrFrozen_fail, !dbg !17
@@ -240,9 +240,9 @@ fillRequiredArgs:                                 ; preds = %functionEntryInitia
   store i64 %rubyStr_ok, i64* %13, align 8, !dbg !18, !tbaa !4
   %14 = getelementptr inbounds i64, i64* %13, i64 1, !dbg !18
   store i64* %14, i64** %11, align 8, !dbg !18
-  %send41 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* %ic_puts.1.sink, i64 0), !dbg !18
+  %send40 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* %ic_puts.1.sink, i64 0), !dbg !18
   store i64* getelementptr inbounds ([23 x i64], [23 x i64]* @iseqEncodedArray, i64 0, i64 20), i64** %0, align 8, !tbaa !12
-  ret i64 %send41
+  ret i64 %send40
 }
 
 ; Function Attrs: nounwind sspreq uwtable
@@ -349,7 +349,7 @@ afterSend23:                                      ; preds = %90, %fastSymCallInt
   %58 = load i64*, i64** %57, align 8, !dbg !46
   store i64 %selfRaw, i64* %58, align 8, !dbg !46, !tbaa !4
   %59 = getelementptr inbounds i64, i64* %58, i64 1, !dbg !46
-  store i64 %send1, i64* %59, align 8, !dbg !46, !tbaa !4
+  store i64 %send2, i64* %59, align 8, !dbg !46, !tbaa !4
   %60 = getelementptr inbounds i64, i64* %59, i64 1, !dbg !46
   store i64* %60, i64** %57, align 8, !dbg !46
   %send = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_delegate, i64 0), !dbg !46
@@ -364,7 +364,7 @@ fastSymCallIntrinsic_Static_keep_def:             ; preds = %53, %25
   store i64 %26, i64* %62, align 8, !dbg !47, !tbaa !4
   %63 = getelementptr inbounds i64, i64* %62, i64 1, !dbg !47
   store i64* %63, i64** %61, align 8, !dbg !47
-  %send1 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_new, i64 0), !dbg !47
+  %send2 = tail call i64 @sorbet_callFuncWithCache(%struct.FunctionInlineCache* @ic_new, i64 0), !dbg !47
   store i64* getelementptr inbounds ([23 x i64], [23 x i64]* @iseqEncodedArray, i64 0, i64 14), i64** %8, align 8, !dbg !47, !tbaa !12
   %rubyId_delegate = load i64, i64* @rubyIdPrecomputed_delegate, align 8, !dbg !45
   %rawSym = tail call i64 @rb_id2sym(i64 %rubyId_delegate), !dbg !45
