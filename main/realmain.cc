@@ -9,6 +9,7 @@
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
+#include "main/autogen/crc.h"
 #include "main/autogen/packages.h"
 #include "main/autogen/subclasses.h"
 #include "main/lsp/LSPInput.h"
@@ -218,8 +219,9 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
     for (int i = 0; i < indexed.size(); ++i) {
         fileq->push(move(i), 1);
     }
+    auto crcBuilder = autogen::CRCBuilder::create();
 
-    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, fileq, resultq]() {
+    workers.multiplexJob("runAutogen", [&gs, &opts, &indexed, &autoloaderCfg, crcBuilder, fileq, resultq]() {
         AutogenResult out;
         int n = 0;
         {
@@ -234,7 +236,7 @@ void runAutogen(const core::GlobalState &gs, options::Options &opts, const autog
                 }
 
                 core::Context ctx(gs, core::Symbols::root(), tree.file);
-                auto pf = autogen::Autogen::generate(ctx, move(tree));
+                auto pf = autogen::Autogen::generate(ctx, move(tree), *crcBuilder);
                 tree = move(pf.tree);
 
                 AutogenResult::Serialized serialized;
