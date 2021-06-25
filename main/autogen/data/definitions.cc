@@ -8,7 +8,7 @@ using namespace std;
 
 namespace sorbet::autogen {
 
-QualifiedName QualifiedName::fromFullName(vector<core::NameRef> name) {
+QualifiedName QualifiedName::fromFullName(vector<core::NameRef> &&name) {
     if (name.size() < 3 || name.front() != core::Names::Constants::PackageRegistry()) {
         return {move(name), nullopt};
     }
