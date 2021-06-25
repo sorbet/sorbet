@@ -143,8 +143,8 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
 
                        ref.id.id(), fmt::map_join(refFullName, " ", nameToString),
                        fmt::map_join(ref.name.nameParts, " ", nameToString), fmt::join(nestingStrings, " "),
-                       fmt::map_join(ref.resolved.nameParts, " ", nameToString), ref.loc.filePosToString(gs),
-                       (int)ref.is_defining_ref);
+                       fmt::map_join(ref.resolved.nameParts, " ", nameToString),
+                       core::Loc(tree.file, ref.loc).filePosToString(gs), (int)ref.is_defining_ref);
 
         if (ref.parent_of.exists()) {
             auto parentOfFullName = showFullName(gs, ref.parent_of);
