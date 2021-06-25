@@ -112,6 +112,10 @@ public:
     };
 
     bool contains(const Loc &other) const;
+
+    // Converts the given LocOffsets into positions en-masse. Faster than position when there are many offsets as it
+    // scans the linebreaks vector once.
+    static std::vector<std::pair<Detail, Detail>> positions(const Context ctx, const std::vector<LocOffsets> &offsets);
     std::pair<Detail, Detail> position(const GlobalState &gs) const;
     std::string toStringWithTabs(const GlobalState &gs, int tabs = 0) const;
     std::string toString(const GlobalState &gs) const {
