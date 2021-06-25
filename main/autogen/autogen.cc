@@ -4,8 +4,7 @@
 #include "ast/treemap/treemap.h"
 #include "common/formatting.h"
 #include "main/autogen/autoloader.h"
-
-#include "CRC.h"
+#include "main/autogen/crc.h"
 
 using namespace std;
 namespace sorbet::autogen {
@@ -326,13 +325,13 @@ public:
 
 // Convert a Sorbet `ParsedFile` into an Autogen `ParsedFile` by walking it as above and also recording the checksum of
 // the current file
-ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree) {
+ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder) {
     AutogenWalk walk;
     tree.tree = ast::TreeMap::apply(ctx, walk, move(tree.tree));
     auto pf = walk.parsedFile();
     pf.path = string(tree.file.data(ctx).path());
     auto src = tree.file.data(ctx).source();
-    pf.cksum = CRC::Calculate(src.data(), src.size(), CRC::CRC_32());
+    pf.cksum = crcBuilder.crc32(src);
     pf.tree = move(tree);
     return pf;
 }
