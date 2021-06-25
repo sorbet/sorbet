@@ -36,8 +36,9 @@ class AutogenWalk {
     }
 
     // Convert a constant literal into a fully qualified name
-    vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit *cnst) {
+    vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit &cnstRef) {
         vector<core::NameRef> out;
+        auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original != nullptr) {
             auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
             out.emplace_back(original.cnst);
@@ -177,7 +178,8 @@ public:
     }
 
     // `true` if the constant is fully qualified and can be traced back to the root scope, `false` otherwise
-    bool isCBaseConstant(ast::ConstantLit *cnst) {
+    bool isCBaseConstant(ast::ConstantLit &cnstRef) {
+        auto *cnst = &cnstRef;
         while (cnst != nullptr && cnst->original != nullptr) {
             auto &original = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(cnst->original);
             cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
@@ -189,14 +191,14 @@ public:
     }
 
     ast::ExpressionPtr postTransformConstantLit(core::Context ctx, ast::ExpressionPtr tree) {
-        auto *original = ast::cast_tree<ast::ConstantLit>(tree);
+        auto &original = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
 
         if (!ignoring.empty()) {
             // this is either a constant in a `keepForIde` node (in which case we don't care) or it was an `include` or
             // an `extend` which already got handled in `preTransformClassDef` (in which case don't handle it again)
             return tree;
         }
-        if (original->original == nullptr) {
+        if (original.original == nullptr) {
             return tree;
         }
 
@@ -215,14 +217,14 @@ public:
             ref.nesting.pop_back();
             ref.scope = nesting.back();
         }
-        ref.loc = original->loc;
+        ref.loc = original.loc;
 
         // the reference location is the location of constant, but this might get updated if the reference corresponds
         // to the definition of the constant, because in that case we'll later on extend the location to cover the whole
         // class or assignment
-        ref.definitionLoc = original->loc;
+        ref.definitionLoc = original.loc;
         ref.name = QualifiedName::fromFullName(constantName(ctx, original));
-        auto sym = original->symbol;
+        auto sym = original.symbol;
         if (!sym.isClassOrModule() || sym != core::Symbols::StubModule()) {
             ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
         }
