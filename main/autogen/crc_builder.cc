@@ -1,4 +1,4 @@
-#include "main/autogen/crc.h"
+#include "main/autogen/crc_builder.h"
 #include "CRC.h"
 
 using namespace std;
