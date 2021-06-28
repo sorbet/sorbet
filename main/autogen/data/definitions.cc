@@ -19,13 +19,11 @@ QualifiedName QualifiedName::fromFullName(vector<core::NameRef> &&name) {
 
 string QualifiedName::show(const core::GlobalState &gs) const {
     if (auto pkg = package) {
-        return fmt::format(
-            "<package {}>::{}", pkg->show(gs),
-            fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string { return string(nr.shortName(gs)); }));
+        return fmt::format("<package {}>::{}", pkg->show(gs),
+                           fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string { return nr.show(gs); }));
     } else {
-        return fmt::format("::{}", fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string {
-                               return string(nr.shortName(gs));
-                           }));
+        return fmt::format("::{}",
+                           fmt::map_join(nameParts, "::", [&](core::NameRef nr) -> string { return nr.show(gs); }));
     }
 }
 
@@ -75,7 +73,7 @@ QualifiedName ParsedFile::showQualifiedName(const core::GlobalState &gs, Definit
 // Pretty-print a `ParsedFile`, including all definitions and references and the pieces of metadata associated with them
 string ParsedFile::toString(const core::GlobalState &gs) const {
     fmt::memory_buffer out;
-    auto nameToString = [&](const auto &nm) -> string { return string(nm.shortName(gs)); };
+    auto nameToString = [&](const auto &nm) -> string { return nm.show(gs); };
 
     fmt::format_to(out,
                    "# ParsedFile: {}\n"
