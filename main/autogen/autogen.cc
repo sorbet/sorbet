@@ -4,7 +4,7 @@
 #include "ast/treemap/treemap.h"
 #include "common/formatting.h"
 #include "main/autogen/autoloader.h"
-#include "main/autogen/crc.h"
+#include "main/autogen/crc_builder.h"
 
 using namespace std;
 namespace sorbet::autogen {
