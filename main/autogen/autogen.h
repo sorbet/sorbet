@@ -1,7 +1,7 @@
 #ifndef AUTOGEN_H
 #define AUTOGEN_H
 
-#include "main/autogen/crc.h"
+#include "main/autogen/crc_builder.h"
 #include "main/autogen/data/definitions.h"
 #include "main/options/options.h"
 

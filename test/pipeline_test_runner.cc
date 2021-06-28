@@ -27,7 +27,7 @@
 #include "infer/infer.h"
 #include "local_vars/local_vars.h"
 #include "main/autogen/autogen.h"
-#include "main/autogen/crc.h"
+#include "main/autogen/crc_builder.h"
 #include "namer/namer.h"
 #include "packager/packager.h"
 #include "parser/parser.h"
