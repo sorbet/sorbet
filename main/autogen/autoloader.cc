@@ -434,9 +434,13 @@ void populateAutoloadTasksAndCreateDirectories(const core::GlobalState &gs, vect
 void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &workers, const AutoloaderConfig &alCfg,
                                     const std::string &path, const DefTree &root) {
     vector<RenderAutoloadTask> tasks;
-    populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, path, root);
+    {
+        Timer timeit(gs.tracer(), "autogenWriteAutoloadsPopulateTasksAndCreateDirectories");
+        populateAutoloadTasksAndCreateDirectories(gs, tasks, alCfg, path, root);
+    }
 
     if (FileOps::exists(path)) {
+        Timer timeit(gs.tracer(), "autogenWriteAutoloadsRemoveFiles");
         // Clear out files that we do not plan to write.
         vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
         UnorderedSet<string> existingFilesSet(make_move_iterator(existingFiles.begin()),

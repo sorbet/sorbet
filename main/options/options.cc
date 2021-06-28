@@ -660,12 +660,14 @@ void readOptions(Options &opts,
         }
 
         if (raw.count("file") > 0) {
+            Timer timeit(*logger, "readOptionsInputFiles");
             auto files = raw["file"].as<vector<string>>();
             opts.rawInputFileNames.insert(opts.rawInputFileNames.end(), files.begin(), files.end());
             opts.inputFileNames.insert(opts.inputFileNames.end(), files.begin(), files.end());
         }
 
         if (raw.count("dir") > 0) {
+            Timer timeit(*logger, "readOptionsInputDirs");
             auto rawDirs = raw["dir"].as<vector<string>>();
             for (auto &dir : rawDirs) {
                 // Since we don't stat here, we're unsure if the directory exists / is a directory.
@@ -678,9 +680,12 @@ void readOptions(Options &opts,
             // default path prefix is that directory.
             opts.pathPrefix = fmt::format("{}/", opts.rawInputDirNames.at(0));
         }
-        fast_sort(opts.inputFileNames);
-        opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
-                                  opts.inputFileNames.end());
+        {
+            Timer timeit(*logger, "readOptionsSortFiles");
+            fast_sort(opts.inputFileNames);
+            opts.inputFileNames.erase(unique(opts.inputFileNames.begin(), opts.inputFileNames.end()),
+                                      opts.inputFileNames.end());
+        }
 
         opts.requiresAncestorEnabled = raw["enable-experimental-requires-ancestor"].as<bool>();
 
