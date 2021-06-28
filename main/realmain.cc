@@ -9,7 +9,7 @@
 #include "common/web_tracer_framework/tracing.h"
 #include "main/autogen/autogen.h"
 #include "main/autogen/autoloader.h"
-#include "main/autogen/crc.h"
+#include "main/autogen/crc_builder.h"
 #include "main/autogen/packages.h"
 #include "main/autogen/subclasses.h"
 #include "main/lsp/LSPInput.h"
