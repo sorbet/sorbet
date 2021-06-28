@@ -276,11 +276,10 @@ void appendFilesInDir(string_view basePath, string_view path, const sorbet::Unor
                              relativeIgnorePatterns);
         } else {
             auto dotLocation = fullPath.rfind('.');
-            // Note: Can't call substr with an index > string length, so explicitly check if a dot isn't found.
             if (dotLocation != string::npos) {
-                auto ext = fullPath.substr(dotLocation);
+                string_view ext(fullPath.c_str() + dotLocation, fullPath.size() - dotLocation);
                 if (extensions.contains(ext)) {
-                    result.emplace_back(fullPath);
+                    result.push_back(move(fullPath));
                 }
             }
         }
