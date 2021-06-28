@@ -442,14 +442,25 @@ void AutoloadWriter::writeAutoloads(const core::GlobalState &gs, WorkerPool &wor
     if (FileOps::exists(path)) {
         Timer timeit(gs.tracer(), "autogenWriteAutoloadsRemoveFiles");
         // Clear out files that we do not plan to write.
-        vector<string> existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
-        UnorderedSet<string> existingFilesSet(make_move_iterator(existingFiles.begin()),
-                                              make_move_iterator(existingFiles.end()));
-        for (auto &task : tasks) {
-            existingFilesSet.erase(task.filePath);
+        vector<string> existingFiles;
+        {
+            Timer timeit(gs.tracer(), "autogenWriteAutoloadsRemoveFilesListFiles");
+            existingFiles = FileOps::listFilesInDir(path, {".rb"}, true, {}, {});
         }
-        for (const auto &file : existingFilesSet) {
-            FileOps::removeFile(file);
+        // `existingFiles` owns the memory behind the string_view
+        UnorderedSet<string_view> existingFilesSet;
+        {
+            Timer timeit(gs.tracer(), "autogenWriteAutoloadsCreateSet");
+            existingFilesSet = UnorderedSet<string_view>(existingFiles.begin(), existingFiles.end());
+            for (auto &task : tasks) {
+                existingFilesSet.erase(task.filePath);
+            }
+        }
+        {
+            Timer timeit(gs.tracer(), "autogenWriteAutoloadsRemoveFilesDeleteFiles");
+            for (const auto &file : existingFilesSet) {
+                FileOps::removeFile(file);
+            }
         }
     }
 
