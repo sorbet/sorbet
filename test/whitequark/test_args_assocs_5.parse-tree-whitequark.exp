@@ -1,0 +1,5 @@
+s(:super,
+  s(:hash,
+    s(:pair,
+      s(:sym, :foo),
+      s(:int, "42"))))
