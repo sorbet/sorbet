@@ -45,6 +45,25 @@ module Opus::Types::Test
         assert_equal(:sigfun, sfm.method_name)
         assert_equal('Integer', sfm.return_type.name)
       end
+
+      it 'returns things on secretly-defined methods with sigs' do
+        c = Class.new do
+          built_sig = T::Private::Methods._declare_sig(self) do
+            returns(Integer)
+          end
+
+          T::Private::Methods._with_declared_signature(self, built_sig) do
+            def sigfun
+              85
+            end
+          end
+        end
+        sfm = T::Utils.signature_for_method(c.instance_method(:sigfun))
+        refute_nil(sfm)
+        assert_equal(:sigfun, sfm.method.name)
+        assert_equal(:sigfun, sfm.method_name)
+        assert_equal('Integer', sfm.return_type.name)
+      end
     end
   end
 end
