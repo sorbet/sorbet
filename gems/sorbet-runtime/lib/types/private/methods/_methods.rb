@@ -31,20 +31,18 @@ module T::Private::Methods
 
   DeclarationBlock = Struct.new(:mod, :loc, :blk, :final, :raw)
 
-  def self.declare_sig(mod, arg, &blk)
-    # caller_depth is 2: 1 to get to our caller and 1 to get to sig()'s caller.
-    T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, arg, caller_depth: 2, &blk)
+  def self.declare_sig(mod, loc, arg, &blk)
+    T::Private::DeclState.current.active_declaration = _declare_sig_internal(mod, loc, arg, &blk)
 
     nil
   end
 
   # See tests for how to use this.  But you shouldn't be using this.
   def self._declare_sig(mod, arg=nil, &blk)
-    # caller_depth is 1: 1 to get to our caller.
-    _declare_sig_internal(mod, arg, caller_depth: 1, raw: true, &blk)
+    _declare_sig_internal(mod, caller_locations(1, 1).first, arg, raw: true, &blk)
   end
 
-  private_class_method def self._declare_sig_internal(mod, arg, caller_depth:, raw: false, &blk)
+  private_class_method def self._declare_sig_internal(mod, loc, arg, raw: false, &blk)
     install_hooks(mod)
 
     if T::Private::DeclState.current.active_declaration
@@ -55,8 +53,6 @@ module T::Private::Methods
     if !arg.nil? && arg != :final
       raise "Invalid argument to `sig`: #{arg}"
     end
-
-    loc = caller_locations(caller_depth + 1, 1).first
 
     DeclarationBlock.new(mod, loc, blk, arg == :final, raw)
   end
