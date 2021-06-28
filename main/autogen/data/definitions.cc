@@ -1,6 +1,7 @@
 #include "main/autogen/data/definitions.h"
 #include "ast/ast.h"
 #include "common/formatting.h"
+#include "core/Files.h"
 #include "core/GlobalState.h"
 #include "main/autogen/data/msgpack.h"
 
@@ -79,7 +80,7 @@ string ParsedFile::toString(const core::GlobalState &gs) const {
                    "# ParsedFile: {}\n"
                    "requires: [{}]\n"
                    "## defs:\n",
-                   path, fmt::map_join(requires, ", ", nameToString));
+                   core::File::censorFilePathForSnapshotTests(path), fmt::map_join(requires, ", ", nameToString));
 
     for (auto &def : defs) {
         string_view type;
